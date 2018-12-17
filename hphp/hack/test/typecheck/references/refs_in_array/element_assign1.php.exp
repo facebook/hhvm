@@ -1,2 +1,2 @@
 File "element_assign1.php", line 5, characters 8-10:
-Cannot take a value by reference in strict mode. (Typing[4154])
+References are only permitted in function calls when in strict mode. (Typing[4154])

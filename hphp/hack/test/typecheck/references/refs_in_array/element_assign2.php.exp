@@ -1,2 +1,2 @@
 File "element_assign2.php", line 5, characters 8-13:
-Binding a reference in an array is no longer supported in Hack. (Typing[4225])
+Cannot take references to array elements. (Typing[4225])

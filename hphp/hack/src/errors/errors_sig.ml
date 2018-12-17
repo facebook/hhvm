@@ -384,7 +384,7 @@ module type S = sig
   val illegal_type_structure : Pos.t -> string -> unit
   val illegal_typeconst_direct_access : Pos.t -> unit
   val class_property_only_static_literal : Pos.t -> unit
-  val reference_expr : Pos.t -> unit
+  val reference_expr : Pos.t -> bool -> unit
   val reference_expr_partial : Pos.t -> unit
   val unification_cycle : Pos.t -> string -> unit
   val eq_incompatible_types : Pos.t -> (Pos.t * string) list
@@ -534,6 +534,7 @@ module type S = sig
     require:[< `Param_name | `Type | `Type_and_param_name ] -> Pos.t -> unit
   val untyped_lambda_strict_mode : Pos.t -> unit
   val binding_ref_in_array : Pos.t -> unit
+  val binding_ref_to_array : Pos.t -> unit
   val return_ref_in_array : Pos.t -> unit
   val passing_array_cell_by_ref : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit

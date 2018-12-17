@@ -278,6 +278,8 @@ let fun_reactivity env attrs params =
     else r in
   r
 
+type array_ctx = NoArray | ElementAssignment | ElementAccess
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -1150,7 +1152,7 @@ and expr
     ?(accept_using_var = false)
     ?(is_using_clause = false)
     ?is_func_arg
-    ?forbid_uref
+    ?array_ref_ctx
     ?(valkind = `other)
     ?(check_defined = true)
     env e =
@@ -1163,7 +1165,7 @@ and expr
        [Log_type ("expected_ty", ty)])])) end;
   raw_expr ~accept_using_var ~is_using_clause
     ~valkind ~check_defined
-    ?is_func_arg ?forbid_uref ?expected env e
+    ?is_func_arg ?array_ref_ctx ?expected env e
 
 and raw_expr
   ?(accept_using_var = false)
@@ -1171,14 +1173,14 @@ and raw_expr
   ?expected
   ?lhs_of_null_coalesce
   ?is_func_arg
-  ?forbid_uref
+  ?array_ref_ctx
   ?valkind:(valkind=`other)
   ?(check_defined = true)
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
     expr_ ~accept_using_var ~is_using_clause ?expected
-      ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
+      ?lhs_of_null_coalesce ?is_func_arg ?array_ref_ctx
       ~valkind ~check_defined env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
@@ -1305,7 +1307,7 @@ and expr_
   ?(is_using_clause = false)
   ?lhs_of_null_coalesce
   ?(is_func_arg = false)
-  ?(forbid_uref = false)
+  ?(array_ref_ctx = NoArray)
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   ~check_defined
   env (p, e) =
@@ -1969,16 +1971,16 @@ and expr_
       end
       end
   | Binop (Ast.Eq None, e1, e2) ->
-      let forbid_uref = match e1, e2 with
-        | (_, Array_get _), (_, Unop (Ast.Uref, _))
-        | _, (_, Unop (Ast.Uref, (_, Array_get _))) -> true
-        | _ -> false in
+     let array_ref_ctx = match e1, e2 with
+        | (_, Array_get _), (_, Unop (Ast.Uref, _)) -> ElementAssignment
+        | _, (_, Unop (Ast.Uref, (_, Array_get _))) -> ElementAccess
+        | _ -> NoArray in
       begin match e1 with
         | _, ImmutableVar (p, x) ->
           Errors.let_var_immutability_violation p (Local_id.get_name x)
         | _ -> ()
       end;
-      let env, te2, ty2 = raw_expr ~forbid_uref env e2 in
+      let env, te2, ty2 = raw_expr ~array_ref_ctx env e2 in
       let env, te1, ty = assign p env e1 ty2 in
       let env =
         if Env.env_local_reactive env then
@@ -2045,7 +2047,7 @@ and expr_
   | Unop (uop, e) ->
       let env, te, ty = raw_expr env e in
       let env = save_and_merge_next_in_catch env in
-      unop ~is_func_arg ~forbid_uref p env uop te ty
+      unop ~is_func_arg ~array_ref_ctx p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false p c e1 e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
@@ -3274,7 +3276,7 @@ and assign_ p ur env e1 ty2 =
     env, ((pos, ty2'), T.Array_get (te1, Some te)), ty2
   | pref, Unop (Ast.Uref, e1') ->
     (* references can be "lvalues" in foreach bindings *)
-    Errors.binding_ref_in_array pref;
+    Errors.binding_ref_to_array pref;
     let env, texpr, ty = assign p env e1' ty2 in
     make_result env (fst e1) (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
@@ -3298,7 +3300,7 @@ and array_field env = function
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
 and array_value ~expected env x =
-  let env, te, ty = expr ?expected ~forbid_uref:true env x in
+  let env, te, ty = expr ?expected ~array_ref_ctx:ElementAssignment env x in
   let env, ty = Typing_env.unbind env ty in
   env, (te, ty)
 
@@ -5251,7 +5253,7 @@ and check_int env p t r =
     then TMT.int r2
     else TMT.dynamic r2
 
-and unop ~is_func_arg ~forbid_uref p env uop te ty =
+and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
   let make_result env te result_ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   let is_any = TUtils.is_any env in
@@ -5318,24 +5320,35 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
         | _ -> make_result env te (TMT.num (Reason.Rarith_ret p))
       end
   | Ast.Uref ->
+     let disallow_refs_in_partial = TypecheckerOptions.disallow_assign_by_ref (Env.get_tcopt env)
+     in
       if Env.env_local_reactive env
          && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
       then Errors.reference_in_rx p;
 
-      if forbid_uref
-      then Errors.binding_ref_in_array p
-      else if is_func_arg then
+      if array_ref_ctx <> NoArray
+      then
+        match array_ref_ctx with
+        | ElementAccess -> Errors.binding_ref_to_array p (* &$x[0]; *)
+        | ElementAssignment -> Errors.binding_ref_in_array p (* $x[0] = &y; *)
+        | NoArray -> ()
+      else if is_func_arg (* Normal function calls, excludes e.g. isset(&x); *)
+      then
         begin
-          if TypecheckerOptions.disallow_array_cell_pass_by_ref
-            (Env.get_tcopt env)
+          if TypecheckerOptions.disallow_array_cell_pass_by_ref (Env.get_tcopt env)
           then match snd te with
-          | T.Array_get _ -> Errors.passing_array_cell_by_ref p
-          | _ -> ()
+          | T.Array_get _ ->
+             (* foo(&x[0]); *)
+             Errors.passing_array_cell_by_ref p
+          | _ ->
+             (* foo(&x); // permitted *)
+             ()
         end
       else if Env.is_strict env
-      then Errors.reference_expr p
-      else if TypecheckerOptions.disallow_assign_by_ref (Env.get_tcopt env)
-      then Errors.reference_expr_partial p;
+      then Errors.reference_expr p disallow_refs_in_partial (* &x; *)
+      else if disallow_refs_in_partial
+      then Errors.reference_expr_partial p; (* &x; // in a partial mode file *)
+
       (* any check omitted because would return the same anyway *)
       make_result env te ty
   | Ast.Usilence ->

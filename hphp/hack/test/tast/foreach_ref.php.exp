@@ -1,5 +1,5 @@
 Errors:
-  [5:20-25] Binding a reference in an array is no longer supported in Hack.
+  [5:20-25] Cannot take references to array elements.
 [(Fun
     { Aast.AnnotatedAST.f_span = [2:1-10:2]; f_annotation = ();
       f_mode = <opaque>; f_ret = (Some ([2:17-20], (Hprim Tint)));

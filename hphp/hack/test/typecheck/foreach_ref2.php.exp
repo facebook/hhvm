@@ -1,2 +1,2 @@
 File "foreach_ref2.php", line 5, characters 26-30:
-Binding a reference in an array is no longer supported in Hack. (Typing[4225])
+Cannot take references to array elements. (Typing[4225])

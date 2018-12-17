@@ -1,2 +1,2 @@
 File "array_ref_var.php", line 13, characters 14-18:
-Binding a reference in an array is no longer supported in Hack. (Typing[4225])
+Arrays cannot contain references. (Typing[4225])

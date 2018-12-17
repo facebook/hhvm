@@ -3189,12 +3189,17 @@ let class_property_only_static_literal pos =
     "Initialization of class property must be a static literal expression." in
   add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteral) pos msg
 
-let reference_expr pos =
-  let msg = "Cannot take a value by reference in strict mode." in
+let reference_expr pos allowed_in_partial =
+  let msg =
+    if allowed_in_partial then
+      "References are only permitted in function calls when in strict mode."
+    else
+      "References are only permitted in function calls."
+  in
   add (Typing.err_code Typing.ReferenceExpr) pos msg
 
 let reference_expr_partial pos =
-  let msg = "Taking a value by reference is no longer supported in Hack." in
+  let msg = "References are only permitted in function calls." in
   add (Typing.err_code Typing.ReferenceExprPartial) pos msg
 
 let pass_by_ref_annotation_missing pos1 pos2 =
@@ -3361,7 +3366,11 @@ let missing_annotation_for_atmost_rx_as_rxfunc_parameter pos =
   )
 
 let binding_ref_in_array pos =
-  let msg = "Binding a reference in an array is no longer supported in Hack." in
+  let msg = "Arrays cannot contain references." in
+  add (Typing.err_code Typing.BindingRefInArray) pos msg
+
+let binding_ref_to_array pos =
+  let msg = "Cannot take references to array elements." in
   add (Typing.err_code Typing.BindingRefInArray) pos msg
 
 let return_ref_in_array pos =
@@ -3370,7 +3379,7 @@ let return_ref_in_array pos =
   add (Typing.err_code Typing.BindingRefInArray) pos msg
 
 let passing_array_cell_by_ref pos =
-  let msg = "Passing array cells by reference is no longer supported; " ^
+  let msg = "Passing array elements by reference is no longer supported; " ^
     "use 'inout' instead" in
   add (Typing.err_code Typing.PassingArrayCellByRef) pos msg
 

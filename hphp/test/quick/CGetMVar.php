@@ -1,7 +1,7 @@
 <?hh
 
 class V { const X = 10; }
-function &values() {
+function values() {
   static $VALUES = array(
     'X'                        => V::X,
   );

@@ -1,6 +1,6 @@
 <?hh
 
-function &foo() {
+function foo() {
   return array()[];
 }
 

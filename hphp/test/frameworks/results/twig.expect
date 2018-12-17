@@ -221,7 +221,7 @@ Twig_Tests_Loader_ArrayTest::testTemplateReference
 Twig_Tests_Loader_ChainTest::testAddLoader
 .
 Twig_Tests_Loader_ChainTest::testExists
-.
+FATAL
 Twig_Tests_Loader_ChainTest::testGetCacheKey
 .
 Twig_Tests_Loader_ChainTest::testGetCacheKeyWhenTemplateDoesNotExist
@@ -569,7 +569,7 @@ Twig_Tests_ParserTest::testGetVarName
 Twig_Tests_ParserTest::testParseIsReentrant
 .
 Twig_Tests_ParserTest::testSetMacroThrowsExceptionOnReservedMethods
-.
+FATAL
 Twig_Tests_ParserTest::testUnknownTag
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #0

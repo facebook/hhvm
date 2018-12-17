@@ -63,8 +63,8 @@ class C
 
 unset($a);
 var_dump($a);
-$a = new C;     // make $a an alias to the allocated object 
-//$a = &new C;  // use of & here is deprecated  
+$a = new C;     // make $a an alias to the allocated object
+//$a = &new C;  // use of & here is deprecated
 var_dump($a);
 $a->m = "abc";
 var_dump($a);
@@ -100,37 +100,4 @@ $a = 10;
 var_dump($a);
 f($a);   // change $a from 10 to 200
 var_dump($a);
-//*/
-
-///*
-// return byRef
-
-function &g1(&$p)
-{
-    echo '$p '.(isset($p) ? "is set\n" : "is not set\n");
-    echo "g1 In:  \$p: $p\n";
-    $p = 200;       // actual argument's value changed
-    echo "g1 Out: \$p: $p\n\n";
-    return $p;      // return by reference (can't use & here)
-}
-
-$a = 10;
-var_dump($a);
-$b = &g1($a);   // change $a from 10 to 200; make $b an alias to $a
-var_dump($a);
-var_dump($b);
-$b = -12;       // change $a/$b
-var_dump($a);
-var_dump($b);
-//*/
-///*
-function &g2()
-{
-    echo "g2 In:\n";
-    $t = "local";
-    return $t;      // return byRef
-}
-
-$b = &g2();    // make $b an alias to the dynamic program location formerly aliased by local variable $t
-var_dump($b);
 //*/

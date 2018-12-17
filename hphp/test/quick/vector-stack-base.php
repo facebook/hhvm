@@ -22,19 +22,8 @@ function makeObj() {
   return new dumper;
 }
 
-function &makeObjRef() {
-  return new dumper();
-}
-
 function makeArr() {
   $a = array();
-  $a['dumper'] = new dumper;
-  return $a;
-}
-
-function &makeArrRef() {
-  static $a = array();
-  var_dump($a);
   $a['dumper'] = new dumper;
   return $a;
 }
@@ -43,25 +32,14 @@ function main() {
   echo "Entering main\n";
   // SetM with array base on the stack
   makeArr()['dumper'] = new stdclass;
-  makeArrRef()['dumper'] = 24;
-  makeArrRef()[234] = 234;
 
-  // More complex SetM with array base on the stack, then with a ref
+  // More complex SetM with array base on the stack
   makeArr()['dumper']->prop = null;
-  makeArrRef()['dumper']->propp = null;
-  makeArrRef()['dumper']->proppp = null;
-
-
-  // Clear out the reference to destruct the array
-  $ref =& makeArrRef();
-  var_dump($ref);
-  $ref = null;
 
   // SetM and CGetM with an object base on the stack
   makeObj()->prop = 'foo';
   var_dump(makeObj()->prop);
-  makeObjRef()->prop = 'bar';
-  var_dump(makeObjRef()->prop[2]);
+  var_dump(makeObj()->prop[2]);
 
   // UnsetM
   unset(makeArr()['dumper']);

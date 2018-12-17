@@ -33,7 +33,7 @@ class Point
     {
         $this->x = $x;
         $this->y = $y;
-    }   
+    }
 
     public function translate($x, $y)
     {
@@ -59,7 +59,7 @@ class Point
     public function __toString()
     {
         return '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 }
 
 ///*
@@ -202,7 +202,7 @@ echo "Done\n";
 ///*
 echo "----------------- byRef returning of handle types ----------------------\n";
 
-function & g2()
+function g2()
 {
     $b = new Point(5, 7);   // create first new point, and make $b an alias to it
 

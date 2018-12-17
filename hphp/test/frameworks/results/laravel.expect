@@ -1413,7 +1413,7 @@ MailMailerTest::testMailerSendSendsMessageWithProperPlainViewContent
 MailMailerTest::testMailerSendSendsMessageWithProperPlainViewContentWhenExplicit
 .
 MailMailerTest::testMailerSendSendsMessageWithProperViewContent
-.
+FATAL
 MailMailerTest::testMessagesCanBeLoggedInsteadOfSent
 .
 MailMessageTest::testBasicAttachment
@@ -1547,7 +1547,7 @@ QueueIronQueueTest::testPopProperlyPopsJobOffOfIronWithoutEncryption
 QueueIronQueueTest::testPushProperlyPushesJobOntoIron
 .
 QueueIronQueueTest::testPushProperlyPushesJobOntoIronWithClosures
-.
+FATAL
 QueueIronQueueTest::testPushProperlyPushesJobOntoIronWithoutEncryption
 .
 QueueIronQueueTest::testPushedJobsCanBeMarshaled
@@ -1995,7 +1995,7 @@ SupportPluralizerTest::testCaseSensitiveUsage
 SupportSerializableClosureTest::testCanGetCodeAndVariablesFromObject
 .
 SupportSerializableClosureTest::testClosureCanBeSerializedAndRebuilt
-.
+FATAL
 SupportSerializableClosureTest::testClosureCanBeSerializedAndRebuiltAndInheritState
 .
 SupportServiceProviderTest::testPackageNameCanBeGuessed
@@ -2163,7 +2163,7 @@ ViewFactoryTest::testInjectStartsSectionWithContent
 ViewFactoryTest::testMakeAViewFromNamedView
 .
 ViewFactoryTest::testMakeCreatesNewViewInstanceWithProperPathAndEngine
-.
+FATAL
 ViewFactoryTest::testMakeWithAlias
 .
 ViewFactoryTest::testMultipleStackPush
@@ -2217,7 +2217,7 @@ ViewFinderTest::testPassingViewWithoutHintReturnsFalse
 ViewPhpEngineTest::testViewsMayBeProperlyRendered
 .
 ViewTest::testDataCanBeSetOnView
-.
+FATAL
 ViewTest::testRenderProperlyRendersView
 .
 ViewTest::testRenderSectionsReturnsEnvironmentSections

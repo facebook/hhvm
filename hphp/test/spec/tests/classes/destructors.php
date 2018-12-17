@@ -11,7 +11,7 @@ error_reporting(-1);
 class D1
 {
 //  private function __destruct()
-    public function & __destruct()  // return by reference
+    public function __destruct()
 //  protected function __destruct()
     {
         echo "In D1 destructor\n";

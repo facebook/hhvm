@@ -66,14 +66,3 @@ f In:  $p: 10
 f Out: $p: 200
 
 int(200)
-int(10)
-$p is set
-g1 In:  $p: 10
-g1 Out: $p: 200
-
-int(200)
-int(200)
-int(-12)
-int(-12)
-g2 In:
-string(5) "local"

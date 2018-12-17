@@ -1,7 +1,7 @@
 <?hh
 
 class Whatever {
-  public function & __get($name) {
+  public function __get($name) {
     var_dump($name); global $lol; return $lol;
   }
 }

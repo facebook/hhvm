@@ -279,7 +279,7 @@ phpbb_controller_controller_test::test_controller_resolver
 phpbb_controller_controller_test::test_provider
 .
 phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #0
-.
+FATAL
 phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #1
 .
 phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #10

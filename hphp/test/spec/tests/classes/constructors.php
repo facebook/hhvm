@@ -12,7 +12,7 @@ class D1
 {
 //  private function __construct($p1)
 //  public function __construct($p1)
-    protected function & __construct($p1)
+    protected function __construct($p1)
     {
         echo "In D1 constructor, $p1\n";
 

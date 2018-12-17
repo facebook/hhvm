@@ -3,8 +3,6 @@
 
 function pass_by_ref(&$d) {}
 
-function &ret_by_ref($d, $key) { return $d[$key]; }
-
 function ref_param($d) {
   echo "========== ref_param ===============================\n";
   try {
@@ -107,36 +105,6 @@ function set_ref($d) {
   var_dump($d);
 }
 
-function ref_return($d) {
-  echo "========== ref_return ==============================\n";
-  try {
-    ret_by_ref($d, 1);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($d, 10);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($d, "key1");
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($d, "key2");
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($d, false);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($d);
-}
-
 function convert_with_ref() {
   echo "========== convert_with_ref ========================\n";
   $arr = ['a', 'b', 'c', 'd', 'e'];
@@ -195,7 +163,6 @@ function main() {
   elem_ref($d);
   append_ref($d);
   set_ref($d);
-  ref_return($d);
   iterate_by_ref($d);
   convert_with_ref();
   ref_unserialize();

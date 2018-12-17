@@ -887,13 +887,13 @@ Composer\Test\Installer\SuggestedPackagesReporterTest::testOutputNotGettingInsta
 Composer\Test\Installer\SuggestedPackagesReporterTest::testOutputSkipInstalledPackages
 .
 Composer\Test\Json\ComposerSchemaTest::testMinimumStabilityValues
-.
+E
 Composer\Test\Json\ComposerSchemaTest::testOptionalAbandonedProperty
-.
+E
 Composer\Test\Json\ComposerSchemaTest::testRequireTypes
-.
+E
 Composer\Test\Json\ComposerSchemaTest::testRequiredProperties
-.
+E
 Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #0
 .
 Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #1
@@ -1011,7 +1011,7 @@ Composer\Test\Json\JsonFileTest::testParseErrorDetectUnescapedBackslash
 Composer\Test\Json\JsonFileTest::testParseErrorSkipsEscapedBackslash
 .
 Composer\Test\Json\JsonFileTest::testSchemaValidation
-.
+E
 Composer\Test\Json\JsonFileTest::testSimpleJsonString
 .
 Composer\Test\Json\JsonFileTest::testTrailingBackslash
@@ -1691,7 +1691,7 @@ Composer\Test\Util\BitbucketTest::testRequestAccessTokenWithValidOAuthConsumerAn
 Composer\Test\Util\BitbucketTest::testUsernamePasswordAuthenticationFlow
 .
 Composer\Test\Util\ConfigValidatorTest::testConfigValidatorCommitRefWarning
-.
+E
 Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureNotice
 .
 Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning

@@ -3,8 +3,6 @@
 
 function pass_by_ref(&$v) {}
 
-function &ret_by_ref($v, $key) { return $v[$key]; }
-
 function ref_param($v) {
   echo "========== ref_param ===============================\n";
   try {
@@ -92,31 +90,6 @@ function set_ref($v) {
   var_dump($v);
 }
 
-function ref_return($v) {
-  echo "========== ref_return ==============================\n";
-  try {
-    ret_by_ref($v, 1);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($v, 10);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($v, "key");
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    ret_by_ref($v, false);
-  } catch (Exception $e) {
-    echo "ref_return exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($v);
-}
-
 function iterate_by_ref($v) {
   echo "========== iterate_by_ref ==========================\n";
   try {
@@ -174,7 +147,6 @@ function main() {
   elem_ref($v);
   append_ref($v);
   set_ref($v);
-  ref_return($v);
   iterate_by_ref($v);
   convert_with_ref();
   ref_unserialize();

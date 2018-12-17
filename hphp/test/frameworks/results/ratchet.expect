@@ -3,7 +3,7 @@ Ratchet\AbstractConnectionDecoratorTest::testDecoratorRecursion
 Ratchet\AbstractConnectionDecoratorTest::testDecoratorRecursionLevel2
 .
 Ratchet\AbstractConnectionDecoratorTest::testGet
-.
+FATAL
 Ratchet\AbstractConnectionDecoratorTest::testGetConnection
 .
 Ratchet\AbstractConnectionDecoratorTest::testGetConnectionLevel2
@@ -65,7 +65,7 @@ Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #
 Ratchet\Application\Server\FlashPolicyTest::testDomainValidation with data set #9
 .
 Ratchet\Application\Server\FlashPolicyTest::testErrorClosesConnection
-.
+FATAL
 Ratchet\Application\Server\FlashPolicyTest::testInvalidDomainPolicyReader
 .
 Ratchet\Application\Server\FlashPolicyTest::testInvalidPolicyReader
@@ -129,7 +129,7 @@ Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data 
 Ratchet\Application\Server\FlashPolicyTest::testSiteControlValidation with data set #9
 .
 Ratchet\Application\Server\IoConnectionTest::testCloseBubbles
-.
+FATAL
 Ratchet\Application\Server\IoConnectionTest::testSendBubbles
 .
 Ratchet\Application\Server\IoConnectionTest::testSendReturnsSelf
@@ -143,7 +143,7 @@ Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromNonGuzz
 Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testMessageProvider
 .
 Ratchet\Http\HttpRequestParserTest::testBufferOverflowResponse
-.
+FATAL
 Ratchet\Http\HttpRequestParserTest::testIsEom with data set #0
 .
 Ratchet\Http\HttpRequestParserTest::testIsEom with data set #1
@@ -171,9 +171,9 @@ Ratchet\Http\HttpServerTest::testOnError
 Ratchet\Http\HttpServerTest::testOnMessageAfterHeaders
 .
 Ratchet\Http\HttpServerTest::testOpen
-.
+FATAL
 Ratchet\Http\OriginCheckTest::testCloseOnNonMatchingOrigin
-.
+FATAL
 Ratchet\Http\OriginCheckTest::testOnClose
 .
 Ratchet\Http\OriginCheckTest::testOnError
@@ -193,7 +193,7 @@ Ratchet\Http\RouterTest::testControllerOnMessageBubbles
 Ratchet\Http\RouterTest::testControllerOnOpen
 .
 Ratchet\Http\RouterTest::testFourOhFour
-.
+FATAL
 Ratchet\Http\RouterTest::testNullRequest
 .
 Ratchet\Http\RouterTest::testRouterGeneratesRouteParameters
@@ -201,7 +201,7 @@ Ratchet\Http\RouterTest::testRouterGeneratesRouteParameters
 Ratchet\Server\EchoServerTest::testErrorClosesConnection
 .
 Ratchet\Server\EchoServerTest::testMessageEchod
-.
+FATAL
 Ratchet\Server\IpBlackListTest::testAddAndRemoveWithFluentInterfaces
 .
 Ratchet\Server\IpBlackListTest::testBlockClosesConnection
@@ -225,7 +225,7 @@ Ratchet\Server\IpBlackListTest::testOnCloseDecoration
 Ratchet\Server\IpBlackListTest::testOnMessageDecoration
 .
 Ratchet\Server\IpBlackListTest::testOnOpen
-.
+FATAL
 Ratchet\Server\IpBlackListTest::testUnblockingSilentlyFails
 .
 Ratchet\Session\Serialize\PhpHandlerTest::testUnserialize with data set #0
@@ -247,7 +247,7 @@ Ratchet\Session\SessionProviderTest::testOpen
 Ratchet\Session\SessionProviderTest::testRejectInvalidSeralizers
 .
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #0
-.
+FATAL
 Ratchet\Session\SessionProviderTest::testToClassCase with data set #1
 .
 Ratchet\Wamp\ServerProtocolTest::testCall with data set #0
@@ -309,7 +309,7 @@ Ratchet\Wamp\ServerProtocolTest::testValidJsonButInvalidProtocol with data set #
 Ratchet\Wamp\ServerProtocolTest::testValidJsonButInvalidProtocol with data set #2
 .
 Ratchet\Wamp\ServerProtocolTest::testWampOnMessageApp
-.
+FATAL
 Ratchet\Wamp\ServerProtocolTest::testWelcomeMessage
 .
 Ratchet\Wamp\TopicManagerTest::testConnIsRemovedFromTopicOnClose
@@ -325,7 +325,7 @@ Ratchet\Wamp\TopicManagerTest::testGetTopicCreatesTopicWithSameName
 Ratchet\Wamp\TopicManagerTest::testGetTopicReturnsSameObject
 .
 Ratchet\Wamp\TopicManagerTest::testGetTopicReturnsTopicObject
-.
+FATAL
 Ratchet\Wamp\TopicManagerTest::testOnCall
 .
 Ratchet\Wamp\TopicManagerTest::testOnCloseBubbles
@@ -347,7 +347,7 @@ Ratchet\Wamp\TopicManagerTest::testUnsubscribeFiresOnce
 Ratchet\Wamp\TopicManagerTest::testUnsubscribeRemovesTopicFromConnection
 .
 Ratchet\Wamp\TopicTest::testAddAndCount
-.
+FATAL
 Ratchet\Wamp\TopicTest::testBroadcast
 .
 Ratchet\Wamp\TopicTest::testBroadcastWithEligible
@@ -373,7 +373,7 @@ Ratchet\Wamp\WampConnectionTest::testCallError
 Ratchet\Wamp\WampConnectionTest::testCallErrorWithTopic
 .
 Ratchet\Wamp\WampConnectionTest::testCallResult
-.
+FATAL
 Ratchet\Wamp\WampConnectionTest::testClose
 .
 Ratchet\Wamp\WampConnectionTest::testDetailedCallError
@@ -393,7 +393,7 @@ Ratchet\Wamp\WampServerTest::testOnClose
 Ratchet\Wamp\WampServerTest::testOnError
 .
 Ratchet\Wamp\WampServerTest::testOnMessageToEvent
-.
+FATAL
 Ratchet\Wamp\WampServerTest::testOpen
 .
 Ratchet\WebSocket\VersionManagerTest::testFluentInterface
@@ -419,7 +419,7 @@ Ratchet\WebSocket\Version\Hixie76Test::testKeySigningForHandshake with data set 
 Ratchet\WebSocket\Version\Hixie76Test::testKeySigningForHandshake with data set #2
 .
 Ratchet\WebSocket\Version\Hixie76Test::testNoUpgradeBeforeBody
-.
+FATAL
 Ratchet\WebSocket\Version\Hixie76Test::testTcpFragmentedUpgrade
 .
 Ratchet\WebSocket\Version\HyBi10Test::testClassImplementsVersionInterface

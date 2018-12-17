@@ -17,7 +17,7 @@ Framework_MockBuilderTest::testMockClassNameCanBeSpecified
 Framework_MockBuilderTest::testOriginalCloneCanBeDisabled
 .
 Framework_MockBuilderTest::testOriginalConstructorCanBeDisabled
-.
+FATAL
 Framework_MockBuilderTest::testProvidesAFluentInterface
 .
 Framework_MockObjectTest::testArgumentCloningOptionGeneratesUniqueMock
@@ -95,7 +95,7 @@ Framework_MockObjectTest::testMockedMethodIsCalledOnce
 Framework_MockObjectTest::testMockedMethodIsCalledOnceWithParameter
 .
 Framework_MockObjectTest::testMockedMethodIsNeverCalled
-.
+FATAL
 Framework_MockObjectTest::testMockedMethodIsNeverCalledWithParameter
 .
 Framework_MockObjectTest::testMockedMethodIsNotCalledWhenExpectsAnyWithParameter
@@ -149,7 +149,7 @@ Framework_MockObject_GeneratorTest::testGetMockFailsWhenInvalidFunctionNameIsPas
 Framework_MockObject_GeneratorTest::testGetMockForAbstractClassAnstractClassDoesNotExist
 .
 Framework_MockObject_GeneratorTest::testGetMockForAbstractClassDoesNotFailWhenFakingInterfaces
-.
+FATAL
 Framework_MockObject_GeneratorTest::testGetMockForAbstractClassExpectingInvalidArgumentException with data set "className not a string"
 .
 Framework_MockObject_GeneratorTest::testGetMockForAbstractClassExpectingInvalidArgumentException with data set "mockClassName not a string"

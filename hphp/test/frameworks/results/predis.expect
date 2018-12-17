@@ -23,7 +23,7 @@ Predis\ClientTest::testConstructorWithArrayArgument
 Predis\ClientTest::testConstructorWithArrayOfArrayArgument
 .
 Predis\ClientTest::testConstructorWithArrayOfConnectionsArgument
-.
+FATAL
 Predis\ClientTest::testConstructorWithArrayOfStringArgument
 .
 Predis\ClientTest::testConstructorWithCallableArgument
@@ -159,7 +159,7 @@ Predis\Cluster\PredisStrategyTest::testSettingCustomCommandHandler
 Predis\Cluster\PredisStrategyTest::testSupportedCommands
 .
 Predis\Cluster\PredisStrategyTest::testSupportsKeyTags
-.
+FATAL
 Predis\Cluster\PredisStrategyTest::testUnsettingCommandHandler
 .
 Predis\Cluster\RedisStrategyTest::testAllKeysCommandsWithMoreKeys
@@ -215,7 +215,7 @@ Predis\Collection\Iterator\HashKeyTest::testIterationWithOptionsMatchAndCount
 Predis\Collection\Iterator\HashKeyTest::testIterationWithOptionsMatchAndCountOnMultipleFetches
 .
 Predis\Collection\Iterator\HashKeyTest::testThrowsExceptionOnInvalidProfile
-.
+FATAL
 Predis\Collection\Iterator\KeyspaceTest::testIterationOnMultipleFetches
 .
 Predis\Collection\Iterator\KeyspaceTest::testIterationOnMultipleFetchesAndHoleInFirstFetch
@@ -241,7 +241,7 @@ Predis\Collection\Iterator\KeyspaceTest::testIterationWithOptionsMatchAndCount
 Predis\Collection\Iterator\KeyspaceTest::testIterationWithOptionsMatchAndCountOnMultipleFetches
 .
 Predis\Collection\Iterator\KeyspaceTest::testThrowsExceptionOnInvalidProfile
-.
+FATAL
 Predis\Collection\Iterator\ListKeyTest::testIterationOnMultipleFetches
 .
 Predis\Collection\Iterator\ListKeyTest::testIterationOnSingleFetch
@@ -257,7 +257,7 @@ Predis\Collection\Iterator\ListKeyTest::testIterationWithNoResults
 Predis\Collection\Iterator\ListKeyTest::testThrowsExceptionOnConstructorWithNegativeCountParameter
 .
 Predis\Collection\Iterator\ListKeyTest::testThrowsExceptionOnConstructorWithNonIntegerCountParameter
-.
+FATAL
 Predis\Collection\Iterator\SetKeyTest::testIterationOnMultipleFetches
 .
 Predis\Collection\Iterator\SetKeyTest::testIterationOnMultipleFetchesAndHoleInFirstFetch
@@ -283,7 +283,7 @@ Predis\Collection\Iterator\SetKeyTest::testIterationWithOptionsMatchAndCount
 Predis\Collection\Iterator\SetKeyTest::testIterationWithOptionsMatchAndCountOnMultipleFetches
 .
 Predis\Collection\Iterator\SetKeyTest::testThrowsExceptionOnInvalidProfile
-.
+FATAL
 Predis\Collection\Iterator\SortedSetKeyTest::testIterationOnMultipleFetches
 .
 Predis\Collection\Iterator\SortedSetKeyTest::testIterationOnMultipleFetchesAndHoleInFirstFetch
@@ -309,7 +309,7 @@ Predis\Collection\Iterator\SortedSetKeyTest::testIterationWithOptionsMatchAndCou
 Predis\Collection\Iterator\SortedSetKeyTest::testIterationWithOptionsMatchAndCountOnMultipleFetches
 .
 Predis\Collection\Iterator\SortedSetKeyTest::testThrowsExceptionOnInvalidProfile
-.
+FATAL
 Predis\Command\CommandTest::testGetArgumentAtIndex
 .
 Predis\Command\CommandTest::testGetEmptyArguments
@@ -1093,7 +1093,7 @@ Predis\Command\Processor\KeyPrefixProcessorTest::testPrefixSort
 Predis\Command\Processor\KeyPrefixProcessorTest::testPrefixZSetStore
 .
 Predis\Command\Processor\KeyPrefixProcessorTest::testProcessPrefixableCommandInterface
-.
+FATAL
 Predis\Command\Processor\KeyPrefixProcessorTest::testSkipNotPrefixableCommands
 .
 Predis\Command\Processor\ProcessorChainTest::testAddMoreProcessors
@@ -1103,7 +1103,7 @@ Predis\Command\Processor\ProcessorChainTest::testAddProcessors
 Predis\Command\Processor\ProcessorChainTest::testConstructor
 .
 Predis\Command\Processor\ProcessorChainTest::testConstructorWithProcessorsArray
-.
+FATAL
 Predis\Command\Processor\ProcessorChainTest::testCountProcessors
 .
 Predis\Command\Processor\ProcessorChainTest::testProcessChain
@@ -1995,7 +1995,7 @@ Predis\CommunicationExceptionTest::testCommunicationExceptionHandling
 Predis\CommunicationExceptionTest::testExceptionConnection
 .
 Predis\CommunicationExceptionTest::testExceptionMessage
-.
+FATAL
 Predis\CommunicationExceptionTest::testShouldResetConnection
 .
 Predis\Configuration\ClusterOptionTest::testAcceptsInstanceOfClusterInterface
@@ -2003,7 +2003,7 @@ Predis\Configuration\ClusterOptionTest::testAcceptsInstanceOfClusterInterface
 Predis\Configuration\ClusterOptionTest::testAcceptsPredefinedShortNameString
 .
 Predis\Configuration\ClusterOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ClusterOptionTest::testThrowsExceptionOnInvalidInstanceType
 .
 Predis\Configuration\ClusterOptionTest::testThrowsExceptionOnInvalidShortNameString
@@ -2013,19 +2013,19 @@ Predis\Configuration\ConnectionFactoryOptionTest::testAcceptsConnectionFactoryIn
 Predis\Configuration\ConnectionFactoryOptionTest::testAcceptsNamedArrayWithSchemeToConnectionClassMappings
 .
 Predis\Configuration\ConnectionFactoryOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ConnectionFactoryOptionTest::testThrowsExceptionOnInvalidArguments
 .
 Predis\Configuration\ExceptionsOptionTest::testAcceptsDifferentValuesAndFiltersThemAsBooleans
 .
 Predis\Configuration\ExceptionsOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ExceptionsOptionTest::testReturnsFalesOnValuesNotParsableAsBooleans
 .
 Predis\Configuration\OptionsTest::testCanCheckOptionsIfDefinedByUser
 .
 Predis\Configuration\OptionsTest::testConstructorWithArrayArgument
-.
+FATAL
 Predis\Configuration\OptionsTest::testConstructorWithoutArguments
 .
 Predis\Configuration\OptionsTest::testIsSetReplicatesPHPBehavior
@@ -2047,7 +2047,7 @@ Predis\Configuration\PrefixOptionTest::testAcceptsCommandProcessorInstance
 Predis\Configuration\PrefixOptionTest::testAcceptsStringAndReturnsCommandProcessor
 .
 Predis\Configuration\PrefixOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ProfileOptionTest::testAcceptsProfileInstanceAsValue
 .
 Predis\Configuration\ProfileOptionTest::testAcceptsStringInterpretedAsProfileVersion
@@ -2057,7 +2057,7 @@ Predis\Configuration\ProfileOptionTest::testAppliesPrefixOnDefaultOptionValue
 Predis\Configuration\ProfileOptionTest::testAppliesPrefixOnProfileCreatedFromStringValue
 .
 Predis\Configuration\ProfileOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ProfileOptionTest::testDoesNotApplyPrefixOnProfileValue
 .
 Predis\Configuration\ProfileOptionTest::testThrowsExceptionOnInvalidValue
@@ -2067,13 +2067,13 @@ Predis\Configuration\ProfileOptionTest::testThrowsExceptionOnUnrecognizedVersion
 Predis\Configuration\ReplicationOptionTest::testAcceptsValuesThatCanBeInterpretedAsBooleans
 .
 Predis\Configuration\ReplicationOptionTest::testDefaultOptionValue
-.
+FATAL
 Predis\Configuration\ReplicationOptionTest::testThrowsExceptionOnInvalidInstanceType
 .
 Predis\Connection\Aggregate\MasterSlaveReplicationTest::testAcceptsCallableToOverrideReadOnlyFlagForCommands
 .
 Predis\Connection\Aggregate\MasterSlaveReplicationTest::testAddingConnectionsToReplication
-.
+FATAL
 Predis\Connection\Aggregate\MasterSlaveReplicationTest::testCanBeSerialized
 .
 Predis\Connection\Aggregate\MasterSlaveReplicationTest::testCanOverrideReadOnlyFlagForCommands
@@ -2125,7 +2125,7 @@ Predis\Connection\Aggregate\MasterSlaveReplicationTest::testWatchTriggersSwitchT
 Predis\Connection\Aggregate\MasterSlaveReplicationTest::testWritesCommandToCorrectConnection
 .
 Predis\Connection\Aggregate\PredisClusterTest::testAddingConnectionsToCluster
-.
+FATAL
 Predis\Connection\Aggregate\PredisClusterTest::testAddingConnectionsToClusterUsesConnectionAlias
 .
 Predis\Connection\Aggregate\PredisClusterTest::testCanBeSerialized
@@ -2165,7 +2165,7 @@ Predis\Connection\Aggregate\PredisClusterTest::testWritesCommandToCorrectConnect
 Predis\Connection\Aggregate\RedisClusterTest::testAcceptsCustomClusterStrategy
 .
 Predis\Connection\Aggregate\RedisClusterTest::testAcceptsCustomConnectionFactory
-.
+FATAL
 Predis\Connection\Aggregate\RedisClusterTest::testAddingConnectionResetsSlotsMap
 .
 Predis\Connection\Aggregate\RedisClusterTest::testAddingConnectionsToCluster
@@ -2237,7 +2237,7 @@ Predis\Connection\ConnectionExceptionTest::testCommunicationExceptionHandling
 Predis\Connection\ConnectionExceptionTest::testExceptionConnection
 .
 Predis\Connection\ConnectionExceptionTest::testExceptionMessage
-.
+FATAL
 Predis\Connection\ConnectionExceptionTest::testShouldResetConnection
 .
 Predis\Connection\FactoryTest::testAggregateConnectionSkipCreationOnConnectionInstance
@@ -2257,7 +2257,7 @@ Predis\Connection\FactoryTest::testCreateConnectionWithNullParameters
 Predis\Connection\FactoryTest::testCreateConnectionWithStringURI
 .
 Predis\Connection\FactoryTest::testCreateConnectionWithoutInitializationCommands
-.
+FATAL
 Predis\Connection\FactoryTest::testCreateUndefinedConnection
 .
 Predis\Connection\FactoryTest::testDefineAndUndefineConnection
@@ -2319,7 +2319,7 @@ Predis\Monitor\ConsumerTest::testGarbageCollectorRunStopsConsumer
 Predis\Monitor\ConsumerTest::testMonitorConsumerDoesNotWorkOnClusters
 .
 Predis\Monitor\ConsumerTest::testMonitorConsumerRequireMonitorCommand
-.
+FATAL
 Predis\Monitor\ConsumerTest::testReadsMessageFromConnectionToRedis24
 .
 Predis\Monitor\ConsumerTest::testReadsMessageFromConnectionToRedis26
@@ -2331,7 +2331,7 @@ Predis\Pipeline\AtomicTest::testExecutorWithAggregateConnection
 Predis\Pipeline\AtomicTest::testPipelineWithErrorInTransaction
 .
 Predis\Pipeline\AtomicTest::testPipelineWithSingleConnection
-.
+FATAL
 Predis\Pipeline\AtomicTest::testReturnsResponseErrorWithClientExceptionsSetToFalse
 .
 Predis\Pipeline\AtomicTest::testThrowsExceptionOnAbortedTransaction
@@ -2339,11 +2339,11 @@ Predis\Pipeline\AtomicTest::testThrowsExceptionOnAbortedTransaction
 Predis\Pipeline\AtomicTest::testThrowsServerExceptionOnResponseErrorByDefault
 .
 Predis\Pipeline\FireAndForgetTest::testPipelineWithSingleConnection
-.
+FATAL
 Predis\Pipeline\FireAndForgetTest::testSwitchesToMasterWithReplicationConnection
 .
 Predis\Pipeline\PipelineTest::testCallDoesNotSendCommandsWithoutExecute
-.
+FATAL
 Predis\Pipeline\PipelineTest::testCallReturnsPipelineForFluentInterface
 .
 Predis\Pipeline\PipelineTest::testConstructor
@@ -2383,7 +2383,7 @@ Predis\PredisExceptionTest::testExceptionMessage
 Predis\Profile\FactoryTest::testDefineInvalidProfile
 .
 Predis\Profile\FactoryTest::testDefineProfile
-.
+FATAL
 Predis\Profile\FactoryTest::testGetDefault
 .
 Predis\Profile\FactoryTest::testGetDevelopment
@@ -2401,7 +2401,7 @@ Predis\Profile\RedisUnstableTest::testCreateCommandWithoutArguments
 Predis\Profile\RedisUnstableTest::testCreateUndefinedCommand
 .
 Predis\Profile\RedisUnstableTest::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisUnstableTest::testDefineInvalidCommand
 .
 Predis\Profile\RedisUnstableTest::testGetCommandClass
@@ -2433,7 +2433,7 @@ Predis\Profile\RedisVersion200Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion200Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion200Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion200Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion200Test::testGetCommandClass
@@ -2465,7 +2465,7 @@ Predis\Profile\RedisVersion220Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion220Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion220Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion220Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion220Test::testGetCommandClass
@@ -2497,7 +2497,7 @@ Predis\Profile\RedisVersion240Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion240Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion240Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion240Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion240Test::testGetCommandClass
@@ -2529,7 +2529,7 @@ Predis\Profile\RedisVersion260Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion260Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion260Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion260Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion260Test::testGetCommandClass
@@ -2561,7 +2561,7 @@ Predis\Profile\RedisVersion280Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion280Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion280Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion280Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion280Test::testGetCommandClass
@@ -2593,7 +2593,7 @@ Predis\Profile\RedisVersion300Test::testCreateCommandWithoutArguments
 Predis\Profile\RedisVersion300Test::testCreateUndefinedCommand
 .
 Predis\Profile\RedisVersion300Test::testDefineCommand
-.
+FATAL
 Predis\Profile\RedisVersion300Test::testDefineInvalidCommand
 .
 Predis\Profile\RedisVersion300Test::testGetCommandClass
@@ -2621,7 +2621,7 @@ Predis\Protocol\ProtocolExceptionTest::testCommunicationExceptionHandling
 Predis\Protocol\ProtocolExceptionTest::testExceptionConnection
 .
 Predis\Protocol\ProtocolExceptionTest::testExceptionMessage
-.
+FATAL
 Predis\Protocol\ProtocolExceptionTest::testShouldResetConnection
 .
 Predis\Protocol\Text\BulkResponseTest::testBulk
@@ -2631,7 +2631,7 @@ Predis\Protocol\Text\BulkResponseTest::testInvalidLength
 Predis\Protocol\Text\BulkResponseTest::testNull
 .
 Predis\Protocol\Text\BulkResponseTest::testZeroLengthBulk
-.
+FATAL
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testConnectionRead
 .
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testConnectionWrite
@@ -2639,15 +2639,15 @@ Predis\Protocol\Text\CompositeProtocolProcessorTest::testConnectionWrite
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testConstructor
 .
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testConstructorWithArguments
-.
+FATAL
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testCustomRequestSerializer
 .
 Predis\Protocol\Text\CompositeProtocolProcessorTest::testCustomResponseReader
 .
 Predis\Protocol\Text\ErrorResponseTest::testOk
-.
+FATAL
 Predis\Protocol\Text\IntegerResponseTest::testInteger
-.
+FATAL
 Predis\Protocol\Text\IntegerResponseTest::testInvalid
 .
 Predis\Protocol\Text\IntegerResponseTest::testNull
@@ -2655,13 +2655,13 @@ Predis\Protocol\Text\IntegerResponseTest::testNull
 Predis\Protocol\Text\MultiBulkResponseTest::testInvalid
 .
 Predis\Protocol\Text\MultiBulkResponseTest::testMultiBulk
-.
+FATAL
 Predis\Protocol\Text\MultiBulkResponseTest::testNull
 .
 Predis\Protocol\Text\ProtocolProcessorTest::testConnectionRead
 .
 Predis\Protocol\Text\ProtocolProcessorTest::testConnectionWrite
-.
+FATAL
 Predis\Protocol\Text\ProtocolProcessorTest::testIterableMultibulkSupport
 .
 Predis\Protocol\Text\ProtocolProcessorTest::testUnknownResponsePrefix
@@ -2669,7 +2669,7 @@ Predis\Protocol\Text\ProtocolProcessorTest::testUnknownResponsePrefix
 Predis\Protocol\Text\RequestSerializerTest::testSerializerIdWithArguments
 .
 Predis\Protocol\Text\RequestSerializerTest::testSerializerIdWithNoArguments
-.
+FATAL
 Predis\Protocol\Text\ResponseReaderTest::testDefaultHandlers
 .
 Predis\Protocol\Text\ResponseReaderTest::testEmptyResponseHeader
@@ -2677,11 +2677,11 @@ Predis\Protocol\Text\ResponseReaderTest::testEmptyResponseHeader
 Predis\Protocol\Text\ResponseReaderTest::testReadResponse
 .
 Predis\Protocol\Text\ResponseReaderTest::testReplaceHandler
-.
+FATAL
 Predis\Protocol\Text\ResponseReaderTest::testUnknownResponsePrefix
 .
 Predis\Protocol\Text\StatusResponseTest::testOk
-.
+FATAL
 Predis\Protocol\Text\StatusResponseTest::testPlainString
 .
 Predis\Protocol\Text\StatusResponseTest::testQueued
@@ -2689,7 +2689,7 @@ Predis\Protocol\Text\StatusResponseTest::testQueued
 Predis\Protocol\Text\StreamableMultiBulkResponseTest::testInvalid
 .
 Predis\Protocol\Text\StreamableMultiBulkResponseTest::testOk
-.
+FATAL
 Predis\PubSub\ConsumerTest::testConstructorWithSubscriptionsStartsConsumer
 .
 Predis\PubSub\ConsumerTest::testConstructorWithoutSubscriptionsDoesNotStartConsumer
@@ -2705,7 +2705,7 @@ Predis\PubSub\ConsumerTest::testIsNotValidWhenNotSubscribed
 Predis\PubSub\ConsumerTest::testPubSubConsumerDoesNotWorkOnClusters
 .
 Predis\PubSub\ConsumerTest::testPubSubConsumerRequirePubSubRelatedCommand
-.
+FATAL
 Predis\PubSub\ConsumerTest::testReadsMessageFromConnection
 .
 Predis\PubSub\ConsumerTest::testReadsPmessageFromConnection
@@ -2727,7 +2727,7 @@ Predis\Replication\ReplicationStrategyTest::testCanSetCommandAsWriteOperation
 Predis\Replication\ReplicationStrategyTest::testCanUseCallableToCheckCommand
 .
 Predis\Replication\ReplicationStrategyTest::testDefaultIsWriteOperation
-.
+FATAL
 Predis\Replication\ReplicationStrategyTest::testDisallowedCommands
 .
 Predis\Replication\ReplicationStrategyTest::testReadCommands
@@ -2753,7 +2753,7 @@ Predis\Response\ErrorTest::testResponseErrorClass
 Predis\Response\ErrorTest::testToString
 .
 Predis\Response\Iterator\MultiBulkTupleTest::testInitiatedMultiBulkIteratorsAreNotValid
-.
+FATAL
 Predis\Response\Iterator\MultiBulkTupleTest::testMultiBulkWithOddSizesAreInvalid
 .
 Predis\Response\ServerExceptionTest::testErrorType
@@ -2841,7 +2841,7 @@ Predis\Transaction\MultiExecTest::testThrowsExceptionOnExecInsideTransactionBloc
 Predis\Transaction\MultiExecTest::testThrowsExceptionOnServerSideTransactionAbort
 .
 Predis\Transaction\MultiExecTest::testThrowsExceptionOnUnsupportedMultiExecInProfile
-.
+FATAL
 Predis\Transaction\MultiExecTest::testThrowsExceptionOnUnsupportedUnwatchInProfile
 .
 Predis\Transaction\MultiExecTest::testThrowsExceptionOnUnsupportedWatchInProfile

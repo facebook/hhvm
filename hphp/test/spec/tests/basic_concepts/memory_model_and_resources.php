@@ -111,7 +111,7 @@ echo "Done\n";
 ///*
 echo "----------------- resource byRef returning ----------------------\n";
 
-function & g2()
+function g2()
 {
     $b = STDOUT;
 

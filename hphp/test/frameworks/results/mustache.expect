@@ -55,7 +55,7 @@ Mustache_Test_EngineTest::testNonCallableEscapeThrowsException with data set #1
 Mustache_Test_EngineTest::testPartialLoadFailLogging
 .
 Mustache_Test_EngineTest::testRender
-.
+FATAL
 Mustache_Test_EngineTest::testSetHelpersThrowsExceptions
 .
 Mustache_Test_EngineTest::testSetLoggerThrowsExceptions

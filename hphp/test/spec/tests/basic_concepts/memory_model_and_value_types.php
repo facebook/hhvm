@@ -129,7 +129,7 @@ echo "Done\n";
 ///*
 echo "----------------- byRef returning of value types ----------------------\n";
 
-function & g2()
+function g2()
 {
     $b = "abc";
 
@@ -168,7 +168,7 @@ echo "h1() is " . h1() . "\n";
 //*/
 
 ///*
-function & h2()
+function h2()
 {
     $b = 10;
 //  return $b + 5;  // Only variable references should be returned by reference

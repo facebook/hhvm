@@ -27,6 +27,7 @@ type global_state =
 ; global_functions_with_finally: SSet.t
 ; global_function_to_labels_map: (bool SMap.t) SMap.t
 ; global_functions_with_hhas_blocks: (string list) SMap.t
+; global_lambda_rx_of_scope: Rx.t SMap.t
 }
 
 let empty_global_state =
@@ -36,6 +37,7 @@ let empty_global_state =
 ; global_functions_with_finally = SSet.empty
 ; global_function_to_labels_map = SMap.empty
 ; global_functions_with_hhas_blocks = SMap.empty
+; global_lambda_rx_of_scope = SMap.empty
 }
 
 let is_hh_file_ = ref false
@@ -67,6 +69,11 @@ let get_unique_id_for_function { Ast.f_name = (_, n); _ } =
   "|" ^ n
 let get_unique_id_for_method { Ast.c_name = (_, cls); _ } { Ast.m_name = (_, m); _} =
   cls ^ "|" ^ m
+
+let get_lambda_rx_of_scope cd md =
+  let key = get_unique_id_for_method cd md in
+  SMap.get key (!global_state_).global_lambda_rx_of_scope
+  |> Option.value ~default:Rx.NonRx
 
 let set_global_state s = global_state_ := s
 let clear_global_state () = set_global_state empty_global_state

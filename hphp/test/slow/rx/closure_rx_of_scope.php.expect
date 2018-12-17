@@ -1,0 +1,10 @@
+php anonymous function is Rx
+php closure is Rx
+short lambda is Rx
+async block works in Rx function
+closure from static method is Rx
+closure from instance method is Rx
+nested closure is Rx
+nested closure with override is RxShallow or RxLocal
+nested closure with override to NonRx is NonRx
+nested closure with override to NonRx and more nesting is NonRx

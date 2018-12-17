@@ -37,6 +37,12 @@ let attr_is_rx_local ast_attr =
 let any_attr_is_rx_local ast_attrs =
   List.exists ast_attrs ~f:attr_is_rx_local
 
+let attr_is_non_rx ast_attr =
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaNonRx
+
+let any_attr_is_non_rx ast_attrs =
+  List.exists ast_attrs ~f:attr_is_non_rx
+
 let attr_is_rx_if_impl ast_attr =
   snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaOnlyRxIfImpl
 
@@ -52,18 +58,20 @@ let any_attr_is_rx_as_args ast_attrs =
 
 let rx_level_from_ast ast_attrs =
   let rx = any_attr_is_rx ast_attrs in
+  let non_rx = any_attr_is_non_rx ast_attrs in
   let rx_shallow = any_attr_is_rx_shallow ast_attrs in
   let rx_local = any_attr_is_rx_local ast_attrs in
   let rx_conditional = any_attr_is_rx_if_impl ast_attrs
     || any_attr_is_rx_as_args ast_attrs in
-  match (rx_conditional, rx_local, rx_shallow, rx) with
-    | (false, false, false, false) -> NonRx
-    | (true,  true,  false, false) -> ConditionalRxLocal
-    | (true,  false, true,  false) -> ConditionalRxShallow
-    | (true,  false, false, true ) -> ConditionalRx
-    | (false, true,  false, false) -> RxLocal
-    | (false, false, true,  false) -> RxShallow
-    | (false, false, false, true ) -> Rx
+  match (rx_conditional, non_rx, rx_local, rx_shallow, rx) with
+    | (false, false, false, false, false) -> None
+    | (false, true,  false, false, false) -> Some NonRx
+    | (true,  false, true,  false, false) -> Some ConditionalRxLocal
+    | (true,  false, false, true,  false) -> Some ConditionalRxShallow
+    | (true,  false, false, false, true ) -> Some ConditionalRx
+    | (false, false, true,  false, false) -> Some RxLocal
+    | (false, false, false, true,  false) -> Some RxShallow
+    | (false, false, false, false, true ) -> Some Rx
     | _ -> failwith "invalid combination of Rx attributes escaped the parser"
 
 let rx_level_to_attr_string level = match level with

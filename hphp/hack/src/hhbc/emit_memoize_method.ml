@@ -359,7 +359,11 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
   let method_is_async = ast_method.Ast.m_fun_kind = Ast_defs.FAsync in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
-  let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
+  (* __Memoize is not allowed on lambdas, so we never need to inherit the rx
+     level from the declaring scope when we're in a Memoize wrapper *)
+  let method_rx_level = 
+    Rx.rx_level_from_ast ast_method.Ast.m_user_attributes
+    |> Option.value ~default:Rx.NonRx in
   let env = Emit_env.with_rx_body (method_rx_level <> Rx.NonRx) env in
   let method_body =
     emit_memoize_wrapper_body env info ast_method

@@ -12,6 +12,7 @@ module ScopeItem =
 struct
   type is_static = bool
   type is_async = bool
+  type rx_level = Rx.t option
   type t =
   (* Named class *)
   | Class of Ast.class_
@@ -20,9 +21,9 @@ struct
   (* Method in class *)
   | Method of Ast.method_
   (* PHP-style closure *)
-  | LongLambda of is_static * is_async
+  | LongLambda of is_static * is_async * rx_level
   (* Short lambda *)
-  | Lambda of is_async
+  | Lambda of is_async * rx_level
 end
 
 module Scope =
@@ -81,7 +82,7 @@ struct
     match scope with
     | ScopeItem.Method md :: _ -> List.mem ~equal:(=) md.Ast.m_kind Ast.Static
     | ScopeItem.Lambda _ :: scope -> is_in_static_method scope
-    | ScopeItem.LongLambda (is_static, _) :: scope ->
+    | ScopeItem.LongLambda (is_static, _, _) :: scope ->
       not is_static && is_in_static_method scope
     | _ -> false
 
@@ -93,4 +94,19 @@ struct
   let is_in_lambda = function
     | ScopeItem.Lambda _ :: _ | ScopeItem.LongLambda _ :: _ -> true
     | _ -> false
+
+  let rec rx_of_scope scope =
+    match scope with
+    | []
+    | ScopeItem.Class _ :: _ ->
+      Rx.NonRx
+    | ScopeItem.Lambda (_, Some rx_level) :: _
+    | ScopeItem.LongLambda (_, _, Some rx_level) :: _ ->
+      rx_level
+    | ScopeItem.Lambda (_, None) :: rest
+    | ScopeItem.LongLambda (_, _, None) :: rest ->
+      rx_of_scope rest
+    | ScopeItem.Method { Ast.m_user_attributes = attrs; _ } :: _
+    | ScopeItem.Function { Ast.f_user_attributes = attrs; _ } :: _ ->
+      Rx.rx_level_from_ast attrs |> Option.value ~default:Rx.NonRx
 end

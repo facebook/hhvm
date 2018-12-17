@@ -188,13 +188,21 @@ let from_ast_wrapper : bool -> _ ->
      Ast_scope.ScopeItem.Class ast_class] in
   let scope =
     if method_is_closure_body
-    then Ast_scope.ScopeItem.Lambda method_is_async :: scope else scope in
+    then Ast_scope.ScopeItem.Lambda (method_is_async, None) :: scope
+    else scope in
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
   let is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let has_ref_params =
     List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
-  let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
+  let method_rx_level = 
+    match Rx.rx_level_from_ast ast_method.Ast.m_user_attributes with
+    | Some l -> l
+    | None ->
+      if method_is_closure_body
+        then Emit_env.get_lambda_rx_of_scope ast_class ast_method
+        else Rx.NonRx
+    in
   let method_body, method_is_generator, method_is_pair_generator =
     if is_native_opcode_impl then
       Emit_native_opcode.emit_body

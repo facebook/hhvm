@@ -153,7 +153,8 @@ let emit_wrapper_function
     make_memoize_function_code
       ~pos ~deprecation_info env params renamed_id function_is_async
   in
-  let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes in
+  let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes
+    |> Option.value ~default:Rx.NonRx in
   let env = Emit_env.with_rx_body (function_rx_level <> Rx.NonRx) env in
   let memoized_body =
     make_wrapper_body env return_type_info params body_instrs in

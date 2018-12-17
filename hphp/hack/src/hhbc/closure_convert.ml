@@ -119,6 +119,8 @@ type state = {
   functions_with_hhas_blocks: (string list) SMap.t;
   (* most recent definition of lexical-scoped `let` variables *)
   let_vars: int SMap.t;
+  (* maps unique name of lambda to Rx level of the declaring scope *)
+  lambda_rx_of_scope: Rx.t SMap.t;
 }
 
 let set_has_finally st =
@@ -162,6 +164,7 @@ let initial_state popt =
   seen_strict_types = None;
   functions_with_hhas_blocks = SMap.empty;
   let_vars = SMap.empty;
+  lambda_rx_of_scope = SMap.empty;
 }
 
 let total_class_count env st =
@@ -305,11 +308,16 @@ let fun_is_async = function FAsync | FAsyncGenerator -> true | _ -> false
 
 let env_with_lambda env fd =
   let is_async = fun_is_async fd.Ast.f_fun_kind in
-  env_with_function_like env (ScopeItem.Lambda is_async) ~is_closure_body:true fd
+  let rx_level = Rx.rx_level_from_ast fd.Ast.f_user_attributes in
+  env_with_function_like env (ScopeItem.Lambda (is_async, rx_level))
+    ~is_closure_body:true fd
 
 let env_with_longlambda env is_static fd =
   let is_async = fun_is_async fd.Ast.f_fun_kind in
-  env_with_function_like env (ScopeItem.LongLambda (is_static, is_async)) ~is_closure_body:true fd
+  let rx_level = Rx.rx_level_from_ast fd.Ast.f_user_attributes in
+  env_with_function_like env
+    (ScopeItem.LongLambda (is_static, is_async, rx_level))
+    ~is_closure_body:true fd
 
 let strip_id id = SU.strip_global_ns (snd id)
 let make_class_name cd = SU.Xhp.mangle_id (strip_id cd.c_name)
@@ -392,11 +400,12 @@ let reset_function_counts st =
     closure_cnt_per_fun = 0;
     anon_cls_cnt_per_fun = 0 }
 
-let record_function_state key { inline_hhas_blocks; has_finally; has_goto; labels } st =
+let record_function_state key { inline_hhas_blocks; has_finally; has_goto; labels } rx_of_scope st =
   if List.is_empty inline_hhas_blocks &&
      not has_finally &&
      not has_goto &&
-     SMap.is_empty labels
+     SMap.is_empty labels &&
+     rx_of_scope = Rx.NonRx
   then st
   else
   let functions_with_finally =
@@ -411,8 +420,12 @@ let record_function_state key { inline_hhas_blocks; has_finally; has_goto; label
     if not @@ List.is_empty inline_hhas_blocks
     then SMap.add key (List.rev inline_hhas_blocks) st.functions_with_hhas_blocks
     else st.functions_with_hhas_blocks in
-  { st with
-    functions_with_finally; function_to_labels_map; functions_with_hhas_blocks }
+  let lambda_rx_of_scope =
+    if rx_of_scope <> Rx.NonRx
+    then SMap.add key rx_of_scope st.lambda_rx_of_scope
+    else st.lambda_rx_of_scope in
+  { st with functions_with_finally; function_to_labels_map;
+    functions_with_hhas_blocks; lambda_rx_of_scope }
 
 let add_function ~has_inout_params env st fd =
   let n = env.defined_function_count
@@ -582,8 +595,8 @@ let check_if_in_async_context { scope; pos; _ } =
   match scope with
   | [] -> Emit_fatal.raise_fatal_parse pos
             "'await' can only be used inside a function"
-  | ScopeItem.Lambda is_async :: _
-  | ScopeItem.LongLambda (_, is_async) :: _ ->
+  | ScopeItem.Lambda (is_async, _) :: _
+  | ScopeItem.LongLambda (_, is_async, _) :: _ ->
     if not is_async then
       Emit_fatal.raise_fatal_parse pos "Await may only appear in an async function"
   | ScopeItem.Class _ :: _ -> () (* Syntax error, wont get here *)
@@ -891,6 +904,7 @@ and convert_lambda env st p fd use_vars_opt =
       if id = SN.SpecialIdents.this
       then Emit_fatal.raise_fatal_parse p "Cannot use $this as lexical variable"));
   let env = append_let_vars env st.let_vars in
+  let rx_of_scope = Scope.rx_of_scope env.scope in
   let env = if Option.is_some use_vars_opt
             then env_with_longlambda env false fd
             else env_with_lambda env fd in
@@ -927,7 +941,7 @@ and convert_lambda env st p fd use_vars_opt =
 
   let rec is_scope_static scope =
     match scope with
-    | ScopeItem.LongLambda (is_static, _) :: scope ->
+    | ScopeItem.LongLambda (is_static, _, _) :: scope ->
       is_static || is_scope_static scope
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method md :: _ ->
@@ -983,7 +997,7 @@ and convert_lambda env st p fd use_vars_opt =
            } in
   let st =
     record_function_state
-      (Emit_env.get_unique_id_for_method cd md) function_state st in
+      (Emit_env.get_unique_id_for_method cd md) function_state rx_of_scope st in
   let env = old_env in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:(add_var env) in
@@ -1233,7 +1247,7 @@ and convert_fun env st fd =
     convert_function_like_body env st fd.f_body in
   let st =
     record_function_state
-      (Emit_env.get_unique_id_for_function fd) function_state st in
+      (Emit_env.get_unique_id_for_function fd) function_state Rx.NonRx st in
   let st, f_params = convert_params env st fd.f_params in
   let st, f_user_attributes =
     convert_user_attributes env st fd.f_user_attributes in
@@ -1292,7 +1306,7 @@ and convert_class_elt env st ce =
       convert_function_like_body env st md.m_body in
     let st =
       record_function_state
-        (Emit_env.get_unique_id_for_method cls md) function_state st in
+        (Emit_env.get_unique_id_for_method cls md) function_state Rx.NonRx st in
     let st, m_params = convert_params env st md.m_params in
     let st, m_user_attributes =
       convert_user_attributes env st md.m_user_attributes in
@@ -1395,7 +1409,8 @@ let convert_toplevel_prog ~popt defs =
   let st, original_defs = convert_defs env 0 0 st defs in
   let main_state = st.current_function_state in
   let st =
-    record_function_state (Emit_env.get_unique_id_for_main ()) main_state st in
+    record_function_state
+      (Emit_env.get_unique_id_for_main ()) main_state Rx.NonRx st in
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
@@ -1409,7 +1424,8 @@ let convert_toplevel_prog ~popt defs =
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
       ; global_functions_with_finally = st.functions_with_finally
       ; global_function_to_labels_map = st.function_to_labels_map
-      ; global_functions_with_hhas_blocks = st.functions_with_hhas_blocks }) in
+      ; global_functions_with_hhas_blocks = st.functions_with_hhas_blocks
+      ; global_lambda_rx_of_scope = st.lambda_rx_of_scope }) in
   {
     ast_defs;
     global_state;

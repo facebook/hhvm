@@ -7,7 +7,6 @@ class C {
     var_dump($obj->cls);
   }
   public static function bar() {
-    var_dump(isset($this));
     $obj = new static;
     var_dump($obj->cls);
   }

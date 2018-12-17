@@ -11,18 +11,10 @@ NULL
 
 Notice: Undefined variable: this in %s on line 13
 NULL
-
-Notice: Undefined variable: this in %s on line 20
-NULL
-
-Notice: Undefined variable: this in %s on line 25
-NULL
-
-Notice: Undefined variable: this in %s on line 20
-NULL
-
-Notice: Undefined variable: this in %s on line 25
-NULL
+c::$a
+static c::$a
+c::$a
+static c::$a
 array(3) {
   [0]=>
   int(1)

@@ -1587,9 +1587,6 @@ and expr_
     let tobj = (Reason.Rwitness p, Tobject) in
     let env = Type.sub_type p Reason.URclone env ty tobj in
     make_result env p (T.Clone te) ty
-  | This when Env.is_static env ->
-      Errors.this_in_static p;
-      expr_error env p (Reason.Rwitness p)
   | This ->
       let r, _ = Env.get_self env in
       if r = Reason.Rnone

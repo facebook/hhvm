@@ -17,16 +17,15 @@ class A {
 
   static function c() {
     $a = function () {
-      var_dump($this);
+      echo "c::\$a\n";
     };
     $a();
 
     $a = static function () {
-      var_dump($this);
+      echo "static c::\$a\n";
     };
     $a();
   }
-
   static function d() {
     var_dump(array_map(function($a) { return $a; }, array(1,2,3)));
   }

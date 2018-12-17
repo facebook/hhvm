@@ -342,6 +342,8 @@ let not_allowed_in_write what =
   what ^ " is not allowed in write context"
 let reassign_this =
   "Cannot re-assign $this"
+let this_in_static =
+  "Don't use $this in a static method, use static:: instead"
 let strict_types_first_statement =
   "strict_types declaration must be the very first statement in the script"
 let async_magic_method ~name =

@@ -3,7 +3,6 @@
 class C1 {
   public static function __callStatic($fn, $args) {
     echo "C1::__callStatic\n";
-    var_dump(isset($this));
     var_dump($fn, $args);
     echo "\n";
   }
@@ -33,7 +32,6 @@ main1();
 class C2 {
   public static function __callStatic($fn, $args) {
     echo "C2::__callStatic\n";
-    var_dump(isset($this));
     var_dump($fn, $args);
     echo "\n";
   }
@@ -75,7 +73,6 @@ class B3 {
   }
   public static function __callStatic($fn, $args) {
     echo "B3::__callStatic\n";
-    var_dump(isset($this));
     var_dump($fn, $args);
     echo "\n";
   }
@@ -117,7 +114,6 @@ class A4 {
 }
 class B4 extends A4 {
   public static function __callStatic($fn, $args) {
-    var_dump(isset($this));
     var_dump($fn, $args);
     echo "\n";
   }
@@ -133,7 +129,6 @@ main4();
 
 class A5 {
   public static function __callStatic($fn, $args) {
-    var_dump(isset($this));
     var_dump($fn, $args);
   }
 }

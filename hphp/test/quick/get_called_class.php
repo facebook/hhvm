@@ -13,7 +13,6 @@ class C {
     var_dump(get_called_class());
   }
   public static function bar() {
-    var_dump(isset($this));
     var_dump(get_called_class());
   }
   public function yar() {
@@ -51,4 +50,3 @@ D::bar();
 echo "**************\n";
 $d->yar();
 D::yar();
-

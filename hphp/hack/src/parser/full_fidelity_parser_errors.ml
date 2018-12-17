@@ -2465,6 +2465,12 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
                is_using_statement_function_scoped us) -> errors
       | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
     end
+  | VariableExpression { variable_expression } when
+    env.is_hh_file &&
+    String.lowercase (text variable_expression) = SN.SpecialIdents.this ->
+    if List.exists parents methodish_contains_static
+    then make_error_from_node node SyntaxError.this_in_static :: errors
+    else errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let check_repeated_properties namespace_name class_name (errors, p_names) prop =
@@ -3571,7 +3577,8 @@ let find_syntax_errors env =
       | ConstructorCall _
       | AwaitableCreationExpression _
       | ConditionalExpression _
-      | CollectionLiteralExpression _ ->
+      | CollectionLiteralExpression _
+      | VariableExpression _ ->
         let errors =
           expression_errors env is_in_concurrent_block namespace_name node parents errors in
         let errors = check_nonrx_annotation node errors in

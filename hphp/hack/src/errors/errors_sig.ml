@@ -160,7 +160,6 @@ module type S = sig
   val unexpected_type_arguments : Pos.t -> unit
   val too_many_type_arguments : Pos.t -> unit
   val return_in_void : Pos.t -> Pos.t -> unit
-  val this_in_static : Pos.t -> unit
   val this_var_outside_class : Pos.t -> unit
   val unbound_global : Pos.t -> unit
   val private_inst_meth : Pos.t -> Pos.t -> unit

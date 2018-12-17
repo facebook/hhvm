@@ -1,7 +1,7 @@
 Test begin
 In C::__construct()
 In C::__construct()
-In C::sMeth(): $this::
+In C::sMeth()
 In D::D()
 In D::D()
 In E::__construct()
@@ -25,7 +25,7 @@ In K::K()
 In K::__construct()
 In C::__construct()
 In C::__construct()
-In C::sMeth(): $this::
+In C::sMeth()
 In D::D()
 In D::D()
 In E::__construct()

@@ -209,6 +209,7 @@ val expected_as_or_insteadof : string
 val expected_dotdotdot : string
 val not_allowed_in_write : string -> string
 val reassign_this : string
+val this_in_static : string
 val strict_types_first_statement : string
 val async_magic_method : name:string -> string
 val reserved_keyword_as_class_name : string -> string

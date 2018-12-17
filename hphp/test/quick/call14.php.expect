@@ -1,10 +1,8 @@
 C1::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C1::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -18,12 +16,10 @@ array(4) {
 }
 
 C1::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C1::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -37,12 +33,10 @@ array(4) {
 }
 
 C1::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C1::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -56,12 +50,10 @@ array(4) {
 }
 
 C1::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C1::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -75,12 +67,10 @@ array(4) {
 }
 
 C2::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C2::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -94,12 +84,10 @@ array(4) {
 }
 
 C2::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C2::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -113,12 +101,10 @@ array(4) {
 }
 
 C2::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C2::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -132,12 +118,10 @@ array(4) {
 }
 
 C2::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C2::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -151,12 +135,10 @@ array(4) {
 }
 
 C2::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
 C2::__callStatic
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>
@@ -170,7 +152,6 @@ array(4) {
 }
 
 B3::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
@@ -189,7 +170,6 @@ array(4) {
 }
 
 B3::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
@@ -208,7 +188,6 @@ array(4) {
 }
 
 B3::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
@@ -227,7 +206,6 @@ array(4) {
 }
 
 B3::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
@@ -246,7 +224,6 @@ array(4) {
 }
 
 B3::__callStatic
-bool(false)
 string(1) "a"
 string(1) "b"
 
@@ -266,7 +243,6 @@ array(4) {
 
 A4::foo
 A4::foo
-bool(false)
 string(3) "foo"
 array(4) {
   [0]=>

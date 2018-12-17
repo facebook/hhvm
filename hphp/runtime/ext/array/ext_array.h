@@ -291,9 +291,11 @@ inline int64_t countHelper(TypedValue tv) {
     return make_tv<KindOfNull>();                                        \
   }                                                                      \
   Variant var_##input(input);                                            \
-  tvCastToArrayInPlace(var_##input.asTypedValue());                      \
-  assertx(var_##input.isArray());                                         \
-  auto arr_##input = var_##input.toArray();
+  tvCastToArrayInPlace<IntishCast::CastSilently>(                        \
+    var_##input.asTypedValue()                                           \
+  );                                                                     \
+  assertx(var_##input.isArray());                                        \
+  auto arr_##input = var_##input.toArray<IntishCast::CastSilently>();
 
 #define getCheckedArray(input)        \
   getCheckedArrayRet(input, make_tv<KindOfNull>())

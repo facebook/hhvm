@@ -141,7 +141,7 @@ TypedValue HHVM_FUNCTION(array_column,
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
     if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
-      sub = it.second().toObject().toArray();
+      sub = it.second().toObject().get()->toArray<IntishCast::CastSilently>();
     } else if (it.second().isArray()) {
       sub = it.second().toArray();
     } else {
@@ -222,7 +222,9 @@ TypedValue HHVM_FUNCTION(array_count_values,
         ? input.asCArrRef()
         // If this isn't exactly an Array, then it must be a hack collection,
         // so it is safe to get the object data
-        : collections::toArray(input.getObjectData())));
+        : collections::toArray<IntishCast::CastSilently>(
+            input.getObjectData()
+          )));
 }
 
 TypedValue HHVM_FUNCTION(array_fill_keys,
@@ -468,11 +470,14 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
     } else if (arr1.exists(key, true)) {
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
-      auto const lval = arr1.lvalAt(key, AccessFlags::Key);
-      auto subarr1 = tvCastToArrayLike(lval.tv()).toPHPArray();
+      auto const arrkey =
+        arr1.convertKey<IntishCast::CastSilently>(*key.asTypedValue());
+      auto const lval = arr1.lvalAt(arrkey, AccessFlags::Key);
+      auto subarr1 = tvCastToArrayLike<IntishCast::CastSilently>(lval.tv())
+        .toPHPArray();
       php_array_merge_recursive(
         seen, couldRecur(lval, subarr1.get()), subarr1,
-        tvCastToArrayLike(iter.secondVal())
+        tvCastToArrayLike<IntishCast::CastSilently>(iter.secondVal())
       );
       tvUnset(lval); // avoid contamination of the value that was strongly bound
       tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
@@ -662,7 +667,9 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
       auto const lval = arr1.lvalAt(key, AccessFlags::Key);
       if (isArrayLikeType(lval.unboxed().type())) {
-        Array subarr1 = tvCastToArrayLike(lval.tv()).toPHPArray();
+        Array subarr1 = tvCastToArrayLike<IntishCast::CastSilently>(
+          lval.tv()
+        ).toPHPArrayIntishCast();
         php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
                                     subarr1, ArrNR(rval.val().parr));
         tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
@@ -1871,7 +1878,7 @@ static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
     if (isArrayLikeType(c1.m_type)) { \
       return tvReturn(container1); \
     } else { \
-      return tvReturn(container1.toArray()); \
+      return tvReturn(container1.toArray<IntishCast::CastSilently>());  \
     } \
   } \
   Array ret = Array::Create();

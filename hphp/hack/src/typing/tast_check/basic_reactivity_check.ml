@@ -541,9 +541,9 @@ let check = object(self)
       )
     | _, Shape els ->
       let ctx = disallow_mutable_locals ctx in
-      Aast.ShapeMap.iter (fun _ v ->
+      List.iter els (fun (_, v) ->
         self#on_expr (env,ctx) v
-      ) els
+      )
     | _, Await e ->
       self#on_expr (env, allow_awaitable ctx) e
     | _, Pipe (_, l, r) ->

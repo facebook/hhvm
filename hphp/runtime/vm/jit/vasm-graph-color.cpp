@@ -108,9 +108,30 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 // State
 
+// RegClass determine what set of things a Vreg can be colored to. This includes
+// whether the Vreg represents a spill slot, and whether its a wide value or
+// not. It is inferred by looking at how a Vreg is used and defined.
+enum RegClass {
+  Any,      // Completely unconstrained. This is the default, but is not valid
+            // for a used register.
+  AnyNarrow,// This means the Vreg can be safely given a GP or SIMD register and
+            // is non-wide. However, the graph coloring algorithm cannot handle
+            // this kind of constraint (union of two other constraints), so
+            // right now its effectively a synonym for GP. TODO (T37587676) to
+            // try to deal with this better.
+
+  GP,       // Generic purpose register
+  SIMD,     // SIMD register
+  SIMDWide, // 128-bit SIMD register
+  SF,       // Singleton flags register
+  Spill,    // Spill slot
+  SpillWide // 128-bit spill slot
+};
+
 // State about each Vreg. Instead of separate data-structures, all Vreg
 // information is concentrated in this one data-structure.
 struct RegInfo {
+  RegClass regClass = RegClass::Any;
   // The physical register this was before it was SSA-ized. The allocator will
   // ensure that this Vreg will be assigned the same physical register at all
   // uses and defs (except copies).
@@ -150,6 +171,20 @@ struct State {
 //////////////////////////////////////////////////////////////////////
 // Pretty-printers
 
+std::string show(RegClass r) {
+  switch (r) {
+    case RegClass::Any:       return "any";
+    case RegClass::AnyNarrow: return "any-narrow";
+    case RegClass::GP:        return "gp";
+    case RegClass::SIMD:      return "simd";
+    case RegClass::SIMDWide:  return "simd-wide";
+    case RegClass::SF:        return "sf";
+    case RegClass::Spill:     return "spill";
+    case RegClass::SpillWide: return "spill-wide";
+  }
+  always_assert(false);
+}
+
 std::string show(const BlockVector& v) {
   using namespace folly::gen;
   return folly::sformat(
@@ -161,11 +196,11 @@ std::string show(const BlockVector& v) {
 }
 
 std::string show(const Vunit& unit, const RegInfo& info) {
-  if (info.precolor != InvalidReg) {
-    return folly::sformat("Pre-Color: {}", show(info.precolor));
-  } else {
-    return std::string{"Pre-Color: -"};
-  }
+  return folly::sformat(
+    "Class: {:10}, Pre-Color: {}",
+    show(info.regClass),
+    info.precolor != InvalidReg ? show(info.precolor) : std::string{"-"}
+  );
 }
 
 std::string show(const State& state) {
@@ -1112,6 +1147,402 @@ void prepare_unit(State& state) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Register class inference
+
+/*
+ * Vregs themselves don't inherently have a class. That is, they're not
+ * inherently GP or SIMD. Instead the set of physical registers they can be
+ * allocated depends solely on their usages and defs. The instructions put
+ * constraints on their operands which is used to infer the proper register
+ * class.
+ *
+ * We need to infer such information here. We start by assuming that all Vregs
+ * are unconstrained (RegClass::Any). We then examine all uses and defs of that
+ * Vreg, constraining the RegClass as appropriate. If the constraints are
+ * incompatible (for example, RegClass::GP and RegClass::SIMD), we insert a copy
+ * between the incompatible points. Copies never constrain their sources or
+ * dests, and its assumed that a copy can deal with moving values between
+ * register classes, so this is always safe.
+ *
+ * A register is wide if its source or dest is a Vreg128. Unlike other
+ * constraints, wideness is propagated across copies (because otherwise the
+ * source would be RegClass::SIMDWide, and the dest would be
+ * RegClass::AnyNarrow, which is 64-bits, so we'd drop data). So a copy which
+ * has a source or dest of RegClass::SIMDWide has the other operand as
+ * RegClass::SIMDWide as well. Other than this wrinkle, the inference is flow
+ * insensitive.
+ *
+ * RegClass::SF is meant to mark registers as being the flags register. We don't
+ * attempt to allocate the flags register (there's only one), so it mainly
+ * serves as a marker to ignore that register (its compatible with nothing).
+ *
+ * RegClass::AnyNarrow means the Vreg is unconstrained (but is not wide). In
+ * theory this means we're completely free to assign it either a GP or SIMD
+ * register. Unfortunately the graph coloring algorithm cannot deal with a
+ * constraint like this. Every Vreg has to either be selected from GPs or SIMDs,
+ * not both. Therefore RegClass::AnyNarrow is a synonym for RegClass::GP right
+ * now. We can do better than that. TODO (T37587676)
+ *
+ * Finally, we insert copies to resolve a few tricky cases. We ensure that
+ * there's no physical to virtual, or virtual to physical copies in copyargs by
+ * copying the physical register to a virtual one either before or after. This
+ * simplifies having to deal with such copies when lowering the copyargs. We
+ * also enforce that phis have the same register class on the src/dst side (by
+ * inserting copies) for similar reasons. We don't do this for copy2 because
+ * unlike other copies it imposed a constraint.
+ */
+
+namespace detail {
+
+// Turn Vreg constraint into RegClass generically
+RegClass reg_class(Vreg)      { return RegClass::AnyNarrow; }
+RegClass reg_class(Vreg64)    { return RegClass::GP; }
+RegClass reg_class(Vreg32)    { return RegClass::GP; }
+RegClass reg_class(Vreg16)    { return RegClass::GP; }
+RegClass reg_class(Vreg8)     { return RegClass::GP; }
+RegClass reg_class(VregDbl)   { return RegClass::SIMD; }
+RegClass reg_class(Vreg128)   { return RegClass::SIMDWide; }
+RegClass reg_class(VregSF)    { return RegClass::SF; }
+RegClass reg_class(PhysReg r) {
+  switch (r.type()) {
+    case PhysReg::GP:   return RegClass::GP;
+    case PhysReg::SIMD: return RegClass::SIMD;
+    case PhysReg::SF:   return RegClass::SF;
+  }
+  always_assert(false);
+}
+
+}
+
+void infer_register_classes(State& state) {
+  auto& unit = state.unit;
+
+  // Vregs which have incompatible uses/defs. Copies must be inserted to resolve
+  // this.
+  VregSet incompatible;
+
+  // Returns the common RegClass between c1 and c2, or folly::none if none
+  // exists.
+  auto const merge = [] (RegClass c1,
+                         RegClass c2) -> folly::Optional<RegClass> {
+    // We shouldn't be mixing SF with anything
+    assertx((c1 == RegClass::SF) == (c2 == RegClass::SF));
+    if (c1 == RegClass::Any) return c2;
+    if (c2 == RegClass::Any) return c1;
+    if (c1 == c2) return c1;
+    if (c1 == RegClass::AnyNarrow &&
+        (c2 == RegClass::GP || c2 == RegClass::SIMD)) {
+      return c2;
+    }
+    if (c2 == RegClass::AnyNarrow &&
+        (c1 == RegClass::GP || c1 == RegClass::SIMD)) {
+      return c1;
+    }
+    return folly::none;
+  };
+
+  auto haveWide = false;
+
+  auto const updateDefs = [&] (auto r) {
+    if (r.isPhys()) return;
+    auto& info = reg_info_create(state, r);
+    assertx(info.regClass == RegClass::Any);
+    info.regClass = (info.precolor != InvalidReg)
+      ? detail::reg_class(info.precolor)
+      : detail::reg_class(r);
+    haveWide |= (info.regClass == RegClass::SIMDWide);
+  };
+
+  auto const updateUses = [&] (auto r) {
+    if (r.isPhys()) return;
+    auto& info = reg_info_create(state, r);
+    auto const newClass = (info.precolor != InvalidReg)
+      ? detail::reg_class(info.precolor)
+      : detail::reg_class(r);
+    if (auto const c = merge(info.regClass, newClass)) {
+      info.regClass = *c;
+      haveWide |= (info.regClass == RegClass::SIMDWide);
+    } else {
+      incompatible.add(r);
+    }
+  };
+
+  auto const processInst = [&] (const Vinstr& inst, bool skipDefs = false) {
+    // Some of the pseudo-instructions use a VregList to store Vreg64
+    // operands. Since this loses the type information, we need to special case
+    // these.
+    auto const uses64 = [&]{
+      switch (inst.op) {
+        case Vinstr::pseudojmp: return inst.pseudojmp_.uses64;
+        case Vinstr::pseudocall: return inst.pseudocall_.uses64;
+        case Vinstr::pseudodiv: return inst.pseudodiv_.uses64;
+        case Vinstr::pseudocallphp: return inst.pseudocallphp_.uses64;
+        default: return Vtuple{};
+      }
+    }();
+    if (uses64.isValid()) {
+      for (auto const r : unit.tuples[uses64]) updateUses(Vreg64{r});
+    }
+    visitUses(unit, inst, updateUses);
+    if (!skipDefs) visitDefs(unit, inst, updateDefs);
+  };
+
+  // Insert copies as necessary to ensure that a copyargs instruction does not
+  // copy between a virtual register and a physical one (which makes the spiller
+  // easier).
+  auto const canonicalizeCopyArgs = [&] (Vlabel b, size_t instIdx) {
+    auto const& inst = unit.blocks[b].code[instIdx];
+    if (inst.op != Vinstr::copyargs) return;
+
+    // If the source is a physical register, we insert a copy before.
+    jit::fast_map<Vreg, Vreg> precopy;
+    // If the dest is a physical register, we insert a copy after.
+    jit::fast_map<Vreg, Vreg> postcopy;
+
+    auto& srcs = unit.tuples[inst.copyargs_.s];
+    auto& dsts = unit.tuples[inst.copyargs_.d];
+    assertx(srcs.size() == dsts.size());
+
+    if (debug) {
+      // Sanity check that the copyargs doesn't have any duplicate defs (even
+      // physical registers, whose semantics would be unclear).
+      VregSet defs;
+      for (size_t i = 0; i < dsts.size(); ++i) {
+        auto const d = dsts[i];
+        always_assert(!defs[d]);
+        defs.add(d);
+      }
+    }
+
+    for (size_t i = 0; i < srcs.size(); ++i) {
+      auto const s = srcs[i];
+      auto const d = dsts[i];
+      if (s.isPhys() == d.isPhys()) continue;
+      if (s.isPhys()) {
+        auto it = precopy.find(s);
+        // The copyargs can take the same register multiple times as a source,
+        // so re-use the same copied register for that.
+        if (it == precopy.end()) it = precopy.emplace(s, unit.makeReg()).first;
+        srcs[i] = it->second;
+      }
+      if (d.isPhys()) {
+        // Dests should be unique, however.
+        auto const result = postcopy.emplace(d, unit.makeReg());
+        assertx(result.second);
+        dsts[i] = result.first->second;
+      }
+    }
+
+    // Insert the copies at the appropriate places.
+    if (!precopy.empty()) {
+      vmodify(
+        unit, b, instIdx,
+        [&] (Vout& v) {
+          for (auto const& p : precopy) v << copy{p.first, p.second};
+          return 0;
+        }
+      );
+    }
+
+    if (!postcopy.empty()) {
+      vmodify(
+        unit, b, instIdx + precopy.size() + 1,
+        [&] (Vout& v) {
+          for (auto const& p : postcopy) v << copy{p.second, p.first};
+          return 0;
+        }
+      );
+    }
+  };
+
+  // Emit a set of copies as either a single copy or a copyargs instruction. Its
+  // guaranteed to only ever emit a single instruction.
+  auto const addCopies = [&] (const jit::vector<std::pair<Vreg, Vreg>>& copies,
+                              Vlabel b,
+                              size_t i) {
+    vmodify(
+      unit, b, i,
+      [&] (Vout& v) {
+        if (copies.size() == 1) {
+          v << copy{copies[0].first, copies[0].second};
+        } else {
+          VregList src;
+          VregList dst;
+          for (auto const& p : copies) {
+            src.emplace_back(p.first);
+            dst.emplace_back(p.second);
+          }
+          v << copyargs{
+            unit.makeTuple(std::move(src)),
+            unit.makeTuple(std::move(dst))
+          };
+        }
+        return 0;
+      }
+    );
+  };
+
+  // First the flow insensitive part. Visit every instruction, using the uses
+  // and defs to determine the register class.
+  for (auto const b : state.rpo) {
+    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
+      // Deal with strange copyargs
+      canonicalizeCopyArgs(b, i);
+      // Analyze the use and defs. If there's no incompatibilities we're done.
+      processInst(unit.blocks[b].code[i]);
+      if (incompatible.none()) continue;
+
+      // Otherwise we need to insert a copy before the use.
+      jit::vector<std::pair<Vreg, Vreg>> copies;
+      incompatible.forEach(
+        [&] (Vreg r) {
+          assertx(!r.isPhys());
+          auto const newReg = unit.makeReg();
+          // Clone the register, except for the RegClass, which is automatically
+          // Any because its coming from a copy. We'll reprocess this
+          // instruction to set the RegClass appropriately.
+          auto& newInfo = reg_info_create(state, newReg);
+          newInfo = reg_info(state, r);
+          newInfo.regClass = RegClass::Any;
+          copies.emplace_back(r, newReg);
+        }
+      );
+      assertx(!copies.empty());
+      addCopies(copies, b, i);
+      // We've inserted a copy, so adjust the instruction index.
+      ++i;
+
+      // Rewrite the instruction to take the new (from copy) register.
+      visitRegsMutable(
+        unit, unit.blocks[b].code[i],
+        [&] (Vreg r) {
+          if (!incompatible[r]) return r;
+          for (auto const& p : copies) {
+            if (p.first == r) return p.second;
+          }
+          always_assert(false);
+        },
+        [&] (Vreg r) { return r; }
+      );
+
+      // Now process the copy and reprocess the instruction. This will set the
+      // RegClass of the new (from copy) registers properly.
+      incompatible.reset();
+      processInst(unit.blocks[b].code[i-1]);
+      processInst(unit.blocks[b].code[i], true);
+      // Reprocessing shouldn't create new incompatibilities.
+      assertx(incompatible.none());
+    }
+  }
+
+  // Now for the flow sensitive part. If either side of a copy is a wide
+  // register, the other side must be forced to be wide as well. Only wideness
+  // is propagated across copies in this way. We only propagate wideness if the
+  // other register is RegClass::AnyNarrow (unconstrained non-wide). If there's
+  // an actual constraint, we want to honor that (it means the code is
+  // attempting to move a 128-bit register to a 64-bit one or vice-versa). If we
+  // didn't see any wide RegClass already, we can skip this. Since this is rare,
+  // we simply loop to a fixed point rather than try a worklist.
+  auto changed = haveWide;
+  while (changed) {
+    changed = false;
+
+    auto const propagateWide = [&] (Vreg s, Vreg d) {
+      if (s.isPhys() || d.isPhys()) return;
+      auto& sInfo = reg_info(state, s);
+      auto& dInfo = reg_info(state, d);
+      if (sInfo.regClass == RegClass::SIMDWide &&
+          dInfo.regClass == RegClass::AnyNarrow) {
+        changed = true;
+        dInfo.regClass = RegClass::SIMDWide;
+      } else if (sInfo.regClass == RegClass::AnyNarrow &&
+                 dInfo.regClass == RegClass::SIMDWide) {
+        changed = true;
+        sInfo.regClass = RegClass::SIMDWide;
+      }
+    };
+
+    for (auto const b : state.rpo) {
+      auto const& block = unit.blocks[b];
+      for (auto const& inst : block.code) {
+        if (inst.op == Vinstr::copy) {
+          propagateWide(inst.copy_.s, inst.copy_.d);
+        } else if (inst.op == Vinstr::copyargs) {
+          auto const& s = unit.tuples[inst.copyargs_.s];
+          auto const& d = unit.tuples[inst.copyargs_.d];
+          assertx(s.size() == d.size());
+          for (size_t i = 0; i < s.size(); ++i) propagateWide(s[i], d[i]);
+        } else if (inst.op == Vinstr::phidef) {
+          // Phis are treated as copies in this context
+          auto const& d = unit.tuples[inst.phidef_.defs];
+          for (auto const pred : state.preds[b]) {
+            auto const& phijmp = unit.blocks[pred].code.back();
+            assertx(phijmp.op == Vinstr::phijmp);
+            auto const& s = unit.tuples[phijmp.phijmp_.uses];
+            assertx(s.size() == d.size());
+            for (size_t i = 0; i < s.size(); ++i) propagateWide(s[i], d[i]);
+          }
+        }
+      }
+    }
+  }
+
+  // Finally we have to ensure that the src/dest pairs of a phi have the same
+  // register class. If not, we'll ensure they do by (yet again) inserting a
+  // copy before the phi of the old src to a new Vreg which has the same
+  // register class of the dest. The new Vreg will then be the src in the
+  // Phi. We need to do all of this because having to deal with moves between
+  // register classes during a parallel phi copy greatly complicates the
+  // spilling logic and the phi lowering logic.
+  for (auto const b : state.rpo) {
+    auto const& block = unit.blocks[b];
+    auto const& inst = block.code.back();
+    if (inst.op != Vinstr::phijmp) continue;
+
+    auto& s = unit.tuples[inst.phijmp_.uses];
+    auto const successorList = succs(block);
+    assertx(successorList.size() == 1);
+    auto const& phidef = unit.blocks[successorList[0]].code.front();
+    assertx(phidef.op == Vinstr::phidef);
+    auto const& d = unit.tuples[phidef.phidef_.defs];
+    assertx(s.size() == d.size());
+
+    if (debug) {
+      // Sanity check that the phi doesn't have duplicate (non-physical) defs.
+      VregSet defs;
+      for (size_t i = 0; i < d.size(); ++i) {
+        if (d[i].isPhys()) continue;
+        always_assert(!defs[d[i]]);
+        defs.add(d[i]);
+      }
+    }
+
+    jit::vector<std::pair<Vreg, Vreg>> copies;
+    for (size_t i = 0; i < s.size(); ++i) {
+      assertx(s[i].isPhys() == d[i].isPhys());
+      if (s[i].isPhys()) continue;
+
+      auto const& sInfo = reg_info(state, s[i]);
+      auto const& dInfo = reg_info(state, d[i]);
+      if (sInfo.regClass == dInfo.regClass) continue;
+
+      // Create a new Vreg in the same RegClass as the dest and use that in the
+      // phi instead. Add a copy between the old src and the new Vreg. This lets
+      // the move between register classes be done outside of the phi, instead
+      // of during it.
+      auto const newReg = unit.makeReg();
+      reg_info_insert(state, newReg, dInfo);
+
+      copies.emplace_back(s[i], newReg);
+      s[i] = newReg;
+    }
+
+    if (copies.empty()) continue;
+    addCopies(copies, b, block.code.size() - 1);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -1126,6 +1557,7 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   SCOPE_ASSERT_DETAIL("Graph color state") { return show(state); };
 
   prepare_unit(state);
+  infer_register_classes(state);
 
   printUnit(kVasmRegAllocLevel, "after vasm-graph-color", unit);
 

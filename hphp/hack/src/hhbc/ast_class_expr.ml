@@ -64,7 +64,6 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
       Option.bind cd_opt get_parent_class_name
     | None -> get_parent_class_name cd
 
-(* Return true in second component if this is a forwarding reference *)
 let expr_to_class_expr ?(check_traits=false) ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
   | A.Id (_, id) when SU.is_static id -> Class_static

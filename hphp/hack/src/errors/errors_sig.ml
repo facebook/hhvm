@@ -486,7 +486,7 @@ module type S = sig
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
   val inconsistent_unset : Pos.t -> unit
-  val reassign_mutable_var : Pos.t -> unit
+  val reassign_mutable_var : in_collection:bool -> Pos.t -> unit
   val mutable_call_on_immutable : Pos.t -> Pos.t -> Pos.t option -> unit
   val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
   val invalid_mutable_return_result: Pos.t -> Pos.t -> string -> unit
@@ -583,7 +583,7 @@ module type S = sig
   val maybe_mutable_attribute_on_function: Pos.t -> unit
   val conflicting_mutable_and_maybe_mutable_attributes: Pos.t -> unit
   val maybe_mutable_methods_must_be_reactive: Pos.t -> string -> unit
-  val reassign_maybe_mutable_var: Pos.t -> unit
+  val reassign_maybe_mutable_var: in_collection:bool -> Pos.t -> unit
   val immutable_argument_mismatch : Pos.t -> Pos.t -> unit
   val maybe_mutable_argument_mismatch : Pos.t -> Pos.t -> unit
   val immutable_call_on_mutable: Pos.t -> Pos.t -> unit
@@ -591,7 +591,7 @@ module type S = sig
   val mutability_mismatch: is_receiver: bool -> Pos.t -> string -> Pos.t -> string -> unit
   val invalid_traversable_in_rx: Pos.t -> unit
   val reference_in_rx: Pos.t -> unit
-  val reassign_mutable_this: Pos.t -> unit
+  val reassign_mutable_this: in_collection:bool -> is_maybe_mutable: bool -> Pos.t -> unit
   val mutable_expression_as_multiple_mutable_arguments: Pos.t -> string -> Pos.t -> string -> unit
   val invalid_unset_target_rx: Pos.t -> unit
   val declare_statement_in_hack : Pos.t -> unit

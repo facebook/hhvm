@@ -598,7 +598,7 @@ let empty tcopt file ~droot = {
     parent_id = "";
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
-    fun_mutable = false;
+    fun_mutable = None;
     anons   = IMap.empty;
     file    = file;
   };

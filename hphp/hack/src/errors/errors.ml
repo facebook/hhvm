@@ -2469,13 +2469,25 @@ let invalid_mutability_flavor pos mut1 mut2 =
     ("Cannot assign " ^ mut2 ^ " value to " ^ mut1 ^ " local variable. \
      Mutability flavor of local variable cannot be altered.")
 
-let reassign_mutable_var pos1 =
-  add (Typing.err_code Typing.ReassignMutableVar) pos1
-  ("This variable is mutable. You cannot create a new reference to it.")
+let reassign_mutable_var ~in_collection pos1 =
+  let msg =
+    if in_collection
+    then "This variable is mutable. You cannot create a new reference to it \
+    by putting it into the collection."
+    else "This variable is mutable. You cannot create a new reference to it." in
+  add (Typing.err_code Typing.ReassignMutableVar) pos1 msg
 
-let reassign_mutable_this pos1 =
-  add (Typing.err_code Typing.ReassignMutableThis) pos1
-  ("$this here is mutable. You cannot create a new reference to it.")
+let reassign_mutable_this ~in_collection ~is_maybe_mutable pos1 =
+  let kind =
+    if is_maybe_mutable
+    then "maybe mutable"
+    else "mutable" in
+  let msg =
+    if in_collection
+    then "$this here is " ^ kind ^ ". You cannot create a new reference to it \
+    by putting it into the collection."
+    else "$this here is " ^ kind ^ ". You cannot create a new reference to it." in
+  add (Typing.err_code Typing.ReassignMutableThis) pos1 msg
 
 let mutable_expression_as_multiple_mutable_arguments pos param_kind prev_pos prev_param_kind =
   add_list (Typing.err_code Typing.MutableExpressionAsMultipleMutableArguments) [
@@ -2484,10 +2496,13 @@ let mutable_expression_as_multiple_mutable_arguments pos param_kind prev_pos pre
     prev_pos, "This is where it was used before, being passed as " ^ prev_param_kind
   ]
 
-let reassign_maybe_mutable_var pos1 =
-  add (Typing.err_code Typing.ReassignMaybeMutableVar) pos1
-  ("This variable is maybe mutable. You cannot create a new reference to it.")
-
+let reassign_maybe_mutable_var ~in_collection pos1 =
+  let msg =
+    if in_collection
+    then "This variable is maybe mutable. You cannot create a new reference to it \
+    by putting it into the collection."
+    else "This variable is maybe mutable. You cannot create a new reference to it." in
+  add (Typing.err_code Typing.ReassignMaybeMutableVar) pos1 msg
 
 let mutable_call_on_immutable  fpos pos1 rx_mutable_hint_pos =
   let l =

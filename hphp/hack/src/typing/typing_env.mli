@@ -172,8 +172,8 @@ val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env
 val local_is_mutable : include_borrowed: bool -> env -> Local_id.t -> bool
-val function_is_mutable : env -> bool
-val set_fun_mutable : env -> bool -> env
+val function_is_mutable : env -> param_mutability option
+val set_fun_mutable : env -> param_mutability option -> env
 val env_with_locals : env -> local_types -> env
 val reinitialize_locals : env -> env
 val anon : local_env -> env -> (env -> env * Tast.expr * locl ty) -> env * Tast.expr * locl ty

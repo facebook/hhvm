@@ -150,7 +150,7 @@ and genv = {
   self    : locl_ty;
   static  : bool;
   fun_kind : Ast.fun_kind;
-  fun_mutable : bool;
+  fun_mutable : param_mutability option;
   anons   : anon IMap.t;
   file    : Relative_path.t;
 }

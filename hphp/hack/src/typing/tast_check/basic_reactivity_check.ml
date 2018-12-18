@@ -23,7 +23,7 @@ let expr_is_valid_borrowed_arg env (e: expr): bool =
     match snd e with
     | Callconv (Ast.Pinout, (_, Lvar (_, id)))
     | Lvar (_, id) -> Env.local_is_mutable ~include_borrowed:true env id
-    | This when Env.function_is_mutable env -> true
+    | This when Env.function_is_mutable env = Some Param_borrowed_mutable -> true
     | _ ->
       false
   end
@@ -111,7 +111,7 @@ end
 let check_escaping_mutable env (pos, x) =
   let mut_env = Env.get_env_mutability env in
   let is_mutable =
-    (x = this && Env.function_is_mutable env) ||
+    (x = this && Env.function_is_mutable env <> None) ||
     begin match Local_id.Map.get x mut_env with
     | Some (_, TME.Immutable) | None -> false
     | _ -> true
@@ -130,7 +130,7 @@ type args_mut_map = (Pos.t * param_mutability option) Borrowable_args.t
 let with_mutable_value env e ~default ~f =
   match snd e with
   (* invoke f only for mutable values *)
-  | This when Env.function_is_mutable env ->
+  | This when Env.function_is_mutable env <> None ->
     f Arg_this
   | Callconv (Ast.Pinout, (_, Lvar (_, id)))
   | Lvar (_, id) when Env.local_is_mutable ~include_borrowed:true env id ->
@@ -387,11 +387,13 @@ type ctx = {
   disallow_this: bool;
   is_expr_statement: bool;
   is_locallable_pass: bool;
+  allow_mutable_locals: bool;
 }
 
 let new_ctx reactivity = {
   reactivity; allow_awaitable = false; disallow_this = false;
   is_expr_statement=false; is_locallable_pass = false;
+  allow_mutable_locals = true;
 }
 
 let new_ctx_for_is_locallable_pass reactivity =
@@ -404,6 +406,14 @@ let allow_awaitable ctx =
 let disallow_awaitable ctx =
   if not ctx.allow_awaitable then ctx
   else { ctx with allow_awaitable = false }
+
+let allow_mutable_locals ctx =
+  if ctx.allow_mutable_locals then ctx
+  else { ctx with allow_mutable_locals = true }
+
+let disallow_mutable_locals ctx =
+  if not ctx.allow_mutable_locals then ctx
+  else { ctx with allow_mutable_locals = false }
 
 let disallow_this ctx =
   if ctx.disallow_this then ctx
@@ -486,7 +496,54 @@ let check = object(self)
       Errors.non_awaited_awaitable_in_rx (get_position expr);
     | _ -> ()
     end;
+    let ctx =
+      if ctx.allow_mutable_locals then ctx
+      else begin
+        begin match expr with
+        | _, Lvar (p, id) ->
+          let mut_env = Env.get_env_mutability env in
+          begin match LMap.get id mut_env with
+          | Some (_, TME.Immutable) | None -> ()
+          | Some (_, TME.MaybeMutable) ->
+            Errors.reassign_maybe_mutable_var ~in_collection:true p
+          | Some (_, (TME.Borrowed | TME.Mutable)) ->
+            Errors.reassign_mutable_var ~in_collection:true p
+          end
+        | _ , This when Env.function_is_mutable env <> None ->
+          let is_maybe_mutable =
+            Env.function_is_mutable env = Some Param_maybe_mutable in
+          Errors.reassign_mutable_this ~in_collection:true ~is_maybe_mutable
+            (get_position expr)
+        | _ -> ()
+        end;
+        allow_mutable_locals ctx
+      end in
     match expr with
+    | _, Varray els
+    | _, ValCollection (_, els) ->
+      let ctx = disallow_mutable_locals ctx in
+      List.iter els ~f:(self#on_expr (env,ctx))
+    | _, Array fs ->
+      let ctx = disallow_mutable_locals ctx in
+      List.iter fs ~f:(function
+      | AFvalue e ->
+        self#on_expr (env,ctx) e
+      | AFkvalue (k, v) ->
+        self#on_expr (env,ctx) k;
+        self#on_expr (env,ctx) v
+      )
+    | _, Darray els
+    | _, KeyValCollection (_, els)->
+      let ctx = disallow_mutable_locals ctx in
+      List.iter els ~f:(fun (k, v) ->
+        self#on_expr (env,ctx) k;
+        self#on_expr (env,ctx) v
+      )
+    | _, Shape els ->
+      let ctx = disallow_mutable_locals ctx in
+      Aast.ShapeMap.iter (fun _ v ->
+        self#on_expr (env,ctx) v
+      ) els
     | _, Await e ->
       self#on_expr (env, allow_awaitable ctx) e
     | _, Pipe (_, l, r) ->
@@ -526,7 +583,7 @@ let check = object(self)
         then List.iter idl (check_escaping_mutable env);
 
         let ctx =
-          if ctx.disallow_this || Env.function_is_mutable env
+          if ctx.disallow_this || Env.function_is_mutable env <> None
           then disallow_this ctx
           else ctx in
 

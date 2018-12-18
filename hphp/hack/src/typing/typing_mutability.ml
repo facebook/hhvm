@@ -103,7 +103,7 @@ let handle_value_in_return
       | _ ->
         env
       end
-    | T.This when not function_returns_mutable && Env.function_is_mutable env ->
+    | T.This when not function_returns_mutable && Env.function_is_mutable env <> None ->
       (* mutable this is treated as borrowed and this cannot be returned as immutable
          unless function is marked with __ReturnsVoidToRx in which case caller
          will not be able to alias the value *)
@@ -180,10 +180,18 @@ let handle_assignment_mutability
  (* If e2 is a mutable expression, then e1 is added to the mutability env *)
  let mut_env = Env.get_env_mutability env in
  let mut_env = match snd te1, te2 with
- | _, Some T.This when Env.function_is_mutable env ->
- (* aliasing $this - bad for __Mutable functions *)
+ | _, Some T.This when Env.function_is_mutable env = Some Param_borrowed_mutable ->
+ (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
    Env.error_if_reactive_context env @@ begin fun () ->
-     Errors.reassign_mutable_this (T.get_position te1)
+     Errors.reassign_mutable_this ~in_collection:false ~is_maybe_mutable:false
+      (T.get_position te1)
+   end;
+   mut_env
+ | _, Some T.This when Env.function_is_mutable env = Some Param_maybe_mutable ->
+ (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
+   Env.error_if_reactive_context env @@ begin fun () ->
+     Errors.reassign_mutable_this ~in_collection:false ~is_maybe_mutable:true
+      (T.get_position te1)
    end;
    mut_env
  (* var = mutable(v)/move(v) - add the var to the env since it points to a owned mutable value *)
@@ -205,8 +213,8 @@ let handle_assignment_mutability
     ) ->
     Env.error_if_reactive_context env @@ begin fun () ->
       match LMap.find id2 mut_env with
-      | _, MaybeMutable -> Errors.reassign_maybe_mutable_var p
-      | _ -> Errors.reassign_mutable_var p
+      | _, MaybeMutable -> Errors.reassign_maybe_mutable_var ~in_collection:false p
+      | _ -> Errors.reassign_mutable_var ~in_collection:false p
     end;
     mut_env
  (* If the Lvar gets reassigned and shadowed to something that

@@ -1,0 +1,36 @@
+File "mutable_in_collections2.php", line 16, characters 5-6:
+$this here is mutable. You cannot create a new reference to it. (Typing[4268])
+File "mutable_in_collections2.php", line 31, characters 5-6:
+$this here is maybe mutable. You cannot create a new reference to it. (Typing[4268])
+File "mutable_in_collections2.php", line 6, characters 16-20:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 7, characters 18-22:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 8, characters 18-22:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 9, characters 22-26:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 10, characters 22-26:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 11, characters 25-29:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 13, characters 23-27:
+$this here is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 15, characters 19-23:
+Neither a Mutable nor MaybeMutable object may be captured by an anonymous function. (Typing[4283])
+File "mutable_in_collections2.php", line 21, characters 16-20:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 22, characters 18-22:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 23, characters 18-22:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 24, characters 22-26:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 25, characters 22-26:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 26, characters 25-29:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 28, characters 23-27:
+$this here is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4268])
+File "mutable_in_collections2.php", line 30, characters 19-23:
+Neither a Mutable nor MaybeMutable object may be captured by an anonymous function. (Typing[4283])

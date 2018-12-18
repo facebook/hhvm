@@ -770,7 +770,14 @@ let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
 }
 
 let fun_mutable user_attributes =
-  Attributes.mem SN.UserAttributes.uaMutable user_attributes
+  let rec go = function
+  | [] -> None
+  | { Nast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMutable ->
+    Some Param_borrowed_mutable
+  | { Nast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMaybeMutable ->
+    Some Param_maybe_mutable
+  | _ :: tl -> go tl in
+  go user_attributes
 
 let desugar_mixed r = Toption (r, Tnonnull)
 

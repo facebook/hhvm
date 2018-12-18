@@ -50,7 +50,8 @@ struct
     | S.Array afl -> T.Array (List.map afl (map_afield menv))
     | S.Darray fl -> T.Darray (List.map fl (map_field menv))
     | S.Varray el -> T.Varray (map_exprl menv el)
-    | S.Shape sm -> T.Shape (ShapeMap.map (map_expr menv) sm)
+    | S.Shape sm -> T.Shape
+      (List.map ~f:(fun (n, e) -> (n, map_expr menv e)) sm)
     | S.ValCollection (k, el) -> T.ValCollection (k, map_exprl menv el)
     | S.KeyValCollection (k, fl) ->
       T.KeyValCollection (k, List.map fl (map_field menv))

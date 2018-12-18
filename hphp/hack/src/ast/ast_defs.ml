@@ -146,3 +146,5 @@ module ShapeMap = struct
 
   let pp _ fmt _ = Format.pp_print_string fmt "[ShapeMap]"
 end
+
+module ShapeSet = Set.Make (ShapeField)

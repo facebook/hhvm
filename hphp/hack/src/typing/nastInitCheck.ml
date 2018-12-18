@@ -485,9 +485,12 @@ and expr_ env acc p e =
       exprl acc el
   | Callconv (_, e) -> expr acc e
   | Shape fdm ->
-      ShapeMap.fold begin fun _ v acc ->
-        expr acc v
-      end fdm acc
+      List.fold_left
+        ~f:begin fun acc (_, v) ->
+          expr acc v
+        end
+        ~init:acc
+        fdm
   | Omitted -> acc
   | NewAnonClass _ -> acc
 

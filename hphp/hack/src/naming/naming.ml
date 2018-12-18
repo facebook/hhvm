@@ -2721,14 +2721,15 @@ module Make (GetLocals : GetLocals) = struct
       N.Xml (Env.type_name env x ~allow_typedef:false, attrl env al,
         exprl env el)
     | Shape fdl ->
-      N.Shape begin List.fold_left fdl ~init:ShapeMap.empty
-        ~f:begin fun fdm (pname, value) ->
+      let (shp, _) = begin List.fold_left fdl ~init:([], ShapeSet.empty)
+        ~f:begin fun (fdm, set) (pname, value) ->
           let pos, name = convert_shape_name env pname in
-          if ShapeMap.mem name fdm
+          if ShapeSet.mem name set
           then Errors.fd_name_already_bound pos;
-          ShapeMap.add name (expr env value) fdm
+          (name, (expr env value)) :: fdm, ShapeSet.add name set
         end
-      end
+      end in
+      N.Shape (List.rev shp)
     | Unsafeexpr e ->
       N.Unsafe_expr (Errors.ignore_ (fun () -> expr env e))
     | BracedExpr _ ->

@@ -406,7 +406,7 @@ module CheckFunctionBody = struct
         expr f_type env e;
         ()
     | _, Shape fdm ->
-        ShapeMap.iter (fun _ v -> expr f_type env v) fdm;
+        List.iter ~f:(fun (_, v) -> expr f_type env v) fdm;
         ()
 
 end
@@ -822,7 +822,7 @@ and check_class_property_initialization prop =
         end
       | Darray fl -> List.iter fl assert_static_literal_for_field_list
       | Varray el -> List.iter el rec_assert_static_literal
-      | Shape fl -> ShapeMap.iter (fun _ -> rec_assert_static_literal) fl
+      | Shape fl -> List.iter ~f:(fun (_, e) -> rec_assert_static_literal e) fl
       | List el
       | Expr_list el
       | String2 el
@@ -1427,7 +1427,7 @@ and expr_ env p = function
       ()
   | Execution_operator _ -> ()
   | Shape fdm ->
-      ShapeMap.iter (fun _ v -> expr env v) fdm
+      List.iter ~f:(fun (_, v) -> expr env v) fdm
 
 and case env = function
   | Default b -> block env b

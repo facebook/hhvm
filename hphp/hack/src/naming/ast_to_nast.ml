@@ -61,9 +61,15 @@ let rec on_variadic_hint h =
   | Hnon_variadic -> Aast.Hnon_variadic
 
 and on_shape_info info =
+  let on_shape_field sf =
+    Aast.{ sfi_optional = sf.sf_optional; sfi_hint = on_hint sf.sf_hint } in
+  let nfm = List.fold_left
+    (fun acc sf -> ShapeMap.add sf.sf_name (on_shape_field sf) acc)
+    ShapeMap.empty
+    info.si_shape_field_list in
   Aast.{
     nsi_allows_unknown_fields = info.si_allows_unknown_fields;
-    nsi_field_map = ShapeMap.empty; (* TODO T37786581: Fill this out properly *)
+    nsi_field_map = nfm;
   }
 
 and on_haccess (pos, root_id) id ids =
@@ -175,6 +181,8 @@ and on_afield f : Aast.afield =
 and on_darray_element (e1, e2) =
   (on_expr e1, on_expr e2)
 
+and on_shape (sfn, e) =
+  (sfn, on_expr e)
 
 and on_xhp_attribute a : Aast.xhp_attribute =
   match a with
@@ -188,7 +196,7 @@ and on_expr (p, e) : Aast.expr =
   | Array al -> Aast.Array (on_list on_afield al)
   | Varray el -> Aast.Varray (on_list on_expr el)
   | Darray d -> Aast.Darray (on_list on_darray_element d)
-  | Shape _ -> Aast.Any (* TODO: T37786581 *)
+  | Shape s -> Aast.Shape (on_list on_shape s)
   | Collection _ -> Aast.Any (* TODO: T37786581 *)
   | Null -> Aast.Null
   | True -> Aast.True

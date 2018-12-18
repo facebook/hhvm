@@ -91,11 +91,15 @@ and afield f = function
     AFkvalue (e1, e2)
 
 and shape f sm =
-  ShapeMap.fold begin fun sf e acc ->
-    let sf = shape_field f sf in
-    let e = expr f e in
-    ShapeMap.add sf e acc
-  end sm ShapeMap.empty
+  List.fold_left
+    ~f:begin fun acc (sf, e) ->
+      let sf = shape_field f sf in
+      let e = expr f e in
+      (sf, e) :: acc
+    end
+    ~init:[]
+    sm
+  |> List.rev
 
 and shape_field f = function
   | Ast.SFlit_int pstr -> Ast.SFlit_int (pstring f pstr)

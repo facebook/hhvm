@@ -2489,40 +2489,42 @@ and expr_
   | Callconv (kind, e) ->
       let env, te, ty = expr env e in
       make_result env p (T.Callconv (kind, te)) ty
-    (* TODO TAST: change AST so that order of shape expressions is preserved.
-     * At present, evaluation order is unspecified in TAST *)
   | Execution_operator _ -> failwith "Execution operator is forbidden in Hack, so this shouldn't occur"
   | Shape fdm ->
       let env, fdm_with_expected =
         match expand_expected env expected with
         | env, Some (pos, ur, (_, Tshape (_, expected_fdm))) ->
           let fdme =
-            ShapeMap.mapi
-              (fun k v ->
+            List.map
+              ~f:(fun (k, v) ->
                 match ShapeMap.get k expected_fdm with
-                | None -> (v, None)
-                | Some sft -> (v, Some (pos, ur, sft.sft_ty))) fdm in
+                | None -> (k, (v, None))
+                | Some sft -> (k, (v, Some (pos, ur, sft.sft_ty)))) fdm in
           env, fdme
       | _ ->
-        env, ShapeMap.map (fun v -> (v, None)) fdm in
+        env, List.map ~f:(fun (k, v) -> (k, (v, None))) fdm in
 
       (* allow_inter adds a type-variable *)
       let env, tfdm =
-        ShapeMap.map_env
-          (fun env _key (e, expected) ->
-            let env, te, ty = expr ?expected env e in env, (te,ty))
+        List.map_env
+          ~f:(fun env (key, (e, expected)) ->
+            let env, te, ty = expr ?expected env e in env, (key, (te,ty)))
           env fdm_with_expected in
       let env, fdm =
-        let convert_expr_and_type_to_shape_field_type env _key (_, ty) =
+        let convert_expr_and_type_to_shape_field_type env (key, (_, ty)) =
           let env, sft_ty = TUtils.unresolved env ty in
           (* An expression evaluation always corresponds to a shape_field_type
              with sft_optional = false. *)
-          env, { sft_optional = false; sft_ty } in
-        ShapeMap.map_env convert_expr_and_type_to_shape_field_type env tfdm in
+          env, (key, { sft_optional = false; sft_ty }) in
+        List.map_env ~f:convert_expr_and_type_to_shape_field_type env tfdm in
+      let fdm = List.fold_left
+        ~f:(fun acc (k, v) -> ShapeMap.add k v acc)
+        ~init:ShapeMap.empty
+        fdm in
       let env = check_shape_keys_validity env p (ShapeMap.keys fdm) in
       (* Fields are fully known, because this shape is constructed
        * using shape keyword and we know exactly what fields are set. *)
-      make_result env p (T.Shape (ShapeMap.map (fun (te,_) -> te) tfdm))
+      make_result env p (T.Shape (List.map ~f:(fun (k,(te,_)) -> (k, te)) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
   with Typing_lenv_cont.Continuation_not_found _ ->
     expr_any env p (Reason.Rwitness p)

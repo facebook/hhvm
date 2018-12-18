@@ -197,7 +197,7 @@ class type ['a] visitor_type = object
   method on_using : 'a -> using_stmt -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
-  method on_shape : 'a -> expr ShapeMap.t -> 'a
+  method on_shape : 'a -> (shape_field_name * expr) list -> 'a
   method on_valCollection : 'a -> vc_kind -> expr list -> 'a
   method on_keyValCollection : 'a -> kvc_kind -> field list -> 'a
   method on_this : 'a -> 'a
@@ -500,10 +500,13 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     List.fold_left afl ~f:this#on_afield ~init:acc
 
   method on_shape acc sm =
-    ShapeMap.fold begin fun _ e acc ->
-      let acc = this#on_expr acc e in
-      acc
-    end sm acc
+    List.fold_left
+      ~f:begin fun acc (_, e) ->
+        let acc = this#on_expr acc e in
+        acc
+      end
+      ~init:acc
+      sm
 
   method on_valCollection acc _ el =
     List.fold_left el ~f:this#on_expr ~init:acc

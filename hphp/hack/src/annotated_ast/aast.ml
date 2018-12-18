@@ -116,8 +116,7 @@ and expr_ =
   | Array of afield list
   | Darray of (expr * expr) list
   | Varray of expr list
-  (* This is more abstract than the AST but forgets evaluation order *)
-  | Shape of expr shape_map
+  | Shape of (shape_field_name * expr) list
   | ValCollection of vc_kind * expr list
   | KeyValCollection of kvc_kind * field list
   | Null

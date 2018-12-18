@@ -293,10 +293,6 @@ public:
     };
   };
 
-  // These are not stored in the repo
-  bool isMemoizeImpl{false};
-  bool hasMemoizeSharedProp{false};
-
   LowStringPtr docComment;
   LowStringPtr originalFilename;
 

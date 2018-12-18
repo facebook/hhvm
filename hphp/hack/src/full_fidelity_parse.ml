@@ -360,6 +360,10 @@ let handle_existing_file args filename =
   end;
   if args.full_fidelity_ast_s_expr || args.dump_nast then begin
     let module Lowerer = Full_fidelity_ast in
+    let popt =
+      if args.dump_nast
+      then { popt with GlobalOptions.po_enable_concurrent = true }
+      else popt in
     let env =
       Lowerer.make_env
         ~codegen:args.codegen

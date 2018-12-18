@@ -184,6 +184,17 @@ and on_darray_element (e1, e2) =
 and on_shape (sfn, e) =
   (sfn, on_expr e)
 
+and on_awaitall_expr (e1, e2) =
+  let e2 = on_expr e2 in
+  let e1 =
+    match e1 with
+    | Some e ->
+      let e = Pos.none, Local_id.make_unscoped (snd e) in
+      Some (Pos.none, Aast.Lvar e)
+    | None -> None
+  in
+  (e1, e2)
+
 and on_xhp_attribute a : Aast.xhp_attribute =
   match a with
   | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
@@ -280,7 +291,7 @@ and on_stmt (p, st) :  Aast.stmt =
   | Goto label                -> Aast.Goto label
   | Static_var el             -> Aast.Static_var (on_list on_expr el)
   | Global_var el             -> Aast.Global_var (on_list on_expr el)
-  | Awaitall _                -> Aast.Noop (* TODO: T37786581 *)
+  | Awaitall el               -> Aast.Awaitall (p, on_list on_awaitall_expr el)
   | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
   | While (e, b)              -> Aast.While (on_expr e, on_block b)

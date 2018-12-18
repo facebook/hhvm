@@ -51,6 +51,9 @@ let shut_down_server root =
 let connect_to_monitor ~timeout root =
   MC.connect_once ~timeout (hh_monitor_config root)
 
+let server_progress ~timeout root =
+  MC.connect_to_monitor_and_get_server_progress ~timeout (hh_monitor_config root)
+
 let print_hash_stats () =
   Utils.try_with_stack SharedMem.dep_stats
   |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)

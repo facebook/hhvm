@@ -1205,9 +1205,9 @@ and subtype_reactivity
       t
     | LoclTy t -> t in
 
-  let parent_class_ty =
-    Option.bind extra_info (fun { parent_class_ty = parent_cls; _ } ->
-      Option.map parent_cls ~f:maybe_localize) in
+  let class_ty =
+    Option.bind extra_info (fun { class_ty = cls; _ } ->
+      Option.map cls ~f:maybe_localize) in
 
   (* for method declarations check if condition type for r_super includes
      reactive method with a matching name. If yes - then it will act as a guarantee
@@ -1271,7 +1271,7 @@ and subtype_reactivity
   | (Local cond_sub | Shallow cond_sub | Reactive cond_sub), Local cond_super, _
   | (Shallow cond_sub | Reactive cond_sub), Shallow cond_super, _
   | Reactive cond_sub, Reactive cond_super, _
-    when subtype_param_rx_if_impl env cond_super parent_class_ty cond_sub ->
+    when subtype_param_rx_if_impl ~is_param:false env cond_sub class_ty cond_super ->
     true
   (* function type TSub of method M with arbitrary reactivity in derive class
      can be subtype of conditionally reactive function type TSuper of method M
@@ -1301,7 +1301,7 @@ and subtype_reactivity
   (* shallow can call into local *)
   | Local cond_sub, Shallow cond_super, _ when
     is_call_site &&
-    subtype_param_rx_if_impl env cond_super parent_class_ty cond_sub ->
+    subtype_param_rx_if_impl ~is_param:false env cond_sub class_ty cond_super ->
     true
   (* local can call into non-reactive *)
   | Nonreactive, Local _, _ when is_call_site -> true
@@ -1312,6 +1312,7 @@ and should_check_fun_params_reactivity
 
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
 and subtype_param_rx_if_impl
+  ~is_param
   (env: Env.env)
   (cond_type_sub: decl ty option)
   (declared_type_sub: locl ty option)
@@ -1323,9 +1324,7 @@ and subtype_param_rx_if_impl
   match cond_type_sub, cond_type_super with
   (* no condition types - do nothing *)
   | None, None -> true
-  (* condition type is specified only for subtype - ok
-    Consider this case:
-    Receivers here are treated as parameters and checked contravariantly
+  (* condition type is specified only for super - ok for receiver case (is_param is false)
     abstract class A {
       <<__RxLocal, __OnlyRxIfImpl(Rx1::class)>>
       public abstract function condlocalrx(): int;
@@ -1338,14 +1337,64 @@ and subtype_param_rx_if_impl
         return 1;
       }
     }
+    for parameters we need to verify that declared type of sub is a subtype of
+    conditional type for super. Here is an example where this is violated:
+
+    interface A {}
+    interface RxA {}
+
+    class C1 {
+      <<__Rx>>
+      public function f(A $a): void {
+      }
+    }
+
+    class C2 extends C1 {
+      // ERROR: invariant f body is reactive iff $a instanceof RxA can be violated
+      <<__Rx, __AtMostRxAsArgs>>
+      public function f(<<__OnlyRxIfImpl(RxA::class)>>A $a): void {
+      }
+    }
+    here declared type of sub is A
+    and cond type of super is RxA
   *)
-  | Some _, None -> true
-  (* condition types are set for both sub and super types *)
+  | None, Some _ when not is_param -> true
+  | None, Some cond_type_super ->
+    Option.value_map declared_type_sub
+      ~default:false
+      ~f:(fun declared_type_sub -> is_sub_type env declared_type_sub cond_type_super)
+  (* condition types are set for both sub and super types: contravariant check
+    interface A {}
+    interface B extends A {}
+    interface C extends B {}
+
+    interface I1 {
+      <<__Rx, __OnlyRxIfImpl(B::class)>>
+      public function f(): void;
+      <<__Rx>>
+      public function g(<<__OnlyRxIfImpl(B::class)>> A $a): void;
+    }
+    interface I2 extends I1 {
+      // OK since condition in I1::f covers I2::f
+      <<__Rx, __OnlyRxIfImpl(A::class)>>
+      public function f(): void;
+      // OK since condition in I1::g covers I2::g
+      <<__Rx>>
+      public function g(<<__OnlyRxIfImpl(A::class)>> A $a): void;
+    }
+    interface I3 extends I1 {
+      // Error since condition in I1::f is less strict that in I3::f
+      <<__Rx, __OnlyRxIfImpl(C::class)>>
+      public function f(): void;
+      // Error since condition in I1::g is less strict that in I3::g
+      <<__Rx>>
+      public function g(<<__OnlyRxIfImpl(C::class)>> A $a): void;
+    }
+   *)
   | Some cond_type_sub, Some cond_type_super ->
-    is_sub_type env cond_type_sub cond_type_super
+    is_sub_type env cond_type_super cond_type_sub
   (* condition type is set for super type, check if declared type of
      subtype is a subtype of condition type
-     Receivers here are treated as parameters and checked contravariantly
      interface Rx {
        <<__Rx>>
        public function f(int $a): void;
@@ -1358,10 +1407,10 @@ and subtype_param_rx_if_impl
      // B <: Rx so B::f is completely reactive
      class B extends A<int> implements Rx {
      } *)
-  | None, Some cond_type_super ->
+  | Some cond_type_sub, None ->
     Option.value_map declared_type_sub
       ~default:false
-      ~f:(fun declared_type_sub -> is_sub_type env declared_type_sub cond_type_super)
+      ~f:(fun declared_type_sub -> is_sub_type env declared_type_sub cond_type_sub)
 
 (* checks reactivity conditions for function parameters *)
 and subtype_fun_params_reactivity
@@ -1417,8 +1466,9 @@ and subtype_fun_params_reactivity
       | Some (Param_rx_if_impl t) -> Some t
       | _ -> None in
     let ok =
-      subtype_param_rx_if_impl env cond_type_sub (Some p_sub.fp_type) cond_type_super in
-      check_with ok (fun () ->
+      subtype_param_rx_if_impl ~is_param:true env cond_type_sub (Some p_sub.fp_type)
+      cond_type_super in
+    check_with ok (fun () ->
       Errors.rx_parameter_condition_mismatch
         SN.UserAttributes.uaOnlyRxIfImpl p_sub.fp_pos p_super.fp_pos) (env, TL.valid)
 

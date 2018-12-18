@@ -655,10 +655,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     (* PARSING *)
 
     debug_print_path_set genv "files_to_parse" files_to_parse;
-    (* log line basically says the same as previous, but easier to parse for
-     * client *)
-    let logstring = Printf.sprintf "Parsing %d files" reparse_count in
-    Hh_logger.log "Begin %s" logstring;
+    ServerProgress.send_progress_to_monitor "parsing %d files" reparse_count;
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
 
@@ -669,7 +666,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
-    let t = Hh_logger.log_duration logstring t in
+    let t = Hh_logger.log_duration "Parsing" t in
 
     (* UPDATE FILE INFO *)
     let logstring = "Updating deps" in
@@ -680,8 +677,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration logstring t in
 
     (* NAMING *)
-    let logstring = "Naming" in
-    Hh_logger.log "Begin %s" logstring;
+    ServerProgress.send_progress_to_monitor "resolving symbol references";
     let errorl', failed_naming, fast = declare_names env fast_parsed in
     let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
@@ -697,7 +693,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
 
     HackEventLogger.naming_end t;
-    let t = Hh_logger.log_duration logstring t in
+    let t = Hh_logger.log_duration "Naming" t in
+    ServerProgress.send_progress_to_monitor "determining changes";
 
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
@@ -728,8 +725,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast_redecl_phase2_now = remove_failed_parsing
       fast_redecl_phase2_now stop_at_errors env failed_parsing in
     let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
-    let logstring = Printf.sprintf "Type-decl %d files" count in
-    Hh_logger.log "Begin %s" logstring;
+    ServerProgress.send_progress_to_monitor "evaluating type declarations of %d files" count;
     Hh_logger.log "Invalidate declarations in %d files"
       (Relative_path.Map.cardinal lazy_decl_later);
 
@@ -778,7 +774,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     HackEventLogger.second_redecl_end t hs;
     ServerRevisionTracker.typing_changed genv.local_config
       (Relative_path.Set.cardinal to_recheck);
-    let t = Hh_logger.log_duration logstring t in
+    let t = Hh_logger.log_duration "Type-decl" t in
     let env = CheckKind.get_env_after_decl
       ~old_env:env ~files_info ~failed_naming in
     Hh_logger.log "Begin evaluating prechecked changes";
@@ -798,8 +794,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       files_to_parse fast files_info to_recheck env in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
     let to_recheck_count = Relative_path.Map.cardinal fast in
-    let logstring = Printf.sprintf "Type-check %d files" in
-    Hh_logger.log "Begin %s" (logstring to_recheck_count);
+    ServerProgress.send_progress_to_monitor "typechecking %d files" to_recheck_count;
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     debug_print_path_set genv "lazy_check_later" lazy_check_later;
@@ -841,7 +836,8 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
-    let t = Hh_logger.log_duration (logstring total_rechecked_count) t in
+    let log_string = Printf.sprintf "Typechecked %d files" total_rechecked_count in
+    let t = Hh_logger.log_duration log_string t in
 
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     if

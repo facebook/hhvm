@@ -42,8 +42,7 @@ let type_decl
     (fast: FileInfo.fast)
     (t: float)
   : ServerEnv.env * float =
-  let logstring = "Type-decl" in
-  Hh_logger.log "Begin %s" logstring;
+  ServerProgress.send_progress_to_monitor "evaluating type declarations";
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let errorl =
     Decl_service.go ~bucket_size genv.workers env.tcopt fast in
@@ -51,7 +50,7 @@ let type_decl
   Hh_logger.log "Heap size: %d" hs;
   Stats.(stats.init_heap_size <- hs);
   HackEventLogger.type_decl_end t;
-  let t = Hh_logger.log_duration logstring t in
+  let t = Hh_logger.log_duration "Type-decl" t in
   let env = {
     env with
     errorl = Errors.merge errorl env.errorl;

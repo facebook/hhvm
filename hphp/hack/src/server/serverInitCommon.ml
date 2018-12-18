@@ -50,12 +50,11 @@ let is_check_mode (options: ServerArgs.options) : bool =
   ServerArgs.save_filename options = None
 
 let indexing (genv: ServerEnv.genv) : Relative_path.t list Bucket.next * float =
-  let logstring = "Indexing" in
-  Hh_logger.log "Begin %s" logstring;
+  ServerProgress.send_progress_to_monitor "indexing";
   let t = Unix.gettimeofday () in
   let get_next = make_next_files genv in
   HackEventLogger.indexing_end t;
-  let t = Hh_logger.log_duration logstring t in
+  let t = Hh_logger.log_duration "indexing" t in
   get_next, t
 
 let parsing
@@ -67,11 +66,10 @@ let parsing
     (t: float)
     ~(trace: bool)
   : ServerEnv.env * float =
-  let logstring =
-    match count with
-    | None -> "Parsing"
-    | Some c -> Printf.sprintf "Parsing %d files" c in
-  Hh_logger.log "Begin %s" logstring;
+  begin match count with
+    | None -> ServerProgress.send_progress_to_monitor "%s" "parsing"
+    | Some c -> ServerProgress.send_progress_to_monitor "parsing %d files" c
+  end;
   let quick = lazy_parse in
   let files_info, errorl, _=
     Parsing_service.go
@@ -91,7 +89,7 @@ let parsing
     files_info;
     errorl = Errors.merge errorl env.errorl;
   } in
-  env, (Hh_logger.log_duration logstring t)
+  env, (Hh_logger.log_duration "Parsing" t)
 
 let update_files
     (genv: ServerEnv.genv)
@@ -105,8 +103,7 @@ let update_files
   end
 
 let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
-  let logstring = "Naming" in
-  Hh_logger.log "Begin %s" logstring;
+  ServerProgress.send_progress_to_monitor "resolving symbol references";
   let env =
     Relative_path.Map.fold env.files_info ~f:begin fun k v env ->
       let errorl, failed_naming = NamingGlobal.ndecl_file env.tcopt k v in
@@ -120,7 +117,7 @@ let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   HackEventLogger.global_naming_end t;
-  env, (Hh_logger.log_duration logstring t)
+  env, (Hh_logger.log_duration "Naming" t)
 
 let type_check
     (genv: ServerEnv.genv)
@@ -137,8 +134,7 @@ let type_check
      * should always recheck everything necessary up-front.*)
     assert (env.prechecked_files = Prechecked_files_disabled);
     let count = Relative_path.Map.cardinal fast in
-    let logstring = Printf.sprintf "Type-check %d files" count in
-    Hh_logger.log "Begin %s" logstring;
+    ServerProgress.send_progress_to_monitor "typechecking %d files" count;
     let errorl =
       let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
       Typing_check_service.go genv.workers env.tcopt Relative_path.Set.empty fast ~memory_cap in
@@ -148,7 +144,7 @@ let type_check
     let env = { env with
       errorl = Errors.merge errorl env.errorl;
     } in
-    env, (Hh_logger.log_duration logstring t)
+    env, (Hh_logger.log_duration "Type-check" t)
   end else begin
     let needs_recheck = Relative_path.Map.fold fast
       ~init:Relative_path.Set.empty

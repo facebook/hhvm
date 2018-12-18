@@ -120,7 +120,8 @@ let finalize_init init_env =
   let t' = Unix.gettimeofday () in
   Hh_logger.log "Heap size: %d" (SharedMem.heap_size ());
   Hh_logger.log "Server is READY";
-  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t)
+  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
+  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None)
 
 let shutdown_persistent_client client env  =
   ClientProvider.shutdown_client client;
@@ -479,6 +480,7 @@ let has_pending_disk_changes genv =
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
+  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS None);
   let has_default_client_pending =
     Option.is_some env.default_client_pending_command_needs_full_check in
   let can_accept_clients = not @@ ServerRevisionTracker.is_hg_updating () in

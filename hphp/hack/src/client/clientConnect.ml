@@ -37,7 +37,7 @@ type conn = {
   conn_retries : int option;
   conn_progress_callback: string option -> unit;
   conn_start_time: float;
-  tail_env: Tail.env option
+  check_progress: unit -> unit;
 }
 
 let tty_progress_reporter () =
@@ -53,155 +53,21 @@ let tty_progress_reporter () =
 let null_progress_reporter (_status: string option) : unit =
   ()
 
-let loading_saved_state_re = Str.regexp_string "loading saved state"
-
-let success_loaded_saved_state_re = Str.regexp_string "loaded saved state"
-
-let could_not_load_saved_state_re = Str.regexp_string "Could not load saved state"
-
-let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
-
-let indexing_re = Str.regexp_string "Indexing"
-
-let parsing_re = Str.regexp_string "Parsing"
-
-let naming_re = Str.regexp_string "Naming"
-
-let determining_changes_re = Str.regexp_string "Determining changes"
-
-let type_decl_re = Str.regexp_string "Type-decl"
-
-let type_check_re = Str.regexp_string "Type-check"
-
-let cst_search_re = Str.regexp_string "CST search"
-
-let server_ready_re = Str.regexp_string "Server is READY"
-
-let begin_re = Str.regexp_string "Begin"
-
-let count_re = Str.regexp "\\([0-9]+\\) files"
-
-let matches_re re s =
-  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
-  pos > -1
-
-let re_list =
-  [
-   loading_saved_state_re;
-   success_loaded_saved_state_re;
-   could_not_load_saved_state_re;
-   begin_re;
-   indexing_re;
-   parsing_re;
-   naming_re;
-   determining_changes_re;
-   tls_bug_re;
-   type_decl_re;
-   type_check_re;
-   cst_search_re;
-   server_ready_re;
-  ]
-
-let is_valid_line s =
-  List.exists ~f:(fun re -> matches_re re s) re_list
-
-type load_state_failure =
-  | No_failure
-  | Saved_state_failed
-  | Tls_bug
-
-let saved_state_failed : load_state_failure ref = ref No_failure
-
-let rec did_loading_saved_state_fail l =
-  match l with
-  | [] -> No_failure
-  | s::ss ->
-     if matches_re tls_bug_re s then begin
-       saved_state_failed := Tls_bug;
-       Tls_bug
-     end
-     else if matches_re success_loaded_saved_state_re s then begin
-       saved_state_failed := No_failure;
-       No_failure
-       end
-     else if matches_re could_not_load_saved_state_re s then
-       Saved_state_failed
-     else if matches_re server_ready_re s then begin
-       saved_state_failed := No_failure; No_failure end
-     else
-       did_loading_saved_state_fail ss
-
-let msg_of_tail tail_env =
-  let count_suffix line =
-    if matches_re count_re line then
-      try let c = Str.matched_group 1 line in " " ^ c ^ " files"
-        with Caml.Not_found -> ""
-    else "" in
-  let final_suffix = if (!saved_state_failed) <> No_failure
-    then " - this can take a long time because loading saved state failed]"
-    else "]" in
-  let line = Tail.last_line tail_env in
-  if matches_re loading_saved_state_re line then
-    "[loading saved state]"
-  else if matches_re success_loaded_saved_state_re line then
-    "[loading saved state succeeded]"
-  else if matches_re could_not_load_saved_state_re line then
-    "[loading saved state failed]"
-  else if matches_re indexing_re line then
-    "[indexing" ^ final_suffix
-  else if matches_re parsing_re line then
-    "[parsing" ^ (count_suffix line) ^ final_suffix
-  else if matches_re naming_re line then
-    "[resolving symbol references" ^ final_suffix
-  else if matches_re determining_changes_re line then
-    "[determining changes]"
-  else if matches_re type_decl_re line then
-    "[evaluating type declarations of" ^ (count_suffix line) ^ final_suffix
-  else if matches_re type_check_re line then
-    "[typechecking" ^ (count_suffix line) ^ final_suffix
-  else if matches_re cst_search_re line then
-    "[CST search - processed" ^ (count_suffix line) ^ "]"
-  else
-    "[processing]"
+let progress = ref None
+let progress_warning = ref None
+let default_progress_message = "processing"
 
 let delta_t : float = 3.0
 
-let open_and_get_tail_msg
-    (start_time : float)
-    (tail_env : Tail.env)
-    : load_state_failure * string =
-  let curr_time = Unix.time () in
-  if not (Tail.is_open_env tail_env) &&
-       curr_time -. start_time > delta_t then begin
-      Tail.open_env tail_env;
-      Tail.update_env is_valid_line tail_env;
-    end else if Tail.is_open_env tail_env then
-    Tail.update_env is_valid_line tail_env;
-  let load_state_failure =
-    let l = (Tail.get_lines tail_env) in
-    did_loading_saved_state_fail l in
-  Tail.set_lines tail_env [];
-  let tail_msg = msg_of_tail tail_env in
-  load_state_failure, tail_msg
-
-let print_wait_msg
-    (progress_callback : string option -> 'a)
-    (start_time : float)
-    (tail_env : Tail.env)
-    : 'a =
-  let load_state_failure, tail_msg =
-    open_and_get_tail_msg start_time tail_env in
-  let () = match load_state_failure with
-  | No_failure -> ()
-  | Saved_state_failed -> begin
-    saved_state_failed := load_state_failure;
-    Printf.eprintf "%s\n%!" ClientMessages.load_state_not_found_msg
-  end
-  | Tls_bug -> begin
-    saved_state_failed := load_state_failure;
-    Printf.eprintf "%s\n%!" ClientMessages.tls_bug_msg
-  end in
-  progress_callback (Some tail_msg)
+let print_wait_msg progress_callback check_progress =
+  let had_warning = Option.is_some !progress_warning in
+  check_progress ();
+  if not had_warning then
+    Option.iter !progress_warning ~f:(Printf.eprintf "%s\n%!");
+  let progress = Option.value !progress ~default:default_progress_message in
+  let final_suffix = if Option.is_some !progress_warning then
+    " - this can take a long time, see warning above]" else "]" in
+  progress_callback (Some ("[" ^ progress ^ final_suffix))
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
@@ -211,28 +77,26 @@ let rec wait_for_server_message
   ~(retries : int option)
   ~(progress_callback : string option -> unit)
   ~(start_time : float)
-  ~(tail_env : Tail.env option)
+  ~(check_progress : unit -> unit)
   : 'a ServerCommandTypes.message_type Lwt.t =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
   | Some n when elapsed_t > n ->
-      (if Option.is_some tail_env then
-        Printf.eprintf "\nError: Ran out of retries, giving up!\n");
+      Printf.eprintf "\nError: Ran out of retries, giving up!\n";
       raise Exit_status.(Exit_with Out_of_retries)
   | Some _
   | None -> ();
   let%lwt readable, _, _ = Lwt_utils.select
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
-    Option.iter tail_env
-      (fun t -> print_wait_msg progress_callback start_time t);
+    print_wait_msg progress_callback check_progress;
     wait_for_server_message
       ~expected_message
       ~ic
       ~retries
       ~progress_callback
       ~start_time
-      ~tail_env
+      ~check_progress
   ) else
     try%lwt
       let fd = Timeout.descr_of_in_channel ic in
@@ -245,10 +109,9 @@ let rec wait_for_server_message
         progress_callback None;
         Lwt.return msg
       end else begin
-        if not is_ping then Option.iter tail_env
-          (fun t -> print_wait_msg progress_callback start_time t);
+        if not is_ping then print_wait_msg progress_callback check_progress;
         wait_for_server_message ~expected_message ~ic ~retries
-          ~progress_callback ~start_time ~tail_env
+          ~progress_callback ~start_time ~check_progress
       end
     with
     | End_of_file
@@ -261,7 +124,7 @@ let wait_for_server_hello
   (retries : int option)
   (progress_callback : string option -> unit)
   (start_time : float)
-  (tail_env : Tail.env option)
+  (check_progress : unit -> unit)
   : unit Lwt.t =
   let%lwt _ : 'a ServerCommandTypes.message_type =
     wait_for_server_message
@@ -270,7 +133,7 @@ let wait_for_server_hello
       ~retries
       ~progress_callback
       ~start_time
-      ~tail_env
+      ~check_progress
   in
   Lwt.return_unit
 
@@ -286,7 +149,6 @@ let rec connect
     (env : env)
     (retries : int option)
     (start_time : float)
-    (tail_env : Tail.env)
     : conn Lwt.t =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
@@ -311,17 +173,24 @@ let rec connect
       (if env.force_dormant_start then Force_dormant_start_only else
           if env.use_priority_pipe then Priority else Default))
   } in
-  let retries, conn =
+  let retries, conn, check_progress =
     let start_t = Unix.gettimeofday () in
     let timeout = (Option.value retries ~default:30) + 1 in
     let conn = ServerUtils.connect_to_monitor
       ~timeout
       env.root
       handoff_options in
+    let check_progress () =
+      match ServerUtils.server_progress ~timeout:3 env.root with
+      | Ok (msg, warning) ->
+        progress := msg;
+        progress_warning := warning
+      | _ -> ()
+    in
     let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
     let retries = Option.map retries
       ~f:(fun retries -> max 0 (retries - elapsed_t)) in
-    retries, conn
+    retries, conn, check_progress
   in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
@@ -330,7 +199,7 @@ let rec connect
         if env.do_post_handoff_handshake then
           with_server_hung_up @@ fun () ->
             wait_for_server_hello ic retries env.progress_callback start_time
-              (Some tail_env)
+              check_progress
         else
           Lwt.return_unit
       in
@@ -339,7 +208,7 @@ let rec connect
         conn_retries = retries;
         conn_progress_callback = env.progress_callback;
         conn_start_time = start_time;
-        tail_env = Some tail_env;
+        check_progress;
       }
   | Error e ->
     if first_attempt then
@@ -350,7 +219,7 @@ let rec connect
     | SMUtils.Server_died
     | SMUtils.Monitor_connection_failure ->
       Unix.sleepf 0.1;
-      connect env retries start_time tail_env
+      connect env retries start_time
     | SMUtils.Server_missing ->
       if env.autostart then begin
         ClientStart.start_server { ClientStart.
@@ -369,7 +238,7 @@ let rec connect
           prechecked = env.prechecked;
           config = env.config;
         };
-        connect env retries start_time tail_env
+        connect env retries start_time
       end else begin
         Printf.eprintf begin
           "Error: no hh_server running. Either start hh_server"^^
@@ -393,11 +262,9 @@ let rec connect
       end;
       raise Exit_status.(Exit_with No_server_running)
     | SMUtils.Monitor_socket_not_ready ->
-      let _, tail_msg = open_and_get_tail_msg start_time tail_env in
-      env.progress_callback (Some tail_msg);
       HackEventLogger.client_connect_once_busy start_time;
       Unix.sleepf 0.1;
-      connect env retries start_time tail_env
+      connect env retries start_time
     | SMUtils.Monitor_establish_connection_timeout ->
       (** This should only happen if the Monitor is being DDOSed or has
        * wedged itself. To ameliorate inadvertent self DDOSing by hh_clients,
@@ -436,18 +303,14 @@ let rec connect
            * before that will actually start the server -- we need to make
            * sure that happens.
            *)
-          Tail.close_env tail_env;
-          connect env retries start_time tail_env
+          connect env retries start_time
         end else raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
 
 let connect (env : env) : conn Lwt.t =
-  let link_file = ServerFiles.log_link env.root in
   let start_time = Unix.time () in
-  let tail_env = Tail.create_env link_file in
   try%lwt
     let%lwt {channels = (_, oc); _} as conn =
-      connect ~first_attempt:true env env.retries start_time tail_env in
-    Tail.close_env tail_env;
+      connect ~first_attempt:true env env.retries start_time in
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then begin
       ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
@@ -464,7 +327,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
     conn_retries = retries;
     conn_progress_callback = progress_callback;
     conn_start_time = start_time;
-    tail_env
+    check_progress
   } cmd ->
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   Out_channel.flush oc;
@@ -475,9 +338,8 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
       ~retries
       ~progress_callback
       ~start_time
-      ~tail_env
+      ~check_progress
     in
-    Option.iter tail_env ~f:Tail.close_env;
     match res with
     | ServerCommandTypes.Response (response, _) -> Lwt.return response
     | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"

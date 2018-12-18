@@ -379,6 +379,12 @@ let get_updates_exn
     SSet.filter updates ~f:filter
     |> Relative_path.relativize_set Relative_path.Root
 
+let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
+
+let matches_re re s =
+  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
+  pos > -1
+
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let fallback_init
     (genv: ServerEnv.genv)
@@ -389,9 +395,12 @@ let fallback_init
   if err <> Lazy_init_no_load_approach then begin
     let err_str = error_to_verbose_string err in
     HackEventLogger.load_state_exn err_str;
-    (* CARE! the following string literal is matched by clientConnect.ml *)
-    (* in its log-scraping function. Change with care. *)
     Hh_logger.log "Could not load saved state: %s" err_str;
+    let warning = if matches_re tls_bug_re err_str
+      then ClientMessages.tls_bug_msg
+      else ClientMessages.load_state_not_found_msg
+    in
+    ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
   end;
   let get_next, t = indexing genv in
   (* The full_fidelity_parser currently works better in both memory and time
@@ -566,7 +575,7 @@ let init
   (root: Path.t)
 : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
   assert(lazy_level = Init);
-  Hh_logger.log "Begin loading saved state";
+  ServerProgress.send_progress_to_monitor "loading saved state";
 
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
   (* saved-state, and then once again while waiting to get dirty files from hg *)
@@ -600,5 +609,5 @@ let init
     (* Fall back to type-checking everything *)
     fallback_init genv env error, state_result
   | Ok (loaded_info, changed_while_parsing) ->
-    Hh_logger.log "Successfully loaded saved state";
+    ServerProgress.send_progress_to_monitor "loading saved state succeeded";
     post_saved_state_initialization ~loaded_info ~changed_while_parsing ~env ~genv, state_result

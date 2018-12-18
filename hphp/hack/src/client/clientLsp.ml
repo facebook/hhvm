@@ -94,7 +94,6 @@ module In_init_env = struct
     editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
-    tail_env: Tail.env option;
   }
 end
 
@@ -526,12 +525,7 @@ let dismiss_showMessageRequest (dialog: ShowMessageRequest.t) : ShowMessageReque
 (* indicators and diagnostics in a state.                                     *)
 let dismiss_ui (state: state) : state =
   match state with
-  | In_init ienv ->
-    let open In_init_env in
-    Option.iter ~f:Tail.close_env ienv.tail_env;
-    In_init { ienv with
-      tail_env = None;
-    }
+  | In_init ienv -> In_init ienv
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
@@ -1506,21 +1500,27 @@ let report_connect_progress
   let open In_init_env in
   let open ShowStatus in
   let open ShowMessageRequest in
-  let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
   let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
   (* TODO: better to report time that hh_server has spent initializing *)
-  let load_state_not_found, tail_msg =
-    ClientConnect.open_and_get_tail_msg ienv.first_start_time tail_env in
-  let message = if load_state_not_found <> ClientConnect.No_failure then
-    Printf.sprintf
-      "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-      tail_msg delay_in_secs
-  else
-    Printf.sprintf
-      "hh_server initializing: %s [%i seconds]"
-      tail_msg delay_in_secs
+  let root = match get_root_opt () with
+    | Some root -> root
+    | None -> failwith "we should have root by now"
   in
+  let progress, warning = match ServerUtils.server_progress ~timeout:3 root with
+    | Error _ -> None, None
+    | Ok (progress, warning) -> progress, warning
+  in
+  let progress = Option.value progress ~default:ClientConnect.default_progress_message in
+  let message = if Option.is_some warning then
+      Printf.sprintf
+        "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
+        progress delay_in_secs
+    else
+      Printf.sprintf
+        "hh_server initializing: %s [%i seconds]"
+        progress delay_in_secs
+    in
   request_showStatus {
     request = {
       type_ = MessageType.WarningMessage;
@@ -1529,7 +1529,7 @@ let report_connect_progress
     };
     progress = None;
     total = None;
-    shortMessage = Some (Printf.sprintf "%s %s" tail_msg (status_tick ()))
+    shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()))
   }
 
 
@@ -1772,7 +1772,6 @@ let rec connect (state: state) : state Lwt.t =
         uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
         (* Similarly, file_edits will be empty: *)
         file_edits = ImmQueue.empty;
-        tail_env = Some (Tail.create_env (ServerFiles.log_link root));
       })
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)

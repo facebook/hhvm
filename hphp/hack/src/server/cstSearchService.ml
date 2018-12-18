@@ -691,7 +691,7 @@ let go
         !num_files_searched - !last_printed_num_files_searched >= 10000
         || is_bucket_empty
       ) then begin
-        Hh_logger.log "CST search: searched %d files..." !num_files_searched;
+        ServerProgress.send_progress_to_monitor "CST search: searched %d files..." !num_files_searched;
         last_printed_num_files_searched := !num_files_searched;
       end
     end;

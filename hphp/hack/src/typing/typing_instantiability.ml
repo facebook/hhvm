@@ -49,6 +49,7 @@ class type ['a] hint_visitor_type = object
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> nast_shape_info -> 'a
   method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a
+  method on_soft   : 'a -> Nast.hint -> 'a
 end
 
 (*****************************************************************************)
@@ -77,6 +78,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Happly (i, hl)        -> this#on_apply  acc i hl
     | Hshape hm             -> this#on_shape  acc hm
     | Haccess (h, il)       -> this#on_access acc h il
+    | Hsoft h               -> this#on_soft   acc h
 
   method on_any acc = acc
   method on_mixed acc = acc
@@ -128,6 +130,9 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_access acc h _ =
     this#on_hint acc h
 
+  method on_soft acc h =
+    this#on_hint acc h
+
 end
 
 (* For checking whether hint refers to a construct that cannot ever have
@@ -136,7 +141,18 @@ end
 module CheckInstantiability = struct
 
   let validate_classname = function
-    | _, (Happly _ | Hthis | Hany | Hmixed | Hnonnull | Habstr _ | Haccess _ | Hdynamic) -> ()
+    | _,
+      (
+        Happly _
+        | Hthis
+        | Hany
+        | Hmixed
+        | Hnonnull
+        | Habstr _
+        | Haccess _
+        | Hdynamic
+        | Hsoft _
+      ) -> ()
     | p,
       (
         Htuple _

@@ -165,6 +165,7 @@ and hint_ f = function
         ShapeMap.empty in
     Hshape { nast_shape_info with nsi_field_map }
   | Haccess (h, sids) -> Haccess (hint f h, List.map sids (pstring f))
+  | Hsoft h -> Hsoft (hint f h)
 
 and attr_list f attrl =
   List.map attrl begin fun attr -> match attr with

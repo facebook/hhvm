@@ -54,7 +54,6 @@ and hint_ =
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info
-
  (* This represents the use of a type const. Type consts are accessed like
   * regular consts in Hack, i.e.
   *
@@ -75,6 +74,7 @@ and hint_ =
   * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
   *)
   | Haccess of hint * sid list
+  | Hsoft of hint
   (* The following constructors don't exist in the AST hint type *)
   | Hany
   | Hmixed

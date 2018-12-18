@@ -95,7 +95,7 @@ and on_hint (p, h) : Aast.hint =
   | Happly (x, hl) -> (p, Aast.Happly (x, on_list on_hint hl))
   | Hshape s -> (p, Aast.Hshape (on_shape_info s))
   | Haccess (root, id, ids) -> (p, on_haccess root id ids)
-  | Hsoft _ -> (p, Aast.Hany)  (* TODO: T37786581 *)
+  | Hsoft h -> (p, Aast.Hsoft (on_hint h))
   | Hreified _ -> (p, Aast.Hany) (* TODO: T37786581 *)
 
 and on_class_elt body elt : class_body =

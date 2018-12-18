@@ -140,3 +140,5 @@ and hint_ p env = function
     let fdm =
       ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
     Tshape (shape_fields_known, fdm)
+  | Hsoft (p, h_) ->
+    hint_ p env h_

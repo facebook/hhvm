@@ -6524,6 +6524,7 @@ and method_def env m =
     };
     T.m_ret_by_ref = m.m_ret_by_ref;
     T.m_external = m.m_external;
+    T.m_doc_comment = m.m_doc_comment;
   } in
   Typing_lambda_ambiguous.suggest_method_def env method_def
 

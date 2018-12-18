@@ -480,7 +480,7 @@ and on_method m : Aast.method_ =
     m_ret             = optional on_hint m.m_ret;
     m_ret_by_ref      = m.m_ret_by_ref;
     m_external        = m.m_external;
-    (* TODO: m_doc_comment *)
+    m_doc_comment     = m.m_doc_comment;
   }
 
 and on_class c : Aast.class_ =

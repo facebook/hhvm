@@ -381,6 +381,7 @@ and method_ = {
   m_ret             : hint option         ;
   m_ret_by_ref      : bool                ;
   m_external        : bool                ;  (* see f_external above for context *)
+  m_doc_comment     : string option       ;
 }
 
 and method_redeclaration = {

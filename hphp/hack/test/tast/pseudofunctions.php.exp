@@ -17,7 +17,7 @@
             { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([4:39-43], (Hprim Tvoid))); m_ret_by_ref = false;
-         m_external = false }
+         m_external = false; m_doc_comment = None }
         ];
       c_methods =
       [{ Aast.AnnotatedAST.m_span = [5:3-41]; m_annotation = ();
@@ -30,7 +30,7 @@
             { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_ret_by_ref = false;
-         m_external = false }
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;

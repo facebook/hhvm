@@ -1814,6 +1814,7 @@ module Make (GetLocals : GetLocals) = struct
       N.m_user_attributes = attrs;
       N.m_ret_by_ref      = m.m_ret_by_ref;
       N.m_external        = m.m_external;
+      N.m_doc_comment     = m.m_doc_comment;
     }
 
   and method_redeclaration genv mt =

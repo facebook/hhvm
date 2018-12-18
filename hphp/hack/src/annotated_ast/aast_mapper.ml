@@ -339,6 +339,7 @@ struct
       T.m_ret = m.S.m_ret;
       T.m_ret_by_ref = m.S.m_ret_by_ref;
       T.m_external = m.S.m_external;
+      T.m_doc_comment = m.S.m_doc_comment;
     }
 
   and map_method_redeclaration menv mt =

@@ -135,19 +135,19 @@ and on_class_elt body elt : class_body =
   | ClassVars cv when List.mem Static cv.cv_kinds ->
     let attrs = on_list on_user_attribute cv.cv_user_attributes in
     let vars = body.c_static_vars @
-      (on_list (on_class_var false (optional on_hint cv.cv_hint) attrs) cv.cv_names) in
+      (on_list (on_class_var false (optional on_hint cv.cv_hint) attrs cv.cv_kinds) cv.cv_names) in
     { body with c_static_vars = vars; }
-  | ClassVars { cv_names; cv_user_attributes; cv_hint; _ } ->
+  | ClassVars { cv_names; cv_user_attributes; cv_hint; cv_kinds; _ } ->
     let attrs = on_list on_user_attribute cv_user_attributes in
     let vars =
-      body.c_vars @ (on_list (on_class_var false (optional on_hint cv_hint) attrs) cv_names) in
+      body.c_vars @ (on_list (on_class_var false (optional on_hint cv_hint) attrs cv_kinds) cv_names) in
     { body with c_vars = vars; }
   | XhpAttr (hopt, var, is_required, maybe_enum)  ->
     (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
     let hopt = optional on_hint hopt in
     let attrs = body.c_xhp_attrs @
       [(hopt,
-        on_class_var true hopt [] var,
+        on_class_var true hopt [] [] var,
         is_required,
         optional on_xhp_attr maybe_enum)] in
     { body with c_xhp_attrs = attrs; }
@@ -383,11 +383,23 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
     c_tconst_type = optional on_hint tc.tconst_type;
   }
 
-and on_class_var is_xhp h attrs (_, id, eopt) : Aast.class_var =
+and on_class_var is_xhp h attrs kinds (_, id, eopt) : Aast.class_var =
+  let cv_final = List.mem Final kinds in
+  let cv_visibility = List.fold_left
+    begin
+      fun acc k ->
+        match k with
+        | Private -> Aast.Private
+        | Public -> Aast.Public
+        | Protected -> Aast.Protected
+        | _ -> acc
+    end
+    Aast.Public
+    kinds in
   Aast.{
-    cv_final = false; (* TODO: T37786581 *)
+    cv_final;
     cv_is_xhp = is_xhp;
-    cv_visibility = Public; (* TODO: T37786581 *)
+    cv_visibility;
     cv_type = h;
     cv_id = id;
     cv_expr = optional on_expr eopt;

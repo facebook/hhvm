@@ -174,10 +174,14 @@ let load_and_check_files dynamic_view_files errors progress ~memory_cap =
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
-let merge files_to_check files_in_progress files_checked (errors, results) acc =
+let merge files_to_check files_to_check_count files_in_progress files_checked
+    files_checked_count (errors, results) acc =
   files_to_check := results.unchecked_files @ !files_to_check;
   List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.checked_files;
   files_checked := results.checked_files @ !files_checked;
+  files_checked_count := (List.length results.checked_files) + !files_checked_count;
+  ServerProgress.send_percentage_progress_to_monitor
+    "typechecking" !files_checked_count files_to_check_count "files";
   Decl_service.merge_lazy_decl errors acc
 
 let next workers ~num_jobs files_to_check files_in_progress =
@@ -215,14 +219,17 @@ let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
   let files_to_check = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
   let files_checked = ref [] in
+  let files_checked_count = ref 0 in
   let num_jobs = List.length fnl in
+  ServerProgress.send_percentage_progress_to_monitor
+    "typechecking" 0 num_jobs "files";
   let next = next ~num_jobs workers files_to_check files_in_progress in
   let errors, env, cancelled =
     MultiWorker.call_with_interrupt
       workers
       ~job:(load_and_check_files dynamic_view_files ~memory_cap)
       ~neutral
-      ~merge:(merge files_to_check files_in_progress files_checked)
+      ~merge:(merge files_to_check num_jobs files_in_progress files_checked files_checked_count)
       ~next
       ~on_cancelled:(on_cancelled next files_to_check files_in_progress)
       ~interrupt

@@ -585,6 +585,8 @@ and hint_ env p = function
       ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map
   | Hsoft h ->
       hint env h; ()
+  | Hreified h ->
+      hint env h; ()
 
 and check_tparams env p x tparams hl =
   let arity = List.length tparams in
@@ -947,6 +949,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Haccess (root_ty, _) ->
         check_tparams root_ty
     | Hsoft ty_ -> check_tparams ty_
+    | Hreified ty_ -> check_tparams ty_
 
 and class_var env cv =
   check_class_property_initialization cv;

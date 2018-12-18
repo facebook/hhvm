@@ -50,6 +50,7 @@ class type ['a] hint_visitor_type = object
   method on_shape  : 'a -> nast_shape_info -> 'a
   method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a
   method on_soft   : 'a -> Nast.hint -> 'a
+  method on_reified : 'a -> Nast.hint -> 'a
 end
 
 (*****************************************************************************)
@@ -79,6 +80,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hshape hm             -> this#on_shape  acc hm
     | Haccess (h, il)       -> this#on_access acc h il
     | Hsoft h               -> this#on_soft   acc h
+    | Hreified h            -> this#on_reified acc h
 
   method on_any acc = acc
   method on_mixed acc = acc
@@ -133,6 +135,9 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_soft acc h =
     this#on_hint acc h
 
+  method on_reified acc h =
+    this#on_hint acc h
+
 end
 
 (* For checking whether hint refers to a construct that cannot ever have
@@ -152,6 +157,7 @@ module CheckInstantiability = struct
         | Haccess _
         | Hdynamic
         | Hsoft _
+        | Hreified _
       ) -> ()
     | p,
       (

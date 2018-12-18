@@ -75,6 +75,7 @@ and hint_ =
   *)
   | Haccess of hint * sid list
   | Hsoft of hint
+  | Hreified of hint
   (* The following constructors don't exist in the AST hint type *)
   | Hany
   | Hmixed

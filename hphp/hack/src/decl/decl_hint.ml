@@ -142,3 +142,5 @@ and hint_ p env = function
     Tshape (shape_fields_known, fdm)
   | Hsoft (p, h_) ->
     hint_ p env h_
+  | Hreified (p, h_) ->
+    hint_ p env h_

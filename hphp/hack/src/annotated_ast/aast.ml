@@ -245,6 +245,9 @@ and fun_ = {
   f_ret_by_ref : bool;
   f_external : bool;  (* true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
+  f_namespace : nsenv;
+  f_doc_comment : string option;
+  f_static : bool;
 }
 
 and func_body =

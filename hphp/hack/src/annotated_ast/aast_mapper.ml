@@ -141,6 +141,9 @@ struct
     List.map fd.S.f_user_attributes (map_user_attribute menv);
     T.f_ret_by_ref = fd.S.f_ret_by_ref;
     T.f_external = fd.S.f_external;
+    T.f_namespace = fd.S.f_namespace;
+    T.f_doc_comment = fd.S.f_doc_comment;
+    T.f_static = fd.S.f_static;
   }
 
   and map_user_attribute menv ua =

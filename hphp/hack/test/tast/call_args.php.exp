@@ -13,7 +13,8 @@
       f_body =
       (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false });
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [5:1-7:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([5:15-19], (Hprim Tvoid)));
@@ -31,5 +32,6 @@
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false })
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

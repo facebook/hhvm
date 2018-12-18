@@ -518,7 +518,7 @@ and fun_def tcopt f =
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
-      let fundef =       {
+      let fundef = {
         T.f_annotation = Env.save local_tpenv env;
         T.f_span = f.f_span;
         T.f_mode = f.f_mode;
@@ -536,6 +536,9 @@ and fun_def tcopt f =
         };
         T.f_ret_by_ref = f.f_ret_by_ref;
         T.f_external = f.f_external;
+        T.f_namespace = f.f_namespace;
+        T.f_doc_comment = f.f_doc_comment;
+        T.f_static = f.f_static;
       } in
       Typing_lambda_ambiguous.suggest_fun_def env fundef
   ) in
@@ -2830,6 +2833,9 @@ and anon_make tenv p f ft idl =
           T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
           T.f_ret_by_ref = f.f_ret_by_ref;
           T.f_external = f.f_external;
+          T.f_namespace = f.f_namespace;
+          T.f_doc_comment = f.f_doc_comment;
+          T.f_static = f.f_static;
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in

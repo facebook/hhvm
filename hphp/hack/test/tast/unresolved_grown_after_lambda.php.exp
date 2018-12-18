@@ -62,7 +62,9 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false; f_external = false },
+                          f_ret_by_ref = false; f_external = false;
+                          f_namespace = <opaque>; f_doc_comment = None;
+                          f_static = false },
                         [([10:13-19], $items)])))
                     ))));
              (Expr
@@ -84,5 +86,6 @@
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false })
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
   ]

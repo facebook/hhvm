@@ -62,7 +62,8 @@ Errors:
              ];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false });
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [19:1-20:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([19:78-79], (Habstr "T")));
@@ -89,7 +90,8 @@ Errors:
        f_body =
        (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false });
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [24:1-42:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([24:25-29], (Hprim Tvoid)));
@@ -268,7 +270,8 @@ Errors:
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false });
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [46:1-59:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([46:31-35], (Hprim Tvoid)));
@@ -360,7 +363,8 @@ Errors:
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false });
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [61:1-65:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([61:35-39], (Hprim Tvoid)));
@@ -384,5 +388,6 @@ Errors:
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false })
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

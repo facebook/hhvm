@@ -14,5 +14,6 @@
       f_fun_kind = FSync;
       f_user_attributes =
       [{ Aast.AnnotatedAST.ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
-      f_ret_by_ref = false; f_external = false })
+      f_ret_by_ref = false; f_external = false; f_namespace = <opaque>;
+      f_doc_comment = None; f_static = false })
   ]

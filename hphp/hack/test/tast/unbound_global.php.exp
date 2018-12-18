@@ -12,5 +12,6 @@ Errors:
            [(Expr (([4:3-17], _), (Id ([4:3-17], "\\unbound_global"))))];
            fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false })
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
   ]

@@ -1955,6 +1955,9 @@ module Make (GetLocals : GetLocals) = struct
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_ret_by_ref = f.f_ret_by_ref;
       f_external = f.f_external;
+      f_namespace = f.f_namespace;
+      f_doc_comment = f.f_doc_comment;
+      f_static = f.f_static;
     } in
     named_fun
 
@@ -2778,6 +2781,9 @@ module Make (GetLocals : GetLocals) = struct
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_ret_by_ref = f.f_ret_by_ref;
       f_external = f.f_external;
+      f_namespace = f.f_namespace;
+      f_doc_comment = f.f_doc_comment;
+      f_static = f.f_static;
     }
 
   and make_class_id env (p, x as cid) hl =

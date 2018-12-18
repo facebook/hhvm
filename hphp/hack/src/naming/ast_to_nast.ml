@@ -351,7 +351,9 @@ and on_fun f : Aast.fun_ =
     f_user_attributes = on_list on_user_attribute f.f_user_attributes;
     f_ret_by_ref = f.f_ret_by_ref;
     f_external = f.f_external;
-    (* TODO: T37786581l; missing f_doc_comment and perhaps other fields *)
+    f_namespace = f.f_namespace;
+    f_doc_comment = f.f_doc_comment;
+    f_static = f.f_static;
   } in
   named_fun
 

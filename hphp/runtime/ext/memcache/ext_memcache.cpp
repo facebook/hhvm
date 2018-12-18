@@ -700,9 +700,6 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 
   for (int server_id = 0; server_id < server_count; server_id++) {
     memcached_stat_st *stat;
-    char stats_key[30] = {0};
-    size_t key_len;
-
     LMCD_SERVER_POSITION_INSTANCE_TYPE instance =
       memcached_server_instance_by_position(&data->m_memcache, server_id);
     const char *hostname = LMCD_SERVER_HOSTNAME(instance);
@@ -715,9 +712,13 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
       continue;
     }
 
-    key_len = snprintf(stats_key, sizeof(stats_key), "%s:%d", hostname, port);
-
-    return_val.set(String(stats_key, key_len, CopyString), server_stats);
+    auto const port_str = folly::to<std::string>(port);
+    auto const key_len = strlen(hostname) + 1 + port_str.length();
+    auto key = String(key_len, ReserveString);
+    key += hostname;
+    key += ":";
+    key += port_str;
+    return_val.set(key, server_stats);
   }
 
   free(stats);

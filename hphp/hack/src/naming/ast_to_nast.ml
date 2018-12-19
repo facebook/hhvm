@@ -336,6 +336,19 @@ and on_fun_param param : Aast.fun_param =
     param_user_attributes = on_list on_user_attribute param.param_user_attributes;
   }
 
+and determine_variadicity params =
+  match params with
+    | [] -> Aast.FVnonVariadic
+    | [x] ->
+      begin
+        match x.param_is_variadic, x.param_id with
+          | false, _ -> Aast.FVnonVariadic
+          | true, (p, "...") -> Aast.FVellipsis p
+          | true, _ -> Aast.FVvariadicArg (on_fun_param x)
+      end
+    | _ :: rl ->
+      determine_variadicity rl
+
 and on_user_attribute attribute : Aast.user_attribute =
   let ua_params = on_list on_expr attribute.ua_params in
   Aast.{ ua_name = attribute.ua_name; ua_params; }
@@ -358,7 +371,7 @@ and on_fun f : Aast.fun_ =
     f_params = on_list on_fun_param f.f_params;
     f_body = body;
     f_fun_kind = f.f_fun_kind;
-    f_variadic = Aast.FVnonVariadic; (* TODO: T37786581 *)
+    f_variadic = determine_variadicity f.f_params;
     f_user_attributes = on_list on_user_attribute f.f_user_attributes;
     f_ret_by_ref = f.f_ret_by_ref;
     f_external = f.f_external;
@@ -434,7 +447,7 @@ and on_method_trait_resolution res : Aast.method_redeclaration =
     mt_name            = res.mt_name;
     mt_tparams         = on_list on_tparam res.mt_tparams;
     mt_where_constraints = on_list on_constr res.mt_constrs;
-    mt_variadic        = Aast.FVnonVariadic; (* TODO: T37786581 Set correct variadicity *)
+    mt_variadic        = determine_variadicity res.mt_params;
     mt_params          = on_list on_fun_param res.mt_params;
     mt_fun_kind        = res.mt_fun_kind;
     mt_ret             = optional on_hint res.mt_ret;
@@ -483,7 +496,7 @@ and on_method m : Aast.method_ =
     m_name            = m.m_name;
     m_tparams         = on_list on_tparam m.m_tparams;
     m_where_constraints = on_list on_constr m.m_constrs;
-    m_variadic        = Aast.FVnonVariadic; (* TODO: Set correct variadicity *)
+    m_variadic        = determine_variadicity m.m_params;
     m_params          = on_list on_fun_param m.m_params;
     m_body            = body;
     m_fun_kind        = m.m_fun_kind;

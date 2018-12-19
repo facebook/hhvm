@@ -217,18 +217,14 @@ void profileRequestStart() {
   requestKind = getRequestKind();
 
   // Force the request to use interpreter (not even running jitted code) when it
-  // is not a standard kind, and during retranslateAll when we need to dump out
-  // precise profile data.
+  // is of RequestKind::Profile, or during retranslateAll when we need to dump
+  // out precise profile data.
   auto const retranslateAllScheduled =
     jit::mcgen::pendingRetranslateAllScheduled();
   auto const forceInterp =
     (retranslateAllScheduled && RuntimeOption::DumpPreciseProfData) ||
-    (requestKind != RequestKind::Standard);
-
-  // When retranslateAll is scheduled to run, we don't want to generate more
-  // profiling or live translations, but the request is allowed to execute
-  // jitted code that is already there.
-  bool okToJit = !forceInterp && !retranslateAllScheduled;
+    (requestKind == RequestKind::Profile);
+  bool okToJit = !forceInterp && (requestKind == RequestKind::Standard);
   if (!RequestInfo::s_requestInfo.isNull()) {
     if (RID().isJittingDisabled()) {
       okToJit = false;
@@ -273,7 +269,7 @@ void profileRequestStart() {
     }
   }
 
-  if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
+  if (okToJit && relocateRequests > 0 && !--relocateRequests) {
     jit::tc::liveRelocate(true);
   }
 }

@@ -35,7 +35,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_path);
-THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_phproot);
 
 const StaticString s_default("default");
 const StaticString s___builtin("__builtin");
@@ -43,7 +42,6 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
                                                  SandboxCondition::Off) {
   s_path.destroy();
-  s_phproot.destroy();
 
   auto documentRoot = transport->getDocumentRoot();
   if (!documentRoot.empty()) {
@@ -91,7 +89,6 @@ SourceRootInfo::SourceRootInfo(const std::string &user,
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
                                                  SandboxCondition::Off) {
   s_path.destroy();
-  s_phproot.destroy();
   if (!sandboxOn()) return;
   m_user = user;
   m_sandbox = sandbox;
@@ -283,21 +280,6 @@ std::string SourceRootInfo::path() const {
   } else {
     return RuntimeOption::SourceRoot;
   }
-}
-
-const StaticString
-  s_SERVER("_SERVER"),
-  s_PHP_ROOT("PHP_ROOT");
-
-std::string& SourceRootInfo::initPhpRoot() {
-  auto const v = php_global(s_SERVER).toArray().rvalAt(s_PHP_ROOT).unboxed();
-  if (isStringType(v.type())) {
-    *s_phproot.getCheck() = std::string(v.val().pstr->data()) + "/";
-  } else {
-    // Our best guess at the source root.
-    *s_phproot.getCheck() = GetCurrentSourceRoot();
-  }
-  return *s_phproot.getCheck();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

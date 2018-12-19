@@ -69,11 +69,6 @@ struct SourceRootInfo {
   Eval::DSandboxInfo getSandboxInfo() const;
 
 private:
-  static const std::string& GetCurrentPhpRoot() {
-    return s_phproot.isNull() ? initPhpRoot() : *s_phproot;
-  }
-
-private:
   String m_user;
   String m_sandbox;
   String m_path;
@@ -84,9 +79,7 @@ private:
   } m_sandboxCond;
   Array m_serverVars;
   static THREAD_LOCAL_NO_CHECK(std::string, s_path);
-  static THREAD_LOCAL_NO_CHECK(std::string, s_phproot);
 
-  static std::string& initPhpRoot();
   std::string parseSandboxServerVariable(const std::string &format) const;
 };
 

@@ -1,24 +1,23 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [11:1-32]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([11:25-29], (Hprim Tvoid)));
+    { f_span = [11:1-32]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([11:25-29], (Hprim Tvoid)));
       f_name = ([11:10-21], "\\might_throw"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_body =
-      (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+      f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = false; f_namespace = <opaque>;
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
       f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [13:1-31:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([13:44-47], (Hprim Tint)));
+     { f_span = [13:1-31:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([13:44-47], (Hprim Tint)));
        f_name = ([13:10-40], "\\terminal_catch_can_do_whatever");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([14:3-10], int),
                  (Binop ((Eq None), (([14:3-5], int), (Lvar ([14:3-5], $a))),

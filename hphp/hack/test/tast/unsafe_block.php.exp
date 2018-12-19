@@ -1,9 +1,9 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [12:1-21:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = None; f_name = ([12:10-13], "\\foo");
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+    { f_span = [12:1-21:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = None; f_name = ([12:10-13], "\\foo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([12:19-21], bool);
+      [{ param_annotation = ([12:19-21], bool);
          param_hint = (Some ([12:14-18], (Hprim Tbool)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [12:19-21]; param_name = "$b"; param_expr = None;
@@ -11,7 +11,7 @@
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
                [(Expr
                    (([15:7-12], _),

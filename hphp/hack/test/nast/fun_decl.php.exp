@@ -1,10 +1,10 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [12:1-28]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([12:23-27], (Hprim Tvoid)));
+    { f_span = [12:1-28]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:23-27], (Hprim Tvoid)));
       f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = [12:18-20];
+      [{ param_annotation = [12:18-20];
          param_hint = (Some ([12:14-17], (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [12:18-20]; param_name = "$v"; param_expr = None;
@@ -12,7 +12,7 @@
         ];
       f_body =
       (UnnamedBody
-         { Aast.AnnotatedAST.fub_ast = <opaque>; fub_tparams = <opaque>;
+         { fub_ast = <opaque>; fub_tparams = <opaque>;
            fub_namespace = <opaque> });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = true; f_namespace = <opaque>;

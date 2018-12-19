@@ -1,11 +1,11 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [2:1-7:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([2:26-30], (Hprim Tvoid)));
+    { f_span = [2:1-7:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([2:26-30], (Hprim Tvoid)));
       f_name = ([2:10-22], "\\test_lambda1"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([3:3-13], string),
                 (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))),
@@ -15,15 +15,14 @@
                  (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
                     (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [4:8-41];
-                          f_annotation = (); f_mode = <opaque>; f_ret = None;
+                        { f_span = [4:8-41]; f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
                           f_name = ([4:8-41], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
-                          [{ Aast.AnnotatedAST.param_annotation =
-                             ([4:8-10], _); param_hint = None;
-                             param_is_reference = false;
+                          [{ param_annotation = ([4:8-10], _);
+                             param_hint = None; param_is_reference = false;
                              param_is_variadic = false; param_pos = [4:8-10];
                              param_name = "$n"; param_expr = None;
                              param_callconv = None;
@@ -31,7 +30,7 @@
                             ];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Return ([4:17-39],
                                    (Some (([4:24-38], string),
                                           (Binop (Dot,

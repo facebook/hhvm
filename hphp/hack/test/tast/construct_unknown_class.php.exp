@@ -2,13 +2,12 @@ Errors:
   [3:32-39] Unbound name: Unknown (an object type)
   [4:14-21] Unbound name: Unknown (an object type)
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-5:2]; f_annotation = ();
-      f_mode = <opaque>;
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:32-39], (Happly (([3:32-39], "\\Unknown"), []))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:27-29], vec<string>);
+      [{ param_annotation = ([3:27-29], vec<string>);
          param_hint =
          (Some ([3:15-26],
                 (Happly (([3:15-18], "\\vec"), [([3:19-25], (Hprim Tstring))]
@@ -19,7 +18,7 @@ Errors:
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Return ([4:3-45],
                (Some (([4:10-44], object),
                       (New (

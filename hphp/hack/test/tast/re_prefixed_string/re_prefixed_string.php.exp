@@ -10,13 +10,13 @@ Errors:
   [57:14-25] Bad regex pattern; Missing delimiter(s).
   [58:14-22] Bad regex pattern; Missing delimiter(s).
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-16:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:15-19], (Hprim Tvoid)));
-      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
-      f_variadic = FVnonVariadic; f_params = [];
+    { f_span = [3:1-16:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:15-19], (Hprim Tvoid))); f_name = ([3:10-11], "\\f");
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params = [];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([4:3-19], HH\Lib\Regex\Pattern<shape(0 => string)>),
                 (Binop ((Eq None),
@@ -65,8 +65,8 @@ Errors:
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [19:1-20:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([19:78-79], (Habstr "T")));
+     { f_span = [19:1-20:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([19:78-79], (Habstr "T")));
        f_name = ([19:10-17], "\\goodbye");
        f_tparams =
        [(Invariant, ([19:18-19], "T"),
@@ -77,8 +77,7 @@ Errors:
          false)];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
-       [{ Aast.AnnotatedAST.param_annotation =
-          ([19:67-75], HH\Lib\Regex\Pattern<T>);
+       [{ param_annotation = ([19:67-75], HH\Lib\Regex\Pattern<T>);
           param_hint =
           (Some ([19:43-66],
                  (Happly (([19:43-63], "\\HH\\Lib\\Regex\\Pattern"),
@@ -87,19 +86,18 @@ Errors:
           param_pos = [19:67-75]; param_name = "$pattern"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];
-       f_body =
-       (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [24:1-42:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([24:25-29], (Hprim Tvoid)));
+     { f_span = [24:1-42:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([24:25-29], (Hprim Tvoid)));
        f_name = ([24:10-21], "\\bad_pattern"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([25:3-33], HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>),
                  (Binop ((Eq None),
@@ -273,13 +271,13 @@ Errors:
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [46:1-59:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([46:31-35], (Hprim Tvoid)));
+     { f_span = [46:1-59:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([46:31-35], (Hprim Tvoid)));
        f_name = ([46:10-27], "\\missing_delimiter"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([47:3-20], _),
                  (Binop ((Eq None),
@@ -366,13 +364,13 @@ Errors:
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [61:1-65:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([61:35-39], (Hprim Tvoid)));
+     { f_span = [61:1-65:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([61:35-39], (Hprim Tvoid)));
        f_name = ([61:10-31], "\\parentheses_are_weird"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([64:3-76], HH\Lib\Regex\Pattern<shape(0 => string)>),
                  (Binop ((Eq None),

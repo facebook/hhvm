@@ -1,6 +1,6 @@
 [(Class
-    { Aast.AnnotatedAST.c_span = [3:1-11]; c_annotation = ();
-      c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
+    { c_span = [3:1-11]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\A"); c_tparams = <opaque>; c_extends = [];
       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
@@ -10,8 +10,7 @@
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
       c_user_attributes = []; c_enum = None; c_doc_comment = None });
   (Fun
-     { Aast.AnnotatedAST.f_span = [5:1-7:2]; f_annotation = ();
-       f_mode = <opaque>;
+     { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
        (Some ([5:23-25],
               (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))));
@@ -19,7 +18,7 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Return ([6:3-18],
                 (Some (([6:10-17], A),
                        (New ((([6:14-15], A), (CI (([6:14-15], "\\A"), []))),
@@ -31,13 +30,13 @@
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [9:1-14:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([9:20-24], (Hprim Tvoid)));
+     { f_span = [9:1-14:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([9:20-24], (Hprim Tvoid)));
        f_name = ([9:10-16], "\\fwhile"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([10:3-15], A),
                  (Binop ((Eq None), (([10:3-5], A), (Lvar ([10:3-5], $x))),
@@ -64,13 +63,13 @@
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [16:1-19:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([16:18-22], (Hprim Tvoid)));
+     { f_span = [16:1-19:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([16:18-22], (Hprim Tvoid)));
        f_name = ([16:10-14], "\\ffor"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(For (
                 (([17:8-20], (A)),
                  (Expr_list

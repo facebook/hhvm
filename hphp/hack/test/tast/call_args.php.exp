@@ -1,28 +1,27 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-42]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:35-39], (Hprim Tvoid)));
+    { f_span = [3:1-42]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:35-39], (Hprim Tvoid)));
       f_name = ([3:10-22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:30-32], string);
+      [{ param_annotation = ([3:30-32], string);
          param_hint = (Some ([3:23-29], (Hprim Tstring)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
-      f_body =
-      (NamedBody { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+      f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [5:1-7:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([5:15-19], (Hprim Tvoid)));
+     { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([5:15-19], (Hprim Tvoid)));
        f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([6:3-24], void),
                  (Call (Cnormal,

@@ -1,16 +1,16 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-28:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([10:4-8], (Hprim Tvoid)));
+    { f_span = [3:1-28:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([10:4-8], (Hprim Tvoid)));
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([4:9-23], array);
+      [{ param_annotation = ([4:9-23], array);
          param_hint = (Some ([4:3-8], (Harray (None, None))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:9-23]; param_name = "$untyped_array";
          param_expr = None; param_callconv = None; param_user_attributes = []
          };
-        { Aast.AnnotatedAST.param_annotation = ([5:18-31], array<?string>);
+        { param_annotation = ([5:18-31], array<?string>);
           param_hint =
           (Some ([5:3-17],
                  (Harray (
@@ -20,8 +20,7 @@
           param_pos = [5:18-31]; param_name = "$vector_array";
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation =
-          ([6:22-32], Container<?string>);
+        { param_annotation = ([6:22-32], Container<?string>);
           param_hint =
           (Some ([6:3-21],
                  (Happly (([6:3-12], "\\Container"),
@@ -30,8 +29,7 @@
           param_pos = [6:22-32]; param_name = "$container";
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation =
-          ([7:32-48], KeyedContainer<int, ?string>);
+        { param_annotation = ([7:32-48], KeyedContainer<int, ?string>);
           param_hint =
           (Some ([7:3-31],
                  (Happly (([7:3-17], "\\KeyedContainer"),
@@ -42,12 +40,11 @@
           param_pos = [7:32-48]; param_name = "$keyed_container";
           param_expr = None; param_callconv = None;
           param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation = ([8:3-11], _);
-          param_hint = None; param_is_reference = false;
-          param_is_variadic = false; param_pos = [8:3-11];
-          param_name = "$untyped"; param_expr = None; param_callconv = None;
-          param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation = ([9:8-10], bool);
+        { param_annotation = ([8:3-11], _); param_hint = None;
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [8:3-11]; param_name = "$untyped"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+        { param_annotation = ([9:8-10], bool);
           param_hint = (Some ([9:3-7], (Hprim Tbool)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [9:8-10]; param_name = "$b"; param_expr = None;
@@ -55,7 +52,7 @@
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([11:3-51], Container<?string>),
                 (Binop ((Eq None),
@@ -128,15 +125,14 @@
                      (Lvar ([20:3-5], $f))),
                     (([20:8-35], (function(?string $x): bool)),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [20:8-35];
-                          f_annotation = (); f_mode = <opaque>;
+                        { f_span = [20:8-35]; f_annotation = ();
+                          f_mode = <opaque>;
                           f_ret = (Some ([20:22-26], (Hprim Tbool)));
                           f_name = ([20:8-35], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
-                          [{ Aast.AnnotatedAST.param_annotation =
-                             ([20:17-19], ?string);
+                          [{ param_annotation = ([20:17-19], ?string);
                              param_hint =
                              (Some ([20:9-16],
                                     (Hoption ([20:10-16], (Hprim Tstring)))));
@@ -148,7 +144,7 @@
                             ];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Return ([20:31-35],
                                    (Some (([20:31-35], bool), True))))
                                  ];

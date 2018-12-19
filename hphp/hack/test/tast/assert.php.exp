@@ -1,6 +1,6 @@
 [(Class
-    { Aast.AnnotatedAST.c_span = [12:1-11]; c_annotation = ();
-      c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
+    { c_span = [12:1-11]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([12:7-8], "\\A"); c_tparams = <opaque>; c_extends = [];
       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
@@ -13,12 +13,12 @@
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
       });
   (Fun
-     { Aast.AnnotatedAST.f_span = [14:1-16:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([14:22-26], (Hprim Tvoid)));
+     { f_span = [14:1-16:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([14:22-26], (Hprim Tvoid)));
        f_name = ([14:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
-       [{ Aast.AnnotatedAST.param_annotation = ([14:17-19], ?A);
+       [{ param_annotation = ([14:17-19], ?A);
           param_hint =
           (Some ([14:14-16],
                  (Hoption ([14:15-16], (Happly (([14:15-16], "\\A"), []))))));
@@ -28,7 +28,7 @@
          ];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([15:3-26], void),
                  (Assert

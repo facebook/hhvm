@@ -1,11 +1,11 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [12:1-15:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([12:18-22], (Hprim Tvoid)));
+    { f_span = [12:1-15:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:18-22], (Hprim Tvoid)));
       f_name = ([12:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([13:3-50], array<string, _>),
                 (Binop ((Eq None),

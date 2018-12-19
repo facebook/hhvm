@@ -1,10 +1,9 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-6:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:23-26], (Hprim Tint)));
-      f_name = ([3:10-12], "\\f0"); f_tparams = []; f_where_constraints = [];
-      f_variadic = FVnonVariadic;
+    { f_span = [3:1-6:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:23-26], (Hprim Tint))); f_name = ([3:10-12], "\\f0");
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:18-20], ?int);
+      [{ param_annotation = ([3:18-20], ?int);
          param_hint = (Some ([3:13-17], (Hoption ([3:14-17], (Hprim Tint)))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:18-20]; param_name = "$x"; param_expr = None;
@@ -12,7 +11,7 @@
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([4:3-11], int),
                 (Binop ((Eq (Some QuestionQuestion)),

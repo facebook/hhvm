@@ -1,6 +1,5 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [2:1-5:2]; f_annotation = ();
-      f_mode = <opaque>;
+    { f_span = [2:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
       (Some ([3:18-45],
              (Hfun (FReactive, false, [([3:32-35], (Hprim Tint))], [None],
@@ -8,12 +7,9 @@
       f_name = ([3:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (NamedBody
-         { Aast.AnnotatedAST.fnb_nast = [(Unsafe_block [])];
-           fnb_unsafe = true });
+      (NamedBody { fnb_nast = [(Unsafe_block [])]; fnb_unsafe = true });
       f_fun_kind = FSync;
-      f_user_attributes =
-      [{ Aast.AnnotatedAST.ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
+      f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
       f_ret_by_ref = false; f_external = false; f_namespace = <opaque>;
       f_doc_comment = None; f_static = false })
   ]

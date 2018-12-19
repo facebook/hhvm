@@ -1,27 +1,24 @@
 [(Class
-    { Aast.AnnotatedAST.c_span = [3:1-5:2]; c_annotation = ();
-      c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\B"); c_tparams = <opaque>; c_extends = [];
       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
       c_implements = []; c_consts = []; c_typeconsts = [];
       c_static_vars = []; c_vars = [];
       c_constructor =
-      (Some { Aast.AnnotatedAST.m_span = [4:3-41]; m_annotation = ();
-              m_final = false; m_abstract = false; m_static = false;
-              m_visibility = Public; m_name = ([4:19-30], "__construct");
-              m_tparams = []; m_where_constraints = [];
-              m_variadic = FVnonVariadic;
+      (Some { m_span = [4:3-41]; m_annotation = (); m_final = false;
+              m_abstract = false; m_static = false; m_visibility = Public;
+              m_name = ([4:19-30], "__construct"); m_tparams = [];
+              m_where_constraints = []; m_variadic = FVnonVariadic;
               m_params =
-              [{ Aast.AnnotatedAST.param_annotation = ([4:35-37], num);
+              [{ param_annotation = ([4:35-37], num);
                  param_hint = (Some ([4:31-34], (Hprim Tnum)));
                  param_is_reference = false; param_is_variadic = false;
                  param_pos = [4:35-37]; param_name = "$x"; param_expr = None;
                  param_callconv = None; param_user_attributes = [] }
                 ];
-              m_body =
-              (NamedBody
-                 { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+              m_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([4:19-30], (Happly (([4:19-30], "void"), []))));
               m_ret_by_ref = false; m_external = false; m_doc_comment = None
@@ -30,22 +27,21 @@
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
       c_user_attributes = []; c_enum = None; c_doc_comment = None });
   (Class
-     { Aast.AnnotatedAST.c_span = [6:1-10:2]; c_annotation = ();
-       c_mode = <opaque>; c_final = false; c_is_xhp = false;
-       c_kind = Cnormal; c_name = ([6:7-8], "\\A"); c_tparams = <opaque>;
+     { c_span = [6:1-10:2]; c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
+       c_name = ([6:7-8], "\\A"); c_tparams = <opaque>;
        c_extends = [([6:17-18], (Happly (([6:17-18], "\\B"), [])))];
        c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
        c_xhp_category = []; c_req_extends = []; c_req_implements = [];
        c_implements = []; c_consts = []; c_typeconsts = [];
        c_static_vars = []; c_vars = [];
        c_constructor =
-       (Some { Aast.AnnotatedAST.m_span = [7:3-9:4]; m_annotation = ();
-               m_final = false; m_abstract = false; m_static = false;
-               m_visibility = Public; m_name = ([7:19-30], "__construct");
-               m_tparams = []; m_where_constraints = [];
-               m_variadic = FVnonVariadic;
+       (Some { m_span = [7:3-9:4]; m_annotation = (); m_final = false;
+               m_abstract = false; m_static = false; m_visibility = Public;
+               m_name = ([7:19-30], "__construct"); m_tparams = [];
+               m_where_constraints = []; m_variadic = FVnonVariadic;
                m_params =
-               [{ Aast.AnnotatedAST.param_annotation = ([7:35-37], int);
+               [{ param_annotation = ([7:35-37], int);
                   param_hint = (Some ([7:31-34], (Hprim Tint)));
                   param_is_reference = false; param_is_variadic = false;
                   param_pos = [7:35-37]; param_name = "$x";
@@ -54,7 +50,7 @@
                  ];
                m_body =
                (NamedBody
-                  { Aast.AnnotatedAST.fnb_nast =
+                  { fnb_nast =
                     [(Expr
                         (([8:5-28], void),
                          (Call (Cnormal,

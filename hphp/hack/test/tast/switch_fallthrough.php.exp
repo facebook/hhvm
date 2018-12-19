@@ -17,13 +17,13 @@ File "switch_fallthrough.php", line 33, characters 7-17:
 File "switch_fallthrough.php", line 37, characters 3-13:
   (bool | num)
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-38:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:18-22], (Hprim Tvoid)));
+    { f_span = [3:1-38:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:18-22], (Hprim Tvoid)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([5:3-9], int),
                 (Binop ((Eq None), (([5:3-5], int), (Lvar ([5:3-5], $x))),

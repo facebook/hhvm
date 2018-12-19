@@ -1,15 +1,15 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-15:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:35-38], (Hprim Tint)));
+    { f_span = [3:1-15:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:35-38], (Hprim Tint)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:19-21], int);
+      [{ param_annotation = ([3:19-21], int);
          param_hint = (Some ([3:15-18], (Hprim Tint)));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:19-21]; param_name = "$i"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
-        { Aast.AnnotatedAST.param_annotation = ([3:30-32], string);
+        { param_annotation = ([3:30-32], string);
           param_hint = (Some ([3:23-29], (Hprim Tstring)));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
@@ -17,7 +17,7 @@
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([4:3-25], Vector<(int | string)>),
                 (Binop ((Eq None),
@@ -33,15 +33,15 @@
                     (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
                     (([5:8-12:4], (function(): int)),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [5:8-12:4];
-                          f_annotation = (); f_mode = <opaque>;
+                        { f_span = [5:8-12:4]; f_annotation = ();
+                          f_mode = <opaque>;
                           f_ret = (Some ([5:12-15], (Hprim Tint)));
                           f_name = ([5:8-12:4], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic; f_params = [];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Expr
                                    (([10:5-22], (int | string)),
                                     (Binop ((Eq None),

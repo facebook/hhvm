@@ -4,15 +4,14 @@ Errors:
   [3:25-27]   via this generic Tu
   [8:24-26] It is incompatible with an int
 [(Fun
-    { Aast.AnnotatedAST.f_span = [3:1-5:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([3:33-35], (Habstr "Tu")));
-      f_name = ([3:10-11], "\\f");
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:33-35], (Habstr "Tu"))); f_name = ([3:10-11], "\\f");
       f_tparams =
       [(Invariant, ([3:18-19], "T"), [], true);
         (Invariant, ([3:21-23], "Tu"), [], false)];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([3:28-30], Tu);
+      [{ param_annotation = ([3:28-30], Tu);
          param_hint = (Some ([3:25-27], (Habstr "Tu")));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:28-30]; param_name = "$f"; param_expr = None;
@@ -20,7 +19,7 @@ Errors:
         ];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Return ([4:3-13],
                (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))
              ];
@@ -29,13 +28,13 @@ Errors:
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
   (Fun
-     { Aast.AnnotatedAST.f_span = [7:1-9:2]; f_annotation = ();
-       f_mode = <opaque>; f_ret = (Some ([7:15-19], (Hprim Tvoid)));
+     { f_span = [7:1-9:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([7:15-19], (Hprim Tvoid)));
        f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = [];
        f_body =
        (NamedBody
-          { Aast.AnnotatedAST.fnb_nast =
+          { fnb_nast =
             [(Expr
                 (([8:3-27], string),
                  (Call (Cnormal,

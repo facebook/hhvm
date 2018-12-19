@@ -1,11 +1,11 @@
 [(Fun
-    { Aast.AnnotatedAST.f_span = [12:1-25:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([12:17-21], (Hprim Tvoid)));
+    { f_span = [12:1-25:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:17-21], (Hprim Tvoid)));
       f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
+         { fnb_nast =
            [(Expr
                (([13:3-9], int),
                 (Binop ((Eq None), (([13:3-5], int), (Lvar ([13:3-5], $y))),
@@ -16,14 +16,13 @@
                     (([15:3-5], [fun]), (Lvar ([15:3-5], $x))),
                     (([15:8-22], HackSuggest<(function(int): int)>),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [15:8-22];
-                          f_annotation = (); f_mode = <opaque>; f_ret = None;
+                        { f_span = [15:8-22]; f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
                           f_name = ([15:8-22], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
-                          [{ Aast.AnnotatedAST.param_annotation =
-                             ([15:8-10], HackSuggest<int>);
+                          [{ param_annotation = ([15:8-10], HackSuggest<int>);
                              param_hint = None; param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [15:8-10]; param_name = "$z";
@@ -32,7 +31,7 @@
                             ];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Return ([15:15-22],
                                    (Some (([15:15-22], _),
                                           (Binop (Plus,
@@ -64,13 +63,13 @@
                     (([18:3-5], [fun]), (Lvar ([18:3-5], $x))),
                     (([18:8-20:4], HackSuggest<(function(int): int)>),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [18:8-20:4];
-                          f_annotation = (); f_mode = <opaque>; f_ret = None;
+                        { f_span = [18:8-20:4]; f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
                           f_name = ([18:8-20:4], ";anonymous");
                           f_tparams = []; f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
-                          [{ Aast.AnnotatedAST.param_annotation =
+                          [{ param_annotation =
                              ([18:17-19], HackSuggest<int>);
                              param_hint = None; param_is_reference = false;
                              param_is_variadic = false;
@@ -80,7 +79,7 @@
                             ];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Return ([19:5-20],
                                    (Some (([19:12-19], _),
                                           (Binop (Plus,
@@ -112,20 +111,19 @@
                     (([23:3-5], [fun]), (Lvar ([23:3-5], $x))),
                     (([23:8-28], HackSuggest<(function(int, int): int)>),
                      (Efun (
-                        { Aast.AnnotatedAST.f_span = [23:8-28];
-                          f_annotation = (); f_mode = <opaque>; f_ret = None;
+                        { f_span = [23:8-28]; f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
                           f_name = ([23:8-28], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic;
                           f_params =
-                          [{ Aast.AnnotatedAST.param_annotation =
-                             ([23:9-11], HackSuggest<int>);
+                          [{ param_annotation = ([23:9-11], HackSuggest<int>);
                              param_hint = None; param_is_reference = false;
                              param_is_variadic = false;
                              param_pos = [23:9-11]; param_name = "$a";
                              param_expr = None; param_callconv = None;
                              param_user_attributes = [] };
-                            { Aast.AnnotatedAST.param_annotation =
+                            { param_annotation =
                               ([23:13-15], HackSuggest<int>);
                               param_hint = None; param_is_reference = false;
                               param_is_variadic = false;
@@ -135,7 +133,7 @@
                             ];
                           f_body =
                           (NamedBody
-                             { Aast.AnnotatedAST.fnb_nast =
+                             { fnb_nast =
                                [(Return ([23:21-28],
                                    (Some (([23:21-28], _),
                                           (Binop (Plus,

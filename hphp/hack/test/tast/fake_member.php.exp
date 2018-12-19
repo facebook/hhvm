@@ -1,14 +1,13 @@
 [(Class
-    { Aast.AnnotatedAST.c_span = [3:1-11:2]; c_annotation = ();
-      c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
+    { c_span = [3:1-11:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
       c_implements = []; c_consts = []; c_typeconsts = [];
       c_static_vars = [];
       c_vars =
-      [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
-         cv_visibility = Private;
+      [{ cv_final = false; cv_is_xhp = false; cv_visibility = Private;
          cv_type = (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))));
          cv_id = ([4:16-20], "foo");
          cv_expr = (Some (([4:23-27], null), Null)); cv_user_attributes = []
@@ -16,13 +15,13 @@
         ];
       c_constructor = None; c_static_methods = [];
       c_methods =
-      [{ Aast.AnnotatedAST.m_span = [6:3-10:4]; m_annotation = ();
-         m_final = false; m_abstract = false; m_static = false;
-         m_visibility = Public; m_name = ([6:19-22], "get"); m_tparams = [];
+      [{ m_span = [6:3-10:4]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([6:19-22], "get"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
          (NamedBody
-            { Aast.AnnotatedAST.fnb_nast =
+            { fnb_nast =
               [(If (
                   (([7:9-19], ?int),
                    (Obj_get ((([7:9-14], this), This),

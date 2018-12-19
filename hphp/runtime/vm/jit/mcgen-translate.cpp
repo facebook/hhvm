@@ -465,9 +465,6 @@ void retranslateAll() {
 
   tc::relocatePublishSortedOptFuncs(std::move(infos));
 
-  s_retranslateAllComplete.store(true, std::memory_order_release);
-  tc::reportJitMaturity();
-
   if (serverMode) {
     Logger::Info("retranslateAll: finished retranslating all optimized "
                  "translations!");
@@ -478,6 +475,10 @@ void retranslateAll() {
   if (RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
     if (checkSerializeProfData()) return;
   }
+
+  // This will enable live translations to happen again.
+  s_retranslateAllComplete.store(true, std::memory_order_release);
+  tc::reportJitMaturity();
 
   if (serverMode) {
     ProfData::Session pds;

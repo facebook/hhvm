@@ -203,6 +203,8 @@ void throwable_init(ObjectData* throwable);
 void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
                                            c_WaitableWaitHandle* wh);
 
+String throwable_to_string(ObjectData* throwable);
+
 //////////////////////////////////////////////////////////////////////
 
 }

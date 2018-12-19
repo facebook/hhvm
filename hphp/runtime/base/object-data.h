@@ -394,6 +394,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Variant invokeWakeup();
   Variant invokeDebugInfo();
 
+  Variant static InvokeSimple(ObjectData* data, const StaticString& name);
+
   /*
    * Returns whether this object has any dynamic properties.
    */

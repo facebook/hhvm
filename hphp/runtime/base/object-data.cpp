@@ -2251,7 +2251,7 @@ void ObjectData::raiseImplicitInvokeToString() const {
   raise_notice("Implicitly invoked %s::__toString", m_cls->name()->data());
 }
 
-static Variant invokeSimple(ObjectData* obj, const StaticString& name) {
+Variant ObjectData::InvokeSimple(ObjectData* obj, const StaticString& name) {
   auto const meth = obj->methodNamed(name.get());
   return meth
     ? g_context->invokeMethodV(obj, meth, InvokeArgs{}, false)
@@ -2259,19 +2259,19 @@ static Variant invokeSimple(ObjectData* obj, const StaticString& name) {
 }
 
 Variant ObjectData::invokeSleep() {
-  return invokeSimple(this, s___sleep);
+  return InvokeSimple(this, s___sleep);
 }
 
 Variant ObjectData::invokeToDebugDisplay() {
-  return invokeSimple(this, s___toDebugDisplay);
+  return InvokeSimple(this, s___toDebugDisplay);
 }
 
 Variant ObjectData::invokeWakeup() {
-  return invokeSimple(this, s___wakeup);
+  return InvokeSimple(this, s___wakeup);
 }
 
 Variant ObjectData::invokeDebugInfo() {
-  return invokeSimple(this, s___debugInfo);
+  return InvokeSimple(this, s___debugInfo);
 }
 
 String ObjectData::invokeToString() {

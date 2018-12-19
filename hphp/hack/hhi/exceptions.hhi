@@ -26,6 +26,7 @@ interface Throwable {
   public function getTraceAsString(): string;
   public function getPrevious(): ?Throwable;
   public function __toString(): string;
+  public function toString(): string;
 }
 
 class Error implements Throwable {
@@ -53,6 +54,7 @@ class Error implements Throwable {
   final public function getTrace(): varray<mixed>;
   final public function getTraceAsString(): string;
   public function __toString(): string;
+  public function toString(): string;
   final private function __clone(): void;
 }
 
@@ -90,6 +92,7 @@ class Exception implements Throwable {
   final protected function __prependTrace(Container<mixed> $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;
+  public function toString(): string;
   final private function __clone(): void;
 
   final public static function getTraceOptions();

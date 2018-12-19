@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
@@ -241,7 +242,8 @@ const StaticString
   s_PWD("PWD"),
   s_HOSTNAME("HOSTNAME"),
   s__SERVER("_SERVER"),
-  s__ENV("_ENV");
+  s__ENV("_ENV"),
+  s_toStringErr("(unable to call toString())");
 
 static RDS_LOCAL(bool, s_sessionInitialized);
 
@@ -556,9 +558,10 @@ static void handle_exception_helper(bool& ret,
       errorMsg = "Exception handler threw an object exception: ";
     }
     try {
-      errorMsg += e.toString().data();
+      auto str = throwable_to_string(e.get());
+      errorMsg += !str.empty() ? str.data() : s_toStringErr.data();
     } catch (...) {
-      errorMsg += "(unable to call toString())";
+      errorMsg += s_toStringErr.data();
     }
     if (where == ContextOfException::Invoke) {
       bool handlerRet = context->onUnhandledException(e);

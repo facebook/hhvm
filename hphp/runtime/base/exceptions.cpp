@@ -31,6 +31,7 @@ const StaticString s_file("file");
 const StaticString s_line("line");
 const StaticString s_trace("trace");
 const StaticString s_traceOpts("traceOpts");
+const StaticString s___toString("__toString");
 const Slot s_fileIdx{3};
 const Slot s_lineIdx{4};
 const Slot s_traceIdx{5};
@@ -382,5 +383,11 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
   throwable_init_file_and_line_from_trace(throwable);
 }
 
+String throwable_to_string(ObjectData* throwable) {
+  auto result = ObjectData::InvokeSimple(throwable, s___toString);
+  return result.isString()
+    ? result.toString()
+    : empty_string();
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

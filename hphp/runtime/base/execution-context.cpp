@@ -75,6 +75,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/exceptions.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1036,7 +1037,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
 }
 
 bool ExecutionContext::onUnhandledException(Object e) {
-  String err = e.toString();
+  String err = throwable_to_string(e.get());
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }

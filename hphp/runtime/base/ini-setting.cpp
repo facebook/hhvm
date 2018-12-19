@@ -595,7 +595,11 @@ void IniSetting::ParserCallback::onPopEntry(
     makeSettingSub(key, offset, value, *arr);
   } else {                                 // Normal array value
     String skey(key);
-    auto const hash = arr->toArrRef().lvalAt(skey);
+    auto& arr_ref = arr->toArrRef();
+    if (!arr_ref.exists(skey)) {
+      arr_ref.set(skey, empty_array());
+    }
+    auto const hash = arr_ref.lvalAt(skey);
     forceToArray(hash);
     if (!oEmpty) {                         // a[b]
       makeArray(hash, offset, value);
@@ -613,7 +617,7 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
   auto start = offset.c_str();
   auto p = start;
   bool last = false;
-  do {
+  for (;;) {
     String index(p);
     last = p + index.size() >= start + offset.size();
     // This is mandatory in case we have a nested array like:
@@ -621,13 +625,20 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
     auto& arr = forceToArray(val);
-    val = arr.lvalAt(arr.convertKey<IntishCast::CastSilently>(index));
+    const auto key = arr.convertKey<IntishCast::CastSilently>(index);
     if (last) {
-      tvMove(make_tv<KindOfString>(StringData::Make(value)), val);
-    } else {
-      p += index.size() + 1;
+      String s{value};
+      arr.set(key, make_tv<KindOfString>(s.get()));
+      break;
     }
-  } while (!last);
+    // Similar to the above, in the case of a nested array we need to ensure
+    // that we create empty arrays on the way down if they don't already exist.
+    if (!arr.exists(key)) {
+      arr.set(key, make_tv<KindOfArray>(staticEmptyArray()));
+    }
+    val = arr.lvalAt(key);
+    p += index.size() + 1;
+  }
 }
 
 void IniSetting::ParserCallback::makeSettingSub(const String& key,

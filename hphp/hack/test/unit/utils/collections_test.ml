@@ -30,11 +30,15 @@ let test_myMap_union () =
 let test_ImmQueue () =
   let queue = ImmQueue.empty in
   if not (ImmQueue.is_empty queue) then failwith "not empty";
+  let (x, queue) = ImmQueue.peek queue in
+  if not (x = None) then failwith "peeking an empty queue should return None";
   let queue = ImmQueue.push queue 4 in
   if ImmQueue.is_empty queue then failwith "empty";
   let queue = ImmQueue.push queue 5 in
   if ImmQueue.length queue <> 2 then failwith "wrong length";
   let queue = ImmQueue.push queue 6 in
+  let (x, queue) = ImmQueue.peek queue in
+  (match x with Some 4 -> () | _ -> (failwith "wrong value"));
   let (x, queue) = ImmQueue.pop queue in
   (match x with Some 4 -> () | _ -> (failwith "wrong value"));
   let (x, queue) = ImmQueue.pop_unsafe queue in

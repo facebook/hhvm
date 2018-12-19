@@ -4142,6 +4142,7 @@ and is_abstract_ft fty = match fty with
       make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   | _ ->
       let env, te, fty = expr env e in
+      let env, fty = SubType.expand_type_and_solve env fty in
       check_coroutine_call env fty;
       let env, tel, tuel, ty = call ~expected p env fty el uel in
       make_call ~tyvars:ISet.empty env te tal tel tuel ty

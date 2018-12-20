@@ -578,9 +578,8 @@ let check = object(self)
         super#on_expr (env, ctx) expr
       | _, This when ctx.disallow_this ->
         Errors.escaping_mutable_object (get_position e)
-      | (_, (_, Tfun fty)), Efun (f, idl) ->
-        if fty.ft_reactive <> Nonreactive
-        then List.iter idl (check_escaping_mutable env);
+      | (_, (_, Tfun _)), Efun (f, idl) ->
+        List.iter idl (check_escaping_mutable env);
 
         let ctx =
           if ctx.disallow_this || Env.function_is_mutable env <> None

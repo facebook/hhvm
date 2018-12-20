@@ -1,0 +1,4 @@
+File "mut_capture1.php", line 11, characters 5-9:
+Neither a Mutable nor MaybeMutable object may be captured by an anonymous function. (Typing[4283])
+File "mut_capture1.php", line 10, characters 5-8:
+Neither a Mutable nor MaybeMutable object may be captured by an anonymous function. (Typing[4283])

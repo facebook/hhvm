@@ -2324,8 +2324,9 @@ and expr_
         let env = Env.set_env_reactive env reactivity in
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
         let env = { env with Typing_env.inside_ppl_class = false } in
+        let ft = { ft with ft_reactive = reactivity } in
         let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
-        let ft = { ft with ft_is_coroutine = is_coroutine; ft_reactive = reactivity } in
+        let ft = { ft with ft_is_coroutine = is_coroutine } in
         let env, tefun, ty = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
         let env = { env with

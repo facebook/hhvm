@@ -134,8 +134,8 @@ static void pretty_print(
   Offset stopOffset
 ) {
   std::map<Offset,const FuncEmitter*> funcMap;
-  for (auto func : ue->fevec()) {
-    funcMap[func->base] = func;
+  for (auto& func : ue->fevec()) {
+    funcMap[func->base] = func.get();
   }
   for (Id i = 0; i < ue->numPreClasses(); i++) {
     for (auto fe : ue->pce(i)->methods()) {
@@ -231,9 +231,9 @@ void printGml(const UnitEmitter* unit) {
   fprintf(file, "graph [\n"
                 "  hierarchic 1\n"
                 "  directed 1\n");
-  for (auto func : unit->fevec()) {
+  for (auto& func : unit->fevec()) {
     Arena scratch;
-    GraphBuilder builder(scratch, func);
+    GraphBuilder builder(scratch, func.get());
     const Graph* g = builder.build();
     int gid = nextid++;
     fprintf(file, "node [ isGroup 1 id %d ]\n", gid);

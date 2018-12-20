@@ -102,7 +102,6 @@ UnitEmitter::UnitEmitter(const MD5& md5, const Native::FuncTable& nativeFuncs)
 UnitEmitter::~UnitEmitter() {
   if (m_bc) free(m_bc);
 
-  for (auto& fe : m_fes) delete fe;
   for (auto& pce : m_pceVec) delete pce;
 }
 
@@ -209,9 +208,10 @@ FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
   // The pseudomain comes first.
   assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
 
-  FuncEmitter* fe = new FuncEmitter(*this, m_nextFuncSn++, m_fes.size(), name);
-  m_fes.push_back(fe);
-  return fe;
+  auto fe = std::make_unique<FuncEmitter>(*this, m_nextFuncSn++, m_fes.size(),
+                                          name);
+  m_fes.push_back(std::move(fe));
+  return m_fes.back().get();
 }
 
 FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* name,
@@ -219,9 +219,9 @@ FuncEmitter* UnitEmitter::newMethodEmitter(const StringData* name,
   return new FuncEmitter(*this, m_nextFuncSn++, name, pce);
 }
 
-void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
+void UnitEmitter::appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe) {
   fe->setIds(m_nextFuncSn++, m_fes.size());
-  m_fes.push_back(fe);
+  m_fes.push_back(std::move(fe));
 }
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,

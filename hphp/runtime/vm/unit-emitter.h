@@ -165,7 +165,7 @@ struct UnitEmitter {
   /*
    * Const reference to all of the Unit's FuncEmitters.
    */
-  const std::vector<FuncEmitter*>& fevec() const;
+  auto const& fevec() const;
 
   /*
    * Create the pseudomain emitter for the Unit.
@@ -196,7 +196,7 @@ struct UnitEmitter {
   /*
    * Add `fe' to the FE vector.
    */
-  void appendTopEmitter(FuncEmitter* fe);
+  void appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe);
 
   /*
    * Create a new function for `fe'.
@@ -430,7 +430,7 @@ private:
   /*
    * FuncEmitter tables.
    */
-  std::vector<FuncEmitter*> m_fes;
+  std::vector<std::unique_ptr<FuncEmitter> > m_fes;
 
   /*
    * PreClassEmitter table.

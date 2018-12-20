@@ -348,7 +348,7 @@ bool UnitChecker::checkBytecode() {
     }
     funcs.insert(FuncMap::value_type(f->base, f));
   };
-  for (auto f : m_unit->fevec()) addFunc(f);
+  for (auto& f : m_unit->fevec()) addFunc(f.get());
   for (Id i = 0; i < m_unit->numPreClasses(); i++) {
     for (auto f : m_unit->pce(i)->methods()) addFunc(f);
   }
@@ -420,7 +420,7 @@ bool UnitChecker::checkFuncs() {
     ok &= checkFunc(func, m_errmode);
   };
 
-  for (auto func : m_unit->fevec()) doCheck(func);
+  for (auto& func : m_unit->fevec()) doCheck(func.get());
 
   for (Id i = 0; i < m_unit->numPreClasses(); i++) {
     for (auto f : m_unit->pce(i)->methods()) doCheck(f);

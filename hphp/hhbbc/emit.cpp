@@ -1582,7 +1582,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   emit_pseudomain(state, *ue, unit);
 
-  std::vector<FuncEmitter*> top_fes;
+  std::vector<std::unique_ptr<FuncEmitter> > top_fes;
   /*
    * Top level funcs are always defined when the unit is loaded, and
    * don't have a DefFunc bytecode. Process them up front.
@@ -1591,9 +1591,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
     auto const f = unit.funcs[id].get();
     assertx(f != unit.pseudomain.get());
     if (!f->top) continue;
-    auto const fe = new FuncEmitter(*ue, -1, -1, f->name);
-    top_fes.push_back(fe);
-    emit_func(state, *ue, fe, *f);
+    top_fes.push_back(std::make_unique<FuncEmitter>(*ue, -1, -1, f->name));
+    emit_func(state, *ue, top_fes.back().get(), *f);
   }
 
   /*
@@ -1639,7 +1638,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   // Top level funcs need to go after any non-top level funcs. See
   // Unit::merge for details.
-  for (auto fe : top_fes) ue->appendTopEmitter(fe);
+  for (auto& fe : top_fes) ue->appendTopEmitter(std::move(fe));
 
   return ue;
 }

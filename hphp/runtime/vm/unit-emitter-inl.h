@@ -45,10 +45,10 @@ inline Offset UnitEmitter::offsetOf(const unsigned char* pc) const {
 // FuncEmitters.
 
 inline FuncEmitter* UnitEmitter::getMain() const {
-  return m_fes[0];
+  return m_fes[0].get();
 }
 
-inline const std::vector<FuncEmitter*>& UnitEmitter::fevec() const {
+inline auto const& UnitEmitter::fevec() const {
   return m_fes;
 }
 

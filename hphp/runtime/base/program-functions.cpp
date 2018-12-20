@@ -2700,8 +2700,18 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
       }
       if (!prelude.empty()) {
         auto const currentDir = context->getCwd().data();
+        // If $SOURCE_ROOT is found in prelude path
+        // Execute the script from PHP root folder
+        // or from current folder
+        static const std::string s_phpRootVar("${SOURCE_ROOT}");
+        std::string preludeScript(prelude);
+        auto posPhpRoot = preludeScript.find(s_phpRootVar);
+        if (std::string::npos != posPhpRoot){
+          preludeScript.replace(posPhpRoot, s_phpRootVar.length(),
+            SourceRootInfo::GetCurrentSourceRoot());
+        }
         FileUtil::runRelative(
-          prelude,
+          preludeScript,
           String(cmd, CopyString),
           currentDir,
           [&] (const String& f) {

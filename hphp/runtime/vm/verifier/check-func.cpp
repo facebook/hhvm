@@ -64,6 +64,8 @@ struct State {
   FpiState* fpi{};    // FPI stack.
   bool* iters{};      // defined/not-defined state of each iter var.
   boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
+  boost::dynamic_bitset<> writtenByClsRefGetTSSlots; // cls-ref slots written
+                                                     // by ClsRefGetTS
   int stklen{0};       // length of evaluation stack.
   int fpilen{0};       // length of FPI stack.
   bool mbr_live{false};    // liveness of member base register
@@ -1011,9 +1013,11 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
              cur->stklen);
       return false;
     }
-    if (cur->clsRefSlots.any()) {
+    if (cur->clsRefSlots.any() || cur->writtenByClsRefGetTSSlots.any()) {
       ferror("all class-ref slots must be uninitialized after Ret* and Unwind; "
-             "got {}\n", slotsToString(cur->clsRefSlots));
+             "got [{}][{}]\n",
+             slotsToString(cur->clsRefSlots),
+             slotsToString(cur->writtenByClsRefGetTSSlots));
       return false;
     }
   }
@@ -1213,6 +1217,7 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
       ok = false;
     }
     cur->clsRefSlots[read] = false;
+    cur->writtenByClsRefGetTSSlots[read] = false;
   }
   for (auto const write : getWrittenClsRefSlots(pc)) {
     if (write < 0) continue;
@@ -1224,6 +1229,7 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
       ok = false;
     }
     cur->clsRefSlots[write] = true;
+    cur->writtenByClsRefGetTSSlots[write] = op == Op::ClsRefGetTS;
   }
 
   return ok;
@@ -1501,6 +1507,21 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
                     "IVA should be unsigned");
       if (elems == 0 || elems > ArrayData::MaxElemsOnStack) {
         ferror("{} has an illegal element count\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    }
+
+    case Op::FPushCtor: {
+      auto new_pc = pc;
+      decode_op(new_pc);
+      decode_iva(new_pc);
+      auto const slot = decode_iva(new_pc);
+      auto const has_generic_op = decode_oa<HasGenericsOp>(new_pc);
+      if (has_generic_op == HasGenericsOp::MaybeGenerics &&
+          !cur->writtenByClsRefGetTSSlots[slot]) {
+        ferror("FPushCtor uses MaybeGenerics flavor but a cls-ref slot that "
+               "was not written by ClsRefGetTS\n");
         return false;
       }
       break;
@@ -2150,10 +2171,11 @@ FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
 
 std::string FuncChecker::stateToString(const State& cur) const {
   return folly::sformat(
-    "{}{}[{}]",
+    "{}{}[{}][{}]",
     iterToString(cur),
     stkToString(cur.stklen, cur.stk),
-    slotsToString(cur.clsRefSlots)
+    slotsToString(cur.clsRefSlots),
+    slotsToString(cur.writtenByClsRefGetTSSlots)
   );
 }
 
@@ -2169,6 +2191,7 @@ void FuncChecker::initState(State* s) {
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
   s->clsRefSlots.resize(numClsRefSlots());
+  s->writtenByClsRefGetTSSlots.resize(numClsRefSlots());
   s->stklen = 0;
   s->fpilen = 0;
   s->mbr_live = false;
@@ -2187,6 +2210,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
   to->clsRefSlots = from->clsRefSlots;
+  to->writtenByClsRefGetTSSlots = from->writtenByClsRefGetTSSlots;
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
@@ -2207,13 +2231,16 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
   int save_stklen = cur.stklen;
   int save_fpilen = cur.fpilen;
   auto save_slots = cur.clsRefSlots;
+  auto save_slots_clsrefgetts = cur.writtenByClsRefGetTSSlots;
   cur.stklen = 0;
   cur.fpilen = 0;
   cur.clsRefSlots.reset();
+  cur.writtenByClsRefGetTSSlots.reset();
   auto const ok = checkEdge(b, cur, b->exn);
   cur.stklen = save_stklen;
   cur.fpilen = save_fpilen;
   cur.clsRefSlots = std::move(save_slots);
+  cur.writtenByClsRefGetTSSlots = std::move(save_slots_clsrefgetts);
   return ok;
 }
 
@@ -2457,12 +2484,16 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
 
   // Check class-ref slot state.
-  if (state.clsRefSlots != cur.clsRefSlots) {
+  if (state.clsRefSlots != cur.clsRefSlots ||
+      state.writtenByClsRefGetTSSlots != cur.writtenByClsRefGetTSSlots) {
     ferror(
-      "mismatched class-ref state on edge B{}->B{}, current {} target {}\n",
+      "mismatched class-ref state on edge B{}->B{}, "
+      "current [{}][{}] target [{}][{}]\n",
       b->id, t->id,
       slotsToString(cur.clsRefSlots),
-      slotsToString(state.clsRefSlots)
+      slotsToString(cur.writtenByClsRefGetTSSlots),
+      slotsToString(state.clsRefSlots),
+      slotsToString(state.writtenByClsRefGetTSSlots)
     );
     return false;
   }

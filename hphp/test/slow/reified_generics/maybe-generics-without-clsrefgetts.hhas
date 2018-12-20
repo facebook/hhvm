@@ -1,0 +1,29 @@
+.hh_file 1;
+
+.main {
+  DefCls 0
+  String "f"
+  FPushFunc 0
+  FCall <> 0 1 - "" ""
+  PopR
+  FPushFuncD 1 "var_dump"
+  String "done"
+  FCall <> 1 1 - "" ""
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > f() {
+  .numclsrefslots 1;
+  String "C"
+  ReifiedName 1
+  ClsRefGetC 0
+  FPushCtor 0 0 MaybeGenerics
+  FCall <> 0 1 - "" ""
+  PopR
+  RetC
+}
+
+.class C {
+}

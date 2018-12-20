@@ -79,6 +79,10 @@ type error_level = Minimum | Typical | Maximum
 
 type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
 
+type context =
+  { active_classish     : Syntax.t option
+  }
+
 type env =
   { syntax_tree          : SyntaxTree.t
   ; level                : error_level
@@ -89,6 +93,7 @@ type env =
   ; codegen              : bool
   ; hhi_mode             : bool
   ; parser_options       : ParserOptions.t
+  ; context              : context
   }
 
 let make_env
@@ -100,7 +105,11 @@ let make_env
   (syntax_tree : SyntaxTree.t)
   ~(codegen : bool)
   : env
-  = { syntax_tree
+  =
+    let context =
+      { active_classish = None
+      } in
+    { syntax_tree
     ; level
     ; hhvm_compat_mode
     ; enable_hh_syntax
@@ -109,6 +118,7 @@ let make_env
     ; codegen
     ; hhi_mode
     ; parser_options
+    ; context
     }
 
 and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
@@ -240,9 +250,9 @@ let make_acc
        ; is_in_concurrent_block
        }
 
-let fold_child_nodes ?(cleanup = (fun x -> x)) f node parents acc =
+let fold_child_nodes ?(cleanup = (fun x -> x)) env f node parents acc =
   Syntax.children node
-  |> List.fold_left ~init:acc ~f:(fun acc c -> f acc c (node :: parents))
+  |> List.fold_left ~init:acc ~f:(fun acc c -> f env acc c (node :: parents))
   |> cleanup
 
 (* Turns a syntax node into a list of nodes; if it is a separated syntax
@@ -416,15 +426,10 @@ let token_kind node =
 let is_token_kind node kind =
   (token_kind node) = Some kind
 
-let rec containing_classish_kind parents =
-  match parents with
-  | [] -> None
-  | h :: t ->
-    begin
-      match syntax h with
-      | ClassishDeclaration c -> token_kind c.classish_keyword
-      | _ -> containing_classish_kind t
-    end
+let active_classish_kind context =
+  Option.value_map context.active_classish ~default:None ~f:(function
+    | { syntax = ClassishDeclaration cd; _ } -> token_kind cd.classish_keyword
+    | _ -> None)
 
 let modifiers_of_function_decl_header_exn node =
   match syntax node with
@@ -585,12 +590,8 @@ let methodish_is_native node =
  * node is inside an interface. *)
 let methodish_inside_interface parents =
   match parents with
-  | _ :: _ :: p3 :: _ ->
-    begin match syntax p3 with
-    | ClassishDeclaration { classish_keyword; _ } ->
-      is_token_kind classish_keyword TokenKind.Interface
-    | _ -> false
-    end
+  | _ :: _ :: { syntax = ClassishDeclaration { classish_keyword; _ }; _ } :: _
+    when is_token_kind classish_keyword TokenKind.Interface -> true
   | _ -> false
 
 (* Test whether node is a non-abstract method without a body and not native.
@@ -767,42 +768,36 @@ let rec is_immediately_in_lambda = function
   | _ :: xs -> is_immediately_in_lambda xs
 
 (* Returns the whether the current context is in an active class scope *)
-let is_in_active_class_scope parents =
-  List.exists parents ~f:begin fun node ->
-  match syntax node with
-  | ClassishDeclaration _ -> true
-  | _ -> false
-  end
+let is_in_active_class_scope context = Option.is_some context.active_classish
 
 (* Returns the first ClassishDeclaration node in the list of parents,
- * or None if there isn't one. *)
-let first_parent_classish_node classish_kind parents =
-  List.find_map parents ~f:begin fun node ->
-  match syntax node with
-  | ClassishDeclaration cd
-    when is_token_kind cd.classish_keyword classish_kind -> Some node
+ * or None if there isn't one or classish_kind does not match. *)
+let first_parent_classish_node classish_kind context =
+  Option.value_map context.active_classish ~default:None ~f:(function
+  { syntax = ClassishDeclaration cd; _ } as node ->
+    Some (node, is_token_kind cd.classish_keyword classish_kind)
   | _ -> None
-  end
-
-(* Return, as a string opt, the name of the earliest Class in the list of
- * parents. *)
-let first_parent_class_name parents =
-  let parent_class_decl = first_parent_classish_node TokenKind.Class parents in
-  Option.value_map parent_class_decl ~default:None ~f:begin fun node ->
-    match syntax node with
-    | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
-    | _ -> None (* This arm is never reached  *)
-  end
+  ) |> Option.value_map ~default:None
+         ~f:(function (n, true) -> Some n | _ -> None)
 
 (* Return, as a string opt, the name of the closest enclosing classish entity in
   the list of parents(not just Classes ) *)
-let enclosing_classish_name parents =
-  List.find_map parents ~f:begin fun node ->
-  match syntax node with
-  | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
-  | _ -> None
-  end
+let active_classish_name context =
+  context.active_classish |> Option.value_map ~default:None ~f:(fun node ->
+    match syntax node with
+    | ClassishDeclaration cd -> Syntax.extract_text cd.classish_name
+    | _ -> None
+    )
 
+(* Return, as a string opt, the name of the earliest Class in the list of
+ * parents. *)
+let first_parent_class_name context =
+  context.active_classish |> Option.value_map ~default:None ~f:(fun parent_classish ->
+    match syntax parent_classish with
+    | ClassishDeclaration cd when token_kind cd.classish_keyword = Some TokenKind.Class ->
+      active_classish_name context
+    | _ -> None (* This arm is never reached  *)
+    )
 
 (* Given a classish_ or methodish_ declaration node, returns the modifier node
    from its list of modifiers, or None if there isn't one. *)
@@ -822,20 +817,20 @@ let extract_keyword modifier declaration_node =
 let is_abstract_declaration declaration_node =
   not (Option.is_none (extract_keyword is_abstract declaration_node))
 
-(* Given a list of parents, tests if the immediate classish parent is an
+(* Given a context, tests if the immediate classish parent is an
  * interface. *)
-let is_inside_interface parents =
-  Option.is_some (first_parent_classish_node TokenKind.Interface parents)
+let is_inside_interface context =
+  Option.is_some (first_parent_classish_node TokenKind.Interface context)
 
-(* Given a list of parents, tests if the immediate classish parent is a
+(* Given a context, tests if the immediate classish parent is a
  * trait. *)
-let is_inside_trait parents =
-  Option.is_some (first_parent_classish_node TokenKind.Trait parents)
+let is_inside_trait context =
+  Option.is_some (first_parent_classish_node TokenKind.Trait context)
 
 (* Tests if md_node is either explicitly declared abstract or is
  * defined inside an interface *)
-let is_generalized_abstract_method md_node parents =
-  is_abstract_declaration md_node || is_inside_interface parents
+let is_generalized_abstract_method md_node context =
+  is_abstract_declaration md_node || is_inside_interface context
 
 (* Returns the 'async'-annotation syntax node from the methodish_declaration
  * node. The returned node may have syntax kind 'Missing', but it will only be
@@ -941,14 +936,14 @@ let check_type_hint env node names errors =
   in
     check (names, errors) node
 
-(* Given a node and its parents, tests if the node declares a method that is
+(* Given a node and its context, tests if the node declares a method that is
  * both abstract and async. *)
-let is_abstract_and_async_method md_node parents =
+let is_abstract_and_async_method md_node context _parents =
   let async_node = extract_async_node md_node in
   match async_node with
   | None -> false
   | Some async_node ->
-    is_generalized_abstract_method md_node parents
+    is_generalized_abstract_method md_node context
         && not (is_missing async_node)
 
 let extract_callconv_node node =
@@ -1053,8 +1048,8 @@ let function_declaration_contains_attribute node attribute =
     attribute_specification_contains attr_spec attribute
   | _ -> false
 
-let methodish_contains_memoize env node parents =
-  (is_typechecker env) && is_inside_interface parents
+let methodish_contains_memoize env node _parents =
+  (is_typechecker env) && is_inside_interface env.context
     && (methodish_contains_attribute node SN.UserAttributes.uaMemoize)
 
 let is_some_reactivity_attribute_name name =
@@ -1237,7 +1232,7 @@ let function_declaration_header_memoize_lsb parents errors =
     in e :: errors
   else errors
 
-let special_method_param_errors node parents errors =
+let special_method_param_errors node context errors =
   match syntax node with
   | FunctionDeclarationHeader {function_name; function_parameter_list; _}
     when SSet.mem (String.lowercase @@ text function_name)
@@ -1245,7 +1240,7 @@ let special_method_param_errors node parents errors =
     let params = syntax_to_list_no_separators function_parameter_list in
     let len = List.length params in
     let name = text function_name in
-    let full_name = match first_parent_class_name parents with
+    let full_name = match first_parent_class_name context with
       | None -> name
       | Some c_name -> c_name ^ "::" ^ name ^ "()"
     in
@@ -1336,7 +1331,7 @@ let methodish_errors env node parents errors =
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
     let modifiers = modifiers_of_function_decl_header_exn header_node in
-    let class_name = Option.value (enclosing_classish_name parents)
+    let class_name = Option.value (active_classish_name env.context)
       ~default:"" in
     let method_name = Option.value (extract_function_name
       md.methodish_function_decl_header) ~default:"" in
@@ -1404,7 +1399,7 @@ let methodish_errors env node parents errors =
       let async_annotation = Option.value (extract_async_node node)
         ~default:node in
       produce_error errors
-      (is_abstract_and_async_method node) parents
+      (is_abstract_and_async_method node env.context) parents
       SyntaxError.error2046 async_annotation in
     let errors =
       if is_typechecker env
@@ -1414,7 +1409,7 @@ let methodish_errors env node parents errors =
       else errors in
     let errors =
       special_method_param_errors
-      md.methodish_function_decl_header parents errors in
+      md.methodish_function_decl_header env.context errors in
     let errors =
       produce_error errors
       methodish_multiple_reactivity_annotations node
@@ -1448,8 +1443,8 @@ let is_in_namespace parents =
       when not @@ is_missing namespace_name && text namespace_name <> "" -> true
     | _ -> false)
 
-let class_has_a_construct_method parents =
-  match first_parent_classish_node TokenKind.Class parents with
+let class_has_a_construct_method context =
+  match first_parent_classish_node TokenKind.Class context with
   | Some ({ syntax = ClassishDeclaration
             { classish_body =
               { syntax = ClassishBody
@@ -1464,8 +1459,8 @@ let class_has_a_construct_method parents =
       | _ -> false)
   | _ -> false
 
-let is_in_construct_method parents =
-  match first_parent_function_name parents, first_parent_class_name parents with
+let is_in_construct_method parents context =
+  match first_parent_function_name parents, first_parent_class_name context with
   | _ when is_immediately_in_lambda parents -> false
   | None, _ -> false
   (* Function name is __construct *)
@@ -1473,7 +1468,7 @@ let is_in_construct_method parents =
   (* Function name is same as class name *)
   | Some s1, Some s2 ->
     not @@ is_in_namespace parents &&
-    not @@ class_has_a_construct_method parents &&
+    not @@ class_has_a_construct_method context &&
     String.lowercase s1 = String.lowercase s2
   | _ -> false
 
@@ -1656,7 +1651,7 @@ let parameter_errors env node parents namespace_name names errors =
           node SyntaxError.inout_param_in_async :: errors
         else errors in
         let errors =
-          if is_in_construct_method parents then
+          if is_in_construct_method parents env.context then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
@@ -1732,7 +1727,7 @@ let redeclaration_errors env node parents namespace_name names errors =
                 Full_fidelity_source_text.file_path text in
             let loc = path ^ ":" ^ string_of_int line in
             let err, error_type =
-              match first_parent_class_name parents with
+              match first_parent_class_name env.context with
               | None ->
                 SyntaxError.redeclaration_of_function ~name:function_name ~loc,
                 SyntaxError.RuntimeError
@@ -2281,7 +2276,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
           node (SyntaxError.namespace_not_a_classname)::errors
         else errors in
       let errors = if is_self_or_parent && is_name_class &&
-          not @@ is_in_active_class_scope parents
+          not @@ is_in_active_class_scope env.context
         then make_error_from_node ~error_type:SyntaxError.RuntimeError
           node (SyntaxError.self_or_parent_colon_colon_class_outside_of_class
             @@ text qualifier) :: errors
@@ -2496,7 +2491,7 @@ let check_repeated_properties namespace_name class_name (errors, p_names) prop =
             | _ -> errors, p_names
           end
   | _ -> (errors, p_names)
-let require_errors _env node parents trait_use_clauses errors =
+let require_errors _env node trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
     let name = text p.require_name in
@@ -2512,7 +2507,7 @@ let require_errors _env node parents trait_use_clauses errors =
           (SyntaxError.conflicting_trait_require_clauses ~name) :: errors
     in
     let errors =
-      match (containing_classish_kind parents, req_kind) with
+      match (active_classish_kind _env.context, req_kind) with
       | (Some TokenKind.Interface, Some TokenKind.Implements)
       | (Some TokenKind.Class, Some TokenKind.Implements) ->
         make_error_from_node node SyntaxError.error2030 :: errors
@@ -2763,9 +2758,9 @@ let classish_errors env node parents namespace_name names errors =
     names, errors
   | _ -> names, errors
 
-let class_element_errors env node parents errors =
+let class_element_errors env node errors =
   match syntax node with
-  | ConstDeclaration _ when is_inside_trait parents ->
+  | ConstDeclaration _ when is_inside_trait env.context ->
     make_error_from_node node SyntaxError.const_in_trait :: errors
   | ConstDeclaration { const_visibility; _ }
     when not (is_missing const_visibility) && env.is_hh_file && not env.codegen ->
@@ -3113,7 +3108,7 @@ let check_static_in_initializer initializer_ =
     end
   | _ -> false
 
-let const_decl_errors _env node parents namespace_name names errors =
+let const_decl_errors env node parents namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
@@ -3152,7 +3147,7 @@ let const_decl_errors _env node parents namespace_name names errors =
       | None -> errors
       | Some _ ->
         (* Only error if this is inside a class *)
-        begin match first_parent_class_name parents with
+        begin match first_parent_class_name env.context with
           | None -> errors
           | Some class_name ->
             let full_name = class_name ^ "::" ^ constant_name in
@@ -3167,10 +3162,11 @@ let const_decl_errors _env node parents namespace_name names errors =
   | _ -> names, errors
 
 
-let class_property_visibility_errors _env node parents errors =
+let class_property_visibility_errors env node errors =
   match syntax node with
   | PropertyDeclaration { property_modifiers; _ } ->
-    let first_parent_name = Option.value (first_parent_class_name parents) ~default:"" in
+    let first_parent_name = Option.value (first_parent_class_name env.context)
+      ~default:"" in
     let errors =
       produce_error errors
         declaration_multiple_visibility node
@@ -3520,7 +3516,7 @@ let is_invalid_hack_mode env errors =
     errors
 
 let find_syntax_errors env =
-  let rec folder acc node parents =
+  let rec folder env acc node parents =
     let { errors
         ; namespace_type
         ; names
@@ -3528,6 +3524,14 @@ let find_syntax_errors env =
         ; trait_require_clauses
         ; is_in_concurrent_block
         } = acc in
+    let env =
+      { env with context =
+        match syntax node with
+        | ClassishDeclaration _ ->
+          { active_classish = Some node
+          }
+        | _ -> env.context
+      } in
     let names, errors =
       parameter_errors env node parents namespace_name names errors in
     let trait_require_clauses, names, errors =
@@ -3586,7 +3590,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | RequireClause _ ->
         let trait_require_clauses, errors =
-          require_errors env node parents trait_require_clauses errors in
+          require_errors env node trait_require_clauses errors in
         trait_require_clauses, names, errors
       | ClassishDeclaration _ ->
         let names, errors =
@@ -3595,7 +3599,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | ConstDeclaration _ ->
         let errors =
-          class_element_errors env node parents errors in
+          class_element_errors env node errors in
         trait_require_clauses, names, errors
       | AliasDeclaration _ ->
         let names, errors = alias_errors env node namespace_name names errors in
@@ -3618,7 +3622,7 @@ let find_syntax_errors env =
             (namespace_name = global_namespace_name) names errors in
         trait_require_clauses, names, errors
       | PropertyDeclaration _ ->
-        let errors = class_property_visibility_errors env node parents errors in
+        let errors = class_property_visibility_errors env node errors in
         let errors = class_reified_param_errors node parents errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
@@ -3665,7 +3669,7 @@ let find_syntax_errors env =
           namespace_name trait_require_clauses
           false in
       (* analyze the body of lambda block *)
-      let acc1 = fold_child_nodes folder node parents acc1 in
+      let acc1 = fold_child_nodes env folder node parents acc1 in
       (* adjust is_in_concurrent_block in final result *)
       make_acc
         acc acc1.errors acc1.namespace_type acc1.names
@@ -3795,7 +3799,7 @@ let find_syntax_errors env =
           namespace_name trait_require_clauses
           true in
       (* analyze the body of concurrent block *)
-      let acc1 = fold_child_nodes folder node parents acc1 in
+      let acc1 = fold_child_nodes env folder node parents acc1 in
       (* adjust is_in_concurrent_block in final result *)
       make_acc
         acc acc1.errors acc1.namespace_type acc1.names
@@ -3819,7 +3823,7 @@ let find_syntax_errors env =
           namespace_name empty_trait_require_clauses
           is_in_concurrent_block
       in
-      let acc1 = fold_child_nodes folder node parents acc1 in
+      let acc1 = fold_child_nodes env folder node parents acc1 in
       (* add newly declared global functions to the old set of names *)
       let old_names =
         {acc.names with t_functions =
@@ -3846,7 +3850,7 @@ let find_syntax_errors env =
           namespace_name empty_trait_require_clauses
           is_in_concurrent_block
       in
-      fold_child_nodes folder node parents acc
+      fold_child_nodes env folder node parents acc
     | ClassishDeclaration _
     | AnonymousClass _ ->
       (* Reset the trait require clauses *)
@@ -3865,7 +3869,7 @@ let find_syntax_errors env =
           namespace_name empty_trait_require_clauses
           is_in_concurrent_block
       in
-      fold_child_nodes ~cleanup folder node parents acc
+      fold_child_nodes ~cleanup env folder node parents acc
     | _ ->
       let acc =
         make_acc
@@ -3873,12 +3877,12 @@ let find_syntax_errors env =
           namespace_name trait_require_clauses
           is_in_concurrent_block
       in
-      fold_child_nodes folder node parents acc in
+      fold_child_nodes env folder node parents acc in
   let errors =
     if is_typechecker env then is_invalid_hack_mode env []
     else []
   in
-  let acc = fold_child_nodes folder (SyntaxTree.root env.syntax_tree) []
+  let acc = fold_child_nodes env folder (SyntaxTree.root env.syntax_tree) []
     { errors
     ; namespace_type = Unspecified
     ; names = empty_names

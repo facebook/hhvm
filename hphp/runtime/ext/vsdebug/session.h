@@ -44,6 +44,7 @@ struct DebuggerSession final {
     const std::string& startupDoc,
     const std::string& sandboxUser,
     const std::string& sandboxName,
+    const std::string& debuggerSessionAuth,
     bool displayStartupMsg
   );
 
@@ -88,6 +89,8 @@ struct DebuggerSession final {
   void setCachedVariableObject(const int key, const folly::dynamic& value);
   void clearCachedVariable(const int key);
 
+  std::string getDebuggerSessionAuth();
+
   static constexpr int kCachedVariableKeyAll = -1;
   static constexpr int kCachedVariableKeyServerConsts = 1;
   static constexpr int kCachedVariableKeyUserConsts = 2;
@@ -121,6 +124,10 @@ private:
 
   AsyncFunc<DebuggerSession> m_dummyThread;
   std::string m_dummyStartupDoc;
+
+  // Auth token provided by the attached debugger client.
+  // Note: it is only safe to read this from the dummy request thread.
+  std::string m_debuggerSessionAuth;
 
   // When a request is paused, the backend must maintain state about scopes,
   // frames and variable IDs sent to the front end. The IDs are globally

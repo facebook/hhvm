@@ -65,6 +65,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
 
+  const auto debuggerSessionAuthToken =
+    tryGetString(args, "debuggerSessionAuthToken", emptyString);
+
   if (!logFilePath.empty()) {
     // Re-open logging using the file path specified by the client.
     int result = VSDebugLogger::InitializeLogging(logFilePath);
@@ -80,11 +83,20 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
     }
   }
 
+  // Obviously don't log the auth token itself, but log whether or not we've
+  // got one.
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Client provided an auth token? %s",
+    debuggerSessionAuthToken.empty() ? "NO" : "YES"
+  );
+
   if (!startupDoc.empty()) {
     m_debugger->startDummyRequest(
       startupDoc,
       sandboxUser,
       sandboxName,
+      debuggerSessionAuthToken,
       displayStartupMsg
     );
   } else {
@@ -92,6 +104,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
       emptyString,
       sandboxUser,
       sandboxName,
+      debuggerSessionAuthToken,
       displayStartupMsg
     );
   }

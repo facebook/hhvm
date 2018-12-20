@@ -58,6 +58,11 @@ String HHVM_FUNCTION(hphp_debug_session_auth) {
   TRACE(5, "in f_hphp_debug_session_auth()\n");
   if (auto proxy = Debugger::GetProxy()) {
     return String(proxy->requestSessionAuth());
+  } else {
+    auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+    if (debugger != nullptr) {
+      return String(debugger->getDebuggerSessionAuth());
+    }
   }
 
   return String();

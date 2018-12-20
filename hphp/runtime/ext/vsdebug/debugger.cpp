@@ -299,6 +299,16 @@ void Debugger::setClientInitialized() {
   }
 }
 
+std::string Debugger::getDebuggerSessionAuth() {
+  Lock lock(m_lock);
+
+  if (!clientConnected() || getCurrentThreadId() != kDummyTheadId) {
+    return "";
+  }
+
+  return m_session->getDebuggerSessionAuth();
+}
+
 request_id_t Debugger::getCurrentThreadId() {
   Lock lock(m_lock);
 
@@ -1359,6 +1369,7 @@ void Debugger::startDummyRequest(
   const std::string& startupDoc,
   const std::string& sandboxUser,
   const std::string& sandboxName,
+  const std::string& debuggerSessionAuthToken,
   bool displayStartupMsg
 ) {
   Lock lock(m_lock);
@@ -1371,6 +1382,7 @@ void Debugger::startDummyRequest(
     startupDoc,
     sandboxUser,
     sandboxName,
+    debuggerSessionAuthToken,
     displayStartupMsg
   );
 }

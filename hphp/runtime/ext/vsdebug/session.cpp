@@ -58,10 +58,13 @@ void DebuggerSession::startDummyRequest(
   const std::string& startupDoc,
   const std::string& sandboxUser,
   const std::string& sandboxName,
+  const std::string& debuggerSessionAuth,
   bool displayStartupMsg
 ) {
   m_sandboxUser = sandboxUser;
   m_sandboxName = sandboxName;
+  m_debuggerSessionAuth = debuggerSessionAuth;
+
   m_dummyStartupDoc = File::TranslatePath(startupDoc).data();
   m_displayStartupMsg = displayStartupMsg;
 
@@ -69,6 +72,11 @@ void DebuggerSession::startDummyRequest(
   std::atomic_thread_fence(std::memory_order_release);
 
   m_dummyThread.start();
+}
+
+std::string DebuggerSession::getDebuggerSessionAuth() {
+  assert(m_debugger->getCurrentThreadId() == Debugger::kDummyTheadId);
+  return m_debuggerSessionAuth;
 }
 
 void DebuggerSession::invokeDummyStartupDocument() {

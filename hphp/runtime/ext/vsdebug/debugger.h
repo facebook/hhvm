@@ -300,6 +300,7 @@ struct Debugger final {
     const std::string& startupDoc,
     const std::string& sandboxUser,
     const std::string& sandboxName,
+    const std::string& debuggerSessionAuth,
     bool displayStartupMsg
   );
 
@@ -308,6 +309,12 @@ struct Debugger final {
 
   // Returns the synthetic request ID for the current request thread.
   request_id_t getCurrentThreadId();
+
+  // Returns the client-provided authentication string to use for
+  // the dummy request, if any.  Returns empty string if called from
+  // any thread other than the dummy request thread or if there is no
+  // debugger client attached.
+  std::string getDebuggerSessionAuth();
 
   // Sends a stopped event to the client.
   void sendStoppedEvent(

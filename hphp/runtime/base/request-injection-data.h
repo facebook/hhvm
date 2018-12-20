@@ -22,7 +22,9 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"
+#include "hphp/util/process.h"
 
+#include <array>
 #include <atomic>
 #include <cassert>
 #include <cinttypes>
@@ -151,6 +153,17 @@ struct RequestInjectionData {
    */
   void clearFlag(SurpriseFlag);
   void setFlag(SurpriseFlag);
+
+  /*
+   * Deliver a "POSIX signal" through the SignaledFlag.
+   */
+  void sendSignal(int signum);
+  /*
+   * Get the next pending signal for this request, and clear the corresponding
+   * bit to avoid reentering in the signal handler.  When there is no pending
+   * signal, return 0.
+   */
+  int getAndClearNextPendingSignal();
 
   /*
    * Flags for rquest-level OOM killer.  The `m_hostOutOfMemory` flag is set on
@@ -357,6 +370,9 @@ private:
   bool m_htmlErrors{false};
   bool m_safeFileAccess{false};
   bool m_logFunctionCalls{false};
+
+  static constexpr size_t kSigMaskWords = (Process::kNSig + 63) / 64;
+  std::array<std::atomic<uint64_t>, kSigMaskWords> m_signalMask{};
 
   /*
    * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to

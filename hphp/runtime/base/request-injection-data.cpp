@@ -678,6 +678,35 @@ void RequestInjectionData::setFlag(SurpriseFlag flag) {
   m_sflagsAndStkPtr->fetch_or(flag);
 }
 
+void RequestInjectionData::sendSignal(int signum) {
+  if (signum <= 0 || signum >= Process::kNSig) {
+    Logger::Warning("%d is not a valid signal", signum);
+    return;
+  }
+  const unsigned index = signum / 64;
+  const unsigned offset = signum % 64;
+  const uint64_t mask = 1ull << offset;
+  m_signalMask[index].fetch_or(mask, std::memory_order_release);
+  setFlag(SignaledFlag);
+}
+
+int RequestInjectionData::getAndClearNextPendingSignal() {
+  // We cannot look at the surprise flag because it may have already been
+  // cleared in handle_request_surprise().
+  for (unsigned i = 0; i < m_signalMask.size(); ++i) {
+    auto& chunk = m_signalMask[i];
+    if (auto value = chunk.load(std::memory_order_acquire)) {
+      unsigned index = folly::findFirstSet(value);
+      assertx(index);
+      --index;             // folly::findFirstSet() returns 1-64 instead of 0-63
+      // Clear the bit.
+      chunk.fetch_and(~(1ull << index), std::memory_order_relaxed);
+      return i * 64 + index;
+    }
+  }
+  return 0;                             // no pending signal
+}
+
 void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
   int64_t newInt = strtoll(limit.begin(), nullptr, 10);
   if (newInt <= 0) {

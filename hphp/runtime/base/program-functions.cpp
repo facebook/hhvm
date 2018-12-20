@@ -103,6 +103,7 @@
 #include "hphp/util/service-data.h"
 #include "hphp/util/shm-counter.h"
 #include "hphp/util/stack-trace.h"
+#include "hphp/util/sync-signal.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/type-scan.h"
 
@@ -2049,6 +2050,8 @@ static int execute_program_impl(int argc, char** argv) {
     int ret = 0;
     hphp_process_init();
     SCOPE_EXIT { hphp_process_exit(); };
+
+    block_sync_signals_and_start_handler_thread();
 
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
         !RuntimeOption::EvalUnixServerPath.empty() &&

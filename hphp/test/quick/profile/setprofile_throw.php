@@ -46,7 +46,7 @@ function func_entry() {
   $xe = new DtorObj(0xe);
   $xf = new DtorObj(0xf);
 
-  posix_kill(posix_getpid(), 10);
+  posix_kill(posix_getpid(), SIGUSR1);
 
   // Surprise flags are checked on function entry.
   func_to_enter();
@@ -72,7 +72,7 @@ function func_backward() {
   $xe = new DtorObj(0xe);
   $xf = new DtorObj(0xf);
 
-  posix_kill(posix_getpid(), 10);
+  posix_kill(posix_getpid(), SIGUSR1);
 
   // Surprise flags are checked on backward branch.
   for ($i = 0; $i < 2; ++$i) {}
@@ -88,7 +88,7 @@ function main() {
 // Test throwing exceptions from surprise flags things (OOM, signals,
 // and req timeout all work this way).
 
-  pcntl_signal(10, 'signal_thrower');
+  pcntl_signal(SIGUSR1, 'signal_thrower');
 
   try { func_entry(); } catch (Exception $x) { echo "caught\n"; }
   try { func_backward(); } catch (Exception $x) { echo "caught\n"; }

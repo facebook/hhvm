@@ -91,6 +91,13 @@ void RequestInfo::ExecutePerRequest(std::function<void(RequestInfo*)> f) {
   }
 }
 
+void RequestInfo::BroadcastSignal(int signo) {
+  ExecutePerRequest([signo] (RequestInfo* t) {
+      t->m_reqInjectionData.sendSignal(signo);
+    }
+  );
+}
+
 int RequestInfo::SetPendingGCForAllOnRequest() {
   int cnt = 0;
   ExecutePerRequest( [&cnt](RequestInfo* t) {

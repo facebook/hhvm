@@ -1,0 +1,6 @@
+do some work in child process
+parent: I received SIGUSR2, switching to new handler
+parent: sending SIGUSR2 to child as ack
+child: I received SIGUSR2...
+child: sending SIGUSR1 to inform parent
+parent: new handler invoked

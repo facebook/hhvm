@@ -36,16 +36,18 @@
 #include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/sync-signal.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct POSIXExtension final : Extension {
-  POSIXExtension() : Extension("posix", NO_EXTENSION_VERSION_YET) {}
+  POSIXExtension() : Extension("posix", "1.0") {}
   void moduleInit() override {
     HHVM_RC_INT(POSIX_S_IFMT, S_IFMT);
     HHVM_RC_INT(POSIX_S_IFSOCK, S_IFSOCK);
@@ -443,6 +445,14 @@ bool HHVM_FUNCTION(posix_isatty,
 bool HHVM_FUNCTION(posix_kill,
                    int pid,
                    int sig) {
+  if (pid == 0 || pid == getpid()) {
+    if (is_sync_signal(sig)) {
+      // Only send to the current thread, and invoke signal handlers in PHP, if
+      // any.
+      RID().sendSignal(sig);
+      return true;
+    }
+  }
   return kill(pid, sig) >= 0;
 }
 

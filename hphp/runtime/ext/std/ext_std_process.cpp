@@ -53,10 +53,6 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/repo.h"
 
-#if !defined(_NSIG) && defined(NSIG)
-# define _NSIG NSIG
-#endif
-
 #ifndef _WIN32
 # define MAYBE_WIFEXITED(var) if (WIFEXITED(var)) { var = WEXITSTATUS(var); }
 #else

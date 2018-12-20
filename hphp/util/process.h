@@ -28,6 +28,7 @@
 #endif
 
 #include <pthread.h>
+#include <signal.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,17 @@ struct ProcStatus {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Process {
+  // The maximum supported signal number is kNSig - 1.
+  static constexpr unsigned kNSig =
+#if defined(NSIG)
+    NSIG
+#elif defined(_NSIG)
+    _NSIG
+#else
+    64
+#endif
+    ;
+
   // Cached process statics
   static std::string HostName;
   static std::string CurrentWorkingDirectory;

@@ -56,6 +56,11 @@ struct RequestInfo {
 
   static void GetExecutionSamples(std::map<Executing, int>& counts);
   static void ExecutePerRequest(std::function<void(RequestInfo*)> f);
+
+  /*
+   * Send POSIX signal to all worker threads.
+   */
+  static void BroadcastSignal(int signo);
   /*
    * Only on-request contexts should set up PendingGCFlag
    * Returns number of on-request contexts.

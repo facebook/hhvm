@@ -24,20 +24,16 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
+#include <folly/String.h>
+
 #include <fcntl.h>
 #include <signal.h>
 
-#include <folly/String.h>
-
-#include "hphp/util/hugetlb.h"
-#include "hphp/util/light-process.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
@@ -50,10 +46,11 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
-
-#if !defined(_NSIG) && defined(NSIG)
-# define _NSIG NSIG
-#endif
+#include "hphp/util/light-process.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/sync-signal.h"
 
 extern char **environ;
 
@@ -258,6 +255,7 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
   pid_t pid = fork();
   Repo::postfork(pid);
   if (pid == 0) {
+    postfork_restart_handler_thread();
     compilers_detach_after_fork();
   }
   return pid;
@@ -280,7 +278,7 @@ Variant HHVM_FUNCTION(pcntl_getpriority,
     switch (errno) {
     case ESRCH:
       raise_warning("Error %d: No process was located using the given "
-                      "parameters", errno);
+                    "parameters", errno);
       break;
     case EINVAL:
       raise_warning("Error %d: Invalid identifier flag", errno);
@@ -309,19 +307,19 @@ bool HHVM_FUNCTION(pcntl_setpriority,
     switch (errno) {
     case ESRCH:
       raise_warning("Error %d: No process was located using the given "
-                      "parameters", errno);
+                    "parameters", errno);
       break;
     case EINVAL:
       raise_warning("Error %d: Invalid identifier flag", errno);
       break;
     case EPERM:
       raise_warning("Error %d: A process was located, but neither its "
-                      "effective nor real user ID matched the effective "
-                      "user ID of the caller", errno);
+                    "effective nor real user ID matched the effective "
+                    "user ID of the caller", errno);
       break;
     case EACCES:
       raise_warning("Error %d: Only a super user may attempt to increase "
-                      "the process priority", errno);
+                    "the process priority", errno);
       break;
     default:
       raise_warning("Unknown error %d has occurred", errno);
@@ -332,90 +330,84 @@ bool HHVM_FUNCTION(pcntl_setpriority,
   return true;
 }
 
-/* php_signal using sigaction is derived from Advanced Programing
- * in the Unix Environment by W. Richard Stevens p 298. */
-typedef void Sigfunc(int);
-static Sigfunc *php_signal(int signo, Sigfunc *func, bool restart) {
-  struct sigaction act,oact;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = 0;
-  if (signo == SIGALRM || (!restart)) {
-#ifdef SA_INTERRUPT
-    act.sa_flags |= SA_INTERRUPT; /* SunOS */
-#endif
-  } else {
-#ifdef SA_RESTART
-    act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
-#endif
-  }
-  if (sigaction(signo, &act, &oact) < 0)
-    return SIG_ERR;
 
-  return oact.sa_handler;
+static rds::Link<Array, rds::Mode::Normal> g_signal_handlers;
+
+static void on_kill_cli(int signo) {
+  RequestInfo::BroadcastSignal(signo);
+  if (!RuntimeOption::CliHasCustomSIGTERMHandler) {
+    // Let the default handler deal with it.
+    reset_sync_signals();
+    raise(signo);
+    pthread_exit(nullptr);
+  }
 }
 
-/* Our custom signal handler that calls the appropriate php_function */
-struct SignalHandlers final : RequestEventHandler {
-  SignalHandlers() {
-    memset(signaled, 0, sizeof(signaled));
-    pthread_sigmask(SIG_SETMASK, NULL, &oldSet);
-  }
-  void requestInit() override {
-    handlers.reset();
-    // restore the old signal mask, thus unblock those that should be
-    pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
-    inited.store(true);
-  }
-  void requestShutdown() override {
-    // block all signals
-    sigset_t set;
-    sigfillset(&set);
-    if (RuntimeOption::EvalPerfMemEventRequestFreq != 0) {
-      sigdelset(&set, SIGIO);
-    }
-    pthread_sigmask(SIG_BLOCK, &set, NULL);
-
-    handlers.reset();
-    inited.store(false);
-  }
-
-  Array handlers;
-  int signaled[_NSIG];
-  sigset_t oldSet;
-  std::atomic<bool> inited{};
-};
-IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
+static void setup_sync_signals() {
+  sync_signal(SIGTERM, on_kill_cli);
+  sync_signal(SIGALRM, on_kill_cli);
+  sync_signal(SIGUSR1, RequestInfo::BroadcastSignal);
+  sync_signal(SIGUSR2, RequestInfo::BroadcastSignal);
+}
+static InitFiniNode init(setup_sync_signals, InitFiniNode::When::ProcessInit);
 
 static bool signalHandlersInited() {
-  return s_signal_handlers.getInited() && s_signal_handlers->inited.load();
+  return g_signal_handlers.bound() && g_signal_handlers.isInit();
 }
 
-static void pcntl_signal_handler(int signo) {
-  if (signo > 0 && signo < _NSIG && signalHandlersInited()) {
-    s_signal_handlers->signaled[signo] = 1;
-    setSurpriseFlag(SignaledFlag);
-  }
-}
-
-struct SignalHandlersStaticInitializer {
-  SignalHandlersStaticInitializer() {
-    signal(SIGALRM, pcntl_signal_handler);
-    signal(SIGUSR1, pcntl_signal_handler);
-    signal(SIGUSR2, pcntl_signal_handler);
-  }
-};
-static SignalHandlersStaticInitializer s_signal_handlers_initializer;
-
+// This is called automatically in handle_request_surprise().  So if you are
+// using HHVM, you don't really need to call this.  Even if you do, chances are
+// that signal handlers are already called automatically before your invokation.
 bool HHVM_FUNCTION(pcntl_signal_dispatch) {
-  if (!signalHandlersInited()) return true;
-  int *signaled = s_signal_handlers->signaled;
-  for (int i = 0; i < _NSIG; i++) {
-    if (signaled[i]) {
-      signaled[i] = 0;
-      if (s_signal_handlers->handlers.exists(i)) {
-        vm_call_user_func(s_signal_handlers->handlers[i],
-                          make_vec_array(i));
+  while (int signum = RID().getAndClearNextPendingSignal()) {
+    // Even if no signal handler is registered, we still try to finish this
+    // loop, to ignore all pending signals. This way, when signal handlers are
+    // registered later, they won't have to deal with ancient signals.
+    if (!signalHandlersInited()) continue;
+    if (g_signal_handlers->exists(signum)) {
+      auto const handler = (*g_signal_handlers)[signum];
+      // We generally catch any exception a handler might throw, except
+      // ExitException and ResourceExceededException.
+      try {
+        vm_call_user_func(handler, make_packed_array(signum));
+      } catch (const ExitException& e) {
+        throw;
+      } catch (const ResourceExceededException& e) {
+        throw;
+      } catch (const Object& e) {
+        std::string what;
+        try {
+          what = e.toString().c_str();
+        } catch (...) {
+          what = "(unable to call toString())";
+        }
+        std::string handlerName = "signal handler";
+        try {
+          auto const name = handler.toString().c_str();
+          handlerName += folly::sformat(" '{}'", name);
+        } catch (...) {
+        }
+        raise_warning("%s threw %s",
+                      handlerName.c_str(), what.c_str());
+
+      } catch (std::exception& e) {
+        std::string handlerName = "signal handler";
+        try {
+          auto const name = handler.toString().c_str();
+          handlerName += folly::sformat(" '{}'", name);
+        } catch (...) {
+        }
+        raise_warning("%s threw an exception: %s",
+                      handlerName.c_str(), e.what());
+      } catch (...) {
+        std::string handlerName = "signal handler";
+        try {
+          auto const name = handler.toString().c_str();
+          handlerName += folly::sformat(" '{}'", name);
+        } catch (...) {
+        }
+        raise_warning("%s threw and unknown exception",
+                      handlerName.c_str());
       }
     }
   }
@@ -432,25 +424,25 @@ bool HHVM_FUNCTION(pcntl_signal,
     if (handle != (long)SIG_DFL && handle != (long)SIG_IGN) {
       raise_warning("Invalid value for handle argument specified");
     }
-    if (php_signal(signo, (Sigfunc *)handle, restart_syscalls) == SIG_ERR) {
-      raise_warning("Error assigning signal");
-      return false;
-    }
+    // Uninstall previous handler for the signal, if any.
+    if (signalHandlersInited()) g_signal_handlers->remove(signo);
     return true;
   }
 
   if (!is_callable(handler)) {
-    raise_warning("%s is not a callable function name error",
-                    handler.toString().data());
+    raise_warning("%s is not a callable function name",
+                  handler.toString().data());
     return false;
   }
 
-  s_signal_handlers->handlers.set(signo, handler);
-
-  if (php_signal(signo, pcntl_signal_handler, restart_syscalls) == SIG_ERR) {
-    raise_warning("Error assigning signal");
-    return false;
+  if (!g_signal_handlers.bound()) {
+    g_signal_handlers.bind(rds::Mode::Normal);
   }
+  if (!g_signal_handlers.isInit()) {
+    g_signal_handlers.initWith(empty_array());
+  }
+  g_signal_handlers->set(signo, handler);
+
   return true;
 }
 
@@ -465,6 +457,12 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
 
   if (how != SIG_BLOCK && how != SIG_UNBLOCK && how != SIG_SETMASK) {
     return invalid_argument();
+  }
+
+  if (RuntimeOption::ServerExecutionMode()) {
+    // Forbid manipulation of signal masks in server mode.
+    raise_warning("pcntl_sigprocmask() not supported in server mode");
+    return false;
   }
 
   sigset_t cset;
@@ -483,7 +481,7 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
   }
 
   auto aoldset = Array::Create();
-  for (int signum = 1; signum < NSIG; ++signum) {
+  for (int signum = 1; signum < Process::kNSig; ++signum) {
     auto const result = sigismember(&coldset, signum);
     if (result == 1) {
       aoldset.append(signum);

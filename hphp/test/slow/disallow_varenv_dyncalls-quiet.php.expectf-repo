@@ -94,30 +94,6 @@ int(200)
 string(3) "101"
 string(3) "201"
 test_extract_dyncall() done
-Running test_extract_cuf() #1....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_cuf() done
-Running test_extract_cuf() #2....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_cuf() done
-Running test_extract_cuf_array() #1....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_cuf_array() done
-Running test_extract_cuf_array() #2....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_cuf_array() done
 Running test_extract_map() #1....
 int(100)
 int(200)
@@ -143,18 +119,22 @@ string(3) "101"
 string(3) "201"
 test_extract_walk() done
 Running test_extract_errors() #1....
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 106
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 107
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 108
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 109
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 111
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
+extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
+extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
 test_extract_errors() done
 Running test_extract_errors() #2....
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 106
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 107
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 108
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 109
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 111
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
+extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
+extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
 test_extract_errors() done
 Running test_parse_str_dyncall() #1....
 int(100)
@@ -217,14 +197,14 @@ string(3) "101"
 string(3) "201"
 test_parse_str_walk() done
 Running test_parse_str_errors() #1....
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 171
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 172
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 173
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
 test_parse_str_errors() done
 Running test_parse_str_errors() #2....
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 171
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 172
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 173
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
 test_parse_str_errors() done
 Running test_framemeta_dyncall() #1....
 int(100)
@@ -259,14 +239,14 @@ int(100)
 string(8) "metadata"
 test_framemeta_map() done
 Running test_framemeta_errors() #1....
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 214
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 215
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 217
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
+HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
 test_framemeta_errors() done
 Running test_framemeta_errors() #2....
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 214
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 215
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 217
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
+HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
 test_framemeta_errors() done
 Running test_getargs_dyncall() #1....
 array(3) {
@@ -329,21 +309,21 @@ array(3) {
 }
 test_getargs_cuf_array() done
 Running test_getargs_errors() #1....
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 254
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 256
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
+func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
 test_getargs_errors() done
 Running test_getargs_errors() #2....
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 254
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 256
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
+func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
 test_getargs_errors() done
 Running test_assert_dyncall_pass() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 263
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 244
 Running test_assert_dyncall_pass() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 263
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 244
 Running test_assert_dyncall_pass2() #1....
 test_assert_dyncall_pass2() done
 Running test_assert_dyncall_pass2() #2....
@@ -351,25 +331,25 @@ test_assert_dyncall_pass2() done
 Running test_assert_dyncall_fail() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 276
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 257
 Running test_assert_dyncall_fail() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 276
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 257
 Running test_assert_dyncall_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 282
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
 test_assert_dyncall_fail2() done
 Running test_assert_dyncall_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 282
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
 test_assert_dyncall_fail2() done
 Running test_assert_cuf_pass() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 289
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 270
 Running test_assert_cuf_pass() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 289
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 270
 Running test_assert_cuf_pass2() #1....
 test_assert_cuf_pass2() done
 Running test_assert_cuf_pass2() #2....
@@ -377,25 +357,25 @@ test_assert_cuf_pass2() done
 Running test_assert_cuf_fail() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 302
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 283
 Running test_assert_cuf_fail() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 302
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 283
 Running test_assert_cuf_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 308
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
 test_assert_cuf_fail2() done
 Running test_assert_cuf_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 308
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
 test_assert_cuf_fail2() done
 Running test_assert_cuf_array_pass() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 315
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 296
 Running test_assert_cuf_array_pass() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 315
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 296
 Running test_assert_cuf_array_pass2() #1....
 test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_pass2() #2....
@@ -403,27 +383,27 @@ test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_fail() #1....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 328
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 309
 Running test_assert_cuf_array_fail() #2....
 int(100)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 328
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 309
 Running test_assert_cuf_array_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 334
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
 test_assert_cuf_array_fail2() done
 Running test_assert_cuf_array_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 334
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
 test_assert_cuf_array_fail2() done
 Running test_assert_map_pass() #1....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 342
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 323
 Running test_assert_map_pass() #2....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 342
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 323
 Running test_assert_map_pass2() #1....
 test_assert_map_pass2() done
 Running test_assert_map_pass2() #2....
@@ -432,30 +412,30 @@ Running test_assert_map_fail() #1....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 356
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 337
 Running test_assert_map_fail() #2....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 356
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 337
 Running test_assert_map_fail2() #1....
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 362
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 362
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
 test_assert_map_fail2() done
 Running test_assert_map_fail2() #2....
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 362
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 362
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
 test_assert_map_fail2() done
 Running test_assert_walk_pass() #1....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 371
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 352
 Running test_assert_walk_pass() #2....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 371
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 352
 Running test_assert_walk_pass2() #1....
 test_assert_walk_pass2() done
 Running test_assert_walk_pass2() #2....
@@ -464,12 +444,12 @@ Running test_assert_walk_fail() #1....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 387
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 368
 Running test_assert_walk_fail() #2....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 387
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 368
 Running test_assert_walk_fail2() #1....
 test_assert_walk_fail2() done
 Running test_assert_walk_fail2() #2....
@@ -478,19 +458,19 @@ Running test_assert_chained() #1....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 402
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 384
 Running test_assert_chained() #2....
 int(100)
 int(200)
 
-Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 402
+Fatal error: assert() is not supported: assert with strings argument in RepoAuthoritative mode in %s/test/slow/disallow_varenv_dyncalls.inc on line 384
 Running test_assert_errors() #1....
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 408
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 409
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 410
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
 test_assert_errors() done
 Running test_assert_errors() #2....
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 408
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 409
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 410
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
 test_assert_errors() done

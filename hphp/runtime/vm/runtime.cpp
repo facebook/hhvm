@@ -250,9 +250,7 @@ void raiseParamRefMismatchForFuncName(const StringData* fname, uint32_t index,
       formatParamRefMismatch(fname->data(), index, funcByRef));
   }
 
-  if (RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
-    raise_warning(formatParamRefMismatch(fname->data(), index, funcByRef));
-  }
+  raise_warning(formatParamRefMismatch(fname->data(), index, funcByRef));
 }
 
 void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {

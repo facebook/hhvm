@@ -56,27 +56,8 @@ function test_extract_dyncall() {
   var_dump($var1, $var2);
 
   $f = 'extract';
-  $f(['var1' => '101', 'var2' => '201']);
-  var_dump($var1, $var2);
-}
-
-function test_extract_cuf() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'extract';
-  call_user_func($f, ['var1' => '101', 'var2' => '201']);
-  var_dump($var1, $var2);
-}
-
-function test_extract_cuf_array() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'extract';
-  call_user_func_array($f, [['var1' => '101', 'var2' => '201']]);
+  $arg = ['var1' => '101', 'var2' => '201'];
+  $f(&$arg);
   var_dump($var1, $var2);
 }
 
@@ -399,7 +380,8 @@ function test_assert_chained() {
   $var2 = 200;
   var_dump($var1, $var2);
   $f = 'assert';
-  call_user_func($f, 'extract([\'var1\' => \'300\', \'var2\' => \'400\']) || true');
+  $args = ['var1' => '300', 'var2' => '400'];
+  call_user_func($f, 'extract(&$args) || true');
   var_dump($var1, $var2);
 }
 
@@ -435,8 +417,6 @@ function run_tests() {
     'test_compact_errors',
 
     'test_extract_dyncall',
-    'test_extract_cuf',
-    'test_extract_cuf_array',
     'test_extract_map',
     'test_extract_walk',
     'test_extract_errors',

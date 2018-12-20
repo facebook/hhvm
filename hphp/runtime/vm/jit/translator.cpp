@@ -1175,10 +1175,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
     return true;
 
   case Op::FHandleRefMismatch:
-    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any || (
-      !RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
-      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch
-    );
+    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
   }
 
   always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));

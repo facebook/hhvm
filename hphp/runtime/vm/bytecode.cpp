@@ -5968,11 +5968,8 @@ OPTBLD_INLINE void implFIsParamByRef(const Func* func, uint32_t paramId,
                                      FPassHint hint) {
   auto const byRef = func->byRef(paramId);
 
-  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch ||
-      RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
-    if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
-      raiseParamRefMismatchForFunc(func, paramId);
-    }
+  if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
+    raiseParamRefMismatchForFunc(func, paramId);
   }
 
   vmStack().pushBool(byRef);

@@ -1491,11 +1491,6 @@ SSATmp* ldPreLiveFunc(IRGS& env) {
 }
 
 void handleRefMismatch(IRGS& env, SSATmp* func, uint32_t paramId) {
-  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
-      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
-    return;
-  }
-
   gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
 }
 
@@ -1590,10 +1585,6 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
 void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
                             const StringData* funcName) {
   assertx(hint != FPassHint::Any);
-  if (!RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch &&
-      !RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
-    return;
-  }
 
   gen(
     env,

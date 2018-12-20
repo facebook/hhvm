@@ -41,164 +41,6 @@ TRACE_SET_MOD(factparse)
 namespace HPHP {
 namespace {
 
-template<class T>
-void parse_file(
-  const std::string& root,
-  const char* path,
-  bool allowHipHopSyntax,
-  typename T::result_type& res,
-  const typename T::state_type& state
-) {
-  T::mark_failed(res);
-  std::string cleanPath;
-  if (FileUtil::isAbsolutePath(path)) {
-    cleanPath = path;
-  } else if (root.empty()) {
-    cleanPath = path;
-  } else {
-    cleanPath =
-      folly::sformat("{}{}{}", root, FileUtil::getDirSeparator(), path);
-  }
-
-  struct stat st;
-  auto w = Stream::getWrapperFromURI(StrNR(cleanPath));
-  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
-    if (w->stat(cleanPath.c_str(), &st)) {
-      return;
-    }
-    if (S_ISDIR(st.st_mode)) {
-      return;
-    }
-    const auto f = w->open(StrNR(cleanPath), "r", 0, nullptr);
-    if (!f) return;
-    auto str = f->read();
-    T::parse_file_impl(cleanPath,
-      allowHipHopSyntax, str.data(), str.size(), res, state);
-  } else {
-    // It would be nice to have an atomic stat + open operation here but this
-    // doesn't seem to be possible with STL in a portable way.
-    if (stat(cleanPath.c_str(), &st)) {
-      return;
-    }
-    if (S_ISDIR(st.st_mode)) {
-      return;
-    }
-    T::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0, res, state);
-  }
-}
-
-template<class T>
-void facts_parse_sequential(
-  const std::string& root,
-  const Array& pathList,
-  DArrayInit& outResArr,
-  bool allowHipHopSyntax
-) {
-  const auto state = T::init_state();
-  for (auto i = 0; i < pathList->size(); ++i) {
-    typename T::result_type workerResult;
-    auto path = tvCastToString(pathList->atPos(i));
-    try {
-      parse_file<T>(root, path.c_str(), allowHipHopSyntax, workerResult, state);
-    } catch (...) {
-      T::mark_failed(workerResult);
-    }
-    T::merge_result(workerResult, outResArr, path);
-  }
-}
-template<class T>
-struct JobContext {
-  JobContext(
-    const std::string& root,
-    bool allowHipHopSyntax,
-    std::vector<std::string>& paths,
-    std::vector<typename T::result_type>& worker_results,
-    folly::MPMCQueue<size_t>& result_q
-  ) : m_root(root), m_allowHipHopSyntax(allowHipHopSyntax), m_paths(paths),
-      m_worker_results(worker_results), m_result_q(result_q) {
-  }
-  const std::string& m_root;
-  bool m_allowHipHopSyntax;
-  std::vector<std::string>& m_paths;
-  std::vector<typename T::result_type>& m_worker_results;
-  folly::MPMCQueue<size_t>& m_result_q;
-};
-
-template<class T>
-using BaseWorker = JobQueueWorker<size_t, const JobContext<T>*, false, true>;
-
-template<class T>
-struct ParseFactsWorker: public BaseWorker<T> {
-  void doJob(typename BaseWorker<T>::JobType job) override {
-    parse(m_state, *(this->m_context), job);
-  }
-  void onThreadEnter() override {
-    hphp_session_init(Treadmill::SessionKind::FactsWorker);
-    m_state = T::init_state();
-  }
-  void onThreadExit() override {
-    m_state = T::clear_state();
-    hphp_context_exit();
-    hphp_session_exit();
-  }
-  static void parse(const typename T::state_type& state,
-                    const JobContext<T>& ctx, size_t i) {
-    try {
-      parse_file<T>(
-        ctx.m_root,
-        ctx.m_paths[i].c_str(),
-        ctx.m_allowHipHopSyntax,
-        ctx.m_worker_results[i],
-        state);
-    } catch (...) {
-      T::mark_failed(ctx.m_worker_results[i]);
-    }
-    ctx.m_result_q.write(i);
-  }
-private:
-  typename T::state_type m_state;
-};
-
-template<class T>
-void facts_parse_threaded(
-  const std::string& root,
-  const Array& pathList,
-  DArrayInit& outResArr,
-  bool allowHipHopSyntax
-) {
-  auto numPaths = pathList->size();
-  std::vector<std::string> pathListCopy;
-  for(auto i = 0; i < numPaths; i++) {
-    pathListCopy.push_back(
-      tvCastToString(pathList->atPos(i)).toCppString()
-    );
-  }
-  std::vector<typename T::result_type> workerResults;
-  workerResults.resize(numPaths);
-  folly::MPMCQueue<size_t> result_q{numPaths};
-
-  JobContext<T> jobContext { root, allowHipHopSyntax,
-    pathListCopy, workerResults, result_q };
-  JobQueueDispatcher<ParseFactsWorker<T>> dispatcher {
-    T::get_workers_count(), T::get_workers_count(), 0, false, &jobContext
-  };
-  dispatcher.start();
-
-  for (auto i = 0; i < numPaths; ++i) {
-    dispatcher.enqueue(i);
-  }
-
-  for (auto numProcessed = 0; numProcessed < numPaths; ++numProcessed) {
-    size_t i;
-    result_q.blockingRead(i);
-    T::merge_result(
-      workerResults[i],
-      outResArr,
-      tvCastToString(pathList->atPos(i)));
-  }
-  dispatcher.waitEmpty();
-}
-
 struct HackCFactsExtractor {
   using result_type = folly::Optional<FactsJSONString>;
   using state_type = std::unique_ptr<FactsParser>;
@@ -261,6 +103,159 @@ struct HackCFactsExtractor {
   };
 };
 
+void parse_file(
+  const std::string& root,
+  const char* path,
+  bool allowHipHopSyntax,
+  HackCFactsExtractor::result_type& res,
+  const HackCFactsExtractor::state_type& state
+) {
+  HackCFactsExtractor::mark_failed(res);
+  std::string cleanPath;
+  if (FileUtil::isAbsolutePath(path)) {
+    cleanPath = path;
+  } else if (root.empty()) {
+    cleanPath = path;
+  } else {
+    cleanPath =
+      folly::sformat("{}{}{}", root, FileUtil::getDirSeparator(), path);
+  }
+
+  struct stat st;
+  auto w = Stream::getWrapperFromURI(StrNR(cleanPath));
+  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+    if (w->stat(cleanPath.c_str(), &st)) {
+      return;
+    }
+    if (S_ISDIR(st.st_mode)) {
+      return;
+    }
+    const auto f = w->open(StrNR(cleanPath), "r", 0, nullptr);
+    if (!f) return;
+    auto str = f->read();
+    HackCFactsExtractor::parse_file_impl(cleanPath,
+      allowHipHopSyntax, str.data(), str.size(), res, state);
+  } else {
+    // It would be nice to have an atomic stat + open operation here but this
+    // doesn't seem to be possible with STL in a portable way.
+    if (stat(cleanPath.c_str(), &st)) {
+      return;
+    }
+    if (S_ISDIR(st.st_mode)) {
+      return;
+    }
+    HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0,
+                                         res, state);
+  }
+}
+
+void facts_parse_sequential(
+  const std::string& root,
+  const Array& pathList,
+  DArrayInit& outResArr,
+  bool allowHipHopSyntax
+) {
+  const auto state = HackCFactsExtractor::init_state();
+  for (auto i = 0; i < pathList->size(); ++i) {
+    HackCFactsExtractor::result_type workerResult;
+    auto path = tvCastToString(pathList->atPos(i));
+    try {
+      parse_file(root, path.c_str(), allowHipHopSyntax, workerResult, state);
+    } catch (...) {
+      HackCFactsExtractor::mark_failed(workerResult);
+    }
+    HackCFactsExtractor::merge_result(workerResult, outResArr, path);
+  }
+}
+struct JobContext {
+  JobContext(
+    const std::string& root,
+    bool allowHipHopSyntax,
+    std::vector<std::string>& paths,
+    std::vector<HackCFactsExtractor::result_type>& worker_results,
+    folly::MPMCQueue<size_t>& result_q
+  ) : m_root(root), m_allowHipHopSyntax(allowHipHopSyntax), m_paths(paths),
+      m_worker_results(worker_results), m_result_q(result_q) {
+  }
+  const std::string& m_root;
+  bool m_allowHipHopSyntax;
+  std::vector<std::string>& m_paths;
+  std::vector<HackCFactsExtractor::result_type>& m_worker_results;
+  folly::MPMCQueue<size_t>& m_result_q;
+};
+
+using BaseWorker = JobQueueWorker<size_t, const JobContext*, false, true>;
+
+struct ParseFactsWorker: public BaseWorker {
+  void doJob(BaseWorker::JobType job) override {
+    parse(m_state, *(this->m_context), job);
+  }
+  void onThreadEnter() override {
+    hphp_session_init(Treadmill::SessionKind::FactsWorker);
+    m_state = HackCFactsExtractor::init_state();
+  }
+  void onThreadExit() override {
+    m_state = HackCFactsExtractor::clear_state();
+    hphp_context_exit();
+    hphp_session_exit();
+  }
+  static void parse(const HackCFactsExtractor::state_type& state,
+                    const JobContext& ctx, size_t i) {
+    try {
+      parse_file(
+        ctx.m_root,
+        ctx.m_paths[i].c_str(),
+        ctx.m_allowHipHopSyntax,
+        ctx.m_worker_results[i],
+        state);
+    } catch (...) {
+      HackCFactsExtractor::mark_failed(ctx.m_worker_results[i]);
+    }
+    ctx.m_result_q.write(i);
+  }
+private:
+  HackCFactsExtractor::state_type m_state;
+};
+
+void facts_parse_threaded(
+  const std::string& root,
+  const Array& pathList,
+  DArrayInit& outResArr,
+  bool allowHipHopSyntax
+) {
+  auto numPaths = pathList->size();
+  std::vector<std::string> pathListCopy;
+  for(auto i = 0; i < numPaths; i++) {
+    pathListCopy.push_back(
+      tvCastToString(pathList->atPos(i)).toCppString()
+    );
+  }
+  std::vector<HackCFactsExtractor::result_type> workerResults;
+  workerResults.resize(numPaths);
+  folly::MPMCQueue<size_t> result_q{numPaths};
+
+  JobContext jobContext { root, allowHipHopSyntax,
+    pathListCopy, workerResults, result_q };
+  JobQueueDispatcher<ParseFactsWorker> dispatcher {
+    HackCFactsExtractor::get_workers_count(),
+      HackCFactsExtractor::get_workers_count(), 0, false, &jobContext};
+  dispatcher.start();
+
+  for (auto i = 0; i < numPaths; ++i) {
+    dispatcher.enqueue(i);
+  }
+
+  for (auto numProcessed = 0; numProcessed < numPaths; ++numProcessed) {
+    size_t i;
+    result_q.blockingRead(i);
+    HackCFactsExtractor::merge_result(
+      workerResults[i],
+      outResArr,
+      tvCastToString(pathList->atPos(i)));
+  }
+  dispatcher.waitEmpty();
+}
+
 Array HHVM_FUNCTION(
   HH_facts_parse,
   const Variant& _root,
@@ -280,10 +275,10 @@ Array HHVM_FUNCTION(
 
   if (!pathList.isNull() && pathList->size()) {
     if (useThreads) {
-      facts_parse_threaded<HackCFactsExtractor>(root, pathList,
+      facts_parse_threaded(root, pathList,
         outResArr, allowHipHopSyntax);
     } else {
-      facts_parse_sequential<HackCFactsExtractor>(root, pathList,
+      facts_parse_sequential(root, pathList,
         outResArr, allowHipHopSyntax);
     }
   }

@@ -198,9 +198,21 @@ struct TypeConstraint {
    */
   MaybeDataType underlyingDataTypeResolved() const;
 
+  /*
+   * Check if this TypeConstraint *might* imply a runtime check. If it returns
+   * false, it definitely doesn't. If it returns true, it might still be a mixed
+   * type at runtime (because of a type-alias for example).
+   */
   bool isCheckable() const {
     return hasConstraint() && !isMixed() && !isTypeVar() && !isTypeConstant();
   }
+
+  /*
+   * Check if this TypeConstraint definitely does not require a runtime check
+   * (equivalent to mixed). This may invoke the autoloader and will resolve
+   * type-aliases, so is exact.
+   */
+  bool isMixedResolved() const;
 
   /*
    * Predicates for various properties of the type constraint.

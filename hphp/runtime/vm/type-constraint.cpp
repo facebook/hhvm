@@ -327,6 +327,16 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   return t;
 }
 
+bool TypeConstraint::isMixedResolved() const {
+  if (!isCheckable()) return true;
+  // isCheckable() implies !isMixed(), so if its not an unresolved object here,
+  // we know it cannot be mixed.
+  if (!isObject() || isResolved()) return false;
+  auto const tyAlias =
+    getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName).first;
+  return tyAlias && tyAlias->type == AnnotType::Mixed;
+}
+
 bool
 TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
   assertx(validForProp());

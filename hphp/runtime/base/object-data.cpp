@@ -92,7 +92,7 @@ void invoke_destructor(ObjectData* obj, const Func* dtor) {
 ALWAYS_INLINE
 bool typeHintChecked(const Class::Prop* prop) {
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return false;
-  return prop && prop->typeConstraint.isCheckable();
+  return prop && !prop->typeConstraint.isMixedResolved();
 }
 
 ALWAYS_INLINE

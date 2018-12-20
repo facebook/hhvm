@@ -761,18 +761,16 @@ Variant HHVM_FUNCTION(file,
     return false;
   }
   String content = contents.toString();
-  Array ret = Array::Create();
   if (content.empty()) {
-    return ret;
+    return empty_varray();
   }
+  auto ret = Array::CreateVArray();
 
   char eol_marker = '\n';
   bool include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
   bool skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
   const char *s = content.data();
   const char *e = s + content.size();
-
-  int i = 0;
   const char *p = (const char *)memchr(s, '\n', content.size());
   if (!p) {
     p = e;
@@ -783,7 +781,7 @@ Variant HHVM_FUNCTION(file,
     do {
       p++;
     parse_eol:
-      ret.set(i++, String(s, p-s, CopyString));
+      ret.append(String(s, p-s, CopyString));
       s = p;
     } while ((p = (const char *)memchr(p, eol_marker, (e-p))));
   } else {
@@ -797,7 +795,7 @@ Variant HHVM_FUNCTION(file,
         s = ++p;
         continue;
       }
-      ret.set(i++, String(s, p-s-windows_eol, CopyString));
+      ret.append(String(s, p-s-windows_eol, CopyString));
       s = ++p;
     } while ((p = (const char *)memchr(p, eol_marker, (e-p))));
   }
@@ -1346,7 +1344,7 @@ const StaticString
 Variant HHVM_FUNCTION(pathinfo,
                       const String& path,
                       int opt /* = 15 */) {
-  ArrayInit ret(4, ArrayInit::Map{});
+  DArrayInit ret{4};
 
   if (opt == 0) {
     return empty_string_variant();
@@ -1803,7 +1801,7 @@ Variant HHVM_FUNCTION(glob,
                   &globbuf);
   if (nret == GLOB_NOMATCH) {
     globfree(&globbuf);
-    return empty_array();
+    return empty_varray();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
@@ -1814,7 +1812,7 @@ Variant HHVM_FUNCTION(glob,
       }
     }
     globfree(&globbuf);
-    return empty_array();
+    return empty_varray();
   }
 
   if (nret) {
@@ -1822,7 +1820,7 @@ Variant HHVM_FUNCTION(glob,
     return false;
   }
 
-  Array ret;
+  auto ret = Array::CreateVArray();
   bool basedir_limit = false;
   for (int n = 0; n < (int)globbuf.gl_pathc; n++) {
     String translated = File::TranslatePath(globbuf.gl_pathv[n]);
@@ -1852,7 +1850,7 @@ Variant HHVM_FUNCTION(glob,
   // php's glob always produces an array, but Variant::Variant(CArrRef)
   // will produce KindOfNull if given a req::ptr wrapped around null.
   if (ret.isNull()) {
-    return empty_array();
+    return empty_varray();
   }
   return ret;
 }
@@ -2088,17 +2086,17 @@ HHVM_FUNCTION(scandir, const String& directory, bool descending /* = false */,
   }
   dir->close();
 
-  if (descending) {
-    sort(names.begin(), names.end(), StringDescending);
-  } else {
-    sort(names.begin(), names.end(), StringAscending);
-  }
+  sort(
+    names.begin(),
+    names.end(),
+    descending ? StringDescending : StringAscending
+  );
 
-  Array ret;
-  for (unsigned int i = 0; i < names.size(); i++) {
-    ret.append(names[i]);
+  VArrayInit ret{names.size()};
+  for (auto& name : names) {
+    ret.append(name);
   }
-  return ret;
+  return ret.toVariant();
 }
 
 void HHVM_FUNCTION(closedir,

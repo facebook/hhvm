@@ -111,13 +111,9 @@ dict(7) {
   ["comp_method"]=>
   int(0)
 }
-array(4) {
-  [0]=>
+vec(4) {
   string(1) "."
-  [1]=>
   string(2) ".."
-  [2]=>
   string(4) "bing"
-  [3]=>
   string(4) "bong"
 }

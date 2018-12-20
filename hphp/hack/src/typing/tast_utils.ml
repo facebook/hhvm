@@ -13,7 +13,7 @@ open Aast_defs
 open Typing_defs
 
 module Env = Tast_env
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 module Cls = Typing_classes_heap
 
 (** Return true if ty definitely does not contain null.  I.e., the
@@ -57,14 +57,14 @@ let fold_truthiness acc truthiness =
 
 let tclass_is_falsy_when_empty, is_traversable =
   let r = Typing_reason.Rnone in
-  let simple_xml_el = TMT.class_type r "\\SimpleXMLElement" [] in
-  let container_type = TMT.container r (r, Tany) in
-  let pair_type = TMT.pair r (r, Tany) (r, Tany) in
+  let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
+  let container_type = MakeType.container r (r, Tany) in
+  let pair_type = MakeType.pair r (r, Tany) (r, Tany) in
   let tclass_is_falsy_when_empty env ty =
     Env.can_subtype env ty simple_xml_el ||
     Env.can_subtype env ty container_type && not (Env.can_subtype env ty pair_type)
   in
-  let trv = TMT.traversable r (r, Tany) in
+  let trv = MakeType.traversable r (r, Tany) in
   let is_traversable env ty = Env.can_subtype env ty trv in
   tclass_is_falsy_when_empty, is_traversable
 

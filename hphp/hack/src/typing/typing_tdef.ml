@@ -18,7 +18,7 @@ module Subst = Decl_subst
 module TUtils = Typing_utils
 module TAccess = Typing_taccess
 module Phase  = Typing_phase
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 (*****************************************************************************)
 (* Expanding type definition *)
@@ -69,7 +69,7 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
       end
     in
     if Naming_special_names.Classes.is_format_string x
-    then env, (ety_env, TMT.class_type r x argl)
+    then env, (ety_env, MakeType.class_type r x argl)
     else env, (ety_env, (r, snd expanded_ty))
   end
 

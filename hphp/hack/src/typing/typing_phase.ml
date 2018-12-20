@@ -18,6 +18,7 @@ module TUtils = Typing_utils
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module ShapeMap = Nast.ShapeMap
+module MakeType = Typing_make_type
 
 (* Here is the general problem the delayed application of the phase solves.
  * Let's say you have a function that you want to operate generically across
@@ -111,7 +112,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
   | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
       env, (ety_env, x)
   | r, Tmixed ->
-      env, (ety_env, (r, TUtils.desugar_mixed r))
+      env, (ety_env, MakeType.mixed r)
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty

@@ -15,7 +15,7 @@ module SubType = Typing_subtype
 module Env    = Typing_env
 module TUtils = Typing_utils
 module SN     = Naming_special_names
-module TMT    = Typing_make_type
+module MakeType    = Typing_make_type
 
 (* If an expression e is of type `opt_ty_maybe`, then this function
 returns the type of `await e`.
@@ -53,7 +53,7 @@ let rec overload_extract_from_awaitable ((env,tyvars) as acc) p opt_ty_maybe =
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _ ) ->
     let type_var, tyvars = Env.fresh_type_add_tyvars p tyvars in
-    let expected_type = TMT.awaitable r type_var in
+    let expected_type = MakeType.awaitable r type_var in
     let return_type = match e_opt_ty with
       | _, Tany -> r, Tany
       | _, Terr -> r, Terr

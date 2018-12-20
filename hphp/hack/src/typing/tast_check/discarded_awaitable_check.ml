@@ -10,12 +10,11 @@
 open Core_kernel
 open Tast
 open Typing_defs
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 let is_awaitable env ty =
-  let mixed =
-    Typing_reason.none, Toption (Typing_reason.none, Tnonnull) in
-  let awaitable_of_mixed = TMT.awaitable Typing_reason.none mixed in
+  let mixed = MakeType.mixed Typing_reason.none in
+  let awaitable_of_mixed = MakeType.awaitable Typing_reason.none mixed in
   let _, is_ty_awaitable = Tast_env.subtype env ty awaitable_of_mixed in
   is_ty_awaitable
 

@@ -16,7 +16,7 @@ module Reason = Typing_reason
 module Unify = Typing_unify
 module URec = Typing_unify_recursive
 module Utils = Typing_utils
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 exception Not_equiv
 exception Arraykinds_dont_unify
@@ -98,7 +98,7 @@ and union_ env ty1 ty2 r =
   | (r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat)
   | (r1, Tprim Nast.Tfloat), (r2, Tprim Nast.Tint) ->
     let r = union_reason r1 r2 in
-    env, TMT.num r
+    env, MakeType.num r
   | (r, Tprim Nast.Tnull), ty
   | ty, (r, Tprim Nast.Tnull) ->
     env, (r, Toption ty)
@@ -411,7 +411,7 @@ and union_shapes env (fields_known1, fdm1, r1) (fields_known2, fdm2, r2) =
               let r = Reason.Rmissing_optional_field (
                 Reason.to_pos r,
                 Utils.get_printable_shape_field_name k) in
-              (r, Typing_utils.desugar_mixed r) in
+              (MakeType.mixed r) in
           (env, fields_known), Some { sft_optional = true; sft_ty }
         (* key is present on both sides *)
         | (_, Some { sft_optional = optional1; sft_ty = ty1 }, _),

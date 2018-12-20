@@ -17,7 +17,7 @@ module Reason       = Typing_reason
 module Subst        = Decl_subst
 module SubType      = Typing_subtype
 module TUtils       = Typing_utils
-module TMT          = Typing_make_type
+module MakeType          = Typing_make_type
 module Cls          = Typing_classes_heap
 
 let raise_xhp_required pos ureason ty =
@@ -113,10 +113,10 @@ and get_spread_attributes env pos onto_xhp cty =
 let is_xhp_child env pos ty =
   let reason = Reason.Rwitness pos in
   (* ?XHPChild *)
-  let ty_child = TMT.class_type reason SN.Classes.cXHPChild [] in
+  let ty_child = MakeType.class_type reason SN.Classes.cXHPChild [] in
   let ty_child = reason, Toption ty_child in
   (* Any ?Traversable *)
-  let ty_traversable = TMT.traversable reason (Reason.none, TUtils.tany env) in
+  let ty_traversable = MakeType.traversable reason (Reason.none, TUtils.tany env) in
   let ty_traversable = reason, Toption ty_traversable in
   let tys = [ty_child; ty_traversable] in
   List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

@@ -16,7 +16,7 @@ module Env          = Typing_env
 module Reason       = Typing_reason
 module TUtils       = Typing_utils
 module Type         = Typing_ops
-module TMT          = Typing_make_type
+module MakeType     = Typing_make_type
 
 let rec refine_shape field_name env shape =
   let env, shape = Env.expand_type env shape in
@@ -44,7 +44,7 @@ let rec refine_shape field_name env shape =
               TUtils.get_printable_shape_field_name field_name in
             let sft_ty_r = Reason.Rmissing_optional_field
               (Reason.to_pos shape_r, printable_field_name) in
-            (sft_ty_r, TUtils.desugar_mixed sft_ty_r)
+            MakeType.mixed sft_ty_r
           | Some {sft_ty; _} -> sft_ty in
         refine_shape_field_type refined_sft_ty
     end
@@ -114,7 +114,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
         | None ->
           env,
           { sft_optional = false
-          ; sft_ty = (Reason.Rwitness p, Tnonnull)
+          ; sft_ty = MakeType.nonnull (Reason.Rwitness p)
           }
         end in
       let ftm = ShapeMap.add field field_type ftm in
@@ -156,11 +156,10 @@ let is_shape_field_required env field_name shape_ty =
   let field_ty = {
     sft_optional = false;
     sft_ty =
-      Reason.Rnone,
-      if experiment_enabled env
-           TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields
-      then Tnonnull
-      else TUtils.desugar_mixed Reason.Rnone
+    if experiment_enabled env
+         TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields
+    then MakeType.nonnull Reason.Rnone
+    else MakeType.mixed Reason.Rnone
   } in
   Typing_subtype.is_sub_type env
     shape_ty
@@ -235,8 +234,8 @@ let to_collection env shape_ty res return_type =
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
           match key with
-          | Ast.SFlit_int (p, _) -> env, TMT.int (Reason.Rwitness p)
-          | Ast.SFlit_str (p, _) -> env, TMT.string (Reason.Rwitness p)
+          | Ast.SFlit_int (p, _) -> env, MakeType.int (Reason.Rwitness p)
+          | Ast.SFlit_str (p, _) -> env, MakeType.string (Reason.Rwitness p)
           | Ast.SFclass_const ((p, cid), (_, mid)) ->
             begin match Env.get_class env cid with
               | Some class_ -> begin match Env.get_const env class_ mid with
@@ -270,4 +269,4 @@ let to_array env shape_ty res =
 
 let to_dict env shape_ty res =
   to_collection env shape_ty res (fun r key value ->
-    TMT.dict r key value)
+    MakeType.dict r key value)

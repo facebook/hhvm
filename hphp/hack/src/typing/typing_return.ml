@@ -13,7 +13,7 @@ open Typing_env_return_info
 
 module Env = Typing_env
 module TUtils = Typing_utils
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 let strip_awaitable fun_kind env ty =
   if fun_kind <> Ast.FAsync then ty
@@ -76,7 +76,7 @@ let wrap_awaitable env p rty =
     | Ast.FAsyncGenerator ->
       (Reason.Rnone, TUtils.terr env)
     | Ast.FAsync ->
-      TMT.awaitable (Reason.Rwitness p) rty
+      MakeType.awaitable (Reason.Rwitness p) rty
 
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
@@ -98,7 +98,7 @@ let force_awaitable env p ty =
 let make_default_return env name =
   if snd name = SN.Members.__destruct
   || snd name = SN.Members.__construct
-  then TMT.void (Reason.Rwitness (fst name))
+  then MakeType.void (Reason.Rwitness (fst name))
   else (Reason.Rwitness (fst name), Typing_utils.tany env)
 
 let suggest_return env p ty =

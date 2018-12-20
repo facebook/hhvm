@@ -21,7 +21,7 @@ module Phase = Typing_phase
 module TL = Typing_logic
 module Cls = Typing_classes_heap
 module TySet = Typing_set
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -288,7 +288,7 @@ and simplify_subtype
            a lower bound.
          *)
         let r = Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull") in
-        let tmixed = (r, Toption (r, Tnonnull)) in
+        let tmixed = MakeType.mixed r in
         env |>
         simplify_subtype ~seen_generic_params ~deep ~this_ty tmixed ty_super
 
@@ -384,7 +384,7 @@ and simplify_subtype
    *)
   | Tprim Nast.Tvoid, Toption ty_super' ->
     let r = Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull") in
-    let tmixed = (r, Toption (r, Tnonnull)) in
+    let tmixed = MakeType.mixed r in
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' |||
     simplify_subtype ~seen_generic_params ~deep ~this_ty tmixed ty_super
@@ -553,7 +553,7 @@ and simplify_subtype
           Reason.to_pos r_sub,
           TUtils.get_printable_shape_field_name name
         ) in
-        res &&& simplify_subtype ~seen_generic_params ~deep ~this_ty (r, TUtils.desugar_mixed r) ty_super in
+        res &&& simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.mixed r) ty_super in
       TUtils.apply_shape
         ~on_common_field
         ~on_missing_omittable_optional_field
@@ -819,10 +819,10 @@ and simplify_subtype
       | AKvarray tv
       | AKvec tv ->
         env |>
-        simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.int r) tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.int r) tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
       | AKvarray_or_darray tv ->
-        let tk_sub = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r)) in
+        let tk_sub = MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r)) in
         env |>
         simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
@@ -897,7 +897,7 @@ and simplify_subtype
 
     | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
       (AKvarray_or_darray tv_super) ->
-      let tk_super = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super))) in
+      let tk_super = MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super))) in
       env |>
       simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
       simplify_subtype ~seen_generic_params ~deep ~this_ty tv_sub tv_super
@@ -905,7 +905,7 @@ and simplify_subtype
     | (AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _)
         when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env)) ->
           let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
-          let int_type = TMT.int int_reason in
+          let int_type = MakeType.int int_reason in
           simplify_subtype ~seen_generic_params ~deep ~this_ty
             (r, Tarraykind (AKmap (int_type, elt_ty))) ty_super env
 
@@ -938,7 +938,7 @@ and simplify_subtype
   | Toption t, Tvar _ when new_inference ->
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty t ty_super &&&
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.null (fst ety_sub)) ty_super
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.null (fst ety_sub)) ty_super
 
   | Tvar _, _ | _, Tvar _ ->
     default ()
@@ -950,8 +950,8 @@ and simplify_subtype
   | Tprim Nast.Tnum, Tunresolved _ when new_inference ->
     let r = fst ty_sub in
     env |>
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.float r) ty_super &&&
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.int r) ty_super
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.float r) ty_super &&&
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.int r) ty_super
 
   | _, Tunresolved tyl ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
@@ -1936,7 +1936,7 @@ and try_union env ty tyl =
     else match snd ty, snd ty' with
     | Tprim Nast.Tfloat, Tprim Nast.Tint
     | Tprim Nast.Tint, Tprim Nast.Tfloat ->
-      let t = TMT.num (fst ty) in
+      let t = MakeType.num (fst ty) in
       try_union env t tyl'
     | _, _ -> ty' :: try_union env ty tyl'
 
@@ -1954,11 +1954,11 @@ let rec sub_string
   if not allow_mixed && TypecheckerOptions.new_inference (Env.get_tcopt env)
   then
     let r = Reason.Rwitness p in
-    let tyl = [TMT.arraykey r;
-               TMT.bool r;
-               TMT.float r;
-               TMT.resource r;
-               TMT.dynamic r] in
+    let tyl = [MakeType.arraykey r;
+               MakeType.bool r;
+               MakeType.float r;
+               MakeType.resource r;
+               MakeType.dynamic r] in
     let tyl =
       if stringish_deprecated
       then tyl
@@ -2402,7 +2402,7 @@ let bind_to_lower_bound env r var =
 let bind_to_upper_bound env r var =
   let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
   match upper_bounds with
-  | [] -> bind env r var (r, TUtils.desugar_mixed r)
+  | [] -> bind env r var (MakeType.mixed r)
   | [ty] -> bind env r var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env

@@ -49,6 +49,8 @@ let datetime_immutable r =
   class_type r SN.Classes.cDateTimeImmutable []
 let const_vector r ty =
   class_type r SN.Collections.cConstVector [ty]
+let const_collection r ty =
+  class_type r SN.Collections.cConstCollection [ty]
 let int r =
   prim_type r Nast.Tint
 let bool r =
@@ -65,7 +67,11 @@ let void r =
   prim_type r Nast.Tvoid
 let null r =
   prim_type r Nast.Tnull
+let nonnull r =
+  (r, Tnonnull)
 let dynamic r =
   (r, Tdynamic)
+let mixed r =
+  (r, Toption (r, Tnonnull))
 let resource r =
   prim_type r Nast.Tresource

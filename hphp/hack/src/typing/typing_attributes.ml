@@ -11,7 +11,7 @@ open Core_kernel
 open Typing_reason
 
 module SN = Naming_special_names
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 module Cls = Typing_classes_heap
 
 let check_implements check_new_object attr_interface
@@ -30,9 +30,9 @@ let check_implements check_new_object attr_interface
       (* successful exit condition: attribute class is subtype of correct interface
        * and its args satisfy the attribute class constructor *)
      let attr_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       TMT.class_type (Rwitness (Cls.pos attr_class)) (Cls.name attr_class) [] in
+       MakeType.class_type (Rwitness (Cls.pos attr_class)) (Cls.name attr_class) [] in
      let interface_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       TMT.class_type (Rwitness (Cls.pos intf_class)) (Cls.name intf_class) [] in
+       MakeType.class_type (Rwitness (Cls.pos intf_class)) (Cls.name intf_class) [] in
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then begin
         let expr_kind =

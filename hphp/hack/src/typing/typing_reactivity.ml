@@ -15,7 +15,7 @@ module Env     = Typing_env
 module SubType = Typing_subtype
 module TU      = Typing_utils
 module CT      = SubType.ConditionTypes
-module TMT     = Typing_make_type
+module MakeType     = Typing_make_type
 
 type method_call_info = {
   receiver_type: locl ty;
@@ -256,7 +256,7 @@ let check_call env method_info pos reason ft arg_types =
   end
 
 let rxTraversableType =
-  TMT.class_type Reason.none Naming_special_names.Rx.cTraversable [(Reason.Rnone, Tany)]
+  MakeType.class_type Reason.none Naming_special_names.Rx.cTraversable [(Reason.Rnone, Tany)]
 
 let check_foreach_collection env p t =
   (* do nothing if unsafe_rx is set *)

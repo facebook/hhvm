@@ -13,7 +13,7 @@ open Core_kernel
 open Typing_defs
 
 module Env = Typing_env
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 module Cls = Typing_classes_heap
 
 let is_disposable_visitor env =
@@ -63,5 +63,5 @@ let enforce_is_disposable_type env has_await pos ty =
     if has_await
     then SN.Classes.cIAsyncDisposable
     else SN.Classes.cIDisposable in
-  let disposable_ty = TMT.class_type (Reason.Rusing pos) class_name [] in
+  let disposable_ty = MakeType.class_type (Reason.Rusing pos) class_name [] in
   Typing_ops.sub_type pos Reason.URusing env ty disposable_ty

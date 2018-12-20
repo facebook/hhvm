@@ -18,6 +18,7 @@ module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 module TySet = Typing_set
 module Cls = Typing_classes_heap
+module MakeType = Typing_make_type
 
 (* This can be useful to debug type which blow up in size *)
 let ty_size ty =
@@ -224,24 +225,9 @@ let rec find_dynamic env tyl =
 let is_dynamic env ty =
   find_dynamic env [ty] <> None
 
-let rec is_hack_collection env ty =
-  let env, ety = Env.expand_type env ty in
-  match ety with
-  | _, Tclass ((_, n), _, _)
-    when n = SN.Collections.cVector
-      || n = SN.Collections.cImmVector
-      || n = SN.Collections.cMap
-      || n = SN.Collections.cImmMap
-      || n = SN.Collections.cSet
-      || n = SN.Collections.cImmSet
-      || n = SN.Collections.cPair -> true
-  | _, Tabstract (AKgeneric _, _) ->
-    let env, tyl = get_concrete_supertypes env ty in
-    List.exists tyl (is_hack_collection env)
-  | _, Tunresolved tyl -> List.for_all tyl ~f:(is_hack_collection env)
-  | (_, (Tany | Tnonnull | Tdynamic | Terr | Toption _ | Tprim _ |
-         Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tabstract _ | Tanon _ |
-         Tobject | Tclass _ | Tarraykind _)) -> false
+let is_hack_collection env ty =
+  is_sub_type env ty
+    (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 (*****************************************************************************)
 (* Check if type is any or a variant thereof  *)
@@ -778,8 +764,6 @@ let fun_mutable user_attributes =
     Some Param_maybe_mutable
   | _ :: tl -> go tl in
   go user_attributes
-
-let desugar_mixed r = Toption (r, Tnonnull)
 
 let tany env =
   let dynamic_view_enabled =

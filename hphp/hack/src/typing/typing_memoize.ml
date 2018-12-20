@@ -13,7 +13,7 @@ open Typing_defs
 module Env = Typing_env
 module SN = Naming_special_names
 module SubType = Typing_subtype
-module TMT = Typing_make_type
+module MakeType = Typing_make_type
 
 let check_param : Env.env -> Nast.fun_param -> unit =
   fun env {param_hint; param_pos; _} ->
@@ -76,7 +76,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     | r, Tclass _ ->
       let env, type_param, tyvars =
         Env.fresh_unresolved_type_add_tyvars env (Reason.to_pos r) ISet.empty in
-      let container_type = TMT.container Reason.none type_param in
+      let container_type = MakeType.container Reason.none type_param in
       let env, is_container =
         Errors.try_
           (fun () ->
@@ -88,7 +88,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
         check_memoizable env type_param
       else
         let r, _ = ty in
-        let memoizable_type = TMT.class_type r SN.Classes.cIMemoizeParam [] in
+        let memoizable_type = MakeType.class_type r SN.Classes.cIMemoizeParam [] in
         if SubType.is_sub_type env ty memoizable_type
         then ()
         else error ty;

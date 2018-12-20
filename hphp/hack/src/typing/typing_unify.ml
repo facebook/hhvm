@@ -14,6 +14,7 @@ open String_utils
 module Env = Typing_env
 module TUtils = Typing_utils
 module TURecursive = Typing_unify_recursive
+module MakeType = Typing_make_type
 
 (* If result is (env', ty) then env' extends env,
  * and ty1 <: ty and ty2 <: ty under env'
@@ -342,7 +343,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           TUtils.get_printable_shape_field_name name
         ) in
         let env, _ = unify env
-          (r, TUtils.desugar_mixed r)
+          (MakeType.mixed r)
           missing_shape_field_type.sft_ty in
         env, acc in
       (* We do it both directions to verify that no field is missing *)

@@ -16,6 +16,7 @@ module Inst    = Decl_instantiate
 module TDef    = Typing_tdef
 module SubType = Typing_subtype
 module Phase   = Typing_phase
+module MakeType = Typing_make_type
 
 (*****************************************************************************)
 (* Exporting. *)
@@ -127,7 +128,7 @@ module LeastUpperBound = struct
     | [] -> None
     | [t] -> Some t
     | (r, _ as ty1) :: ty2 :: ts ->
-      let default = (r, TUtils.desugar_mixed r) in
+      let default = MakeType.mixed r in
       let ty =
         type_visitor
           ~f:(pairwise_least_upper_bound env ~default)
@@ -140,7 +141,7 @@ module LeastUpperBound = struct
     | [] -> None
     | [t] ->  Some t
     | (tenv, p, k, (r, _ as ty1)) :: (_, _, _, ty2) :: ts  ->
-      let default = (r, TUtils.desugar_mixed r) in
+      let default = MakeType.mixed r in
       let ty =
         type_visitor
           ~f:(pairwise_least_upper_bound tenv ~default)

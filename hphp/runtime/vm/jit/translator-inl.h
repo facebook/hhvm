@@ -117,6 +117,16 @@ inline bool opcodeChangesPC(const Op op) {
 }
 
 inline bool opcodeBreaksBB(const Op op, bool inlining) {
+  if (op == Op::ClsCns) {
+    // side exits if it misses in the RDS, and may produce an overly
+    // specific type without guarding if the class comes from an
+    // object (during form_region, the class will appear to be a
+    // specific type, but during irgen, it will probably be a generic
+    // type).
+
+    // We can't mark it BreaksBB because BreaksBB => opcodeChangesPC
+    return true;
+  }
   return opcodeControlFlowInfo(op, inlining) == ControlFlowInfo::BreaksBB;
 }
 

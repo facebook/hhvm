@@ -1,0 +1,44 @@
+File "instance_of_refinement.php", line 23, characters 16-17:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 15, characters 21-23:
+  This is an int
+  File "instance_of_refinement.php", line 18, characters 14-15:
+  It is incompatible with a string
+File "instance_of_refinement.php", line 35, characters 10-11:
+Invalid return type (Typing[4110])
+  File "instance_of_refinement.php", line 30, characters 19-24:
+  This is a string
+  File "instance_of_refinement.php", line 33, characters 21-21:
+  It is incompatible with an object of type B
+File "instance_of_refinement.php", line 41, characters 13-14:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 40, characters 7-16:
+  This is a value of generic type T#1 from this is expression test
+  File "instance_of_refinement.php", line 8, characters 23-23:
+    via this generic T
+  File "instance_of_refinement.php", line 41, characters 13-14:
+  It is incompatible with a string
+File "instance_of_refinement.php", line 42, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 15, characters 21-23:
+  This is an int
+  File "instance_of_refinement.php", line 40, characters 7-16:
+  It is incompatible with a value of generic type T#1 from this is expression test
+  File "instance_of_refinement.php", line 5, characters 26-26:
+    via this generic T
+File "instance_of_refinement.php", line 49, characters 19-27:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 54, characters 24-29:
+  This is a string
+  File "instance_of_refinement.php", line 48, characters 7-16:
+  It is incompatible with a value of generic type T#1 from this is expression test
+  File "instance_of_refinement.php", line 5, characters 26-26:
+    via this generic T
+File "instance_of_refinement.php", line 50, characters 16-24:
+Invalid argument (Typing[4110])
+  File "instance_of_refinement.php", line 15, characters 21-23:
+  This is an int
+  File "instance_of_refinement.php", line 48, characters 7-16:
+  It is incompatible with a value of generic type T#1 from this is expression test
+  File "instance_of_refinement.php", line 5, characters 26-26:
+    via this generic T

@@ -10,6 +10,10 @@
 
 class Closure {
   public function __construct() { }
+
+  public static function bind(Closure $closure, $object, mixed $scope = 'static'): Closure;
+
+  public function bindTo($object, mixed $scope = 'static'): Closure;
 }
 class DummyClosure {
   public function __construct() { }

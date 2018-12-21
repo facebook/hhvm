@@ -16,9 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -31,7 +29,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/job-queue.h"
 
-#include <folly/Conv.h>
 #include <folly/MPMCQueue.h>
 
 #include <sys/stat.h>

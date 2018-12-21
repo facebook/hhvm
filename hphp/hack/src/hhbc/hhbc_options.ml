@@ -56,6 +56,7 @@ type t = {
   option_emit_func_pointers               : bool;
   option_emit_cls_meth_pointers           : bool;
   option_emit_inst_meth_pointers          : bool;
+  option_rx_is_enabled                    : bool;
 }
 
 let default = {
@@ -105,6 +106,7 @@ let default = {
   option_emit_func_pointers = true;
   option_emit_cls_meth_pointers = true;
   option_emit_inst_meth_pointers = true;
+  option_rx_is_enabled = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -151,6 +153,7 @@ let phpism_disable_define o = o.option_phpism_disable_define
 let emit_func_pointers o = o.option_emit_func_pointers
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
+let rx_is_enabled o = o.option_rx_is_enabled
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -201,6 +204,10 @@ let to_string o =
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ; Printf.sprintf "disable_variable_variables: %B" @@ disable_variable_variables o
     ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
+    ; Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o
+    ; Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o
+    ; Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o
+    ; Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -295,6 +302,8 @@ let set_option options name value =
     { options with option_emit_cls_meth_pointers = int_of_string value > 0 }
   | "hhvm.emit_inst_meth_pointers" ->
     { options with option_emit_inst_meth_pointers = int_of_string value > 0 }
+  | "hhvm.rx_is_enabled" ->
+    { options with option_rx_is_enabled = int_of_string value > 0 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -437,6 +446,8 @@ let value_setters = [
      fun opts v -> { opts with option_emit_cls_meth_pointers = (v > 0) });
   (set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_inst_meth_pointers = (v > 0) });
+  (set_value "hhvm.rx_is_enabled" get_value_from_config_int @@
+     fun opts v -> { opts with option_rx_is_enabled = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

@@ -27,6 +27,7 @@ type t = {
   method_is_interceptable  : bool;
   method_is_memoize_impl   : bool;
   method_rx_level          : Rx.t;
+  method_rx_disabled       : bool;
 }
 
 let make
@@ -48,7 +49,8 @@ let make
   method_is_closure_body
   method_is_interceptable
   method_is_memoize_impl
-  method_rx_level = {
+  method_rx_level
+  method_rx_disabled = {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -68,6 +70,7 @@ let make
     method_is_interceptable;
     method_is_memoize_impl;
     method_rx_level;
+    method_rx_disabled;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -92,3 +95,4 @@ let with_body method_def method_body = { method_def with method_body }
 let params m = m.method_body.Hhas_body.body_params
 let return_type m = m.method_body.Hhas_body.body_return_type
 let rx_level method_def = method_def.method_rx_level
+let rx_disabled method_def = method_def.method_rx_disabled

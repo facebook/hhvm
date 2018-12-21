@@ -1518,6 +1518,7 @@ let add_fun_def buf fun_def =
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
+  let function_rx_disabled = Hhas_function.rx_disabled fun_def in
   Acc.add buf "\n.function ";
   Acc.add buf (function_attributes fun_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
@@ -1528,6 +1529,7 @@ let add_fun_def buf fun_def =
   if function_is_generator then Acc.add buf " isGenerator";
   if function_is_async then Acc.add buf " isAsync";
   if function_is_pair_generator then Acc.add buf " isPairGenerator";
+  if function_rx_disabled then Acc.add buf " isRxDisabled";
   Acc.add buf " {";
   add_body buf 2 function_body;
   Acc.add buf "}\n"
@@ -1592,6 +1594,7 @@ let add_method_def buf method_def =
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
   let method_is_closure_body = Hhas_method.is_closure_body method_def in
+  let method_rx_disabled = Hhas_method.rx_disabled method_def in
   Acc.add buf "\n  .method ";
   Acc.add buf (method_attributes method_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options
@@ -1603,6 +1606,7 @@ let add_method_def buf method_def =
   if method_is_async then Acc.add buf " isAsync";
   if method_is_pair_generator then Acc.add buf " isPairGenerator";
   if method_is_closure_body then Acc.add buf " isClosureBody";
+  if method_rx_disabled then Acc.add buf " isRxDisabled";
   Acc.add buf " {";
   add_body buf 4 method_body;
   Acc.add buf "  }"

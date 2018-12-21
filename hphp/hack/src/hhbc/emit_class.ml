@@ -94,6 +94,7 @@ let make_86method
     method_is_interceptable
     method_is_memoize_impl
     Rx.NonRx
+    false (* method_rx_disabled *)
 
 let from_extends ~namespace ~is_enum _tparams extends =
   if is_enum

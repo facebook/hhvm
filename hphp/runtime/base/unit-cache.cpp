@@ -769,6 +769,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalEmitFuncPointers ? '1' : '0')
     + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
     + (RuntimeOption::EvalEmitInstMethPointers ? '1' : '0')
+    + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + hackc_version();

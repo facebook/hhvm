@@ -254,6 +254,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_numClsRefSlots = m_numClsRefSlots;
   f->shared()->m_hasReifiedGenerics = hasReifiedGenerics;
+  f->shared()->m_isRxDisabled = isRxDisabled;
 
   if (hasReifiedGenerics) {
     auto tv = uait->second;

@@ -44,6 +44,15 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes
     |> Option.value ~default:Rx.NonRx in
+  let ast_body, is_rx_body, function_rx_disabled =
+    if function_rx_level <> Rx.NonRx then
+      match Rx.halves_of_is_enabled_body namespace ast_fun.Ast.f_body with
+      | Some (enabled_body, disabled_body) ->
+        if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options
+        then enabled_body, true, false
+        else disabled_body, false, true
+      | None -> ast_fun.Ast.f_body, true, false
+    else ast_fun.Ast.f_body, false, false in
   let function_body, function_is_generator, function_is_pair_generator =
     Emit_body.emit_body
       ~pos: ast_fun.A.f_span
@@ -52,7 +61,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       ~is_memoize
       ~is_native
       ~is_async:function_is_async
-      ~is_rx_body:(function_rx_level <> Rx.NonRx)
+      ~is_rx_body
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~default_dropthrough:None
@@ -62,7 +71,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       ast_fun.Ast.f_tparams
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
-      [Ast.Stmt (Pos.none, Ast.Block ast_fun.Ast.f_body)] in
+      [Ast.Stmt (Pos.none, Ast.Block ast_body)] in
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in
@@ -83,6 +92,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       is_interceptable
       is_memoize (*is_memoize_impl*)
       function_rx_level
+      function_rx_disabled
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize

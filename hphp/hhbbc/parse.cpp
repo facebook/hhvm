@@ -1185,6 +1185,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
   ret->isReified           = fe.userAttributes.find(s_Reified.get()) !=
                              fe.userAttributes.end();
+  ret->isRxDisabled        = fe.isRxDisabled;
 
   add_frame_variables(*ret, fe);
 

@@ -280,7 +280,7 @@ public:
   FPIEntVec fpitab;
 
   union {
-    uint8_t m_repoBoolBitset{0};
+    uint16_t m_repoBoolBitset{0};
     struct {
       bool isMemoizeWrapper    : 1;
       bool isMemoizeWrapperLSB : 1;
@@ -290,6 +290,7 @@ public:
       bool isNative            : 1;
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
+      bool isRxDisabled        : 1;
     };
   };
 

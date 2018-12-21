@@ -91,3 +91,15 @@ let rx_level_from_attr_string s = match s with
   | "rx_shallow"             -> Some RxShallow
   | "rx"                     -> Some Rx
   | _                        -> None
+
+let halves_of_is_enabled_body namespace ast_body =
+  match ast_body with
+  | (_, Ast.If ((_, Ast.Id const), enabled, disabled)) :: [] ->
+    let fq_const =
+      Namespaces.elaborate_id namespace Namespaces.ElaborateConst const in
+    if snd fq_const <> Naming_special_names.Rx.is_enabled then None else
+    begin match disabled with
+    | [] | [ _, Ast.Noop ] -> None
+    | _ -> Some (enabled, disabled)
+    end
+  | _ -> None

@@ -2247,7 +2247,7 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
-    funcAttrIsAnyRx(m_func->attrs);
+    funcAttrIsAnyRx(m_func->attrs) && !m_func->isRxDisabled;
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, unit()) << std::endl;
   }

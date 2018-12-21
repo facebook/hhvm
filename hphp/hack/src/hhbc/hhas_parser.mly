@@ -136,6 +136,7 @@ fundecl:
             (List.mem ~equal:(=) attrs "interceptable")
             false (* is_memoize_impl *)
             (rx_level attrs)
+            (List.mem ~equal:(=) $7 "isRxDisabled")
         }
 ;
 nl:
@@ -306,6 +307,7 @@ methoddecl:
     (List.mem ~equal:(=) (snd $2) "interceptable")
     false (* is_memoize_impl *)
     (rx_level (snd $2))
+    (List.mem ~equal:(=) $7 "isRxDisabled")
   }
 ;
 numclsrefslots:

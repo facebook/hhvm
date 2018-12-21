@@ -166,6 +166,7 @@ let emit_wrapper_function
     is_interceptable
     false (* is_memoize_impl *)
     Rx.NonRx
+    false (* function_rx_disabled *)
 
 let emit_wrapper_method
   ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
@@ -257,3 +258,4 @@ let emit_wrapper_method
     method_is_interceptable
     false (*method_is_memoize_impl*)
     Rx.NonRx
+    false (* method_rx_disabled *)

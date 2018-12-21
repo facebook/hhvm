@@ -550,6 +550,10 @@ inline RxLevel Func::rxLevel() const {
   return rxLevelFromAttr(m_attrs);
 }
 
+inline bool Func::isRxDisabled() const {
+  return shared()->m_isRxDisabled;
+}
+
 inline bool Func::isRxConditional() const {
   return rxConditionalFromAttr(m_attrs);
 }

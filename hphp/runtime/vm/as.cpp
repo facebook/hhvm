@@ -2468,6 +2468,12 @@ void parse_function_flags(AsmState& as) {
       as.fe->isClosureBody = true;
     } else if (flag == "isPairGenerator") {
       as.fe->isPairGenerator = true;
+    } else if (flag == "isRxDisabled") {
+      // this relies on attributes being parsed before flags
+      if (!funcAttrIsAnyRx(as.fe->attrs)) {
+        as.error("isRxDisabled on non-rx func");
+      }
+      as.fe->isRxDisabled = true;
     } else {
       as.error("Unexpected function flag \"" + flag + "\"");
     }
@@ -2650,6 +2656,7 @@ void parse_function(AsmState& as) {
   as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
+  // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
   check_native(as, false);
@@ -2702,6 +2709,7 @@ void parse_method(AsmState& as) {
   as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
+  // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
   check_native(as, name == "__construct" || name == "__destruct");

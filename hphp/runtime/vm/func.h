@@ -898,6 +898,12 @@ struct Func final {
   RxLevel rxLevel() const;
 
   /*
+   * Is this the version of the function body with reactivity disabled via
+   * if (Rx\IS_ENABLED) ?
+   */
+  bool isRxDisabled() const;
+
+  /*
    * Is this function conditionally reactive?
    */
   bool isRxConditional() const;
@@ -1299,12 +1305,13 @@ private:
     bool m_isPhpLeafFn : 1;
     bool m_takesNumArgs : 1;
     bool m_hasReifiedGenerics : 1;
+    bool m_isRxDisabled : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.
     unsigned int m_numClsRefSlots : 2;
 
-    // 18 bits of padding here in LOWPTR builds
+    // 16 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;

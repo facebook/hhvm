@@ -172,3 +172,4 @@ let emit_wrapper_function
     is_interceptable
     false (* is_memoize_impl *)
     function_rx_level
+    false (* function_rx_disabled *)

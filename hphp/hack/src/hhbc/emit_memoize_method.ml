@@ -386,6 +386,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     method_is_interceptable
     false (*method_is_memoize_impl*)
     method_rx_level
+    false (* method_rx_disabled *)
 
 let emit_wrapper_methods env info ast_class ast_methods =
   (* Wrapper methods may not have iterators *)

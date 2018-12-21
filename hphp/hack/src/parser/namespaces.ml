@@ -109,10 +109,13 @@ let autoimport_types = [
   "classname";
   "TypeStructure";
 ]
+let autoimport_consts = [
+  "Rx\\IS_ENABLED";
+]
 
 let autoimport_set =
   let autoimport_list
-    = autoimport_classes @ autoimport_funcs @ autoimport_types in
+    = autoimport_classes @ autoimport_funcs @ autoimport_types @ autoimport_consts in
   List.fold_left autoimport_list ~init:SSet.empty ~f:(fun s e -> SSet.add e s)
 
 (* Return the namespace (or None if the global one) into which id is auto imported.
@@ -243,7 +246,8 @@ let elaborate_id_impl ~autoimport nsenv kind id =
         | false, _ ->
           elaborate_into_current_ns nsenv id
         | true, ns_name ->
-          if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt && kind = ElaborateClass
+          if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt
+            && (kind = ElaborateClass || kind = ElaborateConst)
           then elaborate_into_ns ns_name id
           else global_id
     in

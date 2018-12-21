@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 6: isRxDisabled on non-rx func in %s/test/slow/rx/invalid_disabled_flag.hhas on line -1

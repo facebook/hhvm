@@ -202,6 +202,15 @@ let from_ast_wrapper : bool -> _ ->
         then Emit_env.get_lambda_rx_of_scope ast_class ast_method
         else Rx.NonRx
     in
+  let ast_body, is_rx_body, method_rx_disabled =
+    if method_rx_level <> Rx.NonRx then
+      match Rx.halves_of_is_enabled_body namespace ast_method.Ast.m_body with
+      | Some (enabled_body, disabled_body) ->
+        if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options
+        then enabled_body, true, false
+        else disabled_body, false, true
+      | None -> ast_method.Ast.m_body, true, false
+    else ast_method.Ast.m_body, false, false in
   let method_body, method_is_generator, method_is_pair_generator =
     if is_native_opcode_impl then
       Emit_native_opcode.emit_body
@@ -221,7 +230,7 @@ let from_ast_wrapper : bool -> _ ->
         ~is_memoize
         ~is_native
         ~is_async:method_is_async
-        ~is_rx_body:(method_rx_level <> Rx.NonRx)
+        ~is_rx_body
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
         ~default_dropthrough
@@ -231,7 +240,7 @@ let from_ast_wrapper : bool -> _ ->
         ast_method.Ast.m_tparams
         ast_method.Ast.m_params
         ret
-        [Ast.Stmt (Pos.none, Ast.Block ast_method.Ast.m_body)]
+        [Ast.Stmt (Pos.none, Ast.Block ast_body)]
   in
   let method_id =
     if has_inout_args && (method_is_closure_body || has_ref_params) then
@@ -264,6 +273,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_interceptable
       is_memoize (*method_is_memoize_impl*)
       method_rx_level
+      method_rx_disabled
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args && not (method_is_abstract && has_ref_params)

@@ -1009,6 +1009,7 @@ struct RuntimeOption {
    * 2 - Fail unit verification (i.e. fail to load it)                  \
    */                                                                   \
   F(int32_t, RxVerifyBody, 0)                                           \
+  F(bool, RxIsEnabled, EvalRxPretendIsEnabled)                          \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

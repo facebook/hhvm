@@ -17,6 +17,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/memcached/libmemcached_portability.h"
@@ -84,8 +85,9 @@ const StaticString
 struct MEMCACHEDGlobals final {
   std::string sess_prefix;
 };
-static __thread MEMCACHEDGlobals* s_memcached_globals;
-#define MEMCACHEDG(name) s_memcached_globals->name
+
+static RDS_LOCAL_NO_CHECK(MEMCACHEDGlobals*, s_memcached_globals){nullptr};
+#define MEMCACHEDG(name) (*s_memcached_globals)->name
 
 namespace {
 struct MemcachedResultWrapper {
@@ -457,7 +459,7 @@ struct MemcachedData {
   }
 
   typedef std::map<std::string, ImplPtr> ImplMap;
-  static THREAD_LOCAL(ImplMap, s_persistentMap);
+  static RDS_LOCAL(ImplMap, s_persistentMap);
 };
 
 void HHVM_METHOD(Memcached, __construct,
@@ -1191,24 +1193,23 @@ bool HHVM_METHOD(Memcached, touchbykey,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
+RDS_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
 
 struct MemcachedExtension final : Extension {
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
   void threadInit() override {
-    if (s_memcached_globals) {
-      return;
-    }
-    s_memcached_globals = new MEMCACHEDGlobals;
+    *s_memcached_globals = new MEMCACHEDGlobals;
+    assertx(*s_memcached_globals);
+
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
   }
 
   void threadShutdown() override {
-    delete s_memcached_globals;
-    s_memcached_globals = nullptr;
+    delete *s_memcached_globals;
+    *s_memcached_globals = nullptr;
   }
 
   void moduleInit() override {

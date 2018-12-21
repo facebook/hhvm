@@ -1,4 +1,4 @@
-/*
+  /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -71,31 +71,24 @@ void IntlError::throwException(const char *format, ...) {
 /////////////////////////////////////////////////////////////////////////////
 // INI Setting
 
-static __thread std::string* s_defaultLocale;
+static RDS_LOCAL(std::string, s_defaultLocale);
 
 void IntlExtension::bindIniSettings() {
-  assertx(!s_defaultLocale);
-  s_defaultLocale = new std::string;
+  s_defaultLocale.getCheck();
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",
-                   s_defaultLocale);
-}
-
-void IntlExtension::threadShutdown() {
-  delete s_defaultLocale;
-  s_defaultLocale = nullptr;
+                   s_defaultLocale.get()
+                 );
 }
 
 const String GetDefaultLocale() {
-  assertx(s_defaultLocale);
   if (s_defaultLocale->empty()) {
     return String(uloc_getDefault(), CopyString);
   }
-  return *s_defaultLocale;
+  return *(s_defaultLocale.get());
 }
 
 bool SetDefaultLocale(const String& locale) {
-  assertx(s_defaultLocale);
   *s_defaultLocale = locale.toCppString();
   return true;
 }

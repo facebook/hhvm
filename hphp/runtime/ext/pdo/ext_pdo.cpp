@@ -840,7 +840,8 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
 // PDO
 
 namespace {
-thread_local std::unordered_map<std::string,sp_PDOConnection> s_connections;
+  using StorageT = std::unordered_map<std::string, sp_PDOConnection>;
+  RDS_LOCAL(StorageT, s_connections);
 }
 
 const StaticString s_PDO("PDO");
@@ -925,8 +926,8 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
       shashkey = hashkey.detach().toCppString();
 
       /* let's see if we have one cached.... */
-      if (s_connections.count(shashkey)) {
-        auto const conn = s_connections[shashkey];
+      if (s_connections->count(shashkey)) {
+        auto const conn = (*s_connections)[shashkey];
         data->m_dbh = driver->createResource(conn);
 
         /* is the connection still alive ? */
@@ -976,7 +977,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
   } else if (data->m_dbh) {
     if (is_persistent) {
       assertx(!shashkey.empty());
-      s_connections[shashkey] = data->m_dbh->conn();
+      (*s_connections)[shashkey] = data->m_dbh->conn();
     }
 
     data->m_dbh->conn()->driver = driver;

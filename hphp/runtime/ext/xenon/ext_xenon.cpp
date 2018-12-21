@@ -14,16 +14,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
-
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/rds-local.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -85,7 +84,7 @@ struct XenonRequestLocalData final {
   // Set to true if this request is going to handle the log calls
   bool m_isProfiledRequest{false};
 };
-static THREAD_LOCAL(XenonRequestLocalData, s_xenonData);
+static RDS_LOCAL(XenonRequestLocalData, s_xenonData);
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics used by the Xenon classes

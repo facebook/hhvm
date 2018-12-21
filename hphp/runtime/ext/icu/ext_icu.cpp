@@ -236,10 +236,10 @@ struct LowerCaseTransliterator : ICUTransliterator {
 };
 
 
-// Thread-local globals.
-THREAD_LOCAL(SpaceMatcher, s_spaceMatcher);
-THREAD_LOCAL(NumMatcher, s_numMatcher);
-THREAD_LOCAL(LowerCaseTransliterator, s_lctranslit);
+// Request-local globals, contains internal variable of status
+RDS_LOCAL(SpaceMatcher, s_spaceMatcher);
+RDS_LOCAL(NumMatcher, s_numMatcher);
+RDS_LOCAL(LowerCaseTransliterator, s_lctranslit);
 
 
 /* Normalize a unicode string depending on its type.

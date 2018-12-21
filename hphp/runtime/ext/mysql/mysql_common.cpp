@@ -198,8 +198,8 @@ std::string MySQL::GetHash(const String& host, int port, const String& socket,
 }
 
 namespace {
-thread_local std::unordered_map<std::string,
-                                std::shared_ptr<MySQL>> s_connections;
+using StorageT = std::unordered_map<std::string, std::shared_ptr<MySQL>>;
+RDS_LOCAL(StorageT, s_connections);
 }
 
 std::shared_ptr<MySQL> MySQL::GetCachedImpl(const String& host, int port,
@@ -208,7 +208,7 @@ std::shared_ptr<MySQL> MySQL::GetCachedImpl(const String& host, int port,
                                             const String& password,
                                             int client_flags) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  return s_connections[key];
+  return (*s_connections)[key];
 }
 
 void MySQL::SetCachedImpl(const String& host, int port,
@@ -218,11 +218,11 @@ void MySQL::SetCachedImpl(const String& host, int port,
                           int client_flags,
                           std::shared_ptr<MySQL> conn) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  s_connections[key] = conn;
+  (*s_connections)[key] = conn;
 }
 
 size_t MySQL::NumCachedConnections() {
-  return s_connections.size();
+  return s_connections->size();
 }
 
 std::shared_ptr<MySQL> MySQL::GetDefaultConn() {

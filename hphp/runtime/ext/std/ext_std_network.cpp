@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -283,7 +284,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   }
 }
 
-static THREAD_LOCAL(int, s_response_code);
+static RDS_LOCAL(int, s_response_code);
 
 Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();

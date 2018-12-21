@@ -148,7 +148,7 @@ public:
   String id;
 };
 
-THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
+RDS_LOCAL_NO_CHECK(SessionRequestData, s_session);
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {
@@ -837,7 +837,7 @@ private:
     return nrdels;
   }
 };
-THREAD_LOCAL(FileSessionData, s_file_session_data);
+RDS_LOCAL(FileSessionData, s_file_session_data);
 
 struct FileSessionModule : SessionModule {
   FileSessionModule() : SessionModule("files") {
@@ -1969,13 +1969,13 @@ static struct SessionExtension final : Extension {
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.hash_bits_per_character", "4",
                      &s_session->hash_bits_per_character);
-  }
+}
 
-  void threadShutdown() override {
-    s_session.destroy();
-  }
+void threadShutdown() override {
+ s_session.destroy();
+}
 
-  void requestInit() override {
+void requestInit() override {
     s_session->init();
   }
 

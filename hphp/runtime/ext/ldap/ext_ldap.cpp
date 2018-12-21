@@ -190,7 +190,7 @@ struct LdapRequestData {
 
   RootMap<LdapLink> m_links;
 };
-static THREAD_LOCAL(LdapRequestData, s_ldap_data);
+static RDS_LOCAL(LdapRequestData, s_ldap_data);
 #define LDAPG(name) s_ldap_data->m_ ## name
 
 void LdapExtension::requestInit() {

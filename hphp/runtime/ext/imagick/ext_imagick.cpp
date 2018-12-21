@@ -352,7 +352,7 @@ bool ImagickExtension::hasProgressMonitor() {
   return s_ini_setting->m_progress_monitor;
 }
 
-THREAD_LOCAL(ImagickExtension::ImagickIniSetting,
+RDS_LOCAL(ImagickExtension::ImagickIniSetting,
                        ImagickExtension::s_ini_setting);
 
 ImagickExtension s_imagick_extension;

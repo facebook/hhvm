@@ -91,7 +91,7 @@ struct LibXmlRequestData final : RequestEventHandler {
   RootMap<File> m_streams;
 };
 
-IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
+IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, rl_libxml_request_data);
 
 namespace {
 
@@ -106,7 +106,7 @@ namespace {
 // or are able to store it in a object.
 inline void* rememberStream(req::ptr<File>&& stream) {
   return reinterpret_cast<void*>(
-    tl_libxml_request_data->m_streams.addRoot(std::move(stream))
+    rl_libxml_request_data->m_streams.addRoot(std::move(stream))
   );
 }
 
@@ -114,14 +114,14 @@ inline void* rememberStream(req::ptr<File>&& stream) {
 // If the token is not in the m_streams map, it means a pointer to
 // the File has been stored directly in the XML context.
 inline req::ptr<File> getStream(void* userData) {
-  auto file = tl_libxml_request_data->m_streams.lookupRoot(userData);
+  auto file = rl_libxml_request_data->m_streams.lookupRoot(userData);
   return file ? file : *reinterpret_cast<req::ptr<File>*>(userData);
 }
 
 // This closes and deletes the File associated with the given token.
 // It is used by the XML callback that destroys a context.
 inline bool forgetStream(void* userData) {
-  auto ptr = tl_libxml_request_data->m_streams.removeRoot(userData);
+  auto ptr = rl_libxml_request_data->m_streams.removeRoot(userData);
   return ptr->close();
 }
 
@@ -207,7 +207,7 @@ static req::ptr<File> libxml_streams_IO_open_wrapper(
   // PHP unescapes the URI here, but that should properly be done by the
   // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
   return File::Open(strFilename, mode, 0,
-                    tl_libxml_request_data->m_streams_context);
+                    rl_libxml_request_data->m_streams_context);
 }
 
 int libxml_streams_IO_read(void* context, char* buffer, int len) {
@@ -294,7 +294,7 @@ libxml_create_input_buffer(const char* URI, xmlCharEncoding enc) {
   ITRACE(1, "libxml_create_input_buffer({}, {})\n", URI, static_cast<int>(enc));
   Trace::Indent _i;
 
- if (tl_libxml_request_data->m_entity_loader_disabled || !URI) return nullptr;
+ if (rl_libxml_request_data->m_entity_loader_disabled || !URI) return nullptr;
 
   auto stream = libxml_streams_IO_open_wrapper(URI, "rb", true);
   if (!stream || stream->isInvalid()) return nullptr;
@@ -342,14 +342,14 @@ libxml_create_output_buffer(const char *URI,
 ///////////////////////////////////////////////////////////////////////////////
 
 bool libxml_use_internal_error() {
-  return tl_libxml_request_data->m_use_error;
+  return rl_libxml_request_data->m_use_error;
 }
 
 void libxml_add_error(const std::string &msg) {
-  if (tl_libxml_request_data->m_suppress_error) {
+  if (rl_libxml_request_data->m_suppress_error) {
     return;
   }
-  xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
+  xmlErrorVec* error_list = &rl_libxml_request_data->m_errors;
 
   error_list->resize(error_list->size() + 1);
   xmlError &error_copy = error_list->back();
@@ -475,9 +475,6 @@ bool isOrphanedRoot(xmlNodePtr node) {
 
 }
 
-struct LibXmlDeferredTrees;
-THREAD_LOCAL(LibXmlDeferredTrees, tl_libxml_trees);
-
 // Unfortunately this struct can't be declared with internal linkage as it
 // contains pointers to request allocated resources
 struct LibXmlDeferredTrees final {
@@ -497,10 +494,10 @@ struct LibXmlDeferredTrees final {
   static void decref(xmlNodePtr root) {
     if (!root) return;
 
-    auto it = tl_libxml_trees->m_refCounts.find(root);
-    assertx(it != tl_libxml_trees->m_refCounts.end() && it->second > 0);
+    auto it = rl_libxml_trees->m_refCounts.find(root);
+    assertx(it != rl_libxml_trees->m_refCounts.end() && it->second > 0);
     if (!--it->second) {
-      tl_libxml_trees->m_refCounts.erase(it);
+      rl_libxml_trees->m_refCounts.erase(it);
 
       // There may be new undiscovered roots, this free will find them and
       // re-add the root to the deferred list.
@@ -517,8 +514,8 @@ struct LibXmlDeferredTrees final {
     assertx(!MemoryManager::sweeping());
 
     {
-      auto it = tl_libxml_trees->m_refCounts.find(root);
-      if (it != tl_libxml_trees->m_refCounts.end()) {
+      auto it = rl_libxml_trees->m_refCounts.find(root);
+      if (it != rl_libxml_trees->m_refCounts.end()) {
         assertx(it->second != 0);
         return true;
       }
@@ -538,9 +535,11 @@ struct LibXmlDeferredTrees final {
       [&] (xmlNodePtr node) {}
     );
     if (!count) return false;
-    tl_libxml_trees->m_refCounts.emplace(root, count);
+    rl_libxml_trees->m_refCounts.emplace(root, count);
     return true;
   }
+
+  static RDS_LOCAL(LibXmlDeferredTrees, rl_libxml_trees);
 
 private:
   static xmlNodePtr& rootOf(xmlNodePtr node) {
@@ -550,10 +549,11 @@ private:
 
   req::fast_map<xmlNodePtr,uint32_t> m_refCounts;
 };
+RDS_LOCAL(LibXmlDeferredTrees, LibXmlDeferredTrees::rl_libxml_trees);
 
 static void php_libxml_node_free_resource(xmlNodePtr node, bool force) {
   // If we are sweeping or otherwise iterating the list of roots or ref counts
-  // it is unsafe to perform hasRefs as that may allocate a new tl_libxml_trees
+  // it is unsafe to perform hasRefs as that may allocate a new rl_libxml_trees
   // or invalidate an active iterator. When called with force we are always
   // shutting down and therefore about to lose track of any stored root data
   // so the loss of consistency is fine.
@@ -627,10 +627,10 @@ String libxml_get_valid_file_path(const String& source) {
 }
 
 static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
-  if (tl_libxml_request_data->m_suppress_error) {
+  if (rl_libxml_request_data->m_suppress_error) {
     return;
   }
-  xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
+  xmlErrorVec* error_list = &rl_libxml_request_data->m_errors;
 
   error_list->resize(error_list->size() + 1);
   xmlError &error_copy = error_list->back();
@@ -666,7 +666,7 @@ static Object create_libxmlerror(xmlError &error) {
 }
 
 Array HHVM_FUNCTION(libxml_get_errors) {
-  xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
+  xmlErrorVec* error_list = &rl_libxml_request_data->m_errors;
   const auto length = error_list->size();
   if (!length) {
     return empty_array();
@@ -688,38 +688,38 @@ Variant HHVM_FUNCTION(libxml_get_last_error) {
 
 void HHVM_FUNCTION(libxml_clear_errors) {
   xmlResetLastError();
-  tl_libxml_request_data->m_errors.reset();
+  rl_libxml_request_data->m_errors.reset();
 }
 
 bool HHVM_FUNCTION(libxml_use_internal_errors, bool use_errors) {
   bool ret = (xmlStructuredError == libxml_error_handler);
   if (!use_errors) {
     xmlSetStructuredErrorFunc(nullptr, nullptr);
-    tl_libxml_request_data->m_use_error = false;
-    tl_libxml_request_data->m_suppress_error = false;
-    tl_libxml_request_data->m_errors.reset();
+    rl_libxml_request_data->m_use_error = false;
+    rl_libxml_request_data->m_suppress_error = false;
+    rl_libxml_request_data->m_errors.reset();
   } else {
     xmlSetStructuredErrorFunc(nullptr, libxml_error_handler);
-    tl_libxml_request_data->m_use_error = true;
-    tl_libxml_request_data->m_suppress_error = false;
+    rl_libxml_request_data->m_use_error = true;
+    rl_libxml_request_data->m_suppress_error = false;
   }
   return ret;
 }
 
 void HHVM_FUNCTION(libxml_suppress_errors, bool suppress_errors) {
-  tl_libxml_request_data->m_suppress_error = suppress_errors;
+  rl_libxml_request_data->m_suppress_error = suppress_errors;
 }
 
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
-  bool old = tl_libxml_request_data->m_entity_loader_disabled;
+  bool old = rl_libxml_request_data->m_entity_loader_disabled;
 
-  tl_libxml_request_data->m_entity_loader_disabled = disable;
+  rl_libxml_request_data->m_entity_loader_disabled = disable;
 
   return old;
 }
 
 void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
-  tl_libxml_request_data->m_streams_context =
+  rl_libxml_request_data->m_streams_context =
     dyn_cast_or_null<StreamContext>(context);
 }
 
@@ -817,12 +817,12 @@ struct LibXMLExtension final : Extension {
     }
 
     void requestInit() override {
-      assertx(tl_libxml_trees.isNull());
+      assertx(LibXmlDeferredTrees::rl_libxml_trees.isNull());
       xmlResetLastError();
     }
 
     void requestShutdown() override {
-      tl_libxml_trees.destroy();
+      LibXmlDeferredTrees::rl_libxml_trees.destroy();
     }
 
 } s_libxml_extension;

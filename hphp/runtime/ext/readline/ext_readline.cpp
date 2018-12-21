@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/lock.h"
@@ -34,7 +35,7 @@ struct ReadlineVars {
   Array array;
 };
 
-THREAD_LOCAL(ReadlineVars, s_readline);
+RDS_LOCAL(ReadlineVars, s_readline);
 
 static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   auto result = readline(

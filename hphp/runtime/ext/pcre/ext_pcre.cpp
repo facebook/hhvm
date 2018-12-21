@@ -257,7 +257,8 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
+// The extern symbol would resolve at link time to the same RDS_LOCAL
+// as defined in hphp/runtime/base/preg.cpp
 extern RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 struct PcreExtension final : Extension {

@@ -124,7 +124,6 @@ struct IntlExtension final : Extension {
   void threadInit() override {
     bindIniSettings();
   }
-  void threadShutdown() override;
  private:
   void bindIniSettings();
   void bindConstants();

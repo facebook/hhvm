@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
@@ -72,7 +73,7 @@ struct MysqliIniSetting {
   std::string m_default_pw;
 };
 
-THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
+RDS_LOCAL(MysqliIniSetting, s_ini_setting);
 
 // System-wide ini settings -- PHP_INI_SYSTEM
 static bool allow_local_infile = true;

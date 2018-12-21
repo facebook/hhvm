@@ -22,7 +22,7 @@
 namespace HPHP {
 namespace {
 
-  THREAD_LOCAL(folly::Random::DefaultGenerator, tl_rng);
+  RDS_LOCAL(folly::Random::DefaultGenerator, tl_rng);
   int64_t HHVM_FUNCTION(HH_pseudorandom_int, int64_t min, int64_t max) {
     return std::uniform_int_distribution<int64_t>(min, max)(*tl_rng);
   }

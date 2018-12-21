@@ -21,7 +21,7 @@
 namespace HPHP {
 namespace {
 
-  THREAD_LOCAL(int64_t, request_time_ns);
+  RDS_LOCAL(int64_t, request_time_ns);
 
   int64_t HHVM_FUNCTION(HH_request_time_ns) {
     return *request_time_ns.get();

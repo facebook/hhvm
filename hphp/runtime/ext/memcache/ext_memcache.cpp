@@ -49,8 +49,8 @@ struct MEMCACHEGlobals final {
   std::string hash_function;
 };
 
-static __thread MEMCACHEGlobals* s_memcache_globals;
-#define MEMCACHEG(name) s_memcache_globals->name
+static RDS_LOCAL_NO_CHECK(MEMCACHEGlobals*, s_memcache_globals){nullptr};
+#define MEMCACHEG(name) (*s_memcache_globals)->name
 
 const StaticString s_MemcacheData("MemcacheData");
 
@@ -757,8 +757,8 @@ HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 11211 */,
 struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
-      assertx(!s_memcache_globals);
-      s_memcache_globals = new MEMCACHEGlobals;
+      *s_memcache_globals = new MEMCACHEGlobals;
+      assertx(*s_memcache_globals);
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
@@ -775,8 +775,8 @@ struct MemcacheExtension final : Extension {
                        &MEMCACHEG(hash_function));
     }
     void threadShutdown() override {
-      delete s_memcache_globals;
-      s_memcache_globals = nullptr;
+      delete *s_memcache_globals;
+      *s_memcache_globals = nullptr;
     }
 
     void moduleInit() override {

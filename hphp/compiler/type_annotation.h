@@ -74,7 +74,7 @@ DECLARE_BOOST_TYPES(TypeAnnotation);
  *                                               |__________________|
  *
  * For shapes, we reinterpret the fields of TypeAnnotation so that we
- * store the full information of a shape type. We use the the typeArgs
+ * store the full information of a shape type. We use the typeArgs
  * to point to its member list; each member (field name => field type
  * pairs) has its own TypeAnnotation: the field name is stored in
  * m_name, and the field type is stored in its typeArgs, and we use

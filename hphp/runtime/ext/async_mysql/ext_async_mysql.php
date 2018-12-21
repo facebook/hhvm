@@ -576,7 +576,7 @@ final class AsyncMysqlConnection {
    *
    * The first successful activity of the current connection is its creation.
    *
-   * @return - A `float` representing the the number of seconds ago since epoch
+   * @return - A `float` representing the number of seconds ago since epoch
    *           that we had successful activity on the current connection.
    */
   <<__HipHopSpecific, __Native>>

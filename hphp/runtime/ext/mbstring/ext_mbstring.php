@@ -586,7 +586,7 @@ function mb_preferred_mime_name(string $encoding): mixed;
 function mb_regex_encoding(?string $encoding = null): mixed;
 
 /**
- * @param string $options - The options to set. This is a a string where each
+ * @param string $options - The options to set. This is a string where each
  *   character is an option. To set a mode, the mode character must be the last
  *   one set, however there can only be set one mode but multiple options. Regex
  *   options Option Meaning i Ambiguity match on x Enables extended pattern form

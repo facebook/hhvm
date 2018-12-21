@@ -67,7 +67,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  * exists.
  *
  * Any node properly connected to the root element of an xmlDoc* will remain
- * valid until such time the the owning xmlDoc* becomes invalid or the node
+ * valid until such time the owning xmlDoc* becomes invalid or the node
  * becomes orphaned from the root and its subtree is freed.
  *
  * Documents will remain valid until such time that there are no further

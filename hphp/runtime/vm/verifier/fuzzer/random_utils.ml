@@ -22,7 +22,7 @@ type lazy_instruct = unit -> instruct
 
 let _ = Random.self_init ()
 
-(* Gets a random element from a a list *)
+(* Gets a random element from a list *)
 let rand_elt lst =
   if List.length lst < 0 then failwith "Cannot get rand elt of zero length lst";
   let i = Random.int (List.length lst) in

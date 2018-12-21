@@ -1,4 +1,4 @@
-# The strange set-up here is because Debian doesn't like the license on the the
+# The strange set-up here is because Debian doesn't like the license on the
 # bundled parser. The built in one is still preferred though, so only use json-c
 # if the USE_JSONC option is set
 

@@ -154,8 +154,8 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstRawPtr ar,
       allDeclNames.insert(param->getName());
     }
 
-    // For the purpose of naming (having entered the the function body), a
-    // variadic capture param acts as any other variable.
+    // For the purpose of naming (having entered the function body), a variadic
+    // capture param acts as any other variable.
     for (i = (numDeclParam - 1); i >= 0; --i) {
       auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (names.find(param->getName()) != names.end()) {

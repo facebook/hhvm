@@ -4117,7 +4117,7 @@ res::Func Index::resolve_method(Context ctx,
 
   /*
    * Whether or not the context class has a private method with the
-   * same name as the the method we're trying to call.
+   * same name as the method we're trying to call.
    */
   auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
     if (!ctx.cls) return false;
@@ -4125,7 +4125,7 @@ res::Func Index::resolve_method(Context ctx,
     if (begin(range) == end(range)) {
       // This class had no pre-resolved ClassInfos, which means it
       // always fatals in any way it could be defined, so it doesn't
-      // matter what we return here (as all methods in the the context
+      // matter what we return here (as all methods in the context
       // class are unreachable code).
       return true;
     }

@@ -97,7 +97,7 @@ void CmdList::help(DebuggerClient &client) {
 // The current location is initially determined by the location
 // where execution was interrupted to hand control back to
 // the debugger client and can thereafter be modified by list
-// commands and by switching the the stack frame.
+// commands and by switching the stack frame.
 //
 // The lineFocus and charFocus parameters
 // are non zero only when the source location comes from a breakpoint.

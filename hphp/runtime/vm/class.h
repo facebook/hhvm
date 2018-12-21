@@ -762,7 +762,7 @@ public:
    *
    * For declared instance properties, this means creating a request-local copy
    * of this Class's PropInitVec.  This is necessary in order to accommodate
-   * non-scalar defaults (e.g., class constants), which not be consistent
+   * non-scalar defaults (e.g., class constants), which may not be consistent
    * across requests.
    *
    * For static properties, this means setting up request-local memory for the

@@ -548,7 +548,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         }
       }
       // Break out of the while loop so that we can fall through to the
-      // to the call the the PHP5 autoload impl below.
+      // to the call the PHP5 autoload impl below.
       break;
     }
   }

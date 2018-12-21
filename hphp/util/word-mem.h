@@ -190,11 +190,11 @@ inline void memcpy16_inline(void* dst, const void* src, size_t len) {
  * the two strings have the same length. It will not check for the null
  * terminator.
  *
- * Assumes that the the buffer addresses are word aligned, and that it can
- * read lenBytes rounded up to a whole word. This is possible in HPHP because
- * we always allocate whole numbers of words.
- * The final word compare is adjusted to handle the slack in lenBytes so only
- * the bytes we care about are compared.
+ * Assumes that the buffer addresses are word aligned, and that it can read
+ * lenBytes rounded up to a whole word. This is possible in HPHP because we
+ * always allocate whole numbers of words.  The final word compare is adjusted
+ * to handle the slack in lenBytes so only the bytes we care about are
+ * compared.
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {

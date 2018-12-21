@@ -36,7 +36,6 @@ let make_info ast_class class_id ast_methods =
     then
     let pos = fst ast_method.Ast.m_name in
     Emit_memoize_helpers.check_memoize_possible pos
-      ~ret_by_ref: ast_method.Ast.m_ret_by_ref
       ~params: ast_method.Ast.m_params
       ~is_method:true;
     if ast_class.Ast.c_kind = Ast.Cinterface
@@ -347,7 +346,6 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     || original_name = Naming_special_names.Members.__destruct
     then None
     else ast_method.Ast.m_ret in
-  let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let method_id = Hhbc_id.Method.from_ast_name original_name in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
@@ -385,7 +383,6 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     false (*method_is_generator*)
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
-    method_is_return_by_ref
     method_is_interceptable
     false (*method_is_memoize_impl*)
     method_rx_level

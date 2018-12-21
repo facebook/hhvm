@@ -127,9 +127,7 @@ let make_wrapper_body env return_type params instrs =
 
 let emit_wrapper_function
   ~original_id ~renamed_id ~is_method ~deprecation_info ast_fun =
-  let ret_by_ref = ast_fun.Ast.f_ret_by_ref in
   Emit_memoize_helpers.check_memoize_possible (fst ast_fun.Ast.f_name)
-    ~ret_by_ref
     ~params: ast_fun.Ast.f_params
     ~is_method;
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
@@ -171,7 +169,6 @@ let emit_wrapper_function
     Closure_convert.TopLevel
     false (* no_injection *)
     false (* inout_wrapper *)
-    ret_by_ref
     is_interceptable
     false (* is_memoize_impl *)
     function_rx_level

@@ -9,7 +9,7 @@ class B {
 }
 
 class C {
-  function& __call($x, $y) { global $x; return $x; }
+  function __call($x, $y) { global $x; return $x; }
 }
 
 $x = 'heh';

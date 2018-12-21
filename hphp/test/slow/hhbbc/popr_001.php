@@ -2,7 +2,7 @@
 
 class A {}
 
-function &bar(&$a) {
+function bar(&$a) {
   return $a[0];
 }
 

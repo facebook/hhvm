@@ -12,7 +12,7 @@
         ((missing 0 ())
          (((end_of_line 1) (delimited_comment 149) (end_of_line 1)) function
           8 ((whitespace 1)))
-         (missing 0 ()) (() name 16 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 16 ()) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 10
             ((parameter_declaration 10
@@ -364,7 +364,7 @@
            (end_of_line 1) (single_line_comment 51) (end_of_line 1)
            (end_of_line 1) (delimited_comment 52) (end_of_line 1))
           function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 22 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 22 ()) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 10
             ((parameter_declaration 10
@@ -422,7 +422,7 @@
         ((missing 0 ())
          (((end_of_line 1) (delimited_comment 43) (end_of_line 1)) function 8
           ((whitespace 1)))
-         (missing 0 ()) (() name 18 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 18 ()) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 10
             ((parameter_declaration 10

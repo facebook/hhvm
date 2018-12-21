@@ -13,14 +13,14 @@ module H = Hhbc_ast
 
 type wrapper_type = InoutWrapper | RefWrapper
 
-let extract_inout_or_ref_param_locations ~is_sync ~is_byref ~is_closure_or_func params =
+let extract_inout_or_ref_param_locations ~is_sync ~is_closure_or_func params =
   let inout_param_locations = List.filter_mapi params
     ~f:(fun i p -> if p.Ast.param_callconv <> Some Ast.Pinout
                    then None else Some i) in
   if List.length inout_param_locations <> 0 then
     Some InoutWrapper, inout_param_locations
   else
-    if not is_sync || is_byref
+    if not is_sync
     then None, []
     else
     let module O = Hhbc_options in
@@ -38,19 +38,15 @@ let extract_inout_or_ref_param_locations ~is_sync ~is_byref ~is_closure_or_func 
     else Some RefWrapper, l
 
 let extract_function_inout_or_ref_param_locations fd =
-  let is_byref = fd.Ast.f_ret_by_ref in
   let is_sync = fd.Ast.f_fun_kind = Ast.FSync in
   extract_inout_or_ref_param_locations
-    ~is_byref
     ~is_closure_or_func:true
     ~is_sync
     fd.Ast.f_params
 
 let extract_method_inout_or_ref_param_locations md ~is_closure_or_func =
-  let is_byref = md.Ast.m_ret_by_ref in
   let is_sync = md.Ast.m_fun_kind = Ast.FSync in
   extract_inout_or_ref_param_locations
-    ~is_byref
     ~is_closure_or_func
     ~is_sync
     md.Ast.m_params

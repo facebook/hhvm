@@ -13,7 +13,7 @@
             ((missing 0 ())
              (function_declaration_header 14
               ((missing 0 ()) (((whitespace 2)) function 8 ((whitespace 1)))
-               (missing 0 ()) (() name 1 ()) (missing 0 ()) (() "(" 1 ())
+               (() name 1 ()) (missing 0 ()) (() "(" 1 ())
                (list 2
                 ((list_item 2
                   ((parameter_declaration 2

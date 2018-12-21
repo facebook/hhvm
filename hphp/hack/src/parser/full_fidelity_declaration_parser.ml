@@ -1612,10 +1612,7 @@ module WithExpressionAndStatementAndTypeParser
     *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
-    (* In non-strict mode we allow an & to appear before the name.
-       In strict mode this produces an error during post-parsing. *)
     let (parser, function_token) = require_function parser in
-    let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
       parse_function_label_opt parser ~is_methodish in
     let (parser, generic_type_parameter_list) =
@@ -1629,7 +1626,6 @@ module WithExpressionAndStatementAndTypeParser
       parser
       modifiers
       function_token
-      ampersand_token
       label
       generic_type_parameter_list
       left_paren_token

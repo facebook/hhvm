@@ -368,7 +368,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.FunctionDeclarationHeader {
       function_modifiers = modifiers;
       function_keyword = kw;
-      function_ampersand = amp;
       function_name = name;
       function_type_parameter_list = type_params;
       function_left_paren = leftp;
@@ -379,7 +378,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       function_where_clause = where } ->
     Concat [
       Span (
-        transform_fn_decl_name env modifiers kw amp name type_params leftp);
+        transform_fn_decl_name env modifiers kw name type_params leftp);
       transform_fn_decl_args env params rightp colon ret_type where;
     ]
   | Syntax.WhereClause {
@@ -414,7 +413,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           | Syntax.FunctionDeclarationHeader {
               function_modifiers = modifiers;
               function_keyword = kw;
-              function_ampersand = amp;
               function_name = name;
               function_type_parameter_list = type_params;
               function_left_paren = leftp;
@@ -427,7 +425,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
               transform_fn_decl_name env
                 modifiers
                 kw
-                amp
                 name
                 type_params
                 leftp
@@ -460,7 +457,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           | Syntax.FunctionDeclarationHeader {
               function_modifiers = modifiers;
               function_keyword = kw;
-              function_ampersand = amp;
               function_name = name;
               function_type_parameter_list = type_params;
               function_left_paren = leftp;
@@ -473,7 +469,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
               transform_fn_decl_name env
                 modifiers
                 kw
-                amp
                 name
                 type_params
                 leftp
@@ -1265,7 +1260,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       anonymous_async_keyword = async_kw;
       anonymous_coroutine_keyword = coroutine_kw;
       anonymous_function_keyword = fun_kw;
-      anonymous_ampersand = amp;
       anonymous_left_paren = lp;
       anonymous_parameters = params;
       anonymous_right_paren = rp;
@@ -1283,7 +1277,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env coroutine_kw;
       when_present coroutine_kw space;
       t env fun_kw;
-      when_present amp space;
       transform_argish_with_return_type env lp params rp colon ret_type;
       t env use;
       handle_possible_compound_statement env
@@ -1297,7 +1290,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       php7_anonymous_async_keyword = async_kw;
       php7_anonymous_coroutine_keyword = coroutine_kw;
       php7_anonymous_function_keyword = fun_kw;
-      php7_anonymous_ampersand = amp;
       php7_anonymous_left_paren = lp;
       php7_anonymous_parameters = params;
       php7_anonymous_right_paren = rp;
@@ -1315,7 +1307,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env coroutine_kw;
       when_present coroutine_kw space;
       t env fun_kw;
-      when_present amp space;
       transform_argish env lp params rp;
       t env use;
       t env colon;
@@ -2702,13 +2693,12 @@ and handle_possible_chaining env (obj, arrow1, member1) argish =
     ]
   | _ -> failwith "Expected a chain of at least length 1"
 
-and transform_fn_decl_name env modifiers kw amp name type_params leftp =
+and transform_fn_decl_name env modifiers kw name type_params leftp =
   let mods = handle_possible_list env ~after_each:(fun _ -> Space) modifiers in
   [
     mods;
     t env kw;
     Space;
-    t env amp;
     t env name;
     t env type_params;
     t env leftp;

@@ -7,20 +7,15 @@ function foo($x) {
 }
 function baz(&$x) {
 }
-function &fiz(&$x) {
-  return $x->foo[1]->prop;
-}
 
 <<__EntryPoint>>
 function main_1097() {
-foo(false);
-foreach ($x->foo[1]->prop as &$y) {
-}
-var_dump($x);
-baz($q->foo[1]->prop);
-var_dump($q);
-$y = &$z->foo[1]->prop;
-var_dump($z);
-fiz($w);
-var_dump($w);
+  foo(false);
+  foreach ($x->foo[1]->prop as &$y) {
+  }
+  var_dump($x);
+  baz($q->foo[1]->prop);
+  var_dump($q);
+  $y = &$z->foo[1]->prop;
+  var_dump($z);
 }

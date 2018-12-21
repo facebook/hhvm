@@ -51,7 +51,7 @@ module type SmartConstructors_S = sig
   val make_namespace_group_use_declaration : r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_namespace_use_clause : r -> r -> r -> r -> t -> t * r
   val make_function_declaration : r -> r -> r -> t -> t * r
-  val make_function_declaration_header : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_function_declaration_header : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_where_clause : r -> r -> t -> t * r
   val make_where_constraint : r -> r -> r -> t -> t * r
   val make_methodish_declaration : r -> r -> r -> r -> t -> t * r
@@ -115,8 +115,8 @@ module type SmartConstructors_S = sig
   val make_concurrent_statement : r -> r -> t -> t * r
   val make_simple_initializer : r -> r -> t -> t * r
   val make_anonymous_class : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_php7_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_php7_anonymous_function : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_anonymous_function_use_clause : r -> r -> r -> r -> t -> t * r
   val make_lambda_expression : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_lambda_signature : r -> r -> r -> r -> r -> t -> t * r
@@ -236,7 +236,7 @@ end) = struct
     let namespace_group_use_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_namespace_group_use_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6)
     let namespace_use_clause parser arg0 arg1 arg2 arg3 = call parser (SCI.make_namespace_use_clause arg0 arg1 arg2 arg3)
     let function_declaration parser arg0 arg1 arg2 = call parser (SCI.make_function_declaration arg0 arg1 arg2)
-    let function_declaration_header parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 = call parser (SCI.make_function_declaration_header arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10)
+    let function_declaration_header parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_function_declaration_header arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
     let where_clause parser arg0 arg1 = call parser (SCI.make_where_clause arg0 arg1)
     let where_constraint parser arg0 arg1 arg2 = call parser (SCI.make_where_constraint arg0 arg1 arg2)
     let methodish_declaration parser arg0 arg1 arg2 arg3 = call parser (SCI.make_methodish_declaration arg0 arg1 arg2 arg3)
@@ -300,8 +300,8 @@ end) = struct
     let concurrent_statement parser arg0 arg1 = call parser (SCI.make_concurrent_statement arg0 arg1)
     let simple_initializer parser arg0 arg1 = call parser (SCI.make_simple_initializer arg0 arg1)
     let anonymous_class parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
-    let anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12 = call parser (SCI.make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12)
-    let php7_anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12 = call parser (SCI.make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12)
+    let anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 = call parser (SCI.make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11)
+    let php7_anonymous_function parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 = call parser (SCI.make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11)
     let anonymous_function_use_clause parser arg0 arg1 arg2 arg3 = call parser (SCI.make_anonymous_function_use_clause arg0 arg1 arg2 arg3)
     let lambda_expression parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_lambda_expression arg0 arg1 arg2 arg3 arg4 arg5)
     let lambda_signature parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_lambda_signature arg0 arg1 arg2 arg3 arg4)

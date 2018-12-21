@@ -66,27 +66,6 @@ Notice: Hack Array Compat: Lval on missing array element in %s on line %d
 Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
 
 Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-========== ref_return (empty) ==============================
-
-Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 4 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 10 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key1" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
 ========== iterate_by_ref (empty) ==========================
 
 Notice: Hack Array Compat: Ref binding iteration on array in %s on line %d
@@ -136,25 +115,6 @@ Notice: Hack Array Compat: Binding new-element ref in array in %s on line %d
 
 Notice: Hack Array Compat: Lval on missing array element in %s on line %d
 ========== set_ref (packed) =================================
-
-Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 4 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 10 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key1" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-========== ref_return (packed) ==============================
 
 Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
 
@@ -234,23 +194,6 @@ Notice: Hack Array Compat: Binding ref in array with key "key1" in %s on line %d
 Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
 
 Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-========== ref_return (mixed) ==============================
-
-Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 4 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 10 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key1" in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
 ========== iterate_by_ref (mixed) ==========================
 
 Notice: Hack Array Compat: Ref binding iteration on array in %s on line %d
@@ -296,23 +239,6 @@ Notice: Hack Array Compat: Binding new-element ref in array in %s on line %d
 
 Notice: Hack Array Compat: Lval on missing array element in %s on line %d
 ========== set_ref (apc) =================================
-
-Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 4 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key 10 in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key1" in %s on line %d
-
-Notice: Hack Array Compat: Binding ref in array with key "key2" in %s on line %d
-
-Notice: Hack Array Compat: Lval on missing array element in %s on line %d
-========== ref_return (apc) ==============================
 
 Notice: Hack Array Compat: Binding ref in array with key 3 in %s on line %d
 

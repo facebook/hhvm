@@ -174,7 +174,7 @@ module SC = struct
     | v, Ignored | Ignored, v -> st, v
     | v1, v2 -> st, List [v1; v2]
 
-  let make_function_declaration_header _modifiers _keyword _ampersand name
+  let make_function_declaration_header _modifiers _keyword name
     _type_parameters _left_paren _param_list _right_paren
     _colon _type _where st =
     st, if name = Ignored then Ignored else FunctionDecl name

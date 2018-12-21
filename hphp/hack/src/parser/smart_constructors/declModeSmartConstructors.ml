@@ -47,16 +47,16 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       false :: t, Syntax.make_lambda_expression a1 a2 a3 a4 a5 body
     | _ -> failwith "Invalid state"
 
-  let make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 body = function
+  let make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body = function
     | saw_yield :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: t ->
       let body = replace_body body saw_yield in
-      false :: t, Syntax.make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 body
+      false :: t, Syntax.make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body
     | _ -> failwith "Invalid state"
 
-  let make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 body = function
+  let make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body = function
     | saw_yield :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: t ->
       let body = replace_body body saw_yield in
-      false :: t, Syntax.make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 body
+      false :: t, Syntax.make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body
     | _ -> failwith "Invalid state"
 
   let make_awaitable_creation_expression a1 a2 a3 body = function

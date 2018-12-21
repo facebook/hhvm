@@ -43,7 +43,6 @@ type t = {
   option_include_search_paths             : string list;
   option_include_roots                    : string SMap.t;
   option_enable_perf_logging              : bool;
-  option_disable_return_by_reference      : bool;
   option_enable_reified_generics          : bool;
   option_enable_intrinsics_extension      : bool;
   option_enable_hhjs                      : bool;
@@ -93,7 +92,6 @@ let default = {
   option_include_search_paths = [];
   option_include_roots = SMap.empty;
   option_enable_perf_logging = false;
-  option_disable_return_by_reference = false;
   option_enable_reified_generics = false;
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
@@ -140,7 +138,6 @@ let doc_root o = o.option_doc_root
 let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
 let enable_perf_logging o = o.option_enable_perf_logging
-let disable_return_by_reference o = o.option_disable_return_by_reference
 let enable_reified_generics o = o.option_enable_reified_generics
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
@@ -196,7 +193,6 @@ let to_string o =
     ; Printf.sprintf "include_search_paths: [%s]" search_paths
     ; Printf.sprintf "include_roots: {%s}" inc_roots
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
-    ; Printf.sprintf "disable_return_by_reference: %B" @@ disable_return_by_reference o
     ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
     ; Printf.sprintf "enable_concurrent: %B" @@ enable_concurrent o
@@ -277,8 +273,6 @@ let set_option options name value =
     { options with option_enable_perf_logging = as_bool value }
   | "eval.enableintrinsicsextension" ->
     { options with option_enable_intrinsics_extension = as_bool value }
-  | "hhvm.disable_return_by_reference" ->
-    { options with option_disable_return_by_reference = as_bool value }
   | "eval.enablehhjs" ->
     { options with option_enable_hhjs = as_bool value }
   | "eval.dumphhjs" ->
@@ -423,8 +417,6 @@ let value_setters = [
      fun opts v -> { opts with option_enable_perf_logging = (v = 1) });
   (set_value "hhvm.enable_intrinsics_extension" get_value_from_config_int @@
      fun opts v -> { opts with option_enable_intrinsics_extension = (v = 1) });
-  (set_value "hhvm.disable_return_by_reference" get_value_from_config_int @@
-     fun opts v -> { opts with option_disable_return_by_reference = (v = 1)});
   (set_value "hhvm.enable_hhjs" get_value_from_config_int @@
      fun opts v -> { opts with option_enable_hhjs = (v = 1) });
   (set_value "hhvm.dump_hhjs" get_value_from_config_int @@

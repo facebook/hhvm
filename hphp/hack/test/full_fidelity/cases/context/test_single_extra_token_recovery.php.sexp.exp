@@ -38,8 +38,8 @@
                 ((((end_of_line 1) (whitespace 2)) final 5 ((whitespace 1)))
                  (() protected 9 ((whitespace 1)))
                  (() async 5 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 2 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1))) (() name 2 ((whitespace 1)))
+               (missing 0 ())
                (((extra_token_error 13) (whitespace 1)) "(" 1 ())
                (list 13
                 ((list_item 13

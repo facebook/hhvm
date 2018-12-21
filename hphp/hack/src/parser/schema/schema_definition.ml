@@ -277,7 +277,6 @@ let schema : schema_node list =
     ; fields =
       [ "modifiers", ZeroOrMore Token
       ; "keyword", Token
-      ; "ampersand", ZeroOrOne Token
       ; "name", Token
       ; "type_parameter_list", ZeroOrOne (Just "TypeParameters")
       ; "left_paren", Token
@@ -1136,7 +1135,6 @@ let schema : schema_node list =
       ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
       ; "function_keyword", Token
-      ; "ampersand", ZeroOrOne Token
       ; "left_paren", Token
       ; "parameters", ZeroOrMore (Aggregate Parameter)
       ; "right_paren", Token
@@ -1158,7 +1156,6 @@ let schema : schema_node list =
       ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
       ; "function_keyword", Token
-      ; "ampersand", ZeroOrOne Token
       ; "left_paren", Token
       ; "parameters", ZeroOrMore (Aggregate Parameter)
       ; "right_paren", Token

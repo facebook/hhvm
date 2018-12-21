@@ -42,7 +42,6 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       original_id (Emit_inout_helpers.inout_suffix inout_param_locations)
     else original_id in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
-  let is_return_by_ref = ast_fun.Ast.f_ret_by_ref in
   let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes
     |> Option.value ~default:Rx.NonRx in
   let function_body, function_is_generator, function_is_pair_generator =
@@ -56,7 +55,6 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       ~is_rx_body:(function_rx_level <> Rx.NonRx)
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
-      ~is_return_by_ref
       ~default_dropthrough:None
       ~return_value:instr_null
       ~namespace
@@ -82,7 +80,6 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       hoisted
       is_no_injection
       false (*inout_wrapper*)
-      is_return_by_ref
       is_interceptable
       is_memoize (*is_memoize_impl*)
       function_rx_level

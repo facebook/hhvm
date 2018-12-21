@@ -1,2 +1,0 @@
-File "method.php", line 4, characters 20-23:
-Returning by reference from a function is no longer supported in Hack. (NastCheck[3066])

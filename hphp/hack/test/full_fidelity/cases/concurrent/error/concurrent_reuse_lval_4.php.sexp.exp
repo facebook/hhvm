@@ -8,10 +8,9 @@
       ((missing 0 ())
        (function_declaration_header 18
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
-         (() function 8 ((whitespace 1))) (missing 0 ()) (() name 1 ())
-         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-         (missing 0 ())))
+         (() function 8 ((whitespace 1))) (() name 1 ()) (missing 0 ())
+         (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+         (missing 0 ()) (missing 0 ()) (missing 0 ())))
        (compound_statement 71
         ((() { 1 ((end_of_line 1)))
          (list 65

@@ -283,7 +283,6 @@ let load config_filename options =
     ~tco_disallow_array_literal:(bool_ "disallow_array_literal" ~default:false config)
     ~tco_untyped_nonstrict_lambda_parameters:(bool_
       "untyped_nonstrict_lambda_parameters" ~default:false config)
-    ~tco_disallow_return_by_ref:(bool_ "disallow_return_by_ref" ~default:false config)
     ~tco_disallow_assign_by_ref:(bool_ "disallow_assign_by_ref" ~default:false config)
     ~tco_disallow_array_cell_pass_by_ref:(bool_
       "disallow_array_cell_pass_by_ref" ~default:false config)

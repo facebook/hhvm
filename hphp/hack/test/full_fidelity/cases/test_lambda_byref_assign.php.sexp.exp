@@ -161,9 +161,8 @@
             ((list_item 39
               ((anonymous_function 39
                 ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-                 (() function 8 ()) (missing 0 ()) (() "(" 1 ())
-                 (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-                 (missing 0 ())
+                 (() function 8 ()) (() "(" 1 ()) (missing 0 ())
+                 (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
                  (anonymous_function_use_clause 11
                   ((() use 3 ((whitespace 1))) (() "(" 1 ())
                    (list 5

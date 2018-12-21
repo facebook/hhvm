@@ -25,13 +25,6 @@ function get_arr() {
   return $x;
 }
 
-function &get_arr_ref() {
-  static $a;
-  if (!isset($a)) $a = get_arr();
-  echo "get_arr_ref()\n";
-  return $a;
-}
-
 function main() {
   $x = get_arr();
   $i = 1;
@@ -48,17 +41,6 @@ function main() {
   var_dump($x);
 
   /* The following more general syntax is not allowed-
-  foo(
-    $i = 1,
-    inout get_arr_ref()[launder('alpha')][$i++],
-    inout get_arr_ref()[$t = launder('alpha')][$i++],
-    $a =& get_arr_ref(),
-    inout $a[$t][$i],
-    $i *= 2,
-    $t = 'red',
-  );
-  var_dump($a);
-
   $i = 0;
   $x = 'apple';
   Herp::$derp = get_arr();

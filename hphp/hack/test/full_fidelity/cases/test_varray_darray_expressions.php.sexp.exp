@@ -21,8 +21,8 @@
               ((list 14
                 ((((whitespace 2)) private 7 ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 3 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 3 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))

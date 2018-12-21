@@ -14,7 +14,7 @@ class F {
  }
 }
 
-function &h(&$z) {
+function h(&$z) {
   return $z;
 }
 

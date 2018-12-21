@@ -446,11 +446,6 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ft_ret_by_ref";
-  Format.fprintf fmt "%B" x.ft_ret_by_ref;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "ft_reactive";
   pp_reactivity fmt x.ft_reactive;
   Format.fprintf fmt "@]";

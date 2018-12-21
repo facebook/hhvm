@@ -7,8 +7,8 @@
      (function_declaration 28
       ((missing 0 ())
        (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 13
@@ -36,8 +36,8 @@
             ((missing 0 ())
              (function_declaration_header 26
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 3 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 3 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))
                (missing 0 ())))

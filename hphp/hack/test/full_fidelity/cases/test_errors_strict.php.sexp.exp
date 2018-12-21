@@ -1,5 +1,5 @@
-((script 526
-  ((list 526
+((script 412
+  ((list 412
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -9,8 +9,8 @@
      (function_declaration 82
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ())
          (list 2
           ((list_item 2
             ((parameter_declaration 2
@@ -29,8 +29,8 @@
      (function_declaration 191
       ((missing 0 ())
        (function_declaration_header 21
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
@@ -46,7 +46,7 @@
                (() = 1 ((whitespace 1)))
                (anonymous_function 16
                 ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-                 (() function 8 ()) (missing 0 ()) (() "(" 1 ())
+                 (() function 8 ()) (() "(" 1 ())
                  (list 2
                   ((list_item 2
                     ((parameter_declaration 2
@@ -110,17 +110,4 @@
              (() ";" 1
               ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 113
-      ((missing 0 ())
-       (function_declaration_header 22
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (() & 1 ((whitespace 1))) (() name 3 ()) (missing 0 ())
-         (() "(" 1 ()) (missing 0 ()) (() ")" 1 ()) (() : 1 ((whitespace 1)))
-         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
-         (missing 0 ())))
-       (compound_statement 90
-        ((() { 1 ((whitespace 1) (single_line_comment 53) (end_of_line 1)))
-         (missing 0 ())
-         (((whitespace 25) (single_line_comment 7) (end_of_line 1)) } 1
-          ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

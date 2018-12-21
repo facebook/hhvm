@@ -293,7 +293,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.HackArrCompatSerializeNotices;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalEnableIntishCast = gd.EnableIntishCast;
-  RuntimeOption::EvalDisableReturnByReference = gd.DisableReturnByReference;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedConstFallback = gd.UndefinedConstFallback;
   return {
@@ -399,8 +398,6 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
-  gd.DisableReturnByReference =
-    RuntimeOption::EvalDisableReturnByReference;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

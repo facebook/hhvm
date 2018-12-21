@@ -1,5 +1,5 @@
 <?php
-function &foo() {
+function foo() {
   $a = 5;
   global $c;
   $c = &$a;

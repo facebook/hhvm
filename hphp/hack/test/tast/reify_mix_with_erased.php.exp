@@ -24,9 +24,8 @@ Errors:
                (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+      f_namespace = <opaque>; f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [7:1-9:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([7:15-19], (Hprim Tvoid)));
@@ -45,7 +44,6 @@ Errors:
                     [(([8:24-26], int), (Int "42"))], []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
   ]

@@ -29,7 +29,6 @@ type t = {
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_untyped_nonstrict_lambda_parameters: bool;
-  tco_disallow_return_by_ref: bool;
   tco_disallow_assign_by_ref: bool;
   tco_disallow_array_cell_pass_by_ref: bool;
   tco_language_feature_logging : bool;
@@ -208,7 +207,6 @@ let default = {
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
  tco_untyped_nonstrict_lambda_parameters = false;
- tco_disallow_return_by_ref = false;
  tco_disallow_assign_by_ref = false;
  tco_disallow_array_cell_pass_by_ref = false;
  tco_language_feature_logging = false;
@@ -259,7 +257,6 @@ let make ~tco_assume_php
          ~tco_disallow_array_typehint
          ~tco_disallow_array_literal
          ~tco_untyped_nonstrict_lambda_parameters
-         ~tco_disallow_return_by_ref
          ~tco_disallow_assign_by_ref
          ~tco_disallow_array_cell_pass_by_ref
          ~tco_language_feature_logging
@@ -297,7 +294,6 @@ let make ~tco_assume_php
                    tco_disallow_array_typehint;
                    tco_disallow_array_literal;
                    tco_untyped_nonstrict_lambda_parameters;
-                   tco_disallow_return_by_ref;
                    tco_disallow_assign_by_ref;
                    tco_disallow_array_cell_pass_by_ref;
                    tco_language_feature_logging;
@@ -341,7 +337,6 @@ let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let tco_untyped_nonstrict_lambda_parameters t = t.tco_untyped_nonstrict_lambda_parameters
-let tco_disallow_return_by_ref t = t.tco_disallow_return_by_ref
 let tco_disallow_assign_by_ref t = t.tco_disallow_assign_by_ref
 let tco_disallow_array_cell_pass_by_ref t = t.tco_disallow_array_cell_pass_by_ref
 let tco_language_feature_logging t = t.tco_language_feature_logging

@@ -20,10 +20,9 @@
               ((list 14
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() private 7 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 2
@@ -35,10 +34,9 @@
               ((list 11
                 ((((whitespace 2)) final 5 ((whitespace 1)))
                  (() final 5 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 2
@@ -51,10 +49,9 @@
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))
                  (() final 5 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
@@ -64,10 +61,9 @@
               ((list 16
                 ((((whitespace 2)) private 7 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
@@ -78,10 +74,9 @@
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 2
@@ -94,10 +89,9 @@
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
@@ -105,10 +99,9 @@
             ((missing 0 ())
              (function_declaration_header 27
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (() : 1 ((whitespace 1)))
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
@@ -118,7 +111,7 @@
               ((list 13
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (missing 0 ()) (missing 0 ()) (missing 0 ())))
@@ -129,7 +122,7 @@
             ((missing 0 ())
              (function_declaration_header 43
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ())
                (list 13
@@ -151,7 +144,7 @@
               ((list 15
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (missing 0 ()) (missing 0 ()) (missing 0 ())))
@@ -162,7 +155,7 @@
               ((list 15
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() abstract 8 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (missing 0 ()) (missing 0 ()) (missing 0 ())))
@@ -173,8 +166,8 @@
             ((missing 0 ())
              (function_declaration_header 40
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ())
                (list 13
                 ((list_item 13
                   ((parameter_declaration 13
@@ -193,7 +186,7 @@
             ((missing 0 ())
              (function_declaration_header 35
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __destruct 10 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ())
                (list 6
@@ -212,7 +205,7 @@
             ((missing 0 ())
              (function_declaration_header 29
               ((list 6 ((((whitespace 2)) static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __destruct 10 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (missing 0 ()) (missing 0 ()) (missing 0 ())))
@@ -223,7 +216,7 @@
             ((missing 0 ())
              (function_declaration_header 36
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (() : 1 ((whitespace 1)))
@@ -236,7 +229,7 @@
             ((missing 0 ())
              (function_declaration_header 33
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __destruct 10 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (() : 1 ((whitespace 1)))
@@ -249,7 +242,7 @@
             ((missing 0 ())
              (function_declaration_header 37
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __construct 11 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (() : 1 ((whitespace 1)))
@@ -262,7 +255,7 @@
             ((missing 0 ())
              (function_declaration_header 36
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
+               (() function 8 ((whitespace 1)))
                (() __destruct 10 ((whitespace 1))) (missing 0 ())
                (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (() : 1 ((whitespace 1)))
@@ -275,8 +268,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ())
                (list 3
                 ((list_item 3
                   ((variadic_parameter 3
@@ -294,8 +287,8 @@
             ((missing 0 ())
              (function_declaration_header 31
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ())
                (list 4
                 ((list_item 4
                   ((variadic_parameter 3
@@ -313,8 +306,8 @@
             ((missing 0 ())
              (function_declaration_header 38
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() name 1 ((whitespace 1)))
+               (missing 0 ()) (() "(" 1 ())
                (list 11
                 ((list_item 4
                   ((variadic_parameter 3

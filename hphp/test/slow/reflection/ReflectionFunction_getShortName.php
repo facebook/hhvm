@@ -5,7 +5,7 @@ namespace foo\bar;
 #===============================================================================
 # ReflectionFunction.
 
-function &f($a, &$b, $c=null) {
+function f($a, &$b, $c=null) {
   static $staticX = 4;
   static $staticY;
   print "In f()\n";

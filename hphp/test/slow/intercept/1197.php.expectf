@@ -1,6 +1,0 @@
-Warning: B::bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s/test/slow/intercept/1197.php on line 26
-
-Warning: bar() expects exactly 2 parameters, 1 given in %s/test/slow/intercept/1197.php on line 17
-string(3) "bar"
-int(20)
-int(3)

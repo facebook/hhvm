@@ -3,7 +3,7 @@
 $i = 'gi';
  $s = 'gs';
  class A {
- public static function &dyn_test(&$a) {
+ public static function dyn_test(&$a) {
  global $s;
  $a = $s;
  return $s;

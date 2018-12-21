@@ -518,7 +518,6 @@ module type S = sig
   val inout_annotation_missing : Pos.t -> Pos.t -> unit
   val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
   val inoutness_mismatch : Pos.t -> Pos.t -> unit
-  val inout_params_ret_by_ref : Pos.t -> Pos.t -> unit
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
   val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
@@ -535,7 +534,6 @@ module type S = sig
   val untyped_lambda_strict_mode : Pos.t -> unit
   val binding_ref_in_array : Pos.t -> unit
   val binding_ref_to_array : Pos.t -> unit
-  val return_ref_in_array : Pos.t -> unit
   val passing_array_cell_by_ref : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
   val conditionally_reactive_annotation_invalid_arguments : is_method:bool -> Pos.t -> unit
@@ -551,7 +549,6 @@ module type S = sig
   val atmost_rx_as_rxfunc_invalid_location: Pos.t -> unit
   val no_atmost_rx_as_rxfunc_for_rx_if_args: Pos.t -> unit
   val coroutine_in_constructor: Pos.t -> unit
-  val illegal_return_by_ref: Pos.t -> unit
   val illegal_by_ref_expr: Pos.t -> string -> unit
   val variadic_byref_param: Pos.t -> unit
   val classname_const_instanceof: string -> Pos.t -> unit

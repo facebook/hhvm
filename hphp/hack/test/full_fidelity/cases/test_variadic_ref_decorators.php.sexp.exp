@@ -10,7 +10,7 @@
       ((missing 0 ())
        (function_declaration_header 38
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 8 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 8 ()) (missing 0 ()) (() "(" 1 ())
          (list 12
           ((list_item 12
             ((parameter_declaration 12
@@ -29,7 +29,7 @@
       ((missing 0 ())
        (function_declaration_header 29
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 3 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 8
           ((list_item 8
             ((parameter_declaration 8
@@ -48,7 +48,7 @@
       ((missing 0 ())
        (function_declaration_header 40
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 6 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 6 ()) (missing 0 ()) (() "(" 1 ())
          (list 16
           ((list_item 16
             ((parameter_declaration 16
@@ -69,7 +69,7 @@
       ((missing 0 ())
        (function_declaration_header 34
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 6 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 6 ()) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 10
             ((parameter_declaration 10
@@ -90,7 +90,7 @@
       ((missing 0 ())
        (function_declaration_header 36
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 6 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 6 ()) (missing 0 ()) (() "(" 1 ())
          (list 12
           ((list_item 12
             ((parameter_declaration 12
@@ -111,7 +111,7 @@
       ((missing 0 ())
        (function_declaration_header 38
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 6 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 6 ()) (missing 0 ()) (() "(" 1 ())
          (list 14
           ((list_item 14
             ((parameter_declaration 14

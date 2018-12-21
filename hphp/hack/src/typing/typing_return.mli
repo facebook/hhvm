@@ -16,7 +16,6 @@ val make_info:
   Nast.user_attribute list ->
   Env.env ->
   is_explicit:bool ->
-  is_by_ref:bool ->
   Typing_defs.locl Typing_defs.ty -> Typing_env_return_info.t
 
 val suggest_return:

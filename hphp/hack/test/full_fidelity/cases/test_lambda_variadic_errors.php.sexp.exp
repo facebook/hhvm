@@ -126,7 +126,7 @@
           ((list_item 37
             ((anonymous_function 37
               ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() "(" 1 ())
                (list 17
                 ((list_item 10
                   ((parameter_declaration 9
@@ -157,7 +157,7 @@
           ((list_item 33
             ((anonymous_function 33
               ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() "(" 1 ())
                (list 13
                 ((list_item 6
                   ((parameter_declaration 5
@@ -188,7 +188,7 @@
           ((list_item 31
             ((anonymous_function 31
               ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() "(" 1 ())
                (list 11
                 ((list_item 4
                   ((variadic_parameter 3
@@ -242,7 +242,7 @@
           ((list_item 35
             ((anonymous_function 35
               ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() "(" 1 ())
                (list 15
                 ((list_item 15
                   ((parameter_declaration 15

@@ -24,7 +24,6 @@ type t = {
   method_is_generator      : bool;
   method_is_pair_generator : bool;
   method_is_closure_body   : bool;
-  method_is_return_by_ref  : bool;
   method_is_interceptable  : bool;
   method_is_memoize_impl   : bool;
   method_rx_level          : Rx.t;
@@ -47,7 +46,6 @@ let make
   method_is_generator
   method_is_pair_generator
   method_is_closure_body
-  method_is_return_by_ref
   method_is_interceptable
   method_is_memoize_impl
   method_rx_level = {
@@ -67,7 +65,6 @@ let make
     method_is_generator;
     method_is_pair_generator;
     method_is_closure_body;
-    method_is_return_by_ref;
     method_is_interceptable;
     method_is_memoize_impl;
     method_rx_level;
@@ -89,7 +86,6 @@ let is_async method_def = method_def.method_is_async
 let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator
 let is_closure_body method_def = method_def.method_is_closure_body
-let is_return_by_ref method_def = method_def.method_is_return_by_ref
 let is_interceptable method_def = method_def.method_is_interceptable
 let is_memoize_impl method_def = method_def.method_is_memoize_impl
 let with_body method_def method_body = { method_def with method_body }

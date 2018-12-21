@@ -21,10 +21,9 @@
               ((list 13
                 ((((whitespace 2)) public 6 ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 4 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-               (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-               (missing 0 ())))
+               (() function 8 ((whitespace 1))) (() name 4 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+               (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (compound_statement 30
               ((() { 1 ((end_of_line 1)))
                (list 20

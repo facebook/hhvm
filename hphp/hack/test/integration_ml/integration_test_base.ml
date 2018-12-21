@@ -41,7 +41,6 @@ let global_opts = GlobalOptions.make
   ~tco_disallow_ambiguous_lambda:false
   ~tco_disallow_array_typehint:false
   ~tco_disallow_array_literal:false
-  ~tco_disallow_return_by_ref:false
   ~tco_disallow_assign_by_ref:false
   ~tco_disallow_array_cell_pass_by_ref:false
   ~tco_untyped_nonstrict_lambda_parameters:false

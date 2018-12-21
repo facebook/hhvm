@@ -98,7 +98,6 @@ and hint_ p env = function
       ft_where_constraints = [];
       ft_params = paraml;
       ft_ret = ret;
-      ft_ret_by_ref = false;
       ft_reactive = reactivity;
       ft_return_disposable = false;
       ft_mutability = None;

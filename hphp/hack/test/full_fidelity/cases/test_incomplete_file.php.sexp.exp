@@ -19,7 +19,7 @@
             ((missing 0 ())
              (function_declaration_header 23
               ((missing 0 ()) (((whitespace 4)) function 8 ((whitespace 1)))
-               (missing 0 ()) (() name 1 ())
+               (() name 1 ())
                (type_parameters 3
                 ((() < 1 ())
                  (list 1

@@ -4848,7 +4848,6 @@ class FunctionDeclarationHeader extends EditableSyntax
   constructor(
     modifiers,
     keyword,
-    ampersand,
     name,
     type_parameter_list,
     left_paren,
@@ -4861,7 +4860,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     super('function_declaration_header', {
       modifiers: modifiers,
       keyword: keyword,
-      ampersand: ampersand,
       name: name,
       type_parameter_list: type_parameter_list,
       left_paren: left_paren,
@@ -4873,7 +4871,6 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   get modifiers() { return this.children.modifiers; }
   get keyword() { return this.children.keyword; }
-  get ampersand() { return this.children.ampersand; }
   get name() { return this.children.name; }
   get type_parameter_list() { return this.children.type_parameter_list; }
   get left_paren() { return this.children.left_paren; }
@@ -4886,7 +4883,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4900,21 +4896,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       keyword,
-      this.ampersand,
-      this.name,
-      this.type_parameter_list,
-      this.left_paren,
-      this.parameter_list,
-      this.right_paren,
-      this.colon,
-      this.type,
-      this.where_clause);
-  }
-  with_ampersand(ampersand){
-    return new FunctionDeclarationHeader(
-      this.modifiers,
-      this.keyword,
-      ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4928,7 +4909,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       name,
       this.type_parameter_list,
       this.left_paren,
@@ -4942,7 +4922,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       type_parameter_list,
       this.left_paren,
@@ -4956,7 +4935,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       left_paren,
@@ -4970,7 +4948,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4984,7 +4961,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4998,7 +4974,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -5012,7 +4987,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -5026,7 +5000,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.modifiers,
       this.keyword,
-      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -5044,7 +5017,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     new_parents.push(this);
     var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var type_parameter_list = this.type_parameter_list.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
@@ -5056,7 +5028,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     if (
       modifiers === this.modifiers &&
       keyword === this.keyword &&
-      ampersand === this.ampersand &&
       name === this.name &&
       type_parameter_list === this.type_parameter_list &&
       left_paren === this.left_paren &&
@@ -5073,7 +5044,6 @@ class FunctionDeclarationHeader extends EditableSyntax
       return rewriter(new FunctionDeclarationHeader(
         modifiers,
         keyword,
-        ampersand,
         name,
         type_parameter_list,
         left_paren,
@@ -5092,9 +5062,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.function_keyword, position, source);
     position += keyword.width;
-    let ampersand = EditableSyntax.from_json(
-      json.function_ampersand, position, source);
-    position += ampersand.width;
     let name = EditableSyntax.from_json(
       json.function_name, position, source);
     position += name.width;
@@ -5122,7 +5089,6 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
         modifiers,
         keyword,
-        ampersand,
         name,
         type_parameter_list,
         left_paren,
@@ -5138,7 +5104,6 @@ class FunctionDeclarationHeader extends EditableSyntax
       FunctionDeclarationHeader._children_keys = [
         'modifiers',
         'keyword',
-        'ampersand',
         'name',
         'type_parameter_list',
         'left_paren',
@@ -12419,7 +12384,6 @@ class AnonymousFunction extends EditableSyntax
     async_keyword,
     coroutine_keyword,
     function_keyword,
-    ampersand,
     left_paren,
     parameters,
     right_paren,
@@ -12434,7 +12398,6 @@ class AnonymousFunction extends EditableSyntax
       async_keyword: async_keyword,
       coroutine_keyword: coroutine_keyword,
       function_keyword: function_keyword,
-      ampersand: ampersand,
       left_paren: left_paren,
       parameters: parameters,
       right_paren: right_paren,
@@ -12448,7 +12411,6 @@ class AnonymousFunction extends EditableSyntax
   get async_keyword() { return this.children.async_keyword; }
   get coroutine_keyword() { return this.children.coroutine_keyword; }
   get function_keyword() { return this.children.function_keyword; }
-  get ampersand() { return this.children.ampersand; }
   get left_paren() { return this.children.left_paren; }
   get parameters() { return this.children.parameters; }
   get right_paren() { return this.children.right_paren; }
@@ -12463,7 +12425,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12479,7 +12440,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12495,7 +12455,6 @@ class AnonymousFunction extends EditableSyntax
       async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12511,7 +12470,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12527,23 +12485,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       function_keyword,
-      this.ampersand,
-      this.left_paren,
-      this.parameters,
-      this.right_paren,
-      this.colon,
-      this.type,
-      this.use,
-      this.body);
-  }
-  with_ampersand(ampersand){
-    return new AnonymousFunction(
-      this.attribute_spec,
-      this.static_keyword,
-      this.async_keyword,
-      this.coroutine_keyword,
-      this.function_keyword,
-      ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12559,7 +12500,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       left_paren,
       this.parameters,
       this.right_paren,
@@ -12575,7 +12515,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       parameters,
       this.right_paren,
@@ -12591,7 +12530,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       right_paren,
@@ -12607,7 +12545,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12623,7 +12560,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12639,7 +12575,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12655,7 +12590,6 @@ class AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12675,7 +12609,6 @@ class AnonymousFunction extends EditableSyntax
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
     var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
-    var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var parameters = this.parameters.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
@@ -12689,7 +12622,6 @@ class AnonymousFunction extends EditableSyntax
       async_keyword === this.async_keyword &&
       coroutine_keyword === this.coroutine_keyword &&
       function_keyword === this.function_keyword &&
-      ampersand === this.ampersand &&
       left_paren === this.left_paren &&
       parameters === this.parameters &&
       right_paren === this.right_paren &&
@@ -12708,7 +12640,6 @@ class AnonymousFunction extends EditableSyntax
         async_keyword,
         coroutine_keyword,
         function_keyword,
-        ampersand,
         left_paren,
         parameters,
         right_paren,
@@ -12735,9 +12666,6 @@ class AnonymousFunction extends EditableSyntax
     let function_keyword = EditableSyntax.from_json(
       json.anonymous_function_keyword, position, source);
     position += function_keyword.width;
-    let ampersand = EditableSyntax.from_json(
-      json.anonymous_ampersand, position, source);
-    position += ampersand.width;
     let left_paren = EditableSyntax.from_json(
       json.anonymous_left_paren, position, source);
     position += left_paren.width;
@@ -12765,7 +12693,6 @@ class AnonymousFunction extends EditableSyntax
         async_keyword,
         coroutine_keyword,
         function_keyword,
-        ampersand,
         left_paren,
         parameters,
         right_paren,
@@ -12783,7 +12710,6 @@ class AnonymousFunction extends EditableSyntax
         'async_keyword',
         'coroutine_keyword',
         'function_keyword',
-        'ampersand',
         'left_paren',
         'parameters',
         'right_paren',
@@ -12802,7 +12728,6 @@ class Php7AnonymousFunction extends EditableSyntax
     async_keyword,
     coroutine_keyword,
     function_keyword,
-    ampersand,
     left_paren,
     parameters,
     right_paren,
@@ -12817,7 +12742,6 @@ class Php7AnonymousFunction extends EditableSyntax
       async_keyword: async_keyword,
       coroutine_keyword: coroutine_keyword,
       function_keyword: function_keyword,
-      ampersand: ampersand,
       left_paren: left_paren,
       parameters: parameters,
       right_paren: right_paren,
@@ -12831,7 +12755,6 @@ class Php7AnonymousFunction extends EditableSyntax
   get async_keyword() { return this.children.async_keyword; }
   get coroutine_keyword() { return this.children.coroutine_keyword; }
   get function_keyword() { return this.children.function_keyword; }
-  get ampersand() { return this.children.ampersand; }
   get left_paren() { return this.children.left_paren; }
   get parameters() { return this.children.parameters; }
   get right_paren() { return this.children.right_paren; }
@@ -12846,7 +12769,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12862,7 +12784,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12878,7 +12799,6 @@ class Php7AnonymousFunction extends EditableSyntax
       async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12894,7 +12814,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12910,23 +12829,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       function_keyword,
-      this.ampersand,
-      this.left_paren,
-      this.parameters,
-      this.right_paren,
-      this.use,
-      this.colon,
-      this.type,
-      this.body);
-  }
-  with_ampersand(ampersand){
-    return new Php7AnonymousFunction(
-      this.attribute_spec,
-      this.static_keyword,
-      this.async_keyword,
-      this.coroutine_keyword,
-      this.function_keyword,
-      ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -12942,7 +12844,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       left_paren,
       this.parameters,
       this.right_paren,
@@ -12958,7 +12859,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       parameters,
       this.right_paren,
@@ -12974,7 +12874,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       right_paren,
@@ -12990,7 +12889,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -13006,7 +12904,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -13022,7 +12919,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -13038,7 +12934,6 @@ class Php7AnonymousFunction extends EditableSyntax
       this.async_keyword,
       this.coroutine_keyword,
       this.function_keyword,
-      this.ampersand,
       this.left_paren,
       this.parameters,
       this.right_paren,
@@ -13058,7 +12953,6 @@ class Php7AnonymousFunction extends EditableSyntax
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
     var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
-    var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var parameters = this.parameters.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
@@ -13072,7 +12966,6 @@ class Php7AnonymousFunction extends EditableSyntax
       async_keyword === this.async_keyword &&
       coroutine_keyword === this.coroutine_keyword &&
       function_keyword === this.function_keyword &&
-      ampersand === this.ampersand &&
       left_paren === this.left_paren &&
       parameters === this.parameters &&
       right_paren === this.right_paren &&
@@ -13091,7 +12984,6 @@ class Php7AnonymousFunction extends EditableSyntax
         async_keyword,
         coroutine_keyword,
         function_keyword,
-        ampersand,
         left_paren,
         parameters,
         right_paren,
@@ -13118,9 +13010,6 @@ class Php7AnonymousFunction extends EditableSyntax
     let function_keyword = EditableSyntax.from_json(
       json.php7_anonymous_function_keyword, position, source);
     position += function_keyword.width;
-    let ampersand = EditableSyntax.from_json(
-      json.php7_anonymous_ampersand, position, source);
-    position += ampersand.width;
     let left_paren = EditableSyntax.from_json(
       json.php7_anonymous_left_paren, position, source);
     position += left_paren.width;
@@ -13148,7 +13037,6 @@ class Php7AnonymousFunction extends EditableSyntax
         async_keyword,
         coroutine_keyword,
         function_keyword,
-        ampersand,
         left_paren,
         parameters,
         right_paren,
@@ -13166,7 +13054,6 @@ class Php7AnonymousFunction extends EditableSyntax
         'async_keyword',
         'coroutine_keyword',
         'function_keyword',
-        'ampersand',
         'left_paren',
         'parameters',
         'right_paren',

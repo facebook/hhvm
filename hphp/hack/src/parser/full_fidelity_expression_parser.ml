@@ -2347,7 +2347,6 @@ module WithStatementAndDeclAndTypeParser
     let (parser, async) = optional_token parser Async in
     let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, fn) = assert_token parser Function in
-    let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser
     in
@@ -2362,7 +2361,6 @@ module WithStatementAndDeclAndTypeParser
         async
         coroutine
         fn
-        ampersand_token
         left_paren
         params
         right_paren
@@ -2381,7 +2379,6 @@ module WithStatementAndDeclAndTypeParser
         async
         coroutine
         fn
-        ampersand_token
         left_paren
         params
         right_paren

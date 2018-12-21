@@ -231,11 +231,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 stack =
+  let make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
-    | a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10] "function_declaration_header" in
-      let node = Syntax.make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 in
+    | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9] "function_declaration_header" in
+      let node = Syntax.make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
@@ -743,19 +743,19 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 stack =
+  let make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 stack =
     match stack with
-    | a12 :: a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10; p11; p12] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10; a11; a12] "anonymous_function" in
-      let node = Syntax.make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 in
+    | a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10; p11] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10; a11] "anonymous_function" in
+      let node = Syntax.make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 stack =
+  let make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 stack =
     match stack with
-    | a12 :: a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10; p11; p12] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10; a11; a12] "php7_anonymous_function" in
-      let node = Syntax.make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 in
+    | a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10; p11] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10; a11] "php7_anonymous_function" in
+      let node = Syntax.make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     

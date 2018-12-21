@@ -7,8 +7,8 @@
      (function_declaration 504
       ((missing 0 ())
        (function_declaration_header 21
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
@@ -91,8 +91,7 @@
                      (() = 1 ((whitespace 1)))
                      (anonymous_function 23
                       ((missing 0 ()) (missing 0 ()) (missing 0 ())
-                       (missing 0 ()) (() function 8 ()) (missing 0 ())
-                       (() "(" 1 ())
+                       (missing 0 ()) (() function 8 ()) (() "(" 1 ())
                        (list 2
                         ((list_item 2
                           ((parameter_declaration 2

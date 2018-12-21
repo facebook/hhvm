@@ -44,9 +44,8 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false; f_external = false;
-                          f_namespace = <opaque>; f_doc_comment = None;
-                          f_static = false },
+                          f_external = false; f_namespace = <opaque>;
+                          f_doc_comment = None; f_static = false },
                         [([15:15-17], $y)])))
                     ))));
              (Expr
@@ -92,9 +91,8 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false; f_external = false;
-                          f_namespace = <opaque>; f_doc_comment = None;
-                          f_static = false },
+                          f_external = false; f_namespace = <opaque>;
+                          f_doc_comment = None; f_static = false },
                         [([18:26-28], $y)])))
                     ))));
              (Expr
@@ -146,9 +144,8 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FSync; f_user_attributes = [];
-                          f_ret_by_ref = false; f_external = false;
-                          f_namespace = <opaque>; f_doc_comment = None;
-                          f_static = false },
+                          f_external = false; f_namespace = <opaque>;
+                          f_doc_comment = None; f_static = false },
                         [])))
                     ))));
              (Expr
@@ -164,8 +161,8 @@
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false; f_namespace = <opaque>;
+      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+      f_namespace = <opaque>;
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
       f_static = false })

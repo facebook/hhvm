@@ -1,2 +1,0 @@
-File "return_by_ref.php", line 4, characters 3-19:
-Returning a reference to an element in an array is no longer supported in Hack. (Typing[4225])

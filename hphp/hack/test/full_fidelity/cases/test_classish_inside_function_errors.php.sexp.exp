@@ -8,9 +8,8 @@
       ((missing 0 ())
        (function_declaration_header 18
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 7 ()) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ()) (missing 0 ()) (missing 0 ())
-         (missing 0 ())))
+         (() name 7 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
        (compound_statement 166
         ((() { 1 ((end_of_line 1)))
          (list 160
@@ -18,9 +17,8 @@
             ((missing 0 ())
              (function_declaration_header 16
               ((missing 0 ()) (((whitespace 2)) function 8 ((whitespace 1)))
-               (missing 0 ()) (() name 5 ()) (missing 0 ()) (() "(" 1 ())
-               (missing 0 ()) (() ")" 1 ()) (missing 0 ()) (missing 0 ())
-               (missing 0 ())))
+               (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (compound_statement 144
               ((() { 1 ((end_of_line 1)))
                (list 130
@@ -90,10 +88,9 @@
             ((missing 0 ())
              (function_declaration_header 21
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 3 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-               (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-               (missing 0 ())))
+               (() function 8 ((whitespace 1))) (() name 3 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+               (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (compound_statement 67
               ((() { 1 ((end_of_line 1)))
                (list 10

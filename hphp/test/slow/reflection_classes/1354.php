@@ -12,7 +12,7 @@ class cls1 implements i1, i2 {
  print $param1;
 }
  }
- function &func1(cls1 $p1, &$p2, $p3='def') {
+ function func1(cls1 $p1, &$p2, $p3='def') {
    static $a=1;
  var_dump($p1);
 }
@@ -29,7 +29,6 @@ function dump_func($func) {
    $vars = $func->getStaticVariables();
    var_dump(count($vars));
   var_dump(array_key_exists('a', $vars));
-  var_dump($func->returnsReference());
    var_dump($func->getNumberOfParameters());
    var_dump($func->getNumberOfRequiredParameters());
    foreach ($func->getParameters() as $name => $param) {

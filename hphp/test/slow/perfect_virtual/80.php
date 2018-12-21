@@ -6,7 +6,7 @@ class X {
  }
 }
 class Y extends X {
-  function &foo($a) {
+  function foo($a) {
  return $a;
  }
 }

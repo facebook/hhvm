@@ -12,8 +12,8 @@
         ((missing 0 ())
          (((end_of_line 1) (delimited_comment 76) (end_of_line 1)) function 8
           ((whitespace 1)))
-         (missing 0 ()) (() name 4 ()) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ()) (() : 1 ())
+         (() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ()) (() : 1 ())
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
        (compound_statement 91

@@ -7,8 +7,8 @@
      (function_declaration 163
       ((missing 0 ())
        (function_declaration_header 23
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 1 ()) (missing 0 ()) (() "(" 1 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 1 ())
+         (missing 0 ()) (() "(" 1 ())
          (list 11
           ((list_item 11
             ((parameter_declaration 11

@@ -11,9 +11,8 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+      f_namespace = <opaque>; f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [5:1-9:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:30-34], (Hprim Tvoid)));
@@ -44,9 +43,8 @@
                 ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
   (Class
      { c_span = [11:1-13:2]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -71,8 +69,8 @@
           m_params = [];
           m_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([12:35-39], (Hprim Tvoid))); m_ret_by_ref = false;
-          m_external = false; m_doc_comment = None }
+          m_ret = (Some ([12:35-39], (Hprim Tvoid))); m_external = false;
+          m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = []; c_enum = None;

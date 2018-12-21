@@ -192,7 +192,6 @@ let from_ast_wrapper : bool -> _ ->
     else scope in
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
-  let is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let has_ref_params =
     List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
   let method_rx_level = 
@@ -225,7 +224,6 @@ let from_ast_wrapper : bool -> _ ->
         ~is_rx_body:(method_rx_level <> Rx.NonRx)
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
-        ~is_return_by_ref
         ~default_dropthrough
         ~return_value:instr_null
         ~namespace
@@ -263,7 +261,6 @@ let from_ast_wrapper : bool -> _ ->
       method_is_generator
       method_is_pair_generator
       method_is_closure_body
-      is_return_by_ref
       method_is_interceptable
       is_memoize (*method_is_memoize_impl*)
       method_rx_level

@@ -127,7 +127,6 @@ let make_ft p reactivity is_coroutine params ret_ty =
     ft_where_constraints = [];
     ft_params   = params;
     ft_ret      = ret_ty;
-    ft_ret_by_ref = false;
     ft_reactive = reactivity;
     ft_return_disposable = false;
     ft_returns_mutable = false;
@@ -587,7 +586,6 @@ let empty tcopt file ~droot = {
       return_disposable = false;
       return_mutable = false;
       return_explicit = false;
-      return_by_ref = false;
       return_void_to_rx = false;
     };
     params  = LID.Map.empty;

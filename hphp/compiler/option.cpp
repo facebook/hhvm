@@ -135,10 +135,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                config, "PackageExcludeStaticPatterns");
   Config::Bind(CachePHPFile, ini, config, "CachePHPFile");
 
-  Config::Bind(RuntimeOption::EvalDisableReturnByReference,
-               ini, config, "DisableReturnByReference",
-               RuntimeOption::EvalDisableReturnByReference);
-
   Config::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
 
   Config::Bind(IdPrefix, ini, config, "CodeGeneration.IdPrefix", IdPrefix);

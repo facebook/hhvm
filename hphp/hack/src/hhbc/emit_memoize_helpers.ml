@@ -23,10 +23,7 @@ let param_code_gets params =
     instr_cgetl (Local.Named (Hhas_param.name param))
   )
 
-let check_memoize_possible pos ~ret_by_ref ~params ~is_method =
-  if ret_by_ref
-  then Emit_fatal.raise_fatal_runtime pos
-    "<<__Memoize>> cannot be used on functions that return by reference";
+let check_memoize_possible pos ~params ~is_method =
   if List.exists params (fun p -> p.Ast.param_is_reference)
   then Emit_fatal.raise_fatal_runtime pos
     "<<__Memoize>> cannot be used on functions with args passed by reference";

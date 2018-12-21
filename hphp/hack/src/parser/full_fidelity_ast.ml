@@ -407,8 +407,6 @@ let rec pos_name node env =
   env.ignore_pos <- local_ignore_pos;
   p, name
 
-let is_ret_by_ref node = not @@ is_missing node
-
 let couldMap : 'a . f:'a parser -> 'a list parser = fun ~f -> fun node env ->
   let rec synmap : 'a . 'a parser -> 'a list parser = fun f node env ->
     match syntax node with
@@ -676,7 +674,6 @@ let fun_template yielding node suspension_kind env =
   ; f_tparams         = []
   ; f_constrs         = []
   ; f_ret             = None
-  ; f_ret_by_ref      = false
   ; f_name            = p, ";anonymous"
   ; f_params          = []
   ; f_body            = []
@@ -951,7 +948,6 @@ type fun_hdr =
   ; fh_parameters      : fun_param list
   ; fh_return_type     : hint option
   ; fh_param_modifiers : fun_param list
-  ; fh_ret_by_ref      : bool
   }
 
 let empty_fun_hdr =
@@ -962,7 +958,6 @@ let empty_fun_hdr =
   ; fh_parameters      = []
   ; fh_return_type     = None
   ; fh_param_modifiers = []
-  ; fh_ret_by_ref      = false
   }
 
 let prevent_intrinsic_generic env node ty =
@@ -1726,7 +1721,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; anonymous_static_keyword
       ; anonymous_async_keyword
       ; anonymous_coroutine_keyword
-      ; anonymous_ampersand
       ; anonymous_parameters
       ; anonymous_type
       ; anonymous_use
@@ -1737,7 +1731,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; php7_anonymous_static_keyword = anonymous_static_keyword
       ; php7_anonymous_async_keyword = anonymous_async_keyword
       ; php7_anonymous_coroutine_keyword = anonymous_coroutine_keyword
-      ; php7_anonymous_ampersand = anonymous_ampersand
       ; php7_anonymous_parameters = anonymous_parameters
       ; php7_anonymous_type = anonymous_type
       ; php7_anonymous_use = anonymous_use
@@ -1774,7 +1767,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         let doc_comment = match extract_docblock node with
           | Some _ as doc_comment -> doc_comment
           | None -> top_docblock() in
-        let f_ret_by_ref = is_ret_by_ref anonymous_ampersand in
         let user_attributes = pUserAttributes env attribute_spec in
         let f_external = is_semicolon anonymous_body in
         Efun
@@ -1783,7 +1775,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           ; f_params      = couldMap ~f:pFunParam anonymous_parameters env
           ; f_body
           ; f_static      = not (is_missing anonymous_static_keyword)
-          ; f_ret_by_ref
           ; f_doc_comment = doc_comment
           ; f_user_attributes = user_attributes
           ; f_external
@@ -2363,7 +2354,6 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_modifiers
-    ; function_ampersand
     ; function_name
     ; function_where_clause
     ; function_type_parameter_list
@@ -2416,7 +2406,6 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
       let fh_param_modifiers =
         List.filter ~f:(fun p -> Option.is_some p.param_modifier) fh_parameters
       in
-      let fh_ret_by_ref = is_ret_by_ref function_ampersand in
       { fh_suspension_kind
       ; fh_name
       ; fh_constrs
@@ -2424,7 +2413,6 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
       ; fh_parameters
       ; fh_return_type
       ; fh_param_modifiers
-      ; fh_ret_by_ref
       }
   | LambdaSignature { lambda_parameters; lambda_type; _ } ->
     { empty_fun_hdr with
@@ -2672,7 +2660,6 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_body            = body
       ; m_user_attributes = pUserAttributes env methodish_attribute
       ; m_ret             = hdr.fh_return_type
-      ; m_ret_by_ref      = hdr.fh_ret_by_ref
       ; m_span            = pFunction node env
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       ; m_doc_comment     = doc_comment_opt
@@ -2703,7 +2690,6 @@ and pClassElt : class_elt list parser = fun node env ->
     ; mt_params          = hdr.fh_parameters
     ; mt_user_attributes = pUserAttributes env methodish_trait_attribute
     ; mt_ret             = hdr.fh_return_type
-    ; mt_ret_by_ref      = hdr.fh_ret_by_ref
     ; mt_fun_kind        = mk_fun_kind hdr.fh_suspension_kind false
     ; mt_trait           = qualifier
     ; mt_method          = name
@@ -2919,7 +2905,6 @@ and pDef : def list parser = fun node env ->
       ; f_constrs         = hdr.fh_constrs
       ; f_name            = hdr.fh_name
       ; f_params          = hdr.fh_parameters
-      ; f_ret_by_ref      = hdr.fh_ret_by_ref
       ; f_body            =
         begin
           let containsUNSAFE node =

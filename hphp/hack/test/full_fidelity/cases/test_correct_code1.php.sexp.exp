@@ -310,8 +310,8 @@
                   ((whitespace 1)))
                  (() static 6 ((whitespace 1)))
                  (() async 5 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ())
-               (() name 10 ()) (missing 0 ()) (() "(" 1 ((end_of_line 1)))
+               (() function 8 ((whitespace 1))) (() name 10 ())
+               (missing 0 ()) (() "(" 1 ((end_of_line 1)))
                (list 29
                 ((list_item 11
                   ((parameter_declaration 10

@@ -69,7 +69,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val namespace_group_use_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val namespace_use_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val function_declaration : t -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val function_declaration_header : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val function_declaration_header : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val where_clause : t -> SC.r -> SC.r -> t * SC.r
         val where_constraint : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val methodish_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
@@ -133,8 +133,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val concurrent_statement : t -> SC.r -> SC.r -> t * SC.r
         val simple_initializer : t -> SC.r -> SC.r -> t * SC.r
         val anonymous_class : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val php7_anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val php7_anonymous_function : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val anonymous_function_use_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val lambda_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val lambda_signature : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

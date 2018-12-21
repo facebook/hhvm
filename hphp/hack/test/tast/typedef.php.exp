@@ -24,8 +24,7 @@
               m_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
-              m_ret_by_ref = false; m_external = false; m_doc_comment = None
-              });
+              m_external = false; m_doc_comment = None });
       c_static_methods = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
       c_user_attributes = []; c_enum = None; c_doc_comment = None });

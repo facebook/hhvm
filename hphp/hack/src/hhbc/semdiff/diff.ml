@@ -376,8 +376,6 @@ let function_no_injection_comparer = wrap Hhas_function.no_injection
     (fun _f s -> s) (flag_comparer "noInjection")
 let function_inout_wrapper_comparer = wrap Hhas_function.inout_wrapper
     (fun _f s -> s) (flag_comparer "inoutWrapper")
-let function_is_return_by_ref_comparer = wrap Hhas_function.is_return_by_ref
-    (fun _f s -> s) (flag_comparer "isReturnByRef")
 let function_is_interceptable_comparer = wrap Hhas_function.is_interceptable
         (fun _f s -> s) (flag_comparer "isInterceptable")
 
@@ -403,8 +401,6 @@ let method_is_closure_body_comparer = wrap Hhas_method.is_closure_body
     (fun _f s -> s) (flag_comparer "isClosureBody")
 let method_no_injection_comparer = wrap Hhas_method.no_injection
     (fun _f s -> s) (flag_comparer "noInjection")
-let method_is_return_by_ref_comparer = wrap Hhas_method.is_return_by_ref
-    (fun _f s -> s) (flag_comparer "isReturnByRef")
 let method_is_interceptable_comparer = wrap Hhas_method.is_interceptable
     (fun _f s -> s) (flag_comparer "isInterceptable")
 
@@ -415,15 +411,13 @@ let method_flags_comparer =
      method_is_static_comparer; method_is_final_comparer; method_is_async_comparer;
      method_is_generator_comparer; method_is_pair_generator_comparer;
      method_is_closure_body_comparer; method_is_abstract_comparer;
-     method_no_injection_comparer; method_is_return_by_ref_comparer;
-     method_is_interceptable_comparer]
+     method_no_injection_comparer; method_is_interceptable_comparer]
 
 let function_flags_comparer =
   List.fold_left (join (fun s1 s2 -> s1 ^ s2)) function_is_async_comparer
     [function_is_generator_comparer; function_is_pair_generator_comparer;
      function_is_top_comparer; function_no_injection_comparer;
-     function_inout_wrapper_comparer; function_is_return_by_ref_comparer;
-     function_is_interceptable_comparer]
+     function_inout_wrapper_comparer; function_is_interceptable_comparer]
 
 (* map of function names to functions
    now only selects the top-level ones - others are compared dynamically

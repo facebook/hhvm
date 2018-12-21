@@ -608,7 +608,6 @@ let make_function_decl_header_syntax
   make_function_declaration_header
     modifiers_syntax
     function_keyword_syntax
-    (* function_ampersand *) (make_missing ())
     name_syntax
     (* function_type_parameter_list *) (make_missing ())
     left_paren_syntax

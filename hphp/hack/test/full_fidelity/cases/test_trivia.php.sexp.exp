@@ -13,7 +13,7 @@
          (((end_of_line 1) (delimited_comment 95) (end_of_line 1)
            (end_of_line 1))
           function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 3 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 19
           ((list_item 19
             ((parameter_declaration 19

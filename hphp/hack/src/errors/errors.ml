@@ -1498,12 +1498,6 @@ let inout_params_memoize fpos pos =
   let msg2 = pos, "This is an inout parameter" in
   add_list (NastCheck.err_code NastCheck.InoutParamsMemoize) [msg1; msg2]
 
-let inout_params_ret_by_ref fpos pos =
-  let msg1 = fpos,
-    "Functions with inout parameters cannot return by reference (&)" in
-  let msg2 = pos, "This is an inout parameter" in
-  add_list (NastCheck.err_code NastCheck.InoutParamsRetByRef) [msg1; msg2]
-
 let reading_from_append pos =
   add (NastCheck.err_code NastCheck.ReadingFromAppend) pos "Cannot use [] for reading"
 
@@ -1559,10 +1553,6 @@ let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
 let coroutine_in_constructor pos =
   add (NastCheck.err_code NastCheck.CoroutineInConstructor) pos
     "A class constructor may not be a coroutine"
-
-let illegal_return_by_ref pos =
-  add (NastCheck.err_code NastCheck.IllegalReturnByRef) pos
-    "Returning by reference from a function is no longer supported in Hack."
 
 let illegal_by_ref_expr pos str =
   add (NastCheck.err_code NastCheck.IllegalByRefExpr) pos
@@ -3403,11 +3393,6 @@ let binding_ref_in_array pos =
 
 let binding_ref_to_array pos =
   let msg = "Cannot take references to array elements." in
-  add (Typing.err_code Typing.BindingRefInArray) pos msg
-
-let return_ref_in_array pos =
-  let msg = "Returning a reference to an element in an array is no longer " ^
-    "supported in Hack." in
   add (Typing.err_code Typing.BindingRefInArray) pos msg
 
 let passing_array_cell_by_ref pos =

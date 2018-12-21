@@ -311,18 +311,10 @@ let emit_body
   ~is_rx_body
   ~deprecation_info
   ~skipawaitable
-  ~is_return_by_ref
   ~default_dropthrough
   ~return_value
   ~namespace
   ~doc_comment immediate_tparams params ret body =
-  if is_return_by_ref && Hhbc_options.disable_return_by_reference !Hhbc_options.compiler_options
-  then begin
-    Emit_fatal.raise_fatal_runtime pos (
-      "Return by reference is disabled by the " ^
-      "compiler through the option hhvm.disable_return_by_reference " ^
-      "or Eval.DisableReturnByReference")
-  end;
   if is_async && skipawaitable
   then begin
     let report_error =
@@ -378,7 +370,6 @@ let emit_body
   Emit_statement.set_num_out num_out;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
-  Emit_statement.set_return_by_ref is_return_by_ref;
   Emit_statement.set_function_pos pos;
   Jump_targets.reset ();
 

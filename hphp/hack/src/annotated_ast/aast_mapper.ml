@@ -139,7 +139,6 @@ struct
     T.f_fun_kind = fd.S.f_fun_kind;
     T.f_user_attributes =
     List.map fd.S.f_user_attributes (map_user_attribute menv);
-    T.f_ret_by_ref = fd.S.f_ret_by_ref;
     T.f_external = fd.S.f_external;
     T.f_namespace = fd.S.f_namespace;
     T.f_doc_comment = fd.S.f_doc_comment;
@@ -337,7 +336,6 @@ struct
       T.m_fun_kind = m.S.m_fun_kind;
       T.m_user_attributes = List.map m.S.m_user_attributes (map_user_attribute menv);
       T.m_ret = m.S.m_ret;
-      T.m_ret_by_ref = m.S.m_ret_by_ref;
       T.m_external = m.S.m_external;
       T.m_doc_comment = m.S.m_doc_comment;
     }
@@ -355,7 +353,6 @@ struct
     T.mt_params = List.map mt.S.mt_params (map_fun_param menv);
     T.mt_fun_kind = mt.S.mt_fun_kind;
     T.mt_ret = mt.S.mt_ret;
-    T.mt_ret_by_ref = mt.S.mt_ret_by_ref;
     T.mt_trait = mt.S.mt_trait;
     T.mt_method = mt.S.mt_method;
     T.mt_user_attributes = List.map mt.S.mt_user_attributes (map_user_attribute menv);

@@ -32,7 +32,7 @@
       ((missing 0 ())
        (function_declaration_header 42
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 1 ())
+         (() name 1 ())
          (type_parameters 24
           ((() < 1 ())
            (list 22

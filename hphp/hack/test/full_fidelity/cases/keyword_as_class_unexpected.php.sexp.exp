@@ -666,8 +666,8 @@
          (constructor_call 11
           ((anonymous_function 11
             ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-             (() function 8 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-             (() ")" 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+             (() function 8 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+             (missing 0 ()) (missing 0 ()) (missing 0 ())
              (() ";" 1 ((end_of_line 1)))))
            (missing 0 ()) (missing 0 ()) (missing 0 ())))))
        (missing 0 ())))

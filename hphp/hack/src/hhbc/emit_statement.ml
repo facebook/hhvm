@@ -26,7 +26,6 @@ module Opts = Hhbc_options
 let verify_return = ref false
 let default_return_value = ref instr_null
 let default_dropthrough = ref None
-let return_by_ref = ref false
 let verify_out = ref empty
 let num_out = ref 0
 let function_pos = ref Pos.none
@@ -34,13 +33,11 @@ let set_num_out c = num_out := c
 let set_verify_return b = verify_return := b
 let set_default_return_value i = default_return_value := i
 let set_default_dropthrough i = default_dropthrough := i
-let set_return_by_ref b = return_by_ref := b
 let set_verify_out i = verify_out := i
 let set_function_pos p = function_pos := p
 
-let emit_return ~need_ref env =
+let emit_return env =
   TFR.emit_return
-    ~need_ref
     ~verify_return:!verify_return
     ~verify_out:!verify_out
     ~num_out:!num_out
@@ -152,7 +149,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;
-      emit_return ~need_ref:false env;
+      emit_return env;
     ]
   | A.Expr ((pos, A.Call ((_, A.Id (_, s)), _, exprl, [])) as expr) ->
     if String.lowercase s = "unset" then
@@ -166,13 +163,13 @@ let rec emit_stmt env (pos, st_) =
     gather [
       emit_await env inner_pos e;
       Emit_pos.emit_pos pos;
-      emit_return ~need_ref:false env;
+      emit_return env;
     ]
   | A.Return (Some (_, A.Yield_from e)) ->
     gather [
       emit_yield_from_delegates env pos e;
       Emit_pos.emit_pos pos;
-      emit_return ~need_ref:false env;
+      emit_return env;
     ]
   | A.Expr (pos, A.Await e) ->
     begin match try_inline_genva_call env e GI_ignore_result with
@@ -245,14 +242,13 @@ let rec emit_stmt env (pos, st_) =
     gather [
       instr_null;
       Emit_pos.emit_pos pos;
-      emit_return ~need_ref:false env;
+      emit_return env;
     ]
   | A.Return (Some expr) ->
-    let need_ref = !return_by_ref in
     gather [
-      emit_expr ~last_pos:pos ~need_ref env expr;
-      if not need_ref then Emit_pos.emit_pos pos else empty;
-      emit_return ~need_ref env;
+      emit_expr ~last_pos:pos ~need_ref:false env expr;
+      Emit_pos.emit_pos pos;
+      emit_return env;
     ]
   | A.GotoLabel (_, label) ->
     instr_label (Label.named label)
@@ -1300,7 +1296,7 @@ let emit_dropthrough_return env =
   | Some instrs -> instrs
   | _ ->
     Emit_pos.emit_pos_then (Pos.last_char !function_pos) @@
-    gather [!default_return_value; emit_return ~need_ref:false env]
+    gather [!default_return_value; emit_return env]
 
 let rec emit_final_statement env s =
   match snd s with

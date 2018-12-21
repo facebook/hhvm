@@ -7,8 +7,8 @@
      (function_declaration 212
       ((missing 0 ())
        (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 197

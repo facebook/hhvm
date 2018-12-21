@@ -22,7 +22,6 @@ let emit_main is_evaled popt defs =
       ~is_rx_body:false
       ~deprecation_info:None
       ~skipawaitable:false
-      ~is_return_by_ref:false
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(if is_evaled then instr_null else instr_int 1)
       ~default_dropthrough:None

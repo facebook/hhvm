@@ -344,16 +344,16 @@
       ((missing 0 ())
        (function_declaration_header 16
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 5 ()) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
+         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (function_declaration 23
       ((missing 0 ())
        (function_declaration_header 20
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 9 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 9 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -361,8 +361,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -370,8 +370,8 @@
      (function_declaration 22
       ((missing 0 ())
        (function_declaration_header 19
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 8 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 8 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -379,8 +379,8 @@
      (function_declaration 22
       ((missing 0 ())
        (function_declaration_header 19
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 8 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 8 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -388,8 +388,8 @@
      (function_declaration 23
       ((missing 0 ())
        (function_declaration_header 20
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 9 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 9 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -397,8 +397,8 @@
      (function_declaration 23
       ((missing 0 ())
        (function_declaration_header 20
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 9 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 9 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -406,8 +406,8 @@
      (function_declaration 20
       ((missing 0 ())
        (function_declaration_header 17
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 6 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 6 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -415,8 +415,8 @@
      (function_declaration 18
       ((missing 0 ())
        (function_declaration_header 15
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 4 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -424,8 +424,8 @@
      (function_declaration 18
       ((missing 0 ())
        (function_declaration_header 15
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 4 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -433,8 +433,8 @@
      (function_declaration 25
       ((missing 0 ())
        (function_declaration_header 22
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 11 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 11 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -442,8 +442,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -451,8 +451,8 @@
      (function_declaration 16
       ((missing 0 ())
        (function_declaration_header 13
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 2 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 2 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -460,8 +460,8 @@
      (function_declaration 20
       ((missing 0 ())
        (function_declaration_header 17
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 6 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 6 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -469,8 +469,8 @@
      (function_declaration 17
       ((missing 0 ())
        (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -478,8 +478,8 @@
      (function_declaration 21
       ((missing 0 ())
        (function_declaration_header 18
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 7 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 7 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -487,8 +487,8 @@
      (function_declaration 17
       ((missing 0 ())
        (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -496,8 +496,8 @@
      (function_declaration 22
       ((missing 0 ())
        (function_declaration_header 19
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 8 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 8 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -505,8 +505,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -514,8 +514,8 @@
      (function_declaration 21
       ((missing 0 ())
        (function_declaration_header 18
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 7 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 7 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -523,8 +523,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -532,8 +532,8 @@
      (function_declaration 18
       ((missing 0 ())
        (function_declaration_header 15
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 4 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 4 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -541,8 +541,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -550,8 +550,8 @@
      (function_declaration 20
       ((missing 0 ())
        (function_declaration_header 17
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 6 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 6 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -559,8 +559,8 @@
      (function_declaration 17
       ((missing 0 ())
        (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 3 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2
@@ -568,8 +568,8 @@
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
-        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
-         (() name 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (() name 5 ())
+         (missing 0 ()) (() "(" 1 ()) (missing 0 ())
          (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
          (missing 0 ())))
        (compound_statement 2

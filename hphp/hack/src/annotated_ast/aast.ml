@@ -242,7 +242,6 @@ and fun_ = {
   f_body     : func_body;
   f_fun_kind : Ast.fun_kind;
   f_user_attributes : user_attribute list;
-  f_ret_by_ref : bool;
   f_external : bool;  (* true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
   f_namespace : nsenv;
@@ -379,7 +378,6 @@ and method_ = {
   m_fun_kind        : Ast.fun_kind        ;
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
-  m_ret_by_ref      : bool                ;
   m_external        : bool                ;  (* see f_external above for context *)
   m_doc_comment     : string option       ;
 }
@@ -396,7 +394,6 @@ and method_redeclaration = {
   mt_params          : fun_param list      ;
   mt_fun_kind        : Ast.fun_kind        ;
   mt_ret             : hint option         ;
-  mt_ret_by_ref      : bool                ;
   mt_trait           : hint                ;
   mt_method          : pstring             ;
   mt_user_attributes : user_attribute list;

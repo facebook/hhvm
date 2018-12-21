@@ -3,7 +3,7 @@
 
 class Cls1 {
   <<__NEVER_INLINE>>
-  public function &get() {
+  public function get() {
     static $_ = ['type' => 1];
     return $_;
   }

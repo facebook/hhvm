@@ -31,8 +31,6 @@ val emit_body:
   is_rx_body: bool ->
   deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->
-  (* True if the return type is a ref *)
-  is_return_by_ref: bool ->
   default_dropthrough: Instruction_sequence.t option ->
   return_value: Instruction_sequence.t ->
   namespace: Namespace_env.env ->

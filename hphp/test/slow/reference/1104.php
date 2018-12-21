@@ -9,7 +9,7 @@ function test($a) {
   $a++;
   return $a;
 }
-function &foo() {
+function foo() {
   return $GLOBALS['x'];
 }
 

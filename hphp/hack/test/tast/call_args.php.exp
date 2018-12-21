@@ -11,9 +11,8 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-      f_static = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+      f_namespace = <opaque>; f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:15-19], (Hprim Tvoid)));
@@ -30,7 +29,6 @@
                     [], [(([6:16-23], string), (String "hello"))], []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
   ]

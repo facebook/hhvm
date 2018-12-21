@@ -496,17 +496,9 @@ and func env f named_body =
   error_if_has_atmost_rx_as_rxfunc_attribute env f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
-  if f.f_ret_by_ref
-     && env.is_reactive
-     && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
-  then Errors.reference_in_rx p;
-
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
-  if f.f_ret_by_ref &&
-    TypecheckerOptions.disallow_return_by_ref (Env.get_tcopt env.tenv)
-  then Errors.illegal_return_by_ref p;
   let inout = List.find f.f_params ~f:(
     fun x -> x.param_callconv = Some Ast.Pinout) in
   (match inout with
@@ -514,7 +506,6 @@ and func env f named_body =
       if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes ||
          Attributes.mem SN.UserAttributes.uaMemoizeLSB f.f_user_attributes
       then Errors.inout_params_memoize p param.param_pos;
-      if f.f_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
       ()
     | _ -> ()
   );
@@ -1043,9 +1034,6 @@ and method_ (env, is_static) m =
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
-  if m.m_ret_by_ref &&
-    TypecheckerOptions.disallow_return_by_ref (Env.get_tcopt env.tenv)
-  then Errors.illegal_return_by_ref p;
   let inout = List.find m.m_params ~f:(
     fun x -> x.param_callconv = Some Ast.Pinout) in
   (match inout with
@@ -1053,7 +1041,6 @@ and method_ (env, is_static) m =
       if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
          Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
       then Errors.inout_params_memoize p param.param_pos;
-      if m.m_ret_by_ref then Errors.inout_params_ret_by_ref p param.param_pos;
       ()
     | _ -> ()
   );

@@ -241,7 +241,6 @@ and method_ = {
   m_body: block;
   m_user_attributes : user_attribute list;
   m_ret: hint option;
-  m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
   m_span: pos;
   m_doc_comment: string option;
@@ -256,7 +255,6 @@ and method_trait_resolution = {
   mt_params: fun_param list;
   mt_user_attributes : user_attribute list;
   mt_ret: hint option;
-  mt_ret_by_ref: bool;
   mt_fun_kind: fun_kind;
   mt_trait: hint;
   mt_method: pstring;
@@ -294,7 +292,6 @@ and fun_ = {
   f_tparams         : tparam list;
   f_constrs         : (hint * constraint_kind * hint) list;
   f_ret             : hint option;
-  f_ret_by_ref      : bool;
   f_name            : id;
   f_params          : fun_param list;
   f_body            : block;

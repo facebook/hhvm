@@ -10,7 +10,7 @@ define('SOME_CONSTANT', "some string");
 /**
  * This is f's doc comment.
  */
-function &f($a, &$b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
+function f($a, &$b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
   static $staticX = 4;
   static $staticY;
   print "In f()\n";
@@ -63,10 +63,6 @@ print "\n";
 
 print "--- isUserDefined(\"f\") ---\n";
 var_dump($rf->isUserDefined());
-print "\n";
-
-print "--- returnsReference(\"f\") ---\n";
-var_dump($rf->returnsReference());
 print "\n";
 
 print "--- export(\"f\") ---\n";

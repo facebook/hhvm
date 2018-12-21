@@ -679,7 +679,6 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclarationHeader {
         function_modifiers;
         function_keyword;
-        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -691,7 +690,6 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc function_modifiers in
          let acc = f acc function_keyword in
-         let acc = f acc function_ampersand in
          let acc = f acc function_name in
          let acc = f acc function_type_parameter_list in
          let acc = f acc function_left_paren in
@@ -1434,7 +1432,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
-        anonymous_ampersand;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -1448,7 +1445,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_async_keyword in
          let acc = f acc anonymous_coroutine_keyword in
          let acc = f acc anonymous_function_keyword in
-         let acc = f acc anonymous_ampersand in
          let acc = f acc anonymous_left_paren in
          let acc = f acc anonymous_parameters in
          let acc = f acc anonymous_right_paren in
@@ -1463,7 +1459,6 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
         php7_anonymous_function_keyword;
-        php7_anonymous_ampersand;
         php7_anonymous_left_paren;
         php7_anonymous_parameters;
         php7_anonymous_right_paren;
@@ -1477,7 +1472,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc php7_anonymous_async_keyword in
          let acc = f acc php7_anonymous_coroutine_keyword in
          let acc = f acc php7_anonymous_function_keyword in
-         let acc = f acc php7_anonymous_ampersand in
          let acc = f acc php7_anonymous_left_paren in
          let acc = f acc php7_anonymous_parameters in
          let acc = f acc php7_anonymous_right_paren in
@@ -2544,7 +2538,6 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclarationHeader {
         function_modifiers;
         function_keyword;
-        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -2556,7 +2549,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         function_modifiers;
         function_keyword;
-        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -3299,7 +3291,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
-        anonymous_ampersand;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -3313,7 +3304,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
-        anonymous_ampersand;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -3328,7 +3318,6 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
         php7_anonymous_function_keyword;
-        php7_anonymous_ampersand;
         php7_anonymous_left_paren;
         php7_anonymous_parameters;
         php7_anonymous_right_paren;
@@ -3342,7 +3331,6 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
         php7_anonymous_function_keyword;
-        php7_anonymous_ampersand;
         php7_anonymous_left_paren;
         php7_anonymous_parameters;
         php7_anonymous_right_paren;
@@ -4410,7 +4398,6 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclarationHeader {
         function_modifiers;
         function_keyword;
-        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -4422,7 +4409,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "function_modifiers";
         "function_keyword";
-        "function_ampersand";
         "function_name";
         "function_type_parameter_list";
         "function_left_paren";
@@ -5165,7 +5151,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_async_keyword;
         anonymous_coroutine_keyword;
         anonymous_function_keyword;
-        anonymous_ampersand;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -5179,7 +5164,6 @@ module WithToken(Token: TokenType) = struct
         "anonymous_async_keyword";
         "anonymous_coroutine_keyword";
         "anonymous_function_keyword";
-        "anonymous_ampersand";
         "anonymous_left_paren";
         "anonymous_parameters";
         "anonymous_right_paren";
@@ -5194,7 +5178,6 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_async_keyword;
         php7_anonymous_coroutine_keyword;
         php7_anonymous_function_keyword;
-        php7_anonymous_ampersand;
         php7_anonymous_left_paren;
         php7_anonymous_parameters;
         php7_anonymous_right_paren;
@@ -5208,7 +5191,6 @@ module WithToken(Token: TokenType) = struct
         "php7_anonymous_async_keyword";
         "php7_anonymous_coroutine_keyword";
         "php7_anonymous_function_keyword";
-        "php7_anonymous_ampersand";
         "php7_anonymous_left_paren";
         "php7_anonymous_parameters";
         "php7_anonymous_right_paren";
@@ -6351,7 +6333,6 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.FunctionDeclarationHeader, [
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -6364,7 +6345,6 @@ module WithToken(Token: TokenType) = struct
         FunctionDeclarationHeader {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -7170,7 +7150,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -7185,7 +7164,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -7200,7 +7178,6 @@ module WithToken(Token: TokenType) = struct
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
           php7_anonymous_function_keyword;
-          php7_anonymous_ampersand;
           php7_anonymous_left_paren;
           php7_anonymous_parameters;
           php7_anonymous_right_paren;
@@ -7215,7 +7192,6 @@ module WithToken(Token: TokenType) = struct
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
           php7_anonymous_function_keyword;
-          php7_anonymous_ampersand;
           php7_anonymous_left_paren;
           php7_anonymous_parameters;
           php7_anonymous_right_paren;
@@ -8486,7 +8462,6 @@ module WithToken(Token: TokenType) = struct
       let make_function_declaration_header
         function_modifiers
         function_keyword
-        function_ampersand
         function_name
         function_type_parameter_list
         function_left_paren
@@ -8499,7 +8474,6 @@ module WithToken(Token: TokenType) = struct
         let syntax = FunctionDeclarationHeader {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -9497,7 +9471,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_async_keyword
         anonymous_coroutine_keyword
         anonymous_function_keyword
-        anonymous_ampersand
         anonymous_left_paren
         anonymous_parameters
         anonymous_right_paren
@@ -9512,7 +9485,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -9530,7 +9502,6 @@ module WithToken(Token: TokenType) = struct
         php7_anonymous_async_keyword
         php7_anonymous_coroutine_keyword
         php7_anonymous_function_keyword
-        php7_anonymous_ampersand
         php7_anonymous_left_paren
         php7_anonymous_parameters
         php7_anonymous_right_paren
@@ -9545,7 +9516,6 @@ module WithToken(Token: TokenType) = struct
           php7_anonymous_async_keyword;
           php7_anonymous_coroutine_keyword;
           php7_anonymous_function_keyword;
-          php7_anonymous_ampersand;
           php7_anonymous_left_paren;
           php7_anonymous_parameters;
           php7_anonymous_right_paren;
@@ -10769,7 +10739,6 @@ module WithToken(Token: TokenType) = struct
      let from_function_declaration_header {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -10781,7 +10750,6 @@ module WithToken(Token: TokenType) = struct
        } = FunctionDeclarationHeader {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -10808,7 +10776,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -10822,7 +10789,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -10899,7 +10865,6 @@ module WithToken(Token: TokenType) = struct
         | FunctionDeclarationHeader {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -10911,7 +10876,6 @@ module WithToken(Token: TokenType) = struct
             } -> {
           function_modifiers;
           function_keyword;
-          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -10944,7 +10908,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -10958,7 +10921,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_async_keyword;
           anonymous_coroutine_keyword;
           anonymous_function_keyword;
-          anonymous_ampersand;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;

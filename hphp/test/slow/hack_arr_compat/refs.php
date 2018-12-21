@@ -3,8 +3,6 @@
 
 function pass_by_ref(&$d) {}
 
-function &ret_by_ref($d, $key) { return $d[$key]; }
-
 function ref_param($name, $orig) {
   echo "========== ref_param ($name) ===============================\n";
   $a = $orig;
@@ -54,20 +52,6 @@ function set_ref($name, $orig) {
   $a["key2"] = &$value;
 }
 
-function ref_return($name, $orig) {
-  echo "========== ref_return ($name) ==============================\n";
-  $a = $orig;
-  ret_by_ref($a, 3);
-  $a = $orig;
-  ret_by_ref($a, 4);
-  $a = $orig;
-  ret_by_ref($a, 10);
-  $a = $orig;
-  ret_by_ref($a, "key1");
-  $a = $orig;
-  ret_by_ref($a, "key2");
-}
-
 function iterate_by_ref($name, $orig) {
   echo "========== iterate_by_ref ($name) ==========================\n";
   $a = $orig;
@@ -87,7 +71,6 @@ function run($name, $a) {
   elem_ref($name, $a);
   append_ref($name, $a);
   set_ref($name, $a);
-  ref_return($name, $a);
   iterate_by_ref($name, $a);
 }
 

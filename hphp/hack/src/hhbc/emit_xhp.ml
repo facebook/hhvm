@@ -33,7 +33,6 @@ let xhp_attribute_declaration_method ?p name kind body =
     A.m_body = body;
     A.m_user_attributes = [];
     A.m_ret = None;
-    A.m_ret_by_ref = false;
     A.m_fun_kind = A.FSync;
     A.m_span = p;
     A.m_doc_comment = None;

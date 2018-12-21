@@ -10,9 +10,9 @@
         ((missing 0 ())
          (((delimited_comment 13) (whitespace 1)) function 8
           ((whitespace 1)))
-         (missing 0 ()) (() name 3 ()) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
+         (() name 3 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
        (compound_statement 33
         ((() { 1 ((end_of_line 1)))
          (list 25

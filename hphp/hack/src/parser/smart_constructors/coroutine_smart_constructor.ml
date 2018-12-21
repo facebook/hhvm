@@ -33,26 +33,26 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
       else token in
     state, Syntax.make_token token
 
-  let make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 state =
+  let make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10 state =
     let state = state ||
       (Syntax.syntax_node_to_list modifiers |>
       List.exists ~f:is_coroutine) in
-    state, Syntax.make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10 r11
+    state, Syntax.make_function_declaration_header modifiers r2 r3 r4 r5 r6 r7 r8 r9 r10
 
   let make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9 state =
     let state = state ||
       is_coroutine coroutine in
     state, Syntax.make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9
 
-  let make_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 r13 state =
+  let make_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 state =
     let state = state ||
       is_coroutine coroutine in
-    state, Syntax.make_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 r13
+    state, Syntax.make_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12
 
-  let make_php7_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 r13 state =
+  let make_php7_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 state =
     let state = state ||
       is_coroutine coroutine in
-    state, Syntax.make_php7_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 r13
+    state, Syntax.make_php7_anonymous_function r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12
 
   let make_lambda_expression r1 r2 coroutine r3 r4 r5 state =
     let state = state ||

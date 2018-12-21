@@ -20,8 +20,8 @@
                 ];
               fnb_unsafe = false });
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([4:33-39], (Hprim Tstring))); m_ret_by_ref = false;
-         m_external = false; m_doc_comment = None }
+         m_ret = (Some ([4:33-39], (Hprim Tstring))); m_external = false;
+         m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
@@ -63,7 +63,6 @@
                  (Some (([12:10-12], int), (Lvar ([12:10-12], $x))))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
   ]

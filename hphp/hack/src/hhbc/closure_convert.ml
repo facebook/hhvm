@@ -470,7 +470,6 @@ let make_closure ~class_num
     m_body = body;
     m_user_attributes = fd.f_user_attributes;
     m_ret = fd.f_ret;
-    m_ret_by_ref = fd.f_ret_by_ref;
     m_fun_kind = fd.f_fun_kind;
     m_span = fd.f_span;
     m_doc_comment = fd.f_doc_comment;

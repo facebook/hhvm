@@ -56,10 +56,10 @@ let expand_ty env ty =
                      ft_where_constraints; ft_ret; ft_params;
                      ft_reactive; ft_return_disposable;
                      ft_mutability; ft_returns_mutable;
-                     ft_is_coroutine; ft_ret_by_ref; ft_decl_errors;
+                     ft_is_coroutine; ft_decl_errors;
                      ft_returns_void_to_rx } =
   { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_reactive; ft_is_coroutine;
-    ft_return_disposable; ft_ret_by_ref; ft_mutability; ft_returns_mutable;
+    ft_return_disposable; ft_mutability; ft_returns_mutable;
     ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:exp_tparam) ft_tparams;
     ft_where_constraints = List.map ~f:exp_where_constraint ft_where_constraints;
     ft_ret = exp_ty ft_ret;

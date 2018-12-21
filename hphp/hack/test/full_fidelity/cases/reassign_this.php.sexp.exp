@@ -17,8 +17,8 @@
             ((missing 0 ())
              (function_declaration_header 27
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 1 ())
-               (missing 0 ()) (() "(" 1 ())
+               (() function 8 ((whitespace 1))) (() name 1 ()) (missing 0 ())
+               (() "(" 1 ())
                (list 2
                 ((list_item 2
                   ((parameter_declaration 2

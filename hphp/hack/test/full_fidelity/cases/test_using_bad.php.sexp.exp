@@ -8,8 +8,8 @@
       ((missing 0 ())
        (function_declaration_header 25
         ((list 5 ((() async 5 ((whitespace 1)))))
-         (() function 8 ((whitespace 1))) (missing 0 ()) (() name 1 ())
-         (missing 0 ()) (() "(" 1 ())
+         (() function 8 ((whitespace 1))) (() name 1 ()) (missing 0 ())
+         (() "(" 1 ())
          (list 7
           ((list_item 7
             ((parameter_declaration 7

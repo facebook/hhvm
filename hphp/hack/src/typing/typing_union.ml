@@ -325,9 +325,9 @@ and union_arraykind env ak1 ak2 =
 
 and union_funs env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)
-  if (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_ret_by_ref, fty1.ft_reactive,
+  if (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_reactive,
     fty1.ft_return_disposable, fty1.ft_returns_mutable) =
-    (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_ret_by_ref, fty2.ft_reactive,
+    (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_reactive,
     fty2.ft_return_disposable, fty2.ft_returns_mutable) &&
     ft_params_compare fty1.ft_params fty2.ft_params = 0
   then

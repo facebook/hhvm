@@ -150,8 +150,7 @@ let emit_goto ~in_finally_epilogue env label =
     end
 
 let emit_return
-  ~need_ref ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
-  let ret_instr = if need_ref then instr_retv else instr_retc in
+  ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
   begin match JT.get_closest_enclosing_finally_label jump_targets with
@@ -159,9 +158,7 @@ let emit_return
       released before exit - do it *)
   | None ->
     let verify_return_instr =
-      if verify_return
-      then if need_ref then instr_verifyRetTypeV else instr_verifyRetTypeC
-      else empty
+      if verify_return then instr_verifyRetTypeC else empty
     in
     let release_iterators_instr =
       let iterators_to_release = JT.collect_iterators jump_targets in
@@ -172,22 +169,19 @@ let emit_return
     in
     if in_finally_epilogue
     then
-      let load_retval_instr =
-        if need_ref then instr_vgetl (Local.get_retval_local ())
-        else instr_cgetl (Local.get_retval_local ())
-      in
+      let load_retval_instr = instr_cgetl (Local.get_retval_local ()) in
       gather [
         load_retval_instr;
         verify_return_instr;
         verify_out;
         release_iterators_instr;
-        if num_out <> 0 then instr_retm (num_out + 1) else ret_instr
+        if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
       ]
     else gather [
       verify_return_instr;
       verify_out;
       release_iterators_instr;
-      if num_out <> 0 then instr_retm (num_out + 1) else ret_instr
+      if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
     ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)
@@ -196,16 +190,10 @@ let emit_return
       if in_finally_epilogue then empty
       else
       let save_state = emit_save_label_id (JT.get_id_for_return ()) in
-      let save_retval =
-        if need_ref then gather [
-          instr_bindl (Local.get_retval_local ());
-          instr_popv;
-        ]
-        else gather [
-          instr_setl (Local.get_retval_local ());
-          instr_popc;
-        ]
-      in
+      let save_retval = gather [
+        instr_setl (Local.get_retval_local ());
+        instr_popc;
+      ] in
       gather [
         save_state;
         save_retval;
@@ -216,7 +204,7 @@ let emit_return
       emit_jump_to_label target_label iterators_to_release;
       (* emit ret instr as an indicator for try/finally rewriter to generate
         finally epilogue, try/finally rewriter will remove it. *)
-      ret_instr;
+      instr_retc;
     ]
   end
 
@@ -261,10 +249,7 @@ let emit_finally_epilogue
     | IContFlow RetC
     | IContFlow RetCSuspended ->
       emit_return
-        ~need_ref:false ~verify_return ~verify_out ~num_out ~in_finally_epilogue:true env
-    | IContFlow RetV ->
-      emit_return
-        ~need_ref:true ~verify_return ~verify_out ~num_out ~in_finally_epilogue:true env
+        ~verify_return ~verify_out ~num_out ~in_finally_epilogue:true env
     | ISpecialFlow (Break l) ->
       emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->

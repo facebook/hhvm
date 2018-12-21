@@ -16,8 +16,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
@@ -46,8 +46,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
@@ -86,8 +86,8 @@
              (function_declaration_header 30
               ((list 6
                 ((((end_of_line 1) (whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
@@ -109,8 +109,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
@@ -123,8 +123,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
@@ -137,8 +137,8 @@
             ((missing 0 ())
              (function_declaration_header 30
               ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1))) (missing 0 ()) (() name 6 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() function 8 ((whitespace 1))) (() name 6 ()) (missing 0 ())
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))

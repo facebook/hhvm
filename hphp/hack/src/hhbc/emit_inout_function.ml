@@ -150,7 +150,6 @@ let emit_wrapper_function
   let body =
     make_wrapper_body env doc decl_vars return_type_info modified_params body_instrs
   in
-  let return_by_ref = ast_fun.Ast.f_ret_by_ref in
   let is_interceptable =
     Interceptable.is_function_interceptable namespace ast_fun function_attributes in
   Hhas_function.make
@@ -164,7 +163,6 @@ let emit_wrapper_function
     hoisted
     true (* no_injection *)
     true (* inout_wrapper *)
-    return_by_ref
     is_interceptable
     false (* is_memoize_impl *)
     Rx.NonRx
@@ -205,7 +203,6 @@ let emit_wrapper_method
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_method.Ast.m_ret in
-  let method_is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let param_count = List.length params in
   let wrapper_type, original_id, renamed_id, params =
     if is_closure || has_ref_params then
@@ -257,7 +254,6 @@ let emit_wrapper_method
     false (*method_is_generator*)
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)
-    method_is_return_by_ref
     method_is_interceptable
     false (*method_is_memoize_impl*)
     Rx.NonRx

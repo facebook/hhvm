@@ -408,7 +408,6 @@ and 'phase fun_type = {
   ft_where_constraints : 'phase where_constraint list  ;
   ft_params     : 'phase fun_params   ;
   ft_ret        : 'phase ty           ;
-  ft_ret_by_ref : bool                ;
   ft_reactive   : reactivity          ;
   ft_return_disposable : bool         ;
   (* mutability of the receiver *)
@@ -796,9 +795,9 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
         begin match ft_params_compare fty1.ft_params fty2.ft_params with
         | 0 ->
           compare
-            (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_ret_by_ref, fty1.ft_reactive,
+            (fty1.ft_is_coroutine, fty1.ft_arity, fty1.ft_reactive,
             fty1.ft_return_disposable, fty1.ft_mutability, fty1.ft_returns_mutable)
-            (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_ret_by_ref, fty2.ft_reactive,
+            (fty2.ft_is_coroutine, fty2.ft_arity, fty2.ft_reactive,
             fty2.ft_return_disposable, fty2.ft_mutability, fty2.ft_returns_mutable)
         | n -> n
         end

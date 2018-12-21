@@ -28,9 +28,8 @@
                 ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [9:1-14:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([9:22-26], (Hprim Tvoid)));
@@ -67,7 +66,6 @@
                      (([13:8-29], _), Any), OG_nullthrows))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
   ]

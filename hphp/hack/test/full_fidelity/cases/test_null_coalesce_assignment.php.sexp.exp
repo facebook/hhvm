@@ -10,7 +10,7 @@
       ((missing 0 ())
        (function_declaration_header 25
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 3 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 6
           ((list_item 6
             ((parameter_declaration 6
@@ -32,7 +32,7 @@
       ((missing 0 ())
        (function_declaration_header 24
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
-         (missing 0 ()) (() name 1 ()) (missing 0 ()) (() "(" 1 ())
+         (() name 1 ()) (missing 0 ()) (() "(" 1 ())
          (list 7
           ((list_item 7
             ((parameter_declaration 7

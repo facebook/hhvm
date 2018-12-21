@@ -1,0 +1,6 @@
+File "generics_sub_nullable_tvar.php", line 11, characters 5-6:
+Invalid argument (Typing[4110])
+  File "generics_sub_nullable_tvar.php", line 4, characters 26-28:
+  This is a nullable type
+  File "generics_sub_nullable_tvar.php", line 10, characters 28-29:
+  It is incompatible with a value of generic type T2

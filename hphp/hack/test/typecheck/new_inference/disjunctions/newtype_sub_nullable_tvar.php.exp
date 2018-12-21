@@ -1,0 +1,32 @@
+File "newtype_sub_nullable_tvar.php--file2.php", line 24, characters 14-22:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 19, characters 21-23:
+  This is an int
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+  It is incompatible with a nullable type
+File "newtype_sub_nullable_tvar.php--file2.php", line 32, characters 12-20:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 18, characters 19-19:
+  This is an object of type M
+  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+  It is incompatible with a nullable type
+File "newtype_sub_nullable_tvar.php--file2.php", line 33, characters 12-20:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
+  This is an object of type B
+  File "newtype_sub_nullable_tvar.php--file1.php", line 3, characters 14-15:
+  It is incompatible with a nullable type
+File "newtype_sub_nullable_tvar.php--file2.php", line 43, characters 12-20:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 15, characters 19-19:
+  This is an object of type B
+  File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 14-15:
+  It is incompatible with a nullable type
+File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
+Invalid argument (Typing[4110])
+  File "newtype_sub_nullable_tvar.php--file2.php", line 9, characters 23-24:
+  This is a nullable type
+  File "newtype_sub_nullable_tvar.php--file2.php", line 46, characters 16-16:
+  It is incompatible with the expression dependent type <expr#1>
+  File "newtype_sub_nullable_tvar.php--file2.php", line 49, characters 11-12:
+    where '<expr#1>' is a reference to this expression

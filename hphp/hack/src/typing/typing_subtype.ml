@@ -391,7 +391,7 @@ and simplify_subtype
   | Tdynamic, Toption ty_super ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
   (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
-   * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_super' (widening) and transitivity
+   * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_sub' (widening) and transitivity
    * of <: it follows that ty_sub' <: ?ty_super'.  Conversely, if ty_sub' <: ?ty_super', then
    * by covariance and idempotence of ?, we have ?ty_sub' <: ??ty_sub' <: ?ty_super'.
    * Therefore, this step preserves the set of solutions.
@@ -1674,6 +1674,20 @@ and props_to_env env remain props =
     props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)
+  | TL.Disj disj_props :: conj_props ->
+    (* For now, just find the first prop in the disjunction that works *)
+    let rec try_disj disj_props =
+      match disj_props with
+      | [] ->
+        (* For now let it fail later when calling
+        process_simplify_subtype_result on the remaining constraints. *)
+        props_to_env env (TL.Disj [] :: remain) conj_props
+      | prop :: disj_props' ->
+        Errors.try_
+          (fun () -> props_to_env env remain (prop::conj_props))
+          (fun _ -> try_disj disj_props')
+    in
+    try_disj disj_props
   | prop :: props ->
     props_to_env env (prop::remain) props
 
@@ -1682,15 +1696,8 @@ and props_to_env env remain props =
  * simplify bounds.
  *)
 and prop_to_env env prop =
-  match prop with
-  | TL.Conj props ->
-    let env, props' = props_to_env env [] props in
-    env, TL.conj_list props'
-  | TL.IsSubtype _ ->
-    let env, props' = props_to_env env [] [prop] in
-    env, TL.conj_list props'
-  | _ ->
-    env, prop
+  let env, props' = props_to_env env [] [prop] in
+  env, TL.conj_list props'
 
 and env_to_prop env =
   TL.conj (tvenv_to_prop env.Env.tvenv) env.Env.subtype_prop
@@ -1741,10 +1748,8 @@ and sub_type_inner
       Env.add_subtype_prop env prop
     end
     else env in
-  process_simplify_subtype_result ~this_ty
-    ~fail:(fun () -> TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))
-    env
-    prop
+  let fail () = TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+  process_simplify_subtype_result ~this_ty ~fail env prop
 
 (* Deal with the cases not dealt with by simplify_subtype *)
 and sub_type_inner_helper env ~this_ty

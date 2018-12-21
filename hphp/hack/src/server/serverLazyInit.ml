@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- *)
+*)
 
 (* Lazy Initialization:
 
@@ -56,7 +56,7 @@ let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
  * lock_and_load_deptable
  * load_saved_state
  * synchronously wait 200s for the async dirty query to finish
- *)
+*)
 let download_and_load_state_exn
     ~(use_canary: bool)
     ~(target: ServerMonitorUtils.target_saved_state option)
@@ -98,22 +98,22 @@ let download_and_load_state_exn
     | Error error ->
       Error (Lazy_init_dirty_files_failure error)
     | Ok (dirty_master_files, dirty_local_files) -> begin
-      let () = HackEventLogger.state_loader_dirty_files t in
-      let list_to_set x =
-        List.map x Relative_path.from_root |> Relative_path.set_of_list in
-      let dirty_master_files = list_to_set dirty_master_files in
-      let dirty_local_files = list_to_set dirty_local_files in
-      Ok {
-        saved_state_fn = result.State_loader.saved_state_fn;
-        corresponding_rev = result.State_loader.corresponding_rev;
-        mergebase_rev = result.State_loader.mergebase_rev;
-        dirty_master_files;
-        dirty_local_files;
-        old_saved;
-        old_errors;
-        state_distance = Some result.State_loader.state_distance;
-      }
-    end
+        let () = HackEventLogger.state_loader_dirty_files t in
+        let list_to_set x =
+          List.map x Relative_path.from_root |> Relative_path.set_of_list in
+        let dirty_master_files = list_to_set dirty_master_files in
+        let dirty_local_files = list_to_set dirty_local_files in
+        Ok {
+          saved_state_fn = result.State_loader.saved_state_fn;
+          corresponding_rev = result.State_loader.corresponding_rev;
+          mergebase_rev = result.State_loader.mergebase_rev;
+          dirty_master_files;
+          dirty_local_files;
+          old_saved;
+          old_errors;
+          state_distance = Some result.State_loader.state_distance;
+        }
+      end
 
 let use_precomputed_state_exn
     (genv: ServerEnv.genv)
@@ -121,12 +121,12 @@ let use_precomputed_state_exn
   : loaded_info =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let { ServerArgs.
-    saved_state_fn;
-    corresponding_base_revision;
-    deptable_fn;
-    changes;
-    prechecked_changes;
-    } = info in
+        saved_state_fn;
+        corresponding_base_revision;
+        deptable_fn;
+        changes;
+        prechecked_changes;
+      } = info in
   lock_and_load_deptable deptable_fn ~ignore_hh_version;
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
@@ -148,14 +148,14 @@ let use_precomputed_state_exn
 (* Run naming from a fast generated from saved state.
  * No errors are generated because we assume the fast is directly from
  * a clean state.
- *)
+*)
 let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : float =
   Relative_path.Map.iter fast ~f:begin fun k info ->
-  let { FileInfo.n_classes=classes;
-       n_types=typedefs;
-       n_funs=funs;
-       n_consts=consts} = info in
-  NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
+    let { FileInfo.n_classes=classes;
+          n_types=typedefs;
+          n_funs=funs;
+          n_consts=consts} = info in
+    NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
   end;
   HackEventLogger.fast_naming_end t;
   let hs = SharedMem.heap_size () in
@@ -170,21 +170,21 @@ let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : flo
 let update_search (genv: ServerEnv.genv) (saved: FileInfo.saved_state_info) (t: float) : float =
   (* Don't update search index when in check mode *)
   (* We can't use is_check_mode here because we want to
-    skip this step even while saving saved states.
+     skip this step even while saving saved states.
   *)
   if ServerArgs.check_mode genv.options then t else
-  (* Only look at Hack files *)
-  let fast = FileInfo.saved_to_hack_files saved in
-  (* Filter out non php files *)
-  let fast = Relative_path.Map.filter fast
-    ~f:(fun s _ -> FindUtils.path_filter s) in
+    (* Only look at Hack files *)
+    let fast = FileInfo.saved_to_hack_files saved in
+    (* Filter out non php files *)
+    let fast = Relative_path.Map.filter fast
+        ~f:(fun s _ -> FindUtils.path_filter s) in
 
-  Relative_path.Map.iter fast
-  ~f: (fun fn names ->
-    SearchServiceRunner.update (fn, (SearchServiceRunner.Fast names));
-  );
-  HackEventLogger.update_search_end t;
-  Hh_logger.log_duration "Loading search indices" t
+    Relative_path.Map.iter fast
+      ~f: (fun fn names ->
+          SearchServiceRunner.update (fn, (SearchServiceRunner.Fast names));
+        );
+    HackEventLogger.update_search_end t;
+    Hh_logger.log_duration "Loading search indices" t
 
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)
@@ -301,9 +301,9 @@ let type_check_dirty
   let start_t = Unix.gettimeofday () in
   let dirty_fast = get_dirty_fast old_fast new_fast dirty_files in
   let names s = Relative_path.Map.fold dirty_fast ~f:begin fun k v acc ->
-    if Relative_path.Set.mem s k then FileInfo.merge_names v acc
-    else acc
-  end ~init:FileInfo.empty_names in
+      if Relative_path.Set.mem s k then FileInfo.merge_names v acc
+      else acc
+    end ~init:FileInfo.empty_names in
   let master_deps = names dirty_master_files |> names_to_deps in
   let local_deps = names dirty_local_files |> names_to_deps in
   (* Include similar_files in the dirty_fast used to determine which loaded
@@ -311,35 +311,35 @@ let type_check_dirty
      declarations may have changed, which affects error messages and FIXMEs. *)
   let get_files_to_recheck =
     get_files_to_recheck genv env old_fast new_fast @@
-      extend_fast dirty_fast env.files_info similar_files in
+    extend_fast dirty_fast env.files_info similar_files in
 
   let env, to_recheck = if use_prechecked_files genv then begin
-    (* Start with dirty files and fan-out of local changes only *)
-    let to_recheck =
-      if genv.local_config.SLC.load_decls_from_saved_state
-      then get_files_to_recheck dirty_local_files
-      else
-        let deps = Typing_deps.add_all_deps local_deps in
-        Typing_deps.get_files deps
-    in
-    ServerPrecheckedFiles.set env (Initial_typechecking {
-      rechecked_files = Relative_path.Set.empty;
-      dirty_local_deps = local_deps;
-      dirty_master_deps = master_deps;
-      clean_local_deps = Typing_deps.DepSet.empty;
-    }), to_recheck
-  end else begin
-    (* Start with full fan-out immediately *)
-    let to_recheck =
-      if genv.local_config.SLC.load_decls_from_saved_state
-      then get_files_to_recheck dirty_files
-      else
-        let deps = Typing_deps.DepSet.union master_deps local_deps in
-        let deps = Typing_deps.add_all_deps deps in
-        Typing_deps.get_files deps
-    in
-    env, to_recheck
-  end in
+      (* Start with dirty files and fan-out of local changes only *)
+      let to_recheck =
+        if genv.local_config.SLC.load_decls_from_saved_state
+        then get_files_to_recheck dirty_local_files
+        else
+          let deps = Typing_deps.add_all_deps local_deps in
+          Typing_deps.get_files deps
+      in
+      ServerPrecheckedFiles.set env (Initial_typechecking {
+          rechecked_files = Relative_path.Set.empty;
+          dirty_local_deps = local_deps;
+          dirty_master_deps = master_deps;
+          clean_local_deps = Typing_deps.DepSet.empty;
+        }), to_recheck
+    end else begin
+      (* Start with full fan-out immediately *)
+      let to_recheck =
+        if genv.local_config.SLC.load_decls_from_saved_state
+        then get_files_to_recheck dirty_files
+        else
+          let deps = Typing_deps.DepSet.union master_deps local_deps in
+          let deps = Typing_deps.add_all_deps deps in
+          Typing_deps.get_files deps
+      in
+      env, to_recheck
+    end in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
   let fast = extend_fast dirty_fast env.files_info to_recheck in
@@ -404,7 +404,7 @@ let fallback_init
   end;
   let get_next, t = indexing genv in
   (* The full_fidelity_parser currently works better in both memory and time
-    with a full parse rather than parsing decl asts and then parsing full ones *)
+     with a full parse rather than parsing decl asts and then parsing full ones *)
   let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
   (* full init - too many files to trace all of them *)
   let trace = false in
@@ -416,7 +416,7 @@ let fallback_init
   let fast = FileInfo.simplify_fast env.files_info in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing  in
   let fast = Relative_path.Set.fold failed_parsing
-    ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
+      ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
   type_check genv env fast t
 
 let post_saved_state_initialization
@@ -444,11 +444,12 @@ let post_saved_state_initialization
       old_errors
       [ Errors.Decl; Errors.Typing; ] in
 
-  let (_old_parsing_phase, old_parsing_error_files) = match List.find
-    old_errors
-    ~f:(fun (phase, _files) -> (phase = Errors.Parsing)) with
-      | Some (a, b) -> (a, b)
-      | None -> (Errors.Parsing, Relative_path.Set.empty)
+  let (_old_parsing_phase, old_parsing_error_files) =
+    match List.find
+            old_errors
+            ~f:(fun (phase, _files) -> (phase = Errors.Parsing)) with
+    | Some (a, b) -> (a, b)
+    | None -> (Errors.Parsing, Relative_path.Set.empty)
   in
 
   Hh_logger.log
@@ -467,7 +468,7 @@ let post_saved_state_initialization
   (* Parse and name all dirty files uniformly *)
   let dirty_files =
     Relative_path.Set.union naming_and_parsing_error_files (
-    Relative_path.Set.union dirty_master_files dirty_local_files) in
+      Relative_path.Set.union dirty_master_files dirty_local_files) in
   let build_targets, tracked_targets = get_build_targets env in
   let t = Unix.gettimeofday () in
   (* Build targets are untracked by version control, so we must always
@@ -499,7 +500,7 @@ let post_saved_state_initialization
   (* Parse dirty files only *)
   let next = MultiWorker.next genv.workers parsing_files_list in
   let env, t = parsing genv env ~lazy_parse:true ~get_next:next
-    ~count:(List.length parsing_files_list) t ~trace in
+      ~count:(List.length parsing_files_list) t ~trace in
   SearchServiceRunner.update_fileinfo_map env.files_info;
 
   let t = update_files genv env.files_info t in
@@ -516,33 +517,33 @@ let post_saved_state_initialization
   let fast = FileInfo.simplify_fast env.files_info in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast = Relative_path.Set.fold failed_parsing
-    ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
+      ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
 
   let env = { env with
-    disk_needs_parsing =
-      Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
-  } in
+              disk_needs_parsing =
+                Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+            } in
 
   (* Separate the dirty files from the files whose decl only changed *)
   (* Here, for each dirty file, we compare its hash to the one saved
-  in the saved state. If the hashes are the same, then the declarations
-  on the file have not changed and we only need to retypecheck that file,
-  not all of its dependencies.
-  We call these files "similar" to their previous versions. *)
+     in the saved state. If the hashes are the same, then the declarations
+     on the file have not changed and we only need to retypecheck that file,
+     not all of its dependencies.
+     We call these files "similar" to their previous versions. *)
   let partition_similar dirty_files = Relative_path.Set.partition
-  (fun f ->
-      let info1 = Relative_path.Map.get old_info f in
-      let info2 = Relative_path.Map.get env.files_info f in
-      match info1, info2 with
-      | Some x, Some y ->
-        (match x.FileInfo.hash, y.FileInfo.hash with
-        | Some x, Some y ->
-          OpaqueDigest.equal x y
-        | _ ->
-          false)
-      | _ ->
-        false
-    ) dirty_files in
+      (fun f ->
+         let info1 = Relative_path.Map.get old_info f in
+         let info2 = Relative_path.Map.get env.files_info f in
+         match info1, info2 with
+         | Some x, Some y ->
+           (match x.FileInfo.hash, y.FileInfo.hash with
+            | Some x, Some y ->
+              OpaqueDigest.equal x y
+            | _ ->
+              false)
+         | _ ->
+           false
+      ) dirty_files in
 
   let similar_master_files, dirty_master_files =
     partition_similar dirty_master_files in
@@ -553,12 +554,12 @@ let post_saved_state_initialization
     Relative_path.Set.union similar_master_files similar_local_files in
 
   let env = { env with
-    files_info=Relative_path.Map.union env.files_info old_info;
-    (* The only reason old_parsing_error_files are added to disk_needs_parsing
-      here is because of an issue that seems to be already tracked in T30786759 *)
-    disk_needs_parsing = old_parsing_error_files;
-    needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
-  } in
+              files_info=Relative_path.Map.union env.files_info old_info;
+              (* The only reason old_parsing_error_files are added to disk_needs_parsing
+                 here is because of an issue that seems to be already tracked in T30786759 *)
+              disk_needs_parsing = old_parsing_error_files;
+              needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
+            } in
   (* Update the fileinfo object's dependencies now that we have full fast *)
   let t = update_files genv env.files_info t in
 
@@ -568,12 +569,12 @@ let post_saved_state_initialization
     dirty_master_files dirty_local_files similar_files t
 
 let init
-  ~(load_state_approach: load_state_approach option)
-  (genv: ServerEnv.genv)
-  (lazy_level: lazy_level)
-  (env: ServerEnv.env)
-  (root: Path.t)
-: (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
+    ~(load_state_approach: load_state_approach option)
+    (genv: ServerEnv.genv)
+    (lazy_level: lazy_level)
+    (env: ServerEnv.env)
+    (root: Path.t)
+  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
   assert(lazy_level = Init);
   ServerProgress.send_progress_to_monitor "loading saved state";
 
@@ -594,12 +595,12 @@ let init
       download_and_load_state_exn ~use_canary: false ~target:(Some target) ~genv ~root in
 
   let state_result = try
-    match Timeout.with_timeout ~timeout ~do_ ~on_timeout:(fun () -> Error Lazy_init_timeout) with
-    | Error error ->
-      Error error
-    | Ok loaded_info ->
-      let changed_while_parsing = get_updates_exn genv root in
-      Ok (loaded_info, changed_while_parsing)
+      match Timeout.with_timeout ~timeout ~do_ ~on_timeout:(fun () -> Error Lazy_init_timeout) with
+      | Error error ->
+        Error error
+      | Ok loaded_info ->
+        let changed_while_parsing = get_updates_exn genv root in
+        Ok (loaded_info, changed_while_parsing)
     with exn ->
       let stack = Utils.Callstack (Printexc.get_backtrace ()) in
       Error (Lazy_init_unhandled_exception {exn; stack;}) in

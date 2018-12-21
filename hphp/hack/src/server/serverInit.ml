@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- *)
+*)
 
 open Core_kernel
 open Result.Export
@@ -56,13 +56,13 @@ let save_state
     let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
     let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
     let edges_added: int = SaveStateService.save_state
-      ~tcopt
-      ~file_info_on_disk
-      ~save_decls
-      env.ServerEnv.files_info
-      env.errorl
-      output_filename
-      ~replace_state_after_saving in
+        ~tcopt
+        ~file_info_on_disk
+        ~save_decls
+        env.ServerEnv.files_info
+        env.errorl
+        output_filename
+        ~replace_state_after_saving in
     Some edges_added
   end
 
@@ -84,23 +84,24 @@ let init
   let lazy_lev = get_lazy_level genv in
   let env = ServerEnvBuild.make_env genv.config in
   let init_errors, () = Errors.do_with_context ServerConfig.filename Errors.Init begin fun() ->
-    let fcl = ServerConfig.forward_compatibility_level genv.config in
-    let older_than = ForwardCompatibilityLevel.greater_than fcl in
-    if older_than ForwardCompatibilityLevel.current then
-      let pos = Pos.make_from ServerConfig.filename in
-      if older_than ForwardCompatibilityLevel.minimum
-      then Errors.forward_compatibility_below_minimum pos fcl
-      else Errors.forward_compatibility_not_current pos fcl
-  end in
+      let fcl = ServerConfig.forward_compatibility_level genv.config in
+      let older_than = ForwardCompatibilityLevel.greater_than fcl in
+      if older_than ForwardCompatibilityLevel.current then
+        let pos = Pos.make_from ServerConfig.filename in
+        if older_than ForwardCompatibilityLevel.minimum
+        then Errors.forward_compatibility_below_minimum pos fcl
+        else Errors.forward_compatibility_not_current pos fcl
+    end in
   let env = { env with
-    errorl = init_errors
-  } in
+              errorl = init_errors
+            } in
   let root = ServerArgs.root genv.options in
   let (env, t), state = match lazy_lev with
     | Init ->
       ServerLazyInit.init ~load_state_approach genv lazy_lev env root
     | Off | Decl | Parse ->
-      Option.iter load_state_approach ~f:(fun _ -> Hh_logger.log "Eager init, hence ignoring saved-state option");
+      Option.iter load_state_approach
+        ~f:(fun _ -> Hh_logger.log "Eager init, hence ignoring saved-state option");
       ServerEagerInit.init genv lazy_lev env
   in
   let env, t = ServerAiInit.ai_check genv env.files_info env t in

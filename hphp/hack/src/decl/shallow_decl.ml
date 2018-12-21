@@ -164,7 +164,7 @@ let method_type env m =
     ft_abstract = m.m_abstract;
     ft_is_coroutine = m.m_fun_kind = Ast.FCoroutine;
     ft_arity    = arity;
-    ft_tparams  = tparams;
+    ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params   = params;
     ft_ret      = ret;
@@ -201,7 +201,7 @@ let method_redeclaration_type env m =
     ft_abstract = m.mt_abstract;
     ft_is_coroutine = m.mt_fun_kind = Ast.FCoroutine;
     ft_arity    = arity;
-    ft_tparams  = tparams;
+    ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params   = params;
     ft_ret      = ret;

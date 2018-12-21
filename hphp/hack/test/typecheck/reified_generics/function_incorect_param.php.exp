@@ -1,0 +1,8 @@
+File "function_incorect_param.php", line 8, characters 5-7:
+The type argument at index 0 is not reified (Typing[4302])
+  File "function_incorect_param.php", line 4, characters 18-19:
+  Its definition Tu is
+File "function_incorect_param.php", line 9, characters 11-13:
+The type argument at index 0 is reified (Typing[4302])
+  File "function_incorect_param.php", line 5, characters 12-13:
+  Its definition Tu is not

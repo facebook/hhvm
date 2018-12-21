@@ -261,17 +261,18 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
    * If explicit type parameters are provided, just instantiate tvarl to them.
    *)
   let env, substs, tvarl =
+    let (tparams, _) = ft.ft_tparams in
     if instantiate_tparams
     then
       let default () =
-        List.map_env env ft.ft_tparams (fun env _ ->
+        List.map_env env tparams (fun env _ ->
           TUtils.unresolved_tparam ~reason:(Reason.Rtype_variable use_pos) env) in
       let env, tvarl =
         if List.length explicit_tparams = 0
         then default ()
-        else if List.length explicit_tparams <> List.length ft.ft_tparams
+        else if List.length explicit_tparams <> List.length tparams
         then begin
-          Errors.expected_tparam ~definition_pos:ft.ft_pos ~use_pos (List.length ft.ft_tparams);
+          Errors.expected_tparam ~definition_pos:ft.ft_pos ~use_pos (List.length tparams);
           default ()
         end
         else
@@ -282,10 +283,10 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
             | _ -> localize_hint_with_self env hint in
           List.map_env env explicit_tparams type_argument
       in
-      let ft_subst = Subst.make ft.ft_tparams tvarl in
+      let ft_subst = Subst.make tparams tvarl in
       env, SMap.union ft_subst ety_env.substs, tvarl
     else
-      env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _, _) ->
+      env, List.fold_left tparams ~f:begin fun subst (_, (_, x), _, _) ->
         SMap.remove x subst
       end ~init:ety_env.substs, []
   in
@@ -333,12 +334,12 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   let old_tpenv = env.Env.lenv.Env.tpenv in
   let old_global_tpenv = env.Env.global_tpenv in
 
-  (* If we're instantiating the generic parameters then remove them
-   * from the result. Otherwise localize them *)
-  let has_reified = List.exists ~f:(fun (_, _, _, reified) -> reified) ft.ft_tparams in
-  let env, tparams =
-    if instantiate_tparams && not has_reified then env, []
-    else List.map_env env ft.ft_tparams localize_tparam in
+  (* Always localize tparams so they are available for later Tast check *)
+  let env, tparams = List.map_env env (fst ft.ft_tparams) localize_tparam in
+  let ft_tparams = (
+    tparams,
+    if instantiate_tparams then FTKinstantiated_targs else FTKtparams
+  ) in
 
   (* Localize the 'where' constraints *)
   let env, where_constraints =
@@ -354,7 +355,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
    *)
   let env =
     if instantiate_tparams then
-      let env = check_tparams_constraints ~use_pos ~ety_env env ft.ft_tparams in
+      let env = check_tparams_constraints ~use_pos ~ety_env env (fst ft.ft_tparams) in
       let env = check_where_constraints ~use_pos ~definition_pos:ft.ft_pos ~ety_env env
                   ft.ft_where_constraints in
       env
@@ -370,7 +371,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
     ~f:(fun vars ty -> match ty with (_, Tvar i) -> ISet.add i vars | _ -> vars)
     ~init:ISet.empty tvarl in
   env, { ft with ft_arity = arity; ft_params = params;
-                 ft_ret = ret; ft_tparams = tparams;
+                 ft_ret = ret; ft_tparams = ft_tparams;
                  ft_where_constraints = where_constraints }, vars
 
 (* Given a list of generic parameters [tparams] and a substitution

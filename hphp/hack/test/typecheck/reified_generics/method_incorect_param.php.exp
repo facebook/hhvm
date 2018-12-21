@@ -1,0 +1,8 @@
+File "method_incorect_param.php", line 11, characters 15-17:
+The type argument at index 0 is reified (Typing[4302])
+  File "method_incorect_param.php", line 5, characters 21-21:
+  Its definition T is not
+File "method_incorect_param.php", line 12, characters 9-11:
+The type argument at index 0 is not reified (Typing[4302])
+  File "method_incorect_param.php", line 6, characters 27-27:
+  Its definition T is

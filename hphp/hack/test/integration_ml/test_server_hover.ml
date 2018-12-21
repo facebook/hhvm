@@ -570,7 +570,7 @@ let special_cases_cases = [
   ("special_cases.php", 3, 3), [
     {
       snippet = "\
-function idx(
+function idx<Tk, Tv>(
   ?KeyedContainer<int, ?int> $collection,
   ?int $index
 ): ?int";

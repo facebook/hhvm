@@ -384,6 +384,18 @@ and param_mutability =
   | Param_borrowed_mutable
   | Param_maybe_mutable
 
+and fun_tparams_kind =
+  | FTKtparams
+  (** If ft_tparams is empty, the containing fun_type is a concrete function type.
+      Otherwise, it is a generic function and ft_tparams specifies its type parameters. *)
+  | FTKinstantiated_targs
+  (** The containing fun_type is a concrete function type which is an
+      instantiation of a generic function with at least one reified type
+      parameter. This means that the function requires explicit type arguments
+      at every invocation, and ft_tparams specifies the type arguments with
+      which the generic function was instantiated, as well as whether each
+      explicit type argument must be reified. *)
+
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'phase fun_type = {
@@ -392,7 +404,7 @@ and 'phase fun_type = {
   ft_abstract   : bool                ;
   ft_is_coroutine : bool              ;
   ft_arity      : 'phase fun_arity    ;
-  ft_tparams    : 'phase tparam list  ;
+  ft_tparams    : ('phase tparam) list * fun_tparams_kind;
   ft_where_constraints : 'phase where_constraint list  ;
   ft_params     : 'phase fun_params   ;
   ft_ret        : 'phase ty           ;

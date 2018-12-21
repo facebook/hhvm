@@ -2104,7 +2104,7 @@ let subtype_method
       Typing_utils.add_constraint p_sub env ck ty1 ty2) in
 
   let env =
-    add_tparams_constraints env ft_super_no_tvars.ft_tparams in
+    add_tparams_constraints env (fst ft_super_no_tvars.ft_tparams) in
   let env =
     add_where_constraints env ft_super_no_tvars.ft_where_constraints in
 
@@ -2140,9 +2140,9 @@ let subtype_method
    * TODO: make it an error to override with wrong number of type parameters
   *)
   let env =
-    if List.length ft_sub.ft_tparams <> List.length ft_super.ft_tparams
+    if List.length (fst ft_sub.ft_tparams) <> List.length (fst ft_super.ft_tparams)
     then env
-    else check_tparams_constraints env ft_sub_no_tvars.ft_tparams in
+    else check_tparams_constraints env (fst ft_sub_no_tvars.ft_tparams) in
   let env =
     check_where_constraints env ft_sub_no_tvars.ft_where_constraints in
 

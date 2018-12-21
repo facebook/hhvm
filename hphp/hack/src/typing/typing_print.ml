@@ -537,9 +537,12 @@ module Full = struct
       | Some variadic_param -> params @ [variadic_param]
     in
     Span [
+      (* only print tparams when they have been instantiated with targs
+       * so that they correctly express reified parameterization *)
       (match ft.ft_tparams with
-      | [] -> Nothing
-      | l -> list "<" (tparam to_doc st env) l ">"
+      | [], _
+      | _, FTKtparams -> Nothing
+      | l, FTKinstantiated_targs -> list "<" (tparam to_doc st env) l ">"
       );
       list "(" id params "):";
       Space;
@@ -1252,7 +1255,7 @@ let to_locl_ty
         ft_deprecated = None;
         ft_abstract = false;
         ft_arity = Fstandard (0, 0);
-        ft_tparams = [];
+        ft_tparams = ([], FTKtparams);
         ft_where_constraints = [];
         ft_ret_by_ref = false;
         ft_reactive = Nonreactive;
@@ -1516,13 +1519,16 @@ module PrintFun = struct
     let ft_pos = PrintClass.pos f.ft_pos in
     let ft_abstract = string_of_bool f.ft_abstract in
     let ft_arity = farity f.ft_arity in
-    let ft_tparams = PrintClass.tparam_list tcopt f.ft_tparams in
+    let tparams = PrintClass.tparam_list tcopt (fst f.ft_tparams) in
+    let instantiate_tparams = match snd f.ft_tparams with
+    | FTKtparams -> "FTKtparams"
+    | FTKinstantiated_targs -> "FTKinstantiated_targs" in
     let ft_params = fparams tcopt f.ft_params in
     let ft_ret = Full.to_string_decl tcopt f.ft_ret in
     "ft_pos: "^ft_pos^"\n"^
     "ft_abstract: "^ft_abstract^"\n"^
     "ft_arity: "^ft_arity^"\n"^
-    "ft_tparams: "^ft_tparams^"\n"^
+    "ft_tparams: ("^tparams^", "^instantiate_tparams^")\n"^
     "ft_params: "^ft_params^"\n"^
     "ft_ret: "^ft_ret^"\n"^
     ""

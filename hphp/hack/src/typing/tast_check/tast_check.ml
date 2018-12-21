@@ -34,6 +34,7 @@ let visitor = Tast_visitor.iter_with [
   Basic_reactivity_check.handler;
   Pseudofunctions_check.handler;
   Dynamic_method_call_check.handler;
+  Reified_check.handler;
 ]
 
 let program = visitor#go

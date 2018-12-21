@@ -607,6 +607,8 @@ module type S = sig
   val move_in_nonreactive_context: Pos.t -> unit
   val invalid_move_target : Pos.t -> Pos.t -> string -> unit
   val invalid_move_use : Pos.t -> unit
+  val mismatched_reify : (Pos.t * string) -> Pos.t -> bool -> int -> unit
+  val require_args_reify : Pos.t -> Pos.t -> unit
   val ignored_result_of_freeze : Pos.t -> unit
   val ignored_result_of_move : Pos.t -> unit
   val mutably_owned_argument_mismatch: arg_is_owned_local: bool -> Pos.t -> Pos.t -> unit

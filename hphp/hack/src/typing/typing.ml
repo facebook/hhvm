@@ -3705,7 +3705,7 @@ and is_abstract_ft fty = match fty with
                 ft_abstract = false;
                 ft_is_coroutine = false;
                 ft_arity = Fstandard (arity, arity);
-                ft_tparams = [];
+                ft_tparams = ([], FTKtparams);
                 ft_where_constraints = [];
                 ft_params = List.map vars TUtils.default_fun_param;
                 ft_ret = tr;
@@ -4283,7 +4283,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                   | _ -> p_vis in
                 let ft = { ft with
                   ft_arity = Fellipsis (0, arity_pos);
-                  ft_tparams = []; ft_params = [];
+                  ft_tparams = ([], FTKtparams); ft_params = [];
                 } in
                 let res_ty = (r, Tfun ft) in
                 env, res_ty, tyvars, None
@@ -4473,7 +4473,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
            * valid.
           *)
           let ft = {ft with
-            ft_arity = Fellipsis (0, arity_pos); ft_tparams = []; ft_params = []; } in
+            ft_arity = Fellipsis (0, arity_pos); ft_tparams = ([], FTKtparams); ft_params = []; } in
 
           let member_ty = (r, Tfun ft) in
           env, member_ty, tyvars, Some (mem_pos, vis)
@@ -5167,7 +5167,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
             ft_abstract = false;
             ft_is_coroutine = is_coroutine;
             ft_arity = arity;
-            ft_tparams = [];
+            ft_tparams = ([], FTKtparams);
             ft_where_constraints = [];
             ft_params = tyl;
             ft_ret = ty;

@@ -26,7 +26,7 @@
             [(Expr
                 (([6:3-23], int),
                  (Call (Cnormal,
-                    (([6:3-14], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
+                    (([6:3-14], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
                      (Class_const (
                         (([6:3-9], Shapes), (CI (([6:3-9], "\\Shapes"), []))),
                         ([6:11-14], "idx")))),
@@ -38,7 +38,7 @@
               (Expr
                  (([7:3-26], int),
                   (Call (Cnormal,
-                     (([7:3-14], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
+                     (([7:3-14], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default): int)),
                       (Class_const (
                          (([7:3-9], Shapes), (CI (([7:3-9], "\\Shapes"), []))),
                          ([7:11-14], "idx")))),
@@ -51,7 +51,7 @@
               (Expr
                  (([8:3-29], bool),
                   (Call (Cnormal,
-                     (([8:3-20], (function(shape('x' => int, ?'y' => int) $shape, arraykey $index): bool)),
+                     (([8:3-20], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index): bool)),
                       (Class_const (
                          (([8:3-9], Shapes), (CI (([8:3-9], "\\Shapes"), []))),
                          ([8:11-20], "keyExists")))),
@@ -63,7 +63,7 @@
               (Expr
                  (([9:3-30], void),
                   (Call (Cnormal,
-                     (([9:3-20], (function(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
+                     (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
                       (Class_const (
                          (([9:3-9], Shapes), (CI (([9:3-9], "\\Shapes"), []))),
                          ([9:11-20], "removeKey")))),
@@ -78,7 +78,7 @@
               (Expr
                  (([10:3-22], array<string, int>),
                   (Call (Cnormal,
-                     (([10:3-18], (function(shape('x' => int) $shape): array<string, int>)),
+                     (([10:3-18], (function<T as shape(...)>(shape('x' => int) $shape): array<string, int>)),
                       (Class_const (
                          (([10:3-9], Shapes),
                           (CI (([10:3-9], "\\Shapes"), []))),

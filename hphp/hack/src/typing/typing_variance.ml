@@ -437,15 +437,15 @@ and class_method tcopt root static env (_method_name, method_) =
     then env
     else
       match method_.ce_type with
-      | lazy (_, Tfun { ft_tparams; ft_params; ft_ret; _ }) ->
-          let env = List.fold_left ft_tparams
+      | lazy (_, Tfun { ft_tparams = (tparams, _); ft_params; ft_ret; _ }) ->
+          let env = List.fold_left tparams
             ~f:begin fun env (_, (_, tparam_name), _, _) ->
               SMap.remove tparam_name env
             end ~init:env in
           let env = List.fold_left
             ~f:(fun_param tcopt root static) ~init:env ft_params in
           let env = List.fold_left
-            ~f:(fun_tparam tcopt root) ~init:env ft_tparams in
+            ~f:(fun_tparam tcopt root) ~init:env tparams in
           let env = fun_ret tcopt root static env ft_ret in
           env
       | _ -> assert false

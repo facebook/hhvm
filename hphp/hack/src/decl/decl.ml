@@ -242,7 +242,7 @@ and fun_decl_in_env env f =
     ft_is_coroutine = f.f_fun_kind = Ast.FCoroutine;
     ft_abstract    = false;
     ft_arity       = arity;
-    ft_tparams     = tparams;
+    ft_tparams     = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params      = params;
     ft_ret         = ret_ty;

@@ -2655,6 +2655,23 @@ let invalid_move_use pos1 =
   add (Typing.err_code Typing.InvalidMoveUse) pos1
   ("move takes a single mutably-owned local variable as an argument")
 
+let mismatched_reify (def_pos, def_name) arg_pos arg_reified arg_index =
+  let arg_msg = "The type argument at index " ^ (string_of_int arg_index) ^ " is" ^
+    (if arg_reified then "" else " not") ^ " reified" in
+  let def_msg = "Its definition " ^ def_name ^ " is" ^
+    (if arg_reified then " not" else "") in
+  add_list (Typing.err_code Typing.MismatchedReify) [
+    arg_pos, arg_msg;
+    def_pos, def_msg
+  ]
+
+let require_args_reify def_pos arg_pos =
+  add_list (Typing.err_code Typing.RequireArgsReify) [
+    arg_pos, "All type arguments must be specified because a type parameter is reified";
+    def_pos, "Definition is here"
+  ]
+
+
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos
   ("Result of freeze operation is unused. Note that freeze unsets local variable \

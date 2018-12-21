@@ -417,7 +417,7 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
         pp_tparam fmt x;
         true)
       ~init:false
-      x.ft_tparams);
+      (fst x.ft_tparams));
   Format.fprintf fmt "@,]@]";
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";

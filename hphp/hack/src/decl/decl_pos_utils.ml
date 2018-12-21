@@ -144,15 +144,14 @@ let rec ty (p, x) =
 
   and fun_type ft =
     { ft with
-      ft_tparams = List.map ft.ft_tparams type_param   ;
-      ft_where_constraints = List.map
-        ft.ft_where_constraints where_constraint       ;
-      ft_params  = List.map ft.ft_params fun_param     ;
-      ft_ret     = ty ft.ft_ret                        ;
-      ft_pos     = pos ft.ft_pos                       ;
-      ft_arity   = fun_arity ft.ft_arity               ;
-      ft_reactive = fun_reactive ft.ft_reactive        ;
-      ft_decl_errors = None                            ;
+      ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:type_param) ft.ft_tparams  ;
+      ft_where_constraints = List.map ft.ft_where_constraints where_constraint ;
+      ft_params  = List.map ft.ft_params fun_param                             ;
+      ft_ret     = ty ft.ft_ret                                                ;
+      ft_pos     = pos ft.ft_pos                                               ;
+      ft_arity   = fun_arity ft.ft_arity                                       ;
+      ft_reactive = fun_reactive ft.ft_reactive                                ;
+      ft_decl_errors = None                                                    ;
     }
 
   and fun_reactive = function

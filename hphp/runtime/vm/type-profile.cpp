@@ -17,9 +17,9 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -34,12 +34,11 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <queue>
 #include <utility>
-
-#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 
@@ -77,13 +76,13 @@ __thread bool nonVMThread = false;
  * element n in this list, we log a point along the RFH curve, which is the
  * total number of requests served when server uptime hits n seconds.
  */
-const std::vector<int64_t> rfhBuckets = {
+constexpr std::array<uint32_t, 32> rfhBuckets = {{
   30, 60, 90, 120, 150, 180, 210, 240, 270, 300,             // every 30s, to 5m
   360, 420, 480, 540, 600,                                   // every 1m, to 10m
   900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600, // every 5m, to 1h
   4500, 5400, 6300, 7200,                                    // every 15m, to 2h
-  3 * 3600, 4 * 3600, 5 * 3600, 6 * 3600,                    // every 1h, to 6h
-};
+  3 * 3600, 4 * 3600, 6 * 3600
+}};
 std::atomic<size_t> nextRFH{0};
 
 }
@@ -237,7 +236,7 @@ void profileRequestStart() {
   assertx(!acquiredSingleJit);
   assertx(!acquiredSingleJitConcurrent);
   if (okToJit) {
-    if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
+    if (singleJitRequestCount() < RuntimeOption::EvalNumSingleJitRequests) {
       if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
         acquiredSingleJit = true;
       } else {
@@ -316,19 +315,20 @@ void profileRequestEnd() {
   checkRFH(finished);
 
   if (acquiredSingleJit || acquiredSingleJitConcurrent) {
-    ++singleJitRequests;
+    auto singleJitCount =
+      singleJitRequests.fetch_add(1, std::memory_order_relaxed);
 
     if (acquiredSingleJit) {
       singleJitLock = false;
       acquiredSingleJit = false;
     }
     if (acquiredSingleJitConcurrent) {
-      --singleJitConcurrentCount;
+      singleJitConcurrentCount.fetch_sub(1, std::memory_order_relaxed);
       acquiredSingleJitConcurrent = false;
     }
 
     if (RuntimeOption::ServerExecutionMode()) {
-      Logger::Warning("Finished singleJitRequest %d", singleJitRequests.load());
+      Logger::Info("Finished singleJitRequest %d", singleJitCount + 1);
     }
   }
 }

@@ -1013,9 +1013,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   ArrayIter iter(cell_input);
   for (; pos < offset && iter; ++pos, ++iter) {}
 
-  if (input_is_packed && (offset == 0 ||
-                          !RuntimeOption::EvalEnableIntishCast ||
-                          !preserve_keys)) {
+  if (input_is_packed && (offset == 0 || !preserve_keys)) {
     PackedArrayInit ret(len);
     for (; pos < (offset + len) && iter; ++pos, ++iter) {
       ret.appendWithRef(iter.secondValPlus());

@@ -204,6 +204,8 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
       }
       BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
+      FTRACE(1, "GlobalData loaded from '{}':\n", repoName(repoId));
+      FTRACE(1, "{}", show(s_globalData));
       if (readArrayTable) {
         auto& arrayTypeTable = globalArrayTypeTable();
         decoder(arrayTypeTable);

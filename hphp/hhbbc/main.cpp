@@ -325,21 +325,6 @@ void write_units(UnitEmitterQueue& ueq) {
     }
   }
 
-
-  if (RuntimeOption::EvalAbortBuildOnVerifyError) {
-    parallel::for_each(
-      ues,
-      [&] (const std::unique_ptr<UnitEmitter>& ue) {
-        always_assert_flog(
-          ue->check(false),
-          "The optimized unit for {} did not pass verification, "
-          "bailing because Eval.AbortBuildOnVerifyError is set",
-          ue->m_filepath
-        );
-      }
-    );
-  }
-
   batchCommit(ues);
   ues.clear();
 }

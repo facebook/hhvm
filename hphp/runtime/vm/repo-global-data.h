@@ -255,6 +255,8 @@ struct Repo::GlobalData {
   }
 };
 
+std::string show(const Repo::GlobalData& gd);
+
 //////////////////////////////////////////////////////////////////////
 
 }

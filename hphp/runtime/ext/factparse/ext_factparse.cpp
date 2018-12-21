@@ -87,8 +87,15 @@ struct HackCFactsExtractor {
       if (workerResult.hasValue() && !workerResult.value().value.empty()) {
         outResArr.set(
           path,
-          f_json_decode(String(workerResult.value().value), true, 512,
-            k_JSON_FB_LOOSE | k_JSON_FB_DARRAYS_AND_VARRAYS));
+          Variant::attach(
+            HHVM_FN(json_decode)(
+              String(workerResult.value().value),
+              true,
+              512,
+              k_JSON_FB_LOOSE | k_JSON_FB_DARRAYS_AND_VARRAYS
+            )
+          )
+        );
       }
       else {
         outResArr.set(path, uninit_null());

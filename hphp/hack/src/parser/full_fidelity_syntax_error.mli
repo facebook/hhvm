@@ -312,6 +312,7 @@ val static_property_in_reified_class : string
 val cls_reified_generic_in_static_method : string
 val static_method_reified_obj_creation : string
 val non_invariant_reified_generic : string
+val no_generics_on_constructors : string
 val dollar_unary : string
 val decl_outside_global_scope : string
 val experimental_in_codegen_without_hacksperimental : string

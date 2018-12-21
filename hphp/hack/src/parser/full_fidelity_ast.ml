@@ -2631,6 +2631,8 @@ and pClassElt : class_elt list parser = fun node env ->
         )
       in
       let hdr = pFunHdr (fun _ -> ()) header env in
+      if snd hdr.fh_name = "__construct" && not (List.is_empty hdr.fh_type_parameters) then
+        raise_parsing_error env (`Node header) SyntaxError.no_generics_on_constructors;
       let member_init, member_def =
         List.unzip @@
           List.filter_map hdr.fh_parameters ~f:(fun p ->

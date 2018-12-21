@@ -243,7 +243,7 @@ function sys_getloadavg(): varray;
  * 2.
  */
 <<__Native>>
-function token_get_all(string $source): array;
+function token_get_all(string $source): varray;
 
 /* token_name() gets the symbolic name for a PHP token value.
  * @param int $token - The token value.

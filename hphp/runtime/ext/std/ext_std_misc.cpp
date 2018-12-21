@@ -860,13 +860,13 @@ static String token_get_all_fix_elseif(Array& res,
   assertx(!strcasecmp(tokCEnd - strlen("if"), "if"));
 
   // Shove in the T_ELSE and T_WHITESPACE, then return the remaining T_IF
-  res.append(make_packed_array(
+  res.append(make_varray(
     UserTokenId_T_ELSE,
     String(tokCStr, strlen("else"), CopyString),
     loc.r.line0
   ));
 
-  res.append(make_packed_array(
+  res.append(make_varray(
     UserTokenId_T_WHITESPACE,
     String(tokCStr + strlen("else"), tokText.size() - strlen("elseif"),
            CopyString),
@@ -887,7 +887,7 @@ Array HHVM_FUNCTION(token_get_all, const String& source) {
   ScannerToken tok;
   Location loc;
   int tokid;
-  Array res = Array::Create();
+  Array res = Array::CreateVArray();
   while ((tokid = scanner.getNextToken(tok, loc))) {
 loop_start: // For after seeing a T_INLINE_HTML, see below
     if (tokid < 256) {
@@ -920,7 +920,7 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
             value += String(tok.text());
             tokid = scanner.getNextToken(tok, loc);
           }
-          Array p = make_packed_array(
+          Array p = make_varray(
             tokVal,
             value,
             line
@@ -944,7 +944,7 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
           break;
       }
 
-      Array p = make_packed_array(
+      Array p = make_varray(
         tokVal,
         value,
         loc.r.line0

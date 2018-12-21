@@ -70,7 +70,7 @@
              (Expr
                 (([13:3-16], string),
                  (Binop ((Eq None),
-                    (([13:3-11], (int | string)),
+                    (([13:3-11], string),
                      (Array_get (
                         (([13:3-9], Vector<(int | string)>),
                          (Lvar ([13:3-9], $items))),

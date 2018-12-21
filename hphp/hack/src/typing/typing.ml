@@ -3265,13 +3265,13 @@ and assign_ p ur env e1 ty2 =
       env, te1, ty3
   | pos, Array_get (e1, None) ->
     let env, te1, ty1 = update_array_type pos env e1 None `lvalue in
-    let env, (ty1', ty2') =
-      Typing_array_access.assign_array_append p ur env ty1 ty2 in
+    let (env, tyvars), (ty1', _ty2') =
+      Typing_array_access.assign_array_append p ur (env, ISet.empty) ty1 ty2 in
     let env, te1 =
       if TUtils.is_hack_collection env ty1
       then env, te1
       else let env, te1, _ = assign_ p ur env e1 ty1' in env, te1 in
-    env, ((pos, ty2'), T.Array_get (te1, None)), ty2
+    make_result ~tyvars env pos (T.Array_get (te1, None)) ty2
   | pos, Array_get (e1, Some e) ->
     let env, te1, ty1 = update_array_type pos env e1 (Some e) `lvalue in
     let env, te, ty = expr env e in

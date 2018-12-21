@@ -1,0 +1,48 @@
+File "array_append_bad.php", line 32, characters 16-20:
+Invalid argument (Typing[4110])
+  File "array_append_bad.php", line 11, characters 23-28:
+  This is a string
+  File "array_append_bad.php", line 22, characters 9-11:
+  It is incompatible with an int
+File "array_append_bad.php", line 35, characters 16-20:
+Invalid argument (Typing[4110])
+  File "array_append_bad.php", line 11, characters 23-28:
+  This is a string
+  File "array_append_bad.php", line 23, characters 7-9:
+  It is incompatible with an int
+  File "hhi_lib__srcs/hackarray.hhi", line 13, characters 55-55:
+    via this generic T
+  File "hhi_lib__srcs/interfaces.hhi", line 127, characters 57-58:
+    via this generic Tv
+File "array_append_bad.php", line 24, characters 10-12:
+This is a num (int/float) (Typing[4110])
+  File "hhi_lib__srcs/collections/Vector.hhi", line 48, characters 49-50:
+    via this generic Tv
+  File "hhi_lib__srcs/collections/interfaces.hhi", line 576, characters 48-49:
+    via this generic Tv
+  File "array_append_bad.php", line 37, characters 15-18:
+  It is incompatible with a bool
+File "array_append_bad.php", line 26, characters 7-9:
+This is a num (int/float) (Typing[4110])
+  File "hhi_lib__srcs/collections/Set.hhi", line 49, characters 43-44:
+    via this generic Tv
+  File "hhi_lib__srcs/collections/interfaces.hhi", line 1681, characters 45-46:
+    via this generic Tv
+  File "array_append_bad.php", line 39, characters 12-15:
+  It is incompatible with a bool
+File "array_append_bad.php", line 27, characters 11-13:
+This is a num (int/float) (Typing[4110])
+  File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 51-52:
+    via this generic Tv
+  File "hhi_lib__srcs/collections/interfaces.hhi", line 1127, characters 58-59:
+    via this generic Tv
+  File "array_append_bad.php", line 41, characters 18-20:
+  It is incompatible with a string
+File "array_append_bad.php", line 27, characters 7-9:
+This is an int (Typing[4110])
+  File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 47-48:
+    via this generic Tk
+  File "hhi_lib__srcs/collections/interfaces.hhi", line 1127, characters 54-55:
+    via this generic Tk
+  File "array_append_bad.php", line 42, characters 15-17:
+  It is incompatible with a string

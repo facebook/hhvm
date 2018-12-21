@@ -51,6 +51,9 @@ let const_vector r ty =
   class_type r SN.Collections.cConstVector [ty]
 let const_collection r ty =
   class_type r SN.Collections.cConstCollection [ty]
+let collection r ty =
+  class_type r SN.Collections.cCollection [ty]
+
 let int r =
   prim_type r Nast.Tint
 let bool r =

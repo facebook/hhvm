@@ -28,9 +28,9 @@ let error_const_mutation (env, tyvars) p (r, ty) =
   Errors.const_mutation p (Reason.to_pos r) (Typing_print.error ty);
   (env, tyvars), err_witness env p
 
-let error_assign_array_append env p (r, ty) =
+let error_assign_array_append (env, tyvars) p (r, ty) =
   Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
-  env, ((r, ty), err_witness env p)
+  (env, tyvars), ((r, ty), err_witness env p)
 
 let rec array_get ?(lhs_of_null_coalesce=false)
   is_lvalue p ((env, tyvars) as acc) ty1 e2 ty2 =
@@ -303,62 +303,82 @@ let rec array_get ?(lhs_of_null_coalesce=false)
     let env = SubType.sub_type env ty1 keyed_container in
     (env, tyvars), value
 
-let rec assign_array_append pos ur env ty1 ty2 =
-  let env, ety1 = SubType.expand_type_and_solve env ty1 in
+let rec assign_array_append pos ur (env, tyvars) ty1 ty2 =
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
+  log_types pos env
+    [Log_head ("assign_array_append",
+    [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
+  let env, ety1 = Env.expand_type env ty1 in
   match ety1 with
   | r, (Tany | Tarraykind (AKany | AKempty)) ->
-    env, (ty1, (r, TUtils.tany env))
+    (env, tyvars), (ty1, (r, TUtils.tany env))
   | r, Terr ->
-    env, (ty1, (r, TUtils.terr env))
+    (env, tyvars), (ty1, (r, TUtils.terr env))
   | _, Tclass ((_, n), _, [tv])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
     let env = Typing_ops.sub_type pos ur env ty2 tv in
-    env, (ty1, tv)
+    (env, tyvars), (ty1, tv)
   (* Handle the case where Vector or Set was used as a typehint
      without type parameters *)
   | r, Tclass ((_, n), _, [])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-    env, (ty1, (r, TUtils.tany env))
+    (env, tyvars), (ty1, (r, TUtils.tany env))
   | _, Tclass ((_, n), _, [tk; tv]) when n = SN.Collections.cMap ->
     let tpair = MakeType.pair (Reason.Rmap_append pos) tk tv in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
-    env, (ty1, tpair)
+    (env, tyvars), (ty1, tpair)
   (* Handle the case where Map was used as a typehint without
      type parameters *)
   | _, Tclass ((_, n), _, []) when n = SN.Collections.cMap ->
     let tpair = MakeType.class_type (Reason.Rmap_append pos) SN.Collections.cPair [] in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
-    env, (ty1, tpair)
+    (env, tyvars), (ty1, tpair)
   | r, Tclass ((_, n) as id, e, [tv])
     when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
     let env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tclass (id, e, [tv'])), tv')
+    (env, tyvars), ((r, Tclass (id, e, [tv'])), tv')
   | r, Tarraykind (AKvec tv) ->
     let  env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tarraykind (AKvec tv')), tv')
+    (env, tyvars), ((r, Tarraykind (AKvec tv')), tv')
   | r, Tarraykind (AKvarray tv) ->
     let  env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tarraykind (AKvarray tv')), tv')
-  | r, Tdynamic -> env, (ty1, (r, Tdynamic))
+    (env, tyvars), ((r, Tarraykind (AKvarray tv')), tv')
+  | r, Tdynamic -> (env, tyvars), (ty1, (r, Tdynamic))
   | _, Tobject ->
     if Env.is_strict env
-    then error_assign_array_append env pos ty1
-    else env, (ty1, (Reason.Rwitness pos, TUtils.tany env))
+    then error_assign_array_append (env, tyvars) pos ty1
+    else (env, tyvars), (ty1, (Reason.Rwitness pos, TUtils.tany env))
   | r, Tunresolved ty1l ->
-    let env, resl = List.map_env env ty1l (fun env ty1 -> assign_array_append pos ur env ty1 ty2) in
+    let (env, tyvars), resl =
+      List.map_env (env, tyvars) ty1l (fun acc ty1 -> assign_array_append pos ur acc ty1 ty2) in
     let (ty1l', tyl') = List.unzip resl in
-    env, ((r, Tunresolved ty1l'), (r, Tunresolved tyl'))
+    (env, tyvars), ((r, Tunresolved ty1l'), (r, Tunresolved tyl'))
   | _, Tabstract _ ->
     let resl = TUtils.try_over_concrete_supertypes env ty1 begin fun env ty1 ->
-      assign_array_append pos ur env ty1 ty2
+      let (_env, _tyvars), res = assign_array_append pos ur (env, tyvars) ty1 ty2 in
+      res
     end in
     begin match resl with
-    | [res] -> res
-    | _ -> error_assign_array_append env pos ty1
+    | [res] -> (env, tyvars), res
+    | _ -> error_assign_array_append (env, tyvars) pos ty1
     end
-  | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
+  | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ |
         Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
-    error_assign_array_append env pos ty1
+    error_assign_array_append (env, tyvars) pos ty1
+
+  | _, Tvar _ ->
+    let env, value, tyvars = Env.fresh_unresolved_type_add_tyvars env pos tyvars in
+    let r = Reason.Rwitness pos in
+    let supertype =
+      (r, Tunresolved [
+        MakeType.collection r value;
+        MakeType.vec r value;
+        MakeType.keyset r value;
+        (r, Tarraykind (AKvec value))
+        ]) in
+    let env = SubType.sub_type env ty1 supertype in
+    let env = SubType.sub_type env ty2 value in
+    (env, tyvars), (ty1, value)
 
 (* Used for typing an assignment e1[key] = e2
  * where e1 has type ty1, key has type tkey and e2 has type ty2.

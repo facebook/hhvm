@@ -2390,8 +2390,31 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       return finishMe(plhs);
     }
 
-    if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-        propInfo.typeConstraint && propInfo.typeConstraint->isCheckable()) {
+    /*
+     * If we statically know this SetOp cannot violate the type-hint, we can
+     * skip the type-hint validation. Otherwise we need to use the (slower)
+     * runtime helpers which also perform a type-hint validation. These might
+     * need to perform the SetOp on a temporary, which can trigger COW where we
+     * wouldn't otherwise.
+     *
+     * This is only really important for concat, so that's the only special case
+     * we deal with right now. If the lhs is already a string (and therefore
+     * must satisfy the type-hint), or the type-hint always allows strings
+     * (concats will always produce a string, regardless of the rhs), we know a
+     * check isn't necessary.
+     */
+    auto const fast = [&]{
+      if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
+      if (!propInfo.typeConstraint || !propInfo.typeConstraint->isCheckable()) {
+        return true;
+      }
+      if (op != SetOpOp::ConcatEqual) return false;
+      if (propPtr->type().deref() <= TStr) return true;
+      auto const dummy = make_tv<KindOfPersistentString>(staticEmptyString());
+      return propInfo.typeConstraint->alwaysPasses(&dummy);
+    }();
+
+    if (!fast) {
       gen(
         env,
         SetOpCellVerify,

@@ -486,6 +486,34 @@ bool call_uses_strict_types(const Func* func);
 
 bool verify_fail_may_coerce(const Func* callee);
 
+/*
+ * Check if the result of a SetOp needs to be checked against the property's
+ * type-hint. If we do, we'll have to perform the SetOp on a temporary, do the
+ * check, then move it into the final location. Otherwise we can just do the
+ * SetOp in place.
+ *
+ * For now we only elide the type-check for concats when the lhs is already a
+ * string or the type-hint always allows strings (since a concat always produces
+ * a string). This is more than a minor optimization. If we do the concat on a
+ * temporary, it will increase the ref-count of the target, meaning the concat
+ * will trigger a COW. This can be a major performance hit if the target is
+ * large.
+ */
+inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
+                                SetOpOp op,
+                                tv_rval lhs) {
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0 || !tc.isCheckable()) {
+    return false;
+  }
+  if (op != SetOpOp::ConcatEqual) return true;
+  // If the target of the concat is already a string, or the type-hint always
+  // allows a string, we don't need a check because the concat will always
+  // produce a string, regardless of the rhs.
+  if (LIKELY(isStringType(type(lhs)))) return false;
+  auto const dummy = make_tv<KindOfPersistentString>(staticEmptyString());
+  return !tc.alwaysPasses(&dummy);
+}
+
 }
 
 #endif

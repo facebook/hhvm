@@ -5076,23 +5076,15 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
                 name->data());
   }
 
-  auto const checkable_sprop = [&]() -> const Class::SProp* {
-    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
-    auto const& sprop = cls->staticProperties()[slot];
-    return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
-  }();
-
   val = tvToCell(val);
-  if (checkable_sprop) {
+  auto const& sprop = cls->staticProperties()[slot];
+  if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
     Cell temp;
     cellDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setopBody(&temp, op, fr);
-    checkable_sprop->typeConstraint.verifyStaticProperty(
-      &temp,
-      cls,
-      checkable_sprop->cls,
-      name
+    sprop.typeConstraint.verifyStaticProperty(
+      &temp, cls, sprop.cls, name
     );
     cellMove(temp, *val);
   } else {

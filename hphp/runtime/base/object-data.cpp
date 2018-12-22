@@ -90,24 +90,20 @@ void invoke_destructor(ObjectData* obj, const Func* dtor) {
 }
 
 ALWAYS_INLINE
-bool typeHintChecked(const Class::Prop* prop) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return false;
-  return prop && !prop->typeConstraint.isMixedResolved();
-}
-
-ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
                     const Class::Prop* prop,
                     tv_rval val) {
   assertx(cellIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
-  if (!typeHintChecked(prop)) return;
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (!prop || !prop->typeConstraint.isCheckable()) return;
   prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
 }
 
 ALWAYS_INLINE
 void boxingTypeHint(const Class::Prop* prop) {
-  if (!typeHintChecked(prop)) return;
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (!prop || prop->typeConstraint.isMixedResolved()) return;
   raise_property_typehint_binding_error(
     prop->cls,
     prop->name,
@@ -118,7 +114,8 @@ void boxingTypeHint(const Class::Prop* prop) {
 
 ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
-  if (!typeHintChecked(prop)) return;
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (!prop || prop->typeConstraint.isMixedResolved()) return;
   raise_property_typehint_unset_error(
     prop->cls,
     prop->name,
@@ -1956,9 +1953,11 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       throwMutateImmutable(lookup.slot);
     }
     prop = tvToCell(prop);
-    if (typeHintChecked(lookup.prop)) {
+
+    if (lookup.prop &&
+        setOpNeedsTypeCheck(lookup.prop->typeConstraint, op, prop)) {
       /*
-       * If this property has a type-hint, we can't do the setop truely in
+       * If this property has a type-hint, we can't do the setop truly in
        * place. We need to verify that the new value satisfies the type-hint
        * before assigning back to the property (if we raise a warning and throw,
        * we don't want to have already put the value into the prop).
@@ -2081,7 +2080,10 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
      * that case.
      */
     auto const fast = [&]{
-      if (!typeHintChecked(lookup.prop)) return true;
+      if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
+      if (!lookup.prop || !lookup.prop->typeConstraint.isCheckable()) {
+        return true;
+      }
       if (!isIntType(type(prop))) return false;
       return
         op == IncDecOp::PreInc || op == IncDecOp::PostInc ||

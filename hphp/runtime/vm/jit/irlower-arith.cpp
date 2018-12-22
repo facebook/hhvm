@@ -216,12 +216,22 @@ static void setOpCellVerifyImpl(tv_lval lhs, Cell rhs,
   auto const& prop = cls->declProperties()[slot];
   assertx(prop.typeConstraint.isCheckable());
 
-  Cell temp;
-  cellDup(*lhs, temp);
-  SCOPE_FAIL { tvDecRefGen(&temp); };
-  setOpOpToHelper(Op)(&temp, rhs);
-  prop.typeConstraint.verifyProperty(&temp, cls, prop.cls, prop.name);
-  cellMove(temp, lhs);
+  if (setOpNeedsTypeCheck(prop.typeConstraint, Op, lhs)) {
+    /*
+     * If this property has a type-hint, we can't do the setop truely in
+     * place. We need to verify that the new value satisfies the type-hint
+     * before assigning back to the property (if we raise a warning and throw,
+     * we don't want to have already put the value into the prop).
+     */
+    Cell temp;
+    cellDup(*lhs, temp);
+    SCOPE_FAIL { tvDecRefGen(&temp); };
+    setOpOpToHelper(Op)(&temp, rhs);
+    prop.typeConstraint.verifyProperty(&temp, cls, prop.cls, prop.name);
+    cellMove(temp, lhs);
+  } else {
+    setOpOpToHelper(Op)(lhs, rhs);
+  }
 }
 
 void cgSetOpCellVerify(IRLS& env, const IRInstruction* inst) {

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/type-profile.h"
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -315,7 +316,7 @@ void profileRequestEnd() {
   checkRFH(finished);
 
   if (acquiredSingleJit || acquiredSingleJitConcurrent) {
-    auto singleJitCount =
+    auto const singleJitCount = 1 +
       singleJitRequests.fetch_add(1, std::memory_order_relaxed);
 
     if (acquiredSingleJit) {
@@ -328,7 +329,14 @@ void profileRequestEnd() {
     }
 
     if (RuntimeOption::ServerExecutionMode()) {
-      Logger::Info("Finished singleJitRequest %d", singleJitCount + 1);
+      if (auto transport = g_context->getTransport()) {
+        auto const& endpoint = transport->getCommand();
+        Logger::Info("Finished singleJitRequest %d : %s",
+                     singleJitCount, endpoint.c_str());
+      } else {
+        Logger::Warning("Finished singleJitRequest %d : unknown endpoint",
+                        singleJitCount);
+      }
     }
   }
 }

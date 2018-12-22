@@ -198,7 +198,8 @@ void HttpRequestHandler::setupRequest(Transport* transport) {
   MemoryManager::requestInit();
   HHProf::Request::Setup(transport);
 
-  g_context.getCheck();
+  g_context.getCheck()->setTransport(transport);
+
   GetAccessLog().onNewRequest();
 
   // Set current virtual host.

@@ -31,7 +31,7 @@ function verifyStopLine($frames, $line) {
         "totalFrames" => $frames,
         "stackFrames" => [
           array(
-            "source" => array("path" => $path, "name" => $path),
+            "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
             "line" => $line,
           )
         ]

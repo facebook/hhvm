@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/tv-variant.h"
 
+#include <boost/filesystem.hpp>
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -101,20 +103,15 @@ bool StackTraceCommand::executeImpl(
     }
 
     stackFrame["line"] = lineNumber;
-    stackFrame["column"] = 0;
-    stackFrame["source"] = folly::dynamic::object;
+    stackFrame["column"] = prefs.columnsStartAt1 ? 1 : 0;
 
-    folly::dynamic& source = stackFrame["source"];
     std::string fileName = tvCastToString(file.tv()).toCppString();
-
-    if (fileName.empty()) {
-      // Some routines like builtins and native extensions do not have
-      // a PHP file path in their frame's file name field.
-      fileName = std::string("<unknown>");
+    if (!fileName.empty()) {
+      stackFrame["source"] = folly::dynamic::object;
+      folly::dynamic& source = stackFrame["source"];
+      source["name"] = boost::filesystem::basename(fileName);
+      source["path"] = fileName;
     }
-
-    source["name"] = fileName;
-    source["path"] = fileName;
 
     levelsAdded++;
   }

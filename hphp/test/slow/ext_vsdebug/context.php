@@ -36,13 +36,13 @@ checkObjEqualRecursively($msg, array(
       "totalFrames" => 2,
       "stackFrames" => [
         array(
-          "source" => array("path" => $path, "name" => $path),
+          "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
           "id" => 1,
           "line" => 20,
           "name" => "innerFunc"
         ),
         array(
-          "source" => array("path" => $path, "name" => $path),
+          "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
           "id" => 2,
           "line" => 31,
           "name" => "{main}"

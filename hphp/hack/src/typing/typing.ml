@@ -4790,16 +4790,18 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env =
       | Tclass(c, _, tyl) -> Tclass(c, exact, tyl)
       | self -> self in
     make_result env T.CIself (Reason.Rwitness p, self)
-  | CI (c, hl) as e1 ->
+  | CI (c, tal) as e1 ->
     let class_ = Env.get_class env (snd c) in
     (match class_ with
       | None ->
-        make_result env (T.CI (c, hl)) (Reason.Rwitness p, Typing_utils.tany env)
+        make_result env (T.CI (c, tal)) (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
+        let hint_list, is_reified_list = List.unzip tal in
         let env, ty =
           resolve_type_arguments_and_check_constraints ~exact ~check_constraints
-            env p c e1 (Cls.tparams class_) hl in
-        make_result env (T.CI (c, hl)) ty
+            env p c e1 (Cls.tparams class_) hint_list in
+        let tal = List.zip_exn hint_list is_reified_list in
+        make_result env (T.CI (c, tal)) ty
     )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in

@@ -110,8 +110,8 @@ and shape_field f = function
 and pstring f (p, s) =
   f p, s
 
-and instantiated_sid f (sid, hl) =
-  (pstring f sid, List.map hl (hint f))
+and instantiated_sid f ((sid: Aast.sid), (tal: Aast.targ list)) =
+  (pstring f sid, List.map tal ~f:(Tuple.T2.map_fst ~f:(hint f)))
 
 and special_func f = function
   | Gena e -> Gena (expr f e)

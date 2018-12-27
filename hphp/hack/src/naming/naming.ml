@@ -1062,7 +1062,7 @@ module Make (GetLocals : GetLocals) = struct
             ~allow_typedef ~allow_wildcard ~tp_depth env l =
     List.map l
       (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
-  and targl_funcall env p tal =
+  and targl env p tal =
     check_type_args_for_reified env p tal;
     List.map ~f:(fun (h, is_reified) ->
       let h =
@@ -2378,13 +2378,13 @@ module Make (GetLocals : GetLocals) = struct
     | Call ((_, Id (p, pseudo_func)), tal, el, uel)
         when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel ;
-        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), targl_funcall env p tal, exprl env el, [])
+        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, [])
     | Call ((p, Id (_, cn)), tal, el, uel)
       when cn = SN.SpecialFunctions.call_user_func ->
         arg_unpack_unexpected uel ;
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
-        | f :: el -> N.Call (N.Cuser_func, expr env f, targl_funcall env p tal, exprl env el, [])
+        | f :: el -> N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, [])
         )
     | Call ((p, Id (_, cn)), _, el, uel) when cn = SN.SpecialFunctions.fun_ ->
         arg_unpack_unexpected uel ;
@@ -2487,13 +2487,13 @@ module Make (GetLocals : GetLocals) = struct
       when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
         let n_expr = N.Id (p2, cn) in
         N.Call (N.Cnormal, (p1, n_expr),
-               targl_funcall env p tal, exprl env el, exprl env uel)
+               targl env p tal, exprl env el, exprl env uel)
     | Call ((p, Id f), tal, el, uel) ->
       begin match Env.let_local env f with
       | Some x ->
         (* Translate into local id *)
         let f = (p, N.ImmutableVar x) in
-        N.Call (N.Cnormal, f, targl_funcall env p tal, exprl env el, exprl env uel)
+        N.Call (N.Cnormal, f, targl env p tal, exprl env el, exprl env uel)
       | None ->
         (* The name is not a local `let` binding *)
         let qualified = Env.fun_id env f in
@@ -2527,7 +2527,7 @@ module Make (GetLocals : GetLocals) = struct
           | _ -> Errors.gen_array_rec_arity p; N.Any
           )
         end else
-          N.Call (N.Cnormal, (p, N.Id qualified), targl_funcall env p tal,
+          N.Call (N.Cnormal, (p, N.Id qualified), targl env p tal,
                   exprl env el, exprl env uel)
       end (* match *)
     (* Handle nullsafe instance method calls here. Because Obj_get is used
@@ -2539,13 +2539,13 @@ module Make (GetLocals : GetLocals) = struct
           (N.Cnormal,
            (p, N.Obj_get (expr env e1,
               expr_obj_get_name env e2, N.OG_nullsafe)),
-           targl_funcall env p tal,
+           targl env p tal,
            exprl env el, exprl env uel)
     (* Handle all kinds of calls that weren't handled by any of
        the cases above *)
     | Call (e, tal, el, uel) ->
         N.Call (N.Cnormal, expr env e,
-               targl_funcall env p tal, exprl env el, exprl env uel)
+               targl env p tal, exprl env el, exprl env uel)
     | Yield_break -> N.Yield_break
     | Yield e -> N.Yield (afield env e)
     | Await e -> N.Await (expr env e)
@@ -2661,17 +2661,15 @@ module Make (GetLocals : GetLocals) = struct
     | New ((cp, Id x), tal, el, uel)
     | New ((cp, Lvar x), tal, el, uel) ->
       check_type_args_for_reified env p tal;
-      let hl, _is_reified_list = List.unzip tal in
-      N.New (make_class_id env x hl,
+      N.New (make_class_id env x tal,
         exprl env el,
         exprl env uel,
         cp)
     | New ((p, _e), tal, el, uel) ->
       check_type_args_for_reified env p tal;
-      let hl, _is_reified_list = List.unzip tal in
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
-      N.New (make_class_id env (p, SN.Classes.cUnknown) hl,
+      N.New (make_class_id env (p, SN.Classes.cUnknown) tal,
         exprl env el,
         exprl env uel,
         p)
@@ -2783,7 +2781,7 @@ module Make (GetLocals : GetLocals) = struct
       f_static = f.f_static;
     }
 
-  and make_class_id env (p, x as cid) hl =
+  and make_class_id env (p, x as cid) tal =
     p,
     match x with
       | x when x = SN.Classes.cParent ->
@@ -2810,10 +2808,7 @@ module Make (GetLocals : GetLocals) = struct
            * like "$$::someMethod()". *)
           N.CIexpr(p, N.Lvar (p, Env.found_dollardollar env p))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
-      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false,
-        hintl ~allow_wildcard:true ~forbid_this:false
-          ~allow_typedef:true ~allow_retonly:true ~tp_depth:1 env hl
-        )
+      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false, targl env p tal)
 
   and casel env l =
     List.map_env [] l (case env)

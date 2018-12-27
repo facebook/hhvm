@@ -60,6 +60,7 @@ module FullFidelityParseArgs = struct
     quick_mode : bool;
     lower_coroutines : bool;
     enable_hh_syntax : bool;
+    enable_await_as_an_expression : bool;
     fail_open : bool;
     (* Defining the input *)
     files : string list;
@@ -87,6 +88,7 @@ module FullFidelityParseArgs = struct
     quick_mode
     lower_coroutines
     enable_hh_syntax
+    enable_await_as_an_expression
     fail_open
     show_file_name
     files
@@ -111,6 +113,7 @@ module FullFidelityParseArgs = struct
     quick_mode;
     lower_coroutines;
     enable_hh_syntax;
+    enable_await_as_an_expression;
     fail_open;
     show_file_name;
     files;
@@ -150,6 +153,7 @@ module FullFidelityParseArgs = struct
     let quick_mode = ref false in
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
+    let enable_await_as_an_expression = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
     let dump_nast = ref false in
@@ -250,6 +254,9 @@ No errors are filtered out.";
       "--force-hh-syntax",
         Arg.Set enable_hh_syntax,
         "Force hh syntax for the parser.";
+      "--enable-await-as-an-expression",
+        Arg.Set enable_await_as_an_expression,
+        "Enable await-as-an-expression";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -279,6 +286,7 @@ No errors are filtered out.";
       !quick_mode
       !lower_coroutines
       !enable_hh_syntax
+      !enable_await_as_an_expression
       !fail_open
       !show_file_name
       (List.rev !files)
@@ -308,6 +316,8 @@ let handle_existing_file args filename =
   let popt = ParserOptions.default in
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (args.codegen && args.enable_hh_syntax) in
+  let popt = ParserOptions.with_enable_await_as_an_expression popt
+    (args.enable_await_as_an_expression) in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

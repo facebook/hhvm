@@ -15,6 +15,7 @@ let global_options =
     ~po_disable_define:false
     ~po_allow_goto:false
     ~po_enable_concurrent:false
+    ~po_enable_await_as_an_expression:false
     ~tco_log_inference_constraints:false
     ~tco_user_attrs:None
     ~tco_experimental_features:TypecheckerOptions.experimental_all

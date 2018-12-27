@@ -453,6 +453,8 @@ let make_popt () =
       Hhbc_options.(disable_variable_variables !compiler_options)
     ~enable_concurrent:
       Hhbc_options.(enable_concurrent !compiler_options)
+    ~enable_await_as_an_expression:
+      Hhbc_options.(enable_await_as_an_expression !compiler_options)
     ~disable_define:
       Hhbc_options.(phpism_disable_define !compiler_options)
     ~enable_hh_syntax_for_hhvm:

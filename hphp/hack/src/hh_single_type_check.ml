@@ -186,6 +186,7 @@ let parse_options () =
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
   let enable_concurrent = ref false in
+  let enable_await_as_an_expression = ref false in
   let disallow_stringish_magic = ref false in
   let log_inference_constraints = ref false in
   let new_inference = ref false in
@@ -357,6 +358,9 @@ let parse_options () =
     "--enable-concurrent",
       Arg.Set enable_concurrent,
       " Enable the concurrent feature";
+    "--enable-await-as-an-expression",
+      Arg.Set enable_await_as_an_expression,
+      " Enable the await-as-an-expression feature";
     "--unsafe-rx",
         Arg.Set unsafe_rx,
         " Disables reactivity related errors";
@@ -419,6 +423,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
       GlobalOptions.po_enable_concurrent = !enable_concurrent;
+      GlobalOptions.po_enable_await_as_an_expression = !enable_await_as_an_expression;
       GlobalOptions.log_levels = !log_levels;
   } in
   let tcopt = {

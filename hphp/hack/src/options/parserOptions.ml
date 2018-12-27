@@ -15,15 +15,19 @@ let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
 let disable_variable_variables = GlobalOptions.po_disable_variable_variables
 let allow_goto = GlobalOptions.po_allow_goto
 let enable_concurrent = GlobalOptions.po_enable_concurrent
+let enable_await_as_an_expression = GlobalOptions.po_enable_await_as_an_expression
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
 let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
+let with_enable_await_as_an_expression po b =
+  { po with GlobalOptions.po_enable_await_as_an_expression = b }
 
 let make
   ~auto_namespace_map
   ~enable_hh_syntax_for_hhvm
   ~enable_concurrent
+  ~enable_await_as_an_expression
   ~disallow_execution_operator
   ~disable_variable_variables
   ~disable_define = {
@@ -31,6 +35,7 @@ let make
   GlobalOptions.po_auto_namespace_map = auto_namespace_map;
   GlobalOptions.po_enable_hh_syntax_for_hhvm = enable_hh_syntax_for_hhvm;
   GlobalOptions.po_enable_concurrent = enable_concurrent;
+  GlobalOptions.po_enable_await_as_an_expression = enable_await_as_an_expression;
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
   GlobalOptions.po_disable_variable_variables = disable_variable_variables;
   GlobalOptions.po_disable_define = disable_define;

@@ -762,6 +762,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::EvalDumpHHJS ? '1' : '0')
     + (RuntimeOption::EnableConcurrent ? '1' : '0')
+    + (RuntimeOption::EnableAwaitAsAnExpression ? '1' : '0')
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
     + std::to_string(RuntimeOption::UndefinedConstFallback)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')

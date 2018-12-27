@@ -528,6 +528,9 @@ struct RuntimeOption {
   // Enable concurrent
   // true => allows use of concurrent, false => error
   static bool EnableConcurrent;
+  // Enable await-as-an-expression
+  // true => allows use await as an expression, false => error
+  static bool EnableAwaitAsAnExpression;
   // Disables PHP's define() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error

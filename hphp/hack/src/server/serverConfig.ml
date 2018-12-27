@@ -270,6 +270,7 @@ let load config_filename options =
     ~po_disallow_execution_operator:false
     ~po_disable_define:false
     ~po_enable_concurrent:(bool_ "enable_concurrent" ~default:false config)
+    ~po_enable_await_as_an_expression:(bool_ "enable_await_as_an_expression" ~default:false config)
     ~po_allow_goto:(not (bool_ "disallow_goto" ~default:false config))
     ~tco_user_attrs:(config_user_attributes config)
     ~tco_experimental_features:(config_experimental_tc_features config)

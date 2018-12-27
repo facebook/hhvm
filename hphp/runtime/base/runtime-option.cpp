@@ -440,6 +440,7 @@ bool RuntimeOption::DisallowExecutionOperator = false;
 bool RuntimeOption::DisableVariableVariables = false;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::EnableConcurrent = false;
+bool RuntimeOption::EnableAwaitAsAnExpression = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1593,6 +1594,9 @@ void RuntimeOption::Load(
                 true);
     Config::Bind(EnableConcurrent, ini, config,
                 "Hack.Lang.EnableConcurrent",
+                false);
+    Config::Bind(EnableAwaitAsAnExpression, ini, config,
+                "Hack.Lang.EnableAwaitAsAnExpression",
                 false);
   }
   {

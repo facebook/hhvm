@@ -85,60 +85,21 @@ class TestFinder {
   }
 
   public function findTestMethodsViaTokens(): void {
-    $tests = "";
+    $tests = vec[];
     foreach ($this->test_files as $test_file) {
-      $php_code = file_get_contents($test_file);
-      $tokens = token_get_all($php_code);
-      $count = count($tokens);
-      $nspace = "";
-      $class_name = "";
-      // Get the namespace the class is in, if any
-      for ($i = 1; $i < $count; $i++) {
-        if ($tokens[$i - 1][0] === T_NAMESPACE && // namespace keyword
-            $tokens[$i][0] === T_WHITESPACE) {
-          $i++;
-          // Get the full namespace until we hit a ;
-          while ($tokens[$i][0] !== ";") {
-            $nspace .= $tokens[$i][1];
-            $i++;
-          }
-          break;
-        }
-      }
-      // Get the namespace qualified (if any) class name
-      for ($i = 6; $i < $count; $i++) {
-        if ($tokens[$i - 6][0] === T_CLASS &&       // class keyword
-            $tokens[$i - 5][0] === T_WHITESPACE &&
-            $tokens[$i - 4][0] === T_STRING &&      // class name
-            $tokens[$i - 3][0] === T_WHITESPACE &&
-            $tokens[$i - 2][0] === T_EXTENDS &&      // extends keyword
-            $tokens[$i - 1][0] === T_WHITESPACE) {
-          $classpos = $i - 4;
-          // parent could be non-namespaced or be namespaced
-          // So get through all T_NS_SEPARATOR and T_STRING
-          // Last T_STRING before T_WHITESPACE will be parent name
-          while ($tokens[$i][0] !== T_WHITESPACE) { $i++;}
-          if (strpos($tokens[$i - 1][1], "TestCase") !== false || // parent name
-              strpos($tokens[$i - 1][1], "test_case") !== false) {
-            $class_name = $tokens[$classpos][1];
-          }
-          break;
-        }
-      }
-      // Get all the test functions in the class
-      for ($i = 2; $i < $count; $i++) {
-        if ($tokens[$i - 2][0] === T_FUNCTION &&
-            $tokens[$i - 1][0] === T_WHITESPACE &&
-            $tokens[$i][0] === T_STRING &&
-            strpos($tokens[$i][1], "test") === 0) {
-          if ($nspace !== "") {
-            $tests .= $nspace."\\";
-          }
-          $tests .= $class_name."::".$tokens[$i][1].PHP_EOL;
+      $json = HH\ffp_parse_string(file_get_contents($test_file));
+      $methods = HH\ExperimentalParserUtils\find_test_methods($json);
+      foreach ($methods as list($parent, $class, $method)) {
+        $parent_no_ns = end(&explode('\\', $parent));
+        if ((strpos($parent_no_ns, "TestCase") !== false ||
+             strpos($parent_no_ns, "test_case") !== false) &&
+            strpos($method, "test") === 0) {
+          $tests[] = $class . '::' . $method;
         }
       }
     }
-
+    $tests[] = '';
+    $tests = implode(PHP_EOL, $tests);
     file_put_contents($this->tests_file, $tests);
   }
 

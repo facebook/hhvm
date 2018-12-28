@@ -7,7 +7,7 @@
 # We use `nm` to list symbols, filter to thread locals in the HPHP:: namespace,
 # use cut to select just the name, then strip trailing whitespace and ABI tags.
 ALL=$( \
-  nm --demangle --format sysv "buck-out/gen/hphp/hhvm/hhvm/hhvm" \
+  nm --demangle --format sysv "$1" \
   | grep 'HPHP::' \
   | grep '\(\.tbss\|\.tdata\)' \
   | cut --delimiter '|' --field 1 \

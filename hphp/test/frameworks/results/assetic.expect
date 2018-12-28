@@ -252,18 +252,8 @@ Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebug
 .
 Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebugCached
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testComplexFormula
-.
 Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0
-.
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1
-.
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2
-.
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3
-.
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4
-.
+FATAL
 Assetic\Test\Factory\Resource\CoalescingDirectoryResourceTest::shouldFilterFiles
 .
 Assetic\Test\Factory\Resource\DirectoryResourceTest::testFollowSymlinks

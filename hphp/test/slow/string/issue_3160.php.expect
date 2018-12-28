@@ -1,4 +1,0 @@
-<code><span style="color: #000000">
-&nbsp;&nbsp;<span style="color: #0000BB">&lt;?php<br />&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #DD0000">"</span><span style="color: #0000BB">$var</span><span style="color: #DD0000">"</span><span style="color: #007700">;<br />&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;</span><span style="color: #DD0000">"text&nbsp;</span><span style="color: #0000BB">$var</span><span style="color: #DD0000">&nbsp;text"</span><span style="color: #007700">;<br />&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;</span><span style="color: #DD0000">"text"</span><span style="color: #007700">;<br />&nbsp;&nbsp;</span><span style="color: #0000BB">?&gt;</span>
-</span>
-</code>

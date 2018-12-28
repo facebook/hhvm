@@ -29,13 +29,13 @@ Composer\Test\ApplicationTest::testDevWarningPrevented
 Composer\Test\ApplicationTest::testDevWarningPreventedAlias
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingAuthoritativeAndApcu
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testExcludeFromClassmap
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadGeneration
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadGenerationRemoveExtraEntitiesFromAutoloadFiles
@@ -51,37 +51,37 @@ Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsArePrependedInAuto
 Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsInMainPackage
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloading
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingAlternativeVendorDir
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingWithTargetDir
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageDevAutoloading
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageDevAutoloadingDisabledByDefault
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testOverrideVendorsAutoloading
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testPSRToClassMapIgnoresNonExistingDir
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testPreAndPostEventsAreDispatchedDuringAutoloadDump
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testUseGlobalIncludePath
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirSameAsWorkingDir
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorSubstringPath
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsAutoloading
 .
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloading
-.
+E
 Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloadingWithTargetDir
-.
+E
 Composer\Test\Autoload\ClassLoaderTest::testGetPrefixesWithNoPSR0Configuration
 .
 Composer\Test\Autoload\ClassLoaderTest::testLoadClass with data set #0
@@ -91,33 +91,33 @@ Composer\Test\Autoload\ClassLoaderTest::testLoadClass with data set #1
 Composer\Test\Autoload\ClassLoaderTest::testLoadClass with data set #2
 .
 Composer\Test\Autoload\ClassMapGeneratorTest::testAmbiguousReference
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #0
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #1
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #2
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #3
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #4
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #5
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #6
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #7
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapFinderSupport
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapThrowsWhenDirectoryDoesNotExist
 .
 Composer\Test\Autoload\ClassMapGeneratorTest::testDump
-.
+E
 Composer\Test\Autoload\ClassMapGeneratorTest::testFindClassesThrowsWhenFileDoesNotExist
-.
+F
 Composer\Test\Autoload\ClassMapGeneratorTest::testUnambiguousReference
-.
+E
 Composer\Test\CacheTest::testRemoveFilesWhenCacheIsTooLarge
 .
 Composer\Test\CacheTest::testRemoveOutdatedFiles

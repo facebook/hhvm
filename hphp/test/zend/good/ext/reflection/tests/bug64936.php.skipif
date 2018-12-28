@@ -1,3 +1,0 @@
-<?php
-if (!extension_loaded('reflection') || !extension_loaded('tokenizer')) print 'skip missing reflection of tokernizer extension';
-?>

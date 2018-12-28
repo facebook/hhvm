@@ -30,19 +30,11 @@ function defined(string $name, $autoload = true);
 <<__PHPStdLib>>
 function get_browser($user_agent = null, $return_array = false);
 <<__PHPStdLib>>
-function highlight_file($filename, $ret = false);
-<<__PHPStdLib>>
-function show_source($filename, $ret = false);
-<<__PHPStdLib>>
-function highlight_string($str, $ret = false);
-<<__PHPStdLib>>
 function ignore_user_abort($setting = false);
 <<__PHPStdLib, __Rx>>
 function pack($format, ...);
 <<__PHPStdLib>>
 function php_check_syntax($filename, &$error_message = null);
-<<__PHPStdLib>>
-function php_strip_whitespace($filename);
 <<__PHPStdLib>>
 function sleep($seconds);
 <<__PHPStdLib>>

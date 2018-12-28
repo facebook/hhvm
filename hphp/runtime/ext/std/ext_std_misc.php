@@ -231,28 +231,6 @@ function unpack(string $format,
 <<__Native>>
 function sys_getloadavg(): varray;
 
-/* token_get_all() parses the given source string into PHP language tokens
- * using the Zend engine's lexical scanner.  For a list of parser tokens, see
- * List of Parser Tokens, or use token_name() to translate a token value into
- * its string representation.
- * @param string $source - The PHP source to parse.
- * @return array - An array of token identifiers. Each individual token
- * identifier is either a single character (i.e.: ;, ., >, !, etc...), or a
- * three element array containing the token index in element 0, the string
- * content of the original token in element 1 and the line number in element
- * 2.
- */
-<<__Native>>
-function token_get_all(string $source): varray;
-
-/* token_name() gets the symbolic name for a PHP token value.
- * @param int $token - The token value.
- * @return string - The symbolic name of the given token. The returned name
- * returned matches the name of the matching token constant.
- */
-<<__ParamCoerceModeFalse, __Native>>
-function token_name(int $token): string;
-
 /* Casts a given value to a string.
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.

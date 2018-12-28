@@ -1,5 +1,4 @@
 <?hh
-//var_dump(token_get_all("<?hh const super = 0;"));
 
 class TypeConstraintWhereClausesTest<T> {
   // where should not be a keyword where it could be an identifier

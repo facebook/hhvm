@@ -46,8 +46,6 @@ String HHVM_FUNCTION(uniqid, const String& prefix = null_string,
                      bool more_entropy = false);
 Variant HHVM_FUNCTION(unpack, const String& format, const String& data);
 Array HHVM_FUNCTION(sys_getloadavg);
-Array HHVM_FUNCTION(token_get_all, const String& source);
-String HHVM_FUNCTION(token_name, int64_t token);
 String HHVM_FUNCTION(hphp_to_string, const Variant& v);
 Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v);
 Variant HHVM_FUNCTION(SystemLib_max2, const Variant& arg1, const Variant& arg2);

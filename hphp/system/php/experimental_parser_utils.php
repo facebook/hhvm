@@ -2,23 +2,6 @@
 
 namespace HH\ExperimentalParserUtils {
 
-  function find_single_function(array $json, int $line): ?array {
-    return ffp_json_dfs(
-      $json,
-      false,
-      ($j) ==> {
-        if (array_key_exists($j["kind"],
-            keyset["lambda_expression", "anonymous_function", "methodish_declaration"])) {
-          list($ln, $_) = find_boundary_token($j, false);
-          if ($ln === $line) {
-            return $j;
-          }
-        }
-        return null;
-      }
-    );
-  }
-
   function find_all_functions(array $json): dict<int, array> {
     $funs = Map {};
     ffp_json_dfs(

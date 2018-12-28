@@ -18,8 +18,6 @@ $file = $rm->getFileName();
 var_dump($rm->isAsync());
 $program = file_get_contents($file);
 $json = HH\ffp_parse_string($program);
-$fjson = HH\ExperimentalParserUtils\find_single_function($json, $rm->getStartLine());
-var_dump(HH\ExperimentalParserUtils\body_bounds($fjson));
 $allfuns = HH\ExperimentalParserUtils\find_all_functions($json);
 invariant(array_key_exists($rm->getStartLine(), $allfuns), "Method m missing");
 invariant(array_key_exists($ra->getStartLine(), $allfuns), "Method has_attr missing");

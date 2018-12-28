@@ -674,6 +674,9 @@ let val_and_lval_in_concurrent_block =
 let concurrent_is_disabled =
   "Concurrent is disabled"
 
+let invalid_await_position = "Await cannot be used as an expression in this " ^
+  "location because it's conditionally executed."
+
 let misplaced_reactivity_annotation =
   "Reactive annotations are not allowed on classes, interfaces or traits."
 

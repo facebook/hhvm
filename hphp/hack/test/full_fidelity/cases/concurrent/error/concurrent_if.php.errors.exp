@@ -1,3 +1,0 @@
-(6,5)-(10,5) Concurrent block must contain a compound statement of two or more expression statements, IE concurrent { <expr>; <expr>; }.
-(6,9)-(6,18) Await cannot be used as an expression
-(7,7)-(7,8) Concurrent blocks can only use a lval once

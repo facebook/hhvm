@@ -2086,6 +2086,319 @@ let rec check_reference node errors =
     check_reference parenthesized_expression_expression errors
   | _ -> make_error_from_node node SyntaxError.invalid_reference :: errors
 
+let rec_walk ~init ~f node =
+  let rec rec_walk_impl parents init node =
+    let new_init, continue_walk = f init node parents in
+    if continue_walk then
+      List.fold_left
+        ~init:new_init
+        ~f:(rec_walk_impl ((syntax node) :: parents))
+        (Syntax.children node)
+    else new_init in
+  rec_walk_impl [] init node
+
+let does_binop_create_write_on_left = function
+  | Some (TokenKind.Equal
+        | TokenKind.BarEqual
+        | TokenKind.PlusEqual
+        | TokenKind.StarEqual
+        | TokenKind.StarStarEqual
+        | TokenKind.SlashEqual
+        | TokenKind.DotEqual
+        | TokenKind.MinusEqual
+        | TokenKind.PercentEqual
+        | TokenKind.CaratEqual
+        | TokenKind.AmpersandEqual
+        | TokenKind.LessThanLessThanEqual
+        | TokenKind.GreaterThanGreaterThanEqual
+        | TokenKind.QuestionQuestionEqual) -> true
+  | _ -> false
+
+let does_unop_create_write = function
+  | Some (TokenKind.PlusPlus
+        | TokenKind.MinusMinus
+        | TokenKind.Ampersand
+        | TokenKind.Inout) -> true
+  | _ -> false
+
+let find_invalid_lval_usage errors nodes =
+  let get_lvals_and_vals = rec_walk ~f:(fun ((lvals, vals) as acc) node parents ->
+    match parents, syntax node with
+    | DecoratedExpression {
+      decorated_expression_decorator = token;
+      decorated_expression_expression = ({ syntax = lval; _ } as lval_syntax)
+    } :: _, n
+      when phys_equal lval n &&
+           does_unop_create_write (token_kind token) ->
+      (lval_syntax :: lvals, vals), false
+
+    | PrefixUnaryExpression {
+      prefix_unary_operator = token;
+      prefix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
+    } :: _, n
+    | PostfixUnaryExpression {
+      postfix_unary_operator = token;
+      postfix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
+    } :: _, n
+      when phys_equal lval n &&
+           does_unop_create_write (token_kind token) ->
+      (lval_syntax :: lvals, vals), false
+
+    | BinaryExpression {
+      binary_operator = token;
+      binary_left_operand = ({ syntax = lval; _ } as lval_syntax);
+    _ } :: parents, n
+      when phys_equal lval n &&
+           does_binop_create_write_on_left (token_kind token) ->
+      let acc = match parents with
+      | ExpressionStatement _ :: (([SyntaxList _]) | []) -> acc
+      | _ -> lval_syntax :: lvals, vals in
+      acc, false
+
+    | _, Token t when Token.kind t = TokenKind.Variable ->
+      (lvals, node :: vals), false
+
+    | _ -> acc, true
+  ) in
+
+  let lvals, vals = List.fold_left
+    ~init:([], [])
+    ~f:(fun acc node -> get_lvals_and_vals ~init:acc node)
+    nodes in
+
+  let (lval_set, errors) = List.fold_left
+    ~init:(SSet.empty, errors)
+    ~f:(fun (s, e) node -> match syntax node with
+      | VariableExpression { variable_expression = { syntax = Token t; _ }; _ }
+      | Token t when Token.kind t = TokenKind.Variable ->
+        let name = Token.text t in
+        if SSet.mem name s then
+          (s, make_error_from_node node SyntaxError.duplicate_lval_in_concurrent_block :: e)
+        else (SSet.add name s, e)
+      | _ -> (s, make_error_from_node node SyntaxError.complex_lval_in_concurrent_block :: e)
+    ) lvals in
+
+  List.fold_left
+    ~init:errors
+    ~f:(fun e token -> match syntax token with
+      | Token t when Token.kind t = TokenKind.Variable ->
+        let name = Token.text t in
+        if SSet.mem name lval_set then
+          make_error_from_node token SyntaxError.val_and_lval_in_concurrent_block :: e
+        else e
+      | _ -> failwith "unexpected non-Token node"
+    ) vals
+
+  type binop_allows_await_in_positions =
+    | BinopAllowAwaitBoth
+    | BinopAllowAwaitLeft
+    | BinopAllowAwaitRight
+    | BinopAllowAwaitNone
+
+  let get_positions_binop_allows_await t =
+    (match token_kind t with
+    | None -> BinopAllowAwaitNone
+    | Some t -> (match t with
+    | TokenKind.And
+    | TokenKind.Or
+    | TokenKind.BarBar
+    | TokenKind.AmpersandAmpersand
+    | TokenKind.QuestionColon
+    | TokenKind.QuestionQuestion -> BinopAllowAwaitLeft
+    | TokenKind.Equal
+    | TokenKind.BarEqual
+    | TokenKind.PlusEqual
+    | TokenKind.StarEqual
+    | TokenKind.StarStarEqual
+    | TokenKind.SlashEqual
+    | TokenKind.DotEqual
+    | TokenKind.MinusEqual
+    | TokenKind.PercentEqual
+    | TokenKind.CaratEqual
+    | TokenKind.AmpersandEqual
+    | TokenKind.LessThanLessThanEqual
+    | TokenKind.GreaterThanGreaterThanEqual -> BinopAllowAwaitRight
+    | TokenKind.Xor
+    | TokenKind.Plus
+    | TokenKind.Minus
+    | TokenKind.Star
+    | TokenKind.Slash
+    | TokenKind.StarStar
+    | TokenKind.EqualEqualEqual
+    | TokenKind.LessThan
+    | TokenKind.GreaterThan
+    | TokenKind.Percent
+    | TokenKind.Dot
+    | TokenKind.EqualEqual
+    | TokenKind.ExclamationEqual
+    | TokenKind.LessThanGreaterThan
+    | TokenKind.ExclamationEqualEqual
+    | TokenKind.LessThanEqual
+    | TokenKind.LessThanEqualGreaterThan
+    | TokenKind.GreaterThanEqual
+    | TokenKind.BarGreaterThan (* Custom handling *)
+    | TokenKind.Ampersand
+    | TokenKind.Bar
+    | TokenKind.LessThanLessThan
+    | TokenKind.GreaterThanGreaterThan
+    | TokenKind.Carat -> BinopAllowAwaitBoth
+    | TokenKind.QuestionQuestionEqual
+    | _ -> BinopAllowAwaitNone
+    ))
+
+let unop_allows_await t =
+  (match token_kind t with
+  | None -> false
+  | Some t -> (match t with
+  | TokenKind.Exclamation
+  | TokenKind.Tilde
+  | TokenKind.Plus
+  | TokenKind.Minus
+  | TokenKind.At
+  | TokenKind.Clone
+  | TokenKind.Print -> true
+  | _ -> false
+  ))
+
+let await_as_an_expression_errors await_node parents errors =
+  let rec go parents node =
+    let n, tail =
+      match parents with
+        | head :: tail -> head, tail
+        | _ -> failwith "Unexpect missing parent"
+      in
+    match syntax n with
+    (* statements that root for the concurrently executed await expressions *)
+    | ExpressionStatement _
+    | ReturnStatement _
+    | UnsetStatement _
+    | EchoStatement _
+    | ThrowStatement _ -> errors
+    | IfStatement { if_condition; _ }
+      when phys_equal node if_condition -> errors
+    | ForStatement { for_initializer; _ }
+      when phys_equal node for_initializer -> errors
+    | SwitchStatement { switch_expression; _ }
+      when phys_equal node switch_expression -> errors
+    | ForeachStatement { foreach_collection; _ }
+      when phys_equal node foreach_collection -> errors
+
+    (* Unary based expressions have their own custom fanout *)
+    | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
+    | PostfixUnaryExpression { postfix_unary_operator = operator; _ }
+    | DecoratedExpression { decorated_expression_decorator = operator; _ }
+      when unop_allows_await operator -> go tail n
+    (*
+       left or right operand of binary expressions are considered legal locations
+       if operator is not short-circuiting and containing expression
+       is in legal location *)
+    | BinaryExpression {
+        binary_left_operand = l;
+        binary_right_operand = r;
+        binary_operator = op;
+      }
+        when
+          (match get_positions_binop_allows_await op with
+            | BinopAllowAwaitBoth -> true
+            | BinopAllowAwaitLeft -> phys_equal node l
+            | BinopAllowAwaitRight -> phys_equal node r
+            | BinopAllowAwaitNone -> false) ->
+        go tail n
+    (* test part of conditional expression is considered legal location if
+       conditional expression itself is in legal location *)
+    | ConditionalExpression {
+        conditional_test = test; _
+      } when phys_equal node test -> go tail n
+    | FunctionCallExpression {
+        function_call_receiver = r;
+        function_call_argument_list = args; _
+      } |
+      FunctionCallWithTypeArgumentsExpression {
+        function_call_with_type_arguments_receiver = r;
+        function_call_with_type_arguments_argument_list = args; _
+      }
+        when phys_equal node r ||
+             (phys_equal node args && not (is_safe_member_selection_expression r))
+        -> go tail n
+    (* object of member selection expression or safe member selection expression
+       is in legal position if member selection expression itself is in legal position *)
+    | SafeMemberSelectionExpression {
+        safe_member_object = o; _
+      } when phys_equal node o -> go tail n
+    (* These are nodes where any position is valid *)
+    | CastExpression _
+    | MemberSelectionExpression _
+    | ScopeResolutionExpression _
+    | InstanceofExpression _
+    | IsExpression _
+    | AsExpression _
+    | NullableAsExpression _
+    | EmptyExpression _
+    | IssetExpression _
+    | ParenthesizedExpression _
+    | BracedExpression _
+    | EmbeddedBracedExpression _
+    | CollectionLiteralExpression _
+    | ObjectCreationExpression _
+    | ConstructorCall _
+    | ShapeExpression _
+    | TupleExpression _
+    | ArrayCreationExpression _
+    | ArrayIntrinsicExpression _
+    | DarrayIntrinsicExpression _
+    | DictionaryIntrinsicExpression _
+    | KeysetIntrinsicExpression _
+    | VarrayIntrinsicExpression _
+    | VectorIntrinsicExpression _
+    | ElementInitializer _
+    | FieldInitializer _
+    | SubscriptExpression _
+    | EmbeddedSubscriptExpression _
+    | YieldExpression _
+    | SyntaxList _
+    | ListItem _ -> go tail n
+    (* otherwise report error and bail out *)
+    | _ ->
+      make_error_from_node
+        await_node SyntaxError.invalid_await_position :: errors
+  in
+
+  let errors = go parents await_node in
+  let is_in_concurrent = List.exists
+    ~f:(fun parent -> match syntax parent with
+      | ConcurrentStatement _ -> true
+      | _ -> false
+    ) parents in
+  let errors = if is_in_concurrent then errors else
+    let await_node_statement_parent = List.find
+      ~f:(fun parent -> match syntax parent with
+        | ExpressionStatement _
+        | ReturnStatement _
+        | UnsetStatement _
+        | EchoStatement _
+        | ThrowStatement _
+        | IfStatement _
+        | ForStatement _
+        | SwitchStatement _
+        | ForeachStatement _ -> true
+        | _ -> false
+      ) parents in
+    match await_node_statement_parent with
+    | Some x -> find_invalid_lval_usage errors [x]
+    (* We must have already errored in "go" *)
+    | None -> errors
+  in
+  errors
+
+let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
+  let is_await n = match syntax n with
+  | PrefixUnaryExpression { prefix_unary_operator = op; _ }
+    when token_kind op = Some TokenKind.Await -> true
+  | _ -> false in
+  let found_await = acc || is_await node in
+  found_await, not found_await
+)
+
 let expression_errors env _is_in_concurrent_block namespace_name node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
@@ -2427,6 +2740,25 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         make_error_from_node node SyntaxError.invalid_class_in_collection_initializer in
       e :: errors
     end
+  | PipeVariableExpression _
+    when ParserOptions.enable_await_as_an_expression env.parser_options ->
+    let closest_pipe_operator = List.find_exn parents ~f:begin fun node ->
+      match syntax node with
+      | BinaryExpression { binary_operator; _ }
+        when token_kind binary_operator = Some TokenKind.BarGreaterThan ->
+        true
+      | _ -> false
+      end in
+
+    let closest_pipe_left_operand = match syntax closest_pipe_operator with
+    | BinaryExpression { binary_left_operand; _ } -> binary_left_operand
+    | _ -> failwith "Unexpected non-BinaryExpression" in
+
+    (* If the left side of the pipe operation contains an await then we treat
+       the $$ as an await *)
+    if node_has_await_child closest_pipe_left_operand
+    then await_as_an_expression_errors node parents errors
+    else errors
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
@@ -2458,6 +2790,8 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | us :: _
          when (is_using_statement_block_scoped us ||
                is_using_statement_function_scoped us) -> errors
+      | _ when ParserOptions.enable_await_as_an_expression env.parser_options ->
+        await_as_an_expression_errors node parents errors
       | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
     end
   | VariableExpression { variable_expression } when
@@ -3580,6 +3914,7 @@ let find_syntax_errors env =
       | SubscriptExpression _
       | ConstructorCall _
       | AwaitableCreationExpression _
+      | PipeVariableExpression _
       | ConditionalExpression _
       | CollectionLiteralExpression _
       | VariableExpression _ ->
@@ -3699,96 +4034,16 @@ let find_syntax_errors env =
           SyntaxError.less_than_two_statements_in_concurrent_block :: errors
         ) in
 
-        let rec_walk init f node =
-          let rec rec_walk_impl parents init node =
-            let new_init, continue_walk = f init node parents in
-            if continue_walk then
-              List.fold_left
-                ~init:new_init
-                ~f:(rec_walk_impl ((syntax node) :: parents))
-                (Syntax.children node)
-            else new_init in
-          rec_walk_impl [] init node
-          in
-
-        let lvals, vals = rec_walk ([], []) (fun ((lvals, vals) as acc) node parents ->
-          match parents, syntax node with
-          | DecoratedExpression {
-            decorated_expression_decorator = token;
-            decorated_expression_expression = ({ syntax = lval; _ } as lval_syntax)
-          } :: _, n
-            when phys_equal lval n &&
-                 does_unop_create_write (token_kind token) ->
-            (lval_syntax :: lvals, vals), false
-
-          | PrefixUnaryExpression {
-            prefix_unary_operator = token;
-            prefix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
-          } :: _, n
-          | PostfixUnaryExpression {
-            postfix_unary_operator = token;
-            postfix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
-          } :: _, n
-            when phys_equal lval n &&
-                 does_unop_create_write (token_kind token) ->
-            (lval_syntax :: lvals, vals), false
-
-          | BinaryExpression {
-            binary_operator = token;
-            binary_left_operand = ({ syntax = lval; _ } as lval_syntax);
-          _ } :: parents, n
-            when phys_equal lval n &&
-                 does_binop_create_write_on_left (token_kind token) ->
-            let acc = match parents with
-            | ExpressionStatement _ :: ((SyntaxList _ :: []) | []) -> acc
-            | _ -> lval_syntax :: lvals, vals in
-            acc, false
-
-          | _, Token t when Token.kind t = TokenKind.Variable ->
-            (lvals, node :: vals), false
-
-          | _ -> acc, true
-        ) statements in
-
-        let (lval_set, errors) = List.fold_left
-          ~init:(SSet.empty, errors)
-          ~f:(fun (s, e) node -> match syntax node with
-            | VariableExpression { variable_expression = { syntax = Token t; _ }; _ }
-            | Token t when Token.kind t = TokenKind.Variable ->
-              let name = Token.text t in
-              if SSet.mem name s then
-                (s, make_error_from_node node SyntaxError.duplicate_lval_in_concurrent_block :: e)
-              else (SSet.add name s, e)
-            | _ -> (s, make_error_from_node node SyntaxError.complex_lval_in_concurrent_block :: e)
-          ) lvals in
-
-        let errors = List.fold_left
-          ~init:errors
-          ~f:(fun e token -> match syntax token with
-            | Token t when Token.kind t = TokenKind.Variable ->
-              let name = Token.text t in
-              if SSet.mem name lval_set then
-                make_error_from_node token SyntaxError.val_and_lval_in_concurrent_block :: e
-              else e
-            | _ -> failwith "unexpected non-Token node"
-          ) vals in
-
-        List.fold_left ~init:errors ~f:(fun errors n ->
+        let errors = List.fold_left ~init:errors ~f:(fun errors n ->
           match syntax n with
           | ExpressionStatement { expression_statement_expression = se; _ } ->
-            let node_has_await_child = rec_walk false (fun acc node _ ->
-              let is_await n = match syntax n with
-              | PrefixUnaryExpression { prefix_unary_operator = op; _ }
-                when token_kind op = Some TokenKind.Await -> true
-              | _ -> false in
-              let found_await = acc || is_await node in
-              found_await, not found_await
-            ) in
             if node_has_await_child se then errors else
               make_error_from_node n
                 SyntaxError.statement_without_await_in_concurrent_block :: errors
           | _ -> make_error_from_node n SyntaxError.invalid_syntax_concurrent_block :: errors
-        ) statement_list
+        ) statement_list in
+
+        find_invalid_lval_usage errors statement_list
       | _ -> make_error_from_node node SyntaxError.invalid_syntax_concurrent_block :: errors) in
 
       (* adjust is_in_concurrent_block in accumulator to dive into the

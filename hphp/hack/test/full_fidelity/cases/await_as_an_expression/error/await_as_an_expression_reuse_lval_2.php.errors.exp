@@ -1,0 +1,1 @@
+(4,37)-(4,38) Concurrent blocks can either assign to a variable or read from it, not both.

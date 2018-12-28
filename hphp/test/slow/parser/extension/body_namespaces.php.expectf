@@ -1,0 +1,50 @@
+vec(6) {
+  array(3) {
+    [0]=>
+    string(5) "N1\C2"
+    [1]=>
+    string(5) "N1\C3"
+    [2]=>
+    string(29) "yes_officer_this_method_here1"
+  }
+  array(3) {
+    [0]=>
+    string(12) "N1\Something"
+    [1]=>
+    string(5) "N1\C4"
+    [2]=>
+    string(29) "yes_officer_this_method_here2"
+  }
+  array(3) {
+    [0]=>
+    string(14) "\SomethingElse"
+    [1]=>
+    string(5) "N1\C5"
+    [2]=>
+    string(29) "yes_officer_this_method_here3"
+  }
+  array(3) {
+    [0]=>
+    string(25) "N2\N3\CompletelyDifferent"
+    [1]=>
+    string(8) "N2\N3\C6"
+    [2]=>
+    string(29) "yes_officer_this_method_here4"
+  }
+  array(3) {
+    [0]=>
+    string(2) "C8"
+    [1]=>
+    string(2) "C9"
+    [2]=>
+    string(29) "yes_officer_this_method_here5"
+  }
+  array(3) {
+    [0]=>
+    string(12) "AnotherThing"
+    [1]=>
+    string(3) "C10"
+    [2]=>
+    string(29) "yes_officer_this_method_here6"
+  }
+}

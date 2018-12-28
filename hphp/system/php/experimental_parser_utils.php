@@ -80,6 +80,105 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  function extract_name_from_node(array $name_elem): ?string {
+    if ($name_elem["kind"] === "missing") {
+      return null;
+    }
+
+    if ($name_elem["kind"] === "token") {
+      return $name_elem["token"]["text"];
+    }
+
+    invariant($name_elem["kind"] === "qualified_name",
+              "name kind must be missing, token, or qualified_name");
+    $parts = vec[];
+    foreach ($name_elem["qualified_name_parts"]["elements"] as $e) {
+      if ($e["list_item"]["kind"] === "token") {
+        $parts[] = $e["list_item"]["token"]["text"];
+      } else {
+        invariant($e["list_item"]["kind"] === "missing",
+                  "qualified_name_parts may only be missing or tokens");
+        $parts[] = '';
+      }
+    }
+    return implode('\\', $parts);
+  }
+
+  function find_method_names_in_concrete_derived_class(
+    array $class_decl,
+    ?string $namespace
+  ): vec<(string, string, string)> {
+    if ($class_decl["classish_keyword"]["token"]["kind"] !== "class") {
+      // ignore interfaces and traits
+      return vec[];
+    }
+    if ($class_decl["classish_extends_list"]["kind"] !== "list") {
+      // ignore non-derived classes
+      return vec[];
+    }
+
+    invariant($class_decl["classish_name"]["kind"] === "token",
+              "class name in declaration must be a token");
+    $class_name = $namespace === null
+      ? $class_decl["classish_name"]["token"]["text"]
+      : $namespace . '\\' . $class_decl["classish_name"]["token"]["text"];
+
+    invariant(count($class_decl["classish_extends_list"]["elements"]) === 1,
+              "class may only extend one parent");
+    $parent_name = extract_name_from_node(
+      $class_decl["classish_extends_list"]["elements"][0]["list_item"]["simple_type_specifier"]
+    );
+    invariant($parent_name !== null, "parent class may not have missing name");
+    if ($namespace !== null && substr($parent_name, 0, 1) !== '\\') {
+      $parent_name = $namespace . '\\' . $parent_name;
+    }
+
+    $results = vec[];
+    $class_elements = $class_decl["classish_body"]["classish_body_elements"]["elements"];
+    foreach ($class_elements as $ce) {
+      if ($ce["kind"] === "methodish_declaration") {
+        $method_name = $ce["methodish_function_decl_header"]["function_name"]["token"]["text"];
+        $results[] = tuple($parent_name, $class_name, $method_name);
+      }
+    }
+
+    return $results;
+  }
+
+  function find_test_methods(array $json): vec<(string, string, string)> {
+    $results = vec[];
+    $namespace = null;
+
+    $elements = $json["parse_tree"]["script_declarations"]["elements"];
+    foreach ($elements as $e) {
+      if ($e["kind"] === "namespace_declaration") {
+        $old_namespace = $namespace;
+        $namespace = extract_name_from_node($e["namespace_name"]);
+
+        // the `namespace A;` body kind is "namespace_empty_body"
+        if ($e["namespace_body"]["kind"] === "namespace_body") {
+          $namespace_elements = $e["namespace_body"]["namespace_declarations"]["elements"];
+          foreach ($namespace_elements as $ne) {
+            if ($ne["kind"] === "classish_declaration") {
+              foreach (find_method_names_in_concrete_derived_class($ne, $namespace) as $r) {
+                $results[] = $r;
+              }
+            }
+          }
+
+          // This namespace is ending, so resetting
+          $namespace = $old_namespace;
+        }
+      } else if ($e["kind"] === "classish_declaration") {
+        foreach (find_method_names_in_concrete_derived_class($e, $namespace) as $r) {
+          $results[] = $r;
+        }
+      }
+    }
+
+    return $results;
+  }
+
   // expects JSON of a file with a single type alias that is a shape
   function extract_type_of_only_shape_type_alias(array $json): dict<string, (string, bool)> {
     $elements = $json["parse_tree"]["script_declarations"]["elements"];

@@ -100,7 +100,12 @@ and gconst = {
 
 and targ = hint * reified
 
-and tparam = variance * id * (constraint_kind * hint) list * reified
+and tparam = {
+  tp_variance: variance;
+  tp_name: id;
+  tp_constraints: (constraint_kind * hint) list;
+  tp_reified: reified;
+}
 
 and tconstraint = hint option
 

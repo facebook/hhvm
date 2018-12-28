@@ -62,7 +62,7 @@ let ast_any_is_deprecated ast_attrs =
 let add_reified_attribute attrs params =
   let reified_indices =
     List.filter_mapi params
-      ~f:(fun i (_, _, _, b) -> if b then Some i else None) in
+      ~f:(fun i t -> if t.A.tp_reified then Some i else None) in
   if List.is_empty reified_indices then attrs else
   let data = List.length params :: reified_indices in
   (Hhas_attribute.make "__Reified" @@

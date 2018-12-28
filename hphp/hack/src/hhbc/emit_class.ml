@@ -288,7 +288,7 @@ let emit_reified_init_body env num_reified ast_class =
 
 let emit_reified_init_method env ast_class =
   let num_reified =
-    List.count ast_class.Ast.c_tparams ~f:(function (_, _, _, b) -> b) in
+    List.count ast_class.Ast.c_tparams ~f:(fun t -> t.Ast.tp_reified) in
   let has_reified_parents = match ast_class.Ast.c_extends with
     | (_, Ast.Happly (_, l)):: _ ->
       List.exists l ~f:(function (_, Ast.Hreified _) -> true | _ -> false)

@@ -2377,11 +2377,11 @@ and pTParaml ?(is_class=false): tparam list parser = fun node env ->
         | _ -> Invariant in
       if is_reified && variance <> Invariant then
         raise_parsing_error env (`Node node) SyntaxError.non_invariant_reified_generic;
-      ( variance
-      , pos_name type_name env
-      , couldMap ~f:pTConstraint type_constraints env
-      , is_reified
-      )
+      { tp_variance = variance
+      ; tp_name = pos_name type_name env
+      ; tp_constraints = couldMap ~f:pTConstraint type_constraints env
+      ; tp_reified = is_reified
+      }
     | _ -> missing_syntax "type parameter" node env
   in
   match syntax node with

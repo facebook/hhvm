@@ -120,7 +120,7 @@ let emit_wrapper_function
     empty |> with_namespace namespace |> with_scope scope
     ) in
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
   let params = Emit_param.from_asts ~namespace ~tparams ~generate_defaults:true
     ~scope ast_fun.Ast.f_params in
   let function_attributes =
@@ -182,7 +182,7 @@ let emit_wrapper_method
     empty |> with_namespace namespace |> with_scope scope
     ) in
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
   let params = Emit_param.from_asts ~namespace ~tparams ~generate_defaults:true
     ~scope ast_method.Ast.m_params in
   let has_ref_params = List.exists params ~f:Hhas_param.is_reference in

@@ -258,8 +258,8 @@ let add_generic env st var =
       if is_fun then Ast_scope.Scope.get_fun_tparams env.scope
       else Ast_scope.Scope.get_class_tparams env.scope
     in
-    List.find_mapi tparams
-      ~f:(fun i (_, (_, id), _, b) -> if b && id = var then Some i else None)
+    List.find_mapi tparams ~f:(fun i { tp_name = (_, id); tp_reified = b; _ } ->
+      if b && id = var then Some i else None)
   in
   match is_reified_tparam true with
   | Some i ->
@@ -1253,7 +1253,7 @@ and convert_fun env st fd =
   st, { fd with f_body; f_params; f_user_attributes }
 
 and add_reified_property cd body =
-  if not @@ List.exists cd.c_tparams ~f:(function (_, _, _, b) -> b) then body
+  if not @@ List.exists cd.c_tparams ~f:(function t -> t.tp_reified) then body
   else
     let p = Pos.none in
     (*

@@ -36,7 +36,7 @@ let emit_method_prolog ~pos ~params ~should_emit_init_this =
 
 
 let tparams_to_strings tparams =
-  List.map tparams (fun (_, (_, s), _, _) -> s)
+  List.map tparams (fun t -> snd t.A.tp_name)
 
 let rec emit_def env def =
   match def with
@@ -221,7 +221,11 @@ let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
 
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
+
+
+
+
   match ret with
   | None ->
     Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
@@ -338,7 +342,7 @@ let emit_body
       end;
   end;
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
   Label.reset_label ();
   Iterator.reset_iterator ();
   let return_type_info =
@@ -426,7 +430,7 @@ let emit_body
       | _ when Ast_scope.Scope.is_toplevel scope -> move_this decl_vars
       | _ -> decl_vars in
   let decl_vars =
-    if List.exists ~f:(fun (_, _, _, b) -> b) immediate_tparams &&
+    if List.exists ~f:(fun t -> t.A.tp_reified) immediate_tparams &&
        not is_closure_body
     then "$0ReifiedGenerics" :: decl_vars else decl_vars in
 

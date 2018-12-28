@@ -319,7 +319,13 @@ and on_block stmt_list : Aast.stmt list =
 and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =
   (kind, on_hint hint)
 
-and on_tparam (variance, id, constraint_list, reified) : Aast.tparam =
+and on_tparam t : Aast.tparam =
+  let {
+    tp_variance = variance;
+    tp_name = id;
+    tp_constraints = constraint_list;
+    tp_reified = reified;
+  } = t in
   let constraint_list = on_list on_tparam_constraint constraint_list in
   (variance, id, constraint_list, reified)
 

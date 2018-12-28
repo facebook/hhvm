@@ -685,7 +685,7 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
-let check_constraint (_, (pos, name), _, _) =
+let check_constraint { tp_name = (pos, name); _ } =
   (* TODO refactor this in a separate module for errors *)
   if String.lowercase name = "this"
   then Errors.this_reserved pos
@@ -1190,7 +1190,7 @@ module Make (GetLocals : GetLocals) = struct
     let constructor = List.fold_left ~f:(constructor env) ~init:None c.c_body in
     let constructor, methods, smethods =
       interface c constructor methods smethods in
-    let class_tparam_names = List.map c.c_tparams (fun (_, x, _, _) -> x) in
+    let class_tparam_names = List.map c.c_tparams (fun t -> t.tp_name) in
     let enum = Option.map c.c_enum (enum_ env) in
     check_tparams_constructor class_tparam_names constructor;
     check_name_collision methods;
@@ -1313,7 +1313,8 @@ module Make (GetLocals : GetLocals) = struct
 
   and type_paraml ?(forbid_this = false) env tparams =
     let _, ret = List.fold_left tparams ~init:(SMap.empty, [])
-      ~f:(fun (seen, tparaml) ((_, (p, name), _, _) as tparam) ->
+      ~f:(fun (seen, tparaml) tparam ->
+        let (p, name) = tparam.tp_name in
         match SMap.get name seen with
         | None ->
           SMap.add name p seen, (type_param ~forbid_this env tparam)::tparaml
@@ -1324,7 +1325,13 @@ module Make (GetLocals : GetLocals) = struct
     in
     List.rev ret
 
-  and type_param ~forbid_this env (variance, param_name, cstr_list, reified) =
+  and type_param ~forbid_this env t =
+    let {
+      tp_variance = variance;
+      tp_name = param_name;
+      tp_constraints = cstr_list;
+      tp_reified = reified;
+    } = t in
     if reified && not (TypecheckerOptions.experimental_feature_enabled
         (fst env).tcopt
       TypecheckerOptions.experimental_reified_generics)
@@ -1903,13 +1910,13 @@ module Make (GetLocals : GetLocals) = struct
 
   and make_constraints paraml =
     List.fold_right paraml ~init:SMap.empty
-      ~f:begin fun (_, (_, x), cstr_list, _) acc ->
+      ~f:begin fun { tp_name = (_, x); tp_constraints = cstr_list; _ } acc ->
         SMap.add x cstr_list acc
       end
 
   and extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
-      ~f:begin fun (_, (_, x), cstr_list, _) acc ->
+      ~f:begin fun { tp_name = (_, x); tp_constraints = cstr_list; _ } acc ->
         SMap.add x cstr_list acc
       end in
     { genv with type_params = params }

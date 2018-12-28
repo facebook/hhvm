@@ -61,7 +61,7 @@ let emit_native_opcode_impl name params = function
 let emit_body scope namespace class_attrs name params ret =
   let body_instrs = emit_native_opcode_impl (snd name) params class_attrs in
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _, _) -> s) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.Ast.tp_name) in
   let params =
     Emit_param.from_asts
       ~namespace ~tparams ~generate_defaults:false ~scope params

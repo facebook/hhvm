@@ -310,7 +310,7 @@ let emit_memoize_wrapper_body env memoize_info ast_method
                               ~namespace scope deprecation_info params ret is_async =
     let is_static = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
     let tparams =
-      List.map (Ast_scope.Scope.get_tparams scope) ~f:(fun (_, (_, s), _, _) -> s) in
+      List.map (Ast_scope.Scope.get_tparams scope) ~f:(fun t -> snd t.Ast.tp_name) in
     let return_type_info =
       Emit_body.emit_return_type_info ~scope ~skipawaitable:is_async ~namespace ret in
     let params =
@@ -359,7 +359,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   (* __Memoize is not allowed on lambdas, so we never need to inherit the rx
      level from the declaring scope when we're in a Memoize wrapper *)
-  let method_rx_level = 
+  let method_rx_level =
     Rx.rx_level_from_ast ast_method.Ast.m_user_attributes
     |> Option.value ~default:Rx.NonRx in
   let env = Emit_env.with_rx_body (method_rx_level <> Rx.NonRx) env in

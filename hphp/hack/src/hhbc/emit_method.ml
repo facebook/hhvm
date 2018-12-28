@@ -138,7 +138,7 @@ let from_ast_wrapper : bool -> _ ->
       let tparam_names =
         List.fold_left ast_method.Ast.m_tparams
           ~init:SSet.empty
-          ~f:(fun acc (_, (_, n), _, _) -> SSet.add n acc) in
+          ~f:(fun acc { Ast.tp_name = (_, n); _ } -> SSet.add n acc) in
       List.iter ast_method.Ast.m_params (fun p ->
         if List.length (
           List.filter ast_class.Ast.c_body
@@ -194,7 +194,7 @@ let from_ast_wrapper : bool -> _ ->
   let namespace = Option.value closure_namespace ~default:namespace in
   let has_ref_params =
     List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
-  let method_rx_level = 
+  let method_rx_level =
     match Rx.rx_level_from_ast ast_method.Ast.m_user_attributes with
     | Some l -> l
     | None ->

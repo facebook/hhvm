@@ -811,7 +811,7 @@ and emit_new env pos expr targs args uargs =
   let resolve_self = match expr with
     | _, A.Id (_, n) when SU.is_self n ->
       Ast_scope.Scope.get_class_tparams scope
-      |> List.exists ~f:(fun (_, _, _, b) -> b)
+      |> List.exists ~f:(fun t -> t.A.tp_reified)
       |> not
     | _, A.Id (_, n) when SU.is_parent n ->
       let cls = Ast_scope.Scope.get_class scope in
@@ -1777,7 +1777,8 @@ and is_reified_tparam ~is_fun env name =
     else Ast_scope.Scope.get_class_tparams scope
   in
   List.find_mapi tparams
-    ~f:(fun i (_, (_, id), _, b) -> if b && id = name then Some i else None)
+    ~f:(fun i { A.tp_name = (_, id); A.tp_reified = b; _ } ->
+      if b && id = name then Some i else None)
 
 and get_reified_var_cexpr env name =
   match emit_reified_type_opt env name with
@@ -3065,7 +3066,7 @@ and emit_reified_arg env hint =
   let scope = Emit_env.get_scope env in
   let f is_fun tparam acc =
     match tparam with
-    | _, (_, id), _, true -> SMap.add id is_fun acc
+    | { A.tp_name = (_, id); A.tp_reified = true; _ } -> SMap.add id is_fun acc
     | _ -> acc
   in
   let current_targs =

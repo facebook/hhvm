@@ -46,10 +46,10 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
-#include "hphp/compiler/json.h"
-
 #include "hphp/util/logger.h"
 #include "hphp/util/concurrent-scalable-cache.h"
+
+#include <folly/json.h>
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -869,10 +869,12 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
         }
         if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
+          std::string escaped_name;
+          folly::json::escapeString(name, escaped_name,
+                                    folly::json::serialization_opts());
           Debug::DebugInfo::Get()->recordPerfMap(
             Debug::TCRange(start, end, false),
-            SrcKey{}, nullptr, false, false,
-            HPHP::JSON::Escape(name.c_str())
+            SrcKey{}, nullptr, false, false, escaped_name
           );
         }
       }

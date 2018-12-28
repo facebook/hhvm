@@ -81,7 +81,7 @@ endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # libXed
-if (NOT DISABLE_XED)
+if (ENABLE_XED)
   find_package(LibXed)
   if (LibXed_FOUND)
     include_directories(${LibXed_INCLUDE_DIR})
@@ -596,7 +596,7 @@ int main() {
   endif()
   set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 
-  if (NOT DISABLE_XED)
+  if (ENABLE_XED)
     if (LibXed_FOUND)
         target_link_libraries(${target} ${LibXed_LIBRARY})
     else()

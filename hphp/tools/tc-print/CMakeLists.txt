@@ -1,5 +1,5 @@
 if(IS_X64)
-  if (NOT DISABLE_XED)
+  if (ENABLE_XED)
     find_package(LibXed)
     if (LibXed_FOUND)
       include_directories(${LibXed_INCLUDE_DIR})

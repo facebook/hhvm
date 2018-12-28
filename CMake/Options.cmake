@@ -44,4 +44,4 @@ IF (NOT DEFAULT_CONFIG_DIR)
     "Default directory to find php.ini")
 ENDIF()
 
-option(DISABLE_XED "Disable using the XED library for HHVM. If ON, tc-print will not be built for X86." OFF)
+option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)

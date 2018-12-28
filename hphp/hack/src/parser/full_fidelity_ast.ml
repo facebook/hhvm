@@ -17,12 +17,15 @@ open Ast
 (* Don't allow expressions to nest deeper than this to avoid stack overflow *)
 let recursion_limit = 30000
 
+[@@@warning "-32"] (* unused ppx_deriving show function in OCaml ast trips Werror *)
+type lifted_await_kind = LiftedFromStatement | LiftedFromConcurrent [@@deriving show]
+[@@@warning "+32"]
+
 type lifted_awaits = {
     mutable awaits: (id option * expr) list;
-    mutable name_counter: int
+    mutable name_counter: int;
+    lift_kind: lifted_await_kind
 }[@@deriving show]
-
-let new_lifted_awaits () = { awaits = []; name_counter = 1 }
 
 let make_tmp_var_name c =
   SN.SpecialIdents.tmp_var_prefix ^ (string_of_int c)
@@ -204,11 +207,29 @@ let with_new_nonconcurrent_scope env f =
 
 let with_new_concurrent_scope env f =
   let saved_lifted_awaits = env.lifted_awaits in
-  let lifted_awaits = new_lifted_awaits () in
+  let lifted_awaits =
+    { awaits = []; name_counter = 1; lift_kind = LiftedFromConcurrent } in
   env.lifted_awaits <- Some lifted_awaits;
   let result = f () in
   env.lifted_awaits <- saved_lifted_awaits;
   (lifted_awaits, result)
+
+let with_new_statement_scope env f =
+  let saved_lifted_awaits = env.lifted_awaits in
+  match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
+  | false, _
+  | true, Some { lift_kind = LiftedFromConcurrent; _ } ->
+    (None, f ())
+  | true, Some { lift_kind = LiftedFromStatement; _ }
+  | true, None ->
+    let lifted_awaits =
+      { awaits = []; name_counter = 1; lift_kind = LiftedFromStatement } in
+    env.lifted_awaits <- Some lifted_awaits;
+    let result = f () in
+    env.lifted_awaits <- saved_lifted_awaits;
+    let lifted_awaits =
+      if List.is_empty lifted_awaits.awaits then None else Some lifted_awaits in
+    (lifted_awaits, result)
 
 let syntax_to_list include_separators node  =
   let rec aux acc syntax_list =
@@ -1977,40 +1998,41 @@ and pStmt : stmt parser = fun node env ->
   | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }
   | AlternateSwitchStatement { alternate_switch_expression=expr;
     alternate_switch_sections=sections; _ } ->
-    let pSwitchLabel : (block -> case) parser = fun node env cont ->
-      match syntax node with
-      | CaseLabel { case_expression; _ } ->
-        Case (pExpr case_expression env, cont)
-      | DefaultLabel _ -> Default cont
-      | _ -> missing_syntax "switch label" node env
-    in
-    let pSwitchSection : case list parser = fun node env ->
-      match syntax node with
-      | SwitchSection
-        { switch_section_labels
-        ; switch_section_statements
-        ; switch_section_fallthrough
-        } ->
-        let rec null_out cont = function
-          | [x] -> [x cont]
-          | (x::xs) -> x [] :: null_out cont xs
-          | _ -> raise_parsing_error env (`Node node) "Malformed block result"; []
-        in
-        let blk = List.concat @@
-          couldMap ~f:pStmtUnsafe switch_section_statements env in
-        let blk =
-          if is_missing switch_section_fallthrough
-          then blk
-          else blk @ [Pos.none, Fallthrough]
-        in
-        null_out blk (couldMap ~f:pSwitchLabel switch_section_labels env)
-      | _ -> missing_syntax "switch section" node env
-    in
-    pos,
-    Switch
-    ( pExpr expr env
-    , List.concat @@ couldMap ~f:pSwitchSection sections env
-    )
+    lift_awaits_in_statement env pos (fun () ->
+      let pSwitchLabel : (block -> case) parser = fun node env cont ->
+        match syntax node with
+        | CaseLabel { case_expression; _ } ->
+          Case (pExpr case_expression env, cont)
+        | DefaultLabel _ -> Default cont
+        | _ -> missing_syntax "switch label" node env
+      in
+      let pSwitchSection : case list parser = fun node env ->
+        match syntax node with
+        | SwitchSection
+          { switch_section_labels
+          ; switch_section_statements
+          ; switch_section_fallthrough
+          } ->
+          let rec null_out cont = function
+            | [x] -> [x cont]
+            | (x::xs) -> x [] :: null_out cont xs
+            | _ -> raise_parsing_error env (`Node node) "Malformed block result"; []
+          in
+          let blk = List.concat @@
+            couldMap ~f:pStmtUnsafe switch_section_statements env in
+          let blk =
+            if is_missing switch_section_fallthrough
+            then blk
+            else blk @ [Pos.none, Fallthrough]
+          in
+          null_out blk (couldMap ~f:pSwitchLabel switch_section_labels env)
+        | _ -> missing_syntax "switch section" node env
+      in
+      pos,
+      Switch
+      ( pExpr expr env
+      , List.concat @@ couldMap ~f:pSwitchSection sections env
+      ))
   | IfStatement
     { if_condition=cond;
       if_statement=stmt;
@@ -2021,38 +2043,40 @@ and pStmt : stmt parser = fun node env ->
       alternate_if_statement=stmt;
       alternate_if_elseif_clauses=elseif_clause;
       alternate_if_else_clause=else_clause; _ } ->
-    (* Because consistency is for the weak-willed, Parser_hack does *not*
-     * produce `Noop`s for compound statements **in if statements**
-     *)
-    let if_condition = pExpr cond env in
-    let if_statement = unwrap_extra_block @@ pStmtUnsafe stmt env in
-    let if_elseif_statement =
-      let pElseIf : (block -> block) parser = fun node env ->
-        match syntax node with
-        | ElseifClause { elseif_condition=ei_cond; elseif_statement=ei_stmt; _ }
-        | AlternateElseifClause { alternate_elseif_condition=ei_cond;
-          alternate_elseif_statement=ei_stmt; _ } ->
-          fun next_clause ->
-            let elseif_condition = pExpr ei_cond env in
-            let elseif_statement = unwrap_extra_block @@ pStmtUnsafe ei_stmt env in
-            [ pos, If (elseif_condition, elseif_statement, next_clause) ]
-        | _ -> missing_syntax "elseif clause" node env
+    lift_awaits_in_statement env pos (fun () ->
+      (* Because consistency is for the weak-willed, Parser_hack does *not*
+       * produce `Noop`s for compound statements **in if statements**
+       *)
+      let if_condition = pExpr cond env in
+      let if_statement = unwrap_extra_block @@ pStmtUnsafe stmt env in
+      let if_elseif_statement =
+        let pElseIf : (block -> block) parser = fun node env ->
+          match syntax node with
+          | ElseifClause { elseif_condition=ei_cond; elseif_statement=ei_stmt; _ }
+          | AlternateElseifClause { alternate_elseif_condition=ei_cond;
+            alternate_elseif_statement=ei_stmt; _ } ->
+            fun next_clause ->
+              let elseif_condition = pExpr ei_cond env in
+              let elseif_statement = unwrap_extra_block @@ pStmtUnsafe ei_stmt env in
+              [ pos, If (elseif_condition, elseif_statement, next_clause) ]
+          | _ -> missing_syntax "elseif clause" node env
+        in
+        List.fold_right ~f:(@@)
+            (couldMap ~f:pElseIf elseif_clause env)
+            ~init:( match syntax else_clause with
+              | ElseClause { else_statement=e_stmt; _ }
+              | AlternateElseClause { alternate_else_statement=e_stmt; _ } ->
+                unwrap_extra_block @@ pStmtUnsafe e_stmt env
+              | Missing -> [Pos.none, Noop]
+              | _ -> missing_syntax "else clause" else_clause env
+            )
       in
-      List.fold_right ~f:(@@)
-          (couldMap ~f:pElseIf elseif_clause env)
-          ~init:( match syntax else_clause with
-            | ElseClause { else_statement=e_stmt; _ }
-            | AlternateElseClause { alternate_else_statement=e_stmt; _ } ->
-              unwrap_extra_block @@ pStmtUnsafe e_stmt env
-            | Missing -> [Pos.none, Noop]
-            | _ -> missing_syntax "else clause" else_clause env
-          )
-    in
-    pos, If (if_condition, if_statement, if_elseif_statement)
+      pos, If (if_condition, if_statement, if_elseif_statement))
   | ExpressionStatement { expression_statement_expression; _ } ->
-    if is_missing expression_statement_expression
-    then pos, Noop
-    else pos, Expr (pExpr ~location:AsStatement expression_statement_expression env)
+    lift_awaits_in_statement env pos (fun () ->
+      if is_missing expression_statement_expression
+      then pos, Noop
+      else pos, Expr (pExpr ~location:AsStatement expression_statement_expression env))
   | CompoundStatement { compound_statements; compound_right_brace; _ } ->
     let tail =
       match leading_token compound_right_brace with
@@ -2065,7 +2089,8 @@ and pStmt : stmt parser = fun node env ->
   | SyntaxList _ ->
     handle_loop_body pos node [] env
   | ThrowStatement { throw_expression; _ } ->
-    pos, Throw (pExpr throw_expression env)
+    lift_awaits_in_statement env pos (fun () ->
+      pos, Throw (pExpr throw_expression env))
   | DoStatement { do_body; do_condition; _ } ->
     pos, Do (pBlock do_body env, pExpr do_condition env)
   | WhileStatement { while_condition; while_body; _ } ->
@@ -2109,11 +2134,12 @@ and pStmt : stmt parser = fun node env ->
     pos, Let (id, ty, expr)
   | ForStatement
     { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
-    let ini = pExprL for_initializer env in
-    let ctr = pExprL for_control env in
-    let eol = pExprL for_end_of_loop env in
-    let blk = unwrap_extra_block @@ pStmtUnsafe for_body env in
-    pos, For (ini, ctr, eol, blk)
+    lift_awaits_in_statement env pos (fun () ->
+      let ini = pExprL for_initializer env in
+      let ctr = pExprL for_control env in
+      let eol = pExprL for_end_of_loop env in
+      let blk = unwrap_extra_block @@ pStmtUnsafe for_body env in
+      pos, For (ini, ctr, eol, blk))
   | ForeachStatement
     { foreach_collection
     ; foreach_await_keyword
@@ -2121,23 +2147,25 @@ and pStmt : stmt parser = fun node env ->
     ; foreach_value
     ; foreach_body
     ; _ } ->
-    let col = pExpr foreach_collection env in
-    let akw =
-      match syntax foreach_await_keyword with
-      | Token token when Token.kind token = TK.Await ->
-        Some (pPos foreach_await_keyword env)
-      | _ -> None
-    in
-    let akv =
-      let value = pExpr foreach_value env in
-      match syntax foreach_key with
-        | Missing -> As_v value
-        | _ ->
-          let key = pExpr foreach_key env in
-          As_kv (key, value)
-    in
-    let blk = unwrap_extra_block @@ pStmtUnsafe foreach_body env in
-    pos, Foreach (col, akw, akv, blk)
+    lift_awaits_in_statement env pos (fun () ->
+      let col = pExpr foreach_collection env in
+      let akw =
+        match syntax foreach_await_keyword with
+        | Token token when Token.kind token = TK.Await ->
+          Some (pPos foreach_await_keyword env)
+        | _ -> None
+      in
+      let akv =
+        let value = pExpr foreach_value env in
+        match syntax foreach_key with
+          | Missing -> As_v value
+          | _ ->
+            let key = pExpr foreach_key env in
+            As_kv (key, value)
+      in
+      let blk = unwrap_extra_block @@ pStmtUnsafe foreach_body env in
+      pos, Foreach (col, akw, akv, blk)
+    )
   | TryStatement
     { try_compound_statement; try_catch_clauses; try_finally_clause; _ } ->
     pos, Try
@@ -2176,11 +2204,12 @@ and pStmt : stmt parser = fun node env ->
     in
     pos, Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
   | ReturnStatement { return_expression; _ } ->
-    let expr = match syntax return_expression with
-      | Missing -> None
-      | _ -> Some (pExpr ~location:RightOfReturn return_expression env)
-    in
-    pos, Return (expr)
+    lift_awaits_in_statement env pos (fun () ->
+      let expr = match syntax return_expression with
+        | Missing -> None
+        | _ -> Some (pExpr ~location:RightOfReturn return_expression env)
+      in
+      pos, Return (expr))
   | Syntax.GotoLabel { goto_label_name; _ } ->
     let pos_label = pPos goto_label_name env in
     let label_name = text goto_label_name in
@@ -2191,7 +2220,7 @@ and pStmt : stmt parser = fun node env ->
     pos, Goto  (pos_name goto_statement_label_name env)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
-    -> pos, Expr
+    -> lift_awaits_in_statement env pos (fun () -> pos, Expr
       ( pPos node env
       , Call
         ( (match syntax kw with
@@ -2204,7 +2233,7 @@ and pStmt : stmt parser = fun node env ->
         , []
         , couldMap ~f:pExpr exprs env
         , []
-      ))
+      )))
   | BreakStatement { break_level=level; _ } ->
     pos, Break (pBreak_or_continue_level env level)
   | ContinueStatement { continue_level=level; _ } ->
@@ -2273,6 +2302,17 @@ and pStmt : stmt parser = fun node env ->
   | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
   result
+
+and lift_awaits_in_statement env pos f =
+  let (lifted_awaits, result) =
+    with_new_statement_scope env f in
+
+  match lifted_awaits with
+  | None -> result
+  | Some lifted_awaits ->
+    (* lifted awaits are accumulated in reverse *)
+    let await_all = pos, Awaitall (List.rev lifted_awaits.awaits) in
+    pos, Block [await_all; result]
 
 and is_hashbang text =
   match Syntax.extract_text text with

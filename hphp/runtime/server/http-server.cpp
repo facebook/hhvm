@@ -176,9 +176,10 @@ HttpServer::HttpServer()
     }
   );
 
+  signal(SIGHUP, on_kill);
+  signal(SIGINT, on_kill);
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);
-  signal(SIGHUP, on_kill);
 }
 
 // Synchronously stop satellites

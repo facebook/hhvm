@@ -326,8 +326,6 @@ std::string RuntimeOption::RequestInitDocument;
 std::string RuntimeOption::AutoPrependFile;
 std::string RuntimeOption::AutoAppendFile;
 
-bool RuntimeOption::CliHasCustomSIGTERMHandler = false;
-
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
 std::set<std::string> RuntimeOption::AllowedFiles;
@@ -1344,8 +1342,6 @@ void RuntimeOption::Load(
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(EnableZendSorting, ini, config, "Eval.EnableZendSorting",
                  false);
-    Config::Bind(CliHasCustomSIGTERMHandler, ini, config,
-                 "Eval.CliHasCustomSIGTERMHandler", false);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
                  true);
     Config::Bind(CheckFlushOnUserClose, ini, config,

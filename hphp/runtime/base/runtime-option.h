@@ -442,8 +442,6 @@ struct RuntimeOption {
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
   static bool IntsOverflowToInts;
-  // set to true to avoid invoking default SIGTERM handler in CLI mode
-  static bool CliHasCustomSIGTERMHandler;
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
   static HackStrictOption IconvIgnoreCorrect;

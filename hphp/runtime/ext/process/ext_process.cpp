@@ -333,22 +333,54 @@ bool HHVM_FUNCTION(pcntl_setpriority,
 
 static rds::Link<Array, rds::Mode::Normal> g_signal_handlers;
 
-static void on_kill_cli(int signo) {
-  RequestInfo::BroadcastSignal(signo);
-  if (!RuntimeOption::CliHasCustomSIGTERMHandler) {
-    // Let the default handler deal with it.
-    reset_sync_signals();
-    raise(signo);
-    pthread_exit(nullptr);
+// bitmask of signal number with custom handler
+static uint32_t g_handlerMask = 0;
+
+// Only the following signals are possible to handle in PHP.  Other signals are
+// reserved for use by HHVM itself and its extensions.  The boolean value
+// associated with a signal indicates whether the process should terminate if a
+// signal handler isn't available.
+#define SYNC_SIGNALS                            \
+  SIG(SIGHUP, true)                             \
+  SIG(SIGINT, true)                             \
+  SIG(SIGALRM, true)                            \
+  SIG(SIGTERM, true)                            \
+  SIG(SIGUSR1, false)                           \
+  SIG(SIGUSR2, false)                           \
+  SIG(SIGWINCH, false)
+
+// This runs in the sync-signal handler thread.
+static void sig_handler_cli(int signo) {
+  if (g_handlerMask & (1u << signo)) {
+    RequestInfo::BroadcastSignal(signo);
+  } else if (!RuntimeOption::ServerExecutionMode()) {
+    auto const raise_and_exit = [] (int sig) {
+      // Forward to the default handler.
+      reset_sync_signals();
+      raise(sig);
+      pthread_exit(nullptr);
+    };
+    switch (signo) {
+#define SIG(S, E) case S: if (E) {              \
+        raise_and_exit(signo);                  \
+        return;                                 \
+      } else {                                  \
+        break;                                  \
+      }
+      SYNC_SIGNALS
+#undef SIG
+     default:
+      not_reached();
+    }
   }
 }
 
 static void setup_sync_signals() {
-  sync_signal(SIGTERM, on_kill_cli);
-  sync_signal(SIGALRM, on_kill_cli);
-  sync_signal(SIGUSR1, RequestInfo::BroadcastSignal);
-  sync_signal(SIGUSR2, RequestInfo::BroadcastSignal);
+#define SIG(S, ...) sync_signal(S, sig_handler_cli);
+  SYNC_SIGNALS
+#undef SIG
 }
+
 static InitFiniNode init(setup_sync_signals, InitFiniNode::When::ProcessInit);
 
 static bool signalHandlersInited() {
@@ -360,12 +392,11 @@ static bool signalHandlersInited() {
 // that signal handlers are already called automatically before your invokation.
 bool HHVM_FUNCTION(pcntl_signal_dispatch) {
   while (int signum = RID().getAndClearNextPendingSignal()) {
-    // Even if no signal handler is registered, we still try to finish this
-    // loop, to ignore all pending signals. This way, when signal handlers are
-    // registered later, they won't have to deal with ancient signals.
-    if (!signalHandlersInited()) continue;
-    if (g_signal_handlers->exists(signum)) {
+    if (signalHandlersInited() && g_signal_handlers->exists(signum)) {
       auto const handler = (*g_signal_handlers)[signum];
+      if (handler.isNull()) { // SIG_IGN
+        continue;
+      }
       // We generally catch any exception a handler might throw, except
       // ExitException and ResourceExceededException.
       try {
@@ -409,6 +440,11 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
         raise_warning("%s threw and unknown exception",
                       handlerName.c_str());
       }
+    } else if (!RuntimeOption::ServerExecutionMode()) {
+      switch (signum) {
+#define SIG(S, E) case S: if (E) _Exit(signum + 128); else break;
+        SYNC_SIGNALS
+      }
     }
   }
   return true;
@@ -421,15 +457,20 @@ bool HHVM_FUNCTION(pcntl_signal,
   /* Special long value case for SIG_DFL and SIG_IGN */
   if (handler.isInteger()) {
     int64_t handle = handler.toInt64();
-    if (handle != (long)SIG_DFL && handle != (long)SIG_IGN) {
-      raise_warning("Invalid value for handle argument specified");
+    if (handle == (long)SIG_DFL) {
+      // Uninstall previous handler for the signal, if any.
+      if (signalHandlersInited()) g_signal_handlers->remove(signo);
+      g_handlerMask &= ~(1u << signo);
+      return true;
     }
-    // Uninstall previous handler for the signal, if any.
-    if (signalHandlersInited()) g_signal_handlers->remove(signo);
-    return true;
+    if (handle != (long)SIG_IGN) {
+      raise_warning("Invalid value for handle argument specified");
+      return false;
+    }
+    // A null signal hanlder indicates SIG_IGN.
+    return HHVM_FN(pcntl_signal)(signo, init_null(), restart_syscalls);
   }
-
-  if (!is_callable(handler)) {
+  if (!is_callable(handler) && !handler.isNull()) {
     raise_warning("%s is not a callable function name",
                   handler.toString().data());
     return false;
@@ -442,6 +483,7 @@ bool HHVM_FUNCTION(pcntl_signal,
     g_signal_handlers.initWith(empty_array());
   }
   g_signal_handlers->set(signo, handler);
+  g_handlerMask |= (1u << signo);
 
   return true;
 }

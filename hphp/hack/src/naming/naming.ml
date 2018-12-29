@@ -1117,7 +1117,7 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
-    List.iter tparams begin fun (_, (p,x), _, _) ->
+    List.iter tparams begin fun { N.tp_name = (p,x); _ } ->
       List.iter class_tparam_names
         (fun (pc,xc) -> if (x = xc) then Errors.shadowed_type_param p pc x)
     end
@@ -1326,21 +1326,17 @@ module Make (GetLocals : GetLocals) = struct
     List.rev ret
 
   and type_param ~forbid_this env t =
-    let {
-      tp_variance = variance;
-      tp_name = param_name;
-      tp_constraints = cstr_list;
-      tp_reified = reified;
-    } = t in
-    if reified && not (TypecheckerOptions.experimental_feature_enabled
+    if t.tp_reified && not (TypecheckerOptions.experimental_feature_enabled
         (fst env).tcopt
       TypecheckerOptions.experimental_reified_generics)
     then
-      Errors.experimental_feature (fst param_name) "reified generics";
-    variance,
-    param_name,
-    List.map cstr_list (constraint_ ~forbid_this env),
-    reified
+      Errors.experimental_feature (fst t.tp_name) "reified generics";
+    {
+      N.tp_variance = t.tp_variance;
+      tp_name = t.tp_name;
+      tp_constraints = List.map t.tp_constraints (constraint_ ~forbid_this env);
+      tp_reified = t.tp_reified;
+    }
 
   and type_where_constraints env locl_cstrl =
     List.map locl_cstrl (fun (h1, ck, h2) ->

@@ -278,6 +278,13 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
+and tparam = {
+  tp_variance: Ast.variance;
+  tp_name: sid;
+  tp_constraints: (Ast.constraint_kind * hint) list;
+  tp_reified: Ast.reified;
+}
+
 and static_var = class_var
 and static_method = method_
 and constructor = method_

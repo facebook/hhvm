@@ -128,9 +128,6 @@ and vc_kind = [
   | `Keyset ]
   [@visitors.opaque]
 
-and tparam =
-  Ast.variance * sid * (Ast.constraint_kind * hint) list * Ast.reified
-
 and visibility =
   | Private [@visitors.name "visibility_Private"]
   | Public [@visitors.name "visibility_Public"]

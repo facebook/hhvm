@@ -131,7 +131,8 @@ struct
     T.f_mode = fd.S.f_mode;
     T.f_ret = fd.S.f_ret;
     T.f_name = fd.S.f_name;
-    T.f_tparams = fd.S.f_tparams;
+    T.f_tparams =
+      List.map fd.S.f_tparams (map_tparam menv);
     T.f_where_constraints = fd.S.f_where_constraints;
     T.f_variadic = map_fun_variadicity menv fd.S.f_variadic;
     T.f_params = List.map fd.S.f_params (map_fun_param menv);
@@ -149,6 +150,14 @@ struct
   {
     T.ua_name = ua.S.ua_name;
     T.ua_params = map_exprl menv ua.S.ua_params;
+  }
+
+  and map_tparam _ t =
+  {
+    T.tp_variance = t.S.tp_variance;
+    T.tp_name = t.S.tp_name;
+    T.tp_constraints = t.S.tp_constraints;
+    T.tp_reified = t.S.tp_reified;
   }
 
   and map_func_body menv b =
@@ -252,7 +261,8 @@ struct
     T.c_is_xhp = c.S.c_is_xhp;
     T.c_kind = c.S.c_kind;
     T.c_name = c.S.c_name;
-    T.c_tparams = c.S.c_tparams;
+    T.c_tparams =
+      Tuple.T2.map_fst c.S.c_tparams ~f:(List.map ~f:(map_tparam menv));
     T.c_extends = c.S.c_extends;
     T.c_uses = c.S.c_uses;
     T.c_method_redeclarations =
@@ -328,7 +338,8 @@ struct
       T.m_abstract = m.S.m_abstract;
       T.m_visibility = m.S.m_visibility;
       T.m_name = m.S.m_name;
-      T.m_tparams = m.S.m_tparams;
+      T.m_tparams =
+        List.map m.S.m_tparams (map_tparam menv);
       T.m_where_constraints = m.S.m_where_constraints;
       T.m_variadic = map_fun_variadicity menv m.S.m_variadic;
       T.m_params = List.map m.S.m_params (map_fun_param menv);
@@ -347,7 +358,8 @@ struct
     T.mt_abstract = mt.S.mt_abstract;
     T.mt_visibility = mt.S.mt_visibility;
     T.mt_name = mt.S.mt_name;
-    T.mt_tparams = mt.S.mt_tparams;
+    T.mt_tparams =
+      List.map mt.S.mt_tparams (map_tparam menv);
     T.mt_where_constraints = mt.S.mt_where_constraints;
     T.mt_variadic = map_fun_variadicity menv mt.S.mt_variadic;
     T.mt_params = List.map mt.S.mt_params (map_fun_param menv);
@@ -362,7 +374,8 @@ struct
     T.t_annotation = menv.map_env_annotation td.S.t_annotation;
     T.t_mode = td.S.t_mode;
     T.t_name = td.S.t_name;
-    T.t_tparams = td.S.t_tparams;
+    T.t_tparams =
+      List.map td.S.t_tparams (map_tparam menv);
     T.t_constraint = td.S.t_constraint;
     T.t_vis = td.S.t_vis;
     T.t_kind = td.S.t_kind;

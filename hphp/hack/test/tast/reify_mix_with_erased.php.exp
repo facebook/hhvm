@@ -7,8 +7,11 @@ Errors:
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:33-35], (Habstr "Tu"))); f_name = ([3:10-11], "\\f");
       f_tparams =
-      [(Invariant, ([3:18-19], "T"), [], true);
-        (Invariant, ([3:21-23], "Tu"), [], false)];
+      [{ tp_variance = Invariant; tp_name = ([3:18-19], "T");
+         tp_constraints = []; tp_reified = true };
+        { tp_variance = Invariant; tp_name = ([3:21-23], "Tu");
+          tp_constraints = []; tp_reified = false }
+        ];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:28-30], Tu);

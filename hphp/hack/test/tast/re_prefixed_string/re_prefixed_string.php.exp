@@ -68,12 +68,14 @@ Errors:
        f_ret = (Some ([19:78-79], (Habstr "T")));
        f_name = ([19:10-17], "\\goodbye");
        f_tparams =
-       [(Invariant, ([19:18-19], "T"),
-         [(Constraint_as,
-           ([19:23-41],
-            (Happly (([19:23-41], "\\HH\\Lib\\Regex\\Match"), []))))
-           ],
-         false)];
+       [{ tp_variance = Invariant; tp_name = ([19:18-19], "T");
+          tp_constraints =
+          [(Constraint_as,
+            ([19:23-41],
+             (Happly (([19:23-41], "\\HH\\Lib\\Regex\\Match"), []))))
+            ];
+          tp_reified = false }
+         ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([19:67-75], HH\Lib\Regex\Pattern<T>);

@@ -522,8 +522,8 @@ and func env f named_body =
     env
     named_body.fnb_nast
 
-and tparam env (_, _, cstrl, _) =
-  List.iter cstrl (fun (_, h) -> hint env h)
+and tparam env t =
+  List.iter t.tp_constraints (fun (_, h) -> hint env h)
 
 and hint env (p, h) =
   hint_ env p h
@@ -598,7 +598,12 @@ and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in
   let decl_ty = Decl_hint.hint env.Env.decl_env h in
   let unchecked_tparams =
-    List.map unchecked_tparams begin fun (v, sid, cstrl, reified) ->
+    List.map unchecked_tparams begin fun {
+      tp_variance = v;
+      tp_name = sid;
+      tp_constraints = cstrl;
+      tp_reified = reified;
+    } ->
       let cstrl = List.map cstrl (fun (ck, cstr) ->
             let cstr = Decl_hint.hint env.Env.decl_env cstr in
             (ck, cstr)) in
@@ -910,7 +915,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
   let check_tparams = check_no_class_tparams class_tparams in
   let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
   let matches_class_tparam tp_name =
-    List.iter class_tparams begin fun (_, (c_tp_pos, c_tp_name), _, _) ->
+    List.iter class_tparams begin fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
       if c_tp_name = tp_name
       then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
     end in

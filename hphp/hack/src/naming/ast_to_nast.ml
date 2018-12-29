@@ -320,14 +320,11 @@ and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =
   (kind, on_hint hint)
 
 and on_tparam t : Aast.tparam =
-  let {
-    tp_variance = variance;
-    tp_name = id;
-    tp_constraints = constraint_list;
-    tp_reified = reified;
-  } = t in
-  let constraint_list = on_list on_tparam_constraint constraint_list in
-  (variance, id, constraint_list, reified)
+  { Aast.tp_variance = t.tp_variance;
+    tp_name = t.tp_name;
+    tp_constraints = on_list on_tparam_constraint t.tp_constraints;
+    tp_reified = t.tp_reified;
+  }
 
 and on_fun_param param : Aast.fun_param =
   let p, name = param.param_id in

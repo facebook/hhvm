@@ -122,7 +122,12 @@ let ret_from_fun_kind pos kind =
     | Ast.FSync
     | Ast.FCoroutine -> ty_any
 
-let type_param env (variance, x, cstrl, reified) =
+let type_param env {
+  tp_variance = variance;
+  tp_name = x;
+  tp_constraints = cstrl;
+  tp_reified = reified
+} =
   variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h)), reified
 
 let where_constraint env (ty1, ck, ty2) =

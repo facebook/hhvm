@@ -472,7 +472,7 @@ and localize_hint ~ety_env env hint =
 let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let env = Env.add_generic_parameters env tparams in
-  let localize_bound env ((_var, (pos,name), cstrl, _): Nast.tparam) =
+  let localize_bound env ({ Nast.tp_name = (pos,name); tp_constraints = cstrl; _ }: Nast.tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
     List.map_env env cstrl (fun env (ck, h) ->
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in

@@ -523,7 +523,7 @@ and fun_def tcopt f =
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
-        T.f_tparams = f.f_tparams;
+        T.f_tparams = List.map f.f_tparams (type_param env);
         T.f_where_constraints = f.f_where_constraints;
         T.f_variadic = t_variadic;
         T.f_params = typed_params;
@@ -2813,7 +2813,7 @@ and anon_make tenv p f ft idl =
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
-          T.f_tparams = f.f_tparams;
+          T.f_tparams = List.map f.f_tparams (type_param env);
           T.f_where_constraints = f.f_where_constraints;
           T.f_fun_kind = f.f_fun_kind;
           T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
@@ -6140,7 +6140,7 @@ and class_def_ env c tc =
     T.c_is_xhp = c.c_is_xhp;
     T.c_kind = c.c_kind;
     T.c_name = c.c_name;
-    T.c_tparams = c.c_tparams;
+    T.c_tparams = Tuple.T2.map_fst c.c_tparams ~f:(List.map ~f:(type_param env));
     T.c_extends = c.c_extends;
     T.c_uses = c.c_uses;
     T.c_method_redeclarations = typed_method_redeclarations;
@@ -6263,7 +6263,7 @@ and class_constr_def env c =
 
 and class_implements_type env c1 removals ctype2 =
   let params =
-    List.map (fst c1.c_tparams) begin fun (_, (p, s), _, _) ->
+    List.map (fst c1.c_tparams) begin fun { tp_name = (p, s); _ } ->
       (Reason.Rwitness p, Tgeneric s)
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
@@ -6400,6 +6400,14 @@ and user_attribute env ua =
     T.ua_params = typed_ua_params;
   }
 
+and type_param _ t =
+  {
+    T.tp_variance = t.tp_variance;
+    T.tp_name = t.tp_name;
+    T.tp_constraints = t.tp_constraints;
+    T.tp_reified = t.tp_reified;
+  }
+
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
@@ -6503,7 +6511,7 @@ and method_def env m =
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
     T.m_name = m.m_name;
-    T.m_tparams = m.m_tparams;
+    T.m_tparams = List.map m.m_tparams (type_param env);
     T.m_where_constraints = m.m_where_constraints;
     T.m_variadic = t_variadic;
     T.m_params = typed_params;
@@ -6563,7 +6571,7 @@ and typedef_def tcopt typedef  =
     T.t_user_attributes = List.map typedef.t_user_attributes (user_attribute env);
     T.t_constraint = typedef.t_constraint;
     T.t_kind = typedef.t_kind;
-    T.t_tparams = typedef.t_tparams;
+    T.t_tparams = List.map typedef.t_tparams (type_param env);
     T.t_namespace = typedef.t_namespace;
   }
 

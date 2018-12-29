@@ -32,47 +32,47 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     | _ -> body
 
   let make_yield_expression _a1 _a2 = function
-    | _ :: _ :: t ->
+    | _s2 :: _s1 :: t ->
       true :: t, missing
     | _ -> failwith "Invalid state"
 
   let make_yield_from_expression _a1 _a2 _a3 = function
-    | _ :: _ :: _ :: t ->
+    | _s3 :: _s2 :: _s1 :: t ->
       true :: t, missing
     | _ -> failwith "Invalid state"
 
   let make_lambda_expression a1 a2 a3 a4 a5 body = function
-    | saw_yield :: _ :: _ :: _ :: _ :: _ :: t ->
+    | saw_yield :: _s5 :: _s4 :: _s3 :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_lambda_expression a1 a2 a3 a4 a5 body
     | _ -> failwith "Invalid state"
 
   let make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body = function
-    | saw_yield :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: t ->
+    | saw_yield :: _s11 :: _s10 :: _s9 :: _s8 :: _s7 :: _s6 :: _s5 :: _s4 :: _s3 :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body
     | _ -> failwith "Invalid state"
 
   let make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body = function
-    | saw_yield :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: t ->
+    | saw_yield :: _s11 :: _s10 :: _s9 :: _s8 :: _s7 :: _s6 :: _s5 :: _s4 :: _s3 :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_php7_anonymous_function a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 body
     | _ -> failwith "Invalid state"
 
   let make_awaitable_creation_expression a1 a2 a3 body = function
-    | saw_yield :: _ :: _ :: _ :: t ->
+    | saw_yield :: _s3 :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_awaitable_creation_expression a1 a2 a3 body
     | _ -> failwith "Invalid state"
 
   let make_methodish_declaration a1 a2 body a3 = function
-    | _ :: saw_yield :: _ :: _ :: t ->
+    | _s3 :: saw_yield :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_methodish_declaration a1 a2 body a3
     | _ -> failwith "Invalid state"
 
   let make_function_declaration a1 a2 body = function
-    | saw_yield :: _ :: _ :: t ->
+    | saw_yield :: _s2 :: _s1 :: t ->
       let body = replace_body body saw_yield in
       false :: t, Syntax.make_function_declaration a1 a2 body
     | _ -> failwith "Invalid state"

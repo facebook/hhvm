@@ -356,7 +356,7 @@ and union_newtype env typename tyl1 tyl2 =
   union_tylists_w_variances env tparams tyl1 tyl2
 
 and union_tylists_w_variances env tparams tyl1 tyl2 =
-  let variances = List.map tparams (fun (v, _, _, _) -> v) in
+  let variances = List.map tparams (fun t -> t.tp_variance) in
   let variances =
     let adjust_list_length l newlen filler =
       let len = List.length l in

@@ -598,21 +598,18 @@ and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in
   let decl_ty = Decl_hint.hint env.Env.decl_env h in
   let unchecked_tparams =
-    List.map unchecked_tparams begin fun {
-      tp_variance = v;
-      tp_name = sid;
-      tp_constraints = cstrl;
-      tp_reified = reified;
-    } ->
-      let cstrl = List.map cstrl (fun (ck, cstr) ->
-            let cstr = Decl_hint.hint env.Env.decl_env cstr in
-            (ck, cstr)) in
-      (v, sid, cstrl, reified)
+    List.map unchecked_tparams begin fun t ->
+      let cstrl = List.map t.tp_constraints (fun (ck, cstr) ->
+        let cstr = Decl_hint.hint env.Env.decl_env cstr in
+        (ck, cstr)) in
+      {
+        Typing_defs.tp_variance = t.tp_variance;
+        tp_name = t.tp_name;
+        tp_constraints = cstrl;
+        tp_reified = t.tp_reified;
+      }
     end in
-  let tyl =
-    List.map
-      unchecked_tparams
-      (fun (_, (p, _), _, _) -> Reason.Rwitness p, Tany) in
+  let tyl = List.map unchecked_tparams (fun t -> Reason.Rwitness (fst t.tp_name), Tany) in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with
@@ -633,7 +630,7 @@ and check_happly unchecked_tparams env h =
                   { (Phase.env_with_self env) with
                     substs = Subst.make tc_tparams tyl;
                   } in
-                iter2_shortest begin fun (_, (p, x), cstrl, _) ty ->
+                iter2_shortest begin fun { tp_name = (p, x); tp_constraints = cstrl; _ } ty ->
                   List.iter cstrl (fun (ck, cstr_ty) ->
                       let r = Reason.Rwitness p in
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in

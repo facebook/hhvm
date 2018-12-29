@@ -11,12 +11,12 @@ open Core_kernel
 open Tast
 open Typing_defs
 
-let match_reified i ((_, tparam_id, _, tparam_reified), ((targ_pos, _), targ_reified)) =
-  if (tparam_reified <> targ_reified) then
-    Errors.mismatched_reify tparam_id targ_pos targ_reified i
+let match_reified i (tp, ((targ_pos, _), targ_reified)) =
+  if (tp.tp_reified <> targ_reified) then
+    Errors.mismatched_reify tp.tp_name targ_pos targ_reified i
 
 let verify_targs expr_pos decl_pos targs tparams =
-  if List.exists ~f:(fun (_, _, _, r) -> r) tparams && List.is_empty targs then
+  if List.exists ~f:(fun t -> t.tp_reified) tparams && List.is_empty targs then
     Errors.require_args_reify decl_pos expr_pos;
   (* Unequal_lengths case handled elsewhere *)
   ignore Option.(

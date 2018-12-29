@@ -549,8 +549,12 @@ and typedef_type = {
   td_decl_errors: Errors.t option;
 }
 
-and 'phase tparam =
-  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list * Ast.reified
+and 'phase tparam = {
+  tp_variance: Ast.variance;
+  tp_name: Ast.id;
+  tp_constraints: (Ast.constraint_kind * 'phase ty) list;
+  tp_reified: Ast.reified;
+}
 
 and 'phase where_constraint =
   'phase ty * Ast.constraint_kind * 'phase ty

@@ -215,7 +215,7 @@ and localize_tparams ~ety_env env pos tyl tparams =
   let (env, _), tyl = List.map2_env (env, ety_env) tyl tparams (localize_tparam pos) in
   env, tyl
 
-and localize_tparam pos (env, ety_env) ty (_, (_, name), cstrl, _) =
+and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints = cstrl; _ } =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
       let env, new_name = Env.add_fresh_generic_parameter env name in
@@ -286,8 +286,8 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
       let ft_subst = Subst.make tparams tvarl in
       env, SMap.union ft_subst ety_env.substs, tvarl
     else
-      env, List.fold_left tparams ~f:begin fun subst (_, (_, x), _, _) ->
-        SMap.remove x subst
+      env, List.fold_left tparams ~f:begin fun subst t ->
+        SMap.remove (snd t.tp_name) subst
       end ~init:ety_env.substs, []
   in
   let ety_env = {ety_env with substs = substs} in
@@ -303,10 +303,10 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   in
 
   (* Localize the constraints for a type parameter declaration *)
-  let localize_tparam env (var, name, cstrl, reified) =
-    let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
+  let localize_tparam env t =
+    let env, cstrl = List.map_env env t.tp_constraints begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
-      let name_str = snd name in
+      let name_str = snd t.tp_name in
       (* In order to access type constants on generics on where clauses,
         we need to add the constraints from the type parameters into the
         environment before localizing the where clauses with them. Temporarily
@@ -321,7 +321,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
         Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty in
       env, (ck, ty)
     end in
-    env, (var, name, cstrl, reified)
+    env, { t with tp_constraints = cstrl }
   in
 
   let localize_where_constraint env (ty1, ck, ty2) =
@@ -398,10 +398,10 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
  * function's body.
  *)
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
-  let check_tparam_constraints env (_variance, id, cstrl, _) =
-    List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
+  let check_tparam_constraints env t =
+    List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
-      match SMap.get (snd id) ety_env.substs with
+      match SMap.get (snd t.tp_name) ety_env.substs with
       | Some x_ty ->
         begin
           Typing_log.(log_with_level env "generics" 1 (fun () ->
@@ -409,7 +409,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
               [Log_head ("check_tparams_constraints: add_check_constraint_todo",
                 [Log_type ("ty", ty);
                  Log_type ("x_ty", x_ty)])]));
-          TGenConstraint.add_check_constraint_todo env ~use_pos id ck ty x_ty
+          TGenConstraint.add_check_constraint_todo env ~use_pos t.tp_name ck ty x_ty
         end
       | None ->
         env

@@ -68,7 +68,7 @@ module ConditionTypes = struct
       | Some (((p, _) as sid), cls) ->
       let params =
         List.map (Cls.tparams cls)
-          ~f:(fun (_, (p, x), _, _) -> Reason.Rwitness p, Tgeneric x) in
+          ~f:(fun { tp_name = (p,x); _ } -> Reason.Rwitness p, Tgeneric x) in
       let subst =
         Decl_instantiate.make_subst (Cls.tparams cls) [] in
       let ty = Reason.Rwitness p, (Tapply (sid, params)) in
@@ -576,7 +576,7 @@ and simplify_subtype
       let td = Env.get_typedef env name_super in
       begin match td with
         | Some {td_tparams; _} ->
-          let variancel = List.map td_tparams (fun (var,_,_,_) -> var) in
+          let variancel = List.map td_tparams (fun t -> t.tp_variance) in
           simplify_subtype_variance ~seen_generic_params ~deep name_sub variancel tyl_sub tyl_super env
         | None ->
           invalid ()
@@ -713,7 +713,7 @@ and simplify_subtype
           | None ->
             List.map tyl_sub (fun _ -> Ast.Invariant)
           | Some class_sub ->
-            List.map (Cls.tparams class_sub) (fun (var, _, _, _) -> var) in
+            List.map (Cls.tparams class_sub) (fun t -> t.tp_variance) in
 
           (* C<t1, .., tn> <: C<u1, .., un> iff
            *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
@@ -2095,7 +2095,7 @@ let subtype_method
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
   let add_tparams_constraints env (tparams: locl tparam list) =
-    let add_bound env (_, (pos, name), cstrl, _) =
+    let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
@@ -2128,7 +2128,7 @@ let subtype_method
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
-  let check_tparam_constraints env (_var, (p, name), cstrl, _) =
+  let check_tparam_constraints env { tp_name = (p, name); tp_constraints = cstrl; _ } =
     List.fold_left cstrl ~init:env ~f:begin fun env (ck, cstr_ty) ->
       let tgeneric = (Reason.Rwitness p, Tabstract (AKgeneric name, None)) in
       Typing_generic_constraint.check_constraint env ck cstr_ty tgeneric
@@ -2342,7 +2342,7 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
   | Tabstract (AKnewtype (name, tyl), _) ->
     begin match Env.get_typedef env name with
     | Some {td_tparams; _} ->
-      let variancel = List.map td_tparams (fun (v,_,_,_) -> combine_variance variance v) in
+      let variancel = List.map td_tparams (fun t -> combine_variance variance t.tp_variance) in
       set_tyvar_variance_list ~variancel ~tyvars env tyl
     | None ->
       env
@@ -2355,7 +2355,7 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
     | None -> env
     | Some cls ->
       let tc_tparams = Cls.tparams cls in
-      let variancel = List.map tc_tparams (fun (v,_,_,_) -> combine_variance variance v) in
+      let variancel = List.map tc_tparams (fun t -> combine_variance variance t.tp_variance) in
       set_tyvar_variance_list ~variancel ~tyvars env tyl
     end
     (* Arrays are covariant in key and data types *)

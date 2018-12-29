@@ -267,8 +267,8 @@ let flip reason = function
 (* Given a type parameter, returns the variance inferred. *)
 (*****************************************************************************)
 
-let get_tparam_variance env (_, (_, tparam_name), _, _) =
-  match SMap.get tparam_name env with
+let get_tparam_variance env t =
+  match SMap.get (snd t.tp_name) env with
   | None -> Vboth
   | Some x -> x
 
@@ -276,8 +276,8 @@ let get_tparam_variance env (_, (_, tparam_name), _, _) =
 (* Given a type parameter, returns the variance declared. *)
 (*****************************************************************************)
 
-let make_tparam_variance (variance, (pos, _), _, _) =
-  make_variance Rtype_parameter pos variance
+let make_tparam_variance t =
+  make_variance Rtype_parameter (fst t.tp_name) t.tp_variance
 
 (*****************************************************************************)
 (* Checks that the annotation matches the inferred type. *)
@@ -310,13 +310,13 @@ let check_variance env tparam =
 let check_final_this_pos_variance env_variance rpos class_ty =
   if Cls.final class_ty then
     List.iter (Cls.tparams class_ty)
-      begin fun (typar_variance, id, _, _) ->
-        match env_variance, typar_variance with
+      begin fun t ->
+        match env_variance, t.tp_variance with
         | Vcontravariant(_), (Ast.Covariant | Ast.Contravariant)  ->
            (Errors.contravariant_this
              rpos
              (Utils.strip_ns (Cls.name class_ty))
-             (snd id))
+             (snd t.tp_name))
         | _ -> ()
       end
 
@@ -439,8 +439,8 @@ and class_method tcopt root static env (_method_name, method_) =
       match method_.ce_type with
       | lazy (_, Tfun { ft_tparams = (tparams, _); ft_params; ft_ret; _ }) ->
           let env = List.fold_left tparams
-            ~f:begin fun env (_, (_, tparam_name), _, _) ->
-              SMap.remove tparam_name env
+            ~f:begin fun env t ->
+              SMap.remove (snd t.tp_name) env
             end ~init:env in
           let env = List.fold_left
             ~f:(fun_param tcopt root static) ~init:env ft_params in
@@ -456,8 +456,8 @@ and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
   let variance = Vcontravariant [reason_contravariant] in
   type_ tcopt root variance env ty
 
-and fun_tparam tcopt root env (_, _, cstrl, _) =
-  List.fold_left ~f:(constraint_ tcopt root) ~init:env cstrl
+and fun_tparam tcopt root env t =
+  List.fold_left ~f:(constraint_ tcopt root) ~init:env t.tp_constraints
 
 and fun_ret tcopt root static env (reason, _ as ty) =
   let pos = Reason.to_pos reason in

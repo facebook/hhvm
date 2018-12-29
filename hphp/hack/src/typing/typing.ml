@@ -1723,7 +1723,7 @@ and expr_
         let env, tvarl =
           List.map_env env (Cls.tparams class_) (fun env _ ->
             TUtils.unresolved_tparam ~reason:(Reason.Rtype_variable p) env) in
-        let params = List.map (Cls.tparams class_) begin fun (_, (p, n), _, _) ->
+        let params = List.map (Cls.tparams class_) begin fun { tp_name = (p,n); _ } ->
           Reason.Rwitness p, Tgeneric n
         end in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
@@ -2048,7 +2048,7 @@ and expr_
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->
             (* Typedef type parameters cannot have constraints *)
-            let params = List.map ~f:begin fun (_, (p, x), _, _) ->
+            let params = List.map ~f:begin fun { tp_name = (p,x); _ } ->
               Reason.Rwitness p, Tgeneric x
             end tparaml in
             let tdef = Reason.Rwitness (fst sid), Tapply (sid, params) in
@@ -5756,7 +5756,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
    * with unique suffix *)
   let env, tparams_with_new_names =
     List.map_env env (Cls.tparams class_info)
-      (fun env ((_, (_,name), _, _) as tp) ->
+      (fun env ({tp_name = (_, name); _ } as tp) ->
         let env, name = Env.add_fresh_generic_parameter env name in
         env, Some (tp, name)) in
   let new_names = List.map
@@ -5781,7 +5781,7 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let pad_len = tparams_len - (List.length hint_tyl) in
   let hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
-  let replace_wildcard env hint_ty ((_, (_, tparam_name), _, _) as tp) =
+  let replace_wildcard env hint_ty ({ tp_name = (_, tparam_name); _ } as tp) =
     match hint_ty with
       | Some (_, Tabstract (AKgeneric name, _))
         when Env.is_fresh_generic_parameter name ->
@@ -5811,8 +5811,8 @@ and safely_refine_class_type
     from_class = None;
     validate_dty = None;
   } in
-  let add_bounds env ((_, _, cstr_list, _), ty_fresh) =
-      List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->
+  let add_bounds env (t, ty_fresh) =
+      List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
         (* Substitute fresh type parameters for
          * original formals in constraint *)
       let env, ty = Phase.localize ~ety_env env ty in
@@ -5845,8 +5845,8 @@ and safely_refine_class_type
   let tyl_fresh_simplified =
     List.map2_exn tparams_with_new_names tyl_fresh
       ~f:begin fun x y -> match x, y with
-        | Some ((variance, _, _, _), newname), ty_fresh ->
-          begin match variance,
+        | Some (t, newname), ty_fresh ->
+          begin match t.tp_variance,
             TySet.elements (Env.get_lower_bounds env newname),
             TySet.elements (Env.get_equal_bounds env newname),
             TySet.elements (Env.get_upper_bounds env newname) with
@@ -5951,9 +5951,9 @@ and check_implements_tparaml (env: Env.env) ht =
       let size2 = List.length paraml in
       if size1 <> size2 then Errors.class_arity p class_.dc_pos c size1;
       let subst = Inst.make_subst class_.dc_tparams paraml in
-      iter2_shortest begin fun (_, (_typaram_pos, _), cstrl, _) ty ->
+      iter2_shortest begin fun t ty ->
         let ty_pos = Reason.to_pos (fst ty) in
-        List.iter cstrl begin fun (ck, cstr) ->
+        List.iter t.tp_constraints begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)
           let cstr = Inst.instantiate subst cstr in
           match ck with

@@ -194,8 +194,11 @@ let rec ty (p, x) =
       ttc_origin = tc.ttc_origin;
     }
 
-  and type_param (variance, sid, x, reified) =
-    variance, string_id sid, constraint_ x, reified
+  and type_param t =
+    { t with
+      tp_name = string_id t.tp_name;
+      tp_constraints = constraint_ t.tp_constraints;
+    }
 
   and class_type dc =
     { dc_final                 = dc.dc_final                          ;

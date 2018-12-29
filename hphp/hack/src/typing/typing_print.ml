@@ -564,7 +564,7 @@ module Full = struct
     ]
 
   and tparam: type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
-    fun to_doc st env (_, (_, x), cstrl, _) ->
+    fun to_doc st env { tp_name = (_, x); tp_constraints = cstrl; _ } ->
       Concat [text x; list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl]
 
   and tparam_constraint:
@@ -1363,7 +1363,12 @@ module PrintClass = struct
     | Ast.Contravariant -> "-"
     | Ast.Invariant -> ""
 
-  let tparam tcopt (var, (position, name), cstrl, reified) =
+  let tparam tcopt {
+    tp_variance = var;
+    tp_name = (position, name);
+    tp_constraints = cstrl;
+    tp_reified = reified
+  } =
     variance var^pos position^" "^name^" "^
     (List.fold_right
       cstrl

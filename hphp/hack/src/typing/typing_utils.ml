@@ -693,8 +693,8 @@ let class_is_final_and_not_contravariant class_ty =
     List.for_all
       (Cls.tparams class_ty)
       ~f:(begin function
-          (Ast.Invariant | Ast.Covariant), _, _, _ -> true
-          | _, _, _, _ -> false
+          | { tp_variance = (Ast.Invariant | Ast.Covariant); _ } -> true
+          | _ -> false
           end)
 
 (*****************************************************************************)

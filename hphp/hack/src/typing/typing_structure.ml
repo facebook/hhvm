@@ -24,7 +24,7 @@ let make_ts env ty =
   match Env.get_typedef env SN.FB.cTypeStructure with
   | Some {td_tparams; _} ->
       (* Typedef parameters can not have constraints *)
-      let params = List.map ~f:begin fun (_, (p, x), _, _) ->
+      let params = List.map ~f:begin fun { tp_name = (p,x); _ } ->
         Reason.Rwitness p, Tgeneric x
       end td_tparams in
       let ts = fst ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params) in

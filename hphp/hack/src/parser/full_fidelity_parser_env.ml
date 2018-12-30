@@ -13,6 +13,7 @@ type t = {
   codegen: bool;
   force_hh: bool;
   enable_xhp: bool;
+  enable_stronger_await_binding: bool;
   lang: FileInfo.file_type option;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
@@ -24,6 +25,8 @@ let default = {
   codegen = false;
   force_hh = false;
   enable_xhp = false;
+  enable_stronger_await_binding = false;
+
   lang = None;
   mode = None;
   stats = None;
@@ -35,6 +38,7 @@ let make
   ?(codegen = default.codegen)
   ?(force_hh = default.force_hh)
   ?(enable_xhp = default.enable_xhp)
+  ?(enable_stronger_await_binding = default.enable_stronger_await_binding)
   ?lang
   ?mode
   ?stats
@@ -44,6 +48,7 @@ let make
     codegen;
     force_hh;
     enable_xhp;
+    enable_stronger_await_binding;
     lang;
     mode;
     stats;
@@ -54,6 +59,7 @@ let php5_compat_mode e = e.php5_compat_mode
 let codegen e = e.codegen
 let force_hh e = e.force_hh
 let enable_xhp e = e.enable_xhp
+let enable_stronger_await_binding e = e.enable_stronger_await_binding
 let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats

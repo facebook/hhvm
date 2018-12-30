@@ -45,6 +45,7 @@ type t = {
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
   log_levels : int SMap.t;
+  po_enable_stronger_await_binding : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -224,6 +225,7 @@ let default = {
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
  log_levels = SMap.empty;
+ po_enable_stronger_await_binding = false;
 }
 
 (* Use this instead of default when you don't have access to a project
@@ -274,7 +276,8 @@ let make ~tco_assume_php
          ~tco_disallow_invalid_arraykey
          ~ignored_fixme_codes
          ~forward_compatibility_level
-         ~log_levels = {
+         ~log_levels
+         ~po_enable_stronger_await_binding = {
                    tco_assume_php;
                    tco_safe_array;
                    tco_safe_vector_array;
@@ -312,6 +315,7 @@ let make ~tco_assume_php
                    tco_disallow_invalid_arraykey;
                    forward_compatibility_level;
                    log_levels;
+                   po_enable_stronger_await_binding
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -359,3 +363,4 @@ let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level
 let log_levels t = t.log_levels
+let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding

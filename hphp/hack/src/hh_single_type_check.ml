@@ -194,6 +194,7 @@ let parse_options () =
   let all_errors = ref false in
   let batch_mode = ref false in
   let disallow_invalid_arraykey = ref false in
+  let enable_stronger_await_binding = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -391,6 +392,9 @@ let parse_options () =
     "--disallow-invalid-arraykey",
       Arg.Set disallow_invalid_arraykey,
         " Disallow using values that get casted to arraykey at runtime as array keys";
+    "--stronger-await-binding",
+      Arg.Set enable_stronger_await_binding,
+      "Increases precedence of await during parsing.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -425,6 +429,7 @@ let parse_options () =
       GlobalOptions.po_enable_concurrent = !enable_concurrent;
       GlobalOptions.po_enable_await_as_an_expression = !enable_await_as_an_expression;
       GlobalOptions.log_levels = !log_levels;
+      GlobalOptions.po_enable_stronger_await_binding = !enable_stronger_await_binding;
   } in
   let tcopt = {
     tcopt with

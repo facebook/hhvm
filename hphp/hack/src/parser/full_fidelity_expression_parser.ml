@@ -885,7 +885,7 @@ module WithStatementAndDeclAndTypeParser
 
   and operator_has_lower_precedence operator_kind parser =
     let operator = Operator.trailing_from_token operator_kind in
-    (Operator.precedence operator) < parser.precedence
+    (Operator.precedence parser.env operator) < parser.precedence
 
   and next_is_lower_precedence parser =
     match peek_next_kind_if_operator parser with
@@ -1138,7 +1138,7 @@ module WithStatementAndDeclAndTypeParser
        X::$a[b]() -> X::{$a[b]}()
        *)
     let parser1, e =
-      let precedence = Operator.precedence Operator.IndexingOperator in
+      let precedence = Operator.precedence parser.env Operator.IndexingOperator in
       parse_expression (with_precedence parser precedence) in
     let parser1 = with_precedence parser1 parser.precedence in
     parser1, e
@@ -1697,7 +1697,7 @@ module WithStatementAndDeclAndTypeParser
 
     *)
     let (parser, op) = assert_token parser Instanceof in
-    let precedence = Operator.precedence Operator.InstanceofOperator in
+    let precedence = Operator.precedence parser.env Operator.InstanceofOperator in
     let (parser, right_term) = parse_term parser in
     let (parser, right) =
       parse_remaining_binary_expression_helper parser right_term precedence
@@ -1785,7 +1785,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser, token) = next_token parser in
       let default () =
         let operator = Operator.trailing_from_token (Token.kind token) in
-        let precedence = Operator.precedence operator in
+        let precedence = Operator.precedence parser.env operator in
         let (parser, token) = Make.token parser token in
         let (parser, right_term) =
           if is_rhs_of_assignment then
@@ -1850,8 +1850,8 @@ module WithStatementAndDeclAndTypeParser
     if Operator.is_trailing_operator_token kind &&
       (kind <> As || allow_as_expressions parser) then
       let right_operator = Operator.trailing_from_token kind in
-      let right_precedence = Operator.precedence right_operator in
-      let associativity = Operator.associativity right_operator in
+      let right_precedence = Operator.precedence parser.env right_operator in
+      let associativity = Operator.associativity parser.env right_operator in
       let is_parsable_as_assignment =
         (* check if this is the case ... $a = ...
            where
@@ -1952,7 +1952,9 @@ module WithStatementAndDeclAndTypeParser
     in
     let (parser, colon) = require_colon parser in
     let (parser, term) = parse_term parser in
-    let precedence = Operator.precedence Operator.ConditionalQuestionOperator in
+    let precedence = Operator.precedence
+      parser.env
+      Operator.ConditionalQuestionOperator in
     let (parser, alternative) =
       parse_remaining_binary_expression_helper parser term precedence
     in

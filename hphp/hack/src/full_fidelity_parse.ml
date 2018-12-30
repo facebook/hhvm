@@ -65,6 +65,7 @@ module FullFidelityParseArgs = struct
     (* Defining the input *)
     files : string list;
     dump_nast : bool;
+    enable_stronger_await_binding : bool;
   }
 
   let make
@@ -92,7 +93,8 @@ module FullFidelityParseArgs = struct
     fail_open
     show_file_name
     files
-    dump_nast = {
+    dump_nast
+    enable_stronger_await_binding = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -117,7 +119,9 @@ module FullFidelityParseArgs = struct
     fail_open;
     show_file_name;
     files;
-    dump_nast }
+    dump_nast;
+    enable_stronger_await_binding
+  }
 
   let parse_args () =
     let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
@@ -157,6 +161,7 @@ module FullFidelityParseArgs = struct
     let fail_open = ref true in
     let show_file_name = ref false in
     let dump_nast = ref false in
+    let enable_stronger_await_binding = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
@@ -263,6 +268,9 @@ No errors are filtered out.";
       "--dump-nast",
         Arg.Set dump_nast,
         "Converts the legacy AST to a NAST and prints it.";
+      "--stronger-await-binding",
+        Arg.Set enable_stronger_await_binding,
+        "Increases precedence of await during parsing.";
       ] in
     Arg.parse options push_file usage;
     make
@@ -291,6 +299,7 @@ No errors are filtered out.";
       !show_file_name
       (List.rev !files)
       !dump_nast
+      !enable_stronger_await_binding
 end
 
 open FullFidelityParseArgs
@@ -326,6 +335,7 @@ let handle_existing_file args filename =
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax
+    ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

@@ -1,0 +1,4 @@
+File "await_old_precedence.php", line 10, characters 9-10:
+This expression is of type Awaitable, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+File "await_old_precedence.php", line 8, characters 20-34:
+This is why I think it is Awaitable

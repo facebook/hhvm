@@ -43,6 +43,7 @@ let global_options =
     ~ignored_fixme_codes:ISet.empty
     ~forward_compatibility_level:ForwardCompatibilityLevel.default
     ~log_levels:SMap.empty
+    ~po_enable_stronger_await_binding:false
 
 let empty_env = Typing_env.empty global_options Relative_path.default None
 

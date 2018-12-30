@@ -130,6 +130,7 @@ let () =
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
     ~log_levels: SMap.empty
+    ~po_enable_stronger_await_binding:false
   in
 
   let custom_config = ServerConfig.default_config in

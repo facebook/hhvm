@@ -459,6 +459,8 @@ let make_popt () =
       Hhbc_options.(phpism_disable_define !compiler_options)
     ~enable_hh_syntax_for_hhvm:
       Hhbc_options.(enable_hiphop_syntax !compiler_options)
+    ~enable_stronger_await_binding:
+      Hhbc_options.(enable_stronger_await_binding !compiler_options)
 
 let process_single_source_unit ?(for_debugger_eval = false) compiler_options
   handle_output handle_exception filename source_text =

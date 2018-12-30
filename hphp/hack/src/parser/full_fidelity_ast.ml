@@ -3481,6 +3481,8 @@ let parse_text
         ~force_hh:env.enable_hh_syntax
         ~enable_xhp:env.enable_xhp
         ~php5_compat_mode:env.php5_compat_mode
+        ~enable_stronger_await_binding:
+          (GlobalOptions.po_enable_stronger_await_binding env.parser_options)
         ~lang:lang
         ?mode
         ()

@@ -96,11 +96,11 @@ type assoc =
 | RightAssociative
 | NotAssociative
 
-val precedence : t -> int
+val precedence : Full_fidelity_parser_env.t -> t -> int
 
 val precedence_for_assignment_in_expressions : int
 
-val associativity : t -> assoc
+val associativity : Full_fidelity_parser_env.t -> t -> assoc
 
 val prefix_unary_from_token : TokenKind.t -> t
 

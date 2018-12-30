@@ -58,6 +58,7 @@ let global_opts = GlobalOptions.make
   ~ignored_fixme_codes: ISet.empty
   ~forward_compatibility_level: ForwardCompatibilityLevel.default
   ~log_levels:SMap.empty
+  ~po_enable_stronger_await_binding:false
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options

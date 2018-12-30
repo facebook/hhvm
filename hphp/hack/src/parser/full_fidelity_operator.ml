@@ -8,6 +8,7 @@
  *)
 
 module TokenKind = Full_fidelity_token_kind
+module Env = Full_fidelity_parser_env
 
 type t =
 | DollarOperator
@@ -94,7 +95,7 @@ type assoc =
 | RightAssociative
 | NotAssociative
 
-let precedence operator =
+let precedence env operator =
   (* TODO: eval *)
   (* TODO: Comma *)
   (* TODO: elseif *)
@@ -103,7 +104,8 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
   | IncludeOperator | IncludeOnceOperator | RequireOperator
-  | RequireOnceOperator | AwaitOperator -> 1
+  | RequireOnceOperator -> 1
+  | AwaitOperator when not (Env.enable_stronger_await_binding env) -> 1
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
@@ -141,6 +143,8 @@ let precedence operator =
   | PrefixIncrementOperator | PrefixDecrementOperator
   | ExponentOperator -> 22
   | PostfixIncrementOperator | PostfixDecrementOperator -> 23
+  | AwaitOperator (* implicit: when Env.enable_stronger_await_binding env *)
+    -> 23
   | CloneOperator -> 24
   (* value 25 is reserved for assignment that appear in expressions *)
   | ReferenceOperator -> 26
@@ -153,12 +157,14 @@ let precedence operator =
 
 let precedence_for_assignment_in_expressions = 25
 
-let associativity operator =
+let associativity env operator =
   match operator with
   | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
-  | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
+  | NewOperator | CloneOperator | SpaceshipOperator -> NotAssociative
+
+  | AwaitOperator when not (Env.enable_stronger_await_binding env)
     -> NotAssociative
 
   | DegenerateConditionalOperator
@@ -190,7 +196,9 @@ let associativity operator =
   | RemainderAssignmentOperator | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-  | PrintOperator | SuspendOperator
+  | PrintOperator | SuspendOperator -> RightAssociative
+
+  | AwaitOperator (* implicitly: Env.enable_stronger_await_binding env*)
     -> RightAssociative
 
 let prefix_unary_from_token token =

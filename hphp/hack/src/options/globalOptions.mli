@@ -198,6 +198,10 @@ type t = {
 
  (* Initial hh_log_level settings *)
  log_levels : int SMap.t;
+
+ (* Flag to change the precedence and associativity of await. *)
+ po_enable_stronger_await_binding : bool;
+
 } [@@deriving show]
 val make :
   tco_assume_php: bool ->
@@ -236,6 +240,7 @@ val make :
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
   log_levels: int SMap.t ->
+  po_enable_stronger_await_binding: bool ->
   t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -298,3 +303,4 @@ val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
 val log_levels : t -> int SMap.t
+val po_enable_stronger_await_binding : t -> bool

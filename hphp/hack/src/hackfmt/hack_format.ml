@@ -3100,7 +3100,8 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
     ]
   else
     Concat [
-      let precedence = Full_fidelity_operator.precedence operator_t in
+      let penv = Full_fidelity_parser_env.default in
+      let precedence = Full_fidelity_operator.precedence penv operator_t in
 
       let rec flatten_expression expr =
         match Syntax.syntax expr with
@@ -3109,7 +3110,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
             binary_operator = operator;
             binary_right_operand = right; } ->
           let operator_t = get_operator_type operator in
-          let op_precedence = Full_fidelity_operator.precedence operator_t in
+          let op_precedence = Full_fidelity_operator.precedence penv operator_t in
           if (op_precedence = precedence) then
             (flatten_expression left) @ (operator :: flatten_expression right)
           else [expr]

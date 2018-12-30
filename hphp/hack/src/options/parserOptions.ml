@@ -22,6 +22,7 @@ let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
 let with_enable_await_as_an_expression po b =
   { po with GlobalOptions.po_enable_await_as_an_expression = b }
+let enable_stronger_await_binding = GlobalOptions.po_enable_stronger_await_binding
 
 let make
   ~auto_namespace_map
@@ -30,7 +31,8 @@ let make
   ~enable_await_as_an_expression
   ~disallow_execution_operator
   ~disable_variable_variables
-  ~disable_define = {
+  ~disable_define
+  ~enable_stronger_await_binding = {
   default with
   GlobalOptions.po_auto_namespace_map = auto_namespace_map;
   GlobalOptions.po_enable_hh_syntax_for_hhvm = enable_hh_syntax_for_hhvm;
@@ -39,4 +41,5 @@ let make
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
   GlobalOptions.po_disable_variable_variables = disable_variable_variables;
   GlobalOptions.po_disable_define = disable_define;
+  GlobalOptions.po_enable_stronger_await_binding = enable_stronger_await_binding;
 }

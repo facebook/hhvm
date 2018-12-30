@@ -138,7 +138,7 @@ let with_numeric_precedence parser new_precedence parse_function =
   (parser, result)
 
 let with_operator_precedence parser operator parse_function =
-  let new_precedence = Full_fidelity_operator.precedence operator in
+  let new_precedence = Full_fidelity_operator.precedence parser.env operator in
   with_numeric_precedence parser new_precedence parse_function
 
 let with_reset_precedence parser parse_function =

@@ -529,6 +529,10 @@ struct RuntimeOption {
   // Enable await-as-an-expression
   // true => allows use await as an expression, false => error
   static bool EnableAwaitAsAnExpression;
+  // Enable stronger await binding.
+  // true => await binds similarly to postfix++
+  // false => await binds weaker than everything.
+  static bool EnableStrongerAwaitBinding;
   // Disables PHP's define() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error

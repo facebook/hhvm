@@ -1381,6 +1381,7 @@ and expr_
   match e with
   | Lfun _
   | NewAnonClass _
+  | Import _
   | Omitted -> failwith "AST should not contain these nodes"
   | Any -> expr_error env p (Reason.Rwitness p)
   | Array [] ->

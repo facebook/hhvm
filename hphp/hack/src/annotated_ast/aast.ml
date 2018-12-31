@@ -169,6 +169,7 @@ and expr_ =
   | NewAnonClass of expr list * expr list * class_
   (* We'll add this for now, but later on we should go straight to an Efun *)
   | Lfun of fun_
+  | Import of import_flavor * expr
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -513,5 +514,6 @@ let expr_to_string expr =
   | Omitted -> "Omitted"
   | NewAnonClass _ -> "NewAnonClass"
   | Lfun _ -> "Lfun"
+  | Import _ -> "Import"
 
 end (* of AnnotatedAST functor *)

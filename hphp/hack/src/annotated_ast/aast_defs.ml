@@ -32,9 +32,11 @@ and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 and targ = hint * is_reified
 
 and param_mutability = PMutable | POwnedMutable | PMaybeMutable
-
-and hint = pos * hint_
-and mutable_return = bool
+and import_flavor =
+  | Include
+  | Require
+  | IncludeOnce
+  | RequireOnce
 
 and xhp_child =
   | ChildName of sid
@@ -43,6 +45,9 @@ and xhp_child =
   | ChildBinary of xhp_child * xhp_child
 
 and xhp_child_op = ChildStar | ChildPlus | ChildQuestion
+
+and hint = pos * hint_
+and mutable_return = bool
 
 and variadic_hint =
   | Hvariadic of hint option

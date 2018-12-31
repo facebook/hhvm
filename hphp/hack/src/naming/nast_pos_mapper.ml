@@ -86,6 +86,7 @@ and expr_ f = function
     Errors.internal_error (fst f.f_name)
       "Nast_pos_mapper cannot handle lambdas";
     Lfun (f)
+  | Import _ -> failwith "NAST should not contain Import"
 
 and afield f = function
   | AFvalue e -> AFvalue (expr f e)

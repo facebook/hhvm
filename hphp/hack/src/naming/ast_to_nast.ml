@@ -264,11 +264,18 @@ and on_expr (p, e) : Aast.expr =
   | Lfun f -> Aast.Lfun (on_fun f)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
-  | Import _ -> Aast.Any (* TODO: T37786581 *)
+  | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
   | Execution_operator el -> Aast.Execution_operator (on_list on_expr el)
   in
   (p, node)
+
+and on_import_flavor f =
+  match f with
+  | Include -> Aast.Include
+  | Require -> Aast.Require
+  | IncludeOnce -> Aast.IncludeOnce
+  | RequireOnce -> Aast.RequireOnce
 
 and on_case c : Aast.case =
   match c with

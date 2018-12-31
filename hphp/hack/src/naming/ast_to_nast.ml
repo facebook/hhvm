@@ -252,7 +252,15 @@ and on_expr (p, e) : Aast.expr =
   | New _ -> Aast.Any (* TODO: T37786581 *)
   | NewAnonClass (el1, el2, c) ->
     Aast.NewAnonClass (on_list on_expr el1, on_list on_expr el2, on_class c)
-  | Efun _ -> Aast.Any (* TODO: T37786581 *)
+  | Efun (f, use_list) ->
+    let ids = List.map
+      (fun ((p, id), is_ref) ->
+        if is_ref then Errors.unsupported_feature p "References in use list";
+        (p, Local_id.make_unscoped id)
+      )
+      use_list
+    in
+    Aast.Efun (on_fun f, ids)
   | Lfun _ -> Aast.Any (* TODO: T37786581 *)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)

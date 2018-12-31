@@ -244,7 +244,7 @@ and on_expr (p, e) : Aast.expr =
     let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
     Aast.Pipe ((p, id), on_expr e1, on_expr e2)
   | Eif (e1, opt_e, e2) -> Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
-  | InstanceOf _ -> Aast.Any
+  | InstanceOf (e1, e2) -> Aast.InstanceOf (on_expr e1, (p, Aast.CIexpr (on_expr e2)))
   | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
   | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
   | BracedExpr _ -> Aast.Any (* TODO: T37786581 *)

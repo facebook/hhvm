@@ -167,6 +167,8 @@ and expr_ =
   | Callconv of Ast.param_kind * expr
   | Execution_operator of expr list
   | NewAnonClass of expr list * expr list * class_
+  (* We'll add this for now, but later on we should go straight to an Efun *)
+  | Lfun of fun_
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -510,5 +512,6 @@ let expr_to_string expr =
   | Typename _  -> "Typename"
   | Omitted -> "Omitted"
   | NewAnonClass _ -> "NewAnonClass"
+  | Lfun _ -> "Lfun"
 
 end (* of AnnotatedAST functor *)

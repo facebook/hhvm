@@ -261,7 +261,7 @@ and on_expr (p, e) : Aast.expr =
       use_list
     in
     Aast.Efun (on_fun f, ids)
-  | Lfun _ -> Aast.Any (* TODO: T37786581 *)
+  | Lfun f -> Aast.Lfun (on_fun f)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
   | Import _ -> Aast.Any (* TODO: T37786581 *)

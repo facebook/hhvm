@@ -82,6 +82,10 @@ and expr_ f = function
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Omitted -> Omitted
   | NewAnonClass (el1, el2, c) -> NewAnonClass (el1, el2, c)
+  | Lfun f ->
+    Errors.internal_error (fst f.f_name)
+      "Nast_pos_mapper cannot handle lambdas";
+    Lfun (f)
 
 and afield f = function
   | AFvalue e -> AFvalue (expr f e)

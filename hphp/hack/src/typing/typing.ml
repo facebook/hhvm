@@ -1379,6 +1379,7 @@ and expr_
 
   try
   match e with
+  | Lfun _
   | NewAnonClass _
   | Omitted -> failwith "AST should not contain these nodes"
   | Any -> expr_error env p (Reason.Rwitness p)

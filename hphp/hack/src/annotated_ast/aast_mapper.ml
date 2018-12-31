@@ -118,6 +118,7 @@ struct
     | S.Omitted -> T.Omitted
     | S.NewAnonClass (el1, el2, c) ->
       T.NewAnonClass (List.map el1 (map_expr menv), List.map el2 (map_expr menv), map_class menv c)
+    | S.Lfun f -> T.Lfun (map_fun menv f)
   in
   let p' = menv.map_expr_annotation p in
     (p', e')

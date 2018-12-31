@@ -222,7 +222,7 @@ and on_expr (p, e) : Aast.expr =
   | Obj_get (e1, e2, f) -> Aast.Obj_get (on_expr e1, on_expr e2, f)
   | Array_get (e, opt_e) -> Aast.Array_get (on_expr e, optional on_expr opt_e)
   | Class_get _ -> Aast.Any (* TODO: T37786581 *)
-  | Class_const _ -> Aast.Any (* TODO: T37786581 *)
+  | Class_const (e, s) -> Aast.Class_const ((p, Aast.CIexpr (on_expr e)), s)
   | Call (e, tl, el, uel) ->
     Aast.Call (Aast.Cnormal, on_expr e, on_list on_targ tl, on_list on_expr el, on_list on_expr uel)
   | Int s -> Aast.Int s

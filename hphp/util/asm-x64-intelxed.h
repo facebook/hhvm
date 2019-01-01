@@ -899,10 +899,10 @@ private:
                       &lenCache,
                       [&]() {
                         return xedEmit(instr, toXedOperand(nullrip, size),
-                                       0, dest());
+                                       bytesToBits(size), dest());
                       }, xedLenCacheKey(instr, 0));
     m.r.disp -= ((int64_t)frontier() + (int64_t)instrLen);
-    xedEmit(instr, toXedOperand(m, size), 0);
+    xedEmit(instr, toXedOperand(m, size), bytesToBits(size));
   }
 
   // instr(imm, mem)

@@ -134,7 +134,7 @@ TARGETS_BASE=\
 	_build/hh_client \
 	_build/hh_single_type_check \
 	_build/hackfmt \
-	_build/full_fidelity_parse \
+	_build/hh_parse \
 	_build/hh_single_compile
 
 TARGETS=$(foreach target,$(TARGETS_BASE),$(target).$(TARGET_EXT))
@@ -255,7 +255,7 @@ copy-hack-files: build-hack
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
-	cp _build/full_fidelity_parse.$(TARGET_EXT) ../bin/hh_parse
+	cp _build/hh_parse.$(TARGET_EXT) ../bin/hh_parse
 	cp _build/hh_single_compile.$(TARGET_EXT) ../bin/hh_single_compile
 
 $(COPIED_HHIS): _build/%.hhi: ../%.hhi

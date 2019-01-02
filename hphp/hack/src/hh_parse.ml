@@ -9,7 +9,7 @@
 
  (**
   *
-  * Usage: full_fidelity_parse [OPTIONS] [FILES]
+  * Usage: hh_parse [OPTIONS] [FILES]
   *
   * --full-fidelity-json
   * --full-fidelity-errors

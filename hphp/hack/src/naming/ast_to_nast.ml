@@ -208,7 +208,7 @@ and on_expr (p, e) : Aast.expr =
   | Varray el -> Aast.Varray (on_list on_expr el)
   | Darray d -> Aast.Darray (on_list on_darray_element d)
   | Shape s -> Aast.Shape (on_list on_shape s)
-  | Collection _ -> Aast.Any (* TODO: T37786581 *)
+  | Collection (id, al) -> Aast.Collection (id, on_list on_afield al)
   | Null -> Aast.Null
   | True -> Aast.True
   | False -> Aast.False

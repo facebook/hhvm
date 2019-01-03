@@ -117,8 +117,8 @@ and expr_ =
   | Darray of (expr * expr) list
   | Varray of expr list
   | Shape of (shape_field_name * expr) list
-  | ValCollection of vc_kind * expr list
-  | KeyValCollection of kvc_kind * field list
+  | ValCollection of vc_kind * expr list (* TODO: T38184446 Consolidate collections in AAST *)
+  | KeyValCollection of kvc_kind * field list (* TODO: T38184446 Consolidate collections in AAST *)
   | Null
   | This
   | True
@@ -170,6 +170,7 @@ and expr_ =
   (* We'll add this for now, but later on we should go straight to an Efun *)
   | Lfun of fun_
   | Import of import_flavor * expr
+  | Collection of sid * afield list (* TODO: T38184446 Consolidate collections in AAST *)
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -515,5 +516,6 @@ let expr_to_string expr =
   | NewAnonClass _ -> "NewAnonClass"
   | Lfun _ -> "Lfun"
   | Import _ -> "Import"
+  | Collection _ -> "Collection"
 
 end (* of AnnotatedAST functor *)

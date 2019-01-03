@@ -251,6 +251,7 @@ module CheckFunctionBody = struct
     ()
 
   and expr_ p f_type env exp = match f_type, exp with
+    | _, Collection _
     | _, Import _
     | _, Lfun _
     | _, NewAnonClass _
@@ -805,6 +806,7 @@ and check_class_property_initialization prop =
   Option.iter prop.cv_expr ~f:begin fun e ->
     let rec rec_assert_static_literal e =
       match (snd e) with
+      | Collection _
       | Import _
       | Lfun _
       | NewAnonClass _
@@ -1240,6 +1242,7 @@ and expr env (p, e) =
   expr_ env p e
 
 and expr_ env p = function
+  | Collection _
   | Import _
   | Lfun _
   | NewAnonClass _

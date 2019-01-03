@@ -120,6 +120,7 @@ struct
       T.NewAnonClass (List.map el1 (map_expr menv), List.map el2 (map_expr menv), map_class menv c)
     | S.Lfun f -> T.Lfun (map_fun menv f)
     | S.Import (f, e) -> T.Import (f, map_expr menv e)
+    | S.Collection (id, fl) -> T.Collection (id, List.map fl (map_afield menv))
   in
   let p' = menv.map_expr_annotation p in
     (p', e')

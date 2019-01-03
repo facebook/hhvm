@@ -2985,6 +2985,13 @@ template<typename XProp>
 void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
   auto const& tv = preProp->val();
   auto const& tc = preProp->typeConstraint();
+
+  assertx(
+    !(preProp->attrs() & AttrSystemInitialValue) ||
+    tv.m_type != KindOfNull ||
+    !(preProp->attrs() & AttrNoImplicitNullable)
+  );
+
   if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
       !(preProp->attrs() & AttrInitialSatisfiesTC) &&
       tv.m_type != KindOfUninit) {

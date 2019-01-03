@@ -3797,15 +3797,21 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
       }();
 
       for (auto& prop : c->properties) {
-        auto const nullable =
-          !(prop.attrs & (AttrStatic | AttrPrivate)) &&
-          (!out || out->count(prop.name) > 0);
+        auto const nullable = [&] {
+          if (!(prop.attrs & (AttrStatic | AttrPrivate))) {
+            if (!out || out->count(prop.name)) return true;
+          }
+          if (!(prop.attrs & AttrSystemInitialValue)) return false;
+          return prop.typeConstraint.defaultValue().m_type == KindOfNull;
+        }();
+
         attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
         if (!(prop.attrs & AttrSystemInitialValue)) continue;
         if (prop.val.m_type == KindOfUninit) {
           assertx(prop.attrs & AttrLateInit);
           continue;
         }
+
         prop.val = nullable
           ? make_tv<KindOfNull>()
           : prop.typeConstraint.defaultValue();

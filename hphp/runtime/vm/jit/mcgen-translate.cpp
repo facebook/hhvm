@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/vm-worker.h"
 
 #include "hphp/runtime/server/http-server.h"
 
@@ -326,7 +327,10 @@ void retranslateAll() {
         (mode == JitSerdesMode::Serialize ||
          mode == JitSerdesMode::SerializeAndExit)) {
       if (serverMode) Logger::Info("retranslateAll: serializing profile data");
-      auto const errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+      std::string errMsg;
+      VMWorker([&errMsg] () {
+        errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+      }).run();
       if (serverMode) {
         if (errMsg.empty()) {
           Logger::Info("retranslateAll: serializing done");

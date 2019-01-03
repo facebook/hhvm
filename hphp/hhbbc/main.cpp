@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds-local.h"
+#include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -400,22 +401,22 @@ void compile_repo() {
 
   UnitEmitterQueue ueq;
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
-  auto wp_thread = std::thread([&] {
-    hphp_thread_init();
-    hphp_session_init(Treadmill::SessionKind::CompileRepo);
-    SCOPE_EXIT {
-      hphp_context_exit();
-      hphp_session_exit();
-      hphp_thread_exit();
-    };
-    Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-    whole_program(std::move(input.first), ueq, arrTable);
-  });
-
+  VMWorker wp_thread(
+    [&] {
+      hphp_session_init(Treadmill::SessionKind::CompileRepo);
+      SCOPE_EXIT {
+        hphp_context_exit();
+        hphp_session_exit();
+      };
+      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
+      whole_program(std::move(input.first), ueq, arrTable);
+    }
+  );
+  wp_thread.start();
   write_units(ueq);
   LitstrTable::get().setReading();
   write_global_data(arrTable, input.second);
-  wp_thread.join();
+  wp_thread.waitForEnd();
 }
 
 void print_repo_bytecode_stats() {

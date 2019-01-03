@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/system-profiler.h"
+#include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -904,8 +905,8 @@ void preloadRepo() {
   }
   if (!units.size()) return;
 
-  std::vector<std::thread> workers;
-  auto numWorkers = Process::GetCPUCount();
+  std::vector<VMWorker> workers;
+  auto const numWorkers = Process::GetCPUCount();
   // Compute a batch size that causes each thread to process approximately 16
   // batches.  Even if the batches are somewhat imbalanced in what they contain,
   // the straggler workers are very unlikey to take more than 10% longer than
@@ -913,34 +914,35 @@ void preloadRepo() {
   size_t batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
-    workers.push_back(std::thread([&] {
-      ProfileNonVMThread nonVM;
-      hphp_thread_init();
-      hphp_session_init(Treadmill::SessionKind::PreloadRepo);
-
-      while (true) {
-        auto begin = index.fetch_add(batchSize);
-        auto end = std::min(begin + batchSize, units.size());
-        if (begin >= end) break;
-        auto unitCount = end - begin;
-        for (auto i = size_t{0}; i < unitCount; ++i) {
-          auto& kv = units[begin + i];
-          try {
-            lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
-                       "", nullptr, Native::s_noNativeFuncs);
-          } catch (...) {
-            // swallow errors silently
+    workers.emplace_back(
+      VMWorker(
+        [&] {
+          ProfileNonVMThread nonVM;
+          hphp_session_init(Treadmill::SessionKind::PreloadRepo);
+          while (true) {
+            auto begin = index.fetch_add(batchSize);
+            auto end = std::min(begin + batchSize, units.size());
+            if (begin >= end) break;
+            auto unitCount = end - begin;
+            for (auto i = size_t{0}; i < unitCount; ++i) {
+              auto& kv = units[begin + i];
+              try {
+                lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
+                           "", nullptr, Native::s_noNativeFuncs);
+              } catch (...) {
+                // swallow errors silently
+              }
+            }
           }
-        }
-      }
-
-      hphp_context_exit();
-      hphp_session_exit();
-      hphp_thread_exit();
+          hphp_context_exit();
+          hphp_session_exit();
     }));
   }
   for (auto& worker : workers) {
-    worker.join();
+    worker.start();
+  }
+  for (auto& worker : workers) {
+    worker.waitForEnd();
   }
 }
 

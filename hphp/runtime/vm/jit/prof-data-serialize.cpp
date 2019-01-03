@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/vm-worker.h"
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
@@ -788,57 +789,57 @@ void merge_loaded_units(int numWorkers) {
                          RuntimeOption::ServerExecutionMode());
   auto units = loadedUnitsRepoAuth();
 
-  std::vector<std::thread> workers;
+  std::vector<VMWorker> workers;
   // Compute a batch size that causes each thread to process approximately 16
   // batches.  Even if the batches are somewhat imbalanced in what they contain,
   // the straggler workers are very unlikey to take more than 10% longer than
   // the first worker to finish.
   auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};
-  UNUSED std::atomic_int curr_node{0};
+  std::atomic_int curr_node{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
-    workers.push_back(std::thread([&] {
-      hphp_thread_init();
-      SCOPE_EXIT { hphp_thread_exit(); };
-      ProfileNonVMThread nonVM;
+    WorkerSpec spec;
+    spec.numaNode = next_numa_node(curr_node);
+    workers.emplace_back(
+      VMWorker(
+        spec,
+        [&] {
+          ProfileNonVMThread nonVM;
 #if USE_JEMALLOC_EXTENT_HOOKS
-      auto const numaNode = next_numa_node(curr_node);
-#ifdef HAVE_NUMA
-      if (use_numa) {
-        s_numaNode = numaNode;
-        numa_sched_setaffinity(0, node_to_cpu_mask[numaNode]);
-      }
-#endif
-      if (auto arena = next_extra_arena(numaNode)) {
-        arena->bindCurrentThread();
-      }
-#endif
-
-      hphp_session_init(Treadmill::SessionKind::PreloadRepo);
-
-      while (true) {
-        auto begin = index.fetch_add(batchSize);
-        auto end = std::min(begin + batchSize, units.size());
-        if (begin >= end) break;
-        auto unitCount = end - begin;
-        for (auto i = size_t{0}; i < unitCount; ++i) {
-          auto const unit = units[begin + i];
-          try {
-            unit->merge();
-          } catch (...) {
-            // swallow errors silently. persistent things should raise
-            // errors, and we don't really care about merging
-            // non-persistent things.
+          if (auto arena = next_extra_arena(spec.numaNode)) {
+            arena->bindCurrentThread();
           }
-        }
-      }
+#endif
+          hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 
-      hphp_context_exit();
-      hphp_session_exit();
-    }));
+          while (true) {
+            auto begin = index.fetch_add(batchSize);
+            auto end = std::min(begin + batchSize, units.size());
+            if (begin >= end) break;
+            auto unitCount = end - begin;
+            for (auto i = size_t{0}; i < unitCount; ++i) {
+              auto const unit = units[begin + i];
+              try {
+                unit->merge();
+              } catch (...) {
+                // swallow errors silently. persistent things should raise
+                // errors, and we don't really care about merging
+                // non-persistent things.
+              }
+            }
+          }
+
+          hphp_context_exit();
+          hphp_session_exit();
+        }
+      )
+    );
   }
   for (auto& worker : workers) {
-    worker.join();
+    worker.start();
+  }
+  for (auto& worker : workers) {
+    worker.waitForEnd();
   }
 }
 
@@ -1271,8 +1272,6 @@ Func* read_func(ProfDataDeserializer& ser) {
 
 std::string serializeProfData(const std::string& filename) {
   try {
-    hphp_thread_init();
-    SCOPE_EXIT { hphp_thread_exit(); };
     ProfDataSerializer ser{filename};
 
     write_raw(ser, Repo::get().global().Signature);

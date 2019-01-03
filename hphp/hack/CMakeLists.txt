@@ -15,6 +15,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
   set(HACK_ONLY_BUILD TRUE)
 endif()
 
+if (NOT WITH_DUNE)
 if (HACK_ONLY_BUILD)
   # Woah - this is special. They're running cmake in the hack directory
   # itself so we don't have our usual set up.
@@ -91,6 +92,8 @@ else()
 endif()
 list(APPEND extra_native_libraries "sqlite3")
 
+endif() # WITH_DUNE
+
 # Xcode/Ninja generators undefined MAKE
 if(NOT MAKE)
   set(MAKE make)
@@ -113,7 +116,8 @@ add_custom_target(
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
-        $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+        $(MAKE) --makefile=Makefile.ocamlbuild
+        EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
         EXTRA_LINK_OPTS="${extra_link_opts}"
         EXTRA_CC_FLAGS="${extra_cc_flags}"
@@ -125,6 +129,31 @@ add_custom_target(
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 add_dependencies(hack ocaml opam.stamp)
+
+if (SKIP_OPAM)
+  set(OPAMROOT "~/.opam")
+else ()
+  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam")
+endif()
+
+add_custom_target(
+  hack_dune
+  COMMAND
+        export OPAMROOT=${OPAMROOT} &&
+        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
+        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
+        opam config exec --
+        $(MAKE) --makefile=Makefile.dune
+        BYTECODE="${EMIT_OCAML_BYTECODE}"
+        OCAML="${OCAML_EXECUTABLE}"
+        OCAMLC="${OCAMLC_EXECUTABLE}"
+        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
+add_dependencies(hack_dune ocaml)
+if (NOT SKIP_OPAM)
+  add_dependencies(hack_dune opam.stamp)
+endif()
 
 add_custom_target(
   hack_test
@@ -150,6 +179,7 @@ if(NOT LZ4_FOUND)
   # if the system does not have lz4, make sure that the one in public_tl
   # gets built
   add_dependencies(hack lz4)
+  add_dependencies(hack_dune lz4)
   add_dependencies(hack_test lz4)
 endif()
 
@@ -157,6 +187,7 @@ if(NOT PC_SQLITE3_FOUND)
   # if the system does not have sqlite3, make sure that the one in public_tl
   # gets built
   add_dependencies(hack sqlite3)
+  add_dependencies(hack_dune sqlite3)
   add_dependencies(hack_test sqlite3)
 endif()
 
@@ -164,6 +195,11 @@ configure_file(
   "src/options/buildOptions.ml.in"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/options/buildOptions.ml"
   ESCAPE_QUOTES
+)
+
+configure_file(
+  "src/fsnotify/dune.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/fsnotify/dune"
 )
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client

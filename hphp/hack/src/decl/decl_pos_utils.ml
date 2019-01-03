@@ -140,7 +140,7 @@ let rec ty (p, x) =
     | Ast.SFlit_str s -> Ast.SFlit_str (string_id s)
     | Ast.SFclass_const (id, s) -> Ast.SFclass_const (string_id id, string_id s)
 
-  and constraint_ = List.map ~f:(fun (ck, x) -> (ck, ty x))
+  and constraint_ x = List.map ~f:(fun (ck, x) -> (ck, ty x)) x
 
   and fun_type ft =
     { ft with

@@ -1,0 +1,20 @@
+(library
+  (name ide_rpc_api_types)
+  (wrapped false)
+  (modules
+    ide_api_types)
+  (libraries
+    core_kernel
+    file_content
+    pos))
+
+(library
+  (name nuclide_rpc_message_printer)
+  (wrapped false)
+  (modules
+    nuclide_rpc_message_printer)
+  (libraries
+    coverage_level
+    pos
+    symbol
+    utils_core))

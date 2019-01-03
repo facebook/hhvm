@@ -1,0 +1,7 @@
+(library
+  (name utils_hash)
+  (wrapped false)
+  (libraries
+    core_kernel
+    imported_core
+    utils_process))

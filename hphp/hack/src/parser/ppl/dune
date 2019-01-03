@@ -1,0 +1,7 @@
+(library
+  (name parser_ppl)
+  (wrapped false)
+  (libraries
+    parser_coroutine
+    parser_editable_positioned_syntax
+    parser_smart_constructor))

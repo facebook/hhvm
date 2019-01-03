@@ -1,0 +1,3 @@
+(library
+  (name config_state_loader)
+  (wrapped false))

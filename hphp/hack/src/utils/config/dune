@@ -1,0 +1,22 @@
+(rule
+  (targets build-id)
+  (action
+    (progn
+      (write-file generate-build-id.sh "INSTALL_DIR=$PWD FBCODE_DIR=%{read-lines:../../dune_config/hphp_parent} %{read-lines:../../dune_config/hphp_parent}hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src")
+      (system "chmod +x generate-build-id.sh && ./generate-build-id.sh"))))
+
+(rule
+  (targets compiler-id-opt)
+  (action
+    (write-file compiler-id-opt -DHACKC_COMPILER_ID=%{read:build-id})))
+
+(rule
+  (targets build-id-opt)
+  (action
+    (write-file build-id-opt -DHH_BUILD_ID=%{read:build-id})))
+
+(rule
+  (targets build-timestamp-opt)
+  (action
+    (with-stdout-to build-timestamp-opt
+      (system "echo -DHH_BUILD_TIMESTAMP=$(date +%s)ul"))))

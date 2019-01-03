@@ -1,0 +1,21 @@
+(library
+  (name file_info)
+  (wrapped false)
+  (modules
+    fileInfo)
+  (libraries
+    opaque_digest
+    pos
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_deps)
+  (wrapped false)
+  (modules
+    typing_deps)
+  (libraries
+    collections
+    file_info
+    relative_path
+    worker_cancel))

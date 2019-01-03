@@ -44,3 +44,6 @@ TAGS
 # gdb
 .gdb_history
 tools/gdb/hhvm-gdb
+
+*.merlin
+*_build*

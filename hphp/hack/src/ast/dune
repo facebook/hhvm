@@ -1,0 +1,8 @@
+(library
+  (name ast_deps)
+  (wrapped false)
+  (libraries
+    core_kernel
+    imported_core
+    pos)
+  (preprocess (pps ppx_deriving.std visitors.ppx)))

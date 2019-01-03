@@ -1,0 +1,8 @@
+(library
+  (name utils_config_file)
+  (wrapped false)
+  (libraries
+    core_kernel
+    sys_utils
+    utils_core
+    utils_hash))

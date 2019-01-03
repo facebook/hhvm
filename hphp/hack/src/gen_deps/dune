@@ -1,0 +1,10 @@
+(library
+  (name gen_deps)
+  (wrapped false)
+  (libraries
+    ast
+    naming
+    parser_heap
+    parser_options
+    procs_multi_worker
+    typing_deps))

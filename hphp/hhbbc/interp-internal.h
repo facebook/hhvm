@@ -625,7 +625,9 @@ void killThisLocToKill(ISS& env, LocalId l) {
 // Kill all equivalencies involving the given local to stack values
 void killStkEquiv(ISS& env, LocalId l) {
   for (auto& e : env.state.stack) {
-    if (e.equivLoc == l) e.equivLoc = NoLocalId;
+    if (e.equivLoc != l) continue;
+    e.equivLoc = findLocEquiv(env, l);
+    assertx(e.equivLoc != l);
   }
 }
 
@@ -692,8 +694,8 @@ Type locRaw(ISS& env, LocalId l) {
 
 void setLocRaw(ISS& env, LocalId l, Type t) {
   mayReadLocal(env, l);
-  killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killLocEquiv(env, l);
   killIterEquivs(env, l);
   killThisLocToKill(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
@@ -820,8 +822,8 @@ void refineLocation(ISS& env, LocalId l,
  * to set locals to types that include Uninit.
  */
 void setLoc(ISS& env, LocalId l, Type t, LocalId key = NoLocalId) {
-  killLocEquiv(env, l);
   killStkEquiv(env, l);
+  killLocEquiv(env, l);
   killIterEquivs(env, l, key);
   killThisLocToKill(env, l);
   modifyLocalStatic(env, l, t);

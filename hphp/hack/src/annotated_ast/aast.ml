@@ -132,7 +132,7 @@ and expr_ =
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
-  | Class_get of class_id * pstring
+  | Class_get of class_id * class_get_expr
   | Class_const of class_id * pstring
   | Call of call_type
     * expr (* function *)
@@ -186,6 +186,10 @@ and expr_ =
   | Assert of assert_expr
   | Typename of sid
   | Any
+
+and class_get_expr =
+  | CGstring of pstring
+  | CGexpr of expr
 
 (* These are "very special" constructs that we look for in, among
  * other places, terminality checks. invariant does not appear here

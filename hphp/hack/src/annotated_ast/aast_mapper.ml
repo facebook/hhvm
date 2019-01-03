@@ -44,6 +44,10 @@ struct
   and map_class_id menv (ca, ci) =
     (menv.map_expr_annotation ca, map_class_id_ menv ci)
 
+  and map_class_get_expr menv e =
+    match e with
+    | S.CGstring s -> T.CGstring s
+    | S.CGexpr e -> T.CGexpr (map_expr menv e)
   and map_expr menv (p,e) =
   let e' =
     match e with
@@ -71,7 +75,7 @@ struct
     | S.Yield_break -> T.Yield_break
     | S.Method_caller (x,y) -> T.Method_caller (x,y)
     | S.Smethod_id (x,y) -> T.Smethod_id (x,y)
-    | S.Class_get (ci,y) -> T.Class_get (map_class_id menv ci, y)
+    | S.Class_get (ci,y) -> T.Class_get (map_class_id menv ci, map_class_get_expr menv y)
     | S.Class_const (ci,y) -> T.Class_const (map_class_id menv ci, y)
     | S.Dollardollar x -> T.Dollardollar x
     | S.Typename x -> T.Typename x

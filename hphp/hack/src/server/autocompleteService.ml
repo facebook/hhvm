@@ -578,8 +578,10 @@ let visitor = object (self)
     super#on_Lvar env lid
 
   method! on_Class_get env cid mid =
-    autocomplete_static_member env cid mid;
-    super#on_Class_get env cid mid
+    match mid with
+    | Tast.CGstring p -> autocomplete_static_member env cid p;
+    | Tast.CGexpr _ -> ();
+    super#on_Class_get env cid mid;
 
   method! on_Class_const env cid mid =
     autocomplete_static_member env cid mid;

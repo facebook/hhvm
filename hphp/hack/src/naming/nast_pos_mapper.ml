@@ -48,7 +48,7 @@ and expr_ f = function
   | Special_func sf -> Special_func (special_func f sf)
   | Obj_get (e1, e2, x) -> Obj_get (expr f e1, expr f e2, x)
   | Array_get (e1, e2) -> Array_get (expr f e1, Option.map e2 (expr f))
-  | Class_get (cid, id) -> Class_get (class_id f cid, pstring f id)
+  | Class_get (cid, e) -> Class_get (class_id f cid, class_get_expr f e)
   | Class_const (cid, id) -> Class_const (class_id f cid, pstring f id)
   | Call (ct, e, hl, el, uel) ->
     Call (ct, expr f e, hl, List.map el (expr f), List.map uel (expr f))
@@ -91,6 +91,9 @@ and expr_ f = function
   | ParenthesizedExpr _
   | Import _ -> failwith "NAST should not contain these nodes"
 
+and class_get_expr f = function
+  | CGstring s -> CGstring (pstring f s)
+  | CGexpr e -> CGexpr (expr f e)
 and afield f = function
   | AFvalue e -> AFvalue (expr f e)
   | AFkvalue (e1, e2) ->

@@ -2358,7 +2358,7 @@ module Make (GetLocals : GetLocals) = struct
         N.Array_get (id, None)
     | Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
     | Class_get ((_, (Id x1 | Lvar x1)), (_, (Id x2 | Lvar x2))) ->
-      N.Class_get (make_class_id env x1, x2)
+      N.Class_get (make_class_id env x1, N.CGstring x2)
     | Class_get (x1, x2) ->
       ensure_name_not_dynamic env x1
         Errors.dynamic_class_name_in_strict_mode;

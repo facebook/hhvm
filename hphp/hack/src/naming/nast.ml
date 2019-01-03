@@ -210,7 +210,7 @@ class type ['a] visitor_type = object
   method on_method_caller : 'a -> sid -> pstring -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
   method on_array_get : 'a -> expr -> expr option -> 'a
-  method on_class_get : 'a -> class_id -> pstring -> 'a
+  method on_class_get : 'a -> class_id -> class_get_expr -> 'a
   method on_class_const : 'a -> class_id -> pstring -> 'a
   method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
@@ -463,7 +463,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Special_func sf -> this#on_special_func acc sf
    | Obj_get     (e1, e2, _) -> this#on_obj_get acc e1 e2
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
-   | Class_get   (cid, id)   -> this#on_class_get acc cid id
+   | Class_get   (cid, e)   -> this#on_class_get acc cid e
    | Class_const (cid, id)   -> this#on_class_const acc cid id
    | Call        (ct, e, _, el, uel) -> this#on_call acc ct e el uel
    | String2     el          -> this#on_string2 acc el
@@ -544,7 +544,11 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     in
     acc
 
-  method on_class_get acc cid _ = this#on_class_id acc cid
+  method on_class_get acc cid e =
+    let acc = this#on_class_id acc cid in
+    match e with
+    | CGstring _ -> acc
+    | CGexpr e -> this#on_expr acc e
 
   method on_class_const acc cid _ = this#on_class_id acc cid
 

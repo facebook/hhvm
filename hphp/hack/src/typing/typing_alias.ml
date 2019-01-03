@@ -68,8 +68,9 @@ module Dep = struct
             add local (Local_id.to_string x) acc
         | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
             add local (Env.FakeMembers.make_id x y) acc
-        | Class_get ((_, x), (_, y)) ->
+        | Class_get ((_, x), CGstring (_, y)) ->
             add local (Env.FakeMembers.make_static_id x y) acc
+        | Class_get _ -> failwith "Dynamic Class_get should never occur after naming"
         | _ -> parent#on_expr acc e
     end
 
@@ -95,8 +96,9 @@ end = struct
         Some (Local_id.to_string x)
     | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
         Some (Env.FakeMembers.make_id x y)
-    | Class_get ((_, x), (_, y)) ->
+    | Class_get ((_, x), CGstring (_, y)) ->
         Some (Env.FakeMembers.make_static_id x y)
+    | Class_get _ -> failwith "This case should never occur after naming"
     | _ -> None
 
   let visitor =

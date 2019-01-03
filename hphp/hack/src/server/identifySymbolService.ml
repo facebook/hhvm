@@ -151,7 +151,7 @@ let visitor = object (self)
         typed_property env ty mid
       | Tast.Class_const (((_, ty), _), mid) ->
         typed_const env ty mid
-      | Tast.Class_get (((_, ty), _), mid) ->
+      | Tast.Class_get (((_, ty), _), Tast.CGstring mid) ->
         typed_property env ty mid
       | Tast.Xml (cid, _, _) ->
         process_class_id cid

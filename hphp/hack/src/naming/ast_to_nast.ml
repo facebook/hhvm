@@ -221,7 +221,9 @@ and on_expr (p, e) : Aast.expr =
   | Clone e -> Aast.Clone (on_expr e)
   | Obj_get (e1, e2, f) -> Aast.Obj_get (on_expr e1, on_expr e2, f)
   | Array_get (e, opt_e) -> Aast.Array_get (on_expr e, optional on_expr opt_e)
-  | Class_get _ -> Aast.Any (* TODO: T37786581 *)
+  | Class_get (e1, (_, (Id x2 | Lvar x2))) ->
+    Aast.Class_get((p, Aast.CIexpr (on_expr e1)), Aast.CGstring x2)
+  | Class_get (e1, e2) -> Aast.Class_get ((p, Aast.CIexpr (on_expr e1)), Aast.CGexpr (on_expr e2))
   | Class_const (e, s) -> Aast.Class_const ((p, Aast.CIexpr (on_expr e)), s)
   | Call (e, tl, el, uel) ->
     Aast.Call (Aast.Cnormal, on_expr e, on_list on_targ tl, on_list on_expr el, on_list on_expr uel)

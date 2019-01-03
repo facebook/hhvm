@@ -2074,14 +2074,14 @@ and expr_
             expr_error env p (Reason.Rwitness p)
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get ((px, x), (py, y))
+  | Class_get ((px, x), CGstring (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, te, _ = static_class_id ~check_constraints:false px env [] x  in
-        make_result env p (T.Class_get (te, (py, y))) ty
-  | Class_get ((cpos, cid), mid) ->
+        let env, te, _ = static_class_id ~check_constraints:false px env [] x in
+        make_result env p (T.Class_get (te, T.CGstring (py, y))) ty
+  | Class_get ((cpos, cid), CGstring mid) ->
       let env, te, cty = static_class_id ~check_constraints:false cpos env [] cid in
       let env = save_and_merge_next_in_catch env in
       (* We don't expect type variables to be generated because class properties
@@ -2092,12 +2092,13 @@ and expr_
       then
         let fake_name = Env.FakeMembers.make_static_id cid (snd mid) in
         let env, ty = Env.lost_info fake_name env ty in
-        make_result env p (T.Class_get (te, mid)) ty
+        make_result env p (T.Class_get (te, T.CGstring mid)) ty
       else
-        make_result env p (T.Class_get (te, mid)) ty
+        make_result env p (T.Class_get (te, T.CGstring mid)) ty
     (* Fake member property access. For example:
      *   if ($x->f !== null) { ...$x->f... }
      *)
+  | Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
   | Obj_get (e, (pid, Id (py, y)), nf)
     when Env.FakeMembers.get env e y <> None ->
       let env = save_and_merge_next_in_catch env in
@@ -3236,7 +3237,8 @@ and assign_ p ur env e1 ty2 =
       let env, ty2' = Env.unbind env ty2 in
       let env = Type.coerce_type p ur env ty2' exp_real_type in
       env, te1, ty2
-  | _, Class_get ((_, x), (_, y)) ->
+  | _, Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
+  | _, Class_get ((_, x), CGstring (_, y)) ->
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
       let env, te1, real_type = lvalue no_fakes e1 in
@@ -3635,7 +3637,7 @@ and is_abstract_ft fty = match fty with
           (* find the class constant implicitly defined by the typeconst *)
           let cid = (match e1 with
             | _, Class_const (cid, (_, x))
-            | _, Class_get (cid, (_, x)) when x = SN.Members.mClass -> cid
+            | _, Class_get (cid, CGstring (_, x)) when x = SN.Members.mClass -> cid
             | _ -> (fst e1, Nast.CIexpr e1)) in
           class_const ~incl_tc:true env p (cid, (p, cst))
         | _ ->
@@ -5498,7 +5500,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
 
 and make_a_local_of env e =
   match e with
-  | p, Class_get ((_, cname), (_, member_name)) ->
+  | p, Class_get ((_, cname), CGstring (_, member_name)) ->
     let env, local = Env.FakeMembers.make_static p env cname member_name in
     env, Some (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
@@ -5875,7 +5877,7 @@ and is_instance_var = function
   | _ -> false
 
 and get_instance_var env = function
-  | p, Class_get ((_, cname), (_, member_name)) ->
+  | p, Class_get ((_, cname), CGstring (_, member_name)) ->
     let env, local = Env.FakeMembers.make_static p env cname member_name in
     env, (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->

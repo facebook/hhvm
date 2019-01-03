@@ -676,6 +676,7 @@ let hack_errors_to_lsp_diagnostic
 (************************************************************************)
 
 let do_shutdown (state: state) (ref_unblocked_time: float ref): state Lwt.t =
+  Hh_logger.log "Received shutdown request";
   let state = dismiss_ui state in
   let%lwt () =
     begin match state with
@@ -725,6 +726,8 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
         add_fn ((ServerFiles.log_link root) ^ ".old");
         add_fn (ServerFiles.monitor_log_link root);
         add_fn ((ServerFiles.monitor_log_link root) ^ ".old");
+        add_fn (ServerFiles.client_lsp_log root);
+        add_fn ((ServerFiles.client_lsp_log root) ^ ".old");
         try
           let pids = PidLog.get_pids (ServerFiles.pids_file root) in
           let is_interesting (_, reason) = not (String_utils.string_starts_with reason "slave") in
@@ -1701,6 +1704,27 @@ let do_initialize () : Initialize.result =
     }
   }
 
+let set_up_hh_logger_for_client_lsp () : unit =
+  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
+  `stderr`; this is in addition to that. *)
+  let root = match get_root_opt () with
+    | Some root -> root
+    | None -> failwith (
+        "set_up_hh_logger_for_client_lsp should only be called " ^
+        "after having been initialized with a root"
+      )
+  in
+  let client_lsp_log_fn = (ServerFiles.client_lsp_log root) in
+  begin try
+    Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
+  with _e ->
+    ()
+  end;
+  Hh_logger.set_log client_lsp_log_fn (Out_channel.create
+    client_lsp_log_fn
+    ~append:true
+  );
+  Hh_logger.log "Starting clientLsp at %s" client_lsp_log_fn
 
 let start_server (root: Path.t) : unit =
   (* This basically does "hh_client start": a single attempt to open the     *)
@@ -2001,6 +2025,9 @@ let hack_log_error
     (unblocked_time: float)
   : unit =
   let root = get_root_opt () in
+  Hh_logger.log "Exception: message: %s, stack trace: %s"
+    message
+    stack;
   match event with
   | Some Client_message c ->
     let open Jsonrpc in
@@ -2167,6 +2194,8 @@ let handle_event
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     let initialize_params = c.params |> parse_initialize in
     initialize_params_ref := Some initialize_params;
+    set_up_hh_logger_for_client_lsp ();
+
     hhconfig_version := read_hhconfig_version ();
     let%lwt new_state = connect !state in
     state := new_state;
@@ -2560,6 +2589,14 @@ let main (type a) (env: env) : a Lwt.t =
       let stack = stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event message stack "from_server" !ref_unblocked_time;
       respond_to_error !ref_event (Error.Unknown message) stack;
+      Lwt.return_unit
+    | Error.RequestCancelled _ as e ->
+      let stack = Printexc.get_backtrace () in
+      (* Note: we may send back a request-cancelled error if we decided to
+      cancel the user's request (such as if `hh_server` was not ready to accept
+      it, or if it timed out). This happens fairly frequently and are pretty
+      benign, so don't log them. *)
+      respond_to_error !ref_event e stack;
       Lwt.return_unit
     | e ->
       let stack = Printexc.get_backtrace () in

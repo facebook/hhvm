@@ -32,5 +32,6 @@ let log_link root = path_of_root root "log"
 let pids_file root = path_of_root root "pids"
 let socket_file root = path_of_root root "sock"
 let dfind_log root = path_of_root root "dfind"
+let client_lsp_log root = path_of_root root "client_lsp_log"
 
 let monitor_log_link root = path_of_root root "monitor_log"

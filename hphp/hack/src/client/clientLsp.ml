@@ -2242,6 +2242,10 @@ let handle_event
     end else
       Lwt.return_unit
 
+  | Main_loop _menv, Client_message c when c.method_ = "initialized" ->
+    (* Currently, we don't do anything in response to this notification. *)
+    Lwt.return_unit
+
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
     cancel_if_stale client c short_timeout;

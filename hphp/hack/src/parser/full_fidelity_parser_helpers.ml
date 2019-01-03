@@ -506,19 +506,12 @@ module WithParser(Parser : Parser_S) = struct
       let parser = with_error parser SyntaxError.error1004 in
       Make.missing parser (pos parser)
 
-  (**
-   * TODO: If using qualified names for class names is legal in some cases, then
-   * we need to update the specification accordingly.
-   *
-   * TODO: if we need the use of qualified names to be an error in some cases,
-   * we need to add error checking code in a later pass.
-   *)
   let require_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
       Make.token parser token
     else
-      require_qualified_name parser
+      require_name_allow_non_reserved parser
 
   let require_function parser =
     require_token parser TokenKind.Function SyntaxError.error1003

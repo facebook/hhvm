@@ -1,17 +1,13 @@
-((script 92
-  ((list 92
+((script 80
+  ((list 80
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (classish_declaration 43
+     (classish_declaration 39
       ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (qualified_name 5
-        ((list 5
-          ((list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 1 ((() name 1 ((whitespace 1))) (missing 0 ())))))))
-       (missing 0 ()) (() extends 7 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
        (list 5
         ((list_item 5
           ((simple_type_specifier 5
@@ -32,14 +28,10 @@
            (missing 0 ())))))
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 28
+     (classish_declaration 24
       ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (qualified_name 5
-        ((list 5
-          ((list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 1 ((() name 1 ((whitespace 1))) (missing 0 ())))))))
-       (missing 0 ()) (() extends 7 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
        (list 5
         ((list_item 5
           ((simple_type_specifier 5
@@ -52,15 +44,10 @@
        (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 14
+     (classish_declaration 10
       ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (qualified_name 5
-        ((list 5
-          ((list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 2 ((() name 1 ()) (() "\\" 1 ())))
-           (list_item 1 ((() name 1 ((whitespace 1))) (missing 0 ())))))))
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

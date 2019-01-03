@@ -2894,6 +2894,9 @@ void in(ISS& env, const bc::BindS& op) {
 }
 
 void in(ISS& env, const bc::UnsetL& op) {
+  if (locRaw(env, op.loc1).subtypeOf(TUninit)) {
+    return reduce(env, bc::Nop {});
+  }
   nothrow(env);
   setLocRaw(env, op.loc1, TUninit);
 }

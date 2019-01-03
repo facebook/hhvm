@@ -259,13 +259,17 @@ def TL(name):
 #------------------------------------------------------------------------------
 # Type manipulations.
 
+def destruct(t):
+    return re.sub('^(struct|class|union)\s+', '', t)
+
+
 def rawtype(t):
     return t.unqualified().strip_typedefs()
 
 
 def template_type(t):
     """Get the unparametrized name of a template type."""
-    return str(t).split('<')[0]
+    return destruct(str(t).split('<')[0])
 
 
 def rawptr(val):

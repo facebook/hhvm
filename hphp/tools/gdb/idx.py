@@ -291,7 +291,11 @@ def idx(container, index, hasher=None):
         try:
             value = container[index]
         except:
-            print('idx: Unrecognized container.')
+            print(
+                'idx: Unrecognized container (%s - %s).' % (
+                    container_type, true_type
+                )
+            )
             return None
 
     return value
@@ -334,7 +338,10 @@ hash, if valid, will be used instead of the default hash for the key type.
             return None
 
         ty = str(value.type.pointer())
-        ty_parts = re.split('([*&])', ty, 1)
+        ty_parts = [
+            x for x in
+            re.split('(\s*(?:const\s*)?[*&](?!\s*[>,]))', ty, 1) if x
+        ]
         ty_parts[0] = "'%s'" % ty_parts[0]
 
         gdb.execute('print *(%s)%s' % (

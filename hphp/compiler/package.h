@@ -40,9 +40,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  * Therefore, a package is really toppest entry point for parsing.
  */
 struct Package {
-  explicit Package(const char *root,
-                   bool bShortTags = true,
-                   bool bAspTags = false);
+  explicit Package(const char *root, bool bShortTags = true);
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 

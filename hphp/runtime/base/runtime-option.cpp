@@ -97,7 +97,6 @@ bool RuntimeOption::ServerMode = false;
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnablePHP = true;
 bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = true;
@@ -489,7 +488,6 @@ std::vector<std::string> s_RelativeConfigs;
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableAspTags) type |= Scanner::AllowAspTags;
   if (EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
@@ -1338,7 +1336,6 @@ void RuntimeOption::Load(
     Config::Bind(EnableHipHopExperimentalSyntax, ini,
                  config, "Eval.EnableHipHopExperimentalSyntax");
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
-    Config::Bind(EnableAspTags, ini, config, "Eval.EnableAspTags");
     Config::Bind(EnablePHP, ini, config, "Eval.EnablePHP", EnablePHP);
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(EnableZendSorting, ini, config, "Eval.EnableZendSorting",

@@ -173,10 +173,6 @@ variables and global variables.
 
 Default is true. Is &lt;? allowed with PHP code?
 
-= EnableAspTags
-
-Default is false. Is &lt;% %&gt; allowed with PHP code?
-
 = EnableXHP
 
 Whether to enable XHP extension. XHP adds some syntax sugar to allow better and

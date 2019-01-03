@@ -658,7 +658,6 @@ users can use the same machine serving their own source files.
     EnableHipHopExperimentalSyntax = false
 
     EnableShortTags = true   # is <? allowed
-    EnableAspTags = false    # is <% %> allowed
     EnableXHP = true         # XHP extension
     NativeXHP = true         # Use HPHP to directly handle XHP
 

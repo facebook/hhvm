@@ -127,7 +127,6 @@ struct Option {
   static bool ParseTimeOpts;
   static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;
-  static bool EnableAspTags;
   static int ParserThreadCount;
 
   static int GetScannerType();

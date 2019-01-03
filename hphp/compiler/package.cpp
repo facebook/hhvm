@@ -51,8 +51,7 @@ using std::set;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Package::Package(const char* root, bool /*bShortTags*/ /* = true */,
-                 bool /*bAspTags*/ /* = false */)
+Package::Package(const char* root, bool /*bShortTags*/ /* = true */)
     : m_dispatcher(nullptr), m_lineCount(0), m_charCount(0) {
   m_root = FileUtil::normalizeDir(root);
   m_ar = std::make_shared<AnalysisResult>();

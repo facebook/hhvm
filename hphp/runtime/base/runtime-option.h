@@ -427,7 +427,6 @@ struct RuntimeOption {
   static bool EnableHipHopSyntax;
   static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;
-  static bool EnableAspTags;
   static bool EnableXHP;
   static bool EnablePHP;
   static bool CheckParamTypeInvariance;

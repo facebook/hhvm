@@ -84,13 +84,11 @@ std::string Option::ProgramName;
 bool Option::ParseTimeOpts = true;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
-bool Option::EnableAspTags = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableAspTags) type |= Scanner::AllowAspTags;
   if (RuntimeOption::EnableXHP) type |= Scanner::AllowXHPSyntax;
   if (RuntimeOption::EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
@@ -290,8 +288,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                  "Hack.Lang.DisallowDynamicVarEnvFuncs",
                  RuntimeOption::DisallowDynamicVarEnvFuncs);
   }
-
-  Config::Bind(EnableAspTags, ini, config, "EnableAspTags");
 
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);

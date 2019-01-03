@@ -143,7 +143,14 @@ type on_error =
   data:Hh_json.json option ->
   state ->
   state Lwt.t
-let initialize_params_ref: Lsp.Initialize.params option ref = ref None
+
+(* Note: we assume that we won't ever initialize more than once, since this
+promise can only be resolved once. *)
+let (
+  (initialize_params_promise: Lsp.Initialize.params Lwt.t),
+  (initialize_params_resolver: Lsp.Initialize.params Lwt.u)
+) = Lwt.task ()
+
 let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
 let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
@@ -152,7 +159,7 @@ let ref_from: string ref = ref ""
 let showStatus_outstanding: string ref = ref ""
 
 let initialize_params_exc () : Lsp.Initialize.params =
-  match !initialize_params_ref with
+  match Lwt.poll initialize_params_promise with
   | None -> failwith "initialize_params not yet received"
   | Some initialize_params -> initialize_params
 
@@ -242,12 +249,18 @@ let get_older_hh_server_state (requested_time: float) : hh_server_state =
 
 
 let get_root_opt () : Path.t option =
-  match !initialize_params_ref with
+  match Lwt.poll initialize_params_promise with
   | None ->
     None (* haven't yet received initialize so we don't know *)
   | Some initialize_params ->
     let path = Some (Lsp_helpers.get_root initialize_params) in
     Some (ClientArgsUtils.get_root path)
+
+
+let get_root_wait () : Path.t Lwt.t =
+  let%lwt initialize_params = initialize_params_promise in
+  let path = Lsp_helpers.get_root initialize_params in
+  Lwt.return (ClientArgsUtils.get_root (Some path))
 
 
 let read_hhconfig_version () : string =
@@ -2193,7 +2206,7 @@ let handle_event
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     let initialize_params = c.params |> parse_initialize in
-    initialize_params_ref := Some initialize_params;
+    Lwt.wakeup_later initialize_params_resolver initialize_params;
     set_up_hh_logger_for_client_lsp ();
 
     hhconfig_version := read_hhconfig_version ();

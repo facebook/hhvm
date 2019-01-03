@@ -300,7 +300,9 @@ and stmt env acc st =
       expr acc e1
     | Switch (e, cl) ->
       let acc = expr acc e in
-      let cl = List.map cl (case acc) in
+      (* Filter out cases that fallthrough *)
+      let cl_body = List.filter cl case_has_body in
+      let cl = List.map cl_body (case acc) in
       let c = S.inter_list cl in
       S.union acc c
     | Foreach (e, _, _) ->
@@ -502,6 +504,11 @@ and expr_ env acc p e =
 and case env acc = function
   | Default b
   | Case (_, b) -> block env acc b
+
+and case_has_body = function
+  | Default _ -> true
+  | Case (_, []) -> false
+  | Case _ -> true
 
 and catch env acc (_, _, b) = block env acc b
 

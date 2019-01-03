@@ -40,7 +40,7 @@ module ExprDepTy = struct
               let ereason, dep = new_() in
               pos, ereason, dep
           )
-      | N.CI ((p, cls), _) ->
+      | N.CI (p, cls) ->
           p, Reason.ERclass cls, `cls cls
       | N.CIstatic ->
           pos, Reason.ERstatic, `this

@@ -125,7 +125,7 @@ let autocomplete_trait_only = autocomplete_token Actrait_only None
 
 let autocomplete_new cid env =
   match cid with
-  | Nast.CI (sid, _) -> autocomplete_token Acnew (Some env) sid
+  | Nast.CI sid -> autocomplete_token Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
@@ -644,7 +644,7 @@ let visitor = object (self)
       |> (fun s -> (fst sid, lstrip s ":"))
     in
     autocomplete_id trimmed_sid env;
-    let cid = Nast.CI (sid, []) in
+    let cid = Nast.CI sid in
     Typing_lazy_heap.get_class (Tast_env.get_tcopt env) (snd sid)
     |> Option.iter ~f:begin fun c ->
       List.iter attrs ~f:begin function

@@ -65,13 +65,13 @@ let handler = object
 
   method! at_expr env =
     function
-    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
+    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
       when
         class_name = SN.Shapes.cShapes &&
         method_name = SN.Shapes.keyExists ->
       trivial_shapes_key_exists_check p env shape (pos, field_name)
-    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; (pos, _), String field_name; _], [])
-    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI ((_, class_name), _)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
+    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name; _], [])
+    | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
       when
         class_name = SN.Shapes.cShapes &&
         method_name = SN.Shapes.idx ->

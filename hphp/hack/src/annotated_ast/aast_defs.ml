@@ -147,8 +147,6 @@ and enum_ = {
   e_constraint : hint option;
 }
 
-and instantiated_sid = sid * targ list
-
 and where_constraint = hint * Ast.constraint_kind * hint
 [@@deriving
   show { with_path = false },

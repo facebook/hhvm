@@ -32,8 +32,6 @@ let assert_named_body = function
   | NamedBody b -> b
   | UnnamedBody _ -> failwith "Expecting a named function body"
 
-let get_instantiated_sid_name ((_, x), _) = x
-
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
   | CIself -> SN.Classes.cSelf
@@ -41,7 +39,7 @@ let class_id_to_str = function
   | CIexpr (_, This) -> SN.SpecialIdents.this
   | CIexpr (_, Lvar (_, x)) -> "$"^Local_id.to_string x
   | CIexpr _ -> assert false
-  | CI x -> get_instantiated_sid_name x
+  | CI (_, x) -> x
 
 let is_kvc_kind name =
   name = SN.Collections.cMap ||

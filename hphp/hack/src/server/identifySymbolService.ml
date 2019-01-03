@@ -223,10 +223,6 @@ let visitor = object (self)
     let acc = process_lvar_id (param.Tast.param_pos, param.Tast.param_name) in
     self#plus acc (super#on_fun_param env param)
 
-  method! on_instantiated_sid env id =
-    let acc = process_class_id (fst id) in
-    self#plus acc (super#on_instantiated_sid env id)
-
   method! on_Happly env sid hl =
     let acc = process_class_id sid in
     self#plus acc (super#on_Happly env sid hl)

@@ -14,7 +14,7 @@ open Typing_defs
 let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   match l with
   (* convert class const expression to non-generic type hint *)
-  | [p, Class_const ((_, CI (cls, _)), (_, name))]
+  | [p, Class_const ((_, CI cls), (_, name))]
     when name = SN.Members.mClass ->
       (* set Extends dependency for between class that contains
          method and condition type *)

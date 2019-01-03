@@ -2358,7 +2358,7 @@ module Make (GetLocals : GetLocals) = struct
         N.Array_get (id, None)
     | Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
     | Class_get ((_, (Id x1 | Lvar x1)), (_, (Id x2 | Lvar x2))) ->
-      N.Class_get (make_class_id env x1 [], x2)
+      N.Class_get (make_class_id env x1, x2)
     | Class_get (x1, x2) ->
       ensure_name_not_dynamic env x1
         Errors.dynamic_class_name_in_strict_mode;
@@ -2373,7 +2373,7 @@ module Make (GetLocals : GetLocals) = struct
       | Some (_, `Typedef) when (snd x2) = "class" ->
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
       | _ ->
-        N.Class_const (make_class_id env x1 [], x2)
+        N.Class_const (make_class_id env x1, x2)
       end
     | Class_const _ ->
       (* TODO: report error in strict mode *)
@@ -2430,7 +2430,7 @@ module Make (GetLocals : GetLocals) = struct
             (match (expr env e1), (expr env e2) with
             | (pc, N.String cl), (pm, N.String meth) ->
               N.Method_caller (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
-            | (_, N.Class_const ((_, N.CI (cl, _)), (_, mem))), (pm, N.String meth)
+            | (_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
               N.Method_caller (Env.type_name env cl ~allow_typedef:false, (pm, meth))
             | (p, _), (_) ->
@@ -2460,7 +2460,7 @@ module Make (GetLocals : GetLocals) = struct
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, (pm, meth))
                 | None -> Errors.illegal_class_meth p; N.Any)
-            | (_, N.Class_const ((_, N.CI (cl, _)), (_, mem))), (pm, N.String meth)
+            | (_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth)
               when mem = SN.Members.mClass ->
               N.Smethod_id (Env.type_name env cl ~allow_typedef:false, (pm, meth))
             | (p, N.Class_const ((_, (N.CIself|N.CIstatic)), (_, mem))),
@@ -2630,20 +2630,20 @@ module Make (GetLocals : GetLocals) = struct
         | px, n when n = SN.Classes.cParent ->
           if (fst env).current_cls = None then
             let () = Errors.parent_outside_class p in
-            N.CI ((px, SN.Classes.cUnknown), [])
+            N.CI (px, SN.Classes.cUnknown)
           else N.CIparent
         | px, n when n = SN.Classes.cSelf ->
           if (fst env).current_cls = None then
             let () = Errors.self_outside_class p in
-            N.CI ((px, SN.Classes.cUnknown), [])
+            N.CI (px, SN.Classes.cUnknown)
           else N.CIself
         | px, n when n = SN.Classes.cStatic ->
           if (fst env).current_cls = None then
             let () = Errors.static_outside_class p in
-            N.CI ((px, SN.Classes.cUnknown), [])
+            N.CI (px, SN.Classes.cUnknown)
           else N.CIstatic
         | _ ->
-          N.CI (Env.type_name env x ~allow_typedef:false, [])
+          N.CI (Env.type_name env x ~allow_typedef:false)
       in
       N.InstanceOf (expr env e, (p, id))
     | InstanceOf (e1, (_,
@@ -2664,8 +2664,8 @@ module Make (GetLocals : GetLocals) = struct
     | New ((cp, Id x), tal, el, uel)
     | New ((cp, Lvar x), tal, el, uel) ->
       check_type_args_for_reified env p tal;
-      N.New (make_class_id env x tal,
-        [],
+      N.New (make_class_id env x,
+        targl env p tal,
         exprl env el,
         exprl env uel,
         cp)
@@ -2673,8 +2673,8 @@ module Make (GetLocals : GetLocals) = struct
       check_type_args_for_reified env p tal;
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
-      N.New (make_class_id env (p, SN.Classes.cUnknown) tal,
-        [],
+      N.New (make_class_id env (p, SN.Classes.cUnknown),
+        targl env p tal,
         exprl env el,
         exprl env uel,
         p)
@@ -2786,22 +2786,22 @@ module Make (GetLocals : GetLocals) = struct
       f_static = f.f_static;
     }
 
-  and make_class_id env (p, x as cid) tal =
+  and make_class_id env (p, x as cid) =
     p,
     match x with
       | x when x = SN.Classes.cParent ->
         if (fst env).current_cls = None then
           let () = Errors.parent_outside_class p in
-          N.CI ((p, SN.Classes.cUnknown), [])
+          N.CI (p, SN.Classes.cUnknown)
         else N.CIparent
       | x when x = SN.Classes.cSelf ->
         if (fst env).current_cls = None then
           let () = Errors.self_outside_class p in
-          N.CI ((p, SN.Classes.cUnknown), [])
+          N.CI (p, SN.Classes.cUnknown)
         else N.CIself
       | x when x = SN.Classes.cStatic -> if (fst env).current_cls = None then
           let () = Errors.static_outside_class p in
-          N.CI ((p, SN.Classes.cUnknown), [])
+          N.CI (p, SN.Classes.cUnknown)
         else N.CIstatic
       | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
       | x when x = SN.SpecialIdents.dollardollar ->
@@ -2813,7 +2813,7 @@ module Make (GetLocals : GetLocals) = struct
            * like "$$::someMethod()". *)
           N.CIexpr(p, N.Lvar (p, Env.found_dollardollar env p))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
-      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false, targl env p tal)
+      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false)
 
   and casel env l =
     List.map_env [] l (case env)

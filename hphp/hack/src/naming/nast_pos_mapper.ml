@@ -115,9 +115,6 @@ and shape_field f = function
 and pstring f (p, s) =
   f p, s
 
-and instantiated_sid f ((sid: Aast.sid), (tal: Aast.targ list)) =
-  (pstring f sid, List.map tal ~f:(Tuple.T2.map_fst ~f:(hint f)))
-
 and special_func f = function
   | Gena e -> Gena (expr f e)
   | Genva el -> Genva (List.map el (expr f))
@@ -130,7 +127,7 @@ and class_id_ f = function
   | CIself -> CIself
   | CIstatic -> CIstatic
   | CIexpr e -> CIexpr (expr f e)
-  | CI isid -> CI (instantiated_sid f isid)
+  | CI sid -> CI (pstring f sid)
 
 and hint f (p, h) = f p, hint_ f h
 

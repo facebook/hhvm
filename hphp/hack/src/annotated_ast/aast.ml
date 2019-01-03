@@ -109,7 +109,7 @@ and class_id_ =
   | CIself
   | CIstatic
   | CIexpr of expr
-  | CI of instantiated_sid
+  | CI of sid
 
 and expr = expr_annotation * expr_
 and expr_ =

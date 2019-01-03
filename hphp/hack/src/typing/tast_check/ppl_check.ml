@@ -102,7 +102,7 @@ let check_ppl_class_const env p e =
     if Env.get_inside_ppl_class env && Env.get_inside_constructor env
     then Errors.invalid_ppl_static_call p "inside a <<__PPL>> class constructor"
     else ()
-  | CI ((_, name), _) ->
+  | CI (_, name) ->
     begin
       match Decl_heap.Classes.get name with
       | Some ({ dc_ppl = true; _ }) ->

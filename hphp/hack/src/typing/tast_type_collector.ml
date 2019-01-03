@@ -22,7 +22,7 @@ let type_collector = object
 
   method! on_class_id env ((_, ty), cid) =
     match cid with
-    | Tast.CI ((p,_),_) ->
+    | Tast.CI (p,_) ->
       Pos.AbsolutePosMap.singleton
         (Pos.to_absolute p)
         [(env, Typing_defs.LoclTy ty)]

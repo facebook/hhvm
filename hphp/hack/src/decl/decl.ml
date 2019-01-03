@@ -482,7 +482,7 @@ and get_sealed_whitelist c =
           match param with
             | _, Class_const ((_, CI cls), (_, name))
               when name = SN.Members.mClass ->
-              SSet.add (get_instantiated_sid_name cls) names
+              SSet.add (snd cls) names
             | _ -> names in
         Some (List.fold_left params ~f:add_class_name ~init:SSet.empty)
 

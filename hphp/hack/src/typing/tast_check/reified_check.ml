@@ -33,7 +33,7 @@ let handler = object
     | (pos, _), Call (_, ((_, (_, Tfun { ft_pos; ft_tparams; _ })), _), tal, _, _) ->
       let tparams = fst ft_tparams in
       verify_targs pos ft_pos tal tparams
-    | (pos, _), New ((_, CI ((_, class_id), tal)), _, _, _, _) ->
+    | (pos, _), New ((_, CI (_, class_id)), tal, _, _, _) ->
       begin match Tast_env.get_class env class_id with
       | Some cls ->
         let tparams = Typing_classes_heap.tparams cls in

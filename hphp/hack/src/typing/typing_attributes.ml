@@ -48,7 +48,8 @@ let check_implements check_new_object attr_interface
           ~check_parent:false
           ~check_not_abstract:false
           ~is_using_clause:false attr_pos env
-          (Nast.CI (attr_cid, []))
+          (Nast.CI attr_cid)
+          []
           params (* list of attr parameter literals *)
           [] (* no variadic arguments *) in
         env

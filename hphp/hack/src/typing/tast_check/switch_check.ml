@@ -17,7 +17,7 @@ module Cls = Typing_classes_heap
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case (((pos, _), Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
+  | Case (((pos, _), Class_const ((_, CI (_, cls)), (_, const))), _) ->
     if cls <> Cls.name tc then
       (Errors.enum_switch_wrong_class pos (strip_ns (Cls.name tc)) (strip_ns cls);
        (seen, has_default))

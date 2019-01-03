@@ -1394,7 +1394,7 @@ and expr_ env p = function
       ()
   | InstanceOf (e, e2) ->
       (match e2 with
-      | _, CIexpr (_, Class_const ((_, CI ((_, classname), _)), (p, "class"))) ->
+      | _, CIexpr (_, Class_const ((_, CI (_, classname)), (p, "class"))) ->
         Errors.classname_const_instanceof (Utils.strip_ns classname) p;
       | _ -> ());
       expr env e;

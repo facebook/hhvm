@@ -53,9 +53,9 @@ void getBaseType(Opcode rawOp, bool predict,
     } else if (baseType <= TStr && rawOp == SetElem) {
       /* If the base is known to be a string and the operation is exactly
        * SetElem, we're guaranteed that either the base will end as a
-       * CountedStr or the instruction will throw an exception and side
+       * StaticStr or the instruction will throw an exception and side
        * exit. */
-      baseType = TCountedStr;
+      baseType = TStaticStr;
     } else if (baseType <= TStr && rawOp == SetNewElem) {
       /* If the string base is empty, it will be promoted to an
        * array. Otherwise the base will be left alone and we'll fatal. */

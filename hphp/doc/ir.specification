@@ -180,7 +180,7 @@ loaded, using a separate CheckRefInner instruction.
 
   Also note that many types are not supported as the typeParam right now.
 
-| CheckNullptr, ND, S(CountedStr,Nullptr), B|CRc
+| CheckNullptr, ND, S(StaticStr,Nullptr), B
 
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
@@ -333,7 +333,7 @@ exceptions depending on how coercion is implemented.
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
 
-| AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func,Arr), P
+| AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,StaticStr,Func,Arr), P
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -2879,7 +2879,7 @@ functions (specified in S0) to perform the corresponding vector operation. If
 S1 is a ConstCls it represents the context class for the operation.
 
 SetElem, SetProp, and SetNewElem are used to implement part of the SetM hhbc
-opcode, which almost always pushes its first stack input or a CountedStr as its
+opcode, which almost always pushes its first stack input or a StaticStr as its
 stack result. The combinations of input types that cause SetM to push anything
 other than those two values are vanishingly rare in correct PHP programs, so
 these three instructions have been optimized for the common cases. SetNewElem
@@ -3267,13 +3267,13 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
-| SetElem, DSetElem, S(LvalToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
+| SetElem, DSetElem, S(LvalToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MElem
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
   the case of string bases, the SetM returns a new string containing the newly
   inserted character. So the return value of this instruction is Nullptr unless
-  SetM needed to create a new counted string.
+  SetM needed to return a static string.
 
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).

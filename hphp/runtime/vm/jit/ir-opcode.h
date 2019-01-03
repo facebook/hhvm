@@ -77,7 +77,7 @@ struct SSATmp;
  *     DCtx         single dst has type Cctx|Obj<=ctx, where ctx is the
  *                    current context class
  *     DMulti       multiple dests. type and number depend on instruction
- *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
+ *     DSetElem     single dst is a subset of StaticStr|Nullptr depending on
  *                    sources
  *     DBuiltin     single dst for CallBuiltin. This can return complex data
  *                    types such as (TStr | TNull)

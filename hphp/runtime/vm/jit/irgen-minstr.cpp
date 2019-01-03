@@ -2019,14 +2019,14 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
       auto const t = result->type();
       if (t == TNullptr) {
         // Base is not a string. Result is always value.
-      } else if (t == TCountedStr) {
+      } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
         env.irb->constrainValue(value, DataTypeBoxAndCountness);
         decRef(env, value);
         value = result;
       } else {
-        assertx(t == (TCountedStr | TNullptr));
+        assertx(t == (TStaticStr | TNullptr));
         // Base might be a string. Emit a check to verify the result before
         // returning the optimistic result.
         handleStrTestResult(env, result);

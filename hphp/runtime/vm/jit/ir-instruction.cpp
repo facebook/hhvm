@@ -162,9 +162,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Only consumes the reference to its input array
       return !move && srcNo == 0;
 
-    case CheckNullptr:
-      return !move && srcNo == 0;
-
     case CreateAFWH:
     case CreateAFWHNoVV:
       return !move && srcNo == 4;
@@ -410,13 +407,13 @@ Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
   auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
 
-  // If the base is a Str, the result will always be a CountedStr (or
+  // If the base is a Str, the result will always be a StaticStr (or
   // an exception). If the base might be a str, the result wil be
-  // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
+  // StaticStr or Nullptr. Otherwise, the result is always Nullptr.
   if (baseType <= TStr) {
-    return TCountedStr;
+    return TStaticStr;
   } else if (baseType.maybe(TStr)) {
-    return TCountedStr | TNullptr;
+    return TStaticStr | TNullptr;
   }
   return TNullptr;
 }

@@ -33,7 +33,7 @@ struct DateTimeData {
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
   DateTimeData& operator=(const DateTimeData& other) {
-    m_dt = other.m_dt->cloneDateTime();
+    m_dt = other.m_dt ? other.m_dt->cloneDateTime() : req::ptr<DateTime>{};
     return *this;
   }
   Variant sleep() const {
@@ -41,10 +41,12 @@ struct DateTimeData {
   }
   void wakeup(const Variant& /*content*/, ObjectData* /*obj*/) {}
   int64_t getTimestamp() const {
+    assertx(m_dt);
     bool err = false;
     return m_dt->toTimeStamp(err);
   }
   String format(const String& format) const {
+    assertx(m_dt);
     return m_dt->toString(format, false);
   }
   Array getDebugInfo() const;
@@ -111,11 +113,12 @@ struct DateTimeZoneData {
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
   DateTimeZoneData& operator=(const DateTimeZoneData& other) {
-    m_tz = other.m_tz->cloneTimeZone();
+    m_tz = other.m_tz ? other.m_tz->cloneTimeZone() : req::ptr<TimeZone>{};
     return *this;
   }
 
   String getName() const {
+    assertx(m_tz);
     return m_tz->name();
   }
 
@@ -167,7 +170,8 @@ struct DateIntervalData {
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;
   DateIntervalData& operator=(const DateIntervalData& other) {
-    m_di = other.m_di->cloneDateInterval();
+    m_di =
+      other.m_di ? other.m_di->cloneDateInterval() : req::ptr<DateInterval>{};
     return *this;
   }
 

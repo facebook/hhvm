@@ -88,12 +88,44 @@ static const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void raise_argument_warning(const char* func,
-                                   int param,
-                                   const StaticString& expected,
-                                   const Object& given) {
+namespace {
+
+void raise_argument_warning(const char* func,
+                            int param,
+                            const StaticString& expected,
+                            const Object& given) {
   raise_warning("%s() expects parameter %d to be %s, %s given",
                 func, param, expected.c_str(), given.get()->classname_cstr());
+}
+
+DateTimeData* getDateTimeData(ObjectData* this_) {
+  auto const data = Native::data<DateTimeData>(this_);
+  if (data->m_dt) return data;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Use before DateTime::__construct() called"
+  );
+}
+
+DateTimeData* getDateTimeData(const Object& this_) {
+  return getDateTimeData(this_.get());
+}
+
+DateTimeZoneData* getDateTimeZoneData(ObjectData* this_) {
+  auto const data = Native::data<DateTimeZoneData>(this_);
+  if (data->m_tz) return data;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Use before DateTimeZone::__construct() called"
+  );
+}
+
+DateIntervalData* getDateIntervalData(ObjectData* this_) {
+  auto const data = Native::data<DateIntervalData>(this_);
+  if (data->m_di) return data;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Use before DateInterval::__construct() called"
+  );
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,7 +182,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
 Variant HHVM_METHOD(DateTime, diff,
                     const Variant& datetime2,
                     const Variant& absolute) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   const Object obj_datetime2 = datetime2.toObject();
   if (!obj_datetime2.instanceof(s_DateTimeInterface)) {
     raise_argument_warning("DateTime::diff", 1, s_DateTimeInterface,
@@ -163,7 +195,7 @@ Variant HHVM_METHOD(DateTime, diff,
 
 String HHVM_METHOD(DateTime, format,
                    const Variant& format) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   return data->format(format.toString());
 }
 
@@ -186,17 +218,17 @@ Array HHVM_STATIC_METHOD(DateTime, getLastErrors) {
 }
 
 int64_t HHVM_METHOD(DateTime, getOffset) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   return data->m_dt->offset();
 }
 
 int64_t HHVM_METHOD(DateTime, getTimestamp) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   return data->getTimestamp();
 }
 
 Variant HHVM_METHOD(DateTime, getTimezone) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   req::ptr<TimeZone> tz = data->m_dt->timezone();
   if (tz->isValid()) {
     return DateTimeZoneData::wrap(tz);
@@ -206,7 +238,7 @@ Variant HHVM_METHOD(DateTime, getTimezone) {
 
 Variant HHVM_METHOD(DateTime, modify,
                    const String& modify) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   if (!data->m_dt->modify(modify)) {
     return false;
   }
@@ -217,7 +249,7 @@ Object HHVM_METHOD(DateTime, setDate,
                    int64_t year,
                    int64_t month,
                    int64_t day) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   data->m_dt->setDate(year, month, day);
   return Object(this_);
 }
@@ -226,7 +258,7 @@ Object HHVM_METHOD(DateTime, setISODate,
                    int64_t year,
                    int64_t week,
                    int64_t day /*= 1*/) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   data->m_dt->setISODate(year, week, day);
   return Object(this_);
 }
@@ -235,21 +267,21 @@ Object HHVM_METHOD(DateTime, setTime,
                    int64_t hour,
                    int64_t minute,
                    int64_t second /*= 0*/) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   data->m_dt->setTime(hour, minute, second);
   return Object(this_);
 }
 
 Object HHVM_METHOD(DateTime, setTimestamp,
                    int64_t unixtimestamp) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   data->m_dt->fromTimeStamp(unixtimestamp, false);
   return Object(this_);
 }
 
 Variant HHVM_METHOD(DateTime, setTimezone,
                     const Object& timezone) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   if (!timezone.instanceof(s_DateTimeZone)) {
     raise_argument_warning("DateTime::setTimezone", 1, s_DateTimeZone,
                            timezone);
@@ -261,7 +293,7 @@ Variant HHVM_METHOD(DateTime, setTimezone,
 
 Variant HHVM_METHOD(DateTime, add,
                     const Object& interval) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   if (!interval.instanceof(s_DateInterval)) {
     raise_argument_warning("DateTime::add", 1, s_DateInterval, interval);
     return false;
@@ -273,7 +305,7 @@ Variant HHVM_METHOD(DateTime, add,
 
 Variant HHVM_METHOD(DateTime, sub,
                     const Object& interval) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   if (!interval.instanceof(s_DateInterval)) {
     raise_argument_warning("DateTime::sub", 1, s_DateInterval, interval);
     return false;
@@ -290,7 +322,7 @@ const StaticString
   s_ISOformat("Y-m-d H:i:s.u");
 
 Array HHVM_METHOD(DateTime, __sleep) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
 
   auto const formatted = data->format(s_ISOformat);
   this_->setProp(nullptr, s_date.get(), formatted.toCell());
@@ -317,11 +349,12 @@ void HHVM_METHOD(DateTime, __wakeup) {
 }
 
 Array HHVM_METHOD(DateTime, __debuginfo) {
-  DateTimeData* data = Native::data<DateTimeData>(this_);
+  auto const data = getDateTimeData(this_);
   return data->getDebugInfo();
 }
 
 Array DateTimeData::getDebugInfo() const {
+  assertx(m_dt);
   return make_map_array(
     s_date, format(s_ISOformat),
     s_timezone_type, m_dt->zoneType(),
@@ -334,7 +367,7 @@ Array DateTimeData::getDebugInfo() const {
 
 int64_t DateTimeData::getTimestamp(const Object& obj) {
   if (LIKELY(obj.instanceof(getClass()))) {
-    return Native::data<DateTimeData>(obj)->getTimestamp();
+    return getDateTimeData(obj)->getTimestamp();
   }
   assertx(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
   Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
@@ -347,8 +380,8 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
 
 int DateTimeData::compare(const Object& left, const Object &right) {
   if (LIKELY(left.instanceof(getClass()) && right.instanceof(getClass()))) {
-    auto leftData = Native::data<DateTimeData>(left);
-    auto rightData = Native::data<DateTimeData>(right);
+    auto const leftData = getDateTimeData(left);
+    auto const rightData = getDateTimeData(right);
     return leftData->m_dt->compare(rightData->m_dt);
   } else {
     auto leftTime = getTimestamp(left);
@@ -413,18 +446,18 @@ void HHVM_METHOD(DateTimeZone, __construct,
 }
 
 Array HHVM_METHOD(DateTimeZone, getLocation) {
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  auto const data = getDateTimeZoneData(this_);
   return data->m_tz->getLocation();
 }
 
 String HHVM_METHOD(DateTimeZone, getName) {
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  auto const data = getDateTimeZoneData(this_);
   return data->getName();
 }
 
 Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime) {
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  auto const data = getDateTimeZoneData(this_);
   bool error;
   if (!datetime.instanceof(s_DateTime)) {
     raise_argument_warning("DateTimeZone::getOffset", 1, s_DateTime, datetime);
@@ -438,7 +471,7 @@ Variant HHVM_METHOD(DateTimeZone, getOffset,
 TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
                   int64_t timestamp_begin, /*=k_PHP_INT_MIN*/
                   int64_t timestamp_end /*=k_PHP_INT_MAX*/) {
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  auto const data = getDateTimeZoneData(this_);
   auto result = data->m_tz->transitions(timestamp_begin, timestamp_end);
   if (result.isNull()) {
     return make_tv<KindOfBoolean>(false);
@@ -504,11 +537,12 @@ req::ptr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
 IMPLEMENT_GET_CLASS(DateTimeZoneData)
 
 Array HHVM_METHOD(DateTimeZone, __debuginfo) {
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  auto const data = getDateTimeZoneData(this_);
   return data->getDebugInfo();
 }
 
 Array DateTimeZoneData::getDebugInfo() const {
+  assertx(m_tz);
   return make_map_array(
     s_timezone_type, m_tz->type(),
     s_timezone, m_tz->name()
@@ -545,7 +579,7 @@ const StaticString
 
 Variant HHVM_METHOD(DateInterval, __get,
                     const Variant& member) {
-  DateIntervalData* data = Native::data<DateIntervalData>(this_);
+  auto const data = getDateIntervalData(this_);
   if (member.isString()) {
     if (same(member, s_y)) {
       return data->m_di->getYears();
@@ -585,7 +619,7 @@ Variant HHVM_METHOD(DateInterval, __get,
 Variant HHVM_METHOD(DateInterval, __set,
                     const Variant& member,
                     const Variant& value) {
-  DateIntervalData* data = Native::data<DateIntervalData>(this_);
+  auto const data = getDateIntervalData(this_);
   if (member.isString()) {
     if (same(member, s_y)) {
       data->m_di->setYears(value.toInt64());
@@ -634,7 +668,7 @@ Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
 
 String HHVM_METHOD(DateInterval, format,
                    const String& format) {
-  DateIntervalData* data = Native::data<DateIntervalData>(this_);
+  auto const data = getDateIntervalData(this_);
   return data->m_di->format(format);
 }
 

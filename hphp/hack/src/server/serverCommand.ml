@@ -148,48 +148,6 @@ let full_recheck_if_needed genv env msg =
   end else env
 
 (****************************************************************************)
-(* Called by the client *)
-(****************************************************************************)
-
-exception Remote_fatal_exception of Marshal_tools.remote_exception_data
-exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
-
-let rec wait_for_rpc_response fd state callback =
-  let error state e =
-    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
-    Error (state, Utils.Callstack stack, e)
-  in
-  try
-    begin match Marshal_tools.from_fd_with_preamble fd with
-    | Response (r, t) ->
-      Ok (state, r, t)
-    | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
-      error state (Remote_fatal_exception remote_e_data)
-    | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
-      error state (Remote_nonfatal_exception remote_e_data)
-    | Push m ->
-      let state = callback state m in
-      wait_for_rpc_response fd state callback
-    | Hello ->
-      error state (Failure "unexpected hello after connection already established")
-    | Ping ->
-      error state (Failure "unexpected ping on persistent connection")
-  end with e ->
-    let stack = Printexc.get_backtrace () in
-    Error (state, Utils.Callstack stack, e)
-let stream_request oc cmd =
-  Marshal.to_channel oc (Stream cmd) [];
-  Out_channel.flush oc
-
-let connect_debug oc =
-  Marshal.to_channel oc Debug [];
-  Out_channel.flush oc
-
-let send_connection_type oc t =
-  Marshal.to_channel oc t [];
-  Out_channel.flush oc
-
-(****************************************************************************)
 (* Called by the server *)
 (****************************************************************************)
 

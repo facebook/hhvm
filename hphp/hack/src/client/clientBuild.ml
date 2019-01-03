@@ -94,7 +94,7 @@ let main_exn (env : env) : Exit_status.t Lwt.t =
     ~exit:(fun () ->
       Printf.eprintf "\nHack build id: %s\n%!" request_id)
     ~do_:(fun () ->
-      ServerCommand.stream_request oc (ServerCommandTypes.BUILD env.build_opts);
+      ServerCommandLwt.stream_request oc (ServerCommandTypes.BUILD env.build_opts);
       handle_response env ic) in
   let svnrev = Option.try_with begin fun () ->
     Sys_utils.read_file ServerBuild.svnrev_path

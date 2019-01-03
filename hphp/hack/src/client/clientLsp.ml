@@ -314,15 +314,15 @@ let rpc
       update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
       Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
     in
-    let%lwt result = ServerCommandLwt.rpc_persistent_lwt
+    let%lwt result = ServerCommandLwt.rpc_persistent
       (server_conn.ic, server_conn.oc) () callback command in
     match result with
     | Ok ((), res, start_server_handle_time) ->
       ref_unblocked_time := start_server_handle_time;
       Lwt.return res
-    | Error ((), Utils.Callstack _, ServerCommand.Remote_fatal_exception remote_e_data) ->
+    | Error ((), Utils.Callstack _, ServerCommandLwt.Remote_fatal_exception remote_e_data) ->
       raise (Server_fatal_connection_exception remote_e_data)
-    | Error ((), Utils.Callstack _, ServerCommand.Remote_nonfatal_exception remote_e_data) ->
+    | Error ((), Utils.Callstack _, ServerCommandLwt.Remote_nonfatal_exception remote_e_data) ->
       raise (Server_nonfatal_exception remote_e_data)
     | Error ((), Utils.Callstack stack, e) ->
       let message = Exn.to_string e in
@@ -1566,7 +1566,7 @@ let connect_after_hello
   let%lwt () =
     try%lwt
       let oc = server_conn.oc in
-      ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
+      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Persistent;
       let fd = oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr in
       let%lwt (response : 'a ServerCommandTypes.message_type) =
         Marshal_tools_lwt.from_fd_with_preamble fd in

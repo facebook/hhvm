@@ -315,7 +315,7 @@ let connect (env : env) : conn Lwt.t =
       connect ~first_attempt:true env env.retries start_time in
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then begin
-      ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
+      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
     end;
     Lwt.return conn
   with

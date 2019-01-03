@@ -33,7 +33,7 @@ let main (env : env) : Exit_status.t Lwt.t =
     prechecked = None;
     config = [];
   } in
-  ServerCommand.connect_debug oc;
+  ServerCommandLwt.connect_debug oc;
   (* Exit this via ctrl-C *)
   while true do
     print_endline (Timeout.input_line ic);

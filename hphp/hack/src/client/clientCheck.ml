@@ -13,7 +13,7 @@ open Utils
 open ClientRefactor
 open Ocaml_overrides
 
-module Cmd = ServerCommand
+module Cmd = ServerCommandLwt
 module Rpc = ServerCommandTypes
 module SyntaxTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_minimal_syntax)

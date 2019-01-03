@@ -532,7 +532,7 @@ async function curl_exec(mixed $urlOrHandle,
      * -1, and polling is required.
      */
     if ($select == -1) {
-      await \SleepWaitHandle::create($sleep_ms * 1000);
+      await SleepWaitHandle::create($sleep_ms * 1000);
       if ($sleep_ms < 1000) {
         $sleep_ms *= 2;
       }

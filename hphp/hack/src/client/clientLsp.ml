@@ -2558,8 +2558,8 @@ let main (type a) (env: env) : a Lwt.t =
       respond_to_error !ref_event (Error.Unknown message) stack;
       Lwt.return_unit
     | e ->
-      let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
+      let message = Exn.to_string e in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" !ref_unblocked_time;
       Lwt.return_unit

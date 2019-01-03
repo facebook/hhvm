@@ -171,6 +171,8 @@ and expr_ =
   | Lfun of fun_
   | Import of import_flavor * expr
   | Collection of sid * afield list (* TODO: T38184446 Consolidate collections in AAST *)
+  | BracedExpr of expr
+  | ParenthesizedExpr of expr
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -517,5 +519,7 @@ let expr_to_string expr =
   | Lfun _ -> "Lfun"
   | Import _ -> "Import"
   | Collection _ -> "Collection"
+  | BracedExpr _ -> "BracedExpr"
+  | ParenthesizedExpr _ -> "ParenthesizedExpr"
 
 end (* of AnnotatedAST functor *)

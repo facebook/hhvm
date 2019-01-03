@@ -121,6 +121,8 @@ struct
     | S.Lfun f -> T.Lfun (map_fun menv f)
     | S.Import (f, e) -> T.Import (f, map_expr menv e)
     | S.Collection (id, fl) -> T.Collection (id, List.map fl (map_afield menv))
+    | S.BracedExpr e -> T.BracedExpr (map_expr menv e)
+    | S.ParenthesizedExpr e -> T.ParenthesizedExpr (map_expr menv e)
   in
   let p' = menv.map_expr_annotation p in
     (p', e')

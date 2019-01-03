@@ -255,7 +255,9 @@ module CheckFunctionBody = struct
     | _, Import _
     | _, Lfun _
     | _, NewAnonClass _
-    | _, Omitted -> failwith "AST should not contain these nodes after naming"
+    | _, Omitted
+    | _, BracedExpr _
+    | _, ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
     | _, Any -> ()
     | _, Class_const ((_pos, CIparent), ((_, construct)))
       when construct = SN.Members.__construct ->
@@ -810,7 +812,9 @@ and check_class_property_initialization prop =
       | Import _
       | Lfun _
       | NewAnonClass _
-      | Omitted -> failwith "AST should not contain these nodes after naming"
+      | Omitted
+      | BracedExpr _
+      | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
       | Null | String _ | PrefixedString _ | Unsafe_expr _
@@ -1246,7 +1250,9 @@ and expr_ env p = function
   | Import _
   | Lfun _
   | NewAnonClass _
-  | Omitted -> failwith "AST should not contain these nodes after naming"
+  | Omitted
+  | BracedExpr _
+  | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
   | Any
   | Fun_id _
   | Method_id _

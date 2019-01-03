@@ -496,6 +496,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Lfun f -> this#on_fun_ acc f
    | Import (_, e) -> this#on_expr acc e
    | Collection (_, fl) -> this#on_array acc fl
+   | BracedExpr e -> this#on_expr acc e
+   | ParenthesizedExpr e -> this#on_expr acc e
 
   method on_array acc afl =
     List.fold_left afl ~f:this#on_afield ~init:acc

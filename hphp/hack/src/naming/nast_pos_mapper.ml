@@ -87,6 +87,8 @@ and expr_ f = function
       "Nast_pos_mapper cannot handle lambdas";
     Lfun (f)
   | Collection _
+  | BracedExpr _
+  | ParenthesizedExpr _
   | Import _ -> failwith "NAST should not contain these nodes"
 
 and afield f = function

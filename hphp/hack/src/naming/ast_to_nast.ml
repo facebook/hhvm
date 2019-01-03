@@ -247,8 +247,6 @@ and on_expr (p, e) : Aast.expr =
   | InstanceOf (e1, e2) -> Aast.InstanceOf (on_expr e1, (p, Aast.CIexpr (on_expr e2)))
   | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
   | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
-  | BracedExpr _ -> Aast.Any (* TODO: T37786581 *)
-  | ParenthesizedExpr _ -> Aast.Any (* TODO: T37786581 *)
   | New (e, tl, el1, el2) ->
     Aast.New (
       (p, Aast.CIexpr (on_expr e)),
@@ -269,6 +267,8 @@ and on_expr (p, e) : Aast.expr =
     in
     Aast.Efun (on_fun f, ids)
   | Lfun f -> Aast.Lfun (on_fun f)
+  | BracedExpr e -> Aast.BracedExpr (on_expr e)
+  | ParenthesizedExpr e -> Aast.ParenthesizedExpr (on_expr e)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)

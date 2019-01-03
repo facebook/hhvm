@@ -496,6 +496,8 @@ and expr_ env acc p e =
   | Lfun _ -> acc
   | Import _ -> acc
   | Collection _ -> acc
+  | BracedExpr _ -> acc
+  | ParenthesizedExpr _ -> acc
 
 and case env acc = function
   | Default b

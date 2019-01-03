@@ -2665,6 +2665,7 @@ module Make (GetLocals : GetLocals) = struct
     | New ((cp, Lvar x), tal, el, uel) ->
       check_type_args_for_reified env p tal;
       N.New (make_class_id env x tal,
+        [],
         exprl env el,
         exprl env uel,
         cp)
@@ -2673,6 +2674,7 @@ module Make (GetLocals : GetLocals) = struct
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown) tal,
+        [],
         exprl env el,
         exprl env uel,
         p)

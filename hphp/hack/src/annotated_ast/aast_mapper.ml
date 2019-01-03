@@ -101,8 +101,8 @@ struct
     | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id menv ci)
     | S.Is (e, h) -> T.Is (map_expr menv e, h)
     | S.As (e, h, b) -> T.As (map_expr menv e, h, b)
-    | S.New (ci, el1, el2, ctor_annot) ->
-      T.New (map_class_id menv ci, map_exprl menv el1,
+    | S.New (ci, tl, el1, el2, ctor_annot) ->
+      T.New (map_class_id menv ci, tl, map_exprl menv el1,
         map_exprl menv el2, menv.map_expr_annotation ctor_annot)
     | S.Efun (ef, ids) -> T.Efun(map_fun menv ef, ids)
     | S.Xml (id, pl, el) ->

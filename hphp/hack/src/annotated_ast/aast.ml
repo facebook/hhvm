@@ -160,7 +160,7 @@ and expr_ =
   | InstanceOf of expr * class_id
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
-  | New of class_id * expr list * expr list * (* constructor *) expr_annotation
+  | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
   | Efun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr

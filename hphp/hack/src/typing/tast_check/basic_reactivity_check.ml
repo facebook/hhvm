@@ -630,7 +630,7 @@ let check = object(self)
         | _ -> ()
         end;
         super#on_expr (env, ctx) expr
-      | _, New (_, el, _, (_, ctor_fty)) ->
+      | _, New (_, _, el, _, (_, ctor_fty)) ->
         enforce_mutable_constructor_call env ctor_fty el;
         super#on_expr (env, ctx) expr
       | _ ->

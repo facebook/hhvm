@@ -249,7 +249,14 @@ and on_expr (p, e) : Aast.expr =
   | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
   | BracedExpr _ -> Aast.Any (* TODO: T37786581 *)
   | ParenthesizedExpr _ -> Aast.Any (* TODO: T37786581 *)
-  | New _ -> Aast.Any (* TODO: T37786581 *)
+  | New (e, tl, el1, el2) ->
+    Aast.New (
+      (p, Aast.CIexpr (on_expr e)),
+      on_list on_targ tl,
+      on_list on_expr el1,
+      on_list on_expr el2,
+      p
+    )
   | NewAnonClass (el1, el2, c) ->
     Aast.NewAnonClass (on_list on_expr el1, on_list on_expr el2, on_class c)
   | Efun (f, use_list) ->

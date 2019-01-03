@@ -2231,13 +2231,13 @@ and expr_
       make_result env p (T.Suspend te) ty
 
   | Special_func func -> special_func env p func
-  | New ((pos, c), el, uel, p1) ->
+  | New ((pos, c), tal, el, uel, p1) ->
       let env = save_and_merge_next_in_catch env in
       let env, tc, tel, tuel, tyvars, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c el uel in
       let env = Env.forget_members env p in
-      make_result ~tyvars env p (T.New(tc, tel, tuel, (p1, ctor_fty))) ty
+      make_result ~tyvars env p (T.New(tc, tal, tel, tuel, (p1, ctor_fty))) ty
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
@@ -2459,7 +2459,7 @@ and expr_
           * cid = CI sid cannot produce a union of classes anyhow *)
         | (_, class_info, _)::_ -> Some class_info
       in
-      let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [], (fst sid))) in
+      let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [], [], (fst sid))) in
       let env, typed_attrs, attr_types = xhp_attribute_exprs env class_info attrl in
       let env, tel = List.map_env env el ~f:(fun env e -> let env, te, _ = expr env e in env, te) in
       let txml = T.Xml (sid, typed_attrs, List.rev tel) in

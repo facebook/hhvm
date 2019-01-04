@@ -2439,21 +2439,7 @@ void hphp_process_init() {
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
-
-    if (RuntimeOption::EvalJitWorkerThreadsForSerdes) {
-      RuntimeOption::EvalJitWorkerThreads =
-        RuntimeOption::EvalJitWorkerThreadsForSerdes;
-    }
-    switch (mode) {
-      case JitSerdesMode::Off:
-      case JitSerdesMode::Serialize:
-      case JitSerdesMode::SerializeAndExit:
-        break;
-      case JitSerdesMode::Deserialize:
-      case JitSerdesMode::DeserializeOrFail:
-      case JitSerdesMode::DeserializeOrGenerate:
-      case JitSerdesMode::DeserializeAndDelete:
-      case JitSerdesMode::DeserializeAndExit:
+    if (isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
                       RuntimeOption::EvalJitSerdesFile);
@@ -2493,7 +2479,6 @@ void hphp_process_init() {
         RuntimeOption::EvalJitProfileInterpRequests = 0;
         RuntimeOption::EvalJitProfileRequests = 0;
         RuntimeOption::EvalJitWorkerThreads = numWorkers;
-        RuntimeOption::ServerWarmupThrottleRequestCount /= 4;
 
         // Run retranslateAll asynchronously, without waiting for it to finish
         // here.

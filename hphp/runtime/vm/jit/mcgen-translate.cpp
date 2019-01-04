@@ -324,8 +324,7 @@ void retranslateAll() {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     if (RuntimeOption::RepoAuthoritative &&
         !RuntimeOption::EvalJitSerdesFile.empty() &&
-        (mode == JitSerdesMode::Serialize ||
-         mode == JitSerdesMode::SerializeAndExit)) {
+        isJitSerializing(mode)) {
       if (serverMode) Logger::Info("retranslateAll: serializing profile data");
       std::string errMsg;
       VMWorker([&errMsg] () {

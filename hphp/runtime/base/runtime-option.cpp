@@ -1379,8 +1379,7 @@ void RuntimeOption::Load(
     // few places.  The config file should never need to explicitly set
     // DumpPreciseProfileData to true.
     auto const couldDump = !EvalJitSerdesFile.empty() &&
-      ((EvalJitSerdesMode == JitSerdesMode::Serialize) ||
-       (EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) ||
+      (isJitSerializing(EvalJitSerdesMode) ||
        (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
     Config::Bind(DumpPreciseProfData, ini, config,
                  "Eval.DumpPreciseProfData", couldDump);

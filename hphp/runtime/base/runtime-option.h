@@ -48,15 +48,25 @@ struct IniSettingMap;
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
 enum class JitSerdesMode {
-  Off,
-  Serialize,
-  SerializeAndExit,
-  Deserialize,
-  DeserializeOrFail,
-  DeserializeOrGenerate,
-  DeserializeAndDelete,
-  DeserializeAndExit,
+  // Bit 0: serialize
+  // Bit 1: deserialize
+  Off                   = 0x0,
+  Serialize             = 0x1,          // 00001
+  SerializeAndExit      = 0x5,          // 00101
+  Deserialize           = 0x2,          // 00010
+  DeserializeOrFail     = 0x6,          // 00110
+  DeserializeOrGenerate = 0xa,          // 01010
+  DeserializeAndDelete  = 0xe,          // 01110
+  DeserializeAndExit    = 0x12,         // 10010
 };
+
+inline constexpr bool isJitDeserializing(JitSerdesMode m) {
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x2;
+}
+
+inline constexpr bool isJitSerializing(JitSerdesMode m) {
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
+}
 
 /**
  * Configurable options set from command line or configurable file at startup

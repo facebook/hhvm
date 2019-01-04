@@ -16,9 +16,8 @@ external hh_mem_status : key -> int        = "hh_mem_status"
 external hh_remove : key -> unit           = "hh_remove"
 external hh_move   : key -> key -> unit    = "hh_move"
 external hh_get    : key -> string         = "hh_get_and_deserialize"
-external hh_collect    : bool -> unit         = "hh_collect"
-external hh_should_collect : bool -> bool = "hh_should_collect"
-external heap_size: unit -> int = "hh_heap_size"
+external hh_collect: unit -> unit          = "hh_collect"
+external heap_size: unit -> int = "hh_used_heap_size"
 
 let expect ~msg bool =
   if bool then () else begin
@@ -35,10 +34,13 @@ let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
 
-let should_gentle_collect () = hh_should_collect false
-let should_aggresive_collect () = hh_should_collect true
-let gentle_collect () = hh_collect false
-let aggressive_collect () = hh_collect true
+let gentle_collect () =
+  if SharedMem.should_collect `gentle
+  then hh_collect ()
+
+let aggressive_collect () =
+  if SharedMem.should_collect `aggressive
+  then hh_collect ()
 
 let expect_equals ~name value expected =
   expect
@@ -97,14 +99,14 @@ let expect_gentle_collect expected =
     Printf.sprintf "Expected gentle collection to be %sneeded"
       (if expected then "" else "not ")
     )
-    (should_gentle_collect () = expected)
+    (SharedMem.should_collect `gentle = expected)
 
 let expect_aggressive_collect expected =
   expect ~msg:(
     Printf.sprintf "Expected aggressive collection to be %sneeded"
       (if expected then "" else "not ")
     )
-    (should_aggresive_collect () = expected)
+    (SharedMem.should_collect `aggressive = expected)
 
 let test_ops () =
   expect_stats ~nonempty:0 ~used:0;

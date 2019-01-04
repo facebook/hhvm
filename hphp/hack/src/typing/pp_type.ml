@@ -229,18 +229,6 @@ and pp_array_kind : Format.formatter -> array_kind -> unit = fun fmt ak ->
     pp_ty fmt a1;
     Format.fprintf fmt "@,))@]"
   | AKempty -> Format.pp_print_string fmt "AKempty"
-  | AKshape a0 ->
-    Format.fprintf fmt "(@[<2>AKshape@ ";
-    Nast.ShapeMap.pp
-      (fun fmt (tkey,tval) ->
-        Format.fprintf fmt "(@[";
-        pp_ty fmt tkey;
-        Format.fprintf fmt ",@ ";
-        pp_ty fmt tval;
-        Format.fprintf fmt "@])")
-      fmt
-      a0;
-    Format.fprintf fmt "@])"
 
 and show_array_kind : array_kind -> string = fun x ->
   Format.asprintf "%a" pp_array_kind x

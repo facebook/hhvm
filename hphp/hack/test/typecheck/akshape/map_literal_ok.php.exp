@@ -1,6 +1,0 @@
-File "map_literal_ok.php", line 6, characters 12-19:
-Invalid argument (Typing[4110])
-File "map_literal_ok.php", line 10, characters 19-21:
-This is an int
-File "map_literal_ok.php", line 4, characters 33-37:
-It is incompatible with a string

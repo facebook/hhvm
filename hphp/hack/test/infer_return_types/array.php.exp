@@ -3,5 +3,4 @@
 \h : array<_> try array<_>
 \i : array<_, _> try array<_, _>
 \j : array<_> try array<_>
-\k : shape-like-array(a => int) try shape-like-array(a => int)
 No errors

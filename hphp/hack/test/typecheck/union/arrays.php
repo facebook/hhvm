@@ -179,8 +179,6 @@ function test1(
   $x = ($b ? $arrayIntBool : $arrayIntBool2); // AKmap \/ AKmap
   hh_show($x);
   hh_show($x[0]);
-
-  // TODO AKshape, AKtuple. How to make them??
 }
 
 function expect_array<T>(array<T> $x): void {}

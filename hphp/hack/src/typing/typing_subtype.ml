@@ -243,8 +243,6 @@ and simplify_subtype
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  let again env acc ty_sub = (env, acc) &&&
-      simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super in
   let uerror () = TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
@@ -788,7 +786,6 @@ and simplify_subtype
     when (coll = SN.Collections.cTraversable ||
           coll = SN.Rx.cTraversable ||
           coll = SN.Collections.cContainer) ->
-    let r = fst ety_sub in
       (match akind with
         (* array <: Traversable<t> and emptyarray <: Traversable<t> for any t *)
       | AKany -> valid ()
@@ -804,8 +801,6 @@ and simplify_subtype
       | AKdarray (_, tv)
       | AKvarray_or_darray tv
       | AKmap (_, tv) -> simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super env
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
     )
   | Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super])
     when (coll = SN.Collections.cKeyedTraversable
@@ -831,8 +826,6 @@ and simplify_subtype
         env |>
         simplify_subtype ~seen_generic_params ~deep ~this_ty tk tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
       )
   | Tarraykind _, Tclass _ -> invalid ()
   | Tabstract (AKdependent _, Some ty), Tclass _ ->
@@ -868,17 +861,6 @@ and simplify_subtype
     | AKany, _ ->
       let safe_array = TypecheckerOptions.safe_array (Env.get_tcopt env) in
       if safe_array then invalid () else valid ()
-
-    | AKshape fdm, (
-        AKvarray _
-      | AKvec _
-      | AKdarray _
-      | AKvarray_or_darray _
-      | AKmap _) ->
-      Typing_arrays.fold_akshape_as_akmap_with_acc
-       begin fun env acc ty ->
-         (env, acc) &&& simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super
-       end env TL.valid r fdm
 
     (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
@@ -2367,10 +2349,6 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
     | AKdarray (ty1, ty2) | AKmap (ty1, ty2) ->
       let env = set_tyvar_variance ~variance ~tyvars env ty1 in
       set_tyvar_variance ~variance ~tyvars env ty2
-    | AKshape m ->
-      Nast.ShapeMap.fold begin fun _ (ty1, ty2) env ->
-        let env = set_tyvar_variance ~variance ~tyvars env ty1 in
-        set_tyvar_variance ~variance ~tyvars env ty2 end m env
     end
 
 and set_tyvar_variance_list ~variancel ~tyvars env tyl =

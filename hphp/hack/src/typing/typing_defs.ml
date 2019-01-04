@@ -279,9 +279,6 @@ and array_kind =
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty
-  (* Array "used like a shape" - initialized and indexed with keys that are
-   * only string/class constants *)
-  | AKshape of (locl ty * locl ty) Nast.ShapeMap.t
 
 (* An abstract type derived from either a newtype, a type parameter, or some
  * dependent type
@@ -704,7 +701,6 @@ let array_kind_con_ordinal ak =
   | AKvarray_or_darray _ -> 4
   | AKmap _ -> 5
   | AKempty -> 6
-  | AKshape _ -> 7
 
 let abstract_kind_con_ordinal ak =
   match ak with
@@ -824,12 +820,6 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
       | AKvarray_or_darray ty1, AKvarray_or_darray ty2
       | AKvec ty1, AKvec ty2 ->
         ty_compare ty1 ty2
-      | AKshape fields1, AKshape fields2 ->
-        List.compare (fun (k1, (v1', v1'')) (k2, (v2', v2'')) ->
-          match compare k1 k2 with
-          | 0 -> tyl_compare [v1'; v1''] [v2'; v2'']
-          | n -> n)
-          (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
       | _ ->
         array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
 

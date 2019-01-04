@@ -730,11 +730,6 @@ end = struct
         | AKmap (tk, tv) -> merge
             (this#on_type acc tk)
             (this#on_type acc tv)
-        | AKshape fdm -> ShapeMap.fold (fun _ (tk, tv) acc ->
-            merge
-              (this#on_type acc tk)
-              (this#on_type acc tv)
-          ) fdm acc
     end
   let check_why ty = visitor#on_type None ty
 

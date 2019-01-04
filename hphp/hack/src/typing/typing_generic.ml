@@ -46,8 +46,6 @@ end = struct
           | AKvec tv -> ty tv
           | AKdarray (tk, tv)
           | AKmap (tk, tv) -> ty tk; ty tv
-          | AKshape fdm ->
-              ShapeMap.iter (fun _ (tk, tv) -> ty tk; ty tv) fdm
         end
       | Tvar _ ->
         if TypecheckerOptions.new_inference tcopt

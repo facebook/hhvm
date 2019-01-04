@@ -96,25 +96,25 @@ File "arrays.php", line 15, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 95, characters 20-21:
 Invalid argument (Typing[4110])
-  File "arrays.php", line 187, characters 33-35:
+  File "arrays.php", line 185, characters 33-35:
   This is an int
   File "arrays.php", line 89, characters 17-18:
   It is incompatible with a string
 File "arrays.php", line 96, characters 23-24:
 Invalid argument (Typing[4110])
-  File "arrays.php", line 188, characters 36-41:
+  File "arrays.php", line 186, characters 36-41:
   This is a string
   File "arrays.php", line 87, characters 17-17:
   It is incompatible with an int
 File "arrays.php", line 120, characters 20-21:
 Invalid argument (Typing[4110])
-  File "arrays.php", line 187, characters 33-35:
+  File "arrays.php", line 185, characters 33-35:
   This is an int
   File "arrays.php", line 114, characters 11-12:
   It is incompatible with a string
 File "arrays.php", line 121, characters 23-24:
 Invalid argument (Typing[4110])
-  File "arrays.php", line 188, characters 36-41:
+  File "arrays.php", line 186, characters 36-41:
   This is a string
   File "arrays.php", line 112, characters 17-17:
   It is incompatible with an int

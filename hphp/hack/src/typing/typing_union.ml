@@ -306,21 +306,6 @@ and union_arraykind env ak1 ak2 =
   | AKvarray_or_darray ty1, AKvarray_or_darray ty2 ->
     let env, ty = union env ty1 ty2 in
     env, AKvarray_or_darray ty
-  | AKshape fdm1, AKshape fdm2 ->
-    let union env _k typairopt1 typairopt2 = match typairopt1, typairopt2 with
-      | None, None -> env, None
-      | Some typair, None | None, Some typair -> env, Some typair
-      | Some (tk1, tv1), Some (tk2, tv2) ->
-        let env, tk = union env tk1 tk2 in
-        let env, tv = union env tv1 tv2 in
-        env, Some (tk, tv) in
-    let env, fdm = Nast.ShapeMap.merge_env env fdm1 fdm2 ~combine:union in
-    env, AKshape fdm
-  | AKshape fdm, ak
-  | ak, AKshape fdm ->
-    Nast.ShapeMap.fold_env env (fun env _k (tk, tv) akacc ->
-      let ak = AKdarray (tk, tv) in
-      union_arraykind env akacc ak) fdm ak
   | _ -> raise Dont_unify
 
 and union_funs env fty1 fty2 =

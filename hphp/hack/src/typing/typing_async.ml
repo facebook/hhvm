@@ -99,9 +99,6 @@ let gena (env, tyvars) p ty =
   | r, Tarraykind AKdarray (ty1, ty2) ->
     let acc, ty2 = overload_extract_from_awaitable acc p ty2 in
     acc, (r, Tarraykind (AKdarray (ty1, ty2)))
-  | r, Tarraykind AKshape fdm ->
-    let acc, fdm = overload_extract_from_awaitable_shape acc p fdm in
-    acc, (r, Tarraykind (AKshape fdm))
   | r, Ttuple tyl ->
     let acc, tyl =
       overload_extract_from_awaitable_list acc p tyl in
@@ -170,12 +167,6 @@ let rec gen_array_rec ((env,_tyvars) as acc) p ty =
   | r, Tarraykind (AKdarray (kty, vty)) ->
     let acc, vty = is_array acc vty in
     acc, (r, Tarraykind (AKdarray(kty, vty)))
-  | r, Tarraykind (AKshape fdm) ->
-    let acc, fdm = Nast.ShapeMap.map_env begin fun acc _key (tk, tv) ->
-      let acc, tv = is_array acc tv in
-      acc, (tk, tv)
-    end acc fdm in
-    acc, (r, Tarraykind (AKshape fdm))
   | _, Ttuple tyl -> gen_array_va_rec acc p tyl
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdynamic

@@ -74,8 +74,6 @@ and occurs_array env n ak =
   | AKdarray (t1, t2)
   | AKmap(t1,t2) -> occurs env n t1 || occurs env n t2
   | AKempty -> false
-  | AKshape sm -> Nast.ShapeMap.exists
-      (fun _ (t1,t2) -> occurs env n t1 || occurs env n t2) sm
 and occurs_ft env n ft =
     occurs_params env n ft.ft_params || occurs env n ft.ft_ret
 and occurs_params env n p =

@@ -87,8 +87,6 @@ let expand_ty env ty =
     | AKvarray_or_darray ty -> AKvarray_or_darray (exp_ty ty)
     | AKmap (ty1, ty2) -> AKmap (exp_ty ty1, exp_ty ty2)
     | AKempty -> AKempty
-    | AKshape s -> AKshape (Nast.ShapeMap.map
-      (fun (ty1, ty2) -> (exp_ty ty1, exp_ty ty2)) s)
 
   and exp_abstract_kind ak =
     match ak with

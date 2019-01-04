@@ -70,8 +70,6 @@ module ErrorString = struct
                          -> darray
     | Tarraykind (AKmap (x, y))
                          -> array (Some x, Some y)
-    | Tarraykind (AKshape _)
-                         -> "an array (used like a shape)"
     | Ttuple l           -> "a tuple of size " ^ string_of_int (List.length l)
     | Tmixed             -> "a mixed value"
     | Tnonnull           -> "a nonnull value"
@@ -339,15 +337,6 @@ module Full = struct
     | Tarray (Some x, Some y) -> list "array<" k [x; y] ">"
     | Tarraykind AKdarray (x, y) -> list "darray<" k [x; y] ">"
     | Tarraykind (AKmap (x, y)) -> list "array<" k [x; y] ">"
-    | Tarraykind (AKshape fdm) ->
-      let f_field (shape_map_key, (_tk, tv)) = Concat [
-          to_doc (Env.get_shape_field_name shape_map_key);
-          Space;
-          text "=>";
-          Space;
-          k tv
-        ] in
-      list "shape-like-array(" id (shape_map fdm f_field) ")"
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
@@ -739,12 +728,6 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     typ v.sft_ty in
   let fields fl =
     ["fields", JSON_Array (List.map fl make_field)] in
-  let shape_like_array_field (k, (_, v)) =
-    obj @@
-    name (Typing_env.get_shape_field_name k) @
-    typ v in
-  let shape_like_array_fields fl =
-    ["fields", JSON_Array (List.map fl shape_like_array_field)] in
   let path ids =
     ["path", JSON_Array (List.map ids (fun id -> JSON_String id))] in
   let as_type opt_ty =
@@ -849,9 +832,6 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "array" @ empty false @ args [ty]
   | Tarraykind (AKmap (ty1, ty2)) ->
     obj @@ kind "array" @ empty false @ args [ty1; ty2]
-  | Tarraykind (AKshape fl) ->
-    obj @@ kind "shape" @ is_array true
-      @ shape_like_array_fields (Nast.ShapeMap.elements fl)
   | Tarraykind AKempty ->
     obj @@ kind "array" @ empty true @ args []
 

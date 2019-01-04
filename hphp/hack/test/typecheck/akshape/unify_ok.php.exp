@@ -1,6 +1,0 @@
-File "unify_ok.php", line 14, characters 12-20:
-Invalid argument (Typing[4110])
-File "unify_ok.php", line 3, characters 19-21:
-This is an int
-File "unify_ok.php", line 11, characters 28-32:
-It is incompatible with a string

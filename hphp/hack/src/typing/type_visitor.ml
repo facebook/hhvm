@@ -104,12 +104,6 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | AKmap (tk, tv) ->
       let acc = this#on_type acc tk in
       this#on_type acc tv
-    | AKshape fdm ->
-      let f _ (tk, tv) acc = begin
-        let acc = this#on_type acc tk in
-        this#on_type acc tv
-      end in
-      Nast.ShapeMap.fold f fdm acc
   method on_type: type a. _ -> a ty -> _ = fun acc (r, x) ->
     match x with
     | Tany -> this#on_tany acc r

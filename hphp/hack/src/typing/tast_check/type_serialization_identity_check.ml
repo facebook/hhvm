@@ -123,10 +123,6 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
         ft_returns_void_to_rx = false;
       }
 
-    | Tarraykind (AKshape _shape_fields) ->
-      failwith
-        "Tarraykind for shapes not currently serialized; should not get here"
-
     | Tshape (shape_fields_known, shape_fields) ->
       let shape_fields_known = match shape_fields_known with
         | FieldsFullyKnown -> FieldsFullyKnown

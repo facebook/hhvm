@@ -1345,12 +1345,6 @@ and expr_
     let env, supertype, tyvars = compute_supertype ~expected env tys in
     env, exprs, supertype, tyvars in
 
-  let shape_and_tuple_arrays_enabled =
-    not @@
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_tcopt env)
-        TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
-
   let subtype_arraykey ~class_name ~key_pos env key_ty =
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict key_pos) in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
@@ -1390,19 +1384,6 @@ and expr_
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)
     make_result env p (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
-  | Array l
-    (* TODO: use expected type to determine expected element type *)
-    when Typing_arrays.is_shape_like_array env l &&
-      shape_and_tuple_arrays_enabled ->
-      let env, (tafl, fdm) = List.fold_left_env env l
-        ~init:([], ShapeMap.empty)
-        ~f:begin fun env (tafl,fdm) x ->
-          let env, taf, (key, value) = akshape_field env x in
-          env, (taf::tafl, Nast.ShapeMap.add key value fdm)
-        end in
-      make_result env p (T.Array(List.rev tafl))
-        (Reason.Rwitness p, Tarraykind (AKshape fdm))
-
   | Array (x :: rl as l) ->
       (* True if all fields are values, or all fields are key => value *)
       let fields_consistent = check_consistent_fields x rl in
@@ -3322,23 +3303,6 @@ and array_field_key ~expected env = function
       env, (T.make_typed_expr p ty T.Any, ty)
   | Nast.AFkvalue (x, _) ->
       array_value ~expected env x
-
-and akshape_field env = function
-  | Nast.AFkvalue (k, v) ->
-      let env, tek, tk = expr env k in
-      let env, tk = Typing_env.unbind env tk in
-      let env, tk = TUtils.unresolved env tk in
-      let env, tev, tv = expr env v in
-      let env, tv = Typing_env.unbind env tv in
-      let env, tv = TUtils.unresolved env tv in
-      let field_name =
-        match TUtils.shape_field_name env k with
-        | Some field_name -> field_name
-        | None -> assert false in  (* Typing_arrays.is_shape_like_array
-                                    * should have prevented this *)
-      env, T.AFkvalue (tek, tev), (field_name, (tk, tv))
-  | Nast.AFvalue _ -> assert false (* Typing_arrays.is_shape_like_array
-                                    * should have prevented this *)
 
 and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
@@ -6637,9 +6601,8 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
     make_call ~tyvars env te [] tel tuel ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
-  let access_type = Typing_arrays.static_array_access env e2 in
   let type_mapper =
-    Typing_arrays.update_array_type p access_type in
+    Typing_arrays.update_array_type p ~is_map:(Option.is_some e2) in
   match valkind with
     | `lvalue | `lvalue_subexpr ->
       let env, te1, ty1 =

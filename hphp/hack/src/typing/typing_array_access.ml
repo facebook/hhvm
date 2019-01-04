@@ -165,26 +165,6 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let env, ty2 = Env.unbind env ty2 in
       let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
       acc, v
-  | Tarraykind (AKshape  _ as akind) ->
-      let key = Typing_arrays.static_array_access env (Some e2) in
-      let (env, tyvars), result = match key, akind with
-        | Typing_arrays.AKshape_key field_name, AKshape fdm ->
-            begin match ShapeMap.get field_name fdm with
-              | Some (k, v) ->
-                  let env, ty2 = Env.unbind env ty2 in
-                  let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
-                  acc, Some v
-              | None -> acc, None
-            end
-        | _ -> acc, None in
-      begin match result with
-        | Some ty -> (env, tyvars), ty
-        | None ->
-          (* Key is dynamic, or static and not in the array - treat it as
-            regular map or vec like array *)
-          let env, ty1 = Typing_arrays.downcast_aktypes env ety1 in
-          array_get is_lvalue p (env, tyvars) ty1 e2 ty2
-      end
   | Terr -> acc, err_witness env p
   | Tdynamic -> acc, ety1
   | Tany | Tarraykind (AKany | AKempty) ->
@@ -479,22 +459,6 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let env, tk' = Typing_union.union env tk tkey in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKmap (tk', tv'))), tv')
-  | Tarraykind (AKshape _ as akind) ->
-    let access_type = Typing_arrays.static_array_access env (Some key) in
-    let fallback () =
-      let env, ty1 = Typing_arrays.downcast_aktypes env ety1 in
-      assign_array_get pos ur env ty1 key tkey ty2 in
-    begin match access_type, akind with
-    | Typing_arrays.AKshape_key field_name, AKshape fdm ->
-      begin match ShapeMap.get field_name fdm with
-      | Some (tk, _) ->
-        let env, tk' = Typing_union.union env tk tkey in
-        let fdm' = ShapeMap.add field_name (tk', ty2) fdm in
-        env, ((fst ety1, Tarraykind (AKshape fdm')), ty2)
-      | None -> fallback ()
-      end
-    | _ -> fallback ()
-    end
   | Terr -> error
   | Tdynamic ->
     let tv = Reason.Rwitness pos, Tdynamic in

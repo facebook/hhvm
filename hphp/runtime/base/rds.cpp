@@ -839,7 +839,7 @@ void threadInit(bool shouldRegister) {
 
 void threadExit(bool shouldUnregister) {
   if (shouldUnregister) {
-    local::fini();
+    local::fini(true);
     Guard g(s_tlBaseListLock);
     auto it = std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base);
     if (it != end(s_tlBaseList)) {

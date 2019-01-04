@@ -196,7 +196,7 @@ void RDSInit();
 // init is called to allocate and initialize the rdslocals.
 void init();
 // fini deallocates the rdslocals.
-void fini();
+void fini(bool inrds = false);
 
 template<typename Fn>
 void iterateRoots(Fn fn) {

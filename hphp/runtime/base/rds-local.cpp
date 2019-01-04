@@ -79,18 +79,24 @@ void init() {
   detail::iterate([](detail::RDSLocalNode* p) { p->init(); });
 }
 
-void fini() {
+void fini(bool inrds) {
   // This may be called twice on threads that create a malloced rdslocal area,
   // and then initialize a full RDS segment.  As the RDS segment is detroyed
   // Fini is called, and it is called again from the context that created the
   // malloced area.
   if (!detail::rl_hotSection.rdslocal_base) return;
+
+  if (inrds != (tl_base &&
+                std::less_equal<void>()(localSection().cbegin(),
+                                        detail::rl_hotSection.rdslocal_base)
+                && std::less_equal<void>()(
+                  (const char*)detail::rl_hotSection.rdslocal_base
+                  + detail::s_usedbytes, localSection().cend()))) {
+    // There will be another call to deallocate the rds local section.
+    return;
+  }
   detail::iterate([](detail::RDSLocalNode* p) { p->fini(); });
-  if (!tl_base ||
-      !(localSection().cbegin() <=
-          (const char*)detail::rl_hotSection.rdslocal_base
-        && (const char*)detail::rl_hotSection.rdslocal_base
-           + detail::s_usedbytes <= localSection().cend())) {
+  if (!inrds) {
     free(detail::rl_hotSection.rdslocal_base);
   }
   detail::rl_hotSection.rdslocal_base = nullptr;

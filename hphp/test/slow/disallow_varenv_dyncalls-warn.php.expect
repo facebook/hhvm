@@ -143,10 +143,8 @@ test_extract_walk() done
 Running test_extract_errors() #1....
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 87
 extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 88
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 89
 extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 90
@@ -157,10 +155,8 @@ test_extract_errors() done
 Running test_extract_errors() #2....
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 87
 extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 88
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 89
 extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 90

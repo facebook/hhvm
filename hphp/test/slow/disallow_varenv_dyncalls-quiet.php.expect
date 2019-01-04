@@ -120,18 +120,14 @@ string(3) "201"
 test_extract_walk() done
 Running test_extract_errors() #1....
 extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
 extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
 test_extract_errors() done
 Running test_extract_errors() #2....
 extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 88
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 by reference, but the call was not annotated with '&' in disallow_varenv_dyncalls.inc at line 89
 extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
 extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92

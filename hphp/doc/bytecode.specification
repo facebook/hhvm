@@ -2304,8 +2304,8 @@ FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
   Check whether reffiness of parameters 0..N-1 of the function associated with
   the current FPI matches the corresponding reffiness values specified by the
-  vector %1 of size N. Throws an exception if there is a mismatch. Only used
-  when ThrowOnCallByRefAnnotationMismatch is enabled.
+  vector %1 of size N. Throws an exception if there is a mismatch. This opcode
+  is not used if ThrowOnCallByRefAnnotationMismatch is disabled.
 
 FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
 

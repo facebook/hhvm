@@ -12,6 +12,3 @@ $c = new C2;
 $c(&$x);
 var_dump($x);
  // $x = 1
-call_user_func_array($c, array(&$x));
-var_dump($x);
- // $x = 2

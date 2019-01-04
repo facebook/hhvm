@@ -4,26 +4,6 @@ string(4) "abcd"
 string(4) "abcd"
 int(456)
 int(456)
-
-Warning: extract() expects parameter 1 by reference, but the call was not annotated with '&'
-array(3) {
-  ["var1"]=>
-  int(123)
-  ["var2"]=>
-  int(456)
-  ["var3"]=>
-  int(789)
-}
-
-Warning: extract() expects parameter 1 by reference, but the call was not annotated with '&'
-array(3) {
-  ["var1"]=>
-  int(123)
-  ["var2"]=>
-  int(456)
-  ["var3"]=>
-  int(789)
-}
 array(1) {
   [0]=>
   string(12) "func_get_arg"

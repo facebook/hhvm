@@ -1,6 +1,2 @@
 int(0)
 int(1)
-
-Warning: C2::__invoke() expects parameter 1 by reference, but the call was not annotated with '&' in %s/765.php on line 15
-int(1)
-int(2)

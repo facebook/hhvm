@@ -9,24 +9,14 @@ string(1) "a"
 HI
 string(1) "a"
 HI
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/533.php on line 19
 NULL
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/533.php on line 20
 int(0)
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/533.php on line 21
 
 Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 8
 NULL
 
 Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 9
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/533.php on line 22
 string(1) "a"
 HI
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/533.php on line 23
 string(1) "a"
 HI

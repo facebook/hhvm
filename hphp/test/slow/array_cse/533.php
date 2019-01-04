@@ -11,14 +11,14 @@ function g(&$x, $y) {
 
 <<__EntryPoint>>
 function main_533() {
-f(null, 0);
-f(array(0), 0);
-f(array(0), 'noidx');
-f('abc', 0);
-f('abc', 'noidx');
-g($x = null, 0);
-g($x = array(0), 0);
-g($x = array(0), 'noidx');
-g($x = 'abc', 0);
-g($x = 'abc', 'noidx');
+  f(null, 0);
+  f(array(0), 0);
+  f(array(0), 'noidx');
+  f('abc', 0);
+  f('abc', 'noidx');
+  $x = null; g(&$x, 0);
+  $x = array(0); g(&$x, 0);
+  $x = array(0); g(&$x, 'noidx');
+  $x = 'abc'; g(&$x, 0);
+  $x = 'abc'; g(&$x, 'noidx');
 }

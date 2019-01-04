@@ -1,2 +1,0 @@
-
-Warning: foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s/test/slow/compilation/1319.php on line 12

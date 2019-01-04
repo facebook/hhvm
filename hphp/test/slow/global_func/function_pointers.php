@@ -70,7 +70,11 @@ var_dump($caller(new C(), 1337));
 $caller = meth_caller(C::class, 'ref');
 $x = 1;
 var_dump($caller(new C()));
-var_dump($caller(new C(), $x));
+try {
+  var_dump($caller(new C(), $x));
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}
 
 $c = new C();
 $meth = inst_meth($c, 'meth');

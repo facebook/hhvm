@@ -286,7 +286,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   $tries = 0;
   while ($client === false) {
     try {
-      $client = @stream_socket_client($uri, $errno, $errorMessage);
+      $client = @stream_socket_client($uri, &$errno, &$errorMessage);
     } catch (Exception $e) {
     }
     if ($client === false && $tries > 5) {

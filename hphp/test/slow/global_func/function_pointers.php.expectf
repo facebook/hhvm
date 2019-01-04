@@ -25,9 +25,7 @@ object(HH\Vector)#8 (2) {
 string(12) "Hello World!"
 int(1337)
 int(0)
-
-Warning: C::ref() expects parameter 1 by reference, but the call was not annotated with '&' in %s/function_pointers.php on line 73
-int(0)
+string(82) "C::ref() expects parameter 1 by reference, but the call was not annotated with '&'"
 string(9) "inst_meth"
 string(4) "meth"
 function(foo)fun('foo')function(foo)

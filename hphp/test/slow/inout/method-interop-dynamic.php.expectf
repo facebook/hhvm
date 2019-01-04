@@ -1,76 +1,40 @@
 foo, main
-
-Warning: Herp::foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 38
-foo, main
 foo, main
 int(42)
 int(42)
-int(42)
-
-Warning: Herp::bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 45
-bar, main
 bar, main
 bar, main
 int(9)
 int(9)
-int(9)
 Hello, world!
 Hello, world!
-Hello, world!
-fizz, main
-
-Warning: Herp::fizz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 58
 fizz, main
 fizz, main
 int(24)
 int(24)
-int(24)
-buzz, main
-
-Warning: Herp::buzz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 66
 buzz, main
 buzz, main
-int(19)
 int(19)
 int(19)
 FIZZ, BUZZ
 FIZZ, BUZZ
-FIZZ, BUZZ
-fizz, main
-
-Warning: Herp::fizz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 78
 fizz, main
 fizz, main
 int(24)
 int(24)
-int(24)
-buzz, main
-
-Warning: Herp::buzz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 86
 buzz, main
 buzz, main
-int(19)
 int(19)
 int(19)
 FIZZ, BUZZ
 FIZZ, BUZZ
-FIZZ, BUZZ
-fizz, main
-
-Warning: Herp::fizz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 98
 fizz, main
 fizz, main
 int(24)
 int(24)
-int(24)
-buzz, main
-
-Warning: Herp::buzz() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 106
 buzz, main
 buzz, main
 int(19)
 int(19)
-int(19)
-FIZZ, BUZZ
 FIZZ, BUZZ
 FIZZ, BUZZ

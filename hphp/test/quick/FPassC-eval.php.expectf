@@ -1,4 +1,0 @@
-
-Warning: g() expects parameter 1 by reference, but the call was not annotated with '&' in %s/FPassC-eval.php on line 15
-NULL
-NULL

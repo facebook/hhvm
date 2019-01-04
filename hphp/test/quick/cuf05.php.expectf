@@ -10,19 +10,8 @@ array(1) {
   &int(1)
 }
 
-Warning: bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 11
-int(1)
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-
-Warning: Invalid argument: function: method 'baz' not found in %s on line 16
+Warning: Invalid argument: function: method 'baz' not found in %s on line 11
 NULL
 
-Warning: Invalid argument: function: method 'baz' not found in %s on line 17
+Warning: Invalid argument: function: method 'baz' not found in %s on line 12
 NULL

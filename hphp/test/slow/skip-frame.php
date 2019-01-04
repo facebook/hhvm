@@ -31,13 +31,6 @@ function all_vars() {
   array_map($wrapper[0], $wrapper[1], $wrapper[2]);
 }
 
-function compact_extract() {
-  $wrapper = make_wrapper('extract(["var1" => 123, "var2" => 456, "var3" => 789])');
-  array_map($wrapper[0], $wrapper[1], $wrapper[2]);
-  $wrapper = make_wrapper('var_dump(compact("var1", "var2", "var3"))');
-  array_map($wrapper[0], $wrapper[1], $wrapper[2]);
-}
-
 function change_local_method($x = 123) {
   $var = [$x, $x, $x];
   $v = Vector{'($var = 1234) || true'};
@@ -69,7 +62,6 @@ function main_skip_frame() {
 run('change_local');
 run('add_local');
 run('all_vars');
-run('compact_extract');
 run('get_arg');
 run('change_local_method');
 run('all_vars_method');

@@ -235,9 +235,9 @@ class Client
     {
         if (!$this->_sock) {
             if ($this->_persistentSocket) {
-                $this->_sock = pfsockopen($this->_host, $this->_port, $errno, $errstr, $this->_connectTimeout/1000);
+                $this->_sock = pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
             } else {
-                $this->_sock = fsockopen($this->_host, $this->_port, $errno, $errstr, $this->_connectTimeout/1000);
+                $this->_sock = fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
             }
 
             if (!$this->_sock) {
@@ -422,12 +422,12 @@ class Client
 
     /**
      * Execute a request to the FastCGI application asyncronously
-     * 
+     *
      * This sends request to application and returns the assigned ID for that request.
      *
      * You should keep this id for later use with wait_for_response(). Ids are chosen randomly
      * rather than seqentially to guard against false-positives when using persistent sockets.
-     * In that case it is possible that a delayed response to a request made by a previous script 
+     * In that case it is possible that a delayed response to a request made by a previous script
      * invocation comes back on this socket and is mistaken for response to request made with same ID
      * during this request.
      *
@@ -487,7 +487,7 @@ class Client
 
     /**
      * Blocking call that waits for response to specific request
-     * 
+     *
      * @param Integer $requestId
      * @param Integer $timeoutMs [optional] the number of milliseconds to wait. Defaults to the ReadWriteTimeout value set.
      * @return string  response body
@@ -527,7 +527,7 @@ class Client
             }
             if ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
-                if ($resp['requestId'] == $requestId) { 
+                if ($resp['requestId'] == $requestId) {
                     break;
                 }
             }

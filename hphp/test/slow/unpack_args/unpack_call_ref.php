@@ -67,16 +67,10 @@ function has_ref(
   $p63,
   &$p_that_happens_to_be_by_reference,
 ) {
-  var_dump(func_get_args());
 }
 
+<<__EntryPoint>>
 function main() {
   $args = range(0, 64);
   has_ref(...$args);
-}
-
-
-<<__EntryPoint>>
-function main_unpack_call_ref() {
-main();
 }

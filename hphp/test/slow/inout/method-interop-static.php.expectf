@@ -1,38 +1,20 @@
 foo, main
-
-Warning: Herp::foo() expects parameter 1 by reference, but the call was not annotated with '&' in %s/method-interop-static.php on line 40
-foo, main
 foo, main
 int(42)
 int(42)
-int(42)
-
-Warning: Herp::bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s/method-interop-static.php on line 47
-bar, main
 bar, main
 bar, main
 int(9)
 int(9)
-int(9)
 Hello, world!
 Hello, world!
-Hello, world!
-fizz, main
-
-Warning: Herp::fizz() expects parameter 1 by reference, but the call was not annotated with '&' in %s/method-interop-static.php on line 60
 fizz, main
 fizz, main
 int(24)
 int(24)
-int(24)
-buzz, main
-
-Warning: Herp::buzz() expects parameter 1 by reference, but the call was not annotated with '&' in %s/method-interop-static.php on line 68
 buzz, main
 buzz, main
 int(19)
 int(19)
-int(19)
-FIZZ, BUZZ
 FIZZ, BUZZ
 FIZZ, BUZZ

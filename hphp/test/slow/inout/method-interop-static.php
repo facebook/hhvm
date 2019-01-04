@@ -30,52 +30,37 @@ class Herp {
   }
 }
 
+<<__EntryPoint>>
 function main() {
   $obj = new Herp;
 
   $a = null;
   $b = null;
-  $c = null;
   $g1 = $obj->foo(inout $a);
-  $g2 = $obj->foo($b);
-  $g3 = $obj->foo(&$c);
-  var_dump($a, $b, $c);
+  $g2 = $obj->foo(&$b);
+  var_dump($a, $b);
 
   $x = null;
   $y = null;
-  $z = null;
-  $h1 = $obj->bar($x);
-  $h2 = $obj->bar(&$y);
-  $h3 = $obj->bar(inout $z);
-  var_dump($x, $y, $z);
+  $h1 = $obj->bar(&$x);
+  $h2 = $obj->bar(inout $y);
+  var_dump($x, $y);
 
   echo "$g1, $h1\n";
-  echo "$g2, $h2\n";
   echo "$g2, $h2\n";
 
   $q = null;
   $r = null;
-  $s = null;
   $f1 = Herp::fizz(inout $q);
-  $f2 = Herp::fizz($r);
-  $f3 = Herp::fizz(&$s);
-  var_dump($q, $r, $s);
+  $f2 = Herp::fizz(&$r);
+  var_dump($q, $r);
 
   $t = null;
   $u = null;
-  $v = null;
   $k1 = Herp::buzz(inout $t);
-  $k2 = Herp::buzz($u);
-  $k3 = Herp::buzz(&$v);
-  var_dump($t, $u, $v);
+  $k2 = Herp::buzz(&$u);
+  var_dump($t, $u);
 
   echo "$f1, $k1\n";
   echo "$f2, $k2\n";
-  echo "$f2, $k2\n";
-}
-
-
-<<__EntryPoint>>
-function main_method_interop_static() {
-main();
 }

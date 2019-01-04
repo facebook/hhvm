@@ -85,8 +85,8 @@ function test_extract_walk() {
 function test_extract_errors() {
   $f = 'extract';
   $f();
-  $f(123);
-  $f('foo', 'foo', 'foo', 'foo');
+  $tmp = 123; $f(&$tmp);
+  $tmp = 'foo'; $f(&$tmp, 'foo', 'foo', 'foo');
   array_map($f, ['foo']);
   $args = ['foo'];
   array_walk(&$args, $f);

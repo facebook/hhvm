@@ -1,1 +1,1 @@
--vEval.ThrowOnCallByRefAnnotationMismatch=1 -vEval.EnableHipHopSyntax=1
+-vEval.EnableHipHopSyntax=1

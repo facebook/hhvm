@@ -1,0 +1,4 @@
+Warning: test() expects exactly 1 parameter, 0 given in %s/maybe-mixed-tc.php on line %d
+
+Notice: Undefined variable: c in %s/maybe-mixed-tc.php on line %d
+NULL

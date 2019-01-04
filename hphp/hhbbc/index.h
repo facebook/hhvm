@@ -525,12 +525,6 @@ struct Index {
   ResolvedInfo resolve_type_name(SString name) const;
 
   /*
-   * Try to resolve name in the given context. Follows TypeAliases.
-   */
-  folly::Optional<Type> resolve_class_or_type_alias(
-    const Context& ctx, SString name, const Type& candidate) const;
-
-  /*
    * Resolve a closure class.
    *
    * Returns both a resolved Class, and the actual php::Class for the
@@ -988,7 +982,16 @@ private:
   Type get_type_for_constraint(Context,
                                const TypeConstraint&,
                                const Type&) const;
-  folly::Optional<Type> get_type_for_annotated_type(
+
+  struct ConstraintResolution;
+
+  /*
+   * Try to resolve name in the given context. Follows TypeAliases.
+   */
+  ConstraintResolution resolve_class_or_type_alias(
+      const Context& ctx, SString name, const Type& candidate) const;
+
+  ConstraintResolution get_type_for_annotated_type(
     Context ctx, AnnotType annot, bool nullable,
     SString name, const Type& candidate) const;
 

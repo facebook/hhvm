@@ -1,0 +1,3 @@
+<?hh
+
+type Disable = int;

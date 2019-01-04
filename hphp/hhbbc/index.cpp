@@ -4015,7 +4015,19 @@ Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
   return { AnnotType::Object, nullable, name };
 }
 
-folly::Optional<Type> Index::resolve_class_or_type_alias(
+struct Index::ConstraintResolution {
+  /* implicit */ ConstraintResolution(Type type)
+    : type{std::move(type)}
+    , maybeMixed{false} {}
+  ConstraintResolution(folly::Optional<Type> type, bool maybeMixed)
+    : type{std::move(type)}
+    , maybeMixed{maybeMixed} {}
+
+  folly::Optional<Type> type;
+  bool maybeMixed;
+};
+
+Index::ConstraintResolution Index::resolve_class_or_type_alias(
   const Context& ctx, SString name, const Type& candidate) const {
 
   auto const res = resolve_type_name(name);
@@ -4047,14 +4059,14 @@ folly::Optional<Type> Index::resolve_class_or_type_alias(
       return folly::none;
     };
 
-    if (res.value.isNull()) return folly::none;
+    if (res.value.isNull()) return ConstraintResolution{ folly::none, true };
 
     auto ty = res.value.right() ?
       resolve({ this, res.value.right() }) :
       resolve({ this, res.value.left() });
 
     if (ty && res.nullable) *ty = opt(std::move(*ty));
-    return ty;
+    return ConstraintResolution{ std::move(ty), false };
   }
 
   return get_type_for_annotated_type(ctx, res.type, res.nullable,
@@ -4414,24 +4426,28 @@ Type Index::get_type_for_constraint(Context ctx,
     if (tc.isSoft()) return TCell;
   }
 
-  if (auto const t = get_type_for_annotated_type(ctx,
-                                                 tc.type(),
-                                                 tc.isNullable(),
-                                                 tc.typeName(),
-                                                 candidate)) {
-    return *t;
-  }
-  return getSuperType ? TInitCell : TBottom;
+  auto const res = get_type_for_annotated_type(
+    ctx,
+    tc.type(),
+    tc.isNullable(),
+    tc.typeName(),
+    candidate
+  );
+  if (res.type) return *res.type;
+  // If the type constraint might be mixed, then the value could be
+  // uninit. Any other type constraint implies TInitCell.
+  return getSuperType ? (res.maybeMixed ? TCell : TInitCell) : TBottom;
 }
 
-folly::Optional<Type> Index::get_type_for_annotated_type(
+Index::ConstraintResolution Index::get_type_for_annotated_type(
   Context ctx, AnnotType annot, bool nullable,
   SString name, const Type& candidate) const {
 
   if (candidate.subtypeOf(BInitNull) && nullable) {
     return TInitNull;
   }
-  auto const mainType = [&]() -> const folly::Optional<Type> {
+
+  auto mainType = [&]() -> ConstraintResolution {
     switch (getAnnotMetaType(annot)) {
     case AnnotMetaType::Precise: {
       auto const dt = getAnnotDataType(annot);
@@ -4470,14 +4486,14 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
        * Here we handle "mixed", typevars, and some other ignored
        * typehints (ex. "(function(..): ..)" typehints).
        */
-      return TGen;
+      return { TCell, true };
     case AnnotMetaType::NoReturn:
       return TBottom;
     case AnnotMetaType::Nonnull:
       if (candidate.subtypeOf(BInitNull)) return TBottom;
       if (!candidate.couldBe(BInitNull))  return candidate;
       if (is_opt(candidate))              return unopt(candidate);
-      return folly::none;
+      break;
     case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return setctx(subObj(*s));
       break;
@@ -4517,11 +4533,13 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(BKeyset)) return TKeyset;
       break;
     }
-    return folly::none;
+    return ConstraintResolution{ folly::none, false };
   }();
 
-  if (!mainType || !nullable || mainType->couldBe(BInitNull)) return mainType;
-  return opt(*mainType);
+  if (mainType.type && nullable && !mainType.type->couldBe(BInitNull)) {
+    mainType.type = opt(*mainType.type);
+  }
+  return mainType;
 }
 
 Type Index::lookup_constraint(Context ctx,

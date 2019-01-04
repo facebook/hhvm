@@ -337,6 +337,18 @@ bool TypeConstraint::isMixedResolved() const {
   return tyAlias && tyAlias->type == AnnotType::Mixed;
 }
 
+bool TypeConstraint::maybeMixed() const {
+  if (!isCheckable()) return true;
+  // isCheckable() implies !isMixed(), so if its not an unresolved object here,
+  // we know it cannot be mixed.
+  if (!isObject() || isResolved()) return false;
+  if (auto const def = m_namedEntity->getCachedTypeAlias()) {
+    return def->type == AnnotType::Mixed;
+  }
+  // If its a known class, its definitely not mixed. Otherwise it might be.
+  return !Unit::lookupClass(m_namedEntity);
+}
+
 bool
 TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
   assertx(validForProp());

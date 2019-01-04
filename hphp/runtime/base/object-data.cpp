@@ -143,16 +143,18 @@ bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
 
   // If we're not hard enforcing, then the prop might contain anything.
   if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
-  return
-    !propDecl.typeConstraint.isCheckable() ||
-    propDecl.typeConstraint.isSoft() ||
-    (!(propDecl.attrs & AttrNoImplicitNullable)
-     && prop.type() == KindOfNull) ||
-    ((propDecl.attrs & AttrLateInit) &&
-     prop.type() == KindOfUninit) ||
-    (prop.type() != KindOfRef &&
-     prop.type() != KindOfUninit &&
-     propDecl.typeConstraint.assertCheck(prop));
+  if (!propDecl.typeConstraint.isCheckable() ||
+      propDecl.typeConstraint.isSoft()) return true;
+  if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
+    return true;
+  }
+  if (prop.type() == KindOfUninit && (propDecl.attrs & AttrLateInit)) {
+    return true;
+  }
+  if (prop.type() == KindOfRef || prop.type() == KindOfUninit) {
+    return propDecl.typeConstraint.maybeMixed();
+  }
+  return propDecl.typeConstraint.assertCheck(prop);
 }
 
 }

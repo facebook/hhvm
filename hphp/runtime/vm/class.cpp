@@ -1285,13 +1285,17 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
       }
 
       if (RuntimeOption::EvalCheckPropTypeHints > 2) {
-        auto const typeOk =
-          !decl.typeConstraint.isCheckable() ||
-          decl.typeConstraint.isSoft() ||
-          (!(decl.attrs & AttrNoImplicitNullable)
-           && sProp->m_type == KindOfNull) ||
-          (sProp->m_type != KindOfRef &&
-           decl.typeConstraint.assertCheck(sProp));
+        auto const typeOk = [&]{
+          if (!decl.typeConstraint.isCheckable() ||
+              decl.typeConstraint.isSoft()) return true;
+          if (sProp->m_type == KindOfNull &&
+              !(decl.attrs & AttrNoImplicitNullable)) {
+            return true;
+          }
+          return sProp->m_type == KindOfRef
+            ? decl.typeConstraint.maybeMixed()
+            : decl.typeConstraint.assertCheck(sProp);
+        }();
         always_assert(typeOk);
       }
     }

@@ -970,12 +970,12 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       // type-constraint. If we successfully resolved it, we'll never get here,
       // So if we're here and we have AnnotType::Object, we don't know what the
       // type-hint is, so be conservative.
-      case A::Object:     return TInitCell;
+      case A::Object:
+      case A::Mixed:      return TGen;
       case A::Resource:   return TRes;
       case A::Dict:       return TDict;
       case A::Vec:        return TVec;
       case A::Keyset:     return TKeyset;
-      case A::Mixed:      return TInitCell;
       case A::Nonnull:    return TInitCell - TInitNull;
       case A::Number:     return TInt | TDbl;
       case A::ArrayKey:   return TInt | TStr;
@@ -1027,7 +1027,8 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       return handleCls(cls);
     }
 
-    return TInitCell;
+    // It could be an alias to mixed so we might have refs
+    return TGen;
   }();
   if (tc.isNullable()) base |= TInitNull;
   return base;

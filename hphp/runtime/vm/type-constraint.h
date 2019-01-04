@@ -215,6 +215,14 @@ struct TypeConstraint {
   bool isMixedResolved() const;
 
   /*
+   * Check if this TypeConstraint may not require a runtime check (equivalent to
+   * mixed). If it returns false, it definitely is not. If it returns true, it
+   * still might not be (because of a type-alias for example). This will not
+   * invoke the autoloader.
+   */
+  bool maybeMixed() const;
+
+  /*
    * Predicates for various properties of the type constraint.
    */
   bool isNullable() const { return m_flags & Nullable; }

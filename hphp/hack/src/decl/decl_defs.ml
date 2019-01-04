@@ -70,6 +70,9 @@ type mro_element = {
     TParent, mro_source for TParent would be Parent for the linearization of T, but
     Trait for the linearization of C.) *)
   mro_source : source_type;
+  (* True if this element is included in the linearization because of a require
+     extends or require implements relationship. *)
+  mro_synthesized : bool;
 } [@@deriving show]
 
 type linearization = mro_element Sequence.t

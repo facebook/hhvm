@@ -1,0 +1,8 @@
+Linearization for class \A:
+[\A(child)]
+Linearization for class \T:
+[\T(child), \A<mixed>(req ext)]
+Linearization for class \B:
+[\B(child), \T(trait), \A<mixed>(trait, synthesized), \A<int>(parent)]
+Linearization for class \C:
+[\C(child), \B(parent), \T(parent), \A<mixed>(parent, synthesized), \A<int>(parent)]

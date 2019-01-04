@@ -66,7 +66,17 @@ let rec ancestor_linearization
   : linearization =
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
-  let lin = Sequence.map lin ~f:(fun c -> { c with mro_source = new_source }) in
+  let lin = Sequence.map lin ~f:begin fun c ->
+    let is_synthesized = function
+      | ReqImpl | ReqExtends -> true
+      | Child | Parent | Trait | XHPAttr | Interface -> false
+    in
+    let mro_synthesized = c.mro_synthesized || is_synthesized new_source in
+    { c with
+      mro_source = new_source;
+      mro_synthesized;
+    }
+  end in
   match Sequence.next lin with
   | None -> Sequence.empty
   | Some (c, rest) ->
@@ -89,7 +99,12 @@ let rec ancestor_linearization
 and linearize (env : env) (c : shallow_class) : linearization =
   let mro_name = snd c.sc_name in
   (* The first class doesn't have its type parameters filled in *)
-  let child = { mro_name; mro_params = []; mro_source = Child; } in
+  let child = {
+    mro_name;
+    mro_params = [];
+    mro_source = Child;
+    mro_synthesized = false;
+  } in
   let ancestors = List.concat [
     (* Add traits in backwards order *)
     List.map (List.rev c.sc_uses) (ancestor_from_ty Trait);

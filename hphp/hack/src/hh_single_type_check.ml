@@ -1144,10 +1144,13 @@ let handle_mode
               Typing_print.full tenv ty
             ) in
           let params = if params = [] then "" else "<"^(String.concat ~sep:"," params)^">" in
-           Printf.sprintf "%s%s(%s)"
-             name
-             params
-             (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
+          Printf.sprintf "%s%s(%s%s)"
+            name
+            params
+            (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
+            (match mro.Decl_defs.mro_synthesized, mro.Decl_defs.mro_source with
+            | false, _ | _, Decl_defs.(ReqImpl | ReqExtends) -> ""
+            | true, _ -> ", synthesized")
           )
           |> Sequence.to_list
         in

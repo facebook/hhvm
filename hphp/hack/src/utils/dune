@@ -137,6 +137,7 @@
   (libraries
     lwt
     lwt.unix
+    core_kernel
     utils_core)
   (preprocess
     (pps lwt_ppx)))

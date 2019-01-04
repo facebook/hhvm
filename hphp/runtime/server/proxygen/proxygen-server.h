@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_HTTP_SERVER_PROXYGEN_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_PROXYGEN_SERVER_H_
 
+#include "hphp/runtime/server/cert-reloader.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-worker.h"
@@ -235,18 +236,12 @@ struct ProxygenServer : Server,
 
   void reportShutdownStatus();
 
-  bool initialCertHandler(const std::string& server_name,
-                          const std::string& key_file,
-                          const std::string& cert_file,
-                          bool duplicate);
+  void resetSSLContextConfigs(
+    const std::vector<CertKeyPair>& paths);
 
-  bool dynamicCertHandler(const std::string& server_name,
-                          const std::string& key_file,
-                          const std::string& cert_file);
-
-  bool sniNoMatchHandler(const char *server_name);
-
-  wangle::SSLContextConfig createContextConfig();
+  wangle::SSLContextConfig createContextConfig(
+    const CertKeyPair& path,
+    bool isDefault=false);
 
   void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
@@ -268,6 +263,7 @@ struct ProxygenServer : Server,
   proxygen::AcceptorConfiguration m_httpsConfig;
   std::unique_ptr<HPHPSessionAcceptor> m_httpAcceptor;
   std::unique_ptr<HPHPSessionAcceptor> m_httpsAcceptor;
+  std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
   ResponseMessageQueue m_responseQueue;

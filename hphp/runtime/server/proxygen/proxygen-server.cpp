@@ -22,7 +22,6 @@
 #include "hphp/runtime/server/fake-transport.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
-#include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/crash-reporter.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -37,6 +36,8 @@
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace HPHP {
+
+constexpr auto kPollInterval = std::chrono::milliseconds(60000); // 60 sec
 
 using folly::SocketAddress;
 using folly::AsyncServerSocket;
@@ -323,14 +324,26 @@ void ProxygenServer::start() {
   m_httpAcceptor->init(m_httpServerSocket.get(), m_worker.getEventBase());
 
   if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
+
     if (!RuntimeOption::SSLCertificateDir.empty()) {
-      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
-                                 std::bind(&ProxygenServer::initialCertHandler,
-                                           this,
-                                           std::placeholders::_1,
-                                           std::placeholders::_2,
-                                           std::placeholders::_3,
-                                           std::placeholders::_4));
+      m_filePoller = std::make_unique<wangle::FilePoller>(
+          kPollInterval);
+
+      CertReloader::load(
+        RuntimeOption::SSLCertificateDir,
+        std::bind(&ProxygenServer::resetSSLContextConfigs,
+          this,
+          std::placeholders::_1));
+
+      m_filePoller->addFileToTrack(
+        RuntimeOption::SSLCertificateDir,
+        [this, dir = RuntimeOption::SSLCertificateDir] {
+          CertReloader::load(
+            dir,
+            std::bind(&ProxygenServer::resetSSLContextConfigs,
+              this,
+              std::placeholders::_1));
+        });
     }
   }
   if (m_httpsConfig.isSSL()) {
@@ -442,6 +455,10 @@ void ProxygenServer::stop() {
 
   if (m_credProcessor) {
     m_credProcessor->stop();
+  }
+
+  if (m_filePoller) {
+    m_filePoller->stop();
   }
 
   if (m_takeover_agent) {
@@ -674,38 +691,34 @@ int ProxygenServer::getLibEventConnectionCount() {
   return conns;
 }
 
-bool ProxygenServer::initialCertHandler(const std::string& /*server_name*/,
-                                        const std::string& key_file,
-                                        const std::string& cert_file,
-                                        bool duplicate) {
-  if (duplicate) {
-    return true;
+void ProxygenServer::resetSSLContextConfigs(
+  const std::vector<CertKeyPair>& paths) {
+  std::vector<wangle::SSLContextConfig> configs;
+  // always include the default cert/key
+  auto cfg = createContextConfig({
+        RuntimeOption::SSLCertificateFile,
+        RuntimeOption::SSLCertificateKeyFile}, true);
+  configs.emplace_back(cfg);
+
+  for (const auto& path : paths) {
+    configs.emplace_back(createContextConfig(path));
   }
-  try {
-    wangle::SSLContextConfig sslCtxConfig;
-    sslCtxConfig.clientVerification =
-      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
-    sslCtxConfig.setCertificate(cert_file, key_file, "");
-    sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
-    sslCtxConfig.sniNoMatchFn =
-      std::bind(&ProxygenServer::sniNoMatchHandler, this,
-                std::placeholders::_1);
-    sslCtxConfig.setNextProtocols({
-      std::begin(RuntimeOption::ServerNextProtocols),
-      std::end(RuntimeOption::ServerNextProtocols)
-    });
-    if (m_httpsConfig.isSSL()) {
-      m_httpsConfig.sslContextConfigs.emplace_back(sslCtxConfig);
-    }
-    if (m_httpConfig.isSSL()) {
-      m_httpConfig.sslContextConfigs.emplace_back(sslCtxConfig);
-    }
-    return true;
-  } catch (const std::exception& ex) {
-    Logger::Error(folly::to<std::string>(
-      "Invalid certificate file or key file: ", ex.what()));
-    return false;
-  }
+
+#ifdef FACEBOOK // proxygen update
+  auto evb = m_worker.getEventBase();
+  evb->runInEventBaseThread([this, configs] {
+      if (m_httpsAcceptor && m_httpsConfig.isSSL()) {
+        m_httpsAcceptor->getServerSocketConfig(
+          ).updateSSLContextConfigs(configs);
+        m_httpsAcceptor->resetSSLContextConfigs();
+      }
+      if (m_httpAcceptor && m_httpConfig.isSSL()) {
+        m_httpAcceptor->getServerSocketConfig(
+          ).updateSSLContextConfigs(configs);
+        m_httpAcceptor->resetSSLContextConfigs();
+      }
+  });
+#endif
 }
 
 void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
@@ -722,59 +735,6 @@ void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
   });
 }
 
-bool ProxygenServer::dynamicCertHandler(const std::string& /*server_name*/,
-                                        const std::string& key_file,
-                                        const std::string& cert_file) {
-  try {
-    wangle::SSLContextConfig sslCtxConfig;
-    sslCtxConfig.clientVerification =
-      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
-    sslCtxConfig.setCertificate(cert_file, key_file, "");
-    sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
-    sslCtxConfig.sniNoMatchFn =
-      std::bind(&ProxygenServer::sniNoMatchHandler, this,
-                std::placeholders::_1);
-    sslCtxConfig.setNextProtocols({
-      std::begin(RuntimeOption::ServerNextProtocols),
-      std::end(RuntimeOption::ServerNextProtocols)
-    });
-    if (m_httpsAcceptor) {
-      m_httpsAcceptor->addSSLContextConfig(sslCtxConfig);
-    }
-    if (m_httpConfig.isSSL()) {
-      m_httpAcceptor->addSSLContextConfig(sslCtxConfig);
-    }
-    return true;
-  } catch (const std::exception& ex) {
-    Logger::Error("Invalid certificate file or key file: %s", ex.what());
-    return false;
-  }
-}
-
-bool ProxygenServer::sniNoMatchHandler(const char *server_name) {
-  try {
-    if (!RuntimeOption::SSLCertificateDir.empty()) {
-      static std::mutex dynLoadMutex;
-      if (!dynLoadMutex.try_lock()) return false;
-      SCOPE_EXIT { dynLoadMutex.unlock(); };
-
-      // Reload all certs.
-      Logger::Warning("Reloading SSL certificates upon server name %s",
-                       server_name);
-      ServerNameIndication::load(RuntimeOption::SSLCertificateDir,
-                                 std::bind(&ProxygenServer::dynamicCertHandler,
-                                           this,
-                                           std::placeholders::_1,
-                                           std::placeholders::_2,
-                                           std::placeholders::_3));
-      return true;
-    }
-  } catch (const std::exception& ex) {
-    Logger::Error("Failed to reload certificate files or key files");
-  }
-  return false;
-}
-
 bool ProxygenServer::enableSSL(int port) {
   if (port == 0) {
     return false;
@@ -784,43 +744,44 @@ bool ProxygenServer::enableSSL(int port) {
 
   m_httpsConfig.bindAddress = address;
   m_httpsConfig.strictSSL = false;
-  m_httpsConfig.sslContextConfigs.emplace_back(createContextConfig());
+
+  m_httpsConfig.sslContextConfigs.emplace_back(
+      createContextConfig({
+        RuntimeOption::SSLCertificateFile,
+        RuntimeOption::SSLCertificateKeyFile}, true));
   m_https = true;
   return true;
 }
 
 bool ProxygenServer::enableSSLWithPlainText() {
   m_httpConfig.strictSSL = false;
-  m_httpConfig.sslContextConfigs.emplace_back(createContextConfig());
+  m_httpConfig.sslContextConfigs.emplace_back(
+      createContextConfig({
+        RuntimeOption::SSLCertificateFile,
+        RuntimeOption::SSLCertificateKeyFile}, true));
   m_httpConfig.allowInsecureConnectionsOnSecureServer = true;
   return true;
 }
 
-wangle::SSLContextConfig ProxygenServer::createContextConfig() {
-  wangle::SSLContextConfig cfg;
+wangle::SSLContextConfig ProxygenServer::createContextConfig(
+    const CertKeyPair& path,
+    bool isDefault) {
+  wangle::SSLContextConfig sslCtxConfig;
   // TODO add config to request a client cert
-  cfg.clientVerification = folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
-  if (RuntimeOption::SSLCertificateFile != "" &&
-      RuntimeOption::SSLCertificateKeyFile != "") {
-    try {
-      cfg.setCertificate(RuntimeOption::SSLCertificateFile,
-                                    RuntimeOption::SSLCertificateKeyFile, "");
-      cfg.sslVersion = folly::SSLContext::TLSv1;
-      cfg.isDefault = true;
-      cfg.sniNoMatchFn =
-        std::bind(&ProxygenServer::sniNoMatchHandler, this,
-                  std::placeholders::_1);
-      cfg.setNextProtocols({
-        std::begin(RuntimeOption::ServerNextProtocols),
-        std::end(RuntimeOption::ServerNextProtocols)
-      });
-    } catch (const std::exception& ex) {
-      Logger::Error("Invalid certificate file or key file: %s", ex.what());
-    }
-  } else {
-    Logger::Error("Invalid certificate file or key file");
+  sslCtxConfig.clientVerification =
+    folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
+  try {
+    sslCtxConfig.setCertificate(path.certPath, path.keyPath, "");
+    sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
+    sslCtxConfig.isDefault = isDefault;
+    sslCtxConfig.setNextProtocols({
+      std::begin(RuntimeOption::ServerNextProtocols),
+      std::end(RuntimeOption::ServerNextProtocols)
+    });
+  } catch (const std::exception& ex) {
+    Logger::Error("Invalid certificate file or key file: %s", ex.what());
   }
-  return cfg;
+  return sslCtxConfig;
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {

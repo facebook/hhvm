@@ -1001,6 +1001,9 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
     if (!tc.isObject()) return atToType(tc.type());
 
     auto const handleCls = [&] (const Class* cls) {
+      // Don't try to be clever with magic interfaces
+      if (interface_supports_non_objects(cls->name())) return TInitCell;
+
       if (isEnum(cls)) {
         if (auto const dt = cls->enumBaseTy()) return Type{*dt};
         return TInt | TStr;

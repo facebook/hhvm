@@ -37,8 +37,6 @@ ETCH_NAME(\MANGLED_NAME):
 
         mov       SD_HASH(%rsi), %edx   // key->hash
         mov       \SCALE(%rdi), %eax  // scale
-        push      %rbp
-        mov       %rsp, %rbp
         add       $\DATA, %rdi        // rdi: ad->data()
         push      %rbx
         lea       -1(, %eax, 4), %ebx // mask = scale * 4 -1
@@ -91,7 +89,6 @@ ETCH_LABEL(found\MANGLED_NAME):
         lea       \ELM_DATA(%r8), %rax
 #endif
         pop       %rbx
-        pop       %rbp
         ret
 
 ETCH_LABEL(fail\MANGLED_NAME):
@@ -104,7 +101,6 @@ ETCH_LABEL(fail\MANGLED_NAME):
         xor       %edx, %edx
 #endif
         pop       %rbx
-        pop       %rbp
         ret
 
 ETCH_LABEL(cmplength\MANGLED_NAME):
@@ -149,7 +145,6 @@ ETCH_LABEL(tail\MANGLED_NAME):                       // assert(ecx >= 0)
         lea       \ELM_DATA(%r8), %rax
 #endif
         pop       %rbx
-        pop       %rbp
         ret
 
 ETCH_LABEL(hashHelper_NvGetStr\MANGLED_NAME):

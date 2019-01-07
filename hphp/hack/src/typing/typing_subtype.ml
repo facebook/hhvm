@@ -666,7 +666,7 @@ and simplify_subtype
     invalid ()
   (* Match what's done in unify for non-strict code *)
   | Tobject, Tclass _ ->
-    if Env.is_strict env then default () else valid ()
+    if Env.is_strict env then invalid () else valid ()
   | Tclass (x_sub, exact_sub, tyl_sub), Tclass (x_super, exact_super, tyl_super) ->
     let exact_match =
       match exact_sub, exact_super with

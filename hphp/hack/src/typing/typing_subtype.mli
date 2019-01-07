@@ -96,12 +96,6 @@ val add_constraint :
   locl ty ->
   Env.env
 
-val set_tyvar_variance :
-  tyvars:ISet.t ->
-  Env.env ->
-  locl ty ->
-  Env.env
-
 val solve_tyvars :
   ?solve_invariant:bool ->
   tyvars:ISet.t ->

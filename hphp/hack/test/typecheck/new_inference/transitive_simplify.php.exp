@@ -1,1 +1,6 @@
-No errors
+File "transitive_simplify.php", line 30, characters 7-9:
+You are trying to access the member foo on a value whose class is unknown (Typing[4296])
+  File "transitive_simplify.php", line 26, characters 8-16:
+  It is unknown because a type could not be determined here
+  File "transitive_simplify.php", line 16, characters 37-38:
+    via this generic T1

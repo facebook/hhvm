@@ -889,7 +889,7 @@ and stmt env = function
           check_dynamic env ty1 ~f:begin fun () ->
             Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
           end in
-        let env = SubType.set_tyvar_variance ~tyvars env ty2 in
+        let env = Env.set_tyvar_variance ~tyvars env ty2 in
         let env = SubType.solve_tyvars ~tyvars env in
         let alias_depth =
           if env.Env.in_loop then 1 else Typing_alias.get_depth st in
@@ -1292,7 +1292,7 @@ and exprs_expected (pos, ur, expected_tyl) env el =
 and make_result ?(tyvars = ISet.empty) env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
-  let env = SubType.set_tyvar_variance ~tyvars env ty in
+  let env = Env.set_tyvar_variance ~tyvars env ty in
   (* Immediately attempt to "solve" for those type variables *)
   let env = SubType.solve_tyvars ~tyvars env in
   env, T.make_typed_expr p ty te, ty
@@ -2817,7 +2817,7 @@ and anon_make tenv p f ft idl =
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
-        let env = SubType.set_tyvar_variance ~tyvars env ty in
+        let env = Env.set_tyvar_variance ~tyvars env ty in
         let env = SubType.solve_tyvars ~tyvars env in
         env, te, hret
       end

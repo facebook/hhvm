@@ -151,6 +151,7 @@ RxMoveInvalidLocation = 2096
 MisplacedMutabilityHint = 2097
 MutabilityHintInNonRx = 2098
 InvalidReturnMutableHint = 2099
+NoTparamsOnTypeConsts = 2100
 
 NastCheck Errors:
 AbstractBody = 3001

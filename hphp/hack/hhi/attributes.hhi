@@ -20,4 +20,6 @@ interface StaticPropertyAttribute extends PropertyAttribute {}
 
 interface ParameterAttribute {}
 
+interface TypeParameterAttribute {}
+
 }

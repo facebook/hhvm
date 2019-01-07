@@ -78,7 +78,7 @@
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
        t_tparams =
        [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T");
-          tp_constraints = []; tp_reified = false }
+          tp_constraints = []; tp_reified = false; tp_user_attributes = [] }
          ];
        t_constraint = None; t_kind = ([13:30-36], (Hprim Tstring));
        t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;
@@ -87,7 +87,7 @@
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
        t_tparams =
        [{ tp_variance = Covariant; tp_name = ([14:21-22], "T");
-          tp_constraints = []; tp_reified = false }
+          tp_constraints = []; tp_reified = false; tp_user_attributes = [] }
          ];
        t_constraint = None; t_kind = ([14:26-32], (Hprim Tstring));
        t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;

@@ -293,6 +293,7 @@ and tparam = {
   tp_name: sid;
   tp_constraints: (Ast.constraint_kind * hint) list;
   tp_reified: Ast.reified;
+  tp_user_attributes: user_attribute list
 }
 
 and static_var = class_var

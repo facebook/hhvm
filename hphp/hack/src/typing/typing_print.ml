@@ -1347,7 +1347,8 @@ module PrintClass = struct
     tp_variance = var;
     tp_name = (position, name);
     tp_constraints = cstrl;
-    tp_reified = reified
+    tp_reified = reified;
+    tp_user_attributes = _
   } =
     variance var^pos position^" "^name^" "^
     (List.fold_right

@@ -194,10 +194,16 @@ let rec ty (p, x) =
       ttc_origin = tc.ttc_origin;
     }
 
+  and user_attribute ua =
+    { Nast.ua_name = string_id ua.Nast.ua_name;
+      ua_params = List.map ~f:(Nast_pos_mapper.expr pos) ua.Nast.ua_params;
+    }
+
   and type_param t =
     { t with
       tp_name = string_id t.tp_name;
       tp_constraints = constraint_ t.tp_constraints;
+      tp_user_attributes = List.map ~f:user_attribute t.tp_user_attributes;
     }
 
   and class_type dc =

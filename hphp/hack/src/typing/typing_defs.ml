@@ -551,6 +551,7 @@ and 'phase tparam = {
   tp_name: Ast.id;
   tp_constraints: (Ast.constraint_kind * 'phase ty) list;
   tp_reified: Ast.reified;
+  tp_user_attributes: Nast.user_attribute list;
 }
 
 and 'phase where_constraint =

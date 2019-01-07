@@ -143,6 +143,8 @@ module UserAttributes = struct
   let uaLateInit            = "__LateInit"
   let uaOwnedMutable        = "__OwnedMutable"
   let uaNonRx               = "__NonRx"
+  let uaNewable             = "__Newable"
+  let uaEnforceable         = "__Enforceable"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -175,6 +177,8 @@ module UserAttributes = struct
       uaAtMostRxAsArgs;
       uaOwnedMutable;
       uaNonRx;
+      uaNewable;
+      uaEnforceable;
     ]
 end
 
@@ -191,6 +195,7 @@ module AttributeKinds = struct
   let staticProperty = "\\HH\\StaticPropertyAttribute"
 
   let parameter = "\\HH\\ParameterAttribute"
+  let typeparam = "\\HH\\TypeParameterAttribute"
 
   let plain_english_map =
     List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
@@ -202,6 +207,7 @@ module AttributeKinds = struct
       ; (instProperty, "an instance property")
       ; (staticProperty, "a static property")
       ; (parameter, "a parameter")
+      ; (typeparam, "a type parameter")
       ]
 end
 

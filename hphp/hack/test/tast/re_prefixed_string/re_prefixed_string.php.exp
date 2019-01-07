@@ -74,7 +74,7 @@ Errors:
             ([19:23-41],
              (Happly (([19:23-41], "\\HH\\Lib\\Regex\\Match"), []))))
             ];
-          tp_reified = false }
+          tp_reified = false; tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

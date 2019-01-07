@@ -1213,6 +1213,10 @@ let anon_use_capture_by_ref pos =
     "functions. If the variable is a value type, store it on an object "^
     "instead or refactor your code to avoid using a closure.")
 
+let no_tparams_on_type_consts pos =
+  add (Naming.err_code Naming.NoTparamsOnTypeConsts) pos
+    "Type parameters are not allowed on class type constants"
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

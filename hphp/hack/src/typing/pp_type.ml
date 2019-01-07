@@ -953,7 +953,7 @@ and show_typedef_type : typedef_type -> string = fun x ->
   Format.asprintf "%a" pp_typedef_type x
 
 and pp_tparam : type a. Format.formatter -> a tparam -> unit =
-fun fmt { tp_variance; tp_name; tp_constraints; tp_reified = _ } ->
+fun fmt { tp_variance; tp_name; tp_constraints; tp_reified = _; tp_user_attributes = _ } ->
   Format.fprintf fmt "(@[";
   Ast.pp_variance fmt tp_variance;
   Format.fprintf fmt ",@ ";

@@ -612,6 +612,7 @@ and check_happly unchecked_tparams env h =
         tp_name = t.tp_name;
         tp_constraints = cstrl;
         tp_reified = t.tp_reified;
+        tp_user_attributes = t.tp_user_attributes;
       }
     end in
   let tyl = List.map unchecked_tparams (fun t -> Reason.Rwitness (fst t.tp_name), Tany) in

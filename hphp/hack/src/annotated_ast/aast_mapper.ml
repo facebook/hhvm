@@ -161,12 +161,13 @@ struct
     T.ua_params = map_exprl menv ua.S.ua_params;
   }
 
-  and map_tparam _ t =
+  and map_tparam menv t =
   {
     T.tp_variance = t.S.tp_variance;
     T.tp_name = t.S.tp_name;
     T.tp_constraints = t.S.tp_constraints;
     T.tp_reified = t.S.tp_reified;
+    T.tp_user_attributes = List.map t.S.tp_user_attributes (map_user_attribute menv);
   }
 
   and map_func_body menv b =

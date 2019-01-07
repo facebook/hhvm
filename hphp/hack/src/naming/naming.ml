@@ -1336,6 +1336,7 @@ module Make (GetLocals : GetLocals) = struct
       tp_name = t.tp_name;
       tp_constraints = List.map t.tp_constraints (constraint_ ~forbid_this env);
       tp_reified = t.tp_reified;
+      tp_user_attributes = user_attributes env t.tp_user_attributes;
     }
 
   and type_where_constraints env locl_cstrl =
@@ -1758,6 +1759,8 @@ module Make (GetLocals : GetLocals) = struct
       | h -> h
     in
     let type_ = Option.map hint_ (hint env) in
+    if not @@ List.is_empty t.tconst_tparams then
+      Errors.no_tparams_on_type_consts (fst t.tconst_name);
     N.({ c_tconst_name = t.tconst_name;
          c_tconst_constraint = constr;
          c_tconst_type = type_;

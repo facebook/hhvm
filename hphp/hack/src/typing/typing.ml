@@ -6370,12 +6370,15 @@ and user_attribute env ua =
     T.ua_params = typed_ua_params;
   }
 
-and type_param _ t =
+and type_param env t =
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.typeparam t.tp_user_attributes in
   {
     T.tp_variance = t.tp_variance;
     T.tp_name = t.tp_name;
     T.tp_constraints = t.tp_constraints;
     T.tp_reified = t.tp_reified;
+    T.tp_user_attributes = List.map t.tp_user_attributes (user_attribute env);
   }
 
 and method_def env m =

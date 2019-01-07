@@ -128,6 +128,7 @@ let type_param env (t: Nast.tparam) =
   tp_name = t.tp_name;
   tp_constraints = List.map t.tp_constraints (fun (ck, h) -> (ck, Decl_hint.hint env h));
   tp_reified = t.tp_reified;
+  tp_user_attributes = t.tp_user_attributes;
 }
 
 let where_constraint env (ty1, ck, ty2) =

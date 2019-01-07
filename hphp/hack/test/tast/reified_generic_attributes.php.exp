@@ -1,0 +1,94 @@
+Errors:
+  [7:17-28] Unrecognized user attribute: Enforceable does not have a class and is not listed in .hhconfig
+  [10:15-16] This constructor expects no argument
+[(Class
+    { c_span = [3:1-48]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([3:7-8], "\\A"); c_tparams = <opaque>; c_extends = [];
+      c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
+      c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+      c_implements =
+      [([3:20-45], (Happly (([3:20-45], "\\HH\\TypeParameterAttribute"), [])))
+        ];
+      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+      c_constructor = None; c_static_methods = []; c_methods = [];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+      c_doc_comment = None });
+  (Class
+     { c_span = [4:1-48]; c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
+       c_name = ([4:7-8], "\\B"); c_tparams = <opaque>; c_extends = [];
+       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
+       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+       c_implements =
+       [([4:20-45],
+         (Happly (([4:20-45], "\\HH\\TypeParameterAttribute"), [])))];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None });
+  (Fun
+     { f_span = [6:1-57]; f_annotation = (); f_mode = <opaque>; f_ret = None;
+       f_name = ([6:10-11], "\\f");
+       f_tparams =
+       [{ tp_variance = Invariant; tp_name = ([6:48-49], "T");
+          tp_constraints = []; tp_reified = true;
+          tp_user_attributes =
+          [{ ua_name = ([6:38-39], "\\A"); ua_params = [] };
+            { ua_name = ([6:24-37], "__Enforceable"); ua_params = [] };
+            { ua_name = ([6:14-23], "__Newable"); ua_params = [] }]
+          }
+         ];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+  (Fun
+     { f_span = [7:1-55]; f_annotation = (); f_mode = <opaque>; f_ret = None;
+       f_name = ([7:10-11], "\\g");
+       f_tparams =
+       [{ tp_variance = Invariant; tp_name = ([7:12-13], "T");
+          tp_constraints = []; tp_reified = false; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([7:47-49], "Tu");
+           tp_constraints = []; tp_reified = true;
+           tp_user_attributes =
+           [{ ua_name = ([7:29-38], "__Newable"); ua_params = [] };
+             { ua_name = ([7:17-28], "\\Enforceable"); ua_params = [] }]
+           }
+         ];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+  (Fun
+     { f_span = [8:1-24]; f_annotation = (); f_mode = <opaque>; f_ret = None;
+       f_name = ([8:10-11], "\\h");
+       f_tparams =
+       [{ tp_variance = Invariant; tp_name = ([8:17-18], "T");
+          tp_constraints = []; tp_reified = false;
+          tp_user_attributes =
+          [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }
+         ];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+  (Fun
+     { f_span = [10:1-29]; f_annotation = (); f_mode = <opaque>;
+       f_ret = None; f_name = ([10:10-12], "\\ff");
+       f_tparams =
+       [{ tp_variance = Invariant; tp_name = ([10:22-23], "T");
+          tp_constraints = []; tp_reified = false;
+          tp_user_attributes =
+          [{ ua_name = ([10:15-16], "\\A");
+             ua_params = [(([10:17-18], int), (Int "1"))] }
+            ]
+          }
+         ];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+  ]

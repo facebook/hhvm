@@ -1,0 +1,6 @@
+File "typeparam_class.php", line 8, characters 13-19:
+Invalid argument (Typing[4110])
+File "typeparam_class.php", line 5, characters 31-33:
+This is an int
+File "typeparam_class.php", line 8, characters 13-19:
+It is incompatible with a string

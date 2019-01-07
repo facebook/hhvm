@@ -348,6 +348,7 @@ and on_tparam t : Aast.tparam =
     tp_name = t.tp_name;
     tp_constraints = on_list on_tparam_constraint t.tp_constraints;
     tp_reified = t.tp_reified;
+    tp_user_attributes = on_list on_user_attribute t.tp_user_attributes;
   }
 
 and on_fun_param param : Aast.fun_param =
@@ -393,7 +394,8 @@ and on_fun f : Aast.fun_ =
     f_mode = f.f_mode;
     f_ret = (optional on_hint f.f_ret);
     f_name = f.f_name;
-    f_tparams = on_list on_tparam f.f_tparams;
+    f_tparams =
+      on_list on_tparam f.f_tparams;
     f_where_constraints = on_list on_constr f.f_constrs;
     f_params = on_list on_fun_param f.f_params;
     f_body = body;

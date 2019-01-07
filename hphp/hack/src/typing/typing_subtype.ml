@@ -2311,6 +2311,11 @@ let bind_to_upper_bound env r var =
  *   contravariantly in the expression type then we can maximize it. Ideally we
  *   would use an intersection v := t1 & ... & tn so for now we only solve
  *   if there is a single upper bound.
+ *   (3) If the type variable is bounded by t1, ..., tm <: v <: u1, ..., un and
+ *   u1 & ... & un == t1 | ... | tm then we can set v to either of these
+ *   equivalent types.  Because we don't have intersections, for now we check if
+ *   there exist i, j such that uj <: ti, which implies ti == uj and allows
+ *   us to set v := ti.
  *)
 let solve_tyvar ~solve_invariant env r var =
   (* Don't try and solve twice *)
@@ -2332,7 +2337,15 @@ let solve_tyvar ~solve_invariant env r var =
      *)
     bind_to_upper_bound env r var
   | true, true ->
-    if solve_invariant then bind_to_lower_bound env r var else env
+    (* As in Local Type Inference by Pierce & Turner, if type variable
+     * appears both covariantly and contravariantly and there is a type that
+     * is both a lower and upper bound, force to that type
+     *)
+    let lower_bounds = Env.get_tyvar_lower_bounds env var in
+    let upper_bounds = Env.get_tyvar_upper_bounds env var in
+    match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
+    | Some ty -> bind env r var ty
+    | None -> if solve_invariant then bind_to_lower_bound env r var else env
 
 let solve_tyvars ?(solve_invariant = false) ~tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)

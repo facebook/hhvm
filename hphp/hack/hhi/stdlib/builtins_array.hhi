@@ -88,6 +88,7 @@ function array_fill_keys($keys, $value);
  * function(Container<?Tv>): array<arraykey, Tv>
  *
  */
+<<__PHPStdLib>>
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
 <<__PHPStdLib, __Rx>>
 function array_flip($trans);
@@ -122,6 +123,7 @@ function array_keys<Tk, Tv>(
  * Container<X>          -> R = array<arraykey, Tr>
  * X (unknown type)      -> R = Y (other unknown type)
  */
+<<__PHPStdLib>>
 function array_map($callback, $arr1, ...);
 <<__PHPStdLib, __Rx>>
 function array_merge_recursive($array1, ...);

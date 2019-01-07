@@ -80,7 +80,11 @@ type error_level = Minimum | Typical | Maximum
 type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
 
 type context =
-  { active_classish     : Syntax.t option
+  { active_classish           : Syntax.t option
+  ; active_callable_attr_spec : Syntax.t option
+  (* true if active callable is reactive if it is a function or method, or there is a reactive
+   * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
+  ; active_is_rx_or_enclosing_for_lambdas : bool
   }
 
 type env =
@@ -108,6 +112,8 @@ let make_env
   =
     let context =
       { active_classish = None
+      ; active_callable_attr_spec = None
+      ; active_is_rx_or_enclosing_for_lambdas = false
       } in
     { syntax_tree
     ; level
@@ -1533,39 +1539,7 @@ let decoration_errors node errors =
   let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
   errors
 
-let parameter_rx_errors parents errors node =
-  let rec get_containing_function_attrs l =
-    match l with
-    | [] -> None, []
-    | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
-       { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
-       { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ })
-      :: tl -> Some s, tl
-    | ({ syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
-       { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
-      :: _ -> Some s, []
-    | _ :: tl -> get_containing_function_attrs tl
-  in
-  let rec parent_func_is_reactive attrs parents =
-    (* function/method without attributes *)
-    let is_rx = Option.bind attrs (fun attrs ->
-      attribute_first_reactivity_annotation attrs
-      |> Option.map ~f:(fun a ->
-        match attribute_matches_criteria ((<>) SN.UserAttributes.uaNonRx) a with
-        | Some _ -> true
-        | None -> false
-      )
-    ) in
-    match is_rx, parents with
-    (* method/function/lambda has annotation - use it*)
-    | Some x, _ -> x
-    (* method/function does not have annotation - assume non-rx *)
-    | None, [] -> false
-    (* lambda does not have annotation - try use one from enclosing function *)
-    | None, tl ->
-      let parent_attrs, parent_tl = get_containing_function_attrs tl in
-      parent_func_is_reactive parent_attrs parent_tl
-  in
+let parameter_rx_errors context errors node =
   match syntax node with
   | ParameterDeclaration { parameter_attribute = spec; parameter_name = name; _ } ->
     let has_owned_mutable =
@@ -1602,15 +1576,15 @@ let parameter_rx_errors parents errors node =
       let errors =
         if has_owned_mutable || has_mutable
         then begin
-          let attrs, rest = get_containing_function_attrs parents in
-          let parent_func_is_rx = parent_func_is_reactive attrs rest in
+          let attrs = context.active_callable_attr_spec in
+          let active_is_rx = context.active_is_rx_or_enclosing_for_lambdas in
           let parent_func_is_memoize =
             Option.value_map attrs ~default:false ~f:(fun spec ->
               attribute_specification_contains spec SN.UserAttributes.uaMemoize ||
               attribute_specification_contains spec SN.UserAttributes.uaMemoize
             ) in
           let errors =
-            if has_owned_mutable && not parent_func_is_rx
+            if has_owned_mutable && not active_is_rx
             then make_error_from_node node
               SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
             else errors
@@ -1638,7 +1612,7 @@ let parameter_errors env node parents namespace_name names errors =
     let errors =
       produce_error_from_check errors param_with_callconv_has_default
       node (SyntaxError.error2074 callconv_text) in
-    let errors = parameter_rx_errors parents errors node in
+    let errors = parameter_rx_errors env.context errors node in
     let errors =
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
@@ -1692,7 +1666,7 @@ let parameter_errors env node parents namespace_name names errors =
     } ->
     let errors =
       syntax_to_list_no_separators params
-      |> List.fold_left ~init:errors ~f:(parameter_rx_errors parents) in
+      |> List.fold_left ~init:errors ~f:(parameter_rx_errors env.context) in
     params_errors env params namespace_name names errors
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
@@ -3850,6 +3824,13 @@ let is_invalid_hack_mode env errors =
     errors
 
 let find_syntax_errors env =
+  let has_rx_attr_mutable_hack attrs =
+    attribute_first_reactivity_annotation attrs
+    |> Option.value_map ~default:false ~f:(fun a ->
+      match attribute_matches_criteria ((<>) SN.UserAttributes.uaNonRx) a with
+      | Some _ -> true
+      | None -> false
+    ) in
   let rec folder env acc node parents =
     let { errors
         ; namespace_type
@@ -3862,7 +3843,22 @@ let find_syntax_errors env =
       { env with context =
         match syntax node with
         | ClassishDeclaration _ ->
-          { active_classish = Some node
+          { env.context with active_classish = Some node }
+        | FunctionDeclaration { function_attribute_spec = s; _ }
+        | MethodishDeclaration { methodish_attribute = s; _ } ->
+          { env.context with
+            active_callable_attr_spec = Some s;
+            (* For named functions, inspect the rx attribute directly. *)
+            active_is_rx_or_enclosing_for_lambdas = has_rx_attr_mutable_hack s
+          }
+        | AnonymousFunction { anonymous_attribute_spec = s; _ }
+        | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
+        | LambdaExpression { lambda_attribute_spec = s; _ } ->
+          { env.context with
+            active_callable_attr_spec = Some s;
+            (* For lambdas, use the rx status from the enclosing callable. *)
+            active_is_rx_or_enclosing_for_lambdas =
+              env.context.active_is_rx_or_enclosing_for_lambdas
           }
         | _ -> env.context
       } in

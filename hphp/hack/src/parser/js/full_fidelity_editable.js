@@ -19099,23 +19099,35 @@ class VectorArrayTypeSpecifier extends EditableSyntax
 class TypeParameter extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     reified,
     variance,
     name,
     constraints)
   {
     super('type_parameter', {
+      attribute_spec: attribute_spec,
       reified: reified,
       variance: variance,
       name: name,
       constraints: constraints });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get reified() { return this.children.reified; }
   get variance() { return this.children.variance; }
   get name() { return this.children.name; }
   get constraints() { return this.children.constraints; }
+  with_attribute_spec(attribute_spec){
+    return new TypeParameter(
+      attribute_spec,
+      this.reified,
+      this.variance,
+      this.name,
+      this.constraints);
+  }
   with_reified(reified){
     return new TypeParameter(
+      this.attribute_spec,
       reified,
       this.variance,
       this.name,
@@ -19123,6 +19135,7 @@ class TypeParameter extends EditableSyntax
   }
   with_variance(variance){
     return new TypeParameter(
+      this.attribute_spec,
       this.reified,
       variance,
       this.name,
@@ -19130,6 +19143,7 @@ class TypeParameter extends EditableSyntax
   }
   with_name(name){
     return new TypeParameter(
+      this.attribute_spec,
       this.reified,
       this.variance,
       name,
@@ -19137,6 +19151,7 @@ class TypeParameter extends EditableSyntax
   }
   with_constraints(constraints){
     return new TypeParameter(
+      this.attribute_spec,
       this.reified,
       this.variance,
       this.name,
@@ -19148,11 +19163,13 @@ class TypeParameter extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var reified = this.reified.rewrite(rewriter, new_parents);
     var variance = this.variance.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var constraints = this.constraints.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       reified === this.reified &&
       variance === this.variance &&
       name === this.name &&
@@ -19163,6 +19180,7 @@ class TypeParameter extends EditableSyntax
     else
     {
       return rewriter(new TypeParameter(
+        attribute_spec,
         reified,
         variance,
         name,
@@ -19171,6 +19189,9 @@ class TypeParameter extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.type_attribute_spec, position, source);
+    position += attribute_spec.width;
     let reified = EditableSyntax.from_json(
       json.type_reified, position, source);
     position += reified.width;
@@ -19184,6 +19205,7 @@ class TypeParameter extends EditableSyntax
       json.type_constraints, position, source);
     position += constraints.width;
     return new TypeParameter(
+        attribute_spec,
         reified,
         variance,
         name,
@@ -19193,6 +19215,7 @@ class TypeParameter extends EditableSyntax
   {
     if (TypeParameter._children_keys == null)
       TypeParameter._children_keys = [
+        'attribute_spec',
         'reified',
         'variance',
         'name',

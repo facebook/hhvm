@@ -45,5 +45,8 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
       -> t * Token.t * String.t
     val next_xhp_body_token : t -> t * Token.t
     val rescan_halt_compiler : t -> Token.t -> t * Token.t
+    val scan_leading_php_trivia : t -> t * Token.Trivia.t list
+    val peek_char : t -> int -> char
+    val advance : t -> int -> t
   end (* Lexer_S *)
 end (* WithToken *)

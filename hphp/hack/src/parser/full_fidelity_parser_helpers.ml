@@ -620,6 +620,37 @@ module WithParser(Parser : Parser_S) = struct
         (Relative_path.to_absolute file_path));
     Make.token parser token
 
+  (* Used in conjunction with the following function. If you call next_token
+   * when the parser is at the <<<, it will scan the entire file looking for an
+   * ending to the heredoc, which could quickly get bad if there are many such
+   * declarations in a file. *)
+  let peek_next_partial_token_is_left_angle parser =
+    let lexer = lexer parser in
+    let lexer, _ = Lexer.scan_leading_php_trivia lexer in
+    let c = Lexer.peek_char lexer 0 in
+    c = '<'
+
+  (* In the case of attributes on generics, one could write
+   * function f<<<__Attr>> reify T, ...>
+   * The triple left angle is currently lexed as a HeredocStringLiteral,
+   * but we can get around this by manually advancing the lexer one token
+   * and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle *)
+  let assert_left_angle_in_type_param_list_with_possible_attribute parser =
+    let lexer = lexer parser in
+    let tparam_open = Lexer.peek_char lexer 0 in
+    let attr1 = Lexer.peek_char lexer 1 in
+    let attr2 = Lexer.peek_char lexer 2 in
+    if tparam_open = '<' && attr1 = '<' && attr2 = '<'
+    then
+      let lexer = Lexer.advance lexer 1 in
+      let parser = with_lexer parser lexer in
+      let token = Token.make TokenKind.LessThan
+        (Lexer.source lexer) (Lexer.start_offset lexer) 1 [] [] in
+      Make.token parser token
+    else
+      assert_token parser TokenKind.LessThan
+
+
   let assert_xhp_body_token = assert_token ~tokenizer:Lexer.next_xhp_body_token
 
   type separated_list_kind =

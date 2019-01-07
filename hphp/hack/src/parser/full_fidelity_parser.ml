@@ -80,7 +80,7 @@ and DeclParser : (DeclarationParser_S with module SC = SCWithToken) =
   DeclarationParserSyntax.WithExpressionAndStatementAndTypeParser
     (ExpressionParser) (StatementParser) (TypeParser)
 and TypeParser : (TypeParser_S with module SC = SCWithToken) =
-  TypeParserSyntax.WithExpressionParser(ExpressionParser)
+  TypeParserSyntax.WithExpressionAndDeclParser (ExpressionParser) (DeclParser)
 
 type t = {
   lexer : Lexer.t;

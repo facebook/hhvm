@@ -1942,6 +1942,7 @@
       "description" : "type_parameter",
       "prefix" : "type",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "reified" },
         { "field_name" : "variance" },
         { "field_name" : "name" },

@@ -2119,11 +2119,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc vector_array_right_angle in
          acc
       | TypeParameter {
+        type_attribute_spec;
         type_reified;
         type_variance;
         type_name;
         type_constraints;
       } ->
+         let acc = f acc type_attribute_spec in
          let acc = f acc type_reified in
          let acc = f acc type_variance in
          let acc = f acc type_name in
@@ -3978,11 +3980,13 @@ module WithToken(Token: TokenType) = struct
         vector_array_right_angle;
       ]
       | TypeParameter {
+        type_attribute_spec;
         type_reified;
         type_variance;
         type_name;
         type_constraints;
       } -> [
+        type_attribute_spec;
         type_reified;
         type_variance;
         type_name;
@@ -5838,11 +5842,13 @@ module WithToken(Token: TokenType) = struct
         "vector_array_right_angle";
       ]
       | TypeParameter {
+        type_attribute_spec;
         type_reified;
         type_variance;
         type_name;
         type_constraints;
       } -> [
+        "type_attribute_spec";
         "type_reified";
         "type_variance";
         "type_name";
@@ -7901,12 +7907,14 @@ module WithToken(Token: TokenType) = struct
           vector_array_right_angle;
         }
       | (SyntaxKind.TypeParameter, [
+          type_attribute_spec;
           type_reified;
           type_variance;
           type_name;
           type_constraints;
         ]) ->
         TypeParameter {
+          type_attribute_spec;
           type_reified;
           type_variance;
           type_name;
@@ -10414,12 +10422,14 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_type_parameter
+        type_attribute_spec
         type_reified
         type_variance
         type_name
         type_constraints
       =
         let syntax = TypeParameter {
+          type_attribute_spec;
           type_reified;
           type_variance;
           type_name;

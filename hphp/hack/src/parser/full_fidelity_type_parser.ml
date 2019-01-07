@@ -29,6 +29,11 @@ module type TypeParser_S = Full_fidelity_type_parser_type
   .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
   .TypeParser_S
 
+module type DeclarationParser_S = Full_fidelity_declaration_parser_type
+  .WithSyntax(Syntax)
+  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
+  .DeclarationParser_S
+
 module ParserHelperSyntax = Full_fidelity_parser_helpers.WithSyntax(Syntax)
 module ParserHelper = ParserHelperSyntax
   .WithLexer(Full_fidelity_type_lexer.WithToken(Syntax.Token))
@@ -39,8 +44,9 @@ open Syntax
 module WithSmartConstructors (SCI : SCWithKind_S with module Token = Syntax.Token)
 = struct
 
-module WithExpressionParser
-  (ExpressionParser : ExpressionParser_S with module SC = SCI) :
+module WithExpressionAndDeclParser
+  (ExpressionParser : ExpressionParser_S with module SC = SCI)
+  (DeclParser : DeclarationParser_S with module SC = SCI) :
   (TypeParser_S with module SC = SCI) = struct
 
 module Parser = SimpleParser.WithSmartConstructors (SCI)
@@ -63,6 +69,25 @@ include ParserHelper.WithParser(Parser)
     let sc_state = ExpressionParser.sc_state expr_parser in
     let parser = { env; lexer; errors; context; sc_state } in
     (parser, expr)
+
+let with_decl_parser : 'a . t -> (DeclParser.t -> DeclParser.t * 'a) -> t * 'a
+= fun parser f ->
+  let decl_parser =
+    DeclParser.make
+      parser.env
+      parser.lexer
+      parser.errors
+      parser.context
+      parser.sc_state
+  in
+  let (decl_parser, node) = f decl_parser in
+  let env = DeclParser.env decl_parser in
+  let lexer = DeclParser.lexer decl_parser in
+  let errors = DeclParser.errors decl_parser in
+  let context = DeclParser.context decl_parser in
+  let sc_state = DeclParser.sc_state decl_parser in
+  let parser = { env; lexer; errors; context; sc_state } in
+  (parser, node)
 
 (* TODO: What about something like for::for? Is that a legal
   type constant?  *)
@@ -251,13 +276,15 @@ and parse_variance_opt parser =
   TODO: Update the spec with reified
 *)
 and parse_type_parameter parser =
+  let (parser, attributes) = with_decl_parser parser
+    DeclParser.parse_attribute_specification_opt in
   let (parser, reified) = optional_token parser Reify in
   let (parser, variance) = parse_variance_opt parser in
   let (parser, type_name) = require_name_allow_all_keywords parser in
   let (parser, constraints) =
     parse_list_until_none parser parse_generic_type_constraint_opt
   in
-  Make.type_parameter parser reified variance type_name constraints
+  Make.type_parameter parser attributes reified variance type_name constraints
 
 (* SPEC
   type-parameter-list:
@@ -268,7 +295,7 @@ and parse_type_parameter parser =
     generic-type-parameter  ,  generic-type-parameter
 *)
 and parse_generic_type_parameter_list parser =
-  let (parser, left) = assert_token parser LessThan in
+  let (parser, left) = assert_left_angle_in_type_param_list_with_possible_attribute parser in
   let (parser, params, _) =
     parse_comma_list_allow_trailing
       parser
@@ -278,11 +305,6 @@ and parse_generic_type_parameter_list parser =
   in
   let (parser, right) = require_right_angle parser in
   Make.type_parameters parser left params right
-
-and parse_generic_parameter_list_opt parser =
-  match peek_token_kind parser with
-  | LessThan -> parse_generic_type_parameter_list parser
-  | _ -> Make.missing parser (pos parser)
 
 and parse_type_list parser close_kind =
   (* SPEC:

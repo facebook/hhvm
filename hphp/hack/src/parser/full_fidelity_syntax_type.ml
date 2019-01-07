@@ -1032,7 +1032,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; vector_array_right_angle                           : t
     }
   | TypeParameter                           of
-    { type_reified                                       : t
+    { type_attribute_spec                                : t
+    ; type_reified                                       : t
     ; type_variance                                      : t
     ; type_name                                          : t
     ; type_constraints                                   : t
@@ -2336,7 +2337,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; vector_array_right_angle: Token.t value
     }
   and type_parameter =
-    { type_reified: Token.t option value
+    { type_attribute_spec: attribute_specification option value
+    ; type_reified: Token.t option value
     ; type_variance: Token.t option value
     ; type_name: Token.t value
     ; type_constraints: type_constraint listesque value

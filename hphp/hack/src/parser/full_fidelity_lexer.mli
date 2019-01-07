@@ -53,6 +53,8 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   val next_xhp_class_name : t -> t * Token.t
   val is_next_xhp_class_name : t -> bool
   val is_next_name : t -> bool
+  val peek_char : t -> int -> char
+  val advance : t -> int -> t
   val next_xhp_name : t -> t * Token.t
   val is_next_xhp_category_name : t -> bool
   val next_xhp_category_name : t -> t * Token.t

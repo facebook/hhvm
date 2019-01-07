@@ -201,9 +201,7 @@ module WithExpressionAndStatementAndTypeParser
      * files.
      *)
     let (parser, name) = require_name_allow_non_reserved parser in
-    let (parser, generic) =
-      with_type_parser parser TypeParser.parse_generic_parameter_list_opt
-    in
+    let (parser, generic) = parse_generic_type_parameter_list_opt parser in
     let (parser, constr) = parse_type_constraint_opt parser in
     let (parser, equal) = require_equal parser in
     let (parser, ty) = parse_type_specifier parser in
@@ -1361,9 +1359,8 @@ module WithExpressionAndStatementAndTypeParser
     with_expression_parser parser ExpressionParser.parse_constructor_call
 
   and parse_generic_type_parameter_list_opt parser =
-    let (_parser1, open_angle) = next_token parser in
-    let kind = Token.kind open_angle in
-    if kind = LessThan then
+    if peek_next_partial_token_is_left_angle parser
+    then
       with_type_parser parser TypeParser.parse_generic_type_parameter_list
     else
       Make.missing parser (pos parser)

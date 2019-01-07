@@ -692,6 +692,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_id acc t.tp_name in
     let on_tparam_constraint acc (_, h) = this#on_hint acc h in
     let acc = List.fold_left on_tparam_constraint acc t.tp_constraints in
+    let acc = List.fold_left this#on_user_attribute acc t.tp_user_attributes in
     acc
 
   method on_fun_param acc f =

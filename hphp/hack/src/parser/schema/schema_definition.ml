@@ -1954,7 +1954,8 @@ let schema : schema_node list =
     ; prefix      = "type"
     ; aggregates  = []
     ; fields =
-      [ "reified", ZeroOrOne Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "reified", ZeroOrOne Token
       ; "variance", ZeroOrOne Token
       ; "name", Token
       ; "constraints", ZeroOrMore (Just "TypeConstraint")

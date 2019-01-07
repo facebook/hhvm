@@ -12,17 +12,18 @@
          (list 24
           ((list_item 10
             ((type_parameter 9
-              ((() reify 5 ((whitespace 1))) (() + 1 ()) (() name 2 ())
-               (missing 0 ())))
+              ((missing 0 ()) (() reify 5 ((whitespace 1))) (() + 1 ())
+               (() name 2 ()) (missing 0 ())))
              (() , 1 ((whitespace 1)))))
            (list_item 4
             ((type_parameter 3
-              ((missing 0 ()) (() - 1 ()) (() name 2 ()) (missing 0 ())))
+              ((missing 0 ()) (missing 0 ()) (() - 1 ()) (() name 2 ())
+               (missing 0 ())))
              (() , 1 ((whitespace 1)))))
            (list_item 8
             ((type_parameter 8
-              ((() reify 5 ((whitespace 1))) (missing 0 ()) (() name 2 ())
-               (missing 0 ())))
+              ((missing 0 ()) (() reify 5 ((whitespace 1))) (missing 0 ())
+               (() name 2 ()) (missing 0 ())))
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -38,17 +39,18 @@
            (list 22
             ((list_item 9
               ((type_parameter 8
-                ((() reify 5 ((whitespace 1))) (missing 0 ()) (() name 2 ())
-                 (missing 0 ())))
+                ((missing 0 ()) (() reify 5 ((whitespace 1))) (missing 0 ())
+                 (() name 2 ()) (missing 0 ())))
                (() , 1 ((whitespace 1)))))
              (list_item 3
               ((type_parameter 2
-                ((missing 0 ()) (missing 0 ()) (() name 2 ()) (missing 0 ())))
+                ((missing 0 ()) (missing 0 ()) (missing 0 ()) (() name 2 ())
+                 (missing 0 ())))
                (() , 1 ((whitespace 1)))))
              (list_item 8
               ((type_parameter 8
-                ((() reify 5 ((whitespace 1))) (missing 0 ()) (() name 2 ())
-                 (missing 0 ())))
+                ((missing 0 ()) (() reify 5 ((whitespace 1))) (missing 0 ())
+                 (() name 2 ()) (missing 0 ())))
                (missing 0 ())))))
            (() > 1 ())))
          (() "(" 1 ())

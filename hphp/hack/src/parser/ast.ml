@@ -105,6 +105,7 @@ and tparam = {
   tp_name: id;
   tp_constraints: (constraint_kind * hint) list;
   tp_reified: reified;
+  tp_user_attributes: user_attribute list;
 }
 
 and tconstraint = hint option

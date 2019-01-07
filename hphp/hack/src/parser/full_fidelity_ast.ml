@@ -2367,7 +2367,8 @@ and pTParaml ?(is_class=false): tparam list parser = fun node env ->
   let pTParam : tparam parser = fun node env ->
     match syntax node with
     | TypeParameter
-      { type_reified; type_variance; type_name; type_constraints } ->
+      { type_attribute_spec; type_reified; type_variance; type_name; type_constraints } ->
+      let attributes = pUserAttributes env type_attribute_spec in
       let is_reified = not @@ is_missing type_reified in
       if is_class && is_reified then
         env.cls_reified_generics := SSet.add (text type_name) !(env.cls_reified_generics);
@@ -2381,6 +2382,7 @@ and pTParaml ?(is_class=false): tparam list parser = fun node env ->
       ; tp_name = pos_name type_name env
       ; tp_constraints = couldMap ~f:pTConstraint type_constraints env
       ; tp_reified = is_reified
+      ; tp_user_attributes = attributes
       }
     | _ -> missing_syntax "type parameter" node env
   in

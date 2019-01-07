@@ -919,7 +919,8 @@ module type Syntax_S = sig
     ; vector_array_right_angle                           : t
     }
   | TypeParameter                           of
-    { type_reified                                       : t
+    { type_attribute_spec                                : t
+    ; type_reified                                       : t
     ; type_variance                                      : t
     ; type_name                                          : t
     ; type_constraints                                   : t
@@ -1212,7 +1213,7 @@ module type Syntax_S = sig
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
   val make_varray_type_specifier : t -> t -> t -> t -> t -> t
   val make_vector_array_type_specifier : t -> t -> t -> t -> t
-  val make_type_parameter : t -> t -> t -> t -> t
+  val make_type_parameter : t -> t -> t -> t -> t -> t
   val make_type_constraint : t -> t -> t
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
   val make_map_array_type_specifier : t -> t -> t -> t -> t -> t -> t

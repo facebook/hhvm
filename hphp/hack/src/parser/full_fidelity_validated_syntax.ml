@@ -3381,12 +3381,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_name = validate_token x.type_name
     ; type_variance = validate_option_with (validate_token) x.type_variance
     ; type_reified = validate_option_with (validate_token) x.type_reified
+    ; type_attribute_spec = validate_option_with (validate_attribute_specification) x.type_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.TypeParameter) s
   and invalidate_type_parameter : type_parameter invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.TypeParameter
-      { type_reified = invalidate_option_with (invalidate_token) x.type_reified
+      { type_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.type_attribute_spec
+      ; type_reified = invalidate_option_with (invalidate_token) x.type_reified
       ; type_variance = invalidate_option_with (invalidate_token) x.type_variance
       ; type_name = invalidate_token x.type_name
       ; type_constraints = invalidate_list_with (invalidate_type_constraint) x.type_constraints

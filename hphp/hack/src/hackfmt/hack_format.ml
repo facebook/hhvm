@@ -2057,11 +2057,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         left_a ks_type trailing_comma right_a;
     ]
   | Syntax.TypeParameter {
+      type_attribute_spec = attr;
       type_reified = reified;
       type_variance = variance;
       type_name = name;
       type_constraints = constraints; } ->
     Concat [
+      t env attr;
       t env reified;
       when_present reified space;
       t env variance;

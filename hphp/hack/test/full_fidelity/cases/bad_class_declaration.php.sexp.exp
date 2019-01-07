@@ -12,7 +12,8 @@
          (list 4
           ((list_item 4
             ((type_parameter 4
-              ((missing 0 ()) (missing 0 ()) (() name 4 ()) (missing 0 ())))
+              ((missing 0 ()) (missing 0 ()) (missing 0 ()) (() name 4 ())
+               (missing 0 ())))
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

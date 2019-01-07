@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -72,7 +73,7 @@ void checkHHConfig(const Unit* unit) {
 /**
  * The default of "true" here is correct -- see autoTypecheckRequestInit().
  */
-static __thread bool tl_doneAutoTypecheck = true;
+static RDS_LOCAL_NO_CHECK(bool, tl_doneAutoTypecheck)(true);
 
 /**
  * autoTypecheckRequestInit() and autoTypecheckRequestExit() work together to
@@ -91,25 +92,25 @@ static __thread bool tl_doneAutoTypecheck = true;
  * merged.
  */
 void autoTypecheckRequestInit() {
-  tl_doneAutoTypecheck = false;
+  *tl_doneAutoTypecheck = false;
 }
 
 /**
  * See autoTypecheckRequestInit().
  */
 void autoTypecheckRequestExit() {
-  tl_doneAutoTypecheck = true;
+  *tl_doneAutoTypecheck = true;
 }
 
 void autoTypecheck(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::AutoTypecheck ||
-      tl_doneAutoTypecheck ||
+      *tl_doneAutoTypecheck ||
       !unit->isHHFile() ||
       isDebuggerAttached()) {
     return;
   }
-  tl_doneAutoTypecheck = true;
+  *tl_doneAutoTypecheck = true;
 
   vm_call_user_func("\\HH\\Client\\typecheck_and_error",
                     Variant{staticEmptyArray()});

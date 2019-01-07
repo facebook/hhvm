@@ -46,11 +46,11 @@ TRACE_SET_MOD(treadmill);
  * they are densely packed.
  *
  * The plan here is that each thread starts with s_thisThreadIdx as
- * kInvalidThreadIdx.  And the first time a thread starts using the Treadmill
+ * kInvalidRequestIdx.  And the first time a thread starts using the Treadmill
  * it allocates a new thread id from s_nextThreadIdx with fetch_add.
  */
 std::atomic<int64_t> g_nextThreadIdx{0};
-__thread int64_t tl_thisThreadIdx{kInvalidThreadIdx};
+RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx){kInvalidRequestIdx};
 
 namespace {
 
@@ -170,27 +170,27 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
 }
 
 void startRequest(SessionKind session_kind) {
-  auto const threadIdx = Treadmill::threadIdx();
+  auto const requestIdx = Treadmill::requestIdx();
 
   GenCount startTime = getTime();
   {
     GenCountGuard g;
     refreshStats();
     checkOldest();
-    if (threadIdx >= s_inflightRequests.size()) {
+    if (requestIdx >= s_inflightRequests.size()) {
       s_inflightRequests.resize(
-        threadIdx + 1, {kIdleGenCount, 0, SessionKind::None});
+        requestIdx + 1, {kIdleGenCount, 0, SessionKind::None});
     } else {
-      assertx(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
+      assertx(s_inflightRequests[requestIdx].startTime == kIdleGenCount);
     }
-    s_inflightRequests[threadIdx].startTime = correctTime(startTime);
-    s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
-    s_inflightRequests[threadIdx].sessionKind = session_kind;
-    FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
-           s_inflightRequests[threadIdx].pthreadId,
-           s_inflightRequests[threadIdx].startTime);
+    s_inflightRequests[requestIdx].startTime = correctTime(startTime);
+    s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
+    s_inflightRequests[requestIdx].sessionKind = session_kind;
+    FTRACE(1, "requestIdx {} pthreadId {} start @gen {}\n", requestIdx,
+           s_inflightRequests[requestIdx].pthreadId,
+           s_inflightRequests[requestIdx].startTime);
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
-      s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
+      s_oldestRequestInFlight = s_inflightRequests[requestIdx].startTime;
     }
     if (!RequestInfo::s_requestInfo.isNull()) {
       RI().changeGlobalGCStatus(RequestInfo::Idle,
@@ -200,15 +200,15 @@ void startRequest(SessionKind session_kind) {
 }
 
 void finishRequest() {
-  auto const threadIdx = Treadmill::threadIdx();
-  assertx(threadIdx != -1);
-  FTRACE(1, "tid {} finish\n", threadIdx);
+  auto const requestIdx = Treadmill::requestIdx();
+  assertx(requestIdx != -1);
+  FTRACE(1, "tid {} finish\n", requestIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
     GenCountGuard g;
-    assertx(s_inflightRequests[threadIdx].startTime != kIdleGenCount);
-    GenCount finishedRequest = s_inflightRequests[threadIdx].startTime;
-    s_inflightRequests[threadIdx].startTime = kIdleGenCount;
+    assertx(s_inflightRequests[requestIdx].startTime != kIdleGenCount);
+    GenCount finishedRequest = s_inflightRequests[requestIdx].startTime;
+    s_inflightRequests[requestIdx].startTime = kIdleGenCount;
 
     // After finishing a request, check to see if we've allowed any triggers
     // to fire and update the time of the oldest request in flight.

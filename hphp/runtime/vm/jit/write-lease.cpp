@@ -74,7 +74,7 @@ private:
 __thread bool threadCanAcquire = true;
 __thread bool threadCanAcquireConcurrent = true;
 
-AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidThreadIdx};
+AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidRequestIdx};
 static InitFiniNode s_funcOwnersReinit([]{
   UnsafeReinitEmptyAtomicVector(
     s_funcOwners, RuntimeOption::EvalFuncCountHint);
@@ -202,8 +202,8 @@ bool couldAcquireOptimizeLease(const Func* func) {
       auto const funcId = func->getFuncId();
       s_funcOwners.ensureSize(funcId + 1);
       auto const owner = s_funcOwners[funcId].load(std::memory_order_relaxed);
-      auto const self = Treadmill::threadIdx();
-      return owner == self || owner == Treadmill::kInvalidThreadIdx;
+      auto const self = Treadmill::requestIdx();
+      return owner == self || owner == Treadmill::kInvalidRequestIdx;
     }
     case LockLevel::Kind:
       return s_optimizeLease.couldAcquire();
@@ -236,11 +236,11 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
     s_funcOwners.ensureSize(funcId + 1);
     auto& owner = s_funcOwners[funcId];
     auto oldOwner = owner.load(std::memory_order_relaxed);
-    auto const self = Treadmill::threadIdx();
+    auto const self = Treadmill::requestIdx();
 
     if (oldOwner == self) {
       // We already have the lock on this Func.
-    } else if (oldOwner != Treadmill::kInvalidThreadIdx) {
+    } else if (oldOwner != Treadmill::kInvalidRequestIdx) {
       // Already owned by another thread.
       return;
     } else {
@@ -255,7 +255,7 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
         if (threads >= RuntimeOption::EvalJitThreads) return;
       }
 
-      assertx(oldOwner == Treadmill::kInvalidThreadIdx);
+      assertx(oldOwner == Treadmill::kInvalidRequestIdx);
       if (!owner.compare_exchange_strong(oldOwner, self,
                                          std::memory_order_acq_rel)) {
         return;
@@ -292,7 +292,7 @@ void LeaseHolder::dropLocks() {
 
   if (m_acquiredFunc) {
     auto& owner = s_funcOwners[m_func->getFuncId()];
-    owner.store(Treadmill::kInvalidThreadIdx, std::memory_order_release);
+    owner.store(Treadmill::kInvalidRequestIdx, std::memory_order_release);
     m_acquiredFunc = false;
   }
 

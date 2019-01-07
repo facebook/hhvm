@@ -18,6 +18,7 @@
 #define TYPE_PROFILE_H_
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
@@ -59,14 +60,22 @@ int singleJitRequestCount();
  */
 void profileIncrementFuncCounter(const Func*);
 
-extern __thread RequestKind requestKind;
+struct TypeProfileLocals {
+  RequestKind requestKind = RequestKind::Warmup;
+  bool standardRequest = true;
+  bool acquiredSingleJit = false;
+  bool acquiredSingleJitConcurrent = false;
+  bool nonVMThread = false;
+};
+
+extern RDS_LOCAL_NO_CHECK(TypeProfileLocals, rl_typeProfileLocals);
+
 inline bool isProfileRequest() {
-  return requestKind == RequestKind::Profile;
+  return rl_typeProfileLocals->requestKind == RequestKind::Profile;
 }
 
-extern __thread bool standardRequest;
 inline bool isStandardRequest() {
-  return standardRequest;
+  return rl_typeProfileLocals->standardRequest;
 }
 
 void setRelocateRequests(int32_t n);

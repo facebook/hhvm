@@ -6,22 +6,18 @@ HPHP::s_numaNode
 HPHP::s_readline
 HPHP::tl_heap_id
 HPHP::AsioSession::s_current
-HPHP::requestKind
 HPHP::ServerStats::s_logger
 HPHP::s_hugeRange
 HPHP::s_stackSize
-HPHP::tl_regState
+HPHP::tl_regState   # okay always clean at context switch.
 HPHP::tl_sweeping
 HPHP::(anonymous namespace)::tl_cliSock
-HPHP::(anonymous namespace)::nonVMThread
 HPHP::(anonymous namespace)::tl_traceTask
 HPHP::(anonymous namespace)::s_connections
 HPHP::(anonymous namespace)::tl_perf_event
 HPHP::(anonymous namespace)::tl_extractPath
 HPHP::(anonymous namespace)::request_time_ns
 HPHP::(anonymous namespace)::tl_loaded_units
-HPHP::(anonymous namespace)::acquiredSingleJit
-HPHP::(anonymous namespace)::acquiredSingleJitConcurrent
 HPHP::(anonymous namespace)::tl_env
 HPHP::(anonymous namespace)::tl_rng
 HPHP::(anonymous namespace)::tl_proc
@@ -36,7 +32,6 @@ HPHP::s_date_globals
 HPHP::SourceRootInfo::s_path
 HPHP::SourceRootInfo::s_phproot
 HPHP::HardwareCounter::s_counter
-HPHP::standardRequest
 HPHP::tl_libxml_trees
 HPHP::AssertDetailImpl::s_head
 HPHP::high_arena_flags
@@ -45,7 +40,6 @@ HPHP::RPCRequestHandler::s_accessLogThreadData
 HPHP::HttpRequestHandler::s_accessLogThreadData
 HPHP::AdminRequestHandler::s_accessLogThreadData
 HPHP::s_file_session_data
-HPHP::tl_func_sequence_id
 HPHP::s_filter_request_data
 HPHP::s_misc_display_errors
 HPHP::s_request_workload_stats
@@ -55,15 +49,11 @@ HPHP::s_misc_highlight_default_string
 HPHP::s_misc_highlight_default_comment
 HPHP::s_misc_highlight_default_default
 HPHP::s_misc_highlight_default_keyword
-HPHP::jit::tl_profData
-HPHP::jit::(anonymous namespace)::s_counters
 HPHP::jit::(anonymous namespace)::cachedTypeInfo
 HPHP::jit::(anonymous namespace)::tl_active_prot
 HPHP::jit::(anonymous namespace)::threadCanAcquire
 HPHP::jit::(anonymous namespace)::threadCanAcquireConcurrent
-HPHP::jit::tl_perf_counters
 HPHP::jit::tl_debuggerCatches
-HPHP::jit::tc::(anonymous namespace)::s_initialTCSize
 HPHP::jit::VMProtect::is_protected
 HPHP::rds::s_constantsStorage
 HPHP::rds::local::detail::rl_hotSection
@@ -83,7 +73,6 @@ HPHP::tl_heap
 HPHP::FileScope::s_current
 HPHP::s_session
 HPHP::s_tlSpace
-HPHP::Treadmill::tl_thisThreadIdx
 HPHP::g_variables
 HPHP::s_ldap_data
 HPHP::s_prev_line
@@ -96,7 +85,6 @@ HPHP::tl_curRankDepth
 HPHP::s_memcache_globals
 HPHP::s_xbox_server_info
 HPHP::s_memcached_globals
-HPHP::tl_doneAutoTypecheck
 HPHP::s_xbox_request_handler
 HPHP::s_xbox_prev_req_init_doc
 HPHP::s_note

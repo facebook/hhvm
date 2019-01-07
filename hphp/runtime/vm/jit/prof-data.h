@@ -20,6 +20,7 @@
 #include "hphp/util/atomic-vector.h"
 
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -39,7 +40,7 @@ namespace HPHP { namespace jit {
 
 struct ProfData;
 
-extern __thread ProfData* tl_profData;
+extern RDS_LOCAL_NO_CHECK(ProfData*, rl_profData);
 
 /*
  * Perform any process-global initialization required for ProfData.
@@ -61,7 +62,7 @@ void requestExitProfData();
  * survive at least as long as the current request.
  */
 inline ProfData* profData() {
-  return tl_profData;
+  return *rl_profData;
 }
 
 const ProfData* globalProfData();

@@ -685,12 +685,18 @@ void checkRetranslateAll(bool force) {
     // for mcgen.
     Logger::Info("Scheduling the retranslation of all profiled translations");
     Treadmill::enqueue([] {
-      s_retranslateAllThread = std::thread([] { retranslateAll(); });
+      s_retranslateAllThread = std::thread([] {
+        rds::local::init();
+        SCOPE_EXIT { rds::local::fini(); };
+        retranslateAll();
+      });
     });
   } else {
     s_retranslateAllThread = std::thread([] {
       BootStats::Block timer("retranslateall",
                              RuntimeOption::ServerExecutionMode());
+      rds::local::init();
+      SCOPE_EXIT { rds::local::fini(); };
       retranslateAll();
     });
   }

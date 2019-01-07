@@ -27,19 +27,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef __APPLE__
-// Clang believes that it can force tl_perf_counters into 16-byte alignment,
-// and thus emit an inlined version of memcpy later in this file using SSE
-// instructions which require  such alignment. It can, in fact, do this --
-// except due to what is as far as I can tell a linker bug on OS X, ld doesn't
-// actually lay this out with 16 byte alignment, and so the SSE instructions
-// crash. In order to work around this, tell clang to force it to only 8 byte
-// alignment, which causes it to emit an inlined version of memcpy which does
-// not assume 16-byte alignment. (Perversely, it also tickles the ld bug
-// differently such that it actually gets 16-byte alignment :\)
-alignas(8)
-#endif
-__thread int64_t tl_perf_counters[tpc_num_counters];
+RDS_LOCAL_NO_CHECK(PerfCounters, rl_perf_counters)(PerfCounters{});
 
 #define TPC(n) "jit_" #n,
 const char* const kPerfCounterNames[] = {
@@ -59,7 +47,7 @@ void getPerfCounters(Array& ret) {
     // Until perflab can automatically scale the values we give it to an
     // appropriate range, we have to fudge these numbers so they look more like
     // reasonable hardware counter values.
-    ret.set(s_PerfCounterNames[i], tl_perf_counters[i] * 1000);
+    ret.set(s_PerfCounterNames[i], rl_perf_counters[i] * 1000);
   }
 
   for (auto const& pair : Timer::Counters()) {

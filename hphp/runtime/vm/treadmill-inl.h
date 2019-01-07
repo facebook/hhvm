@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_TREADMILL_INL_H_
 #define incl_HPHP_TREADMILL_INL_H_
 
+#include "hphp/runtime/base/rds-local.h"
+
 #include <folly/Likely.h>
 
 #include <atomic>
@@ -25,13 +27,14 @@
 namespace HPHP { namespace Treadmill {
 
 extern std::atomic<int64_t> g_nextThreadIdx;
-extern __thread int64_t tl_thisThreadIdx;
+extern RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx);
 
-inline int64_t threadIdx() {
-  if (UNLIKELY(tl_thisThreadIdx == kInvalidThreadIdx)) {
-    tl_thisThreadIdx = g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
+inline int64_t requestIdx() {
+  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
+    *rl_thisRequestIdx =
+      g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
   }
-  return tl_thisThreadIdx;
+  return *rl_thisRequestIdx;
 }
 
 //////////////////////////////////////////////////////////////////////

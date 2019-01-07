@@ -94,8 +94,8 @@ String HHVM_FUNCTION(server_warmup_status) {
     return "Waiting on retranslateAll()";
   }
 
-  auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -
-                  jit::tl_perf_counters[jit::tpc_interp_bb_force];
+  auto tpc_diff = jit::rl_perf_counters[jit::tpc_interp_bb] -
+                  jit::rl_perf_counters[jit::tpc_interp_bb_force];
   if (tpc_diff) {
     return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
   }

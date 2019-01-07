@@ -668,7 +668,7 @@ void logLoad(
     ent.setStr("result", "file_not_found");
   }
 
-  switch (requestKind) {
+  switch (rl_typeProfileLocals->requestKind) {
   case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
   case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
   case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;

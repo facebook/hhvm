@@ -145,6 +145,9 @@ void cgShl(IRLS& env, const IRInstruction* inst) {
 void cgShr(IRLS& env, const IRInstruction* inst) {
   implShift<sar,sarqi>(vmain(env), env, inst);
 }
+void cgLshr(IRLS& env, const IRInstruction* inst) {
+  implShift<shr,shrqi>(vmain(env), env, inst);
+}
 
 void cgDivDbl(IRLS& env, const IRInstruction* inst) {
   auto const d = dstLoc(env, inst, 0).reg();

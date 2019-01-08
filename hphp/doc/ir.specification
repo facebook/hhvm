@@ -384,6 +384,8 @@ exceptions depending on how coercion is implemented.
 
 | Shr, D(Int), S(Int) S(Int), NF
 
+| Lshr, D(Int), S(Int) S(Int), NF
+
   Double arithmetic, integer arithmetic, and integer bitwise operations.
   Performs the operation described by the opcode name on S0 and S1, and puts
   the result in D.
@@ -401,6 +403,8 @@ exceptions depending on how coercion is implemented.
   must divide S1.
 
   Note that Shr is an arithmetic right shift: The MSB is sign-extended.
+
+  Lshr is logical right shift.
 
   Floor and Ceil will return an integral value not greater, or not less
   than their input respectively. Their use requires SSE 4.1, availability

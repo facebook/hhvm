@@ -190,6 +190,7 @@ struct Vunit;
   O(orqim, I(s0) I(fl), UM(m), D(sf))\
   O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(shl, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(shr, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(sarqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shlli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shlqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -329,6 +330,7 @@ struct Vunit;
   O(idiv, I(fl), U(s), D(sf))\
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(shrq, I(fl), UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
   O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
   O(csincw, I(cc), U(sf) U(f) U(t), D(d))\
@@ -1035,6 +1037,7 @@ struct orqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 // shift: s1 << s0 => d, sf
 struct sar { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct shl { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct shr { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
@@ -1226,6 +1229,7 @@ struct cqo {};
 struct idiv { Vreg64 s; VregSF sf; Vflags fl; };
 struct sarq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
+struct shrq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 
 /*
  * arm intrinsics.

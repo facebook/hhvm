@@ -234,6 +234,7 @@ struct Vgen {
   void emit(const setcc& i) { a.setcc(i.cc, i.d); }
   void emit(shlli i) { binary(i); a.shll(i.s0, i.d); }
   void emit(shlq i) { unary(i); a.shlq(i.d); }
+  void emit(shrq i) { unary(i); a.shrq(i.d); }
   void emit(shlqi i) { binary(i); a.shlq(i.s0, i.d); }
   void emit(shrli i) { binary(i); a.shrl(i.s0, i.d); }
   void emit(shrqi i) { binary(i); a.shrq(i.s0, i.d); }
@@ -1013,6 +1014,13 @@ void lower(Vunit& unit, shl& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
     v << copy{inst.s0, rcx};
     v << shlq{inst.s1, inst.d, inst.sf};
+  });
+}
+
+void lower(Vunit& unit, shr& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rcx};
+    v << shrq{inst.s1, inst.d, inst.sf};
   });
 }
 

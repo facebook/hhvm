@@ -903,6 +903,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterNextK:
   case LookupClsRDS:
   case LookupSPropSlot:
+  case Lshr:
   case LtBool:
   case LtDbl:
   case LteBool:

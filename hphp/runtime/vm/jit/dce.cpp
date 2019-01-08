@@ -57,6 +57,7 @@ bool canDCE(IRInstruction* inst) {
   case XorInt:
   case Shl:
   case Shr:
+  case Lshr:
   case Floor:
   case Ceil:
   case XorBool:

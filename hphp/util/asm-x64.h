@@ -987,6 +987,7 @@ public:
   void shrw  (Immed i, Reg16 r) { instrIR(instr_shr, i, r); }
 
   void shlq (Reg64 r) { instrR(instr_shl, r); }
+  void shrq (Reg64 r) { instrR(instr_shr, r); }
   void sarq (Reg64 r) { instrR(instr_sar, r); }
 
   void roundsd (RoundDirection d, RegXMM src, RegXMM dst) {

@@ -799,11 +799,16 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 
   // Optimization: x % 2^n == x & (2^n - 1)
   if (folly::popcount(llabs(src2Val)) == 1) {
-    // (x & (y - 1)) | (-y & (x >> 63))
-    return gen(env, OrInt,
-               gen(env, AndInt, src1, cns(env, src2Val - 1)),
+    // long shft =
+    //  static_cast<unsigned long>(x >> 63) >> (64 - __builtin_ctzll(y));
+    // ret ((x + shft) & (y - 1)) - shft;
+    auto const divisor = llabs(src2Val);
+    auto const trailingZeros = cns(env, 64 - __builtin_ctzll(divisor));
+    auto const shft = gen(env, Lshr,
+                          gen(env, Shr, src1, cns(env, 63)), trailingZeros);
+    return gen(env, SubInt,
                gen(env, AndInt,
-                 gen(env, Shr, src1, cns(env, 63)), cns(env, -src2Val)));
+                   gen(env, AddInt, src1, shft), cns(env, divisor - 1)), shft);
   }
   return nullptr;
 }
@@ -1017,6 +1022,13 @@ SSATmp* simplifyShl(State& env, const IRInstruction* inst) {
   return shiftImpl(env, inst,
                    [] (uint64_t a, int64_t b) -> int64_t {
                      return a << b;
+                   });
+}
+
+SSATmp* simplifyLshr(State& env, const IRInstruction* inst) {
+  return shiftImpl(env, inst,
+                   [] (uint64_t a, int64_t b) -> int64_t {
+                     return a >> b;
                    });
 }
 

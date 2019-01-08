@@ -49,6 +49,18 @@ print "1 / 0.0 --> "; print 1 / 0.0;
 print "1.0 / 0.0 --> "; print 1.0 / 0.0;
 print "\n";
 
+for ($i = -10; $i <= 10; $i++) {
+  print $i." % 4 --> ";
+  print $i % 4;
+  print "\n";
+}
+
+for ($i = -10; $i <= 10; $i++) {
+  print $i." % -4 --> ";
+  print $i % -4;
+  print "\n";
+}
+
 print "7 % 3 --> "; print 7 % 3; print "\n";
 print "-7 % 3 --> "; print -7 % 3; print "\n";
 print "7 % -3 --> "; print 7 % -3; print "\n";

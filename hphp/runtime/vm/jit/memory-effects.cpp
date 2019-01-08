@@ -1795,6 +1795,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Sqrt:
   case Shl:
   case Shr:
+  case Lshr:
   case IsNType:
   case IsType:
   case Mov:

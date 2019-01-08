@@ -61,6 +61,13 @@ let own_props c props =
     else acc
   end ~init:props
 
+let initialized_props c props =
+  List.fold_left c.sc_props ~f:begin fun acc sp ->
+    if (not (prop_needs_init sp)) && (not sp.sp_lateinit)
+    then SSet.add (snd sp.sp_name) acc
+    else acc
+  end ~init:props
+
 let parent_props decl_env c props =
   List.fold_left c.sc_extends ~f:begin fun acc parent ->
     match parent with

@@ -96,6 +96,7 @@ module Env = struct
     methods : method_status ref SMap.t ;
     props   : SSet.t ;
     tenv    : Typing_env.env ;
+    class_init_props: SSet.t;
   }
 
   let parent_id c = match c.c_extends with
@@ -110,14 +111,16 @@ module Env = struct
     let methods = List.fold_left ~f:method_ ~init:SMap.empty c.c_methods in
     let decl_env = tenv.Typing_env.decl_env in
     let sc = Shallow_decl.class_ decl_env.Decl_env.decl_tcopt c in
+    let class_init_props = DICheck.initialized_props sc SSet.empty in
     let props = SSet.empty
       |> DICheck.own_props sc
       (* If we define our own constructor, we need to pretend any traits we use
        * did *not* define a constructor, because they are not reachable through
        * parent::__construct or similar functions. *)
       |> DICheck.trait_props decl_env sc
+      |> DICheck.parent_props decl_env sc
       |> DICheck.parent decl_env sc in
-    { methods; props; tenv; }
+    { methods; props; tenv; class_init_props }
 
   and method_ acc m =
     if m.m_visibility <> Private then acc else
@@ -163,13 +166,16 @@ let rec class_ tenv c =
     let inits = constructor env c.c_constructor in
 
     let check_inits inits =
-    let uninit_props = SSet.diff env.props inits in
-    if SSet.empty <> uninit_props then begin
-      if SSet.mem DICheck.parent_init_prop uninit_props then
-        Errors.no_construct_parent p
-      else
-        Errors.not_initialized (p, snd c.c_name) (SSet.elements uninit_props)
-    end in
+      let uninit_props = SSet.diff env.props inits in
+      if SSet.empty <> uninit_props then begin
+        if SSet.mem DICheck.parent_init_prop uninit_props then
+          Errors.no_construct_parent p
+        else
+          let class_uninit_props = SSet.filter (fun v
+              -> not(SSet.mem v env.class_init_props)) uninit_props in
+          if SSet.empty <> class_uninit_props then
+            Errors.not_initialized (p, snd c.c_name) (SSet.elements class_uninit_props)
+      end in
 
     let check_throws_or_init_all inits =
       match inits with

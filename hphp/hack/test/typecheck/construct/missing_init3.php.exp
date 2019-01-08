@@ -1,0 +1,5 @@
+File "missing_init3.php", line 10, characters 19-29:
+Class B does not initialize all of its members; batchID is not always initialized.
+Make sure you systematically set $this->batchID when the method __construct is called.
+Alternatively, you can define the member as optional (?...)
+ (NastCheck[3015])

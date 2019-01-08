@@ -335,24 +335,6 @@ let merge_tvar_info tvinfo1 tvinfo2 =
 let get_tvar_info tvenv var =
   Option.value (IMap.get var tvenv) ~default:empty_tvar_info
 
-(* Add a single new upper bound [ty] to type variable [var] in [tvenv] *)
-let add_tvenv_upper_bound_ tvenv var ty =
-  (* Don't add superfluous v <: v or v <: ?v to environment *)
-  if is_tvar ~elide_nullable:true ty var
-  then tvenv
-  else
-  let tvinfo = get_tvar_info tvenv var in
-  IMap.add var { tvinfo with upper_bounds = ty ++ tvinfo.upper_bounds } tvenv
-
-(* Add a single new lower bound [ty] to type variable [var] in [tvenv] *)
-let add_tvenv_lower_bound_ tvenv var ty =
-  (* Don't add superfluous v <: v to environment *)
-  if is_tvar ~elide_nullable:false ty var
-  then tvenv
-  else
-  let tvinfo = get_tvar_info tvenv var in
-  IMap.add var { tvinfo with lower_bounds = ty ++ tvinfo.lower_bounds } tvenv
-
 let env_with_tvenv env tvenv =
   { env with tvenv = tvenv }
 
@@ -1333,17 +1315,15 @@ let set_tyvar_variance ~tyvars env ty =
   *   v <: (t1 & ... & tn)
   *)
  let add_tyvar_upper_bound ?intersect env var ty =
-   let env =
-     match intersect with
-     | None -> env_with_tvenv env (add_tvenv_upper_bound_ env.tvenv var ty)
-     | Some intersect ->
-       let tvinfo = get_tvar_info env.tvenv var in
-       let tyl = intersect ty (TySet.elements tvinfo.upper_bounds) in
-       let add ty tys =
-         if is_tvar ~elide_nullable:true ty var
-         then tys else TySet.add ty tys in
-       let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
-       env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } env.tvenv) in
+  (* Don't add superfluous v <: v or v <: ?v to environment *)
+  if is_tvar ~elide_nullable:true ty var then env else
+  let tvinfo = get_tvar_info env.tvenv var in
+  let upper_bounds = match intersect with
+    | None -> ty ++ tvinfo.upper_bounds
+    | Some intersect ->
+      TySet.of_list (intersect ty (TySet.elements tvinfo.upper_bounds)) in
+   let env = env_with_tvenv env
+    (IMap.add var { tvinfo with upper_bounds } env.tvenv) in
    if get_tyvar_appears_contravariantly env var
    then update_variance_of_tyvars_occurring_in_upper_bound env ty
    else env
@@ -1357,14 +1337,15 @@ let set_tyvar_variance ~tyvars env ty =
  *   (t1 | ... | tn) <: v
  *)
 let add_tyvar_lower_bound ?union env var ty =
-  let env =
-    match union with
-    | None -> env_with_tvenv env (add_tvenv_lower_bound_ env.tvenv var ty)
+  (* Don't add superfluous v <: v to environment *)
+  if is_tvar ~elide_nullable:false ty var then env else
+  let tvinfo = get_tvar_info env.tvenv var in
+  let lower_bounds = match union with
+    | None -> ty ++ tvinfo.lower_bounds
     | Some union ->
-      let tvinfo = get_tvar_info env.tvenv var in
-      let tyl = union ty (TySet.elements tvinfo.lower_bounds) in
-      let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
-      env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } env.tvenv) in
+      TySet.of_list (union ty (TySet.elements tvinfo.lower_bounds)) in
+  let env = env_with_tvenv env
+    (IMap.add var { tvinfo with lower_bounds } env.tvenv) in
   if get_tyvar_appears_covariantly env var
   then update_variance_of_tyvars_occurring_in_lower_bound env ty
   else env

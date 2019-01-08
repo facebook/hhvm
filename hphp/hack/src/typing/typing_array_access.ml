@@ -284,11 +284,11 @@ let rec array_get ?(lhs_of_null_coalesce=false)
     (env, tyvars), value
 
 let rec assign_array_append pos ur (env, tyvars) ty1 ty2 =
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types pos env
     [Log_head ("assign_array_append",
-    [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
-  let env, ety1 = Env.expand_type env ty1 in
+    [Log_type ("ty1", ty1); Log_type("ety1", ety1); Log_type("ty2", ty2)])]));
   match ety1 with
   | r, (Tany | Tarraykind (AKany | AKempty)) ->
     (env, tyvars), (ty1, (r, TUtils.tany env))
@@ -342,37 +342,24 @@ let rec assign_array_append pos ur (env, tyvars) ty1 ty2 =
     | [res] -> (env, tyvars), res
     | _ -> error_assign_array_append (env, tyvars) pos ty1
     end
-  | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ |
+  | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
         Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
     error_assign_array_append (env, tyvars) pos ty1
-
-  | _, Tvar _ ->
-    let env, value, tyvars = Env.fresh_unresolved_type_add_tyvars env pos tyvars in
-    let r = Reason.Rwitness pos in
-    let supertype =
-      (r, Tunresolved [
-        MakeType.collection r value;
-        MakeType.vec r value;
-        MakeType.keyset r value;
-        (r, Tarraykind (AKvec value))
-        ]) in
-    let env = SubType.sub_type env ty1 supertype in
-    let env = SubType.sub_type env ty2 value in
-    (env, tyvars), (ty1, value)
 
 (* Used for typing an assignment e1[key] = e2
  * where e1 has type ty1, key has type tkey and e2 has type ty2.
  * Return (ty1', ty2') where ty1' is the new array type, and ty2' is the element type
  *)
 let rec assign_array_get pos ur env ty1 key tkey ty2 =
-Typing_log.(log_with_level env "typing" 1 (fun () ->
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types pos env
   [Log_head ("assign_array_get",
    [Log_type ("ty1", ty1);
+    Log_type ("ety1", ety1);
     Log_type ("tkey", tkey);
     Log_type ("ty2", ty2)])]));
 
-  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   let arity_error (_, name) =
     Errors.array_get_arity pos name (Reason.to_pos (fst ety1)) in
   let type_index env p ty_have ty_expect reason =

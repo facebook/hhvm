@@ -725,6 +725,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
+    case KindOfClass:
     case KindOfRef: {
       String value = data.toString();
       if (!value.empty()) {
@@ -736,9 +737,6 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
-    case KindOfClass:
-      raise_warning("Not a valid stream resource");
-      return false;
   }
 
   // like fwrite(), fclose() can error when fflush()ing

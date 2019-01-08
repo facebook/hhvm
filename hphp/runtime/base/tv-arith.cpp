@@ -442,7 +442,8 @@ void cellBitOpEq(Op op, tv_lval c1, Cell c2) {
 // Op must implement the interface described for cellIncDecOp.
 template<class Op>
 void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
-  assertx(isStringType(type(cell)) || isFuncType(type(cell)));
+  assertx(isStringType(type(cell)) || isFuncType(type(cell)) ||
+          isClassType(type(cell)));
 
   if (sd->empty()) {
     decRefStr(sd);
@@ -784,10 +785,12 @@ void cellBitNot(Cell& cell) {
       cell.m_data.num = ~double_to_int64(cell.m_data.dbl);
       break;
 
+    case KindOfClass:
     case KindOfFunc:
+      cell.m_data.pstr = isFuncType(cell.m_type)
+        ? const_cast<StringData*>(funcToStringHelper(cell.m_data.pfunc))
+        : const_cast<StringData*>(classToStringHelper(cell.m_data.pclass));
       cell.m_type = KindOfString;
-      cell.m_data.pstr =
-        const_cast<StringData*>(funcToStringHelper(cell.m_data.pfunc));
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
     case KindOfPersistentString:
@@ -832,7 +835,6 @@ void cellBitNot(Cell& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       raise_error("Unsupported operand type for ~");
   }
 }

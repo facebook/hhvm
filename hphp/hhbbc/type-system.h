@@ -307,6 +307,7 @@ enum trep : uint64_t {
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
   BOptFunc     = BInitNull | BFunc,
+  BOptCls      = BInitNull | BCls,
   BOptSVecE    = BInitNull | BSVecE,
   BOptCVecE    = BInitNull | BCVecE,
   BOptSVecN    = BInitNull | BSVecN,
@@ -370,18 +371,18 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
-  BStrLike    = BFunc | BStr,
-  BUncStrLike = BFunc | BSStr,
+  BStrLike    = BFunc | BStr | BCls,
+  BUncStrLike = BFunc | BSStr | BCls,
 
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
-  BInitPrim = BInitNull | BBool | BNum | BFunc,
+  BInitPrim = BInitNull | BBool | BNum | BFunc | BCls,
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset | BFunc,
+              BVec | BDict | BKeyset | BFunc | BCls,
   BCell     = BUninit | BInitCell,
   BInitGen  = BInitCell | BRef,
   BGen      = BUninit | BInitGen,
@@ -861,6 +862,7 @@ X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
 X(OptFunc)                                      \
+X(OptCls)                                       \
 X(OptSVecE)                                     \
 X(OptSVecN)                                     \
 X(OptSVec)                                      \

@@ -472,6 +472,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
+    case KindOfClass:
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
@@ -524,7 +525,6 @@ static int fb_compact_serialize_variant(
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(
         "fb_compact_serialize(): unable to serialize "

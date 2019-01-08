@@ -1021,7 +1021,9 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 }
 
-const StaticString s_funcToStringWarning("Func to string conversion");
+const StaticString
+  s_funcToStringWarning("Func to string conversion"),
+  s_clsToStringWarning("Class to string conversion");
 
 void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
@@ -1048,6 +1050,33 @@ void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 
   PUNT(Func-cmp);
+}
+
+void implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  auto const rightTy = right->type();
+
+  if (rightTy <= TCls) {
+    if (op == Op::Eq || op == Op::Same) {
+      push(env, gen(env, EqCls, left, right));
+      return;
+    }
+    if (op == Op::Neq || op == Op::NSame) {
+      push(
+        env, gen(env, XorBool, gen(env, EqCls, left, right), cns(env, true)));
+      return;
+    }
+  }
+
+  if (rightTy <= TStr) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    auto const str = gen(env, LdClsName, left);
+    implStrCmp(env, op, str, right);
+    return;
+  }
+
+  PUNT(Cls-cmp);
 }
 
 /*
@@ -1108,7 +1137,9 @@ void implCmp(IRGS& env, Op op) {
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
       (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||
-      (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType()));
+      (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
+      (isClassType(leftTy.toDataType()) && isStringType(rightTy.toDataType()))||
+      (isStringType(leftTy.toDataType()) && isClassType(rightTy.toDataType()));
   };
 
   // If it's a same-ish comparison and the types don't match (taking into
@@ -1130,6 +1161,7 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TObj) implObjCmp(env, op, left, right);
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
   else if (leftTy <= TFunc) implFunCmp(env, op, left, right);
+  else if (leftTy <= TCls) implClsCmp(env, op, left, right);
   else always_assert(false);
 
   decRef(env, left);

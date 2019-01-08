@@ -72,6 +72,8 @@ auto constexpr OP_NOT_SUPPORTED_STRING =
   "Operator not supported for strings";
 auto constexpr OP_NOT_SUPPORTED_FUNC =
   "Operator not supported for funcs";
+auto constexpr OP_NOT_SUPPORTED_CLASS =
+  "Operator not supported for classes";
 auto constexpr ASYNC_WITHOUT_BODY =
   "Cannot declare %s method %s::%s() async; async is only meaningful"
   " when it modifies a method body";

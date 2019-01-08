@@ -88,6 +88,12 @@ inline bool is_string(const Cell* c) {
     }
     return true;
   }
+  if (tvIsClass(c)) {
+    if (RuntimeOption::EvalIsStringNotices) {
+      raise_notice("Class used in is_string");
+    }
+    return true;
+  }
   return false;
 }
 

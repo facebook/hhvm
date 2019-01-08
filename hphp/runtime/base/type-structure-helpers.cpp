@@ -41,7 +41,14 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfResource:
+      return false;
+
     case KindOfClass:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_string(cls->name())) {
+        classToStringHelper(tv->m_data.pclass); // maybe raise a warning
+        return true;
+      }
       return false;
 
     case KindOfFunc:
@@ -375,8 +382,8 @@ bool checkTypeStructureMatchesCellImpl(
         result = true;
         break;
       } else if (isClassType(type)) {
-        if (RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_warning("Class to string conversion");
+        if (RuntimeOption::EvalIsStringNotices) {
+          raise_notice("Class used in is_string");
         }
         result = true;
         break;

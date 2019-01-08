@@ -4333,7 +4333,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   if (env.index.satisfies_constraint(env.ctx,
                                      locAsCell(env, op.loc1),
                                      constraint)) {
-    if (!locAsCell(env, op.loc1).couldBe(TFunc)) return reduce(env, bc::Nop {});
+    if (!locAsCell(env, op.loc1).couldBe(BFunc | BCls)) {
+      return reduce(env, bc::Nop {});
+    }
   }
 
   if (!RuntimeOption::EvalHardTypeHints) return;
@@ -4421,10 +4423,10 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   }
 
   // VerifyRetType will convert a TFunc to a TStr implicitly (and possibly warn)
-  auto const convFunc = tcT.subtypeOf(TStr) && stackT.couldBe(TFunc);
+  auto const convToStr = tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls);
 
   auto retT = intersection_of(std::move(tcT), std::move(stackT));
-  if (convFunc) retT |= TStr;
+  if (convToStr) retT |= TStr;
 
   if (retT.subtypeOf(BBottom)) {
     unreachable(env);

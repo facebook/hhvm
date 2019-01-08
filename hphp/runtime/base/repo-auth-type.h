@@ -73,6 +73,8 @@ struct RepoAuthType {
     TAG(OptObj)                                   \
     TAG(Func)                                     \
     TAG(OptFunc)                                  \
+    TAG(Cls)                                      \
+    TAG(OptCls)                                   \
     TAG(InitUnc)                                  \
     TAG(Unc)                                      \
     TAG(UncArrKey)                                \

@@ -459,11 +459,14 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       sb.append(';');
       return sb.detach();
     }
+    case KindOfClass:
     case KindOfFunc:
     case KindOfPersistentString:
     case KindOfString: {
-      auto const str = isStringType(value.getType())
-        ? value.getStringData() : funcToStringHelper(value.toFuncVal());
+      auto const str =
+        isStringType(value.getType()) ? value.getStringData() :
+        isFuncType(value.getType())   ? funcToStringHelper(value.toFuncVal()) :
+                                        classToStringHelper(value.toClassVal());
       auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%d) exceeds max", size);
@@ -546,8 +549,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     }
     case KindOfDouble:
     case KindOfObject:
-    // TODO (T29639296)
-    case KindOfClass:
       break;
 
     case KindOfRef:
@@ -796,6 +797,12 @@ void HHVM_FUNCTION(parse_str,
   arr.assignIfRef(result);
 }
 
+Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer,
+                     const String& name) {
+  auto const cls = Unit::loadClass(name.get());
+  return cls ? Variant{cls} : init_null();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initVariable() {
@@ -858,6 +865,8 @@ void StandardExtension::initVariable() {
                 hhvm_intrinsics_serialize_keep_dvarrays);
     HHVM_FALIAS(__hhvm_intrinsics\\deserialize_keep_dvarrays,
                 hhvm_intrinsics_unserialize_keep_dvarrays);
+    HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer,
+                hhvm_intrinsics_create_class_pointer);
   }
 
   loadSystemlib("std_variable");

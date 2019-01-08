@@ -57,11 +57,15 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
     case KindOfFunc:
+    case KindOfClass:
     case KindOfPersistentString:
     case KindOfString: {
-      auto const s = cell.type() == KindOfFunc
-        ? const_cast<StringData*>(funcToStringHelper(val(cell).pfunc))
-        : val(cell).pstr;
+      auto const s =
+        isFuncType(cell.type())
+          ? const_cast<StringData*>(funcToStringHelper(val(cell).pfunc)) :
+        isClassType(cell.type())
+          ? const_cast<StringData*>(classToStringHelper(val(cell).pclass))
+          : val(cell).pstr;
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
@@ -133,9 +137,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       // Resources to the empty array during various serialization operations,
       // which does not match Zend behavior. We should fix this.
       return APCArray::MakeSharedEmptyArray();
-
-    case KindOfClass:
-      always_assert(false);
 
     case KindOfRef:
       return {nullptr, 0};

@@ -171,6 +171,7 @@ template <typename GetVal,
           typename PredInner,
           typename ColToArr,
           typename FuncToStr,
+          typename ClassToStr,
           typename Fail,
           typename HackArr,
           typename Callable,
@@ -184,6 +185,7 @@ void verifyTypeImpl(IRGS& env,
                     PredInner predInner,
                     ColToArr colToArr,
                     FuncToStr funcToStr,
+                    ClassToStr classToStr,
                     Fail fail,
                     HackArr hackArr,
                     Callable callable,
@@ -305,6 +307,22 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::ConvertFunc:
       assertx(valType <= TFunc);
       if (!funcToStr(val)) return genFail();
+      return;
+
+    case AnnotAction::WarnClass:
+      assertx(valType <= TCls);
+      gen(
+        env,
+        RaiseNotice,
+        cns(
+          env,
+          makeStaticString("Implicit Class to string conversion for type-hint")
+        )
+      );
+
+    case AnnotAction::ConvertClass:
+      assertx(valType <= TCls);
+      if (!classToStr(val)) return genFail();
       return;
   }
   assertx(result == AnnotAction::ObjectCheck);
@@ -533,6 +551,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
 
 const StaticString s_FUNC_CONVERSION("Func to string conversion");
 const StaticString s_FUNC_IS_STRING("Func used in is_string");
+const StaticString s_CLASS_IS_STRING("Class used in is_string");
 const StaticString s_CLASS_CONVERSION("Class to string conversion");
 
 SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
@@ -551,7 +570,20 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
           }
           return cns(env, true);
         },
-        [&] { return cns(env, false); }
+        [&] {
+          return cond(
+            env,
+            [&] (Block* taken) { gen(env, CheckType, TCls, taken, src); },
+            [&] {
+              if (RuntimeOption::EvalIsStringNotices) {
+                gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get())
+                );
+              }
+              return cns(env, true);
+            },
+            [&] { return cns(env, false); }
+          );
+        }
       );
     }
   );
@@ -892,9 +924,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
         gen(env, RaiseWarning, cns(env, s_FUNC_IS_STRING.get()));
       } else if (t->isA(TCls) &&
         RuntimeOption::EvalRaiseClassConversionWarning) {
-        gen(env, RaiseWarning, cns(env, s_CLASS_CONVERSION.get()));
+        gen(env, RaiseWarning, cns(env, s_CLASS_IS_STRING.get()));
       }
-      return unionOf(TStr, TFunc);
+      return unionOf(TStr, TFunc, TCls);
     }
     case TypeStructure::Kind::T_null:        return primitive(TNull);
     case TypeStructure::Kind::T_void:        return primitive(TNull);
@@ -1076,6 +1108,12 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
       push(env, str);
       return true;
     },
+    [&] (SSATmp* val) { // class to string conversions
+      auto const str = gen(env, LdClsName, val);
+      discard(env, 1);
+      push(env, str);
+      return true;
+    },
     [&] (Type, bool hard) { // Check failure
       updateMarker(env);
       env.irb->exceptionStackBoundary();
@@ -1146,6 +1184,11 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
     },
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
+      stLocRaw(env, id, fp(env), str);
+      return true;
+    },
+    [&] (SSATmp* val) { // class to string conversions
+      auto const str = gen(env, LdClsName, val);
       stLocRaw(env, id, fp(env), str);
       return true;
     },
@@ -1224,6 +1267,7 @@ void verifyPropType(IRGS& env,
     },
     [&] (Type) {}, // No collection to array automatic conversions
     [&] (SSATmp*) { return false; }, // No func to string automatic conversions
+    [&] (SSATmp*) { return false; }, // No class to string automatic conversions
     [&] (Type, bool hard) { // Check failure
       auto const failHard =
         hard && RuntimeOption::EvalCheckPropTypeHints >= 3;

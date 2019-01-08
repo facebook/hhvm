@@ -1462,7 +1462,7 @@ void VariableSerializer::serializeFunc(const Func* func) {
       m_buf->append(')');
       break;
     case Type::JSON:
-      write(name->data(), name->size());
+      write(StrNR(funcToStringHelper(func)));
       break;
     case Type::Serialize:
     case Type::Internal:
@@ -1474,8 +1474,38 @@ void VariableSerializer::serializeFunc(const Func* func) {
 }
 
 void VariableSerializer::serializeClass(const Class* cls) {
-  auto const name = cls->name();
-  write(name->data(), name->size());
+  switch (getType()) {
+    case Type::VarExport:
+    case Type::PHPOutput:
+      m_buf->append("class(");
+      write(cls->name()->data(), cls->name()->size());
+      m_buf->append(')');
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+      // TODO (T29639296)
+      // For now we use function(foo) to dump function pointers in most cases,
+      // and this can be changed in the future.
+      m_buf->append("class(");
+      m_buf->append(cls->name());
+      m_buf->append(")\n");
+      break;
+    case Type::PrintR:
+    case Type::DebuggerDump:
+      m_buf->append("class(");
+      m_buf->append(cls->name());
+      m_buf->append(')');
+      break;
+    case Type::JSON:
+      write(StrNR(classToStringHelper(cls)));
+      break;
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+      write(StrNR(classToStringHelper(cls)));
+      break;
+  }
 }
 
 NEVER_INLINE

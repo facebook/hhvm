@@ -529,6 +529,10 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
         raise_notice("Implicit Func to string conversion for type-hint");
       case AnnotAction::ConvertFunc:
         return false; // verifyFail will deal with the conversion
+      case AnnotAction::WarnClass:
+        raise_notice("Implicit Class to string conversion for type-hint");
+      case AnnotAction::ConvertClass:
+        return false; // verifyFail will deal with the conversion
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(td->type == AnnotType::Object);
@@ -725,6 +729,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::WarnFunc:
       raise_notice("Implicit Func to string conversion for type-hint");
     case AnnotAction::ConvertFunc:
+      return false; // verifyFail will handle the conversion
+    case AnnotAction::WarnClass:
+      raise_notice("Implicit Class to string conversion for type-hint");
+    case AnnotAction::ConvertClass:
       return false; // verifyFail will handle the conversion
   }
   not_reached();
@@ -935,8 +943,10 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     return;
   }
 
-  if (isString() && !isSoft() && c->m_type == KindOfFunc) {
-    c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
+  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
+    c->m_data.pstr = isFuncType(c->m_type)
+      ? const_cast<StringData*>(c->m_data.pfunc->name())
+      : const_cast<StringData*>(c->m_data.pclass->name());
     c->m_type = KindOfPersistentString;
     return;
   }
@@ -1067,9 +1077,11 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  if (!isSoft() && c->m_type == KindOfFunc) {
+  if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
-      c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
+      c->m_data.pstr = isFuncType(c->m_type)
+        ? const_cast<StringData*>(c->m_data.pfunc->name())
+        : const_cast<StringData*>(c->m_data.pclass->name());
       c->m_type = KindOfPersistentString;
       return;
     }

@@ -139,6 +139,8 @@ enum class AnnotAction {
   NonVArrayOrDArrayCheck,
   WarnFunc,
   ConvertFunc,
+  WarnClass,
+  ConvertClass,
 };
 
 /*
@@ -258,6 +260,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     return RuntimeOption::EvalStringHintNotices
       ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
   }
+  if (at == AnnotType::String && dt == KindOfClass) {
+    return RuntimeOption::EvalStringHintNotices
+      ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+  }
   if (at != AnnotType::Object) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
@@ -307,12 +313,17 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
             ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
         }
         return AnnotAction::Fail;
+      case KindOfClass:
+        if (interface_supports_string(annotClsName)) {
+          return RuntimeOption::EvalStringHintNotices
+            ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+        }
+        return AnnotAction::Fail;
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
         return AnnotAction::Fail;
-      case KindOfClass:
       case KindOfObject:
       case KindOfRef:
         not_reached();

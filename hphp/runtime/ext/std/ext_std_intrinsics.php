@@ -35,6 +35,9 @@ function dummy_arraylike_builtin(arraylike $x): arraylike;
 <<__Native, __HipHopSyntax>>
 function dummy_array_builtin(array $x): array;
 
+<<__Native, __HipHopSyntax>>
+function create_class_pointer(string $name): mixed;
+
 /*
  * Like serialize(), but serialize d/varrays into their own format so that they
  * can be distinguished and deserialized as themselves (serialize() will

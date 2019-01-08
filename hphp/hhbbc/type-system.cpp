@@ -176,6 +176,7 @@ bool mayHaveData(trep bits) {
   case BOptStrLike:
   case BOptUncStrLike:
   case BOptFunc:
+  case BOptCls:
   case BInitCell:
   case BCell:
   case BInitGen:
@@ -214,6 +215,7 @@ bool canBeOptional(trep bits) {
   case BObj:
   case BRes:
   case BFunc:
+  case BCls:
     return true;
 
   case BSPArrE:
@@ -261,7 +263,6 @@ bool canBeOptional(trep bits) {
   case BKeyset:
     return true;
 
-  case BCls:
   case BRef:
     return false;
 
@@ -322,6 +323,7 @@ bool canBeOptional(trep bits) {
   case BOptUncStrLike:
   case BOptStrLike:
   case BOptFunc:
+  case BOptCls:
     return false;
 
   case BInitPrim:
@@ -4918,7 +4920,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
     if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
   }
-  if (testTy.subtypeOf(BStrLike)) return valTy.couldBe(BFunc);
+  if (testTy.subtypeOf(BStrLike)) return valTy.couldBe(BFunc | BCls);
   return false;
 }
 
@@ -5256,7 +5258,6 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
 }
 
 RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
-  assert(!t.couldBe(BCls));
   assert(!t.subtypeOf(BBottom));
   using T = RepoAuthType::Tag;
 
@@ -5318,6 +5319,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptObj)
   X(Func)
   X(OptFunc)
+  X(Cls)
+  X(OptCls)
   X(UncArrKey)
   X(ArrKey)
   X(OptUncArrKey)

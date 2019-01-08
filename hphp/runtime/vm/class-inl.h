@@ -585,7 +585,7 @@ inline bool classMayHaveMagicPropMethods(const Class* cls) {
 
 inline const StringData* classToStringHelper(const Class* cls) {
  if (RuntimeOption::EvalRaiseClassConversionWarning) {
-   raise_warning("Class to string convesion");
+   raise_warning("Class to string conversion");
  }
  return cls->name();
 }

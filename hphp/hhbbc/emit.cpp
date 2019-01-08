@@ -1229,6 +1229,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptRes:
   case T::OptObj:
   case T::OptFunc:
+  case T::OptCls:
   case T::OptUncArrKey:
   case T::OptArrKey:
   case T::OptUncStrLike:
@@ -1255,6 +1256,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Str:
   case T::Obj:
   case T::Func:
+  case T::Cls:
     return;
 
   case T::OptSArr:
@@ -1501,7 +1503,7 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls, true);
   for (auto& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
-      if (ty.couldBe(BCls)) return RepoAuthType{};
+      if (!ty.subtypeOf(BGen)) return RepoAuthType{};
       if (ty.subtypeOf(BBottom)) {
         // Properties are only allowed to be TBottom if they're LateInit. The
         // repo auth type here doesn't particularly matter, since every access

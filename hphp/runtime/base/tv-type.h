@@ -57,6 +57,7 @@ CASE(Object)
 CASE(Resource)
 CASE(Ref)
 CASE(Func)
+CASE(Class)
 
 #undef CASE
 

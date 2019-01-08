@@ -358,7 +358,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    case KindOfClass:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
       if (checkHACArrayKeyCast()) {
         raiseHackArrCompatImplicitArrayKey(cell);
@@ -368,6 +367,9 @@ bool HHVM_FUNCTION(array_key_exists,
 
     case KindOfFunc:
       return ad->exists(StrNR(funcToStringHelper(cell->m_data.pfunc)));
+
+    case KindOfClass:
+      return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass)));
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -3007,6 +3009,9 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfFunc:
       return tvReturn(StrNR(funcToStringHelper(input.toFuncVal())));
 
+    case KindOfClass:
+      return tvReturn(StrNR(classToStringHelper(input.toClassVal())));
+
     case KindOfInt64:
     case KindOfBoolean:
     case KindOfDouble:
@@ -3051,10 +3056,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfObject:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Objects cannot be cast to an array-key"
-      );
-    case KindOfClass:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Classes cannot be cast to an array-key"
       );
     case KindOfRef:
       break;

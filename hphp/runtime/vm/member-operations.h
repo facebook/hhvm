@@ -314,6 +314,11 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
       base, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
     );
   }
+  if (isClassType(dt)) {
+    return ElemArrayPre<mode, intishCast>(
+      base, const_cast<StringData*>(classToStringHelper(key.m_data.pclass))
+    );
+  }
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
@@ -1331,10 +1336,12 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-    case KindOfClass:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
+    case KindOfClass:
+      raise_error(Strings::OP_NOT_SUPPORTED_CLASS);
+      return nullptr;
     case KindOfFunc:
       raise_error(Strings::OP_NOT_SUPPORTED_FUNC);
       return nullptr;
@@ -1706,6 +1713,11 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, Cell* value) {
   if (isFuncType(key.m_type)) {
     return SetElemArrayPre<setResult, intishCast>(
       a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value
+    );
+  }
+  if (isClassType(key.m_type)) {
+    return SetElemArrayPre<setResult, intishCast>(
+      a, const_cast<StringData*>(classToStringHelper(key.m_data.pclass)), value
     );
   }
   if (checkHACArrayKeyCast()) {
@@ -2613,6 +2625,11 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key) {
   if (isFuncType(key.m_type)) {
     return UnsetElemArrayPre<intishCast>(
       a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
+    );
+  }
+  if (isClassType(key.m_type)) {
+    return UnsetElemArrayPre<intishCast>(
+      a, const_cast<StringData*>(classToStringHelper(key.m_data.pclass))
     );
   }
   auto const k = tvToKey(key, a);

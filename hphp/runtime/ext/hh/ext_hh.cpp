@@ -254,6 +254,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_string_data(sb, funcToStringHelper(tv.m_data.pfunc));
       break;
 
+    case KindOfClass:
+      serialize_memoize_code(sb, SER_MC_STRING);
+      serialize_memoize_string_data(sb, classToStringHelper(tv.m_data.pclass));
+      break;
+
     case KindOfPersistentString:
     case KindOfString:
       serialize_memoize_code(sb, SER_MC_STRING);
@@ -278,7 +283,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfResource:
-    case KindOfClass:
     case KindOfRef: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

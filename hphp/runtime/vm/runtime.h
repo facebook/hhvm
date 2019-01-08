@@ -227,14 +227,10 @@ inline ObjectData* newInstance(Class* cls) {
 }
 
 // Does the same work as newInstance but also sets the reified generics on the
-// class denoted as `cls`. If this class is not reified, this function raises
-// an error.
+// class denoted as `cls`.
 inline ObjectData* newInstanceReified(Class* cls, ArrayData* reifiedTypes) {
+  if (!cls->hasReifiedGenerics()) return newInstance(cls);
   auto* inst = newInstanceImpl(cls);
-  if (!cls->hasReifiedGenerics()) {
-    raise_error("Cannot create a new instance of a non-reified class with "
-                "the reified generics");
-  }
   assertx(reifiedTypes != nullptr);
   checkClassReifiedGenericMismatch(cls, reifiedTypes);
   setReifiedGenerics(inst, cls, reifiedTypes);

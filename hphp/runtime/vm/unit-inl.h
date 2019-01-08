@@ -342,10 +342,6 @@ inline Class* Unit::loadClass(const StringData* name) {
   class_ = loadClass(generic_ne, name);
   // If the class still does not exists, return null
   if (!class_) return nullptr;
-  if (!class_->hasReifiedGenerics()) {
-    raise_error("Cannot create a new instance of a non-reified class with "
-                "the reified generics");
-  }
   ne->m_cachedClass.bind(
     classHasPersistentRDS(class_) ? rds::Mode::Persistent : rds::Mode::Normal);
   ne->setCachedClass(class_);

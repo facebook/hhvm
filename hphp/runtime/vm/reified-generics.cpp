@@ -129,12 +129,7 @@ void checkReifiedGenericMismatchHelper(
                     i);
       }
       // It is not a wildcard
-      if (it == locations.end() || *it != i) {
-        raise_error("%s %s does not expect a reified generic at index %zu",
-                    fun ? "Function" : "Class",
-                    name->data(),
-                    i);
-      }
+      if (it == locations.end() || *it != i) return false;
       ++it;
       return false;
     }

@@ -1,1 +1,1 @@
-Fatal error: Class C does not expect a reified generic at index 1 in %s on line 5
+Fatal error: Class C expects a reified generic at index 2 in %s on line 5

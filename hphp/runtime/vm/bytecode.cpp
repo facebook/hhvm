@@ -1685,10 +1685,7 @@ namespace {
 // Check whether HasReifiedGenerics is set on the ActRec
 // Check whether the location of reified generics matches the one we expect
 void checkForReifiedGenericsErrors(const ActRec* ar) {
-  if (!ar->m_func->hasReifiedGenerics() && !ar->hasReifiedGenerics()) return;
-  if (!ar->m_func->hasReifiedGenerics()) {
-    raise_error(Strings::REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN);
-  }
+  if (!ar->m_func->hasReifiedGenerics()) return;
   if (!ar->hasReifiedGenerics()) {
     raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN);
   }

@@ -103,9 +103,6 @@ SSATmp* emitLdARReifiedGenericsSafe(IRGS& env) {
 const StaticString s_reified_generics_not_given(
   Strings::REIFIED_GENERICS_NOT_GIVEN
 );
-const StaticString s_reified_generics_should_not_be_given(
-  Strings::REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN
-);
 
 // Check whether HasReifiedGenerics is set on the ActRec
 void emitARHasReifiedGenericsCheck(IRGS& env) {
@@ -120,20 +117,12 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
       RuntimeOption::RepoAuthoritative) {
     return;
   }
-  ifThenElse(
+  if (!func->hasReifiedGenerics()) return;
+  ifThen(
     env,
     [&] (Block* taken) {
       auto const test = emitARHasReifiedGenericsTest(env);
       gen(env, JmpZero, taken, test);
-    },
-    [&] {
-      if (func->hasReifiedGenerics()) return;
-      hint(env, Block::Hint::Unlikely);
-      gen(
-        env,
-        RaiseError,
-        cns(env, s_reified_generics_should_not_be_given.get())
-      );
     },
     [&] {
       if (!func->hasReifiedGenerics()) return;
@@ -142,7 +131,6 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
       gen(env, RaiseError, cns(env, s_reified_generics_not_given.get()));
     }
   );
-  if (!func->hasReifiedGenerics()) return;
   // Now that we know that first local is not Tuninit,
   // lets tell that to the JIT
   gen(

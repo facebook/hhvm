@@ -1315,17 +1315,16 @@ and expr_
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
-  let compute_supertype ~expected env tys =
+  let compute_supertype ~expected ~reason p env tyvars tys =
     let env, supertype, tyvars =
       match expected with
-      | None -> Env.fresh_unresolved_type_add_tyvars env Pos.none ISet.empty
-      | Some (_, _, ty) -> env, ty, ISet.empty in
+      | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars
+      | Some (_, _, ty) -> env, ty, tyvars in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
       | (_, Tany) -> env, supertype, tyvars
       | _ ->
-      let subtype_value env ty =
-        Type.sub_type p Reason.URarray_value env ty supertype in
+      let subtype_value env ty = Type.sub_type p reason env ty supertype in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
       if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
         (* If one of the values comes from PHP land, we have to be conservative
@@ -1339,15 +1338,12 @@ and expr_
    * function extracts a list of exprs from the list, and computes the supertype
    * of all of the expressions' tys.
    *)
-  let compute_exprs_and_supertype ~expected env l extract_expr_and_ty =
+  let compute_exprs_and_supertype ~expected ?(reason = Reason.URarray_value)
+    p env tyvars l extract_expr_and_ty =
     let env, exprs_and_tys = List.map_env env l (extract_expr_and_ty ~expected) in
     let exprs, tys = List.unzip exprs_and_tys in
-    let env, supertype, tyvars = compute_supertype ~expected env tys in
+    let env, supertype, tyvars = compute_supertype ~expected ~reason p env tyvars tys in
     env, exprs, supertype, tyvars in
-
-  let subtype_arraykey ~class_name ~key_pos env key_ty =
-    let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict key_pos) in
-    Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
 
   let forget_fake_members env p callexpr =
     (* Some functions are well known to not change the types of members, e.g.
@@ -1403,7 +1399,7 @@ and expr_
             env, None in
         let env, tel, arraykind, tyvars =
           let env, tel, value_ty, tyvars =
-            compute_exprs_and_supertype ~expected:elem_expected env l array_field_value in
+            compute_exprs_and_supertype ~expected:elem_expected p env ISet.empty l array_field_value in
           env, tel, AKvec value_ty, tyvars in
         make_result ~tyvars env p
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
@@ -1424,9 +1420,8 @@ and expr_
           | _ ->
             env, None in
         let env, _value_exprs, value_ty, tyvars =
-          compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
-        make_result ~tyvars env p T.Any
-          (Reason.Rwitness p, Tarraykind (AKvec value_ty))
+          compute_exprs_and_supertype ~expected:vexpected p env ISet.empty l array_field_value in
+        make_result ~tyvars env p T.Any (Reason.Rwitness p, Tarraykind (AKvec value_ty))
       else
         (* Use expected type to determine expected element type *)
         let env, kexpected, vexpected =
@@ -1438,11 +1433,12 @@ and expr_
             end
           | _ ->
             env, None, None in
-        let env, key_exprs, key_ty, key_tyvars =
-          compute_exprs_and_supertype ~expected:kexpected env l array_field_key in
-        let env, value_exprs, value_ty, value_tyvars =
-          compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
-        make_result ~tyvars:(ISet.union key_tyvars value_tyvars) env p
+        let tyvars = ISet.empty in
+        let env, key_exprs, key_ty, tyvars =
+          compute_exprs_and_supertype ~expected:kexpected p env tyvars l array_field_key in
+        let env, value_exprs, value_ty, tyvars =
+          compute_exprs_and_supertype ~expected:vexpected p env tyvars l array_field_value in
+        make_result ~tyvars env p
           (T.Array (List.map (List.zip_exn key_exprs value_exprs)
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
           (Reason.Rwitness p, Tarraykind (AKmap (key_ty, value_ty)))
@@ -1461,18 +1457,14 @@ and expr_
         | _ ->
           env, None, None in
       let keys, values = List.unzip l in
-
-      let env, value_exprs, value_ty, value_tyvars =
-        compute_exprs_and_supertype ~expected:vexpected env values array_value in
-      let env, key_exprs, key_ty, key_tyvars =
-        compute_exprs_and_supertype ~expected:kexpected env keys array_value in
-      let env =
-        List.fold_left key_exprs ~init:env ~f:begin
-          fun env ((key_pos, key_ty), _) ->
-            subtype_arraykey ~class_name:"darray" ~key_pos env key_ty
-        end in
+      let tyvars = ISet.empty in
+      let env, value_exprs, value_ty, tyvars =
+        compute_exprs_and_supertype ~expected:vexpected p env tyvars values array_value in
+      let env, key_exprs, key_ty, tyvars =
+        compute_exprs_and_supertype ~expected:kexpected p env tyvars keys
+          (arraykey_value p "darray") in
       let field_exprs = List.zip_exn key_exprs value_exprs in
-      make_result ~tyvars:(ISet.union value_tyvars key_tyvars) env p
+      make_result ~tyvars env p
         (T.Darray field_exprs)
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
 
@@ -1491,13 +1483,12 @@ and expr_
           env, None
         in
       let env, value_exprs, value_ty, tyvars =
-        compute_exprs_and_supertype ~expected:elem_expected env values array_value in
+        compute_exprs_and_supertype ~expected:elem_expected p env ISet.empty values array_value in
       make_result ~tyvars env p
         (T.Varray value_exprs)
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
   | ValCollection (kind, el) ->
-      let tyvars = ISet.empty in
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match expand_expected env expected with
@@ -1509,28 +1500,21 @@ and expr_
             env, None
           end
         | _ -> env, None in
-      let env, tel, tyl = exprs ?expected:elem_expected env el in
-      let env, tyl = List.map_env env tyl Typing_env.unbind in
-      let env, elem_ty, tyvars =
-        match elem_expected with
-        | Some (_, _, ty) -> env, ty, tyvars
-        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
       let class_name = vc_kind_to_name kind in
-      let subtype_val env ((pos, _), ty) =
-        let env = Type.sub_type p Reason.URvector env ty elem_ty in
-        begin match kind with
+      let subtype_val =
+        match kind with
         | `Set | `ImmSet | `Keyset ->
-          subtype_arraykey ~class_name ~key_pos:pos env ty
+          arraykey_value p class_name
         | `Vector | `ImmVector | `Vec | `Pair ->
-           env
-        end in
-      let env =
-        List.fold_left (List.zip_exn el tyl) ~init:env ~f:subtype_val in
+          array_value in
+
+      let env, tel, elem_ty, tyvars =
+        compute_exprs_and_supertype ~expected:elem_expected ~reason:Reason.URvector
+          p env ISet.empty el subtype_val in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [elem_ty] in
       make_result ~tyvars env p (T.ValCollection (kind, tel)) ty
   | KeyValCollection (kind, l) ->
       (* Use expected type to determine expected key and value types *)
-      let tyvars = ISet.empty in
       let env, kexpected, vexpected =
         match expand_expected env expected with
         | env, Some (pos, ur, ety) ->
@@ -1542,27 +1526,14 @@ and expr_
           end
         | _ -> env, None, None in
       let kl, vl = List.unzip l in
-      let env, tkl, kl = exprs ?expected:kexpected env kl in
-      let env, tvl, vl = exprs ?expected:vexpected env vl in
-      let env, kl = List.map_env env kl Typing_env.unbind in
-      let env, k, tyvars =
-        match kexpected with
-        | Some (_, _, k) -> env, k, tyvars
-        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
-      let env, vl = List.map_env env vl Typing_env.unbind in
-      let env, v, tyvars =
-        match vexpected with
-        | Some (_, _, v) -> env, v, tyvars
-        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
+      let tyvars = ISet.empty in
       let class_name = kvc_kind_to_name kind in
-      let subtype_key env (((key_pos, _), _), ty) =
-        let env = Type.sub_type p Reason.URkey env ty k in
-        subtype_arraykey ~class_name ~key_pos env ty in
-      let env =
-        List.fold_left (List.zip_exn tkl kl) ~init:env ~f:subtype_key in
-      let subtype_val env ty = Type.sub_type p Reason.URvalue env ty v in
-      let env =
-        List.fold_left vl ~init:env ~f:subtype_val in
+      let env, tkl, k, tyvars =
+        compute_exprs_and_supertype ~expected:kexpected ~reason:Reason.URkey
+          p env tyvars kl (arraykey_value p class_name) in
+      let env, tvl, v, tyvars =
+        compute_exprs_and_supertype ~expected:vexpected ~reason:Reason.URvalue
+          p env tyvars vl array_value in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [k; v] in
       make_result ~tyvars env p (T.KeyValCollection (kind, List.zip_exn tkl tvl)) ty
   | Clone e ->
@@ -3292,9 +3263,14 @@ and array_value ~expected env x =
   env, (te, ty)
 
 and array_field_value ~expected env = function
-  | Nast.AFvalue x
-  | Nast.AFkvalue (_, x) ->
+  | Nast.AFvalue x | Nast.AFkvalue (_, x) ->
       array_value ~expected env x
+
+and arraykey_value p class_name ~expected env ((pos, _) as x) =
+  let env, (te, ty) = array_value ~expected env x in
+  let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
+  let env = Type.sub_type p (Reason.index_class class_name) env ty ty_arraykey in
+  env, (te, ty)
 
 and array_field_key ~expected env = function
   (* This shouldn't happen *)

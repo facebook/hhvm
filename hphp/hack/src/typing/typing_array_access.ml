@@ -123,6 +123,18 @@ let rec array_get ?(lhs_of_null_coalesce=false)
               any, any
         in
         let env, ty2 = Env.unbind env ty2 in
+        (* dict and keyset are covariant in the key type, so subsumption
+         * lets you upcast the key type beyond ty2 to arraykey.
+         * e.g. consider $d: dict<string,int> and $i:int
+         * and $d[$i] should actually type check because
+         * dict<string,int> <: dict<arraykey,int>
+         *)
+        let env, k = Env.expand_type env k in
+        let k =
+          if TypecheckerOptions.new_inference (Env.get_tcopt env)
+          && (cn = SN.Collections.cDict || cn = SN.Collections.cKeyset)
+          then MakeType.arraykey (fst k)
+          else k in
         let acc = type_index (env, tyvars) p ty2 k (Reason.index_class cn) in
         acc, v
   (* Certain container/collection types are intended to be immutable/const,
@@ -163,6 +175,12 @@ let rec array_get ?(lhs_of_null_coalesce=false)
     error_const_mutation acc p ety1
   | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
       let env, ty2 = Env.unbind env ty2 in
+      (* See comment for dict and keyset above *)
+      let env, k = Env.expand_type env k in
+      let k =
+        if TypecheckerOptions.new_inference (Env.get_tcopt env)
+        then MakeType.arraykey (fst k)
+        else k in
       let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
       acc, v
   | Terr -> acc, err_witness env p

@@ -95,7 +95,7 @@ int64_t BZ2File::readImpl(char * buf, int64_t length) {
   if (len <= 0) {
     setEof(true);
     if (len < 0) {
-      return -1;
+      return 0;
     }
   }
   return len;

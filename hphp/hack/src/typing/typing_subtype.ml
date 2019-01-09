@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+open Common
 open Utils
 open Typing_defs
 
@@ -2275,6 +2276,130 @@ let add_constraint
   in
     iter 0 env'
 
+(* Given a type ty, replace any covariant or contravariant components of the type
+ * with fresh type variables. Components replaced include
+ *   covariant key and element types for tuples, arrays, and shapes
+ *   covariant return type and contravariant parameter types for function types
+ *   co- and contra-variant parameters to classish types and newtypes
+ * Assert that the component is a subtype of the fresh variable (covariant) or
+ * a supertype of the fresh variable (contravariant).
+ *
+ * Note that the variance of type variables is set explicitly to be invariant
+ * because we only use this function on the lower bounds of an invariant
+ * type variable.
+ *
+ * Also note that freshening lifts through unions and nullables.
+ *
+ * For example, the type
+ *   ?dict<t1,t2>
+ * will be transformed to
+ *   ?dict<tvar1,tvar2> with t1 <: tvar1 and t2 <: tvar2
+ * For example, the type
+ *   Contra<t>
+ * will be transformed to
+ *   Contra<tvar1> with tvar1 <: t
+ *)
+let rec freshen_inside_ty_wrt_variance env ((r, ty_) as ty) =
+  let default () = env, ty in
+  match ty_ with
+  | Tany | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ | Tabstract(_, None) ->
+    default ()
+    (* Nullable is covariant *)
+  | Toption ty ->
+    let env, ty = freshen_inside_ty_wrt_variance env ty in
+    env, (r, Toption ty)
+  | Tunresolved tyl ->
+    let env, tyl = List.map_env env tyl freshen_inside_ty_wrt_variance in
+    env, (r, Tunresolved tyl)
+    (* Tuples are covariant *)
+  | Ttuple tyl ->
+    let env, tyl = List.map_env env tyl (freshen_ty ~variance:Ast.Covariant) in
+    env, (r, Ttuple tyl)
+    (* Shape data is covariant *)
+  | Tshape (known, fdm) ->
+    let env, fdm = ShapeFieldMap.map_env (freshen_ty ~variance:Ast.Covariant) env fdm in
+    env, (r, Tshape (known, fdm))
+    (* Functions are covariant in return type, contravariant in parameter types *)
+  | Tfun ft ->
+    let env, ft_ret = freshen_ty ~variance:Ast.Covariant env ft.ft_ret in
+    let env, ft_params = List.map_env env ft.ft_params
+      (fun env p ->
+       let env, fp_type = freshen_ty ~variance:Ast.Contravariant env p.fp_type in
+       env, { p with fp_type = fp_type }) in
+    env, (r, Tfun { ft with ft_ret = ft_ret; ft_params = ft_params })
+    (* Newtype definitions carry their own variance declarations *)
+  | Tabstract (AKnewtype (name, tyl), tyopt) ->
+    begin match Env.get_typedef env name with
+    | None ->
+      default ()
+    | Some td ->
+      let variancel = List.map td.td_tparams (fun t -> t.tp_variance) in
+      let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
+      env, (r, Tabstract (AKnewtype (name, tyl), tyopt))
+    end
+  | Tabstract _ ->
+    default ()
+    (* Classes carry their own variance declarations *)
+  | Tclass ((p, cid), e, tyl) ->
+    begin match Env.get_class env cid with
+    | None ->
+      default ()
+    | Some cls ->
+      let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in
+      let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
+      env, (r, Tclass((p, cid), e, tyl))
+    end
+    (* Arrays are covariant in key and data types *)
+  | Tarraykind ak ->
+    begin match ak with
+    | AKany | AKempty -> default ()
+    | AKvarray ty ->
+      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      env, (r, Tarraykind (AKvarray ty))
+    | AKvec ty ->
+      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      env, (r, Tarraykind (AKvec ty))
+    | AKvarray_or_darray ty ->
+      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      env, (r, Tarraykind (AKvarray_or_darray ty))
+    | AKdarray (ty1, ty2) ->
+      let env, ty1 = freshen_ty ~variance:Ast.Covariant env ty1 in
+      let env, ty2 = freshen_ty ~variance:Ast.Covariant env ty2 in
+      env, (r, Tarraykind (AKdarray (ty1, ty2)))
+    | AKmap (ty1, ty2) ->
+      let env, ty1 = freshen_ty ~variance:Ast.Covariant env ty1 in
+      let env, ty2 = freshen_ty ~variance:Ast.Covariant env ty2 in
+      env, (r, Tarraykind (AKmap (ty1, ty2)))
+    end
+  | Tvar _ ->
+    default ()
+
+and freshen_ty ~variance env ty =
+  match variance with
+  | Ast.Invariant -> env, ty
+  | Ast.Covariant | Ast.Contravariant ->
+    let v = Env.fresh () in
+    let env = Env.set_tyvar_appears_covariantly env v in
+    let env = Env.set_tyvar_appears_contravariantly env v in
+    let freshty = (fst ty, Tvar v) in
+    let env =
+      if variance = Ast.Covariant
+      then sub_type env ty freshty
+      else sub_type env freshty ty in
+    env, freshty
+
+
+and freshen_tparams_wrt_variance env variancel tyl =
+   match variancel, tyl with
+   | [], [] ->
+     env, []
+   | variance::variancel, ty::tyl ->
+     let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
+     let env, ty = freshen_ty ~variance env ty in
+     env, ty::tyl
+   | _ ->
+     env, tyl
+
 let bind env r var ty =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
   log_types (Reason.to_pos r) env
@@ -2285,7 +2410,11 @@ let bind env r var ty =
   (* Remove the variable from the environment *)
   Env.remove_tyvar env var
 
-let bind_to_lower_bound env r var =
+(* Solve type variable var by assigning it to the union of its lower bounds.
+ * If freshen=true, first freshen the covariant and contravariant components of
+ * the bounds.
+ *)
+let bind_to_lower_bound ~freshen env r var =
   let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
   (* Construct the union of the lower bounds. Note that if there are no lower
    * bounds then we will construct the empty type, i.e. Tunresolved []. *)
@@ -2293,6 +2422,10 @@ let bind_to_lower_bound env r var =
     match lower_bounds with
     | [ty] -> ty
     | tys -> (r, Tunresolved tys) in
+  let env, ty =
+    if freshen
+    then freshen_inside_ty_wrt_variance env ty
+    else env, ty in
   bind env r var ty
 
 let bind_to_upper_bound env r var =
@@ -2317,7 +2450,7 @@ let bind_to_upper_bound env r var =
  *   there exist i, j such that uj <: ti, which implies ti == uj and allows
  *   us to set v := ti.
  *)
-let solve_tyvar ~solve_invariant env r var =
+let solve_tyvar ~freshen ~solve_invariant env r var =
   (* Don't try and solve twice *)
   if Env.tyvar_is_solved env var
   then env
@@ -2330,7 +2463,7 @@ let solve_tyvar ~solve_invariant env r var =
     (* As in Local Type Inference by Pierce & Turner, if type variable does
      * not appear at all, or only appears covariantly, force to lower bound
      *)
-    bind_to_lower_bound env r var
+    bind_to_lower_bound ~freshen:false env r var
   | false, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears only contravariantly, force to upper bound
@@ -2345,20 +2478,27 @@ let solve_tyvar ~solve_invariant env r var =
     let upper_bounds = Env.get_tyvar_upper_bounds env var in
     match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
     | Some ty -> bind env r var ty
-    | None -> if solve_invariant then bind_to_lower_bound env r var else env
+    | None -> if solve_invariant then bind_to_lower_bound ~freshen env r var else env
 
 let solve_tyvars ?(solve_invariant = false) ~tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
   then ISet.fold
-    (fun tyvar env -> solve_tyvar ~solve_invariant env Reason.Rnone tyvar)
+    (fun tyvar env -> solve_tyvar ~freshen:false ~solve_invariant env Reason.Rnone tyvar)
     tyvars env
   else env
 
+(* Expand an already-solved type variable, and solve an unsolved type variable
+ * by binding it to the union of its lower bounds, with covariant and contravariant
+ * components of the type suitably "freshened". For example,
+ *    vec<C> <: #1
+ * will be solved by
+ *    #1 := vec<#2>  where C <: #2
+ *)
 let expand_type_and_solve env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
   | (_, Tvar v) when TypecheckerOptions.new_inference_eager_solve (Env.get_tcopt env) ->
-    let env = solve_tyvar ~solve_invariant:true env Reason.Rnone v in
+    let env = solve_tyvar ~freshen:true ~solve_invariant:true env Reason.Rnone v in
     Env.expand_type env ty
   | _ ->
     env, ety

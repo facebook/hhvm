@@ -1381,6 +1381,12 @@ and convert_defs env class_count typedef_count st dl =
     let st = set_namespace st ns in
     let st, dl = convert_defs env class_count typedef_count st dl in
     st, (TopLevel, SetNamespaceEnv ns) :: dl
+  | FileAttributes fa :: dl ->
+    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, fa_user_attributes =
+      convert_user_attributes env st fa.fa_user_attributes in
+    let fa = { fa with fa_user_attributes } in
+    st, (TopLevel, FileAttributes fa) :: dl
 
 let count_classes defs =
   List.count defs ~f:(function Class _ -> true | _ -> false)

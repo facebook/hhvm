@@ -33,6 +33,7 @@ let get_defs ast =
       | Ast.NamespaceUse _ | Ast.SetNamespaceEnv _ ->
         acc
        (* toplevel statements are ignored *)
+      | Ast.FileAttributes _
       | Ast.Stmt _ -> acc
     end
 in

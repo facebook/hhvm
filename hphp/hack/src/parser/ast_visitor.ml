@@ -138,6 +138,7 @@ class type ['a] ast_visitor_type = object
   method on_method_: 'a -> method_ -> 'a
   method on_namespace: 'a -> id -> program -> 'a
   method on_namespaceUse: 'a -> (Ast.ns_kind * id * id) list -> 'a
+  method on_file_attributes: 'a -> Ast.file_attributes -> 'a
   method on_program: 'a -> program -> 'a
   method on_tparam: 'a -> tparam -> 'a
   method on_typeConst: 'a -> typeconst -> 'a
@@ -656,6 +657,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Namespace (i, p) -> this#on_namespace acc i p
     | NamespaceUse idl -> this#on_namespaceUse acc idl
     | SetNamespaceEnv _e -> acc
+    | FileAttributes fa -> this#on_file_attributes acc fa
 
   method on_class_ acc c =
     let acc = List.fold_left this#on_user_attribute acc c.c_user_attributes in
@@ -687,6 +689,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       let acc = this#on_id acc i1 in
       let acc = this#on_id acc i2 in
       acc end acc il
+
+  method on_file_attributes acc fa =
+    List.fold_left this#on_user_attribute acc fa.fa_user_attributes
 
   method on_tparam acc t =
     let acc = this#on_id acc t.tp_name in

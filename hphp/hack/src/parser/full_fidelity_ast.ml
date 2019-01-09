@@ -1065,8 +1065,10 @@ and pFunParam : fun_param parser = fun node env ->
   | _ -> missing_syntax "function parameter" node env
 and pUserAttribute : user_attribute list parser = fun node env ->
   match syntax node with
-  | AttributeSpecification { attribute_specification_attributes; _ } ->
-    couldMap attribute_specification_attributes env ~f:begin function
+  | FileAttributeSpecification
+    { file_attribute_specification_attributes = attrs; _ }
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    couldMap attrs env ~f:begin function
       | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
         fun env ->
           { ua_name   = pos_name constructor_call_type env
@@ -3143,7 +3145,11 @@ and pDef : def list parser = fun node env ->
     ; _ } ->
       let f = pNamespaceUseClause env kind ~prefix:None in
       [ NamespaceUse (List.map ~f (as_list clauses)) ]
-  | FileAttributeSpecification _ -> []
+  | FileAttributeSpecification _ ->
+    [ FileAttributes
+    { fa_user_attributes = pUserAttribute node env
+    ; fa_namespace = Namespace_env.empty env.parser_options
+    }]
   | _ when env.fi_mode = FileInfo.Mdecl || env.fi_mode = FileInfo.Mphp
         && not env.codegen -> []
   | _ -> [ Stmt (pStmt node env) ]

@@ -623,6 +623,7 @@ and on_def : def -> Aast.def = function
   | Namespace (id, p) -> Aast.Namespace (id, on_program p)
   | NamespaceUse usel -> Aast.NamespaceUse (on_list on_ns_use usel)
   | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
+  | FileAttributes _ -> Aast.Stmt Aast.Noop
 
 and on_program ast = on_list on_def ast
 

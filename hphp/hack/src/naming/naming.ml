@@ -3031,6 +3031,7 @@ module Make (GetLocals : GetLocals) = struct
         top_level_env := (genv, lenv)
       end;
       []
+    | Ast.FileAttributes _ -> []
   end in program ast
 end
 

@@ -52,6 +52,7 @@ and def =
   | Namespace of id * program
   | NamespaceUse of (ns_kind * id * id) list
   | SetNamespaceEnv of nsenv
+  | FileAttributes of file_attributes
 
 and cst_kind =
   (* The constant was introduced with: define('X', ...); *)
@@ -86,6 +87,11 @@ and typedef = {
   t_user_attributes: user_attribute list;
   t_namespace: nsenv;
   t_mode: fimode;
+}
+
+and file_attributes = {
+  fa_user_attributes: user_attribute list;
+  fa_namespace: nsenv;
 }
 
 and gconst = {

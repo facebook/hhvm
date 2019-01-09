@@ -63,6 +63,13 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   return nullptr;
 }
 
+bool isMBaseLoad(const IRInstruction* inst) {
+  if (!inst->is(LdMem)) return false;
+  auto src = inst->src(0)->inst();
+  while (src->isPassthrough()) src = src->getPassthroughValue()->inst();
+  return src->is(LdMBase);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -110,6 +117,11 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         case CheckMBase:
           return folly::make_optional<Location>(Location::MBase{});
 
+        case LdMem:
+          return isMBaseLoad(inst)
+            ? folly::make_optional<Location>(Location::MBase{})
+            : folly::none;
+
         default:
           return folly::none;
       }
@@ -120,7 +132,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     // to be recorded in side tables.
     if (l) {
       m_constraints.typeSrcs[inst] = m_state.typeSrcsOf(*l);
-      if (!inst->is(LdLoc, LdStk)) {
+      if (!inst->is(LdLoc, LdStk) && !isMBaseLoad(inst)) {
         constrainLocation(*l, DataTypeGeneric, "appendInstruction");
         m_constraints.prevTypes[inst] = m_state.typeOf(*l);
       }
@@ -639,7 +651,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
   ITRACE(1, "constraining {} to {}\n", *inst, gc);
   Indent _i;
 
-  if (inst->is(LdLoc, LdStk)) {
+  if (inst->is(LdLoc, LdStk) || isMBaseLoad(inst)) {
     // If the value's type source is non-null and not a FramePtr, it's a real
     // value that was killed by a Call. The value won't be live but it's ok to
     // use it to track down the guard.
@@ -655,10 +667,12 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
         if (inst->is(LdLoc)) {
           ITRACE(1, "constraining guard for local[{}]\n",
                  inst->extra<LdLoc>()->locId);
-        } else {
-          assertx(inst->is(LdStk));
+        } else if (inst->is(LdStk)) {
           ITRACE(1, "constraining guard for stack[{}]\n",
                  inst->extra<LdStk>()->offset.offset);
+        } else {
+          assertx(isMBaseLoad(inst));
+          ITRACE(1, "constraining guard for mbase\n");
         }
       }
       changed |= constrainTypeSrc(typeSrc, gc);
@@ -760,7 +774,7 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
     return false;
   }
 
-  if (guard->is(AssertLoc, AssertStk)) {
+  if (guard->is(AssertLoc, AssertStk, AssertMBase)) {
     return constrainAssert(guard, gc, prevType);
   }
   return constrainCheck(guard, gc, prevType);

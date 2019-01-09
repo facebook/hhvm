@@ -397,7 +397,7 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 // Intermediate ops
 
 PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
-                                  bool constrain, bool ignoreLateInit) {
+                                  bool ignoreLateInit) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
@@ -407,17 +407,7 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   auto const baseCls = baseType.clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (info.offset == -1) return info;
-
-  if (env.irb->constrainValue(
-        base, GuardConstraint(info.propClass).setWeak())) {
-    if (!constrain) {
-      // We can't use this specialized class without making a guard more
-      // expensive, so don't do it.
-      return PropInfo{};
-    }
-    specializeObjBase(env, base);
-  }
-
+  specializeObjBase(env, base);
   return info;
 }
 
@@ -971,7 +961,7 @@ SSATmp* emitKeysetEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
@@ -1400,7 +1390,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
   auto const base = extractBaseIfObj(env);
 
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), true, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo.offset == -1 ||
       propInfo.immutable ||
       mode == MOpMode::Unset ||
@@ -1646,7 +1636,7 @@ template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, bool nullsafe, Finish finish) {
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), true, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpMode::None, propInfo)) {
@@ -1724,7 +1714,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
 
   auto const mode = MOpMode::Define;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), true, true);
+    getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&
@@ -2346,7 +2336,7 @@ template<class Finish>
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs, Finish finish) {
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
       !propInfo.immutable &&

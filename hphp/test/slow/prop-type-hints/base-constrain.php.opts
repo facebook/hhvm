@@ -1,0 +1,2 @@
+-vEval.JitPGO=false
+-vEval.CheckPropTypeHints=3

@@ -517,6 +517,9 @@ and fun_def tcopt f =
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
+      let filename = Pos.filename (fst f.f_name) in
+      let droot = env.Env.decl_env.Decl_env.droot in
+      let file_attrs = file_attributes tcopt filename f.f_mode droot f.f_file_attributes in
       let fundef = {
         T.f_annotation = Env.save local_tpenv env;
         T.f_span = f.f_span;
@@ -528,7 +531,7 @@ and fun_def tcopt f =
         T.f_variadic = t_variadic;
         T.f_params = typed_params;
         T.f_fun_kind = f.f_fun_kind;
-        T.f_file_attributes = [];
+        T.f_file_attributes = file_attrs;
         T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
         T.f_body = T.NamedBody {
           T.fnb_nast = tb;
@@ -6091,6 +6094,10 @@ and class_def_ env c tc =
   let typed_static_vars =
     List.map c.c_static_vars (class_var_def env ~is_static:true c) in
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
+  let filename = Pos.filename (fst c.c_name) in
+  let droot = env.Env.decl_env.Decl_env.droot in
+  let file_attrs =
+    file_attributes (Env.get_tcopt env) filename c.c_mode droot c.c_file_attributes in
   {
     T.c_span = c.c_span;
     T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
@@ -6115,7 +6122,7 @@ and class_def_ env c tc =
     T.c_constructor = typed_constructor;
     T.c_static_methods = typed_static_methods;
     T.c_methods = typed_methods;
-    T.c_file_attributes = [];
+    T.c_file_attributes = file_attrs;
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
     T.c_namespace = c.c_namespace;
     T.c_enum = c.c_enum;
@@ -6368,6 +6375,13 @@ and supertype_redeclared_method tc env m =
       )
     | _ -> ()
   end); env
+
+and file_attributes tcopt file mode droot file_attrs =
+  let env = Env.empty tcopt file ~droot in
+  let env = Env.set_mode env mode in
+  let env =
+    Typing_attributes.check_def env new_object SN.AttributeKinds.file file_attrs in
+  List.map file_attrs (user_attribute env)
 
 and user_attribute env ua =
   let typed_ua_params =

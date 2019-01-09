@@ -1,0 +1,6 @@
+File "file_attributes_wrong_type.php", line 3, characters 11-11:
+Invalid argument (Typing[4110])
+File "file_attributes_wrong_type.php", line 5, characters 38-43:
+This is a string
+File "file_attributes_wrong_type.php", line 3, characters 11-11:
+It is incompatible with an int

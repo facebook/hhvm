@@ -3070,6 +3070,7 @@ and assign_ p ur env e1 ty2 =
     let resl =
       TUtils.try_over_concrete_supertypes env folded_ty2
         begin fun env ty2 ->
+          let env, ty2 = SubType.expand_type_and_solve env ty2 in
           match ty2 with
           (* Vector<t> or ImmVector<t> or ConstVector<t> or vec<T> *)
           | (_, Tclass ((_, x), _, [elt_type]))

@@ -723,6 +723,24 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env type_var;
       t env ellipsis;
     ]
+  | Syntax.FileAttributeSpecification {
+      file_attribute_specification_left_double_angle = left_da;
+      file_attribute_specification_keyword = keyword;
+      file_attribute_specification_colon = colon;
+      file_attribute_specification_attributes = attrs;
+      file_attribute_specification_right_double_angle = right_da; } ->
+    Concat [
+      t env left_da;
+      t env keyword;
+      t env colon;
+      when_present colon space;
+      transform_possible_comma_list
+        env
+        ~allow_trailing:false
+        attrs
+        right_da;
+      Newline;
+    ]
   | Syntax.AttributeSpecification {
       attribute_specification_left_double_angle = left_da;
       attribute_specification_attributes = attrs;

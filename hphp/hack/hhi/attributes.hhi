@@ -19,6 +19,7 @@ interface InstancePropertyAttribute extends PropertyAttribute {}
 interface StaticPropertyAttribute extends PropertyAttribute {}
 
 interface ParameterAttribute {}
+interface FileAttribute {}
 
 interface TypeParameterAttribute {}
 

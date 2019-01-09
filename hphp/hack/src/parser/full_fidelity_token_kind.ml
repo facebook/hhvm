@@ -68,6 +68,7 @@ type t =
   | Extends
   | Fallthrough
   | Float
+  | File
   | Final
   | Finally
   | For
@@ -290,6 +291,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "extends"                                                            -> Some Extends
   | "fallthrough"     when is_hack                &&   not only_reserved -> Some Fallthrough
   | "float"                                       when not only_reserved -> Some Float
+  | "file"            when is_hack                &&   not only_reserved -> Some File
   | "final"                                                              -> Some Final
   | "finally"                                                            -> Some Finally
   | "for"                                                                -> Some For
@@ -483,6 +485,7 @@ let to_string kind =
   | Extends                       -> "extends"
   | Fallthrough                   -> "fallthrough"
   | Float                         -> "float"
+  | File                          -> "file"
   | Final                         -> "final"
   | Finally                       -> "finally"
   | For                           -> "for"

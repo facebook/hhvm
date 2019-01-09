@@ -100,6 +100,8 @@ class EditableSyntax
       return VariableExpression.from_json(json, position, source);
     case 'pipe_variable':
       return PipeVariableExpression.from_json(json, position, source);
+    case 'file_attribute_specification':
+      return FileAttributeSpecification.from_json(json, position, source);
     case 'enum_declaration':
       return EnumDeclaration.from_json(json, position, source);
     case 'enumerator':
@@ -807,6 +809,8 @@ class EditableToken extends EditableSyntax
        return new FallthroughToken(leading, trailing);
     case 'float':
        return new FloatToken(leading, trailing);
+    case 'file':
+       return new FileToken(leading, trailing);
     case 'final':
        return new FinalToken(leading, trailing);
     case 'finally':
@@ -1533,6 +1537,13 @@ class FloatToken extends EditableToken
   constructor(leading, trailing)
   {
     super('float', leading, trailing, 'float');
+  }
+}
+class FileToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('file', leading, trailing, 'file');
   }
 }
 class FinalToken extends EditableToken
@@ -3416,6 +3427,133 @@ class PipeVariableExpression extends EditableSyntax
       PipeVariableExpression._children_keys = [
         'expression'];
     return PipeVariableExpression._children_keys;
+  }
+}
+class FileAttributeSpecification extends EditableSyntax
+{
+  constructor(
+    left_double_angle,
+    keyword,
+    colon,
+    attributes,
+    right_double_angle)
+  {
+    super('file_attribute_specification', {
+      left_double_angle: left_double_angle,
+      keyword: keyword,
+      colon: colon,
+      attributes: attributes,
+      right_double_angle: right_double_angle });
+  }
+  get left_double_angle() { return this.children.left_double_angle; }
+  get keyword() { return this.children.keyword; }
+  get colon() { return this.children.colon; }
+  get attributes() { return this.children.attributes; }
+  get right_double_angle() { return this.children.right_double_angle; }
+  with_left_double_angle(left_double_angle){
+    return new FileAttributeSpecification(
+      left_double_angle,
+      this.keyword,
+      this.colon,
+      this.attributes,
+      this.right_double_angle);
+  }
+  with_keyword(keyword){
+    return new FileAttributeSpecification(
+      this.left_double_angle,
+      keyword,
+      this.colon,
+      this.attributes,
+      this.right_double_angle);
+  }
+  with_colon(colon){
+    return new FileAttributeSpecification(
+      this.left_double_angle,
+      this.keyword,
+      colon,
+      this.attributes,
+      this.right_double_angle);
+  }
+  with_attributes(attributes){
+    return new FileAttributeSpecification(
+      this.left_double_angle,
+      this.keyword,
+      this.colon,
+      attributes,
+      this.right_double_angle);
+  }
+  with_right_double_angle(right_double_angle){
+    return new FileAttributeSpecification(
+      this.left_double_angle,
+      this.keyword,
+      this.colon,
+      this.attributes,
+      right_double_angle);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_double_angle = this.left_double_angle.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var attributes = this.attributes.rewrite(rewriter, new_parents);
+    var right_double_angle = this.right_double_angle.rewrite(rewriter, new_parents);
+    if (
+      left_double_angle === this.left_double_angle &&
+      keyword === this.keyword &&
+      colon === this.colon &&
+      attributes === this.attributes &&
+      right_double_angle === this.right_double_angle)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new FileAttributeSpecification(
+        left_double_angle,
+        keyword,
+        colon,
+        attributes,
+        right_double_angle), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_double_angle = EditableSyntax.from_json(
+      json.file_attribute_specification_left_double_angle, position, source);
+    position += left_double_angle.width;
+    let keyword = EditableSyntax.from_json(
+      json.file_attribute_specification_keyword, position, source);
+    position += keyword.width;
+    let colon = EditableSyntax.from_json(
+      json.file_attribute_specification_colon, position, source);
+    position += colon.width;
+    let attributes = EditableSyntax.from_json(
+      json.file_attribute_specification_attributes, position, source);
+    position += attributes.width;
+    let right_double_angle = EditableSyntax.from_json(
+      json.file_attribute_specification_right_double_angle, position, source);
+    position += right_double_angle.width;
+    return new FileAttributeSpecification(
+        left_double_angle,
+        keyword,
+        colon,
+        attributes,
+        right_double_angle);
+  }
+  get children_keys()
+  {
+    if (FileAttributeSpecification._children_keys == null)
+      FileAttributeSpecification._children_keys = [
+        'left_double_angle',
+        'keyword',
+        'colon',
+        'attributes',
+        'right_double_angle'];
+    return FileAttributeSpecification._children_keys;
   }
 }
 class EnumDeclaration extends EditableSyntax
@@ -21350,6 +21488,7 @@ exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
 exports.FallthroughToken = FallthroughToken;
 exports.FloatToken = FloatToken;
+exports.FileToken = FileToken;
 exports.FinalToken = FinalToken;
 exports.FinallyToken = FinallyToken;
 exports.ForToken = ForToken;
@@ -21540,6 +21679,7 @@ exports.LiteralExpression = LiteralExpression;
 exports.PrefixedStringExpression = PrefixedStringExpression;
 exports.VariableExpression = VariableExpression;
 exports.PipeVariableExpression = PipeVariableExpression;
+exports.FileAttributeSpecification = FileAttributeSpecification;
 exports.EnumDeclaration = EnumDeclaration;
 exports.Enumerator = Enumerator;
 exports.AliasDeclaration = AliasDeclaration;

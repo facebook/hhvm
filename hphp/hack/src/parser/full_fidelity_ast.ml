@@ -3143,6 +3143,7 @@ and pDef : def list parser = fun node env ->
     ; _ } ->
       let f = pNamespaceUseClause env kind ~prefix:None in
       [ NamespaceUse (List.map ~f (as_list clauses)) ]
+  | FileAttributeSpecification _ -> []
   | _ when env.fi_mode = FileInfo.Mdecl || env.fi_mode = FileInfo.Mphp
         && not env.codegen -> []
   | _ -> [ Stmt (pStmt node env) ]

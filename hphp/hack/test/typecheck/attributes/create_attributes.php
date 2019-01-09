@@ -1,5 +1,7 @@
 <?hh // strict
 
+<<file: Fi>>
+
 class C implements HH\ClassAttribute {}
 class E implements HH\EnumAttribute {}
 class F implements HH\FunctionAttribute {}
@@ -8,6 +10,7 @@ class IProp implements HH\InstancePropertyAttribute {}
 class SProp implements HH\StaticPropertyAttribute {}
 class P implements HH\ParameterAttribute {}
 class T implements HH\TypeAliasAttribute {}
+class Fi implements HH\FileAttribute {}
 
 <<F>>
 function ff(<<P>>int $i): void {}

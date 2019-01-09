@@ -2403,7 +2403,8 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       if is_typechecker env then
         match parents with
         (* list item -> syntax list -> attribute *)
-        | _ :: _ :: a :: _ when is_attribute_specification a ->
+        | _ :: _ :: a :: _ when
+          is_attribute_specification a || is_file_attribute_specification a ->
           []
         | _ ->
           if (is_missing ctr_call.constructor_call_left_paren ||
@@ -3533,6 +3534,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
           | { syntax = ( DeclareDirectiveStatement _
                        | DeclareBlockStatement _
                        | NamespaceUseDeclaration _
+                       | FileAttributeSpecification _
                        ); _} :: rest ->
             is_first rest
           | { syntax = NamespaceDeclaration _; _} :: _ -> true
@@ -3550,6 +3552,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
                          | { syntax = ExpressionStatement {
                             expression_statement_expression =
                             { syntax = HaltCompilerExpression _; _}; _}; _}
+                         | { syntax = FileAttributeSpecification _; _}
                          | { syntax = EndOfFile _; _}
                          | { syntax = NamespaceUseDeclaration _; _} -> false
                          | _ -> true)

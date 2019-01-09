@@ -57,6 +57,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val prefixed_string_expression : t -> SC.r -> SC.r -> t * SC.r
         val variable_expression : t -> SC.r -> t * SC.r
         val pipe_variable_expression : t -> SC.r -> t * SC.r
+        val file_attribute_specification : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enum_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enumerator : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val alias_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

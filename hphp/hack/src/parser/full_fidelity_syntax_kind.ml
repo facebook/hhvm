@@ -29,6 +29,7 @@ type t =
   | PrefixedStringExpression
   | VariableExpression
   | PipeVariableExpression
+  | FileAttributeSpecification
   | EnumDeclaration
   | Enumerator
   | AliasDeclaration
@@ -207,6 +208,7 @@ let to_string kind =
   | PrefixedStringExpression                -> "prefixed_string"
   | VariableExpression                      -> "variable"
   | PipeVariableExpression                  -> "pipe_variable"
+  | FileAttributeSpecification              -> "file_attribute_specification"
   | EnumDeclaration                         -> "enum_declaration"
   | Enumerator                              -> "enumerator"
   | AliasDeclaration                        -> "alias_declaration"

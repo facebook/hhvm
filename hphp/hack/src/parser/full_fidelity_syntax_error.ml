@@ -695,3 +695,5 @@ let mutable_return_in_memoize_function =
 let vararg_and_mutable =
   "__Mutable, __OwnedMutable and __MaybeMutable annotations cannot be used with \
   variadic parameters."
+
+let expected_user_attribute = "A user attribute is expected here."

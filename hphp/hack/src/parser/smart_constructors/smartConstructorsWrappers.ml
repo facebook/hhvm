@@ -41,6 +41,7 @@ module type SyntaxKind_S = sig
   val is_prefixed_string_expression : r -> bool
   val is_variable_expression : r -> bool
   val is_pipe_variable_expression : r -> bool
+  val is_file_attribute_specification : r -> bool
   val is_enum_declaration : r -> bool
   val is_enumerator : r -> bool
   val is_alias_declaration : r -> bool
@@ -236,6 +237,7 @@ module SyntaxKind(SC : SC_S)
   let make_prefixed_string_expression arg0 arg1 state = compose SK.PrefixedStringExpression (SC.make_prefixed_string_expression (snd arg0) (snd arg1) state)
   let make_variable_expression arg0 state = compose SK.VariableExpression (SC.make_variable_expression (snd arg0) state)
   let make_pipe_variable_expression arg0 state = compose SK.PipeVariableExpression (SC.make_pipe_variable_expression (snd arg0) state)
+  let make_file_attribute_specification arg0 arg1 arg2 arg3 arg4 state = compose SK.FileAttributeSpecification (SC.make_file_attribute_specification (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.EnumDeclaration (SC.make_enum_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_enumerator arg0 arg1 arg2 arg3 state = compose SK.Enumerator (SC.make_enumerator (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_alias_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 state = compose SK.AliasDeclaration (SC.make_alias_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) state)
@@ -413,6 +415,7 @@ module SyntaxKind(SC : SC_S)
   let is_prefixed_string_expression                   = has_kind SK.PrefixedStringExpression
   let is_variable_expression                          = has_kind SK.VariableExpression
   let is_pipe_variable_expression                     = has_kind SK.PipeVariableExpression
+  let is_file_attribute_specification                 = has_kind SK.FileAttributeSpecification
   let is_enum_declaration                             = has_kind SK.EnumDeclaration
   let is_enumerator                                   = has_kind SK.Enumerator
   let is_alias_declaration                            = has_kind SK.AliasDeclaration

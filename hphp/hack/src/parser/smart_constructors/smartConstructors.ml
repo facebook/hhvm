@@ -39,6 +39,7 @@ module type SmartConstructors_S = sig
   val make_prefixed_string_expression : r -> r -> t -> t * r
   val make_variable_expression : r -> t -> t * r
   val make_pipe_variable_expression : r -> t -> t * r
+  val make_file_attribute_specification : r -> r -> r -> r -> r -> t -> t * r
   val make_enum_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_enumerator : r -> r -> r -> r -> t -> t * r
   val make_alias_declaration : r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
@@ -224,6 +225,7 @@ end) = struct
     let prefixed_string_expression parser arg0 arg1 = call parser (SCI.make_prefixed_string_expression arg0 arg1)
     let variable_expression parser arg0 = call parser (SCI.make_variable_expression arg0)
     let pipe_variable_expression parser arg0 = call parser (SCI.make_pipe_variable_expression arg0)
+    let file_attribute_specification parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_file_attribute_specification arg0 arg1 arg2 arg3 arg4)
     let enum_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let enumerator parser arg0 arg1 arg2 arg3 = call parser (SCI.make_enumerator arg0 arg1 arg2 arg3)
     let alias_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 = call parser (SCI.make_alias_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7)

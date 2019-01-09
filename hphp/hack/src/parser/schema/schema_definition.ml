@@ -108,6 +108,20 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields      = [ "expression", Token ]
     }
+  ; { kind_name   = "FileAttributeSpecification"
+    ; type_name   = "file_attribute_specification"
+    ; func_name   = "file_attribute_specification"
+    ; description = "file_attribute_specification"
+    ; prefix      = "file_attribute_specification"
+    ; aggregates  = [ TopLevelDeclaration ]
+    ; fields =
+      [ "left_double_angle", Token
+      ; "keyword", Token
+      ; "colon", Token
+      ; "attributes", ZeroOrMore (Just "ConstructorCall")
+      ; "right_double_angle", Token
+      ]
+    }
   (* TODO: Make all uses of attribute_spec consistent in the API. *)
   ; { kind_name   = "EnumDeclaration"
     ; type_name   = "enum_declaration"

@@ -68,6 +68,7 @@ module WithToken(Token: TokenType) = struct
       | PrefixedStringExpression                _ -> SyntaxKind.PrefixedStringExpression
       | VariableExpression                      _ -> SyntaxKind.VariableExpression
       | PipeVariableExpression                  _ -> SyntaxKind.PipeVariableExpression
+      | FileAttributeSpecification              _ -> SyntaxKind.FileAttributeSpecification
       | EnumDeclaration                         _ -> SyntaxKind.EnumDeclaration
       | Enumerator                              _ -> SyntaxKind.Enumerator
       | AliasDeclaration                        _ -> SyntaxKind.AliasDeclaration
@@ -252,6 +253,7 @@ module WithToken(Token: TokenType) = struct
     let is_prefixed_string_expression                   = has_kind SyntaxKind.PrefixedStringExpression
     let is_variable_expression                          = has_kind SyntaxKind.VariableExpression
     let is_pipe_variable_expression                     = has_kind SyntaxKind.PipeVariableExpression
+    let is_file_attribute_specification                 = has_kind SyntaxKind.FileAttributeSpecification
     let is_enum_declaration                             = has_kind SyntaxKind.EnumDeclaration
     let is_enumerator                                   = has_kind SyntaxKind.Enumerator
     let is_alias_declaration                            = has_kind SyntaxKind.AliasDeclaration
@@ -533,6 +535,19 @@ module WithToken(Token: TokenType) = struct
         pipe_variable_expression;
       } ->
          let acc = f acc pipe_variable_expression in
+         acc
+      | FileAttributeSpecification {
+        file_attribute_specification_left_double_angle;
+        file_attribute_specification_keyword;
+        file_attribute_specification_colon;
+        file_attribute_specification_attributes;
+        file_attribute_specification_right_double_angle;
+      } ->
+         let acc = f acc file_attribute_specification_left_double_angle in
+         let acc = f acc file_attribute_specification_keyword in
+         let acc = f acc file_attribute_specification_colon in
+         let acc = f acc file_attribute_specification_attributes in
+         let acc = f acc file_attribute_specification_right_double_angle in
          acc
       | EnumDeclaration {
         enum_attribute_spec;
@@ -2395,6 +2410,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         pipe_variable_expression;
       ]
+      | FileAttributeSpecification {
+        file_attribute_specification_left_double_angle;
+        file_attribute_specification_keyword;
+        file_attribute_specification_colon;
+        file_attribute_specification_attributes;
+        file_attribute_specification_right_double_angle;
+      } -> [
+        file_attribute_specification_left_double_angle;
+        file_attribute_specification_keyword;
+        file_attribute_specification_colon;
+        file_attribute_specification_attributes;
+        file_attribute_specification_right_double_angle;
+      ]
       | EnumDeclaration {
         enum_attribute_spec;
         enum_keyword;
@@ -4256,6 +4284,19 @@ module WithToken(Token: TokenType) = struct
         pipe_variable_expression;
       } -> [
         "pipe_variable_expression";
+      ]
+      | FileAttributeSpecification {
+        file_attribute_specification_left_double_angle;
+        file_attribute_specification_keyword;
+        file_attribute_specification_colon;
+        file_attribute_specification_attributes;
+        file_attribute_specification_right_double_angle;
+      } -> [
+        "file_attribute_specification_left_double_angle";
+        "file_attribute_specification_keyword";
+        "file_attribute_specification_colon";
+        "file_attribute_specification_attributes";
+        "file_attribute_specification_right_double_angle";
       ]
       | EnumDeclaration {
         enum_attribute_spec;
@@ -6181,6 +6222,20 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         PipeVariableExpression {
           pipe_variable_expression;
+        }
+      | (SyntaxKind.FileAttributeSpecification, [
+          file_attribute_specification_left_double_angle;
+          file_attribute_specification_keyword;
+          file_attribute_specification_colon;
+          file_attribute_specification_attributes;
+          file_attribute_specification_right_double_angle;
+        ]) ->
+        FileAttributeSpecification {
+          file_attribute_specification_left_double_angle;
+          file_attribute_specification_keyword;
+          file_attribute_specification_colon;
+          file_attribute_specification_attributes;
+          file_attribute_specification_right_double_angle;
         }
       | (SyntaxKind.EnumDeclaration, [
           enum_attribute_spec;
@@ -8273,6 +8328,23 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = PipeVariableExpression {
           pipe_variable_expression;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_file_attribute_specification
+        file_attribute_specification_left_double_angle
+        file_attribute_specification_keyword
+        file_attribute_specification_colon
+        file_attribute_specification_attributes
+        file_attribute_specification_right_double_angle
+      =
+        let syntax = FileAttributeSpecification {
+          file_attribute_specification_left_double_angle;
+          file_attribute_specification_keyword;
+          file_attribute_specification_colon;
+          file_attribute_specification_attributes;
+          file_attribute_specification_right_double_angle;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

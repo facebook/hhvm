@@ -1358,6 +1358,22 @@ module WithExpressionAndStatementAndTypeParser
   and parse_attribute parser =
     with_expression_parser parser ExpressionParser.parse_constructor_call
 
+  and parse_file_attribute_specification_opt parser =
+    if peek_token_kind parser = LessThanLessThan then
+      let (parser, left) = assert_token parser LessThanLessThan in
+      let (parser, keyword) = assert_token parser File in
+      let (parser, colon) = require_colon parser in
+      let (parser, items, _) =
+        parse_comma_list_allow_trailing
+          parser
+          GreaterThanGreaterThan
+          SyntaxError.expected_user_attribute
+          parse_attribute in
+      let (parser, right) = require_token parser GreaterThanGreaterThan SyntaxError.error1029 in
+      Make.file_attribute_specification parser left keyword colon items right
+    else
+      Make.missing parser (pos parser)
+
   and parse_generic_type_parameter_list_opt parser =
     if peek_next_partial_token_is_left_angle parser
     then
@@ -1830,7 +1846,11 @@ module WithExpressionAndStatementAndTypeParser
           parser
           StatementParser.parse_possible_php_function
       | LessThanLessThan ->
-        parse_enum_or_classish_or_function_declaration parser
+        begin match peek_token_kind parser1 with
+        | File when peek_token_kind ~lookahead:1 parser1 = Colon ->
+          parse_file_attribute_specification_opt parser
+        | _ -> parse_enum_or_classish_or_function_declaration parser
+        end
         (* TODO figure out what global const differs from class const *)
       | Const ->
         let pos = pos parser in

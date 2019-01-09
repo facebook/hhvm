@@ -169,6 +169,13 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | PipeVariableExpression                  of
     { pipe_variable_expression                           : t
     }
+  | FileAttributeSpecification              of
+    { file_attribute_specification_left_double_angle     : t
+    ; file_attribute_specification_keyword               : t
+    ; file_attribute_specification_colon                 : t
+    ; file_attribute_specification_attributes            : t
+    ; file_attribute_specification_right_double_angle    : t
+    }
   | EnumDeclaration                         of
     { enum_attribute_spec                                : t
     ; enum_keyword                                       : t
@@ -1170,6 +1177,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SingletonList of 'a value
   and top_level_declaration =
   | TLDEndOfFile                    of end_of_file
+  | TLDFileAttributeSpecification   of file_attribute_specification
   | TLDEnum                         of enum_declaration
   | TLDAlias                        of alias_declaration
   | TLDNamespace                    of namespace_declaration
@@ -1473,6 +1481,13 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and pipe_variable_expression =
     { pipe_variable_expression: Token.t value
+    }
+  and file_attribute_specification =
+    { file_attribute_specification_left_double_angle: Token.t value
+    ; file_attribute_specification_keyword: Token.t value
+    ; file_attribute_specification_colon: Token.t value
+    ; file_attribute_specification_attributes: constructor_call listesque value
+    ; file_attribute_specification_right_double_angle: Token.t value
     }
   and enum_declaration =
     { enum_attribute_spec: attribute_specification option value

@@ -111,6 +111,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_top_level_declaration : top_level_declaration validator = fun x ->
     match Syntax.syntax x with
     | Syntax.EndOfFile _ -> tag validate_end_of_file (fun x -> TLDEndOfFile x) x
+    | Syntax.FileAttributeSpecification _ -> tag validate_file_attribute_specification (fun x -> TLDFileAttributeSpecification x) x
     | Syntax.EnumDeclaration _ -> tag validate_enum_declaration (fun x -> TLDEnum x) x
     | Syntax.AliasDeclaration _ -> tag validate_alias_declaration (fun x -> TLDAlias x) x
     | Syntax.NamespaceDeclaration _ -> tag validate_namespace_declaration (fun x -> TLDNamespace x) x
@@ -151,6 +152,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and invalidate_top_level_declaration : top_level_declaration invalidator = fun (value, thing) ->
     match thing with
     | TLDEndOfFile                    thing -> invalidate_end_of_file                    (value, thing)
+    | TLDFileAttributeSpecification   thing -> invalidate_file_attribute_specification   (value, thing)
     | TLDEnum                         thing -> invalidate_enum_declaration               (value, thing)
     | TLDAlias                        thing -> invalidate_alias_declaration              (value, thing)
     | TLDNamespace                    thing -> invalidate_namespace_declaration          (value, thing)
@@ -808,6 +810,26 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.PipeVariableExpression
       { pipe_variable_expression = invalidate_token x.pipe_variable_expression
+      }
+    ; Syntax.value = v
+    }
+  and validate_file_attribute_specification : file_attribute_specification validator = function
+  | { Syntax.syntax = Syntax.FileAttributeSpecification x; value = v } -> v,
+    { file_attribute_specification_right_double_angle = validate_token x.file_attribute_specification_right_double_angle
+    ; file_attribute_specification_attributes = validate_list_with (validate_constructor_call) x.file_attribute_specification_attributes
+    ; file_attribute_specification_colon = validate_token x.file_attribute_specification_colon
+    ; file_attribute_specification_keyword = validate_token x.file_attribute_specification_keyword
+    ; file_attribute_specification_left_double_angle = validate_token x.file_attribute_specification_left_double_angle
+    }
+  | s -> validation_fail (Some SyntaxKind.FileAttributeSpecification) s
+  and invalidate_file_attribute_specification : file_attribute_specification invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.FileAttributeSpecification
+      { file_attribute_specification_left_double_angle = invalidate_token x.file_attribute_specification_left_double_angle
+      ; file_attribute_specification_keyword = invalidate_token x.file_attribute_specification_keyword
+      ; file_attribute_specification_colon = invalidate_token x.file_attribute_specification_colon
+      ; file_attribute_specification_attributes = invalidate_list_with (invalidate_constructor_call) x.file_attribute_specification_attributes
+      ; file_attribute_specification_right_double_angle = invalidate_token x.file_attribute_specification_right_double_angle
       }
     ; Syntax.value = v
     }

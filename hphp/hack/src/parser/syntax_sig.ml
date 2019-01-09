@@ -56,6 +56,13 @@ module type Syntax_S = sig
   | PipeVariableExpression                  of
     { pipe_variable_expression                           : t
     }
+  | FileAttributeSpecification              of
+    { file_attribute_specification_left_double_angle     : t
+    ; file_attribute_specification_keyword               : t
+    ; file_attribute_specification_colon                 : t
+    ; file_attribute_specification_attributes            : t
+    ; file_attribute_specification_right_double_angle    : t
+    }
   | EnumDeclaration                         of
     { enum_attribute_spec                                : t
     ; enum_keyword                                       : t
@@ -1073,6 +1080,7 @@ module type Syntax_S = sig
   val make_prefixed_string_expression : t -> t -> t
   val make_variable_expression : t -> t
   val make_pipe_variable_expression : t -> t
+  val make_file_attribute_specification : t -> t -> t -> t -> t -> t
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1249,6 +1257,7 @@ module type Syntax_S = sig
   val is_prefixed_string_expression : t -> bool
   val is_variable_expression : t -> bool
   val is_pipe_variable_expression : t -> bool
+  val is_file_attribute_specification : t -> bool
   val is_enum_declaration : t -> bool
   val is_enumerator : t -> bool
   val is_alias_declaration : t -> bool

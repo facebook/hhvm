@@ -61,8 +61,9 @@ Errors:
                     ))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-      f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false });
   (Fun
      { f_span = [19:1-20:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([19:78-79], (Habstr "T")));
@@ -88,8 +89,9 @@ Errors:
           param_callconv = None; param_user_attributes = [] }
          ];
        f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [24:1-42:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([24:25-29], (Hprim Tvoid)));
@@ -267,8 +269,9 @@ Errors:
                      ))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [46:1-59:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([46:31-35], (Hprim Tvoid)));
@@ -359,8 +362,9 @@ Errors:
                      (([58:14-22], _), Any)))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [61:1-65:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([61:35-39], (Hprim Tvoid)));
@@ -383,6 +387,7 @@ Errors:
                     ))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

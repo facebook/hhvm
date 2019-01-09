@@ -123,6 +123,7 @@ and typedef_kind =
 and class_ = {
   c_mode: fimode;
   c_user_attributes: user_attribute list;
+  c_file_attributes: file_attributes list;
   c_final: bool;
   c_kind: class_kind;
   c_is_xhp: bool;
@@ -308,6 +309,7 @@ and fun_ = {
   f_params          : fun_param list;
   f_body            : block;
   f_user_attributes : user_attribute list;
+  f_file_attributes : file_attributes list;
   f_fun_kind        : fun_kind;
   f_namespace       : nsenv;
   f_span            : pos;

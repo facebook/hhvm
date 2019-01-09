@@ -20,6 +20,7 @@
                ))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-      f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
   ]

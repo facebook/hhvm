@@ -20,8 +20,9 @@
                (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FAsync; f_user_attributes = []; f_external = false;
-      f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+      f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false });
   (Fun
      { f_span = [5:1-12:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([5:18-22], (Hprim Tvoid)));
@@ -65,8 +66,9 @@
                                  ];
                                fnb_unsafe = false });
                           f_fun_kind = FAsync; f_user_attributes = [];
-                          f_external = false; f_namespace = <opaque>;
-                          f_doc_comment = None; f_static = false },
+                          f_file_attributes = []; f_external = false;
+                          f_namespace = <opaque>; f_doc_comment = None;
+                          f_static = false },
                         [])))
                     ))));
               (Expr
@@ -112,12 +114,14 @@
                                   ];
                                 fnb_unsafe = false });
                            f_fun_kind = FAsync; f_user_attributes = [];
-                           f_external = false; f_namespace = <opaque>;
-                           f_doc_comment = None; f_static = false },
+                           f_file_attributes = []; f_external = false;
+                           f_namespace = <opaque>; f_doc_comment = None;
+                           f_static = false },
                          [])))
                      ))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

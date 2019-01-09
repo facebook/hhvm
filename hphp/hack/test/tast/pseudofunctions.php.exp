@@ -27,8 +27,8 @@
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
-      c_doc_comment = None });
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_doc_comment = None });
   (Fun
      { f_span = [8:1-24:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([8:22-26], (Hprim Tvoid)));
@@ -111,8 +111,9 @@
                      [], [(([23:23-28], string), (String "foo"))], []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [26:1-30:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([27:21-25], (Hprim Tvoid)));
@@ -149,6 +150,6 @@
             fnb_unsafe = false });
        f_fun_kind = FSync;
        f_user_attributes = [{ ua_name = ([26:3-7], "__Rx"); ua_params = [] }];
-       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
-       f_static = false })
+       f_file_attributes = []; f_external = false; f_namespace = <opaque>;
+       f_doc_comment = None; f_static = false })
   ]

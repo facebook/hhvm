@@ -699,6 +699,7 @@ let fun_template yielding node suspension_kind env =
   ; f_params          = []
   ; f_body            = []
   ; f_user_attributes = []
+  ; f_file_attributes = []
   ; f_fun_kind        = mk_fun_kind suspension_kind yielding
   ; f_namespace       = Namespace_env.empty env.parser_options
   ; f_span            = p
@@ -1065,8 +1066,7 @@ and pFunParam : fun_param parser = fun node env ->
   | _ -> missing_syntax "function parameter" node env
 and pUserAttribute : user_attribute list parser = fun node env ->
   match syntax node with
-  | FileAttributeSpecification
-    { file_attribute_specification_attributes = attrs; _ }
+  | FileAttributeSpecification { file_attribute_specification_attributes = attrs; _ }
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
     couldMap attrs env ~f:begin function
       | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
@@ -1614,6 +1614,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let args, varargs = split_args_varargs args in
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = [] in
+      let c_file_attributes = [] in
       let c_final = false in
       let c_is_xhp = false in
       let c_name = pos, "anonymous" in
@@ -1629,6 +1630,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let cls =
         { c_mode
         ; c_user_attributes
+        ; c_file_attributes
         ; c_final
         ; c_is_xhp
         ; c_name
@@ -2980,6 +2982,7 @@ and pDef : def list parser = fun node env ->
       let env = non_tls env in
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
+      let c_file_attributes = [] in
       let kinds = pKinds (fun _ -> ()) mods env in
       let c_final = List.mem kinds Final ~equal:(=) in
       let c_is_xhp =
@@ -3023,6 +3026,7 @@ and pDef : def list parser = fun node env ->
       [ Class
       { c_mode
       ; c_user_attributes
+      ; c_file_attributes
       ; c_final
       ; c_is_xhp
       ; c_name
@@ -3097,6 +3101,7 @@ and pDef : def list parser = fun node env ->
       [ Class
       { c_mode            = mode_annotation env.fi_mode
       ; c_user_attributes = pUserAttributes env attrs
+      ; c_file_attributes = []
       ; c_final           = false
       ; c_kind            = Cenum
       ; c_is_xhp          = false

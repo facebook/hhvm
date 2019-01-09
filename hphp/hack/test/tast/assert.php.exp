@@ -8,7 +8,7 @@
       c_static_vars = []; c_vars = []; c_constructor = None;
       c_static_methods = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None;
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
       });
@@ -39,6 +39,7 @@
                            (([15:24-25], A), (CI ([15:24-25], "\\A"))))))))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

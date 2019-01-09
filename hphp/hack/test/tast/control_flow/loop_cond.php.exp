@@ -8,7 +8,8 @@
       c_static_vars = []; c_vars = []; c_constructor = None;
       c_static_methods = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None; c_doc_comment = None });
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_doc_comment = None });
   (Fun
      { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
@@ -26,8 +27,9 @@
                 ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [9:1-14:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([9:20-24], (Hprim Tvoid)));
@@ -58,8 +60,9 @@
                  ))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([16:18-22], (Hprim Tvoid)));
@@ -96,6 +99,7 @@
                 []))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

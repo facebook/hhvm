@@ -27,7 +27,8 @@
               m_external = false; m_doc_comment = None });
       c_static_methods = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None; c_doc_comment = None });
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_doc_comment = None });
   (Class
      { c_span = [4:1-46]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -39,8 +40,8 @@
        c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
-       c_doc_comment = None });
+       c_namespace = <opaque>; c_user_attributes = [];
+       c_file_attributes = []; c_enum = None; c_doc_comment = None });
   (Class
      { c_span = [5:1-58]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -53,8 +54,8 @@
        c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
-       c_doc_comment = None });
+       c_namespace = <opaque>; c_user_attributes = [];
+       c_file_attributes = []; c_enum = None; c_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([8:6-8], "\\T1"); t_tparams = [];
        t_constraint = None; t_kind = ([8:11-14], (Hprim Tint));

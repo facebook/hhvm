@@ -106,6 +106,9 @@ module Env : sig
   val make_fun_decl_genv :
     TypecheckerOptions.t ->
     type_constraint SMap.t -> Ast.fun_ -> genv
+  val make_file_attributes_env :
+    TypecheckerOptions.t ->
+    FileInfo.mode -> Ast.file_attributes -> genv * lenv
   val make_const_env : TypecheckerOptions.t -> Ast.gconst -> genv * lenv
 
   val has_unsafe : genv * lenv -> bool
@@ -345,6 +348,27 @@ end = struct
 
   let make_top_level_env nenv =
     let genv = make_top_level_genv nenv in
+    let lenv = empty_local None in
+    let env  = genv, lenv in
+    env
+
+  let make_file_attributes_genv tcopt mode fa =
+  {
+    in_mode       = mode;
+    tcopt;
+    in_try        = false;
+    in_finally    = false;
+    in_ppl        = false;
+    type_params   = SMap.empty;
+    current_cls   = None;
+    class_consts  = Caml.Hashtbl.create 0;
+    class_props   = Caml.Hashtbl.create 0;
+    droot         = Typing_deps.Dep.Fun "";
+    namespace     = fa.fa_namespace;
+  }
+
+  let make_file_attributes_env nenv mode fa =
+    let genv = make_file_attributes_genv nenv mode fa in
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
@@ -1222,6 +1246,7 @@ module Make (GetLocals : GetLocals) = struct
         N.c_static_methods        = smethods;
         N.c_methods               = methods;
         N.c_user_attributes       = attrs;
+        N.c_file_attributes       = file_attributes nenv c.c_mode c.c_file_attributes;
         N.c_namespace             = c.c_namespace;
         N.c_enum                  = enum;
         N.c_doc_comment           = c.c_doc_comment;
@@ -1257,6 +1282,12 @@ module Make (GetLocals : GetLocals) = struct
              N.ua_params = List.map ua_params (expr env)
            } in
            attr :: acc
+    end
+
+  and file_attributes tcopt mode file_attributes_list =
+    List.concat_map file_attributes_list ~f:begin fun fa ->
+      let env = Env.make_file_attributes_env tcopt mode fa in
+      user_attributes env fa.fa_user_attributes
     end
 
   and xhp_attribute_decl env h cv is_required maybe_enum =
@@ -1958,6 +1989,7 @@ module Make (GetLocals : GetLocals) = struct
       f_fun_kind = f_kind;
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.f_user_attributes;
+      f_file_attributes = file_attributes nenv f.f_mode f.f_file_attributes;
       f_external = f.f_external;
       f_namespace = f.f_namespace;
       f_doc_comment = f.f_doc_comment;
@@ -2782,6 +2814,7 @@ module Make (GetLocals : GetLocals) = struct
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
+      f_file_attributes = [];
       f_user_attributes = user_attributes env f.f_user_attributes;
       f_external = f.f_external;
       f_namespace = f.f_namespace;

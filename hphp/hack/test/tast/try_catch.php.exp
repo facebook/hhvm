@@ -4,8 +4,8 @@
       f_name = ([11:10-21], "\\might_throw"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-      f_namespace = <opaque>;
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>;
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
       f_static = false });
@@ -64,6 +64,7 @@
                  (Some (([30:10-12], int), (Lvar ([30:10-12], $a))))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

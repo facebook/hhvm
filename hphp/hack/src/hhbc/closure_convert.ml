@@ -484,6 +484,7 @@ let make_closure ~class_num
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];
+    c_file_attributes = [];
     c_final = false;
     c_kind = Cnormal;
     c_is_xhp = false;

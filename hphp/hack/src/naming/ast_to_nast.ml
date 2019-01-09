@@ -381,6 +381,12 @@ and on_user_attribute attribute : Aast.user_attribute =
   let ua_params = on_list on_expr attribute.ua_params in
   Aast.{ ua_name = attribute.ua_name; ua_params; }
 
+and on_file_attribute file_attribute : Aast.user_attribute list =
+  on_list on_user_attribute file_attribute.fa_user_attributes
+
+and on_file_attributes file_attributes : Aast.user_attribute list =
+  List.concat (on_list on_file_attribute file_attributes)
+
 and on_fun f : Aast.fun_ =
   let body = on_block f.f_body in
   let body = Aast.NamedBody {
@@ -402,6 +408,7 @@ and on_fun f : Aast.fun_ =
     f_fun_kind = f.f_fun_kind;
     f_variadic = determine_variadicity f.f_params;
     f_user_attributes = on_list on_user_attribute f.f_user_attributes;
+    f_file_attributes = on_file_attributes f.f_file_attributes;
     f_external = f.f_external;
     f_namespace = f.f_namespace;
     f_doc_comment = f.f_doc_comment;
@@ -565,6 +572,7 @@ and on_class c : Aast.class_ =
       c_xhp_children          = body.c_xhp_children;
       c_xhp_attrs             = body.c_xhp_attrs;
       c_user_attributes       = on_list on_user_attribute c.c_user_attributes;
+      c_file_attributes       = [];
       c_namespace             = c.c_namespace;
       c_enum                  = optional on_enum c.c_enum;
       c_doc_comment           = c.c_doc_comment;

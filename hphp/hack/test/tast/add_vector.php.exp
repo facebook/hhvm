@@ -104,7 +104,8 @@
           m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None;
       c_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
       });
@@ -118,7 +119,8 @@
        c_static_vars = []; c_vars = []; c_constructor = None;
        c_static_methods = []; c_methods = []; c_attributes = [];
        c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None; c_doc_comment = None });
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Class
      { c_span = [29:1-21]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -130,7 +132,8 @@
        c_static_vars = []; c_vars = []; c_constructor = None;
        c_static_methods = []; c_methods = []; c_attributes = [];
        c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None; c_doc_comment = None });
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Class
      { c_span = [30:1-21]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -142,7 +145,8 @@
        c_static_vars = []; c_vars = []; c_constructor = None;
        c_static_methods = []; c_methods = []; c_attributes = [];
        c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None; c_doc_comment = None });
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Fun
      { f_span = [32:1-37:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([32:37-41], (Hprim Tvoid)));
@@ -212,6 +216,7 @@
                      []))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

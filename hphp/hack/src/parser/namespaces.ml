@@ -377,15 +377,31 @@ module ElaborateDefs = struct
             in name);
         cst_namespace = nsenv;
       }]
+    | FileAttributes fa ->
+      finish nsenv false @@ map_def nsenv (FileAttributes {fa with
+        fa_namespace = nsenv;
+      })
     | other -> nsenv, [map_def nsenv other]
 
+  and attach_file_attributes p =
+    let file_attributes =
+      List.filter_map p ~f:begin function
+      | FileAttributes fa -> Some fa
+      | _ -> None
+    end in
+    List.map p ~f:begin function
+      | Class c -> Class { c with c_file_attributes = file_attributes }
+      | Fun f -> Fun { f with f_file_attributes = file_attributes }
+      | x -> x
+    end
+
   and program ~autoimport f nsenv p =
-    let _, acc =
+    let _, p =
       List.fold_left p ~init:(nsenv, []) ~f:begin fun (nsenv, acc) item ->
         let nsenv, item = def ~autoimport f nsenv item in
         nsenv, item :: acc
       end in
-    List.concat (List.rev acc)
+    p |> List.rev |> List.concat |> attach_file_attributes
 end
 
 let noop _ x = x

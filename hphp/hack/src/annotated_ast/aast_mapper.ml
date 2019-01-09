@@ -149,6 +149,8 @@ struct
     T.f_fun_kind = fd.S.f_fun_kind;
     T.f_user_attributes =
     List.map fd.S.f_user_attributes (map_user_attribute menv);
+    T.f_file_attributes =
+    List.map fd.S.f_file_attributes (map_user_attribute menv);
     T.f_external = fd.S.f_external;
     T.f_namespace = fd.S.f_namespace;
     T.f_doc_comment = fd.S.f_doc_comment;
@@ -291,6 +293,7 @@ struct
     T.c_methods = List.map c.S.c_methods (map_method menv);
     T.c_namespace = c.S.c_namespace;
     T.c_user_attributes = List.map c.S.c_user_attributes (map_user_attribute menv);
+    T.c_file_attributes = List.map c.S.c_file_attributes (map_user_attribute menv);
     T.c_enum = c.S.c_enum;
     T.c_doc_comment = c.S.c_doc_comment;
     T.c_attributes = List.map c.S.c_attributes (map_attribute menv);

@@ -24,8 +24,8 @@
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
-      c_doc_comment = None });
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_doc_comment = None });
   (Fun
      { f_span = [9:1-13:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([9:18-21], (Hprim Tint)));
@@ -63,6 +63,7 @@
                  (Some (([12:10-12], int), (Lvar ([12:10-12], $x))))))
               ];
             fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_external = false;
-       f_namespace = <opaque>; f_doc_comment = None; f_static = false })
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

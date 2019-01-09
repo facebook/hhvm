@@ -3786,6 +3786,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   switch (inst->op()) {
   X(Shl)
   X(Shr)
+  X(Lshr)
   X(AbsDbl)
   X(AssertNonNull)
   X(BoxPtr)

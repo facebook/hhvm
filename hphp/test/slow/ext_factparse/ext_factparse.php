@@ -252,6 +252,18 @@ if ((int)HH\ext_factparse_version()) {
 # Check bad arg handling
 #
 
-HH\facts_parse(null, null, null, null);
-HH\facts_parse(null, array(null), null, null);
-HH\facts_parse(null, array(array()), null, null);
+try {
+  HH\facts_parse(null, null, null, null);
+} catch (InvalidOperationException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  HH\facts_parse(null, array(null), null, null);
+} catch (InvalidOperationException $e) {
+  var_dump($e->getMessage());
+}
+try {
+  HH\facts_parse(null, array(array()), null, null);
+} catch (InvalidOperationException $e) {
+  var_dump($e->getMessage());
+}

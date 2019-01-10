@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/type-string.h"
@@ -61,12 +62,11 @@ struct HackCFactsExtractor {
   static void parse_file_impl(
     const std::string& path,
     bool allowHipHopSyntax,
-    const char* code,
-    int len,
+    folly::StringPiece code,
     result_type& res,
     const state_type& state
   ) {
-    auto result = extract_facts(*state, path, code, len);
+    auto result = extract_facts(*state, path, code.data(), code.size());
     match<void>(
       result,
       [&](FactsJSONString& r) {
@@ -109,7 +109,7 @@ struct HackCFactsExtractor {
 
 void parse_file(
   const std::string& root,
-  const char* path,
+  folly::StringPiece path,
   bool allowHipHopSyntax,
   HackCFactsExtractor::result_type& res,
   const HackCFactsExtractor::state_type& state
@@ -117,9 +117,9 @@ void parse_file(
   HackCFactsExtractor::mark_failed(res);
   std::string cleanPath;
   if (FileUtil::isAbsolutePath(path)) {
-    cleanPath = path;
+    cleanPath = std::string{path};
   } else if (root.empty()) {
-    cleanPath = path;
+    cleanPath = std::string{path};
   } else {
     cleanPath =
       folly::sformat("{}{}{}", root, FileUtil::getDirSeparator(), path);
@@ -137,8 +137,8 @@ void parse_file(
     const auto f = w->open(StrNR(cleanPath), "r", 0, nullptr);
     if (!f) return;
     auto str = f->read();
-    HackCFactsExtractor::parse_file_impl(cleanPath,
-      allowHipHopSyntax, str.data(), str.size(), res, state);
+    HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax,
+                                         str.slice(), res, state);
   } else {
     // It would be nice to have an atomic stat + open operation here but this
     // doesn't seem to be possible with STL in a portable way.
@@ -148,34 +148,35 @@ void parse_file(
     if (S_ISDIR(st.st_mode)) {
       return;
     }
-    HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax, "", 0,
-                                         res, state);
+    HackCFactsExtractor::parse_file_impl(cleanPath, allowHipHopSyntax,
+                                         folly::StringPiece{""}, res, state);
   }
 }
 
 void facts_parse_sequential(
   const std::string& root,
-  const Array& pathList,
+  const req::vector<StringData*>& pathList,
   DArrayInit& outResArr,
   bool allowHipHopSyntax
 ) {
   const auto state = HackCFactsExtractor::init_state();
-  for (auto i = 0; i < pathList->size(); ++i) {
+  for (auto i = 0; i < pathList.size(); ++i) {
     HackCFactsExtractor::result_type workerResult;
-    auto path = tvCastToString(pathList->atPos(i));
+    auto path = pathList.at(i);
     try {
-      parse_file(root, path.c_str(), allowHipHopSyntax, workerResult, state);
+      parse_file(root, path->slice(), allowHipHopSyntax, workerResult, state);
     } catch (...) {
       HackCFactsExtractor::mark_failed(workerResult);
     }
-    HackCFactsExtractor::merge_result(workerResult, outResArr, path);
+    HackCFactsExtractor::merge_result(workerResult, outResArr,
+                                      StrNR(path));
   }
 }
 struct JobContext {
   JobContext(
     const std::string& root,
     bool allowHipHopSyntax,
-    std::vector<std::string>& paths,
+    const req::vector<StringData*>& paths,
     std::vector<HackCFactsExtractor::result_type>& worker_results,
     folly::MPMCQueue<size_t>& result_q
   ) : m_root(root), m_allowHipHopSyntax(allowHipHopSyntax), m_paths(paths),
@@ -183,7 +184,7 @@ struct JobContext {
   }
   const std::string& m_root;
   bool m_allowHipHopSyntax;
-  std::vector<std::string>& m_paths;
+  const req::vector<StringData*>& m_paths;
   std::vector<HackCFactsExtractor::result_type>& m_worker_results;
   folly::MPMCQueue<size_t>& m_result_q;
 };
@@ -208,7 +209,7 @@ struct ParseFactsWorker: public BaseWorker {
     try {
       parse_file(
         ctx.m_root,
-        ctx.m_paths[i].c_str(),
+        ctx.m_paths[i]->slice(),
         ctx.m_allowHipHopSyntax,
         ctx.m_worker_results[i],
         state);
@@ -223,23 +224,17 @@ private:
 
 void facts_parse_threaded(
   const std::string& root,
-  const Array& pathList,
+  const req::vector<StringData*>& pathList,
   DArrayInit& outResArr,
   bool allowHipHopSyntax
 ) {
-  auto numPaths = pathList->size();
-  std::vector<std::string> pathListCopy;
-  for(auto i = 0; i < numPaths; i++) {
-    pathListCopy.push_back(
-      tvCastToString(pathList->atPos(i)).toCppString()
-    );
-  }
+  auto numPaths = pathList.size();
   std::vector<HackCFactsExtractor::result_type> workerResults;
   workerResults.resize(numPaths);
   folly::MPMCQueue<size_t> result_q{numPaths};
 
   JobContext jobContext { root, allowHipHopSyntax,
-    pathListCopy, workerResults, result_q };
+    pathList, workerResults, result_q };
   JobQueueDispatcher<ParseFactsWorker> dispatcher {
     HackCFactsExtractor::get_workers_count(),
       HackCFactsExtractor::get_workers_count(), 0, false, &jobContext};
@@ -255,7 +250,7 @@ void facts_parse_threaded(
     HackCFactsExtractor::merge_result(
       workerResults[i],
       outResArr,
-      tvCastToString(pathList->atPos(i)));
+      StrNR(pathList.at(i)));
   }
   dispatcher.waitEmpty();
 }
@@ -272,19 +267,35 @@ Array HHVM_FUNCTION(
       "HH\\facts_parse not allowed in repo-authoritative mode. See #11153611.");
   }
 
+  DArrayInit outResArr(pathList->size());
+
+  if (pathList.isNull() || !pathList->size()) {
+    return outResArr.toArray();
+  }
+
   auto root = _root.isNull() ?
     "" : _root.toString().toCppString();
 
-  DArrayInit outResArr(pathList->size());
-
-  if (!pathList.isNull() && pathList->size()) {
-    if (useThreads) {
-      facts_parse_threaded(root, pathList,
-        outResArr, allowHipHopSyntax);
-    } else {
-      facts_parse_sequential(root, pathList,
-        outResArr, allowHipHopSyntax);
+  req::vector<StringData*> pathListStringData;
+  IterateVNoInc(
+    pathList.get(),
+    [&] (TypedValue tv) {
+      if (UNLIKELY(!isStringType(tv.m_type))) {
+        SystemLib::throwInvalidOperationExceptionObject(
+          "HH\\facts_parse expects a varray<string> but was given an array "
+          "with a non-string value."
+        );
+      }
+      pathListStringData.push_back(tv.m_data.pstr);
     }
+  );
+
+  if (useThreads) {
+    facts_parse_threaded(root, pathListStringData,
+      outResArr, allowHipHopSyntax);
+  } else {
+    facts_parse_sequential(root, pathListStringData,
+      outResArr, allowHipHopSyntax);
   }
 
   return outResArr.toArray();

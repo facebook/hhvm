@@ -7,7 +7,7 @@ function bar($x) {
 
 function foo($x) {
   $x = (array)$x;
-  array_walk_recursive($x, "foo");
+  array_map("foo", $x);
   bar($x);
 }
 

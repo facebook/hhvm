@@ -1299,45 +1299,6 @@ static void walk_func(Variant& value,
   );
 }
 
-bool HHVM_FUNCTION(array_walk_recursive,
-                   VRefParam input,
-                   const Variant& funcname,
-                   const Variant& userdata /* = uninit_variant */) {
-  if (!input.isPHPArray()) {
-    throw_expected_array_exception("array_walk_recursive");
-    return false;
-  }
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(funcname, cf(), false, ctx);
-  if (ctx.func == NULL) {
-    return false;
-  }
-  PointerSet seen;
-  Variant var(input, Variant::WithRefBind{});
-  ArrayUtil::Walk(var, walk_func, &ctx, true, &seen, userdata);
-  return true;
-}
-
-bool HHVM_FUNCTION(array_walk,
-                   VRefParam input,
-                   const Variant& funcname,
-                   const Variant& userdata /* = uninit_variant */) {
-  if (!input.isPHPArray()) {
-    throw_expected_array_exception("array_walk");
-    return false;
-  }
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(funcname, cf(), false, ctx);
-  if (ctx.func == NULL) {
-    return false;
-  }
-  Variant var(input, Variant::WithRefBind{});
-  ArrayUtil::Walk(var, walk_func, &ctx, false, NULL, userdata);
-  return true;
-}
-
 static void compact(PointerSet& seen, VarEnv* v, Array& ret,
                     const Variant& var) {
   if (var.isArray()) {
@@ -3172,8 +3133,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_unique);
     HHVM_FE(array_unshift);
     HHVM_FE(array_values);
-    HHVM_FE(array_walk_recursive);
-    HHVM_FE(array_walk);
     HHVM_FE(compact);
     HHVM_FE(shuffle);
     HHVM_FE(count);

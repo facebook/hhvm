@@ -37,7 +37,7 @@ EloquentTest::testCatProperties
 EloquentTest::testNumberOfCatOwners
 .
 EloquentTest::testNumberOfCats
-.
+FATAL
 EloquentTest::testUserProperties
 .
 FacadeTest::testReset

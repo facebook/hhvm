@@ -103,14 +103,6 @@ TypedValue HHVM_FUNCTION(array_unshift,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_values,
                          const Variant& input);
-bool HHVM_FUNCTION(array_walk_recursive,
-                   VRefParam input,
-                   const Variant& funcname,
-                   const Variant& userdata = uninit_variant);
-bool HHVM_FUNCTION(array_walk,
-                   VRefParam input,
-                   const Variant& funcname,
-                    const Variant& userdata = uninit_variant);
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args = null_array);

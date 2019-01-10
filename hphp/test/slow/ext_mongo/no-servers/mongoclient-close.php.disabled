@@ -9,7 +9,9 @@ function createCons()
 	$c = new Mongo('mongodb://localhost:13000', array( 'replicaSet' => 'seta' ));
 	$cons = $c->getConnections();
 	echo "- available cons:\n";
-	array_walk( $cons, function( $a ) { echo $a['hash'], "\n"; } );
+  foreach ($cons as $conn) {
+	  echo $conn['hash'], "\n";
+  }
 }
 
 echo "Testing closing master (BC):\n";

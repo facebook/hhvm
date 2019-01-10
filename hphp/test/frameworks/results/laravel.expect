@@ -175,7 +175,7 @@ CacheTaggedCacheTest::testRedisCacheForeverTagsCanBeFlushed
 CacheTaggedCacheTest::testRedisCacheTagsPushForeverKeysCorrectly
 .
 CacheTaggedCacheTest::testSectionCanBeFlushed
-.
+FATAL
 CacheTaggedCacheTest::testTagsCacheForever
 .
 CacheTaggedCacheTest::testTagsWithStringArgument
@@ -463,7 +463,7 @@ DatabaseEloquentBuilderTest::testQueryScopes
 DatabaseEloquentBuilderTest::testQuickPaginateMethod
 .
 DatabaseEloquentBuilderTest::testRealNestedWhereWithScopes
-.
+FATAL
 DatabaseEloquentBuilderTest::testRelationshipEagerLoadProcess
 .
 DatabaseEloquentBuilderTest::testSimpleWhere
@@ -901,7 +901,7 @@ DatabaseQueryBuilderTest::testSQLiteMultipleInserts
 DatabaseQueryBuilderTest::testSQLiteOrderBy
 .
 DatabaseQueryBuilderTest::testSelectWithCaching
-.
+FATAL
 DatabaseQueryBuilderTest::testSelectWithCachingAndTags
 .
 DatabaseQueryBuilderTest::testSelectWithCachingForever
@@ -1779,7 +1779,7 @@ SupportCollectionTest::testFirstWithCallback
 SupportCollectionTest::testFirstWithCallbackAndDefault
 .
 SupportCollectionTest::testFlatten
-.
+FATAL
 SupportCollectionTest::testFlip
 .
 SupportCollectionTest::testGetListValueWithAccessors
@@ -1889,7 +1889,7 @@ SupportHelpersTest::testArrayFetch
 SupportHelpersTest::testArrayFirst
 .
 SupportHelpersTest::testArrayFlatten
-.
+FATAL
 SupportHelpersTest::testArrayForget
 .
 SupportHelpersTest::testArrayGet

@@ -201,10 +201,6 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 //
 echo "array_multisort: ";
 var_dump(array_multisort(&$k1));
-echo "array_walk: ";
-var_dump(array_walk(&$k1, function($foo) { return "bar"; }));
-echo "array_walk_recursive: ";
-var_dump(array_walk_recursive(&$k1, function($foo) { return "bar"; }));
 
 // Those should simply return a php array.
 //

@@ -76,238 +76,196 @@ array(1) {
   }
 }
 test_compact_map() done
-Running test_compact_walk() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 43
-test_compact_walk() done
-Running test_compact_walk() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 43
-test_compact_walk() done
 Running test_compact_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 48
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 48
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 49
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 49
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 50
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 50
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 40
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 40
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 41
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 41
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 42
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 42
 test_compact_errors() done
 Running test_compact_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 48
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 48
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 49
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 49
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 50
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 50
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 40
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 40
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 41
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 41
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line 42
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 42
 test_compact_errors() done
 Running test_extract_dyncall() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 60
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 52
 string(3) "101"
 string(3) "201"
 test_extract_dyncall() done
 Running test_extract_dyncall() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 60
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 52
 string(3) "101"
 string(3) "201"
 test_extract_dyncall() done
 Running test_extract_map() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 70
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 62
 string(3) "101"
 string(3) "201"
 test_extract_map() done
 Running test_extract_map() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 70
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 62
 string(3) "101"
 string(3) "201"
 test_extract_map() done
-Running test_extract_walk() #1....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 81
-string(3) "101"
-string(3) "201"
-test_extract_walk() done
-Running test_extract_walk() #2....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 81
-string(3) "101"
-string(3) "201"
-test_extract_walk() done
 Running test_extract_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 87
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 89
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 90
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 92
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 68
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 68
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 69
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 69
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 70
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 70
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 71
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 71
 test_extract_errors() done
 Running test_extract_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 87
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 88
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 89
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 90
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 92
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 68
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 68
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 69
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 69
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 70
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 70
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) extract should not be called dynamically in disallow_varenv_dyncalls.inc at line 71
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 71
 test_extract_errors() done
 Running test_parse_str_dyncall() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 105
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 84
 string(3) "101"
 string(3) "201"
 test_parse_str_dyncall() done
 Running test_parse_str_dyncall() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 105
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 84
 string(3) "101"
 string(3) "201"
 test_parse_str_dyncall() done
 Running test_parse_str_cuf() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 115
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 94
 string(3) "101"
 string(3) "201"
 test_parse_str_cuf() done
 Running test_parse_str_cuf() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 115
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 94
 string(3) "101"
 string(3) "201"
 test_parse_str_cuf() done
 Running test_parse_str_cuf_array() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 125
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 104
 string(3) "101"
 string(3) "201"
 test_parse_str_cuf_array() done
 Running test_parse_str_cuf_array() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 125
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 104
 string(3) "101"
 string(3) "201"
 test_parse_str_cuf_array() done
 Running test_parse_str_map() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 135
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 114
 string(3) "101"
 string(3) "201"
 test_parse_str_map() done
 Running test_parse_str_map() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 135
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 114
 string(3) "101"
 string(3) "201"
 test_parse_str_map() done
-Running test_parse_str_walk() #1....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 146
-string(3) "101"
-string(3) "201"
-test_parse_str_walk() done
-Running test_parse_str_walk() #2....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 146
-string(3) "101"
-string(3) "201"
-test_parse_str_walk() done
 Running test_parse_str_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 152
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 153
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 154
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 120
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 120
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 121
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 121
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 122
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 122
 test_parse_str_errors() done
 Running test_parse_str_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 152
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 153
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 154
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 120
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 120
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 121
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 121
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) parse_str should not be called dynamically in disallow_varenv_dyncalls.inc at line 122
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 122
 test_parse_str_errors() done
 Running test_framemeta_dyncall() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 162
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 130
 string(8) "metadata"
 test_framemeta_dyncall() done
 Running test_framemeta_dyncall() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 162
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 130
 string(8) "metadata"
 test_framemeta_dyncall() done
 Running test_framemeta_cuf() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 171
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 139
 string(8) "metadata"
 test_framemeta_cuf() done
 Running test_framemeta_cuf() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 171
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 139
 string(8) "metadata"
 test_framemeta_cuf() done
 Running test_framemeta_cuf_array() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 180
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 148
 string(8) "metadata"
 test_framemeta_cuf_array() done
 Running test_framemeta_cuf_array() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 180
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 148
 string(8) "metadata"
 test_framemeta_cuf_array() done
 Running test_framemeta_map() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 189
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 157
 string(8) "metadata"
 test_framemeta_map() done
 Running test_framemeta_map() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 189
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 157
 string(8) "metadata"
 test_framemeta_map() done
 Running test_framemeta_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 195
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 196
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 198
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 163
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 163
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 164
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 164
 test_framemeta_errors() done
 Running test_framemeta_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 195
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 196
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 198
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 163
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 163
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line 164
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 164
 test_framemeta_errors() done
 Running test_getargs_dyncall() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 203
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 169
 array(3) {
   [0]=>
   int(100)
@@ -318,7 +276,7 @@ array(3) {
 }
 test_getargs_dyncall() done
 Running test_getargs_dyncall() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 203
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 169
 array(3) {
   [0]=>
   int(100)
@@ -329,7 +287,7 @@ array(3) {
 }
 test_getargs_dyncall() done
 Running test_getargs_cuf() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 211
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 177
 array(3) {
   [0]=>
   int(100)
@@ -340,7 +298,7 @@ array(3) {
 }
 test_getargs_cuf() done
 Running test_getargs_cuf() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 211
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 177
 array(3) {
   [0]=>
   int(100)
@@ -351,7 +309,7 @@ array(3) {
 }
 test_getargs_cuf() done
 Running test_getargs_cuf_array() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 219
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 185
 array(3) {
   [0]=>
   int(100)
@@ -362,7 +320,7 @@ array(3) {
 }
 test_getargs_cuf_array() done
 Running test_getargs_cuf_array() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 219
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 185
 array(3) {
   [0]=>
   int(100)
@@ -373,260 +331,208 @@ array(3) {
 }
 test_getargs_cuf_array() done
 Running test_getargs_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 235
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 237
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 201
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 201
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 202
+func_get_args() expects exactly 0 parameters, 1 given in disallow_varenv_dyncalls.inc at line 202
 test_getargs_errors() done
 Running test_getargs_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 235
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 237
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 201
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 201
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line 202
+func_get_args() expects exactly 0 parameters, 1 given in disallow_varenv_dyncalls.inc at line 202
 test_getargs_errors() done
 Running test_assert_dyncall_pass() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 244
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 209
 string(3) "200"
 test_assert_dyncall_pass() done
 Running test_assert_dyncall_pass() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 244
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 209
 string(3) "200"
 test_assert_dyncall_pass() done
 Running test_assert_dyncall_pass2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 250
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 215
 test_assert_dyncall_pass2() done
 Running test_assert_dyncall_pass2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 250
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 215
 test_assert_dyncall_pass2() done
 Running test_assert_dyncall_fail() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 257
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 257
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 222
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 222
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 257
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 257
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 222
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 222
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 263
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 228
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 228
 test_assert_dyncall_fail2() done
 Running test_assert_dyncall_fail2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 263
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 228
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 228
 test_assert_dyncall_fail2() done
 Running test_assert_cuf_pass() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 270
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 235
 string(3) "200"
 test_assert_cuf_pass() done
 Running test_assert_cuf_pass() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 270
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 235
 string(3) "200"
 test_assert_cuf_pass() done
 Running test_assert_cuf_pass2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 276
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 241
 test_assert_cuf_pass2() done
 Running test_assert_cuf_pass2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 276
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 241
 test_assert_cuf_pass2() done
 Running test_assert_cuf_fail() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 283
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 283
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 248
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 248
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 283
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 283
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 248
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 248
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 289
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 254
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 254
 test_assert_cuf_fail2() done
 Running test_assert_cuf_fail2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 289
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 254
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 254
 test_assert_cuf_fail2() done
 Running test_assert_cuf_array_pass() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 296
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 261
 string(3) "200"
 test_assert_cuf_array_pass() done
 Running test_assert_cuf_array_pass() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 296
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 261
 string(3) "200"
 test_assert_cuf_array_pass() done
 Running test_assert_cuf_array_pass2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 267
 test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_pass2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 267
 test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_fail() #1....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 309
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 309
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 274
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 274
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail() #2....
 int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 309
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 309
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 274
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 274
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 315
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 280
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 280
 test_assert_cuf_array_fail2() done
 Running test_assert_cuf_array_fail2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 315
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 280
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 280
 test_assert_cuf_array_fail2() done
 Running test_assert_map_pass() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 288
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 288
 string(3) "300"
 string(3) "400"
 test_assert_map_pass() done
 Running test_assert_map_pass() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 288
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 288
 string(3) "300"
 string(3) "400"
 test_assert_map_pass() done
 Running test_assert_map_pass2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 329
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 329
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 294
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 294
 test_assert_map_pass2() done
 Running test_assert_map_pass2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 329
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 329
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 294
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 294
 test_assert_map_pass2() done
 Running test_assert_map_fail() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 337
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 337
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 302
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 302
 string(3) "300"
 string(3) "400"
 test_assert_map_fail() done
 Running test_assert_map_fail() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 337
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 337
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 302
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 302
 string(3) "300"
 string(3) "400"
 test_assert_map_fail() done
 Running test_assert_map_fail2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
 test_assert_map_fail2() done
 Running test_assert_map_fail2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
 test_assert_map_fail2() done
-Running test_assert_walk_pass() #1....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 352
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 352
-string(3) "300"
-string(3) "400"
-test_assert_walk_pass() done
-Running test_assert_walk_pass() #2....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 352
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 352
-string(3) "300"
-string(3) "400"
-test_assert_walk_pass() done
-Running test_assert_walk_pass2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 359
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 359
-test_assert_walk_pass2() done
-Running test_assert_walk_pass2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 359
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 359
-test_assert_walk_pass2() done
-Running test_assert_walk_fail() #1....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 368
-assert(): 0 "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 368
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 368
-assert(): 1 "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 368
-string(3) "300"
-string(3) "400"
-test_assert_walk_fail() done
-Running test_assert_walk_fail() #2....
-int(100)
-int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 368
-assert(): 0 "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 368
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 368
-assert(): 1 "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 368
-string(3) "300"
-string(3) "400"
-test_assert_walk_fail() done
-Running test_assert_walk_fail2() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 375
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 375
-test_assert_walk_fail2() done
-Running test_assert_walk_fail2() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 375
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 375
-test_assert_walk_fail2() done
 Running test_assert_chained() #1....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 384
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 317
 string(3) "300"
 string(3) "400"
 test_assert_chained() done
 Running test_assert_chained() #2....
 int(100)
 int(200)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 384
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 317
 string(3) "300"
 string(3) "400"
 test_assert_chained() done
 Running test_assert_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 390
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 391
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 392
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 323
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 324
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 324
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 325
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 325
 test_assert_errors() done
 Running test_assert_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 390
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 391
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 392
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 323
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 323
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 324
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 324
+(hhvm.hack.disallow_dynamic_var_env_funcs=warn) assert should not be called dynamically in disallow_varenv_dyncalls.inc at line 325
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 325
 test_assert_errors() done

@@ -68,19 +68,15 @@ array(1) {
   }
 }
 test_compact_map() done
-Running test_compact_walk() #1....
-test_compact_walk() done
-Running test_compact_walk() #2....
-test_compact_walk() done
 Running test_compact_errors() #1....
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 48
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 49
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 50
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 40
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 41
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 42
 test_compact_errors() done
 Running test_compact_errors() #2....
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 48
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 49
-compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 50
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 40
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 41
+compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 42
 test_compact_errors() done
 Running test_extract_dyncall() #1....
 int(100)
@@ -106,31 +102,17 @@ int(200)
 string(3) "101"
 string(3) "201"
 test_extract_map() done
-Running test_extract_walk() #1....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_walk() done
-Running test_extract_walk() #2....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_extract_walk() done
 Running test_extract_errors() #1....
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 68
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 69
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 70
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 71
 test_extract_errors() done
 Running test_extract_errors() #2....
-extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 87
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 88
-extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 89
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 90
-extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 92
+extract() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 68
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 69
+extract() expects at most 3 parameters, 4 given in disallow_varenv_dyncalls.inc at line 70
+extract() expects parameter 1 to be array in disallow_varenv_dyncalls.inc at line 71
 test_extract_errors() done
 Running test_parse_str_dyncall() #1....
 int(100)
@@ -180,27 +162,15 @@ int(200)
 string(3) "101"
 string(3) "201"
 test_parse_str_map() done
-Running test_parse_str_walk() #1....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_parse_str_walk() done
-Running test_parse_str_walk() #2....
-int(100)
-int(200)
-string(3) "101"
-string(3) "201"
-test_parse_str_walk() done
 Running test_parse_str_errors() #1....
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 120
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 121
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 122
 test_parse_str_errors() done
 Running test_parse_str_errors() #2....
-parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 152
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 153
-parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 154
+parse_str() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 120
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 121
+parse_str() expects parameter 1 to be string, array given in disallow_varenv_dyncalls.inc at line 122
 test_parse_str_errors() done
 Running test_framemeta_dyncall() #1....
 int(100)
@@ -235,14 +205,12 @@ int(100)
 string(8) "metadata"
 test_framemeta_map() done
 Running test_framemeta_errors() #1....
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 163
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 164
 test_framemeta_errors() done
 Running test_framemeta_errors() #2....
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 195
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 196
-HH\set_frame_metadata() expects exactly 1 parameter, 2 given in disallow_varenv_dyncalls.inc at line 198
+HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 163
+HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line 164
 test_framemeta_errors() done
 Running test_getargs_dyncall() #1....
 array(3) {
@@ -305,12 +273,12 @@ array(3) {
 }
 test_getargs_cuf_array() done
 Running test_getargs_errors() #1....
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 201
+func_get_args() expects exactly 0 parameters, 1 given in disallow_varenv_dyncalls.inc at line 202
 test_getargs_errors() done
 Running test_getargs_errors() #2....
-func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 235
-func_get_args() expects exactly 0 parameters, 2 given in disallow_varenv_dyncalls.inc at line 237
+func_get_args() expects exactly 0 parameters, 3 given in disallow_varenv_dyncalls.inc at line 201
+func_get_args() expects exactly 0 parameters, 1 given in disallow_varenv_dyncalls.inc at line 202
 test_getargs_errors() done
 Running test_assert_dyncall_pass() #1....
 int(100)
@@ -326,19 +294,19 @@ Running test_assert_dyncall_pass2() #2....
 test_assert_dyncall_pass2() done
 Running test_assert_dyncall_fail() #1....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 257
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 222
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail() #2....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 257
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 222
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 228
 test_assert_dyncall_fail2() done
 Running test_assert_dyncall_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 263
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 228
 test_assert_dyncall_fail2() done
 Running test_assert_cuf_pass() #1....
 int(100)
@@ -354,19 +322,19 @@ Running test_assert_cuf_pass2() #2....
 test_assert_cuf_pass2() done
 Running test_assert_cuf_fail() #1....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 283
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 248
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail() #2....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 283
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 248
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 254
 test_assert_cuf_fail2() done
 Running test_assert_cuf_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 289
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 254
 test_assert_cuf_fail2() done
 Running test_assert_cuf_array_pass() #1....
 int(100)
@@ -382,19 +350,19 @@ Running test_assert_cuf_array_pass2() #2....
 test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_fail() #1....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 309
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 274
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail() #2....
 int(100)
-assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 309
+assert(): assertion failed "($var = '200') && false" failed in disallow_varenv_dyncalls.inc at line 274
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail2() #1....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 280
 test_assert_cuf_array_fail2() done
 Running test_assert_cuf_array_fail2() #2....
-assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 315
+assert(): assertion failed failed in disallow_varenv_dyncalls.inc at line 280
 test_assert_cuf_array_fail2() done
 Running test_assert_map_pass() #1....
 int(100)
@@ -415,63 +383,27 @@ test_assert_map_pass2() done
 Running test_assert_map_fail() #1....
 int(100)
 int(200)
-assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 337
+assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 302
 string(3) "300"
 string(3) "400"
 test_assert_map_fail() done
 Running test_assert_map_fail() #2....
 int(100)
 int(200)
-assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 337
-assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 337
+assert(): Assertion "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 302
+assert(): Assertion "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 302
 string(3) "300"
 string(3) "400"
 test_assert_map_fail() done
 Running test_assert_map_fail2() #1....
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
 test_assert_map_fail2() done
 Running test_assert_map_fail2() #2....
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
-assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 343
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
+assert(): Assertion failed in disallow_varenv_dyncalls.inc at line 308
 test_assert_map_fail2() done
-Running test_assert_walk_pass() #1....
-int(100)
-int(200)
-string(3) "300"
-string(3) "400"
-test_assert_walk_pass() done
-Running test_assert_walk_pass() #2....
-int(100)
-int(200)
-string(3) "300"
-string(3) "400"
-test_assert_walk_pass() done
-Running test_assert_walk_pass2() #1....
-test_assert_walk_pass2() done
-Running test_assert_walk_pass2() #2....
-test_assert_walk_pass2() done
-Running test_assert_walk_fail() #1....
-int(100)
-int(200)
-assert(): 0 "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 368
-assert(): 1 "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 368
-string(3) "300"
-string(3) "400"
-test_assert_walk_fail() done
-Running test_assert_walk_fail() #2....
-int(100)
-int(200)
-assert(): 0 "($var1 = '300') && false" failed in disallow_varenv_dyncalls.inc at line 368
-assert(): 1 "($var2 = '400') && false" failed in disallow_varenv_dyncalls.inc at line 368
-string(3) "300"
-string(3) "400"
-test_assert_walk_fail() done
-Running test_assert_walk_fail2() #1....
-test_assert_walk_fail2() done
-Running test_assert_walk_fail2() #2....
-test_assert_walk_fail2() done
 Running test_assert_chained() #1....
 int(100)
 int(200)
@@ -485,12 +417,12 @@ string(3) "300"
 string(3) "400"
 test_assert_chained() done
 Running test_assert_errors() #1....
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 323
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 324
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 325
 test_assert_errors() done
 Running test_assert_errors() #2....
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 390
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 391
-assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 392
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 323
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 324
+assert() expects at least 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line 325
 test_assert_errors() done

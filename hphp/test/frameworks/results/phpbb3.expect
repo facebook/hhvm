@@ -53,7 +53,7 @@ phpbb_avatar_manager_test::test_clean_row with data set #3
 phpbb_avatar_manager_test::test_clean_row with data set #4
 .
 phpbb_avatar_manager_test::test_get_all_drivers
-.
+FATAL
 phpbb_avatar_manager_test::test_get_avatar_settings
 .
 phpbb_avatar_manager_test::test_get_driver_all with data set #0
@@ -1791,7 +1791,7 @@ phpbb_path_helper_web_root_path_test::test_clean_url with data set #7
 phpbb_path_helper_web_root_path_test::test_clean_url with data set #8
 .
 phpbb_path_helper_web_root_path_test::test_get_web_root_path
-.
+FATAL
 phpbb_path_helper_web_root_path_test::test_update_web_root_path with data set #0
 .
 phpbb_path_helper_web_root_path_test::test_update_web_root_path with data set #1
@@ -2533,7 +2533,7 @@ S
 phpbb_search_postgres_test::test_split_keywords with data set #9
 S
 phpbb_security_extract_current_page_test::test_query_string_php_self with data set #0
-.
+FATAL
 phpbb_security_extract_current_page_test::test_query_string_php_self with data set #1
 .
 phpbb_security_extract_current_page_test::test_query_string_request_uri with data set #0
@@ -2545,7 +2545,7 @@ phpbb_security_hash_test::test_check_hash_with_large_input
 phpbb_security_hash_test::test_check_hash_with_phpass
 .
 phpbb_security_redirect_test::test_redirect with data set #0
-.
+FATAL
 phpbb_security_redirect_test::test_redirect with data set #1
 .
 phpbb_security_redirect_test::test_redirect with data set #10

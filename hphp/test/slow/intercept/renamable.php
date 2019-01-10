@@ -3,7 +3,7 @@
 function test() {
   $x = 42;
   $a = array(array('x' => 24));
-  array_walk(&$a, 'extract');
+  array_map('extract', $a);
   return $x;
 }
 

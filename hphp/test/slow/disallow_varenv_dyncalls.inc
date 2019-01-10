@@ -35,14 +35,6 @@ function test_compact_map() {
   var_dump(array_map($f, [['var1', 'var2']]));
 }
 
-function test_compact_walk() {
-  $var1 = 100;
-  $var2 = 200;
-  $f = 'compact';
-  $args = [['var1', 'var2']];
-  array_walk(&$args, $f);
-}
-
 function test_compact_errors() {
   $f = 'compact';
   $f();
@@ -71,25 +63,12 @@ function test_extract_map() {
   var_dump($var1, $var2);
 }
 
-function test_extract_walk() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'extract';
-  $args = [['var1' => '101', 'var2' => '201']];
-  array_walk(&$args, $f);
-  var_dump($var1, $var2);
-}
-
 function test_extract_errors() {
   $f = 'extract';
   $f();
   $tmp = 123; $f(&$tmp);
   $tmp = 'foo'; $f(&$tmp, 'foo', 'foo', 'foo');
   array_map($f, ['foo']);
-  $args = ['foo'];
-  array_walk(&$args, $f);
 }
 
 function make_parse_str_str($v1, $v2) {
@@ -133,17 +112,6 @@ function test_parse_str_map() {
 
   $f = 'parse_str';
   array_map($f, [make_parse_str_str(101, 201)]);
-  var_dump($var1, $var2);
-}
-
-function test_parse_str_walk() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'parse_str';
-  $args = [make_parse_str_str(101, 201)];
-  array_walk(&$args, $f);
   var_dump($var1, $var2);
 }
 
@@ -194,8 +162,6 @@ function test_framemeta_errors() {
   $f = 'HH\set_frame_metadata';
   $f();
   $f('abc', 'def', 'ghi');
-  $args = ['foo'];
-  array_walk(&$args, $f);
 }
 
 function test_getargs_dyncall_impl($a, $b, $c) {
@@ -233,8 +199,7 @@ function test_getargs_map() {
 function test_getargs_errors() {
   $f = 'func_get_args';
   $f('abc', 100, false);
-  $args = [1];
-  array_walk(&$args, $f);
+  array_map($f, [1]);
 }
 
 function test_assert_dyncall_pass() {
@@ -343,38 +308,6 @@ function test_assert_map_fail2() {
   array_map($f, [false, false]);
 }
 
-function test_assert_walk_pass() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-  $f = 'assert';
-  $args = ['($var1 = \'300\') && true', '($var2 = \'400\') && true'];
-  array_walk(&$args, $f);
-  var_dump($var1, $var2);
-}
-
-function test_assert_walk_pass2() {
-  $f = 'assert';
-  $args = [true, true];
-  array_walk(&$args, $f);
-}
-
-function test_assert_walk_fail() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-  $f = 'assert';
-  $args = ['($var1 = \'300\') && false', '($var2 = \'400\') && false'];
-  array_walk(&$args, $f);
-  var_dump($var1, $var2);
-}
-
-function test_assert_walk_fail2() {
-  $f = 'assert';
-  $args = [true, true];
-  array_walk(&$args, $f);
-}
-
 function test_assert_chained() {
   $var1 = 100;
   $var2 = 200;
@@ -413,19 +346,16 @@ function run_tests() {
     'test_compact_cuf',
     'test_compact_cuf_array',
     'test_compact_map',
-    'test_compact_walk',
     'test_compact_errors',
 
     'test_extract_dyncall',
     'test_extract_map',
-    'test_extract_walk',
     'test_extract_errors',
 
     'test_parse_str_dyncall',
     'test_parse_str_cuf',
     'test_parse_str_cuf_array',
     'test_parse_str_map',
-    'test_parse_str_walk',
     'test_parse_str_errors',
 
     'test_framemeta_dyncall',
@@ -455,10 +385,6 @@ function run_tests() {
     'test_assert_map_pass2',
     'test_assert_map_fail',
     'test_assert_map_fail2',
-    'test_assert_walk_pass',
-    'test_assert_walk_pass2',
-    'test_assert_walk_fail',
-    'test_assert_walk_fail2',
     'test_assert_chained',
     'test_assert_errors',
   ];

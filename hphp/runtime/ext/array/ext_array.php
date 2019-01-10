@@ -597,53 +597,6 @@ function array_values(
 ): mixed;
 
 /**
- * Applies the user-defined function funcname to each element of the input
- *   array. This function will recur into deeper arrays.
- *
- * @param mixed $input - The input array.
- * @param mixed $funcname - Typically, funcname takes on two parameters. The
- *   input parameter's value being the first, and the key/index second. If
- *   funcname needs to be working with the actual values of the array, specify
- *   the first parameter of funcname as a reference. Then, any changes made to
- *   those elements will be made in the original array itself.
- * @param mixed $userdata - If the optional userdata parameter is supplied, it
- *   will be passed as the third parameter to the callback funcname.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Native>>
-function array_walk_recursive(
-  mixed &$input,
-  mixed $funcname,
-  mixed $userdata = null,
-): bool;
-
-/**
- * @param mixed $input - The input array.
- *
- * @param mixed $funcname - Typically, funcname takes on two parameters. The
- *   array parameter's value being the first, and the key/index second. If
- *   funcname needs to be working with the actual values of the array, specify
- *   the first parameter of funcname as a reference. Then, any changes made to
- *   those elements will be made in the original array itself. Users may not
- *   change the array itself from the callback function. e.g. Add/delete
- *   elements, unset elements, etc. If the array that array_walk() is applied to
- *   is changed, the behavior of this function is undefined, and unpredictable.
- * @param mixed $userdata - If the optional userdata parameter is supplied, it
- *   will be passed as the third parameter to the callback funcname.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Native>>
-function array_walk(
-  mixed &$input,
-  mixed $funcname,
-  mixed $userdata = null,
-): bool;
-
-/**
  * Creates an array containing variables and their values. For each of these,
  *   compact() looks for a variable with that name in the current symbol table
  *   and adds it to the output array such that the variable name becomes the key

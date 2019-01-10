@@ -480,66 +480,6 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 
-static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
-                                  Variant& var) {
-  if (!var.is(KindOfObject)) {
-    miter.emplace(var.asRef()->m_data.pref);
-    return;
-  }
-
-  auto const odata = var.getObjectData();
-  if (odata->isCollection()) {
-    raise_error("Collection elements cannot be taken by reference");
-  }
-  bool isIterable;
-  Object iterable = odata->iterableObject(isIterable);
-  if (isIterable) {
-    raise_fatal_error("An iterator cannot be used with "
-                              "foreach by reference");
-  }
-  Array properties = iterable->o_toIterArray(null_string,
-                                             ObjectData::CreateRefs);
-  miter.emplace(properties.detach());
-}
-
-void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
-                     const void *data, bool recursive /* = false */,
-                     PointerSet *seen /* = NULL */,
-                     const Variant& userdata /* = uninit_variant */) {
-  assertx(walk_function);
-
-  // The Optional is just to avoid copy constructing MArrayIter.
-  folly::Optional<MArrayIter> miter;
-  create_miter_for_walk(miter, input);
-  assertx(miter.hasValue());
-
-  Variant k;
-  Variant v;
-  while (miter->advance()) {
-    k = miter->key();
-    v.assignRef(miter->val());
-    if (recursive && v.isArray()) {
-      assertx(seen);
-      ArrayData *arr = v.getArrayData();
-
-      if (v.isReferenced()) {
-        if (seen->find(arr) != seen->end()) {
-          raise_warning("array_walk_recursive(): recursion detected");
-          return;
-        }
-        seen->insert(arr);
-      }
-
-      Walk(v, walk_function, data, recursive, seen, userdata);
-      if (v.isReferenced()) {
-        seen->erase(arr);
-      }
-    } else {
-      walk_function(v, k, userdata, data);
-    }
-  }
-}
-
 Variant ArrayUtil::Reduce(const Array& input, PFUNC_REDUCE reduce_function,
                           const void *data,
                           const Variant& initial /* = uninit_variant */) {

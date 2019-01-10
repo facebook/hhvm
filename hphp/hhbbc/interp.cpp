@@ -3991,21 +3991,6 @@ void in(ISS& env, const bc::LIterInitK& op) {
   );
 }
 
-void in(ISS& env, const bc::MIterInit& op) {
-  popV(env);
-  env.propagate(op.target2, &env.state);
-  unbindLocalStatic(env, op.loc3);
-  setLocRaw(env, op.loc3, TRef);
-}
-
-void in(ISS& env, const bc::MIterInitK& op) {
-  popV(env);
-  env.propagate(op.target2, &env.state);
-  unbindLocalStatic(env, op.loc3);
-  setLocRaw(env, op.loc3, TRef);
-  setLoc(env, op.loc4, TInitCell);
-}
-
 void in(ISS& env, const bc::WIterInit& op) {
   popC(env);
   env.propagate(op.target2, &env.state);
@@ -4040,19 +4025,6 @@ void in(ISS& env, const bc::LIterNextK& op) {
   iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3);
 }
 
-void in(ISS& env, const bc::MIterNext& op) {
-  env.propagate(op.target2, &env.state);
-  unbindLocalStatic(env, op.loc3);
-  setLocRaw(env, op.loc3, TRef);
-}
-
-void in(ISS& env, const bc::MIterNextK& op) {
-  env.propagate(op.target2, &env.state);
-  unbindLocalStatic(env, op.loc3);
-  setLocRaw(env, op.loc3, TRef);
-  setLoc(env, op.loc4, TInitCell);
-}
-
 void in(ISS& env, const bc::WIterNext& op) {
   env.propagate(op.target2, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
@@ -4081,10 +4053,6 @@ void in(ISS& env, const bc::IterFree& op) {
 void in(ISS& env, const bc::LIterFree& op) {
   nothrow(env);
   mayReadLocal(env, op.loc2);
-  freeIter(env, op.iter1);
-}
-void in(ISS& env, const bc::MIterFree& op) {
-  nothrow(env);
   freeIter(env, op.iter1);
 }
 void in(ISS& env, const bc::CIterFree& op) {

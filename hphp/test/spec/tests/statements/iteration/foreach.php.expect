@@ -23,34 +23,6 @@ array(3) {
   [2]=>
   string(4) "blue"
 }
-red
-black
-white
-black
-blue
-black
-array(3) {
-  [0]=>
-  string(5) "black"
-  [1]=>
-  string(5) "black"
-  [2]=>
-  &string(5) "black"
-}
-black
-green
-black
-green
-black
-green
-array(3) {
-  [0]=>
-  string(5) "green"
-  [1]=>
-  string(5) "green"
-  [2]=>
-  &string(5) "green"
-}
   abc  ij
   mnop  xyz
 ------

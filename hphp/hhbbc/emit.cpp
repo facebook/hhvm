@@ -1044,14 +1044,12 @@ void emit_eh_region(FuncEmitter& fe,
       eh.m_handler = blockInfo[cr.catchEntry].offset;
       eh.m_end = kInvalidOffset;
       eh.m_iterId = cr.iterId;
-      eh.m_itRef = cr.itRef;
     },
     [&] (const php::FaultRegion& fr) {
       eh.m_type = EHEnt::Type::Fault;
       eh.m_handler = blockInfo[fr.faultEntry].offset;
       eh.m_end = kInvalidOffset;
       eh.m_iterId = fr.iterId;
-      eh.m_itRef = fr.itRef;
     }
   );
 

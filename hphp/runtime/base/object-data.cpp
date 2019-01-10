@@ -703,21 +703,13 @@ size_t getPropertyIfAccessible(ObjectData* obj,
                                ObjectData::IterMode mode,
                                Array& properties,
                                size_t propLeft) {
-  if (mode == ObjectData::CreateRefs) {
-    auto const prop = obj->vGetProp(ctx, key);
-    if (prop) {
-      --propLeft;
-      properties.setRef(StrNR(key), prop, true);
-    }
-  } else {
-    auto const prop = obj->getProp(ctx, key);
-    if (prop && prop.type() != KindOfUninit) {
-      --propLeft;
-      if (mode == ObjectData::EraseRefs) {
-        properties.set(StrNR(key), prop.tv(), true);
-      } else {
-        properties.setWithRef(StrNR(key), prop.tv(), true);
-      }
+  auto const prop = obj->getProp(ctx, key);
+  if (prop && prop.type() != KindOfUninit) {
+    --propLeft;
+    if (mode == ObjectData::EraseRefs) {
+      properties.set(StrNR(key), prop.tv(), true);
+    } else {
+      properties.setWithRef(StrNR(key), prop.tv(), true);
     }
   }
   return propLeft;
@@ -801,11 +793,6 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       if (UNLIKELY(!isStringType(key.m_type))) {
         assertx(key.m_type == KindOfInt64);
         switch (mode) {
-        case CreateRefs: {
-          auto const lval = dynProps.lvalAt(key.m_data.num);
-          retArray.setRef(key.m_data.num, lval);
-          break;
-        }
         case EraseRefs: {
           auto const val = dynProps.get()->at(key.m_data.num);
           retArray.set(key.m_data.num, val);
@@ -822,11 +809,6 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
 
       auto const strKey = key.m_data.pstr;
       switch (mode) {
-      case CreateRefs: {
-        auto const lval = dynProps.lvalAt(StrNR(strKey), AccessFlags::Key);
-        retArray.setRef(StrNR(strKey), lval, true /* isKey */);
-        break;
-      }
       case EraseRefs: {
         auto const val = dynProps.get()->at(strKey);
         retArray.set(StrNR(strKey), val, true /* isKey */);
@@ -1435,18 +1417,6 @@ tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   auto const lookup = const_cast<ObjectData*>(this)
     ->getPropImpl<false, true, false>(ctx, key);
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
-}
-
-tv_lval ObjectData::vGetProp(const Class* ctx, const StringData* key) {
-  auto const lookup = getPropImpl<true, true, false>(ctx, key);
-  auto prop = lookup.val;
-  if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
-  if (lookup.accessible && prop && type(prop) != KindOfUninit) {
-    boxingTypeHint(lookup.prop);
-    tvBoxIfNeeded(prop);
-    return prop;
-  }
-  return tv_lval{};
 }
 
 tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {

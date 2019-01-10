@@ -378,9 +378,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
             ReleaseVVAndSkip,
-            MIterFree,
-            MIterNext,
-            MIterNextK,
             LIterInit,
             LIterInitK,
             LIterNext,
@@ -994,7 +991,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Iterator instructions
 
   case IterInit:
-  case MIterInit:
   case WIterInit:
   case LIterInit:
   case LIterNext:
@@ -1004,7 +1000,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AFrame { inst.src(1), inst.extra<IterData>()->valId }
     );
   case IterNext:
-  case MIterNext:
   case WIterNext:
     return iter_effects(
       inst,
@@ -1013,7 +1008,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   case IterInitK:
-  case MIterInitK:
   case WIterInitK:
   case LIterInitK:
   case LIterNextK:
@@ -1024,7 +1018,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case IterNextK:
-  case MIterNextK:
   case WIterNextK:
     {
       AliasClass key = AFrame { inst.src(0), inst.extra<IterData>()->keyId };
@@ -1033,7 +1026,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case IterFree:
-  case MIterFree:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
   //////////////////////////////////////////////////////////////////////

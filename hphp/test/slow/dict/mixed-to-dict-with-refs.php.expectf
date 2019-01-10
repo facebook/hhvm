@@ -1,4 +1,0 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Dicts cannot contain references' in %s/test/slow/dict/mixed-to-dict-with-refs.php:13
-Stack trace:
-#0 %s/test/slow/dict/mixed-to-dict-with-refs.php(25): test()
-#1 {main}

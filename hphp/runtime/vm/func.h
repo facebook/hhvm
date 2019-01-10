@@ -91,7 +91,6 @@ struct EHEnt {
   };
 
   Type m_type;
-  bool m_itRef;
   Offset m_base;
   Offset m_past;
   int m_iterId;

@@ -1075,7 +1075,7 @@ Predis\Command\Processor\KeyPrefixProcessorTest::testCanUndefineCommandHandlers
 Predis\Command\Processor\KeyPrefixProcessorTest::testChangePrefix
 .
 Predis\Command\Processor\KeyPrefixProcessorTest::testConstructorWithPrefix
-.
+FATAL
 Predis\Command\Processor\KeyPrefixProcessorTest::testInstanceCanBeCastedToString
 .
 Predis\Command\Processor\KeyPrefixProcessorTest::testPrefixAll

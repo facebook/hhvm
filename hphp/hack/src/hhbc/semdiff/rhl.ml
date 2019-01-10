@@ -504,10 +504,8 @@ let check_instruct_iterator asn i i' =
  match i, i' with
   | IterInit (it,lab,l), IterInit (it',lab',l')
   | WIterInit (it,lab,l), WIterInit (it',lab',l')
-  | MIterInit (it,lab,l), MIterInit (it',lab',l')
   | IterNext (it,lab,l), IterNext (it',lab',l')
-  | WIterNext (it,lab,l), WIterNext (it',lab',l')
-  | MIterNext (it,lab,l), MIterNext (it',lab',l')  ->
+  | WIterNext (it,lab,l), WIterNext (it',lab',l') ->
     (* COMPLETENESS: not tracking correspondence between iterators yet *)
     if it = it' then
       (* next instruction's state *)
@@ -518,10 +516,8 @@ let check_instruct_iterator asn i i' =
     else (None,[])
   | IterInitK (it,lab,l1,l2), IterInitK (it',lab',l1',l2')
   | WIterInitK (it,lab,l1,l2), WIterInitK (it',lab',l1',l2')
-  | MIterInitK (it,lab,l1,l2), MIterInitK (it',lab',l1',l2')
   | IterNextK (it,lab,l1,l2), IterNextK (it',lab',l1',l2')
-  | WIterNextK (it,lab,l1,l2), WIterNextK (it',lab',l1',l2')
-  | MIterNextK (it,lab,l1,l2), MIterNextK (it',lab',l1',l2')  ->
+  | WIterNextK (it,lab,l1,l2), WIterNextK (it',lab',l1',l2') ->
     if it = it' then
       match writes asn l1 l1' with
       | None -> (None,[])
@@ -535,14 +531,14 @@ let check_instruct_iterator asn i i' =
   | _ , IterBreak (_,_) ->
     (* This case should have been handled along with other control flow. *)
     (None,[])
-  | IterInit _, _ | WIterInit _, _ | MIterInit _, _ | IterNext _, _
+  | IterInit _, _ | WIterInit _, _ | IterNext _, _
   | LIterInit _, _ | LIterInitK _, _ | LIterNext _, _ | LIterNextK _, _
-  | WIterNext _, _ | MIterNext _, _ | IterInitK _, _ | WIterInitK _, _
-  | MIterInitK _, _ | IterNextK _, _ | WIterNextK _, _ | MIterNextK _, _ ->
+  | WIterNext _, _ | IterInitK _, _ | WIterInitK _, _
+  | IterNextK _, _ | WIterNextK _, _ ->
     (None, [])
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | IterFree _, _ | MIterFree _, _ | CIterFree _, _ | LIterFree _, _ ->
+  | IterFree _, _ | CIterFree _, _ | LIterFree _, _ ->
     if i=i' then (Some asn,[]) else (None,[])
 
 let check_instruct_misc asn i i' =

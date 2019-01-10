@@ -439,11 +439,6 @@ let mut_imms (is : IS.t) : IS.t =
     | WIterInitK (i, l, id, id') ->
         WIterInitK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
-    | MIterInit  (i, l, id)      ->
-        MIterInit  (i, mutate_label data l,      mutate_local_id id  !mag)
-    | MIterInitK (i, l, id, id') ->
-        MIterInitK (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterNext   (i, l, id)      ->
         IterNext   (i, mutate_label data l,      mutate_local_id id  !mag)
     | IterNextK  (i, l, id, id') ->
@@ -454,14 +449,9 @@ let mut_imms (is : IS.t) : IS.t =
     | WIterNextK (i, l, id, id') ->
         WIterNextK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
-    | MIterNext  (i, l, id)      ->
-        MIterNext  (i, mutate_label data l,      mutate_local_id id  !mag)
-    | MIterNextK (i, l, id, id') ->
-        MIterNextK (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterBreak  (l, lst)        ->
         IterBreak     (mutate_label data l,
-                       List.map ~f:(fun (b, i) -> (mutate_bool b, i)) lst)
+                       List.map ~f:(fun (k, i) -> (k, i)) lst)
     | _ -> s in
   let mutate_misc s =
     let mutate_bare op = if should_mutate() then random_bare_op    () else op in

@@ -90,23 +90,6 @@ function set_ref($v) {
   var_dump($v);
 }
 
-function iterate_by_ref($v) {
-  echo "========== iterate_by_ref ==========================\n";
-  try {
-    foreach ($v as &$value) { var_dump($value); }
-  } catch (Exception $e) {
-    echo "iterate_by_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    foreach ($v as $key => &$value) {
-      var_dump($key);
-      var_dump($value);
-    }
-  } catch (Exception $e) {
-    echo "iterate_by_ref (key) exception: \"", $e->getMessage(), "\"\n";
-  }
-}
-
 function convert_with_ref() {
   echo "========== convert_with_ref ========================\n";
   $arr = ['a', 'b', 'c', 'd', 'e'];
@@ -147,7 +130,6 @@ function main() {
   elem_ref($v);
   append_ref($v);
   set_ref($v);
-  iterate_by_ref($v);
   convert_with_ref();
   ref_unserialize();
   nested_refs($v);

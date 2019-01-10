@@ -34,9 +34,9 @@ foreach ($list as $v) {
 unset($fo);
 
 $res = file($file);
-foreach($res as &$val)
+foreach($res as $key => $val)
 {
-	$val = substr($val, 0, -1);
+	$res[$key] = substr($val, 0, -1);
 }
 echo '$list = ';var_export($res);echo ";\n";
 

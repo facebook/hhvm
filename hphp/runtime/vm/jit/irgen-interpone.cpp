@@ -296,15 +296,6 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpMIterInitK:
-    case OpMIterNextK:
-      setImmLocType(3, TCell);
-      /* fallthrough */
-    case OpMIterInit:
-    case OpMIterNext:
-      setImmLocType(2, TBoxedInitCell);
-      break;
-
     case OpIterInitK:
     case OpWIterInitK:
     case OpIterNextK:

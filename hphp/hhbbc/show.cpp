@@ -125,7 +125,6 @@ std::string show(const Func& func, const Bytecode& bc) {
     auto const kindStr = [&] (IterKind kind) -> const char* {
       switch (kind) {
       case KindOfIter:   return "Iter";
-      case KindOfMIter:  return "MIter";
       case KindOfCIter:  return "CIter";
       case KindOfLIter:  return "LIter";
       }

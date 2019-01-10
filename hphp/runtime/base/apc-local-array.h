@@ -32,7 +32,6 @@ namespace HPHP {
 struct Variant;
 struct TypedValue;
 struct StringData;
-struct MArrayIter;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -107,8 +106,6 @@ struct APCLocalArray final : ArrayData,
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);
   static ssize_t IterRewind(const ArrayData*, ssize_t prev);
-  static bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp);
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* CopyStatic(const ArrayData*);
   static constexpr auto Pop = &ArrayCommon::Pop;
   static constexpr auto Dequeue = &ArrayCommon::Dequeue;

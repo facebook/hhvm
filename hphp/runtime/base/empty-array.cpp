@@ -75,13 +75,6 @@ ssize_t EmptyArray::IterRewind(const ArrayData*, ssize_t /*prev*/) {
   not_reached();
 }
 
-// Even though we always return false in ValidMArrayIter, this function may
-// still be called because MArrayIters are constructed in an invalid position,
-// and then advanced to the first element.
-bool EmptyArray::AdvanceMArrayIter(ArrayData*, MArrayIter& /*fp*/) {
-  return false;
-}
-
 // We're always already a static array.
 void EmptyArray::OnSetEvalScalar(ArrayData*) { not_reached(); }
 ArrayData* EmptyArray::CopyStatic(const ArrayData* /*ad*/) {

@@ -1,10 +1,10 @@
 <?php
 $foo = array(1,2,3,4);
-foreach($foo as $key => &$val) {
+foreach($foo as $key => $val) {
 	if($val == 3) {
 		$foo[$key] = 0;
 	} else {
-		$val++;
+		$foo[$key]++;
 	}
 }
 var_dump($foo);

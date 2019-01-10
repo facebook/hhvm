@@ -29,7 +29,7 @@ Twig_Tests_AutoloaderTest::testAutoload
 Twig_Tests_EnvironmentTest::testAddExtension
 .
 Twig_Tests_EnvironmentTest::testAutoescapeOption
-.
+FATAL
 Twig_Tests_EnvironmentTest::testExtensionsAreNotInitializedWhenRenderingACompiledTemplate
 .
 Twig_Tests_EnvironmentTest::testGlobals
@@ -51,7 +51,7 @@ Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #2
 Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #3
 .
 Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissingWithInheritanceOnDisk
-.
+FATAL
 Twig_Tests_ExpressionParserTest::testArrayExpression with data set #0
 .
 Twig_Tests_ExpressionParserTest::testArrayExpression with data set #1
@@ -71,7 +71,7 @@ Twig_Tests_ExpressionParserTest::testArraySyntaxError with data set #1
 Twig_Tests_ExpressionParserTest::testAttributeCallDoesNotSupportNamedArguments
 .
 Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #0
-.
+FATAL
 Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #1
 .
 Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #2
@@ -157,11 +157,11 @@ Twig_Tests_Extension_SandboxTest::testSandboxGloballySet
 Twig_Tests_Extension_SandboxTest::testSandboxLocallySetForAnInclude
 .
 Twig_Tests_Extension_SandboxTest::testSandboxWithInheritance
-.
+FATAL
 Twig_Tests_FileCachingTest::testClearingCacheFiles
 .
 Twig_Tests_FileCachingTest::testWritingCacheFiles
-.
+FATAL
 Twig_Tests_LexerTest::testBigNumbers
 .
 Twig_Tests_LexerTest::testBracketsNesting
@@ -181,7 +181,7 @@ Twig_Tests_LexerTest::testLongVar
 Twig_Tests_LexerTest::testNameLabelForFunction
 .
 Twig_Tests_LexerTest::testNameLabelForTag
-.
+FATAL
 Twig_Tests_LexerTest::testOperatorEndingWithALetterAtTheEndOfALine
 .
 Twig_Tests_LexerTest::testStringWithEscapedDelimiter
@@ -239,7 +239,7 @@ Twig_Tests_Loader_FilesystemTest::testFindTemplateWithCache
 Twig_Tests_Loader_FilesystemTest::testGetNamespaces
 .
 Twig_Tests_Loader_FilesystemTest::testLoadTemplateAndRenderBlockWithCache
-.
+FATAL
 Twig_Tests_Loader_FilesystemTest::testPaths
 .
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #0
@@ -281,7 +281,7 @@ Twig_Tests_Loader_FilesystemTest::testSecurity with data set #8
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #9
 .
 Twig_Tests_NativeExtensionTest::testGetProperties
-.
+FATAL
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #0
 .
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #1
@@ -307,7 +307,7 @@ Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #8
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #9
 .
 Twig_Tests_NodeVisitor_OptimizerTest::testRenderBlockOptimizer
-.
+FATAL
 Twig_Tests_NodeVisitor_OptimizerTest::testRenderParentBlockOptimizer
 .
 Twig_Tests_NodeVisitor_OptimizerTest::testRenderVariableBlockOptimizer
@@ -391,7 +391,7 @@ Twig_Tests_Node_Expression_ConstantTest::testCompile with data set #0
 Twig_Tests_Node_Expression_ConstantTest::testConstructor
 .
 Twig_Tests_Node_Expression_FilterTest::testCompile with data set #0
-.
+FATAL
 Twig_Tests_Node_Expression_FilterTest::testCompile with data set #1
 .
 Twig_Tests_Node_Expression_FilterTest::testCompile with data set #2
@@ -409,7 +409,7 @@ Twig_Tests_Node_Expression_FilterTest::testCompileWithWrongNamedArgumentName
 Twig_Tests_Node_Expression_FilterTest::testConstructor
 .
 Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #0
-.
+FATAL
 Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #1
 .
 Twig_Tests_Node_Expression_FunctionTest::testCompile with data set #2
@@ -455,7 +455,7 @@ Twig_Tests_Node_Expression_ParentTest::testConstructor
 Twig_Tests_Node_Expression_TestTest::testCompile with data set #0
 .
 Twig_Tests_Node_Expression_TestTest::testCompile with data set #1
-.
+FATAL
 Twig_Tests_Node_Expression_TestTest::testConstructor
 .
 Twig_Tests_Node_Expression_Unary_NegTest::testCompile with data set #0
@@ -1367,7 +1367,7 @@ Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #98
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #99
 .
 Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #0
-.
+FATAL
 Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #1
 .
 Twig_Tests_TemplateTest::testGetAttributeExceptions with data set #10

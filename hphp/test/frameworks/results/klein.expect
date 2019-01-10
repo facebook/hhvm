@@ -1,7 +1,7 @@
 Klein\Tests\AbstractRouteFactoryTest::testAppendNamespace
 .
 Klein\Tests\AbstractRouteFactoryTest::testNamespaceGetSet
-.
+FATAL
 Klein\Tests\AppTest::testCall
 .
 Klein\Tests\AppTest::testCallBadMethod
@@ -13,7 +13,7 @@ Klein\Tests\AppTest::testGetBadMethod
 Klein\Tests\AppTest::testRegisterDuplicateMethod
 .
 Klein\Tests\AppTest::testRegisterFiller
-.
+FATAL
 Klein\Tests\DataCollection\DataCollectionTest::testAll with data set #0
 .
 Klein\Tests\DataCollection\DataCollectionTest::testArrayAccessGet with data set #0
@@ -75,7 +75,7 @@ Klein\Tests\DataCollection\HeaderDataCollectionTest::testSet
 Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testConstructorRoutesThroughSet with data set #0
 .
 Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testSet with data set #0
-.
+FATAL
 Klein\Tests\DataCollection\ResponseCookieDataCollectionTest::testSetStringConvertsToCookie
 .
 Klein\Tests\DataCollection\RouteCollectionTest::testAddCallableConvertsToRoute
@@ -89,13 +89,13 @@ Klein\Tests\DataCollection\RouteCollectionTest::testPrepareNamed with data set #
 Klein\Tests\DataCollection\RouteCollectionTest::testRouteOrderDoesntChangeAfterPreparing with data set #0
 .
 Klein\Tests\DataCollection\RouteCollectionTest::testSet with data set #0
-.
+FATAL
 Klein\Tests\DataCollection\RouteCollectionTest::testSetCallableConvertsToRoute
 .
 Klein\Tests\DataCollection\ServerDataCollectionTest::testGetHeaders with data set #0
 .
 Klein\Tests\DataCollection\ServerDataCollectionTest::testHasPrefix
-.
+FATAL
 Klein\Tests\HttpStatusTests::testAutomaticMessage
 .
 Klein\Tests\HttpStatusTests::testManualEntryViaConstructor
@@ -103,13 +103,13 @@ Klein\Tests\HttpStatusTests::testManualEntryViaConstructor
 Klein\Tests\HttpStatusTests::testManualEntryViaSetters
 .
 Klein\Tests\HttpStatusTests::testStaticMessageFromCode
-.
+FATAL
 Klein\Tests\HttpStatusTests::testStringOutput
 .
 Klein\Tests\RequestTest::testBody
 .
 Klein\Tests\RequestTest::testConstructorAndGetters
-.
+FATAL
 Klein\Tests\RequestTest::testGlobalsCreation
 .
 Klein\Tests\RequestTest::testId
@@ -145,7 +145,7 @@ Klein\Tests\ResponseCookieTest::testExpireGetSet with data set #0
 Klein\Tests\ResponseCookieTest::testHttpOnlyGetSet with data set #0
 .
 Klein\Tests\ResponseCookieTest::testNameGetSet with data set #0
-.
+FATAL
 Klein\Tests\ResponseCookieTest::testPathGetSet with data set #0
 .
 Klein\Tests\ResponseCookieTest::testSecureGetSet with data set #0
@@ -187,7 +187,7 @@ Klein\Tests\ResponsesTest::testNoCache
 Klein\Tests\ResponsesTest::testPrepend
 .
 Klein\Tests\ResponsesTest::testProtocolVersionGetSet
-.
+FATAL
 Klein\Tests\ResponsesTest::testRedirect
 .
 Klein\Tests\ResponsesTest::testSend
@@ -209,7 +209,7 @@ Klein\Tests\ResponsesTest::testSendWhenAlreadySent
 Klein\Tests\ResponsesTest::testStatusGetter
 .
 Klein\Tests\RouteFactoryTest::testBuildBasic
-.
+FATAL
 Klein\Tests\RouteFactoryTest::testBuildWithCustomNegatedAnchoredRegexPath
 .
 Klein\Tests\RouteFactoryTest::testBuildWithCustomNegatedRegexPath
@@ -227,7 +227,7 @@ Klein\Tests\RouteFactoryTest::testBuildWithNamespacedNullPath
 Klein\Tests\RouteFactoryTest::testBuildWithNamespacedPath
 .
 Klein\Tests\RouteTest::testCallbackGetSet
-.
+FATAL
 Klein\Tests\RouteTest::testCallbackSetWithIncorrectType
 .
 Klein\Tests\RouteTest::testCountMatchGetSet
@@ -259,7 +259,7 @@ Klein\Tests\RoutingTest::testApcDependencyFailsGracefully
 Klein\Tests\RoutingTest::testAppReference
 .
 Klein\Tests\RoutingTest::testBasic
-.
+FATAL
 Klein\Tests\RoutingTest::testCallable
 .
 Klein\Tests\RoutingTest::testCallbackArguments
@@ -403,7 +403,7 @@ Klein\Tests\ServiceProviderTest::testBackWithoutRefererSet
 Klein\Tests\ServiceProviderTest::testBinder
 .
 Klein\Tests\ServiceProviderTest::testConstructor
-.
+FATAL
 Klein\Tests\ServiceProviderTest::testEscapeCharacters
 .
 Klein\Tests\ServiceProviderTest::testFlash
@@ -445,7 +445,7 @@ Klein\Tests\ValidationsTest::testChars
 Klein\Tests\ValidationsTest::testContains
 .
 Klein\Tests\ValidationsTest::testCustomValidationMessage
-.
+FATAL
 Klein\Tests\ValidationsTest::testCustomValidator
 .
 Klein\Tests\ValidationsTest::testCustomValidatorWithManyArgs

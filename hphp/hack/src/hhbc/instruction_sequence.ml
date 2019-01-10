@@ -65,16 +65,6 @@ let instr_iternextk id label key value =
   instr (IIterator (IterNextK (id, label, key, value)))
 let instr_iterfree id =
   instr (IIterator (IterFree id))
-let instr_miterinit iter_id label value =
-  instr (IIterator (MIterInit (iter_id, label, value)))
-let instr_miterinitk id label key value =
-  instr (IIterator (MIterInitK (id, label, key, value)))
-let instr_miternext id label value =
-  instr (IIterator (MIterNext (id, label, value)))
-let instr_miternextk id label key value =
-  instr (IIterator (MIterNextK (id, label, key, value)))
-let instr_miterfree id =
-  instr (IIterator (MIterFree id))
 let instr_whresult =
   instr (IAsync WHResult)
 
@@ -869,13 +859,11 @@ let get_input_output_count i =
     failwith "this pseudo-instruction is internal to HackC"
   | IIterator i ->
     begin match i with
-    | IterInit _ | IterInitK _ | WIterInit _ | WIterInitK _
-    | MIterInit _ | MIterInitK _ -> (1, 0)
+    | IterInit _ | IterInitK _ | WIterInit _ | WIterInitK _ -> (1, 0)
     | LIterInit _ | LIterInitK _
     | IterNext _ | IterNextK _ | LIterNext _ | LIterNextK _
-    | WIterNext _ | WIterNextK _ | MIterNext _ | MIterNextK _
-    | IterFree _ | MIterFree _ | CIterFree _ | LIterFree _
-    | IterBreak _ -> (0, 0)
+    | WIterNext _ | WIterNextK _ | IterFree _ | CIterFree _
+    | LIterFree _ | IterBreak _ -> (0, 0)
     end
   | IContFlow _
   | ILabel _
@@ -1029,8 +1017,8 @@ let collect_locals f instrs =
     | IBase (BaseNL (l, _) | BaseGL (l, _))
     | IFinal (SetWithRefRML l)
     | IIterator (
-      IterInit (_, _, l) | WIterInit (_, _, l) | MIterInit (_, _, l) |
-      IterNext (_, _, l) | WIterNext (_, _, l) | MIterNext (_, _, l) |
+      IterInit (_, _, l) | WIterInit (_, _, l) |
+      IterNext (_, _, l) | WIterNext (_, _, l) |
       LIterFree (_, l)
       )
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
@@ -1042,8 +1030,8 @@ let collect_locals f instrs =
       -> add acc l
     | IFinal (SetWithRefLML (l1, l2))
     | IIterator (
-      IterInitK (_, _, l1, l2) | WIterInitK (_, _, l1, l2) | MIterInitK (_, _, l1, l2) |
-      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) | MIterNextK (_, _, l1, l2) |
+      IterInitK (_, _, l1, l2) | WIterInitK (_, _, l1, l2) |
+      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) |
       LIterInit (_, l1, _, l2) | LIterNext (_, l1, _, l2)
       )
       -> add (add acc l1) l2

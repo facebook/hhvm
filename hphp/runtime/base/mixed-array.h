@@ -398,8 +398,6 @@ public:
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
-  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Escalate(const ArrayData* ad) {
     return const_cast<ArrayData*>(ad);
   }
@@ -459,8 +457,6 @@ public:
   static constexpr auto IterEndDict = &IterEnd;
   static constexpr auto IterAdvanceDict = &IterAdvance;
   static constexpr auto IterRewindDict = &IterRewind;
-  static constexpr auto ValidMArrayIterDict = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterDict = &AdvanceMArrayIter;
   static constexpr auto EscalateForSortDict = &EscalateForSort;
   static constexpr auto KsortDict = &Ksort;
   static constexpr auto SortDict = &Sort;
@@ -564,8 +560,6 @@ public:
   static constexpr auto IterEndShape = &IterEnd;
   static constexpr auto IterAdvanceShape = &IterAdvance;
   static constexpr auto IterRewindShape = &IterRewind;
-  static constexpr auto ValidMArrayIterShape = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterShape = &AdvanceMArrayIter;
   static constexpr auto EscalateForSortShape = &EscalateForSort;
   static constexpr auto KsortShape = &Ksort;
   static constexpr auto SortShape = &Sort;
@@ -788,7 +782,6 @@ private:
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);
   template <class K> ArrayData* updateRef(K k, tv_lval data);
 
-  void adjustMArrayIter(ssize_t pos);
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {
     eraseNoCompact(pos);

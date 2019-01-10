@@ -43,24 +43,6 @@ foreach ($colors as $color)
 }
 var_dump($colors);
 
-// Modify the the actual element itself
-
-foreach ($colors as &  $color)  // note the &
-{
-    echo $color."\n";
-    $color = "black";
-    echo $color."\n";
-}
-var_dump($colors);
-
-foreach ($colors as $index => & $color)
-{
-    echo $color."\n";
-    $color = "green";
-    echo $color."\n";
-}
-var_dump($colors);
-
 $ary = array();
 $ary[0][0] = "abc";
 $ary[0][1] = "ij";

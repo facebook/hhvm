@@ -135,7 +135,7 @@ S
 Monolog\Handler\DoctrineCouchDBHandlerTest::testHandle
 .
 Monolog\Handler\DynamoDbHandlerTest::testConstruct
-.
+FATAL
 Monolog\Handler\DynamoDbHandlerTest::testGetFormatter
 .
 Monolog\Handler\DynamoDbHandlerTest::testHandle

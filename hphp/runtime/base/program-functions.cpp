@@ -2608,7 +2608,6 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
-  rl_miter_table.getCheck();
   // Allow request event handlers to be created now that a new request has
   // started.
   g_context->acceptRequestEventHandlers(true);

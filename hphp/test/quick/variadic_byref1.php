@@ -1,7 +1,7 @@
 <?php
 
 function variadic_by_ref(&...$args) {
-  foreach ($args as &$a) { $a++; }
+  for ($i = 0; $i < count($args); ++$i) { $args[$i]++; }
 }
 
 function main() {

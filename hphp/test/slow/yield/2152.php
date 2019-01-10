@@ -2,9 +2,9 @@
 
 function f($a1, &$a2) {
   foreach ($a1 as $k1 => $v1) {
-    foreach ($a2 as $k2 => &$v2) {
-      $v2 += $v1;
- yield $v2;
+    foreach ($a2 as $k2 => $v2) {
+      $a2[$k2] += $v1;
+      yield $a2[$k2];
     }
   }
 }

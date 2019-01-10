@@ -24,7 +24,6 @@ namespace HPHP {
 
 struct ArrayData;
 struct ObjectData;
-struct MArrayIter;
 struct Variant;
 
 //////////////////////////////////////////////////////////////////////
@@ -42,12 +41,6 @@ struct Variant;
  */
 struct ArrayCommon {
   static ssize_t ReturnInvalidIndex(const ArrayData*);
-
-  /*
-   * The normal case for ValidMArrayIter is shared between packed and mixed
-   * arrays.
-   */
-  static bool ValidMArrayIter(const ArrayData*, const MArrayIter&);
 
   /*
    * Generic Pop and Dequeue implementations in terms of other functions.

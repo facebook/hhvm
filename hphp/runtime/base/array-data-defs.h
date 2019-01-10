@@ -320,14 +320,6 @@ inline ssize_t ArrayData::iter_rewind(ssize_t pos) const {
   return g_array_funcs.iterRewind[kind()](this, pos);
 }
 
-inline bool ArrayData::validMArrayIter(const MArrayIter& fp) const {
-  return g_array_funcs.validMArrayIter[kind()](this, fp);
-}
-
-inline bool ArrayData::advanceMArrayIter(MArrayIter& fp) {
-  return g_array_funcs.advanceMArrayIter[kind()](this, fp);
-}
-
 inline ArrayData* ArrayData::escalateForSort(SortFunction sf) {
   return g_array_funcs.escalateForSort[kind()](this, sf);
 }

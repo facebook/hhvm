@@ -145,7 +145,7 @@ Goetas\Twital\Tests\DynamicAttrAttributeTest::testInvalidVisitAttribute with dat
 Goetas\Twital\Tests\DynamicAttrAttributeTest::testInvalidVisitAttribute with data set #1
 .
 Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #0
-.
+FATAL
 Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #1
 .
 Goetas\Twital\Tests\DynamicAttrAttributeTest::testVisitAttribute with data set #10

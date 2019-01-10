@@ -17,7 +17,7 @@ class A {
 function main_661() {
 ;
 $obj = new A(1, 2, 3, 4);
-foreach ($obj as $key => &$val) {
+foreach ($obj as $key => $val) {
   if($val == 2) {
     $obj->$key = 0;
   }
@@ -26,7 +26,7 @@ foreach ($obj as $key => &$val) {
     unset($obj->$key);
   }
  else {
-    $val++;
+    $obj->$key++;
   }
 }
 var_dump($obj);

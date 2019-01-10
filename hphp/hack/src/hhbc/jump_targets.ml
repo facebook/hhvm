@@ -98,12 +98,10 @@ let collect_valid_target_labels_for_switch_cases is_hh_file cl =
   if not (!function_has_goto_) then SSet.empty
   else collect_valid_target_labels_for_switch_cases_aux is_hh_file SSet.empty cl
 
-type iterator = (*is mutable*) bool * Iterator.t
-
 type loop_labels =
 { label_break: Label.t
 ; label_continue: Label.t
-; iterator: iterator option
+; iterator: Iterator.t option
 }
 
 type region =
@@ -259,13 +257,13 @@ type resolved_try_finally =
 { target_label: Label.t
 ; finally_label: Label.t
 ; adjusted_level: int
-; iterators_to_release: iterator list
+; iterators_to_release: Iterator.t list
 }
 
 type resolved_jump_target =
   | NotFound
   | ResolvedTryFinally of resolved_try_finally
-  | ResolvedRegular of Label.t * iterator list
+  | ResolvedRegular of Label.t * Iterator.t list
 
 let add_iterator it_opt iters =
   Option.value_map it_opt ~default:iters ~f:(fun v -> v :: iters)
@@ -339,11 +337,11 @@ let collect_iterators t =
 
 type resolved_goto_finally = {
   rgf_finally_start_label: Label.t;
-  rgf_iterators_to_release: iterator list
+  rgf_iterators_to_release: Iterator.t list
 }
 
 type resolved_goto_target =
-  | ResolvedGoto_label of iterator list
+  | ResolvedGoto_label of Iterator.t list
   | ResolvedGoto_finally of resolved_goto_finally
   | ResolvedGoto_goto_from_finally
   | ResolvedGoto_goto_invalid_label

@@ -689,9 +689,9 @@ class Redis {
 
   protected function doEval($cmd, $script, array $args, $numKeys) {
     $keyCount = $numKeys;
-    foreach($args as &$arg) {
+    foreach($args as $idx => $arg) {
       if ($keyCount-- <= 0) break;
-      $arg = $this->_prefix($arg);
+      $args[$idx] = $this->_prefix($arg);
     }
     array_unshift(&$args, $numKeys);
     array_unshift(&$args, $script);
@@ -1163,13 +1163,13 @@ class Redis {
         ($flags & self::VAR_SERIALIZE)) {
       $first = true;
       $varkey = $flags & self::VAR_KEY_MASK;
-      foreach($args as &$arg) {
+      foreach($args as $idx => $arg) {
         if (( $first and ($varkey == self::VAR_KEY_FIRST)) or
             (!$first and ($varkey == self::VAR_KEY_NOT_FIRST)) or
                          ($varkey == self::VAR_KEY_ALL)) {
-          $arg = $this->_prefix($arg);
+          $args[$idx] = $this->_prefix($arg);
         } else if ($flags & self::VAR_SERIALIZE) {
-          $arg = $this->_serialize($arg);
+          $args[$idx] = $this->_serialize($arg);
         }
         $first = false;
       }

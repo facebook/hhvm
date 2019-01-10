@@ -21,9 +21,6 @@ foreach ($a as $s[3]) {
   var_dump($s);
 }
 $i = 0;
-foreach ($a as          $a[bar($i++, $i++, $i++)] => &$a[foo($i++, $i++, $i++)]) {
-  var_dump($a[1],$a[2]);
-}
 foreach ($a as          $a[bar($i++, $i++, $i++)] => $a[foo($i++, $i++, $i++)]) {
   var_dump($a[1],$a[2]);
 }

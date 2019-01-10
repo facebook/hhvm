@@ -135,7 +135,7 @@ Ratchet\Application\Server\IoConnectionTest::testSendBubbles
 Ratchet\Application\Server\IoConnectionTest::testSendReturnsSelf
 .
 Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromGuzzleHeaders
-.
+FATAL
 Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromNonGuzzleBody
 .
 Ratchet\Http\Guzzle\Http\Message\RequestFactoryTest::testExpectedDataFromNonGuzzleHeaders
@@ -405,7 +405,7 @@ Ratchet\WebSocket\VersionManagerTest::testGetSupportedVersionAfterRemoval
 Ratchet\WebSocket\VersionManagerTest::testGetSupportedVersionString
 .
 Ratchet\WebSocket\VersionManagerTest::testGetVersion
-.
+FATAL
 Ratchet\WebSocket\VersionManagerTest::testNoIsVersionEnabled
 .
 Ratchet\WebSocket\VersionManagerTest::testYesIsVersionEnabled
@@ -439,7 +439,7 @@ Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #2
 Ratchet\WebSocket\Version\HyBi10Test::testUnframeMessage with data set #3
 .
 Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #0
-.
+FATAL
 Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #1
 .
 Ratchet\WebSocket\Version\RFC6455Test::testIsProtocolWithCaseInsensitivity with data set #2

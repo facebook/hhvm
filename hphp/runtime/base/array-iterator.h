@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/util/tls-pod-bag.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
@@ -306,7 +305,7 @@ private:
   ssize_t m_pos;
  private:
   // we don't use this pointer, but it gives ArrayIter the same layout
-  // as MArrayIter and CufIter, allowing Iter to be scanned without a union
+  // as CufIter, allowing Iter to be scanned without a union
   // descriminator.
   MaybeCountable* m_unused;
   UNUSED int m_alsoUnused;
@@ -324,236 +323,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * MArrayIter provides the necessary functionality for supporting
- * "foreach by reference" (also called "strong foreach").
- *
- * In the common case, a MArrayIter is bound to a RefData when it is
- * initialized.  When iterating objects with foreach by reference, a
- * MArrayIter may instead be bound directly to an array which m_data
- * points to.  (This is because the array is created as a temporary.)
- *
- * Foreach by reference is a pain.  Iteration needs to be robust in
- * the face of two challenges: (1) the case where an element is unset
- * during iteration, and (2) the case where user code modifies the
- * RefData to be a different array or a non-array value.  In such
- * cases, we should never crash and ideally when an element is unset
- * we should be able to keep track of where we are in the array.
- *
- * MArrayIter works by "registering" itself with the array being
- * iterated over, in a way that any array can find out all active
- * MArrayIters associated with it (if any).  See MIterTable below.
- *
- * Using this association, when an array mutation occurs, if there are
- * active MArrayIters the array will update them to ensure they behave
- * coherently.  For example, if an element is unset, the MArrayIter's
- * that were pointing to that element are moved to point to the
- * element before the element being unset.
- *
- * Note that it is possible for an iterator to point to the position
- * before the first element (this is what the "reset" flag is for).
- *
- * MArrayIter has also has a m_container field to keep track of which
- * array it has "registered" itself with.  By comparing the array
- * pointed to through m_ref with the array pointed to by m_container,
- * MArrayIter can detect if user code has modified the inner cell to
- * be a different array or a non-array value.  When this happens, the
- * MArrayIter unregisters itself with the old array (pointed to by
- * m_container) and registers itself with the new array (pointed to by
- * m_ref->cell().m_data.parr) and resumes iteration at the position
- * pointed to by the new array's internal cursor (ArrayData::m_pos).
- * If m_ref points to a non-array value, iteration terminates.
- */
-struct MArrayIter {
-  explicit MArrayIter(RefData* ref);
-  explicit MArrayIter(ArrayData* data);
-  ~MArrayIter();
-
-  MArrayIter(const MArrayIter&) = delete;
-  MArrayIter& operator=(const MArrayIter&) = delete;
-
-  /*
-   * It is only safe to call key() and val() if all of the following
-   * conditions are met:
-   *  1) The calls to key() and/or val() are immediately preceded by
-   *     a call to advance(), prepare(), or end().
-   *  2) The iterator points to a valid position in the array.
-   */
-  Variant key() {
-    ArrayData* data = getArray();
-    assertx(data && data == getContainer());
-    assertx(!getResetFlag() && data->validMArrayIter(*this));
-    return data->getKey(m_pos);
-  }
-
-  variant_ref val() {
-    ArrayData* data = getArray();
-    assertx(data && data == getContainer());
-    assertx(!data->cowCheck() || data->noCopyOnWrite());
-    assertx(!getResetFlag());
-    assertx(data->validMArrayIter(*this));
-    // Normally it's not ok to modify the return value of rvalPos, but the
-    // whole point of mutable array iteration is that this is allowed, so this
-    // as_lval() is not actually evil. This may change if we ever decide to
-    // make tv_rval hold the TypedValue by value, rather than a pointer.
-    return variant_ref{data->rvalPos(m_pos).as_lval()};
-  }
-
-  void release() { delete this; }
-
-  // Returns true if the iterator points past the last element (or if
-  // it points before the first element)
-  bool end() const;
-
-  // Move the iterator forward one element
-  bool advance();
-
-  // Returns true if the iterator points to a valid element
-  bool prepare();
-
-  ArrayData* getArray() const {
-    return hasRef() ? getData() : getAd();
-  }
-
-  bool hasRef() const {
-    return m_ref && !(intptr_t(m_ref) & 1LL);
-  }
-  bool hasAd() const {
-    return bool(intptr_t(m_data) & 1LL);
-  }
-  RefData* getRef() const {
-    assertx(hasRef());
-    return m_ref;
-  }
-  ArrayData* getAd() const {
-    assertx(hasAd());
-    return (ArrayData*)(intptr_t(m_data) & ~1LL);
-  }
-  void setRef(RefData* ref) {
-    m_ref = ref;
-  }
-  void setAd(ArrayData* val) {
-    m_data = (ArrayData*)(intptr_t(val) | 1LL);
-  }
-  ArrayData* getContainer() const {
-    return m_container;
-  }
-  void setContainer(ArrayData* arr) {
-    m_container = arr;
-  }
-
-  bool getResetFlag() const { return m_resetFlag; }
-  void setResetFlag(bool reset) { m_resetFlag = reset; }
-
-private:
-  ArrayData* getData() const {
-    assertx(hasRef());
-    return isArrayType(m_ref->cell()->m_type)
-      ? m_ref->cell()->m_data.parr
-      : nullptr;
-  }
-
-  ArrayData* cowCheck();
-  void escalateCheck();
-  ArrayData* reregister();
-
-private:
-  /*
-   * m_ref/m_data are used to keep track of the array that we're
-   * supposed to be iterating over. The low bit is used to indicate
-   * whether we are using m_ref or m_data.
-   *
-   * Mutable array iteration usually iterates over m_ref---the m_data
-   * case here occurs is when we've converted an object to an array
-   * before iterating it (and this MArrayIter object actually owns a
-   * temporary array).
-   */
-  union {
-    RefData* m_ref;
-    ArrayData* m_data;
-  };
-public:
-  // m_pos is used by the array implementation to track the current position
-  // in the array.
-  ssize_t m_pos;
-private:
-  // m_container keeps track of which array we're "registered" with. Normally
-  // getArray() and m_container refer to the same array. However, the two may
-  // differ in cases where user code has modified the inner cell to be a
-  // different array or non-array value.
-  ArrayData* m_container;
-  // The m_resetFlag is used to indicate a mutable array iterator is
-  // "before the first" position in the array.
-  UNUSED uint32_t m_unused;
-  uint32_t m_resetFlag;
-  friend struct Iter;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Active mutable iterators are associated with their corresponding
- * arrays using a table in thread local storage.  The iterators
- * themselves can find their registered container using their
- * m_container pointer, but arrays must linearly search this table to
- * go the other direction.
- *
- * This scheme is optimized for the overwhelmingly common case that
- * there are no active mutable array iterations in the whole request.
- * When there are active mutable iterators, it is also overwhelmingly
- * the case that there is only one, and on real applications exceeding
- * 4 or 5 simultaneously is apparently rare.
- *
- * This table has the following semantics:
- *
- *   o If there are any 'active' MArrayIters (i.e. ones that are
- *     actually associated with arrays), one of them will be present
- *     in the first Ent slot in this table.  This is so that any array
- *     can check that there are no active MArrayIters just by
- *     comparing the first slot of this table with null.  (See
- *     strong_iterators_exist().)
- *
- *   o Secondly we expect that we essentially never exceed a small
- *     number iterators (outside of code specifically designed to
- *     stress mutable array iteration).  We've chosen 7 preallocated
- *     slots because it fills out two cache lines, and we've observed
- *     4 or 5 occasionally in some real programs.  If there are
- *     actually more live than 7, we allocate additional space and
- *     point to it with 'extras'.
- *
- *   o The entries in this table (including 'extras') are not
- *     guaranteed to be contiguous.  Empty entries may be present in
- *     the middle, and there is no ordering.
- *
- *   o If an entry has a non-null array pointer, it must have a
- *     non-null iter pointer.  Checking either one for null are both
- *     valid ways to check if a slot is empty.
- */
-struct MIterTable {
-  struct Ent {
-    ArrayData* array;
-    MArrayIter* iter;
-  };
-
-  static void clear();
-
-  static constexpr int ents_size = 7;
-  std::array<Ent, ents_size> ents;
-  // Slow path: we expect this `extras' list to rarely be allocated.
-  TlsPodBag<Ent,req::Allocator<Ent>> extras;
-  ~MIterTable();
-};
-static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
-extern DECLARE_RDS_LOCAL_HOTVALUE(bool, rl_miter_exists);
-extern RDS_LOCAL_NO_CHECK(MIterTable, rl_miter_table);
-
-void free_strong_iterators(ArrayData*);
-void move_strong_iterators(ArrayData* dest, ArrayData* src);
-bool has_strong_iterator(ArrayData*);
-void reset_strong_iterators(ArrayData* ad);
-
-//////////////////////////////////////////////////////////////////////
 
 struct CufIter {
   CufIter() : m_obj_or_cls(nullptr), m_func(nullptr),
@@ -590,28 +359,24 @@ struct CufIter {
 
 struct alignas(16) Iter {
   const ArrayIter&   arr() const { return m_u.aiter; }
-  const MArrayIter& marr() const { return m_u.maiter; }
   const CufIter&     cuf() const { return m_u.cufiter; }
         ArrayIter&   arr()       { return m_u.aiter; }
-        MArrayIter& marr()       { return m_u.maiter; }
         CufIter&     cuf()       { return m_u.cufiter; }
 
   template <bool Local> bool init(TypedValue* c1);
   bool next();
   bool nextLocal(const ArrayData*);
   void free();
-  void mfree();
   void cfree();
 
 private:
-  // ArrayIter, MArrayIter, and CufIter all declare pointers at the
-  // same offsets, allowing gen-type-scanners to generate a scanner
-  // automatically, for the union. If the layouts become incompatible,
-  // gen-type-scanners will report a build-time error.
+  // ArrayIter and CufIter all declare pointers at the same offsets, allowing
+  // gen-type-scanners to generate a scanner automatically, for the union. If
+  // the layouts become incompatible, gen-type-scanners will report a build-time
+  // error.
   union Data {
     Data() {}
     ArrayIter aiter;
-    MArrayIter maiter;
     CufIter cufiter;
   } m_u;
 };
@@ -845,13 +610,6 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 int64_t witer_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
-
-int64_t new_miter_array_key(Iter* dest, RefData* arr, TypedValue* val,
-                           TypedValue* key);
-int64_t new_miter_object(Iter* dest, RefData* obj, Class* ctx,
-                        TypedValue* val, TypedValue* key);
-int64_t new_miter_other(Iter* dest, RefData* data);
-int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);

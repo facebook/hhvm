@@ -350,12 +350,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
 
-  enum IterMode { EraseRefs, CreateRefs, PreserveRefs };
+  enum IterMode { EraseRefs, PreserveRefs };
   /*
    * Create an array of object properties suitable for iteration.
    *
    * EraseRefs    - array should contain unboxed properties
-   * CreateRefs   - array should contain boxed properties
    * PreserveRefs - reffiness of properties should be preserved in returned
    *                array
    */
@@ -481,10 +480,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void throwBindImmutable(Slot prop) const;
 
  public:
-  // never box the lval returned from getPropLval; use propB or vGetProp instead
+  // never box the lval returned from getPropLval; use propB instead
   tv_lval getPropLval(const Class*, const StringData*);
   tv_rval getProp(const Class*, const StringData*) const;
-  tv_lval vGetProp(const Class*, const StringData*);
   // don't use vGetPropIgnoreAccessibility in new code
   tv_lval vGetPropIgnoreAccessibility(const StringData*);
 

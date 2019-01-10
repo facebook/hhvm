@@ -13,8 +13,8 @@ function ends_with($big, $little) {
 }
 
 // More efficient lookups than array_search
-foreach ($config as $key => &$value) {
-  $value = array_fill_keys($value, true);
+foreach ($config as $key => $value) {
+  $config[$key] = array_fill_keys($value, true);
 }
 
 function is_valid_diff($wanted_re, $output) {

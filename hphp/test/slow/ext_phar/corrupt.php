@@ -1,8 +1,8 @@
 <?php
 
-$corrupt = tempnam(sys_get_temp_dir(), 'composer-corrupt');
+$corrupt = tempnam(sys_get_temp_dir(), 'phpunit-corrupt');
 
-copy(__DIR__."/composer.phar", $corrupt);
+copy(__DIR__."/phpunit.phar", $corrupt);
 // We'll corrupt the 1024th byte
 $byte = 1024;
 

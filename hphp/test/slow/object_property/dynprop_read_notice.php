@@ -34,10 +34,6 @@ function test($thing) {
   echo "== foreach ==\n";
   foreach ($thing as $k => $v) { }
 
-  echo "== foreach by reference ==\n";
-  foreach ($thing as $k => &$v) { }
-  unset($v); // unbind
-
   echo "== ReflectionProperty ==\n";
   $discard = new ReflectionProperty($thing, 'dynprop');
 

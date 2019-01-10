@@ -125,7 +125,7 @@ S
 phpbb_cache_null_driver_test::test_purge
 S
 phpbb_class_loader_test::test_resolve_cached
-.
+FATAL
 phpbb_class_loader_test::test_resolve_path
 .
 phpbb_config_db_test::test_delete
@@ -275,7 +275,7 @@ S
 phpbb_content_visibility_set_topic_visibility_test::test_set_topic_visibility with data set #3
 S
 phpbb_controller_controller_test::test_controller_resolver
-.
+FATAL
 phpbb_controller_controller_test::test_provider
 .
 phpbb_controller_helper_route_test::test_helper_url_no_rewrite with data set #0
@@ -697,7 +697,7 @@ phpbb_deactivated_super_global_test::test_write_triggers_error
 phpbb_di_container_test::test_phpbb_create_compiled_container
 .
 phpbb_di_container_test::test_phpbb_create_container
-.
+FATAL
 phpbb_di_container_test::test_phpbb_create_install_container
 .
 phpbb_download_http_byte_range_test::test_find_range_request

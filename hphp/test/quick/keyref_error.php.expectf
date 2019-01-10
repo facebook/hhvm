@@ -1,2 +1,2 @@
 
-Fatal error: Key element cannot be a reference in %s on line 4
+Fatal error: & is not allowed in write context in %s on line 4

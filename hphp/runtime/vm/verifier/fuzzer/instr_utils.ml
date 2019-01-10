@@ -110,8 +110,6 @@ let stk_data : instruct -> stack_sig = function
   | IBasic PopR                            -> ["R"], []
   | IBasic PopU                            -> ["U"], []
   | IContFlow RetV
-  | IIterator MIterInit _
-  | IIterator MIterInitK _
   | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]

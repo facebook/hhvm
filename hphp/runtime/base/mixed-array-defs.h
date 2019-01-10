@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -270,16 +269,6 @@ struct MixedArray::ValIter {
      return isMixed(m_kind) ? m_iterMixed == m_stopMixed
                             : m_iterPacked == m_stopPacked;
    }
-
-   void advance() {
-     if (UNLIKELY(isMixed(m_kind))) {
-       do {
-         ++m_iterMixed;
-       } while (!empty() && MixedArray::isTombstone(m_iterMixed->data.m_type));
-      return;
-    }
-    ++m_iterPacked;
-  }
 
   ssize_t currentPos() const {
     if (isMixed(m_kind)) return m_iterMixed - asMixed(m_arr)->data();

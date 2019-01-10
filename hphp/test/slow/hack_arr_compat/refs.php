@@ -52,14 +52,6 @@ function set_ref($name, $orig) {
   $a["key2"] = &$value;
 }
 
-function iterate_by_ref($name, $orig) {
-  echo "========== iterate_by_ref ($name) ==========================\n";
-  $a = $orig;
-  foreach ($a as &$value) { }
-  $a = $orig;
-  foreach ($a as $key => &$value) { }
-}
-
 function ref_unserialize() {
   echo "========== ref_unserialize =================================\n";
   $ref_str = "a:2:{s:3:\"foo\";D:1:{s:1:\"a\";s:1:\"b\";}s:3:\"bar\";R:2;}";
@@ -71,7 +63,6 @@ function run($name, $a) {
   elem_ref($name, $a);
   append_ref($name, $a);
   set_ref($name, $a);
-  iterate_by_ref($name, $a);
 }
 
 function main() {

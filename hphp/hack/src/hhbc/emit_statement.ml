@@ -921,18 +921,10 @@ and make_finally_catch exn_local finally_body =
     instr_throw;
   ]
 
-and is_mutable_iterator iterator =
-  match iterator with
-  | A.As_kv (_, (_, A.Unop(A.Uref, _)))
-  | A.As_v (_, A.Unop(A.Uref, _)) -> true
-  | _ -> false
-
-and get_id_of_simple_lvar_opt ~is_key v =
+and get_id_of_simple_lvar_opt v =
   match v with
   | A.Lvar (pos, str) when str = SN.SpecialIdents.this ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
-  | A.Unop (A.Uref, (_, A.Lvar (pos, _))) when is_key ->
-    Emit_fatal.raise_fatal_parse pos "Key element cannot be a reference"
   | A.Lvar (_, id) | A.Unop (A.Uref, (_, A.Lvar (_, id)))
     when not (SN.Superglobals.is_superglobal id) -> Some id
   | _ -> None
@@ -994,8 +986,8 @@ and emit_load_list_element env path i v =
 and emit_iterator_key_value_storage env iterator =
   match iterator with
   | A.As_kv (((_, k) as expr_k), ((_, v) as expr_v)) ->
-    begin match get_id_of_simple_lvar_opt ~is_key:true k,
-                get_id_of_simple_lvar_opt ~is_key:false v with
+    begin match get_id_of_simple_lvar_opt k,
+                get_id_of_simple_lvar_opt v with
     | Some key_id, Some value_id ->
       let key_local = Local.Named key_id in
       let value_local = Local.Named value_id in
@@ -1021,7 +1013,7 @@ and emit_iterator_key_value_storage env iterator =
       (gather value_preamble)::value_load
     end
   | A.As_v ((_, v) as expr_v) ->
-    begin match get_id_of_simple_lvar_opt ~is_key:false v with
+    begin match get_id_of_simple_lvar_opt v with
     | Some value_id ->
       let value_local = Local.Named value_id in
       None, value_local, [], []
@@ -1087,28 +1079,16 @@ and emit_iterator_lvalue_storage env v local =
     ]
     in
     preamble, load_values
-  | pos, x ->
-    match x with
-    | A.Unop (A.Uref, e) ->
-      let (lhs, rhs, set_op) =
-        emit_lval_op_nonlist_steps env pos LValOp.SetRef e (instr_vgetl local) 1
-      in
-      [lhs], [
-        rhs;
-        set_op;
-        instr_popv;
-        instr_unsetl local
-      ]
-    | _ ->
-      let (lhs, rhs, set_op) =
-        emit_lval_op_nonlist_steps env pos LValOp.Set v (instr_cgetl local) 1
-      in
-      [lhs], [
-        rhs;
-        set_op;
-        instr_popc;
-        instr_unsetl local
-      ]
+  | pos, _ ->
+    let (lhs, rhs, set_op) =
+      emit_lval_op_nonlist_steps env pos LValOp.Set v (instr_cgetl local) 1
+    in
+    [lhs], [
+      rhs;
+      set_op;
+      instr_popc;
+      instr_unsetl local
+    ]
 
 and wrap_non_empty_block_in_fault prefix block fault_block =
   match block with
@@ -1172,7 +1152,6 @@ and emit_foreach_ env pos collection iterator block =
   let loop_break_label = Label.next_regular () in
   let loop_continue_label = Label.next_regular () in
   let loop_head_label = Label.next_regular () in
-  let mutable_iter = is_mutable_iterator iterator in
   let key_local_opt, value_local, key_preamble, value_preamble =
     emit_iterator_key_value_storage env iterator
   in
@@ -1184,10 +1163,7 @@ and emit_foreach_ env pos collection iterator block =
   in
   let init, next, preamble = match key_local_opt with
   | Some (key_local) ->
-    let initf, nextf =
-      if mutable_iter then instr_miterinitk, instr_miternextk
-      else instr_iterinitk, instr_iternextk
-    in
+    let initf, nextf = instr_iterinitk, instr_iternextk in
     let init = initf iterator_number loop_break_label value_local key_local in
     let cont = nextf iterator_number loop_head_label value_local key_local in
     let preamble =
@@ -1204,12 +1180,8 @@ and emit_foreach_ env pos collection iterator block =
     in
     init, cont, preamble
   | None ->
-    let initf, nextf =
-      if mutable_iter then instr_miterinit, instr_miternext
-      else instr_iterinit, instr_iternext
-    in
-    let init = initf iterator_number loop_break_label value_local in
-    let cont = nextf iterator_number loop_head_label value_local in
+    let init = instr_iterinit iterator_number loop_break_label value_local in
+    let cont = instr_iternext iterator_number loop_head_label value_local in
     let preamble =
       wrap_non_empty_block_in_fault
         (instr_label loop_head_label)
@@ -1221,9 +1193,9 @@ and emit_foreach_ env pos collection iterator block =
 
   let body =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
-      ~iter:(mutable_iter, iterator_number) block emit_stmt in
+      ~iter:iterator_number block emit_stmt in
   let result = gather [
-    emit_expr ~need_ref:mutable_iter env collection;
+    emit_expr ~need_ref:false env collection;
     emit_pos (fst collection);
     init;
     instr_try_fault
@@ -1239,8 +1211,7 @@ and emit_foreach_ env pos collection iterator block =
       (* fault body *)
       (gather [
         Emit_pos.emit_pos enclosing_span;
-        if mutable_iter then instr_miterfree iterator_number
-        else instr_iterfree iterator_number;
+        instr_iterfree iterator_number;
         instr_unwind ]);
     instr_label loop_break_label
   ] in

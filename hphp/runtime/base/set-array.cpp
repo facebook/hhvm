@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -310,9 +309,6 @@ void SetArray::Release(ArrayData* in) {
       assertx(!elm.isEmpty());
       tvDecRefGen(&elm.tv);
     }
-
-    // We better not have strong iterators associated with keysets.
-    assertx(!has_strong_iterator(ad));
   }
   tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
@@ -337,9 +333,6 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
         }
       }
     }
-
-    // We better not have strong iterators associated with keysets.
-    assertx(!has_strong_iterator(ad));
   }
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
@@ -519,7 +512,6 @@ void SetArray::compact() {
  * Zombie state:
  *
  *   m_used = UINT_MAX
- *   no MArrayIter's are pointing to this array
  *
  * Non-zombie:
  *
@@ -732,12 +724,6 @@ ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k) {
 
 ArrayData* SetArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
   return RemoveImpl(ad, k, false/*copy*/, k->hash());
-}
-
-bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (strong iteration)"
-  );
 }
 
 void SetArray::Sort(ArrayData*, int, bool) {

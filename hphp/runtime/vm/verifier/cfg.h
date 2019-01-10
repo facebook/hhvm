@@ -107,24 +107,19 @@ inline bool isIter(PC pc) {
   // iterartor ids, rather than a single iterator id.
   switch (peek_op(pc)) {
   case Op::IterInit:
-  case Op::MIterInit:
   case Op::WIterInit:
   case Op::LIterInit:
   case Op::IterInitK:
-  case Op::MIterInitK:
   case Op::WIterInitK:
   case Op::LIterInitK:
   case Op::IterNext:
-  case Op::MIterNext:
   case Op::WIterNext:
   case Op::LIterNext:
   case Op::IterNextK:
-  case Op::MIterNextK:
   case Op::WIterNextK:
   case Op::LIterNextK:
   case Op::DecodeCufIter:
   case Op::IterFree:
-  case Op::MIterFree:
   case Op::CIterFree:
   case Op::LIterFree:
     return true;

@@ -275,9 +275,8 @@ enum class InitPropOp : uint8_t {
 
 enum IterKind {
   KindOfIter  = 0,
-  KindOfMIter = 1,
-  KindOfCIter = 2,
-  KindOfLIter = 3,
+  KindOfCIter = 1,
+  KindOfLIter = 2,
 };
 
 #define FATAL_OPS                               \
@@ -702,24 +701,19 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
   O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
   O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(MIterInitK,      FOUR(IA,BA,LA,LA),ONE(VV),         NOV,        CF) \
   O(WIterInitK,      FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
   O(LIterInitK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
   O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(MIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
   O(WIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
   O(LIterNext,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
   O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(MIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
   O(WIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
   O(LIterNextK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
   O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
-  O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
   O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \

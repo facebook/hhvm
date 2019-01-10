@@ -51,7 +51,9 @@ let cleanup_try_body instrseq =
 let emit_jump_to_label l iters =
   match iters with
   | [] -> instr_jmp l
-  | iters -> instr_iter_break l iters
+  | iters ->
+    let iters = List.map iters ~f:(fun id -> Iter, id) in
+    instr_iter_break l iters
 
 let emit_save_label_id id =
   gather [
@@ -162,10 +164,7 @@ let emit_return
     in
     let release_iterators_instr =
       let iterators_to_release = JT.collect_iterators jump_targets in
-      gather @@ List.map iterators_to_release ~f:(fun (is_mutable, it) ->
-        let iter_free = if is_mutable then MIterFree it else IterFree it in
-        instr (IIterator iter_free)
-      )
+      gather @@ List.map iterators_to_release ~f:instr_iterfree
     in
     if in_finally_epilogue
     then

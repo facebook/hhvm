@@ -471,6 +471,11 @@ type instruct_final =
   | SetWithRefRML of local_id
   | SetRangeM of num_params * setrange_op * int
 
+type iter_kind =
+  | Iter
+  | CIter
+  | LIter
+
 type instruct_iterator =
   | IterInit of Iterator.t * Label.t * local_id
   | IterInitK of Iterator.t * Label.t * local_id * local_id
@@ -478,21 +483,16 @@ type instruct_iterator =
   | LIterInitK of Iterator.t * local_id * Label.t * local_id * local_id
   | WIterInit of Iterator.t * Label.t * local_id
   | WIterInitK of Iterator.t * Label.t * local_id * local_id
-  | MIterInit of Iterator.t * Label.t * local_id
-  | MIterInitK of Iterator.t * Label.t * local_id * local_id
   | IterNext of Iterator.t * Label.t * local_id
   | IterNextK of Iterator.t * Label.t * local_id * local_id
   | LIterNext of Iterator.t * local_id * Label.t * local_id
   | LIterNextK of Iterator.t * local_id * Label.t * local_id * local_id
   | WIterNext of Iterator.t * Label.t * local_id
   | WIterNextK of Iterator.t * Label.t * local_id * local_id
-  | MIterNext of Iterator.t * Label.t * local_id
-  | MIterNextK of Iterator.t * Label.t * local_id * local_id
   | IterFree of Iterator.t
-  | MIterFree of Iterator.t
   | CIterFree of Iterator.t
   | LIterFree of Iterator.t * local_id
-  | IterBreak of Label.t * (bool * Iterator.t) list
+  | IterBreak of Label.t * (iter_kind * Iterator.t) list
 
 type instruct_include_eval_define =
   | Incl

@@ -12,7 +12,7 @@ array(2) {
     }
   }
   [1]=>
-  &array(4) {
+  array(4) {
     ["file"]=>
     string(6) "string"
     ["line"]=>

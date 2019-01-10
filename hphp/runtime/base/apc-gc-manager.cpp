@@ -289,7 +289,6 @@ void PackedArray::RegisterUncountedAllocations(ArrayData* ad,
   for (auto ptr = data; ptr != stop; ++ptr) {
     RegisterUncountedTvAllocations(*ptr, rootAPCHandle);
   }
-  assertx(!has_strong_iterator(ad));
   assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,
                                         (char*)ad + PackedArray::heapSize(ad),
@@ -318,7 +317,6 @@ void MixedArray::RegisterUncountedAllocations(ArrayData* in,
       }
       RegisterUncountedTvAllocations(ptr->data, rootAPCHandle);
     }
-    assertx(!has_strong_iterator(ad));
   }
   assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,
@@ -350,7 +348,6 @@ void SetArray::RegisterUncountedAllocations(ArrayData* in,
         }
       }
     }
-    assertx(!has_strong_iterator(ad));
   }
   assertx(RuntimeOption::EvalGCForAPC);
   APCGCManager::getInstance().registerAllocation(ad,

@@ -52,27 +52,6 @@ Offset iterBranchTarget(const NormalizedInstruction& i) {
   }
 }
 
-template<class Lambda>
-void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
-  // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
-
-  auto const exit  = makeExit(env);
-  auto const pred  = env.irb->predictedStackInnerType(spOffBCFromIRSP(env));
-  auto const src   = topV(env);
-
-  if (!pred.subtypeOfAny(TArrLike, TObj)) {
-    PUNT(MIterInit-unsupportedSrcType);
-  }
-
-  // Guard the inner type before we call the helper.
-  gen(env, CheckRefInner, pred, exit, src);
-
-  auto const res = genFunc(src, pred);
-  auto const out = popV(env);
-  decRef(env, out);
-  implCondJmp(env, bcOff(env) + relOffset, true, res);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -342,74 +321,8 @@ void emitWIterNextK(IRGS& env,
   implIterJmp(env, relOffset, targetOffset, res);
 }
 
-void emitMIterInit(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
-    return gen(
-      env,
-      MIterInit,
-      type,
-      IterInitData(iterId, uint32_t(-1), valLocalId, true),
-      src,
-      fp(env)
-    );
-  });
-}
-
-void emitMIterInitK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
-    return gen(
-      env,
-      MIterInitK,
-      type,
-      IterInitData(iterId, keyLocalId, valLocalId, true),
-      src,
-      fp(env)
-    );
-  });
-}
-
-void emitMIterNext(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  auto const res = gen(
-    env,
-    MIterNext,
-    TBool,
-    IterData(iterId, uint32_t(-1), valLocalId),
-    fp(env)
-  );
-  implIterJmp(env, relOffset, bcOff(env) + relOffset, res);
-}
-
-void emitMIterNextK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  auto const res = gen(
-    env,
-    MIterNextK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    fp(env)
-  );
-  implIterJmp(env, relOffset, bcOff(env) + relOffset, res);
-}
-
 void emitIterFree(IRGS& env, int32_t iterId) {
   gen(env, IterFree, IterId(iterId), fp(env));
-}
-
-void emitMIterFree(IRGS& env, int32_t iterId) {
-  gen(env, MIterFree, IterId(iterId), fp(env));
 }
 
 void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
@@ -425,7 +338,6 @@ void emitIterBreak(IRGS& env, Offset relOffset, const IterTable& it) {
   for (auto const& ent : it) {
     switch (ent.kind) {
     case KindOfIter:  emitIterFree(env, ent.id);  break;
-    case KindOfMIter: emitMIterFree(env, ent.id); break;
     case KindOfLIter: emitLIterFree(env, ent.id, ent.local); break;
     case KindOfCIter: emitCIterFree(env, ent.id); break;
     }

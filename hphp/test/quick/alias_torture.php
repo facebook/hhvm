@@ -149,8 +149,8 @@ class C {
     $this->aliases = $aliases;
   }
   public function __destruct() {
-    foreach($this->aliases as &$arf) {
-      $arf = randphp();
+    foreach($this->aliases as $k => $_) {
+      $this->aliases[$k] = randphp();
     }
   }
 }

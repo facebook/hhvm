@@ -6,5 +6,3 @@ start witer loop
 
 Warning: Invalid argument supplied for foreach() in %s on line 12
 end witer loop
-start miter loop
-end of miter loop

@@ -16,9 +16,5 @@ $a = new A();
  var_dump((array)$a);
  $f = 100;
  f($a->$f);
- foreach ($a as $k => &$v) {
- var_dump($k);
- $v = 1;
- }
  var_dump($a);
 }

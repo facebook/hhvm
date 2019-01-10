@@ -442,8 +442,6 @@ public:
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData*);
-  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell);

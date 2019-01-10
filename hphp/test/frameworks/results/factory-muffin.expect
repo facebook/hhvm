@@ -1,5 +1,5 @@
 CustomisationTest::testCustomMaker
-.
+FATAL
 CustomisationTest::testCustomSetter
 .
 DefinitionTest::testAttributesFor
@@ -7,7 +7,7 @@ DefinitionTest::testAttributesFor
 DefinitionTest::testCreateCallback
 .
 DefinitionTest::testDefine
-.
+FATAL
 DefinitionTest::testDefineMultiple
 .
 DefinitionTest::testDefineWithReplacementGenerators
@@ -45,7 +45,7 @@ FacadeTest::testReset
 FactoryMuffinTest::testCanCreateFromStaticMethod
 .
 FactoryMuffinTest::testDefaultingToFaker
-.
+FATAL
 FactoryMuffinTest::testFakerDefaultBoolean
 .
 FactoryMuffinTest::testFakerDefaultLatitude

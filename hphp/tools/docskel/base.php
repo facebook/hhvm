@@ -180,11 +180,11 @@ class HHVMDocExtension {
   }
 
   protected function fixupClasses(): void {
-    foreach ($this->classes as &$class) {
+    foreach ($this->classes as $k => $class) {
       if (!empty($class['functions']) &&
            empty($class['name'])) {
         foreach($class['functions'] as $func) {
-          $class['name'] = $func['class'];
+          $this->classes[$k]['name'] = $func['class'];
           break;
         }
       }

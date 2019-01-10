@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/tv-variant.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
 namespace HPHP {
@@ -177,12 +176,6 @@ MixedArray* PackedArray::ToMixed(ArrayData* old, bool promotion) {
   }
   old->m_sizeAndPos = 0;
 
-  // PHP does not have the concept of packed VS mixed, so packed to mixed
-  // promotion needs to be invisible to strong iteration in order to match
-  // PHP behavior; intentionally not doing the same in ToMixedCopy{,Reserve}
-  // because copies _are_ supposed to be visible to strong iteration
-  if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, old);
-
   assertx(ad->checkInvariants());
   assertx(!ad->isFull());
   assertx(ad->hasExactlyOneRef());
@@ -285,8 +278,6 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     assertx(ad->m_size == adIn->m_size);
     assertx(ad->m_pos == adIn->m_pos);
     adIn->m_sizeAndPos = 0; // old is a zombie now
-
-    if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, adIn);
   }
 
   assertx(ad->kind() == adIn->kind());
@@ -618,9 +609,6 @@ void PackedArray::Release(ArrayData* ad) {
   for (auto elm = packedData(ad), end = elm + ad->m_size; elm < end; ++elm) {
     tvDecRefGen(elm);
   }
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(ad);
-  }
   tl_heap->objFreeIndex(ad, sizeClass(ad));
   AARCH64_WALKABLE_FRAME();
 }
@@ -636,8 +624,6 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
     ReleaseUncountedTv(*ptr);
   }
 
-  // We better not have strong iterators associated with uncounted arrays.
-  assertx(!has_strong_iterator(ad));
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
@@ -1031,25 +1017,6 @@ ArrayData* PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, tv_lval) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void adjustMArrayIterAfterPop(ArrayData* ad) {
-  assertx(ad->hasPackedLayout());
-  auto const size = ad->getSize();
-  if (size) {
-    for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
-      if (miEnt.array != ad) return;
-      auto const iter = miEnt.iter;
-      if (iter->getResetFlag()) return;
-      if (iter->m_pos >= size) iter->m_pos = size - 1;
-    });
-  } else {
-    reset_strong_iterators(ad);
-  }
-}
-
-}
-
 ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
@@ -1137,25 +1104,6 @@ ssize_t PackedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
     return pos - 1;
   }
   return ad->m_size;
-}
-
-bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
-  assertx(checkInvariants(ad));
-  if (fp.getResetFlag()) {
-    fp.setResetFlag(false);
-    fp.m_pos = 0;
-  } else if (fp.m_pos == ad->m_size) {
-    return false;
-  } else {
-    fp.m_pos = IterAdvance(ad, fp.m_pos);
-  }
-  if (fp.m_pos == ad->m_size) {
-    return false;
-  }
-  // We set ad's internal cursor to point to the next element
-  // to conform with PHP5 behavior
-  ad->m_pos = IterAdvance(ad, fp.m_pos);
-  return true;
 }
 
 ArrayData* PackedArray::AppendImpl(ArrayData* adIn, Cell v, bool copy) {
@@ -1294,7 +1242,6 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   auto const oldTV = tv;
   ad->m_size = oldSize - 1;
   ad->m_pos = 0;
-  if (UNLIKELY(strong_iterators_exist())) adjustMArrayIterAfterPop(ad);
   tvDecRefGen(oldTV);
   return ad;
 }
@@ -1303,12 +1250,6 @@ ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   assertx(checkInvariants(adIn));
 
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-  // To conform to PHP behavior, we invalidate all strong iterators when an
-  // element is removed from the beginning of the array.
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(ad);
-  }
-
   if (UNLIKELY(ad->m_size == 0)) {
     value = uninit_null();
     return ad;
@@ -1329,13 +1270,6 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v) {
   assertx(checkInvariants(adIn));
 
   auto const ad = PrepareForInsert(adIn, adIn->cowCheck());
-
-  // To conform to PHP behavior, we invalidate all strong iterators when an
-  // element is added to the beginning of the array.
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(ad);
-  }
-
   auto const size = ad->m_size;
   auto const data = packedData(ad);
   std::memmove(data + 1, data, sizeof *data * size);

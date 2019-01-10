@@ -153,12 +153,10 @@ struct Block {
  */
 
 struct FaultRegion { BlockId faultEntry;
-                     Id iterId;
-                     bool itRef; };
+                     Id iterId; };
 
 struct CatchRegion { BlockId catchEntry;
-                     Id iterId;
-                     bool itRef; };
+                     Id iterId; };
 
 struct ExnNode {
   uint32_t id;

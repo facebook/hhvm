@@ -679,12 +679,13 @@ function find_tests($files, array $options = null) {
     $ft = array_merge($ft, find_test_files($file));
   }
   $files = $ft;
-  foreach ($files as &$file) {
+  foreach ($files as $idx => $file) {
     if (!@stat($file)) {
       error("Not valid file or directory: '$file'");
     }
     $file = preg_replace(',//+,', '/', realpath($file));
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
+    $files[$idx] = $file;
   }
   $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
@@ -1047,8 +1048,8 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   if (is_array($cmds)) {
-    foreach ($cmds as &$c) {
-      $c .= $cmd;
+    foreach ($cmds as $idx => $_) {
+      $cmds[$idx] .= $cmd;
     }
     $cmd = $cmds;
   } else {

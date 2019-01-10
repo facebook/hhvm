@@ -105,9 +105,6 @@ struct HotRDSLocals {
   void* rdslocal_base;
   void* g_context;
 
-  // Every array operation requires checking if the mutable iteration table is
-  // empty.  This bool offers the fastest way to get at that information.
-  bool rl_miter_exists;
   uint32_t os_max_id;
   bool t_eager_gc;
   ArrayDataHash s_cachedHash;

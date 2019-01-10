@@ -40,7 +40,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
-struct MArrayIter;
 struct String;
 struct StringData;
 struct RefData;
@@ -670,27 +669,6 @@ public:
   bool isTail() const;
   bool isInvalid() const;
 
-  /*
-   * Check if a `fp' points to a valid element within this array.
-   *
-   * @requires: fp.getContainer() == this
-   *            escalate() == this
-   *
-   * Return false if the iterator points past the last element or before the
-   * first element, else true.
-   */
-  bool validMArrayIter(const MArrayIter& fp) const;
-
-  /*
-   * Advance `fp' to the next element in the array.
-   *
-   * @requires: fp.getContainer() == this
-   *            escalate() == this
-   *
-   * Return false if the iterator has moved past the last element, else true.
-   */
-  bool advanceMArrayIter(MArrayIter& fp);
-
   /////////////////////////////////////////////////////////////////////////////
   // PHP array functions.
 
@@ -1005,8 +983,6 @@ struct ArrayFunctions {
   ssize_t (*iterEnd[NK])(const ArrayData*);
   ssize_t (*iterAdvance[NK])(const ArrayData*, ssize_t pos);
   ssize_t (*iterRewind[NK])(const ArrayData*, ssize_t pos);
-  bool (*validMArrayIter[NK])(const ArrayData*, const MArrayIter&);
-  bool (*advanceMArrayIter[NK])(ArrayData*, MArrayIter&);
   ArrayData* (*escalateForSort[NK])(ArrayData*, SortFunction);
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);

@@ -104,7 +104,6 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
     }
     if (it->m_iterId != -1) {
       out << " iterId " << it->m_iterId;
-      out << " itRef " << (it->m_itRef ? "true" : "false");
     }
     out << " handle at " << it->m_handler;
     if (it->m_end != kInvalidOffset) {

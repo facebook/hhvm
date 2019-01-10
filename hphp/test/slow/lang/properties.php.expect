@@ -296,34 +296,6 @@ Properties:
   "p" => 112
   "q" => 223
   "r" => 340
-=== Foreach by reference ===
-  "np" => H::I
-  "nq" => H::I
-  "nr" => H::O
-  "p" => 112
-  "q" => q
-  "r" => 340
-object(H)#6 (6) {
-  ["np"]=>
-  string(4) "H::I"
-  ["nq"]=>
-  string(4) "H::I"
-  ["nr"]=>
-  string(2) "nr"
-  ["p"]=>
-  int(112)
-  ["q"]=>
-  string(1) "q"
-  ["r"]=>
-  &string(1) "r"
-}
-Properties:
-  "np" => H::I
-  "nq" => H::I
-  "nr" => nr
-  "p" => 112
-  "q" => q
-  "r" => r
 object(dumper)#9 (1) {
   ["prop"]=>
   int(10)

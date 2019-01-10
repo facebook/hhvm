@@ -1171,7 +1171,7 @@ std::vector<bool> read_argvb(AsmState& as) {
 
 // Read in a vector of iterators the format for this vector is:
 // <(TYPE) ID LOCAL?, (TYPE) ID LOCAL?, ...>
-// Where TYPE := Iter | MIter | CIter
+// Where TYPE := Iter | CIter | LIter
 // and   ID   := Integer
 // and   LOCAL := String (only valid when TYPE = LIter)
 IterTable read_iter_table(AsmState& as) {
@@ -1187,7 +1187,6 @@ IterTable read_iter_table(AsmState& as) {
     as.in.expectWs('(');
     if (!as.in.readword(word)) as.error("Was expecting Iterator type.");
     if (!word.compare("Iter")) ent.kind = KindOfIter;
-    else if (!word.compare("MIter")) ent.kind = KindOfMIter;
     else if (!word.compare("CIter")) ent.kind = KindOfCIter;
     else if (!word.compare("LIter")) ent.kind = KindOfLIter;
     else as.error("Unknown iterator type `" + word + "'");

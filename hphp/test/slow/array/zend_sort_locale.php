@@ -19,8 +19,8 @@ $table = array("AB" => "Alberta",
 asort($table, SORT_LOCALE_STRING);
 
 #ASCII-ize
-foreach($table as &$val) {
-  $val = urlencode($val);
+foreach($table as $key => $val) {
+  $table[$key] = urlencode($val);
 }
 unset($val);
 var_dump($table);

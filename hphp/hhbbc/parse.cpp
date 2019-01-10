@@ -268,13 +268,13 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
       {
         auto const fault = findBlock(eh.m_handler);
         ret.faultFuncletStarts.insert(eh.m_handler);
-        node->info = php::FaultRegion { fault->id, eh.m_iterId, eh.m_itRef };
+        node->info = php::FaultRegion { fault->id, eh.m_iterId };
       }
       break;
     case EHEnt::Type::Catch:
       {
         auto const catchBlk = findBlock(eh.m_handler);
-        node->info = php::CatchRegion { catchBlk->id, eh.m_iterId, eh.m_itRef };
+        node->info = php::CatchRegion { catchBlk->id, eh.m_iterId };
       }
       break;
     }

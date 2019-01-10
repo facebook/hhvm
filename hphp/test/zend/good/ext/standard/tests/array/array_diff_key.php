@@ -9,10 +9,10 @@ $c_f = array_flip($c);
 $d_f = array_flip($d);
 $i = 1;
 /* give nicer values */
-foreach ($a_f as $k=> &$a_f_el) { $a_f_el =$k*2;}
-foreach ($b_f as $k=> &$b_f_el) { $b_f_el =$k*2;}
-foreach ($c_f as $k=> &$c_f_el) { $c_f_el =$k*2;}
-foreach ($d_f as $k=> &$d_f_el) { $d_f_el =$k*2;}
+foreach ($a_f as $k => $_) { $a_f[$k] =$k*2;}
+foreach ($b_f as $k => $_) { $b_f[$k] =$k*2;}
+foreach ($c_f as $k => $_) { $c_f[$k] =$k*2;}
+foreach ($d_f as $k => $_) { $d_f[$k] =$k*2;}
 
 echo "------ Test $i --------\n";$i++;// 1
 var_dump(array_diff_key($a_f, $b_f));// keys -> 1, 6, 15, 1200

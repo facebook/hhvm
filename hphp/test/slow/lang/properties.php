@@ -264,18 +264,6 @@ foreach ($o as $k => $v) {
 }
 obj_dump($o);
 
-print "=== Foreach by reference ===\n";
-foreach ($o as $k => &$v) {
-  print "  \"".$k."\" => ".$v."\n";
-  $o->q = "q";
-  if ($k == "nr") {
-    $v = "nr";
-  }
-  if ($k == "r") {
-    $v = "r";
-  }
-}
-obj_dump($o);
 useReturn();
 
 print "Test end\n";

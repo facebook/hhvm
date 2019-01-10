@@ -285,7 +285,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
       auto const kindStr = [&]() -> const char* {
         switch (kind) {
         case KindOfIter:   return "(Iter)";
-        case KindOfMIter:  return "(MIter)";
         case KindOfCIter:  return "(CIter)";
         case KindOfLIter:  return "(LIter)";
         }

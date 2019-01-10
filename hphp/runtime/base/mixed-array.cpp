@@ -50,7 +50,6 @@
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 
 namespace HPHP {
 
@@ -566,10 +565,6 @@ void MixedArray::Release(ArrayData* in) {
       }
       tvDecRefGen(&ptr->data);
     }
-
-    if (UNLIKELY(strong_iterators_exist())) {
-      free_strong_iterators(ad);
-    }
   }
   tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
@@ -594,9 +589,6 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
       }
       ReleaseUncountedTv(ptr->data);
     }
-
-    // We better not have strong iterators associated with uncounted arrays.
-    assertx(!has_strong_iterator(ad));
   }
   auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;
   uncounted_sized_free(reinterpret_cast<char*>(ad) - extra,
@@ -624,7 +616,6 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
  * Zombie state:
  *
  *   m_used == UINT32_MAX
- *   no MArrayIter's are pointing to this array
  *
  * Non-zombie:
  *
@@ -861,7 +852,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
       tvIncRefGen(elm->data);
     }
   } else {
-    if (UNLIKELY(strong_iterators_exist())) move_strong_iterators(ad, old);
     old->setZombie();
   }
 
@@ -926,24 +916,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       mPos.hash = e.hash();
       mPos.skey = e.skey;
     }
-    if (UNLIKELY(strong_iterators_exist())) {
-      for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-        if (miEnt.array != this) return;
-        if (miEnt.iter->getResetFlag()) return;
-        updateStrongIters = true;
-        auto const ei = miEnt.iter->m_pos;
-        if (ei == m_used) return;
-        auto& e = data()[ei];
-        siKeys.push_back(ElmKey(e.hash(), e.skey));
-      });
-    }
   } else {
-    // To conform to PHP behavior, when array's integer keys are renumbered
-    // we invalidate all strong iterators and we reset the array's internal
-    // cursor (even if the array is empty or has no integer keys).
-    if (UNLIKELY(strong_iterators_exist())) {
-      free_strong_iterators(this);
-    }
     m_pos = 0;
     // Set m_nextKI to 0 for now to prepare for renumbering integer keys
     m_nextKI = 0;
@@ -983,30 +956,6 @@ void MixedArray::compact(bool renumber /* = false */) {
     return;
   }
 
-  // Update strong iterators now that compaction is complete. Note
-  // that we wait to update m_used until after we've updated the
-  // strong iterators because we need to consult what the _old_ value
-  // of m_used before compaction was performed.
-  int key = 0;
-  for_each_strong_iterator(
-    [&] (MIterTable::Ent& miEnt) {
-      if (miEnt.array != this) return;
-      auto const iter = miEnt.iter;
-      if (iter->getResetFlag()) return;
-      if (iter->m_pos == m_used) {
-        // If this iterator was set to the _old_ canonical invalid position,
-        // we need to update it to the _new_ canonical invalid position after
-        // compaction.
-        iter->m_pos = m_size;
-        return;
-      }
-      auto& k = siKeys[key];
-      key++;
-      iter->m_pos = k.hash >= 0 ? ssize_t(find(k.skey, k.hash))
-                                : ssize_t(find(k.ikey, k.hash));
-      assertx(iter->m_pos >= 0 && iter->m_pos < m_size);
-    }
-  );
   // Finally, update m_used and return
   m_used = m_size;
 }
@@ -1241,35 +1190,8 @@ MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
 //=============================================================================
 // Delete.
 
-NEVER_INLINE
-void MixedArray::adjustMArrayIter(ssize_t pos) {
-  assertx(pos >= 0 && pos < m_used);
-  ssize_t eIPrev = Tombstone;
-  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
-    if (miEnt.array != this) return;
-    auto const iter = miEnt.iter;
-    if (iter->getResetFlag()) return;
-    if (iter->m_pos == pos) {
-      if (eIPrev == Tombstone) {
-        // eIPrev will actually be used, so properly initialize it with the
-        // previous element before pos (or an invalid position if pos was the
-        // first element).
-        eIPrev = prevElm(data(), pos);
-      }
-
-      if (eIPrev == m_used) {
-        iter->setResetFlag(true);
-      }
-      iter->m_pos = eIPrev;
-    }
-  });
-}
-
 void MixedArray::eraseNoCompact(ssize_t pos) {
   assertx(validPos(pos));
-
-  // move strong iterators to the previous element
-  if (UNLIKELY(strong_iterators_exist())) adjustMArrayIter(pos);
 
   // If the internal pointer points to this element, advance it.
   Elm* elms = data();
@@ -1902,26 +1824,6 @@ void MixedArray::OnSetEvalScalar(ArrayData* ad) {
       tvAsVariant(&e.data).setEvalScalar();
     }
   }
-}
-
-bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
-  auto a = asMixed(ad);
-  Elm* elms = a->data();
-  if (fp.getResetFlag()) {
-    fp.setResetFlag(false);
-    fp.m_pos = a->nextElm(elms, -1);
-  } else if (fp.m_pos == a->m_used) {
-    return false;
-  } else {
-    fp.m_pos = a->nextElm(elms, fp.m_pos);
-  }
-  if (fp.m_pos == a->m_used) {
-    return false;
-  }
-  // To conform to PHP5 behavior, we need to set the internal
-  // cursor to point to the next element.
-  a->m_pos = a->nextElm(elms, fp.m_pos);
-  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

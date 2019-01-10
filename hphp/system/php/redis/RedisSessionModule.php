@@ -50,12 +50,12 @@ class RedisSessionModule implements SessionHandlerInterface {
       ];
       if (isset($url['query'])) {
         parse_str($url['query'], &$query);
-        foreach ($args as $key => &$val) {
+        foreach ($args as $key => $val) {
           if (!isset($query[$key])) continue;
           if (is_string($val)) {
-            $val = $query[$key];
+            $args[$key] = $query[$key];
           } else {
-            $val = (int)$query[$key];
+            $args[$key] = (int)$query[$key];
           }
         }
       }
@@ -133,8 +133,8 @@ class RedisSessionModule implements SessionHandlerInterface {
   }
 
   public function close() {
-    foreach ($this->paths as &$path) {
-      $path['connection'] = null;
+    foreach ($this->paths as $idx => $_) {
+      $this->paths[$idx]['connection'] = null;
     }
 
     return true;

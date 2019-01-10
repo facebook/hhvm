@@ -373,16 +373,6 @@ ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   return next >= 0 ? next : a->m_size;
 }
 
-bool APCLocalArray::ValidMArrayIter(const ArrayData* ad,
-                                    const MArrayIter& fp) {
-  assertx(fp.getContainer() == ad);
-  not_reached();  // we should've escalated
-}
-
-bool APCLocalArray::AdvanceMArrayIter(ArrayData* /*ad*/, MArrayIter& /*fp*/) {
-  not_reached();  // we should've escalated
-}
-
 ArrayData* APCLocalArray::CopyStatic(const ArrayData*) {
   raise_error("APCLocalArray::copyStatic not implemented.");
   return nullptr;

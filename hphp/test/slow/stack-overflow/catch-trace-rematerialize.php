@@ -43,8 +43,8 @@ function choose($a) {
     $arr
   );
 
-  foreach ($out as &$thing) {
-    $thing = $thing . 'boop';
+  foreach ($out as $idx => $thing) {
+    $out[$idx] = $thing . 'boop';
   }
 
   return $arr[0] === 'bananaboop';
@@ -66,8 +66,8 @@ function quux($b, $a) {
     $arr
   );
 
-  foreach ($out as &$thing) {
-    $thing = chwrap($thing) ? foo($thing) : bar($thing);
+  foreach ($out as $idx => $thing) {
+    $out[$idx] = chwrap($thing) ? foo($thing) : bar($thing);
   }
   return $out;
 }

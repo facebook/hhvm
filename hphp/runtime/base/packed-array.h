@@ -38,7 +38,6 @@ struct Variant;
 struct RefData;
 struct ArrayData;
 struct StringData;
-struct MArrayIter;
 struct MixedArray;
 struct APCArray;
 struct APCHandle;
@@ -127,8 +126,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t pos);
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
-  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
@@ -215,8 +212,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto IterEndVec = &IterEnd;
   static constexpr auto IterAdvanceVec = &IterAdvance;
   static constexpr auto IterRewindVec = &IterRewind;
-  static constexpr auto ValidMArrayIterVec = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterVec = &AdvanceMArrayIter;
   static constexpr auto EscalateForSortVec = &EscalateForSort;
   static constexpr auto KsortVec = &Ksort;
   static constexpr auto SortVec = &Sort;

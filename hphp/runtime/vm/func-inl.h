@@ -44,7 +44,6 @@ void EHEnt::serde(SerDe& sd) {
     (m_iterId)
     (m_handler)
     (m_end)
-    (m_itRef)
     (m_parentIndex)
     ;
 }

@@ -247,40 +247,6 @@ ssize_t GlobalsArray::IterRewind(const ArrayData* ad, ssize_t prev) {
   return iter.toInteger();
 }
 
-bool
-GlobalsArray::ValidMArrayIter(const ArrayData* ad,
-                                       const MArrayIter & fp) {
-  assertx(fp.getContainer() == ad);
-  auto a = asGlobals(ad);
-  if (fp.getResetFlag()) return false;
-  if (fp.m_pos == IterEnd(a)) return false;
-  NameValueTable::Iterator iter(a->m_tab, fp.m_pos);
-  return iter.valid();
-}
-
-bool GlobalsArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
-  auto a = asGlobals(ad);
-  bool reset = fp.getResetFlag();
-  NameValueTable::Iterator iter = reset ?
-    NameValueTable::Iterator(a->m_tab) :
-    NameValueTable::Iterator(a->m_tab, fp.m_pos);
-  if (reset) {
-    fp.setResetFlag(false);
-  } else {
-    if (!iter.valid()) {
-      return false;
-    }
-    iter.next();
-  }
-  fp.m_pos = iter.toInteger();
-  if (!iter.valid()) return false;
-  // To conform to PHP behavior, we need to set the internal
-  // cursor to point to the next element.
-  iter.next();
-  a->m_pos = iter.toInteger();
-  return true;
-}
-
 ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction /*sf*/) {
   raise_warning("Sorting the $GLOBALS array is not supported");
   return ad;

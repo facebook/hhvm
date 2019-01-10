@@ -34,20 +34,6 @@ ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
   return 0;
 }
 
-bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
-  assertx(fp.getContainer() == ad);
-  if (fp.getResetFlag()) return false;
-  if (ad->hasPackedLayout()) {
-    assertx(PackedArray::checkInvariants(ad));
-    return fp.m_pos != ad->getSize();
-  } else if (ad->isKeyset()) {
-    return false;
-  } else {
-    assertx(MixedArray::asMixed(ad));
-    return fp.m_pos != MixedArray::asMixed(ad)->iterLimit();
-  }
-}
-
 ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_last();

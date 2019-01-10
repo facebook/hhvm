@@ -342,23 +342,18 @@ static const struct {
   /*** 11. Iterator instructions ***/
 
   { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
-  { OpMIterInit,   {Stack1,           Local,        OutUnknown      }},
   { OpWIterInit,   {Stack1,           Local,        OutUnknown      }},
   { OpLIterInit,   {Local,            Local,        OutUnknown      }},
   { OpIterInitK,   {Stack1,           Local,        OutUnknown      }},
-  { OpMIterInitK,  {Stack1,           Local,        OutUnknown      }},
   { OpWIterInitK,  {Stack1,           Local,        OutUnknown      }},
   { OpLIterInitK,  {Local,            Local,        OutUnknown      }},
   { OpIterNext,    {None,             Local,        OutUnknown      }},
-  { OpMIterNext,   {None,             Local,        OutUnknown      }},
   { OpWIterNext,   {None,             Local,        OutUnknown      }},
   { OpLIterNext,   {Local,            Local,        OutUnknown      }},
   { OpIterNextK,   {None,             Local,        OutUnknown      }},
-  { OpMIterNextK,  {None,             Local,        OutUnknown      }},
   { OpWIterNextK,  {None,             Local,        OutUnknown      }},
   { OpLIterNextK,  {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
-  { OpMIterFree,   {None,             None,         OutNone         }},
   { OpCIterFree,   {None,             None,         OutNone         }},
   { OpLIterFree,   {Local,            None,         OutNone         }},
   { OpIterBreak,   {Local,            None,         OutNone         }},
@@ -881,10 +876,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::WIterInitK:
   case Op::WIterNext:
   case Op::WIterNextK:
-  case Op::MIterInit:
-  case Op::MIterInitK:
-  case Op::MIterNext:
-  case Op::MIterNextK:
   case Op::IterInitK:
   case Op::IterInit:
   case Op::LIterInitK:
@@ -1039,7 +1030,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::LIterFree:
   case Op::LateBoundCls:
   case Op::Method:
-  case Op::MIterFree:
   case Op::Mod:
   case Op::Pow:
   case Op::ClsRefName:

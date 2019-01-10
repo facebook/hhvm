@@ -121,51 +121,6 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void implMIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<IterInitData>();
-
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  auto const valOff = localOffset(extra->valId);
-
-  auto& v = vmain(env);
-
-  auto args = argGroup(env, inst)
-    .addr(fp, iterOff)
-    .ssa(0 /* src */);
-
-  auto const innerType = inst->typeParam();
-  assertx(innerType.isKnownDataType());
-
-  if (innerType <= TArrLike) {
-    args.addr(fp, valOff);
-    if (inst->is(MIterInitK)) {
-      args.addr(fp, localOffset(extra->keyId));
-    } else {
-      args.imm(0);
-    }
-    cgCallHelper(v, env, CallSpec::direct(new_miter_array_key),
-                 callDest(env, inst), SyncOptions::Sync, args);
-    return;
-  }
-
-  always_assert(innerType <= TObj);
-
-  args.immPtr(inst->marker().func()->cls())
-      .addr(fp, valOff);
-  if (inst->is(MIterInitK)) {
-    args.addr(fp, localOffset(extra->keyId));
-  } else {
-    args.imm(0);
-  }
-
-  // new_miter_object decrefs its src object if it propagates an exception out,
-  // so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
-  // element on an unwind, skipping over the src object.
-  cgCallHelper(v, env, CallSpec::direct(new_miter_object),
-               callDest(env, inst), SyncOptions::SyncAdjustOne, args);
-}
-
 void implIterNext(IRLS& env, const IRInstruction* inst) {
   // Nothing uses WIterNext so we intentionally don't support it here to avoid
   // a null check in the witer_next_key helper.  This will need to change if we
@@ -193,26 +148,6 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
                                 CallSpec::direct(iter_next_ind);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void implMIterNext(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<IterData>();
-
-  auto const args = [&] {
-    auto const fp = srcLoc(env, inst, 0).reg();
-
-    auto ret = argGroup(env, inst)
-      .addr(fp, iterOffset(inst->marker(), extra->iterId))
-      .addr(fp, localOffset(extra->valId));
-    if (inst->is(MIterNextK)) {
-      ret.addr(fp, localOffset(extra->keyId));
-    } else {
-      ret.imm(0);
-    }
-    return ret;
-  }();
-  cgCallHelper(vmain(env), env, CallSpec::direct(miter_next_key),
-               callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implLIterNext(IRLS& env, const IRInstruction* inst) {
@@ -277,14 +212,6 @@ void cgLIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgMIterInit(IRLS& env, const IRInstruction* inst) {
-  implMIterInit(env, inst);
-}
-
-void cgMIterInitK(IRLS& env, const IRInstruction* inst) {
-  implMIterInit(env, inst);
-}
-
 void cgIterNext(IRLS& env, const IRInstruction* inst) {
   implIterNext(env, inst);
 }
@@ -301,14 +228,6 @@ void cgWIterNextK(IRLS& env, const IRInstruction* inst) {
   implIterNext(env, inst);
 }
 
-void cgMIterNext(IRLS& env, const IRInstruction* inst) {
-  implMIterNext(env, inst);
-}
-
-void cgMIterNextK(IRLS& env, const IRInstruction* inst) {
-  implMIterNext(env, inst);
-}
-
 void cgLIterNext(IRLS& env, const IRInstruction* inst) {
   implLIterNext(env, inst);
 }
@@ -319,10 +238,6 @@ void cgLIterNextK(IRLS& env, const IRInstruction* inst) {
 
 void cgIterFree(IRLS& env, const IRInstruction* inst) {
   implIterFree(env, inst, CallSpec::method(&Iter::free));
-}
-
-void cgMIterFree(IRLS& env, const IRInstruction* inst) {
-  implIterFree(env, inst, CallSpec::method(&Iter::mfree));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

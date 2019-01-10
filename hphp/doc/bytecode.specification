@@ -809,22 +809,18 @@ FCall* may consume any of the values from the evaluation stack that were
 pushed onto the stack before the FPush* instruction.
 
 13) The initialization state of each iterator variable must be known at every
-point in the code and must be the same for all control paths. There are four
+point in the code and must be the same for all control paths. There are three
 possible states: (1) uninitialized, (2) "iter-initialized" (initialized via
-IterInit*), (3) "miter-initialized" (initialized via MIterInit*), and (4)
-"cuf-initialized" (initialized via DecodeCufIter). Every range of bytecode for
-which an iterator variable i is initialized must be protected by a fault
-funclet that unsets i by calling IterFree, MIterFree, or CIterFree.
+IterInit*), and (3) "cuf-initialized" (initialized via DecodeCufIter). Every
+range of bytecode for which an iterator variable i is initialized must be
+protected by a fault funclet that unsets i by calling IterFree, or CIterFree.
 
-14) The iterator variable referenced by IterInit* or MIterInit* or
-DecodeCufIter must be in the uninitialized state when the instruction executes.
-An iterator variable referenced by IterNext* and IterFree must be in the
-"iter-initialized" state, an iterator variable referenced by MIterNext* or
-MIterFree must be in the "miter-initialized" state, and an iterator variable
-referenced by FPushCufIter or CIterFree must be in the citer-initialized state.
-Note that IterInit* and MIterInit* conditionally initialize the iterator
-variable, and IterNext* and MIterNext* conditionally free the iterator
-variable.
+14) The iterator variable referenced by IterInit* or DecodeCufIter must be in
+the uninitialized state when the instruction executes. An iterator variable
+referenced by IterNext* and IterFree must be in the "iter-initialized" state,
+and an iterator variable referenced by FPushCufIter or CIterFree must be in
+the citer-initialized state. Note that IterInit* conditionally initialize the
+iterator variable, and IterNext* conditionally free the iterator variable.
 
 15) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
@@ -892,7 +888,7 @@ refer to the value directly below $2, and so forth. Also, %1 is used to refer
 to the first immediate argument, and %2 is used to refer to the second
 immediate argument.
 
-Note that the relative offset immediate used by a Jmp*, Iter*, MIter*, Switch,
+Note that the relative offset immediate used by a Jmp*, Iter*, Switch,
 or SSwitch instruction is relative to the beginning of the instruction.
 
 There are numerous instructions that operate on different kinds of locations.
@@ -3680,50 +3676,6 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
     If the iterator specified by %1 is a non-mutable default class iterator,
     this instruction stores a copy of the name of the current property in %4.
 
-MIterInit  <iterator id> <rel offset> <local id>               [V]  ->  []
-MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
-
-  Initialize mutable iterator. If $1 is an array, these instructions create a
-  mutable array iterator, rewind the mutable array iterator to point to the
-  beginning of the array, and store the mutable array iterator in the iterator
-  variable %1. Then these instructions check if the iterator is at the end, and
-  if it is these instructions free the iterator and transfers control the
-  location specified by %2.
-
-  If $1 is an object that is an instance of an extension class that implements
-  the Traversable interface, these instructions throw a fatal error.
-
-  If $1 is an object that implements the Iterator interface, these instructions
-  throw a fatal error.
-
-  If $1 is an object that implements the IteratorAggregate interface, these
-  instructions throw a fatal error.
-
-  If $1 is an object that does not match any of the three cases above, these
-  instructions create a mutable default class iterator, rewind it to point to
-  the first accessible property, and store it in the iterator variable %1.
-  Then these instructions check if the iterator is at the end, and if it is
-  these instructions free the iterator and transfer control to the location
-  specified by %2.
-
-  If $1 is not an array or an object, these instructions raise a warning and
-  transfer control to the location specified by %2.
-
-  If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the current value in %3 as a ref.
-
-  If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the current property in %3 as a ref.
-
-  For the MIterInitK version, the following also happens:
-
-  If the iterator specified by %1 is an array iterator, this instruction stores
-  a copy of the current key in %4 as a cell.
-
-  If the iterator specified by %1 is a mutable default class iterator, this
-  instruction stores a copy of the name of the current property in %4 as a
-  cell.
-
 LIterInit <iterator id> <local id> <rel offset> <local id>     []   ->  []
 LIterInitK <iterator id> <local id> <rel offset>
            <local id> <local id>                               []   ->  []
@@ -3775,38 +3727,6 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   The semantics of how to determine what the key and value are depend on %1 in
   an analogous way to {W,}IterInit{K,}.
 
-MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
-MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
-
-  Iterator next. If the specified iterator is a mutable array iterator, advance
-  the iterator to point to the next element. If the iterator is not at the end,
-  these instructions transfer control to the location specified by %2.
-
-  If the specified iterator is a mutable default class iterator, advance the
-  iterator to point to the next accessible property in the object. If the
-  iterator is not at the end, these instructions transfer control to the
-  location specified by %2.
-
-  If the specified iterator is at the end, free the iterator variable with an
-  implicit MIterFree, then fall through to the next instruction.
-
-  If the specified iterator is not at the end, retrieve the key and value:
-
-  If the iterator specified by %1 is a mutable array iterator, these
-  instructions store the new current value in %3 as a ref.
-
-  If the iterator specified by %1 is a mutable default class iterator, these
-  instructions store the new current property in %3 as a ref.
-
-  For the MIterNextK version, the following also happens:
-
-  If the iterator specified by %1 is an array iterator, this instruction stores
-  a copy of the new current key in %4 as a cell.
-
-  If the iterator specified by %1 is a mutable default class iterator, this
-  instruction stores a copy of the name of the new current property in %4 as a
-  cell.
-
 LIterNext <iterator id> <local id> <rel offset> <local id>     []   ->  []
 LIterNextK <iterator id> <local id> <rel offset>
            <local id> <local id>                               []   ->  []
@@ -3824,13 +3744,6 @@ IterFree <iterator id>    []  ->  []
   Typically an iterator gets freed by IterNext, so IterFree is only needed for
   guarding against exceptions and implementing break and return control flow
   statements inside iterator loops.
-
-MIterFree <iterator id>    []  ->  []
-
-  Mutable iterator free. This instruction frees the specified iterator
-  variable. Typically an iterator gets freed by MIterNext*, so MIterFree is
-  only needed for guarding against exceptions and implementing break and return
-  control flow statements inside iterator loops.
 
 CIterFree <iterator id>    []  ->  []
 
@@ -4474,16 +4387,16 @@ statements; most real switch statements are implemented naively using the Eq
 and JmpNZ instructions. Also, the functionality of both the echo statement and
 the print statement is implemented with the Print instruction.
 
-Foreach statements are implemented using iterator variables and the Iter* and
-MIter* instructions. Each foreach loop must be protected by a fault funclet to
+Foreach statements are implemented using iterator variables and the Iter*
+instructions. Each foreach loop must be protected by a fault funclet to
 ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
 Simple break statements and continue statements are implemented using the Jmp*,
-IterFree, MIterFree and CIterFree instructions. Dynamic break is implemented
-using an unnamed local (to store the 'break count') and a chain of basic
-blocks, where each block decrements the unnamed local variable and compares it
-with 0, and then decides where to jump next.
+IterFree and CIterFree instructions. Dynamic break is implemented using an
+unnamed local (to store the 'break count') and a chain of basic blocks, where
+each block decrements the unnamed local variable and compares it with 0, and
+then decides where to jump next.
 
 
 Basic expression transformations

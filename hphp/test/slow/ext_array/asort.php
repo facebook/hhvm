@@ -26,9 +26,8 @@ $arr = array("G\xediron",        // &iacute; (Latin-1)
 asort($arr, SORT_REGULAR);
 
 # Make the output ASCII-safe
-foreach($arr as &$val) {
-  $val = urlencode($val);
+foreach($arr as $key => $val) {
+  $arr[$key] = urlencode($val);
 }
-unset($val);
 var_dump($arr);
 }

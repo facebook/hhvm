@@ -117,23 +117,6 @@ function convert_with_ref() {
   }
 }
 
-function iterate_by_ref($d) {
-  echo "========== iterate_by_ref ==========================\n";
-  try {
-    foreach ($d as &$value) { var_dump($value); }
-  } catch (Exception $e) {
-    echo "iterate_by_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    foreach ($d as $key => &$value) {
-      var_dump($key);
-      var_dump($value);
-    }
-  } catch (Exception $e) {
-    echo "iterate_by_ref (key) exception: \"", $e->getMessage(), "\"\n";
-  }
-}
-
 function ref_unserialize() {
   echo "========== ref_unserialize =========================\n";
   $ref_str = "D:2:{s:3:\"foo\";D:1:{s:1:\"a\";s:1:\"b\";}s:3:\"bar\";R:2;}";
@@ -163,7 +146,6 @@ function main() {
   elem_ref($d);
   append_ref($d);
   set_ref($d);
-  iterate_by_ref($d);
   convert_with_ref();
   ref_unserialize();
   nested_refs($d);

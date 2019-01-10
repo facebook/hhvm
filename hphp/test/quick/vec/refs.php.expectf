@@ -71,9 +71,6 @@ vec(5) {
     int(7)
   }
 }
-========== iterate_by_ref ==========================
-iterate_by_ref exception: "Vecs cannot contain references"
-iterate_by_ref (key) exception: "Vecs cannot contain references"
 ========== convert_with_ref ========================
 convert_with_ref exception: "Vecs cannot contain references"
 ========== ref_unserialize =========================

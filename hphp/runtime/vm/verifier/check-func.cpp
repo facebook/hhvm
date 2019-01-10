@@ -1083,11 +1083,10 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   if (op == Op::IterInit || op == Op::IterInitK ||
       op == Op::LIterInit || op == Op::LIterInitK ||
       op == Op::WIterInit || op == Op::WIterInitK ||
-      op == Op::MIterInit || op == Op::MIterInitK ||
       op == Op::DecodeCufIter) {
     if (cur->iters[id]) {
       error(
-        "IterInit* or MIterInit* <%d> trying to double-initialize\n", id);
+        "IterInit* <%d> trying to double-initialize\n", id);
       ok = false;
     }
   } else {
@@ -1096,7 +1095,6 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
       ok = false;
     }
     if (op == Op::IterFree ||
-        op == Op::MIterFree ||
         op == Op::CIterFree ||
         op == Op::LIterFree) {
       cur->iters[id] = false;
@@ -2021,11 +2019,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::BindN:
     case Op::BindG:
     case Op::BindS:
-    case Op::MIterInit:
-    case Op::MIterInitK:
-    case Op::MIterNext:
-    case Op::MIterNextK:
-    case Op::MIterFree:
     case Op::VerifyRetTypeV:
     case Op::VGetM:
     case Op::BindM:
@@ -2321,7 +2314,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     bool taken_state =
       (last_op == OpIterNext || last_op == OpIterNextK ||
        last_op == OpLIterNext || last_op == OpLIterNextK ||
-       last_op == OpMIterNext || last_op == OpMIterNextK ||
        last_op == OpWIterNext || last_op == OpWIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;

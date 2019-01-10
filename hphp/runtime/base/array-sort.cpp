@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include <folly/ScopeGuard.h>
@@ -228,9 +227,6 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
 
 #define SORT_BODY(acc_type, resetKeys)                          \
   do {                                                          \
-    if (UNLIKELY(strong_iterators_exist())) {                   \
-      free_strong_iterators(a);                                 \
-    }                                                           \
     if (!a->m_size) return;                                     \
     SortFlavor flav = a->preSort<acc_type>(acc_type(), true);   \
     a->m_pos = ssize_t(0);                                      \
@@ -282,9 +278,6 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   }
   assertx(!ad->hasMultipleRefs());
   auto a = ad;
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(a);
-  }
   SortFlavor flav = preSort(ad);
   a->m_pos = 0;
   auto data_begin = packedData(ad);
@@ -298,9 +291,6 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
 
 #define USER_SORT_BODY(acc_type, resetKeys)                     \
   do {                                                          \
-    if (UNLIKELY(strong_iterators_exist())) {                   \
-      free_strong_iterators(a);                                 \
-    }                                                           \
     if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
     CallerFrame cf;                                             \
@@ -373,9 +363,6 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
     return true;
   }
   assertx(!ad->hasMultipleRefs());
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(ad);
-  }
   ElmUCompare<TVAccessor> comp;
   CallCtx ctx;
   CallerFrame cf;

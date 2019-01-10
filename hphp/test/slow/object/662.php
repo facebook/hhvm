@@ -14,7 +14,7 @@ class A {
 }
 function gen() {
   $obj = new A(1, 2, 3, 4);
-  foreach ($obj as $key => &$val) {
+  foreach ($obj as $key => $val) {
     yield null;
     if($val == 2) {
       $obj->$key = 0;
@@ -24,7 +24,7 @@ function gen() {
       unset($obj->$key);
     }
  else {
-      $val++;
+      $obj->$key++;
     }
   }
   var_dump($obj);

@@ -2717,10 +2717,6 @@ To string conversions:
 
 | WIterInitK<IterData>, D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
 
-| MIterInit<T,IterData>,  D(Bool), S(BoxedCell) S(FramePtr), NF
-
-| MIterInitK<T,IterData>, D(Bool), S(BoxedCell) S(FramePtr), NF
-
 | LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr), NF
 
 | LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr), NF
@@ -2748,11 +2744,6 @@ To string conversions:
   The WIterInit and WIterInitK instructions copy referenced array elements by
   reference, and non-referenced array elements by value.
 
-  The MIterInit and MIterInitK instructions always copy the array element by
-  reference, and take a type parameter indicating the inner type of S0.  (This
-  must have been proven via guards prior to running this opcode.)  Right now T
-  must be Obj or Arr.
-
   The LIter variations only accept arrays and do not take ownership of their
   base. Instead the base is provided on each operation on the iterator. This
   avoids having to raise the ref-count of the base (in situations where this is
@@ -2768,10 +2759,6 @@ To string conversions:
 | WIterNext<IterData>,  D(Bool), S(FramePtr), NF
 
 | WIterNextK<IterData>, D(Bool), S(FramePtr), NF
-
-| MIterNext<IterData>,  D(Bool), S(FramePtr), NF
-
-| MIterNextK<IterData>, D(Bool), S(FramePtr), NF
 
 | LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), NF
 
@@ -2791,13 +2778,9 @@ To string conversions:
 
   The IterInit and IterInitK instructions always copy the array element by
   value. The WIterInit and WIterInitK instructions copy referenced array
-  elements by reference, and non-referenced array elements by value. The
-  MIterNext and MIterNextK instructions always copy the array element by
-  reference.
+  elements by reference, and non-referenced array elements by value.
 
 | IterFree,  ND, S(FramePtr), NF
-
-| MIterFree, ND, S(FramePtr), NF
 
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.

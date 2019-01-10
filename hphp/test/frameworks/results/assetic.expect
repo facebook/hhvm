@@ -215,7 +215,7 @@ Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutput
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutputPattern
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testReference
-.
+FATAL
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testUnclosedTag
 .
 Assetic\Test\Extension\Twig\AsseticExtensionTest::testVariables
@@ -223,7 +223,7 @@ Assetic\Test\Extension\Twig\AsseticExtensionTest::testVariables
 Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testFunction
 .
 Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testMixture
-.
+FATAL
 Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testUnclosedTag
 .
 Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameGetContent
@@ -481,7 +481,7 @@ S
 Assetic\Test\Filter\LessFilterTest::testSettingLoadPaths
 S
 Assetic\Test\Filter\LessphpFilterTest::testFilterLoad
-.
+FATAL
 Assetic\Test\Filter\LessphpFilterTest::testFormatterClassic
 .
 Assetic\Test\Filter\LessphpFilterTest::testFormatterCompressed
@@ -575,7 +575,7 @@ S
 Assetic\Test\Filter\ScssphpFilterTest::testCompassExtension
 I
 Assetic\Test\Filter\ScssphpFilterTest::testFilterLoad
-.
+FATAL
 Assetic\Test\Filter\ScssphpFilterTest::testImport
 .
 Assetic\Test\Filter\ScssphpFilterTest::testSetImportPath

@@ -548,31 +548,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(IterRewind)
 
   /*
-   * bool ValidMArrayIter(const ArrayData*, const MArrayIter& fp)
-   *
-   *    Returns whether a given MArrayIter is pointing at a valid
-   *    position for this array.  This should return false if the
-   *    MArrayIter is in the reset flag state.
-   *
-   *    This function may not be called without first calling
-   *    Escalate.
-   *
-   *    Pre: fp.getContainer() == ad
-   */
-  DISPATCH(ValidMArrayIter)
-
-  /*
-   * bool AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp)
-   *
-   *   Advance a mutable array iterator to the next position.
-   *
-   *   This function may not be called without first calling Escalate.
-   *
-   *   Pre: fp.getContainer() == ad
-   */
-  DISPATCH(AdvanceMArrayIter)
-
-  /*
    * ArrayData* EscalateForSort(ArrayData*, SortFunction)
    *
    *   Must be called before calling any of the sort routines on an
@@ -756,11 +731,7 @@ const ArrayFunctions g_array_funcs = {
    * ArrayData* Escalate(const ArrayData*)
    *
    *   Arrays must be given a chance to 'escalate' to more general
-   *   kinds prior to some unusual operations.  The operations that
-   *   are only legal after a call to Escalate are:
-   *
-   *      - ValidMArrayIter
-   *      - AdvanceMArrayIter
+   *   kinds prior to some unusual operations.
    */
   DISPATCH(Escalate)
 

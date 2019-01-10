@@ -3677,6 +3677,8 @@ let assignment_errors _env node errors =
       | PostfixUnaryExpression { postfix_unary_operator = op; _ }) ->
         begin match token_kind op with
           | Some TokenKind.At | Some TokenKind.Dollar -> errors
+          | Some TokenKind.Ampersand ->
+            err (SyntaxError.not_allowed_in_write "&")
           | _ -> err (SyntaxError.not_allowed_in_write "Unary expression")
         end (* match *)
       (* FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
@@ -3722,18 +3724,7 @@ let assignment_errors _env node errors =
       foreach_value = v;
       _
     } ->
-    let allow_ref node errors = match syntax node with
-      | PrefixUnaryExpression
-        { prefix_unary_operator = op
-        ; prefix_unary_operand = loperand
-        } when token_kind op = Some (TokenKind.Ampersand) ->
-        check_lvalue loperand errors
-      | Missing -> errors
-      | _loperand -> check_lvalue node errors
-    in
-      let errors = allow_ref k errors in
-      let errors = allow_ref v errors in
-        errors
+    check_lvalue k @@ check_lvalue v errors
   | _ -> errors
 
 

@@ -22,7 +22,7 @@ function bar() {
   }
  catch (Exception $exn) {
     $a = $exn->getTrace();
- foreach ($a as &$b) $b['file'] = 'string';
+    foreach ($a as $k => $v) $a[$k]['file'] = 'string';
     var_dump($a);
     var_dump($exn->getLine());
   }

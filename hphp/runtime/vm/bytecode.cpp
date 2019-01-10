@@ -934,9 +934,7 @@ static std::string toStringElm(const TypedValue* tv) {
   return os.str();
 }
 
-static std::string toStringIter(const Iter* it, bool itRef) {
-  if (itRef) return "I:MutableArray";
-
+static std::string toStringIter(const Iter* it) {
   // TODO(#2458166): it might be a CufIter, but we're just lucky that
   // the bit pattern for the CufIter is going to have a 0 in
   // getIterType for now.
@@ -954,16 +952,13 @@ static std::string toStringIter(const Iter* it, bool itRef) {
 
 /*
  * Return true if Offset o is inside the protected region of a fault
- * funclet for iterId, otherwise false. itRef will be set to true if
- * the iterator was initialized with MIterInit*, false if the iterator
- * was initialized with IterInit*.
+ * funclet for iterId, otherwise false.
  */
-static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
+static bool checkIterScope(const Func* f, Offset o, Id iterId) {
   assertx(o >= f->base() && o < f->past());
   for (auto const& eh : f->ehtab()) {
     if (eh.m_base <= o && o < eh.m_past &&
         eh.m_iterId == iterId) {
-      itRef = eh.m_itRef;
       return true;
     }
   }
@@ -1024,9 +1019,8 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
       if (i > 0) {
         os << " ";
       }
-      bool itRef;
-      if (checkIterScope(func, offset, i, itRef)) {
-        os << toStringIter(it, itRef);
+      if (checkIterScope(func, offset, i)) {
+        os << toStringIter(it);
       } else {
         os << "I:Undefined";
       }
@@ -3025,7 +3019,6 @@ void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
     auto iter = frame_iter(vmfp(), ent.id);
     switch (ent.kind) {
       case KindOfIter:  iter->free();  break;
-      case KindOfMIter: iter->mfree(); break;
       case KindOfCIter: iter->cfree(); break;
       case KindOfLIter: iter->free();  break;
     }
@@ -6192,37 +6185,6 @@ iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   }
 }
 
-inline bool initIteratorM(Iter* it, Ref* r1, TypedValue *val, TypedValue *key) {
-  TypedValue* rtv = r1->m_data.pref->cell();
-  if (isArrayLikeType(rtv->m_type)) {
-    return new_miter_array_key(it, r1->m_data.pref, val, key);
-  }
-  if (rtv->m_type == KindOfObject)  {
-    Class* ctx = arGetContextClass(vmfp());
-    return new_miter_object(it, r1->m_data.pref, ctx, val, key);
-  }
-  return new_miter_other(it, r1->m_data.pref);
-}
-
-OPTBLD_INLINE void iopMIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
-  Ref* r1 = vmStack().topV();
-  assertx(isRefType(r1->m_type));
-  if (!initIteratorM(it, r1, val.ptr, nullptr)) {
-    pc = targetpc; // nothing to iterate; exit foreach loop.
-  }
-  vmStack().popV();
-}
-
-OPTBLD_INLINE void
-iopMIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  Ref* r1 = vmStack().topV();
-  assertx(isRefType(r1->m_type));
-  if (!initIteratorM(it, r1, val.ptr, key.ptr)) {
-    pc = targetpc; // nothing to iterate; exit foreach loop.
-  }
-  vmStack().popV();
-}
-
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
   if (it->next()) {
     vmpc() = targetpc;
@@ -6306,33 +6268,12 @@ iopWIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
   }
 }
 
-OPTBLD_INLINE void iopMIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (miter_next_key(it, val.ptr, nullptr)) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-  }
-}
-
-OPTBLD_INLINE void
-iopMIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (miter_next_key(it, val.ptr, key.ptr)) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-  }
-}
-
 OPTBLD_INLINE void iopIterFree(Iter* it) {
   it->free();
 }
 
 OPTBLD_INLINE void iopLIterFree(Iter* it, local_var) {
   it->free();
-}
-
-OPTBLD_INLINE void iopMIterFree(Iter* it) {
-  it->mfree();
 }
 
 OPTBLD_INLINE void iopCIterFree(Iter* it) {

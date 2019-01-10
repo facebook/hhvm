@@ -845,7 +845,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
     auto const k = (IterKind)decode_iva(it);            \
     switch (k) {                                        \
       case KindOfIter:  out += "(Iter) ";  break;       \
-      case KindOfMIter: out += "(MIter) "; break;       \
       case KindOfCIter: out += "(CIter) "; break;       \
       case KindOfLIter: out += "(LIter) "; break;       \
     }                                                   \

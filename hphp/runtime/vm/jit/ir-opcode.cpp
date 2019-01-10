@@ -480,8 +480,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LtVec:
   case MapGet:
   case MapSet:
-  case MIterInit:
-  case MIterInitK:
   case NativeImpl:
   case NeqArr:
   case NeqShape:
@@ -931,9 +929,6 @@ bool opcodeMayRaise(Opcode opc) {
   case MemoSetLSBCache:
   case MemoSetLSBValue:
   case MethodExists:
-  case MIterFree:
-  case MIterNext:
-  case MIterNextK:
   case MixedArrayGetK:
   case Mod:
   case Mov:

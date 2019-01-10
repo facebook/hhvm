@@ -803,7 +803,14 @@ let checkstarted_of_arg arg =
 
 let iterwithkindofiarg arg =
   match arg with
-  | IAIteratorid (kind, id) -> kind = "MIter", Iterator.Id (Int64.to_int_exn id)
+  | IAIteratorid (kind, id) ->
+    let kind = match kind with
+    | "Iter" -> Iter
+    | "CIter" -> CIter
+    | "LIter" -> LIter
+    | _ -> report_error ("bad iterator kind " ^ kind)
+    in
+    kind, (Iterator.Id (Int64.to_int_exn id))
   | _ -> report_error "bad iterator"
 
 let memberopmodeofiarg arg =
@@ -1039,7 +1046,6 @@ let makeunaryinst s arg = match s with
 
    (* instruct_iterator *)
    | "IterFree" -> IIterator(IterFree (Iterator.Id (intofiarg arg)))
-   | "MIterFree" ->IIterator(MIterFree (Iterator.Id (intofiarg arg)))
    | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
 
    (* async_functions
@@ -1220,13 +1226,9 @@ let maketernaryinst s arg1 arg2 arg3 =
                                          labelofiarg arg2, localidofiarg arg3))
  | "WIterInit" -> IIterator(WIterInit (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
- | "MIterInit" -> IIterator(MIterInit (iterofiarg arg1,
-                                         labelofiarg arg2, localidofiarg arg3))
  | "IterNext" -> IIterator(IterNext (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
  | "WIterNext" -> IIterator(WIterNext (iterofiarg arg1,
-                                         labelofiarg arg2, localidofiarg arg3))
- | "MIterNext" -> IIterator(MIterNext (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
 
  (* instruct_misc *)
@@ -1241,13 +1243,9 @@ match s with
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "WIterInitK" -> IIterator(WIterInitK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
- | "MIterInitK" -> IIterator(MIterInitK(iterofiarg arg1,
-                     labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "IterNextK" -> IIterator(IterNextK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "WIterNextK" -> IIterator(WIterNextK(iterofiarg arg1,
-                     labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
- | "MIterNextK" -> IIterator(MIterNextK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "LIterInit" -> IIterator(LIterInit (iterofiarg arg1, localidofiarg arg2,
                                        labelofiarg arg3, localidofiarg arg4))

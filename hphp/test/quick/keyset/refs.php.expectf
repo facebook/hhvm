@@ -42,9 +42,6 @@ keyset(4) {
   string(3) "abc"
   int(123)
 }
-========== iterate_by_ref ==========================
-iterate_by_ref exception: "Keysets cannot contain references"
-iterate_by_ref (key) exception: "Keysets cannot contain references"
 ========== convert_with_ref ========================
 convert_with_ref exception: "Keysets cannot contain references"
 ========== ref_unserialize =========================

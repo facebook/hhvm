@@ -1616,13 +1616,19 @@ and add_tyvar_upper_bound env r var ty =
   log_types (Reason.to_pos r) env
     [Log_head ("Typing_subtype.props_to_env/add_tyvar_upper_bound",
     [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
-  if Typing_set.mem ty (Env.get_tyvar_upper_bounds env var)
-  then env
-  else
-    let tys = Env.get_tyvar_lower_bounds env var in
-    let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
-    let env = Typing_set.fold (fun ty_sub env -> sub_type env ty_sub ty) tys env in
-    Env.remove_equivalent_tyvars env var
+  let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
+  let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
+  let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
+  let added_upper_bounds = Typing_set.diff upper_bounds_after upper_bounds_before in
+  let lower_bounds = Env.get_tyvar_lower_bounds env var in
+  let env =
+    Typing_set.fold (fun upper_bound env ->
+      Typing_set.fold (fun lower_bound env ->
+        sub_type env lower_bound upper_bound)
+        lower_bounds env)
+      added_upper_bounds env in
+  if not (Typing_set.is_empty added_upper_bounds) then
+    Env.remove_equivalent_tyvars env var else env
 
 (* Add a new lower bound ty on var.  Apply transitivity of sutyping,
  * so if we already have var <: tyl, then check that for each ty_super
@@ -1633,13 +1639,19 @@ and add_tyvar_lower_bound env r var ty =
   log_types (Reason.to_pos r) env
     [Log_head ("Typing_subtype.props_to_env/add_tyvar_lower_bound",
     [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
-  if Typing_set.mem ty (Env.get_tyvar_lower_bounds env var)
-  then env
-  else
-    let tys = Env.get_tyvar_upper_bounds env var in
-    let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
-    let env = Typing_set.fold (fun ty_super env -> sub_type env ty ty_super) tys env in
-    Env.remove_equivalent_tyvars env var
+  let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
+  let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
+  let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
+  let added_lower_bounds = Typing_set.diff lower_bounds_after lower_bounds_before in
+  let upper_bounds = Env.get_tyvar_upper_bounds env var in
+  let env =
+    Typing_set.fold (fun lower_bound env ->
+      Typing_set.fold (fun upper_bound env ->
+        sub_type env lower_bound upper_bound)
+        upper_bounds env)
+      added_lower_bounds env in
+  if not (Typing_set.is_empty added_lower_bounds) then
+    Env.remove_equivalent_tyvars env var else env
 
 and props_to_env env remain props =
   match props with

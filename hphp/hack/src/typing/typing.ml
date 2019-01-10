@@ -2232,6 +2232,7 @@ and expr_
       else safely_refine_type env p reason lpos lty rty
     in
     let env, te, expr_ty = expr env e in
+    let env = save_and_merge_next_in_catch env in
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env hint in
     let env, hint_ty =

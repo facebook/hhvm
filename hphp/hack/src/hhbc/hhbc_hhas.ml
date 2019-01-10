@@ -1878,6 +1878,16 @@ let add_typedef buf typedef =
   | None ->
     Acc.add buf ";"
 
+let add_file_attributes buf file_attributes =
+  match file_attributes with
+  | [] -> ()
+  | _ ->
+    let attrs = Emit_adata.attributes_to_strings file_attributes in
+    let attrs = attributes_to_string attrs in
+    Acc.add buf "\n.file_attributes ";
+    Acc.add buf attrs;
+    Acc.add buf ";\n"
+
 let add_include_region
     ?path ?doc_root ?search_paths ?include_roots ?(check_paths_exist=true)
     buf includes =
@@ -1943,6 +1953,7 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
   List.iter ~f:(add_fun_def buf) functions;
   List.iter ~f:(add_class_def buf) classes;
   List.iter ~f:(add_typedef buf) (Hhas_program.typedefs hhas_prog);
+  add_file_attributes buf (Hhas_program.file_attributes hhas_prog);
   if dump_symbol_refs then begin
     let opts = !Hhbc_options.compiler_options in
     add_include_region ?path buf symbol_refs.Hhas_symbol_refs.includes

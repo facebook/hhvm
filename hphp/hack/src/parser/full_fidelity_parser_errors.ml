@@ -85,7 +85,8 @@ type context =
   (* true if active callable is reactive if it is a function or method, or there is a reactive
    * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
   ; active_is_rx_or_enclosing_for_lambdas : bool
-  }
+  ; active_awaitable          : Syntax.t option
+}
 
 type env =
   { syntax_tree          : SyntaxTree.t
@@ -114,6 +115,7 @@ let make_env
       { active_classish = None
       ; active_callable_attr_spec = None
       ; active_is_rx_or_enclosing_for_lambdas = false
+      ; active_awaitable = None
       } in
     { syntax_tree
     ; level
@@ -1844,17 +1846,6 @@ let is_in_unyieldable_magic_method parents =
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 
-let is_in_function ?(await=false) parents =
-  List.exists parents ~f:begin fun node ->
-    match syntax node with
-    | FunctionDeclaration _
-    | MethodishDeclaration _
-    | AnonymousFunction _
-    | LambdaExpression _  -> true
-    | AwaitableCreationExpression _ -> await
-    | _ -> false
-    end
-
 let function_call_argument_errors node errors =
   match syntax node with
   | DecoratedExpression
@@ -2507,10 +2498,10 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       if is_in_unyieldable_magic_method parents then
       make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
       else errors in
-    let errors =
-      if not (is_in_function parents) then
-      make_error_from_node node SyntaxError.yield_outside_function :: errors
-      else errors in
+    let errors = match env.context.active_callable_attr_spec with
+      | Some _ -> errors
+      | None -> make_error_from_node node SyntaxError.yield_outside_function :: errors
+    in
     let errors =
       if has_inout_params parents then
       let e =
@@ -2737,9 +2728,11 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
-    let errors = if not (is_in_function ~await:true parents) then
-      make_error_from_node node SyntaxError.toplevel_await_use :: errors
-    else errors in
+    let errors = match env.context.active_callable_attr_spec, env.context.active_awaitable with
+      | None, None ->
+        make_error_from_node node SyntaxError.toplevel_await_use :: errors
+      | _ -> errors
+    in
     begin match parents with
       | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
         errors
@@ -3863,6 +3856,8 @@ let find_syntax_errors env =
             active_is_rx_or_enclosing_for_lambdas =
               env.context.active_is_rx_or_enclosing_for_lambdas
           }
+        | AwaitableCreationExpression _ ->
+          { env.context with active_awaitable = Some node }
         | _ -> env.context
       } in
     let names, errors =

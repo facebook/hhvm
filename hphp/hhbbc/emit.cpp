@@ -1577,6 +1577,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   ue->m_useStrictTypes = unit.useStrictTypes;
   ue->m_useStrictTypesForBuiltins = unit.useStrictTypesForBuiltins;
   ue->m_metaData = unit.metaData;
+  ue->m_fileAttributes = unit.fileAttributes;
 
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);

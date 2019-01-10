@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-hash-set.h"
@@ -26,8 +27,10 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -37,8 +40,6 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/system/systemlib.h"
-
-#include "hphp/runtime/vm/native-prop-handler.h"
 
 #include <functional>
 #include <boost/algorithm/string/predicate.hpp>
@@ -996,6 +997,50 @@ static String HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto ret = const_cast<StringData*>(func->implCls()->name());
   return String(ret);
+}
+
+// ------------------------- class ReflectionFile
+
+const StaticString s_ReflectionFileHandle("ReflectionFileHandle");
+
+// helper for __construct
+static String HHVM_METHOD(ReflectionFile, __init, const String& name) {
+  if (name.isNull()) {
+    Reflection::ThrowReflectionExceptionObject(
+      "Tried to construct ReflectionFile but the name was null"
+    );
+  }
+
+  const Unit* unit = lookupUnit(
+    File::TranslatePath(name).get(),
+    "",
+    nullptr,
+    Native::s_noNativeFuncs
+  );
+
+  if (!unit) {
+    Reflection::ThrowReflectionExceptionObject(folly::sformat(
+      "File '{}' does not exist",
+      name
+    ));
+  }
+
+  ReflectionFileHandle::Get(this_)->setUnit(unit);
+
+  return String::attach(const_cast<StringData*>(unit->filepath()));
+}
+
+static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
+  auto const unit = ReflectionFileHandle::GetUnitFor(this_);
+  assertx(unit);
+
+  auto fileAttrs = unit->fileAttributes();
+  DArrayInit ai(fileAttrs.size());
+
+  for (auto it = fileAttrs.begin(); it != fileAttrs.end(); ++it) {
+    ai.set(StrNR(it->first), tvAsCVarRef(&it->second));
+  }
+  return ai.toArray();
 }
 
 // ------------------------- class ReflectionFunction
@@ -2080,6 +2125,9 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionMethod, getPrototypeClassname);
     HHVM_ME(ReflectionMethod, getDeclaringClassname);
 
+    HHVM_ME(ReflectionFile, __init);
+    HHVM_ME(ReflectionFile, getAttributesNamespaced);
+
     HHVM_ME(ReflectionFunction, __initName);
     HHVM_ME(ReflectionFunction, __initClosure);
     HHVM_ME(ReflectionFunction, getClosureUseVariables);
@@ -2156,6 +2204,8 @@ struct ReflectionExtension final : Extension {
       s_ReflectionConstHandle.get());
     Native::registerNativeDataInfo<ReflectionPropHandle>(
       s_ReflectionPropHandle.get());
+    Native::registerNativeDataInfo<ReflectionFileHandle>(
+      s_ReflectionFileHandle.get());
     Native::registerNativeDataInfo<ReflectionTypeAliasHandle>(
       s_ReflectionTypeAliasHandle.get(), Native::NO_SWEEP);
 

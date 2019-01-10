@@ -48,6 +48,7 @@ class ReflectionClass implements Reflector {
    * Returns string or false
    */
   public function getFileName(): mixed;
+  public function getFile(): ReflectionFile;
   public function getInterfaceNames(): varray<string>;
   public function getInterfaces(): darray<string, ReflectionClass>;
   final public function getAttributes(): darray<string, varray<mixed>>;
@@ -124,6 +125,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isVariadic(): bool;
   public function isUserDefined(): bool;
   public function getFileName(): mixed; // string | false
+  public function getFile(): ReflectionFile;
   public function getStartLine(): mixed; // int | false
   public function getEndLine(): mixed; // int | false
   public function getDocComment(): mixed; // string | false
@@ -315,6 +317,7 @@ class ReflectionTypeAlias implements Reflector {
   public function getAssignedTypeText(): string;
   public function getName(): string;
   public function getFileName(): string;
+  public function getFile(): ReflectionFile;
   final public function getAttributes(): darray;
   final public function getAttribute(string $name);
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
@@ -327,4 +330,15 @@ class ReflectionType {
   public function allowsNull(): bool;
   public function isBuiltin(): bool;
   public function __toString(): string;
+}
+
+
+class ReflectionFile implements Reflector {
+  final private function __clone();
+  final public function __construct(string $name);
+  public function __toString(): string;
+  public function getName(): string;
+  final public function getAttributes(): darray;
+  final public function getAttribute(string $name);
+  final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
 }

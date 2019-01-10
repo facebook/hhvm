@@ -1499,6 +1499,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   ret->useStrictTypes = ue.m_useStrictTypes;
   ret->useStrictTypesForBuiltins = ue.m_useStrictTypesForBuiltins;
   ret->metaData = ue.m_metaData;
+  ret->fileAttributes = ue.m_fileAttributes;
 
   ParseUnitState puState{ prog.nextFuncId };
   if (ue.hasSourceLocInfo()) {

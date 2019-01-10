@@ -600,6 +600,7 @@ struct Unit {
   CompactVector<std::pair<SString,SString>> classAliases;
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
+  UserAttributeMap fileAttributes;
 };
 
 /*

@@ -48,6 +48,35 @@ struct Reflection {
   static void ThrowReflectionExceptionObject(const Variant& message);
 };
 
+extern const StaticString s_ReflectionFileHandle;
+struct ReflectionFileHandle {
+  ReflectionFileHandle(): m_unit(nullptr) {}
+  explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {};
+  ReflectionFileHandle(const ReflectionFileHandle&) = delete;
+  ReflectionFileHandle& operator=(const ReflectionFileHandle& other) {
+    m_unit = other.m_unit;
+    return *this;
+  }
+
+  static ReflectionFileHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionFileHandle>(obj);
+  }
+
+  static const Unit* GetUnitFor(ObjectData* obj) {
+    return Native::data<ReflectionFileHandle>(obj)->getUnit();
+  }
+
+  const Unit* getUnit() { return m_unit; }
+  void setUnit(const Unit* unit) {
+    assertx(unit != nullptr);
+    assertx(m_unit == nullptr);
+    m_unit = unit;
+  }
+
+ private:
+  LowPtr<const Unit> m_unit{nullptr};
+};
+
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
 extern const StaticString s_ReflectionFuncHandle;

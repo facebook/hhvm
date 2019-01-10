@@ -152,6 +152,31 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getFileName(): mixed;
 
   /**
+   * Gets the declaring file for a user-defined function.
+   *
+   * @return ReflectionFile   A ReflectionFile object of the file that the
+   *                           reflected function is part of.
+   */
+  public function getFile(): ReflectionFile {
+    $fileName = $this->getFileName();
+
+    if ($fileName === false) {
+      throw new ReflectionException(
+        'Couldn\'t get ReflectionFile because the function was not defined in '.
+        'a file.'
+      );
+    }
+
+    if (!is_string($fileName)) {
+      throw new ReflectionException(
+        'Unexpected non-string file name for ReflectionFunction.'
+      );
+    }
+
+    return new ReflectionFile((string)$fileName);
+  }
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.getstartline.php )
    *
@@ -665,7 +690,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    * @return object|NULL Returns $this pointer. Returns NULL in case of
    * an error.
    */
-  public function getClosureThis(): ?mixed {
+  public function getClosureThis(): mixed {
     if ($this->closure) {
       return $this->getClosureThisObject($this->closure);
     }
@@ -2147,6 +2172,31 @@ class ReflectionClass implements Reflector {
   public function getFileName(): mixed;
 
   /**
+   * Gets the declaring file for the reflected class.
+   *
+   * @return ReflectionFile   A ReflectionFile object of the file that the
+   *                           reflected class is part of.
+   */
+  public function getFile(): ReflectionFile {
+    $fileName = $this->getFileName();
+
+    if ($fileName === false) {
+      throw new ReflectionException(
+        'Couldn\'t get ReflectionFile because the class was not defined in a '.
+        'file.'
+      );
+    }
+
+    if (!is_string($fileName)) {
+      throw new ReflectionException(
+        'Unexpected non-string file name for ReflectionClass.'
+      );
+    }
+
+    return new ReflectionFile((string)$fileName);
+  }
+
+  /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php
    * )
    *
@@ -2466,6 +2516,16 @@ class ReflectionTypeAlias implements Reflector {
   <<__Native>>
   public function getFileName(): string;
 
+  /**
+   * Gets the declaring file for the reflected type alias.
+   *
+   * @return ReflectionFile   A ReflectionFile object of the file that the
+   *                           reflected type alias is part of.
+   */
+  public function getFile() {
+    return new ReflectionFile($this->getFileName());
+  }
+
   // Prevent cloning
   final public function __clone() {
     throw new BadMethodCallException(
@@ -2475,6 +2535,70 @@ class ReflectionTypeAlias implements Reflector {
 
   public function __toString() {
     return "TypeAlias [ {$this->name} : {$this->getAssignedTypeText()} ]\n";
+  }
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// files
+
+/** The ReflectionFile class reports information about a file.
+ */
+<<__NativeData('ReflectionFileHandle')>>
+final class ReflectionFile implements Reflector {
+
+  private string $name = '';
+
+  /**
+   * Constructs a new ReflectionFile.
+   *
+   * @name      string  Name of the file.
+   */
+  final public function __construct(string $name) {
+    $n = $this->__init($name);
+    if (!$n) {
+      throw new ReflectionException(
+        "file {$name} does not exist");
+    }
+    $this->name = $n;
+  }
+
+  // helper for ctor
+  <<__Native>>
+  private function __init(string $name): string;
+
+  /**
+   * Gets all attributes
+   *
+   * @return  darray<arraykey, varray<mixed>>
+   */
+  <<__Native>>
+  final public function getAttributesNamespaced(
+  ): darray<arraykey, varray<mixed>>;
+
+  use ReflectionLegacyAttribute;
+
+  use ReflectionTypedAttribute;
+
+  /**
+   * Get the name of the file.
+   *
+   * @return    string  The name of the file
+   */
+  public function getName() {
+    return $this->name;
+  }
+
+  // Prevent cloning
+  final public function __clone() {
+    throw new BadMethodCallException(
+      'Trying to clone an uncloneable object of class ReflectionFile'
+    );
+  }
+
+  public function __toString() {
+    return "File [ {$this->name} ]\n";
   }
 
 }

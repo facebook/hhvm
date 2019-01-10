@@ -31,6 +31,7 @@ open Hhas_parser_actions
 %token ISMEMOIZEWRAPPERLSBDIRECTIVE STATICDIRECTIVE REQUIREDIRECTIVE
 %token SRCLOCDIRECTIVE
 %token METADATADIRECTIVE
+%token FILEATTRIBUTESDIRECTIVE
 %token LANGLE
 %token RANGLE
 %token COLONCOLON
@@ -57,8 +58,9 @@ open Hhas_parser_actions
 %type <Hhas_asm.t> functionbodywithdirectives
 %%
 program:
-    nl decllist nl EOF { split_decl_list $2 false false [] [] None [] []
-                         Hhas_symbol_refs.IncludePathSet.empty SSet.empty SSet.empty SSet.empty}
+    nl decllist nl EOF { split_decl_list $2 false false [] [] None [] [] []
+                         Hhas_symbol_refs.IncludePathSet.empty SSet.empty
+                         SSet.empty SSet.empty }
 ;
 decl:
     | maindecl {Main_decl $1}
@@ -70,6 +72,7 @@ decl:
     | constantrefsdecl {ConstantRefs_decl $1}
     | classrefsdecl {ClassRefs_decl $1}
     | functionrefsdecl {FunctionRefs_decl $1}
+    | fileattributesdecl {FileAttributes_decl $1}
 ;
 aliasdecl:
     | ALIASDIRECTIVE attributes ID EQUALS aliastypeinfo TRIPLEQUOTEDSTRING SEMI nl
@@ -656,4 +659,9 @@ classrefsdecl:
 ;
 functionrefsdecl:
     | FUNCTIONREFSDIRECTIVE LBRACE nl nlidlist nl RBRACE nl {SSet.of_list $4}
+;
+fileattributesdecl:
+    | FILEATTRIBUTESDIRECTIVE attributes SEMI {
+        let user_attrs, _ = $2 in user_attrs
+    }
 ;

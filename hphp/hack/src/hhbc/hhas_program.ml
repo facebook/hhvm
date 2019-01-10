@@ -8,20 +8,21 @@
 *)
 
 type t = {
-  hhas_is_hh       : bool;
-  hhas_adata       : Hhas_adata.t list;
-  hhas_fun         : Hhas_function.t list;
-  hhas_classes     : Hhas_class.t list;
-  hhas_typedefs    : Hhas_typedef.t list;
-  hhas_main        : Hhas_body.t;
-  hhas_symbol_refs : Hhas_symbol_refs.t;
-  hhas_strict_types: bool option;
+  hhas_is_hh           : bool;
+  hhas_adata           : Hhas_adata.t list;
+  hhas_fun             : Hhas_function.t list;
+  hhas_classes         : Hhas_class.t list;
+  hhas_typedefs        : Hhas_typedef.t list;
+  hhas_file_attributes : Hhas_attribute.t list;
+  hhas_main            : Hhas_body.t;
+  hhas_symbol_refs     : Hhas_symbol_refs.t;
+  hhas_strict_types    : bool option;
 }
 
-let make hhas_is_hh hhas_adata hhas_fun hhas_classes hhas_typedefs hhas_main
-  hhas_symbol_refs hhas_strict_types =
-  { hhas_is_hh; hhas_adata; hhas_fun; hhas_classes; hhas_typedefs; hhas_main;
-    hhas_symbol_refs; hhas_strict_types; }
+let make hhas_is_hh hhas_adata hhas_fun hhas_classes hhas_typedefs
+  hhas_file_attributes hhas_main hhas_symbol_refs hhas_strict_types =
+  { hhas_is_hh; hhas_adata; hhas_fun; hhas_classes; hhas_typedefs;
+    hhas_file_attributes; hhas_main; hhas_symbol_refs; hhas_strict_types; }
 
 let is_hh hhas_prog =
   hhas_prog.hhas_is_hh
@@ -34,6 +35,9 @@ let classes hhas_prog =
 
 let typedefs hhas_prog =
   hhas_prog.hhas_typedefs
+
+let file_attributes hhas_prog =
+  hhas_prog.hhas_file_attributes
 
 let main hhas_prog =
   hhas_prog.hhas_main

@@ -87,6 +87,7 @@ rule read =
   | ".property"         {PROPERTYDIRECTIVE}
   | ".filepath"         {FILEPATHDIRECTIVE}
   | ".alias"            {ALIASDIRECTIVE}
+  | ".file_attributes"  {FILEATTRIBUTESDIRECTIVE}
   | ".strict"           {STRICTDIRECTIVE}
   | ".hh_file"          {HHFILE}
   | ".static"           {STATICDIRECTIVE}

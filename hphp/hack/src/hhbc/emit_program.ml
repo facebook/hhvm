@@ -52,7 +52,7 @@ let emit_fatal_program ~ignore_message op pos message =
     None (* env *)
   in
   Hhas_program.make
-    false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
+    false [] [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
 
 let from_ast ~is_hh_file ~is_evaled ~popt ast =
   Utils.try_finally
@@ -77,12 +77,12 @@ let from_ast ~is_hh_file ~is_evaled ~popt ast =
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
       let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in
+      let compiled_file_attributes = [] in (* Added in next diff *)
       let adata = Emit_adata.get_adata () in
       let symbol_refs = Emit_symbol_refs.get_symbol_refs () in
-      let hhas = Hhas_program.make
-        is_hh_file
-        adata compiled_funs compiled_classes
-        compiled_typedefs compiled_defs symbol_refs strict_types in
+      let hhas = Hhas_program.make is_hh_file adata compiled_funs
+        compiled_classes compiled_typedefs compiled_file_attributes
+        compiled_defs symbol_refs strict_types in
       hhas
     with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
       emit_fatal_program ~ignore_message:false op pos message

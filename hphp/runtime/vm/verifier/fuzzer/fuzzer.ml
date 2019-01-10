@@ -824,14 +824,15 @@ let mutate_metadata (input : HP.t)  =
   let mut_data (prog : HP.t) : HP.t =
     let ids = prog |> HP.classes |> delete_map Hhas_class.name in
     HP.make
-      (prog |> HP.is_hh     |> mutate_bool)
-      (prog |> HP.adata     |> delete_map mutate_adata)
-      (prog |> HP.functions |> delete_map mutate_fun_data)
-      (prog |> HP.classes   |> delete_map (mutate_class_data ids))
-      (prog |> HP.typedefs  |> delete_map mutate_typedef)
-      (prog |> HP.main      |> mutate_body_data)
+      (prog |> HP.is_hh           |> mutate_bool)
+      (prog |> HP.adata           |> delete_map mutate_adata)
+      (prog |> HP.functions       |> delete_map mutate_fun_data)
+      (prog |> HP.classes         |> delete_map (mutate_class_data ids))
+      (prog |> HP.typedefs        |> delete_map mutate_typedef)
+      (prog |> HP.file_attributes |> delete_map mutate_attribute)
+      (prog |> HP.main            |> mutate_body_data)
       Emit_symbol_refs.empty_symbol_refs
-      (prog |> HP.strict_types |> option_lift mutate_bool) in
+      (prog |> HP.strict_types    |> option_lift mutate_bool) in
   let open Nondet in
   return input |> num_fold
     (fun a -> mut_data input |> add_event a) !metadata_reps

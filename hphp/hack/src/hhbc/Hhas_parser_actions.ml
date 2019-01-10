@@ -161,9 +161,10 @@ type decl =
   | FunctionRefs_decl of SSet.t
   | HHFile_decl of bool
   | StrictTypes_decl of bool
+  | FileAttributes_decl of Hhas_attribute.t list
 
-let rec split_decl_list ds hh_file strict_types funs classes optmain datadecls aliasdecls
-    includesdecls constantrefsdecls classrefsdecls functionrefsdecls =
+let rec split_decl_list ds hh_file strict_types funs classes optmain datadecls
+  aliasdecls fileattributesdecls includesdecls constantrefsdecls classrefsdecls functionrefsdecls =
   match ds with
     | [] ->
       begin match optmain with
@@ -176,49 +177,71 @@ let rec split_decl_list ds hh_file strict_types funs classes optmain datadecls a
             ; Hhas_symbol_refs.functions = functionrefsdecls
             } in
           Hhas_program.make hh_file (List.rev datadecls) (List.rev funs)
-            (List.rev classes) (List.rev aliasdecls) m symbol_refs (Some strict_types)
+            (List.rev classes) (List.rev aliasdecls)
+            (List.rev fileattributesdecls) m symbol_refs (Some strict_types)
       end
     | Main_decl md :: rest ->
       begin match optmain with
         | None ->
-          split_decl_list rest hh_file strict_types funs classes (Some md) datadecls aliasdecls
-            includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+          split_decl_list rest hh_file strict_types funs classes (Some md)
+          datadecls aliasdecls fileattributesdecls includesdecls
+          constantrefsdecls classrefsdecls functionrefsdecls
         | Some _ -> report_error "duplicate main"
       end
     | Fun_decl fd :: rest ->
-      split_decl_list rest hh_file strict_types (fd :: funs) classes optmain datadecls aliasdecls
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      let funs = fd :: funs in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | Class_decl cd :: rest ->
-      split_decl_list rest hh_file strict_types funs (cd :: classes) optmain datadecls aliasdecls
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      let classes = cd :: classes in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | Data_decl dd :: rest ->
-      split_decl_list rest hh_file strict_types funs classes optmain (dd :: datadecls) aliasdecls
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      let datadecls = dd :: datadecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | Alias_decl ad :: rest ->
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls (ad :: aliasdecls)
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      let aliasdecls = ad :: aliasdecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | Includes_decl ids :: rest ->
-      let includes = Hhas_symbol_refs.IncludePathSet.union ids includesdecls in
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-         includes constantrefsdecls classrefsdecls functionrefsdecls
+      let includesdecls =
+        Hhas_symbol_refs.IncludePathSet.union ids includesdecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | ConstantRefs_decl crs :: rest ->
-      let constant_refs = SSet.union crs constantrefsdecls in
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-        includesdecls constant_refs classrefsdecls functionrefsdecls
+      let constantrefsdecls = SSet.union crs constantrefsdecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | ClassRefs_decl crs :: rest ->
-      let class_refs = SSet.union crs classrefsdecls in
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-        includesdecls constantrefsdecls class_refs functionrefsdecls
+      let classrefsdecls = SSet.union crs classrefsdecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | FunctionRefs_decl frs :: rest ->
-      let function_refs = SSet.union frs functionrefsdecls in
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-        includesdecls constantrefsdecls classrefsdecls function_refs
+      let functionrefsdecls = SSet.union frs functionrefsdecls in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
+    | FileAttributes_decl file_attributes :: rest ->
+      let fileattributesdecls = (file_attributes @ fileattributesdecls) in
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | HHFile_decl hh_file :: rest ->
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
     | StrictTypes_decl strict_types :: rest ->
-      split_decl_list rest hh_file strict_types funs classes optmain datadecls aliasdecls
-        includesdecls constantrefsdecls classrefsdecls functionrefsdecls
+      split_decl_list rest hh_file strict_types funs classes optmain datadecls
+      aliasdecls fileattributesdecls includesdecls constantrefsdecls
+      classrefsdecls functionrefsdecls
 
 (* This is a pretty poor way to deal with these flags on functions, and
    doesn't Throw if there's an illegal one in the list, but it'll do for now.

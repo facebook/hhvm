@@ -301,6 +301,13 @@ inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// File attributes
+
+inline const UserAttributeMap& Unit::fileAttributes() const {
+  return m_fileAttributes;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Class lookup.
 
 inline Class* Unit::lookupClass(const NamedEntity* ne) {

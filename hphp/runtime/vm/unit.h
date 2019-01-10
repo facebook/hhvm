@@ -721,6 +721,11 @@ public:
   bool defTypeAlias(Id id);
 
   /////////////////////////////////////////////////////////////////////////////
+  // File attributes.
+
+  const UserAttributeMap& fileAttributes() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Merge.
 
   /*
@@ -935,6 +940,7 @@ private:
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
+  UserAttributeMap m_fileAttributes;
 };
 
 struct UnitExtended : Unit {

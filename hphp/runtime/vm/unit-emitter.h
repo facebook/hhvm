@@ -389,6 +389,7 @@ public:
   int m_preloadPriority{0};
   TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
+  UserAttributeMap m_fileAttributes;
 
   /*
    * name=>NativeFuncInfo for native funcs in this unit

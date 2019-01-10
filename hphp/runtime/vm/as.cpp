@@ -3418,22 +3418,35 @@ void parse_metadata(AsmState& as) {
 }
 
 /*
+ * directive-file-attributes : attribute-list ';'
+ *                           ;
+ */
+void parse_file_attributes(AsmState& as) {
+  as.in.skipWhitespace();
+
+  parse_attribute_list(as, AttrContext::Func, &(as.ue->m_fileAttributes));
+
+  as.in.expectWs(';');
+}
+
+/*
  * asm-file : asm-tld* <EOF>
  *          ;
  *
- * asm-tld :    ".filepath"     directive-filepath
- *         |    ".main"         directive-main
- *         |    ".function"     directive-function
- *         |    ".adata"        directive-adata
- *         |    ".class"        directive-class
- *         |    ".alias"        directive-alias
- *         |    ".strict"       directive-strict
- *         |    ".hh_file"      directive-hh-file
- *         |    ".includes      directive-filepaths
- *         |    ".constant_refs directive-symbols
- *         |    ".function_refs directive-symbols
- *         |    ".class_refs    directive-symbols
- *         |    ".metadata      directive-meta-data
+ * asm-tld :    ".filepath"         directive-filepath
+ *         |    ".main"             directive-main
+ *         |    ".function"         directive-function
+ *         |    ".adata"            directive-adata
+ *         |    ".class"            directive-class
+ *         |    ".alias"            directive-alias
+ *         |    ".strict"           directive-strict
+ *         |    ".hh_file"          directive-hh-file
+ *         |    ".includes"         directive-filepaths
+ *         |    ".constant_refs"    directive-symbols
+ *         |    ".function_refs"    directive-symbols
+ *         |    ".class_refs"       directive-symbols
+ *         |    ".metadata"         directive-meta-data
+ *         |    ".file_attributes"  directive-file-attributes
  *         ;
  */
 void parse(AsmState& as) {
@@ -3441,19 +3454,20 @@ void parse(AsmState& as) {
   std::string directive;
 
   while (as.in.readword(directive)) {
-    if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
-    if (directive == ".main")          { parse_main(as)          ; continue; }
-    if (directive == ".function")      { parse_function(as)      ; continue; }
-    if (directive == ".adata")         { parse_adata(as)         ; continue; }
-    if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".alias")         { parse_alias(as)         ; continue; }
-    if (directive == ".strict")        { parse_strict(as)        ; continue; }
-    if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
-    if (directive == ".includes")      { parse_includes(as)      ; continue; }
-    if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
-    if (directive == ".function_refs") { parse_function_refs(as) ; continue; }
-    if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }
-    if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
+    if (directive == ".filepath")        { parse_filepath(as)       ; continue;}
+    if (directive == ".main")            { parse_main(as)           ; continue;}
+    if (directive == ".function")        { parse_function(as)       ; continue;}
+    if (directive == ".adata")           { parse_adata(as)          ; continue;}
+    if (directive == ".class")           { parse_class(as)          ; continue;}
+    if (directive == ".alias")           { parse_alias(as)          ; continue;}
+    if (directive == ".strict")          { parse_strict(as)         ; continue;}
+    if (directive == ".hh_file")         { parse_hh_file(as)        ; continue;}
+    if (directive == ".includes")        { parse_includes(as)       ; continue;}
+    if (directive == ".constant_refs")   { parse_constant_refs(as)  ; continue;}
+    if (directive == ".function_refs")   { parse_function_refs(as)  ; continue;}
+    if (directive == ".class_refs")      { parse_class_refs(as)     ; continue;}
+    if (directive == ".metadata")        { parse_metadata(as)       ; continue;}
+    if (directive == ".file_attributes") { parse_file_attributes(as); continue;}
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }

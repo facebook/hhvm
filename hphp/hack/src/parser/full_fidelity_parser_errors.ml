@@ -81,6 +81,7 @@ type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
 
 type context =
   { active_classish           : Syntax.t option
+  ; active_methodish          : Syntax.t option
   ; active_callable_attr_spec : Syntax.t option
   (* true if active callable is reactive if it is a function or method, or there is a reactive
    * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
@@ -113,6 +114,7 @@ let make_env
   =
     let context =
       { active_classish = None
+      ; active_methodish = None
       ; active_callable_attr_spec = None
       ; active_is_rx_or_enclosing_for_lambdas = false
       ; active_awaitable = None
@@ -377,12 +379,6 @@ let is_parameter_with_default_value param =
     not (is_missing parameter_default_value)
   | _ -> false
 
-(* True or false: the first item in this list matches the predicate? *)
-let matches_first f items =
-  match items with
-  | h :: _ when f h -> true
-  | _ -> false
-
 (* test a node is a syntaxlist and that the list contains an element
  * satisfying a given predicate *)
 let list_contains_predicate p node =
@@ -486,12 +482,12 @@ let contains_async_not_last mods =
   List.exists ~f:is_async mod_list
     && not @@ is_async @@ List.nth_exn mod_list (List.length mod_list - 1)
 
-let has_static node parents f =
+let has_static node context f =
   match node with
   | FunctionDeclarationHeader node ->
     let label = node.function_name in
     (f label) &&
-    (matches_first (methodish_contains_static) parents)
+      context.active_methodish |> Option.exists ~f:methodish_contains_static
   | _ -> false
 
 (* checks if a methodish decl or property has multiple visibility modifiers *)
@@ -504,19 +500,19 @@ let declaration_multiple_visibility node =
 let is_clone label =
   String.lowercase (text label) = SN.SpecialFunctions.clone
 
-let class_constructor_has_static node parents =
-  has_static node parents is_construct
+let class_constructor_has_static node context =
+  has_static node context is_construct
 
-let class_destructor_cannot_be_static node parents =
-  has_static node parents (is_destruct)
+let class_destructor_cannot_be_static node context =
+  has_static node context is_destruct
 
-let clone_cannot_be_static node parents =
-  has_static node parents is_clone
+let clone_cannot_be_static node context =
+  has_static node context is_clone
 
 (* Given a function declaration header, confirm that it is NOT a constructor
  * and that the header containing it has visibility modifiers in parameters
  *)
-let class_non_constructor_has_visibility_param node _parents =
+let class_non_constructor_has_visibility_param node _context =
   match node with
   | FunctionDeclarationHeader node ->
     let has_visibility node =
@@ -531,7 +527,7 @@ let class_non_constructor_has_visibility_param node _parents =
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
-let class_constructor_destructor_has_non_void_type env node _parents =
+let class_constructor_destructor_has_non_void_type env node _context =
   if not (is_typechecker env) then false
   else
   match node with
@@ -548,7 +544,7 @@ let class_constructor_destructor_has_non_void_type env node _parents =
     (is_construct label || is_destruct label) &&
     not (is_missing || is_void)
   | _ -> false
-let async_magic_method node _parents =
+let async_magic_method node _context =
   match node with
   | FunctionDeclarationHeader node ->
     let name = String.lowercase @@ text node.function_name in
@@ -561,7 +557,7 @@ let async_magic_method node _parents =
   | _ -> false
 
 
-let clone_destruct_takes_no_arguments _method_name node _parents =
+let clone_destruct_takes_no_arguments _method_name node _context =
   match node with
   | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
@@ -596,18 +592,18 @@ let methodish_is_native node =
 
 (* By checking the third parent of a methodish node, tests whether the methodish
  * node is inside an interface. *)
-let methodish_inside_interface parents =
-  match parents with
-  | _ :: _ :: { syntax = ClassishDeclaration { classish_keyword; _ }; _ } :: _
-    when is_token_kind classish_keyword TokenKind.Interface -> true
-  | _ -> false
-
+let methodish_inside_interface context =
+  context.active_classish |> Option.exists ~f:(fun parent_classish ->
+    match syntax parent_classish with
+    | ClassishDeclaration cd when token_kind cd.classish_keyword = Some TokenKind.Interface -> true
+    | _ -> false
+    )
 (* Test whether node is a non-abstract method without a body and not native.
  * Here node is the methodish node
  * And methods inside interfaces are inherently considered abstract *)
-let methodish_non_abstract_without_body_not_native env node parents =
+let methodish_non_abstract_without_body_not_native env node _ =
   let non_abstract = not (methodish_contains_abstract node
-      || methodish_inside_interface parents) in
+      || methodish_inside_interface env.context) in
   let not_has_body = not (methodish_has_body node) in
   let not_native = not (methodish_is_native node) in
   let not_hhi  = not (env.hhi_mode) in
@@ -627,9 +623,9 @@ let methodish_abstract_conflict_with_final node =
   let has_final = methodish_contains_final node in
   is_abstract && has_final
 
-let methodish_abstract_inside_interface parents node =
+let methodish_abstract_inside_interface context node =
   let is_abstract = methodish_contains_abstract node in
-  let is_in_interface = methodish_inside_interface parents in
+  let is_in_interface = methodish_inside_interface context in
   is_abstract && is_in_interface
 
 let using_statement_function_scoped_is_legal parents =
@@ -712,17 +708,15 @@ let produce_error_from_check acc check node error =
     (make_error_from_node error_node error) :: acc
   | _ -> acc
 
-let produce_error_parents acc check node parents error error_node =
-  if check node parents then
+let produce_error_context acc check node context error error_node =
+  if check node context then
     (make_error_from_node error_node error) :: acc
   else acc
 
-(* use [check] to check properties of function *)
-let function_header_check_helper check node parents =
-  check (syntax node) parents
-
 let produce_error_for_header acc check node error error_node =
-  produce_error_parents acc (function_header_check_helper check) node
+  (* use [check] to check properties of function *)
+  let function_header_check_helper check node = check (syntax node) in
+  produce_error_context acc (function_header_check_helper check) node
     error error_node
 
 
@@ -946,7 +940,7 @@ let check_type_hint env node names errors =
 
 (* Given a node and its context, tests if the node declares a method that is
  * both abstract and async. *)
-let is_abstract_and_async_method md_node context _parents =
+let is_abstract_and_async_method md_node context =
   let async_node = extract_async_node md_node in
   match async_node with
   | None -> false
@@ -1056,7 +1050,7 @@ let function_declaration_contains_attribute node attribute =
     attribute_specification_contains attr_spec attribute
   | _ -> false
 
-let methodish_contains_memoize env node _parents =
+let methodish_contains_memoize env node _context =
   (is_typechecker env) && is_inside_interface env.context
     && (methodish_contains_attribute node SN.UserAttributes.uaMemoize)
 
@@ -1306,10 +1300,10 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error_for_header errors
       (class_constructor_destructor_has_non_void_type env)
-      node parents SyntaxError.error2018 function_type in
+      node env.context SyntaxError.error2018 function_type in
     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
-      node parents SyntaxError.error2010 function_parameter_list in
+      node env.context SyntaxError.error2010 function_parameter_list in
     let errors =
       function_declaration_header_memoize_lsb parents errors in
     errors
@@ -1349,25 +1343,25 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error_for_header errors
       (methodish_contains_memoize env)
-      node parents SyntaxError.interface_with_memoize header_node in
+      node env.context SyntaxError.interface_with_memoize header_node in
     let errors =
       produce_error_for_header errors
       (class_constructor_has_static) header_node
-      [node] (SyntaxError.error2009 class_name method_name) modifiers in
+      env.context (SyntaxError.error2009 class_name method_name) modifiers in
     let errors =
       produce_error_for_header errors
       (class_destructor_cannot_be_static)
-      header_node [node]
+      header_node env.context
       (SyntaxError.class_destructor_cannot_be_static class_name method_name) modifiers in
     let errors =
-      produce_error_for_header errors async_magic_method header_node [node]
+      produce_error_for_header errors async_magic_method header_node env.context
       (SyntaxError.async_magic_method ~name:method_name) modifiers in
     let errors =
       produce_error_for_header errors
-      (clone_destruct_takes_no_arguments method_name) header_node [node]
+      (clone_destruct_takes_no_arguments method_name) header_node env.context
       (SyntaxError.clone_destruct_takes_no_arguments class_name method_name) modifiers in
     let errors =
-      produce_error_for_header errors (clone_cannot_be_static) header_node [node]
+      produce_error_for_header errors (clone_cannot_be_static) header_node env.context
       (SyntaxError.clone_cannot_be_static class_name method_name) modifiers in
     let errors =
       produce_error errors declaration_multiple_visibility node
@@ -1386,7 +1380,7 @@ let methodish_errors env node parents errors =
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
-      (methodish_non_abstract_without_body_not_native env node) parents
+      (methodish_non_abstract_without_body_not_native env node) ()
       (SyntaxError.error2015 class_name method_name) fun_semicolon in
     let errors =
       produce_error errors
@@ -1399,7 +1393,7 @@ let methodish_errors env node parents errors =
     let errors =
       if not (is_strict env && is_typechecker env) then errors else
       produce_error errors
-      (methodish_abstract_inside_interface parents)
+      (methodish_abstract_inside_interface env.context)
       node SyntaxError.error2045 modifiers in
     let errors =
       methodish_memoize_lsb_on_non_static node errors in
@@ -1407,7 +1401,7 @@ let methodish_errors env node parents errors =
       let async_annotation = Option.value (extract_async_node node)
         ~default:node in
       produce_error errors
-      (is_abstract_and_async_method node env.context) parents
+      (is_abstract_and_async_method node) env.context
       SyntaxError.error2046 async_annotation in
     let errors =
       if is_typechecker env
@@ -3411,6 +3405,12 @@ let check_static_in_initializer initializer_ =
   | _ -> false
 
 let const_decl_errors env node parents namespace_name names errors =
+  (* TODO: use produce_error_context when parents parameter is removed *)
+  let produce_error_parents acc check node context error error_node =
+    if check node context then
+      (make_error_from_node error_node error) :: acc
+    else acc
+  in
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
@@ -3843,6 +3843,10 @@ let find_syntax_errors env =
         | FunctionDeclaration { function_attribute_spec = s; _ }
         | MethodishDeclaration { methodish_attribute = s; _ } ->
           { env.context with
+            active_methodish = begin match syntax node with
+              | MethodishDeclaration _ -> Some node
+              | _ -> None
+              end;
             active_callable_attr_spec = Some s;
             (* For named functions, inspect the rx attribute directly. *)
             active_is_rx_or_enclosing_for_lambdas = has_rx_attr_mutable_hack s

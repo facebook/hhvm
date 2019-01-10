@@ -1,0 +1,16 @@
+File "box_keyword.php", line 9, characters 20-25:
+The type argument at index 0 is reified (Typing[4302])
+  File "box_keyword.php", line 4, characters 14-14:
+  Its definition T is not
+File "box_keyword.php", line 12, characters 20-31:
+The type argument at index 0 is reified (Typing[4302])
+  File "box_keyword.php", line 4, characters 14-14:
+  Its definition T is not
+File "box_keyword.php", line 16, characters 15-20:
+The type argument at index 0 is not reified (Typing[4302])
+  File "box_keyword.php", line 5, characters 21-22:
+  Its definition Tr is
+File "box_keyword.php", line 19, characters 15-26:
+The type argument at index 0 is not reified (Typing[4302])
+  File "box_keyword.php", line 5, characters 21-22:
+  Its definition Tr is

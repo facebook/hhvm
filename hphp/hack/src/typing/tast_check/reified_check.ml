@@ -41,4 +41,23 @@ let handler = object
         verify_targs pos class_pos tal tparams
       | None -> () end
     | _ -> ()
+
+  method! at_hint env = function
+    | pos, Aast.Happly ((_, class_id), tal) ->
+      begin match Tast_env.get_class env class_id with
+      | Some tc ->
+        let tparams = Typing_classes_heap.tparams tc in
+        let tparams_length = List.length tparams in
+        let targs_length = List.length tal in
+        if tparams_length <> targs_length
+        then begin
+          if targs_length <> 0
+          then Errors.type_arity pos class_id (string_of_int tparams_length)
+          else if List.exists ~f:(fun t -> t.tp_reified) tparams then
+            Errors.require_args_reify (Typing_classes_heap.pos tc) pos end
+      | None -> ()
+      end
+    | _ ->
+      ()
+
 end

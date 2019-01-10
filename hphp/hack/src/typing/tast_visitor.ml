@@ -191,6 +191,7 @@ class type handler = object
     Tast.expr list ->
     Tast.expr list ->
     unit
+  method at_hint : Env.t -> Aast.hint -> unit
 end
 
 (** A {!handler} which does not need to make use of every visitation method can
@@ -208,6 +209,7 @@ class virtual handler_base : handler = object
   method at_stmt _ _ = ()
   method at_fun_ _ _ = ()
   method at_Call _ _ _ _ _ _ = ()
+  method at_hint _ _ = ()
 end
 
 let if_enabled env f handler =
@@ -256,4 +258,9 @@ let iter_with (handlers : handler list) : iter = object
   method! on_Call env ct e tal el uel =
     List.iter handlers (if_enabled env (fun v -> v#at_Call env ct e tal el uel));
     super#on_Call env ct e tal el uel;
+
+  method! on_hint env h =
+    List.iter handlers (if_enabled env (fun v -> v#at_hint env h));
+    super#on_hint env h;
+
 end

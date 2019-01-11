@@ -88,6 +88,7 @@ type context =
    * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
   ; active_is_rx_or_enclosing_for_lambdas : bool
   ; active_awaitable          : Syntax.t option
+  ; active_const              : Syntax.t option
 }
 
 type env =
@@ -120,6 +121,7 @@ let make_env
       ; active_callable_attr_spec = None
       ; active_is_rx_or_enclosing_for_lambdas = false
       ; active_awaitable = None
+      ; active_const = None
       } in
     { syntax_tree
     ; level
@@ -785,7 +787,7 @@ let first_parent_classish_node classish_kind context =
          ~f:(function (n, true) -> Some n | _ -> None)
 
 (* Return, as a string opt, the name of the closest enclosing classish entity in
-  the list of parents(not just Classes ) *)
+  the given context (not just Classes ) *)
 let active_classish_name context =
   context.active_classish |> Option.value_map ~default:None ~f:(fun node ->
     match syntax node with
@@ -978,10 +980,10 @@ let is_abstract_const declaration =
 
 (* Given a ConstDeclarator node, test whether it is abstract, but has an
    initializer. *)
-let constant_abstract_with_initializer init parents =
+let constant_abstract_with_initializer init context =
   let is_abstract =
-    match parents with
-    | _p_list_item :: _p_syntax_list :: p_const_declaration :: _
+    match context.active_const with
+    | Some p_const_declaration
       when is_abstract_const p_const_declaration -> true
     | _ -> false
     in
@@ -997,9 +999,9 @@ let is_concrete_const declaration =
 
 (* Given a ConstDeclarator node, test whether it is concrete, but has no
    initializer. *)
-let constant_concrete_without_initializer init parents =
-  let is_concrete = match parents with
-    | _p_list_item :: _p_syntax_list :: p_const_declaration :: _ ->
+let constant_concrete_without_initializer init context =
+  let is_concrete = match context.active_const with
+    | Some p_const_declaration ->
       is_concrete_const p_const_declaration
     | _ -> false in
   is_concrete && is_missing init
@@ -3416,22 +3418,16 @@ let check_static_in_initializer initializer_ =
     end
   | _ -> false
 
-let const_decl_errors env node parents namespace_name names errors =
-  (* TODO: use produce_error_context when parents parameter is removed *)
-  let produce_error_parents acc check node context error error_node =
-    if check node context then
-      (make_error_from_node error_node error) :: acc
-    else acc
-  in
+let const_decl_errors env node namespace_name names errors =
   match syntax node with
   | ConstantDeclarator cd ->
     let errors =
-      produce_error_parents errors constant_abstract_with_initializer
-      cd.constant_declarator_initializer parents
+      produce_error_context errors constant_abstract_with_initializer
+      cd.constant_declarator_initializer env.context
       SyntaxError.error2051 cd.constant_declarator_initializer in
     let errors =
-      produce_error_parents errors constant_concrete_without_initializer
-      cd.constant_declarator_initializer parents SyntaxError.error2050
+      produce_error_context errors constant_concrete_without_initializer
+      cd.constant_declarator_initializer env.context SyntaxError.error2050
       cd.constant_declarator_initializer in
     let errors =
       produce_error errors is_global_in_const_decl cd.constant_declarator_initializer
@@ -3867,6 +3863,8 @@ let find_syntax_errors env =
           }
         | AwaitableCreationExpression _ ->
           { env.context with active_awaitable = Some node }
+        | ConstDeclaration _ ->
+          { env.context with active_const = Some node }
         | _ -> env.context
       } in
     let names, errors =
@@ -3944,7 +3942,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | ConstantDeclarator _ ->
         let names, errors =
-          const_decl_errors env node parents namespace_name names errors in
+          const_decl_errors env node namespace_name names errors in
         trait_require_clauses, names, errors
       | NamespaceBody _
       | NamespaceEmptyBody _

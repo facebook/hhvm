@@ -346,10 +346,10 @@ void retranslateAll() {
     return false;
   };
 
-  // 0) Check if we should dump profile data in the beginning
-  if (!RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
-    if (checkSerializeProfData()) return;
-  }
+  // 0) Check if we should dump profile data.  We may exit the server in
+  // SerializeAndExit mode, without really doing the JIT.
+
+  if (checkSerializeProfData()) return;
 
   const bool serverMode = RuntimeOption::ServerExecutionMode();
 
@@ -471,12 +471,6 @@ void retranslateAll() {
   if (serverMode) {
     Logger::Info("retranslateAll: finished retranslating all optimized "
                  "translations!");
-  }
-
-  // 5) Check if we should dump profile data after retranslateAll
-
-  if (RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
-    if (checkSerializeProfData()) return;
   }
 
   // This will enable live translations to happen again.

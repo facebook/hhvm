@@ -330,12 +330,12 @@ std::pair<Type, bool> vecFirstLastType(
   assertx(arr <= (TVec | Type::Array(ArrayData::kPackedKind)));
 
   if (arr.hasConstVal()) {
-    auto arrVal = arr.arrVal();
-    if (arrVal->empty()) {
+    auto const val = arr.vecVal();
+    if (val->empty()) {
       return {TBottom, false};
     }
-    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
-    return {Type::cns(arrVal->atPos(pos)), true};
+    auto pos = isFirst ? val->iter_begin() : val->iter_end();
+    return {Type::cns(val->atPos(pos)), true};
   }
 
   auto type = (arr <= (TPersistentVec | TPersistentArr)) ?
@@ -377,12 +377,12 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
   assertx(arr <= (TDict | Type::Array(ArrayData::kMixedKind)));
 
   if (arr.hasConstVal()) {
-    auto arrVal = arr.arrVal();
-    if (arrVal->empty()) {
+    auto const val = arr.dictVal();
+    if (val->empty()) {
       return {TBottom, false};
     }
-    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
-    auto tv = isKey ? arrVal->nvGetKey(pos) : arrVal->atPos(pos);
+    auto pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto tv = isKey ? val->nvGetKey(pos) : val->atPos(pos);
     return {Type::cns(tv), true};
   }
 
@@ -395,12 +395,12 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
   assertx(arr <= TKeyset);
 
   if (arr.hasConstVal()) {
-    auto arrVal = arr.arrVal();
-    if (arrVal->empty()) {
+    auto val = arr.keysetVal();
+    if (val->empty()) {
       return {TBottom, false};
     }
-    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
-    return {Type::cns(arrVal->atPos(pos)), true};
+    auto pos = isFirst ? val->iter_begin() : val->iter_end();
+    return {Type::cns(val->atPos(pos)), true};
   }
 
   auto type = TStr | TInt;

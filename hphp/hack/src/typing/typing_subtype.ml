@@ -2509,7 +2509,7 @@ let solve_tyvars ?(solve_invariant = false) ~tyvars env =
 let expand_type_and_solve env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | (_, Tvar v) when TypecheckerOptions.new_inference_eager_solve (Env.get_tcopt env) ->
+  | (_, Tvar v) when not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) ->
     let env = solve_tyvar ~freshen:true ~solve_invariant:true env Reason.Rnone v in
     Env.expand_type env ty
   | _ ->

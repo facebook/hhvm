@@ -2,4 +2,3 @@
 --all-errors
 --disallow-stringish-magic
 --hh-log-level prop 1
---new-inference-eager-solve

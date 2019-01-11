@@ -1,2 +1,3 @@
 --new-inference
+--new-inference-no-eager-solve
 --all-errors

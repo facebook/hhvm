@@ -190,7 +190,7 @@ let parse_options () =
   let disallow_stringish_magic = ref false in
   let log_inference_constraints = ref false in
   let new_inference = ref false in
-  let new_inference_eager_solve = ref false in
+  let new_inference_no_eager_solve = ref false in
   let all_errors = ref false in
   let batch_mode = ref false in
   let disallow_invalid_arraykey = ref false in
@@ -377,9 +377,9 @@ let parse_options () =
     "--new-inference",
         Arg.Set new_inference,
         " Type inference by constraint generation.";
-    "--new-inference-eager-solve",
-        Arg.Set new_inference_eager_solve,
-        " Eagerly solve invariant type variable constraints.";
+    "--new-inference-no-eager-solve",
+        Arg.Set new_inference_no_eager_solve,
+        " Do not eagerly solve invariant type variable constraints.";
     "--hh-log-level",
         Arg.Tuple ([
           Arg.String (fun x -> log_key := x);
@@ -423,7 +423,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
       GlobalOptions.tco_log_inference_constraints = !log_inference_constraints;
       GlobalOptions.tco_new_inference = if !new_inference then 1.0 else 0.0;
-      GlobalOptions.tco_new_inference_eager_solve = !new_inference_eager_solve;
+      GlobalOptions.tco_new_inference_no_eager_solve = !new_inference_no_eager_solve;
       GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
       GlobalOptions.po_enable_concurrent = !enable_concurrent;

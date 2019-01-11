@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -48,7 +48,7 @@ class for_string_rsort
 
 // array of integer objects
 
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_rsort(11,33,30),
   new for_integer_rsort(66,44,4),
   new for_integer_rsort(-88,-5,5),
@@ -56,8 +56,8 @@ $unsorted_int_obj = array(
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
-  new for_string_rsort("axx","AXX","ass"), 
+$unsorted_str_obj = array (
+  new for_string_rsort("axx","AXX","ass"),
   new for_string_rsort("t","eee","abb"),
   new for_string_rsort("w","W", "c"),
   new for_string_rsort("py","PY", "pt"),
@@ -68,23 +68,23 @@ echo "\n-- Sort flag = default --\n";
 
 // testing rsort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
-var_dump(rsort($temp_array) );
+var_dump(rsort(&$temp_array) );
 var_dump($temp_array);
 
 // testing rsort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
-var_dump(rsort($temp_array) );
+var_dump(rsort(&$temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Sort flag = SORT_REGULAR --\n";
 // testing rsort() function by supplying integer object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_int_obj;
-var_dump(rsort($temp_array, SORT_REGULAR) );
+var_dump(rsort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 // testing rsort() function by supplying string object array, flag value = SORT_REGULAR
 $temp_array = $unsorted_str_obj;
-var_dump(rsort($temp_array, SORT_REGULAR) );
+var_dump(rsort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done";

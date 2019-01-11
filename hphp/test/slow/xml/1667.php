@@ -4,7 +4,8 @@ class xml {
   var $parser;
   function xml() {
     $this->parser = xml_parser_create();
-    xml_set_object($this->parser, $this);
+    $thiz =& $this;
+    xml_set_object($this->parser, &$thiz);
     xml_set_element_handler($this->parser, 'tag_open', 'tag_close');
     xml_set_character_data_handler($this->parser, 'cdata');
   }

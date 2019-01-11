@@ -145,7 +145,7 @@ function heapsort($N = 20000) {
   for ($i=1; $i<=$N; $i++) {
     $ary[$i] = ($N - $i);
   }
-  heapsort_r($N, $ary);
+  heapsort_r($N, &$ary);
   var_dump($ary[$N]);
 }
 

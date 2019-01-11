@@ -10,6 +10,9 @@ class Foob {
   public static function a($y) {
     $y->bummer(self::$maybe_boxed);
   }
+  public static function b($y) {
+    $y->bummer(&self::$maybe_boxed);
+  }
   public static function get() { return self::$maybe_boxed; }
   public static function ok() { return self::$ok; }
 }
@@ -20,7 +23,7 @@ function main() {
   var_dump(Foob::get());
   Foob::a(new A());
   var_dump(Foob::get());
-  Foob::a(new B());
+  Foob::b(new B());
   var_dump(Foob::get());
   var_dump(Foob::ok());
   var_dump(ok());

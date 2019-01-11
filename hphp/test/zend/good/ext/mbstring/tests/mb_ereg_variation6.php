@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -16,13 +16,13 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$regex_char = array ('\w+' => b'\w+', 
-                     '\W+' => b'\W+', 
-                     '\s+' => b'\s+', 
-                     '\S+' => b'\S+', 
-                     '\d+' => b'\d+', 
-                     '\D+' => b'\D+', 
-                     '\b' =>  b'\b', 
+$regex_char = array ('\w+' => b'\w+',
+                     '\W+' => b'\W+',
+                     '\s+' => b'\s+',
+                     '\S+' => b'\S+',
+                     '\d+' => b'\d+',
+                     '\D+' => b'\D+',
+                     '\b' =>  b'\b',
                      '\B' =>  b'\B');
 
 $string_ascii = b'This is an English string. 0123456789.';
@@ -35,11 +35,11 @@ foreach ($regex_char as $displayChar => $char) {
 		$regs_mb = null;
 	}
 	echo "-- ASCII String: --\n";
-	var_dump(mb_ereg($char, $string_ascii, $regs_ascii));
+	var_dump(mb_ereg($char, $string_ascii, &$regs_ascii));
 	base64_encode_var_dump($regs_ascii);
 
 	echo "-- Multibyte String: --\n";
-	var_dump(mb_ereg($char, $string_mb, $regs_mb));
+	var_dump(mb_ereg($char, $string_mb, &$regs_mb));
 	base64_encode_var_dump($regs_mb);
 
 }

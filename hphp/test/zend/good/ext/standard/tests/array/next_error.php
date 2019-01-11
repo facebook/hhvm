@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed next(array $array_arg)
- * Description: Move array argument's internal pointer to the next element and return it 
+ * Description: Move array argument's internal pointer to the next element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -18,6 +18,6 @@ var_dump( next() );
 echo "\n-- Testing next() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( next($array_arg, $extra_arg) );
+var_dump( next(&$array_arg, $extra_arg) );
 ?>
 ===DONE===

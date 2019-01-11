@@ -1,10 +1,10 @@
 <?php
-/* 
+/*
 Prototype: int fileinode ( string $filename );
 Description: Returns the inode number of the file, or FALSE in case of an error.
 */
 
-/* Creating soft and hard links to a file and applying fileinode() on links */ 
+/* Creating soft and hard links to a file and applying fileinode() on links */
 
 $file_path = dirname(__FILE__);
 fclose( fopen($file_path."/fileinode_variation1.tmp", "w") );

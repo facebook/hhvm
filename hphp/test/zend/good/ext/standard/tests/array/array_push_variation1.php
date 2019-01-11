@@ -1,6 +1,6 @@
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+/* Prototype  : int array_push(&array $stack, mixed $var [, mixed $...])
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -86,7 +86,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( array_push($input, $var) );
+  var_dump( array_push(&$input, $var) );
   $iterator++;
 };
 

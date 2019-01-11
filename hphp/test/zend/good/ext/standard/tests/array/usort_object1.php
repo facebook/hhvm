@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
+/* Prototype  : bool usort(&array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -67,7 +67,7 @@ $array_arg = array(
 2 => new SimpleClass1(100),
 3 => new SimpleClass1(50)
 );
-var_dump( usort($array_arg, 'simple_cmp') );
+var_dump( usort(&$array_arg, 'simple_cmp') );
 var_dump($array_arg);
 
 // array of SimpleClass objects having more than one properties
@@ -76,7 +76,7 @@ $array_arg = array(
 1 => new SimpleClass2(10, 1.2, "apple"),
 2 => new SimpleClass2(5, 2.5, "orange"),
 );
-var_dump( usort($array_arg, 'multiple_cmp') );
+var_dump( usort(&$array_arg, 'multiple_cmp') );
 var_dump($array_arg);
 ?>
 ===DONE===

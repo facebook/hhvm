@@ -22,7 +22,7 @@ foreach($args as $arg) {
 
   $cmd = PHP_BINARY . $arg_str . __FILE__ . " dummy";
 
-  $proc = proc_open($cmd, $descriptorspec, $pipes);
+  $proc = proc_open($cmd, $descriptorspec, &$pipes);
   if (!$proc) {
     echo "Failed to open: $cmd\n";
     exit -1;

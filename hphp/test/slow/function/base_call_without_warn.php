@@ -7,7 +7,7 @@ function name(){
   return 'foo';
 }
 function foo(){
-  increment(${name()}[0]);
+  increment(&${name()}[0]);
   echo "done\n";
 }
 

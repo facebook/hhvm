@@ -5,7 +5,7 @@ class MyConverter extends UConverter {
    */
   public function toUCallback($reason, $source, $codeUnits, &$error) {
     echo "toUCallback(", UConverter::reasonText($reason), ", ...)\n";
-    return parent::toUCallback($reason, $source, $codeUnits, $error);
+    return parent::toUCallback($reason, $source, $codeUnits, &$error);
   }
 
   /**
@@ -13,7 +13,7 @@ class MyConverter extends UConverter {
    */
   public function fromUCallback($reason, $source, $codePoint, &$error) {
     echo "fromUCallback(", UConverter::reasonText($reason), ", ...)\n";
-    return parent::fromUCallback($reason, $source, $codePoint, $error);
+    return parent::fromUCallback($reason, $source, $codePoint, &$error);
   }
 
 }

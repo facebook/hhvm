@@ -14,10 +14,10 @@ function check_iscallable( $functions ) {
     echo "-- Iteration  $counter --\n";
     var_dump( is_callable($func) );  //given only $var argument
     var_dump( is_callable($func, TRUE) );  //given $var and $syntax argument
-    var_dump( is_callable($func, TRUE, $callable_name) );
+    var_dump( is_callable($func, TRUE, &$callable_name) );
     echo $callable_name, "\n";
     var_dump( is_callable($func, FALSE) );  //given $var and $syntax argument
-    var_dump( is_callable($func, FALSE, $callable_name) );
+    var_dump( is_callable($func, FALSE, &$callable_name) );
     echo $callable_name, "\n";
     $counter++;
   }

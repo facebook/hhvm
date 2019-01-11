@@ -10,7 +10,7 @@ if ($pid == 0) {
   print $a . "\n";
   exit(5);
 }
-pcntl_wait($status);
+pcntl_wait(&$status);
 $a = 2;
 eval('$a = 53;');
 print $a . "\n";

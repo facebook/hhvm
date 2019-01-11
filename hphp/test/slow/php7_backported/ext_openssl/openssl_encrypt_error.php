@@ -17,5 +17,5 @@ var_dump(openssl_encrypt($data, $arr, $object));
 var_dump(openssl_encrypt($data, $method, $arr));
 
 // invalid using of an authentication tag
-var_dump(openssl_encrypt($data, $method, $password, 0, $iv, $wrong));
+var_dump(openssl_encrypt($data, $method, $password, 0, $iv, &$wrong));
 ?>

@@ -11,7 +11,7 @@ function test($use_extract) {
 	var_dump($a, $b);
 
 	if ($use_extract) {
-		extract($arr, EXTR_REFS);
+		extract(&$arr, EXTR_REFS);
 	} else {
 		$_a = &$arr['_a'];
 		$_b = &$arr['_b'];

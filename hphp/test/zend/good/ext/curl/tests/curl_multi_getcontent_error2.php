@@ -10,7 +10,7 @@
 	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-	
+
 	//CREATE MULTIPLE CURL HANDLE
 	$mh=curl_multi_init();
 
@@ -21,7 +21,7 @@
 	//EXECUTE
 	$running=0;
 	do {
-		curl_multi_exec($mh,$running);
+		curl_multi_exec($mh,&$running);
 	} while ($running>0);
 
 	$results1=curl_multi_getcontent($ch1,$ch2); //no parameter
@@ -30,9 +30,9 @@
 	//CLOSE
  	curl_multi_remove_handle($mh,$ch1);
 	curl_multi_remove_handle($mh,$ch2);
-	curl_multi_close($mh);	
+	curl_multi_close($mh);
 
-	echo $results1; 
+	echo $results1;
 	echo $results2;
 
 ?>

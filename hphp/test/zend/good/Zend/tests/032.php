@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 function test(&$var) { }
-test($arr[]);
+test(&$arr[]);
 
 print "ok!\n";
 

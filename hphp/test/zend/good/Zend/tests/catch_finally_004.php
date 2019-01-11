@@ -16,7 +16,7 @@ function foo (&$ex) {
       } finally {
         echo "4";
         throw_exception("finally");
-      } 
+      }
    } catch (Exception $e) {
       $ex = $e;
       echo "3";
@@ -26,7 +26,7 @@ function foo (&$ex) {
    return 1;
 }
 
-var_dump(foo($ex));
+var_dump(foo(&$ex));
 
 do {
   var_dump($ex->getMessage());

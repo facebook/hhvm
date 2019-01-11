@@ -19,21 +19,21 @@ ldap_set_option($link, LDAP_OPT_CLIENT_CONTROLS, $controls);
 ldap_set_option($link, LDAP_OPT_RESTART, false);
 
 var_dump(
-	ldap_get_option($link, LDAP_OPT_DEREF, $option),
+	ldap_get_option($link, LDAP_OPT_DEREF, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_SIZELIMIT, $option),
+	ldap_get_option($link, LDAP_OPT_SIZELIMIT, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_TIMELIMIT, $option),
+	ldap_get_option($link, LDAP_OPT_TIMELIMIT, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, $option),
+	ldap_get_option($link, LDAP_OPT_NETWORK_TIMEOUT, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_REFERRALS, $option),
+	ldap_get_option($link, LDAP_OPT_REFERRALS, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_RESTART, $option),
+	ldap_get_option($link, LDAP_OPT_RESTART, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $option),
+	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, &$option),
 	$option,
-	ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, $option),
+	ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, &$option),
 	$option
 );
 ?>

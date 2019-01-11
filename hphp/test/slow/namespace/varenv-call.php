@@ -3,7 +3,7 @@
 namespace SomeNS;
 
 function runExtract($args) {
-  extract($args);
+  extract(&$args);
   var_dump($var1);
 }
 

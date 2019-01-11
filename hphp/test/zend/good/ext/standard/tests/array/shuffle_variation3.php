@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : bool shuffle(array $array_arg)
+/* Prototype  : bool shuffle(&array $array_arg)
  * Description: Randomly shuffle the contents of an array 
  * Source code: ext/standard/array.c
 */
@@ -50,7 +50,7 @@ echo "\n*** Testing shuffle() with arrays having different types of values ***\n
 $counter = 1;
 foreach($array_arg as $arr) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( shuffle($arr) );  
+  var_dump( shuffle(&$arr) );  
   echo "\nThe output array is:\n";
   var_dump( $arr ); 
   $counter++;

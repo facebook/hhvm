@@ -1,7 +1,7 @@
 <?php
 
 function sort_opt($a) {
-  ksort($a);
+  ksort(&$a);
   var_dump($a);
 }
 

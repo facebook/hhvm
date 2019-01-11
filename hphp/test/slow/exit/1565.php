@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_1565() {
 $command = "exit 2";
-passthru($command, $return);
+passthru($command, &$return);
 print "$return\n";
 }

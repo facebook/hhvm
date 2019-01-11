@@ -15,6 +15,6 @@ $a = new A();
  var_dump($a);
  var_dump((array)$a);
  $f = 100;
- f($a->$f);
+ f(&$a->$f);
  var_dump($a);
 }

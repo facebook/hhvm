@@ -11,7 +11,7 @@ var_dump(ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION));
 
 // Too many parameters
 var_dump(
-	ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, $option, "Additional data"),
+	ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, &$option, "Additional data"),
 	$option
 );
 ?>

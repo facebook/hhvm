@@ -82,14 +82,14 @@ function test_SpoofChecker_areconfusable() {
 function test_SpoofChecker_issuesfound() {
   $checker = new SpoofChecker();
 
-  VS($checker->issuspicious("NAPKIN PEZ", $ret), true);
+  VS($checker->issuspicious("NAPKIN PEZ", &$ret), true);
   VS($ret, Spoofchecker::WHOLE_SCRIPT_CONFUSABLE);
 
-  VS($checker->issuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), $ret),
+  VS($checker->issuspicious(u('f\u0430\u0441\u0435b\u043e\u043ek'), &$ret),
      true);
   VS($ret, SpoofChecker::MIXED_SCRIPT_CONFUSABLE);
 
-  VS($checker->areconfusable("hello, world", "he11o, wor1d", $ret), true);
+  VS($checker->areconfusable("hello, world", "he11o, wor1d", &$ret), true);
   VS($ret, SpoofChecker::SINGLE_SCRIPT_CONFUSABLE);
 
   return Count(true);

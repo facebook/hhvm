@@ -13,17 +13,17 @@ var_dump($first, $a, $b, $c);
 
 echo "\nTest string with array values and results array\n";
 $s1 = "first=abc&a[]=123&a[]=false&b[]=str&c[]=3.5&a[]=last";
-var_dump(parse_str($s1, $res3_array));
+var_dump(parse_str($s1, &$res3_array));
 var_dump($res3_array); 
 
 echo "\nTest string containing numerical array keys\n";
 $str = "arr[1]=sid&arr[4]=bill";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 echo "\nTest string containing associative keys\n";
 $str = "arr[first]=sid&arr[forth]=bill";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 echo "\nTest string with array values with same name as existing variable\n";
@@ -65,22 +65,22 @@ var_dump($str);
 
 echo "\nTest string with 2-dim array with numeric keys\n";
 $str = "arr[3][4]=sid&arr[3][6]=fred";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 echo "\nTest string with 2-dim array with null keys\n";
 $str = "arr[][]=sid&arr[][]=fred";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 echo "\nTest string with 2-dim array with non-numeric keys\n";
 $str = "arr[one][four]=sid&arr[three][six]=fred";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 echo "\nTest string with 3-dim array with numeric keys\n";
 $str = "arr[1][2][3]=sid&arr[1][2][6]=fred";
-var_dump(parse_str($str, $res));
+var_dump(parse_str($str, &$res));
 var_dump($res);
 
 ?>

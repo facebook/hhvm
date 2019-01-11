@@ -8,4 +8,4 @@ class Collator2 extends Collator{
 
 $c = new Collator2();
 $a = array('a', 'b');
-$c->sortWithSortKeys($a);
+$c->sortWithSortKeys(&$a);

@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -46,7 +46,7 @@ function multiple_cmp($value1, $value2)
 class SimpleClass1
 {
   private $int_value;
-  
+
   public function __construct($value) {
     $this->int_value = $value;
   }
@@ -65,7 +65,7 @@ class SimpleClass2
   }
   public function getValue() {
     return $this->int_value;
-  }  
+  }
 }
 
 // array of SimpleClass objects with only one member
@@ -75,7 +75,7 @@ $array_arg = array(
   2 => new SimpleClass1(100),
   3 => new SimpleClass1(50)
 );
-var_dump( uasort($array_arg, 'simple_cmp') );
+var_dump( uasort(&$array_arg, 'simple_cmp') );
 var_dump($array_arg);
 
 // array of SimpleClass objects having more than one members
@@ -84,7 +84,7 @@ $array_arg = array(
   1 => new SimpleClass2(10, 1.2, "apple"),
   2 => new SimpleClass2(5, 2.5, "orange"),
 );
-var_dump( uasort($array_arg, 'multiple_cmp') );
+var_dump( uasort(&$array_arg, 'multiple_cmp') );
 var_dump($array_arg);
 
 echo "Done"

@@ -41,7 +41,7 @@ foreach ($iterator as $fileinfo) {
   }
 }
 
-ksort($files);
+ksort(&$files);
 foreach ($files as $path => $file) {
   $p = new PharData($path);
   $tmpdir = tempdir();

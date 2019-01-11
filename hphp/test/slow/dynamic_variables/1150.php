@@ -3,7 +3,8 @@
 
 <<__EntryPoint>>
 function main_1150() {
-$a = null;
- extract(array('a' => 'ok'), EXTR_IF_EXISTS);
- var_dump($a);
+  $a = null;
+  $arr = array('a' => 'ok');
+  extract(&$arr, EXTR_IF_EXISTS);
+  var_dump($a);
 }

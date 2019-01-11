@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it 
+ * Description: Move array argument's internal pointer to the previous element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -18,6 +18,6 @@ var_dump( prev() );
 echo "\n-- Testing prev() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( prev($array_arg, $extra_arg) );
+var_dump( prev(&$array_arg, $extra_arg) );
 ?>
 ===DONE===

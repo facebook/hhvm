@@ -13,7 +13,7 @@ function t1()
 
 	var_dump($a, $b);
 
-	extract($a, EXTR_REFS);
+	extract(&$a, EXTR_REFS);
 
 	$foo = 'noo';
 
@@ -35,7 +35,7 @@ function t2()
 
 	var_dump($a, $b);
 
-	extract($a, EXTR_REFS);
+	extract(&$a, EXTR_REFS);
 
 	$foo = 'noo';
 
@@ -58,7 +58,7 @@ function t3()
 
 	var_dump($a);
 
-	extract($a, EXTR_REFS);
+	extract(&$a, EXTR_REFS);
 
 	$foo = 'noo';
 

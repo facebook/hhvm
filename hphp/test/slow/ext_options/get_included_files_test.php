@@ -2,7 +2,7 @@
 
 function foo($files) {
   // Zend and HHVM output in different orders; level the field
-  sort($files);
+  sort(&$files);
   foreach ($files as $filename) {
     $idx = strrpos($filename, "/");
     $pre = substr($filename, 0, $idx + 1);

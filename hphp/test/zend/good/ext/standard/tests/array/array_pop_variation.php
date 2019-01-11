@@ -20,19 +20,19 @@ $mixed_array = array(
 echo"\n*** Checking for internal array pointer being reset when pop is called ***\n";
 
 echo "\nCurrent Element is : ";
-var_dump( current($mixed_array[1]) );
+var_dump( current(&$mixed_array[1]) );
 
 echo "\nNext Element is : ";
-var_dump( next($mixed_array[1]) );
+var_dump( next(&$mixed_array[1]) );
 
 echo "\nNext Element is : ";
-var_dump( next($mixed_array[1]) );
+var_dump( next(&$mixed_array[1]) );
 
 echo "\nPOPed Element is : ";
-var_dump( array_pop($mixed_array[1]) );
+var_dump( array_pop(&$mixed_array[1]) );
 
 echo "\nCurrent Element after POP operation is: ";
-var_dump( current($mixed_array[1]) );
+var_dump( current(&$mixed_array[1]) );
 
 echo"\nDone";
 ?>

@@ -5,7 +5,7 @@
 */
 
 /* Prototype: void check_iscallable_objects( $methods );
-   Description: use is_callable() on given $method to check if the array 
+   Description: use is_callable() on given $method to check if the array
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */
@@ -17,9 +17,9 @@ function check_iscallable_objects( $methods ) {
     var_dump( is_callable($method) );
     var_dump( is_callable($method, true) );
     var_dump( is_callable($method, false) );
-    var_dump( is_callable($method, true, $callable_name) );
+    var_dump( is_callable($method, true, &$callable_name) );
     echo $callable_name, "\n";
-    var_dump( is_callable($method, false, $callable_name) );
+    var_dump( is_callable($method, false, &$callable_name) );
     echo $callable_name, "\n";
     $counter++;
   }
@@ -29,11 +29,11 @@ echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
 {
   public $value = 100;
-  
+
   /* static method */
   static public function foo() {
   }
-  
+
   public function foo1() {
   }
   /* function name with mixed string and integer */
@@ -44,7 +44,7 @@ class object_class
   }
   /* function name having boolean value */
   public function TRUE() {
-  }  
+  }
 
   protected function foo2() {
   }

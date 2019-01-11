@@ -1,6 +1,6 @@
 <?php
 
-class kls { public static function meth() { echo "heh\n"; } }
+class kls { public static function meth(&$foo) { echo "heh\n"; } }
 
 function get_bad_stuff() {
   return array('y' => array());
@@ -18,7 +18,8 @@ function foo() {
    * information into the ActRec properly.
    */
   for ($i = 0; $i < 2; ++$i) {
-    $x(mt_rand() ? get_bad_stuff() : array('y' => array()));
+    $arr = mt_rand() ? get_bad_stuff() : array('y' => array());
+    $x(&$arr);
     // Note that dynamically calling extract is not allowed with the
     // DisallowDynamicVarEnvFuncs option
     $x = 'extract'; // bad times

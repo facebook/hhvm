@@ -20,7 +20,7 @@ class D2 extends Derived {
 function main() {
   $x = new D2;
   $y = 'ok';
-  $x->foo($y);
+  $x->foo(&$y);
 }
 
 

@@ -1,13 +1,13 @@
 <?php
 
 function replace_variables($text, $params) {
-	
+
 	$c = function($matches) use (&$params, &$text) {
-		$text = preg_replace( '/(\?)/', array_shift( $params ), $text, 1 );
+		$text = preg_replace( '/(\?)/', array_shift( &$params ), $text, 1 );
 	};
 
 	preg_replace_callback( '/(\?)/', $c, $text );
-	
+
 	return $text;
 }
 

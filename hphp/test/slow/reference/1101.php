@@ -18,5 +18,5 @@ function f($x) {
 <<__EntryPoint>>
 function main_1101() {
 $a = array(new X);
-test($a[0], f(1));
+test(&$a[0], f(1));
 }

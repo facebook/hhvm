@@ -15,7 +15,7 @@ function foo($a1, &$a2) {
 function main_g1() {
 $a1 = 1;
 $a2 = -999999999;
-$x = foo($a1, $a2);
+$x = foo($a1, &$a2);
 $y1 = clone $x;
 $y2 = clone $x;
 $a2 = 2;

@@ -252,7 +252,7 @@ obj_dump($j);
 
 print "=== Var properties ===\n";
 $str = "it didn't work";
-$d = new ThingerMaker($str);
+$d = new ThingerMaker(&$str);
 $d->doAssignment();
 echo $str . "\n";
 

@@ -10,7 +10,7 @@ echo "\n-- Testing is_callable() function with less than expected no. of argumen
 var_dump( is_callable() );
 
 echo "\n-- Testing is_callable() function with more than expected no. of arguments --\n";
-var_dump( is_callable("string", TRUE, $callable_name, "EXTRA") );
+var_dump( is_callable("string", TRUE, &$callable_name, "EXTRA") );
 
 ?>
 ===DONE===

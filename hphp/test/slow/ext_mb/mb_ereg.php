@@ -84,7 +84,7 @@ $r = mb_ereg_search_getregs(); // get first result
 var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
 
 $date = "1973-04-30";
-mb_ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, $regs);
+mb_ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, &$regs);
 var_dump($regs[3]);
 var_dump($regs[2]);
 var_dump($regs[1]);
@@ -107,6 +107,6 @@ var_dump(mb_eregi("z", $str));
 
 $str = "XYZ";
 $matches = array();
-var_dump(mb_eregi("z", $str, $matches));
+var_dump(mb_eregi("z", $str, &$matches));
 var_dump($matches);
 }

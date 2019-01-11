@@ -4,6 +4,6 @@
 <<__EntryPoint>>
 function main_1564() {
 $command = "exit 2";
-system($command, $return);
+system($command, &$return);
 print "$return\n";
 }

@@ -11,7 +11,7 @@ function main() {
       $file->getExtension()
     );
   }
-  ksort($out);
+  ksort(&$out);
   var_dump($out);
 }
 

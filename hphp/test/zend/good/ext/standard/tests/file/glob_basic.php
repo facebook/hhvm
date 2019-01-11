@@ -32,7 +32,7 @@ sort_var_dump( glob($dirname."/*.*") );
 echo "Done\n";
 
 function sort_var_dump($results) {
-   sort($results);
+   sort(&$results);
    var_dump($results);
 }
 ?>

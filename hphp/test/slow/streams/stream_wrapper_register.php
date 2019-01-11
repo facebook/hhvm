@@ -162,7 +162,7 @@ fread($fp, 1);
 $r = array($fp);
 $w = null;
 $e = null;
-stream_select($r, $w, $e, 0);
+stream_select(&$r, &$w, &$e, 0);
 
 fflush($fp);
 flock($fp, LOCK_SH);

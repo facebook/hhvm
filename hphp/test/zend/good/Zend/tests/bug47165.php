@@ -8,6 +8,6 @@ class Foo {
 		return $instance->bar;
 	}
 }
-extract(Foo::bar());
+extract(&Foo::bar());
 echo "ok\n";
 ?>

@@ -50,7 +50,7 @@ foreach($operations as $operation) {
   $j = 0;
   foreach($wouldblocks as $wouldblock) {
     echo "-- Inner iteration $j in $i --\n";
-    var_dump(flock($fp, $operation, $wouldblock));
+    var_dump(flock($fp, $operation, &$wouldblock));
     $j++;
   }
   $i++;

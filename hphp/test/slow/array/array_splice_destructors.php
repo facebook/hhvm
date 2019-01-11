@@ -12,8 +12,8 @@ class C {
 
 function test() {
   $a = array(1, 2, 3);
-  $a[] = new C($a);
-  array_splice($a, 2);
+  $a[] = new C(&$a);
+  array_splice(&$a, 2);
   var_dump($a);
 }
 

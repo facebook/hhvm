@@ -10,10 +10,10 @@ class C {
 }
 $o = new C;
 $x = "value";
-$o->F($x);
+$o->F(&$x);
 echo $x;
 echo "\n";
 $y = "zero";
-$o->F($y, "0");
+$o->F(&$y, "0");
 echo $y;
 ?>

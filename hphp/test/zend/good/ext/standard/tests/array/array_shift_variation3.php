@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -36,7 +36,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e10 => 'large',
        12.3456789000E-10 => 'small',
@@ -45,8 +45,8 @@ $inputs = array(
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -56,17 +56,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/  'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -93,7 +93,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
-  var_dump( array_shift($input) );
+  var_dump( array_shift(&$input) );
   var_dump($input);
   $iterator++;
 };

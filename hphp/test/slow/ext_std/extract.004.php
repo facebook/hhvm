@@ -2,7 +2,8 @@
 
 class A {
   public static function b() {
-    extract(['this' => 'Hello!']);
+    $arr = ['this' => 'Hello!'];
+    extract(&$arr);
     var_dump($this);
   }
 }

@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : array each(array $arr)
+/* Prototype  : array each(&array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
  * and advance the pointer to the next element 
  * Source code: Zend/zend_builtin_functions.c
@@ -106,7 +106,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator: $key data --\n";
-  var_dump( each($input) );
+  var_dump( each(&$input) );
   $iterator++;
 };
 

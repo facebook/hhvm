@@ -10,7 +10,7 @@ function foo(array &$a) {
  }
 
 function test($a) {
-  foo($a);
+  foo(&$a);
 }
 
 

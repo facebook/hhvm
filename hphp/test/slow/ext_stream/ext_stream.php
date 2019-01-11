@@ -28,7 +28,7 @@ function retry_bind_server($udp = false) {
     $address = $scheme."127.0.0.1:" . $port;
 
     if ($udp) {
-      $server = @stream_socket_server($address, $errno, $errstr,
+      $server = @stream_socket_server($address, &$errno, &$errstr,
                                      STREAM_SERVER_BIND);
     } else {
       $server = @stream_socket_server($address);
@@ -47,7 +47,7 @@ function retry_bind_server6($udp = false) {
     $address = $scheme."[::1]:" . $port;
 
     if ($udp) {
-      $server = @stream_socket_server($address, $errno, $errstr,
+      $server = @stream_socket_server($address, &$errno, &$errstr,
                                      STREAM_SERVER_BIND);
     } else {
       $server = @stream_socket_server($address);
@@ -141,7 +141,7 @@ function test_stream_wrapper_restore() {
 function test_stream_select() {
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   $reads = array($f);
-  VERIFY(stream_select($reads, $ignore, $ignore, 0, 0) != false);
+  VERIFY(stream_select(&$reads, &$ignore, &$ignore, 0, 0) != false);
 }
 
 function test_stream_socket_recvfrom_tcp() {

@@ -9,7 +9,7 @@ class foo {
 }
 function t() {
   $x = 1;
-  foo::ioo($x, $y);
+  foo::ioo($x, &$y);
 }
 
 <<__EntryPoint>>

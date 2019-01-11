@@ -1,18 +1,18 @@
 <?php
 $fp = fopen(dirname(__FILE__) . "/cert.crt","r");
 $a = fread($fp,8192);
-fclose($fp); 
+fclose($fp);
 
 $b = "file://" . dirname(__FILE__) . "/cert.crt";
 $c = "invalid cert";
 $d = openssl_x509_read($a);
 $e = array();
 
-var_dump(openssl_x509_export($a, $output));	// read cert as a binary string
-var_dump(openssl_x509_export($b, $output2));	// read cert from a filename string
-var_dump(openssl_x509_export($c, $output3));	// read an invalid cert, fails
-var_dump(openssl_x509_export($d, $output4));	// read cert from a resource
-var_dump(openssl_x509_export($e, $output5));	// read an array, fails
+var_dump(openssl_x509_export($a, &$output));	// read cert as a binary string
+var_dump(openssl_x509_export($b, &$output2));	// read cert from a filename string
+var_dump(openssl_x509_export($c, &$output3));	// read an invalid cert, fails
+var_dump(openssl_x509_export($d, &$output4));	// read cert from a resource
+var_dump(openssl_x509_export($e, &$output5));	// read an array, fails
 
 $outfilename = tempnam("/tmp", "ssl");
 if ($outfilename === false)

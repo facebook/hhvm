@@ -17,10 +17,10 @@ $numbers = array(
 );
 
 foreach ($numbers as $ns) {
-	$num = unpack("d", pack("H*", $ns)); $num = reset($num);
+	$num = unpack("d", pack("H*", $ns)); $num = reset(&$num);
 	echo "number: ", sprintf("%.17e", $num), "... ";
 	$num2 = unserialize(serialize($num));
-	$repr = unpack("H*", pack("d", $num2)); $repr = reset($repr);
+	$repr = unpack("H*", pack("d", $num2)); $repr = reset(&$repr);
 	if ($repr == $ns)
 		echo "OK\n";
 	else

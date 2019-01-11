@@ -19,14 +19,14 @@ function sort_arrays( $locale, $arrays )
     foreach( $arrays as $array )
     {
         // Sort array values
-        $res_val = ut_coll_sort_with_sort_keys( $coll, $array );
+        $res_val = ut_coll_sort_with_sort_keys( $coll, &$array );
 
         // Concatenate the sorted array and function result
         // with output string.
         $res_dump = "\n" . dump( $array ) .
                     "\n Result: " . dump( $res_val );
-        
-        
+
+
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
 

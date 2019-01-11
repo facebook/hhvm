@@ -29,7 +29,7 @@ s_var_dump(class_implements('fooExtended'));
 
 
 function s_var_dump($arr) {
-   krsort($arr);
+   krsort(&$arr);
    var_dump($arr);
 }
 ?>

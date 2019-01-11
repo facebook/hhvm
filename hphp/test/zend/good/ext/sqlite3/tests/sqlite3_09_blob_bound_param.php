@@ -16,7 +16,7 @@ var_dump($foo);
 
 echo "BINDING Parameter\n";
 var_dump($insert_stmt->bindValue(1, 'a', SQLITE3_TEXT));
-var_dump($insert_stmt->bindParam(2, $foo, SQLITE3_BLOB));
+var_dump($insert_stmt->bindParam(2, &$foo, SQLITE3_BLOB));
 $insert_stmt->execute();
 echo "Closing statement\n";
 var_dump($insert_stmt->close());

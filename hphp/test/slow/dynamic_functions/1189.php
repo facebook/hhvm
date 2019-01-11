@@ -8,7 +8,7 @@ function bar($flag) {
  else {
  $f = 'array_multisort';
  }
-  $f($arr[0], $arr[1], $arr[2]);
+  $f(&$arr[0], &$arr[1], &$arr[2]);
   var_dump($arr);
 }
 bar($argc > 100);

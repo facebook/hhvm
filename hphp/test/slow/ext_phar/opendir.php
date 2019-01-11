@@ -19,7 +19,7 @@ var_dump(scandir('phar://'.__DIR__."/basic.phar/not_a_dir"));
 
 var_dump(opendir('phar://'.__DIR__."/phpunit.phar/File_Iterator-1.3.3"));
 $files = array(readdir(), readdir(), readdir(), readdir(), readdir());
-asort($files);
+asort(&$files);
 var_dump(array_values($files));
 
 $files = scandir('phar://'.__DIR__."/phpunit.phar/File_Iterator-1.3.3");

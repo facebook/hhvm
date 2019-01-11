@@ -7,7 +7,7 @@ class collection implements Iterator {
   }
 
   public function rewind() {
-    reset($this->_elements);
+    reset(&$this->_elements);
   }
 
   public function count() {
@@ -15,18 +15,18 @@ class collection implements Iterator {
   }
 
   public function current() {
-    $element = current($this->_elements);
+    $element = current(&$this->_elements);
     return $element;
   }
 
   public function next() {
-    $element = next($this->_elements);
+    $element = next(&$this->_elements);
     return $element;
   }
 
   public function key() {
     $this->_fillCollection();
-    $element = key($this->_elements);
+    $element = key(&$this->_elements);
     return $element;
   }
 
@@ -49,7 +49,7 @@ try {
   	//irrelevant
 	}
 	echo 'shouldn`t get here';
-	//$dummy = 'this will not crash'; 
+	//$dummy = 'this will not crash';
 	$obj->dummy = 'this will crash';
 } catch (Exception $e) {
 	echo "ok\n";

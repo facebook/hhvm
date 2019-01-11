@@ -29,7 +29,22 @@ function main() {
   $c = 3;
   global $randBits;
   foreach($randBits as $idx => $bit) {
-    $funcs[$bit]($b, $c);
+    try {
+      $funcs[$bit]($b, $c);
+    } catch (InvalidArgumentException $e) {
+      echo "byRef ";
+      $c *= $b;
+    }
+    echo "$idx: $b, $c\n";
+  }
+  $b = 2;
+  $c = 3;
+  foreach($randBits as $idx => $bit) {
+    try {
+      $funcs[$bit]($b, &$c);
+    } catch (InvalidArgumentException $e) {
+      echo "byVal ";
+    }
     echo "$idx: $b, $c\n";
   }
 }

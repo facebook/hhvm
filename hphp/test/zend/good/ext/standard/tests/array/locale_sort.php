@@ -13,6 +13,6 @@ $table = array("AB" => "Alberta",
 "NT" => "Territoires du Nord-Ouest",
 "NU" => "Nunavut",
 "YT" => "Territoire du Yukon");
-asort($table, SORT_LOCALE_STRING);
+asort(&$table, SORT_LOCALE_STRING);
 var_dump($table);
 ?>

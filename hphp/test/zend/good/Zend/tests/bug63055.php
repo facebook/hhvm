@@ -13,6 +13,6 @@ $dummy[1] = &$dummy;
 $matches[1] = &$matches;
 $matches[2] = $dummy;
 
-str_replace("foo", "bar", "foobar", $matches);
+str_replace("foo", "bar", "foobar", &$matches);
 echo "okey";
 ?>

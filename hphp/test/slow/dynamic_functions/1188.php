@@ -7,5 +7,5 @@ if ($argc > 100) {
  $f = 'sscanf';
  }
 $auth = "24\tLewis Carroll";
-$n = $f($auth, "%d\t%s %s", $id, $first, $last);
+$n = $f($auth, "%d\t%s %s", &$id, &$first, &$last);
 echo "$id,$first,$last\n";

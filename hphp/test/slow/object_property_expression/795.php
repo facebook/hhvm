@@ -14,6 +14,6 @@ function assign_ref(&$lv) {
 function main_795() {
 $b = 10;
 $c1 = new C1();
-assign_ref($c1->a);
+assign_ref(&$c1->a);
 var_dump($b);
 }

@@ -5,7 +5,7 @@
 <<__EntryPoint>>
 function main_wait_dont_update_status() {
 $status = -123;
-pcntl_wait($status, WNOHANG);
-pcntl_waitpid(-1, $status, WNOHANG);
+pcntl_wait(&$status, WNOHANG);
+pcntl_waitpid(-1, &$status, WNOHANG);
 var_dump($status);
 }

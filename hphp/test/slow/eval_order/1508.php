@@ -12,6 +12,6 @@ function id($x) {
 <<__EntryPoint>>
 function main_1508() {
 $a = new a();
-id($a)->r($x);
+id($a)->r(&$x);
 var_dump($x);
 }

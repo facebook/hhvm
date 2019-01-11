@@ -10,10 +10,10 @@
 		mb_ereg_search_init( $str, $look_for, $opt );
 		while ( mb_ereg_search_pos() ) {
 			$regs = mb_ereg_search_getregs();
-			array_shift( $regs );
+			array_shift( &$regs );
 			printf( "(%s) (%d) %s\n", $test_enc, mb_ereg_search_getpos(), mb_convert_encoding( ( is_array( $regs ) ? implode( '-', $regs ): '' ), $in_enc, $test_enc ) );
 		}
-	}	
+	}
 	function do_tests( $enc, $opt ) {
 		test_search( $enc, "¢Ï¡¦ ¡¦¢Ï\n", ' (¡¦?¢Ï¡¦?)[[:space:]]', $opt );
 		test_search( $enc, 'abcde abdeabcf anvfabc odu abcd ', '(ab[a-z]+)', $opt );

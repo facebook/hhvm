@@ -65,7 +65,7 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   VERIFY($stmt->clear());
   VERIFY($stmt->reset());
   $id = "DEF";
-  VERIFY($stmt->bindparam(":id", $id, SQLITE3_TEXT));
+  VERIFY($stmt->bindparam(":id", &$id, SQLITE3_TEXT));
   $id = "ABC";
   {
     $res = $stmt->execute();

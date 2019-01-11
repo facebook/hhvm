@@ -73,7 +73,7 @@ for($index = 0; $index < count($values); $index ++) {
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
    elseif (is_array($v)) {
-    asort($v);
+    asort(&$v);
     var_dump($v);
    } else {
     var_dump($v);
@@ -83,7 +83,7 @@ for($index = 0; $index < count($values); $index ++) {
   if (is_array($v) && count($v) > 100)
     var_dump(count($v));
    elseif (is_array($v)) {
-    asort($v);
+    asort(&$v);
     var_dump($v);
    } else {
     var_dump($v);

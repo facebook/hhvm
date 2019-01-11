@@ -1,6 +1,6 @@
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+/* Prototype  : int array_push(&array $stack, mixed $var [, mixed $...])
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -14,10 +14,10 @@ $stack = array ('one' => 'un', 'two' => 'deux');
 $var0 = 'zero';
 
 echo "\n-- Call array_push() --\n";
-var_dump($result = array_push($stack, $var0));
+var_dump($result = array_push(&$stack, $var0));
 
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key($stack) . " => " . current ($stack) . "\n";
+echo key(&$stack) . " => " . current (&$stack) . "\n";
 
 echo "Done";
 ?>

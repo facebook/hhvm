@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -17,7 +17,7 @@ echo "\n-- Call array_key_exists() --\n";
 var_dump($result = array_key_exists('one', $input));
 
 echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key($input) . " => " . current ($input) . "\n";
+echo key(&$input) . " => " . current (&$input) . "\n";
 
 echo "Done";
 ?>

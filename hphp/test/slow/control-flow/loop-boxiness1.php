@@ -9,7 +9,7 @@ function main() {
   $arr = array();
   $arr[0] = -1;
   while (true) {
-    if (foo($arr)) break;
+    if (foo(&$arr)) break;
   }
 }
 

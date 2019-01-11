@@ -11,6 +11,6 @@ $i = 'gi';
 }
  $obj = new A();
  $f = 'dyn_test';
- $c = &$obj->$f($b);
+ $c = &$obj->$f(&$b);
  var_dump($b);
  var_dump($c);

@@ -3,7 +3,7 @@
 function foo() {
   $x = new stdClass;
   $x->foo = 12;
-  extract($x);
+  extract(&$x);
   var_dump(get_defined_vars());
 }
 

@@ -6,7 +6,7 @@
 
 $extra_arg = 10;
 echo "\n-- Testing similar_text() function with more than expected no. of arguments --\n";
-similar_text("abc", "def", $percent, $extra_arg);
+similar_text("abc", "def", &$percent, $extra_arg);
 
 echo "\n-- Testing similar_text() function with less than expected no. of arguments --\n";
 similar_text("abc");

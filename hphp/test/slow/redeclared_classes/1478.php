@@ -18,7 +18,7 @@ class A2 extends C {
 <<__EntryPoint>>
 function main_1478() {
 $a = 'failed';
-A::bar($a);
+A::bar(&$a);
 var_dump($a);
 if (false) {
   class A{
@@ -27,6 +27,6 @@ if (false) {
 }
 }
 $a = 'failed';
-A2::bar($a);
+A2::bar(&$a);
 var_dump($a);
 }

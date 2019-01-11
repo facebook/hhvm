@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
- * Source code: ext/mbstring/php_mbregex.c 
+ * Description: Regular expression match for multibyte string
+ * Source code: ext/mbstring/php_mbregex.c
  */
 
 /*
@@ -57,7 +57,7 @@ $inputs = array(
 /*12*/ "string",
        'string',
        $heredoc,
- 
+
 // object data
 /*15*/ new classA(),
 
@@ -72,7 +72,7 @@ foreach($inputs as $input) {
 		$regs = null;
 	}
 	echo "\n-- Iteration $iterator --\n";
-	var_dump( mb_ereg($input, $string, $regs) );
+	var_dump( mb_ereg($input, $string, &$regs) );
 	var_dump($regs);
 	$iterator++;
 };

@@ -52,7 +52,7 @@ $foo->f5()->a = 1;
 var_dump($foo->o2);
 
 $foo->a1[0] = 1;
-$foo->f7($foo->a1[0]);
+$foo->f7(&$foo->a1[0]);
 var_dump($foo->a1[0]);
 $foo->f1()[0]++;
 var_dump($foo->a1[0]);

@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto resource fsockopen(string hostname, int port [, int errno [, string errstr [, float timeout]]])
- * Description: Open Internet or Unix domain socket connection 
+ * Description: Open Internet or Unix domain socket connection
  * Source code: ext/standard/fsock.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing fsockopen() : basic functionality ***\n";
@@ -25,7 +25,7 @@ $errstr = null;
 $timeout = 1.5;
 
 echo "\nCalling fsockopen() with all possible arguments:\n";
-$client = fsockopen($hostname, $port, $errno, $errstr, $timeout);
+$client = fsockopen($hostname, $port, &$errno, &$errstr, $timeout);
 var_dump($client);
 fclose($client);
 

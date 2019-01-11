@@ -18,7 +18,7 @@ $regex = '/\d/';
 $subject = 'there are 7 words in this sentence.';
 $limit = 10;
 $extra_arg = 10;
-var_dump(preg_replace_callback($regex, 'integer_word', $subject, $limit, $count, $extra_arg));
+var_dump(preg_replace_callback($regex, 'integer_word', $subject, $limit, &$count, $extra_arg));
 //Testing preg_replace_callback() with one less than the expected number of arguments
 echo "\n-- Testing preg_replace_callback() function with less than expected no. of arguments --\n";
 $regex = '/\d/';

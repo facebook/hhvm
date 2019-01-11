@@ -3,6 +3,7 @@
 
 <<__EntryPoint>>
 function main_1144() {
-extract(array('a' => 'aval'));
- var_dump($a);
+  $arr = array('a' => 'aval');
+  extract(&$arr);
+  var_dump($a);
 }

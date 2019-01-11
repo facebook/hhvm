@@ -6,7 +6,7 @@
 
 /*
  * Testing the functionality of array_unshift() by passing different
- * single quoted strings for $var argument that is prepended to the array 
+ * single quoted strings for $var argument that is prepended to the array
  * passed through $array argument
 */
 
@@ -29,12 +29,12 @@ $iterator = 1;
 foreach($vars as $var) {
   echo "-- Iteration $iterator --\n";
   $temp_array = $array;  // assign $array to another temporary $temp_array
-  
+
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
-  var_dump( array_unshift($temp_array, $var) );
-  
+  var_dump( array_unshift(&$temp_array, $var) );
+
   // dump the resulting array
   var_dump($temp_array);
 
@@ -42,7 +42,7 @@ foreach($vars as $var) {
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var, "hello", 'world') );
+  var_dump( array_unshift(&$temp_array, $var, "hello", 'world') );
 
   // dump the resulting array
   var_dump($temp_array);

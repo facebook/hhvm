@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -33,7 +33,7 @@ foreach($character_classes as $string => $pattern) {
 	}
 	// make sure any multibyte output is in base 64
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_ereg($pattern, $string, $regs));
+	var_dump(mb_ereg($pattern, $string, &$regs));
 	base64_encode_var_dump($regs);
 	$iterator++;
 }

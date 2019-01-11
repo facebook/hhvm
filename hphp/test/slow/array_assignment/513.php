@@ -8,7 +8,8 @@ class c {
 function setNullVariantHelper($f, $value) {
   $a = array();
   $obj = new c;
-  $obj->$f($a[$obj] = 1, $value);
+  $a[$obj] = 1;
+  $obj->$f(&$a[$obj], $value);
   var_dump($a[$obj] = 1);
 }
 function setNullVariant($value) {

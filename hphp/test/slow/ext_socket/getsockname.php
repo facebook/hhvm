@@ -10,7 +10,7 @@ $f = '/tmp/socktest'.rand();
 $ret = socket_bind($s, $f);
 var_dump($ret);
 
-$ret = socket_getsockname($s, $n);
+$ret = socket_getsockname($s, &$n);
 var_dump($ret);
 
 var_dump($f);

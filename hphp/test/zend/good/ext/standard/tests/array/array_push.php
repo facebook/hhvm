@@ -1,6 +1,6 @@
 <?php
 
-/* Prototype: int array_push( array &array );
+/* Prototype: int array_push(& array &array );
  * Description: Push one or more elements onto the end of array
  and returns the new number of elements in the array.
  */
@@ -34,16 +34,16 @@ echo "\n*** Testing Error Conditions ***\n";
 var_dump( array_push() );
 
 /* Scalar argument */
-var_dump( array_push($number, 22) );
+var_dump( array_push(&$number, 22) );
 
 /* String argument */
-var_dump( array_push($str, 22) );
+var_dump( array_push(&$str, 22) );
 
 /* Invalid Number of arguments */
-var_dump( array_push($mixed_array[1],1,2) );
+var_dump( array_push(&$mixed_array[1],1,2) );
 
 /* Empty Array as argument */
-var_dump( array_push($empty_array, 2) );
+var_dump( array_push(&$empty_array, 2) );
 
 
 /* Loop to test normal functionality with different arrays inputs */
@@ -51,17 +51,17 @@ echo "\n*** Testing with various array inputs ***\n";
 
 $counter = 1;
 foreach( $mixed_array as $sub_array )
-{ 
+{
  echo "\n-- Input Array for Iteration $counter is --\n";
  print_r( $sub_array );
  echo "\nOutput after push is :\n";
- var_dump( array_push($sub_array, 22, "abc") );
+ var_dump( array_push(&$sub_array, 22, "abc") );
  $counter++;
-} 
+}
 
 /* Checking for return value and the new array formed from push operation */
 echo "\n*** Checking for return value and the new array formed from push operation ***\n";
-var_dump( array_push($mixed_array[2], 22, 33, "44") );
+var_dump( array_push(&$mixed_array[2], 22, 33, "44") );
 var_dump( $mixed_array[2] );
 
 echo"\nDone";

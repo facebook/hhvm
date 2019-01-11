@@ -3019,9 +3019,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        instr (IBase (BaseC (base_offset, base_mode))))
        1
 
-and get_pass_by_ref_hint expr =
-  if expr_starts_with_ref expr then Ref else Cell
-
 and strip_ref e =
   match snd e with
   | A.Unop (A.Uref, e) -> e
@@ -3095,13 +3092,10 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
-  let use_hint = Emit_env.is_hh_syntax_enabled () in
-  let throw_on_mismatch = use_hint &&
-    (
-      Hhbc_options.throw_on_call_by_ref_annotation_mismatch
-        !Hhbc_options.compiler_options ||
-      Emit_env.is_in_rx_body env
-    ) in
+  let throw_on_mismatch =
+    Hhbc_options.throw_on_call_by_ref_annotation_mismatch
+      !Hhbc_options.compiler_options ||
+    Emit_env.is_in_rx_body env in
 
   let rec aux i rem_args inout_setters =
     match rem_args with
@@ -3180,7 +3174,7 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in next @@
       let param_pos, _ = expr in
-      let hint = if use_hint then get_pass_by_ref_hint expr else Any in
+      let hint = if expr_starts_with_ref expr then Ref else Cell in
       let expr = strip_ref expr in
       if i >= args_count then
         emit_expr ~need_ref:false env expr

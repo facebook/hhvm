@@ -22,7 +22,7 @@ var_dump(get_magic_quotes_gpc());
 var_dump(get_magic_quotes_runtime());
 
 
-clock_getres(CLOCK_THREAD_CPUTIME_ID, $sec, $nsec);
+clock_getres(CLOCK_THREAD_CPUTIME_ID, &$sec, &$nsec);
 var_dump($sec);
 var_dump($nsec);
 

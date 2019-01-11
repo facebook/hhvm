@@ -7,8 +7,8 @@ function f2($a=array(bar)) {
 	return $a[0];
 }
 function f3($a=array(bar=>0)) {
-	reset($a);
-	return key($a);
+	reset(&$a);
+	return key(&$a);
 }
 echo bar."\n";
 echo f1()."\n";

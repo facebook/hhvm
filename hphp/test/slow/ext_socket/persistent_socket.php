@@ -53,8 +53,8 @@ function test_client($scheme, $port) {
 function do_request($scheme, $port, $context) {
   $client = stream_socket_client(
     "$scheme://127.0.0.1:$port",
-    $errno,
-    $errstr,
+    &$errno,
+    &$errstr,
     1.0,
     STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT,
     $context
@@ -94,14 +94,14 @@ $certdata = array('countryName' => 'US',
 
 // Generate the certificate
 $pkey = openssl_pkey_new();
-$cert = openssl_csr_new($certdata, $pkey);
+$cert = openssl_csr_new($certdata, &$pkey);
 $cert = openssl_csr_sign($cert, null, $pkey, 1);
 
 // Generate and save the PEM file
 $pem_passphrase = 'testing';
 $pem = array();
-openssl_x509_export($cert, $pem[0]);
-openssl_pkey_export($pkey, $pem[1], $pem_passphrase);
+openssl_x509_export($cert, &$pem[0]);
+openssl_pkey_export($pkey, &$pem[1], $pem_passphrase);
 if (file_put_contents($pemfile, implode($pem)) === false) {
   echo "Error writing PEM file.\n";
   die;
@@ -125,8 +125,8 @@ foreach ($schemes as $i => $scheme) {
     $port = rand(50000, 65535);
     $server = @stream_socket_server(
       "$scheme://127.0.0.1:$port",
-      $errno,
-      $errstr,
+      &$errno,
+      &$errstr,
       STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,
       $contexts[$i]
     );
@@ -143,7 +143,7 @@ foreach ($schemes as $i => $scheme) {
   $pid = pcntl_fork();
   if( $pid ) {
     test_server($server);
-    pcntl_wait($status);
+    pcntl_wait(&$status);
     exit;
   } else {
     test_client($scheme, $port);

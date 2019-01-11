@@ -10,9 +10,9 @@ function f() {
 }
 function test() {
   $x = new X;
-  $x->y(f(),$x->x);
+  $x->y(f(),&$x->x);
   var_dump($x);
-  $x->y(0,$x->x);
+  $x->y(0,&$x->x);
   var_dump($x);
 }
 

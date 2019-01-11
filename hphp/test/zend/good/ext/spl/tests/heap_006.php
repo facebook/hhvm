@@ -1,6 +1,6 @@
 <?php
 $input = range(1,100);
-shuffle($input);
+shuffle(&$input);
 
 $h = new SplMaxHeap();
 

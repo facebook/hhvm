@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
- * Source code: ext/standard/array.c 
+ * Description: Pops an element off the beginning of the array
+ * Source code: ext/standard/array.c
  */
 
 /*
@@ -18,7 +18,7 @@ var_dump( array_shift() );
 echo "\n-- Testing array_shift() function with more than expected no. of arguments --\n";
 $stack = array(1, 2);
 $extra_arg = 10;
-var_dump( array_shift($stack, $extra_arg) );
+var_dump( array_shift(&$stack, $extra_arg) );
 
 echo "Done";
 ?>

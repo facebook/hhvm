@@ -7,6 +7,6 @@ function f(&$a) {
  <<__EntryPoint>>
 function main_1075() {
 $a = 10;
- f($a);
+ f(&$a);
  var_dump($a);
 }

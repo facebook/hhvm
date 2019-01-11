@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : array each(array $arr)
+/* Prototype  : array each(&array $arr)
  * Description: Return the currently pointed key..value pair in the passed array, 
  * and advance the pointer to the next element 
  * Source code: Zend/zend_builtin_functions.c
@@ -19,7 +19,7 @@ var_dump( each() );
 echo "\n-- Testing each() function with more than expected no. of arguments --\n";
 $arr = array(1, 2);
 $extra_arg = 10;
-var_dump( each($arr, $extra_arg) );
+var_dump( each(&$arr, $extra_arg) );
 
 echo "Done";
 ?>

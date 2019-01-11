@@ -2,9 +2,9 @@
 
 function test_me($desc) {
   $pipes = null;
-  $process = proc_open(__DIR__."/test_proc_open.sh", $desc, $pipes);
+  $process = proc_open(__DIR__."/test_proc_open.sh", $desc, &$pipes);
   $status = proc_get_status($process);
-  pcntl_waitpid($status["pid"], $child_status);
+  pcntl_waitpid($status["pid"], &$child_status);
 }
 
 

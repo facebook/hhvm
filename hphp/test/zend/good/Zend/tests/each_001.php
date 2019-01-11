@@ -1,5 +1,5 @@
 <?php
 
-each($foo);
+each(&$foo);
 
 ?>

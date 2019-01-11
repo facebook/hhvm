@@ -1,6 +1,6 @@
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+/* Prototype  : mixed array_shift(&array &$stack)
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -16,7 +16,7 @@ var_dump($array);
 
 echo "\n-- After shift: --\n";
 echo "Returned value:\t";
-var_dump(array_shift($array));
+var_dump(array_shift(&$array));
 echo "New array:\n";
 var_dump($array);
 

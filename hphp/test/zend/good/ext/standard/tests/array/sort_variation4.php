@@ -23,17 +23,17 @@ $unsorted_numerics =  array( &$value1 , &$value2, &$value3);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
-var_dump( sort($temp_array) ); // expecting : bool(true)
+var_dump( sort(&$temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' = SORT_REGULAR --\n";
 $temp_array = &$unsorted_numerics;
-var_dump( sort($temp_array, SORT_REGULAR) ); // expecting : bool(true)
+var_dump( sort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' = SORT_NUMERIC --\n";
 $temp_array = &$unsorted_numerics;
-var_dump( sort($temp_array, SORT_NUMERIC) ); // expecting : bool(true)
+var_dump( sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";

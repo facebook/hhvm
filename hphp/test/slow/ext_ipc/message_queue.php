@@ -28,7 +28,7 @@ msg_send($queue, 1, "ok");
 msg_receive($queue, 2, &$type, 100, &$msg);
 var_dump($msg);
 
-$ret = @msg_send($queue, 0, 'msg', false, false, $s_error_code);
+$ret = @msg_send($queue, 0, 'msg', false, false, &$s_error_code);
 var_dump($ret);
 var_dump(22 === $s_error_code); // 22 - invalid argument
 

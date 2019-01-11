@@ -1,5 +1,5 @@
 <?php
-parse_str("a=1&b=2", $_GET);
+parse_str("a=1&b=2", &$_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
 _filter_snapshot_globals();
 
@@ -20,7 +20,7 @@ $res = filter_input_array(INPUT_GET, array(
 					'filter' => FILTER_CALLBACK,
 					'options' => 'myfunc'
 					),
-				'b' => FILTER_VALIDATE_INT 
+				'b' => FILTER_VALIDATE_INT
 		)
 	);
 

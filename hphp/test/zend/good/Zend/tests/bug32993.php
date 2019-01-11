@@ -3,11 +3,11 @@ class Test implements Iterator {
 
     public $arr = array();
 
-    public function rewind()    { return reset($this->arr); }
+    public function rewind()    { return reset(&$this->arr); }
     public function current()   { throw new Exception(); }
-    public function key()       { return key($this->arr); }
-    public function next()      { return next($this->arr); }
-    public function valid()     { return (current($this->arr) !== false); }
+    public function key()       { return key(&$this->arr); }
+    public function next()      { return next(&$this->arr); }
+    public function valid()     { return (current(&$this->arr) !== false); }
 }
 
 $t = new Test();

@@ -5,7 +5,7 @@ function test(&$x) {
 	$x = $class->prepare('SELECT 1');
 }
 
-test($foo);
+test(&$foo);
 
 echo "done\n";
 

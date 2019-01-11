@@ -18,11 +18,11 @@ function refVal(&$x, $y) {
 
 echo "\n\n-- Val, Ref --\n";
 $a = 'original.a';
-valRef($a, $a);
+valRef($a, &$a);
 var_dump($a);
 
 echo "\n\n-- Ref, Val --\n";
 $b = 'original.b';
-refVal($b, $b);
+refVal(&$b, $b);
 var_dump($b);
 ?>

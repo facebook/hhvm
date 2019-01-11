@@ -16,12 +16,12 @@ var_dump(preg_replace_callback_array(1,2,3));
 // Provide an integer subject; no warning, just null
 var_dump(preg_replace_callback_array(array(), 3));
 $a = 5;
-var_dump(preg_replace_callback_array(1,2,3,$a));
+var_dump(preg_replace_callback_array(1,2,3,&$a));
 $a = "";
-var_dump(preg_replace_callback_array(array("" => ""),"","",$a));
+var_dump(preg_replace_callback_array(array("" => ""),"","",&$a));
 $a = array();
 $b = "";
-var_dump(preg_replace_callback_array($a, $a, $a, $a, $b));
+var_dump(preg_replace_callback_array($a, $a, $a, &$a, $b));
 var_dump($b);
 $b = "";
 // PHP 7 used preg_replace_callback here, but we are testing
@@ -29,7 +29,7 @@ $b = "";
 // Testing multiple invalid. We only catch the first invalid one
 // even if there are more - that matches PHP 7
 var_dump(preg_replace_callback_array(
-  array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, $b)
+  array("xx" => "notValid1", "yy" => "notValid2"), $a, -1, &$b)
 );
 var_dump($b);
 var_dump(preg_replace_callback_array(array('/\w' => 'f'), 'z'));

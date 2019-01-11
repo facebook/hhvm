@@ -45,7 +45,7 @@ function dump_func($func) {
   }
 }
 function verify_classes($classes) {
-  ksort($classes);
+  ksort(&$classes);
   foreach ($classes as $cls) {
     verify_class($cls);
    }

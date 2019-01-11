@@ -13,7 +13,7 @@ while($it->valid()) {
   $list[] = $it->getSubPath();
   $it->next();
 }
-asort($list);
+asort(&$list);
 foreach ($list as $item) {
 	echo $item . "\n";
 }

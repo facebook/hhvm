@@ -2,7 +2,8 @@
 
 class A {
   public function __construct() {
-    var_dump(extract(['this' => 'a']));
+    $arr = ['this' => 'a'];
+    var_dump(extract(&$arr));
     var_dump($this);
   }
 }

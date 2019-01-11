@@ -9,5 +9,5 @@ var_dump(array_combine(array(), array()));
 var_dump(array_chunk(1));
 var_dump(array_chunk(array()));
 $a = array(1, 2);
-var_dump(asort($a, 100000));
+var_dump(asort(&$a, 100000));
 }

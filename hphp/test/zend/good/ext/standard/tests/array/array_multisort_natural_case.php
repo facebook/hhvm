@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE], ...])
- * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL 
+ * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_multisort() : natural sorting case-sensitive\n";
@@ -27,7 +27,8 @@ $b = array(
 	'3 e',
 );
 
-array_multisort($b, SORT_NATURAL, $a);
+$natural = SORT_NATURAL;
+array_multisort(&$b, &$natural, &$a);
 
 var_dump($a, $b);
 

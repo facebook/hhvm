@@ -9,7 +9,7 @@ class ai implements Iterator {
 	}
 
 	function rewind() {
-		reset($this->array);
+		reset(&$this->array);
 		$this->next();
 	}
 
@@ -26,8 +26,8 @@ class ai implements Iterator {
 	}
 
 	function next() {
-		list($this->key, $this->current) = each($this->array);
-//		list($key, $current) = each($this->array);
+		list($this->key, $this->current) = each(&$this->array);
+//		list($key, $current) = each(&$this->array);
 //		$this->key = $key;
 //		$this->current = $current;
 	}

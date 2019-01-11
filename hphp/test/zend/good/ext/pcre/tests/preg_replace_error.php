@@ -14,7 +14,7 @@ $replace = '1';
 $subject = 'string_val';
 $limit = 10;
 $extra_arg = 10;
-var_dump(preg_replace($regex, $replace, $subject, $limit, $count, $extra_arg));
+var_dump(preg_replace($regex, $replace, $subject, $limit, &$count, $extra_arg));
 //Testing preg_replace() with one less than the expected number of arguments
 echo "\n-- Testing preg_replace() function with less than expected no. of arguments --\n";
 $regex = '/\w/';

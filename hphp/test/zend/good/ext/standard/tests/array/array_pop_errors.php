@@ -29,16 +29,16 @@ echo "\n*** Testing Error Conditions ***\n";
 var_dump( array_pop() );
 
 /* Scalar argument */
-var_dump( array_pop($number) );
+var_dump( array_pop(&$number) );
 
 /* String argument */
-var_dump( array_pop($str) );
+var_dump( array_pop(&$str) );
 
 /* Invalid Number of arguments */
-var_dump( array_pop($mixed_array[1],$mixed_array[2]) );
+var_dump( array_pop(&$mixed_array[1],$mixed_array[2]) );
 
 /* Empty Array as argument */
-var_dump( array_pop($empty_array) );
+var_dump( array_pop(&$empty_array) );
 
 echo"\nDone";
 ?>

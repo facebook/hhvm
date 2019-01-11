@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array 
+ * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
@@ -70,7 +70,7 @@ $values = array(
 
 foreach($values as $key => $value) {
       echo "\n-- Arg value $key --\n";
-      getimagesize($imagefile, $value);
+      getimagesize($imagefile, &$value);
       var_dump(bin2hex($value["APP0"]));
 };
 

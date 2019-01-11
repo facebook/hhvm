@@ -7,7 +7,8 @@
 
 echo "*** Testing array_multisort() : Testing with empty array ***\n";
 
-var_dump(array_multisort(array()));
+$arr = array();
+var_dump(array_multisort(&$arr));
 
 ?>
 ===DONE===

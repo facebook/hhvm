@@ -10,6 +10,6 @@ $i = 'gi';
 }
 }
  $f = 'dyn_test';
- $e = A::$f($d);
+ $e = A::$f(&$d);
  var_dump($d);
  var_dump($e);

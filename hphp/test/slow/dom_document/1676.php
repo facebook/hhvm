@@ -72,7 +72,7 @@ $a = array();
 foreach ($ents AS $key=>$node) {
   $a[$key] = $node;
 }
-ksort($a);
+ksort(&$a);
 
 foreach ($a as $key => $node) {
  echo "Key: $key Name: ".$node->nodeName."\n";

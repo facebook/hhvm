@@ -19,7 +19,7 @@ function run_with_iterator(Iterator $it, $root = '') {
       (string) $data
     );
   }
-  ksort($out);
+  ksort(&$out);
   var_dump($out);
 }
 

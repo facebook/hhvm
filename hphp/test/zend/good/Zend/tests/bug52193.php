@@ -17,7 +17,7 @@ var_dump($y());
 $items = range(1, 5);
 $func = function(){ return 'just a test'; };
 
-array_splice($items, 0 , 4, $func);
+array_splice(&$items, 0 , 4, $func);
 var_dump($items);
 
 ?>

@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array 
+ * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
 
@@ -88,10 +88,10 @@ foreach($arrays as $array) {
   echo "\n-- Iteration $iterator --";
 
   /* with default arguments */
-  // returns element count in the resulting array after arguments are pushed to 
+  // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var) );
+  var_dump( array_unshift(&$temp_array, $var) );
 
   // dump the resulting array
   var_dump($temp_array);
@@ -100,7 +100,7 @@ foreach($arrays as $array) {
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var, "hello", 'world') );
+  var_dump( array_unshift(&$temp_array, $var, "hello", 'world') );
 
   // dump the resulting array
   var_dump($temp_array);

@@ -7,7 +7,8 @@ class classA
 }
 
 $A = new classA();
-var_dump ( extract(get_object_vars($A),EXTR_REFS));
+$arr = get_object_vars($A);
+var_dump ( extract(&$arr, EXTR_REFS));
 
 echo "Done\n";
 ?>

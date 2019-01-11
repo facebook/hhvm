@@ -25,7 +25,7 @@ class counter {
     global $test_cnt;
     $test_cnt--;
   }
-  
+
   static public function destroy(&$obj) {
   	$obj = NULL;
   	}
@@ -37,7 +37,7 @@ Show();
 $obj2 = new counter;
 $obj2->Show();
 Show();
-counter::destroy($obj1);
+counter::destroy(&$obj1);
 Show();
 // or uncomment this line and it works
 //counter::destroy($obj2);

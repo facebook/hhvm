@@ -27,7 +27,7 @@ $vars = array(
 );
 
 foreach ($vars as $var) {
-	settype($var, "null");
+	settype(&$var, "null");
 	var_dump($var);
 }
 

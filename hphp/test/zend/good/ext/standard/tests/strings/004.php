@@ -2,7 +2,7 @@
 function stats($f, $a) {
     $times = 90000;
     print "$f\n";
-    ksort($a);
+    ksort(&$a);
     foreach($a as $k => $v)
         print "$k: $v: " . sprintf('%0.3f', $v / $times) . "\n";
 }
@@ -10,7 +10,7 @@ $a = array();
 $times = 90000;
 for ($i = 0; $i < $times; $i++) {
     $p = range(1,4);
-    shuffle($p);
+    shuffle(&$p);
     $s = join('', $p);
     if (empty($a[$s])) $a[$s] = 0; 
     $a[$s]++;

@@ -5,7 +5,7 @@ class X {
  $ref = 1;
  }
   function bar() {
-    $this->ref($this->priv);
+    $this->ref(&$this->priv);
   }
 }
 class Y extends X {

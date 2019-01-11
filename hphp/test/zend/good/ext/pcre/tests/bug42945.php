@@ -1,6 +1,6 @@
 <?php
 
-var_dump(preg_match_all('/\b/', "a'", $m, PREG_OFFSET_CAPTURE));
+var_dump(preg_match_all('/\b/', "a'", &$m, PREG_OFFSET_CAPTURE));
 var_dump($m);
 
 var_dump(preg_split('/\b/', "a'"));

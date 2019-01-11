@@ -9,15 +9,15 @@ $a = array(
 );
 
 // Set the pointer of $a to 'b' and the pointer of 'b' to 'CC'
-reset($a);
-next($a);
-next($a['b']);
-next($a['b']);
-next($a['b']);
+reset(&$a);
+next(&$a);
+next(&$a['b']);
+next(&$a['b']);
+next(&$a['b']);
 
-var_dump(key($a['b']));
+var_dump(key(&$a['b']));
 foreach($a as $k => $d)
 {
 }
 // Alternatively $c = $a; and foreachloop removal will cause identical results.
-var_dump(key($a['b']));
+var_dump(key(&$a['b']));

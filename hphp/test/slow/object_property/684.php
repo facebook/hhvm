@@ -21,13 +21,13 @@ else {
  }
  }
 $vars = get_class_vars('A');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 A::$a = 1;
 $vars = get_class_vars('A');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('B');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 }

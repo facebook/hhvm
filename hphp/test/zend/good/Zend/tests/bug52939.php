@@ -1,6 +1,6 @@
 <?php
 $ar1 = array("row1" => 2, "row2" => 1);
-var_dump(array_multisort($ar1));
+var_dump(array_multisort(&$ar1));
 var_dump($ar1);
 
 $ar1 = array("row1" => 2, "row2" => 1);

@@ -15,7 +15,7 @@ function test() {
   $a = 123;
   $b = &$a;
   $c = 'abc';
-  blah('a', $a, $b, $c);
+  blah('a', &$a, &$b, &$c);
   var_dump($a);
 }
 

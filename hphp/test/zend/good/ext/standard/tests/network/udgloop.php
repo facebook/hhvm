@@ -4,7 +4,7 @@
 		die('Temporary socket /tmp/$uniqid.sock already exists.');
 
 	/* Setup socket server */
-	$server = stream_socket_server("udg:///tmp/$uniqid.sock", $errno, $errstr, STREAM_SERVER_BIND);
+	$server = stream_socket_server("udg:///tmp/$uniqid.sock", &$errno, &$errstr, STREAM_SERVER_BIND);
 	if (!$server) {
 		die('Unable to create AF_UNIX socket [server]');
 	}

@@ -7,7 +7,7 @@ class A {
  static $d;
  }
 function f($a) {
- asort($a);
+ asort(&$a);
  foreach ($a as $v) {
  var_dump($v->getName());
  }

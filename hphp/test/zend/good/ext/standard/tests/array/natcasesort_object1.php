@@ -29,7 +29,7 @@ class for_string_natcasesort
 
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   new for_string_natcasesort("axx"), new for_string_natcasesort("t"),
   new for_string_natcasesort("w"), new for_string_natcasesort("py"),
   new for_string_natcasesort("apple"), new for_string_natcasesort("Orange"),
@@ -40,7 +40,7 @@ $unsorted_str_obj = array (
 echo "\n-- Testing natcasesort() by supplying various object arrays --\n";
 
 // testing natcasesort() function by supplying string object array
-var_dump(natcasesort($unsorted_str_obj) );
+var_dump(natcasesort(&$unsorted_str_obj) );
 var_dump($unsorted_str_obj);
 
 echo "Done";

@@ -9,5 +9,5 @@ function foo() {
 <<__EntryPoint>>
 function main_695() {
 foo()->v[0] += 5;
-var_dump(shuffle(foo()->v));
+var_dump(shuffle(&foo()->v));
 }

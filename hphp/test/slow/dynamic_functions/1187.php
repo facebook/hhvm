@@ -17,7 +17,7 @@ if ($a) {
 }
 }
 $goo = 'goo';
-goo(foo());
-$goo(foo());
+goo(&foo());
+$goo(&foo());
 bar(foo());
 }

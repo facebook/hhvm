@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed prev(array $array_arg)
- * Description: Move array argument's internal pointer to the previous element and return it 
+ * Description: Move array argument's internal pointer to the previous element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -14,16 +14,16 @@
 echo "*** Testing prev() : usage variations ***\n";
 
 $subarray = array(9,8,7);
-end($subarray);
+end(&$subarray);
 
 $array_arg = array ($subarray, 'a' => 'z');
-end($array_arg);
+end(&$array_arg);
 
 echo "\n-- Pass a two-dimensional array as \$array_arg --\n";
-var_dump(prev($array_arg));
-var_dump(prev($array_arg));
+var_dump(prev(&$array_arg));
+var_dump(prev(&$array_arg));
 
 echo "\n-- Pass a sub-array as \$array_arg --\n";
-var_dump(prev($array_arg[0]));
+var_dump(prev(&$array_arg[0]));
 ?>
 ===DONE===

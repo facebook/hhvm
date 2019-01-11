@@ -8,7 +8,7 @@ $ds = array(
 $cat = proc_open(
 		"/bin/cat",
 		$ds,
-		$pipes
+		&$pipes
 		);
 
 proc_close($cat);

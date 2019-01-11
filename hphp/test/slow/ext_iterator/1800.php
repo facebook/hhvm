@@ -15,7 +15,7 @@ foreach ($ite as $filename=>$cur) {
   $nbfiles++;
   $files[] = "$filename => $filesize\n";
 }
-asort($files);
+asort(&$files);
 var_dump(array_values($files));
 echo "Total: $nbfiles files, $bytestotal bytes\n";
 }

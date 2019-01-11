@@ -27,7 +27,7 @@ $vars = array(
 );
 
 foreach ($vars as $var) {
-	settype($var, "double");
+	settype(&$var, "double");
 	var_dump($var);
 }
 

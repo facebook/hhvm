@@ -6,7 +6,7 @@ class X {
 }
 function test($a) {
   $b = 1;
-  return new X($a, $b);
+  return new X($a, &$b);
 }
 
 <<__EntryPoint>>

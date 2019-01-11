@@ -18,7 +18,7 @@ var_dump( natcasesort() );
 echo "\n-- Testing natcasesort() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( natcasesort($array_arg, $extra_arg) );
+var_dump( natcasesort(&$array_arg, $extra_arg) );
 
 echo "Done";
 ?>

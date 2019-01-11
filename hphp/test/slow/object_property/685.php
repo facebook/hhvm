@@ -45,20 +45,20 @@ class Z {
   static $z2 = 2;
 }
 $vars = get_class_vars('A');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('B');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('C');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('X');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('Y');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 $vars = get_class_vars('Z');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);

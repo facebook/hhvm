@@ -16,12 +16,12 @@ $value3 = 555;
 
 echo "\n-- Initial test --\n";
 $array =  array( &$value1 , &$value2, &$value3);
-var_dump( natcasesort($array) );
+var_dump( natcasesort(&$array) );
 var_dump($array);
 
 echo "\n-- Change \$value1 --\n";
 $value1 = -29;
-var_dump( natcasesort($array) );
+var_dump( natcasesort(&$array) );
 var_dump($array);
 
 echo "Done";

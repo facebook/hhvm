@@ -9,6 +9,6 @@ function f(&$a) {
 function main_1082() {
 $a = new T();
  $a->b = 10;
- f($a->b);
+ f(&$a->b);
  var_dump($a);
 }

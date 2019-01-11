@@ -32,6 +32,6 @@ function getProps($class, $obj) {
 <<__EntryPoint>>
 function main_set_accessible() {
 $ret = array_merge(getProps('A', new A), getProps('E', 'E'));
-ksort($ret);
+ksort(&$ret);
 var_dump($ret);
 }

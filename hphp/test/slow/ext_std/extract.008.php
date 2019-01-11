@@ -2,12 +2,15 @@
 
 class A {
   public function __construct() {
-    extract(['this' => 'a']);
+    $arr = ['this' => 'a'];
+    extract(&$arr);
     var_dump($this);
     unset($this);
-    extract(['this' => 'a']);
+    $arr = ['this' => 'a'];
+    extract(&$arr);
     var_dump($this);
-    extract(['this' => 'b']);
+    $arr = ['this' => 'b'];
+    extract(&$arr);
     var_dump($this);
   }
 }
@@ -15,9 +18,11 @@ class A {
 
 <<__EntryPoint>>
 function main_extract_008() {
-new A();
-extract(['this' => 'a']);
-var_dump($this);
-extract(['this' => 'b']);
-var_dump($this);
+  new A();
+  $arr = ['this' => 'a'];
+  extract(&$arr);
+  var_dump($this);
+  $arr = ['this' => 'b'];
+  extract(&$arr);
+  var_dump($this);
 }

@@ -8,7 +8,7 @@ for($i = 0; $i < 41; $i++) {
 foreach($it as $key=>$value) {
   $vals[$key] = $value['key'];
 }
-ksort($vals);
+ksort(&$vals);
 var_dump($vals);
 
 ?>

@@ -10,6 +10,6 @@ function f(&$a) {
 function main_1080() {
 $a = new T();
  $a->b = 10;
- f($a->b);
+ f(&$a->b);
  var_dump($a);
 }

@@ -53,11 +53,11 @@ function ut_coll_compare( $coll, $str1, $str2 )
 }
 function ut_coll_sort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? $coll->sort( $arr, $sort_flag ) : collator_sort( $coll, $arr, $sort_flag );
+    return $GLOBALS['oo-mode'] ? $coll->sort( &$arr, $sort_flag ) : collator_sort( $coll, &$arr, $sort_flag );
 }
 function ut_coll_sort_with_sort_keys( $coll, &$arr )
 {
-    return $GLOBALS['oo-mode'] ? $coll->sortWithSortKeys( $arr ) : collator_sort_with_sort_keys( $coll, $arr );
+    return $GLOBALS['oo-mode'] ? $coll->sortWithSortKeys( &$arr ) : collator_sort_with_sort_keys( $coll, &$arr );
 }
 function ut_coll_get_sort_key( $coll, $str )
 {
@@ -65,7 +65,7 @@ function ut_coll_get_sort_key( $coll, $str )
 }
 function ut_coll_asort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ? $coll->asort( $arr, $sort_flag ) : collator_asort( $coll, $arr, $sort_flag );
+    return $GLOBALS['oo-mode'] ? $coll->asort( &$arr, $sort_flag ) : collator_asort( $coll, &$arr, $sort_flag );
 }
 function ut_coll_get_locale( $coll, $type )
 {
@@ -143,7 +143,7 @@ function ut_nfmt_parse( $fmt, $string, $type = NumberFormatter::TYPE_DOUBLE, &$p
     if(is_null($position)) {
     return $GLOBALS['oo-mode'] ? $fmt->parse( $string, $type ) : numfmt_parse( $fmt, $string, $type );
     } else {
-    return $GLOBALS['oo-mode'] ? $fmt->parse( $string, $type, $position ) : numfmt_parse( $fmt, $string, $type, $position );
+    return $GLOBALS['oo-mode'] ? $fmt->parse( $string, $type, &$position ) : numfmt_parse( $fmt, $string, $type, &$position );
     }
 }
 function ut_nfmt_format_currency( $fmt, $number, $currency )
@@ -153,9 +153,9 @@ function ut_nfmt_format_currency( $fmt, $number, $currency )
 function ut_nfmt_parse_currency( $fmt, $string, &$currency, &$position = null )
 {
     if(is_null($position)) {
-    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, $currency ) : numfmt_parse_currency( $fmt, $string, $currency );
+    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, &$currency ) : numfmt_parse_currency( $fmt, $string, &$currency );
     } else {
-    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, $currency, $position ) : numfmt_parse_currency( $fmt, $string, $currency, $position );
+    return $GLOBALS['oo-mode'] ? $fmt->parseCurrency( $string, &$currency, &$position ) : numfmt_parse_currency( $fmt, $string, &$currency, &$position );
    }
 }
 function ut_nfmt_set_attribute( $fmt, $attribute, $value )
@@ -383,11 +383,11 @@ function ut_datefmt_format( $fmt , $value )
 }
 function ut_datefmt_parse( $fmt , $value , &$parse_pos=0 )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->parse(  $value ,$parse_pos ) : datefmt_parse( $fmt ,  $value,$parse_pos);
+    return $GLOBALS['oo-mode'] ? $fmt->parse(  $value ,&$parse_pos ) : datefmt_parse( $fmt ,  $value,&$parse_pos);
 }
 function ut_datefmt_localtime( $fmt , $value , &$parse_pos=0 )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->localtime(  $value , $parse_pos ) : datefmt_localtime( $fmt ,  $value , $parse_pos );
+    return $GLOBALS['oo-mode'] ? $fmt->localtime(  $value , &$parse_pos ) : datefmt_localtime( $fmt ,  $value , &$parse_pos );
 }
 
 function ut_resourcebundle_create( $locale, $bundle, $fallback=true )

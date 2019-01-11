@@ -11,6 +11,6 @@ class X {
 function main_691() {
 define('FOO', 'foo');
 $vars = get_class_vars('X');
- asort($vars);
+ asort(&$vars);
  var_dump($vars);
 }

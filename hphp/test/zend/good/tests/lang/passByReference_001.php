@@ -13,12 +13,12 @@ function g (&$arg1, &$arg2)
 $a = 7;
 $b = 15;
 
-f($a, $b);
+f($a, &$b);
 
 var_dump($a);
 var_dump($b);
 
 $c=array(1);
-g($c,$c[0]);
+g(&$c,&$c[0]);
 
 ?>

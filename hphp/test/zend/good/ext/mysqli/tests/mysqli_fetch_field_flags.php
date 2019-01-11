@@ -29,7 +29,7 @@
 	else
 		$flags[8192] = 'ON_UPDATE_NOW';
 
-	krsort($flags);
+	krsort(&$flags);
 
 	$columns = array(
 		'INT DEFAULT NULL' => 'NUM',

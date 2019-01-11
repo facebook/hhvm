@@ -1,4 +1,4 @@
 <?php
-exec("echo x", $output);
+exec("echo x", &$output);
 var_dump($output);
 ?>

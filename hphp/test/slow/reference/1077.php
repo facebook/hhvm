@@ -8,6 +8,6 @@ function f(&$a) {
 function main_1077() {
 $a = array();
  $c = &$a['b'];
- f($c);
+ f(&$c);
  var_dump($a);
 }

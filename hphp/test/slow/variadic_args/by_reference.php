@@ -7,7 +7,7 @@ function variadic_by_ref(&...$args) {
 function main() {
   $a = 10;
   $b = 20;
-  variadic_by_ref($a, $b);
+  variadic_by_ref(&$a, &$b);
   var_dump($a, $b);
 }
 

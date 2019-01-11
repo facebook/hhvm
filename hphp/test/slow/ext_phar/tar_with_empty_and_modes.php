@@ -32,6 +32,6 @@ foreach ($rii as $path => $info) {
   }
 }
 rmdir($dir);
-ksort($out);
+ksort(&$out);
 var_dump($out);
 }

@@ -8,7 +8,7 @@ function bar(&$a) {
 
 function main() {
   $a = array(new A);
-  bar($a);
+  bar(&$a);
 }
 
 

@@ -49,7 +49,7 @@ echo "omc
 $q->f(p(1), p(2), p(3), 4);
 echo "rsfc
 ";
-rt($a, id(10));
+rt(&$a, id(10));
 var_dump($a);
 dump($v++, $v++);
 $v = 10;

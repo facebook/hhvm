@@ -20,7 +20,7 @@ $data = array(
     rand(1, 100),
     rand(2, 200)
 );
-$outer = new Outer($data);
+$outer = new Outer(&$data);
 $proxy = $outer->getArrayAccess();
 /* null because no inheritance, so no access to protected member */
 var_dump(@$outer->getArrayAccess()[0]);

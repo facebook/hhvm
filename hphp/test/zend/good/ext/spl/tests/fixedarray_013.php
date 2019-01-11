@@ -8,7 +8,7 @@ function test(SplFixedArray &$arr) {
 }
 
 try {
-	test($a[]);
+	test(&$a[]);
 } catch (Exception $e) {
 	echo $e->getMessage(), "\n";
 }

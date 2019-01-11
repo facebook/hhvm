@@ -18,6 +18,6 @@ var_dump( key() );
 echo "\n-- Testing key() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( key($array_arg, $extra_arg) );
+var_dump( key(&$array_arg, $extra_arg) );
 ?>
 ===DONE===

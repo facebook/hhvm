@@ -2,7 +2,8 @@
 
 function f() {
   $a = array();
-  array_push($a[] = 1);
+  $a[] = 1;
+  array_push(&$a);
   var_dump($a);
 }
 

@@ -10,14 +10,14 @@ function getFiles(&$rdi,$depth=0) {
       $indent = '';
       for ($i = 0; $i<=$depth; ++$i) $indent .= " ";
       $files[] = $indent.$rdi->current()."\n";
-      if ($rdi->hasChildren()) getFiles($rdi->getChildren(),1+$depth);
+      if ($rdi->hasChildren()) getFiles(&$rdi->getChildren(),1+$depth);
     }
   }
-  asort($files);
+  asort(&$files);
   var_dump(array_values($files));
 }
 
 <<__EntryPoint>>
 function main_1804() {
-getFiles(new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir'));
+getFiles(&new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir'));
 }

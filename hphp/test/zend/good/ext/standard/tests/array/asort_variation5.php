@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool asort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association 
+ * Description: Sort an array and maintain index association
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -15,14 +15,14 @@
 echo "*** Testing asort() : usage variations ***\n";
 
 $various_arrays = array (
-  // group of escape sequences 
-  array ("null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e", 
-        "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh", 
+  // group of escape sequences
+  array ("null"=>  null, "NULL" => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+        "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
         "\ddd" => "\ddd", "\v" => "\v"
         ),
 
-  // array contains combination of capital/small letters 
-  array ('l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test", 
+  // array contains combination of capital/small letters
+  array ('l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
         'T' => "TTTT", 't' => "ttt", 'w' => "ww", 'x' => "x", 'X' => "X", 'o' => "oraNGe",
         'B' => "BANANA"
         )
@@ -39,14 +39,14 @@ foreach ($various_arrays as $array) {
 
   echo "- With default sort_flag -\n";
   $temp_array = $array;
-  var_dump(asort($temp_array) ); // expecting : bool(true)
+  var_dump(asort(&$temp_array) ); // expecting : bool(true)
   var_dump($temp_array);
 
   // loop through $flags array and setting all possible flag values
   foreach($flags as $key => $flag){
     echo "- Sort_flag = $key -\n";
     $temp_array = $array;
-    var_dump(asort($temp_array, $flag) ); // expecting : bool(true)
+    var_dump(asort(&$temp_array, $flag) ); // expecting : bool(true)
     var_dump($temp_array);
   }
   $count++;

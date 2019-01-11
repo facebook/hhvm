@@ -10,7 +10,7 @@ function f($a) {
  return g($a);
  }
 function test($a) {
-  return reset((f($a)));
+  return reset(&(f($a)));
   }
 
 <<__EntryPoint>>

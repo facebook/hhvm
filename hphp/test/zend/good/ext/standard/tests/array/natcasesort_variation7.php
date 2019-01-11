@@ -14,7 +14,7 @@ $array = array (1, 3.00, 'zero', '2');
 $array[] = &$array;
 var_dump($array);
 
-var_dump(@natcasesort($array));
+var_dump(@natcasesort(&$array));
 var_dump($array);
 
 echo "Done";

@@ -40,9 +40,9 @@ function i(&$x) {
 function main_27() {
 f(10);
 $x = 1;
-g(0, $x, 2);
-h(0, $x, array(1, 2), 3);
+g(0, &$x, 2);
+h(0, &$x, array(1, 2), 3);
 $x = 10;
-i($x);
+i(&$x);
 i();
 }

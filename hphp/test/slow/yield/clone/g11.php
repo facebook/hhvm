@@ -9,7 +9,7 @@ function f(&$a) {
 <<__EntryPoint>>
 function main_g11() {
 $a = 3;
-$x = f($a);
+$x = f(&$a);
 unset($a);
 $y1 = clone $x;
 $y2 = clone $x;

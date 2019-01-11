@@ -112,12 +112,12 @@ VS(boolval(new stdClass), true);
 
 {
   $v = "5bar";
-  VERIFY(settype($v, "integer"));
+  VERIFY(settype(&$v, "integer"));
   VS($v, 5);
 }
 {
   $v = true;
-  VERIFY(settype($v, "string"));
+  VERIFY(settype(&$v, "string"));
   VS($v, "1");
 }
 
@@ -158,7 +158,7 @@ $typesTest = array(
 
 foreach ($typesTest as $testedType => $values) {
     foreach ($values as $value) {
-        settype($value, $testedType);
+        settype(&$value, $testedType);
         var_dump(gettype($value));
     }
 }

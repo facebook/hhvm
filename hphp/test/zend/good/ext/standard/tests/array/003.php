@@ -10,15 +10,15 @@ function cmp ($a, $b) {
 }
 
 echo " -- Testing uasort() -- \n";
-uasort ($data, 'cmp');
+uasort (&$data, 'cmp');
 var_dump ($data);
 
 
 echo "\n -- Testing uksort() -- \n";
-uksort ($data, 'cmp');
+uksort (&$data, 'cmp');
 var_dump ($data);
 
 echo "\n -- Testing usort() -- \n";
-usort ($data, 'cmp');
+usort (&$data, 'cmp');
 var_dump ($data);
 ?>

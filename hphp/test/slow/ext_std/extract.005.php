@@ -4,7 +4,8 @@ class X {
   static function foo() {
     $t = "this";
     $$t = 5;
-    extract(array("this" => "foo"));
+    $arr = array("this" => "foo");
+    extract(&$arr);
     var_dump($this);
   }
 }

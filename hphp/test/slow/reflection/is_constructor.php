@@ -34,7 +34,7 @@ function main() {
     $out[$class] = $rc->getMethod('__construct')->isConstructor();
   }
 
-  ksort($out);
+  ksort(&$out);
   var_dump($out);
 }
 

@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : mixed reset(array $array_arg)
+/* Prototype  : mixed reset(&array $array_arg)
  * Description: Set array argument's internal pointer to the first element and return it 
  * Source code: ext/standard/array.c
  */
@@ -18,6 +18,6 @@ var_dump( reset() );
 echo "\n-- Testing reset() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( reset($array_arg, $extra_arg) );
+var_dump( reset(&$array_arg, $extra_arg) );
 ?>
 ===DONE===

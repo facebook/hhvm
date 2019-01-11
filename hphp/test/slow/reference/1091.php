@@ -9,16 +9,12 @@ function test2($some_ref) {
 
 <<__EntryPoint>>
 function main_1091() {
-test($some_ref = 1);
-var_dump($some_ref);
 $var = null;
-test($var);
+test(&$var);
 var_dump($var);
 $var = null;
-test($some_ref = $var);
-var_dump($some_ref, $var);
-$var = null;
-test($some_ref = &$var);
+$some_ref = &$var;
+test(&$var);
 var_dump($some_ref, $var);
 test2($some_ref = 1);
 var_dump($some_ref);

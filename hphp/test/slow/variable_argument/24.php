@@ -78,25 +78,25 @@ function bar() {
   f1($a, $a, $a);
   var_dump($a);
   $a = 1;
-  f2($a, $a, $a);
+  f2($a, &$a, $a);
   var_dump($a);
   $a = 1;
-  f3($a, $a, $a);
+  f3(&$a, $a, $a);
   var_dump($a);
   $a = 1;
-  f4($a, $a, $a);
+  f4(&$a, &$a, $a);
   var_dump($a);
   $a = 1;
   f5($a, $a, $a);
   var_dump($a);
   $a = 1;
-  f6($a, $a, $a);
+  f6($a, &$a, $a);
   var_dump($a);
   $a = 1;
-  f7($a, $a, $a);
+  f7(&$a, $a, $a);
   var_dump($a);
   $a = 1;
-  f8($a, $a, $a);
+  f8(&$a, &$a, $a);
   var_dump($a);
 }
 

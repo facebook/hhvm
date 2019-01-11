@@ -9,12 +9,12 @@ function foo() {
  $e = 111;
   $c = &$d;
  $arr = get_defined_vars();
- ksort($arr);
+ ksort(&$arr);
  var_dump($arr);
  return $arr;
 }
 function bar($arr) {
-  extract($arr, EXTR_REFS);
+  extract(&$arr, EXTR_REFS);
   var_dump($a, $b, $c, $d, $e);
   $a = 'aaa';
  $b = 'bbb';

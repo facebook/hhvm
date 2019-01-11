@@ -12,7 +12,7 @@ function main() {
       (string) $data
     );
   }
-  ksort($out);
+  ksort(&$out);
   var_dump($out);
 }
 

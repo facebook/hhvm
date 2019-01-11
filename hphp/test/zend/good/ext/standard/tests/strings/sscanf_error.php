@@ -17,7 +17,7 @@ var_dump( sscanf($str) );
 
 echo "\n-- Testing sscanf() function with more than expected no. of arguments --\n";
 
-var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
+var_dump( sscanf($str, $format, &$str1, &$str2, &$extra_str) );
 
 ?>
 ===DONE===

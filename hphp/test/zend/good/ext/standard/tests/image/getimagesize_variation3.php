@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array 
+ * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
  */
 
@@ -25,7 +25,7 @@ echo "*** Testing getimagesize() : variation ***\n";
 foreach($file_types_array as $key => $filename) {
       echo "\n-- $key ($filename) --\n";
       var_dump( getimagesize(dirname(__FILE__)."/$filename" ) );
-      var_dump( getimagesize(dirname(__FILE__)."/$filename", $info) );
+      var_dump( getimagesize(dirname(__FILE__)."/$filename", &$info) );
       var_dump( $info );
 };
 ?>

@@ -54,7 +54,7 @@ $search_str = array (
 for( $i = 0; $i < count($search_str); $i++ ) {
   echo "\n--- Iteration $i ---";
   echo "\n-- String after replacing the search value is => --\n";
-  var_dump( str_replace($search_str[$i], "FOUND", $subject, $count) );
+  var_dump( str_replace($search_str[$i], "FOUND", $subject, &$count) );
   echo "-- search string has found '$count' times\n";
 }
 

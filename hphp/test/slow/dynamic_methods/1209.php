@@ -32,7 +32,7 @@ function refTest($q) {
  $q = 1;
  }
   $x = 1;
-  $q->refTestHelper($x);
+  $q->refTestHelper(&$x);
   var_dump($x);
 }
 

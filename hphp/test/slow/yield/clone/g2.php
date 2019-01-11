@@ -15,7 +15,7 @@ function foo($a1, &$a2) {
 function main_g2() {
 $a1 = 1;
 $a2 = -999999999;
-$x = foo($a1, $a2);
+$x = foo($a1, &$a2);
 $a2 = 2;
 $x->rewind();
 $y1 = clone $x;

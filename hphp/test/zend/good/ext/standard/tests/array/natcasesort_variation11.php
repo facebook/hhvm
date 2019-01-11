@@ -36,7 +36,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
 /*3*/  'extreme floats' => array(
        12.3456789000e6 => 'large',
        12.3456789000E-10 => 'small',
@@ -45,8 +45,8 @@ $inputs = array(
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
-       ), 
-       
+       ),
+
 /*5*/  'null lowercase' => array(
        null => 'null 2',
        ),
@@ -56,17 +56,17 @@ $inputs = array(
        true => 'lowert',
        false => 'lowerf',
        ),
-       
+
 /*7*/  'bool uppercase' => array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*8*/ 'empty double quotes' => array(
        "" => 'emptyd',
        ),
-       
+
 /*9*/  'empty single quotes' => array(
        '' => 'emptys',
        ),
@@ -87,21 +87,21 @@ $inputs = array(
 /*12*/ 'unset' => array(
        @$unset_var => 'unset',
        ),
-       
+
        // duplicate values
 /*13*/ 'duplicate' => array(
        'foo' => 'bar',
        'baz' => 'bar',
        'hello' => 'world'
        ),
-       
+
 );
 
 // loop through each element of $inputs to check the behavior of natcasesort()
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump( natcasesort($input) );
+	var_dump( natcasesort(&$input) );
 	var_dump($input);
 	$iterator++;
 };

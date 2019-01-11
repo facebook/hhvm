@@ -177,7 +177,7 @@ var_dump($tokens);
 }
 {
   $str = str_replace("ll", "", "good golly miss molly!",
-                              $count);
+                              &$count);
   var_dump($count);
 }
 {
@@ -293,7 +293,7 @@ var_dump(vsprintf("A%sB%dC", array("test", 10)));
 
 var_dump(sscanf("SN/2350001", "SN/%d"));
 
-var_dump(sscanf("SN/2350001", "SN/%d", $out));
+var_dump(sscanf("SN/2350001", "SN/%d", &$out));
 var_dump($out);
 
 var_dump(chr(92));
@@ -419,12 +419,12 @@ var_dump(soundex("carrot"));
 
 var_dump(metaphone("carrot"));
 
-parse_str("first=value&arr[]=foo+bar&arr[]=baz", $output);
+parse_str("first=value&arr[]=foo+bar&arr[]=baz", &$output);
 var_dump($output['first']);
 var_dump($output['arr'][0]);
 var_dump($output['arr'][1]);
 
-parse_str('a[2][i]=3&a[4][i]=5', $output);
+parse_str('a[2][i]=3&a[4][i]=5', &$output);
 var_dump($output['a'][2]['i']);
 var_dump($output['a'][4]['i']);
 

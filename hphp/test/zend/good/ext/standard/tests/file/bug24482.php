@@ -19,11 +19,11 @@ if (count($dirs) != count($globdirs)) {
 	echo "Directory count mismatch\n";
 	
 	echo "glob found:\n";
-	sort($globdirs);	
+	sort(&$globdirs);	
 	var_dump($globdirs);
 	
 	echo "opendir/readdir/isdir found:\n";
-	sort($dirs);	
+	sort(&$dirs);	
 	var_dump($dirs);
 } else {
 	echo "OK\n";

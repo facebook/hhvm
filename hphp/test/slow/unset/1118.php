@@ -13,6 +13,6 @@ function f(&$x, $y) {
 <<__EntryPoint>>
 function main_1118() {
 $myvar = 10;
-f($myvar, 30);
+f(&$myvar, 30);
 var_dump($myvar);
 }

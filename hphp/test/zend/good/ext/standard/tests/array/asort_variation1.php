@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : bool asort(array &array_arg [, int sort_flags])
  * Description: Sort an array and maintain index association
-                Elements will be arranged from lowest to highest when this function has completed. 
+                Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
@@ -73,16 +73,16 @@ $unexpected_values = array (
 // loop though each element of the array and check the working of asort()
 // when $array argument is supplied with different values from $unexpected_values
 echo "\n-- Testing asort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n";
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {
   echo "-- Iteration $counter --\n";
   $value = $unexpected_values [$index];
-  var_dump( asort($value) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_REGULAR) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_NUMERIC) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_STRING) ); // expecting : bool(false)
+  var_dump( asort(&$value) ); // expecting : bool(false)
+  var_dump( asort(&$value, SORT_REGULAR) ); // expecting : bool(false)
+  var_dump( asort(&$value, SORT_NUMERIC) ); // expecting : bool(false)
+  var_dump( asort(&$value, SORT_STRING) ); // expecting : bool(false)
   $counter++;
 }
 

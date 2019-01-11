@@ -22,7 +22,7 @@ function foo($a, &$b) {
 function main_g12() {
 $a1 = 1;
 $a2 = -999999999;
-$x = foo($a1, $a2);
+$x = foo($a1, &$a2);
 $a2 = 2;
 $x->rewind();
 $y1 = clone $x;

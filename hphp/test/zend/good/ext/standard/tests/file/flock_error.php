@@ -1,7 +1,7 @@
 <?php
-/* 
+/*
 Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
+Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
 
@@ -20,7 +20,7 @@ $operations = array(
   array(),
   "string",
   "",
-  "\0" 
+  "\0"
 );
 
 $i = 0;
@@ -36,14 +36,14 @@ $fp = fopen($file, "w");
 fclose($fp);
 var_dump(flock($fp, LOCK_SH|LOCK_NB));
 
-var_dump(flock("", "", $var));
+var_dump(flock("", "", &$var));
 
 /* No.of args leass than expected */
 var_dump(flock());
 var_dump(flock($fp));
 
 /* No.of args greater than expected */
-var_dump(flock($fp, "", $var, ""));
+var_dump(flock($fp, "", &$var, ""));
 
 echo "\n*** Done ***\n";
 ?>

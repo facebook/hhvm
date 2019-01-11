@@ -9,7 +9,7 @@ $descriptorspec = array(
   2 => array("pipe", "a"),
 );
 
-$process = proc_open('echo', $descriptorspec, $io);
+$process = proc_open('echo', $descriptorspec, &$io);
 var_dump(stream_set_read_buffer($io[0], 0));
 
 

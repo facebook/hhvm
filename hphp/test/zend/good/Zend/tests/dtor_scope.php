@@ -5,7 +5,7 @@
 
                 public function add($a)
                 {
-                        array_push($this->var, $a);
+                        array_push(&$this->var, $a);
                 }
 
                 public function __destruct()

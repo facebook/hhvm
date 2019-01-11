@@ -20,10 +20,10 @@ $fail = '{
     }
 }';
 
-$count = preg_match($re, $pass, $match);
+$count = preg_match($re, $pass, &$match);
 var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
 
-$count = preg_match($re, $fail, $match);
+$count = preg_match($re, $fail, &$match);
 var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
 
 $count = preg_replace($re, '', $fail);

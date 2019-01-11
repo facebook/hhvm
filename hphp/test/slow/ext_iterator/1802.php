@@ -14,6 +14,6 @@ foreach (new RecursiveIteratorIterator(
     $files[] = $file."\n";
   }
 }
-asort($files);
+asort(&$files);
 var_dump(array_values($files));
 }

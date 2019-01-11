@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it 
+ * Description: Advances array argument's internal pointer to the last element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -18,6 +18,6 @@ var_dump( end() );
 echo "\n-- Testing end() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( end($array_arg, $extra_arg) );
+var_dump( end(&$array_arg, $extra_arg) );
 ?>
 ===DONE===

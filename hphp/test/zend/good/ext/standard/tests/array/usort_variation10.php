@@ -1,5 +1,5 @@
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
+/* Prototype  : bool usort(&array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -28,14 +28,14 @@ $array_arg = array(0 => 2,     "a" => 8, "d" => 9,
                    "z" => -99, 0 => 1,   "z" => 3);
 
 echo "\n-- Array with duplicate keys --\n";
-var_dump( usort($array_arg, 'cmp') );
+var_dump( usort(&$array_arg, 'cmp') );
 var_dump($array_arg);
 
 // Array with default and assigned keys
 $array_arg = array(0 => "Banana", 1 => "Mango", "Orange", 2 => "Apple", "Pineapple");
 
 echo "\n-- Array with default/assigned keys --\n";
-var_dump( usort($array_arg, 'cmp') );
+var_dump( usort(&$array_arg, 'cmp') );
 var_dump($array_arg);
 ?>
 ===DONE===

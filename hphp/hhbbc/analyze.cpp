@@ -459,6 +459,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;
   ai.usedParams = collect.usedParams;
+  ai.publicSPropMutations = std::move(collect.publicSPropMutations);
 
   index.fixup_return_type(ctx.func, ai.inferredReturn);
 
@@ -510,7 +511,7 @@ FuncAnalysis do_analyze(const Index& index,
                         CollectionOpts opts) {
   auto const ctx = adjust_closure_context(inputCtx);
   CollectedInfo collect {
-    index, ctx, clsAnalysis, nullptr, opts
+    index, ctx, clsAnalysis, opts
   };
 
   auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
@@ -742,14 +743,17 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    * non-scalar initializers, and these need not be be run again as part
    * of the fixedpoint computation.
    */
+  CompactVector<FuncAnalysis> initResults;
   auto analyze_86init = [&](const StaticString &name) {
     if (auto f = find_method(ctx.cls, name.get())) {
-      do_analyze(
-        index,
-        Context { ctx.unit, f, ctx.cls },
-        &clsAnalysis,
-        nullptr,
-        CollectionOpts::TrackConstantArrays
+      initResults.push_back(
+        do_analyze(
+          index,
+          Context { ctx.unit, f, ctx.cls },
+          &clsAnalysis,
+          nullptr,
+          CollectionOpts::TrackConstantArrays
+        )
       );
     }
   };
@@ -860,7 +864,10 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (previousProps   == clsAnalysis.privateProperties &&
         previousStatics == clsAnalysis.privateStatics &&
         noExceptionalChanges()) {
-      clsAnalysis.methods.reserve(methodResults.size());
+      clsAnalysis.methods.reserve(initResults.size() + methodResults.size());
+      for (auto& m : initResults) {
+        clsAnalysis.methods.push_back(std::move(m));
+      }
       for (auto& m : methodResults) {
         clsAnalysis.methods.push_back(std::move(m));
       }

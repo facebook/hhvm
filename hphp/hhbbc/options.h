@@ -86,6 +86,11 @@ struct Options {
   uint32_t returnTypeRefineLimit = 15;
 
   /*
+   * Limit public static property refinement for the same reason.
+   */
+  uint32_t publicSPropRefineLimit = 15;
+
+  /*
    * Whether to produce extended stats information.  (Takes extra
    * time.)
    */

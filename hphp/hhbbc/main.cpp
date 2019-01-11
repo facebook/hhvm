@@ -154,6 +154,7 @@ void parse_options(int argc, char** argv) {
     ("analyze-func-wlimit",  po::value(&options.analyzeFuncWideningLimit))
     ("analyze-class-wlimit", po::value(&options.analyzeClassWideningLimit))
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
+    ("public-sprop-refine-limit", po::value(&options.publicSPropRefineLimit))
     ("bytecode-stats",       po::bool_switch(&print_bytecode_stats_and_exit))
     ;
 

@@ -146,11 +146,9 @@ std::string show(const php::Func& f, const Iter& iter) {
 CollectedInfo::CollectedInfo(const Index& index,
                              Context ctx,
                              ClassAnalysis* cls,
-                             PublicSPropIndexer* publicStatics,
                              CollectionOpts opts,
                              const FuncAnalysis* fa)
     : props{index, ctx, cls}
-    , publicStatics{publicStatics}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
 {
   if (fa) {

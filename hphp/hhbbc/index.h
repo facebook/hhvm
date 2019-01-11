@@ -43,7 +43,7 @@ namespace HPHP { namespace HHBBC {
 
 struct Type;
 struct Index;
-struct PublicSPropIndexer;
+struct PublicSPropMutations;
 struct FuncAnalysisResult;
 struct Context;
 struct ContextHash;
@@ -74,35 +74,49 @@ struct Program;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A DependencyContext encodes enough of the context to record a
- * dependency - either a php::Func, or, if we're doing private
- * property analysis and its a suitable class, a php::Class
+ * A DependencyContext encodes enough of the context to record a dependency - a
+ * php::Func, if we're doing private property analysis and its a suitable class,
+ * a php::Class, or a public static property with a particular name.
  */
-using DependencyContext = Either<const php::Func*,
-                                 const php::Class*>;
+
+enum class DependencyContextType : uint16_t {
+  Func,
+  Class,
+  PropName
+};
+
+using DependencyContext = CompactTaggedPtr<const void, DependencyContextType>;
 
 struct DependencyContextLess {
   bool operator()(const DependencyContext& a,
                   const DependencyContext& b) const {
-    return a.toOpaque() < b.toOpaque();
+    return a.getOpaque() < b.getOpaque();
+  }
+};
+
+struct DependencyContextEquals {
+  bool operator()(const DependencyContext& a,
+                  const DependencyContext& b) const {
+    return a.getOpaque() == b.getOpaque();
   }
 };
 
 struct DependencyContextHash {
   size_t operator()(const DependencyContext& d) const {
-    return pointer_hash<void>{}(reinterpret_cast<void*>(d.toOpaque()));
+    return pointer_hash<void>{}(reinterpret_cast<void*>(d.getOpaque()));
   }
 };
 
 struct DependencyContextHashCompare : DependencyContextHash {
   bool equal(const DependencyContext& a, const DependencyContext& b) const {
-    return a.toOpaque() == b.toOpaque();
+    return a.getOpaque() == b.getOpaque();
   }
   size_t hash(const DependencyContext& d) const { return (*this)(d); }
 };
 
 using DependencyContextSet = hphp_hash_set<DependencyContext,
-                                           DependencyContextHash>;
+                                           DependencyContextHash,
+                                           DependencyContextEquals>;
 using ContextSet = hphp_hash_set<Context, ContextHash>;
 
 std::string show(Context);
@@ -252,7 +266,7 @@ private:
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
-  friend struct ::HPHP::HHBBC::PublicSPropIndexer;
+  friend struct ::HPHP::HHBBC::PublicSPropMutations;
   const Index* index;
   Either<SString,ClassInfo*> val;
 };
@@ -745,8 +759,10 @@ struct Index {
    * This function will always return TInitGen before refine_public_statics has
    * been called, or if the AnalyzePublicStatics option is off.
    */
-  Type lookup_public_static(const Type& cls, const Type& name) const;
-  Type lookup_public_static(const php::Class*, SString name) const;
+  Type lookup_public_static(Context ctx, const Type& cls,
+                            const Type& name) const;
+  Type lookup_public_static(Context ctx, const php::Class*,
+                            SString name) const;
 
   /*
    * Lookup if initializing (which is a side-effect of several bytecodes) the
@@ -761,18 +777,6 @@ struct Index {
   bool lookup_public_static_maybe_late_init(const Type& cls,
                                             const Type& name) const;
 
-  /*
-   * If we resolve a public static initializer to a constant, and eliminate the
-   * 86pinit, we need to update the initializer in the index.
-   *
-   * Note that this is called from code that runs in parallel, and
-   * consequently isn't normally allowed to modify the index. Its safe
-   * in this case, because for any given property there can only be
-   * one InitProp which sets it, and all we do is modify an existing
-   * element of a map.
-   */
-  void fixup_public_static(const php::Class*, SString name,
-                           const Type& ty) const;
   /*
    * Returns whether a public static property is known to be immutable.  This
    * is used to add AttrPersistent flags to static properties, and relies on
@@ -895,13 +899,30 @@ struct Index {
                               const PropState&);
 
   /*
-   * After a whole program pass using PublicSPropIndexer, the types can be
+   * Record in the index that the given set of public static property mutations
+   * has been found while analyzing the given function. During a round of
+   * analysis, the mutations are gathered from the analysis results for each
+   * function, recorded in the index, and then refine_public_statics is called
+   * to process the mutations and update the index.
+   *
+   * No other threads should be calling functions on this Index when this
+   * function is called.
+   */
+  void record_public_static_mutations(const php::Func& func,
+                                      PublicSPropMutations mutations);
+
+  /*
+   * After a round of analysis with all the public static property mutations
+   * being recorded with record_public_static_mutations, the types can be
    * reflected into the index for use during another type inference pass.
    *
-   * No other threads should be calling functions on this Index or on the
-   * provided PublicSPropIndexer when this function is called.
+   * No other threads should be calling functions on this Index when this
+   * function is called.
+   *
+   * Merges the set of Contexts that depended on a public static property whose
+   * type has changed.
    */
-  void refine_public_statics(const PublicSPropIndexer&);
+  void refine_public_statics(DependencyContextSet& deps);
 
   /*
    * Refine whether the given class has properties with initial values which
@@ -971,7 +992,8 @@ private:
   Index& operator=(Index&&) = delete;
 
 private:
-  friend struct PublicSPropIndexer;
+  friend struct PublicSPropMutations;
+
   template<class FuncRange>
   res::Func resolve_func_helper(const FuncRange&, SString) const;
   res::Func do_resolve(const php::Func*) const;
@@ -1004,57 +1026,48 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Indexer object used for collecting information about public static property
- * types.  See analyze_public_statics in whole-program.cpp for details about
- * how it is used.
+ * Used for collecting all mutations of public static property types.
  */
-struct PublicSPropIndexer {
-  explicit PublicSPropIndexer(const Index* index)
-    : m_index(index)
-  {}
-
+struct PublicSPropMutations {
   /*
-   * Called by the interpreter during analyze_func_collect when a
-   * PublicSPropIndexer is active.  This function must be called anywhere the
-   * interpreter does something that could change the type of public static
-   * properties named `name' on classes of type `cls' to `val'.
+   * This function must be called anywhere the interpreter does something that
+   * could change the type of public static properties named `name' on classes
+   * of type `cls' to `val'.
    *
    * Note that if cls and name are both too generic this object will have to
    * give up all information it knows about any public static properties.
-   *
-   * This routine may be safely called concurrently by multiple analysis
-   * threads.
    */
-  void merge(Context ctx, const Type& cls, const Type& name, const Type& val);
-  void merge(Context ctx, ClassInfo* cinfo,
+  void merge(const Index& index, Context ctx, const Type& cls,
              const Type& name, const Type& val);
-  void merge(Context ctx, const php::Class& cls,
+  void merge(const Index& index, Context ctx, ClassInfo* cinfo,
+             const Type& name, const Type& val);
+  void merge(const Index& index, Context ctx, const php::Class& cls,
              const Type& name, const Type& val);
 
 private:
   friend struct Index;
 
   struct KnownKey {
-    bool operator==(KnownKey o) const {
-      return cinfo == o.cinfo && prop == o.prop;
-    }
-
-    friend size_t tbb_hasher(KnownKey k) {
-      return folly::hash::hash_combine(k.cinfo, k.prop);
+    bool operator<(KnownKey o) const {
+      if (cinfo != o.cinfo) return cinfo < o.cinfo;
+      return prop < o.prop;
     }
 
     ClassInfo* cinfo;
     SString prop;
   };
 
-  using UnknownMap = tbb::concurrent_hash_map<SString,Type>;
-  using KnownMap = tbb::concurrent_hash_map<KnownKey,Type>;
+  using UnknownMap = std::map<SString,Type>;
+  using KnownMap = std::map<KnownKey,Type>;
 
-private:
-  const Index* m_index;
-  std::atomic<bool> m_everything_bad{false};
-  UnknownMap m_unknown;
-  KnownMap m_known;
+  // Public static property mutations are actually rare, so defer allocating the
+  // maps until we actually see one.
+  struct Data {
+    bool m_nothing_known{false};
+    UnknownMap m_unknown;
+    KnownMap m_known;
+  };
+  std::unique_ptr<Data> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////

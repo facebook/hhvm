@@ -30,6 +30,7 @@
 #include <folly/portability/Stdlib.h>
 
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 
@@ -114,7 +115,7 @@ void dump_class_state(std::ostream& out,
 
     for (auto const& prop : c->properties) {
       out << clsName << "::$" << prop.name->data() << " :: "
-          << show(index.lookup_public_static(c, prop.name)) << '\n';
+          << show(index.lookup_public_static(Context{}, c, prop.name)) << '\n';
     }
   }
 

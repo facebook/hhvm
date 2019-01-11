@@ -1741,7 +1741,7 @@ void in(ISS& env, const bc::CGetS& op) {
     }
   }
 
-  auto indexTy = env.index.lookup_public_static(tcls, tname);
+  auto indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
   if (indexTy.subtypeOf(BInitCell)) {
     /*
      * Constant propagation here can change when we invoke autoload, so it's
@@ -1802,9 +1802,9 @@ void in(ISS& env, const bc::VGetS& op) {
     }
   }
 
-  if (auto c = env.collect.publicStatics) {
-    c->merge(env.ctx, tcls, tname, TRef);
-  }
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, tcls, tname, TRef
+  );
 
   push(env, TRef);
 }
@@ -2202,7 +2202,7 @@ void in(ISS& env, const bc::IssetS& op) {
     }
   }
 
-  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  auto const indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
   if (indexTy.subtypeOf(BInitCell)) {
     // See the comments in CGetS about constprop for public statics.
     if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
@@ -2811,9 +2811,7 @@ void in(ISS& env, const bc::SetS& op) {
     }
   }
 
-  if (auto c = env.collect.publicStatics) {
-    c->merge(env.ctx, tcls, tname, t1);
-  }
+  env.collect.publicSPropMutations.merge(env.index, env.ctx, tcls, tname, t1);
 
   push(env, std::move(t1));
 }
@@ -2881,9 +2879,9 @@ void in(ISS& env, const bc::SetOpS& op) {
     }
   }
 
-  if (auto c = env.collect.publicStatics) {
-    c->merge(env.ctx, tcls, tname, TInitCell);
-  }
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, tcls, tname, TInitCell
+  );
 
   push(env, TInitCell);
 }
@@ -2936,9 +2934,9 @@ void in(ISS& env, const bc::IncDecS& op) {
     }
   }
 
-  if (auto c = env.collect.publicStatics) {
-    c->merge(env.ctx, tcls, tname, TInitCell);
-  }
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, tcls, tname, TInitCell
+  );
 
   push(env, TInitCell);
 }
@@ -2995,9 +2993,9 @@ void in(ISS& env, const bc::BindS& op) {
     }
   }
 
-  if (auto c = env.collect.publicStatics) {
-    c->merge(env.ctx, tcls, tname, TRef);
-  }
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, tcls, tname, TRef
+  );
 
   push(env, TRef);
 }
@@ -4082,10 +4080,6 @@ void in(ISS& env, const bc::IterBreak& op) {
 
 /*
  * Any include/require (or eval) op kills all locals, and private properties.
- *
- * We don't need to do anything for collect.publicStatics because we'll analyze
- * the included pseudo-main separately and see any effects it may have on
- * public statics.
  */
 void inclOpImpl(ISS& env) {
   popC(env);
@@ -4692,9 +4686,9 @@ void in(ISS& env, const bc::InitProp& op) {
   switch (op.subop2) {
     case InitPropOp::Static:
       mergeSelfProp(env, op.str1, t);
-      if (auto c = env.collect.publicStatics) {
-        c->merge(env.ctx, *env.ctx.cls, sval(op.str1), t);
-      }
+      env.collect.publicSPropMutations.merge(
+        env.index, env.ctx, *env.ctx.cls, sval(op.str1), t
+      );
       break;
     case InitPropOp::NonStatic:
       mergeThisProp(env, op.str1, t);
@@ -4718,11 +4712,6 @@ void in(ISS& env, const bc::InitProp& op) {
       prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
       if (!v) break;
       prop.val = *v;
-      if (op.subop2 == InitPropOp::Static &&
-          !env.collect.publicStatics &&
-          !env.index.frozen()) {
-        env.index.fixup_public_static(env.ctx.func->cls, prop.name, t);
-      }
       return reduce(env, bc::PopC {});
     }
   }

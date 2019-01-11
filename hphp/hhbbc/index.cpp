@@ -144,14 +144,17 @@ copy_range(const MultiMap& map, typename MultiMap::key_type key) {
 
 enum class Dep : uintptr_t {
   /* This dependency should trigger when the return type changes */
-  ReturnTy = 0x1,
+  ReturnTy = (1u << 0),
   /* This dependency should trigger when a DefCns is resolved */
-  ConstVal = 0x2,
+  ConstVal = (1u << 1),
   /* This dependency should trigger when a class constant is resolved */
-  ClsConst = 0x4,
+  ClsConst = (1u << 2),
   /* This dependency should trigger when the bad initial prop value bit for a
    * class changes */
-  PropBadInitialValues = 0x8,
+  PropBadInitialValues = (1u << 3),
+  /* This dependency should trigger when a public static property with a
+   * particular name changes */
+  PublicSPropName = (1u << 4),
 };
 
 Dep operator|(Dep a, Dep b) {
@@ -177,12 +180,6 @@ using DepMap =
 
 //////////////////////////////////////////////////////////////////////
 
-enum class PublicSPropState {
-  Unrefined,    // refine_public_statics never called
-  Invalid,      // analyzed, but we know nothing (m_everything_bad case)
-  Valid,
-};
-
 /*
  * Each ClassInfo has a table of public static properties with these entries.
  * The `initializerType' is for use during refine_public_statics, and
@@ -191,6 +188,7 @@ enum class PublicSPropState {
 struct PublicSPropEntry {
   Type inferredType;
   Type initializerType;
+  uint32_t refinements;
   bool everModified;
 };
 
@@ -501,7 +499,6 @@ struct ClassInfo {
    * need to be unioned with values from IndexData::unknownClassSProps.
    */
   hphp_hash_map<SString,PublicSPropEntry> publicStaticProps;
-
 
   /*
    * Flags to track if this class is mocked, or if any of its dervied classes
@@ -1009,21 +1006,27 @@ struct Index::IndexData {
   > privateStaticPropInfo;
 
   /*
-   * Public static property information.
-   *
-   * We have state for whether any of it is valid (before we've analyzed for
-   * it, or if the program contains /any/ modifications of static properties
-   * where both the name and class are unknown).
-   *
-   * Each ClassInfo has a map of known largest static property types, valid if
-   * PublicSPropState is true, but we also have information here about types
-   * that may exist in static properties by name, when we didn't know the
-   * class.  The Type we're allowed to assume any static property contains is
-   * the union of the ClassInfo-specific type with the unknown class type for
-   * that property name that's stored here.
+   * Public static property information:
    */
-  PublicSPropState publicSPropState;
-  PropState unknownClassSProps;
+
+  // If this is true, we don't know anything about public static properties and
+  // must be pessimistic. We start in this state (before we've analyzed any
+  // mutations) and remain in it if we see a mutation where both the name and
+  // class are unknown.
+  bool allPublicSPropsUnknown{true};
+
+  // Best known types for public static properties where we knew the name, but
+  // not the class. The type we're allowed to assume for a public static
+  // property is the union of the ClassInfo-specific type with the unknown class
+  // type that's stored here. The second value is the number of times the type
+  // has been refined.
+  hphp_hash_map<SString, std::pair<Type, uint32_t>> unknownClassSProps;
+
+  // The set of gathered public static property mutations for each function. The
+  // inferred types for the public static properties is the union of all these
+  // mutations. If a function is not analyzed in a particular analysis round,
+  // its mutations are left unchanged from the previous round.
+  hphp_hash_map<const php::Func*, PublicSPropMutations> publicSPropMutations;
 
   /*
    * Map from interfaces to their assigned vtable slots, computed in
@@ -1066,23 +1069,34 @@ namespace {
 
 using IndexData = Index::IndexData;
 
-DependencyContext dep_context(IndexData& data, const Context& ctx) {
-  if (!ctx.cls || !data.useClassDependencies) return ctx.func;
-  auto const cls = ctx.cls->closureContextCls ?
-    ctx.cls->closureContextCls : ctx.cls;
-  if (is_used_trait(*cls)) return ctx.func;
-  return cls;
+DependencyContext make_dep(const php::Func* func) {
+  return DependencyContext{DependencyContextType::Func, func};
+}
+DependencyContext make_dep(const php::Class* cls) {
+  return DependencyContext{DependencyContextType::Class, cls};
+}
+DependencyContext make_dep(SString name) {
+  return DependencyContext{DependencyContextType::PropName, name};
 }
 
+DependencyContext dep_context(IndexData& data, const Context& ctx) {
+  if (!ctx.cls || !data.useClassDependencies) return make_dep(ctx.func);
+  auto const cls = ctx.cls->closureContextCls ?
+    ctx.cls->closureContextCls : ctx.cls;
+  if (is_used_trait(*cls)) return make_dep(ctx.func);
+  return make_dep(cls);
+}
+
+template <typename T>
 void add_dependency(IndexData& data,
-                    DependencyContext src,
+                    T src,
                     const Context& dst,
                     Dep newMask) {
   if (data.frozen) return;
 
   auto d = dep_context(data, dst);
   DepMap::accessor acc;
-  data.dependencyMap.insert(acc, src);
+  data.dependencyMap.insert(acc, make_dep(src));
   auto& current = acc->second[d];
   current = current | newMask;
 }
@@ -1115,12 +1129,13 @@ FuncInfo* func_info(IndexData& data, const php::Func* f) {
   return fi;
 }
 
+template <typename T>
 void find_deps(IndexData& data,
-               DependencyContext src,
+               T src,
                Dep mask,
                DependencyContextSet& deps) {
   DepMap::const_accessor acc;
-  if (data.dependencyMap.find(acc, src)) {
+  if (data.dependencyMap.find(acc, make_dep(src))) {
     for (auto& kv : acc->second) {
       if (has_dep(kv.second, mask)) deps.insert(kv.first);
     }
@@ -3317,11 +3332,9 @@ PublicSPropEntry lookup_public_static_impl(
   const ClassInfo* cinfo,
   SString prop
 ) {
-  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, true};
+  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, 0, true};
 
-  if (data.publicSPropState != PublicSPropState::Valid) {
-    return noInfo;
-  }
+  if (data.allPublicSPropsUnknown) return noInfo;
 
   const ClassInfo* knownCInfo = nullptr;
   auto const knownClsPart = visit_public_statics(
@@ -3339,7 +3352,7 @@ PublicSPropEntry lookup_public_static_impl(
   auto const unkPart = [&]() -> const Type* {
     auto unkIt = data.unknownClassSProps.find(prop);
     if (unkIt != end(data.unknownClassSProps)) {
-      return &unkIt->second;
+      return &unkIt->second.first;
     }
     return nullptr;
   }();
@@ -3365,6 +3378,7 @@ PublicSPropEntry lookup_public_static_impl(
     return PublicSPropEntry {
       union_of(knownClsPart->inferredType, *unkPart),
       union_of(knownClsPart->initializerType, *unkPart),
+      0,
       true
     };
   }
@@ -3379,7 +3393,7 @@ PublicSPropEntry lookup_public_static_impl(
   auto const classes = find_range(data.classInfo, cls->name);
   if (begin(classes) == end(classes) ||
       std::next(begin(classes)) != end(classes)) {
-    return PublicSPropEntry{TInitGen, TInitGen, true};
+    return PublicSPropEntry{TInitGen, TInitGen, 0, true};
   }
   return lookup_public_static_impl(data, begin(classes)->second, name);
 }
@@ -4946,7 +4960,9 @@ Index::lookup_private_statics(const php::Class* cls,
   );
 }
 
-Type Index::lookup_public_static(const Type& cls, const Type& name) const {
+Type Index::lookup_public_static(Context ctx,
+                                 const Type& cls,
+                                 const Type& name) const {
   auto const cinfo = [&] () -> const ClassInfo* {
     if (!is_specialized_cls(cls)) {
       return nullptr;
@@ -4965,30 +4981,20 @@ Type Index::lookup_public_static(const Type& cls, const Type& name) const {
   }
   auto const sname = vname->m_data.pstr;
 
+  if (ctx.unit) add_dependency(*m_data, sname, ctx, Dep::PublicSPropName);
   return lookup_public_static_impl(*m_data, cinfo, sname).inferredType;
 }
 
-Type Index::lookup_public_static(const php::Class* cls,
+Type Index::lookup_public_static(Context ctx,
+                                 const php::Class* cls,
                                  SString name) const {
+  if (ctx.unit) add_dependency(*m_data, name, ctx, Dep::PublicSPropName);
   return lookup_public_static_impl(*m_data, cls, name).inferredType;
 }
 
 bool Index::lookup_public_static_immutable(const php::Class* cls,
                                            SString name) const {
   return !lookup_public_static_impl(*m_data, cls, name).everModified;
-}
-
-void Index::fixup_public_static(const php::Class* cls,
-                                SString name, const Type& ty) const {
-  auto const classes = find_range(m_data->classInfo, cls->name);
-  for (auto& cinfo : classes) {
-    if (cinfo.second->cls == cls) {
-      auto const it = cinfo.second->publicStaticProps.find(name);
-      if (it != end(cinfo.second->publicStaticProps)) {
-        it->second.inferredType = it->second.initializerType = ty;
-      }
-    }
-  }
 }
 
 bool Index::lookup_public_static_maybe_late_init(const Type& cls,
@@ -5082,15 +5088,17 @@ void Index::init_public_static_prop_types() {
        * much.
        *
        * If the property is AttrLateInitSoft, it can be anything because of the
-       * default value, so just assume TGen.
+       * default value, so give the initial value as TInitGen, which will keep
+       * us from inferring anything.
        */
       auto const tyRaw = from_cell(prop.val);
       auto const ty = (prop.attrs & AttrLateInitSoft)
-        ? TGen
+        ? TInitGen
         : tyRaw.subtypeOf(BUninit)
           ? TBottom
           : tyRaw;
-      cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
+      cinfo->publicStaticProps[prop.name] =
+        PublicSPropEntry { TInitGen, ty, 0, true };
     }
   }
 }
@@ -5421,92 +5429,182 @@ void Index::refine_private_statics(const php::Class* cls,
   refine_private_propstate(m_data->privateStaticPropInfo, cls, cleanedState);
 }
 
-/*
- * Note: this routine is implemented to support refining the public static
- * types repeatedly (we could get plausibly better types for them sometimes by
- * doing that), but currently the tradeoff with compile time is probably not
- * worth it, and we're only doing one pass (see whole-program.cpp).  If we add
- * other 'whole program' passes that want to iterate, iterating this one at the
- * same time would probably be mostly free, so we can consider that later.
- */
-void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
-  if (indexer.m_everything_bad ||
-      m_data->publicSPropState == PublicSPropState::Invalid) {
-    m_data->publicSPropState = PublicSPropState::Invalid;
+void Index::record_public_static_mutations(const php::Func& func,
+                                           PublicSPropMutations mutations) {
+  if (!mutations.m_data) {
+    m_data->publicSPropMutations.erase(&func);
     return;
   }
-  auto const firstRefinement =
-    m_data->publicSPropState == PublicSPropState::Unrefined;
-  m_data->publicSPropState = PublicSPropState::Valid;
+  m_data->publicSPropMutations.insert_or_assign(&func, std::move(mutations));
+}
 
-  for (auto& kv : indexer.m_unknown) {
+void Index::refine_public_statics(DependencyContextSet& deps) {
+  trace_time update("update public statics");
+
+  // Union together the mutations for each function, including the functions
+  // which weren't analyzed this round.
+  auto nothing_known = false;
+  PublicSPropMutations::UnknownMap unknown;
+  PublicSPropMutations::KnownMap known;
+  for (auto const& mutations : m_data->publicSPropMutations) {
+    if (!mutations.second.m_data) continue;
+    if (mutations.second.m_data->m_nothing_known) {
+      nothing_known = true;
+      break;
+    }
+
+    for (auto const& kv : mutations.second.m_data->m_unknown) {
+      auto const ret = unknown.insert(kv);
+      if (!ret.second) ret.first->second |= kv.second;
+    }
+    for (auto const& kv : mutations.second.m_data->m_known) {
+      auto const ret = known.insert(kv);
+      if (!ret.second) ret.first->second |= kv.second;
+    }
+  }
+
+  if (nothing_known) {
+    // We cannot go from knowing the types to not knowing the types (this is
+    // equivalent to widening the types).
+    always_assert(m_data->allPublicSPropsUnknown);
+    return;
+  }
+
+  auto const firstRefinement = m_data->allPublicSPropsUnknown;
+  m_data->allPublicSPropsUnknown = false;
+
+  if (firstRefinement) {
+    // If this is the first refinement, reschedule any dependency which looked
+    // at the public static property state previously.
+    always_assert(m_data->unknownClassSProps.empty());
+    for (auto const& dependency : m_data->dependencyMap) {
+      if (dependency.first.tag() != DependencyContextType::PropName) continue;
+      for (auto const& kv : dependency.second) {
+        if (has_dep(kv.second, Dep::PublicSPropName)) deps.insert(kv.first);
+      }
+    }
+  }
+
+  // Refine unknown class state
+  for (auto const& kv : unknown) {
     // We can't keep context dependent types in public properties.
-    auto const newType = unctx(kv.second);
+    auto newType = unctx(kv.second);
     auto it = m_data->unknownClassSProps.find(kv.first);
     if (it == end(m_data->unknownClassSProps)) {
-      m_data->unknownClassSProps.emplace(kv.first, newType);
+      // If this is the first refinement, our previous state was effectively
+      // TGen for everything, so inserting a type into the map can only
+      // refine. However, if this isn't the first refinement, a name not present
+      // in the map means that its TBottom, so we shouldn't be inserting
+      // anything.
+      always_assert(firstRefinement);
+      m_data->unknownClassSProps.emplace(
+        kv.first,
+        std::make_pair(std::move(newType), 0)
+      );
       continue;
     }
 
-    assert(!firstRefinement);
+    /*
+     * We may only shrink the types we recorded for each property. (If a
+     * property type ever grows, the interpreter could infer something
+     * incorrect at some step.)
+     */
+    always_assert(!firstRefinement);
     always_assert_flog(
-      newType.subtypeOf(it->second),
+      newType.subtypeOf(it->second.first),
       "Static property index invariant violated for name {}:\n"
       "  {} was not a subtype of {}",
       kv.first->data(),
       show(newType),
-      show(it->second)
+      show(it->second.first)
     );
 
-    it->second = newType;
+    // Put a limit on the refinements to ensure termination. Since we only ever
+    // refine types, we can stop at any point and maintain correctness.
+    if (it->second.second + 1 < options.publicSPropRefineLimit) {
+      if (newType.strictSubtypeOf(it->second.first)) {
+        find_deps(*m_data, it->first, Dep::PublicSPropName, deps);
+      }
+      it->second.first = std::move(newType);
+      ++it->second.second;
+    } else {
+      FTRACE(
+        1, "maxed out public static property refinements for name {}\n",
+        kv.first->data()
+      );
+    }
   }
 
-  for (auto& knownInfo : indexer.m_known) {
-    auto const cinfo   = knownInfo.first.cinfo;
-    auto const name    = knownInfo.first.prop;
-    auto const it      = cinfo->publicStaticProps.find(name);
-    // We can't keep context dependent types in public properties.
-    auto const newType = unctx(knownInfo.second);
+  // If we didn't see a mutation among all the functions for a particular name,
+  // it means the type is TBottom. Iterate through the unknown class state and
+  // remove any entries which we didn't see a mutation for.
+  if (!firstRefinement) {
+    auto it = begin(m_data->unknownClassSProps);
+    auto last = end(m_data->unknownClassSProps);
+    while (it != last) {
+      auto const unknownIt = unknown.find(it->first);
+      if (unknownIt == end(unknown)) {
+        if (unknownIt->second != TBottom) {
+          find_deps(*m_data, unknownIt->first, Dep::PublicSPropName, deps);
+        }
+        it = m_data->unknownClassSProps.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
 
-    FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
-      cinfo->cls->name,
-      name,
-      show(newType));
+  // Refine known class state
+  for (auto const& cinfo : m_data->allClassInfos) {
+    for (auto& kv : cinfo->publicStaticProps) {
+      auto const newType = [&] {
+        auto const it = known.find(
+          PublicSPropMutations::KnownKey { cinfo.get(), kv.first }
+        );
+        // If we didn't see a mutation, the type is TBottom.
+        if (it == end(known)) return TBottom;
+        // We can't keep context dependent types in public properties.
+        return unctx(it->second);
+      }();
 
-    // Cases where it's not public should've already been filtered out in the
-    // indexer.
-    always_assert_flog(
-      it != end(cinfo->publicStaticProps),
-      "Attempt to merge a public static property ({}) that wasn't declared "
-      "on class {}",
-      name->data(),
-      cinfo->cls->name->data()
-    );
+      // The type from the indexer doesn't contain the in-class initializer
+      // types. Add that here.
+      auto effectiveType = union_of(newType, kv.second.initializerType);
 
-    // The type from the indexer doesn't contain the in-class initializer
-    // types.  Add that here.
-    auto const effectiveType = union_of(newType, it->second.initializerType);
-
-    /*
-     * If refine_public_statics is called more than once, the subsequent calls
-     * may only shrink the types we recorded for each property.  (If a property
-     * type ever grows, the interpreter could infer something incorrect at some
-     * step.)
-     */
-    if (!firstRefinement) {
+      /*
+       * We may only shrink the types we recorded for each property. (If a
+       * property type ever grows, the interpreter could infer something
+       * incorrect at some step.)
+       */
       always_assert_flog(
-        effectiveType.subtypeOf(it->second.inferredType),
+        effectiveType.subtypeOf(kv.second.inferredType),
         "Static property index invariant violated on {}::{}:\n"
         "  {} is not a subtype of {}",
         cinfo->cls->name->data(),
-        name->data(),
-        show(newType),
-        show(it->second.inferredType)
+        kv.first->data(),
+        show(effectiveType),
+        show(kv.second.inferredType)
       );
-    }
+      always_assert(newType == TBottom || kv.second.everModified);
 
-    it->second.inferredType = effectiveType;
-    it->second.everModified = true;
+      // Put a limit on the refinements to ensure termination. Since we only
+      // ever refine types, we can stop at any point and still maintain
+      // correctness.
+      if (kv.second.refinements + 1 < options.publicSPropRefineLimit) {
+        if (effectiveType.strictSubtypeOf(kv.second.inferredType)) {
+          find_deps(*m_data, kv.first, Dep::PublicSPropName, deps);
+        }
+        kv.second.inferredType = std::move(effectiveType);
+        kv.second.everModified = newType != TBottom;
+        ++kv.second.refinements;
+      } else {
+        FTRACE(
+          1, "maxed out public static property refinements for {}:{}\n",
+          cinfo->cls->name->data(),
+          kv.first->data()
+        );
+      }
+    }
   }
 }
 
@@ -5631,10 +5729,11 @@ Index::could_be_related(const php::Class* cls,
 
 //////////////////////////////////////////////////////////////////////
 
-void PublicSPropIndexer::merge(Context ctx,
-                               const Type& tcls,
-                               const Type& name,
-                               const Type& val) {
+void PublicSPropMutations::merge(const Index& index,
+                                 Context ctx,
+                                 const Type& tcls,
+                                 const Type& name,
+                                 const Type& val) {
   // Figure out which class this can affect.  If we have a DCls::Sub we have to
   // assume it could affect any subclass, so we repeat this merge for all exact
   // class types deriving from that base.
@@ -5643,10 +5742,10 @@ void PublicSPropIndexer::merge(Context ctx,
     if (auto const cinfo = dcls.cls.val.right()) {
       switch (dcls.type) {
         case DCls::Exact:
-          return merge(ctx, cinfo, name, val);
+          return merge(index, ctx, cinfo, name, val);
         case DCls::Sub:
           for (auto const sub : cinfo->subclassList) {
-            merge(ctx, sub, name, val);
+            merge(index, ctx, sub, name, val);
           }
           return;
       }
@@ -5654,13 +5753,21 @@ void PublicSPropIndexer::merge(Context ctx,
     }
   }
 
-  merge(ctx, nullptr, name, val);
+  merge(index, ctx, nullptr, name, val);
 }
 
-void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
-                               const Type& name, const Type& val) {
+void PublicSPropMutations::merge(const Index& index,
+                                 Context ctx,
+                                 ClassInfo* cinfo,
+                                 const Type& name,
+                                 const Type& val) {
   FTRACE(2, "merge_public_static: {} {} {}\n",
          cinfo ? cinfo->cls->name->data() : "<unknown>", show(name), show(val));
+
+  auto get = [this] () -> Data& {
+    if (!m_data) m_data = std::make_unique<Data>();
+    return *m_data;
+  };
 
   auto const vname = tv(name);
   auto const unknownName = !vname ||
@@ -5686,16 +5793,12 @@ void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
         "NOTE: The offending code occured in this context: %s\n",
         show(ctx).c_str()
       );
-      m_everything_bad = true;
+      get().m_nothing_known = true;
       return;
     }
 
-    UnknownMap::accessor acc;
-    if (m_unknown.insert(acc, vname->m_data.pstr)) {
-      acc->second = val;
-    } else {
-      acc->second |= val;
-    }
+    auto const res = get().m_unknown.emplace(vname->m_data.pstr, val);
+    if (!res.second) res.first->second |= val;
     return;
   }
 
@@ -5707,7 +5810,7 @@ void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
     visit_public_statics(cinfo,
                          [&] (const ClassInfo* ci) {
                            for (auto& kv : ci->publicStaticProps) {
-                             merge(ctx, cinfo, sval(kv.first), val);
+                             merge(index, ctx, cinfo, sval(kv.first), val);
                            }
                            return false;
                          });
@@ -5746,25 +5849,25 @@ void PublicSPropIndexer::merge(Context ctx, ClassInfo* cinfo,
   }
 
   // Merge the property type.
-  KnownMap::accessor acc;
-  if (m_known.insert(acc, KnownKey { affectedCInfo, vname->m_data.pstr })) {
-    acc->second = val;
-  } else {
-    acc->second |= val;
-  }
+  auto const res = get().m_known.emplace(
+    KnownKey { affectedCInfo, vname->m_data.pstr },
+    val
+  );
+  if (!res.second) res.first->second |= val;
 }
 
-void PublicSPropIndexer::merge(Context ctx,
-                               const php::Class& cls,
-                               const Type& name,
-                               const Type& val) {
-  auto range = find_range(m_index->m_data->classInfo, cls.name);
+void PublicSPropMutations::merge(const Index& index,
+                                 Context ctx,
+                                 const php::Class& cls,
+                                 const Type& name,
+                                 const Type& val) {
+  auto range = find_range(index.m_data->classInfo, cls.name);
   for (auto const& pair : range) {
     auto const cinfo = pair.second;
     if (cinfo->cls != &cls) continue;
     // Note that this works for both traits and regular classes
     for (auto const sub : cinfo->subclassList) {
-      merge(ctx, sub, name, val);
+      merge(index, ctx, sub, name, val);
     }
   }
 }

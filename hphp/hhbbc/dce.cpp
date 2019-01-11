@@ -2370,7 +2370,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   };
 
   auto collect = CollectedInfo {
-    index, ai.ctx, nullptr, nullptr,
+    index, ai.ctx, nullptr,
     CollectionOpts::TrackConstantArrays, &ai
   };
 

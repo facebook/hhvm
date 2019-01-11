@@ -351,6 +351,20 @@ void setPrivateStaticForBase(ISS& env, Type ty) {
   );
 }
 
+void setPublicStaticForBase(ISS& env, Type ty) {
+  auto const& base = env.state.mInstrState.base;
+  assertx(couldBeInPublicStatic(base));
+
+  auto const nameTy = base.locName ? sval(base.locName) : TStr;
+  FTRACE(
+    4, "      public ({})::$({}) |= {}\n",
+    show(base.locTy), show(nameTy), show(ty)
+  );
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, base.locTy, nameTy, ty
+  );
+}
+
 // Run backwards through an array chain doing array_set operations
 // to produce the array type that incorporates the effects of any
 // intermediate defining dims.
@@ -416,9 +430,9 @@ void updateBaseWithType(ISS& env,
   if (mustBeInStack(base)) {
     return setStackForBase(env, ty);
   }
-  if (couldBeInPrivateStatic(env, base)) {
-    return setPrivateStaticForBase(env, ty);
-  }
+
+  if (couldBeInPrivateStatic(env, base)) setPrivateStaticForBase(env, ty);
+  if (couldBeInPublicStatic(base))       setPublicStaticForBase(env, ty);
 }
 
 void startBase(ISS& env, Base base) {
@@ -585,14 +599,13 @@ void handleInPublicStaticElemD(ISS& env) {
   auto const& base = env.state.mInstrState.base;
   if (!couldBeInPublicStatic(base)) return;
 
-  auto const indexer = env.collect.publicStatics;
-  if (!indexer) return;
-
   auto const name = baseLocNameType(base);
-  auto const ty = env.index.lookup_public_static(base.locTy, name);
+  auto const ty = env.index.lookup_public_static(env.ctx, base.locTy, name);
   if (elemCouldPromoteToArr(ty)) {
     // Might be possible to only merge a TArrE, but for now this is ok.
-    indexer->merge(env.ctx, base.locTy, name, TArr);
+    env.collect.publicSPropMutations.merge(
+      env.index, env.ctx, base.locTy, name, TArr
+    );
   }
 }
 
@@ -619,14 +632,13 @@ void handleInPublicStaticPropD(ISS& env, bool isNullsafe) {
   auto const& base = env.state.mInstrState.base;
   if (!couldBeInPublicStatic(base)) return;
 
-  auto const indexer = env.collect.publicStatics;
-  if (!indexer) return;
-
   auto const name = baseLocNameType(base);
-  auto const ty = env.index.lookup_public_static(base.locTy, name);
+  auto const ty = env.index.lookup_public_static(env.ctx, base.locTy, name);
   if (propCouldPromoteToObj(ty)) {
-    indexer->merge(env.ctx, base.locTy, name,
-                   objExact(env.index.builtin_class(s_stdClass.get())));
+    env.collect.publicSPropMutations.merge(
+      env.index, env.ctx, base.locTy, name,
+      objExact(env.index.builtin_class(s_stdClass.get()))
+    );
   }
 }
 
@@ -661,19 +673,13 @@ void handleInPublicStaticElemU(ISS& env) {
   auto const& base = env.state.mInstrState.base;
   if (!couldBeInPublicStatic(base)) return;
 
-  auto const indexer = env.collect.publicStatics;
-  if (!indexer) return;
-
   /*
-   * We need to ensure that the type could become non-static, but since we're
-   * never going to see anything specialized from lookup_public_static the
-   * first time we're running with collect.publicStatics, we can't do much
-   * right now since we don't have a type for the union of all counted types.
-   *
    * Merging InitCell is correct, but very conservative, for now.
    */
   auto const name = baseLocNameType(base);
-  indexer->merge(env.ctx, base.locTy, name, TInitCell);
+  env.collect.publicSPropMutations.merge(
+    env.index, env.ctx, base.locTy, name, TInitCell
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -765,7 +771,7 @@ Base miBaseSProp(ISS& env, Type cls, const Type& tprop) {
         Base { std::move(*ty), BaseLoc::StaticProp, std::move(cls), name };
     }
   }
-  auto indexTy = env.index.lookup_public_static(cls, tprop);
+  auto indexTy = env.index.lookup_public_static(env.ctx, cls, tprop);
   if (!indexTy.subtypeOf(BInitCell)) indexTy = TInitCell;
   return Base { std::move(indexTy),
                 BaseLoc::StaticProp,

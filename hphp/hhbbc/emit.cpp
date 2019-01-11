@@ -29,6 +29,7 @@
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
@@ -1533,7 +1534,7 @@ void emit_class(EmitUnitState& state,
     if (attrs & AttrPrivate) {
       propTy = privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
     } else if ((attrs & AttrPublic) && (attrs & AttrStatic)) {
-      propTy = state.index.lookup_public_static(&cls, prop.name);
+      propTy = state.index.lookup_public_static(Context{}, &cls, prop.name);
     }
 
     pce->addProperty(

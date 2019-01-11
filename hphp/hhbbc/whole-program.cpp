@@ -229,28 +229,35 @@ std::vector<Context> opt_prop_type_hints_contexts(const php::Program& program) {
   return ret;
 }
 
-WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
-  if (auto const cls = d.right()) {
-    assertx(mode != AnalyzeMode::ConstPass &&
-            options.HardPrivatePropInference &&
-            !is_used_trait(*cls));
-    return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
+WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
+  switch (d.tag()) {
+    case DependencyContextType::Class: {
+      auto const cls = (const php::Class*)d.ptr();
+      assertx(mode != AnalyzeMode::ConstPass &&
+              options.HardPrivatePropInference &&
+              !is_used_trait(*cls));
+      return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
+    }
+    case DependencyContextType::Func: {
+      auto const func = (const php::Func*)d.ptr();
+      auto const cls = !func->cls ? nullptr :
+        func->cls->closureContextCls ?
+        func->cls->closureContextCls : func->cls;
+      assertx(!cls ||
+              mode == AnalyzeMode::ConstPass ||
+              !options.HardPrivatePropInference ||
+              is_used_trait(*cls));
+      return WorkItem {
+        WorkType::Func,
+        Context { func->unit, const_cast<php::Func*>(func), cls }
+      };
+    }
+    case DependencyContextType::PropName:
+      // We only record dependencies on static property names. We don't schedule
+      // any work on their behalf.
+      break;
   }
-
-  auto const func = d.left();
-  assertx(func);
-  auto const cls = !func->cls ? nullptr :
-    func->cls->closureContextCls ?
-    func->cls->closureContextCls : func->cls;
-  assertx(!cls ||
-          mode == AnalyzeMode::ConstPass ||
-          !options.HardPrivatePropInference ||
-          is_used_trait(*cls));
-
-  return WorkItem {
-    WorkType::Func,
-    Context { func->unit, const_cast<php::Func*>(func), cls }
-  };
+  always_assert(false);
 }
 
 /*
@@ -295,7 +302,7 @@ void analyze_iteratively(Index& index, php::Program& program,
 
   auto work = initial_work(program, mode);
   while (!work.empty()) {
-    auto const results = [&] {
+    auto results = [&] {
       trace_time trace(
         "analyzing",
         folly::format("round {} -- {} work items", round, work.size()).str()
@@ -328,7 +335,7 @@ void analyze_iteratively(Index& index, php::Program& program,
 
     DependencyContextSet deps;
 
-    auto update_func = [&] (const FuncAnalysisResult& fa) {
+    auto update_func = [&] (FuncAnalysisResult& fa) {
       SCOPE_ASSERT_DETAIL("update_func") {
         return "Updating Func: " + show(fa.ctx);
       };
@@ -336,6 +343,14 @@ void analyze_iteratively(Index& index, php::Program& program,
       index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
       index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
+
+      if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+        index.record_public_static_mutations(
+          *fa.ctx.func,
+          std::move(fa.publicSPropMutations)
+        );
+      }
+
       if (fa.resolvedConstants.size()) {
         index.refine_class_constants(fa.ctx,
                                      fa.resolvedConstants,
@@ -356,7 +371,7 @@ void analyze_iteratively(Index& index, php::Program& program,
       }
     };
 
-    auto update_class = [&] (const ClassAnalysis& ca) {
+    auto update_class = [&] (ClassAnalysis& ca) {
       {
         SCOPE_ASSERT_DETAIL("update_class") {
           return "Updating Class: " + show(ca.ctx);
@@ -382,6 +397,10 @@ void analyze_iteratively(Index& index, php::Program& program,
         update_class(result->cls);
         break;
       }
+    }
+
+    if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+      index.refine_public_statics(deps);
     }
 
     index.update_class_aliases();
@@ -410,30 +429,6 @@ void constant_pass(Index& index, php::Program& program) {
 
   index.thaw();
   options.InsertAssertions = save;
-}
-
-void analyze_public_statics(Index& index, php::Program& program) {
-  PublicSPropIndexer publicStatics{&index};
-
-  {
-    trace_time timer("analyze public statics");
-    parallel::for_each(
-      all_function_contexts(program),
-      [&] (Context ctx) {
-        if (ctx.cls && ctx.cls->closureContextCls) {
-          ctx.cls = ctx.cls->closureContextCls;
-        }
-        auto info = CollectedInfo {
-          index, ctx, nullptr, &publicStatics,
-          CollectionOpts::TrackConstantArrays
-        };
-        analyze_func_collect(index, ctx, info);
-      }
-    );
-  }
-
-  trace_time update("update public statics");
-  index.refine_public_statics(publicStatics);
 }
 
 void mark_persistent_static_properties(const Index& index,
@@ -592,14 +587,12 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         assert(check(*program));
         prop_type_hint_pass(*index, *program);
         index->rewrite_default_initial_values(*program);
-        index->init_public_static_prop_types();
         constant_pass(*index, *program);
+        // Defer initializing public static property types until after the
+        // constant pass, to try to get better initial values.
+        index->init_public_static_prop_types();
         index->use_class_dependencies(options.HardPrivatePropInference);
         analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        if (options.AnalyzePublicStatics) {
-          analyze_public_statics(*index, *program);
-          analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        }
         final_pass(*index, *program);
         index->mark_persistent_classes_and_functions(*program);
         state_after("optimize", *program);

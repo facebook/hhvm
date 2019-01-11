@@ -135,6 +135,11 @@ struct FuncAnalysisResult {
    * The size_t is the index into ctx.cls->constants
    */
   CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
+
+  /*
+   * Public static property mutations in this function.
+   */
+  PublicSPropMutations publicSPropMutations;
 };
 
 struct FuncAnalysis : FuncAnalysisResult {

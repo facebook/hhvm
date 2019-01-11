@@ -1267,7 +1267,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     CollectionOpts::TrackConstantArrays : CollectionOpts{};
 
   collect.emplace(
-    index, ainfo.ctx, nullptr, nullptr,
+    index, ainfo.ctx, nullptr,
     collectionOpts, &ainfo
   );
 
@@ -1300,7 +1300,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        */
       ainfo = analyze_func(index, ainfo.ctx, collectionOpts);
       collect.emplace(
-        index, ainfo.ctx, nullptr, nullptr,
+        index, ainfo.ctx, nullptr,
         collectionOpts, &ainfo
       );
       if (!again) {

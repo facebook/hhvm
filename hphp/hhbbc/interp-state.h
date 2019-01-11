@@ -427,13 +427,11 @@ struct CollectedInfo {
   explicit CollectedInfo(const Index& index,
                          Context ctx,
                          ClassAnalysis* cls,
-                         PublicSPropIndexer* publicStatics,
                          CollectionOpts opts,
                          const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
-  PublicSPropIndexer* const publicStatics;
   ConstantMap cnsMap;
   hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
@@ -449,6 +447,8 @@ struct CollectedInfo {
    * See FuncAnalysisResult for details.
    */
   std::bitset<64> usedParams;
+
+  PublicSPropMutations publicSPropMutations;
 };
 
 //////////////////////////////////////////////////////////////////////

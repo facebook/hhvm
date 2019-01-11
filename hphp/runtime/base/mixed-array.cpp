@@ -896,8 +896,6 @@ MixedArray* MixedArray::prepareForInsert(bool copy) {
 void MixedArray::compact(bool renumber /* = false */) {
   bool updatePosAfterCompact = false;
   ElmKey mPos;
-  bool updateStrongIters = false;
-  req::TinyVector<ElmKey,3> siKeys;
 
   // Prep work before beginning the compaction process
   if (LIKELY(!renumber)) {
@@ -949,14 +947,6 @@ void MixedArray::compact(bool renumber /* = false */) {
     assertx(m_pos >= 0 && m_pos < m_size);
   }
 
-  if (LIKELY(!updateStrongIters)) {
-    // In the common case there aren't any strong iterators that need updating,
-    // so we can just update m_used and return
-    m_used = m_size;
-    return;
-  }
-
-  // Finally, update m_used and return
   m_used = m_size;
 }
 

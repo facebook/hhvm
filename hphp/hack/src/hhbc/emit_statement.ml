@@ -1163,9 +1163,10 @@ and emit_foreach_ env pos collection iterator block =
   in
   let init, next, preamble = match key_local_opt with
   | Some (key_local) ->
-    let initf, nextf = instr_iterinitk, instr_iternextk in
-    let init = initf iterator_number loop_break_label value_local key_local in
-    let cont = nextf iterator_number loop_head_label value_local key_local in
+    let init =
+      instr_iterinitk iterator_number loop_break_label value_local key_local in
+    let cont =
+      instr_iternextk iterator_number loop_head_label value_local key_local in
     let preamble =
       wrap_non_empty_block_in_fault
         (instr_label loop_head_label)

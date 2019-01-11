@@ -2302,11 +2302,12 @@ let add_constraint
  *
  * Also note that freshening lifts through unions and nullables.
  *
- * For example, the type
+ * Example 1: the type
  *   ?dict<t1,t2>
  * will be transformed to
  *   ?dict<tvar1,tvar2> with t1 <: tvar1 and t2 <: tvar2
- * For example, the type
+ *
+ * Example 2: the type
  *   Contra<t>
  * will be transformed to
  *   Contra<tvar1> with tvar1 <: t
@@ -2400,7 +2401,6 @@ and freshen_ty ~variance env ty =
       else sub_type env freshty ty in
     env, freshty
 
-
 and freshen_tparams_wrt_variance env variancel tyl =
    match variancel, tyl with
    | [], [] ->
@@ -2428,12 +2428,21 @@ let bind env r var ty =
  *)
 let bind_to_lower_bound ~freshen env r var =
   let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-  (* Construct the union of the lower bounds. Note that if there are no lower
-   * bounds then we will construct the empty type, i.e. Tunresolved []. *)
+  (* Construct the union of the lower bounds, normalizing null|t to ?t because
+   * some code is still sensitive to this representation.
+   * Note that if there are no lower bounds then we will construct the empty
+   * type, i.e. Tunresolved []. *)
+  let (nulls, nonnulls) =
+    List.partition_tf lower_bounds
+      (fun ty -> match ty with (_, Tprim Nast.Tnull) -> true | _ -> false) in
   let ty =
-    match lower_bounds with
+    match nonnulls with
     | [ty] -> ty
     | tys -> (r, Tunresolved tys) in
+  let ty =
+    if List.is_empty nulls
+    then ty
+    else (fst ty, Toption ty) in
   let env, ty =
     if freshen
     then freshen_inside_ty_wrt_variance env ty

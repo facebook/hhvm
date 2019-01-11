@@ -1900,7 +1900,7 @@ and try_intersect env ty tyl =
     then try_intersect env ty tyl'
     else
     if is_sub_type_alt env ty' ty = Some true
-    then try_intersect env ty' tyl'
+    then tyl
     else
     let nonnull_ty = (fst ty, Tnonnull) in
     match ty, ty' with
@@ -1929,7 +1929,7 @@ and try_union env ty tyl =
   | [] -> [ty]
   | ty'::tyl' ->
     if is_sub_type_alt env ty ty' = Some true
-    then try_union env ty' tyl'
+    then tyl
     else
     if is_sub_type_alt env ty' ty = Some true
     then try_union env ty tyl'

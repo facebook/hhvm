@@ -5,7 +5,7 @@
 .main {
   FPushFuncD 0 "main"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -37,290 +37,238 @@
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Div
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
 # exclude divide by zero
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Div
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
 # exclude divide by zero
 
@@ -330,55 +278,49 @@
   False
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   True
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   False
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   True
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
   FCall <> 0 1 - "" ""
-  UnboxR
   False
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
   FCall <> 0 1 - "" ""
-  UnboxR
   True
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
 # HHIRSimplification == false to test two immediates
 
@@ -387,42 +329,42 @@
   True
   Add
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   True
   False
   Sub
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   False
   False
   BitOr
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   False
   True
   BitAnd
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   True
   False
   BitXor
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 1 "print_bool_result"
   False
   True
   Mul
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   Null
   RetC

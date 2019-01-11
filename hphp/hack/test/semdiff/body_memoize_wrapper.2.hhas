@@ -10,7 +10,7 @@
   .method [public static] <"HH\\this" "HH\\this" hh_type extended_hint > get() {
     FPushCtorD 0 "MemoizeWrappers"
     FCall <> 0 1 - "" ""
-    PopR
+    PopC
     VerifyRetTypeC
     RetC
   }

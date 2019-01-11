@@ -71,7 +71,6 @@ let emit_body_instrs_ref params call_instrs =
     call_instrs;
     param_instrs;
     instr_fcall fcall_args;
-    instr_unboxr_nop;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)
   ]

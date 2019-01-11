@@ -170,10 +170,8 @@ enum FlavorDesc {
   NOV,  // None
   CV,   // Cell
   VV,   // Var
-  RV,   // Return value (cell or var)
   UV,   // Uninit
   CVV,  // Cell or Var argument
-  CRV,  // Cell or Return value argument
   CUV,  // Cell, or Uninit argument
   CVUV, // Cell, Var, or Uninit argument
 };
@@ -489,17 +487,11 @@ constexpr uint32_t kMaxConcatN = 4;
   O(DiscardClsRef,   ONE(CAR),         NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
-  O(PopR,            NA,               ONE(RV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
   O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \
-  O(BoxR,            NA,               ONE(RV),         ONE(VV),    NF) \
-  O(BoxRNop,         NA,               ONE(RV),         ONE(VV),    NF) \
-  O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
-  O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
-  O(RGetCNop,        NA,               ONE(CV),         ONE(RV),    NF) \
   O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
   O(UGetCUNop,       NA,               ONE(CUV),        ONE(UV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
@@ -605,7 +597,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
-  O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
   O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        TF) \
@@ -699,7 +690,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
@@ -744,7 +735,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VerifyOutType,   ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
   O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
-  O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
   O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
   O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \
@@ -800,8 +790,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseR,           TWO(IVA, OA(MOpMode)),                             \
-                                       NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
   O(Dim,             TWO(OA(MOpMode), KA),                              \
                                        NOV,             NOV,        NF) \
@@ -818,7 +806,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
-  O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
   O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
   O(MemoGetEager,    THREE(BA, BA, LAR),                                \
                                        NOV,             ONE(CV),    CF) \
@@ -1135,7 +1122,7 @@ inline bool isFCallStar(Op opcode) {
 }
 
 constexpr bool isRet(Op op) {
-  return op == OpRetC || op == OpRetV || op == OpRetM || op == OpRetCSuspended;
+  return op == OpRetC || op == OpRetCSuspended || op == OpRetM;
 }
 
 constexpr bool isReturnish(Op op) {
@@ -1160,7 +1147,6 @@ inline bool isMemberBaseOp(Op op) {
     case Op::BaseSL:
     case Op::BaseL:
     case Op::BaseC:
-    case Op::BaseR:
     case Op::BaseH:
       return true;
 
@@ -1184,7 +1170,6 @@ inline bool isMemberFinalOp(Op op) {
     case Op::BindM:
     case Op::UnsetM:
     case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
       return true;
 
     default:
@@ -1205,7 +1190,6 @@ inline MOpMode finalMemberOpMode(Op op) {
     case Op::SetOpM:
     case Op::BindM:
     case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;
@@ -1220,7 +1204,7 @@ inline MOpMode finalMemberOpMode(Op op) {
 
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
-  return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
+  return op == OpRetC || op == OpNativeImpl ||
          op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
          op == OpYield || op == OpYieldK || op == OpRetM ||
          op == OpRetCSuspended || op == OpYieldFromDelegate;

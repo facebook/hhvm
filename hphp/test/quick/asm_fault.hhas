@@ -3,7 +3,7 @@
 .main {
   FPushFuncD 0 "main"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -21,7 +21,7 @@
     FPushCtorD 1 "Exception"
     CGetL $msg
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   } .catch {
     String "throw_stuff's exception handler ...\n"
@@ -44,7 +44,7 @@
     FPushFuncD 1 "throw_stuff"
     String "the message"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
 
     String "unreached\n"
     Print
@@ -78,16 +78,16 @@ repeat:
 
 make_one:    FPushCtorD 0 "One"
              FCall <> 0 1 - "" ""
-             PopR
+             PopC
              Throw
 make_two:    FPushCtorD 0 "Two"
              FCall <> 0 1 - "" ""
-             PopR
+             PopC
              Throw
 make_three:  FPushCtorD 1 "Three"
              String "third exception from throw_various"
              FCall <> 1 1 - "" ""
-             PopR
+             PopC
              Throw
            } .catch {
              Dup
@@ -132,7 +132,7 @@ on_three:    String "three\n"
 resume:  .try {
            FPushFunc 0
            FCall <> 0 1 - "" ""
-           PopR
+           PopC
            Jmp resume2
          } .catch {
            SetL $ex
@@ -141,7 +141,6 @@ resume:  .try {
            PushL $ex
            FPushObjMethodD 0 "getMessage" NullThrows
            FCall <> 0 1 - "" ""
-           UnboxR
            Concat
            String "\n"
            Concat

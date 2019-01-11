@@ -217,11 +217,11 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   // If the current state is OUT and we are still at a stack level less than the
-  // original, then we skip over the PopR opcode if it exists and then break
+  // original, then we skip over the PopC opcode if it exists and then break
   // (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Out &&
       curStackDisp == StackDepthDisposition::Shallower &&
-      peek_op(pc) != OpPopR)) {
+      peek_op(pc) != OpPopC)) {
     req_data.setDebuggerStepOut(StepOutState::None);
     if (!req_data.getDebuggerNext()) {
       // Next command not active, break
@@ -539,8 +539,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
   const Unit* unit = f->unit();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen(pc)) {
-    if (peek_op(pc) != OpRetC && peek_op(pc) != OpRetV &&
-        peek_op(pc) != OpRetM && peek_op(pc) != OpRetCSuspended) {
+    if (peek_op(pc) != OpRetC && peek_op(pc) != OpRetCSuspended &&
+        peek_op(pc) != OpRetM) {
       continue;
     }
 
@@ -612,8 +612,8 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
   auto& req_data = RID();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen(pc)) {
-    if (peek_op(pc) == OpRetC || peek_op(pc) == OpRetV ||
-        peek_op(pc) == OpRetM || peek_op(pc) == OpRetCSuspended) {
+    if (peek_op(pc) == OpRetC || peek_op(pc) == OpRetCSuspended ||
+        peek_op(pc) == OpRetM) {
       req_data.m_retBreakPointFilter.removePC(pc);
     }
   }

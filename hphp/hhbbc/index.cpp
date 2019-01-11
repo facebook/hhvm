@@ -294,7 +294,7 @@ struct res::Func::FuncInfo {
    * information.  May be TBottom if the function is known to never
    * return (e.g. always throws).
    */
-  Type returnTy = TInitGen;
+  Type returnTy = TInitCell;
 
   /*
    * If the function always returns the same parameter, this will be
@@ -4779,8 +4779,8 @@ Type Index::lookup_foldable_return_type(Context ctx,
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&](res::Func::FuncName)   { return TInitGen; },
-    [&](res::Func::MethodName) { return TInitGen; },
+    [&](res::Func::FuncName)   { return TInitCell; },
+    [&](res::Func::MethodName) { return TInitCell; },
     [&](FuncInfo* finfo) {
       add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
       return unctx(finfo->returnTy);
@@ -4788,7 +4788,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     [&](const MethTabEntryPair* mte) {
       add_dependency(*m_data, mte->second.func, ctx, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->func) return TInitGen;
+      if (!finfo->func) return TInitCell;
       return unctx(finfo->returnTy);
     },
     [&](FuncFamily* fam) {
@@ -4796,7 +4796,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
       for (auto const pf : fam->possibleFuncs) {
         add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
-        if (!finfo->func) return TInitGen;
+        if (!finfo->func) return TInitCell;
         ret |= unctx(finfo->returnTy);
       }
       return ret;
@@ -4819,7 +4819,7 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
     [&](const MethTabEntryPair* mte) {
       add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
-      if (!finfo->func) return TInitGen;
+      if (!finfo->func) return TInitCell;
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
     [&] (FuncFamily* fam) {
@@ -4827,7 +4827,7 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
       for (auto& pf : fam->possibleFuncs) {
         add_dependency(*m_data, pf->second.func, callCtx.caller, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
-        if (!finfo->func) ret |= TInitGen;
+        if (!finfo->func) ret |= TInitCell;
         else ret |= return_with_context(finfo->returnTy, callCtx.context);
       }
       return ret;
@@ -4856,7 +4856,7 @@ Type Index::lookup_return_type_raw(const php::Func* f) const {
     assertx(it->func == f);
     return it->returnTy;
   }
-  return TInitGen;
+  return TInitCell;
 }
 
 Type Index::lookup_return_type_and_clear(
@@ -5239,7 +5239,7 @@ void Index::refine_local_static_types(
 }
 
 void Index::init_return_type(const php::Func* func) {
-  if (func->attrs & (AttrReference | AttrBuiltin) || func->isMemoizeWrapper) {
+  if ((func->attrs & AttrBuiltin) || func->isMemoizeWrapper) {
     return;
   }
 

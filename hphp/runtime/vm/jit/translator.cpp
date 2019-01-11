@@ -94,17 +94,12 @@ static const struct {
   { OpPopV,        {Stack1|
                     DontGuardStack1|
                     IgnoreInnerType,  None,         OutNone         }},
-  { OpPopR,        {Stack1|
-                    DontGuardStack1|
-                    IgnoreInnerType,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput       }},
-  { OpBoxR,        {Stack1,           Stack1,       OutVInput       }},
-  { OpUnboxR,      {Stack1,           Stack1,       OutCInput       }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -219,16 +214,15 @@ static const struct {
   { OpSwitch,      {Stack1,           None,         OutNone         }},
   { OpSSwitch,     {Stack1,           None,         OutNone         }},
   /*
-   * RetC and RetV are special. Their manipulation of the runtime stack are
+   * RetC and RetM are special. Their manipulation of the runtime stack are
    * outside the boundaries of the tracelet abstraction; since they always end
    * a basic block, they behave more like "glue" between BBs than the
    * instructions in the body of a BB.
    *
-   * RetC and RetV consume a value from the stack, and this value's type needs
+   * RetC and RetM consume values from the stack, and these values' types needs
    * to be known at compile-time.
    */
   { OpRetC,        {AllLocals,        None,         OutNone         }},
-  { OpRetV,        {AllLocals,        None,         OutNone         }},
   { OpRetM,        {AllLocals,        None,         OutNone         }},
   { OpRetCSuspended,
                    {AllLocals,        None,         OutNone         }},
@@ -389,8 +383,6 @@ static const struct {
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
-  { OpVerifyRetTypeV,
-                   {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyRetNonNullC,
@@ -465,7 +457,6 @@ static const struct {
   { OpBaseSL,      {Local,            MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
-  { OpBaseR,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
@@ -485,8 +476,6 @@ static const struct {
                                       None,         OutNone         }},
   { OpSetWithRefLML,
                    {MBase,            None,         OutNone         }},
-  { OpSetWithRefRML,
-                   {Stack1|MBase,     None,         OutNone         }},
   { OpMemoGet,     {LocalRange,       None,         OutUnknown      }},
   { OpMemoGetEager,{LocalRange,       None,         OutUnknown      }},
   { OpMemoSet,     {Stack1|LocalRange,
@@ -506,11 +495,9 @@ void initInstrInfo() {
       instrInfo[info.op] = info.info;
     }
     if (!RuntimeOption::EvalCheckReturnTypeHints) {
-      for (size_t j = 0; j < 2; ++j) {
-        auto& ii = instrInfo[j == 0 ? OpVerifyRetTypeC : OpVerifyRetTypeV];
-        ii.in = ii.out = None;
-        ii.type = OutNone;
-      }
+      auto& ii = instrInfo[OpVerifyRetTypeC];
+      ii.in = ii.out = None;
+      ii.type = OutNone;
     }
     instrInfoInited = true;
   }
@@ -612,17 +599,13 @@ int64_t getStackPushed(PC pc) {
 
 bool isAlwaysNop(const NormalizedInstruction& ni) {
   switch (ni.op()) {
-  case Op::BoxRNop:
   case Op::DefClsNop:
   case Op::Nop:
-  case Op::UnboxRNop:
-  case Op::RGetCNop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::EntryNop:
     return true;
   case Op::VerifyRetTypeC:
-  case Op::VerifyRetTypeV:
     return !RuntimeOption::EvalCheckReturnTypeHints;
   default:
     return false;
@@ -1052,14 +1035,12 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Parent:
   case Op::DiscardClsRef:
   case Op::PopC:
-  case Op::PopR:
   case Op::PopV:
   case Op::PopU:
   case Op::PopL:
   case Op::Print:
   case Op::PushL:
   case Op::RetC:
-  case Op::RetV:
   case Op::RetCSuspended:
   case Op::Self:
   case Op::SetG:
@@ -1075,7 +1056,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Throw:
   case Op::True:
   case Op::Unbox:
-  case Op::UnboxR:
   case Op::UnsetL:
   case Op::VGetG:
   case Op::VGetL:
@@ -1083,7 +1063,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::VerifyParamType:
   case Op::VerifyRetTypeC:
   case Op::VerifyRetNonNullC:
-  case Op::VerifyRetTypeV:
   case Op::VerifyOutType:
   case Op::WHResult:
   case Op::Xor:
@@ -1095,7 +1074,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BaseSL:
   case Op::BaseL:
   case Op::BaseC:
-  case Op::BaseR:
   case Op::BaseH:
   case Op::Dim:
   case Op::QueryM:
@@ -1106,7 +1084,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BindM:
   case Op::UnsetM:
   case Op::SetWithRefLML:
-  case Op::SetWithRefRML:
   case Op::SetRangeM:
   case Op::MemoGet:
   case Op::MemoGetEager:
@@ -1120,10 +1097,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Nop:
   case Op::EntryNop:
   case Op::Box:
-  case Op::BoxR:
-  case Op::BoxRNop:
-  case Op::UnboxRNop:
-  case Op::RGetCNop:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::AddElemV:
@@ -1273,7 +1246,7 @@ Type flavorToType(FlavorDesc f) {
     case CUV: return TCell;
     case UV: return TUninit;
     case VV: return TBoxedInitCell;
-    case RV: case CRV: case CVV: case CVUV: return TGen;
+    case CVV: case CVUV: return TGen;
   }
   not_reached();
 }

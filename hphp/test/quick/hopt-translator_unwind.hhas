@@ -5,7 +5,7 @@
   FPushFuncD 1 "set_error_handler"
     String "thrower"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   # If get_undefined_var is inlined then the context passed to handler will
   # contain the locals from test_unwind_dirty_stack_regs in an array which will
@@ -15,12 +15,11 @@
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   .try {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall <> 0 1 - "" ""
-    UnboxR
     RetC
   } .catch {
     SetL _1
@@ -29,7 +28,6 @@
     PushL _1
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Concat
     String "\n"
     Concat
@@ -44,7 +42,7 @@
   FPushCtorD 1 "Exception"
     String "hi"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
 }
 
@@ -86,7 +84,7 @@
   FPushCtorD 1 "DtorPrinter"
     CGetL $id
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   RetC
 }
 
@@ -109,19 +107,16 @@
   FPushFuncD 1 "make_obj"
     Int 0
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_2
   PopC
 
@@ -131,7 +126,7 @@
 
   FPushFuncD 0 "get_undefined_var"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   # This code isn't reached---but let's Pop this junk just so
   # theoretically we could pass verification some day.

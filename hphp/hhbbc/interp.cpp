@@ -203,14 +203,6 @@ void in(ISS& env, const bc::PopC&) {
 }
 void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
-void in(ISS& env, const bc::PopR&) {
-  auto t = topT(env, 0);
-  if (t.subtypeOf(BCell)) {
-    return reduce(env, bc::UnboxRNop {}, bc::PopC {});
-  }
-  nothrow(env);
-  popR(env);
-}
 
 void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
 
@@ -239,30 +231,11 @@ void in(ISS& env, const bc::Box&) {
   push(env, TRef);
 }
 
-void in(ISS& env, const bc::BoxR&) {
-  effect_free(env);
-  if (topR(env).subtypeOf(BRef)) {
-    return reduce(env, bc::BoxRNop {});
-  }
-  popR(env);
-  push(env, TRef);
-}
-
 void in(ISS& env, const bc::Unbox&) {
   effect_free(env);
   popV(env);
   push(env, TInitCell);
 }
-
-void in(ISS& env, const bc::UnboxR&) {
-  auto const t = topR(env);
-  if (t.subtypeOf(BInitCell)) return reduce(env, bc::UnboxRNop {});
-  nothrow(env);
-  popT(env);
-  push(env, TInitCell);
-}
-
-void in(ISS& env, const bc::RGetCNop&) { effect_free(env); }
 
 void in(ISS& env, const bc::CGetCUNop&) {
   effect_free(env);
@@ -274,21 +247,6 @@ void in(ISS& env, const bc::UGetCUNop&) {
   effect_free(env);
   popCU(env);
   push(env, TUninit);
-}
-
-void in(ISS& env, const bc::UnboxRNop&) {
-  effect_free(env);
-  constprop(env);
-  auto t = popR(env);
-  if (!t.subtypeOf(BInitCell)) t = TInitCell;
-  push(env, std::move(t));
-}
-
-void in(ISS& env, const bc::BoxRNop&) {
-  effect_free(env);
-  auto t = popR(env);
-  if (!t.subtypeOf(BRef)) t = TRef;
-  push(env, std::move(t));
 }
 
 void in(ISS& env, const bc::Null&) {
@@ -1577,9 +1535,6 @@ void in(ISS& env, const bc::RetC& /*op*/) {
     env.flags.retParam = locEquiv;
   }
 }
-void in(ISS& env, const bc::RetV& /*op*/) {
-  doRet(env, popV(env), false);
-}
 void in(ISS& env, const bc::RetM& op) {
   std::vector<Type> ret(op.arg1);
   for (int i = 0; i < op.arg1; i++) {
@@ -1626,7 +1581,6 @@ void in(ISS& env, const bc::NativeImpl&) {
 
   if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
     assert(env.ctx.func->attrs & AttrParamCoerceModeNull);
-    assert(!(env.ctx.func->attrs & AttrReference));
     auto const resCls = env.index.builtin_class(env.ctx.cls->name);
     // Can still return null if parameter coercion fails
     return doRet(env, union_of(objExact(resCls), TInitNull), true);
@@ -1635,7 +1589,7 @@ void in(ISS& env, const bc::NativeImpl&) {
   if (env.ctx.func->nativeInfo) {
     return doRet(env, native_function_return_type(env.ctx.func), true);
   }
-  doRet(env, TInitGen, true);
+  doRet(env, TInitCell, true);
 }
 
 void in(ISS& env, const bc::CGetL& op) {
@@ -2075,7 +2029,6 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             false
           },
           bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
-          bc::UnboxR {},
           bc::CastString {}
         );
       }
@@ -2098,7 +2051,6 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
             false
           },
           bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
-          bc::UnboxR {},
           bc::CastString {},
           bc::Int { 0 },
           bc::IsTypeL { op.loc1, IsTypeOp::Null },
@@ -3519,7 +3471,6 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
         bc::FPushCtorD { 1, exCls, false },
         bc::String { err },
         bc::FCall { FCallArgs(1), staticEmptyString(), staticEmptyString() },
-        bc::UnboxRNop {},
         bc::PopC {},
         bc::Throw {}
       );
@@ -3611,7 +3562,6 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
       if (auto v = tv(ty)) {
         BytecodeVec repl { fca.numArgs, bc::PopC {} };
         repl.push_back(gen_constant(*v));
-        repl.push_back(bc::RGetCNop {});
         fpiPop(env);
         reduce(env, std::move(repl));
         return folly::none;
@@ -3769,9 +3719,7 @@ void in(ISS& env, const bc::FCall& op) {
     popC(env);
   }
   for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < fca.numRets; ++i) {
-    push(env, fca.numRets == 1 ? TInitGen : TInitCell);
-  }
+  for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::DecodeCufIter& op) {
@@ -4399,7 +4347,6 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   push(env, std::move(retT));
 }
 
-void in(ISS& /*env*/, const bc::VerifyRetTypeV& /*op*/) {}
 void in(ISS& env, const bc::VerifyOutType& op) {
   verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint, false);
 }

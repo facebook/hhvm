@@ -58,16 +58,10 @@ let string_of_basic instruction =
     | EntryNop    -> "EntryNop"
     | PopC        -> "PopC"
     | PopV        -> "PopV"
-    | PopR        -> "PopR"
     | PopU        -> "PopU"
     | Dup         -> "Dup"
     | Box         -> "Box"
     | Unbox       -> "Unbox"
-    | BoxR        -> "BoxR"
-    | BoxRNop     -> "BoxRNop"
-    | UnboxR      -> "UnboxR"
-    | UnboxRNop   -> "UnboxRNop"
-    | RGetCNop    -> "RGetCNop"
 
 let string_of_list_of_shape_fields sl =
   String.concat ~sep:" " @@ List.map ~f:SU.quote_string sl
@@ -398,7 +392,6 @@ let string_of_control_flow instruction =
   | RetC -> "RetC"
   | RetCSuspended -> "RetCSuspended"
   | RetM p -> "RetM " ^ string_of_int p
-  | RetV -> "RetV"
   | Throw -> "Throw"
   | Unwind -> "Unwind"
   | Switch (kind, base, labels) -> string_of_switch kind base labels
@@ -451,8 +444,6 @@ let string_of_base x =
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
   | BaseC (si, m) ->
     sep ["BaseC"; string_of_stack_index si; MemberOpMode.to_string m]
-  | BaseR (si, m) ->
-    sep ["BaseR"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseH ->
     "BaseH"
   | Dim (m, mk) ->
@@ -484,14 +475,12 @@ let string_of_final instruction =
   | SetRangeM (i, op, s) ->
     sep ["SetRangeM";
       string_of_int i; string_of_setrange_op op; string_of_int s]
-  | SetWithRefLML _
-  | SetWithRefRML _ -> failwith "unreachable final instruction"
+  | SetWithRefLML _ -> failwith "unreachable final instruction"
 
 (*
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t
 | SetWithRefLML of local_id * local_id
-| SetWithRefRML of local_id
 *)
 
 let string_of_param_locations pl =
@@ -590,7 +579,6 @@ let string_of_misc instruction =
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
-    | VerifyRetTypeV -> "VerifyRetTypeV"
     | Catch -> "Catch"
     | ChainFaults -> "ChainFaults"
     | CheckThis -> "CheckThis"

@@ -19,7 +19,6 @@
     PushL $a
     PushL $b
   FCall <> 2 1 - "" ""
-  UnboxR
   RetC
 }
 

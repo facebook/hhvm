@@ -4,7 +4,7 @@
 .main {
   FPushFuncD 0 "foo"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -19,7 +19,7 @@
         String "Error Processing Request"
         Int 1
         FCall <> 2 1 - "" ""
-        PopR
+        PopC
         Throw
         Jmp L0
       } .catch {
@@ -44,7 +44,7 @@
       FPushCtorD 1 "Exception"
       String "exn thrown after inner"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
     .try_fault F11 {
@@ -62,7 +62,7 @@ L2:
   FPushFuncD 1 "var_dump"
   CGetL $x
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 F11:
@@ -89,7 +89,7 @@ F9:
     FPushCtorD 1 "Exception"
     String "exn thrown after inner"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   }
   .try_fault F13 {

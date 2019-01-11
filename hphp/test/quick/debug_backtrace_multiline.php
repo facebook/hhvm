@@ -27,16 +27,16 @@ function newInstanceOfA($line) {
   return (new A())->x($line, 1);
 }
 
-// UnboxR
+// non-PopC
 (new A())->x(__LINE__)->
   x(__LINE__)->
   x(__LINE__);
 
-// PopR
+// PopC
 (new A())->x(__LINE__)
   ;
 
-// BoxR
+// Box
 $var = &newInstanceOfA(__LINE__);
 $var =
   &newInstanceOfA(__LINE__)

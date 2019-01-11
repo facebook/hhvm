@@ -79,12 +79,6 @@ Type native_function_return_type(const php::Func* f,
                                  bool include_coercion_failures) {
   assert(f->nativeInfo);
 
-  // If the function returns by ref, we can't say much about it. It can be a ref
-  // or null.
-  if (f->attrs & AttrReference) {
-    return union_of(TRef, TInitNull);
-  }
-
   // Infer the type from the HNI declaration
   auto t = [&]{
     auto const hni = f->nativeInfo->returnType;

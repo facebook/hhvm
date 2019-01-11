@@ -292,7 +292,6 @@ interpOutputLocals(IRGS& env,
     case OpBindM:
     case OpUnsetM:
     case OpSetWithRefLML:
-    case OpSetWithRefRML:
       smashesAllLocals = true;
       break;
 

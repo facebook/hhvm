@@ -457,8 +457,7 @@ let check_instruct_base asn i i' =
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | BaseNC _, _ | BaseGC _, _ | BaseSC _, _ | BaseC _, _ | BaseR _, _
-  | BaseH, _ ->
+  | BaseNC _, _ | BaseGC _, _ | BaseSC _, _ | BaseC _, _ | BaseH, _ ->
     if i=i' then Some asn else None
 
 let check_instruct_final asn i i' =
@@ -485,13 +484,8 @@ let check_instruct_final asn i i' =
     when n=n' -> reads_member_key asn mk mk'
   | SetRangeM (n, op, s), SetRangeM (n', op', s')
     when n=n' && op=op' && s=s' -> Some asn
-  | SetWithRefRML _, SetWithRefRML _ ->
-    (* COMPLETENESS: HackC/HHVM do not generate this instruction, so reject it
-      for now. *)
-    None
   | SetWithRefLML _, _ | QueryM _, _ | VGetM _, _ | SetM _, _ | IncDecM _, _
-  | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetWithRefRML _, _
-  | SetRangeM _, _ ->
+  | SetOpM _, _ | BindM _, _ | UnsetM _, _ | SetRangeM _, _ ->
     None
 
 (* Iterators. My understanding is that the initializers either jump to the
@@ -599,7 +593,7 @@ let check_instruct_misc asn i i' =
     (e.g. they do not access locals). *)
   | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | ChainFaults, _
   | OODeclExists _, _
-  | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeV, _ | Self _, _
+  | VerifyParamType _, _ | VerifyRetTypeC, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _ | ReifiedName _, _ | ReifiedGeneric _, _
   | RecordReifiedGeneric _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
@@ -612,8 +606,8 @@ let check_instruct_basic i i' =
   match i, i' with
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | Nop, _ | EntryNop, _ | PopC, _ | PopV, _ | PopR, _ | PopU, _ | Dup, _
-  | Box, _ | Unbox, _ | BoxR, _ | BoxRNop, _ | UnboxR, _ | UnboxRNop, _ | RGetCNop, _ ->
+  | Nop, _ | EntryNop, _ | PopC, _ | PopV, _ | PopU, _ | Dup, _
+  | Box, _ | Unbox, _ ->
     if i=i' then Some () else None
 
 let check_instruct_lit_const asn i i' =
@@ -948,8 +942,7 @@ let equiv prog prog' startlabelpairs =
               (hs_of_pc pc', LabelMap.find lab' labelmap')) asn todo)
         | RetM n, RetM m ->
           if n=m then donext assumed todo else try_specials ()
-        | RetC, RetC
-        | RetV, RetV ->
+        | RetC, RetC ->
           donext assumed todo
 
       (* Two-sided treatment of throw. Here we need the instructions to be the
@@ -1524,20 +1517,6 @@ let equiv prog prog' startlabelpairs =
          end
       end) in
 
-    let vget_retv_pattern =
-      vget_unnamed_pattern
-      $$ uRetV
-      $> (fun (n,_) -> n) in
-    let two_vget_retv_pattern = vget_retv_pattern $*$ vget_retv_pattern in
-    let two_vget_retv_pattern_action =
-      two_vget_retv_pattern
-      $>> (fun (n,n') (_,_) ->
-        match reads asn (Local.Unnamed n) (Local.Unnamed n') with
-        | None -> Some(pc,pc',asn,assumed,todo)
-        | Some _new_asn ->
-          donext (add_assumption (pc,pc') asn assumed) todo
-      ) in
-
     (* Isset and branch where we know statically that a variable is
       unset. This should morally be in one_side_x, but we don't currently do
       any non-trivial pattern-matching there, so I'm putting it here, even
@@ -1575,7 +1554,6 @@ let equiv prog prog' startlabelpairs =
       two_cugetl_list_createcl_action;
       two_vget_base_action;
       two_vget_cget_bind_action;
-      two_vget_retv_pattern_action;
       two_vget_binds_action;
       issetl_jmpz_action_left;
       issetl_jmpz_action_right;

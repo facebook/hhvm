@@ -5,11 +5,11 @@
 .main {
   FPushFuncD 0 "init_test"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 0 "uninit_test"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   Int 1
   RetC
@@ -83,7 +83,7 @@
   ClsRefGetL $who 0
   FPushCtor 0 0 NoGenerics
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
@@ -103,7 +103,6 @@
   FPushFuncD 1 "do_test"
     String "Init"
   FCall <> 1 1 - "" ""
-  UnboxR
   RetC
 }
 
@@ -111,6 +110,5 @@
   FPushFuncD 1 "do_test"
     String "Uninit"
   FCall <> 1 1 - "" ""
-  UnboxR
   RetC
 }

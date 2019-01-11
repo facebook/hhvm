@@ -6,7 +6,7 @@
   FPushFuncD 1 "main"
   Int 12
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 }

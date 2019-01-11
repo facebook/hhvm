@@ -6,7 +6,7 @@
 .main {
   FPushFuncD 0 "foo"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

@@ -1518,23 +1518,6 @@ void in(ISS& env, const bc::BaseC& op) {
   nothrow(env);
 }
 
-void in(ISS& env, const bc::BaseR& op) {
-  assert(op.arg1 < env.state.stack.size());
-  auto const ty = topR(env, op.arg1);
-  startBase(
-    env,
-    Base {
-      ty.subtypeOf(BInitCell) ? std::move(ty) : TInitCell,
-      BaseLoc::Stack,
-      TBottom,
-      SString{},
-      NoLocalId,
-      (uint32_t)env.state.stack.size() - op.arg1 - 1
-    }
-  );
-  nothrow(env);
-}
-
 void in(ISS& env, const bc::BaseH&) {
   auto const ty = thisType(env);
   startBase(env, Base{ty ? *ty : TObj, BaseLoc::This});
@@ -1710,12 +1693,6 @@ void in(ISS& env, const bc::UnsetM& op) {
 void in(ISS& env, const bc::SetWithRefLML& op) {
   locAsCell(env, op.loc1);
   locAsCell(env, op.loc2);
-  miFinalSetWithRef(env);
-}
-
-void in(ISS& env, const bc::SetWithRefRML& op) {
-  locAsCell(env, op.loc1);
-  popR(env);
   miFinalSetWithRef(env);
 }
 

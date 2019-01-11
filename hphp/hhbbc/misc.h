@@ -50,7 +50,7 @@ using BytecodeVec = CompactVector<Bytecode>;
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, R, U, CR, CU, CV, CVU };
+enum class Flavor { C, V, U, CU, CV, CVU };
 
 /*
  * Types of parameter preparation (or unknown).

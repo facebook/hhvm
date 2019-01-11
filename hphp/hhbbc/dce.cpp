@@ -919,17 +919,17 @@ DceActionMap& commitUis(Env& env, bool linked,
  *
  *   $a ? f() : 42
  *
- * If f() is known to return a non-counted type, we have UnboxRNop ->
- * PopC on one path, and Int 42 -> PopC on another, and the PopC marks
+ * If f() is known to return a non-counted type, we have FCall -> PopC on
+ * one path, and Int 42 -> PopC on another, and the PopC marks
  * its value Use::Not. When we get to the Int 42 it thinks both
- * instructions can be killed; but when we get to the UnboxRNop it
+ * instructions can be killed; but when we get to the FCall it
  * does nothing. So any time we decide to ignore a Use::Not or
  * Use::UsedIfLastRef, we have to record that fact so we can prevent
  * the other paths from trying to use that information. We communicate
  * this via the ui.location field, and the forcedLiveLocations set.
  *
  * [ We deal with this case now by inserting a PopC after the
- *   UnboxRNop, which allows the 42/PopC to be removed - but there are
+ *   FCall, which allows the 42/PopC to be removed - but there are
  *   other cases that are not yet handled. ]
  */
 void markUisLive(Env& env, bool linked, const UseInfo& ui) {
@@ -1103,7 +1103,6 @@ void pushRemovable(Env& env) {
 
 void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
 void dce(Env& env, const bc::PopV&)          { discardNonDtors(env); }
-void dce(Env& env, const bc::PopR&)          { discardNonDtors(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
@@ -1120,13 +1119,6 @@ void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
-
-void dce(Env& env, const bc::UnboxRNop&) {
-  stack_ops(env, [&] (const UseInfo& ui) {
-      return allUnused(ui) ?
-        PushFlags::PopOutputs : PushFlags::MarkLive;
-    });
-}
 
 void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
@@ -1786,7 +1778,6 @@ void dce(Env& env, const bc::BaseC& op)       { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseNC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseSC& op)      { minstr_base(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseR& op)       { minstr_base(env, op, op.arg1); }
 
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
 
@@ -1863,7 +1854,6 @@ void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseNC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
-void adjustMinstr(bc::BaseR& op, MaskType m)       { m_adj(op.arg1, m); }
 
 void adjustMinstr(bc::Dim& op, MaskType m)         { m_adj(op.mkey, m); }
 
@@ -2006,11 +1996,7 @@ dce_visit(const Index& index,
             for (auto i = 0; i < final.numPop(); i++) {
               use(dceState.forcedLiveLocations,
                   dceState.stack, dceState.stack.size() - 1 - i);
-              if (op.op == Op::BaseR && i == op.BaseR.arg1) {
-                bcs.push_back(bc::PopR {});
-              } else {
-                bcs.push_back(bc::PopC {});
-              }
+              bcs.push_back(bc::PopC {});
             }
             dceState.replaceMap.emplace(visit_env.id, std::move(bcs));
             dceState.minstrUI->actions[visit_env.id] = DceAction::Replace;

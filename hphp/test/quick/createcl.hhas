@@ -3,13 +3,13 @@
 .main {
   FPushFuncD 0 "foo"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 0 "bar"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 0 "baz"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   Int 1
   RetC

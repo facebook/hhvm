@@ -6,7 +6,7 @@
 .main {
   FPushFuncD 0 "f"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -17,7 +17,7 @@
     .try_fault F0 {
       FPushCtorD 0 "Exception"
       FCall <> 0 1 - "" ""
-      PopR
+      PopC
       Throw
     }
   } .catch {

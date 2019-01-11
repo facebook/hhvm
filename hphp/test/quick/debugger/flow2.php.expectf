@@ -187,10 +187,10 @@ Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
 
 out
 Destructor
-Break at foo() on line 44 of %s/flow2.php
-  43 
-  44*  $c = new C1(6); // Runs a destructor
-  45   $d = $c;
+Break at foo() on line 45 of %s/flow2.php
+  44   $c = new C1(6); // Runs a destructor
+  45*  $d = $c;
+  46   $e = new C1(7);
 
 continue
 Constructor

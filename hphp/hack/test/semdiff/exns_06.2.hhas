@@ -4,23 +4,23 @@
   FPushFuncD 1 "foo"
   String "lop"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "goo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "blah"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "baz"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "bar"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -31,7 +31,7 @@
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     } .catch {
       UnsetL _0
@@ -39,7 +39,7 @@
       FPushCtorD 1 "Exception"
       String "two"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
   }
@@ -56,7 +56,7 @@ F0:
     FPushCtorD 1 "Exception"
     String "one"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   } .catch {
    .try_fault F2 {
@@ -114,7 +114,7 @@ F2:
     FPushCtorD 1 "Exception"
     String "one"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   } .catch {
   .try {
@@ -124,7 +124,7 @@ F2:
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   } .catch {
     Dup
@@ -138,7 +138,6 @@ F2:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     Throw
@@ -153,7 +152,7 @@ F2:
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
   } .catch {
       .try_fault F1 {
@@ -161,7 +160,7 @@ F2:
         FPushCtorD 1 "Exception"
         String "two"
         FCall <> 1 1 - "" ""
-        PopR
+        PopC
         Throw
       }
    }
@@ -181,7 +180,7 @@ F1:
       FPushCtorD 1 "Exception"
       String "bar"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
    } .catch {
       .try_fault F1 {
@@ -233,7 +232,7 @@ L2:
     FPushFuncD 1 "call_user_func"
     CGetL $fname
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Jmp L0
   } .catch {
     Dup
@@ -247,7 +246,6 @@ L2:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     String "\n"

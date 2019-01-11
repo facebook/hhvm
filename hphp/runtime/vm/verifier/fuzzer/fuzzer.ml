@@ -259,8 +259,7 @@ let maintain_stack (data : Instr_utils.seq_data) :
   let helper instr buffer =  (* is used later as an argument to *)
     let ctrl_buffer =        (* flat_map, the internal state is not exposed *)
       match instr with
-      | IContFlow RetC (* These require a stack height of 1 *)
-      | IContFlow RetV   ->
+      | IContFlow RetC   -> (* Requires a stack height of 1 *)
           let old_stk = !stk in
           stk := num_fold List.tl_exn (List.length !stk - 1) !stk;
           empty_stk old_stk 1
@@ -391,8 +390,6 @@ let mut_imms (is : IS.t) : IS.t =
                                              mutate_mode     mode)
     | BaseC     (idx, mode)     -> BaseC    (mutate_int idx !mag,
                                              mutate_mode     mode)
-    | BaseR     (idx, mode)     -> BaseR    (mutate_int idx !mag,
-                                             mutate_mode     mode)
     | Dim       (mode, key) -> Dim      (mutate_mode  mode, mutate_key key !mag)
     | _ -> s in
   let mutate_ctrl_flow data s =
@@ -423,7 +420,6 @@ let mut_imms (is : IS.t) : IS.t =
     | UnsetM  (i,     k) -> UnsetM  (mutate_int i  !mag,     mutate_key k !mag)
     | SetWithRefLML (id, id') ->
         SetWithRefLML (mutate_local_id id !mag, mutate_local_id id' !mag)
-    | SetWithRefRML  id  -> SetWithRefRML (mutate_local_id id !mag)
     | SetRangeM (i, op, s) ->
         SetRangeM (mutate_int i !mag, op, mutate_int s !mag)
   in

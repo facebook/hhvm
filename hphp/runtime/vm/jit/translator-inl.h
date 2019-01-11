@@ -63,7 +63,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::YieldK:
     case Op::YieldFromDelegate:
     case Op::RetC:
-    case Op::RetV:
     case Op::RetM:
     case Op::RetCSuspended:
     case Op::Exit:

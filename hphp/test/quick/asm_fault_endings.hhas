@@ -2,7 +2,6 @@
   .try {
     FPushFuncD 0 "main"
     FCall <> 0 1 - "" ""
-    UnboxR
     RetC
   } .catch {
     PopC
@@ -22,7 +21,7 @@
       FPushCtorD 1 "Exception"
       String "ex"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     } .catch {
       String "handler2\n"

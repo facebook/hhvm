@@ -12,7 +12,6 @@
   DefCls 6
   FPushFuncD 0 "main"
   FCall <> 0 1 - "" ""
-  UnboxR
   RetC
 }
 
@@ -71,52 +70,52 @@
 .function main() {
   FPushCtorD 0 "UseFrob"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "frob" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushCtorD 0 "AliasFrob"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "heh" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushCtorD 0 "Publicize"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "foo" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushCtorD 0 "Resolution"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "frob" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   CGetL $obj
   FPushObjMethodD 0 "yo" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   Int 1
   RetC

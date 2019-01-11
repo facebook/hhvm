@@ -30,7 +30,7 @@ let collect_jump_instructions instrseq env =
       IMap.add (get_label_id ~is_break:true l) i map
     | ISpecialFlow Continue l ->
       IMap.add (get_label_id ~is_break:false l) i map
-    | IContFlow (RetC | RetV | RetCSuspended | RetM _) ->
+    | IContFlow (RetC | RetCSuspended | RetM _) ->
       IMap.add (JT.get_id_for_return ()) i map
     | ISpecialFlow Goto l ->
       IMap.add (JT.get_id_for_label (Label.named l)) i map
@@ -43,7 +43,7 @@ let collect_jump_instructions instrseq env =
 let cleanup_try_body instrseq =
   let rewriter i =
     match i with
-    | ISpecialFlow _ | IContFlow (RetC | RetV | RetCSuspended | RetM _) -> None
+    | ISpecialFlow _ | IContFlow (RetC | RetCSuspended | RetM _) -> None
     | _ -> Some i
   in
   InstrSeq.filter_map instrseq ~f:rewriter

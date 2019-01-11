@@ -23,17 +23,16 @@ PART1
   if ($filter) {
     echo "           FPushCtorD 0 \"HH\\\\Map\"\n";
     echo "           FCall <> 0 1 - \"\" \"\"\n";
-    echo "           PopR\n";
+    echo "           PopC\n";
   } else if ($immutable) {
     echo "           This\n";
     echo "           FPushObjMethodD 0 \"toMap\" NullThrows\n";
     echo "           FCall <> 0 1 - \"\" \"\"\n";
-    echo "           UnboxRNop\n";
   } else {
     echo "           FPushCtorD 1 \"HH\\\\Map\"\n";
     echo "           This\n";
     echo "           FCall <> 1 1 - \"\" \"\"\n";
-    echo "           PopR\n";
+    echo "           PopC\n";
   }
   echo <<<'PART2'
            SetL $res
@@ -57,7 +56,6 @@ PART2
   }
 
   if ($filter) {
-    echo "            UnboxR\n";
     if ($filter == 1) {
       echo "            JmpZ next\n";
     } else {
@@ -66,8 +64,6 @@ PART2
       echo "    skip:\n";
     }
     echo "            CGetL \$v\n";
-  } else {
-    echo "            UnboxR\n";
   }
   echo <<<'PART3'
             AssertRATL $res Obj=HH\Map
@@ -94,7 +90,6 @@ PART3;
   if ($immutable) {
     echo "           FPushObjMethodD 0 \"toImmMap\" NullThrows\n";
     echo "           FCall <> 0 1 - \"\" \"\"\n";
-    echo "           UnboxRNop\n";
   }
 
   echo <<<'PART4'
@@ -103,7 +98,7 @@ PART3;
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
           FCall <> 1 1 - "" ""
-          PopR
+          PopC
           Throw
 
 EOT

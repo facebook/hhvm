@@ -274,7 +274,7 @@ let emit_deprecation_warning scope = function
       instr_int64 sampling_rate;
       instr_int error_code;
       instr_trigger_sampled_error;
-      instr_popr;
+      instr_popc;
     ]
 
 let rec is_awaitable h =

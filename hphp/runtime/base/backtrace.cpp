@@ -336,9 +336,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     auto const curUnit = fp->func()->unit();
     auto const curOp = curUnit->getOp(pc);
     auto const isReturning =
-      curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
-      curOp == Op::RetCSuspended || curOp == Op::CreateCont ||
-      curOp == Op::Await || fp->localsDecRefd();
+      curOp == Op::RetC || curOp == Op::RetCSuspended || curOp == Op::RetM ||
+      curOp == Op::CreateCont || curOp == Op::Await || fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
     if (prevFp && !prevFp->func()->isBuiltin()) {
@@ -670,9 +669,8 @@ void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
   auto const curUnit = fp->func()->unit();
   auto const curOp = curUnit->getOp(prevPc);
   auto const isReturning =
-    curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
-    curOp == Op::RetCSuspended || curOp == Op::CreateCont ||
-    curOp == Op::Await || fp->localsDecRefd();
+    curOp == Op::RetC || curOp == Op::RetCSuspended || curOp == Op::RetM ||
+    curOp == Op::CreateCont || curOp == Op::Await || fp->localsDecRefd();
   m_frames.push_back(Frame{
     fp->func(),
     prevPc,

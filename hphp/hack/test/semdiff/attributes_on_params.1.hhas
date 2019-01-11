@@ -4,7 +4,7 @@
   DefCls 0
   FPushFuncD 0 "run"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -21,7 +21,6 @@
   FPushObjMethodD 1 "getAttribute" NullThrows
   CGetL $attribute
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $p
   PopC
   String ":"
@@ -49,13 +48,12 @@ L1:
   FPushCtorD 1 "ReflectionClass"
   String "A"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   SetL $cls
   PopC
   CGetL $cls
   FPushObjMethodD 0 "getConstructor" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   SetL $ctor
   PopC
   FPushFuncD 4 "test"
@@ -63,25 +61,23 @@ L1:
   CGetL $ctor
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 0
   String "Annotation"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 4 "test"
   String "2. missing attribute"
   CGetL $ctor
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 0
   String "Annotation-missing"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   FPushCtorD 1 "ReflectionFunction"
   String "f"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   SetL $func
   PopC
   FPushFuncD 4 "test"
@@ -89,41 +85,37 @@ L1:
   CGetL $func
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 0
   String "A1"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 4 "test"
   String "4. missing attribute"
   CGetL $func
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 0
   String "A1-missing"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 4 "test"
   String "5. existing attribute"
   CGetL $func
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 1
   String "A2"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 4 "test"
   String "6. missing attribute"
   CGetL $func
   FPushObjMethodD 0 "getParameters" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   Int 1
   String "A2-missing"
   FCall <> 4 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 }

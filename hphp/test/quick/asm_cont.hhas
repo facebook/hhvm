@@ -6,7 +6,6 @@
   .numiters 1;
   FPushFuncD 0 "R"
   FCall <> 0 1 - "" ""
-  UnboxR
   IterInit 0 L0 $i
   .try {
   L1:

@@ -106,11 +106,11 @@ The details of how we decide whether we are in case (1), (2) or (3), and what we
 do in case (3), can be expressed using inference rules for deducing judgments
 Gamma |- pc,pc':[phi], where Gamma is the set of assumptions. For example
 
- prog.pc = RetV   prog'.pc' = RetV
+ prog.pc = RetC   prog'.pc' = RetC
  ---------------------------------
       Gamma |- pc,pc' : [phi]
 
-This is a case (2) rule. It says that if both program counters point to RetV
+This is a case (2) rule. It says that if both program counters point to RetC
 instructions, then we will get equal behaviour if the states are related by any
 phi, and irrespective of Gamma. The reason this is valid is that any phi in our
 assertion language represents a relation that says that the two evaluation
@@ -322,17 +322,6 @@ there's a CGet before the VGetL (instead of a CGetL2 afterwards), and where the
 middle section does
    BaseL l,mode; BindM n, key
 instead of BindN.
-
-VGetL-RetV
-----------
-
-Another special case that appears in some code is:
-
-  prog,pc -> [VGetL _n; RetV]
-  prog',pc' -> [VGetL _n'; RetV]
-  phi = _n = _n'
- --------------------------------
-   Gamma |- pc,pc' : [phi]
 
 Exceptions
 ==========

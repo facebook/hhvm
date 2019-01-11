@@ -6,21 +6,20 @@
   FPushCtorD 1 "A"
   String "foo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   SetL $x
   PopC
   CGetL $x
   FPushObjMethodD 1 "set" NullThrows
   String "bar"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "var_dump"
   CGetL $x
   FPushObjMethodD 0 "get" NullThrows
   FCall <> 0 1 - "" ""
-  UnboxR
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

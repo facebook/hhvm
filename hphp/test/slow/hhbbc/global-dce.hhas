@@ -5,15 +5,13 @@
   String "b"
   String "c"
   FCall <> 3 1 - "" ""
-  UnboxR
   FPushFuncD 3 "test"
   Null
   String "b"
   String "c"
   FCall <> 3 1 - "" ""
-  UnboxR
   FCall <> 2 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

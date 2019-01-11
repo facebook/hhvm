@@ -37,8 +37,6 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1)) :: buf, "C" :: extra
   | "V", (buf, extra) ->
     ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
-  | "R", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1)) :: IBasic (BoxR) :: buf,"R" :: extra
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
   | _ -> [], [] (* Impossible *)
 
@@ -50,7 +48,6 @@ let rec empty_stk (stk : stack) (remaining : int) : instruct list =
   | [] -> []
   | "C" :: t -> IBasic PopC :: empty_stk t remaining
   | "V" :: t -> IBasic PopV :: empty_stk t remaining
-  | "R" :: t -> IBasic PopR :: empty_stk t remaining
   | "U" :: t -> IBasic PopU :: empty_stk t remaining
   | _   :: t -> remaining - 1 |> empty_stk t
 
@@ -106,10 +103,7 @@ let stk_data : instruct -> stack_sig = function
   | IMisc StaticLocInit _
   | IMisc CheckReifiedGenericMismatch
   | IBasic PopC                            -> ["C"], []
-  | IFinal SetWithRefRML _
-  | IBasic PopR                            -> ["R"], []
   | IBasic PopU                            -> ["U"], []
-  | IContFlow RetV
   | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
@@ -119,11 +113,6 @@ let stk_data : instruct -> stack_sig = function
   | IBasic Box                             -> ["C"], ["V"]
   | IBasic Unbox                           -> ["V"], ["C"]
   | IMutator BindL _                       -> ["V"], ["V"]
-  (*| IBasic BoxRNop*)
-  | IBasic BoxR                            -> ["R"], ["V"]
-  | IBasic UnboxRNop
-  | IBasic UnboxR                          -> ["R"], ["C"]
-  | IBasic RGetCNop                        -> ["C"], ["R"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | IGet VGetL _                           -> [], ["V"]
@@ -210,7 +199,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator _
   | IAsync _
   | ILitConst ColFromArray _               -> ["C"], ["C"]
-  | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
   | IOp CombineAndResolveTypeStruct n      -> produce "C" n, ["C"]
   | IMisc RecordReifiedGeneric n           -> produce "C" n, ["C"]
   | IMisc ReifiedName n                    -> produce "C" n, ["C"]
@@ -219,8 +207,8 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]
   | ICall FCall ((f, n, r, _), _, _)       ->
     produce "C" (n + (if f.has_unpack then 1 else 0)),
-    produce (if r = 1 then "R" else "C") r
-  | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["R"]
+    produce "C" r
+  | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["C"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []
   | _ -> [], []

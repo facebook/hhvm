@@ -1955,10 +1955,6 @@ Type builtinReturnType(const Func* builtin) {
     assertx(type == TInitCell || type.isSimpleType());
   }
 
-  // Functions which return by ref can always return null.
-  if (builtin->isReturnRef()) {
-    return (type.box() & TBoxedInitCell) | TInitNull;
-  }
   return type & TInitCell;
 }
 

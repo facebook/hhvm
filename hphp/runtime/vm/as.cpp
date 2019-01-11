@@ -1576,9 +1576,9 @@ std::map<std::string,ParserFunc> opcode_parsers;
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \
-    /* Stack depth should be 0 after RetC or RetV. */                  \
-    if (thisOpcode == OpRetC || thisOpcode == OpRetV ||                \
-        thisOpcode == OpRetM || thisOpcode == OpRetCSuspended) {       \
+    /* Stack depth should be 0 after RetC or RetM. */                  \
+    if (thisOpcode == OpRetC || thisOpcode == OpRetCSuspended ||       \
+        thisOpcode == OpRetM) {                                        \
       as.enforceStackDepth(0);                                         \
     }                                                                  \
                                                                        \

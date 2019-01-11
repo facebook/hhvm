@@ -50,7 +50,7 @@ type param_locations = int list
  *       as they are handled separately
  *)
 module Flavor = struct
-  type t = Cell | Ref | ReturnVal
+  type t = Cell | Ref
 end
 
 (* Indicates whether a call site was annotated as pass-by-ref or not *)
@@ -164,16 +164,10 @@ type instruct_basic =
   | EntryNop
   | PopC
   | PopV
-  | PopR
   | PopU
   | Dup
   | Box
   | Unbox
-  | BoxR
-  | BoxRNop
-  | UnboxR
-  | UnboxRNop
-  | RGetCNop
 
 type typestruct_resolve_op =
   | Resolve
@@ -305,7 +299,6 @@ type instruct_control_flow =
   | RetC
   | RetCSuspended
   | RetM of num_params
-  | RetV
   | Unwind
   | Throw
 
@@ -455,7 +448,6 @@ type instruct_base =
   | BaseSL of local_id * stack_index * MemberOpMode.t
   | BaseL of local_id * MemberOpMode.t
   | BaseC of stack_index * MemberOpMode.t
-  | BaseR of stack_index * MemberOpMode.t
   | BaseH
   | Dim of MemberOpMode.t * MemberKey.t
 
@@ -468,7 +460,6 @@ type instruct_final =
   | BindM of num_params * MemberKey.t
   | UnsetM of num_params * MemberKey.t
   | SetWithRefLML of local_id * local_id
-  | SetWithRefRML of local_id
   | SetRangeM of num_params * setrange_op * int
 
 type iter_kind =
@@ -536,7 +527,6 @@ type instruct_misc =
   | VerifyParamType of param_id
   | VerifyOutType of param_id
   | VerifyRetTypeC
-  | VerifyRetTypeV
   | Self of classref_id
   | Parent of classref_id
   | LateBoundCls of classref_id

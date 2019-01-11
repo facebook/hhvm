@@ -46,8 +46,7 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
     assertx(ty.subtypeOf(BUninit));
     reduce(env,
            bc::PopU {},
-           bc::String { env.ctx.cls->name },
-           bc::RGetCNop {});
+           bc::String { env.ctx.cls->name });
     return true;
   }
 
@@ -185,11 +184,10 @@ bool handle_oodecl_exists(ISS& env,
     if (!topT(env).subtypeOf(BBool)) {
       reduce(env,
              bc::CastBool {},
-             bc::OODeclExists { subop },
-             bc::RGetCNop {});
+             bc::OODeclExists { subop });
       return true;
     }
-    reduce(env, bc::OODeclExists { subop }, bc::RGetCNop {});
+    reduce(env, bc::OODeclExists { subop });
     return true;
   }
   if (!topT(env).strictSubtypeOf(TBool)) return false;
@@ -199,8 +197,7 @@ bool handle_oodecl_exists(ISS& env,
          bc::PopC {},
          bc::CastString {},
          gen_constant(*v),
-         bc::OODeclExists { subop },
-         bc::RGetCNop {});
+         bc::OODeclExists { subop });
   return true;
 }
 
@@ -235,8 +232,7 @@ bool builtin_class_alias(ISS& env, const bc::FCallBuiltin& op) {
 
   reduce(env, bc::PopC {}, bc::PopC {}, bc::PopC {},
          gen_constant(make_tv<KindOfBoolean>(aload == TTrue)),
-         bc::AliasCls { orig_tv->m_data.pstr, alias_tv->m_data.pstr },
-         bc::RGetCNop {});
+         bc::AliasCls { orig_tv->m_data.pstr, alias_tv->m_data.pstr });
   return true;
 }
 
@@ -245,7 +241,7 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = topC(env);
 
   if (ty.subtypeOf(BNum) || ty.subtypeOf(BBool) || ty.subtypeOf(BRes)) {
-    reduce(env, bc::CastInt {}, bc::RGetCNop {});
+    reduce(env, bc::CastInt {});
     return true;
   }
 

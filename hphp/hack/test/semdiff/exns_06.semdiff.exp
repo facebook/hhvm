@@ -32,7 +32,7 @@ for lop:
 - FPushCtorD 1 "Exception"
 - String "two"
 - FCall 1
-- PopR
+- PopC
 - Throw
 - }
 - String "outer finally\n"
@@ -94,7 +94,7 @@ for blah:
 - FPushCtorD 1 "Exception"
 - String "two"
 - FCall 1
-- PopR
+- PopC
 - Throw
 - Jmp L0
 - Dup
@@ -108,7 +108,6 @@ for blah:
 - CGetL $e
 - FPushObjMethodD 0 "getMessage" NullThrows
 - FCall 0
-- UnboxR
 - Print
 - PopC
 - Jmp L0
@@ -144,7 +143,7 @@ for baz:
 - FPushCtorD 1 "Exception"
 - String "two"
 - FCall 1
-- PopR
+- PopC
 - Throw
 - Unwind
 - F0:

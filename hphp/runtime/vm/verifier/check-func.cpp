@@ -753,9 +753,7 @@ static const char* stkflav(FlavorDesc f) {
   case NOV:  return "N";
   case CV:   return "C";
   case VV:   return "V";
-  case RV:   return "R";
   case UV:   return "U";
-  case CRV:  return "C|R";
   case CUV:  return "C|U";
   case CVV:  return "C|V";
   case CVUV: return "C|V|U";
@@ -768,7 +766,6 @@ static bool checkArg(FlavorDesc expect, FlavorDesc check) {
 
   switch (expect) {
     case CVV:  return check == CV || check == VV;
-    case CRV:  return check == CV || check == RV;
     case CUV:  return check == CV || check == UV;
     case CVUV: return check == CV || check == VV || check == UV || check == CUV;
     default:   return false;
@@ -827,24 +824,16 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::VGetM:
   case Op::IncDecM:
   case Op::UnsetM:
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = CRV;
-    }
-    return m_tmp_sig;
   case Op::SetM:
   case Op::SetOpM:
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = i == n - 1 ? CV : CRV;
-    }
-    return m_tmp_sig;
   case Op::SetRangeM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = i >= n - 3 ? CV : CRV;
+      m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
   case Op::BindM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = i == n - 1 ? VV : CRV;
+      m_tmp_sig[i] = i == n - 1 ? VV : CV;
     }
     return m_tmp_sig;
   case Op::FCall: {      // THREE(FCA,SA,SA), FCALL, FCALL
@@ -857,7 +846,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
   }
-  case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(RV)
+  case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CVUV;
     }
@@ -911,7 +900,6 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       break;
     case Op::SetRangeM:
     case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
       return true;
 
     default:
@@ -1401,8 +1389,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     case Op::BaseNC:
     case Op::BaseGC:
     case Op::BaseSC:
-    case Op::BaseC:
-    case Op::BaseR: {
+    case Op::BaseC: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
         ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
@@ -1611,7 +1598,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       if (pushes == 1) outs[0] = outs[1];
     } else if (op == Op::FCall) {
       for (int i = 0; i < pushes; ++i) {
-        outs[i] = pushes == 1 ? RV : CV;
+        outs[i] = CV;
       }
     } else {
       for (int i = 0; i < pushes; ++i) {
@@ -1644,8 +1631,8 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->mbr_mode.clear();
   }
 
-  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV || op == Op::RetM ||
-                          op == Op::RetCSuspended || op == Op::Unwind)) {
+  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetCSuspended ||
+                          op == Op::RetM || op == Op::Unwind)) {
     error("%s instruction encountered inside of FPI region\n",
           opcodeToName(op));
     ok = false;
@@ -1663,9 +1650,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
 
     // flavor safety
-    case Op::UnboxR:
-    case Op::UnboxRNop:
-    case Op::RGetCNop:
     case Op::CGetCUNop:
     case Op::UGetCUNop:
       return true;
@@ -1782,7 +1766,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Dup:
     case Op::Select:
     case Op::PopC:
-    case Op::PopR:
     case Op::PopU:
     case Op::PopL:
     case Op::CGetL:
@@ -1914,13 +1897,11 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::WIterNext:
     case Op::WIterNextK:
     case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
       return true;
 
     // safe member base operations
     case Op::BaseL:
     case Op::BaseC:
-    case Op::BaseR:
     case Op::BaseH:
       cur->mbrMustContainThis = op == Op::BaseH;
       cur->afterDim = false;
@@ -2006,11 +1987,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::PopV:
     case Op::Box:
     case Op::Unbox:
-    case Op::BoxR:
-    case Op::BoxRNop:
     case Op::AddElemV:
     case Op::AddNewElemV:
-    case Op::RetV:
     case Op::VGetL:
     case Op::VGetN:
     case Op::VGetG:
@@ -2019,7 +1997,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::BindN:
     case Op::BindG:
     case Op::BindS:
-    case Op::VerifyRetTypeV:
     case Op::VGetM:
     case Op::BindM:
       ferror("references are forbidden in Rx functions: {}\n",

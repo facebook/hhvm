@@ -22,13 +22,12 @@
   JmpNZ target
   CGetL $bar
   FCall <> 2 1 - "" ""
-  UnboxR
   SetL $baz
   PopC
   FPushFuncD 1 "var_dump"
   CGetL $baz
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

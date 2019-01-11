@@ -277,7 +277,7 @@ let emit_reified_init_body env num_reified ast_class =
           (Hhbc_id.Method.from_raw_string SU.Reified.reified_init_method_name);
         generic_arr;
         instr_fcall (make_fcall_args 1);
-        instr_popr;
+        instr_popc;
       ] in
     gather [
       set_prop;

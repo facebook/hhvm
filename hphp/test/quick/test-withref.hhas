@@ -35,7 +35,7 @@
     FPushFuncD 1 "var_dump"
     CGetL $ar
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
   # line 7
     BaseL $ar Define
     VGetM 0 EI:0
@@ -49,12 +49,12 @@
     FPushFuncD 1 "var_dump"
     CGetL $x
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
   # line 10
     FPushFuncD 1 "var_dump"
     CGetL $ar
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
   # line 12
     Array @empty
     SetL $ar2
@@ -64,7 +64,6 @@
     String "%d"
     Int 11
     FCall <> 2 1 - "" ""
-    UnboxR
     SetL $k
     PopC
   # line 14
@@ -72,7 +71,6 @@
     String "%d"
     Int 22
     FCall <> 2 1 - "" ""
-    UnboxR
     SetL $v
     PopC
   # line 18
@@ -97,17 +95,17 @@ end_loop:
     FPushFuncD 1 "var_dump"
     CGetL $ar2
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
   # line 20
     FPushFuncD 1 "var_dump"
     CGetL $ar
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
   # line 21
     FPushFuncD 1 "var_dump"
     CGetL $x
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Int 1
     RetC
 }

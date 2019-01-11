@@ -530,9 +530,9 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
-#define MFINAL return manyFlavor(op, idx, CRV);
-#define C_MFINAL(n) return idx < n ? CV : CRV;
-#define V_MFINAL return idx == 0 ? VV : CRV;
+#define MFINAL return manyFlavor(op, idx, CV);
+#define C_MFINAL(n) return manyFlavor(op, idx, CV);
+#define V_MFINAL return idx == 0 ? VV : CV;
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define FCALL return fcallFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);

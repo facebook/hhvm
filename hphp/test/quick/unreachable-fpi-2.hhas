@@ -1,7 +1,7 @@
 .main {
   FPushFuncD 0 "foo"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   String "done.\n"
   Print
   PopC
@@ -15,7 +15,7 @@ L2:
   Jmp L1
   FPushFuncD 0 "bar"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 L1:
   Jmp L2
 L0:

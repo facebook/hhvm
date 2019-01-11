@@ -5,11 +5,11 @@
   FPushFuncD 1 "test"
   ClsCnsD "FOO" "Foo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "test"
   String "hi"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

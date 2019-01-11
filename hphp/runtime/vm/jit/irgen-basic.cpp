@@ -611,7 +611,6 @@ void emitDiscardClsRef(IRGS& env, uint32_t slot)   { killClsRef(env, slot); }
 
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
-void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopU(IRGS& env)   { popU(env); }
 
 void emitPopL(IRGS& env, int32_t id) {
@@ -662,12 +661,6 @@ void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 
 void emitNop(IRGS&)                {}
 void emitEntryNop(IRGS&)           {}
-void emitBoxRNop(IRGS& env) {
-  assertTypeStack(env, BCSPRelOffset{0}, TBoxedCell);
-}
-void emitUnboxRNop(IRGS& env) {
-  assertTypeStack(env, BCSPRelOffset{0}, TCell);
-}
 void emitCGetCUNop(IRGS& env) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   auto const knownType = env.irb->stack(offset, DataTypeSpecific).type;
@@ -676,7 +669,6 @@ void emitCGetCUNop(IRGS& env) {
 void emitUGetCUNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
-void emitRGetCNop(IRGS&)           {}
 void emitDefClsNop(IRGS&, uint32_t){}
 void emitBreakTraceHint(IRGS&)     {}
 

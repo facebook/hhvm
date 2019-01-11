@@ -8,9 +8,8 @@
   String "1"
   String "2"
   FCall <> 2 1 - "" ""
-  UnboxR
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

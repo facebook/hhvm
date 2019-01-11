@@ -326,7 +326,7 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
   auto fcall = ninst.nextSk();
 
   // Check if the next instruction is an acceptable FCall.
-  if (fcall.op() != Op::FCall || funcd->isResumable() || funcd->isReturnRef()) {
+  if (fcall.op() != Op::FCall || funcd->isResumable()) {
     return false;
   }
 

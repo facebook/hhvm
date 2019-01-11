@@ -5,7 +5,7 @@
 .main {
   FPushFuncD 0 "test"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -36,7 +36,6 @@
       CGetL $b
       FThrowOnRefMismatch "00"
       FCall <> 2 1 - "" ""
-      UnboxR
       SetL _8
       PopC
       CGetL $a
@@ -80,9 +79,8 @@ F1:
   CGetL $p
   CGetL $f
   FCall <> 2 1 - "" ""
-  UnboxR
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 }

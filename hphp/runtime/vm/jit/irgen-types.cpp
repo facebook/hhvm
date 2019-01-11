@@ -1096,7 +1096,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
     onlyCheckNullability,
     nullptr,
     [&] { // Get value to test
-      return topR(env);
+      return topC(env);
     },
     [] (SSATmp*) -> Type { // Get boxed inner value
       PUNT(VerifyReturnTypeBoxed);
@@ -1316,10 +1316,6 @@ void verifyPropType(IRGS& env,
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
-  verifyRetTypeImpl(env, TypeConstraint::ReturnId, false);
-}
-
-void emitVerifyRetTypeV(IRGS& env) {
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, false);
 }
 

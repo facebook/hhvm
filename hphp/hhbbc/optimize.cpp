@@ -72,8 +72,6 @@ const StaticString s_86linit("86linit");
  */
 bool ignoresStackInput(Op op) {
   switch (op) {
-  case Op::UnboxRNop:
-  case Op::BoxRNop:
   case Op::UGetCUNop:
   case Op::CGetCUNop:
   case Op::PopU:
@@ -162,7 +160,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     case Op::BaseNC:      assert_stack(bcode.BaseNC.arg1);      break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
     case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
-    case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
     case Op::Dim: {
       switch (bcode.Dim.mkey.mcode) {
         case MEC: case MPC:
@@ -201,7 +198,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   };
   switch (op.op) {
   case Op::Box:
-  case Op::BoxR:
   case Op::Null:
   case Op::NullUninit:
   case Op::True:
@@ -445,12 +441,7 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
     switch (op.popFlavor(i)) {
     case Flavor::C:  gen(bc::PopC {}); break;
     case Flavor::V:  gen(bc::PopV {}); break;
-    case Flavor::R:
-      gen(bc::UnboxRNop {});
-      gen(bc::PopC {});
-      break;
     case Flavor::U:  not_reached();    break;
-    case Flavor::CR: not_reached();    break;
     case Flavor::CU:
       // We only support C's for CU right now.
       gen(bc::PopC {});
@@ -470,14 +461,6 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
       constVals[i] : *tv(state.stack[stkSize - i - 1].type);
     gen(gen_constant(v));
     state.stack[stkSize - i - 1].type = from_cell(v);
-
-    // Similar special case for FCallBuiltin.  We need to turn things into R
-    // flavors since opcode that followed the call are going to expect that
-    // flavor.
-    if (op.op == Op::FCallBuiltin) {
-      gen(bc::RGetCNop {});
-      continue;
-    }
   }
 
   return true;

@@ -5,7 +5,7 @@
 .main {
   FPushFuncD 0 "main"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 }

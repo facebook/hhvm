@@ -6,7 +6,7 @@
   String "main"
   FPushFunc 0
   FCall <> 0 1 - "" "" # allow the JIT why not
-  PopR
+  PopC
 
   Int 1
   RetC
@@ -27,7 +27,7 @@
     ClsRefGetC 0
     CGetS 0
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   String "ClassWithArray"
   SetL $x
@@ -40,7 +40,7 @@
     BaseSC 1 0 Warn
     QueryM 2 CGet EC:0
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   True
   RetC
@@ -49,7 +49,7 @@
 .function main() {
   FPushFuncD 0 "ArrayMember"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   Array @my_array
   SetL $arr
@@ -100,14 +100,14 @@ unset_label:  String "win\n"
               FPushFuncD 1 "var_dump"
               CGetL $arr
               FCall <> 1 1 - "" ""
-              PopR
+              PopC
 
               FPushFuncD 1 "var_dump"
               Int 1
               String "b"
               NewPackedArray 2
               FCall <> 1 1 - "" ""
-              PopR
+              PopC
 
               Null
               RetC

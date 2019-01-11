@@ -96,8 +96,7 @@ inline bool isFF(PC pc) {
 
 inline bool isRet(PC pc) {
   auto const op = peek_op(pc);
-  return op == Op::RetC || op == Op::RetV ||
-    op == Op::RetM || op == Op::RetCSuspended;
+  return op == Op::RetC || op == Op::RetCSuspended || op == Op::RetM;
 }
 
 // Return true if pc points to an Iter instruction whose first immedate

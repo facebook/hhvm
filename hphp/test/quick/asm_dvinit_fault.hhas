@@ -8,9 +8,8 @@
   FPushFuncD 1 "var_dump"
     FPushFuncD 0 "main"
     FCall <> 0 1 - "" ""
-    UnboxR
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -35,7 +34,7 @@ dv_init2:
 
       FPushCtorD 0 "Exception"
       FCall <> 0 1 - "" ""
-      PopR
+      PopC
       Throw
     } .catch {
       Int 4321

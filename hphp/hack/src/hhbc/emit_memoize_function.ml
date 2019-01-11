@@ -39,7 +39,6 @@ let make_memoize_function_no_params_code
     instr_label notfound;
     instr_fpushfuncd 0 renamed_function_id;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset None;
     if is_async then
       gather [
@@ -89,7 +88,6 @@ let make_memoize_function_with_params_code
     instr_fpushfuncd param_count renamed_method_id;
     param_code_gets params;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset (Some (first_local, param_count));
     if is_async then
       gather [

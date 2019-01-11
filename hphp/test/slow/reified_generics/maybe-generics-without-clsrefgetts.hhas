@@ -5,11 +5,11 @@
   String "f"
   FPushFunc 0
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "var_dump"
   String "done"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -21,7 +21,7 @@
   ClsRefGetC 0
   FPushCtor 0 0 MaybeGenerics
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   RetC
 }
 

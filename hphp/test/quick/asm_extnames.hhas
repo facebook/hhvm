@@ -3,10 +3,10 @@
 .main {
   FPushCtorI 0 0
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   FPushObjMethodD 0 "print$foo" NullThrows
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

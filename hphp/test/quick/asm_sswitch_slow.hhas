@@ -4,7 +4,6 @@
 .main {
   FPushFuncD 0 "main"
   FCall <> 0 1 - "" ""
-  UnboxR
   RetC
 }
 
@@ -44,14 +43,12 @@ fail:
 .function case_three() {
   FPushFuncD 0 "get_three"
   FCall <> 0 1 - "" ""
-  UnboxR
   SetL $foo
   PopC
 
   FPushFuncD 1 "sswitch_on"
   CGetL $foo
   FCall <> 1 1 - "" ""
-  UnboxR
   RetC
 }
 
@@ -66,14 +63,13 @@ fail:
 .function with_obj() {
   FPushCtorD 0 "Obj"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   SetL $obj
   PopC
 
   FPushFuncD 1 "sswitch_on"
   CGetL $obj
   FCall <> 1 1 - "" ""
-  UnboxR
   RetC
 }
 
@@ -81,22 +77,21 @@ fail:
   FPushFuncD 1 "sswitch_on"
   String "kujhasekguheku"
   FCall <> 1 1 - "" ""
-  UnboxR
   RetC
 }
 
 .function main() {
   FPushFuncD 0 "case_three"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 0 "with_obj"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   FPushFuncD 0 "case_default"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   String "Done\n"
   Print

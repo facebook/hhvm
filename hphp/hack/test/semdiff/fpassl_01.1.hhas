@@ -22,7 +22,6 @@
 # so needed the extension to the fpassl special-case
 # semdiff pattern
     FCall <> 2 1 - "" ""
-    UnboxR
   }
   UnsetL _6
   SetL _6
@@ -31,7 +30,6 @@
     FPushFuncU 1 "HH\\Lib\\Dict\\gen" "gen"
     CGetL _6
     FCall <> 1 1 - "" ""
-    UnboxR
   }
   UnsetL _6
   Dup
@@ -89,7 +87,6 @@ F6:
     CGetL $v
     FThrowOnRefMismatch "00"
     FCall <> 2 1 - "" ""
-    UnboxR
     RetC
   }
 }

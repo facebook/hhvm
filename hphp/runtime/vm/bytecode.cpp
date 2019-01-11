@@ -2003,14 +2003,6 @@ OPTBLD_INLINE void iopPopV() {
   vmStack().popV();
 }
 
-OPTBLD_INLINE void iopPopR() {
-  if (!isRefType(vmStack().topTV()->m_type)) {
-    vmStack().popC();
-  } else {
-    vmStack().popV();
-  }
-}
-
 OPTBLD_INLINE void iopPopU() {
   vmStack().popU();
 }
@@ -2039,30 +2031,6 @@ OPTBLD_INLINE void iopBox() {
 
 OPTBLD_INLINE void iopUnbox() {
   vmStack().unbox();
-}
-
-OPTBLD_INLINE void iopBoxR() {
-  TypedValue* tv = vmStack().topTV();
-  if (!isRefType(tv->m_type)) {
-    tvBox(*tv);
-  }
-}
-
-OPTBLD_INLINE void iopBoxRNop() {
-  assertx(refIsPlausible(*vmStack().topTV()));
-}
-
-OPTBLD_INLINE void iopUnboxR() {
-  if (isRefType(vmStack().topTV()->m_type)) {
-    vmStack().unbox();
-  }
-}
-
-OPTBLD_INLINE void iopUnboxRNop() {
-  assertx(cellIsPlausible(*vmStack().topTV()));
-}
-
-OPTBLD_INLINE void iopRGetCNop() {
 }
 
 OPTBLD_INLINE void iopCGetCUNop() {
@@ -3417,12 +3385,6 @@ OPTBLD_INLINE TCA iopRetCSuspended(PC& pc) {
   return ret<true>(pc);
 }
 
-OPTBLD_INLINE TCA iopRetV(PC& pc) {
-  assertx(!vmfp()->resumed());
-  assertx(!vmfp()->func()->isResumable());
-  return ret<false>(pc);
-}
-
 OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   auto const jitReturn = jitReturnPre(vmfp());
 
@@ -3795,11 +3757,7 @@ OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
 
 OPTBLD_INLINE void iopBaseC(uint32_t idx, MOpMode) {
   auto& mstate = initMState();
-  mstate.base = vmStack().indTV(idx);
-}
-
-OPTBLD_INLINE void iopBaseR(uint32_t idx, MOpMode mode) {
-  iopBaseC(idx, mode);
+  mstate.base = vmStack().indC(idx);
 }
 
 OPTBLD_INLINE void iopBaseH() {
@@ -4267,7 +4225,9 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
   mFinal(mstate, nDiscard, folly::none);
 }
 
-static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
+OPTBLD_INLINE void iopSetWithRefLML(local_var kloc, local_var vloc) {
+  auto const key = *tvToCell(kloc.ptr);
+  auto const value = vloc.ptr;
   auto& mstate = vmMInstrState();
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
     mstate.base = [&] {
@@ -4348,17 +4308,6 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   tvSetWithRef(*value, mstate.base);
 
   mFinal(mstate, 0, folly::none);
-}
-
-OPTBLD_INLINE void iopSetWithRefLML(local_var kloc, local_var vloc) {
-  auto const key = *tvToCell(kloc.ptr);
-  setWithRefImpl(key, vloc.ptr);
-}
-
-OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
-  auto const key = *tvToCell(local.ptr);
-  setWithRefImpl(key, vmStack().topTV());
-  vmStack().popTV();
 }
 
 namespace {
@@ -6628,7 +6577,7 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   }
 }
 
-OPTBLD_INLINE void implVerifyRetType() {
+OPTBLD_INLINE void iopVerifyRetTypeC() {
   if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     return;
   }
@@ -6636,16 +6585,8 @@ OPTBLD_INLINE void implVerifyRetType() {
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().topTV(), func);
+    tc.verifyReturn(vmStack().topC(), func);
   }
-}
-
-OPTBLD_INLINE void iopVerifyRetTypeC() {
-  implVerifyRetType();
-}
-
-OPTBLD_INLINE void iopVerifyRetTypeV() {
-  implVerifyRetType();
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
@@ -6654,7 +6595,7 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
   }
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  tc.verifyReturnNonNull(vmStack().topTV(), func);
+  tc.verifyReturnNonNull(vmStack().topC(), func);
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {

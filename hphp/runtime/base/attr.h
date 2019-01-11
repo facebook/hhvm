@@ -34,9 +34,6 @@ namespace HPHP {
 enum Attr {
   AttrNone                 = 0,          // class | property | method  //
                                          //       |          |         //
-  // Does this function return by reference?      |          |         //
-  AttrReference            = (1u <<  0), //       |          |    X    //
-                                         //       |          |         //
   // Class forbids dynamic properties?   //       |          |         //
   AttrForbidDynamicProps   = (1u <<  0), //   X   |          |         //
                                          //       |          |         //

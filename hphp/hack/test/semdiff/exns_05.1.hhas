@@ -7,23 +7,23 @@
   FPushFuncD 1 "foo"
   String "lop"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "goo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "blah"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "baz"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "bar"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -34,13 +34,13 @@
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   }
   String "outer finally\n"
@@ -54,7 +54,7 @@ F1:
   FPushCtorD 1 "Exception"
   String "two"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
   Unwind
 F0:
@@ -74,7 +74,7 @@ F0:
         FPushCtorD 1 "Exception"
         String "one"
         FCall <> 1 1 - "" ""
-        PopR
+        PopC
         Throw
       }
       String "fh1\n"
@@ -126,7 +126,7 @@ F2:
     FPushCtorD 1 "Exception"
     String "one"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   }
   .try {
@@ -136,7 +136,7 @@ F2:
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
     Jmp L0
   } .catch {
@@ -151,7 +151,6 @@ F2:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     Jmp L0
@@ -171,7 +170,7 @@ F4:
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
     Jmp L2
   } .catch {
@@ -186,7 +185,6 @@ F4:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     Jmp L2
@@ -203,13 +201,13 @@ L2:
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   }
   String "end"
@@ -223,7 +221,7 @@ F1:
   FPushCtorD 1 "Exception"
   String "two"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
   Unwind
 F0:
@@ -242,7 +240,7 @@ F0:
       FPushCtorD 1 "Exception"
       String "bar"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
     String "in finally\n"
@@ -287,7 +285,7 @@ F2:
     FPushFuncD 1 "call_user_func"
     CGetL $fname
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Jmp L0
   } .catch {
     Dup
@@ -301,7 +299,6 @@ F2:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     String "\n"

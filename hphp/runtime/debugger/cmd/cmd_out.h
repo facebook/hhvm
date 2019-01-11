@@ -31,7 +31,7 @@ struct CmdOut : CmdFlowControl {
   void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
 
 private:
-  bool m_skippingOverPopR{false};
+  bool m_skippingOverPopC{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

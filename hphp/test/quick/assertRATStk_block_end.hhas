@@ -2,15 +2,14 @@
 
 .main {
   Int 1
-  RGetCNop
   Int 2
   JmpNZ target_label
   AssertRATStk 0 Cell
   target_label: FPushFuncD 1 "var_dump"
   Int 42
   FCall <> 1 1 - "" ""
-  PopR
-  PopR
+  PopC
+  PopC
   Int 1
   RetC
 }

@@ -54,7 +54,7 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 
   m_needsVMInterrupt = false;
 
-  if (m_skippingOverPopR) {
+  if (m_skippingOverPopC) {
     m_complete = true;
     return;
   }
@@ -84,9 +84,9 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   int depth = decCount();
   if (depth == 0) {
     PC pc = vmpc();
-    // Step over PopR following a call
-    if (peek_op(pc) == Op::PopR) {
-      m_skippingOverPopR = true;
+    // Step over PopC following a call
+    if (peek_op(pc) == Op::PopC) {
+      m_skippingOverPopC = true;
       m_needsVMInterrupt = true;
     } else {
       m_complete = true;

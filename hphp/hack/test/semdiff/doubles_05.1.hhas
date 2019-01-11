@@ -1,7 +1,7 @@
 .main {
   FPushFuncD 0 "main_foo"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -14,7 +14,7 @@
   FPushFuncD 1 "var_dump"
   CGetL $myinf
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Null
   RetC
 }

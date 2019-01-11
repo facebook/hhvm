@@ -2,11 +2,11 @@
   FPushCtorD 1 "Exception"
   String "foo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
   FPushFuncD 0 "bar"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

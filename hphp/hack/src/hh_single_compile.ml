@@ -368,11 +368,6 @@ let modify_prog_for_debugger_eval ast hhas_prog =
             Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
             Hhbc_ast.IContFlow Hhbc_ast.RetC ] ->
           replace_prog_end_with [ Hhbc_ast.IContFlow Hhbc_ast.RetC ]
-        | [ Hhbc_ast.IBasic Hhbc_ast.PopR;
-            Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
-            Hhbc_ast.IContFlow Hhbc_ast.RetC ] ->
-          replace_prog_end_with [ Hhbc_ast.IBasic Hhbc_ast.UnboxR;
-                                  Hhbc_ast.IContFlow Hhbc_ast.RetC ]
         | _ -> hhas_prog
       end
     | _ -> hhas_prog

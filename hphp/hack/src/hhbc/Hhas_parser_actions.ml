@@ -345,16 +345,10 @@ let make_nullary_inst s =
  | "EntryNop"-> IBasic (EntryNop)
  | "PopC" -> IBasic (PopC)
  | "PopV" -> IBasic (PopV)
- | "PopR" -> IBasic (PopR)
  | "PopU" -> IBasic (PopU)
  | "Dup"  -> IBasic (Dup)
  | "Box"  -> IBasic (Box)
  | "Unbox" -> IBasic (Unbox)
- | "BoxR"  -> IBasic (BoxR)
- | "BoxRNop"  -> IBasic (BoxRNop)
- | "UnboxR" -> IBasic (UnboxR)
- | "UnboxRNop" -> IBasic (UnboxRNop)
- | "RGetCNop" -> IBasic (RGetCNop)
 
  (* instruct_lit_const *)
  | "Null" -> ILitConst (Null)
@@ -421,7 +415,6 @@ let make_nullary_inst s =
  (* instruct_control_flow *)
  | "RetC" -> IContFlow (RetC)
  | "RetCSuspended" -> IContFlow (RetCSuspended)
- | "RetV" -> IContFlow (RetV)
  | "Unwind" -> IContFlow (Unwind)
  | "Throw" -> IContFlow (Throw)
 
@@ -464,7 +457,6 @@ let make_nullary_inst s =
  | "Catch" -> IMisc(Catch)
  | "ChainFaults" -> IMisc(ChainFaults)
  | "VerifyRetTypeC" -> IMisc(VerifyRetTypeC)
- | "VerifyRetTypeV" -> IMisc(VerifyRetTypeV)
  | "NativeImpl" -> IMisc(NativeImpl)
  | "AKExists" -> IMisc(AKExists)
  | "Idx" -> IMisc(Idx)
@@ -1041,9 +1033,6 @@ let makeunaryinst s arg = match s with
    | "ResolveObjMethod" -> IOp (ResolveObjMethod)
    | "ResolveClsMethod" -> IOp (ResolveClsMethod)
 
-   (* instruct_final *)
-   | "SetWithRefRML" -> IFinal(SetWithRefRML(localidofiarg arg))
-
    (* instruct_iterator *)
    | "IterFree" -> IIterator(IterFree (Iterator.Id (intofiarg arg)))
    | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
@@ -1130,7 +1119,6 @@ match s with
  | "BaseGC" -> IBase (BaseGC (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGL" -> IBase (BaseGL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "BaseC" -> IBase(BaseC (intofiarg arg1, memberopmodeofiarg arg2))
- | "BaseR" -> IBase(BaseR (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseL" -> IBase (BaseL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "Dim" -> IBase (Dim (memberopmodeofiarg arg1, memberkeyofiarg arg2))
 

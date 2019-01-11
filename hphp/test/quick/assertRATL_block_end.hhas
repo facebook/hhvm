@@ -4,7 +4,7 @@
     FPushFuncD 1 "foo"
     Int 9
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Int 1
     RetC
 }
@@ -16,6 +16,5 @@
     target_label: FPushFuncD 1 "var_dump"
     Int 42
     FCall <> 1 1 - "" ""
-    UnboxR
     RetC
 }

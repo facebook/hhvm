@@ -4,23 +4,23 @@
   FPushFuncD 1 "foo"
   String "lop"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "goo"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "blah"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "baz"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "foo"
   String "bar"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -31,7 +31,7 @@
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
   }
@@ -39,7 +39,7 @@ F3:
   FPushCtorD 1 "Exception"
   String "two"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
 F2:
   String "outer finally\n"
@@ -55,7 +55,7 @@ F2:
         FPushCtorD 1 "Exception"
         String "one"
         FCall <> 1 1 - "" ""
-        PopR
+        PopC
         Throw
       }
     } .catch {
@@ -101,7 +101,7 @@ F2:
     FPushCtorD 1 "Exception"
     String "one"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   }
 F1:
@@ -112,7 +112,7 @@ F1:
     FPushCtorD 1 "Exception"
     String "two"
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Throw
   } .catch {
     Dup
@@ -126,7 +126,6 @@ F1:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     Unwind
@@ -140,7 +139,7 @@ F1:
       FPushCtorD 1 "Exception"
       String "one"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
 F1:
@@ -148,7 +147,7 @@ F1:
    FPushCtorD 1 "Exception"
    String "two"
    FCall <> 1 1 - "" ""
-   PopR
+   PopC
    Throw
   }
 F0:
@@ -167,7 +166,7 @@ F0:
       FPushCtorD 1 "Exception"
       String "bar"
       FCall <> 1 1 - "" ""
-      PopR
+      PopC
       Throw
     }
   } .catch {
@@ -206,7 +205,7 @@ F2:
     FPushFuncD 1 "call_user_func"
     CGetL $fname
     FCall <> 1 1 - "" ""
-    PopR
+    PopC
     Jmp L0
   } .catch {
     Dup
@@ -220,7 +219,6 @@ F2:
     CGetL $e
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Print
     PopC
     String "\n"

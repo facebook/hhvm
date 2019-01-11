@@ -91,7 +91,6 @@ let instr_cast_dict = instr (IOp CastDict)
 let instr_retc = instr (IContFlow RetC)
 let instr_retc_suspended = instr (IContFlow (RetCSuspended))
 let instr_retm p = instr (IContFlow (RetM p))
-let instr_retv = instr (IContFlow RetV)
 let instr_null = instr (ILitConst Null)
 let instr_nulluninit = instr (ILitConst NullUninit)
 let instr_catch = instr (IMisc Catch)
@@ -166,7 +165,6 @@ let instr_fhandle_ref_mismatch i hint name =
   instr (ICall (FHandleRefMismatch (i, hint, name)))
 
 let instr_popu = instr (IBasic PopU)
-let instr_popr = instr (IBasic PopR)
 let instr_popc = instr (IBasic PopC)
 let instr_popv = instr (IBasic PopV)
 let instr_popl l = instr (IMutator (PopL l))
@@ -174,7 +172,6 @@ let instr_pop flavor =
   match flavor with
   | Flavor.Ref -> instr_popv
   | Flavor.Cell -> instr_popc
-  | Flavor.ReturnVal -> instr_popr
 
 let instr_pushl local = instr (IGet (PushL local))
 let instr_throw = instr (IContFlow Throw)
@@ -196,11 +193,8 @@ let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))
 let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))
-let instr_unboxr = instr (IBasic UnboxR)
 let instr_unbox = instr (IBasic Unbox)
 let instr_box = instr (IBasic Box)
-let instr_boxr = instr (IBasic BoxR)
-let instr_unboxr_nop = instr (IBasic UnboxRNop)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
@@ -213,7 +207,6 @@ let instr_basesc y mode =
 let instr_basesl local mode =
   instr (IBase(BaseSL(local, class_ref_rewrite_sentinel, mode)))
 let instr_baseh = instr (IBase BaseH)
-let instr_baser i mode = instr (IBase (BaseR(i, mode)))
 let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall fcall_args =
@@ -233,7 +226,6 @@ let instr_memoset_eager range =
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
-let instr_verifyRetTypeV = instr (IMisc VerifyRetTypeV)
 let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
@@ -726,9 +718,9 @@ let get_input_output_count i =
   | IBasic i ->
     begin match i with
     | Nop | EntryNop -> (0, 0)
-    | PopC | PopV | PopR | PopU -> (1, 0)
+    | PopC | PopV | PopU -> (1, 0)
     | Dup -> (1, 2)
-    | Box | Unbox | BoxR | BoxRNop | UnboxR | UnboxRNop | RGetCNop -> (1, 1)
+    | Box | Unbox -> (1, 1)
     end
   | ILitConst i ->
     begin match i with
@@ -806,7 +798,7 @@ let get_input_output_count i =
     | BreakTraceHint| Silence _ -> (0, 0)
     | StaticLocDef _ | StaticLocInit _ | CheckReifiedGenericMismatch -> (1, 0)
     | OODeclExists _ | AKExists -> (2, 1)
-    | VerifyOutType _ | VerifyRetTypeC | VerifyRetTypeV | CGetCUNop
+    | VerifyOutType _ | VerifyRetTypeC | CGetCUNop
     | UGetCUNop -> (1, 1)
     | CreateCl (n, _) -> (n, 1)
     | MemoGet _ -> (0, 1) | MemoGetEager _ -> (0, 1)
@@ -843,7 +835,7 @@ let get_input_output_count i =
     begin match i with
     | BaseNC _ | BaseSC _ | BaseSL _ -> (1, 1)
     | BaseNL _ -> (0, 1)
-    | BaseGC _ | BaseGL _ | BaseL _ | BaseC _ | BaseR _ | BaseH
+    | BaseGC _ | BaseGL _ | BaseL _ | BaseC _ | BaseH
     | Dim _ -> (0, 0)
     end
   | IFinal i ->
@@ -852,7 +844,6 @@ let get_input_output_count i =
     | UnsetM (n, _) -> (n, 1)
     | SetM (n, _) | SetOpM (n, _, _) | BindM (n, _) -> (n + 1, 1)
     | SetWithRefLML _ -> (0, 0)
-    | SetWithRefRML _ -> (1, 0)
     | SetRangeM (n, _, _) -> (n + 3, 0)
     end
   | ISpecialFlow _ ->
@@ -971,7 +962,6 @@ let get_estimated_stack_depth instrs =
       | RetM _
       | RetC
       | RetCSuspended
-      | RetV
       | Unwind
       | Throw ->
         (* assume stack depth = 0 after Ret*/Throw/Unwind *)
@@ -1015,7 +1005,6 @@ let collect_locals f instrs =
     | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
                 UnsetL l)
     | IBase (BaseNL (l, _) | BaseGL (l, _))
-    | IFinal (SetWithRefRML l)
     | IIterator (
       IterInit (_, _, l) | WIterInit (_, _, l) |
       IterNext (_, _, l) | WIterNext (_, _, l) |

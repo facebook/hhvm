@@ -170,10 +170,10 @@ Break at C1::__destruct() on line 30 of %s/flow_multistep.php
 out 2
 C1 destructor!
 C2 destructor done
-Break at main() on line 54 of %s/flow_multistep.php
-  53   $c2 = new C2(5);
-  54*  $c2 = new C2(6);
-  55   $d = $c1;
+Break at main() on line 55 of %s/flow_multistep.php
+  54   $c2 = new C2(6);
+  55*  $d = $c1;
+  56   $c1 = null;
 
 out
 object(C1)#1 (1) {

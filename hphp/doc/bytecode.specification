@@ -707,9 +707,6 @@ Here is a description of each flavor descriptor:
 
   C - cell; specifies that the value must be a cell at run time
   V - ref; specifies that the value must be a ref at run time
-  R - return value; specifies that the value may be a cell or a ref at run
-      time; this flavor descriptor is used for return values from function
-      calls
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
@@ -755,17 +752,15 @@ inputs' flavor descriptors.
 uninitialized at any offset listed as a catch entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
-a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, or NativeImpl
-instruction, the evaluation stack before executing the given instruction must
-be empty, and all classref slots must be uninitialized.
+a Jmp, Switch, SSwitch, RetC, Unwind, Fatal, Throw, or NativeImpl instruction,
+the evaluation stack before executing the given instruction must be empty, and
+all classref slots must be uninitialized.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
-Likewise, before executing the RetV instruction, the evaluation stack must
-contain exactly one value and the flavor descriptor of the value must be the
-ref. Finally, before executing the Unwind or NativeImpl instructions, the
-evaluation stack must be empty. In all the above cases, all classref slots must
-be uninitialized.
+Finally, before executing the Unwind or NativeImpl instructions, the evaluation
+stack must be empty. In all the above cases, all classref slots must be
+uninitialized.
 
 6) The code for the primary function body and fault funclets must be laid out
 in order in one contiguous block, starting with the primary function body and
@@ -777,7 +772,7 @@ another funclet.
 7) Any bytecode instruction inside the primary function body or a fault funclet
 that is immediately followed by an instruction not inside the same primary
 function body or fault funclet must be one of the following instructions: Jmp,
-Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, or NativeImpl.
+Switch, SSwitch, RetC, Unwind, Fatal, Throw, or NativeImpl.
 
 8) The primary function body may not contain the Unwind instruction, and fault
 funclets may not contain the Ret* instructions. Also, each catch entry point
@@ -904,7 +899,6 @@ location descriptors is given below:
   S - static property; location is the static property whose class is given by
       a classref and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
-  R - return value; location is a temporary value given by a cell or a ref
   H - $this; location is the $this pointer in the current frame. Must only be
       used in a frame that is known to have a non-null $this pointer; CheckThis
       is most commonly used to ensure this.
@@ -969,7 +963,6 @@ DiscardClsRef <class-ref slot> []  ->  []
 
 PopC                  [C]  ->  []
 PopV                  [V]  ->  []
-PopR                  [R]  ->  []
 PopU                  [U]  ->  []
 
   Pop. Discards the value on the top of the stack.
@@ -994,33 +987,6 @@ Unbox    [V:<T>]  ->  [C:<T>]
 
   Unbox. Creates a copy of the cell that ref $1 points to, and pushes the cell
   onto the stack.
-
-BoxR    [R:<T>]  ->  [V:<T>]
-
-  Box. If $1 is a ref at run time, this instruction does nothing.
-
-  If $1 is a cell at run time, this instruction creates a new ref, sets the new
-  ref to point at a copy of cell $1, and pushes the ref onto the stack.
-
-BoxRNop   [R:<T>]  ->  [V:<T>]
-
-  Box, no op. $1 must be statically known to be boxed.
-
-UnboxR    [R:<T>]  ->  [C:<T>]
-
-  Unbox. If $1 is a cell at run time, this instruction does nothing.
-
-  If $1 is a ref at run time, this instruction creates a copy of the cell that
-  ref $1 points to, and pushes the cell onto the stack.
-
-UnboxRNop   [R:<T>]  ->  [C:<T>]
-
-  UnboxR, no op. $1 must be statically known to be unboxed. This instruction
-  pushes $1 on the stack as a cell.
-
-RGetCNop    [C:<T>]  ->  [R:<T>]
-
-  Convert a cell to an R, no op.  This is a flavor-safety only opcode.
 
 CGetCUNop   [C|U:<T>]  ->  [C:<T>]
 
@@ -1637,11 +1603,6 @@ RetCSuspended   [C]  ->  []
   caller. This instruction can only be used within async functions. This is
   meant to be used within memoized async functions where the memoized value to
   be returned is already wrapped in a wait-handle.
-
-RetV    [V]  ->  []
-
-  Return a ref. Returns $1 to the caller. This instruction may not be used
-  inside fault funclets, async functions and generators.
 
 RetM <num returns> [C..C] -> []
 
@@ -2318,14 +2279,13 @@ FCall* opcodes
   data:
 
   <flags> <num args> <num returns> <async eager offset>
-  [C|V..C|V]  ->  [R | C..C]
+  [C|V..C|V]  ->  [C..C]
 
   FCall* transfers the top %2 values from the stack to the callee as parameters
   and invokes the function according to the specific opcode. When the callee
   returns, it will transfer %3 return values onto the caller's evaluation stack
-  using the R flavor if %3 was one (callee must use one of the RetC/RetV
-  opcodes) or C flavor otherwise (callee must return the matching number of
-  values using the RetM opcode).
+  using the C flavor. The callee must return the matching number of values using
+  either RetC opcode (if %3 was one) or RetM opcode (otherwise).
 
   If the optional offset %4 was specified, the callee supports async eager
   return and it would return a finished Awaitable, it may instead return the
@@ -2351,7 +2311,7 @@ FCall* opcodes
   SupportsAER: hint from static analysis indicating whether the callee is known
   to support async eager return. Requires specified async eager offset in %4.
 
-FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
+FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
 
   FPI call. This instruction pops the current FPI off the FPI stack and calls
   the function associated with it. The strings in %2 and %3 provide hints from
@@ -2363,7 +2323,7 @@ FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
     empty     | non-empty | function %3
     non-empty | non-empty | method %2::%3
 
-FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
+FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [C]
 
   Optimized builtin call without an ActRec. This instruction attempts to lookup
   a builtin function named %3. If no function named %3 is defined, this
@@ -2372,7 +2332,7 @@ FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
   the callee as parameters, and then invokes the dispatcher to call the callee.
   %2 denotes the number of non-default parameters pushed onto stack by user
   level code. When the callee returns, it will transfer the return value onto
-  the caller's evaluation stack using the R flavor.
+  the caller's evaluation stack using the C flavor.
 
 
 9. Member operations
@@ -2411,11 +2371,6 @@ BaseC     [C]  ->  [B]
 
   Get base from value. This operation outputs a base that points to the value
   given by $1.
-
-BaseR     [R]  ->  [B]
-
-  Get base from return value. This operation outputs a base that points to the
-  return value given by $1.
 
 BaseL <local variable id>    []  ->  [B]
 
@@ -3494,9 +3449,8 @@ BaseL <local id> <member op mode>    []  ->  []
   BaseL{,W,D} member operation.
 
 BaseC <stack index> <member op mode>   []  ->  []
-BaseR <stack index> <member op mode>   []  ->  []
 
-  Base{C,R} member operation.
+  BaseC member operation.
 
 BaseH    []  ->  []
 
@@ -3516,7 +3470,7 @@ Dim  <member op mode> <member key>     []  ->  []
 
 All final operations take a <stack count> immediate, which indicates the number
 of elements on the eval stack that must be consumed before pushing the final
-result. These are elements read by Base*[CR] instructions, and member keys.
+result. These are elements read by Base*C instructions, and member keys.
 
 QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
@@ -3590,10 +3544,6 @@ UnsetM <stack count> <member key>    [...]  ->  []
 SetWithRefLML <local id> <local id>    []  ->  []
 
   Set member %1, preserving reffiness of value in %2.
-
-SetWithRefRML <local id>    [R]  ->  []
-
-  Set member %1, preserving reffiness of stack input.
 
 11. Iterator instructions
 -------------------------
@@ -3953,7 +3903,6 @@ VerifyParamType <parameter id>    []  ->  []
   recoverable error is raised.
 
 VerifyRetTypeC    [C] -> [C]
-VerifyRetTypeV    [V] -> [V]
 
   Verify return type. This instruction pops $1 off of the stack, checks if $1
   is compatible with the current function's return type annotation and raises

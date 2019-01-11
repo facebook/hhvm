@@ -7,7 +7,7 @@
   CheckProp "foo"
   InitProp "bar" NonStatic
 
-  PopR
+  PopC
   RetC
 }
 

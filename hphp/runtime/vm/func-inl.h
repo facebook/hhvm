@@ -275,10 +275,6 @@ inline bool Func::isReturnByValue() const {
   return shared()->m_returnByValue;
 }
 
-inline bool Func::isReturnRef() const {
-  return m_attrs & AttrReference;
-}
-
 inline const TypeConstraint& Func::returnTypeConstraint() const {
   return shared()->m_retTypeConstraint;
 }

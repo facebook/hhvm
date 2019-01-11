@@ -251,16 +251,6 @@ void emitRetC(IRGS& env) {
   }
 }
 
-void emitRetV(IRGS& env) {
-  assertx(resumeMode(env) == ResumeMode::None);
-  assertx(!curFunc(env)->isResumable());
-  if (isInlining(env)) {
-    retFromInlined(env);
-  } else {
-    implRet(env, false);
-  }
-}
-
 void emitRetM(IRGS& env, uint32_t nvals) {
   assertx(!isInlining(env));
   assertx(resumeMode(env) == ResumeMode::None);

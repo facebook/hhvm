@@ -102,7 +102,6 @@ let make_memoize_instance_method_no_params_code
     instr_this;
     instr_fpushobjmethodd_nullthrows 0 renamed_name;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset None;
     if is_async then
       gather [
@@ -158,7 +157,6 @@ let make_memoize_instance_method_with_params_code ~pos
     instr_fpushobjmethodd_nullthrows param_count renamed_name;
     param_code_gets params;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset (Some (first_local, param_count));
     if is_async then
       gather [
@@ -199,7 +197,6 @@ let make_memoize_static_method_no_params_code
     instr_label notfound;
     get_cls_method info 0 method_id with_lsb;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset None;
     if is_async then
       gather [
@@ -250,7 +247,6 @@ let make_memoize_static_method_with_params_code ~pos
     get_cls_method info param_count method_id with_lsb;
     param_code_gets params;
     instr_fcall fcall_args;
-    instr_unboxr;
     instr_memoset (Some (first_local, param_count));
     if is_async then
       gather [

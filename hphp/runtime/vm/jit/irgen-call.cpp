@@ -599,28 +599,6 @@ void fpushFuncCommon(IRGS& env,
               cns(env, false));
 }
 
-void implUnboxR(IRGS& env) {
-  auto const exit = makeExit(env);
-  auto const srcBox = popR(env);
-  auto const unboxed = unbox(env, srcBox, exit);
-  if (unboxed == srcBox) {
-    // If the Unbox ended up being a noop, don't bother refcounting
-    push(env, unboxed);
-  } else {
-    pushIncRef(env, unboxed);
-    decRef(env, srcBox);
-  }
-}
-
-void implBoxR(IRGS& env) {
-  auto const value = pop(env, DataTypeGeneric);
-  auto const boxed = boxHelper(
-    env,
-    gen(env, AssertType, TCell | TBoxedInitCell, value),
-    [] (SSATmp* ) {});
-  push(env, boxed);
-}
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1595,9 +1573,6 @@ void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
   );
 }
 
-void emitUnboxR(IRGS& env) { implUnboxR(env); }
-void emitBoxR(IRGS& env) { implBoxR(env); }
-
 //////////////////////////////////////////////////////////////////////
 
 void emitCallerDynamicCallChecks(IRGS& env,
@@ -1747,7 +1722,7 @@ void emitFCall(IRGS& env,
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        auto const ty = callee ? callReturnType(callee) : TInitGen;
+        auto const ty = callee ? callReturnType(callee) : TInitCell;
         push(env, gen(env, AssertType, ty, retVal));
       }
     );
@@ -1830,7 +1805,7 @@ Type callReturnType(const Func* callee) {
   // interception functions can return arbitrary types.
   if (RuntimeOption::EvalJitEnableRenameFunction ||
       callee->attrs() & AttrInterceptable) {
-    return TInitGen;
+    return TInitCell;
   }
 
   if (callee->isCPPBuiltin()) {

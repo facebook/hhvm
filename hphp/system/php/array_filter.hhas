@@ -16,7 +16,7 @@ bad_param2:
           String "array_filter() expects parameter 2 to be a valid callback"
 warning:  Cns "E_WARNING"
           FCallBuiltin 2 2 "trigger_error"
-          PopR
+          PopC
           Null
           RetC
 
@@ -54,7 +54,6 @@ start:          IsTypeL $arr ArrLike
                 Jmp call_val
     by_ref_val: VGetL $v
     call_val:   FCall <> 1 1 - "" ""
-                UnboxR
                 JmpZ next_val
                 BaseL $res Define
                 SetWithRefLML $k $v
@@ -75,7 +74,6 @@ start:          IsTypeL $arr ArrLike
     by_ref_k_both:
                 VGetL $k
     call_both:  FCall <> 2 1 - "" ""
-                UnboxR
                 JmpZ next_both
                 BaseL $res Define
                 SetWithRefLML $k $v
@@ -89,7 +87,6 @@ start:          IsTypeL $arr ArrLike
                 Jmp call_key
     by_ref_key: VGetL $k
     call_key:   FCall <> 1 1 - "" ""
-                UnboxR
                 JmpZ next_key
                 BaseL $res Define
                 SetWithRefLML $k $v
@@ -157,7 +154,6 @@ start_kt:         IssetL $func
                   Jmp call_val_kt
     by_ref_val_kt:VGetL $v
     call_val_kt:  FCall <> 1 1 - "" ""
-                  UnboxR
                   JmpZ next_val_kt
                   CGetL $v
                   BaseL $res Define
@@ -181,7 +177,6 @@ start_kt:         IssetL $func
     by_ref_k_both_kt:
                   VGetL $k
     call_both_kt: FCall <> 2 1 - "" ""
-                  UnboxR
                   JmpZ next_both_kt
                   CGetL $v
                   BaseL $res Define
@@ -197,7 +192,6 @@ start_kt:         IssetL $func
                   Jmp call_key_kt
     by_ref_key_kt:VGetL $k
     call_key_kt:  FCall <> 1 1 - "" ""
-                  UnboxR
                   JmpZ next_key_kt
                   CGetL $v
                   BaseL $res Define

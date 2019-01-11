@@ -574,13 +574,12 @@ and emit_using env pos is_block_scoped has_await e b =
         if has_await then
           let after_await = Label.next_regular() in
           gather [
-            instr_unboxr;
             instr_await;
             instr_label after_await;
             instr_popc
           ], Some after_await
         else
-          instr_popr, None
+          instr_popc, None
       in gather [
         instr_cgetl local;
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
@@ -1127,7 +1126,6 @@ and emit_foreach_await env pos collection iterator block =
       instr_cgetl iter_temp_local;
       instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
       instr_fcall (make_fcall_args ~async_eager_label 0);
-      instr_unboxr;
       instr_await;
       instr_label async_eager_label;
       instr_setl result_temp_local;

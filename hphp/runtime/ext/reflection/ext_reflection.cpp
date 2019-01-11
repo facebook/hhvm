@@ -715,8 +715,7 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, isVariadic) {
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReference) {
-  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return func->attrs() & AttrReference;
+  return false;
 }
 
 static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getNumberOfParameters) {
@@ -2276,9 +2275,6 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
 static void set_debugger_reflection_function_info(Array& ret,
                                                   const Func* func) {
   // return type
-  if (func->attrs() & AttrReference) {
-    ret.set(s_ref,      true_varNR.tv());
-  }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR.tv());
   }

@@ -5,7 +5,7 @@
   FPushFuncD 1 "set_error_handler"
     String "thrower"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   # If get_undefined_var is inlined then the context passed to handler will
   # contain the locals from test_unwind_dirty_stack_regs in an array which will
@@ -15,12 +15,11 @@
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
 
   .try {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall <> 0 1 - "" ""
-    UnboxR
     RetC
   } .catch {
     SetL _1
@@ -29,7 +28,6 @@
     PushL _1
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 - "" ""
-    UnboxR
     Concat
     String "\n"
     Concat
@@ -44,7 +42,7 @@
   FPushCtorD 1 "Exception"
     String "hi"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Throw
 }
 
@@ -86,7 +84,7 @@
   FPushCtorD 1 "DtorPrinter"
     CGetL $id
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   RetC
 }
 
@@ -109,91 +107,76 @@
   FPushFuncD 1 "make_obj"
     Int 0
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_2
   PopC
   FPushFuncD 1 "make_obj"
     Int 3
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_3
   PopC
   FPushFuncD 1 "make_obj"
     Int 4
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_4
   PopC
   FPushFuncD 1 "make_obj"
     Int 5
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_5
   PopC
   FPushFuncD 1 "make_obj"
     Int 6
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_6
   PopC
   FPushFuncD 1 "make_obj"
     Int 7
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_7
   PopC
   FPushFuncD 1 "make_obj"
     Int 8
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_8
   PopC
   FPushFuncD 1 "make_obj"
     Int 9
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_9
   PopC
   FPushFuncD 1 "make_obj"
     Int 10
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_10
   PopC
   FPushFuncD 1 "make_obj"
     Int 11
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_11
   PopC
   FPushFuncD 1 "make_obj"
     Int 12
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_12
   PopC
   FPushFuncD 1 "make_obj"
     Int 13
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_13
   PopC
   FPushFuncD 1 "make_obj"
     Int 14
   FCall <> 1 1 - "" ""
-  UnboxR
   SetL $k_14
   PopC
 
@@ -215,7 +198,7 @@
 
   FPushFuncD 0 "get_undefined_var"
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
 
   # This code isn't reached---but let's Pop this junk just so
   # theoretically we could pass verification some day.

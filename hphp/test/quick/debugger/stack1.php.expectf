@@ -44,7 +44,7 @@ Break at foo() on line 16 of %s/stack1.php
 where
 #0   ()
     at %s/stack1.php:16
-#1  foo (1, 0)
+#1  foo ()
     at %s/stack1.php:28
 #2  cls::pri (1, 0)
     at %s/stack1.php:22

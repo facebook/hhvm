@@ -5,11 +5,11 @@
   String "f"
   FPushFunc 0
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   FPushFuncD 1 "var_dump"
   String "done"
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }
@@ -19,7 +19,6 @@
   FPushFuncD 1 "__hhvm_intrinsics\\launder_value"
   Int 1
   FCall <> 1 1 - "" ""
-  UnboxR
   JmpZ L0
   String "C"
   ReifiedName 1
@@ -31,7 +30,7 @@ L0:
 L1:
   FPushCtor 0 0 MaybeGenerics
   FCall <> 0 1 - "" ""
-  PopR
+  PopC
   RetC
 }
 

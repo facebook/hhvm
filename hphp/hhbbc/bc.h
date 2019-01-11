@@ -520,7 +520,6 @@ namespace imm {
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
 #define POP_VV  if (i == 0) return Flavor::V
-#define POP_RV  if (i == 0) return Flavor::R
 #define POP_CUV if (i == 0) return Flavor::CU
 
 #define POP_NOV             uint32_t numPop() const { return 0; } \
@@ -697,7 +696,6 @@ OPCODES
 #undef POP_UV
 #undef POP_CV
 #undef POP_VV
-#undef POP_RV
 
 #undef POP_NOV
 #undef POP_ONE

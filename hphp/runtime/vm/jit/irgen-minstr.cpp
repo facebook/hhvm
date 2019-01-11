@@ -2106,12 +2106,8 @@ void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   auto const irOff = offsetFromIRSP(env, bcOff);
   stMBase(env, ldStkAddr(env, bcOff));
 
-  auto base = top(env, bcOff);
+  auto base = topC(env, bcOff);
   simpleBaseImpl(env, base, mode, Location::Stack { offsetFromFP(env, irOff) });
-}
-
-void emitBaseR(IRGS& env, uint32_t idx, MOpMode mode) {
-  emitBaseC(env, idx, mode);
 }
 
 void emitBaseH(IRGS& env) {
@@ -2501,12 +2497,6 @@ void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 
 void emitSetWithRefLML(IRGS& env, int32_t keyLoc, int32_t valLoc) {
   setWithRefImpl(env, keyLoc, ldLoc(env, valLoc, nullptr, DataTypeGeneric));
-  mFinalImpl(env, 0, nullptr);
-}
-
-void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
-  setWithRefImpl(env, keyLoc, top(env, BCSPRelOffset{0}, DataTypeGeneric));
-  popDecRef(env);
   mFinalImpl(env, 0, nullptr);
 }
 

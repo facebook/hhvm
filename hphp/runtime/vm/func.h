@@ -501,11 +501,6 @@ struct Func final {
   bool isReturnByValue() const;
 
   /*
-   * Whether this function returns by reference (e.g., function &foo()).
-   */
-  bool isReturnRef() const;
-
-  /*
    * The TypeConstraint of the return.
    */
   const TypeConstraint& returnTypeConstraint() const;

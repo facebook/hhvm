@@ -6,7 +6,7 @@
   String "asdfasdf"
   OODeclExists Interface
   FCall <> 1 1 - "" ""
-  PopR
+  PopC
   Int 1
   RetC
 }

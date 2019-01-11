@@ -332,7 +332,6 @@ Type popCU(ISS& env) {
   return v;
 }
 
-Type popR(ISS& env)  { return popT(env); }
 Type popCV(ISS& env) { return popT(env); }
 
 void discard(ISS& env, int n) {
@@ -351,7 +350,6 @@ Type& topC(ISS& env, uint32_t i = 0) {
   return topT(env, i);
 }
 
-Type& topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
 Type& topCV(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
 Type& topV(ISS& env, uint32_t i = 0) {

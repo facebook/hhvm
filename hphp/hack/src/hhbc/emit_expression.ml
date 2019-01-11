@@ -604,15 +604,6 @@ and emit_box_if_necessary pos need_ref instrs =
   | false -> instrs
   | true -> gather [ instrs; emit_pos pos; instr_box ]
 
-and emit_box_or_unbox_if_necessary pos need_ref (instrs, flavor) =
-  match need_ref, flavor with
-  | false, Flavor.Cell -> instrs
-  | false, Flavor.Ref -> gather [ instrs; emit_pos pos; instr_unbox ]
-  | false, Flavor.ReturnVal -> gather [ instrs; emit_pos pos; instr_unboxr ]
-  | true, Flavor.Cell -> gather [ instrs; emit_pos pos; instr_box ]
-  | true, Flavor.Ref -> instrs
-  | true, Flavor.ReturnVal -> gather [ instrs; emit_pos pos; instr_boxr ]
-
 and emit_instanceof env pos e1 e2 =
   match (e1, e2) with
   | (_, (_, A.Id _)) ->
@@ -627,10 +618,7 @@ and emit_instanceof env pos e1 e2 =
     let scope = Emit_env.get_scope env in
     begin match expr_to_class_expr ~resolve_self:true scope e2 with
     | Class_static ->
-      from_class_ref @@ gather [
-        instr_fcallbuiltin 0 0 "get_called_class";
-        instr_unboxr_nop;
-      ]
+      from_class_ref @@ instr_fcallbuiltin 0 0 "get_called_class"
     | Class_parent ->
       from_class_ref @@ gather [
         instr_parent;
@@ -861,28 +849,28 @@ and emit_new env pos expr targs args uargs =
       emit_pos pos;
       instr_fpushctord nargs fq_id;
       emit_args_and_call env pos args uargs None;
-      instr_popr
+      instr_popc
       ]
   | Class_static ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
       emit_args_and_call env pos args uargs None;
-      instr_popr
+      instr_popc
       ]
   | Class_self ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
       emit_args_and_call env pos args uargs None;
-      instr_popr
+      instr_popc
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
       emit_args_and_call env pos args uargs None;
-      instr_popr
+      instr_popc
       ]
   | _ ->
     let instrs = match cexpr with
@@ -893,7 +881,7 @@ and emit_new env pos expr targs args uargs =
       instrs;
       instr_fpushctor nargs 0 has_generics;
       emit_args_and_call env pos args uargs None;
-      instr_popr
+      instr_popc
     ]
 
 and emit_new_anon env pos cls_idx args uargs =
@@ -901,7 +889,7 @@ and emit_new_anon env pos cls_idx args uargs =
   gather [
     instr_fpushctori nargs cls_idx;
     emit_args_and_call env pos args uargs None;
-    instr_popr
+    instr_popc
     ]
 
 and emit_clone env expr =
@@ -923,52 +911,51 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
   match snd e, targs, args, uargs with
   | A.Id (_, "__hhas_adata"), _, [ (_, A.String data) ], [] ->
     let v = Typed_value.HhasAdata data in
-    emit_pos_then pos @@ instr (ILitConst (TypedValue v)), Flavor.Cell
+    emit_pos_then pos @@ instr (ILitConst (TypedValue v))
   | A.Id (_, id), _, _, []
     when String.lowercase id = "isset" ->
-    emit_call_isset_exprs env pos args, Flavor.Cell
+    emit_call_isset_exprs env pos args
   | A.Id (_, id), _, [arg1], []
     when String.lowercase id = "empty" ->
-    emit_call_empty_expr env pos arg1, Flavor.Cell
+    emit_call_empty_expr env pos arg1
   | A.Id (_, id), _, ([_; _] | [_; _; _]), []
     when String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
-    emit_idx env pos args, Flavor.Cell
+    emit_idx env pos args
 
   | A.Id (_, id), _, [(_, A.String s); e], []
     when String.lowercase id = "define"
       && is_global_namespace env
       && not(Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options) ->
-    emit_define env pos s e, Flavor.Cell
+    emit_define env pos s e
   | A.Id (_, id), _, [arg1], []
     when String.lowercase id = "eval" ->
-    emit_eval env pos arg1, Flavor.Cell
+    emit_eval env pos arg1
   | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2], []
     when is_global_namespace env -> gather [
       emit_pos pos;
       instr_true;
       instr_alias_cls c1 c2
-    ], Flavor.Cell
+    ]
   | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2; arg3], []
     when is_global_namespace env -> gather [
       emit_expr ~need_ref:false env arg3;
       emit_pos pos;
       instr_alias_cls c1 c2
-    ], Flavor.Cell
+    ]
   | A.Id (_, "get_class"), _, [], [] ->
-    emit_get_class_no_args (), Flavor.Cell
+    emit_get_class_no_args ()
   | A.Id (_, s), _, [], []
     when (String.lowercase s = "exit" || String.lowercase s = "die") ->
-    emit_pos_then pos @@ emit_exit env None, Flavor.Cell
+    emit_pos_then pos @@ emit_exit env None
   | A.Id (_, s), _, [arg1], []
     when (String.lowercase s = "exit" || String.lowercase s = "die") ->
-    emit_pos_then pos @@ emit_exit env (Some arg1), Flavor.Cell
+    emit_pos_then pos @@ emit_exit env (Some arg1)
   | A.Id (_, "__hhvm_intrinsics\\get_reified_type"), _, [ (_, A.Id (_, s)) ], []
     when enable_intrinsics_extension () ->
-    emit_pos_then pos @@ emit_reified_type env s, Flavor.Cell
+    emit_pos_then pos @@ emit_reified_type env s
   | _, _, _, _ ->
-    let instrs, flavor = emit_call env pos e targs args uargs async_eager_label
-    in
-    emit_pos_then pos instrs, flavor
+    let instrs = emit_call env pos e targs args uargs async_eager_label in
+    emit_pos_then pos instrs
 
 and emit_known_class_id env id =
   let fq_id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
@@ -1152,7 +1139,6 @@ and emit_execution_operator env pos exprs =
     instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
     instrs;
     instr_fcall (make_fcall_args 1);
-    instr_unboxr_nop
   ]
 
 and emit_string2 env pos exprs =
@@ -1477,23 +1463,15 @@ and emit_eval env pos e =
     instr_eval;
   ]
 
-and emit_xhp_obj_get_raw env pos e s nullflavor =
+and emit_xhp_obj_get env pos e s nullflavor =
   let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
   let args = [pos, A.String (SU.Xhp.clean s)] in
-  fst (emit_call env pos fn_name [] args [] None)
-
-and emit_xhp_obj_get ~need_ref env pos e s nullflavor =
-  gather [
-    emit_xhp_obj_get_raw env pos e s nullflavor;
-    emit_pos pos;
-    if need_ref then instr_boxr else instr_unboxr
-  ]
+  emit_call env pos fn_name [] args [] None
 
 and emit_get_class_no_args () =
   gather [
     instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "get_class");
-    instr_fcall (make_fcall_args 0);
-    instr_unboxr
+    instr_fcall (make_fcall_args 0)
   ]
 
 and try_inline_gen_call env e =
@@ -1585,7 +1563,6 @@ and inline_gena_call env arg = Local.scope @@ fun () ->
             (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
           instr_cgetl arr_local;
           instr_fcall (make_fcall_args ~async_eager_label 1);
-          instr_unboxr;
           instr_await;
           instr_label async_eager_label;
           instr_popc;
@@ -1731,8 +1708,7 @@ and emit_await env pos expr =
     let after_await = Label.next_regular () in
     let instrs = match snd expr with
     | A.Call (e, targs, args, uargs) ->
-      emit_box_or_unbox_if_necessary (fst expr) false @@
-        emit_call_expr env pos e targs args uargs (Some after_await)
+      emit_call_expr env pos e targs args uargs (Some after_await)
     | _ ->
       emit_expr ~need_ref:false env expr
     in gather [
@@ -1862,7 +1838,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
   | A.Call (e, targs, args, uargs) ->
-    emit_box_or_unbox_if_necessary pos need_ref @@
+    emit_box_if_necessary pos need_ref @@
       emit_call_expr env pos e targs args uargs None
   | A.Execution_operator es ->
     emit_box_if_necessary pos need_ref @@
@@ -2622,7 +2598,9 @@ and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr pr
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
-      emit_xhp_obj_get ~need_ref env pos expr s null_flavor, None
+      (emit_box_if_necessary pos need_ref @@
+        emit_xhp_obj_get env pos expr s null_flavor),
+      None
     | _ ->
       let mode =
         if null_coalesce_assignment then MemberOpMode.Warn
@@ -2969,9 +2947,9 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      begin match snd prop_expr with
      | A.Id (_, s) when SU.Xhp.is_xhp s ->
        emit_default
-         (emit_xhp_obj_get_raw env pos base_expr s null_flavor)
+         (emit_xhp_obj_get env pos base_expr s null_flavor)
          empty
-         (gather [ instr_baser base_offset base_mode ])
+         (gather [ instr_basec base_offset base_mode ])
          1
      | _ ->
        let mk, prop_expr_instrs, prop_stack_size =
@@ -3033,15 +3011,12 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        (emit_pos_then pos @@ instr_basenc base_offset base_mode)
        1
    | _ ->
-     let base_expr_instrs, flavor = emit_flavored_expr env expr in
+     let base_expr_instrs = emit_expr ~need_ref:false env expr in
      emit_default
-       (if binary_assignment_rhs_starts_with_ref expr
-       then gather [base_expr_instrs; instr_unbox]
-       else base_expr_instrs)
+       base_expr_instrs
        empty
        (emit_pos_then pos @@
-       instr (IBase (if flavor = Flavor.ReturnVal
-                     then BaseR (base_offset, base_mode) else BaseC (base_offset, base_mode))))
+       instr (IBase (BaseC (base_offset, base_mode))))
        1
 
 and get_pass_by_ref_hint expr =
@@ -3222,13 +3197,7 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
         | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _)) ->
           emit_expr_as_ref env expr;
         | _ ->
-          let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-          if flavor <> Flavor.ReturnVal then instrs else
-          gather [
-            instrs;
-            emit_pos param_pos;
-            instr_boxr
-          ]
+          fst @@ emit_flavored_expr env ~last_pos:call_pos expr
       else
       let emit_ref_cond instrs_init instrs_by_val instrs_by_ref =
         let by_ref_label = Label.next_regular () in
@@ -3287,7 +3256,6 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
         let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
         match flavor with
         | Flavor.Ref -> emit_ref_cond instrs instr_unbox empty
-        | Flavor.ReturnVal -> emit_ref_cond instrs instr_unboxr instr_boxr
         | Flavor.Cell ->
           gather [
             instrs;
@@ -3544,7 +3512,7 @@ and emit_special_function env pos id args uargs default =
            instr (IOp Print);
            if i = nargs-1 then empty else instr_popc
          ] end in
-    Some (instrs, Flavor.Cell)
+    Some instrs
 
   | "array_slice", [
     _, A.Call ((_, A.Id (_, s)), _, [], []); (_, A.Int _ as count)
@@ -3555,7 +3523,7 @@ and emit_special_function env pos id args uargs default =
         A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [] None)
 
   | "hh\\asm", [_, A.String s] ->
-    Some (emit_inline_hhas s, Flavor.Cell)
+    Some (emit_inline_hhas s)
 
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in
@@ -3568,7 +3536,7 @@ and emit_special_function env pos id args uargs default =
       Emit_fatal.emit_fatal_runtime pos "invariant_violation";
       instr_label l;
       instr_null;
-    ], Flavor.Cell)
+    ])
 
   | "assert", _ ->
     let l0 = Label.next_regular () in
@@ -3576,17 +3544,15 @@ and emit_special_function env pos id args uargs default =
     Some (gather [
       instr_string "zend.assertions";
       instr_fcallbuiltin 1 1 "ini_get";
-      instr_unboxr_nop;
       instr_int 0;
       instr_gt;
       instr_jmpz l0;
-      fst @@ default ();
-      instr_unboxr;
+      default ();
       instr_jmp l1;
       instr_label l0;
       instr_true;
       instr_label l1;
-    ], Flavor.Cell)
+    ])
 
   | ("class_exists" | "interface_exists" | "trait_exists" as id), arg1::_
     when nargs = 1 || nargs = 2 ->
@@ -3605,10 +3571,10 @@ and emit_special_function env pos id args uargs default =
         instr (IOp CastBool)
       ];
       instr (IMisc (OODeclExists class_kind))
-    ], Flavor.Cell)
+    ])
 
   | ("exit" | "die"), _ when nargs = 0 || nargs = 1 ->
-    Some (emit_exit env (List.hd args), Flavor.Cell)
+    Some (emit_exit env (List.hd args))
 
   | "hh\\fun", _ ->
     if nargs <> 1 then
@@ -3622,8 +3588,8 @@ and emit_special_function env pos id args uargs default =
         let func_id = Option.value_map id_opt
           ~default:func_id ~f:Hhbc_id.Function.from_raw_string in
         if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
-        then Some (instr_resolve_func func_id, Flavor.Cell)
-        else Some (instr_string (Hhbc_id.Function.to_raw_string func_id), Flavor.Cell)
+        then Some (instr_resolve_func func_id)
+        else Some (instr_string (Hhbc_id.Function.to_raw_string func_id))
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     end
@@ -3637,7 +3603,7 @@ and emit_special_function env pos id args uargs default =
           if Hhbc_options.emit_inst_meth_pointers !Hhbc_options.compiler_options
           then instr_resolve_obj_method
           else instr (ILitConst (NewVArray 2));
-        ], Flavor.Cell)
+        ])
       | _ ->
         Emit_fatal.raise_fatal_runtime pos
           ("inst_meth() expects exactly 2 parameters, " ^
@@ -3653,7 +3619,7 @@ and emit_special_function env pos id args uargs default =
             if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
             then instr_resolve_cls_method
             else instr (ILitConst (NewVArray 2));
-          ], Flavor.Cell)
+          ])
         | _ ->
           Emit_fatal.raise_fatal_runtime pos
             ("class_meth() expects exactly 2 parameters, " ^
@@ -3668,23 +3634,23 @@ and emit_special_function env pos id args uargs default =
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
         emit_is env pos h
-      ], Flavor.Cell)
+      ])
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
       when SN.Superglobals.is_superglobal arg_str ->
       Some (gather [
         emit_local ~notice:NoNotice ~need_ref:false env arg_id;
         emit_pos pos;
         instr (IIsset (IsTypeC i))
-      ], Flavor.Cell)
+      ])
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
       when not (is_local_this env arg_str) ->
-      Some (instr (IIsset (IsTypeL (get_local env arg_id, i))), Flavor.Cell)
+      Some (instr (IIsset (IsTypeL (get_local env arg_id, i))))
     | [arg_expr], Some i, _ ->
       Some (gather [
         emit_expr ~need_ref:false env arg_expr;
         emit_pos pos;
         instr (IIsset (IsTypeC i))
-      ], Flavor.Cell)
+      ])
     | _ ->
       begin match get_call_builtin_func_info lower_fq_name with
       | Some (nargs, i) when nargs = List.length args ->
@@ -3693,7 +3659,7 @@ and emit_special_function env pos id args uargs default =
           emit_exprs env pos args;
           emit_pos pos;
           instr i
-        ], Flavor.Cell)
+        ])
       | _ -> None
       end
     end
@@ -3712,36 +3678,32 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () =
-    let flavor = if List.is_empty inout_arg_positions then
-      Flavor.ReturnVal else Flavor.Cell in
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
         env pos expr targs nargs (not (List.is_empty uargs)) inout_arg_positions;
       emit_args_and_call env pos args uargs async_eager_label;
-    ], flavor in
+    ] in
 
   match expr_, args with
   | A.Id (_, id), _ ->
     let special_fn_opt = emit_special_function env pos id args uargs default in
     begin match special_fn_opt with
-    | Some (instrs, flavor) -> instrs, flavor
+    | Some instrs -> instrs
     | None -> default ()
     end
   | _ -> default ()
 
-
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
  *)
-and emit_flavored_expr env ?last_pos (pos, expr_ as expr) =
-  match expr_ with
-  | A.Call (e, targs, args, uargs) ->
-    emit_call_expr env pos e targs args uargs None
+and emit_flavored_expr env ?last_pos expr =
+  match snd expr with
+  | A.Binop (A.Eq None, _, e) when expr_starts_with_ref e ->
+    (* binary assignment rhs starts with ref *)
+    emit_expr ?last_pos ~need_ref:true env expr, Flavor.Ref
   | _ ->
-    let need_ref = binary_assignment_rhs_starts_with_ref expr in
-    let flavor = if need_ref then Flavor.Ref else Flavor.Cell in
-    emit_expr ?last_pos ~need_ref env expr, flavor
+    emit_expr ?last_pos ~need_ref:false env expr, Flavor.Cell
 
 and emit_final_member_op stack_index op mk =
   match op with
@@ -3906,10 +3868,6 @@ and emit_lval_op_list ?(last_usage=false) env outer_pos local indices expr =
 
 and expr_starts_with_ref = function
   | _, A.Unop (A.Uref, _) -> true
-  | _ -> false
-
-and binary_assignment_rhs_starts_with_ref = function
-  | _, A.Binop (A.Eq None, _, e) when expr_starts_with_ref e -> true
   | _ -> false
 
 (* Emit code for an l-value operation *)

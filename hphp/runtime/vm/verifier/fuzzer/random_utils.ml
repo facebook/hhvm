@@ -148,7 +148,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IIsset (IsTypeL (random_local (),random_op_type ())));
     (fun () -> ILitConst NullUninit);
     (fun () -> IBasic PopC);
-    (fun () -> IBasic PopR);
     (fun () -> IBasic PopU);
     (fun () -> IBasic PopV);
     (fun () -> ILitConst (ColFromArray (random_collection_type ())));
@@ -189,11 +188,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IGet VGetN);
     (fun () -> IGet VGetG);
     (fun () -> IBasic Unbox);
-    (*(fun () -> IBasic BoxRNop);*)
-    (fun () -> IBasic BoxR);
-    (fun () -> IBasic UnboxR);
-    (fun () -> IBasic UnboxRNop);
-    (fun () -> IBasic RGetCNop);
     (fun () -> IMisc UGetCUNop);
     (fun () -> IMisc CGetCUNop);
     (fun () -> IBasic Dup);
@@ -265,7 +259,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (OODeclExists (random_class_kind ())));
     (fun () -> IMisc (VerifyParamType (random_param_id ())));
     (fun () -> IMisc VerifyRetTypeC);
-    (fun () -> IMisc VerifyRetTypeV);
     (*(fun () -> IMisc NativeImpl);*)
     (fun () -> IMisc AKExists);
     (fun () -> IMisc (CreateCl (Random.int 10, Random.int 10)));
@@ -307,7 +300,6 @@ let base_instrs (fn : IS.t) : lazy_instruct list =
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
    (fun () -> IBase (BaseC (Random.int 10, random_mode ())));
-   (fun () -> IBase (BaseR (Random.int 10, random_mode ())));
    (fun () -> IBase BaseH);
    (fun () -> IBase (Dim (random_mode(), random_key ())))] @
    begin
@@ -328,8 +320,7 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
      random_eq_op (), random_key ())));
    (fun () -> IFinal (BindM (Random.int 10, random_key ())));
    (fun () -> IFinal (UnsetM (Random.int 10, random_key ())));
-   (fun () -> IFinal (SetWithRefLML (random_local (), random_local())));
-   (fun () -> IFinal (SetWithRefRML (random_local ())))]
+   (fun () -> IFinal (SetWithRefLML (random_local (), random_local())))]
 
 (* An association list of stack signatures to random generators for
     instructions with that stack signature, produced from input list of

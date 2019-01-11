@@ -925,7 +925,7 @@ int DebuggerProxy::getRealStackDepth() {
   if (!fp) return 0;
 
   while (fp != nullptr) {
-    fp = context->getPrevVMState(fp, nullptr, nullptr);
+    fp = context->getPrevVMState(fp);
     depth++;
   }
   return depth;

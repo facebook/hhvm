@@ -1823,7 +1823,7 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   assertx(ar);
   assertx(!ar->sfp());
   assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
-  assertx(ar->m_soff == 0);
+  assertx(ar->m_callOff == 0);
 
   auto ec = &*g_context;
   DEBUG_ONLY int faultDepth = ec->m_faults.size();
@@ -2053,7 +2053,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
         *prevSp = (TypedValue*)(fp + 1);
       }
     }
-    if (prevPc) *prevPc = prevFp->func()->base() + fp->m_soff;
+    if (prevPc) *prevPc = prevFp->func()->base() + fp->m_callOff;
     if (fromVMEntry) *fromVMEntry = false;
     return prevFp;
   }
@@ -2085,8 +2085,8 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
 
   return true iff the pseudomain needs to be executed.
 */
-bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
-  vmpc() = pc;
+bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
+  vmpc() = callPC;
   unit->merge();
   if (unit->isMergeOnly()) {
     Stats::inc(Stats::PseudoMain_Skipped);
@@ -2108,7 +2108,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   }
   ar->initNumArgs(0);
   assertx(vmfp());
-  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
+  ar->setReturn(vmfp(), callPC, jit::tc::ustubs().retHelper);
   pushFrameSlots(func);
 
   auto prevFp = vmfp();
@@ -2393,16 +2393,16 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
   // Find a suitable PC to use when switching to the target frame. If the target
   // is the current frame, this is just vmpc(). For other cases, this will
-  // generally be the return address from a call from that frame's function. If
-  // we can't find the target frame (because it lies deeper in the stack), then
-  // just use the target frame's func's entry point.
+  // generally be the address of a call from that frame's function. If we can't
+  // find the target frame (because it lies deeper in the stack), then just use
+  // the target frame's func's entry point.
   auto const findSuitablePC = [this](const ActRec* target){
     if (auto fp = vmfp()) {
       if (fp == target) return vmpc();
       while (true) {
         auto prevFp = getPrevVMState(fp);
         if (!prevFp) break;
-        if (prevFp == target) return prevFp->func()->getEntry() + fp->m_soff;
+        if (prevFp == target) return prevFp->func()->getEntry() + fp->m_callOff;
         fp = prevFp;
       }
     }

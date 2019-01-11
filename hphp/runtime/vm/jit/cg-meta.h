@@ -35,14 +35,14 @@ using IFrameID = int32_t;
 
 struct IFrame {
   const Func* func; // callee (m_func)
-  int32_t soff;     // caller offset (m_soff)
+  int32_t callOff;  // caller offset (m_callOff)
   IFrameID parent;  // parent frame (m_sfp)
 };
 
 struct IStack {
   IFrameID frame; // leaf frame in this stack
   uint32_t nframes;
-  uint32_t soff;
+  uint32_t callOff;
 };
 
 /*
@@ -238,9 +238,9 @@ public:
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
     auto str = folly::sformat(
-      "IFrame{{func = {}, soff = {}, parent = {}}}",
+      "IFrame{{func = {}, callOff = {}, parent = {}}}",
       m_ifr.func->fullName()->data(),
-      m_ifr.soff,
+      m_ifr.callOff,
       m_ifr.parent
     );
     format_value::formatString(str, arg, cb);

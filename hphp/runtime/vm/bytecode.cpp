@@ -987,7 +987,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   func->validate();
   std::string funcName(func->fullName()->data());
   os << "{func:" << funcName
-     << ",soff:" << fp->m_soff
+     << ",callOff:" << fp->m_callOff
      << ",this:0x"
      << std::hex << (func->cls() && fp->hasThis() ? fp->getThis() : nullptr)
      << std::dec << "}";
@@ -1056,8 +1056,8 @@ std::string Stack::toString(const ActRec* fp, int offset,
   // print stack fragments from deepest to shallowest -- a then b in the
   // following example:
   //
-  //   {func:foo,soff:51}<C:8> {func:bar} C:8 C:1 {func:biz} C:0
-  //                           aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbb
+  //   {func:foo,callOff:51}<C:8> {func:bar} C:8 C:1 {func:biz} C:0
+  //                              aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbb
   //
   // Use depth-first recursion to get the output order correct.
 
@@ -1555,7 +1555,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   return true;
 }
 
-static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
+static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
   assertx(!ar->resumed());
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -1659,18 +1659,15 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   pushFrameSlots(func, nlocals);
 
   vmfp() = ar;
+  vmpc() = firstDVInitializer != InvalidAbsoluteOffset
+    ? func->unit()->entry() + firstDVInitializer
+    : func->getEntry();
   vmJitReturnAddr() = nullptr;
-  if (firstDVInitializer != InvalidAbsoluteOffset) {
-    pc = func->unit()->entry() + firstDVInitializer;
-  } else {
-    pc = func->getEntry();
-  }
+
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
   if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
-    // need to sync vmpc() to pc for backtraces/re-entry
-    vmpc() = pc;
     HPHP::jit::raiseMissingArgument(func, ar->numArgs());
   }
 }
@@ -1728,7 +1725,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     vmfp() = enterFnAr;
     vmpc() = enterFnAr->func()->getEntry();
   } else {
-    prepareFuncEntry(enterFnAr, vmpc(), stk);
+    prepareFuncEntry(enterFnAr, stk);
   }
 
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
@@ -3237,7 +3234,7 @@ struct JitReturn {
   uint64_t savedRip;
   ActRec* fp;
   ActRec* sfp;
-  uint32_t soff;
+  uint32_t callOff;
 };
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
@@ -3259,7 +3256,7 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     throw VMSwitchMode();
   }
 
-  return {savedRip, fp, fp->sfp(), fp->m_soff};
+  return {savedRip, fp, fp->sfp(), fp->m_callOff};
 }
 
 OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
@@ -3270,7 +3267,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
       // the approprate catch trace.
       assertx(jit::g_unwind_rds.isInit());
       jit::g_unwind_rds->debuggerReturnSP = vmsp();
-      jit::g_unwind_rds->debuggerReturnOff = retInfo.soff;
+      jit::g_unwind_rds->debuggerCallOff = retInfo.callOff;
       return jit::unstashDebuggerCatch(retInfo.fp);
     }
 
@@ -3317,6 +3314,13 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   return nullptr;
 }
 
+OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
+  vmfp() = sfp;
+  pc = LIKELY(sfp != nullptr)
+    ? skipCall(sfp->func()->getEntry() + callOff)
+    : nullptr;
+}
+
 }
 
 template <bool suspended>
@@ -3346,7 +3350,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+  Offset callOff = vmfp()->m_callOff;
 
   if (LIKELY(!vmfp()->resumed())) {
     // If in an eagerly executed async function, wrap the return value into
@@ -3398,8 +3402,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   }
 
   // Return control to the caller.
-  vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
@@ -3446,7 +3449,7 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+  Offset callOff = vmfp()->m_callOff;
 
   // Free ActRec and store the return value.
   vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
@@ -3464,8 +3467,7 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   *vmStack().allocTV() = retvals[0];
 
   // Return control to the caller.
-  vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
@@ -5988,7 +5990,7 @@ OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
   raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
-bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack) {
+bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
@@ -6018,11 +6020,9 @@ bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack) {
   }
 
   prepareFuncEntry(
-    ar, pc,
+    ar,
     unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
-  vmpc() = pc;
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
-    pc = vmpc();
     return false;
   }
   checkForReifiedGenericsErrors(ar);
@@ -6031,21 +6031,21 @@ bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack) {
   return true;
 }
 
-bool doFCallUnpackTC(PC pc, int32_t numArgsInclUnpack, void* retAddr) {
+bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   auto const ar = arFromSp(numArgsInclUnpack);
   assertx(ar->numArgs() == numArgsInclUnpack);
-  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->setJitReturn(retAddr);
-  auto const ret = doFCall(ar, pc, numArgsInclUnpack - 1, true);
+  auto const ret = doFCall(ar, numArgsInclUnpack - 1, true);
   tl_regState = VMRegState::DIRTY;
   return ret;
 }
 
 OPTBLD_FLT_INLINE
-void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
+void iopFCall(PC origpc, PC& pc, ActRec* ar, FCallArgs fca,
               const StringData* /*clsName*/, const StringData* funcName) {
   auto const func = ar->func();
   assertx(
@@ -6067,8 +6067,9 @@ void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
-  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  doFCall(ar, pc, fca.numArgs, fca.hasUnpack());
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
+  doFCall(ar, fca.numArgs, fca.hasUnpack());
+  pc = vmpc();
 }
 
 OPTBLD_FLT_INLINE
@@ -6280,7 +6281,8 @@ OPTBLD_INLINE void iopCIterFree(Iter* it) {
   it->cfree();
 }
 
-OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags, const char* opName) {
+OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
+                          const char* opName) {
   Cell* c1 = vmStack().topC();
   auto path = String::attach(prepareKey(*c1));
   bool initial;
@@ -6326,38 +6328,39 @@ OPTBLD_INLINE void inclOp(PC& pc, InclOpFlags flags, const char* opName) {
   }
 
   if (!(flags & InclOpFlags::Once) || initial) {
-    g_context->evalUnit(unit, pc, EventHook::PseudoMain);
+    g_context->evalUnit(unit, origpc, pc, EventHook::PseudoMain);
   } else {
     Stats::inc(Stats::PseudoMain_Guarded);
     vmStack().pushBool(true);
   }
 }
 
-OPTBLD_INLINE void iopIncl(PC& pc) {
-  inclOp(pc, InclOpFlags::Default, "include");
+OPTBLD_INLINE void iopIncl(PC origpc, PC& pc) {
+  inclOp(origpc, pc, InclOpFlags::Default, "include");
 }
 
-OPTBLD_INLINE void iopInclOnce(PC& pc) {
-  inclOp(pc, InclOpFlags::Once, "include_once");
+OPTBLD_INLINE void iopInclOnce(PC origpc, PC& pc) {
+  inclOp(origpc, pc, InclOpFlags::Once, "include_once");
 }
 
-OPTBLD_INLINE void iopReq(PC& pc) {
-  inclOp(pc, InclOpFlags::Fatal, "require");
+OPTBLD_INLINE void iopReq(PC origpc, PC& pc) {
+  inclOp(origpc, pc, InclOpFlags::Fatal, "require");
 }
 
-OPTBLD_INLINE void iopReqOnce(PC& pc) {
-  inclOp(pc, InclOpFlags::Fatal | InclOpFlags::Once, "require_once");
+OPTBLD_INLINE void iopReqOnce(PC origpc, PC& pc) {
+  inclOp(origpc, pc, InclOpFlags::Fatal | InclOpFlags::Once, "require_once");
 }
 
-OPTBLD_INLINE void iopReqDoc(PC& pc) {
+OPTBLD_INLINE void iopReqDoc(PC origpc, PC& pc) {
   inclOp(
+    origpc,
     pc,
     InclOpFlags::Fatal | InclOpFlags::Once | InclOpFlags::DocRoot,
     "require_once"
   );
 }
 
-OPTBLD_INLINE void iopEval(PC& pc) {
+OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
   Cell* c1 = vmStack().topC();
 
   if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
@@ -6405,7 +6408,7 @@ OPTBLD_INLINE void iopEval(PC& pc) {
     vmStack().pushBool(false);
     return;
   }
-  vm->evalUnit(unit, pc, EventHook::Eval);
+  vm->evalUnit(unit, origpc, pc, EventHook::Eval);
 }
 
 OPTBLD_INLINE void iopDefFunc(uint32_t fid) {
@@ -6665,7 +6668,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
-  Offset soff = vmfp()->m_soff;
+  Offset callOff = vmfp()->m_callOff;
 
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
@@ -6673,8 +6676,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   vmStack().ret();
 
   // Return control to the caller.
-  vmfp() = sfp;
-  pc = LIKELY(vmfp() != nullptr) ? vmfp()->func()->getEntry() + soff : nullptr;
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
@@ -6751,7 +6753,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();
-  Offset soff = fp->m_soff;
+  Offset callOff = fp->m_callOff;
 
   // Free ActRec and store the return value.
   vmStack().ndiscard(numSlots);
@@ -6760,24 +6762,22 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
   assertx(vmStack().topTV() == fp->retSlot());
 
   // Return control to the caller.
-  vmfp() = sfp;
-  pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void moveProgramCounterIntoGenerator(PC &pc, BaseGenerator* gen) {
+OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
   assertx(gen->isRunning());
   ActRec* genAR = gen->actRec();
-  genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
+  genAR->setReturn(vmfp(), origpc, genAR->func()->isAsync() ?
     jit::tc::ustubs().asyncGenRetHelper :
     jit::tc::ustubs().genRetHelper);
 
   vmfp() = genAR;
 
   assertx(genAR->func()->contains(gen->resumable()->resumeOffset()));
-  pc = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
-  vmpc() = pc;
+  vmpc() = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
 }
 
 OPTBLD_INLINE bool tvIsGenerator(TypedValue tv) {
@@ -6786,7 +6786,7 @@ OPTBLD_INLINE bool tvIsGenerator(TypedValue tv) {
 }
 
 template<bool recursive>
-OPTBLD_INLINE void contEnterImpl(PC& pc) {
+OPTBLD_INLINE void contEnterImpl(PC origpc) {
 
   // The stack must have one cell! Or else resumableStackBase() won't work!
   assertx(vmStack().top() + 1 ==
@@ -6798,7 +6798,7 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   // we drop down to the lowest running delegate generator. This is useful for
   // ContRaise, which should throw from the context of the lowest generator.
   if(!recursive || vmfp()->getThis()->getVMClass() != Generator::getClass()) {
-    moveProgramCounterIntoGenerator(pc, this_base_generator(vmfp()));
+    movePCIntoGenerator(origpc, this_base_generator(vmfp()));
   } else {
     // TODO(https://github.com/facebook/hhvm/issues/6040)
     // Implement throwing from delegate generators.
@@ -6808,26 +6808,21 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
       SystemLib::throwExceptionObject("Throwing from a delegate generator is "
           "not currently supported in HHVM");
     }
-    moveProgramCounterIntoGenerator(pc, gen);
+    movePCIntoGenerator(origpc, gen);
   }
 
   EventHook::FunctionResumeYield(vmfp());
 }
 
-OPTBLD_INLINE void iopContEnter(PC& pc) {
-  contEnterImpl<false>(pc);
+OPTBLD_INLINE void iopContEnter(PC origpc, PC& pc) {
+  contEnterImpl<false>(origpc);
+  pc = vmpc();
 }
 
-OPTBLD_INLINE void iopContRaise(PC& pc) {
-  contEnterImpl<true>(pc);
+OPTBLD_INLINE void iopContRaise(PC origpc, PC& pc) {
+  contEnterImpl<true>(origpc);
+  pc = vmpc();
   iopThrow(pc);
-}
-
-OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc,
-                                              ActRec* sfp, Offset soff) {
-  // Return control to the next()/send()/raise() caller.
-  vmfp() = sfp;
-  pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
 }
 
 OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
@@ -6842,7 +6837,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   EventHook::FunctionSuspendYield(fp);
 
   auto const sfp = fp->sfp();
-  auto const soff = fp->m_soff;
+  auto const callOff = fp->m_callOff;
 
   if (!func->isAsync()) {
     // Non-async generator.
@@ -6865,7 +6860,7 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
     }
   }
 
-  moveProgramCounterToCaller(pc, sfp, soff);
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
@@ -6919,7 +6914,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   cellSetNull(gen->m_value);
 }
 
-OPTBLD_INLINE void iopContEnterDelegate(PC& pc) {
+OPTBLD_INLINE void iopContEnterDelegate(PC origpc, PC& pc) {
   // Make sure we have a delegate
   auto gen = frame_generator(vmfp());
 
@@ -6954,8 +6949,9 @@ OPTBLD_INLINE void iopContEnterDelegate(PC& pc) {
   // right state.
   delegate->preNext(false);
 
-  moveProgramCounterIntoGenerator(pc, delegate);
+  movePCIntoGenerator(origpc, delegate);
   EventHook::FunctionResumeYield(vmfp());
+  pc = vmpc();
 }
 
 OPTBLD_INLINE
@@ -6975,7 +6971,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
 
   EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
-  auto const soff = fp->m_soff;
+  auto const callOff = fp->m_callOff;
 
   // We don't actually want to "yield" anything here. The implementation of
   // key/current are smart enough to dive into our delegate generator, so
@@ -6985,7 +6981,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
   gen->resumable()->setResumeAddr(nullptr, resumeOffset);
   gen->setState(BaseGenerator::State::Started);
 
-  moveProgramCounterToCaller(pc, sfp, soff);
+  returnToCaller(pc, sfp, callOff);
 
   return jitReturnPost(jitReturn);
 }
@@ -7016,13 +7012,13 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
 
   EventHook::FunctionSuspendYield(fp);
   auto const sfp = fp->sfp();
-  auto const soff = fp->m_soff;
+  auto const callOff = fp->m_callOff;
 
   auto key = *(arr.first().asTypedValue());
   auto value = *(arr.second().asTypedValue());
   gen->yield(resumeOffset, &key, value);
 
-  moveProgramCounterToCaller(pc, sfp, soff);
+  returnToCaller(pc, sfp, callOff);
 
   it->next();
 
@@ -7130,7 +7126,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
 
     // Grab caller info from ActRec.
     ActRec* sfp = fp->sfp();
-    Offset soff = fp->m_soff;
+    Offset callOff = fp->m_callOff;
 
     // Free ActRec and store the return value. In case async eager return was
     // requested by the caller, let it know that we did not finish eagerly.
@@ -7141,8 +7137,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     assertx(vmStack().topTV() == fp->retSlot());
 
     // Return control to the caller.
-    pc = LIKELY(sfp != nullptr) ? sfp->func()->getEntry() + soff : nullptr;
-    vmfp() = sfp;
+    returnToCaller(pc, sfp, callOff);
   } else {  // Async generator.
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
@@ -7157,8 +7152,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
 
     // Return control to the caller (AG::next()).
     assertx(fp->sfp());
-    pc = fp->sfp()->func()->getEntry() + fp->m_soff;
-    vmfp() = fp->sfp();
+    returnToCaller(pc, fp->sfp(), fp->m_callOff);
   }
 }
 

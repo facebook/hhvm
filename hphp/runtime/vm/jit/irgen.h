@@ -233,7 +233,7 @@ bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
                    SrcKey startSk,
-                   Offset returnBcOffset,
+                   Offset callBcOffset,
                    ReturnTarget returnTarget,
                    int cost,
                    bool conjure);

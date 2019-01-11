@@ -74,7 +74,7 @@ struct ActRec {
   uint64_t m_savedRip; // native (in-TC) return address
 #endif
   const Func* m_func;  // Function.
-  uint32_t m_soff;     // offset of caller from its bytecode start.
+  uint32_t m_callOff;  // bc offset of call opcode from caller func entry.
   uint32_t m_numArgsAndFlags; // arg_count:26, flags:6
   union {
     ObjectData* m_thisUnsafe; // This.
@@ -161,7 +161,7 @@ struct ActRec {
   /*
    * Set up frame linkage with the caller ActRec.
    */
-  void setReturn(ActRec* fp, PC pc, void* retAddr);
+  void setReturn(ActRec* fp, PC callPC, void* retAddr);
   void setJitReturn(void* retAddr);
 
   /*

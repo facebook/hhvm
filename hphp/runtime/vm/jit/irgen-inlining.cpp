@@ -210,7 +210,7 @@ bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
                    SrcKey startSk,
-                   Offset returnBcOffset,
+                   Offset callBcOffset,
                    ReturnTarget returnTarget,
                    int cost,
                    bool conjure) {
@@ -218,11 +218,11 @@ bool beginInlining(IRGS& env,
 
   assertx(!fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
-  assertx(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
+  assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
   assertx((!curFunc(env) ||
-          curFunc(env)->base() + returnBcOffset < curFunc(env)->past()) &&
-         "returnBcOffset past end of caller");
+          curFunc(env)->base() + callBcOffset < curFunc(env)->past()) &&
+         "callBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
@@ -332,7 +332,7 @@ bool beginInlining(IRGS& env,
 
   DefInlineFPData data;
   data.target        = target;
-  data.retBCOff      = returnBcOffset;
+  data.callBCOff     = callBcOffset;
   data.ctx           = target->isClosureBody() ? nullptr : ctx;
   data.retSPOff      = prevBCSPOff;
   data.spOffset      = calleeAROff;
@@ -451,7 +451,7 @@ bool conjureBeginInlining(IRGS& env,
     numParams,
     func,
     startSk,
-    0 /* returnBcOffset */,
+    0 /* callBcOffset */,
     returnTarget,
     9, /* cost */
     true

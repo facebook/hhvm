@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
@@ -179,7 +180,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   auto const func = fp->func();
   auto const curOp = peek_op(pc);
   auto const prevFp = fp->sfp();
-  auto const soff = fp->m_soff;
+  auto const callOff = fp->m_callOff;
 
   ITRACE(1, "tearDownFrame: {} ({})\n",
          func->fullName()->data(),
@@ -208,7 +209,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     Offset prevPc;
     auto outer = g_context->getPrevVMState(fp, &prevPc);
     if (outer) {
-      auto fe = outer->func()->findPrecedingFPI(prevPc);
+      auto fe = outer->func()->findFPI(prevPc);
       if (fe && isFPushCtor(outer->func()->unit()->getOp(fe->m_fpushOff))) {
         fp->getThis()->setNoDestruct();
       }
@@ -317,8 +318,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->resumed());
-  auto const prevOff = soff + prevFp->func()->base();
-  pc = prevFp->func()->unit()->at(prevOff);
+  pc = skipCall(prevFp->func()->unit()->at(callOff + prevFp->func()->base()));
   fp = prevFp;
   return phpException;
 }
@@ -668,7 +668,7 @@ void unwindBuiltinFrame() {
   ActRec* sfp = g_context->getPrevVMState(fp, &pc);
   assertx(pc != -1);
   fp = sfp;
-  vmpc() = fp->m_func->unit()->at(pc);
+  vmpc() = skipCall(fp->m_func->unit()->at(pc));
   stack.ndiscard(numSlots);
   stack.discardAR();
   stack.pushNull(); // return value

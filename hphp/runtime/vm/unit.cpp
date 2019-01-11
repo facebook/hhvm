@@ -791,7 +791,7 @@ struct FrameRestore : private VMRegAnchor {
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
       tmp.m_func = unit->getMain(nullptr);
-      tmp.m_soff = !fp
+      tmp.m_callOff = !fp
         ? 0
         : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base();
       tmp.trashThis();

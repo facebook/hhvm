@@ -376,7 +376,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
   if (doneFlag.toBoolean()) {
     Offset pcOff;
-    ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
+    bool vmEntry;
+    ActRec* outer = g_context->getPrevVMState(ar, &pcOff, nullptr, &vmEntry);
 
     ar->setLocalsDecRefd();
     frame_free_locals_no_hook(ar);
@@ -412,6 +413,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;
+    if (vmpc() && !vmEntry) vmpc() = skipCall(vmpc());
 
     return false;
   }

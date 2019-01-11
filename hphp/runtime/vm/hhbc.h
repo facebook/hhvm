@@ -951,6 +951,7 @@ int instrLen(PC opcode);
 int numSuccs(PC opcode);
 bool pushesActRec(Op opcode);
 
+PC skipCall(PC pc);
 IterTable iterTableFromStream(PC&);
 
 /*

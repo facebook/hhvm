@@ -1749,20 +1749,20 @@ To string conversions:
   the SP. It has no effect other than to hint to optimization passes that at the
   start of the inlined function its stack is dead.
 
-| DefInlineFP<func,retBCOff,retSPOff>, D(FramePtr),
-|                                      S(StkPtr) S(FramePtr),
-|                                      NF
+| DefInlineFP<func,callBCOff,retSPOff>, D(FramePtr),
+|                                       S(StkPtr) S(FramePtr),
+|                                       NF
 
   Defines a frame pointer for an inlined function.
 
-  `func' is the function being inlined. `retBCOff' and `retSPOff' represent
-  what the bytecode and stack offsets should be after the FCall instruction in
-  ther caller.
+  `func' is the function being inlined. `callBCOff' points to the caller's
+  FCall instruction, `retSPOff' represents what the stack offset should be
+  after the FCall instruction in the caller.
 
   This instruction is primarily used to represent a frame in the IR in a way
   that allows us to eliminate it entirely. When it cannot be eliminated (or if
   it is pushed into an unlikely path) it performs callee-side responsibilities
-  for setting up an activation record (i.e. setting the return ip and m_soff,
+  for setting up an activation record (i.e. setting the return ip and m_callOff,
   storing the frame pointer into D).
 
   The caller frame pointer is passed as S1. This is used to keep track of the
@@ -1792,7 +1792,7 @@ To string conversions:
   dead. InlineFrameStart is the caller FP-relative offset of the start of the
   callee frame. Everything below InlineFrameStart is dead.
 
-| CallUnpack<spOffset,numParams,callOff,after,funcd,destroyLocals>,
+| CallUnpack<spOffset,numParams,callOff,funcd,destroyLocals>,
 |                       DCall,
 |                       S(StkPtr) S(FramePtr),
 |                       NF
@@ -1804,14 +1804,14 @@ To string conversions:
   off the stack, pushes the elements of the array as arguments, and invokes the
   function in the ActRec.
 
-| SyncReturnBC<spOffset,bcOffset>, ND, S(StkPtr) S(FramePtr), NF
+| SyncReturnBC<spOffset,callBCOffset>, ND, S(StkPtr) S(FramePtr), NF
 
-  Stores bcOffset into the frame at spOffset from S0 as the return bytecode
+  Stores callBCOffset into the frame at spOffset from S0 as the call bytecode
   address and the frame S1 as the return frame.
 
-| Call<offset,numParams,returnOff,funcd,destroyLocals>, DCall,
-|                                                       S(StkPtr) S(FramePtr),
-|                                                       NF
+| Call<offset,numParams,callOff,funcd,destroyLocals>, DCall,
+|                                                     S(StkPtr) S(FramePtr),
+|                                                     NF
 
   Transfer control to a callee, based on the pre-live activation record and set
   of args on the stack pointed to by S0 at `offset'. S1 is the current caller
@@ -2553,15 +2553,15 @@ To string conversions:
   Store the resume address S1 into the Resumable whose ActRec is given by S0,
   marking the offset to resume at as `offset'.
 
-| ContEnter<spOffset,returnBCOffset>, DGenIter,
-|                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
-|                                     NF
+| ContEnter<spOffset,callBCOffset>, DGenIter,
+|                                   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
+|                                   NF
 
   Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
   stack, S1 is the current frame pointer, S2 is the generator frame pointer
   embedded in the Generator object, and S3 is the address to jump to. The
-  `returnBCOffset' will be stored to the m_soff field of the pre-live ActRec on
-  the stack.
+  `callBCOffset' will be stored to the m_callOff field of the ActRec in
+  the generator.
 
 | ContPreNext, ND, S(Obj) C(Bool), B
 

@@ -602,7 +602,7 @@ struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       target->fullName()->data(), "(),",
-      retBCOff, ',',
+      callBCOff, ',',
       retSPOff.offset, ',',
       spOffset.offset
     );
@@ -610,7 +610,7 @@ struct DefInlineFPData : IRExtraData {
 
   const Func* target;
   SSATmp* ctx;  // Ctx, Cls or Nullptr.
-  Offset retBCOff;
+  Offset callBCOff;
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   uint32_t numNonDefault;
@@ -618,15 +618,15 @@ struct DefInlineFPData : IRExtraData {
 };
 
 struct SyncReturnBCData : IRExtraData {
-  SyncReturnBCData(Offset bcOff, IRSPRelOffset spOff)
-    : bcOffset(bcOff)
+  SyncReturnBCData(Offset callBCOff, IRSPRelOffset spOff)
+    : callBCOffset(callBCOff)
     , spOffset(spOff)
   {}
   std::string show() const {
-    return folly::to<std::string>(bcOffset, ",", spOffset.offset);
+    return folly::to<std::string>(callBCOffset, ",", spOffset.offset);
   }
 
-  Offset bcOffset;
+  Offset callBCOffset;
   IRSPRelOffset spOffset;
 };
 
@@ -634,16 +634,14 @@ struct CallUnpackData : IRExtraData {
   explicit CallUnpackData(IRSPRelOffset spOffset,
                           uint32_t numParams,
                           uint32_t numOut,
-                          Offset pcOffset,
-                          Offset after,
+                          Offset callOffset,
                           const Func* callee,
                           bool writeLocals,
                           bool readLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
-    , pc(pcOffset)
-    , after(after)
+    , callOffset(callOffset)
     , callee(callee)
     , writeLocals(writeLocals)
     , readLocals(readLocals)
@@ -653,8 +651,7 @@ struct CallUnpackData : IRExtraData {
 
   std::string show() const {
     return folly::to<std::string>(
-      pc, ",",
-      after,
+      callOffset, ",",
       callee
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
@@ -665,8 +662,7 @@ struct CallUnpackData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numParams;
   uint32_t numOut;
-  Offset pc;     // XXX why isn't this available in the marker?
-  Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
+  Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
   const Func* callee; // nullptr if not statically known
   bool writeLocals;
   bool readLocals;
@@ -709,7 +705,7 @@ struct CallData : IRExtraData {
   explicit CallData(IRSPRelOffset spOffset,
                     uint32_t numParams,
                     uint32_t numOut,
-                    Offset after,
+                    Offset callOffset,
                     const Func* callee,
                     bool writeLocals,
                     bool readLocals,
@@ -718,7 +714,7 @@ struct CallData : IRExtraData {
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
-    , after(after)
+    , callOffset(callOffset)
     , callee(callee)
     , writeLocals(writeLocals)
     , readLocals(readLocals)
@@ -728,7 +724,7 @@ struct CallData : IRExtraData {
 
   std::string show() const {
     return folly::to<std::string>(
-      spOffset.offset, ',', numParams, ',', after,
+      spOffset.offset, ',', numParams, ',', callOffset,
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
@@ -742,7 +738,7 @@ struct CallData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   uint32_t numParams;
   uint32_t numOut;     // number of values returned via stack from the callee
-  Offset after;        // m_soff style: offset from func->base()
+  Offset callOffset;   // m_callOff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool writeLocals;
   bool readLocals;
@@ -1340,20 +1336,20 @@ struct GeneratorState : IRExtraData {
 };
 
 struct ContEnterData : IRExtraData {
-  explicit ContEnterData(IRSPRelOffset spOffset, Offset returnBCOffset,
+  explicit ContEnterData(IRSPRelOffset spOffset, Offset callBCOffset,
                          bool isAsync)
     : spOffset(spOffset)
-    , returnBCOffset(returnBCOffset)
+    , callBCOffset(callBCOffset)
     , isAsync(isAsync)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(spOffset.offset, ',', returnBCOffset,
+    return folly::to<std::string>(spOffset.offset, ',', callBCOffset,
                                   isAsync ? ",async" : "");
   }
 
   IRSPRelOffset spOffset;
-  Offset returnBCOffset;
+  Offset callBCOffset;
   bool isAsync;
 };
 

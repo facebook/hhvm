@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -343,7 +344,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       }
       Unit* destUnit = caller->func()->unit();
       // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
+      vmpc() = skipCall(destUnit->at(caller->m_func->base() + ar->m_callOff));
       if (ar->isAsyncEagerReturn()) {
         // When returning to the interpreted FCall, the execution continues at
         // the next opcode, not honoring the request for async eager return.
@@ -369,8 +370,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       auto fp = vmfp();
       auto caller = fp->func();
       assertx(g_unwind_rds.isInit());
-      vmpc() = caller->unit()->at(caller->base() +
-                                  g_unwind_rds->debuggerReturnOff);
+      vmpc() = skipCall(caller->unit()->at(caller->base() +
+                                           g_unwind_rds->debuggerCallOff));
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
              vmpc(), fp->func()->fullName()->data());
       sk = liveSK();

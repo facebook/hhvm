@@ -539,13 +539,12 @@ void emitCreateCont(IRGS& env) {
 }
 
 void emitContEnter(IRGS& env) {
-  auto const returnOffset = nextBcOff(env);
   assertx(curClass(env));
   assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
           curClass(env)->classof(Generator::getClass()));
-  assertx(curFunc(env)->contains(returnOffset));
 
-  auto isAsync = curClass(env)->classof(AsyncGenerator::getClass());
+  auto const callBCOffset = bcOff(env) - curFunc(env)->base();
+  auto const isAsync = curClass(env)->classof(AsyncGenerator::getClass());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
   auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
@@ -558,11 +557,10 @@ void emitContEnter(IRGS& env) {
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
-  auto returnBcOffset = returnOffset - curFunc(env)->base();
   auto const retVal = gen(
     env,
     ContEnter,
-    ContEnterData { spOffBCFromIRSP(env), returnBcOffset, isAsync },
+    ContEnterData { spOffBCFromIRSP(env), callBCOffset, isAsync },
     sp(env),
     fp(env),
     genFp,

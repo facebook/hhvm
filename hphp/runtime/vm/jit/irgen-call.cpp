@@ -1693,7 +1693,6 @@ void emitFCall(IRGS& env,
       fca.numArgs + 1,
       fca.numRets - 1,
       bcOff(env),
-      nextBcOff(env),
       callee,
       writeLocals,
       readLocals
@@ -1716,7 +1715,7 @@ void emitFCall(IRGS& env,
         spOffBCFromIRSP(env),
         fca.numArgs,
         fca.numRets - 1,
-        nextBcOff(env) - curFunc(env)->base(),
+        bcOff(env) - curFunc(env)->base(),
         callee,
         writeLocals,
         readLocals,
@@ -1784,7 +1783,7 @@ void emitFCall(IRGS& env,
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args) {
-  auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
+  auto const callBcOffset = bcOff(env) - curFunc(env)->base();
 
   env.irb->fs().setFPushOverride(Op::FPushFuncD);
   fpushActRec(
@@ -1810,7 +1809,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
       spOffBCFromIRSP(env),
       static_cast<uint32_t>(numParams),
       0,
-      returnBcOffset,
+      callBcOffset,
       callee,
       funcWritesLocals(callee),
       funcReadsLocals(callee),

@@ -405,7 +405,7 @@ static void sync_regstate_to_caller(ActRec* preLive) {
     ? ec->m_nestedVMs.back().fp
     : preLive->m_sfp;
   regs.fp = fp;
-  regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_soff);
+  regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_callOff);
   regs.jitReturnAddr = (TCA)preLive->m_savedRip;
 
   tl_regState = VMRegState::CLEAN;

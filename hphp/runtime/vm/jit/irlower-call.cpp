@@ -113,6 +113,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<Call>();
   auto const callee = extra->callee;
   auto const argc = extra->numParams;
+  auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
   auto& v = vmain(env);
   auto& vc = vcold(env);
@@ -124,7 +125,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const target = getCallTarget(env, inst, sp);
 
   v << store{fp, calleeAR + AROFF(m_sfp)};
-  v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
+  v << storeli{callOff, calleeAR + AROFF(m_callOff)};
 
   if (extra->asyncEagerReturn) {
     v << orlim{
@@ -255,9 +256,8 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
   }
 
   auto const target = tc::ustubs().fcallUnpackHelper;
-  auto const pc = v.cns(extra->pc);
-  auto const after = v.cns(extra->after);
-  auto const args = v.makeTuple({pc, after, v.cns(extra->numParams)});
+  auto const callOff = v.cns(extra->callOffset);
+  auto const args = v.makeTuple({callOff, v.cns(extra->numParams)});
 
   auto const done = v.makeBlock();
   v << vcallunpack{target, fcall_unpack_regs(), args,

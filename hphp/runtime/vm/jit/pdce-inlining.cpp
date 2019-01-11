@@ -501,16 +501,16 @@ void adjustFrame(IRUnit& unit,
   if (!inst.is(Call)) return;
   /*
    * At various points we may walk the rbp chain to do such things as generate
-   * backtraces. Occasionally we look at m_soff and expect it to refer to
+   * backtraces. Occasionally we look at m_callOff and expect it to refer to
    * an offset in m_sfp->m_func, which won't be the case if we've dropped frames
-   * for inlining. To avoid this problem we update the return BC offset to refer
+   * for inlining. To avoid this problem we update the call BC offset to refer
    * to the outer frame and fix it up in the catch trace when we restore the
    * rbp chain.
    */
   auto extra = inst.extra<Call>();
-  auto const after = extra->after;
+  auto const callOffset = extra->callOffset;
   auto const sk = findCallSK(*oldFp->inst());
-  extra->after = sk.advanced().offset() - sk.func()->base();
+  extra->callOffset = sk.offset() - sk.func()->base();
 
   auto catchBlock = inst.taken();
   assertx(catchBlock && catchBlock->isCatch());
@@ -537,7 +537,7 @@ void adjustFrame(IRUnit& unit,
   auto syncInst = unit.gen(
     SyncReturnBC,
     it->bcctx(),
-    SyncReturnBCData{after, extra->spOffset + extra->numParams},
+    SyncReturnBCData{callOffset, extra->spOffset + extra->numParams},
     inst.src(0),
     def->dst()
   );

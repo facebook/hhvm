@@ -580,22 +580,6 @@ const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
   }
 }
 
-const FPIEnt* Func::findPrecedingFPI(Offset o) const {
-  assertx(o >= base() && o < past());
-  const FPIEntVec& fpitab = shared()->m_fpitab;
-  assertx(fpitab.size());
-  const FPIEnt* fe = 0;
-  for (unsigned i = 0; i < fpitab.size(); i++) {
-    const FPIEnt* cur = &fpitab[i];
-    if (o > cur->m_fpiEndOff &&
-        (!fe || fe->m_fpiEndOff < cur->m_fpiEndOff)) {
-      fe = cur;
-    }
-  }
-  assertx(fe);
-  return fe;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.

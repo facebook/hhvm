@@ -128,7 +128,7 @@ ActRec* initBTContextAt(
     auto prevFp = &ctx.fakeAR[0];
     auto ifr = jit::getInlineFrame(stk->frame);
     ctx.inlineStack = *stk;
-    prevFp->m_soff = ifr.soff;
+    prevFp->m_callOff = ifr.callOff;
     prevFp->m_func = ifr.func;
 
     ctx.stashedAR = fp;
@@ -136,7 +136,7 @@ ActRec* initBTContextAt(
     ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
     if (prevPc) {
       ctx.stashedPC = *prevPc;
-      *prevPc = stk->soff + ifr.func->base();
+      *prevPc = stk->callOff + ifr.func->base();
     }
     return prevFp;
   }
@@ -156,12 +156,12 @@ ActRec* getPrevActRec(
 
     auto prevFp = fp->m_sfp;
     auto ifr = jit::getInlineFrame(ctx.inlineStack.frame);
-    prevFp->m_soff = ifr.soff;
+    prevFp->m_callOff = ifr.callOff;
     prevFp->m_func = ifr.func;
 
     ctx.inlineStack.frame = ifr.parent;
     ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
-    if (prevPc) *prevPc = fp->m_soff + ifr.func->base();
+    if (prevPc) *prevPc = fp->m_callOff + ifr.func->base();
     return prevFp;
   }
 
@@ -349,24 +349,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
       assertx(prevFile);
       frame.set(s_file, Variant{const_cast<StringData*>(prevFile)});
-
-      // In the normal method case, the "saved pc" for line number printing is
-      // pointing at the cell conversion (Unbox/Pop) instruction, not the call
-      // itself. For multi-line calls, this instruction is associated with the
-      // subsequent line which results in an off-by-n. We're subtracting one
-      // in order to look up the line associated with the FCall instruction.
-      // Exception handling and the other opcodes (ex. BoxR) already do the
-      // right thing. The emitter associates object access with the subsequent
-      // expression and this would be difficult to modify.
-      auto const opAtPrevPc = prevUnit->getOp(prevPc);
-      Offset pcAdjust = 0;
-      if (opAtPrevPc == Op::PopR ||
-          opAtPrevPc == Op::UnboxR ||
-          opAtPrevPc == Op::UnboxRNop) {
-        pcAdjust = 1;
-      }
-      frame.set(s_line,
-                prevFp->func()->unit()->getLineNumber(prevPc - pcAdjust));
+      frame.set(s_line, prevFp->func()->unit()->getLineNumber(prevPc));
     }
 
     // Check for include.
@@ -710,15 +693,8 @@ Array CompactTrace::Key::extract() const {
       }
 
       auto const prevPc = prev->prevPc;
-      auto const opAtPrevPc = prevUnit->getOp(prevPc);
-      Offset pcAdjust = 0;
-      if (opAtPrevPc == Op::PopR ||
-          opAtPrevPc == Op::UnboxR ||
-          opAtPrevPc == Op::UnboxRNop) {
-        pcAdjust = 1;
-      }
       frame.set(s_file, StrNR(prevFile).asString());
-      frame.set(s_line, prevUnit->getLineNumber(prevPc - pcAdjust));
+      frame.set(s_line, prevUnit->getLineNumber(prevPc));
     }
 
     auto const f = m_frames[idx].func;

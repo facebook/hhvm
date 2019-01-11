@@ -58,7 +58,7 @@ IFrameID insertFrames(const std::vector<IFrame>& frames) {
 
   for (IFrameID i = 0; i < frames.size(); ++i) {
     auto& f = frames[i];
-    auto newFrame = IFrame{f.func, f.soff, f.parent + start};
+    auto newFrame = IFrame{f.func, f.callOff, f.parent + start};
     s_inlineFrames.exchange(start + i, newFrame);
   }
 

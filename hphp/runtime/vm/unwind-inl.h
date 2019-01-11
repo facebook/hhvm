@@ -93,9 +93,8 @@ inline void exception_handler(Action action) {
        * details.
        */
       auto const outer = fp->m_sfp;
-      auto const off = outer->func()->base() + fp->m_soff;
-      auto const fe = outer->func()->findPrecedingFPI(off);
-      vmpc() = outer->func()->unit()->at(fe->m_fpiEndOff);
+      auto const off = outer->func()->base() + fp->m_callOff;
+      vmpc() = outer->func()->unit()->at(off);
       assertx(isFCallStar(peek_op(vmpc())));
       vmfp() = outer;
       assertx(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());

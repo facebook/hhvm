@@ -1165,24 +1165,43 @@ X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+bool instrIsVMCall(Op opcode) {
+  switch (opcode) {
+    case OpContEnter:
+    case OpContEnterDelegate:
+    case OpContRaise:
+    case OpEval:
+    case OpFCall:
+    case OpIncl:
+    case OpInclOnce:
+    case OpReq:
+    case OpReqDoc:
+    case OpReqOnce:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool instrMayVMCall(Op opcode) {
+  return instrIsVMCall(opcode) || opcode == OpIdx;
+}
+
+}
+
 bool instrIsNonCallControlFlow(Op opcode) {
-  if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
+  if (!instrIsControlFlow(opcode) || instrIsVMCall(opcode)) return false;
 
   switch (opcode) {
     case OpAwait:
     case OpAwaitAll:
     case OpYield:
     case OpYieldK:
-    case OpContEnter:
-    case OpContRaise:
-    case OpContEnterDelegate:
     case OpYieldFromDelegate:
     case OpFCallBuiltin:
-    case OpIncl:
-    case OpInclOnce:
-    case OpReq:
-    case OpReqOnce:
-    case OpReqDoc:
       return false;
 
     default:
@@ -1198,6 +1217,11 @@ bool instrAllowsFallThru(Op opcode) {
 bool instrReadsCurrentFpi(Op opcode) {
   InstrFlags opFlags = instrFlags(opcode);
   return (opFlags & FF) != 0;
+}
+
+PC skipCall(PC callPC) {
+  assertx(instrMayVMCall(peek_op(callPC)));
+  return callPC + instrLen(callPC);
 }
 
 ImmVector getImmVector(PC opcode) {

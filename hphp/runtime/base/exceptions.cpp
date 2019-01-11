@@ -248,15 +248,7 @@ namespace {
       for (auto& f : bt->frames()) {
         if (!f.func || f.func->isBuiltin()) continue;
 
-        auto const opAtPrevPc = f.func->unit()->getOp(f.prevPc);
-        Offset pcAdjust = 0;
-        if (opAtPrevPc == Op::PopR ||
-            opAtPrevPc == Op::UnboxR ||
-            opAtPrevPc == Op::UnboxRNop) {
-          pcAdjust = 1;
-        }
-
-        auto const ln = f.func->unit()->getLineNumber(f.prevPc - pcAdjust);
+        auto const ln = f.func->unit()->getLineNumber(f.prevPc);
         tvSetIgnoreRef(
           make_tv<KindOfInt64>(ln),
           throwable->propLvalAtOffset(s_lineIdx)

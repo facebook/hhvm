@@ -81,14 +81,14 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const extra = inst->extra<ContEnter>();
   auto const spOff = extra->spOffset;
-  auto const returnOff = extra->returnBCOffset;
+  auto const callOff = extra->callBCOffset;
 
   auto& v = vmain(env);
 
   auto const next = v.makeBlock();
 
   v << store{fp, genFP[AROFF(m_sfp)]};
-  v << storeli{returnOff, genFP[AROFF(m_soff)]};
+  v << storeli{callOff, genFP[AROFF(m_callOff)]};
 
   v << copy{genFP, fp};
   auto const sync_sp = v.makeReg();

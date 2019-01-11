@@ -217,7 +217,7 @@ FCallHelperRet fcallHelper(ActRec* ar) {
 
   try {
     VMRegAnchor _(ar);
-    if (doFCall(ar, vmpc(), ar->numArgs(), false)) {
+    if (doFCall(ar, ar->numArgs(), false)) {
       return { tc::ustubs().resumeHelperRet, nullptr };
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs
@@ -455,10 +455,10 @@ void loadGenFrame(Vout& v, Vreg d) {
 }
 
 void debuggerRetImpl(Vout& v, Vreg ar) {
-  auto const soff = v.makeReg();
+  auto const callOff = v.makeReg();
 
-  v << loadl{ar[AROFF(m_soff)], soff};
-  v << storel{soff, rvmtl()[unwinderDebuggerReturnOffOff()]};
+  v << loadl{ar[AROFF(m_callOff)], callOff};
+  v << storel{callOff, rvmtl()[unwinderDebuggerCallOffOff()]};
   v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
 
   auto const ret = v.makeReg();
@@ -586,12 +586,10 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
     v << load{unit[Unit::bcOff()], bc};
 
     auto const pc = v.makeReg();
-    auto const next = v.makeReg();
 
     // Convert offsets into PCs, and sync the PC.
     v << addq{bc, rarg(0), pc, v.makeReg()};
     v << store{pc, rvmtl()[rds::kVmpcOff]};
-    v << addq{bc, rarg(1), next, v.makeReg()};
 
     auto const retAddr = v.makeReg();
     v << loadstubret{retAddr};
@@ -603,7 +601,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
 
     v << vinvoke{
       CallSpec::direct(helper),
-      v.makeVcallArgs({{next, rarg(2), retAddr}}),
+      v.makeVcallArgs({{pc, rarg(1), retAddr}}),
       v.makeTuple({should_continue}),
       {done, ctch},
       Fixup{},

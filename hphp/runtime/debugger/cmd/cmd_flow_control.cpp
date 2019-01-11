@@ -147,19 +147,19 @@ void CmdFlowControl::setupStepOuts() {
   assertx(!hasStepOuts());
   auto fp = vmfp();
   if (!fp) return; // No place to step out to!
-  Offset returnOffset;
+  Offset callOffset;
   bool fromVMEntry;
   while (!hasStepOuts()) {
-    fp = g_context->getPrevVMState(fp, &returnOffset, nullptr, &fromVMEntry);
+    fp = g_context->getPrevVMState(fp, &callOffset, nullptr, &fromVMEntry);
     // If we've run off the top of the stack, just return having setup no
     // step outs. This will cause cmds like Next and Out to just let the program
     // run, which is appropriate.
     if (!fp) break;
     Unit* returnUnit = fp->m_func->unit();
-    PC returnPC = returnUnit->at(returnOffset);
+    PC callPC = returnUnit->at(callOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
-          fp->m_func->fullName()->data(), returnOffset,
-          opcodeToName(peek_op(returnPC)));
+          fp->m_func->fullName()->data(), callOffset,
+          opcodeToName(peek_op(callPC)));
     // Don't step out to generated or builtin functions, keep looking.
     if (fp->m_func->line1() == 0) continue;
     if (fp->m_func->isBuiltin()) continue;
@@ -167,22 +167,22 @@ void CmdFlowControl::setupStepOuts() {
       TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
-      auto const retOp = peek_op(returnPC);
-      assertx(!isSwitch(retOp) && numSuccs(returnPC) <= 2);
+      auto const reentrantOp = peek_op(callPC);
+      assertx(!isSwitch(reentrantOp) && numSuccs(callPC) <= 2);
       // Set an internal breakpoint after the instruction if it can fall thru.
-      if (instrAllowsFallThru(retOp)) {
-        Offset nextOffset = returnOffset + instrLen(returnPC);
+      if (instrAllowsFallThru(reentrantOp)) {
+        Offset nextOffset = callOffset + instrLen(callPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->m_func->fullName()->data(), nextOffset);
         m_stepOut1 = StepDestination(returnUnit, nextOffset);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
-      if (instrIsControlFlow(retOp)) {
-        auto const targets = instrJumpTargets(returnPC, 0);
+      if (instrIsControlFlow(reentrantOp)) {
+        auto const targets = instrJumpTargets(callPC, 0);
         if (!targets.empty()) {
           assertx(targets.size() == 1);
-          Offset targetOffset = returnOffset + targets[0];
+          Offset targetOffset = callOffset + targets[0];
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
                 fp->m_func->fullName()->data(), targetOffset);
           m_stepOut2 = StepDestination(returnUnit, targetOffset);
@@ -192,6 +192,7 @@ void CmdFlowControl::setupStepOuts() {
       // again. The most common case that leads here is Ret*, which does not
       // fall-thru and has no encoded target.
     } else {
+      auto const returnOffset = returnUnit->offsetOf(skipCall(callPC));
       TRACE(2, "CmdFlowControl: step out to '%s' offset %d\n",
             fp->m_func->fullName()->data(), returnOffset);
       m_stepOut1 = StepDestination(returnUnit, returnOffset);

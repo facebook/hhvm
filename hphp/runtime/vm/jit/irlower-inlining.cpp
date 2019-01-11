@@ -62,7 +62,7 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   v << store{callerFP, ar + AROFF(m_sfp)};
   emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
                 ar + AROFF(m_savedRip));
-  v << storeli{extra->retBCOff, ar + AROFF(m_soff)};
+  v << storeli{extra->callBCOff, ar + AROFF(m_callOff)};
   if (extra->target->attrs() & AttrMayUseVV) {
     v << storeqi{0, ar + AROFF(m_invName)};
   }
@@ -149,12 +149,12 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
 void cgSyncReturnBC(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<SyncReturnBC>();
   auto const spOffset = cellsToBytes(extra->spOffset.offset);
-  auto const bcOffset = extra->bcOffset;
+  auto const callBCOffset = safe_cast<int32_t>(extra->callBCOffset);
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 1).reg();
 
   auto& v = vmain(env);
-  v << storeli{safe_cast<int32_t>(bcOffset), sp[spOffset + AROFF(m_soff)]};
+  v << storeli{callBCOffset, sp[spOffset + AROFF(m_callOff)]};
   v << store{fp, sp[spOffset + AROFF(m_sfp)]};
 }
 

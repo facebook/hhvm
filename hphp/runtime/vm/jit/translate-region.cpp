@@ -749,7 +749,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                numArgs,
                show(irgs));
 
-        auto returnSk = inst.nextSk();
         auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto asyncEagerOffset = callee->supportsAsyncEagerReturn()
@@ -757,11 +756,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         auto returnTarget = irgen::ReturnTarget {
           returnBlock, suspendRetBlock, asyncEagerOffset
         };
-        auto returnFuncOff = returnSk.offset() - block.func()->base();
+        auto callFuncOff = inst.offset() - block.func()->base();
 
         if (irgen::beginInlining(irgs, numArgs, callee,
                                  calleeRegion->start(),
-                                 returnFuncOff,
+                                 callFuncOff,
                                  returnTarget,
                                  calleeCost,
                                  false)) {

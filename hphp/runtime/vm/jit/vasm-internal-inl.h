@@ -227,12 +227,12 @@ void computeFrames(Vunit& unit);
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void Venv::record_inline_stack(TCA addr) {
-  uint32_t soff = 0;
+  uint32_t callOff = 0;
   if (origin) {
     auto const marker = origin->marker();
-    soff = marker.bcOff() - marker.func()->base();
+    callOff = marker.bcOff() - marker.func()->base();
   }
-  stacks.emplace_back(addr, IStack{frame - 1, pending_frames, soff});
+  stacks.emplace_back(addr, IStack{frame - 1, pending_frames, callOff});
 }
 
 template<class Vemit>
@@ -327,7 +327,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   // Register inline frames.
   for (auto& f : unit.frames) {
     if (f.parent == Vframe::Top) continue; // skip the top frame
-    fixups.inlineFrames.emplace_back(IFrame{f.func, f.soff, f.parent - 1});
+    fixups.inlineFrames.emplace_back(IFrame{f.func, f.callOff, f.parent - 1});
   }
 
   // Register inline stacks.

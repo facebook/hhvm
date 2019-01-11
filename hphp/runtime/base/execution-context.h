@@ -377,7 +377,7 @@ public:
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();
-  bool evalUnit(Unit* unit, PC& pc, int funcType);
+  bool evalUnit(Unit* unit, PC callPC, PC& pc, int funcType);
   TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);

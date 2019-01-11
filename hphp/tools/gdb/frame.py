@@ -181,17 +181,13 @@ def create_php(idx, ar, rip='0x????????', pc=None):
         # Builtins don't have source files.
         return frame
 
-    # Pull the PC from Func::base() and ar->m_soff if necessary.
+    # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
-        pc = shared['m_base'] + ar['m_soff']
+        pc = shared['m_base'] + ar['m_callOff']
 
     # Adjust it for calls.
     op_ptype = T('HPHP::Op').pointer()
     op = (func['m_unit']['m_bc'] + pc).cast(op_ptype).dereference()
-
-    if op in [V('HPHP::Op::' + x) for x in
-              ['PopR', 'UnboxR', 'UnboxRNop']]:
-        pc -= 1
 
     frame['file'] = php_filename(func)
     frame['line'] = php_line_number(func, pc)

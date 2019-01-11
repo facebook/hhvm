@@ -82,6 +82,7 @@ type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
 type context =
   { active_classish           : Syntax.t option
   ; active_methodish          : Syntax.t option
+  ; active_callable           : Syntax.t option
   ; active_callable_attr_spec : Syntax.t option
   (* true if active callable is reactive if it is a function or method, or there is a reactive
    * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
@@ -115,6 +116,7 @@ let make_env
     let context =
       { active_classish = None
       ; active_methodish = None
+      ; active_callable = None
       ; active_callable_attr_spec = None
       ; active_is_rx_or_enclosing_for_lambdas = false
       ; active_awaitable = None
@@ -843,26 +845,24 @@ let extract_async_node md_node =
   |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
   |> List.find ~f:is_async
 
-let get_params_and_is_async_for_first_parent_function_or_lambda parents =
-  List.find_map parents ~f:begin fun node ->
-    match syntax node with
+let get_params_for_enclosing_callable context =
+  context.active_callable |> Option.bind ~f:(fun callable ->
+    match syntax callable with
     | FunctionDeclaration { function_declaration_header = header; _ }
     | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
       begin match syntax header with
       | FunctionDeclarationHeader fdh ->
-        let is_async = List.exists ~f:is_async @@
-          syntax_to_list_no_separators fdh.function_modifiers in
-        Some (fdh.function_parameter_list, is_async)
+        Some fdh.function_parameter_list
       | _ -> None
       end
-    | LambdaExpression { lambda_signature; lambda_async; _} ->
+    | LambdaExpression { lambda_signature; _} ->
       begin match syntax lambda_signature with
       | LambdaSignature { lambda_parameters; _ } ->
-        Some (lambda_parameters, not @@ is_missing lambda_async)
+        Some lambda_parameters
       | _ -> None
       end
     | _ -> None
-    end
+    )
 
 let first_parent_function_attributes_contains parents name =
   List.exists parents ~f:begin fun node ->
@@ -891,17 +891,29 @@ let is_parameter_with_callconv param =
     not @@ is_missing variadic_parameter_call_convention
   | _ -> false
 
-let has_inout_params parents =
-  match get_params_and_is_async_for_first_parent_function_or_lambda parents with
-  | Some (function_parameter_list, _) ->
+let has_inout_params context =
+  match get_params_for_enclosing_callable context with
+  | Some function_parameter_list ->
     let params = syntax_to_list_no_separators function_parameter_list in
     List.exists params ~f:is_parameter_with_callconv
   | _ -> false
 
-let is_inside_async_method parents =
-  match get_params_and_is_async_for_first_parent_function_or_lambda parents with
-  | Some (_, is_async) -> is_async
-  | None -> false
+let is_inside_async_method context =
+  Option.value_map context.active_callable ~f:(fun node ->
+    match syntax node with
+    | FunctionDeclaration { function_declaration_header = header; _ }
+    | MethodishDeclaration { methodish_function_decl_header = header; _ } ->
+      begin match syntax header with
+      | FunctionDeclarationHeader fdh ->
+        List.exists ~f:is_async @@
+          syntax_to_list_no_separators fdh.function_modifiers
+      | _ -> false
+      end
+    | LambdaExpression { lambda_signature = { syntax = LambdaSignature _; _}
+                       ; lambda_async; _} ->
+      not @@ is_missing lambda_async
+    | _ -> false
+    ) ~default:false
 
 let make_name_already_used_error node name short_name original_location
   report_error =
@@ -1616,7 +1628,7 @@ let parameter_errors env node parents namespace_name names errors =
       check_type_hint env p.parameter_type names errors in
     let errors = if is_parameter_with_callconv node then
       begin
-        let errors = if is_inside_async_method parents then
+        let errors = if is_inside_async_method env.context then
         make_error_from_node ~error_type:SyntaxError.RuntimeError
           node SyntaxError.inout_param_in_async :: errors
         else errors in
@@ -2497,9 +2509,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | None -> make_error_from_node node SyntaxError.yield_outside_function :: errors
     in
     let errors =
-      if has_inout_params parents then
+      if has_inout_params env.context then
       let e =
-        if is_inside_async_method parents
+        if is_inside_async_method env.context
         then SyntaxError.inout_param_in_async_generator
         else SyntaxError.inout_param_in_generator in
       make_error_from_node ~error_type:SyntaxError.RuntimeError node e :: errors
@@ -3831,25 +3843,27 @@ let find_syntax_errors env =
         match syntax node with
         | ClassishDeclaration _ ->
           { env.context with active_classish = Some node }
+        | AnonymousFunction { anonymous_attribute_spec = s; _ }
+        | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
+        | LambdaExpression { lambda_attribute_spec = s; _ }
         | FunctionDeclaration { function_attribute_spec = s; _ }
         | MethodishDeclaration { methodish_attribute = s; _ } ->
           { env.context with
             active_methodish = begin match syntax node with
               | MethodishDeclaration _ -> Some node
-              | _ -> None
+              | FunctionDeclaration _ -> None  (* cannot nest functions in methods *)
+              | _ -> env.context.active_methodish  (* preserve context when entering lambdas *)
+              end;
+            active_callable = begin match syntax node with
+              | AnonymousFunction _ | Php7AnonymousFunction _ -> env.context.active_callable
+              | _ -> Some node
               end;
             active_callable_attr_spec = Some s;
-            (* For named functions, inspect the rx attribute directly. *)
-            active_is_rx_or_enclosing_for_lambdas = has_rx_attr_mutable_hack s
-          }
-        | AnonymousFunction { anonymous_attribute_spec = s; _ }
-        | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
-        | LambdaExpression { lambda_attribute_spec = s; _ } ->
-          { env.context with
-            active_callable_attr_spec = Some s;
-            (* For lambdas, use the rx status from the enclosing callable. *)
-            active_is_rx_or_enclosing_for_lambdas =
-              env.context.active_is_rx_or_enclosing_for_lambdas
+            active_is_rx_or_enclosing_for_lambdas = match syntax node with
+              (* For named functions, inspect the rx attribute directly. *)
+              | (FunctionDeclaration _ | MethodishDeclaration _) -> has_rx_attr_mutable_hack s
+              (* For lambdas, use the rx status from the enclosing callable. *)
+              | _ -> env.context.active_is_rx_or_enclosing_for_lambdas;
           }
         | AwaitableCreationExpression _ ->
           { env.context with active_awaitable = Some node }

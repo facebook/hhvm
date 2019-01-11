@@ -412,19 +412,22 @@ let do_compile filename compiler_options popt fail_or_ast debug_time for_debugge
   then log_success compiler_options filename debug_time;
   hhas
 
-let extract_facts ?pretty text =
-  let enable_hh_syntax =
-    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-  let enable_xhp =
-    Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
-
-  Facts_parser.extract_as_json
-    ~php5_compat_mode:true
-    ~hhvm_compat_mode:true
-    ~force_hh:enable_hh_syntax
-    ~enable_xhp text
+let extract_facts ?pretty ~filename text =
+  let json_facts = match Hackc_parse_delegator.extract_facts filename with
+    | Some result -> Some result
+    | None ->
+      let enable_hh_syntax =
+        Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+      let enable_xhp =
+        Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
+      Facts_parser.extract_as_json
+        ~php5_compat_mode:true
+        ~hhvm_compat_mode:true
+        ~force_hh:enable_hh_syntax
+        ~enable_xhp text
+  in
   (* return empty string if file has syntax errors *)
-  |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
+  Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty) json_facts
   |> fun x -> [x]
 
 let parse_hh_file filename body =
@@ -465,7 +468,7 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
     let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts
-      then extract_facts ~pretty:true source_text
+      then extract_facts ~pretty:true ~filename source_text
       else begin
         let fail_or_ast =
           match Hackc_parse_delegator.parse_file filename source_text with
@@ -577,9 +580,10 @@ let decl_and_run_mode compiler_options =
             if String.length body = 0
             then Sys_utils.cat filename
             else body in
+          let path = Relative_path.create Relative_path.Dummy filename in
           handle_output
-            (Relative_path.create Relative_path.Dummy filename)
-            (extract_facts body))
+            path
+            (extract_facts ~filename:path body))
             (new_debug_time ()))
         ; parse = (fun header body -> (
           let filename = get_field

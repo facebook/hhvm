@@ -8,3 +8,4 @@
  *)
 
 let parse_file _ _ = None
+let extract_facts _ = None

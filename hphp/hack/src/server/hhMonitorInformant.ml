@@ -151,23 +151,18 @@ module Revision_map = struct
             (Relative_path.to_absolute ServerConfig.filename) in
           (** Query doesn't exist yet, so we create one and consume it when
            * it's ready. *)
-          let future = begin match hhconfig_hash with
-            | None ->
-              (** Have no config file hash.
-               * Just return a fake empty list of XDB results. *)
-              Future.of_value []
-            | Some hhconfig_hash ->
-              let hh_version = if t.ignore_hh_version
-                then None
-                else Some Build_id.build_revision in
-              Xdb.find_nearest
-                ~db:Xdb.hack_db_name
-                ~db_table:Xdb.saved_states_table
-                ~svn_rev
-                ~hh_version
-                ~hhconfig_hash
-              |> fst
-          end in
+          let future =
+            let hh_version = if t.ignore_hh_version
+              then None
+              else Some Build_id.build_revision in
+            Xdb.find_nearest
+              ~db:Xdb.hack_db_name
+              ~db_table:Xdb.saved_states_table
+              ~svn_rev
+              ~hh_version
+              ~hhconfig_hash
+            |> fst
+          in
           let () = Caml.Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
           None
       in

@@ -100,7 +100,8 @@ MODULES=\
   $(INOTIFY)
 
 HEADER_DIRS=\
-  $(ROOT)/heap
+  $(ROOT)/heap\
+  $(ROOT)/utils/hashlib
 
 NATIVE_C_FILES=\
   heap/hh_assert.c\
@@ -109,6 +110,8 @@ NATIVE_C_FILES=\
   libancillary/libancillary-stubs.c\
   third-party/libancillary/fd_recv.c\
   third-party/libancillary/fd_send.c\
+  utils/hashlib/sha1c.c\
+  utils/hashlib/sha1_ocaml.c\
   utils/sys/files.c\
   utils/sys/gc_profiling.c\
   utils/sys/getrusage.c\

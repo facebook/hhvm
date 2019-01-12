@@ -67,19 +67,14 @@ let set_xdb ~state_svn_rev ~for_svn_rev ~everstore_handle  =
       assert false
   in
   let hhconfig_hash, _config = Config_file.parse "/tmp/.hhconfig" in
-  match hhconfig_hash with
-  | None ->
-    Printf.eprintf "Error: Failed to get hash of config file. Cannot continue.\n";
-    assert false
-  | Some hhconfig_hash ->
-    let result = {
-      Xdb.svn_rev = state_svn_rev;
-      hg_hash;
-      everstore_handle;
-      hh_version;
-      hhconfig_hash;
-    } in
-    let result = Future.of_value [result] in
-    Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
-      ~db_table:Xdb.saved_states_table
-      ~svn_rev:for_svn_rev ~hh_version:(Some hh_version) result
+  let result = {
+    Xdb.svn_rev = state_svn_rev;
+    hg_hash;
+    everstore_handle;
+    hh_version;
+    hhconfig_hash;
+  } in
+  let result = Future.of_value [result] in
+  Xdb.Mocking.find_nearest_returns ~db:Xdb.hack_db_name
+    ~db_table:Xdb.saved_states_table
+    ~svn_rev:for_svn_rev ~hh_version:(Some hh_version) result

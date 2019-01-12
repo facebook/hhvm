@@ -814,7 +814,7 @@ String resolveVmInclude(StringData* path,
 }
 
 Unit* checkPhpUnits(Unit* unit) {
-  if (UNLIKELY(!RuntimeOption::EnablePHP) && !unit->isHHFile()) {
+  if (UNLIKELY(!RuntimeOption::EnablePHP) && unit && !unit->isHHFile()) {
     throw PhpNotSupportedException(unit->filepath()->data());
   }
   return unit;

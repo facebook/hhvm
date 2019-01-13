@@ -186,25 +186,25 @@ ALWAYS_INLINE bool MaybeCountable::hasMultipleRefs() const {
 }
 
 ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
-  assertx(checkCount());
+  assertx(checkCountZ());
   if (one_bit_refcount) return m_count != OneReference;
 
   return m_count > 1;
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasExactlyOneRef() const {
-  assertx(checkCount());
+  assertx(checkCountZ());
   return m_count == OneReference;
 }
 
 ALWAYS_INLINE bool MaybeCountable::hasZeroRefs() const {
-  assertx(checkCount());
+  assertx(checkCountZ());
   if (one_bit_refcount) return false;
   return m_count == 0;
 }
 
 ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {
-  assertx(checkCount());
+  assertx(checkCountZ());
   return m_count == OneReference;
 }
 

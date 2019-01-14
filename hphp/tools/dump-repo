@@ -11,9 +11,9 @@ repo=$1
 pattern=$2
 
 if [[ -n $DUMP_HHAS ]] ; then
-    dump_what=-vEval.DumpHhas=1
+    dump_what=-vEval.DumpHhas="${DUMP_LEVEL:-1}"
 else
-    dump_what=-vEval.DumpBytecode=1
+    dump_what=-vEval.DumpBytecode="${DUMP_LEVEL:-1}"
 fi
 
 table=$(sqlite3 $repo ".tables 'FileMd5%'")

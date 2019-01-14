@@ -2649,11 +2649,9 @@ let invalid_move_use pos1 =
   add (Typing.err_code Typing.InvalidMoveUse) pos1
   ("move takes a single mutably-owned local variable as an argument")
 
-let mismatched_reify (def_pos, def_name) arg_pos arg_reified arg_index =
-  let arg_msg = "The type argument at index " ^ (string_of_int arg_index) ^ " is" ^
-    (if arg_reified then "" else " not") ^ " reified" in
-  let def_msg = "Its definition " ^ def_name ^ " is" ^
-    (if arg_reified then " not" else "") in
+let mismatched_reify (def_pos, def_name) arg_pos arg_index =
+  let arg_msg = "The type argument at index " ^ (string_of_int arg_index) ^ " is not reified" in
+  let def_msg = "Its definition " ^ def_name ^ " is reified" in
   add_list (Typing.err_code Typing.MismatchedReify) [
     arg_pos, arg_msg;
     def_pos, def_msg

@@ -6,10 +6,10 @@ class Reified<reify Tr> {}
 
 function Erased_keywordCheck(): void {
   new Erased<Erased>();
-  new Erased<reify Erased>(); // bad
+  new Erased<reify Erased>(); // relaxed restriction for migration
 
   new Erased<Reified<int>>();
-  new Erased<reify Reified<int>>(); // bad
+  new Erased<reify Reified<int>>(); // relaxed restriction for migration
 }
 
 function Reified_keywordCheck(): void {

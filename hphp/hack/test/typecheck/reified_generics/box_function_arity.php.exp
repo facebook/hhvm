@@ -3,4 +3,4 @@ The type C expects 2 type parameter(s) (Typing[4101])
 File "box_function_arity.php", line 13, characters 5-26:
 The type argument at index 0 is not reified (Typing[4302])
   File "box_function_arity.php", line 5, characters 18-18:
-  Its definition T is
+  Its definition T is reified

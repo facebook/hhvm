@@ -11,12 +11,23 @@ open Core_kernel
 open Tast
 open Typing_defs
 
-let match_reified i (tp, ((targ_pos, _), targ_reified)) =
-  if (tp.tp_reified <> targ_reified) then
-    Errors.mismatched_reify tp.tp_name targ_pos targ_reified i
+let is_soft_reified tparam =
+  List.exists tparam.tp_user_attributes ~f:(fun { Nast.ua_name = (_, n); _ } ->
+    Naming_special_names.UserAttributes.uaSoft = n
+  )
+
+let tparams_has_reified tparams =
+  List.exists ~f:(fun t -> t.tp_reified && not (is_soft_reified t)) tparams
+
+let match_reified i (tparam, targ) =
+  let { tp_reified; tp_name; _ } = tparam in
+  let (targ_pos, _), targ_reified = targ in
+  if (tp_reified && not (is_soft_reified tparam) && not targ_reified) then
+    Errors.mismatched_reify tp_name targ_pos i
 
 let verify_targs expr_pos decl_pos targs tparams =
-  if List.exists ~f:(fun t -> t.tp_reified) tparams && List.is_empty targs then
+  if tparams_has_reified tparams &&
+     List.is_empty targs then
     Errors.require_args_reify decl_pos expr_pos;
   (* Unequal_lengths case handled elsewhere *)
   ignore Option.(
@@ -53,7 +64,7 @@ let handler = object
         then begin
           if targs_length <> 0
           then Errors.type_arity pos class_id (string_of_int tparams_length)
-          else if List.exists ~f:(fun t -> t.tp_reified) tparams then
+          else if tparams_has_reified tparams then
             Errors.require_args_reify (Typing_classes_heap.pos tc) pos end
       | None -> ()
       end

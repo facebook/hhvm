@@ -89,6 +89,8 @@ type context =
   ; active_is_rx_or_enclosing_for_lambdas : bool
   ; active_awaitable          : Syntax.t option
   ; active_const              : Syntax.t option
+  (* Named (not anonymous) namespaces that the current expression is enclosed within. *)
+  ; nested_namespaces         : Syntax.t list
 }
 
 type env =
@@ -122,6 +124,7 @@ let make_env
       ; active_is_rx_or_enclosing_for_lambdas = false
       ; active_awaitable = None
       ; active_const = None
+      ; nested_namespaces = []
       } in
     { syntax_tree
     ; level
@@ -1445,14 +1448,6 @@ let is_hashbang text =
     let count = List.length @@ String_utils.split_on_newlines text in
     count = 1 && Str.string_match r text 0 && Str.matched_string text = text
 
-
-let is_in_namespace parents =
-  List.exists parents ~f:(fun node ->
-    match syntax node with
-    | NamespaceDeclaration {namespace_name; _}
-      when not @@ is_missing namespace_name && text namespace_name <> "" -> true
-    | _ -> false)
-
 let class_has_a_construct_method context =
   match first_parent_classish_node TokenKind.Class context with
   | Some ({ syntax = ClassishDeclaration
@@ -1477,7 +1472,7 @@ let is_in_construct_method parents context =
   | Some s, _ when String.lowercase s = SN.Members.__construct -> true
   (* Function name is same as class name *)
   | Some s1, Some s2 ->
-    not @@ is_in_namespace parents &&
+    context.nested_namespaces = [] &&
     not @@ class_has_a_construct_method context &&
     String.lowercase s1 = String.lowercase s2
   | _ -> false
@@ -3861,6 +3856,11 @@ let find_syntax_errors env =
           { env.context with active_awaitable = Some node }
         | ConstDeclaration _ ->
           { env.context with active_const = Some node }
+        | NamespaceDeclaration { namespace_name; _ }
+          when not @@ is_missing namespace_name && text namespace_name <> "" ->
+          { env.context with
+            nested_namespaces = node :: env.context.nested_namespaces;
+          }
         | _ -> env.context
       } in
     let names, errors =

@@ -745,15 +745,13 @@ let extract_function_name header_node =
 
 (* Return, as a string opt, the name of the function with the earliest
  * declaration node in the list of parents. *)
-let first_parent_function_name parents =
-  List.find_map parents ~f:begin fun node ->
-    match syntax node with
-    | FunctionDeclaration {function_declaration_header = header; _ }
-    | MethodishDeclaration {methodish_function_decl_header = header; _ } ->
-      extract_function_name header
-    | _ -> None
-  end
-
+let first_parent_function_name context =
+  (* Note: matching on either is sound because functions and/or methods cannot be nested *)
+  match context.active_methodish with
+  | Some { syntax = FunctionDeclaration { function_declaration_header = header; _ }; _ }
+  | Some { syntax = MethodishDeclaration { methodish_function_decl_header = header; _ }; _ }
+    -> extract_function_name header
+  | _ -> None
 
 (* Given a particular TokenKind.(Trait/Interface), tests if a given
  * classish_declaration node is both of that kind and declared abstract. *)
@@ -866,23 +864,21 @@ let get_params_for_enclosing_callable context =
     | _ -> None
     )
 
-let first_parent_function_attributes_contains parents name =
-  List.exists parents ~f:begin fun node ->
-    match syntax node with
-    | FunctionDeclaration { function_attribute_spec = {
-        syntax = AttributeSpecification {
-          attribute_specification_attributes; _ }; _ }; _ }
-    | MethodishDeclaration { methodish_attribute = {
-        syntax = AttributeSpecification {
-          attribute_specification_attributes; _ }; _ }; _ } ->
+let first_parent_function_attributes_contains context name =
+  match context.active_methodish with
+  | Some { syntax = FunctionDeclaration { function_attribute_spec = {
+      syntax = AttributeSpecification {
+        attribute_specification_attributes; _ }; _ }; _ }; _ }
+  | Some { syntax = MethodishDeclaration { methodish_attribute = {
+      syntax = AttributeSpecification {
+        attribute_specification_attributes; _ }; _ }; _ }; _ }
+    ->
       let attrs =
         syntax_to_list_no_separators attribute_specification_attributes in
       List.exists attrs
         ~f:(function { syntax = ConstructorCall { constructor_call_type; _}; _} ->
           text constructor_call_type = name | _ -> false)
-    | _ -> false
-    end
-
+  | _ -> false
 let is_parameter_with_callconv param =
   match syntax param with
   | ParameterDeclaration { parameter_call_convention; _ } ->
@@ -1240,13 +1236,13 @@ let function_multiple_reactivity_annotations node =
     attribute_multiple_reactivity_annotations attr_spec
   | _ -> false
 
-let function_declaration_header_memoize_lsb parents errors =
-  let node = List.hd_exn parents in
-  if function_declaration_contains_attribute node SN.UserAttributes.uaMemoizeLSB
-  then
+let function_declaration_header_memoize_lsb context errors =
+  match context.active_methodish, context.active_classish with
+  | Some node, None  (* a function, not a method *)
+    when function_declaration_contains_attribute node SN.UserAttributes.uaMemoizeLSB ->
     let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_method
     in e :: errors
-  else errors
+  | _ -> errors
 
 let special_method_param_errors node context errors =
   match syntax node with
@@ -1291,23 +1287,21 @@ let special_method_param_errors node context errors =
     errors
   | _ -> errors
 
-let is_in_reified_class parents =
-  List.exists parents ~f:(fun node ->
-    match syntax node with
-    | ClassishDeclaration {
+let is_in_reified_class context =
+  match context.active_classish with
+  | Some { syntax = ClassishDeclaration {
       classish_type_parameters = {
         syntax = TypeParameters {
-          type_parameters_parameters = l; _ }; _}; _ } ->
+          type_parameters_parameters = l; _ }; _}; _ }; _ } ->
       syntax_to_list_no_separators l
       |> List.exists ~f:(fun p ->
           match syntax p with
           | TypeParameter { type_reified; _} -> not @@ is_missing type_reified
           | _ -> false
          )
-    | _ -> false
-  )
+  | _ -> false
 
-let methodish_errors env node parents errors =
+let methodish_errors env node errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
@@ -1319,7 +1313,7 @@ let methodish_errors env node parents errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
       node env.context SyntaxError.error2010 function_parameter_list in
     let errors =
-      function_declaration_header_memoize_lsb parents errors in
+      function_declaration_header_memoize_lsb env.context errors in
     errors
   | FunctionDeclaration fd ->
     let function_attrs = fd.function_attribute_spec in
@@ -1476,7 +1470,7 @@ let class_has_a_construct_method context =
   | _ -> false
 
 let is_in_construct_method parents context =
-  match first_parent_function_name parents, first_parent_class_name context with
+  match first_parent_function_name context, first_parent_class_name context with
   | _ when is_immediately_in_lambda parents -> false
   | None, _ -> false
   (* Function name is __construct *)
@@ -1640,9 +1634,9 @@ let parameter_errors env node parents namespace_name names errors =
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
         let inMemoize = first_parent_function_attributes_contains
-          parents SN.UserAttributes.uaMemoize in
+          env.context SN.UserAttributes.uaMemoize in
         let inMemoizeLSB = first_parent_function_attributes_contains
-          parents SN.UserAttributes.uaMemoizeLSB in
+          env.context SN.UserAttributes.uaMemoizeLSB in
         let errors = if (inMemoize || inMemoizeLSB) &&
               not @@ is_immediately_in_lambda parents then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
@@ -1842,8 +1836,8 @@ let invalid_shape_field_check env node errors =
     invalid_shape_initializer_name env field_initializer_name errors
   | _ -> make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
 
-let is_in_unyieldable_magic_method parents =
-  match first_parent_function_name parents with
+let is_in_unyieldable_magic_method context =
+  match first_parent_function_name context with
   | None -> false
   | Some s ->
     let s = String.lowercase s in
@@ -2503,7 +2497,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | YieldFromExpression _
   | YieldExpression _ ->
     let errors =
-      if is_in_unyieldable_magic_method parents then
+      if is_in_unyieldable_magic_method env.context then
       make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
       else errors in
     let errors = match env.context.active_callable_attr_spec with
@@ -2773,7 +2767,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | VariableExpression { variable_expression } when
     env.is_hh_file &&
     String.lowercase (text variable_expression) = SN.SpecialIdents.this ->
-    if List.exists parents methodish_contains_static
+    if Option.exists env.context.active_methodish ~f:methodish_contains_static
     then make_error_from_node node SyntaxError.this_in_static :: errors
     else errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
@@ -2873,7 +2867,7 @@ let reified_parameter_errors node errors =
           type_parameters_parameters errors
   | _ -> errors
 
-let class_reified_param_errors node parents errors =
+let class_reified_param_errors env node errors =
   match syntax node with
   | ClassishDeclaration cd ->
     let reified_params, errors = match syntax cd.classish_type_parameters with
@@ -2904,7 +2898,7 @@ let class_reified_param_errors node parents errors =
       | _ -> errors in
     errors
   | PropertyDeclaration _ ->
-    if methodish_contains_static node && is_in_reified_class parents then
+    if methodish_contains_static node && is_in_reified_class env.context then
       make_error_from_node node SyntaxError.static_property_in_reified_class
       :: errors else errors
   | _ -> errors
@@ -3836,7 +3830,8 @@ let find_syntax_errors env =
         } = acc in
     let env =
       { env with context =
-        match syntax node with
+        let node_syntax = syntax node in
+        match node_syntax with
         | ClassishDeclaration _ ->
           { env.context with active_classish = Some node }
         | AnonymousFunction { anonymous_attribute_spec = s; _ }
@@ -3844,22 +3839,23 @@ let find_syntax_errors env =
         | LambdaExpression { lambda_attribute_spec = s; _ }
         | FunctionDeclaration { function_attribute_spec = s; _ }
         | MethodishDeclaration { methodish_attribute = s; _ } ->
+          let active_methodish, active_is_rx_or_enclosing_for_lambdas = match node_syntax with
+            | FunctionDeclaration _ | MethodishDeclaration _ ->  (* named functions *)
+              ( Some node  (* a _single_ variable suffices as they cannot be nested *)
+              , has_rx_attr_mutable_hack s  (* inspect the rx attribute directly. *)
+              )
+            | _ ->
+              (* preserve context when entering lambdas (and anonymous functions) *)
+              env.context.active_methodish, env.context.active_is_rx_or_enclosing_for_lambdas
+            in
           { env.context with
-            active_methodish = begin match syntax node with
-              | MethodishDeclaration _ -> Some node
-              | FunctionDeclaration _ -> None  (* cannot nest functions in methods *)
-              | _ -> env.context.active_methodish  (* preserve context when entering lambdas *)
-              end;
+            active_methodish = active_methodish;
             active_callable = begin match syntax node with
               | AnonymousFunction _ | Php7AnonymousFunction _ -> env.context.active_callable
               | _ -> Some node
               end;
             active_callable_attr_spec = Some s;
-            active_is_rx_or_enclosing_for_lambdas = match syntax node with
-              (* For named functions, inspect the rx attribute directly. *)
-              | (FunctionDeclaration _ | MethodishDeclaration _) -> has_rx_attr_mutable_hack s
-              (* For lambdas, use the rx status from the enclosing callable. *)
-              | _ -> env.context.active_is_rx_or_enclosing_for_lambdas;
+            active_is_rx_or_enclosing_for_lambdas = active_is_rx_or_enclosing_for_lambdas;
           }
         | AwaitableCreationExpression _ ->
           { env.context with active_awaitable = Some node }
@@ -3885,7 +3881,7 @@ let find_syntax_errors env =
         let names, errors =
           redeclaration_errors env node parents namespace_name names errors in
         let errors =
-          methodish_errors env node parents errors in
+          methodish_errors env node errors in
         trait_require_clauses, names, errors
       | FunctionCallWithTypeArgumentsExpression _ ->
         let errors = reified_function_call_errors node errors in
@@ -3931,7 +3927,7 @@ let find_syntax_errors env =
       | ClassishDeclaration _ ->
         let names, errors =
           classish_errors env node parents namespace_name names errors in
-        let errors = class_reified_param_errors node parents errors in
+        let errors = class_reified_param_errors env node errors in
         trait_require_clauses, names, errors
       | ConstDeclaration _ ->
         let errors =
@@ -3959,7 +3955,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | PropertyDeclaration _ ->
         let errors = class_property_visibility_errors env node errors in
-        let errors = class_reified_param_errors node parents errors in
+        let errors = class_reified_param_errors env node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

@@ -1,2 +1,2 @@
 -vEval.HackArrCompatNotices=1
--vEval.HackArrCompatPromoteNotices=1
+-vEval.HackArrCompatCheckVarrayPromote=true

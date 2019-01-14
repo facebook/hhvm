@@ -15,10 +15,16 @@ function test_literal() {
   var_dump(is_varray($x));
 }
 
+function test_promotion() {
+  $x = varray[];
+  $x['foo'] = 'bar';
+}
+
 
 <<__EntryPoint>>
 function main_implicit_append() {
-$x = test(varray[], 0) |> test($$, 1) |> test($$, 2);
-var_dump(is_varray($x));
-test_literal();
+  $x = test(varray[], 0) |> test($$, 1) |> test($$, 2);
+  var_dump(is_varray($x));
+  test_literal();
+  test_promotion();
 }

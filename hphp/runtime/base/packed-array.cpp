@@ -122,7 +122,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   assertx(checkInvariants(old));
 
   if (promotion &&
-      UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
+      UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
       old->isVArray()) {
     raise_hackarr_compat_notice("varray promoting to darray");
   }
@@ -706,7 +706,7 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
   }
 
   if (size_t(k) == adIn->getSize()) {
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatPromoteNotices) &&
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend) &&
         adIn->isVArray()) {
       raise_hackarr_compat_notice("Implicit append to varray");
     }

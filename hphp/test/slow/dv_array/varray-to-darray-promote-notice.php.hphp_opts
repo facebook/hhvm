@@ -1,2 +1,2 @@
 -vRuntime.Eval.HackArrCompatNotices=1
--vRuntime.Eval.HackArrCompatPromoteNotices=1
+-vRuntime.Eval.HackArrCompatCheckVarrayPromotion=true

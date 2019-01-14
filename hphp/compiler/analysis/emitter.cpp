@@ -166,8 +166,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     RuntimeOption::EvalInitialStaticStringTableSize;
   gd.HackArrCompatIsArrayNotices =
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
-  gd.HackArrCompatPromoteNotices =
-    RuntimeOption::EvalHackArrCompatPromoteNotices;
   gd.HackArrCompatTypeHintNotices =
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =

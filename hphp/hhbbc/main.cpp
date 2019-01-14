@@ -285,8 +285,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
     gd.HackArrCompatIsArrayNotices;
-  RuntimeOption::EvalHackArrCompatPromoteNotices =
-    gd.HackArrCompatPromoteNotices;
   RuntimeOption::EvalHackArrCompatTypeHintNotices =
     gd.HackArrCompatTypeHintNotices;
   RuntimeOption::EvalHackArrCompatDVCmpNotices =
@@ -371,8 +369,6 @@ void write_global_data(
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
-  gd.HackArrCompatPromoteNotices =
-    RuntimeOption::EvalHackArrCompatPromoteNotices;
   gd.HackArrCompatTypeHintNotices =
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =

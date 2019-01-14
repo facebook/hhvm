@@ -247,7 +247,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   BIND_HAC_OPTION(CheckArrayKeyCast, Notices)
   BIND_HAC_OPTION(CheckArrayPlus, Notices)
   BIND_HAC_OPTION_SELF(IsArrayNotices)
-  BIND_HAC_OPTION_SELF(PromoteNotices)
   BIND_HAC_OPTION_SELF(TypeHintNotices)
   BIND_HAC_OPTION_SELF(DVCmpNotices)
   BIND_HAC_OPTION_SELF(SerializeNotices)

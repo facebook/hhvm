@@ -2330,6 +2330,18 @@ void RuntimeOption::Load(
   if (TraceFunctions.size() || TraceFuncId != InvalidFuncId) {
     Trace::ensureInit(getTraceOutputFile());
   }
+
+  // Hack Array Compats
+
+  // Ensure that implicit varray append and varray promotion flags cannot be
+  // set if HackArrCompatNotices is not set
+  RuntimeOption::EvalHackArrCompatCheckVarrayPromote =
+    RuntimeOption::EvalHackArrCompatCheckVarrayPromote &&
+    RuntimeOption::EvalHackArrCompatNotices;
+  RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend =
+    RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
+    RuntimeOption::EvalHackArrCompatNotices;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

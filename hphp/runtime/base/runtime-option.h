@@ -958,7 +958,15 @@ struct RuntimeOption {
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
   F(bool, HackArrCompatIsVecDictNotices, false)                         \
-  F(bool, HackArrCompatPromoteNotices, false)                           \
+  /* Raise a notice when a varray is promoted to a darray through:      \
+   * - inserting at a key that would force the array to be mixed        \
+   * - unsetting _any_ key                                              \
+   */                                                                   \
+  F(bool, HackArrCompatCheckVarrayPromote, false)                       \
+  /* Raise a notice when a varray is implicitly appended to by          \
+   * inserting at n == count(arr)                                       \
+   */                                                                   \
+  F(bool, HackArrCompatCheckImplicitVarrayAppend, false)                \
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \

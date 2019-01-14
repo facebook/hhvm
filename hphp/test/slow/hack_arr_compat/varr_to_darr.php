@@ -19,19 +19,26 @@ function literals() {
 }
 
 
+function test_implicit_append() {
+  $x = varray[];
+  $x[0] = 1;
+}
+
 <<__EntryPoint>>
 function main_varr_to_darr() {
-test(varray[]);
-test(darray[]);
-test([]);
-test(dict[]);
+  test(varray[]);
+  test(darray[]);
+  test([]);
+  test(dict[]);
 
-test(varray[1, 2, 3, 4]);
-test(darray['a' => 10, 'b' => 20]);
-test(['a' => 10, 'b' => 20]);
-test(dict['a' => 10, 'b' => 20]);
+  test(varray[1, 2, 3, 4]);
+  test(darray['a' => 10, 'b' => 20]);
+  test(['a' => 10, 'b' => 20]);
+  test(dict['a' => 10, 'b' => 20]);
 
-test(varray[1, 2, 3, 4, 5, 6, 7, 8]);
+  test(varray[1, 2, 3, 4, 5, 6, 7, 8]);
 
-literals();
+  literals();
+
+  test_implicit_append();
 }

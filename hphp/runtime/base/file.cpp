@@ -744,6 +744,7 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
     }
 
     m_data->m_readpos += toread;
+    m_data->m_position += toread;
     if (skip) {
       m_data->m_readpos += delimiter.size();
       m_data->m_position += delimiter.size();

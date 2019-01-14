@@ -151,7 +151,8 @@ let find_inline_comment (finder : finder) (line : int) : string option =
       None
   | None -> None
 
-let line_comment_prefix = Str.regexp "^// ?"
+(* Regexp matching single-line comments, either # foo or // foo . *)
+let line_comment_prefix = Str.regexp "^\\(//\\|#\\) ?"
 
 let get_docblock node =
   let rec helper trivia_list acc eols_until_exit =

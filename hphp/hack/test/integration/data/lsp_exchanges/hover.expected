@@ -61,7 +61,8 @@
         {
           "language": "hack",
           "value": "int"
-        }
+        },
+          "A comment describing b_hover."
       ],
       "range": {
         "start": {

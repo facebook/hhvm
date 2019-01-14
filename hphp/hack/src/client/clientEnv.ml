@@ -30,7 +30,7 @@ type client_mode =
 | MODE_IDENTIFY_SYMBOL3 of string
 | MODE_IN_MEMORY_DEP_TABLE_SIZE
 | MODE_INFER_RETURN_TYPE of string
-| MODE_LINT of string list
+| MODE_LINT
 | MODE_LINT_ALL of int
 | MODE_LINT_STDIN of string
 | MODE_LINT_XCONTROLLER of string
@@ -67,6 +67,7 @@ type client_check_env = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
+  lint_paths: string list;
   log_inference_constraints: bool;
   mode: client_mode;
   no_load: bool;
@@ -104,7 +105,7 @@ let mode_to_string = function
   | MODE_IDENTIFY_SYMBOL3 _ -> "MODE_IDENTIFY_SYMBOL3"
   | MODE_IN_MEMORY_DEP_TABLE_SIZE -> "MODE_IN_MEMORY_DEP_TABLE_SIZE"
   | MODE_INFER_RETURN_TYPE _ -> "MODE_INFER_RETURN_TYPE"
-  | MODE_LINT _ -> "MODE_LINT"
+  | MODE_LINT -> "MODE_LINT"
   | MODE_LINT_ALL _ -> "MODE_LINT_ALL"
   | MODE_LINT_STDIN _ -> "MODE_LINT_STDIN"
   | MODE_LINT_XCONTROLLER _ -> "MODE_LINT_XCONTROLLER"

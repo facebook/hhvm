@@ -431,17 +431,23 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt results = rpc args @@ Rpc.SEARCH (query, type_) in
       ClientSearch.go results args.output_json;
       Lwt.return Exit_status.No_error
-    | MODE_LINT fnl ->
-      let fnl = List.fold_left fnl ~f:begin fun acc fn ->
-        match Sys_utils.realpath fn with
-        | Some path -> path :: acc
-        | None ->
-            prerr_endlinef "Could not find file '%s'" fn;
-            acc
-      end ~init:[] in
-      let%lwt results = rpc args @@ Rpc.LINT fnl in
-      ClientLint.go results args.output_json;
-      Lwt.return Exit_status.No_error
+    | MODE_LINT ->
+      let fnl = List.filter_map args.lint_paths
+        (fun fn -> match Sys_utils.realpath fn with
+          | Some path -> Some path
+          | None -> prerr_endlinef "Could not find file '%s'" fn; None)
+      in
+      begin
+        match args.lint_paths with
+        | [] ->
+           prerr_endline "No lint errors (0 files checked)!";
+           prerr_endline "Note: --lint expects a list of filenames to check.";
+           Lwt.return Exit_status.No_error
+        | _ ->
+           let%lwt results = rpc args @@ Rpc.LINT fnl in
+           ClientLint.go results args.output_json;
+           Lwt.return Exit_status.No_error
+      end
     | MODE_LINT_STDIN filename ->
       begin match Sys_utils.realpath filename with
       | None ->

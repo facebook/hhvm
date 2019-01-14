@@ -336,12 +336,8 @@ let parse_check_args cmd =
     "--json",
       Arg.Set output_json,
       " output json for machine consumption. (default: false)";
-    "--lint", Arg.Rest begin fun fn ->
-        mode := match !mode with
-          | None -> Some (MODE_LINT [fn])
-          | Some (MODE_LINT fnl) -> Some (MODE_LINT (fn :: fnl))
-          | _ -> raise (Arg.Bad "only a single mode should be specified")
-      end,
+    "--lint",
+    Arg.Unit (set_mode MODE_LINT),
       " (mode) lint the given list of files";
     "--lint-all",
       Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
@@ -506,15 +502,18 @@ let parse_check_args cmd =
     exit 0;
   end;
 
+  let mode = Option.value !mode ~default:MODE_STATUS in
+
   (* fixups *)
-  let root =
-    match args with
-    | [] -> ClientArgsUtils.get_root None
-    | [x] -> ClientArgsUtils.get_root (Some x)
-    | _ ->
-        Printf.fprintf stderr
-          "Error: please provide at most one www directory\n%!";
-        exit 1;
+  let root, lint_paths =
+    match mode, args with
+    | MODE_LINT, _ -> ClientArgsUtils.get_root None, args
+    | _, [] -> ClientArgsUtils.get_root None, []
+    | _, [x] -> ClientArgsUtils.get_root (Some x), []
+    | _, _ ->
+           Printf.fprintf stderr
+             "Error: please provide at most one www directory\n%!";
+           exit 1
   in
 
   if !monitor_logname then begin
@@ -542,11 +541,12 @@ let parse_check_args cmd =
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
+    lint_paths = lint_paths;
     log_inference_constraints = !log_inference_constraints;
-    mode = Option.value !mode ~default:MODE_STATUS;
+    mode = mode;
     no_load = !no_load || (
-      match !mode with
-      | Some (MODE_REMOVE_DEAD_FIXMES _) -> true
+      match mode with
+      | MODE_REMOVE_DEAD_FIXMES _ -> true
       | _ -> false);
     output_json = !output_json;
     prechecked = !prechecked;

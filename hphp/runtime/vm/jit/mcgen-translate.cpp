@@ -337,7 +337,6 @@ void retranslateAll() {
           Logger::Error(errMsg);
         }
         if (mode == JitSerdesMode::SerializeAndExit) {
-          s_retranslateAllComplete.store(true, std::memory_order_release);
           HttpServer::Server->stop();
           return true;
         }

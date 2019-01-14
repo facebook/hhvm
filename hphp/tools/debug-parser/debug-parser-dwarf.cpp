@@ -72,7 +72,7 @@ template<typename It> It end(std::pair<It,It> p) { return p.second; }
  * infer the fully qualified name for any given class, the current scope is
  * tracked as the DIEs are walked.
  *
- * Likewise, DWARF as no concept of linkage, but the linkage is needed to know
+ * Likewise, DWARF has no concept of linkage, but the linkage is needed to know
  * which types are actually equivalent. Luckily, a type's linkage is closely
  * related to its scope (except for templates, see below), so it can be inferred
  * the same way.
@@ -799,13 +799,15 @@ void TypeParserImpl::genNames(Env& env,
 
       // Determine the base name, whether this type was unnamed, and whether
       // this is an incomplete type or not from the DIE's attributes.
-      const auto info = [&]() -> std::tuple<std::string, bool, bool> {
+      auto get_info = [&](Dwarf_Die cur,
+                          bool updateOffsets) ->
+        std::tuple<std::string, bool, bool> {
         std::string name;
         std::string linkage_name;
         auto incomplete = false;
 
         dwarf.forEachAttribute(
-          die,
+          cur,
           [&](Dwarf_Attribute attr) {
             switch (dwarf.getAttributeType(attr)) {
               case DW_AT_name:
@@ -827,10 +829,13 @@ void TypeParserImpl::genNames(Env& env,
                 // and update it based on the definition ignoring the
                 // definition's name (this feels a little backwards,
                 // but its how dwarf works).
-                declarationOffset = dwarf.getAttributeValueRef(attr);
+                if (updateOffsets) {
+                  declarationOffset = dwarf.getAttributeValueRef(attr);
+                }
                 break;
               case DW_AT_signature:
-                if (dwarf.getAttributeForm(attr) == DW_FORM_ref_sig8) {
+                if (updateOffsets &&
+                    dwarf.getAttributeForm(attr) == DW_FORM_ref_sig8) {
                   // The actual definition is in another type-unit, we
                   // can ignore this declaration.
                   definitionOffset = dwarf.getAttributeValueRef(attr);
@@ -865,7 +870,7 @@ void TypeParserImpl::genNames(Env& env,
                                       auto member_type) {
           std::string first_member;
           dwarf.forEachChild(
-            die,
+            cur,
             [&](Dwarf_Die child) {
               if (dwarf.getTag(child) == member_type) {
                 first_member = dwarf.getDIEName(child);
@@ -925,7 +930,8 @@ void TypeParserImpl::genNames(Env& env,
           true,
           incomplete
         );
-      }();
+      };
+      const auto info = get_info(die, /*updateOffsets=*/true);
 
       auto offset = dwarf.getDIEOffset(die);
       if (definitionOffset) {
@@ -980,9 +986,21 @@ void TypeParserImpl::genNames(Env& env,
 
       // If we inferred a base name, use that to form the fully qualified name,
       // otherwise treat it as an unnamed type.
-      std::get<1>(info) ?
-        scope.pushUnnamedType(std::get<0>(info), offset) :
-        scope.pushType(std::get<0>(info), offset);
+      if (!definitionOffset) {
+        std::get<1>(info) ?
+          scope.pushUnnamedType(std::get<0>(info), offset) :
+          scope.pushType(std::get<0>(info), offset);
+      } else {
+        // Push the name of the definition, not of the declaration
+        dwarf.onDIEAtOffset(
+            *definitionOffset,
+            [&] (Dwarf_Die def) {
+              const auto info_def = get_info(def, /*updateOffsets=*/false);
+              std::get<1>(info_def) ?
+                scope.pushUnnamedType(std::get<0>(info_def), offset) :
+                scope.pushType(std::get<0>(info_def), offset);
+            });
+      }
       SCOPE_EXIT { scope.pop(); };
 
       if (declarationOffset) {
@@ -1113,11 +1131,28 @@ void TypeParserImpl::genNames(Env& env,
           die,
           [&](Dwarf_Attribute attr) {
             switch (dwarf.getAttributeType(attr)) {
-              case DW_AT_type:
-                template_params->emplace_back(
-                  dwarf.getAttributeValueRef(attr)
-                );
+              case DW_AT_type: {
+                auto offset = dwarf.getAttributeValueRef(attr);
+                // Check this type to see if it is a declaration and use the
+                // real type instead
+                dwarf.onDIEAtOffset(
+                  offset,
+                  [&] (Dwarf_Die type_die) {
+                    dwarf.forEachAttribute(
+                      type_die,
+                      [&](Dwarf_Attribute attr) {
+                        if (dwarf.getAttributeType(attr) == DW_AT_signature &&
+                            dwarf.getAttributeForm(attr) == DW_FORM_ref_sig8) {
+                          offset = dwarf.getAttributeValueRef(attr);
+                          return false;
+                        }
+                        return true;
+                      }
+                    );
+                  });
+                template_params->emplace_back(offset);
                 return false;
+              }
               default:
                 return true;
             }

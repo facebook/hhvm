@@ -1228,7 +1228,6 @@ and eif env ~expected ~coalesce p c e1 e2 =
   let env = condition env true tc in
   let env, te1, ty1 = match e1 with
     | None ->
-        let env, tyc = SubType.expand_type_and_solve env tyc in
         let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
@@ -5498,9 +5497,7 @@ and condition_nullity ~nonnull (env: Env.env) te =
     refine_lvalue_type env shape ~refine
   | _ ->
     let refine env ty = if nonnull
-      then
-        let env, ty = SubType.expand_type_and_solve env ty in
-        TUtils.non_null env ty
+      then TUtils.non_null env ty
       else env, ty in
     refine_lvalue_type env te ~refine
 

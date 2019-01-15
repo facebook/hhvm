@@ -78,6 +78,10 @@ type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
 let add_constraint x = !add_constraint_ref x
 
+type expand_type_and_solve_type = Env.env -> locl ty -> Env.env * locl ty
+let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implemented
+let expand_type_and_solve x = !expand_type_and_solve_ref x
+
 type expand_typeconst =
   expand_env -> Env.env -> Reason.t -> locl ty -> Nast.sid list ->
   Env.env * ety
@@ -546,7 +550,7 @@ let rec push_option_out env ty =
   let is_option = function
     | _, Toption _ -> true
     | _ -> false in
-  let env, ty = Env.expand_type env ty in
+  let env, ty = expand_type_and_solve env ty in
   match ty with
   | r, Toption ty ->
     let env, ty = push_option_out env ty in

@@ -768,11 +768,9 @@ let is_classish_kind_declared_abstract env cd_node =
       list_contains_predicate is_abstract classish_modifiers
   | _ -> false
 
-let rec is_immediately_in_lambda = function
-  | { syntax = LambdaExpression _; _} :: _ -> true
-  | [] | { syntax = (FunctionDeclaration _ | MethodishDeclaration _); _} :: _
-    -> false
-  | _ :: xs -> is_immediately_in_lambda xs
+let is_immediately_in_lambda context = match context.active_callable with
+  | Some { syntax = LambdaExpression _; _} -> true
+  | _ -> false
 
 (* Returns the whether the current context is in an active class scope *)
 let is_in_active_class_scope context = Option.is_some context.active_classish
@@ -1464,9 +1462,8 @@ let class_has_a_construct_method context =
       | _ -> false)
   | _ -> false
 
-let is_in_construct_method parents context =
+let is_in_construct_method context = if is_immediately_in_lambda context then false else
   match first_parent_function_name context, first_parent_class_name context with
-  | _ when is_immediately_in_lambda parents -> false
   | None, _ -> false
   (* Function name is __construct *)
   | Some s, _ when String.lowercase s = SN.Members.__construct -> true
@@ -1602,7 +1599,7 @@ let parameter_rx_errors context errors node =
     errors
   | _ -> errors
 
-let parameter_errors env node parents namespace_name names errors =
+let parameter_errors env node namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
 
@@ -1624,7 +1621,7 @@ let parameter_errors env node parents namespace_name names errors =
           node SyntaxError.inout_param_in_async :: errors
         else errors in
         let errors =
-          if is_in_construct_method parents env.context then
+          if is_in_construct_method env.context then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
@@ -1633,7 +1630,7 @@ let parameter_errors env node parents namespace_name names errors =
         let inMemoizeLSB = first_parent_function_attributes_contains
           env.context SN.UserAttributes.uaMemoizeLSB in
         let errors = if (inMemoize || inMemoizeLSB) &&
-              not @@ is_immediately_in_lambda parents then
+              not @@ is_immediately_in_lambda env.context then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
             node SyntaxError.memoize_with_inout :: errors
           else errors in
@@ -3864,7 +3861,7 @@ let find_syntax_errors env =
         | _ -> env.context
       } in
     let names, errors =
-      parameter_errors env node parents namespace_name names errors in
+      parameter_errors env node namespace_name names errors in
     let trait_require_clauses, names, errors =
       match syntax node with
       | TryStatement _

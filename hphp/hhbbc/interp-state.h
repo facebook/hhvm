@@ -307,13 +307,6 @@ struct State {
     ArrayChain arrayChain;
   };
   MInstrState mInstrState;
-  /*
-   * If we're calling a function with parameters of unknown refiness, we can't
-   * know statically whether a member instruction sequence is defining or
-   * not. In that case, we keep track of two parallel mInstrStates, one for the
-   * non-defining case, and one for the defining case.
-   */
-  copy_ptr<MInstrState> mInstrStateDefine;
 
   /*
    * Mapping of a local to other locals which are known to have

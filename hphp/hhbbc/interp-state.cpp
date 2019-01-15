@@ -613,14 +613,6 @@ std::string state_string(const php::Func& f, const State& st,
     folly::format(&ret, "mInstrState   :: {}\n", show(f, st.mInstrState));
   }
 
-  if (st.mInstrStateDefine) {
-    folly::format(
-      &ret,
-      "mInstrState (define)   :: {}\n",
-      show(f, *st.mInstrStateDefine)
-    );
-  }
-
   if (st.speculated != NoBlockId) {
     folly::format(
       &ret,

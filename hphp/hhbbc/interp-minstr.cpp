@@ -440,7 +440,6 @@ void startBase(ISS& env, Base base) {
   assert(oldState.base.loc == BaseLoc::None);
   assert(oldState.arrayChain.empty());
   assert(isInitialBaseLoc(base.loc));
-  assert(!env.state.mInstrStateDefine);
 
   oldState.base = std::move(base);
   FTRACE(5, "    startBase: {}\n", show(*env.ctx.func, oldState.base));

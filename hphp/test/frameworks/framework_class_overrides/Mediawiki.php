@@ -9,7 +9,7 @@ class Mediawiki extends Framework {
     parent::__construct($name, $tc, null, null, true, TestFindModes::TOKEN);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     $this->skipDatabaseTests();
     # Mediawiki has a custom test runner that pulls in parts of PHPUnit

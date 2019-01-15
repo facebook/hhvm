@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 
 class LessPHP extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     // See https://github.com/leafo/lessphp/pull/549
     file_put_contents(

@@ -16,7 +16,7 @@ class Yii extends Framework {
     }
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Creating a new phpunit.xml for running the yii tests.\n");
     $phpunit_xml = <<<XML

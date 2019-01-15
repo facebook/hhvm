@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 
 class Kohana extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPreComposer(): void {
     $root = nullthrows($this->getInstallRoot());
 
@@ -44,7 +44,7 @@ XML;
     file_put_contents($this->getTestPath()."/phpunit.xml", $phpunit_xml);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getTestPath()."/phpunit.xml",

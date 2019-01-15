@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 
 class Mustache extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Initialize submodules.\n");
     $git_command = "git submodule update --init";

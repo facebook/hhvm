@@ -50,9 +50,6 @@ type t = {
   *)
  tco_safe_vector_array : bool;
 
- (* List of <<UserAttribute>> names expected in the codebase *)
- tco_user_attrs : SSet.t option;
-
  (* Set of experimental features, in lowercase. *)
  tco_experimental_features : SSet.t;
 
@@ -214,7 +211,6 @@ val make :
   po_enable_concurrent: bool ->
   po_enable_await_as_an_expression: bool ->
   tco_log_inference_constraints : bool ->
-  tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
   tco_dynamic_view: bool ->
@@ -245,12 +241,10 @@ val make :
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
-val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 val tco_disallow_array_as_tuple : t -> bool
-val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool

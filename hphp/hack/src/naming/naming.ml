@@ -1272,8 +1272,7 @@ module Make (GetLocals : GetLocals) = struct
     end in
     List.fold_left attrl ~init:[] ~f:begin fun acc {ua_name; ua_params} ->
       let ua_name =
-        if String.is_prefix (snd ua_name) ~prefix:"__" ||
-           TypecheckerOptions.allowed_attribute (fst env).tcopt (snd ua_name)
+        if String.is_prefix (snd ua_name) ~prefix:"__"
         then ua_name
         else Env.type_name env ua_name ~allow_typedef:false in
       if not (validate_seen ua_name) then acc

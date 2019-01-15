@@ -96,7 +96,6 @@ let () =
     ~tco_assume_php: false
     ~tco_safe_array: false
     ~tco_safe_vector_array: false
-    ~tco_user_attrs: None
     ~tco_experimental_features: GlobalOptions.tco_experimental_all
     ~tco_migration_flags: SSet.empty
     ~tco_dynamic_view: false

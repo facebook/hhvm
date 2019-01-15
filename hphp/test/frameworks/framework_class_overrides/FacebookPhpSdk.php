@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 
 class FacebookPhpSdk extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Creating a phpunit.xml for running the Facebook PHP SDK tests.\n");
     $phpunit_xml = <<<XML
@@ -17,7 +17,7 @@ XML;
     file_put_contents($this->getTestPath()."/phpunit.xml", $phpunit_xml);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getTestPath()."/phpunit.xml",

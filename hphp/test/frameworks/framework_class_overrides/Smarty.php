@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 require_once __DIR__.'/../utils.php';
 class Smarty extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Moving key smarty directories out of vendor");
     rename($this->getInstallRoot()."/vendor/smarty/smarty",

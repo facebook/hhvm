@@ -8,7 +8,7 @@ class Symfony extends Framework {
                         TestFindModes::TOKEN);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPreComposer() {
     // Add a default timezone, because Symfony requires a
     // default timezone in the default php.ini

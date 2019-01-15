@@ -54,11 +54,7 @@ let check_implements check_new_object attr_interface
           [] (* no variadic arguments *) in
         env
     | _ ->
-      (* Fall back to legacy .hhconfig check *)
-      let tc_options = Typing_env.get_tcopt env in
-      if not (TypecheckerOptions.allowed_attribute tc_options attr_name)
-      then Errors.unbound_attribute_name attr_pos attr_name;
-      env
+      Errors.unbound_attribute_name attr_pos attr_name; env
 
 let check_def env check_new_object kind f_attrs =
   List.fold_right ~f:(check_implements check_new_object kind) f_attrs ~init:env

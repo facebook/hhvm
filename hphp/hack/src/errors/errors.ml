@@ -904,7 +904,7 @@ let rx_of_scope_and_explicit_rx pos =
 let unbound_attribute_name pos name =
   let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"
-    else "does not have a class and is not listed in .hhconfig"
+    else "does not have a class. Please declare a class for the attribute."
   in add (Naming.err_code Naming.UnboundName) pos
     ("Unrecognized user attribute: "^(Utils.strip_ns name)^" "^reason)
 

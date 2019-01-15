@@ -405,7 +405,6 @@ let parse_options () =
     GlobalOptions.default with
       GlobalOptions.tco_assume_php = not !dont_assume_php;
       GlobalOptions.tco_unsafe_rx = !unsafe_rx;
-      GlobalOptions.tco_user_attrs = if !allow_user_attributes then None else Some SSet.empty;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;

@@ -11,7 +11,6 @@ type t = {
   tco_assume_php : bool;
   tco_safe_array : bool;
   tco_safe_vector_array : bool;
-  tco_user_attrs : SSet.t option;
   tco_experimental_features : SSet.t;
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
@@ -189,7 +188,6 @@ let default = {
  tco_assume_php = false;
  tco_safe_array = false;
  tco_safe_vector_array = false;
- tco_user_attrs = None;
  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
  tco_experimental_features = tco_experimental_all;
@@ -238,7 +236,6 @@ let default = {
 let make_permissive tcopt =
   { tcopt with
     tco_assume_php = true;
-    tco_user_attrs = None;
   }
 
 let make ~tco_assume_php
@@ -251,7 +248,6 @@ let make ~tco_assume_php
          ~po_enable_concurrent
          ~po_enable_await_as_an_expression
          ~tco_log_inference_constraints
-         ~tco_user_attrs
          ~tco_experimental_features
          ~tco_migration_flags
          ~tco_dynamic_view
@@ -281,7 +277,6 @@ let make ~tco_assume_php
                    tco_assume_php;
                    tco_safe_array;
                    tco_safe_vector_array;
-                   tco_user_attrs;
                    tco_experimental_features;
                    tco_migration_flags;
                    tco_dynamic_view;
@@ -320,10 +315,6 @@ let make ~tco_assume_php
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
-let tco_user_attrs t = t.tco_user_attrs
-let tco_allowed_attribute t name = match t.tco_user_attrs with
- | None -> true
- | Some attr_names -> SSet.mem name attr_names
 let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
 let tco_migration_flag_enabled t s =

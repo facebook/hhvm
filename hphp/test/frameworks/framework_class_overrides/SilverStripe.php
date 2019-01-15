@@ -6,7 +6,7 @@ class SilverStripe extends Framework {
     parent::__construct($name);
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPreComposer(): void {
     $composer_json_path = find_first_file_recursive(
       Set {'composer.json'},
@@ -30,7 +30,7 @@ class SilverStripe extends Framework {
     }
   }
 
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
@@ -54,7 +54,7 @@ ENV_FILE;
     );
   }
 
-  <<Override>>
+  <<__Override>>
    protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getInstallRoot()."/sqlite3",

@@ -1,5 +1,5 @@
 Errors:
-  [7:17-28] Unrecognized user attribute: Enforceable does not have a class and is not listed in .hhconfig
+  [7:17-28] Unrecognized user attribute: Enforceable does not have a class. Please declare a class for the attribute.
   [10:15-16] This constructor expects no argument
 [(Class
     { c_span = [3:1-48]; c_annotation = (); c_mode = <opaque>;

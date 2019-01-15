@@ -2,7 +2,7 @@
 require_once __DIR__.'/../Framework.php';
 
 class Predis extends Framework {
-  <<Override>>
+  <<__Override>>
   protected function extraPostComposer(): void {
     verbose("Creating a phpunit.xml for running the Predis tests.\n");
     $phpunit_xml = <<<XML

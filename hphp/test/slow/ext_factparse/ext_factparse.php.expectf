@@ -1,10 +1,12 @@
 array(3) {
   [%s]=>
-  array(6) {
+  array(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     array(13) {
       [0]=>
@@ -266,11 +268,13 @@ array(3) {
     }
   }
   [%s]=>
-  array(6) {
+  array(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     array(13) {
       [0]=>
@@ -524,11 +528,13 @@ array(3) {
     }
   }
   [%s]=>
-  array(6) {
+  array(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     array(13) {
       [0]=>

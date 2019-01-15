@@ -36,4 +36,4 @@ type facts = {
 
 val empty: facts
 
-val facts_to_json: string -> facts -> Hh_json.json
+val facts_to_json: md5:string -> sha1:string -> facts -> Hh_json.json

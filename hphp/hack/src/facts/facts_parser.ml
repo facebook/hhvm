@@ -282,4 +282,5 @@ let extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~force_hh ~enable_xhp te
   from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp text
   |> Option.map ~f:(fun facts ->
     let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
-    facts_to_json md5 facts)
+    let sha1 = Sha1.digest text in
+    facts_to_json ~md5 ~sha1 facts)

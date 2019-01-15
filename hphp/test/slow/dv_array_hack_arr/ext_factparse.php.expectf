@@ -1,10 +1,12 @@
 dict(3) {
   [%s]=>
-  dict(6) {
+  dict(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -221,11 +223,13 @@ dict(3) {
     }
   }
   [%s]=>
-  dict(6) {
+  dict(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -438,11 +442,13 @@ dict(3) {
     }
   }
   [%s]=>
-  dict(6) {
+  dict(7) {
     ["md5sum0"]=>
     int(%i)
     ["md5sum1"]=>
     int(%i)
+    ["sha1sum"]=>
+    string(40) "%s"
     ["types"]=>
     vec(13) {
       dict(4) {

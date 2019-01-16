@@ -27,6 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+using ReifiedGenericsTable = hphp_string_map<ArrayData*>;
 ReifiedGenericsTable g_reified_generics_table;
 } // namespace
 

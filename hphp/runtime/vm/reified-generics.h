@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/tv-val.h"
 
-#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/hash-map.h"
@@ -28,19 +27,11 @@ namespace HPHP {
 
 struct ActRec;
 struct ArrayData;
+struct Class;
+struct Func;
 struct StringData;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-/*
- * Global reified types map for classes
- */
-using ReifiedGenericsTable = hphp_string_map<ArrayData*>;
-
-extern ReifiedGenericsTable g_reified_generics_table;
-
-} // namespace
 
 void addToReifiedGenericsTable(const std::string& mangledName,
                                ArrayData* tsList);

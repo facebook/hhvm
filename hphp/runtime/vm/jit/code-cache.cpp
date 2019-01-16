@@ -47,6 +47,7 @@ uint32_t CodeCache::AColdSize = 0;
 uint32_t CodeCache::AFrozenSize = 0;
 uint32_t CodeCache::GlobalDataSize = 0;
 uint32_t CodeCache::AMaxUsage = 0;
+uint32_t CodeCache::AProfMaxUsage = 0;
 uint32_t CodeCache::AColdMaxUsage = 0;
 uint32_t CodeCache::AFrozenMaxUsage = 0;
 bool CodeCache::MapTCHuge = false;
@@ -108,6 +109,7 @@ CodeCache::CodeCache()
     GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
     AMaxUsage = ASize - ASize / 128;
+    AProfMaxUsage = AProfSize - ASize / 128;
     AColdMaxUsage = AColdSize - AColdSize / 128;
     AFrozenMaxUsage = AFrozenSize - AFrozenSize / 128;
 

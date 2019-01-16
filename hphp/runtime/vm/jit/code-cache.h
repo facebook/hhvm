@@ -59,6 +59,7 @@ struct CodeCache {
   static uint32_t GlobalDataSize;
 
   static uint32_t AMaxUsage;
+  static uint32_t AProfMaxUsage;
   static uint32_t AColdMaxUsage;
   static uint32_t AFrozenMaxUsage;
 

@@ -321,36 +321,25 @@ void checkFreeProfData() {
 bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 
-  // Don't start profiling new functions if the size of either main or
-  // prof is already above Eval.JitAMaxUsage and we already filled hot.
-  auto tcUsage = std::max(code().main().used(), code().prof().used());
-  if (tcUsage >= CodeCache::AMaxUsage && !code().hotEnabled()) {
-    return false;
-  }
-
   // We have two knobs to control the number of functions we're allowed to
   // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
   // functions until either of these limits is exceeded. In practice, we expect
   // to hit the bytecode size limit first, but we keep the request limit around
   // as a safety net.
-  if (RuntimeOption::EvalJitProfileBCSize > 0 &&
-      profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
-    return false;
-  }
-
-  return requestCount() <= RuntimeOption::EvalJitProfileRequests;
+  return profData()->profilingBCSize() < RuntimeOption::EvalJitProfileBCSize &&
+    requestCount() < RuntimeOption::EvalJitProfileRequests;
 }
 
 bool profileFunc(const Func* func) {
-  if (!shouldPGOFunc(func)) return false;
-
   // If retranslateAll has been scheduled (including cases when it is going on,
   // or has finished), we can't emit more Profile translations.  This is to
   // ensure that, when retranslateAll() runs, no more Profile translations are
   // being added to ProfData.
-  if (mcgen::retranslateAllScheduled()) {
-    return false;
-  }
+  if (mcgen::retranslateAllScheduled()) return false;
+
+  if (code().prof().used() >= CodeCache::AProfMaxUsage) return false;
+
+  if (!shouldPGOFunc(func)) return false;
 
   if (profData()->optimized(func->getFuncId())) return false;
 

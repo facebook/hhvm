@@ -228,9 +228,9 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // Do a quick test before grabbing the write lease
   if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
 
-  auto computeKind = [&] {
-    return tc::profileFunc(func) ? TransKind::ProfPrologue :
-                                   TransKind::LivePrologue;
+  auto const computeKind = [&] {
+    return tc::profileFunc(func) ? TransKind::ProfPrologue
+                                 : TransKind::LivePrologue;
   };
 
   const auto funcId = func->getFuncId();

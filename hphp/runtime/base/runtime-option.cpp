@@ -1514,15 +1514,8 @@ void RuntimeOption::Load(
     Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize",
                  ahotDefault());
     Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
-
-    if (RuntimeOption::EvalJitPGO) {
-      Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
-                   64 << 20);
-    } else {
-      // Avoid "Possible bad confg node" warning for unused keys.
-      config["Eval.JitAProfSize"].configGetUInt64();
-      CodeCache::AProfSize = 0;
-    }
+    Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
+                 RuntimeOption::EvalJitPGO ? (64 << 20) : 0);
     Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
                  24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
@@ -1530,12 +1523,20 @@ void RuntimeOption::Load(
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
                  "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
 
+    // The MaxUsage should be slightly smaller than the max capacity, to avoid
+    // overflow.
+    auto constexpr maxUsage = [] (uint32_t size) {
+      return size - size / 128;
+    };
+
     Config::Bind(CodeCache::AMaxUsage, ini, config,
-                 "Eval.JitAMaxUsage", CodeCache::ASize);
+                 "Eval.JitAMaxUsage", maxUsage(CodeCache::ASize));
+    Config::Bind(CodeCache::AProfMaxUsage, ini, config,
+                 "Eval.JitAProfMaxUsage", maxUsage(CodeCache::AProfSize));
     Config::Bind(CodeCache::AColdMaxUsage, ini, config,
-                 "Eval.JitAColdMaxUsage", CodeCache::AColdSize);
+                 "Eval.JitAColdMaxUsage", maxUsage(CodeCache::AColdSize));
     Config::Bind(CodeCache::AFrozenMaxUsage, ini, config,
-                 "Eval.JitAFrozenMaxUsage", CodeCache::AFrozenSize);
+                 "Eval.JitAFrozenMaxUsage", maxUsage(CodeCache::AFrozenSize));
 
     Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
                  hugePagesSoundNice());

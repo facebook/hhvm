@@ -664,7 +664,8 @@ struct Index {
    */
   Type lookup_foldable_return_type(Context ctx,
                                    const php::Func* func,
-                                   std::vector<Type> args) const;
+                                   Type ctxType,
+                                   CompactVector<Type> args) const;
   /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitGen at worst.

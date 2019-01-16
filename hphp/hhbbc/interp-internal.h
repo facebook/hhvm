@@ -430,10 +430,16 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
       // Not worth trying if we're going to warn due to missing args
       return check_nargs_in_range(func, nArgs);
     }
-    // If the function has no args, we can simply check that its effect free
+
+    if (!(func->attrs & AttrStatic) && func->cls) {
+      return env.state.thisAvailable &&
+        is_scalar(env.index.lookup_return_type_raw(func));
+    }
+
+    // The function has no args. Just check that it's effect free
     // and returns a literal.
     return env.index.is_effect_free(*ar.func) &&
-    is_scalar(env.index.lookup_return_type_raw(func));
+      is_scalar(env.index.lookup_return_type_raw(func));
   }();
   if (foldable) effect_free(env);
   ar.foldable = foldable;

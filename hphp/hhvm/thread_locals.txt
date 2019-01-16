@@ -91,7 +91,5 @@ HPHP::s_note
 HPHP::s_state
 HPHP::s_globals
 HPHP::jit::irgen::IRBuilder::optimizeInst(HPHP::jit::IRInstruction*, HPHP::jit::irgen::IRBuilder::CloneFlag, HPHP::jit::Block*)::instNest
-HPHP::HHBBC::(anonymous namespace)::context_sensitive_return_type(HPHP::HHBBC::Index const&, HPHP::HHBBC::res::Func::FuncInfo*, HPHP::HHBBC::CallContext)::interp_nesting_level
 HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
-HPHP::HHBBC::Index::lookup_foldable_return_type(HPHP::HHBBC::Context, HPHP::HHBBC::php::Func const*, std::vector<HPHP::HHBBC::Type, std::allocator<HPHP::HHBBC::Type> >) const::interp_nesting_level
 HPHP::high_arena_tcache # Only needed in lowptr builds.

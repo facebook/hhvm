@@ -43,6 +43,11 @@ namespace {
 
 TRACE_SET_MOD(hhbbc);
 
+struct KnownArgs {
+  Type context;
+  const CompactVector<Type>& args;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_86cinit("86cinit");
@@ -74,7 +79,7 @@ State pseudomain_entry_state(const php::Func* func) {
 }
 
 State entry_state(const Index& index, Context const ctx,
-                  const std::vector<Type>* knownArgs) {
+                  const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisAvailable = index.lookup_this_available(ctx.func);
@@ -82,24 +87,30 @@ State entry_state(const Index& index, Context const ctx,
   ret.iters.resize(ctx.func->numIters);
   ret.clsRefSlots.resize(ctx.func->numClsRefSlots, TCls);
 
-  // TODO(#3788877): when we're doing a context sensitive analyze_func_inline,
-  // thisAvailable and specific type of $this should be able to come from the
-  // call context.
+  if (knownArgs && !ret.thisAvailable && ctx.cls &&
+      !(ctx.func->attrs & AttrStatic)) {
+    // check couldBe to rule out TBottom
+    if (knownArgs->context.couldBe(BObj) &&
+        knownArgs->context.subtypeOf(BObj)) {
+      ret.thisAvailable = true;
+    }
+  }
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
     // Parameters may be Uninit (i.e. no InitCell).  Also note that if
     // a function takes a param by ref, it might come in as a Cell.
     if (knownArgs) {
-      if (locId < knownArgs->size()) {
+      if (locId < knownArgs->args.size()) {
         if (ctx.func->params[locId].isVariadic) {
-          std::vector<Type> pack(knownArgs->begin() + locId, knownArgs->end());
+          std::vector<Type> pack(knownArgs->args.begin() + locId,
+                                 knownArgs->args.end());
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
             ? vec(std::move(pack))
             : arr_packed_varray(std::move(pack));
         } else {
-          ret.locals[locId] = unctx((*knownArgs)[locId]);
+          ret.locals[locId] = unctx(knownArgs->args[locId]);
         }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic
@@ -202,7 +213,7 @@ State entry_state(const Index& index, Context const ctx,
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
                     FuncAnalysis& ai,
-                    const std::vector<Type>* knownArgs) {
+                    const KnownArgs* knownArgs) {
   auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
@@ -221,8 +232,8 @@ prepare_incompleteQ(const Index& index,
     // When we have known args, we only need to add one of the entry points to
     // the initial state, since we know how many arguments were passed.
     auto const useDvInit = [&] {
-      if (knownArgs->size() >= numParams) return false;
-      for (auto i = knownArgs->size(); i < numParams; ++i) {
+      if (knownArgs->args.size() >= numParams) return false;
+      for (auto i = knownArgs->args.size(); i < numParams; ++i) {
         auto const dv = ctx.func->params[i].dvEntryPoint;
         if (dv != NoBlockId) {
           ai.bdata[dv].stateIn = entryState;
@@ -278,7 +289,7 @@ Context adjust_closure_context(Context ctx) {
 FuncAnalysis do_analyze_collect(const Index& index,
                                 Context const ctx,
                                 CollectedInfo& collect,
-                                const std::vector<Type>* knownArgs) {
+                                const KnownArgs* knownArgs) {
   assertx(ctx.cls == adjust_closure_context(ctx).cls);
   FuncAnalysis ai{ctx};
 
@@ -507,7 +518,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 FuncAnalysis do_analyze(const Index& index,
                         Context const inputCtx,
                         ClassAnalysis* clsAnalysis,
-                        const std::vector<Type>* knownArgs,
+                        const KnownArgs* knownArgs,
                         CollectionOpts opts) {
   auto const ctx = adjust_closure_context(inputCtx);
   CollectedInfo collect {
@@ -520,7 +531,7 @@ FuncAnalysis do_analyze(const Index& index,
     size_t idx = 0;
     for (auto const& c : ctx.cls->constants) {
       if (c.val && c.val->m_type == KindOfUninit) {
-        auto const fa = analyze_func_inline(index, ctx, { sval(c.name) });
+        auto const fa = analyze_func_inline(index, ctx, TCls, { sval(c.name) });
         if (auto const val = tv(fa.inferredReturn)) {
           ret.resolvedConstants.emplace_back(idx, *val);
         }
@@ -629,10 +640,12 @@ FuncAnalysis analyze_func_collect(const Index& index,
 
 FuncAnalysis analyze_func_inline(const Index& index,
                                  Context const ctx,
-                                 std::vector<Type> args,
+                                 const Type& thisType,
+                                 const CompactVector<Type>& args,
                                  CollectionOpts opts) {
   assert(!ctx.func->isClosureBody);
-  return do_analyze(index, ctx, nullptr, &args,
+  KnownArgs knownArgs { thisType, args };
+  return do_analyze(index, ctx, nullptr, &knownArgs,
                     opts | CollectionOpts::Inlining);
 }
 

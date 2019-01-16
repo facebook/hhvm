@@ -22,6 +22,8 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
 
+#include "hphp/util/compact-vector.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
@@ -64,7 +66,7 @@ inline bool operator<(Context a, Context b) {
  */
 struct CallContext {
   Context caller;
-  std::vector<Type> args;
+  CompactVector<Type> args;
   Type context;
 };
 

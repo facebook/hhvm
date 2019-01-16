@@ -9,6 +9,7 @@
 ALL=$( \
   nm --demangle --format sysv "$1" \
   | grep 'HPHP::' \
+  | grep -v 'HPHP::HHBBC::' \
   | grep '\(\.tbss\|\.tdata\)' \
   | cut --delimiter '|' --field 1 \
   | sed -e 's/ *$//' \

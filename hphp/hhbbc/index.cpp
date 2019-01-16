@@ -3226,7 +3226,8 @@ Type context_sensitive_return_type(const Index& index,
       finfo->func->cls
     };
     auto const ty =
-      analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
+      analyze_func_inline(index, calleeCtx,
+                          callCtx.context, callCtx.args).inferredReturn;
     return return_with_context(ty, callCtx.context);
   }();
 
@@ -4697,7 +4698,8 @@ bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
 
 Type Index::lookup_foldable_return_type(Context ctx,
                                         const php::Func* func,
-                                        std::vector<Type> args) const {
+                                        Type ctxType,
+                                        CompactVector<Type> args) const {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
 
@@ -4708,10 +4710,12 @@ Type Index::lookup_foldable_return_type(Context ctx,
   add_dependency(*m_data, func, ctx, Dep::ReturnTy);
 
   auto const calleeCtx = CallContext {
-    { func->unit, const_cast<php::Func*>(func), func->cls }, std::move(args)
+    { func->unit, const_cast<php::Func*>(func), func->cls },
+    std::move(args),
+    std::move(ctxType)
   };
 
-  auto showArgs DEBUG_ONLY = [] (const std::vector<Type>& a) {
+  auto showArgs DEBUG_ONLY = [] (const CompactVector<Type>& a) {
     std::string ret, sep;
     for (auto& arg : a) {
       folly::format(&ret, "{}{}", sep, show(arg));
@@ -4756,6 +4760,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
 
     auto const fa = analyze_func_inline(*this,
                                         calleeCtx.caller,
+                                        calleeCtx.context,
                                         calleeCtx.args,
                                         CollectionOpts::TrackConstantArrays |
                                         CollectionOpts::EffectFreeOnly);

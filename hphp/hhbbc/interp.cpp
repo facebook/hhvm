@@ -198,8 +198,9 @@ void in(ISS& env, const bc::DiscardClsRef& op) {
   takeClsRefSlot(env, op.slot);
 }
 void in(ISS& env, const bc::PopC&) {
+  auto const guarded = topStkEquiv(env) != NoLocalId;
+  if (!could_run_destructor(popC(env)) || guarded) return effect_free(env);
   nothrow(env);
-  if (!could_run_destructor(popC(env))) effect_free(env);
 }
 void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
@@ -1236,7 +1237,7 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   // Infer the return type of the wrapped function, taking into account the
   // types of the parameters for context sensitive types.
   auto const numArgs = env.ctx.func->params.size();
-  std::vector<Type> args{numArgs};
+  CompactVector<Type> args{numArgs};
   for (auto i = LocalId{0}; i < numArgs; ++i) {
     args[i] = locAsCell(env, i);
   }
@@ -3113,7 +3114,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const input = topC(env);
   auto const mayCallMethod = input.couldBe(BObj);
   auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
-  auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? TObj : TOptObj);
+  auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
 
   if (!mayCallMethod && !mayCallNullsafe) {
     // This FPush may only throw, make sure it's not optimized away.
@@ -3562,7 +3563,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
           auto ret = const_fold(env, fca.numArgs, *ar.func);
           return ret ? *ret : TBottom;
         }
-        std::vector<Type> args(fca.numArgs);
+        CompactVector<Type> args(fca.numArgs);
         for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
           auto const& arg = topT(env, i);
           auto const argNum = fca.numArgs - i - 1;
@@ -3576,7 +3577,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
         }
 
         return env.index.lookup_foldable_return_type(
-          env.ctx, func, std::move(args));
+          env.ctx, func, ar.context, std::move(args));
       }();
       if (auto v = tv(ty)) {
         BytecodeVec repl { fca.numArgs, bc::PopC {} };
@@ -3594,7 +3595,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   }
 
   auto returnType = [&] {
-    std::vector<Type> args(fca.numArgs);
+    CompactVector<Type> args(fca.numArgs);
     auto const firstArgPos = fca.numArgs + (fca.hasUnpack() ? 1 : 0) - 1;
     for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
       args[i] = topCV(env, firstArgPos - i);

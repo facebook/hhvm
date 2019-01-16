@@ -215,7 +215,8 @@ FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
  */
 FuncAnalysis analyze_func_inline(const Index&,
                                  Context,
-                                 std::vector<Type> args,
+                                 const Type& thisType,
+                                 const CompactVector<Type>& args,
                                  CollectionOpts opts =
                                  CollectionOpts::TrackConstantArrays);
 

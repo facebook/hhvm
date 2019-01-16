@@ -69,7 +69,7 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 State pseudomain_entry_state(const php::Func* func) {
   auto ret = State{};
   ret.initialized = true;
-  ret.thisAvailable = false;
+  ret.thisType = TOptObj;
   ret.locals.resize(func->locals.size());
   ret.iters.resize(func->numIters);
   ret.clsRefSlots.resize(func->numClsRefSlots);
@@ -82,19 +82,24 @@ State entry_state(const Index& index, Context const ctx,
                   const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
-  ret.thisAvailable = index.lookup_this_available(ctx.func);
+  ret.thisType = [&] {
+    if (!ctx.cls) return TNull;
+    if (knownArgs && !knownArgs->context.subtypeOf(BBottom)) {
+      if (knownArgs->context.subtypeOf(BOptObj)) return knownArgs->context;
+      if (is_specialized_cls(knownArgs->context)) {
+        auto const dcls = dcls_of(knownArgs->context);
+        return setctx(dcls.type == DCls::Exact ?
+                      objExact(dcls.cls) : subObj(dcls.cls));
+      }
+    }
+    auto const maybeThisType = thisType(index, ctx);
+    auto const thisType = maybeThisType ? *maybeThisType : TObj;
+    if (index.lookup_this_available(ctx.func)) return thisType;
+    return opt(thisType);
+  }();
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
   ret.clsRefSlots.resize(ctx.func->numClsRefSlots, TCls);
-
-  if (knownArgs && !ret.thisAvailable && ctx.cls &&
-      !(ctx.func->attrs & AttrStatic)) {
-    // check couldBe to rule out TBottom
-    if (knownArgs->context.couldBe(BObj) &&
-        knownArgs->context.subtypeOf(BObj)) {
-      ret.thisAvailable = true;
-    }
-  }
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {

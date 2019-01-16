@@ -22,12 +22,13 @@
 
 #include "hphp/runtime/base/type-string.h"
 
+#include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/func-util.h"
-#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -375,6 +376,69 @@ void push(ISS& env, Type t, LocalId l) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// $this
+
+void setThisAvailable(ISS& env) {
+  FTRACE(2, "    setThisAvailable\n");
+  if (env.ctx.cls ?
+      is_unused_trait(*env.ctx.cls) || (env.ctx.func->attrs & AttrStatic) :
+      !is_pseudomain(env.ctx.func)) {
+    return unreachable(env);
+  }
+  if (!env.state.thisType.couldBe(BObj) ||
+      !env.state.thisType.subtypeOf(BOptObj)) {
+    return unreachable(env);
+  }
+  if (is_opt(env.state.thisType)) {
+    env.state.thisType = unopt(env.state.thisType);
+  }
+}
+
+bool thisAvailable(ISS& env) {
+  assertx(!env.state.thisType.subtypeOf(BBottom));
+  return env.state.thisType.subtypeOf(BObj);
+}
+
+// Returns the type $this would have if it's not null.  Generally
+// you have to check thisAvailable() before assuming it can't be
+// null.
+folly::Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
+  // Due to `bindTo`, we can't conclude the type of $this.
+  if (RuntimeOption::EvalAllowScopeBinding && ctx.func->isClosureBody) {
+    return folly::none;
+  }
+
+  if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
+  return folly::none;
+}
+
+folly::Optional<Type> thisType(ISS& env) {
+  if (!is_specialized_obj(env.state.thisType)) return folly::none;
+  return is_opt(env.state.thisType) ?
+    unopt(env.state.thisType) : env.state.thisType;
+}
+
+folly::Optional<Type> selfCls(ISS& env) {
+  if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
+  return folly::none;
+}
+
+folly::Optional<Type> selfClsExact(ISS& env) {
+  if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
+  return folly::none;
+}
+
+folly::Optional<Type> parentCls(ISS& env) {
+  if (auto rcls = env.index.parentCls(env.ctx)) return subCls(*rcls);
+  return folly::none;
+}
+
+folly::Optional<Type> parentClsExact(ISS& env) {
+  if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
+  return folly::none;
+}
+
+//////////////////////////////////////////////////////////////////////
 // fpi
 
 /*
@@ -431,9 +495,16 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
       return check_nargs_in_range(func, nArgs);
     }
 
+    auto has_better_this = [&] {
+      if (!is_specialized_obj(env.state.thisType)) return false;
+      auto const dobj = dobj_of(env.state.thisType);
+      return dobj.type == DObj::Exact || dobj.cls.cls() != func->cls;
+    };
+
     if (!(func->attrs & AttrStatic) && func->cls) {
-      return env.state.thisAvailable &&
-        is_scalar(env.index.lookup_return_type_raw(func));
+      return thisAvailable(env) &&
+        (has_better_this() ||
+         is_scalar(env.index.lookup_return_type_raw(func)));
     }
 
     // The function has no args. Just check that it's effect free
@@ -1049,53 +1120,6 @@ bool iterIsDead(ISS& env, IterId iter) {
     [] (DeadIter) { return true; },
     [] (const LiveIter&) { return false; }
   );
-}
-
-//////////////////////////////////////////////////////////////////////
-// $this
-
-void setThisAvailable(ISS& env) {
-  FTRACE(2, "    setThisAvailable\n");
-  env.state.thisAvailable = true;
-}
-
-bool thisAvailable(ISS& env) { return env.state.thisAvailable; }
-
-// Returns the type $this would have if it's not null.  Generally
-// you have to check thisIsAvailable() before assuming it can't be
-// null.
-folly::Optional<Type> thisTypeHelper(const Index& index, Context ctx) {
-  // Due to `bindTo`, we can't conclude the type of $this.
-  if (RuntimeOption::EvalAllowScopeBinding && ctx.func->isClosureBody) {
-    return folly::none;
-  }
-
-  if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
-  return folly::none;
-}
-
-folly::Optional<Type> thisType(ISS& env) {
-  return thisTypeHelper(env.index, env.ctx);
-}
-
-folly::Optional<Type> selfCls(ISS& env) {
-  if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
-  return folly::none;
-}
-
-folly::Optional<Type> selfClsExact(ISS& env) {
-  if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
-  return folly::none;
-}
-
-folly::Optional<Type> parentCls(ISS& env) {
-  if (auto rcls = env.index.parentCls(env.ctx)) return subCls(*rcls);
-  return folly::none;
-}
-
-folly::Optional<Type> parentClsExact(ISS& env) {
-  if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
-  return folly::none;
 }
 
 //////////////////////////////////////////////////////////////////////

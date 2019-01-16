@@ -279,7 +279,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
 
   case Op::This:
   case Op::BareThis:
-    if (auto tt = thisType(interp)) {
+    if (auto tt = thisType(interp.index, interp.ctx)) {
       auto t = interp.state.stack.back().type;
       if (is_opt(t)) t = unopt(std::move(t));
       return !t.strictSubtypeOf(*tt);

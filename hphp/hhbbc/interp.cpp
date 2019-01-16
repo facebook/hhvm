@@ -4101,11 +4101,7 @@ void in(ISS& env, const bc::This&) {
   }
   auto const ty = thisType(env);
   push(env, ty ? *ty : TObj, StackThisId);
-  if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
-    unreachable(env);
-  } else {
-    setThisAvailable(env);
-  }
+  setThisAvailable(env);
 }
 
 void in(ISS& env, const bc::LateBoundCls& op) {
@@ -4118,11 +4114,7 @@ void in(ISS& env, const bc::CheckThis&) {
   if (thisAvailable(env)) {
     return reduce(env, bc::Nop {});
   }
-  if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
-    unreachable(env);
-  } else {
-    setThisAvailable(env);
-  }
+  setThisAvailable(env);
 }
 
 void in(ISS& env, const bc::BareThis& op) {
@@ -4140,8 +4132,8 @@ void in(ISS& env, const bc::BareThis& op) {
       effect_free(env);
       break;
     case BareThisOp::NeverNull:
-      effect_free(env);
       setThisAvailable(env);
+      if (!env.state.unreachable) effect_free(env);
       return push(env, ty ? *ty : TObj, StackThisId);
   }
 
@@ -5125,8 +5117,8 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   dispatch(env, op);
 }
 
-folly::Optional<Type> thisType(const Interp& interp) {
-  return thisTypeHelper(interp.index, interp.ctx);
+folly::Optional<Type> thisType(const Index& index, Context ctx) {
+  return thisTypeFromContext(index, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////

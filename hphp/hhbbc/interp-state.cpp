@@ -176,7 +176,7 @@ bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
 State without_stacks(const State& src) {
   auto ret          = State{};
   ret.initialized   = src.initialized;
-  ret.thisAvailable = src.thisAvailable;
+  ret.thisType      = src.thisType;
   ret.thisLoc       = src.thisLoc;
 
   if (UNLIKELY(src.locals.size() > (1LL << 50))) {
@@ -312,10 +312,10 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   auto changed = false;
 
-  auto const available = dst.thisAvailable && src.thisAvailable;
-  if (available != dst.thisAvailable) {
+  auto const thisType = join(dst.thisType, src.thisType);
+  if (thisType != dst.thisType) {
     changed = true;
-    dst.thisAvailable = available;
+    dst.thisType = thisType;
   }
 
   if (dst.thisLoc != src.thisLoc) {
@@ -552,7 +552,7 @@ std::string state_string(const php::Func& f, const State& st,
 
   folly::format(&ret, "state{}:\n", st.unreachable ? " (unreachable)" : "");
   if (f.cls) {
-    folly::format(&ret, "thisAvailable({})\n", st.thisAvailable);
+    folly::format(&ret, "thisType({})\n", show(st.thisType));
   }
 
   if (st.thisLoc != NoLocalId) {

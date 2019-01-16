@@ -260,7 +260,7 @@ enum class LocalStaticBinding {
  */
 struct State {
   State() {
-    initialized = unreachable = thisAvailable = false;
+    initialized = unreachable = false;
     speculatedIsUnconditional = false;
     speculatedIsFallThrough = false;
   };
@@ -271,7 +271,6 @@ struct State {
 
   uint8_t initialized : 1;
   uint8_t unreachable : 1;
-  uint8_t thisAvailable : 1;
   // if set, speculated is where we end up when we fall through
   uint8_t speculatedIsFallThrough : 1;
   // if set, speculated is taken unconditionally
@@ -280,6 +279,7 @@ struct State {
   uint8_t speculatedPops{};
   uint32_t speculated = NoBlockId;
   LocalId thisLoc = NoLocalId;
+  Type thisType;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
   CompactVector<Type> clsRefSlots;

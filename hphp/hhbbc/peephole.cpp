@@ -66,6 +66,17 @@ void BasicPeephole::push_back(const Bytecode& next) {
       cur.srcLoc = srcLoc;
     };
 
+    // Kill <side-effect-free-expr>; PopX
+    if ((next.op == Op::PopC && poppable(cur.op)) ||
+        (next.op == Op::PopU && cur.op == Op::NullUninit)) {
+      m_next.pop_back();
+      return;
+    }
+
+    if (cur.op == Op::This && next.op == Op::PopC) {
+      return update_cur(bc::CheckThis {});
+    }
+
     // transform <expr> === null or <expr> !== null to IsTypeC Null [Not]
     if (cur.op == Op::Null &&
         (next.op == Op::Same || next.op == Op::NSame)) {

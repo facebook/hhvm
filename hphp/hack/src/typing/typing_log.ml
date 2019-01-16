@@ -159,7 +159,7 @@ let log_return_type env =
     let Typing_env_return_info.
       {return_type; return_disposable; return_mutable; return_explicit;
        return_void_to_rx; } = Env.get_return env in
-    lprintf (Normal Green) "%s%s%s%s%s%s"
+    lprintf (Normal Green) "%s%s%s%s%s"
       (Typing_print.debug env return_type)
       (if return_disposable then " (disposable)" else "")
       (if return_mutable then " (mutable_return)" else "")

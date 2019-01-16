@@ -1,6 +1,6 @@
-\f : array<_, _> try array<_, _>
-\g : \Awaitable<array<_, _>> try \Awaitable<array<_, _>>
-\h : array<_> try array<_>
-\i : array<_, _> try array<_, _>
-\j : array<_> try array<_>
+\f : array<string, int> try array<string, int>
+\g : \Awaitable<array<string, int>> try \Awaitable<array<string, int>>
+\h : array<int> try array<int>
+\i : array<string, (int | bool)> try array<string, (int | bool)>
+\j : array<(int | bool)> try array<(int | bool)>
 No errors

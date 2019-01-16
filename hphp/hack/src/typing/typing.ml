@@ -743,7 +743,7 @@ and stmt env = function
         if return_explicit
         then Some (pos, Reason.URreturn,
           Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type)
-        else Some (pos, Reason.URreturn, (Reason.Rwitness p, Typing_utils.tany env)) in
+        else None in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
       let env =

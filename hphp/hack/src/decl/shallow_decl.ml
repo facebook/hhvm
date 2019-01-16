@@ -94,7 +94,9 @@ let prop env cv =
     else Decl_hint.hint env ty'
   end in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let lateinit = Attrs.mem2
+    SN.UserAttributes.uaLateInit SN.UserAttributes.uaSoftLateInit
+    cv.cv_user_attributes in
   if cv.cv_final then Errors.final_property cv_pos;
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   {

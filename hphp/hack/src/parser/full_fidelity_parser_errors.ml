@@ -746,8 +746,7 @@ let extract_function_name header_node =
      Syntax.extract_text fdh.function_name
    | _ -> None
 
-(* Return, as a string opt, the name of the function with the earliest
- * declaration node in the list of parents. *)
+(* Return, as a string opt, the name of the function or method given the context *)
 let first_parent_function_name context =
   (* Note: matching on either is sound because functions and/or methods cannot be nested *)
   match context.active_methodish with
@@ -775,7 +774,7 @@ let is_immediately_in_lambda context = match context.active_callable with
 (* Returns the whether the current context is in an active class scope *)
 let is_in_active_class_scope context = Option.is_some context.active_classish
 
-(* Returns the first ClassishDeclaration node in the list of parents,
+(* Returns the first ClassishDeclaration node in the given context,
  * or None if there isn't one or classish_kind does not match. *)
 let first_parent_classish_node classish_kind context =
   Option.value_map context.active_classish ~default:None ~f:(function
@@ -794,8 +793,7 @@ let active_classish_name context =
     | _ -> None
     )
 
-(* Return, as a string opt, the name of the earliest Class in the list of
- * parents. *)
+(* Return, as a string opt, the name of the Class in the given context *)
 let first_parent_class_name context =
   context.active_classish |> Option.value_map ~default:None ~f:(fun parent_classish ->
     match syntax parent_classish with
@@ -3789,8 +3787,8 @@ let reified_function_call_errors node errors =
     end
   | _ -> errors
 
-let get_namespace_name parents current_namespace_name =
-  match parents with
+let get_namespace_name context current_namespace_name =
+  match context.nested_namespaces with
   | { syntax = NamespaceDeclaration { namespace_name = ns; _ }; _ } :: _ ->
     if is_missing ns then current_namespace_name
     else combine_names current_namespace_name (text ns)
@@ -4062,7 +4060,7 @@ let find_syntax_errors env =
         else namespace_type in
       (* reset names/namespace_type before diving into namespace body,
          keeping global function names *)
-      let namespace_name = get_namespace_name parents namespace_name in
+      let namespace_name = get_namespace_name env.context namespace_name in
       let is_global _ f = f.f_global in
       let global_funs names = strmap_filter is_global names.t_functions in
       let new_names = {empty_names with t_functions = global_funs names} in
@@ -4090,7 +4088,7 @@ let find_syntax_errors env =
         then Unbracketed (make_location_of_node namespace_semicolon)
         else namespace_type
       in
-      let namespace_name = get_namespace_name parents namespace_name in
+      let namespace_name = get_namespace_name env.context namespace_name in
       (* consider the rest of file to be the part of the namespace:
          reset names and namespace type, keep errors *)
       let acc =

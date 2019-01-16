@@ -354,11 +354,11 @@ The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
 bytecode address of the appropriate entry point. Arguments are pushed on the
 stack either as cells or as refs, but they may be refs only if the parameter
-is passed by ref. The FIsParamByRefCufIter and FThrowOnRefMismatch instructions
-are used to enforce proper flavor. The FCall* instructions look at the current
-FPI to get the bytecode address of the function (the callee), transfers the
-parameters from the evaluation stack to the callee, pops the current FPI off
-of the FPI stack, and then invokes the dispatcher to call the function.
+is passed by ref. The FThrowOnRefMismatch instruction is used to enforce proper
+flavor. The FCall* instructions look at the current FPI to get the bytecode
+address of the function (the callee), transfers the parameters from the
+evaluation stack to the callee, pops the current FPI off of the FPI stack, and
+then invokes the dispatcher to call the function.
 
 Calls to builtin functions may be optimized to avoid pushing an entry on the
 FPI stack if it is known that the builtin function does not need access to the
@@ -2239,14 +2239,6 @@ FPushCufIter <num params> <iterator id>   []  ->  []
 
   FPI push the result of a previous DecodeCufIter. No warning is raised.
 
-FIsParamByRefCufIter <param id> <reffiness hint> <iterator id>  []  ->  [C:Bool]
-
-  FIsParamByRefCufIter opcode pushes a bool indicating whether parameter %1 of
-  a function stored inside iterator %3 by a previous DecodeCufIter is pass by
-  ref. If the reffiness hint %2, which may be 'Any', 'Cell', or 'Ref', is not
-  'Any' and does not match the reffiness of parameter %1 the runtime may raise
-  a warning or throw an exception.
-
 FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
   Check whether reffiness of parameters 0..N-1 of the function associated with
@@ -3524,17 +3516,11 @@ UnsetM <stack count> <member key>    [...]  ->  []
 
   Unset{Prop,Elem} member operation.
 
-SetWithRefLML <local id> <local id>    []  ->  []
-
-  Set member %1, preserving reffiness of value in %2.
-
 11. Iterator instructions
 -------------------------
 
 IterInit  <iterator id> <rel offset> <local id>                [C]  ->  []
 IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
-WIterInit  <iterator id> <rel offset> <local id>               [C]  ->  []
-WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
 
   Initialize iterator. If $1 is an array, these instructions create an array
   iterator, rewind the array iterator to point to the beginning of the array,
@@ -3578,11 +3564,8 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   should receive the value (in %3) and key (in %4) for the iteration, in
   accordance with the type of iterator initialized in %1.
 
-  For the non-W* flavors of these instructions, the locals are stored to with
-  the same semantics as SetL (non-binding assignment). The W* flavors of these
-  instructions do a binding assignment to %3 if the rhs was a reference, or if
-  not they unset the old value of the local and then do a non-binding
-  assignment. The W* flavors still do a non-binding assignment to %4.
+  The locals are stored to with the same semantics as SetL (non-binding
+  assignment).
 
   The logical value is computed differently depending on the iterator type that
   is initialized in %1:
@@ -3626,8 +3609,6 @@ LIterInitK <iterator id> <local id> <rel offset>
 
 IterNext  <iterator id> <rel offset> <local id>               []  ->  []
 IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
-WIterNext  <iterator id> <rel offset> <local id>              []  ->  []
-WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
 
   Iterator next. If the specified iterator is a non-mutable array iterator or
   an extension class iterator, advance the iterator to point to the next
@@ -3653,12 +3634,10 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   iterator initialized in %1.
 
   These locals are stored to with the same semantics as SetL (non-binding
-  assignment), except the W* flavors of these instructions do a "with
-  reference" assignment (i.e. the local gets a binding assignment if and only
-  if the value to be assigned is already a reference).
+  assignment).
 
   The semantics of how to determine what the key and value are depend on %1 in
-  an analogous way to {W,}IterInit{K,}.
+  an analogous way to IterInit{K,}.
 
 LIterNext <iterator id> <local id> <rel offset> <local id>     []   ->  []
 LIterNextK <iterator id> <local id> <rel offset>

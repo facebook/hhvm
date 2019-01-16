@@ -991,7 +991,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Iterator instructions
 
   case IterInit:
-  case WIterInit:
   case LIterInit:
   case LIterNext:
     return iter_effects(
@@ -1000,7 +999,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AFrame { inst.src(1), inst.extra<IterData>()->valId }
     );
   case IterNext:
-  case WIterNext:
     return iter_effects(
       inst,
       inst.src(0),
@@ -1008,7 +1006,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   case IterInitK:
-  case WIterInitK:
   case LIterInitK:
   case LIterNextK:
     {
@@ -1018,7 +1015,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case IterNextK:
-  case WIterNextK:
     {
       AliasClass key = AFrame { inst.src(0), inst.extra<IterData>()->keyId };
       AliasClass val = AFrame { inst.src(0), inst.extra<IterData>()->valId };
@@ -1501,7 +1497,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
-  case SetWithRefElem:
   case VGetElem:
   case VGetProp:
     return minstr_final_with_prop_state(inst);

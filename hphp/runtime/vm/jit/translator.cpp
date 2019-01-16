@@ -316,8 +316,6 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
-  { OpFIsParamByRefCufIter,
-                   {None,             Stack1,       OutBoolean      }},
   { OpFThrowOnRefMismatch,
                    {None,             None,         OutNone         }},
   /*
@@ -332,16 +330,12 @@ static const struct {
   /*** 11. Iterator instructions ***/
 
   { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
-  { OpWIterInit,   {Stack1,           Local,        OutUnknown      }},
   { OpLIterInit,   {Local,            Local,        OutUnknown      }},
   { OpIterInitK,   {Stack1,           Local,        OutUnknown      }},
-  { OpWIterInitK,  {Stack1,           Local,        OutUnknown      }},
   { OpLIterInitK,  {Local,            Local,        OutUnknown      }},
   { OpIterNext,    {None,             Local,        OutUnknown      }},
-  { OpWIterNext,   {None,             Local,        OutUnknown      }},
   { OpLIterNext,   {Local,            Local,        OutUnknown      }},
   { OpIterNextK,   {None,             Local,        OutUnknown      }},
-  { OpWIterNextK,  {None,             Local,        OutUnknown      }},
   { OpLIterNextK,  {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
   { OpCIterFree,   {None,             None,         OutNone         }},
@@ -470,8 +464,6 @@ static const struct {
                                       Stack1,       OutSameAsInput1  }},
   { OpUnsetM,      {BStackN|MBase|MKey,
                                       None,         OutNone         }},
-  { OpSetWithRefLML,
-                   {MBase,            None,         OutNone         }},
   { OpMemoGet,     {LocalRange,       None,         OutUnknown      }},
   { OpMemoGetEager,{LocalRange,       None,         OutUnknown      }},
   { OpMemoSet,     {Stack1|LocalRange,
@@ -851,10 +843,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IterNextK:
   case Op::LIterNext:
   case Op::LIterNextK:
-  case Op::WIterInit:
-  case Op::WIterInitK:
-  case Op::WIterNext:
-  case Op::WIterNextK:
   case Op::IterInitK:
   case Op::IterInit:
   case Op::LIterInitK:
@@ -865,7 +853,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNS:
   case Op::FCall:
   case Op::ClsCnsD:
-  case Op::FIsParamByRefCufIter:
   case Op::FThrowOnRefMismatch:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
@@ -1078,7 +1065,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::SetOpM:
   case Op::BindM:
   case Op::UnsetM:
-  case Op::SetWithRefLML:
   case Op::SetRangeM:
   case Op::MemoGet:
   case Op::MemoGetEager:

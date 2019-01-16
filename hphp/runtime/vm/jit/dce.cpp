@@ -604,14 +604,10 @@ bool canDCE(IRInstruction* inst) {
   case RestoreErrorLevel:
   case IterInit:
   case IterInitK:
-  case WIterInit:
-  case WIterInitK:
   case LIterInit:
   case LIterInitK:
   case IterNext:
   case IterNextK:
-  case WIterNext:
-  case WIterNextK:
   case LIterNext:
   case LIterNextK:
   case IterFree:
@@ -676,7 +672,6 @@ bool canDCE(IRInstruction* inst) {
   case MapSet:
   case VectorSet:
   case SetElem:
-  case SetWithRefElem:
   case SetRange:
   case SetRangeRev:
   case UnsetElem:

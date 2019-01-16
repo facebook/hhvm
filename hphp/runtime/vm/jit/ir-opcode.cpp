@@ -527,7 +527,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SetProp:
   case SetRange:
   case SetRangeRev:
-  case SetWithRefElem:
   case StringGet:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:
@@ -559,10 +558,6 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetFailHard:
   case VGetElem:
   case VGetProp:
-  case WIterInit:
-  case WIterInitK:
-  case WIterNext:
-  case WIterNextK:
     return true;
 
   case AbsDbl:

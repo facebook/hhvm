@@ -1108,12 +1108,6 @@ SSATmp* emitEmptyElem(IRGS& env, SSATmp* base,
   always_assert(false);
 }
 
-void setWithRefImpl(IRGS& env, int32_t keyLoc, SSATmp* value) {
-  auto const key = ldLoc(env, keyLoc, nullptr, DataTypeGeneric);
-  auto const base = ldMBase(env);
-  gen(env, SetWithRefElem, base, key, value, propStatePtrElem(env, base));
-}
-
 /*
  * Determine which simple collection op to use for the given base and key
  * types.
@@ -1662,7 +1656,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   return gen(env, CGetPropQ, base, key);
 }
 
-Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
+Block* makeCatchSet(IRGS& env) {
   auto block = defBlock(env, Block::Hint::Unused);
 
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), block);
@@ -1686,18 +1680,14 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
 
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
-  if (!isSetWithRef) {
-    popDecRef(env, DataTypeGeneric);
-  }
+  popDecRef(env, DataTypeGeneric);
   auto const nDiscard = env.currentNormalizedInstruction->imm[0].u_IVA;
   for (int i = 0; i < nDiscard; ++i) {
     popDecRef(env, DataTypeGeneric);
   }
   cleanTvRefs(env);
-  if (!isSetWithRef) {
-    auto const val = gen(env, LdUnwinderValue, TCell);
-    push(env, val);
-  }
+  auto const val = gen(env, LdUnwinderValue, TCell);
+  push(env, val);
 
   // The minstr is done here, so we want to drop a FinishMemberOp to kill off
   // stores to MIState.
@@ -2493,11 +2483,6 @@ void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   }
 
   mFinalImpl(env, nDiscard, nullptr);
-}
-
-void emitSetWithRefLML(IRGS& env, int32_t keyLoc, int32_t valLoc) {
-  setWithRefImpl(env, keyLoc, ldLoc(env, valLoc, nullptr, DataTypeGeneric));
-  mFinalImpl(env, 0, nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

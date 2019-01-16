@@ -261,7 +261,7 @@ struct ArrayIter {
 private:
   template<bool Local>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<bool withRef, bool Local>
+  template<bool Local>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
 
@@ -603,12 +603,11 @@ bool IterateKV(const TypedValue& it,
 
 template <bool Local>
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
-template <bool withRef, bool Local>
+template <bool Local>
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
-int64_t witer_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);

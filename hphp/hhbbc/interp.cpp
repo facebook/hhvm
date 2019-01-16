@@ -3421,13 +3421,6 @@ void in(ISS& env, const bc::FPushCufIter&) {
   fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
-void in(ISS& env, const bc::FIsParamByRefCufIter& op) {
-  if (op.subop2 == FPassHint::Any) {
-    nothrow(env);
-  }
-  return push(env, TBool);
-}
-
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
   auto& ar = fpiTop(env);
   if (!ar.func || ar.fallbackFunc) return;
@@ -3914,22 +3907,6 @@ void in(ISS& env, const bc::LIterInitK& op) {
   );
 }
 
-void in(ISS& env, const bc::WIterInit& op) {
-  popC(env);
-  env.propagate(op.target2, &env.state);
-  // WIter* instructions may leave the value locals as either refs
-  // or cells, depending whether the rhs of the assignment was a
-  // ref.
-  setLocRaw(env, op.loc3, TInitGen);
-}
-
-void in(ISS& env, const bc::WIterInitK& op) {
-  popC(env);
-  env.propagate(op.target2, &env.state);
-  setLocRaw(env, op.loc3, TInitGen);
-  setLoc(env, op.loc4, TInitCell);
-}
-
 void in(ISS& env, const bc::IterNext& op) {
   iterNextImpl(env, op.iter1, op.loc3, op.target2);
 }
@@ -3946,17 +3923,6 @@ void in(ISS& env, const bc::IterNextK& op) {
 void in(ISS& env, const bc::LIterNextK& op) {
   mayReadLocal(env, op.loc2);
   iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3);
-}
-
-void in(ISS& env, const bc::WIterNext& op) {
-  env.propagate(op.target2, &env.state);
-  setLocRaw(env, op.loc3, TInitGen);
-}
-
-void in(ISS& env, const bc::WIterNextK& op) {
-  env.propagate(op.target2, &env.state);
-  setLocRaw(env, op.loc3, TInitGen);
-  setLoc(env, op.loc4, TInitCell);
 }
 
 void in(ISS& env, const bc::IterFree& op) {

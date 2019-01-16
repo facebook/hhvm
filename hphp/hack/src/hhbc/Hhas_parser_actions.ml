@@ -685,17 +685,6 @@ let incdecopofiarg arg =
   )
   | _ -> report_error "wrong kind of incdecop arg"
 
-let fpasshintof arg =
-  match arg with
-  | IAId s -> (
-    match s with
-    | "Any" -> Any
-    | "Cell" -> Cell
-    | "Ref" -> Ref
-    | _ -> report_error @@ Printf.sprintf "bad fpasshint: '%s'" s
-  )
-  | _ -> report_error "wrong kind of fpasshint arg"
-
 let paramidofiarg arg =
   match arg with
   | IAId s -> Param_named s
@@ -1126,8 +1115,6 @@ match s with
  | "SetM" -> IFinal (SetM (intofiarg arg1, memberkeyofiarg arg2))
  | "BindM" -> IFinal  (BindM (intofiarg arg1, memberkeyofiarg arg2))
  | "UnsetM" -> IFinal (UnsetM (intofiarg arg1, memberkeyofiarg arg2))
- | "SetWithRefLML" ->
-    IFinal (SetWithRefLML (localidofiarg arg1, localidofiarg arg2))
 
  (* instruct_iterator *)
  | "IterBreak" ->
@@ -1189,8 +1176,6 @@ let maketernaryinst s arg1 arg2 arg3 =
                                 (intofiarg arg1, method_id_of_iarg arg2, class_id_of_iarg arg3))
  | "FPushClsMethodSD" -> ICall(FPushClsMethodSD
                                  (intofiarg arg1, specialclsrefofiarg arg2, method_id_of_iarg arg3))
- | "FIsParamByRefCufIter" ->
-    ICall (FIsParamByRefCufIter (intofiarg arg1, fpasshintof arg2, iterofiarg arg3))
  | "FCallBuiltin" ->
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
 
@@ -1209,11 +1194,7 @@ let maketernaryinst s arg1 arg2 arg3 =
 (* instruct_iterator *)
  | "IterInit" -> IIterator(IterInit (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
- | "WIterInit" -> IIterator(WIterInit (iterofiarg arg1,
-                                         labelofiarg arg2, localidofiarg arg3))
  | "IterNext" -> IIterator(IterNext (iterofiarg arg1,
-                                         labelofiarg arg2, localidofiarg arg3))
- | "WIterNext" -> IIterator(WIterNext (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
 
  (* instruct_misc *)
@@ -1226,11 +1207,7 @@ let makequaternaryinst s arg1 arg2 arg3 arg4 =
 match s with
  | "IterInitK" -> IIterator(IterInitK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
- | "WIterInitK" -> IIterator(WIterInitK(iterofiarg arg1,
-                     labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "IterNextK" -> IIterator(IterNextK(iterofiarg arg1,
-                     labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
- | "WIterNextK" -> IIterator(WIterNextK(iterofiarg arg1,
                      labelofiarg arg2, localidofiarg arg3, localidofiarg arg4))
  | "LIterInit" -> IIterator(LIterInit (iterofiarg arg1, localidofiarg arg2,
                                        labelofiarg arg3, localidofiarg arg4))

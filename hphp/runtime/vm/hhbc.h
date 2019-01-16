@@ -455,17 +455,6 @@ enum class CudOp : uint8_t {
 #undef CUD_OP
 };
 
-#define FPASS_HINT_OPS \
-  OP(Any)              \
-  OP(Cell)             \
-  OP(Ref)
-
-enum class FPassHint : uint8_t {
-#define OP(name) name,
-  FPASS_HINT_OPS
-#undef OP
-};
-
 #define SPECIAL_CLS_REFS                        \
   REF(Self)                                     \
   REF(Static)                                   \
@@ -682,22 +671,16 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    PF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
-  O(FIsParamByRefCufIter, THREE(IVA,OA(FPassHint),IA),                  \
-                                       NOV,             ONE(CV),    NF) \
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
   O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(WIterInitK,      FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
   O(LIterInitK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
   O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(WIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
   O(LIterNext,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
   O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(WIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
   O(LIterNextK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
   O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
@@ -801,7 +784,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        C_MFINAL(1),     ONE(CV),    NF) \
   O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
-  O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
   O(MemoGetEager,    THREE(BA, BA, LAR),                                \
                                        NOV,             ONE(CV),    CF) \
@@ -976,7 +958,6 @@ const char* subopToName(ReifiedGenericOp);
 const char* subopToName(HasGenericsOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
-const char* subopToName(FPassHint);
 const char* subopToName(SpecialClsRef);
 
 /*
@@ -1165,7 +1146,6 @@ inline bool isMemberFinalOp(Op op) {
     case Op::SetOpM:
     case Op::BindM:
     case Op::UnsetM:
-    case Op::SetWithRefLML:
       return true;
 
     default:
@@ -1185,7 +1165,6 @@ inline MOpMode finalMemberOpMode(Op op) {
     case Op::IncDecM:
     case Op::SetOpM:
     case Op::BindM:
-    case Op::SetWithRefLML:
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;

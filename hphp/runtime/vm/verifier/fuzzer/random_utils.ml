@@ -37,8 +37,6 @@ let random_mode () : MemberOpMode.t =
   [MemberOpMode.ModeNone; MemberOpMode.Define; MemberOpMode.Warn;
    MemberOpMode.Unset] |> rand_elt
 
-let random_fpasshint () : fpass_hint = [Any; Cell; Ref] |> rand_elt
-
 let random_local () : local_id = Local.Unnamed (Random.int 10)
 let random_param_id () : param_id = Param_unnamed (Random.int 10)
 
@@ -319,8 +317,7 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
    (fun () -> IFinal (SetOpM (Random.int 10,
      random_eq_op (), random_key ())));
    (fun () -> IFinal (BindM (Random.int 10, random_key ())));
-   (fun () -> IFinal (UnsetM (Random.int 10, random_key ())));
-   (fun () -> IFinal (SetWithRefLML (random_local (), random_local())))]
+   (fun () -> IFinal (UnsetM (Random.int 10, random_key ())))]
 
 (* An association list of stack signatures to random generators for
     instructions with that stack signature, produced from input list of

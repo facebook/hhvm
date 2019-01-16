@@ -291,20 +291,15 @@ interpOutputLocals(IRGS& env,
     case OpSetOpM:
     case OpBindM:
     case OpUnsetM:
-    case OpSetWithRefLML:
       smashesAllLocals = true;
       break;
 
     case OpIterInitK:
-    case OpWIterInitK:
     case OpIterNextK:
-    case OpWIterNextK:
       setImmLocType(3, TCell);
       /* fallthrough */
     case OpIterInit:
-    case OpWIterInit:
     case OpIterNext:
-    case OpWIterNext:
       setImmLocType(2, TGen);
       break;
 

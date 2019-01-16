@@ -1112,31 +1112,6 @@ template void bindElemC<ICMode::Ignore>(tv_lval, TypedValue,
                                         RefData*, const MInstrPropState*);
 
 template <ICMode intishCast>
-void setWithRefElem(tv_lval base, TypedValue keyTV, TypedValue val,
-                    const MInstrPropState* pState) {
-  TypedValue localTvRef;
-  auto const keyC = tvToCell(keyTV);
-
-  if (UNLIKELY(isRefType(val.m_type))) {
-    HPHP::SetWithRefMLElem<MOpMode::Define, true, intishCast>(
-      localTvRef, base, keyC, val, pState);
-  } else {
-    HPHP::SetWithRefMLElem<MOpMode::Define, false, intishCast>(
-      localTvRef, base, keyC, val, pState);
-  }
-}
-
-template
-void setWithRefElem<ICMode::Warn>(tv_lval, TypedValue, TypedValue,
-                                  const MInstrPropState*);
-template
-void setWithRefElem<ICMode::Cast>(tv_lval, TypedValue, TypedValue,
-                                  const MInstrPropState*);
-template
-void setWithRefElem<ICMode::Ignore>(tv_lval, TypedValue, TypedValue,
-                                    const MInstrPropState*);
-
-template <ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key,
                       IncDecOp op, const MInstrPropState* pState) {
   auto const result = HPHP::IncDecElem<intishCast>(op, base, key, pState);

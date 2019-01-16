@@ -57,8 +57,7 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  bool isInitK = inst->is(IterInitK, WIterInitK, LIterInitK);
-  bool isWInit = inst->is(WIterInit, WIterInitK);
+  bool isInitK = inst->is(IterInitK, LIterInitK);
   bool isLInit = inst->is(LIterInit, LIterInitK);
 
   auto const extra = inst->extra<IterInitData>();
@@ -78,18 +77,14 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.addr(fp, valOff);
     if (isInitK) {
       args.addr(fp, localOffset(extra->keyId));
-    } else if (isWInit) {
-      args.imm(0);
     }
 
     auto const target = [&] {
-      if (isWInit) {
-        return CallSpec::direct(new_iter_array_key<true, false>);
-      } else if (isLInit) {
-        if (isInitK) return CallSpec::direct(new_iter_array_key<false, true>);
+      if (isLInit) {
+        if (isInitK) return CallSpec::direct(new_iter_array_key<true>);
         return CallSpec::direct(new_iter_array<true>);
       } else if (isInitK) {
-        return CallSpec::direct(new_iter_array_key<false, false>);
+        return CallSpec::direct(new_iter_array_key<false>);
       } else {
         return CallSpec::direct(new_iter_array<false>);
       }
@@ -122,13 +117,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
 }
 
 void implIterNext(IRLS& env, const IRInstruction* inst) {
-  // Nothing uses WIterNext so we intentionally don't support it here to avoid
-  // a null check in the witer_next_key helper.  This will need to change if we
-  // ever start using it in an hhas file.
-  always_assert(!inst->is(WIterNext));
-
-  bool isNextK = inst->is(IterNextK, WIterNextK);
-  bool isWNext = inst->is(WIterNext, WIterNextK);
+  bool isNextK = inst->is(IterNextK);
 
   auto const extra = inst->extra<IterData>();
 
@@ -143,8 +132,7 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
     return ret;
   }();
 
-  auto const target = isWNext ? CallSpec::direct(witer_next_key) :
-                      isNextK ? CallSpec::direct(iter_next_key_ind) :
+  auto const target = isNextK ? CallSpec::direct(iter_next_key_ind) :
                                 CallSpec::direct(iter_next_ind);
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -196,14 +184,6 @@ void cgIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgWIterInit(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
-void cgWIterInitK(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
 void cgLIterInit(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
@@ -217,14 +197,6 @@ void cgIterNext(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgIterNextK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
-}
-
-void cgWIterNext(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
-}
-
-void cgWIterNextK(IRLS& env, const IRInstruction* inst) {
   implIterNext(env, inst);
 }
 

@@ -43,18 +43,9 @@ check_func:
 
   .try 1 {
     loop_x:   FPushCufIter 2 0
-              FIsParamByRefCufIter 0 Any 0
-              JmpNZ by_ref_res
               CGetL $res
-              Jmp pass_v
-    by_ref_res:
-              VGetL $res
-    pass_v:   FIsParamByRefCufIter 1 Any 0
-              JmpNZ by_ref_v
               CGetL $v
-              Jmp call
-    by_ref_v: VGetL $v
-    call:     FCall <> 2 1 - "" ""
+              FCall <> 2 1 - "" ""
               SetL $res
               PopC
               IterNext 1 loop_x $v

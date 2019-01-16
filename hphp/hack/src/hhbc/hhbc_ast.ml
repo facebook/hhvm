@@ -53,12 +53,6 @@ module Flavor = struct
   type t = Cell | Ref
 end
 
-(* Indicates whether a call site was annotated as pass-by-ref or not *)
-type fpass_hint =
-  | Any
-  | Cell
-  | Ref
-
 module SpecialClsRef = struct
 
   type t =
@@ -432,7 +426,6 @@ type instruct_call =
   | FPushCtorS of num_params * SpecialClsRef.t
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
-  | FIsParamByRefCufIter of param_num * fpass_hint * Iterator.t
   | FThrowOnRefMismatch of bool list
   | FCall of fcall_args * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
@@ -457,7 +450,6 @@ type instruct_final =
   | SetOpM of num_params  * eq_op * MemberKey.t
   | BindM of num_params * MemberKey.t
   | UnsetM of num_params * MemberKey.t
-  | SetWithRefLML of local_id * local_id
   | SetRangeM of num_params * setrange_op * int
 
 type iter_kind =
@@ -470,14 +462,10 @@ type instruct_iterator =
   | IterInitK of Iterator.t * Label.t * local_id * local_id
   | LIterInit of Iterator.t * local_id * Label.t * local_id
   | LIterInitK of Iterator.t * local_id * Label.t * local_id * local_id
-  | WIterInit of Iterator.t * Label.t * local_id
-  | WIterInitK of Iterator.t * Label.t * local_id * local_id
   | IterNext of Iterator.t * Label.t * local_id
   | IterNextK of Iterator.t * Label.t * local_id * local_id
   | LIterNext of Iterator.t * local_id * Label.t * local_id
   | LIterNextK of Iterator.t * local_id * Label.t * local_id * local_id
-  | WIterNext of Iterator.t * Label.t * local_id
-  | WIterNextK of Iterator.t * Label.t * local_id * local_id
   | IterFree of Iterator.t
   | CIterFree of Iterator.t
   | LIterFree of Iterator.t * local_id

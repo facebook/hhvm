@@ -2708,10 +2708,6 @@ To string conversions:
 
 | IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
 
-| WIterInit<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
-
-| WIterInitK<IterData>, D(Bool), S(ArrLike,Obj) S(FramePtr), CRc
-
 | LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr), NF
 
 | LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr), NF
@@ -2736,9 +2732,6 @@ To string conversions:
   The IterInit and IterInitK instructions always copy the array element by
   value.
 
-  The WIterInit and WIterInitK instructions copy referenced array elements by
-  reference, and non-referenced array elements by value.
-
   The LIter variations only accept arrays and do not take ownership of their
   base. Instead the base is provided on each operation on the iterator. This
   avoids having to raise the ref-count of the base (in situations where this is
@@ -2750,10 +2743,6 @@ To string conversions:
 | IterNext<IterData>,   D(Bool), S(FramePtr), NF
 
 | IterNextK<IterData>,  D(Bool), S(FramePtr), NF
-
-| WIterNext<IterData>,  D(Bool), S(FramePtr), NF
-
-| WIterNextK<IterData>, D(Bool), S(FramePtr), NF
 
 | LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), NF
 
@@ -2772,8 +2761,7 @@ To string conversions:
   (and key) into the local variable with index valId (and keyId, respectively).
 
   The IterInit and IterInitK instructions always copy the array element by
-  value. The WIterInit and WIterInitK instructions copy referenced array
-  elements by reference, and non-referenced array elements by value.
+  value.
 
 | IterFree,  ND, S(FramePtr), NF
 
@@ -3266,10 +3254,6 @@ fields of that struct for holding intermediate values.
 
   Perform a range set or reverse range set operation, with the same arguments
   and semantics as the RangeSet bytecode instruction.
-
-| SetWithRefElem, ND, S(LvalToGen) S(Gen) S(Gen) S(MIPropSPtr,Nullptr), MElem
-
-  Set element with key S1 in S0 to S2.
 
 | UnsetElem, ND, S(LvalToGen) S(Cell), MElem
 

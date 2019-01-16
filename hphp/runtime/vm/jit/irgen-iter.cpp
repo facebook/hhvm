@@ -37,10 +37,6 @@ Offset iterBranchTarget(const NormalizedInstruction& i) {
     case OpIterInitK:
     case OpIterNext:
     case OpIterNextK:
-    case OpWIterInit:
-    case OpWIterInitK:
-    case OpWIterNext:
-    case OpWIterNextK:
       return i.offset() + i.imm[1].u_BA;
     case OpLIterInit:
     case OpLIterInitK:
@@ -255,69 +251,6 @@ void emitLIterNextK(IRGS& env,
       );
     };
   }();
-  implIterJmp(env, relOffset, targetOffset, res);
-}
-
-void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                   int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInit);
-  auto const res = gen(
-    env,
-    WIterInit,
-    TBool,
-    IterInitData(iterId, uint32_t(-1), valLocalId, true),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
-}
-
-void emitWIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                    int32_t valLocalId, int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInitK);
-  auto const res = gen(
-    env,
-    WIterInitK,
-    TBool,
-    IterInitData(iterId, keyLocalId, valLocalId, true),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
-}
-
-void emitWIterNext(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    WIterNext,
-    TBool,
-    IterData(iterId, uint32_t(-1), valLocalId),
-    fp(env)
-  );
-  implIterJmp(env, relOffset, targetOffset, res);
-}
-
-void emitWIterNextK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    WIterNextK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    fp(env)
-  );
   implIterJmp(env, relOffset, targetOffset, res);
 }
 

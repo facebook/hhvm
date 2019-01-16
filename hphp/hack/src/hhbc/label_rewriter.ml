@@ -32,14 +32,10 @@ let get_regular_labels instr =
   | IIterator (IterInitK (_, l, _, _))
   | IIterator (LIterInit (_, _, l, _))
   | IIterator (LIterInitK (_, _, l, _, _))
-  | IIterator (WIterInit (_, l, _))
-  | IIterator (WIterInitK (_, l, _, _))
   | IIterator (IterNext (_, l, _))
   | IIterator (IterNextK (_, l, _, _))
   | IIterator (LIterNext (_, _, l, _))
   | IIterator (LIterNextK (_, _, l, _, _))
-  | IIterator (WIterNext (_, l, _))
-  | IIterator (WIterNextK (_, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (DecodeCufIter (_, l))
   | ICall (FCall ((_, _, _, Some l), _, _))
@@ -116,10 +112,6 @@ let rewrite_params_and_body defs used refs params body =
       Some (IIterator (LIterInit (id, b, relabel l, v)))
     | IIterator (LIterInitK (id, b, l, k, v)) ->
       Some (IIterator (LIterInitK (id, b, relabel l, k, v)))
-    | IIterator (WIterInit (id, l, v)) ->
-      Some (IIterator (WIterInit (id, relabel l, v)))
-    | IIterator (WIterInitK (id, l, k, v)) ->
-      Some (IIterator (WIterInitK (id, relabel l, k, v)))
     | IIterator (IterNext (id, l, v)) ->
       Some (IIterator (IterNext (id, relabel l, v)))
     | IIterator (IterNextK (id, l, k, v)) ->
@@ -128,10 +120,6 @@ let rewrite_params_and_body defs used refs params body =
       Some (IIterator (LIterNext (id, b, relabel l, v)))
     | IIterator (LIterNextK (id, b, l, k, v)) ->
       Some (IIterator (LIterNextK (id, b, relabel l, k, v)))
-    | IIterator (WIterNext (id, l, v)) ->
-      Some (IIterator (WIterNext (id, relabel l, v)))
-    | IIterator (WIterNextK (id, l, k, v)) ->
-      Some (IIterator (WIterNextK (id, relabel l, k, v)))
     | IIterator (IterBreak (l, x)) ->
       Some (IIterator (IterBreak (relabel l, x)))
     | IGenDelegation (YieldFromDelegate (i, l)) ->
@@ -216,10 +204,6 @@ let clone_with_fresh_regular_labels block =
       IIterator (LIterInit (id, b, relabel l, v))
     | IIterator (LIterInitK (id, b, l, k, v)) ->
       IIterator (LIterInitK (id, b, relabel l, k, v))
-    | IIterator (WIterInit (id, l, v)) ->
-      IIterator (WIterInit (id, relabel l, v))
-    | IIterator (WIterInitK (id, l, k, v)) ->
-      IIterator (WIterInitK (id, relabel l, k, v))
     | IIterator (IterNext (id, l, v)) ->
       IIterator (IterNext (id, relabel l, v))
     | IIterator (IterNextK (id, l, k, v)) ->
@@ -228,10 +212,6 @@ let clone_with_fresh_regular_labels block =
       IIterator (LIterNext (id, b, relabel l, v))
     | IIterator (LIterNextK (id, b, l, k, v)) ->
       IIterator (LIterNextK (id, b, relabel l, k, v))
-    | IIterator (WIterNext (id, l, v)) ->
-      IIterator (WIterNext (id, relabel l, v))
-    | IIterator (WIterNextK (id, l, k, v)) ->
-      IIterator (WIterNextK (id, relabel l, k, v))
     | IIterator (IterBreak (l, x)) ->
       IIterator (IterBreak (relabel l, x))
     | ICall (DecodeCufIter (x, l)) ->

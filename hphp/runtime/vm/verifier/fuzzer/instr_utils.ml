@@ -98,8 +98,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall DecodeCufIter _
   | IIterator IterInit _
   | IIterator IterInitK _
-  | IIterator WIterInit _
-  | IIterator WIterInitK _
   | IMisc StaticLocInit _
   | IMisc CheckReifiedGenericMismatch
   | IBasic PopC                            -> ["C"], []

@@ -121,15 +121,6 @@ TypedValue MixedArray::getArrayElmKey(ssize_t pos) const {
   return getElmKey(elm);
 }
 
-ALWAYS_INLINE
-void MixedArray::dupArrayElmWithRef(ssize_t pos,
-                                   TypedValue* valOut,
-                                   TypedValue* keyOut) const {
-  auto& elm = data()[pos];
-  tvDupWithRef(elm.data, *valOut);
-  cellCopy(getElmKey(elm), *keyOut);
-}
-
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assertx(!exists(ki));
   assertx(!isFull());

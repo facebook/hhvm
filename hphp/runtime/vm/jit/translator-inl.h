@@ -69,14 +69,10 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::Fatal:
     case Op::IterNext:
     case Op::IterNextK:
-    case Op::WIterNext:
-    case Op::WIterNextK:
     case Op::LIterNext:
     case Op::LIterNextK:
     case Op::IterInit: // May branch to fail case.
     case Op::IterInitK: // Ditto
-    case Op::WIterInit: // Ditto
-    case Op::WIterInitK: // Ditto
     case Op::LIterInit: // Ditto
     case Op::LIterInitK: // Ditto
     case Op::DecodeCufIter: // Ditto

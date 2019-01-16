@@ -248,12 +248,6 @@ let string_of_setrange_op = function
   | Forward -> "Forward"
   | Reverse -> "Reverse"
 
-let string_of_fpasshint h =
-  match h with
-  | Any -> "Any"
-  | Cell -> "Cell"
-  | Ref -> "Ref"
-
 let string_of_eq_op op =
   match op with
   | PlusEqual -> "PlusEqual"
@@ -475,12 +469,10 @@ let string_of_final instruction =
   | SetRangeM (i, op, s) ->
     sep ["SetRangeM";
       string_of_int i; string_of_setrange_op op; string_of_int s]
-  | SetWithRefLML _ -> failwith "unreachable final instruction"
 
 (*
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t
-| SetWithRefLML of local_id * local_id
 *)
 
 let string_of_param_locations pl =
@@ -535,9 +527,6 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
-  | FIsParamByRefCufIter (i, h, id) ->
-    sep ["FIsParamByRefCufIter"; string_of_param_num i; string_of_fpasshint h;
-         string_of_iterator_id id]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FCall (fcall_args, c, f) ->
@@ -712,7 +701,6 @@ let string_of_iterator instruction =
       let values =
         String.concat ~sep:", " (List.rev_map ~f:map_item iterlist) in
       "IterBreak " ^ (string_of_label label) ^ " <" ^ values ^ ">"
-  | _ -> "### string_of_iterator instruction not implemented"
 
 let string_of_try instruction =
   match instruction with

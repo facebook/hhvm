@@ -634,8 +634,6 @@ public:
   // Otherwise get the value cell (unboxing), and initialize keyOut.
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   void getArrayElm(ssize_t pos, TypedValue* out) const;
-  void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,
-    TypedValue* keyOut) const;
 
   const TypedValue* getArrayElmPtr(ssize_t pos) const;
   TypedValue getArrayElmKey(ssize_t pos) const;

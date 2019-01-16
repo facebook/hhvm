@@ -216,7 +216,6 @@ inline const char* prettytype(TypeStructResolveOp) {
 }
 inline const char* prettytype(ReifiedGenericOp) { return "ReifiedGenericOp"; }
 inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
-inline const char* prettytype(FPassHint) { return "FPassHint"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -4225,91 +4224,6 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
   mFinal(mstate, nDiscard, folly::none);
 }
 
-OPTBLD_INLINE void iopSetWithRefLML(local_var kloc, local_var vloc) {
-  auto const key = *tvToCell(kloc.ptr);
-  auto const value = vloc.ptr;
-  auto& mstate = vmMInstrState();
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
-    mstate.base = [&] {
-      if (LIKELY(!isRefType(value->m_type))) {
-        SuppressHACFalseyPromoteNotices shacn;
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return ElemD<MOpMode::Define, false, ICMode::Warn>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-          case ICMode::Cast:
-            return ElemD<MOpMode::Define, false, ICMode::Cast>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-          case ICMode::Ignore:
-            return ElemD<MOpMode::Define, false, ICMode::Ignore>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-        }
-        not_reached();
-      }
-
-      // See the comment in SetWithRefMLElem() for an explanation of this check
-      // and the notice suppressor below.
-      if (RuntimeOption::EvalHackArrCompatCheckRefBind &&
-          !val(mstate.base).parr->isGlobalsArray()) {
-        raiseHackArrCompatRefBind(key);
-      }
-
-      SuppressHACFalseyPromoteNotices shacn;
-      switch (intishCastMode()) {
-        case ICMode::Warn:
-          return ElemD<MOpMode::Define, true, ICMode::Warn>(
-            mstate.tvRef, mstate.base, key, &mstate.propState
-          );
-        case ICMode::Cast:
-          return ElemD<MOpMode::Define, true, ICMode::Cast>(
-            mstate.tvRef, mstate.base, key, &mstate.propState
-          );
-        case ICMode::Ignore:
-          return ElemD<MOpMode::Define, true, ICMode::Ignore>(
-            mstate.tvRef, mstate.base, key, &mstate.propState
-          );
-      }
-      not_reached();
-    }();
-  } else {
-    switch (intishCastMode()) {
-      case ICMode::Warn:
-        mstate.base = UNLIKELY(isRefType(value->m_type))
-          ? ElemD<MOpMode::Define, true, ICMode::Warn>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            )
-          : ElemD<MOpMode::Define, false, ICMode::Warn>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-        break;
-      case ICMode::Cast:
-        mstate.base = UNLIKELY(isRefType(value->m_type))
-          ? ElemD<MOpMode::Define, true, ICMode::Cast>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            )
-          : ElemD<MOpMode::Define, false, ICMode::Cast>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-        break;
-      case ICMode::Ignore:
-        mstate.base = UNLIKELY(isRefType(value->m_type))
-          ? ElemD<MOpMode::Define, true, ICMode::Ignore>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            )
-          : ElemD<MOpMode::Define, false, ICMode::Ignore>(
-              mstate.tvRef, mstate.base, key, &mstate.propState
-            );
-        break;
-    }
-  }
-  tvSetWithRef(*value, mstate.base);
-
-  mFinal(mstate, 0, folly::none);
-}
-
 namespace {
 
 inline void checkThis(ActRec* fp) {
@@ -5895,18 +5809,6 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   }
 }
 
-OPTBLD_INLINE void iopFIsParamByRefCufIter(uint32_t paramId, FPassHint hint,
-                                           Iter* it) {
-  auto const func = it->cuf().func();
-  auto const byRef = func->byRef(paramId);
-
-  if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
-    raiseParamRefMismatchForFunc(func, paramId);
-  }
-
-  vmStack().pushBool(byRef);
-}
-
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
   assertx(byRefs.size <= ar->numArgs());
   auto const func = ar->func();
@@ -6099,22 +6001,6 @@ OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local,
   }
 }
 
-OPTBLD_INLINE void iopWIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
-  }
-}
-
-OPTBLD_INLINE void
-iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
-}
-
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
   if (it->next()) {
     vmpc() = targetpc;
@@ -6174,26 +6060,6 @@ OPTBLD_INLINE void iopLIterNextK(PC& pc,
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
-}
-
-OPTBLD_INLINE void iopWIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (it->next()) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
-  }
-}
-
-OPTBLD_INLINE void
-iopWIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (it->next()) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-    tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
     tvAsVariant(key.ptr) = it->arr().first();
   }
 }

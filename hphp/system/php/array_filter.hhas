@@ -34,7 +34,7 @@ start:          IsTypeL $arr ArrLike
                 PopC
 
                 CGetL $arr
-                WIterInitK 1 endloop_a $v $k
+                IterInitK 1 endloop_a $v $k
   .try 1 {
                 IssetL $flag
                 JmpZ loop_val
@@ -48,49 +48,37 @@ start:          IsTypeL $arr ArrLike
                 JmpNZ loop_key
 
     loop_val:   FPushCufIter 1 0
-                FIsParamByRefCufIter 0 Any 0
-                JmpNZ by_ref_val
                 CGetL $v
-                Jmp call_val
-    by_ref_val: VGetL $v
-    call_val:   FCall <> 1 1 - "" ""
+                FCall <> 1 1 - "" ""
                 JmpZ next_val
+                CGetL $v
                 BaseL $res Define
-                SetWithRefLML $k $v
-    next_val:   WIterNextK 1 loop_val $v $k
+                SetM 0 EL:$k
+                PopC
+    next_val:   IterNextK 1 loop_val $v $k
                 Jmp endloop_a
 
     loop_both:  FPushCufIter 2 0
-                FIsParamByRefCufIter 0 Any 0
-                JmpNZ by_ref_v_both
                 CGetL $v
-                Jmp pass_k_both
-    by_ref_v_both:
-                VGetL $v
-    pass_k_both:FIsParamByRefCufIter 1 Any 0
-                JmpNZ by_ref_k_both
                 CGetL $k
-                Jmp call_both
-    by_ref_k_both:
-                VGetL $k
-    call_both:  FCall <> 2 1 - "" ""
+                FCall <> 2 1 - "" ""
                 JmpZ next_both
+                CGetL $v
                 BaseL $res Define
-                SetWithRefLML $k $v
-    next_both:  WIterNextK 1 loop_both $v $k
+                SetM 0 EL:$k
+                PopC
+    next_both:  IterNextK 1 loop_both $v $k
                 Jmp endloop_a
 
     loop_key:   FPushCufIter 1 0
-                FIsParamByRefCufIter 0 Any 0
-                JmpNZ by_ref_key
                 CGetL $k
-                Jmp call_key
-    by_ref_key: VGetL $k
-    call_key:   FCall <> 1 1 - "" ""
+                FCall <> 1 1 - "" ""
                 JmpZ next_key
+                CGetL $v
                 BaseL $res Define
-                SetWithRefLML $k $v
-    next_key:   WIterNextK 1 loop_key $v $k
+                SetM 0 EL:$k
+                PopC
+    next_key:   IterNextK 1 loop_key $v $k
                 Jmp endloop_a
   } .catch {
                 IterFree 1
@@ -109,13 +97,15 @@ no_func:  NewLikeArrayL $arr 0
           SetL $res
           PopC
           CGetL $arr
-          WIterInitK 1 endloop_n $v $k
+          IterInitK 1 endloop_n $v $k
 .try 1 {
 loop_n:   CGetL $v
           JmpZ skip_n
+          CGetL $v
           BaseL $res Define
-          SetWithRefLML $k $v
-skip_n:   WIterNextK 1 loop_n $v $k
+          SetM 0 EL:$k
+          PopC
+skip_n:   IterNextK 1 loop_n $v $k
           Jmp endloop_n
 } .catch {
           IterFree 1
@@ -148,12 +138,8 @@ start_kt:         IssetL $func
                   JmpNZ loop_key_kt
 
     loop_val_kt:  FPushCufIter 1 0
-                  FIsParamByRefCufIter 0 Any 0
-                  JmpNZ by_ref_val_kt
                   CGetL $v
-                  Jmp call_val_kt
-    by_ref_val_kt:VGetL $v
-    call_val_kt:  FCall <> 1 1 - "" ""
+                  FCall <> 1 1 - "" ""
                   JmpZ next_val_kt
                   CGetL $v
                   BaseL $res Define
@@ -163,20 +149,9 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_both_kt: FPushCufIter 2 0
-                  FIsParamByRefCufIter 0 Any 0
-                  JmpNZ by_ref_v_both_kt
                   CGetL $v
-                  Jmp pass_k_both_kt
-    by_ref_v_both_kt:
-                  VGetL $v
-    pass_k_both_kt:
-                  FIsParamByRefCufIter 1 Any 0
-                  JmpNZ by_ref_k_both_kt
                   CGetL $k
-                  Jmp call_both_kt
-    by_ref_k_both_kt:
-                  VGetL $k
-    call_both_kt: FCall <> 2 1 - "" ""
+                  FCall <> 2 1 - "" ""
                   JmpZ next_both_kt
                   CGetL $v
                   BaseL $res Define
@@ -186,12 +161,8 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_key_kt:  FPushCufIter 1 0
-                  FIsParamByRefCufIter 0 Any 0
-                  JmpNZ by_ref_key_kt
                   CGetL $k
-                  Jmp call_key_kt
-    by_ref_key_kt:VGetL $k
-    call_key_kt:  FCall <> 1 1 - "" ""
+                  FCall <> 1 1 - "" ""
                   JmpZ next_key_kt
                   CGetL $v
                   BaseL $res Define

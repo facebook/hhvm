@@ -408,20 +408,6 @@ IMPL_OPCODE_CALL(BindNewElem);
     not_reached();                                                     \
   }())
 
-void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-
-  auto const target = ICMODE_DISPATCH(MInstrHelpers::setWithRefElem);
-
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .typedValue(1)
-    .typedValue(2)
-    .ssa(3);
-
-  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
-}
-
 void cgBindElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 

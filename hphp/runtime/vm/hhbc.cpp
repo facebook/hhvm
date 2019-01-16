@@ -1074,12 +1074,6 @@ static const char* CudOp_names[] = {
 #undef CUD_OP
 };
 
-static const char* FPassHint_names[] = {
-#define OP(x) #x,
-  FPASS_HINT_OPS
-#undef OP
-};
-
 static const char* SpecialClsRef_names[] = {
 #define REF(x) #x,
   SPECIAL_CLS_REFS
@@ -1159,7 +1153,6 @@ X(HasGenericsOp,  static_cast<int>(HasGenericsOp::NoGenerics))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
-X(FPassHint,      static_cast<int>(FPassHint::Any))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 #undef X
 

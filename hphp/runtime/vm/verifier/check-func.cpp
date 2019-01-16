@@ -899,7 +899,6 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       key = decode_member_key(pc, unit());
       break;
     case Op::SetRangeM:
-    case Op::SetWithRefLML:
       return true;
 
     default:
@@ -1062,7 +1061,6 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   auto op = peek_op(pc);
   if (op == Op::IterInit || op == Op::IterInitK ||
       op == Op::LIterInit || op == Op::LIterInitK ||
-      op == Op::WIterInit || op == Op::WIterInitK ||
       op == Op::DecodeCufIter) {
     if (cur->iters[id]) {
       error(
@@ -1831,7 +1829,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::DecodeCufIter:
     case Op::FPushCufIter:
     case Op::CIterFree:
-    case Op::FIsParamByRefCufIter:
     case Op::FThrowOnRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:
@@ -1867,14 +1864,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::WHResult:
     case Op::Await:
     case Op::AwaitAll:
-      return true;
-
-    // special ops for array_map/filter/walk functions
-    case Op::WIterInit:
-    case Op::WIterInitK:
-    case Op::WIterNext:
-    case Op::WIterNextK:
-    case Op::SetWithRefLML:
       return true;
 
     // safe member base operations
@@ -2268,8 +2257,7 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     auto const last_op = peek_op(b->last);
     bool taken_state =
       (last_op == OpIterNext || last_op == OpIterNextK ||
-       last_op == OpLIterNext || last_op == OpLIterNextK ||
-       last_op == OpWIterNext || last_op == OpWIterNextK);
+       last_op == OpLIterNext || last_op == OpLIterNextK);
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_errmode == kVerbose) {

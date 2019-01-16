@@ -246,9 +246,6 @@ uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
 template <ICMode intishCast>
 void bindElemC(tv_lval, TypedValue, RefData*, const MInstrPropState*);
-template <ICMode intishCast>
-void setWithRefElem(tv_lval, TypedValue, TypedValue,
-                    const MInstrPropState*);
 template<ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
                       const MInstrPropState*);

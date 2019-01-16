@@ -1423,19 +1423,6 @@ void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
   finish(TRef);
 }
 
-void miFinalSetWithRef(ISS& env) {
-  auto const& baseTy = env.state.mInstrState.base.type;
-  auto const isvec = baseTy.subtypeOf(BVec);
-  auto const isdict = baseTy.subtypeOf(BDict);
-  auto const iskeyset = baseTy.subtypeOf(BKeyset);
-  endBase(env);
-  if (!isvec && !isdict && !iskeyset) {
-    killLocals(env);
-    killThisProps(env);
-    killSelfProps(env);
-  }
-}
-
 }
 
 namespace interp_step {
@@ -1687,12 +1674,6 @@ void in(ISS& env, const bc::UnsetM& op) {
     assert(mcodeIsElem(op.mkey.mcode));
     miFinalUnsetElem(env, op.arg1, *key);
   }
-}
-
-void in(ISS& env, const bc::SetWithRefLML& op) {
-  locAsCell(env, op.loc1);
-  locAsCell(env, op.loc2);
-  miFinalSetWithRef(env);
 }
 
 }

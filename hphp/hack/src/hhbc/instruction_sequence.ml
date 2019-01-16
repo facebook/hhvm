@@ -780,8 +780,7 @@ let get_input_output_count i =
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
     | FPushFuncD _ | FThrowOnRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
-    | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
-    | FIsParamByRefCufIter _ -> (0, 1)
+    | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _ -> (0, 1)
     | FCall ((f, n1, n2, _), _, _) -> (n1 + (if f.has_unpack then 1 else 0), n2)
     | FCallBuiltin (n, _, _) -> (n, 1)
     end
@@ -839,18 +838,16 @@ let get_input_output_count i =
     | QueryM (n, _, _) | VGetM (n, _) | IncDecM (n, _, _)
     | UnsetM (n, _) -> (n, 1)
     | SetM (n, _) | SetOpM (n, _, _) | BindM (n, _) -> (n + 1, 1)
-    | SetWithRefLML _ -> (0, 0)
     | SetRangeM (n, _, _) -> (n + 3, 0)
     end
   | ISpecialFlow _ ->
     failwith "this pseudo-instruction is internal to HackC"
   | IIterator i ->
     begin match i with
-    | IterInit _ | IterInitK _ | WIterInit _ | WIterInitK _ -> (1, 0)
+    | IterInit _ | IterInitK _ -> (1, 0)
     | LIterInit _ | LIterInitK _
     | IterNext _ | IterNextK _ | LIterNext _ | LIterNextK _
-    | WIterNext _ | WIterNextK _ | IterFree _ | CIterFree _
-    | LIterFree _ | IterBreak _ -> (0, 0)
+    | IterFree _ | CIterFree _ | LIterFree _ | IterBreak _ -> (0, 0)
     end
   | IContFlow _
   | ILabel _
@@ -1001,11 +998,7 @@ let collect_locals f instrs =
     | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
                 UnsetL l)
     | IBase (BaseNL (l, _) | BaseGL (l, _))
-    | IIterator (
-      IterInit (_, _, l) | WIterInit (_, _, l) |
-      IterNext (_, _, l) | WIterNext (_, _, l) |
-      LIterFree (_, l)
-      )
+    | IIterator (IterInit (_, _, l) | IterNext (_, _, l) | LIterFree (_, l))
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
              GetMemoKeyL l |
@@ -1013,10 +1006,8 @@ let collect_locals f instrs =
              MemoSet (Some (l, _)) | MemoSetEager (Some (l, _)))
     | IAsync (AwaitAll (Some (l, _)))
       -> add acc l
-    | IFinal (SetWithRefLML (l1, l2))
     | IIterator (
-      IterInitK (_, _, l1, l2) | WIterInitK (_, _, l1, l2) |
-      IterNextK (_, _, l1, l2) | WIterNextK (_, _, l1, l2) |
+      IterInitK (_, _, l1, l2) | IterNextK (_, _, l1, l2) |
       LIterInit (_, l1, _, l2) | LIterNext (_, l1, _, l2)
       )
       -> add (add acc l1) l2

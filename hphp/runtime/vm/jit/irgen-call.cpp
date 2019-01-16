@@ -1468,45 +1468,6 @@ SSATmp* ldPreLiveFunc(IRGS& env) {
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
 }
 
-void handleRefMismatch(IRGS& env, SSATmp* func, uint32_t paramId) {
-  gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
-}
-
-}
-
-void emitFIsParamByRefCufIter(IRGS& env, uint32_t paramId, FPassHint hint,
-                              int32_t itId) {
-  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
-  if (func->hasConstVal(TFunc)) {
-    auto const byRef = func->funcVal()->byRef(paramId);
-    if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
-      handleRefMismatch(env, func, paramId);
-    }
-    push(env, cns(env, byRef));
-    return;
-  }
-
-  push(env, cond(
-    env,
-    [&] (Block* taken) {
-      // CheckRefs only needs to know the number of parameters when there are
-      // more than 64 args.
-      auto const numParams = paramId < 64
-        ? cns(env, 64) : gen(env, LdFuncNumParams, func);
-      auto const bucket = paramId / 64 * 64;
-      auto const mask = 1UL << (paramId % 64);
-      gen(env, CheckRefs, taken, CheckRefsData { bucket, mask, 0 }, func,
-          numParams);
-    },
-    [&] {
-      if (hint == FPassHint::Ref) handleRefMismatch(env, func, paramId);
-      return cns(env, false);
-    },
-    [&] {
-      if (hint == FPassHint::Cell) handleRefMismatch(env, func, paramId);
-      return cns(env, true);
-    }
-  ));
 }
 
 void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
@@ -1518,7 +1479,8 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
     auto const f = func->funcVal();
     for (auto i = 0; i < immVec.size(); ++i) {
       if (f->byRef(i) != ((byRefs[i / 8] >> (i % 8)) & 1)) {
-        PUNT(FThrowOnRefMismatch-RefMismatch);
+        gen(env, RaiseParamRefMismatchForFunc, ParamData { i }, func);
+        return;
       }
     }
     return;

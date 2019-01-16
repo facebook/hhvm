@@ -60,19 +60,15 @@ not_array:
             PopC
 
             CGetL $arr
-            WIterInitK 1 endloop_kt $v $k
+            IterInitK 1 endloop_kt $v $k
   .try 1 {
     loop_x_kt:FPushCufIter 1 0
-              FIsParamByRefCufIter 0 Any 0
-              JmpNZ by_ref_kt
               CGetL $v
-              Jmp call_kt
-    by_ref_kt:VGetL $v
-    call_kt:  FCall <> 1 1 - "" ""
+              FCall <> 1 1 - "" ""
               BaseL $res Define
               SetM 0 EL:$k
               PopC
-              WIterNextK 1 loop_x_kt $v $k
+              IterNextK 1 loop_x_kt $v $k
               Jmp endloop_kt
   } .catch {
               IterFree 1
@@ -103,20 +99,16 @@ one_array:
             PopC
 
             CGetL $arr
-            WIterInitK 1 endloop $v $k
+            IterInitK 1 endloop $v $k
 
   .try 1 {
     loop_x:   FPushCufIter 1 0
-              FIsParamByRefCufIter 0 Any 0
-              JmpNZ by_ref
               CGetL $v
-              Jmp call
-    by_ref:   VGetL $v
-    call:     FCall <> 1 1 - "" ""
+              FCall <> 1 1 - "" ""
               BaseL $res Define
               SetM 0 EL:$k
               PopC
-              WIterNextK 1 loop_x $v $k
+              IterNextK 1 loop_x $v $k
               Jmp endloop
   } .catch {
               IterFree 1

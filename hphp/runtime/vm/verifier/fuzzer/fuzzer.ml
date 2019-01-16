@@ -239,9 +239,6 @@ let mutate_key (k : MemberKey.t) c =
 let mutate_mode (m : MemberOpMode.t) =
   if should_mutate() then random_mode () else m
 
-let mutate_fpasshint (h : fpass_hint) =
-  if should_mutate() then random_fpasshint () else h
-
 (* When given stack data about an instruction sequences, and applied as a
  * wrapper around 'op', this will ensure that the mutations occurring as part
  * of 'op' don't unbalance the evaluation stack. It does this by calculating
@@ -416,8 +413,6 @@ let mut_imms (is : IS.t) : IS.t =
     | SetOpM  (i, op, k) -> SetOpM  (mutate_int i  !mag, op, mutate_key k !mag)
     | BindM   (i,     k) -> BindM   (mutate_int i  !mag,     mutate_key k !mag)
     | UnsetM  (i,     k) -> UnsetM  (mutate_int i  !mag,     mutate_key k !mag)
-    | SetWithRefLML (id, id') ->
-        SetWithRefLML (mutate_local_id id !mag, mutate_local_id id' !mag)
     | SetRangeM (i, op, s) ->
         SetRangeM (mutate_int i !mag, op, mutate_int s !mag)
   in
@@ -428,20 +423,10 @@ let mut_imms (is : IS.t) : IS.t =
     | IterInitK  (i, l, id, id') ->
         IterInitK  (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
-    | WIterInit  (i, l, id)      ->
-        WIterInit  (i, mutate_label data l,      mutate_local_id id  !mag)
-    | WIterInitK (i, l, id, id') ->
-        WIterInitK (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterNext   (i, l, id)      ->
         IterNext   (i, mutate_label data l,      mutate_local_id id  !mag)
     | IterNextK  (i, l, id, id') ->
         IterNextK  (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
-    | WIterNext  (i, l, id)      ->
-        WIterNext  (i, mutate_label data l,      mutate_local_id id  !mag)
-    | WIterNextK (i, l, id, id') ->
-        WIterNextK (i, mutate_label data l,
                        mutate_local_id  id !mag, mutate_local_id id' !mag)
     | IterBreak  (l, lst)        ->
         IterBreak     (mutate_label data l,

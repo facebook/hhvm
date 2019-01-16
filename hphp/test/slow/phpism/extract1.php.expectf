@@ -1,4 +1,0 @@
-
-Warning: extract() is deprecated and subject to removal from the Hack language in %s on line %d
-int(1)
-string(3) "bar"

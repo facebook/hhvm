@@ -1,6 +1,6 @@
 <?hh
-function extract() { echo "extract()\n"; }
-function main() { extract(); }
+function parse_str() { echo "parse_str()\n"; }
+function main() { parse_str(); }
 
 // Copyright 2004-present Facebook. All Rights Reserved.
 

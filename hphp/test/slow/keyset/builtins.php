@@ -136,10 +136,6 @@ function with_keyset($k1) {
   var_dump(current(&$k));
   echo "end: ";
   var_dump(end(&$k));
-  echo "extract: ";
-  $ks = keyset['php_is_awesome', 42];
-  var_dump(extract(&$ks));
-  var_dump($php_is_awesome);
   echo "in_array: ";
   var_dump([in_array('x', $k1), in_array('q', $k1)]);
   echo "key: ";

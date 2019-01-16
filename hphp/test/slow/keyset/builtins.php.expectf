@@ -328,8 +328,6 @@ each: array(4) {
 }
 current 2: string(1) "e"
 end: string(1) "t"
-extract: int(1)
-string(14) "php_is_awesome"
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -633,8 +631,6 @@ each: array(4) {
 }
 current 2: int(8)
 end: int(8)
-extract: int(1)
-string(14) "php_is_awesome"
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -922,8 +918,6 @@ each: array(4) {
 }
 current 2: string(1) "8"
 end: string(1) "8"
-extract: int(1)
-string(14) "php_is_awesome"
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -1103,8 +1097,6 @@ current 1: bool(false)
 each: bool(false)
 current 2: bool(false)
 end: bool(false)
-extract: int(1)
-string(14) "php_is_awesome"
 in_array: array(2) {
   [0]=>
   bool(false)

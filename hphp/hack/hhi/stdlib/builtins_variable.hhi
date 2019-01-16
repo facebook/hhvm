@@ -57,8 +57,6 @@ function unserialize($str, $class_whitelist = array());
 function get_defined_vars();
 <<__PHPStdLib>>
 function import_request_variables($types, $prefix = "");
-<<__PHPStdLib>>
-function extract(&$var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");
 }
 
 namespace HH\Lib\_Private\Native {

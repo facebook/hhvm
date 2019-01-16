@@ -42,86 +42,6 @@ function test_compact_errors() {
   call_user_func_array($f, []);
 }
 
-function test_extract_dyncall() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'extract';
-  $arg = ['var1' => '101', 'var2' => '201'];
-  $f(&$arg);
-  var_dump($var1, $var2);
-}
-
-function test_extract_map() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'extract';
-  array_map($f, [['var1' => '101', 'var2' => '201']]);
-  var_dump($var1, $var2);
-}
-
-function test_extract_errors() {
-  $f = 'extract';
-  $f();
-  $tmp = 123; $f(&$tmp);
-  $tmp = 'foo'; $f(&$tmp, 'foo', 'foo', 'foo');
-  array_map($f, ['foo']);
-}
-
-function make_parse_str_str($v1, $v2) {
-  return "var1=$v1&var2=$v2";
-}
-
-function test_parse_str_dyncall() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'parse_str';
-  $f(make_parse_str_str(101, 201));
-  var_dump($var1, $var2);
-}
-
-function test_parse_str_cuf() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'parse_str';
-  call_user_func($f, make_parse_str_str(101, 201));
-  var_dump($var1, $var2);
-}
-
-function test_parse_str_cuf_array() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'parse_str';
-  call_user_func_array($f, [make_parse_str_str(101, 201)]);
-  var_dump($var1, $var2);
-}
-
-function test_parse_str_map() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-
-  $f = 'parse_str';
-  array_map($f, [make_parse_str_str(101, 201)]);
-  var_dump($var1, $var2);
-}
-
-function test_parse_str_errors() {
-  $f = 'parse_str';
-  $f();
-  $f([]);
-  array_map($f, [[]]);
-}
-
 function test_framemeta_dyncall() {
   $v = '86metadata';
   $$v = 100;
@@ -202,129 +122,6 @@ function test_getargs_errors() {
   array_map($f, [1]);
 }
 
-function test_assert_dyncall_pass() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  $f('($var = \'200\') && true', 'assertion failed');
-  var_dump($var);
-}
-
-function test_assert_dyncall_pass2() {
-  $f = 'assert';
-  $f(true, 'assertion failed');
-}
-
-function test_assert_dyncall_fail() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  $f('($var = \'200\') && false', 'assertion failed');
-  var_dump($var);
-}
-
-function test_assert_dyncall_fail2() {
-  $f = 'assert';
-  $f(false, 'assertion failed');
-}
-
-function test_assert_cuf_pass() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  call_user_func($f, '($var = \'200\') && true', 'assertion failed');
-  var_dump($var);
-}
-
-function test_assert_cuf_pass2() {
-  $f = 'assert';
-  call_user_func($f, true, 'assertion failed');
-}
-
-function test_assert_cuf_fail() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  call_user_func($f, '($var = \'200\') && false', 'assertion failed');
-  var_dump($var);
-}
-
-function test_assert_cuf_fail2() {
-  $f = 'assert';
-  call_user_func($f, false, 'assertion failed');
-}
-
-function test_assert_cuf_array_pass() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  call_user_func_array($f, ['($var = \'200\') && true', 'assertion failed']);
-  var_dump($var);
-}
-
-function test_assert_cuf_array_pass2() {
-  $f = 'assert';
-  call_user_func_array($f, [true, 'assertion failed']);
-}
-
-function test_assert_cuf_array_fail() {
-  $var = 100;
-  var_dump($var);
-  $f = 'assert';
-  call_user_func_array($f, ['($var = \'200\') && false', 'assertion failed']);
-  var_dump($var);
-}
-
-function test_assert_cuf_array_fail2() {
-  $f = 'assert';
-  call_user_func_array($f, [false, 'assertion failed']);
-}
-
-function test_assert_map_pass() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-  $f = 'assert';
-  array_map($f, ['($var1 = \'300\') && true', '($var2 = \'400\') && true']);
-  var_dump($var1, $var2);
-}
-
-function test_assert_map_pass2() {
-  $f = 'assert';
-  array_map($f, [true, true]);
-}
-
-function test_assert_map_fail() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-  $f = 'assert';
-  array_map($f, ['($var1 = \'300\') && false', '($var2 = \'400\') && false']);
-  var_dump($var1, $var2);
-}
-
-function test_assert_map_fail2() {
-  $f = 'assert';
-  array_map($f, [false, false]);
-}
-
-function test_assert_chained() {
-  $var1 = 100;
-  $var2 = 200;
-  var_dump($var1, $var2);
-  $f = 'assert';
-  $args = ['var1' => '300', 'var2' => '400'];
-  call_user_func($f, 'extract(&$args) || true');
-  var_dump($var1, $var2);
-}
-
-function test_assert_errors() {
-   $f = 'assert';
-   $f();
-   call_user_func($f);
-   call_user_func_array($f, []);
-}
-
 function get_current_test($all) {
   $tests = apc_fetch('tests');
   if (!is_array($tests)) {
@@ -348,16 +145,6 @@ function run_tests() {
     'test_compact_map',
     'test_compact_errors',
 
-    'test_extract_dyncall',
-    'test_extract_map',
-    'test_extract_errors',
-
-    'test_parse_str_dyncall',
-    'test_parse_str_cuf',
-    'test_parse_str_cuf_array',
-    'test_parse_str_map',
-    'test_parse_str_errors',
-
     'test_framemeta_dyncall',
     'test_framemeta_cuf',
     'test_framemeta_cuf_array',
@@ -368,25 +155,6 @@ function run_tests() {
     'test_getargs_cuf',
     'test_getargs_cuf_array',
     'test_getargs_errors',
-
-    'test_assert_dyncall_pass',
-    'test_assert_dyncall_pass2',
-    'test_assert_dyncall_fail',
-    'test_assert_dyncall_fail2',
-    'test_assert_cuf_pass',
-    'test_assert_cuf_pass2',
-    'test_assert_cuf_fail',
-    'test_assert_cuf_fail2',
-    'test_assert_cuf_array_pass',
-    'test_assert_cuf_array_pass2',
-    'test_assert_cuf_array_fail',
-    'test_assert_cuf_array_fail2',
-    'test_assert_map_pass',
-    'test_assert_map_pass2',
-    'test_assert_map_fail',
-    'test_assert_map_fail2',
-    'test_assert_chained',
-    'test_assert_errors',
   ];
 
   $test = get_current_test($all);

@@ -211,4 +211,4 @@ function similar_text($first, $second, &$percent = null);
 function soundex($str);
 <<__PHPStdLib, __Rx>>
 function metaphone($str, $phones = 0);
-function parse_str($str, &$arr = null);
+function parse_str($str, &$arr);

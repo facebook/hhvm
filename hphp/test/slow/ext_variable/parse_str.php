@@ -2,16 +2,16 @@
 function testme() {
   $data='a=1&b=2&c=3';
   echo 'parse_data(): ',$data,EOL;
-  parse_str($data);
-  if (isset($b)) {
-    echo 'isset b='.$b,EOL;
+  parse_str($data, &$output);
+  if (isset($output['b'])) {
+    echo 'isset b='.$output['b'],EOL;
   } else {
-    echo 'notset b='.$b,EOL;
+    echo 'notset b='.$output['b'],EOL;
   }
-  if (isset($b)) {
-    echo 'isset b='.$b,EOL;
+  if (isset($output['b'])) {
+    echo 'isset b='.$output['b'],EOL;
   } else {
-    echo 'no b='.$b,EOL;
+    echo 'no b='.$output['b'],EOL;
   }
 }
 
@@ -22,11 +22,11 @@ define('EOL',"\n");
 $data='a=1&b=2&c=3';
 echo 'global scope',EOL;
 echo 'parse_data(): ',$data,EOL;
-parse_str($data);
-if (isset($b)) {
-  echo 'isset b='.$b,EOL;
+parse_str($data, &$output);
+if (isset($output['b'])) {
+  echo 'isset b='.$output['b'],EOL;
 } else {
-  echo 'no b='.$b,EOL;
+  echo 'no b='.$output['b'],EOL;
 }
 echo EOL;
 

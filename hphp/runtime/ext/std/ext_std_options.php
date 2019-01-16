@@ -8,15 +8,7 @@ function assert_options(int $what,
                         mixed $value = null): mixed;
 
 /* assert() will check the given assertion and take appropriate action if its
- * result is FALSE.  If the assertion is given as a string it will be
- * evaluated as PHP code by assert(). The advantages of a string assertion are
- * less overhead when assertion checking is off and messages containing the
- * assertion expression when an assertion fails. This means that if you pass a
- * boolean condition as assertion this condition will not show up as parameter
- * to the assertion function which you may have defined with the
- * assert_options() function, the condition is converted to a string before
- * calling that handler function, and the boolean FALSE is converted as the
- * empty string.  Assertions should be used as a debugging feature only. You
+ * result is FALSE.  Assertions should be used as a debugging feature only. You
  * may use them for sanity-checks that test for conditions that should always
  * be TRUE and that indicate some programming errors if not or to check for
  * the presence of certain features like extension functions or certain system
@@ -24,20 +16,9 @@ function assert_options(int $what,
  * operations like input parameter checks. As a rule of thumb your code should
  * always be able to work correctly if assertion checking is not activated.
  * The behavior of assert() may be configured by assert_options() or by
- * .ini-settings described in that functions manual page.  The
- * assert_options() function and/or ASSERT_CALLBACK configuration directive
- * allow a callback function to be set to handle failed assertions.  assert()
- * callbacks are particularly useful for building automated test suites
- * because they allow you to easily capture the code passed to the assertion,
- * along with information on where the assertion was made. While this
- * information can be captured via other methods, using assertions makes it
- * much faster and easier!  The callback function should accept three
- * arguments. The first argument will contain the file the assertion failed
- * in. The second argument will contain the line the assertion failed on and
- * the third argument will contain the expression that failed (if any -
- * literal values such as 1 or "two" will not be passed via this argument)
+ * .ini-settings described in that functions manual page.
  */
-<<__Native("ReadsCallerFrame", "WritesCallerFrame")>>
+<<__Native>>
 function assert(mixed $assertion, mixed $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use

@@ -23,6 +23,6 @@ function dumpFuncInfo($name) {
 
 dumpFuncInfo('foo');
 dumpFuncInfo('bar');
-dumpFuncInfo('extract');
+dumpFuncInfo('array_pop');
 
 ?>

@@ -170,8 +170,7 @@ function get_defined_vars(): array;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
  * you disabled register_globals, but would like to see some variables in the
- * global scope.  If you're interested in importing other variables into the
- * global scope, such as $_SERVER, consider using extract().
+ * global scope.
  */
 function import_request_variables(string $types,
                                   string $prefix = ""): bool {
@@ -184,18 +183,8 @@ function import_request_variables(string $types,
                       "this function is called.");
 }
 
-/* Import variables from an array into the current symbol table.  Checks each
- * key to see whether it has a valid variable name. It also checks for
- * collisions with existing variables in the symbol table.
- */
-<<__Native("WritesCallerFrame")>>
-function extract(mixed &$var_array,
-                 int $extract_type = EXTR_OVERWRITE,
-                 string $prefix = ""): int;
-
 /*
- * Parses str as if it were the query string passed via a URL and sets
- * variables in the current scope.
+ * Parses str as if it were the query string passed via a URL and sets $arr.
  *
  * To get the current QUERY_STRING, you may use the variable
  * $_SERVER['QUERY_STRING']. Also, you may want to read the section on
@@ -205,8 +194,8 @@ function extract(mixed &$var_array,
  * parse_str() uses the same mechanism that PHP uses to populate the $_GET,
  * $_POST, etc. variables.
  */
-<<__Native("WritesCallerFrame")>>
-function parse_str(string $str, mixed &$arr = null): void;
+<<__Native>>
+function parse_str(string $str, mixed &$arr): void;
 
 }
 

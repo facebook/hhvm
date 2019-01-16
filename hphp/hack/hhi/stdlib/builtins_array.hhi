@@ -28,16 +28,6 @@ const int SORT_FLAG_CASE = 0;
 const int COUNT_NORMAL = 0;
 const int COUNT_RECURSIVE = 0;
 
-// flags for extract()
-const int EXTR_OVERWRITE = 0;
-const int EXTR_SKIP = 0;
-const int EXTR_PREFIX_SAME = 0;
-const int EXTR_PREFIX_ALL = 0;
-const int EXTR_PREFIX_INVALID = 0;
-const int EXTR_PREFIX_IF_EXISTS = 0;
-const int EXTR_IF_EXISTS = 0;
-const int EXTR_REFS = 0;
-
 const int UCOL_DEFAULT = 0;
 const int UCOL_PRIMARY = 0;
 const int UCOL_SECONDARY = 0;

@@ -7,8 +7,8 @@ function main_redefine_builtin_cond() {
 $already_ran = apc_fetch('already_ran');
 if ($already_ran) {
   echo "Before redefine\n";
-  function extract() { echo "extract()\n"; }
-  function main() { extract(); }
+  function parse_str() { echo "parse_str()\n"; }
+  function main() { parse_str(); }
   main();
 } else {
   apc_store('already_ran', true);

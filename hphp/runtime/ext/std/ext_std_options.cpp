@@ -64,7 +64,6 @@ const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
 const StaticString s_ZEND_VERSION("2.4.99");
 
 const int64_t k_ASSERT_ACTIVE      = 1;
-const int64_t k_ASSERT_CALLBACK    = 2;
 const int64_t k_ASSERT_BAIL        = 3;
 const int64_t k_ASSERT_WARNING     = 4;
 const int64_t k_ASSERT_QUIET_EVAL  = 5;
@@ -81,16 +80,13 @@ struct OptionData final : RequestEventHandler {
     assertQuietEval = false;
   }
 
-  void requestShutdown() override {
-    assertCallback.unset();
-  }
+  void requestShutdown() override {}
 
   int assertActive;
   int assertException;
   int assertWarning;
   int assertBail;
   bool assertQuietEval;
-  Variant assertCallback;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
@@ -125,11 +121,6 @@ static Variant HHVM_FUNCTION(assert_options,
     if (!value.isNull()) s_option_data->assertBail = value.toInt64();
     return oldValue;
   }
-  if (what == k_ASSERT_CALLBACK) {
-    Variant oldValue = s_option_data->assertCallback;
-    if (!value.isNull()) s_option_data->assertCallback = value;
-    return oldValue;
-  }
   if (what == k_ASSERT_QUIET_EVAL) {
     bool oldValue = s_option_data->assertQuietEval;
     if (!value.isNull()) s_option_data->assertQuietEval = value.toBoolean();
@@ -144,101 +135,20 @@ static Variant HHVM_FUNCTION(assert_options,
   return false;
 }
 
-static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
-  String prefixedCode = concat3(
-    curFP->unit()->isHHFile() ? "<?hh return " : "<?php return ",
-    codeStr,
-    ";"
-  );
-
-  auto const oldErrorLevel =
-    s_option_data->assertQuietEval ? HHVM_FN(error_reporting)(Variant(0)) : 0;
-  SCOPE_EXIT {
-    if (s_option_data->assertQuietEval) HHVM_FN(error_reporting)(oldErrorLevel);
-  };
-
-  auto const unit = g_context->compileEvalString(prefixedCode.get());
-  if (unit == nullptr) {
-    raise_recoverable_error("Syntax error in assertx()");
-    // Failure to compile the eval string doesn't count as an
-    // assertion failure.
-    return Variant(true);
-  }
-
-  if (!(curFP->func()->attrs() & AttrMayUseVV)) {
-    throw_not_supported("assert()",
-                        "assert called from non-varenv function");
-  }
-
-  if (!curFP->hasVarEnv()) {
-    curFP->setVarEnv(VarEnv::createLocal(curFP));
-  }
-  auto varEnv = curFP->getVarEnv();
-
-  ObjectData* thiz = nullptr;
-  Class* cls = nullptr;
-  Class* ctx = curFP->func()->cls();
-  if (ctx) {
-    if (curFP->hasThis()) {
-      thiz = curFP->getThis();
-      cls = thiz->getVMClass();
-    } else {
-      cls = curFP->getClass();
-    }
-  }
-  auto const func = unit->getMain(ctx);
-  return Variant::attach(
-    g_context->invokeFunc(
-      func,
-      init_null_variant,
-      thiz,
-      cls,
-      varEnv,
-      nullptr,
-      ExecutionContext::InvokePseudoMain
-    )
-  );
-}
-
 static Variant HHVM_FUNCTION(assert, const Variant& assertion,
                              const Variant& message /* = null */) {
- auto const warning = "assert() is deprecated and subject"
-   " to removal from the Hack language";
-   switch (RuntimeOption::DisableAssert) {
-     case 0:  break;
-     case 1:  raise_warning(warning); break;
-     default: raise_error(warning);
-   }
+  auto const warning = "assert() is deprecated and subject"
+    " to removal from the Hack language";
+  switch (RuntimeOption::DisableAssert) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
 
   if (!s_option_data->assertActive) return true;
 
-  CallerFrame cf;
-  Offset callerOffset;
-  auto const fp = cf(&callerOffset);
+  if (assertion.toBoolean()) return true;
 
-  auto const passed = [&]() -> bool {
-    if (assertion.isString()) {
-      if (RuntimeOption::EvalAuthoritativeMode) {
-        // We could support this with compile-time string literals,
-        // but it's not yet implemented.
-        throw_not_supported("assert()",
-          "assert with strings argument in RepoAuthoritative mode");
-      }
-      return eval_for_assert(fp, assertion.toString()).toBoolean();
-    }
-    return assertion.toBoolean();
-  }();
-  if (passed) return true;
-
-  if (!s_option_data->assertCallback.isNull()) {
-    auto const unit = fp->m_func->unit();
-
-    PackedArrayInit ai(3);
-    ai.append(String(const_cast<StringData*>(unit->filepath())));
-    ai.append(Variant(unit->getLineNumber(callerOffset)));
-    ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
-    HHVM_FN(call_user_func)(s_option_data->assertCallback, ai.toArray());
-  }
   if (s_option_data->assertException) {
     if (message.isObject()) {
       Object exn = message.toObject();
@@ -1353,7 +1263,6 @@ void StandardExtension::initOptions() {
   HHVM_RC_INT(INFO_ALL, 0x7FFFFFFF);
 
   HHVM_RC_INT(ASSERT_ACTIVE, k_ASSERT_ACTIVE);
-  HHVM_RC_INT(ASSERT_CALLBACK, k_ASSERT_CALLBACK);
   HHVM_RC_INT(ASSERT_BAIL, k_ASSERT_BAIL);
   HHVM_RC_INT(ASSERT_WARNING, k_ASSERT_WARNING);
   HHVM_RC_INT(ASSERT_QUIET_EVAL, k_ASSERT_QUIET_EVAL);

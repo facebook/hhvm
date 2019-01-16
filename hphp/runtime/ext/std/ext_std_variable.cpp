@@ -622,178 +622,11 @@ Array HHVM_FUNCTION(get_defined_vars) {
   return v ? v->getDefinedVariables() : empty_array();
 }
 
-const StaticString
-  s_GLOBALS("GLOBALS"),
-  s_this("this");
-
-static const Func* arGetContextFunc(const ActRec* ar) {
-  if (ar == nullptr) {
-    return nullptr;
-  }
-  if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
-    // Pseudomains inherit the context of their caller
-    auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMState(ar);
-    while (ar != nullptr &&
-             (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMState(ar);
-    }
-    if (ar == nullptr) {
-      return nullptr;
-    }
-  }
-  return ar->m_func;
-}
-
-static bool modify_extract_name(VarEnv* v,
-                                String& name,
-                                int64_t extract_type,
-                                const String& prefix) {
-  switch (extract_type) {
-  case EXTR_SKIP:
-    if (v->lookup(name.get()) != nullptr) {
-      return false;
-    }
-    break;
-  case EXTR_IF_EXISTS:
-    if (v->lookup(name.get()) == nullptr) {
-      return false;
-    } else {
-      goto namechecks;
-    }
-    break;
-  case EXTR_PREFIX_SAME:
-    if (v->lookup(name.get()) != nullptr) {
-      name = prefix + "_" + name;
-    } else {
-      goto namechecks;
-    }
-    break;
-  case EXTR_PREFIX_ALL:
-    name = prefix + "_" + name;
-    break;
-  case EXTR_PREFIX_INVALID:
-    if (!is_valid_var_name(name.get()->data(), name.size())) {
-      name = prefix + "_" + name;
-    } else {
-      goto namechecks;
-    }
-    break;
-  case EXTR_PREFIX_IF_EXISTS:
-    if (v->lookup(name.get()) == nullptr) {
-      return false;
-    }
-    name = prefix + "_" + name;
-    break;
-  case EXTR_OVERWRITE:
-    namechecks:
-    if (name == s_GLOBALS) {
-      return false;
-    }
-    if (name == s_this) {
-      // Only disallow $this when inside a non-static method, or a static method
-      // that has defined $this (matches Zend)
-      auto const func = arGetContextFunc(GetCallerFrame());
-
-      if (func && func->isMethod() && v->lookup(s_this.get()) != nullptr) {
-        return false;
-      }
-    }
-  default:
-    break;
-  }
-
-  // skip invalid variable names, as in PHP
-  return is_valid_var_name(name.get()->data(), name.size());
-}
-
-int64_t HHVM_FUNCTION(extract,
-                      VRefParam vref_array,
-                      int64_t extract_type = EXTR_OVERWRITE,
-                      const String& prefix = "") {
-  auto const warning =
-    "extract() is deprecated and subject to removal from the Hack language";
-  switch (RuntimeOption::DisableExtract) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-  auto arrByRef = false;
-  auto arr_tv = vref_array.wrapped().asTypedValue();
-  if (isRefType(arr_tv->m_type)) {
-    arr_tv = arr_tv->m_data.pref->cell();
-    arrByRef = true;
-  }
-  if (!isArrayLikeType(arr_tv->m_type)) {
-    raise_warning("extract() expects parameter 1 to be array");
-    return 0;
-  }
-
-  bool reference = extract_type & EXTR_REFS;
-  extract_type &= ~EXTR_REFS;
-
-  VMRegAnchor _;
-  auto const varEnv = g_context->getOrCreateVarEnv();
-  if (!varEnv) return 0;
-
-  auto& carr = tvAsCVarRef(arr_tv).asCArrRef();
-  if (UNLIKELY(reference)) {
-    auto extr_refs = [&](Array& arr) {
-      if (arr.size() > 0) {
-        // force arr to escalate (if necessary) by getting an lvalue to the
-        // first element.
-        ArrayData* ad = arr.get();
-        auto const& first_key = ad->getKey(ad->iter_begin());
-        arr.lvalAt(first_key);
-      }
-      int count = 0;
-      for (ArrayIter iter(arr); iter; ++iter) {
-        auto name = iter.first().toString();
-        if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-        // The as_lval() is safe because we escalated the array.  We can't use
-        // arr.lvalAt(name), because arr may have been modified as a side
-        // effect of an earlier iteration.
-        auto const rval = iter.secondRval();
-        g_context->bindVar(name.get(), rval.as_lval());
-        ++count;
-      }
-      return count;
-    };
-
-    if (arrByRef) {
-      return extr_refs(tvAsVariant(vref_array.getRefData()->cell()).asArrRef());
-    }
-    Array tmp = carr;
-    return extr_refs(tmp);
-  }
-
-  int count = 0;
-  for (ArrayIter iter(carr); iter; ++iter) {
-    auto name = iter.first().toString();
-    if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-    g_context->setVar(name.get(), iter.secondRval());
-    ++count;
-  }
-  return count;
-}
-
 void HHVM_FUNCTION(parse_str,
                    const String& str,
-                   VRefParam arr /* = null */) {
-  if (!arr.isReferenced()) {
-    auto const warning = "parse_str() requires two arguments";
-    switch (RuntimeOption::DisableParseStrSingleArg) {
-      case 0:  break;
-      case 1:  raise_warning(warning); break;
-      default: raise_error(warning);
-    }
-  }
+                   VRefParam arr) {
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
-  if (!arr.isReferenced()) {
-    HHVM_FN(extract)(result);
-    return;
-  }
   arr.assignIfRef(result);
 }
 
@@ -806,15 +639,6 @@ Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer,
 /////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initVariable() {
-  HHVM_RC_INT_SAME(EXTR_IF_EXISTS);
-  HHVM_RC_INT_SAME(EXTR_OVERWRITE);
-  HHVM_RC_INT_SAME(EXTR_PREFIX_ALL);
-  HHVM_RC_INT_SAME(EXTR_PREFIX_IF_EXISTS);
-  HHVM_RC_INT_SAME(EXTR_PREFIX_INVALID);
-  HHVM_RC_INT_SAME(EXTR_PREFIX_SAME);
-  HHVM_RC_INT_SAME(EXTR_REFS);
-  HHVM_RC_INT_SAME(EXTR_SKIP);
-
   HHVM_FE(is_null);
   HHVM_FE(is_bool);
   HHVM_FE(is_int);
@@ -851,7 +675,6 @@ void StandardExtension::initVariable() {
   HHVM_FE(serialize);
   HHVM_FE(unserialize);
   HHVM_FE(get_defined_vars);
-  HHVM_FE(extract);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);

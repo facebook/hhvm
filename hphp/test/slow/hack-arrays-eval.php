@@ -26,31 +26,6 @@ function test_eval() {
   eval('var_dump(is_keyset($k));');
 }
 
-function test_assert() {
-  echo "============ test_assert =====================================\n";
-
-  assert('($v = vec[1, 2, 3]) || true');
-  assert('($d = dict[100 => \'abc\', 200 => \'def\']) || true');
-  assert('($k = keyset[1, \'abc\', 3]) || true');
-
-  var_dump($v);
-  var_dump($d);
-  var_dump($k);
-
-  $a = [100, 200, 300];
-  assert('($v = vec($a)) || true');
-  assert('($d = dict($a)) || true');
-  assert('($k = keyset($a)) || true');
-
-  var_dump($v);
-  var_dump($d);
-  var_dump($k);
-
-  assert('(var_dump(is_vec($v))) || true');
-  assert('(var_dump(is_dict($d))) || true');
-  assert('(var_dump(is_keyset($k))) || true');
-}
-
 function test_create_function() {
   echo "============ test_create_function ============================\n";
 
@@ -101,7 +76,6 @@ function main_hack_arrays_eval() {
 $array = [];
 
 test_eval();
-test_assert();
 test_create_function();
 test_default_value();
 }

@@ -1,2 +1,3 @@
 <?hh
-$test = assert('print(123)');
+$test = assert(true);
+print($test);

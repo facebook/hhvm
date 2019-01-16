@@ -600,8 +600,8 @@ bool popCouldRunDestructor(Env& env, uint32_t i = 0) {
   // reference, so popping the stack won't run any destructors.
   auto const& s = env.stateBefore.stack;
   auto const& e = s[s.size() - i - 1];
-  return (e.equivLoc == NoLocalId || e.equivLoc == StackDupId) &&
-    could_run_destructor(e.type);
+  // Either StackDupId or StackThisId will guard the popped value
+  return e.equivLoc == NoLocalId && could_run_destructor(e.type);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -648,7 +648,7 @@ Type locRaw(Env& env, LocalId loc) {
 
 bool setLocCouldHaveSideEffects(Env& env, LocalId loc, bool forExit = false) {
   // A "this" local is protected by the $this in the ActRec.
-  if (loc == env.stateBefore.thisLocToKill) return false;
+  if (loc == env.stateBefore.thisLoc) return false;
 
   // Normally, if there's an equivLocal this isn't the last reference,
   // so overwriting it won't run any destructors. But if we're

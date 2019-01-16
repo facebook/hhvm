@@ -177,7 +177,7 @@ State without_stacks(const State& src) {
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisAvailable = src.thisAvailable;
-  ret.thisLocToKill = src.thisLocToKill;
+  ret.thisLoc       = src.thisLoc;
 
   if (UNLIKELY(src.locals.size() > (1LL << 50))) {
     // gcc 4.9 has a bug where it will spit out a warning:
@@ -318,9 +318,9 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     dst.thisAvailable = available;
   }
 
-  if (dst.thisLocToKill != src.thisLocToKill) {
-    if (dst.thisLocToKill != NoLocalId) {
-      dst.thisLocToKill = NoLocalId;
+  if (dst.thisLoc != src.thisLoc) {
+    if (dst.thisLoc != NoLocalId) {
+      dst.thisLoc = NoLocalId;
       changed = true;
     }
   }
@@ -555,8 +555,8 @@ std::string state_string(const php::Func& f, const State& st,
     folly::format(&ret, "thisAvailable({})\n", st.thisAvailable);
   }
 
-  if (st.thisLocToKill != NoLocalId) {
-    folly::format(&ret, "thisLocToKill({})\n", st.thisLocToKill);
+  if (st.thisLoc != NoLocalId) {
+    folly::format(&ret, "thisLoc({})\n", st.thisLoc);
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
@@ -595,7 +595,6 @@ std::string state_string(const php::Func& f, const State& st,
                   i,
                   show(st.stack[i].type),
                   st.stack[i].equivLoc == NoLocalId ? "" :
-                  st.stack[i].equivLoc == StackDupId ? "Dup" :
                   local_string(f, st.stack[i].equivLoc));
   }
 

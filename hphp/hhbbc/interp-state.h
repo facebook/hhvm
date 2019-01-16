@@ -208,7 +208,8 @@ struct StackElem {
   // A location which is known to have an equivalent value to this
   // stack value. This could be a valid LocalId, the special value
   // StackDupId to indicate that its equivalent to the stack element
-  // below it, or NoLocalId if it has no known equivalents.
+  // below it, the special value StackThisId to indicate that its the
+  // value of $this, or NoLocalId if it has no known equivalents.
   // Note that the location may not match the stack value wrt Uninit.
   LocalId equivLoc;
 
@@ -278,7 +279,7 @@ struct State {
   // when speculated is set, the number of extra pops to be inserted
   uint8_t speculatedPops{};
   uint32_t speculated = NoBlockId;
-  LocalId thisLocToKill = NoLocalId;
+  LocalId thisLoc = NoLocalId;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
   CompactVector<Type> clsRefSlots;

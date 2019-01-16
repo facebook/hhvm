@@ -64,7 +64,8 @@ constexpr const LocalId NoLocalId = -1;
  * this element is a dup of the one below.
  */
 constexpr const LocalId StackDupId = -2;
-constexpr const LocalId MaxLocalId = StackDupId - 1;
+constexpr const LocalId StackThisId = -3;
+constexpr const LocalId MaxLocalId = StackThisId - 1;
 
 using IterId = uint32_t;
 using ClsRefSlotId = uint32_t;

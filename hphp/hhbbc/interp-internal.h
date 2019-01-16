@@ -363,14 +363,14 @@ void push(ISS& env, Type t) {
 }
 
 void push(ISS& env, Type t, LocalId l) {
-  if (l != StackDupId) {
-    if (l == NoLocalId || peekLocRaw(env, l).couldBe(BRef)) {
+  if (l == NoLocalId) return push(env, t);
+  if (l <= MaxLocalId) {
+    if (peekLocRaw(env, l).couldBe(BRef)) {
       return push(env, t);
     }
     assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
   }
-  FTRACE(2, "    push: {} (={})\n",
-         show(t), l == StackDupId ? "Dup" : local_string(*env.ctx.func, l));
+  FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
@@ -532,6 +532,13 @@ bool locsAreEquiv(ISS& env, LocalId l1, LocalId l2) {
   return false;
 }
 
+bool locIsThis(ISS& env, LocalId l) {
+  assertx(l <= MaxLocalId);
+  return l == env.state.thisLoc ||
+    (env.state.thisLoc <= MaxLocalId &&
+     locsAreEquiv(env, l, env.state.thisLoc));
+}
+
 void killLocEquiv(State& state, LocalId l) {
   if (l >= state.equivLocals.size()) return;
   if (state.equivLocals[l] == NoLocalId) return;
@@ -582,7 +589,7 @@ void addLocEquiv(ISS& env,
 LocalId topStkLocal(const State& state, uint32_t idx = 0) {
   assert(idx < state.stack.size());
   auto const equiv = state.stack[state.stack.size() - idx - 1].equivLoc;
-  return equiv == StackDupId ? NoLocalId : equiv;
+  return equiv > MaxLocalId ? NoLocalId : equiv;
 }
 LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
   return topStkLocal(env.state, idx);
@@ -597,26 +604,27 @@ LocalId topStkEquiv(ISS& env, uint32_t idx = 0) {
 void setStkLocal(ISS& env, LocalId loc, uint32_t idx = 0) {
   assertx(loc <= MaxLocalId);
   always_assert(peekLocRaw(env, loc).subtypeOf(BCell));
-  while (true) {
-    auto equiv = topStkEquiv(env, idx);
-    if (equiv != StackDupId) {
-      if (equiv <= MaxLocalId) {
-        if (loc == equiv || locsAreEquiv(env, loc, equiv)) return;
-        addLocEquiv(env, loc, equiv);
-        return;
-      }
-      env.state.stack[env.state.stack.size() - idx - 1].equivLoc = loc;
-      return;
+  auto const equiv = [&] {
+    while (true) {
+      auto const e = topStkEquiv(env, idx);
+      if (e != StackDupId) return e;
+      idx++;
     }
-    idx++;
+  }();
+
+  if (equiv <= MaxLocalId) {
+    if (loc == equiv || locsAreEquiv(env, loc, equiv)) return;
+    addLocEquiv(env, loc, equiv);
+    return;
   }
+  env.state.stack[env.state.stack.size() - idx - 1].equivLoc = loc;
 }
 
-void killThisLocToKill(ISS& env, LocalId l) {
+void killThisLoc(ISS& env, LocalId l) {
   if (l != NoLocalId ?
-      env.state.thisLocToKill == l : env.state.thisLocToKill != NoLocalId) {
-    FTRACE(2, "Killing thisLocToKill: {}\n", env.state.thisLocToKill);
-    env.state.thisLocToKill = NoLocalId;
+      env.state.thisLoc == l : env.state.thisLoc != NoLocalId) {
+    FTRACE(2, "Killing thisLoc: {}\n", env.state.thisLoc);
+    env.state.thisLoc = NoLocalId;
   }
 }
 
@@ -631,7 +639,7 @@ void killStkEquiv(ISS& env, LocalId l) {
 
 void killAllStkEquiv(ISS& env) {
   for (auto& e : env.state.stack) {
-    if (e.equivLoc != StackDupId) e.equivLoc = NoLocalId;
+    if (e.equivLoc <= MaxLocalId) e.equivLoc = NoLocalId;
   }
 }
 
@@ -681,10 +689,6 @@ Type peekLocRaw(ISS& env, LocalId l) {
   return ret;
 }
 
-Type peekLocation(ISS& env, LocalId l, uint32_t idx = 0) {
-  return l == StackDupId ? topT(env, idx) : peekLocRaw(env, l);
-}
-
 Type locRaw(ISS& env, LocalId l) {
   mayReadLocal(env, l);
   return peekLocRaw(env, l);
@@ -695,7 +699,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   killStkEquiv(env, l);
   killLocEquiv(env, l);
   killIterEquivs(env, l);
-  killThisLocToKill(env, l);
+  killThisLoc(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l];
     always_assert_flog(current == TGen, "volatile local was not TGen");
@@ -786,7 +790,12 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     }
     l = stk->equivLoc;
   }
-  if (l == NoLocalId) return ok;
+  if (l == StackThisId) {
+    if (env.state.thisLoc != NoLocalId) {
+      l = env.state.thisLoc;
+    }
+  }
+  if (l > MaxLocalId) return ok;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
     do {
@@ -823,7 +832,7 @@ void setLoc(ISS& env, LocalId l, Type t, LocalId key = NoLocalId) {
   killStkEquiv(env, l);
   killLocEquiv(env, l);
   killIterEquivs(env, l, key);
-  killThisLocToKill(env, l);
+  killThisLoc(env, l);
   modifyLocalStatic(env, l, t);
   mayReadLocal(env, l);
   refineLocHelper(env, l, std::move(t));
@@ -850,7 +859,7 @@ void loseNonRefLocalTypes(ISS& env) {
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);
-  killThisLocToKill(env, NoLocalId);
+  killThisLoc(env, NoLocalId);
   modifyLocalStatic(env, NoLocalId, TCell);
 }
 
@@ -863,7 +872,7 @@ void boxUnknownLocal(ISS& env) {
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);
-  killThisLocToKill(env, NoLocalId);
+  killThisLoc(env, NoLocalId);
   // Don't update the local statics here; this is called both for
   // boxing and binding, and the effects on local statics are
   // different.
@@ -876,7 +885,7 @@ void unsetUnknownLocal(ISS& env) {
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);
-  killThisLocToKill(env, NoLocalId);
+  killThisLoc(env, NoLocalId);
   unbindLocalStatic(env, NoLocalId);
 }
 
@@ -888,7 +897,7 @@ void killLocals(ISS& env) {
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);
-  killThisLocToKill(env, NoLocalId);
+  killThisLoc(env, NoLocalId);
 }
 
 //////////////////////////////////////////////////////////////////////

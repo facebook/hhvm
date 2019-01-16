@@ -85,6 +85,9 @@ std::string array_string(SArray arr) {
 namespace php {
 
 std::string local_string(const Func& func, LocalId lid) {
+  if (lid == StackDupId) return "Dup";
+  if (lid == StackThisId) return "This";
+  assertx(lid <= MaxLocalId);
   auto const& loc = func.locals[lid];
   return loc.name
     ? folly::to<std::string>("$", loc.name->data())

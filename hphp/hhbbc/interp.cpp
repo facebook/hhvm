@@ -706,8 +706,8 @@ std::pair<Type,bool> resolveSame(ISS& env) {
     auto const v2 = tv(t2);
 
     if (l1 == StackDupId ||
-        (l1 <= MaxLocalId && l2 <= MaxLocalId &&
-         (l1 == l2 || locsAreEquiv(env, l1, l2)))) {
+        (l1 == l2 && l1 != NoLocalId) ||
+        (l1 <= MaxLocalId && l2 <= MaxLocalId && locsAreEquiv(env, l1, l2))) {
       if (!t1.couldBe(BDbl) || !t2.couldBe(BDbl) ||
           (v1 && (v1->m_type != KindOfDouble || !std::isnan(v1->m_data.dbl))) ||
           (v2 && (v2->m_type != KindOfDouble || !std::isnan(v2->m_data.dbl)))) {
@@ -755,7 +755,11 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
 
   auto const loc0 = topStkEquiv(env, 0);
   auto const loc1 = topStkEquiv(env, 1);
-  if (loc0 == NoLocalId && loc1 == NoLocalId) return bail();
+  // If loc0 == loc1, either they're both NoLocalId, so there's
+  // nothing for us to deduce, or both stack elements are the same
+  // value, so the only thing we could deduce is that they are or are
+  // not NaN. But we don't track that, so just bail.
+  if (loc0 == loc1 || loc0 == StackDupId) return bail();
 
   auto const ty0 = topC(env, 0);
   auto const ty1 = topC(env, 1);
@@ -782,13 +786,13 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
     // we know that won't be affected. Its irrelevant for uncounted
     // things, and for TObj and TRes, $x === $y iff $x and $y refer to
     // the same thing.
-    if (loc0 <= MaxLocalId && loc1 <= MaxLocalId &&
-        (ty0.subtypeOfAny(TOptObj, TOptRes) ||
-         ty1.subtypeOfAny(TOptObj, TOptRes) ||
+    if (loc0 <= MaxLocalId &&
+        (ty0.subtypeOf(BObj | BRes | BPrim) ||
+         ty1.subtypeOf(BObj | BRes | BPrim) ||
          (ty0.subtypeOf(BUnc) && ty1.subtypeOf(BUnc)))) {
       if (loc1 == StackDupId) {
-        setStkLocal(env, loc0);
-      } else if (loc0 != loc1 && !locsAreEquiv(env, loc0, loc1)) {
+        setStkLocal(env, loc0, 1);
+      } else if (loc1 <= MaxLocalId && !locsAreEquiv(env, loc0, loc1)) {
         auto loc = loc0;
         while (true) {
           auto const other = findLocEquiv(env, loc);
@@ -1102,9 +1106,6 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   nothrow(env);
 
   if (location == NoLocalId) return env.propagate(op.target1, &env.state);
-
-  auto val = peekLocation(env, location);
-  assertx(!val.couldBe(BRef)); // we shouldn't have an equivLoc if it was
 
   refineLocation(env, location,
                  Negate ? assert_nonemptiness : assert_emptiness,
@@ -1593,8 +1594,10 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
-  if (op.loc1 == env.state.thisLocToKill) {
-    return reduce(env, bc::BareThis { BareThisOp::Notice });
+  if (locIsThis(env, op.loc1)) {
+    auto const subop = peekLocRaw(env, op.loc1).couldBe(BUninit) ?
+      BareThisOp::Notice : BareThisOp::NoNotice;
+    return reduce(env, bc::BareThis { subop });
   }
   if (!locCouldBeUninit(env, op.loc1)) {
     nothrow(env);
@@ -1604,7 +1607,7 @@ void in(ISS& env, const bc::CGetL& op) {
 }
 
 void in(ISS& env, const bc::CGetQuietL& op) {
-  if (op.loc1 == env.state.thisLocToKill) {
+  if (locIsThis(env, op.loc1)) {
     return reduce(env, bc::BareThis { BareThisOp::NoNotice });
   }
   nothrow(env);
@@ -1781,9 +1784,11 @@ void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
 }
 
 void in(ISS& env, const bc::ClsRefGetL& op) {
-  if (op.loc1 == env.state.thisLocToKill) {
+  if (locIsThis(env, op.loc1)) {
+    auto const subop = peekLocRaw(env, op.loc1).couldBe(BUninit) ?
+      BareThisOp::Notice : BareThisOp::NoNotice;
     return reduce(env,
-                  bc::BareThis { BareThisOp::Notice },
+                  bc::BareThis { subop },
                   bc::ClsRefGetC { op.slot });
   }
   clsRefGetImpl(env, locAsCell(env, op.loc1), op.slot);
@@ -2104,7 +2109,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
 }
 
 void in(ISS& env, const bc::IssetL& op) {
-  if (op.loc1 == env.state.thisLocToKill) {
+  if (locIsThis(env, op.loc1)) {
     return reduce(env,
                   bc::BareThis { BareThisOp::NoNotice },
                   bc::IsTypeC { IsTypeOp::Null },
@@ -2669,12 +2674,20 @@ template <typename Op>
 folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
                                                         const Op& op) {
   nothrow(env);
-  auto equivLoc = topStkLocal(env);
+  auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
   if (!locCouldBeRef(env, op.loc1)) {
+    if (equivLoc == StackThisId && env.state.thisLoc != NoLocalId) {
+      if (env.state.thisLoc == op.loc1 ||
+                 locsAreEquiv(env, env.state.thisLoc, op.loc1)) {
+        return folly::none;
+      } else {
+        equivLoc = env.state.thisLoc;
+      }
+    }
     assertx(!is_volatile_local(env.ctx.func, op.loc1));
-    if (equivLoc != NoLocalId) {
+    if (equivLoc <= MaxLocalId) {
       if (equivLoc == op.loc1 ||
           locsAreEquiv(env, equivLoc, op.loc1)) {
         // We allow equivalency to ignore Uninit, so we need to check
@@ -2683,7 +2696,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
           return folly::none;
         }
       }
-    } else {
+    } else if (equivLoc == NoLocalId) {
       equivLoc = op.loc1;
     }
     if (any(env.collect.opts & CollectionOpts::Inlining) &&
@@ -2695,7 +2708,13 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   }
   auto val = popC(env);
   setLoc(env, op.loc1, val);
-  if (equivLoc != op.loc1 && equivLoc != NoLocalId) {
+  if (equivLoc == StackThisId) {
+    assertx(env.state.thisLoc == NoLocalId);
+    equivLoc = env.state.thisLoc = op.loc1;
+  }
+  if (equivLoc == StackDupId) {
+    setStkLocal(env, op.loc1);
+  } else if (equivLoc != op.loc1 && equivLoc != NoLocalId) {
     addLocEquiv(env, op.loc1, equivLoc);
   }
   return { std::make_pair(std::move(val), equivLoc) };
@@ -4080,7 +4099,7 @@ void in(ISS& env, const bc::This&) {
     return reduce(env, bc::BareThis { BareThisOp::NeverNull });
   }
   auto const ty = thisType(env);
-  push(env, ty ? *ty : TObj);
+  push(env, ty ? *ty : TObj, StackThisId);
   if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
     unreachable(env);
   } else {
@@ -4114,23 +4133,23 @@ void in(ISS& env, const bc::BareThis& op) {
 
   auto const ty = thisType(env);
   switch (op.subop1) {
-  case BareThisOp::Notice:
-    break;
-  case BareThisOp::NoNotice:
-    nothrow(env);
-    break;
-  case BareThisOp::NeverNull:
-    nothrow(env);
-    setThisAvailable(env);
-    return push(env, ty ? *ty : TObj);
+    case BareThisOp::Notice:
+      break;
+    case BareThisOp::NoNotice:
+      effect_free(env);
+      break;
+    case BareThisOp::NeverNull:
+      effect_free(env);
+      setThisAvailable(env);
+      return push(env, ty ? *ty : TObj, StackThisId);
   }
 
-  push(env, ty ? opt(*ty) : TOptObj);
+  push(env, ty ? opt(*ty) : TOptObj, StackThisId);
 }
 
 void in(ISS& env, const bc::InitThisLoc& op) {
   setLocRaw(env, op.loc1, TCell);
-  env.state.thisLocToKill = op.loc1;
+  env.state.thisLoc = op.loc1;
 }
 
 void in(ISS& env, const bc::StaticLocDef& op) {

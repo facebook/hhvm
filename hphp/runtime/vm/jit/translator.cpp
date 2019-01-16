@@ -316,13 +316,9 @@ static const struct {
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
-  { OpFIsParamByRef,
-                   {None,             Stack1,       OutBoolean      }},
   { OpFIsParamByRefCufIter,
                    {None,             Stack1,       OutBoolean      }},
   { OpFThrowOnRefMismatch,
-                   {None,             None,         OutNone         }},
-  { OpFHandleRefMismatch,
                    {None,             None,         OutNone         }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
@@ -869,7 +865,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNS:
   case Op::FCall:
   case Op::ClsCnsD:
-  case Op::FIsParamByRef:
   case Op::FIsParamByRefCufIter:
   case Op::FThrowOnRefMismatch:
   case Op::FCallBuiltin:
@@ -1136,9 +1131,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::YieldFromDelegate:
   case Op::ContUnsetDelegate:
     return true;
-
-  case Op::FHandleRefMismatch:
-    return static_cast<FPassHint>(ni.imm[1].u_OA) == FPassHint::Any;
   }
 
   always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));

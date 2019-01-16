@@ -1472,8 +1472,11 @@ void handleRefMismatch(IRGS& env, SSATmp* func, uint32_t paramId) {
   gen(env, RaiseParamRefMismatchForFunc, ParamData { (int32_t)paramId }, func);
 }
 
-void implFIsParamByRef(IRGS& env, SSATmp* func, uint32_t paramId,
-                       FPassHint hint) {
+}
+
+void emitFIsParamByRefCufIter(IRGS& env, uint32_t paramId, FPassHint hint,
+                              int32_t itId) {
+  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
   if (func->hasConstVal(TFunc)) {
     auto const byRef = func->funcVal()->byRef(paramId);
     if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
@@ -1504,18 +1507,6 @@ void implFIsParamByRef(IRGS& env, SSATmp* func, uint32_t paramId,
       return cns(env, true);
     }
   ));
-}
-
-}
-
-void emitFIsParamByRef(IRGS& env, uint32_t paramId, FPassHint hint) {
-  implFIsParamByRef(env, ldPreLiveFunc(env), paramId, hint);
-}
-
-void emitFIsParamByRefCufIter(IRGS& env, uint32_t paramId, FPassHint hint,
-                              int32_t itId) {
-  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
-  implFIsParamByRef(env, func, paramId, hint);
 }
 
 void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
@@ -1558,19 +1549,6 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
     gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
         numParams);
   }
-}
-
-void emitFHandleRefMismatch(IRGS& env, uint32_t paramId, FPassHint hint,
-                            const StringData* funcName) {
-  assertx(hint != FPassHint::Any);
-
-  gen(
-    env,
-    RaiseParamRefMismatchForFuncName,
-    ParamData { (int32_t)paramId },
-    cns(env, funcName),
-    cns(env, hint == FPassHint::Cell)
-  );
 }
 
 //////////////////////////////////////////////////////////////////////

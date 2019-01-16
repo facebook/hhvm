@@ -3421,47 +3421,6 @@ void in(ISS& env, const bc::FPushCufIter&) {
   fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
-void in(ISS& env, const bc::FIsParamByRef& op) {
-  auto& ar = fpiTop(env);
-  auto const kind = ar.func && !ar.fallbackFunc
-    ? env.index.lookup_param_prep(env.ctx, *ar.func, op.arg1)
-    : PrepKind::Unknown;
-
-  auto makeFuncName = [&]() -> SString {
-    if (!ar.cls) return ar.func->name();
-    return makeStaticString(
-      folly::sformat("{}::{}", ar.cls->name()->data(), ar.func->name()->data())
-    );
-  };
-
-  switch (kind) {
-  case PrepKind::Unknown:
-    if (ar.foldable) {
-      fpiNotFoldable(env);
-    }
-    if (op.subop2 == FPassHint::Any) {
-      nothrow(env);
-    }
-    return push(env, TBool);
-  case PrepKind::Val:
-    if (op.subop2 != FPassHint::Ref) {
-      return reduce(env, bc::False {});
-    } else {
-      auto const funcName = makeFuncName();
-      auto const hrm = bc::FHandleRefMismatch { op.arg1, op.subop2, funcName };
-      return reduce(env, hrm, bc::False {});
-    }
-  case PrepKind::Ref:
-    if (op.subop2 != FPassHint::Cell) {
-      return reduce(env, bc::True {});
-    } else {
-      auto const funcName = makeFuncName();
-      auto const hrm = bc::FHandleRefMismatch { op.arg1, op.subop2, funcName };
-      return reduce(env, hrm, bc::True {});
-    }
-  }
-}
-
 void in(ISS& env, const bc::FIsParamByRefCufIter& op) {
   if (op.subop2 == FPassHint::Any) {
     nothrow(env);
@@ -3499,8 +3458,6 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
 
   reduce(env, bc::Nop {});
 }
-
-void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
 
 Type typeFromWH(Type t) {
   if (!t.couldBe(BObj)) {

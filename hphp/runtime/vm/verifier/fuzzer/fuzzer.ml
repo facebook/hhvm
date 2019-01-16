@@ -367,8 +367,6 @@ let mut_imms (is : IS.t) : IS.t =
                                                   op)
     | FPushCtorI    (i, id)     -> FPushCtorI    (i, mutate_int        id !mag)
     | DecodeCufIter (i, id)     -> DecodeCufIter (i, mutate_label data id)
-    | FIsParamByRef (i, h)      -> FIsParamByRef (mutate_int        i  !mag,
-                                                  mutate_fpasshint  h)
     | _ -> s in
   let mutate_base s =
     match s with

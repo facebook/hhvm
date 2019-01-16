@@ -157,12 +157,8 @@ let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
-let instr_fis_param_by_ref i hint =
-  instr (ICall (FIsParamByRef (i, hint)))
 let instr_fthrow_on_ref_mismatch by_refs =
   instr (ICall (FThrowOnRefMismatch by_refs))
-let instr_fhandle_ref_mismatch i hint name =
-  instr (ICall (FHandleRefMismatch (i, hint, name)))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)
@@ -782,10 +778,10 @@ let get_input_output_count i =
     | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _ | DecodeCufIter _
     | FPushFunc _ -> (1, 0)
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
-    | FPushFuncD _ | FThrowOnRefMismatch _ | FHandleRefMismatch _ -> (0, 0)
+    | FPushFuncD _ | FThrowOnRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
-    | FIsParamByRef _ | FIsParamByRefCufIter _ -> (0, 1)
+    | FIsParamByRefCufIter _ -> (0, 1)
     | FCall ((f, n1, n2, _), _, _) -> (n1 + (if f.has_unpack then 1 else 0), n2)
     | FCallBuiltin (n, _, _) -> (n, 1)
     end

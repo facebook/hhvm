@@ -2092,7 +2092,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
   case RaiseParamRefMismatchForFunc:
-  case RaiseParamRefMismatchForFuncName:
   case RaiseForbiddenDynCall:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:

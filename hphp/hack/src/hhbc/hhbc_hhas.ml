@@ -535,16 +535,11 @@ let string_of_call instruction =
     sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
   | FPushCufIter (n, id) ->
     sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
-  | FIsParamByRef (i, h) ->
-    sep ["FIsParamByRef"; string_of_param_num i; string_of_fpasshint h]
   | FIsParamByRefCufIter (i, h, id) ->
     sep ["FIsParamByRefCufIter"; string_of_param_num i; string_of_fpasshint h;
          string_of_iterator_id id]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
-  | FHandleRefMismatch (i, h, f) ->
-    sep ["FHandleRefMismatch"; string_of_param_num i; string_of_fpasshint h;
-         "\"" ^ f ^ "\""]
   | FCall (fcall_args, c, f) ->
     sep ["FCall";
       string_of_fcall_args fcall_args;

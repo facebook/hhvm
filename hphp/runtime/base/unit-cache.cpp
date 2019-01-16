@@ -744,7 +744,6 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
-    + (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch  ? '1' : '0')
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
     + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
     + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')

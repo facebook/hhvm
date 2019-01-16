@@ -243,19 +243,9 @@ std::string formatParamRefMismatch(const char* fname, uint32_t index,
   }
 }
 
-void raiseParamRefMismatchForFuncName(const StringData* fname, uint32_t index,
-                                      bool funcByRef) {
-  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      formatParamRefMismatch(fname->data(), index, funcByRef));
-  }
-
-  raise_warning(formatParamRefMismatch(fname->data(), index, funcByRef));
-}
-
 void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
-  raiseParamRefMismatchForFuncName(func->fullDisplayName(), index,
-                                   func->byRef(index));
+  SystemLib::throwInvalidArgumentExceptionObject(formatParamRefMismatch(
+    func->fullDisplayName()->data(), index, func->byRef(index)));
 }
 
 //////////////////////////////////////////////////////////////////////

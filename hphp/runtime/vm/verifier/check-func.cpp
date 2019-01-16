@@ -1037,20 +1037,12 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
             push_params);
       ok = false;
     }
-  } else if (op == Op::FThrowOnRefMismatch) {
+  } else {
+    assertx(op == Op::FThrowOnRefMismatch);
     int num_checked_params = getImmVector(pc).size();
     int push_params = getImmIva(at(fpi.fpush));
     if (num_checked_params > push_params) {
       error("num_checked_params %d out of range [0:%d]\n", num_checked_params,
-             push_params);
-      return false;
-    }
-  } else {
-    assertx(op == Op::FIsParamByRef);
-    int param_id = getImmIva(pc);
-    int push_params = getImmIva(at(fpi.fpush));
-    if (param_id >= push_params) {
-      error("param_id %d out of range [0:%d)\n", param_id,
              push_params);
       return false;
     }
@@ -1468,18 +1460,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       // by the runtime.
       cur->silences.clear();
       break;
-    case Op::FHandleRefMismatch: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      decode_iva(new_pc);
-      if (decode_oa<FPassHint>(new_pc) == FPassHint::Any) {
-        ferror("{} at PC {} with immediate value 'Any', allowable FPassHint "
-               "values for this opcode are 'Cell' and 'Ref'\n",
-               opcodeToName(op), offset(pc));
-        return false;
-      }
-      break;
-    }
 
     case Op::NewPackedArray:
     case Op::NewVArray:
@@ -1851,10 +1831,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::DecodeCufIter:
     case Op::FPushCufIter:
     case Op::CIterFree:
-    case Op::FIsParamByRef:
     case Op::FIsParamByRefCufIter:
     case Op::FThrowOnRefMismatch:
-    case Op::FHandleRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:
     case Op::NativeImpl:

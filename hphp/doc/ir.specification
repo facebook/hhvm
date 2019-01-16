@@ -2242,11 +2242,6 @@ To string conversions:
   Raise a warning or exception indicating that the reffiness of a parameter was
   incorrectly annotated at the callsite.
 
-| RaiseParamRefMismatchForFuncName<paramIndex>, ND, C(StaticStr) C(Bool), NF
-
-  Raise a warning or exception indicating that the reffiness of a parameter was
-  incorrectly annotated at the callsite.
-
 | RaiseForbiddenDynCall, ND, S(Func), NF
 
   Depending on the setting of the `ForbidDynamicCalls` runtime option, either

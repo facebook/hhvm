@@ -432,10 +432,8 @@ type instruct_call =
   | FPushCtorS of num_params * SpecialClsRef.t
   | DecodeCufIter of Iterator.t * Label.t
   | FPushCufIter of num_params * Iterator.t
-  | FIsParamByRef of param_num * fpass_hint
   | FIsParamByRefCufIter of param_num * fpass_hint * Iterator.t
   | FThrowOnRefMismatch of bool list
-  | FHandleRefMismatch of param_num * fpass_hint * string
   | FCall of fcall_args * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 

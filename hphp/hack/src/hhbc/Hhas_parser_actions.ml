@@ -1111,7 +1111,6 @@ match s with
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
  | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
- | "FIsParamByRef" -> ICall (FIsParamByRef (intofiarg arg1, fpasshintof arg2))
 
  (* instruct_base *)
  | "BaseNC" -> IBase (BaseNC (intofiarg arg1, memberopmodeofiarg arg2))
@@ -1194,8 +1193,6 @@ let maketernaryinst s arg1 arg2 arg3 =
     ICall (FIsParamByRefCufIter (intofiarg arg1, fpasshintof arg2, iterofiarg arg3))
  | "FCallBuiltin" ->
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
- | "FHandleRefMismatch" ->
-    ICall (FHandleRefMismatch (intofiarg arg1, fpasshintof arg2, stringofiarg arg3))
 
  (* instruct_base *)
  | "BaseSC" -> IBase(BaseSC (intofiarg arg1, intofiarg arg2, memberopmodeofiarg arg3))

@@ -354,8 +354,8 @@ The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
 bytecode address of the appropriate entry point. Arguments are pushed on the
 stack either as cells or as refs, but they may be refs only if the parameter
-is passed by ref. The FIsParamByRef* and FThrowOnRefMismatch instructions are
-used to enforce proper flavor. The FCall* instructions look at the current
+is passed by ref. The FIsParamByRefCufIter and FThrowOnRefMismatch instructions
+are used to enforce proper flavor. The FCall* instructions look at the current
 FPI to get the bytecode address of the function (the callee), transfers the
 parameters from the evaluation stack to the callee, pops the current FPI off
 of the FPI stack, and then invokes the dispatcher to call the function.
@@ -782,8 +782,8 @@ must point to a Catch instruction.
 after an FPush* instruction and it must end with an FCall* instruction. Each
 use of the FPush* instruction must be the instruction immediately before
 exactly one FPI region. Likewise, each use of the FCall* instruction must be
-the last instruction in exactly one FPI region. Finally, FIsParamByRef and
-FThrowOnRefMismatch instructions may not be used outside an FPI region.
+the last instruction in exactly one FPI region. Finally, FThrowOnRefMismatch
+instruction may not be used outside an FPI region.
 
 10) Each FPI region may not contain backward jumps, nor may it contain forward
 jumps that jump outside the end of the FPI region. Also, there may not be jumps
@@ -2239,36 +2239,19 @@ FPushCufIter <num params> <iterator id>   []  ->  []
 
   FPI push the result of a previous DecodeCufIter. No warning is raised.
 
-FIsParamByRef* opcodes
-----------------------
-
-  FIsParamByRef* opcodes push a bool indicating whether parameter %1 of
-  a function determined by the specific opcode is pass by ref. If the reffiness
-  hint %2, which may be 'Any', 'Cell', or 'Ref', is not 'Any' and does not
-  match the reffiness of parameter %1 the runtime may raise a warning or throw
-  an exception.
-
-FIsParamByRef <param id> <reffiness hint>   []  ->  [C:Bool]
-
-  Uses function associated with the current FPI.
-
 FIsParamByRefCufIter <param id> <reffiness hint> <iterator id>  []  ->  [C:Bool]
 
-  Uses function stored inside iterator %3 by a previous DecodeCufIter.
-
+  FIsParamByRefCufIter opcode pushes a bool indicating whether parameter %1 of
+  a function stored inside iterator %3 by a previous DecodeCufIter is pass by
+  ref. If the reffiness hint %2, which may be 'Any', 'Cell', or 'Ref', is not
+  'Any' and does not match the reffiness of parameter %1 the runtime may raise
+  a warning or throw an exception.
 
 FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
   Check whether reffiness of parameters 0..N-1 of the function associated with
   the current FPI matches the corresponding reffiness values specified by the
-  vector %1 of size N. Throws an exception if there is a mismatch. This opcode
-  is not used if ThrowOnCallByRefAnnotationMismatch is disabled.
-
-FHandleRefMismatch <param id> <reffiness hint> <func name>   []  ->  []
-
-  Handle known mismatch between reffiness of the parameter %1 of the function
-  named %3 and the reffiness hint %2, which may be 'Cell', or 'Ref'. Depending
-  on the runtime configuration, may raise a warning or throw an exception.
+  vector %1 of size N. Throws an exception if there is a mismatch.
 
 FCall* opcodes
 --------------

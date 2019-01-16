@@ -3092,10 +3092,6 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
-  let throw_on_mismatch =
-    Hhbc_options.throw_on_call_by_ref_annotation_mismatch
-      !Hhbc_options.compiler_options ||
-    Emit_env.is_in_rx_body env in
 
   let rec aux i rem_args inout_setters =
     match rem_args with
@@ -3103,7 +3099,7 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
       let num_rets = (List.length inout_setters) + 1 in
       let nargs = List.length args in
       let instr_enforce_hint =
-        if throw_on_mismatch && args <> []
+        if args <> []
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
         else empty
       in
@@ -3173,15 +3169,11 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
 
     | expr :: rest ->
       let next c = gather [ c; aux (i + 1) rest inout_setters ] in next @@
-      let param_pos, _ = expr in
-      let hint = if expr_starts_with_ref expr then Ref else Cell in
+      let by_ref = expr_starts_with_ref expr in
       let expr = strip_ref expr in
-      if i >= args_count then
+      if i >= args_count || not by_ref then
         emit_expr ~need_ref:false env expr
       else
-      if throw_on_mismatch && hint = Cell then
-        emit_expr ~need_ref:false env expr
-      else if throw_on_mismatch && hint = Ref then
         match snd expr with
         | A.Lvar _
         | A.Dollar _
@@ -3189,74 +3181,9 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
         | A.Obj_get _
         | A.Class_get _
         | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _)) ->
-          emit_expr_as_ref env expr;
+          emit_expr_as_ref env expr
         | _ ->
-          fst @@ emit_flavored_expr env ~last_pos:call_pos expr
-      else
-      let emit_ref_cond instrs_init instrs_by_val instrs_by_ref =
-        let by_ref_label = Label.next_regular () in
-        let done_label = Label.next_regular () in
-        gather [
-          instrs_init;
-          emit_pos param_pos;
-          instr_fis_param_by_ref i hint;
-          instr_jmpnz by_ref_label;
-          instrs_by_val;
-          instr_jmp done_label;
-          instr_label by_ref_label;
-          instrs_by_ref;
-          instr_label done_label
-        ]
-      in
-      let pos, expr_ = expr in
-      match expr_ with
-      | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal x ->
-        emit_ref_cond
-          (emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar x))
-          instr_cgetg instr_vgetg
-      | A.Lvar ((_, str) as id)
-        when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
-        let local = get_local env id in
-        emit_ref_cond empty (instr_cgetl local) (instr_vgetl local)
-      | A.Dollar e ->
-        check_non_pipe_local e;
-        emit_ref_cond (emit_expr ~need_ref:false env e) instr_cgetn instr_vgetn
-      | A.Array_get ((_, A.Lvar (_, x)), Some e)
-        when x = SN.Superglobals.globals ->
-        emit_ref_cond (emit_expr ~need_ref:false env e) instr_cgetg instr_vgetg
-      | A.Array_get (base_expr, opt_elem_expr) ->
-        let env = { env with Emit_env.env_allows_array_append = true } in
-        emit_ref_cond empty
-          (fst (emit_array_get ~need_ref:false env pos QueryOp.CGet base_expr
-            opt_elem_expr))
-          (fst (emit_array_get ~need_ref:true env pos QueryOp.Empty base_expr
-            opt_elem_expr))
-      | A.Obj_get (e1, e2, nullflavor) ->
-        emit_ref_cond empty
-          (fst (emit_obj_get ~need_ref:false env pos QueryOp.CGet e1 e2 nullflavor))
-          (fst (emit_obj_get ~need_ref:true env pos QueryOp.Empty e1 e2 nullflavor))
-      | A.Class_get (cid, prop) ->
-        emit_ref_cond empty
-          (emit_class_get env QueryOp.CGet false cid prop)
-          (emit_class_get env QueryOp.CGet true cid prop)
-      | A.Binop (A.Eq None, (_, A.List _ as e), (_, A.Lvar id)) ->
-        let local = get_local env id in
-        let lhs_instrs, set_instrs =
-          emit_lval_op_list env pos (Some local) [] e in
-        emit_ref_cond
-          (gather [ lhs_instrs; set_instrs ])
-          (instr_cgetl local) (instr_vgetl local)
-      | _ ->
-        let instrs, flavor = emit_flavored_expr env ~last_pos:call_pos expr in
-        match flavor with
-        | Flavor.Ref -> emit_ref_cond instrs instr_unbox empty
-        | Flavor.Cell ->
-          gather [
-            instrs;
-            emit_pos param_pos;
-            instr_fis_param_by_ref i hint;
-            instr_popc;
-          ]
+          emit_expr ~need_ref:false env expr
   in
   Local.scope @@ fun () -> aux 0 all_args []
 

@@ -4,7 +4,8 @@ class X {
   private $x;
 
   function foo() {
-    $this->bar($this);
+    $thiz = &$this;
+    $this->bar(&$thiz);
     return $this;
   }
 

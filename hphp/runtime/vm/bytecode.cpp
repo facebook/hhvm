@@ -5895,10 +5895,9 @@ OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
   }
 }
 
-namespace {
-
-OPTBLD_INLINE void implFIsParamByRef(const Func* func, uint32_t paramId,
-                                     FPassHint hint) {
+OPTBLD_INLINE void iopFIsParamByRefCufIter(uint32_t paramId, FPassHint hint,
+                                           Iter* it) {
+  auto const func = it->cuf().func();
   auto const byRef = func->byRef(paramId);
 
   if (hint == (byRef ? FPassHint::Cell : FPassHint::Ref)) {
@@ -5906,19 +5905,6 @@ OPTBLD_INLINE void implFIsParamByRef(const Func* func, uint32_t paramId,
   }
 
   vmStack().pushBool(byRef);
-}
-
-}
-
-OPTBLD_INLINE void iopFIsParamByRef(ActRec* ar, uint32_t paramId,
-                                    FPassHint hint) {
-  assertx(paramId < ar->numArgs());
-  implFIsParamByRef(ar->func(), paramId, hint);
-}
-
-OPTBLD_INLINE void iopFIsParamByRefCufIter(uint32_t paramId, FPassHint hint,
-                                           Iter* it) {
-  implFIsParamByRef(it->cuf().func(), paramId, hint);
 }
 
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
@@ -5931,12 +5917,6 @@ OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
         formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
     }
   }
-}
-
-OPTBLD_INLINE void iopFHandleRefMismatch(uint32_t paramId, FPassHint hint,
-                                         const StringData* funcName) {
-  assertx(hint != FPassHint::Any);
-  raiseParamRefMismatchForFuncName(funcName, paramId, hint == FPassHint::Cell);
 }
 
 bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {

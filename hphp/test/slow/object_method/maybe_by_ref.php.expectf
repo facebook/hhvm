@@ -1,3 +1,1 @@
-
-Warning: Y::bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s/maybe_by_ref.php on line 7
 int(42)

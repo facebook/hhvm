@@ -5,6 +5,13 @@ function test_inout(inout bool $x) {
   $x = false;
 }
 
+<<__Rx, __MutableReturn>>
+function returns_object() {
+  $o = new stdClass();
+  $o->p = array(5 => true);
+  return $o;
+}
+
 class C {
   public $p;
 
@@ -13,7 +20,6 @@ class C {
     $a = array(1 => true);
     $x1 = $a[1]; // BaseL
     $x2 = (array(1 => true))[1]; // BaseC
-    $x3 = __hhvm_intrinsics\launder_value(array(1 => true))[1]; // BaseR
     $x3 = $this->p; // BaseH
   }
 
@@ -24,6 +30,8 @@ class C {
     $p->q = true;
     $o = new stdClass();
     $o->p = $p;
+    $mo = new stdClass();
+    $mo->p = array(2 => true);
     $this->p = array(2 => true);
     $l1 = 1;
     $lp = 'p';
@@ -62,25 +70,27 @@ class C {
     test_inout(inout $a[$l1][2]);
     test_inout(inout $a[__hhvm_intrinsics\launder_value(1)][2]);
 
-    // Define is valid on arrays
+    // Define is valid on arrays, objects in locals, and $this
     $a[1][2] = false;
     $a['two'][2] = false;
     $a[$l1][2] = false;
     $a[__hhvm_intrinsics\launder_value(1)][2] = false;
     $a[][2] = false;
-
-    // Define is also valid on $this
+    $mo->p[2] = false;
+    $mo->{$lp}[2] = false;
+    $mo->{__hhvm_intrinsics\launder_value('p')}[2] = false;
     $this->p[2] = false;
     $this->{$lp}[2] = false;
     $this->{__hhvm_intrinsics\launder_value('p')}[2] = false;
 
-    // Unset is valid on arrays
+    // Unset is valid on arrays, objects in locals, and $this
     unset($a[1][2]);
     unset($a['two'][2]);
     unset($a[$l1][2]);
     unset($a[__hhvm_intrinsics\launder_value(1)][2]);
-
-    // Unset is also valid on $this
+    unset($mo->p[2]);
+    unset($mo->{$lp}[2]);
+    unset($mo->{__hhvm_intrinsics\launder_value('p')}[2]);
     unset($this->p[2]);
     unset($this->{$lp}[2]);
     unset($this->{__hhvm_intrinsics\launder_value('p')}[2]);
@@ -88,33 +98,45 @@ class C {
 
   <<__Rx>>
   public function bad_dim() {
+    $p1 = new stdClass();
+    $p1->q = array(3 => true);
+    $this->p = $p1;
+    $p2 = new stdClass();
+    $p2->q = array(4 => true);
     $o = new stdClass();
-    $o->p = array(2 => true);
-    $p = new stdClass();
-    $p->q = array(3 => true);
-    $this->p = $p;
+    $o->p = $p2;
     $lp = 'p';
     $lq = 'q';
-
-    // Define on object that isn't $this
-    $o->p[2] = false;
-    $o->{$lp}[2] = false;
-    $o->{__hhvm_intrinsics\launder_value('p')}[2] = false;
 
     // Second Define after dimming out of $this
     $this->p->q[3] = false;
     $this->p->{$lq}[3] = false;
     $this->p->{__hhvm_intrinsics\launder_value('q')}[3] = false;
 
-    // Unset on object that isn't $this
-    unset($o->p[2]);
-    unset($o->{$lp}[2]);
-    unset($o->{__hhvm_intrinsics\launder_value('p')}[2]);
+    // Second Define after dimming out of local
+    $o->p->q[4] = false;
+    $o->{$lp}->q[4] = false;
+    $o->{__hhvm_intrinsics\launder_value('p')}->q[4] = false;
 
     // Second Unset after dimming out of $this
     unset($this->p->q[3]);
     unset($this->p->{$lq}[3]);
     unset($this->p->{__hhvm_intrinsics\launder_value('q')}[3]);
+
+    // Second Unset after dimming out of local
+    unset($o->p->q[4]);
+    unset($o->{$lp}->q[4]);
+    unset($o->{__hhvm_intrinsics\launder_value('p')}->q[4]);
+
+    // Define on result of function call
+    returns_object()->p[5] = false;
+    returns_object()->{$lp}[5] = false;
+    returns_object()->{__hhvm_intrinsics\launder_value('p')}[5] = false;
+
+    // Unset on result of function call
+    unset(returns_object()->p[5]);
+    unset(returns_object()->{$lp}[5]);
+    unset(returns_object()->{__hhvm_intrinsics\launder_value('p')}[5]);
   }
 
   <<__Rx>>
@@ -142,6 +164,12 @@ class C {
     $a['a']['i']++;
     $a['a']['i'] *= 2;
     unset($a['a']['i']);
+
+    // Writes to array after Dim through local object
+    $o->a['i'] = 2;
+    $o->a['i']++;
+    $o->a['i'] *= 2;
+    unset($o->a['i']);
 
     // Writes to array after Dim through $this
     $this->p['a']['i'] = 2;
@@ -195,6 +223,12 @@ class C {
     $this->p[2]->q++;
     $this->p[2]->q *= 2;
     unset($this->p[2]->q);
+
+    // writes to object returned from function call
+    returns_object()->q = 2;
+    returns_object()->q++;
+    returns_object()->q *= 2;
+    unset(returns_object()->q);
   }
 }
 

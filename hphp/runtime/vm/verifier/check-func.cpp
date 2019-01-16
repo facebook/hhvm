@@ -72,7 +72,9 @@ struct State {
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
   bool guaranteedThis; // whether $this is guaranteed to be non-null
-  bool mbrMustContainThis; // immediately following BaseH in a minstr sequence
+  // immediately following BaseL or BaseH in a minstr sequence, when the base
+  // was known to be Rx mutable
+  bool mbrMustContainMutableLocalOrThis;
   bool afterDim; // has there been a Dim in the current minstr seqence
 };
 
@@ -1868,16 +1870,24 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
 
     // safe member base operations
     case Op::BaseL:
-    case Op::BaseC:
     case Op::BaseH:
-      cur->mbrMustContainThis = op == Op::BaseH;
+      // TODO(alexeyt): check mutability
+      cur->mbrMustContainMutableLocalOrThis = true;
       cur->afterDim = false;
       return true;
 
-    // Dim is safe as long as we're not doing a write through an object
+    // more safe member base operations
+    case Op::BaseC:
+      cur->mbrMustContainMutableLocalOrThis = false;
+      cur->afterDim = false;
+      return true;
+
+    // Dim is safe as long as we're not doing a write. Doing writes using [] is
+    // safe. Doing writes using -> is only safe if the base refers to a mutable
+    // local or mutable $this.
     case Op::Dim: {
-      auto const mbr_contains_this = cur->mbrMustContainThis;
-      cur->mbrMustContainThis = false;
+      auto const mbr_contains_mutable = cur->mbrMustContainMutableLocalOrThis;
+      cur->mbrMustContainMutableLocalOrThis = false;
       cur->afterDim = true;
       decode_op(pc);
       auto const mode = decode_oa<MOpMode>(pc);
@@ -1893,10 +1903,11 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
         case MPL:
         case MPT:
         case MQT:
-          if (mbr_contains_this) return true;
+          if (mbr_contains_mutable) return true;
           break;
       }
-      ferror("Dim through object for write is forbidden in Rx functions\n");
+      ferror("Dim through object for write is only allowed on locals and "
+             "$this in Rx functions\n");
       return RuntimeOption::EvalRxVerifyBody < 2;
     }
 
@@ -1908,7 +1919,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::SetRangeM:
       return true;
 
-    // member final write: prop write must not follow Dim
+    // member final write: prop write must not follow Dim, base must be mutable
     case Op::SetM:
     case Op::UnsetM:
     case Op::IncDecM:
@@ -1947,6 +1958,11 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
                opcodeToName(op));
         return RuntimeOption::EvalRxVerifyBody < 2;
       }
+      if (!cur->mbrMustContainMutableLocalOrThis) {
+        ferror("property writes are only allowed on mutable values in Rx "
+               "functions: {}\n", opcodeToName(op));
+        return RuntimeOption::EvalRxVerifyBody < 2;
+      }
       return true;
     }
 
@@ -1973,7 +1989,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: globals
     case Op::BaseGC:
     case Op::BaseGL:
-      cur->mbrMustContainThis = false;
+      cur->mbrMustContainMutableLocalOrThis = false;
       cur->afterDim = false;
       // fallthrough
     case Op::CGetG:
@@ -1990,7 +2006,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: class statics
     case Op::BaseSC:
     case Op::BaseSL:
-      cur->mbrMustContainThis = false;
+      cur->mbrMustContainMutableLocalOrThis = false;
       cur->afterDim = false;
       // fallthrough
     case Op::CGetS:
@@ -2005,7 +2021,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: variable variables
     case Op::BaseNC:
     case Op::BaseNL:
-      cur->mbrMustContainThis = false;
+      cur->mbrMustContainMutableLocalOrThis = false;
       cur->afterDim = false;
       // fallthrough
     case Op::CGetN:
@@ -2136,7 +2152,7 @@ void FuncChecker::initState(State* s) {
   s->silences.clear();
   s->guaranteedThis =
     !m_func->isClosureBody && (m_func->attrs & AttrRequiresThis);
-  s->mbrMustContainThis = false;
+  s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
 }
 
@@ -2154,7 +2170,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->mbr_mode = from->mbr_mode;
   to->silences = from->silences;
   to->guaranteedThis = from->guaranteedThis;
-  to->mbrMustContainThis = from->mbrMustContainThis;
+  to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
 }
 

@@ -1,5 +1,5 @@
-((script 689
-  ((list 689
+((script 719
+  ((list 719
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -146,7 +146,7 @@
            (() ")" 1 ((whitespace 1)))))
          (() % 1 ((whitespace 1))) (literal 1 ((() decimal_literal 1 ())))))
        (() ";" 1 ((whitespace 1) (single_line_comment 13) (end_of_line 1)))))
-     (function_declaration 64
+     (function_declaration 94
       ((missing 0 ())
        (function_declaration_header 26
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
@@ -162,7 +162,7 @@
               ((simple_type_specifier 3 ((() int 3 ()))) (missing 0 ())))))
            (() ")" 1 ((whitespace 1)))))
          (missing 0 ())))
-       (compound_statement 37
+       (compound_statement 67
         ((() { 1 ((end_of_line 1)))
          (list 18
           ((return_statement 18
@@ -177,6 +177,6 @@
                   ((literal 1 ((() decimal_literal 1 ()))) (missing 0 ())))))
                (() ")" 1 ())))
              (() ";" 1
-              ((whitespace 1) (single_line_comment 12) (end_of_line 1)))))))
+              ((whitespace 1) (single_line_comment 42) (end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

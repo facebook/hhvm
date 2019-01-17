@@ -1910,7 +1910,8 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.Suspend _ ->
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->
-    failwith "List destructor can only be used as an lvar"
+    Emit_fatal.raise_fatal_parse pos
+      "list() can only be used as an lvar. Did you mean to use tuple()?"
 
 and emit_static_collection ~transform_to_collection pos tv =
   let transform_instr =

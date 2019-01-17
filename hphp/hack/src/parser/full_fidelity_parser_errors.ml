@@ -2456,6 +2456,12 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
           SyntaxError.error2077 :: errors
       | _ -> errors
     end
+  | ListExpression _ ->
+    begin match parents with
+      | e :: _ when is_return_statement e ->
+      make_error_from_node node SyntaxError.list_must_be_lvar :: errors
+      | _ -> errors
+    end
   | ShapeExpression { shape_expression_fields; _} ->
     List.fold_right ~f:(invalid_shape_field_check env)
       (syntax_to_list_no_separators shape_expression_fields) ~init:errors

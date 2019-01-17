@@ -241,6 +241,7 @@ let error2075 call_modifier = "An '" ^ call_modifier ^ "' parameter cannot " ^
   "be passed by reference ('&')."
 let error2076 = "Cannot use both 'inout' and '&' on the same argument."
 let error2077 = "Cannot use empty list"
+let list_must_be_lvar = "list() can only be used as an lvar. Did you mean to use tuple()?"
 
 (* Start giving names rather than numbers *)
 let async_not_last = "The 'async' modifier must be directly before the 'function' keyword."

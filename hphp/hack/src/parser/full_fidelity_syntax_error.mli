@@ -168,6 +168,7 @@ val error2076 : string
 val error2077 : string
 
 (* Start giving names rather than numbers *)
+val list_must_be_lvar : string
 val async_not_last : string
 val list_as_subscript : string
 val vdarray_in_php : string

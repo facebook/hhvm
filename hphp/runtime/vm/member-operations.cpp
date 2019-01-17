@@ -391,7 +391,7 @@ void setRangeVec(
   range_check(count * size);
   auto const vec_data = packedData(vec);
   auto const elem_type = type(vec_data[0]);
-  auto bad_type = [&]() NEVER_INLINE {
+  auto bad_type = [&]() {
     fail_invalid(
       "Bad type ({}) and element size ({}) combination in vec source",
       getDataTypeString(elem_type).data(), size

@@ -506,7 +506,7 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
       hdf->value = strdup(value);
       if (hdf->value == NULL)
 	return nerr_raise (NERR_NOMEM, "Unable to duplicate value %s for %s",
-	    value, name);
+	    value, hdf->name);
     }
     else
     {
@@ -1697,4 +1697,3 @@ NEOERR* hdf_read_file (HDF *hdf, const char *path)
   err = hdf_read_file_internal (hdf, path, INCLUDE_FILE);
   return nerr_pass(err);
 }
-

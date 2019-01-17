@@ -6,10 +6,9 @@ Displays the list of command line options with short descriptions.
 
 = -t, --target=TARGET
 
-This sets the mode of operation for hphp. TARGET is one of <b>lint</b>,
-<b>hhbc</b>, <b>filecache</b>, and <b>run</b> (default).
+This sets the mode of operation for hphp. TARGET is one of <b>hhbc</b>,
+<b>filecache</b>, and <b>run</b> (default).
 
-lint: only parses the input files.
 hhbc: runs analysis on the input files and generates a repo as output.
 run: is the same as hhbc but also runs the program.
 filecache: only builds the static file cache.

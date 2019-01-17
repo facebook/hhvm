@@ -143,7 +143,6 @@ private:
 int prepareOptions(CompilerOptions &po, int argc, char **argv);
 void createOutputDirectory(CompilerOptions &po);
 int process(const CompilerOptions &po);
-int lintTarget(const CompilerOptions &po);
 int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
@@ -214,12 +213,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("help", "display this message")
     ("version", "display version number")
     ("target,t", value<std::string>(&po.target)->default_value("run"),
-     "lint | "
      "hhbc | "
      "filecache | "
      "run (default)")
     ("format,f", value<std::string>(&po.format),
-     "lint: (none); \n"
      "hhbc: binary (default) | hhas | text | exe; \n"
      "run: binary (default) | hhas | text | exe")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
@@ -380,7 +377,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   }
 
   if (po.target != "run"
-      && po.target != "lint"
       && po.target != "hhbc"
       && po.target != "filecache") {
     Logger::Error("Error in command line: target '%s' is not supported.",
@@ -549,11 +545,6 @@ int process(const CompilerOptions &po) {
 #endif
   }
 
-  // lint doesn't need analysis
-  if (po.target == "lint") {
-    return lintTarget(po);
-  }
-
   register_process_init();
 
   Timer timer(Timer::WallTime);
@@ -676,31 +667,6 @@ int process(const CompilerOptions &po) {
 
   if (!po.filecache.empty()) {
     fileCacheThread.waitForEnd();
-  }
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-int lintTarget(const CompilerOptions &po) {
-  int ret = 0;
-  for (unsigned int i = 0; i < po.inputs.size(); i++) {
-    std::string filename = po.inputDir + "/" + po.inputs[i];
-    try {
-      Scanner scanner(filename, Option::GetScannerType());
-      Compiler::Parser parser(scanner, filename.c_str(),
-                              std::make_shared<AnalysisResult>());
-      if (!parser.parse()) {
-        Logger::Error("Unable to parse file %s: %s", filename.c_str(),
-                      parser.getMessage().c_str());
-        ret = 1;
-      } else {
-        Logger::Info("%s parsed successfully...", filename.c_str());
-      }
-    } catch (FileOpenException& e) {
-      Logger::Error("%s", e.getMessage().c_str());
-      ret = 1;
-    }
   }
   return ret;
 }

@@ -691,18 +691,10 @@ private:
     m_blockEndOffsets;
 
   mutable folly::SharedMutex m_targetProfilesLock;
-  jit::fast_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
+  jit::fast_map<TransID, jit::vector<TargetProfileInfo>> m_targetProfiles;
 
   bool m_wasDeserialized{false};
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Returns whether or not we've collected enough profile data to trigger
- * retranslateAll.
- */
-bool hasEnoughProfDataToRetranslateAll();
 
 //////////////////////////////////////////////////////////////////////
 

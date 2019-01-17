@@ -42,7 +42,7 @@
 
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/vm-worker.h"
-
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/boot-stats.h"
@@ -545,6 +545,11 @@ translate(TransArgs args, FPInvOffset spOff,
 TCA retranslate(TransArgs args, const RegionContext& ctx) {
   VMProtect _;
 
+  if (RID().isJittingDisabled()) {
+    SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
+
   auto sr = tc::findSrcRec(args.sk);
   auto const initialNumTrans = sr->numTrans();
 
@@ -559,8 +564,8 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   // answer to profileFunc() changes, so use a lambda rather than just
   // storing the result.
   auto kind = [&] {
-    return tc::profileFunc(args.sk.func()) ?
-      TransKind::Profile : TransKind::Live;
+    return tc::profileFunc(args.sk.func()) ? TransKind::Profile
+                                           : TransKind::Live;
   };
   args.kind = kind();
 
@@ -605,11 +610,6 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.sk, "retranslate\n");
-
-  if (UNLIKELY(RID().isJittingDisabled())) {
-    SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
-    return nullptr;
-  }
 
   args.kind = kind();
   if (!writer.checkKind(args.kind)) return nullptr;
@@ -660,10 +660,25 @@ bool retranslateAllEnabled() {
 
 void checkRetranslateAll(bool force) {
   if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
-      !retranslateAllEnabled() ||
-      !(force || hasEnoughProfDataToRetranslateAll())) {
+      !retranslateAllEnabled()) {
     return;
   }
+  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  if (!force) {
+    auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
+    if (uptime >= (int)RuntimeOption::EvalJitRetranslateAllSeconds) {
+      assertx(serverMode);
+      Logger::FInfo("retranslateAll: scheduled after {} seconds", uptime);
+    } else if (requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest) {
+      if (serverMode) {
+        Logger::FInfo("retranslateAll: scheduled after {} requests",
+                      requestCount());
+      }
+    } else {
+      return;
+    }
+  }
+
   if (s_retranslateAllScheduled.exchange(true)) {
     // Another thread beat us.
     return;
@@ -676,7 +691,6 @@ void checkRetranslateAll(bool force) {
     // additional locking on the ProfData. We use a fresh thread to avoid
     // stalling the treadmill, the thread is joined in the processExit handler
     // for mcgen.
-    Logger::Info("Scheduling the retranslation of all profiled translations");
     Treadmill::enqueue([] {
       s_retranslateAllThread = std::thread([] {
         rds::local::init();
@@ -693,9 +707,8 @@ void checkRetranslateAll(bool force) {
       retranslateAll();
     });
   }
-  if (!RuntimeOption::ServerExecutionMode()) { // script mode
-    s_retranslateAllThread.join();
-  }
+
+  if (!serverMode) s_retranslateAllThread.join();
 }
 
 bool retranslateAllPending() {

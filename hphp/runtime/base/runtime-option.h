@@ -20,6 +20,7 @@
 #include <folly/dynamic.h>
 
 #include <unordered_map>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <map>
@@ -588,9 +589,9 @@ struct RuntimeOption {
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
-  F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
+  F(int, JitWorkerThreads,             std::max(1, Process::GetCPUCount() / 2)) \
   F(int, JitWorkerThreadsForSerdes,    0)                               \
-  F(int, JitWorkerArenas,              Process::GetCPUCount() / 4)      \
+  F(int, JitWorkerArenas,              std::max(1, Process::GetCPUCount() / 4)) \
   F(bool, JitDesProfDataAfterRetranslateAll, true)                      \
   F(int, JitLdimmqSpan,                8)                               \
   F(int, JitPrintOptimizedIR,          0)                               \
@@ -618,7 +619,7 @@ struct RuntimeOption {
   /* The command to invoke to spawn hh_single_compile in server mode. */\
   F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
   /* The number of hh_single_compile daemons to keep alive. */          \
-  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount() / 2)      \
+  F(uint64_t, HackCompilerWorkers,     std::max(1, Process::GetCPUCount() / 2)) \
   /* The number of times to retry after an infra failure communicating
      with a compiler process. */                                        \
   F(uint64_t, HackCompilerMaxRetries,  0)                               \

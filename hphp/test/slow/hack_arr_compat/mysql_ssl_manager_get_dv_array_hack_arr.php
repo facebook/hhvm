@@ -9,4 +9,5 @@ function main_mysql_ssl_manager_get_typehint_notices() {
       'db_user' => 'scriptro:sys.unittestdb',
     ],
   );
+  echo "Done\n";
 }

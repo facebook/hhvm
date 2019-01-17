@@ -365,12 +365,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
          (!typeArray && iter->arr().getIterType() == ArrayIter::TypeIterator));
   ArrayIter& arrIter = iter->arr();
   if (typeArray) {
-    auto const cur = arrIter.nvSecond();
-    if (isRefType(cur.type())) {
-      cellDup(*(cur.val().pref->cell()), *out);
-    } else {
-      cellDup(cur.tv(), *out);
-    }
+    cellDup(tvToCell(arrIter.nvSecond().tv()), *out);
   } else {
     Variant val = arrIter.second();
     assertx(!isRefType(val.getRawType()));

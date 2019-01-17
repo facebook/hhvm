@@ -324,7 +324,7 @@ function curl_multi_setopt(resource $mh, int $option, mixed $value) : bool;
  */
 <<__Native>>
 function curl_setopt_array(resource $ch,
-                           array $options): bool;
+                           darray $options): bool;
 
 /**
  * Set an option for a cURL transfer

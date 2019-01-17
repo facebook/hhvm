@@ -6,11 +6,7 @@
           Jmp warning
 no_args:  String "array_filter() expects at least 1 parameter, 0 given"
           Jmp warning
-not_array:
-          CGetL $arr
-          InstanceOfD "HH\\KeyedTraversable"
-          JmpNZ start_kt
-          String "array_filter() expects parameter 1 to be an array or collection"
+bad_arr:  String "array_filter() expects parameter 1 to be an array or collection"
           Jmp warning
 bad_param2:
           String "array_filter() expects parameter 2 to be a valid callback"
@@ -20,8 +16,9 @@ warning:  Cns "E_WARNING"
           Null
           RetC
 
-start:          IsTypeL $arr ArrLike
-                JmpZ not_array
+start:          CGetL $arr
+                InstanceOfD "HH\\KeyedTraversable"
+                JmpZ bad_arr
 
                 IssetL $func
                 JmpZ no_func
@@ -110,95 +107,5 @@ skip_n:   IterNextK 1 loop_n $v $k
 } .catch {
           IterFree 1
           Throw
-}
-
-
-start_kt:         IssetL $func
-                  JmpZ no_func_kt
-
-                  CGetL $func
-                  DecodeCufIter 0 bad_param2
-.try {
-                  NewLikeArrayL $arr 0
-                  SetL $res
-                  PopC
-
-                  CGetL $arr
-                  IterInitK 1 endloop_a_kt $v $k
-  .try 1 {
-                  IssetL $flag
-                  JmpZ loop_val_kt
-                  Int 1           # ARRAY_FILTER_USE_BOTH
-                  CGetL $flag
-                  Same
-                  JmpNZ loop_both_kt
-                  Int 2           # ARRAY_FILTER_USE_KEY
-                  CGetL $flag
-                  Same
-                  JmpNZ loop_key_kt
-
-    loop_val_kt:  FPushCufIter 1 0
-                  CGetL $v
-                  FCall <> 1 1 - "" ""
-                  JmpZ next_val_kt
-                  CGetL $v
-                  BaseL $res Define
-                  SetM 0 EL:$k
-                  PopC
-    next_val_kt:  IterNextK 1 loop_val_kt $v $k
-                  Jmp endloop_a_kt
-
-    loop_both_kt: FPushCufIter 2 0
-                  CGetL $v
-                  CGetL $k
-                  FCall <> 2 1 - "" ""
-                  JmpZ next_both_kt
-                  CGetL $v
-                  BaseL $res Define
-                  SetM 0 EL:$k
-                  PopC
-    next_both_kt: IterNextK 1 loop_both_kt $v $k
-                  Jmp endloop_a_kt
-
-    loop_key_kt:  FPushCufIter 1 0
-                  CGetL $k
-                  FCall <> 1 1 - "" ""
-                  JmpZ next_key_kt
-                  CGetL $v
-                  BaseL $res Define
-                  SetM 0 EL:$k
-                  PopC
-    next_key_kt:  IterNextK 1 loop_key_kt $v $k
-                  Jmp endloop_a_kt
-  } .catch {
-                  IterFree 1
-                  Throw
-  }
-} .catch {
-               CIterFree 0
-               Throw
-}
-
-endloop_a_kt:CIterFree 0
-endloop_n_kt:CGetL $res
-             RetC
-
-no_func_kt:  NewLikeArrayL $arr 0
-             SetL $res
-             PopC
-             CGetL $arr
-             IterInitK 1 endloop_n_kt $v $k
-.try 1 {
-loop_n_kt:   CGetL $v
-             JmpZ skip_n_kt
-             CGetL $v
-             BaseL $res Define
-             SetM 0 EL:$k
-             PopC
-skip_n_kt:   IterNextK 1 loop_n_kt $v $k
-             Jmp endloop_n_kt
-} .catch {
-             IterFree 1
-             Throw
 }
 }

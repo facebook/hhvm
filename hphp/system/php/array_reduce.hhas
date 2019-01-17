@@ -9,6 +9,9 @@ no_args:
 one_arg:  String "array_reduce() expects at least 2 parameters, "
           Jmp warn_num
 
+bad_input:
+          String "array_reduce() expects parameter 1 to be an array or collection"
+          Jmp warning
 bad_func: String "array_reduce() expects parameter 2 to be a valid callback"
           Jmp warning
 warn_num: FCallBuiltin 0 0 "func_num_args"
@@ -20,19 +23,12 @@ warning:  Cns "E_USER_WARNING"
           Null
           RetC
 
-check_collection:
-          CGetL $input
-          InstanceOfD "HH\\KeyedTraversable"
-          JmpNZ check_func
-          String "array_reduce() expects parameter 1 to be an array or collection"
-          Jmp warning
-
 two_args: Null
           SetL $res
           PopC
-got_args: IsTypeL $input ArrLike
-          JmpZ check_collection
-check_func:
+got_args: CGetL $input
+          InstanceOfD "HH\\KeyedTraversable"
+          JmpZ bad_input
           IssetL $func
           JmpZ bad_func
           CGetL $func

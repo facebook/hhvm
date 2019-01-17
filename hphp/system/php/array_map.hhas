@@ -36,61 +36,23 @@ warning:  Cns "E_USER_WARNING"
 
 convert_to_array:
 # with a null func, we have to convert the input to an array
+          IsTypeL $arr ArrLike
+          JmpNZ ident
           CGetL $arr
           FPushObjMethodD 0 "toArray" NullThrows
           FCall <> 0 1 - "" ""
           RetC
-
-not_array:
-          CGetL $arr
-          InstanceOfD "HH\\KeyedTraversable"
-          JmpZ call_cpp_impl
-          IssetL $func
-          JmpZ convert_to_array
-# make an apparently pointless copy of the loop
-# we could share the one for arrays, but then we
-# would max out the translation chain much quicker,
-# hurting performance.
-
-          CGetL $func
-          DecodeCufIter 0 bad_func
-.try {
-            NewLikeArrayL $arr 0
-            SetL $res
-            PopC
-
-            CGetL $arr
-            IterInitK 1 endloop_kt $v $k
-  .try 1 {
-    loop_x_kt:FPushCufIter 1 0
-              CGetL $v
-              FCall <> 1 1 - "" ""
-              BaseL $res Define
-              SetM 0 EL:$k
-              PopC
-              IterNextK 1 loop_x_kt $v $k
-              Jmp endloop_kt
-  } .catch {
-              IterFree 1
-              Throw
-  }
-} .catch {
-            CIterFree 0
-            Throw
-}
-
-endloop_kt:
-          CIterFree 0
-          CGetL $res
+ident:    CGetL $arr
           RetC
 
 # if we get here, there was only one array,
 # so we use the fast, php version
 one_array:
-          IsTypeL $arr ArrLike
-          JmpZ not_array
+          CGetL $arr
+          InstanceOfD "HH\\KeyedTraversable"
+          JmpZ call_cpp_impl
           IssetL $func
-          JmpZ ident
+          JmpZ convert_to_array
           CGetL $func
           DecodeCufIter 0 bad_func
 .try {
@@ -121,8 +83,5 @@ one_array:
 
 endloop:  CIterFree 0
           CGetL $res
-          RetC
-
-ident:    CGetL $arr
           RetC
 }

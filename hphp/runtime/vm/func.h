@@ -27,9 +27,10 @@
 #include "hphp/runtime/base/user-attributes.h"
 
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/rx.h"
 
 #include "hphp/util/fixed-vector.h"
 
@@ -1050,10 +1051,10 @@ struct Func final {
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns a pair of how many generics this func has and indices of its
-   * reified generics
+   * Returns a ReifiedGenericsInfo containing how many generics this func has,
+   * indices of its reified generics, and which ones are soft reified
    */
-  const std::pair<size_t, std::vector<size_t>>& getReifiedGenericsInfo() const;
+  const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
@@ -1312,7 +1313,6 @@ private:
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;
-    std::pair<size_t, std::vector<size_t>> m_reifiedGenericsInfo;
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly
@@ -1349,6 +1349,7 @@ private:
     MaybeDataType m_hniReturnType;
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
+    ReifiedGenericsInfo m_reifiedGenericsInfo;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     Id m_actualNumClsRefSlots;

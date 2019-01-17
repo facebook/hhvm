@@ -57,16 +57,23 @@ let ast_any_is_deprecated ast_attrs =
 
 (* Adds an __Reified attribute for functions and classes with reified type
  * parameters. The arguments to __Reified are number of type parameters
- * followed by the indicies of these reified type parameters
+ * followed by the indicies of these reified type parameters and whether they
+ * are soft reified or not
  *)
 let add_reified_attribute attrs params =
-  let reified_indices =
-    List.filter_mapi params
-      ~f:(fun i t -> if t.A.tp_reified then Some i else None) in
-  if List.is_empty reified_indices then attrs else
-  let data = List.length params :: reified_indices in
-  (Hhas_attribute.make "__Reified" @@
-    List.map data (fun i -> TV.Int (Int64.of_int i))) :: attrs
+  let is_soft =
+    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
+  let reified_data =
+    List.filter_mapi params ~f:(fun i t ->
+      if t.A.tp_reified then Some (i, is_soft t.A.tp_user_attributes) else None)
+  in
+  if List.is_empty reified_data then attrs else
+  let data = List.concat_map reified_data
+    ~f:(fun (i, is_soft) -> [TV.Int (Int64.of_int i);
+                             TV.Int (Int64.of_int (if is_soft then 1 else 0))])
+  in
+  let data = TV.Int (Int64.of_int (List.length params)) :: data in
+  Hhas_attribute.make "__Reified" data :: attrs
 
 let add_reified_parent_attribute attrs = function
   | ((_, Ast.Happly (_, hl))) :: _ ->

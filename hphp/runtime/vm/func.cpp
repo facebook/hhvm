@@ -597,13 +597,14 @@ void Func::resetPrologue(int numParams) {
 // Reified Generics
 
 namespace {
-std::pair<size_t, std::vector<size_t>> defaultReifiedGenericsInfo{0, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}, {}};
 } // namespace
 
-const std::pair<size_t, std::vector<size_t>>&
-Func::getReifiedGenericsInfo() const {
-  if (!shared()->m_hasReifiedGenerics) return defaultReifiedGenericsInfo;
-  return shared()->m_reifiedGenericsInfo;
+const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {
+  if (!shared()->m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
+  auto const ex = extShared();
+  assertx(ex);
+  return ex->m_reifiedGenericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

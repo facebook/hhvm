@@ -246,7 +246,8 @@ let emit_reified_extends_params env ast_class =
     instr (H.ILitConst (H.TypedValue tv))
   else
     gather [
-      gather @@ Emit_expression.emit_reified_targs env Pos.none type_params;
+      gather @@
+        Emit_expression.emit_reified_targs env ast_class.A.c_span type_params;
       instr_record_reified_generic (List.length type_params);
     ]
 

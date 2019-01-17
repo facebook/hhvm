@@ -1590,12 +1590,11 @@ bool Class::hasReifiedParent() const {
 }
 
 namespace {
-std::pair<size_t, std::vector<size_t>> defaultReifiedGenericsInfo{0, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}, {}};
 } // namespace
 
-const std::pair<size_t, std::vector<size_t>>&
-Class::getReifiedGenericsInfo() const {
-  if (!m_hasReifiedGenerics) return defaultReifiedGenericsInfo;
+const ReifiedGenericsInfo& Class::getReifiedGenericsInfo() const {
+  if (!m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
   assertx(m_extra);
   return m_extra.raw()->m_reifiedGenericsInfo;
 }

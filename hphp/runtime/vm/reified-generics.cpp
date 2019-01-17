@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
 
 #include "hphp/util/debug.h"
 
@@ -73,36 +74,44 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
   return getClsReifiedGenericsProp(cls, this_);
 }
 
-std::pair<size_t, std::vector<size_t>>
+ReifiedGenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
-  auto len = 0;
+  size_t len = 0;
   std::vector<size_t> pos;
+  std::vector<size_t> soft;
   IterateKV(
     arr,
     [&](Cell k, TypedValue v) {
       assertx(isIntType(k.m_type));
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
-        len = v.m_data.num;
+        len = (size_t) v.m_data.num;
+      } else if (k.m_data.num % 2 == 0) {
+        // whether soft or not
+        // If soft, add the last reified index
+        if (v.m_data.num) soft.emplace_back(pos.back());
       } else {
+        // reified index
         pos.emplace_back(v.m_data.num);
       }
     }
   );
   assertx(pos.size() <= len);
-  return std::make_pair(len, pos);
+  assertx(soft.size() <= pos.size());
+  return {len, pos, soft};
 }
 
 // Raises a runtime error if the location of reified generics of f does not
 // match the location of reified_generics
 template <bool fun>
 void checkReifiedGenericMismatchHelper(
-  const std::pair<size_t, std::vector<size_t>>& info,
+  const ReifiedGenericsInfo& info,
   const StringData* name,
   const ArrayData* reified_generics
 ) {
-  auto const len = info.first;
-  auto const locations = info.second;
+  auto const len = info.m_numGenerics;
+  auto const locations = info.m_reifiedGenericPositions;
+  auto const soft = info.m_softReifiedGenericPositions;
   if (len != reified_generics->size()) {
     raise_error("%s %s requires %zu generics but %zu given",
                 fun ? "Function" : "Class",
@@ -111,6 +120,7 @@ void checkReifiedGenericMismatchHelper(
                 reified_generics->size());
   }
   auto it = locations.begin();
+  auto softit = soft.begin();
   IterateKV(
     reified_generics,
     [&](Cell k, TypedValue v) {
@@ -124,13 +134,21 @@ void checkReifiedGenericMismatchHelper(
       }
       if (wildcard) {
         if (it == locations.end() || *it > i) return false;
-        raise_error("%s %s expects a reified generic at index %zu",
-                    fun ? "Function" : "Class",
-                    name->data(),
-                    i);
+        if (softit == soft.end() || *softit != i) {
+          raise_error("%s %s expects a reified generic at index %zu",
+                      fun ? "Function" : "Class",
+                      name->data(),
+                      i);
+        }
+        raise_warning("Generic at index %zu to %s %s must be reified,"
+                      " erased given",
+                      i,
+                      fun ? "Function" : "Class",
+                      name->data());
       }
       // It is not a wildcard
       if (it == locations.end() || *it != i) return false;
+      if (softit != soft.end() && *softit == *it) softit++;
       ++it;
       return false;
     }

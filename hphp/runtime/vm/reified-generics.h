@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/tv-val.h"
 
+#include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/hash-map.h"
@@ -44,12 +45,13 @@ ArrayData* getReifiedTypeList(const std::string& name);
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
-// Returns a pair of number of generics and their indices
+// Returns a ReifiedGenericsInfo that contians number of generics,
+// their indices, indices of the soft reifications
 // Format of the input is a list of integers where the first one is the count
-// of reified generics and the following numbers are their indices
+// of reified generics and the following numbers are their indices and whether
+// they are soft or not interleaved
 // This is used to distinguish reified and erased generics
-std::pair<size_t, std::vector<size_t>>
-extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
+ReifiedGenericsInfo extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
 
 // Raises a runtime error if the location of reified generics of f/c does not
 // match the location of reified_generics

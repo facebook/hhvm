@@ -183,10 +183,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->m_isPreFunc = !!preClass;
 
+  auto const uait = userAttributes.find(s___Reified.get());
+  auto const hasReifiedGenerics = uait != userAttributes.end();
+
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     past - base >= Func::kSmallDeltaLimit ||
+    hasReifiedGenerics ||
     m_numClsRefSlots > 3;
 
   f->m_shared.reset(
@@ -229,9 +233,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     makeStaticString(RuntimeOption::SourceRoot +
                      originalFilename->toCppString());
 
-  auto const uait = userAttributes.find(s___Reified.get());
-  auto const hasReifiedGenerics = uait != userAttributes.end();
-
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -259,7 +260,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (hasReifiedGenerics) {
     auto tv = uait->second;
     assertx(tvIsVecOrVArray(tv));
-    f->shared()->m_reifiedGenericsInfo =
+    f->extShared()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   }
 

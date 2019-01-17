@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/preclass.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/default-ptr.h"
@@ -1182,10 +1183,10 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns a pair of how many generics this class has and indices of its
-   * reified generics
+   * Returns ReifiedGenericsInfo containing how many generics this class has,
+   * indices of its reified generics, and which ones are soft reified
    */
-  const std::pair<size_t, std::vector<size_t>>& getReifiedGenericsInfo() const;
+  const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
 
   /*
    * Returns whether any of this class's parents have reified generics
@@ -1290,7 +1291,7 @@ private:
     /*
      * Cache for reified generics info
      */
-    std::pair<size_t, std::vector<size_t>> m_reifiedGenericsInfo;
+    ReifiedGenericsInfo m_reifiedGenericsInfo{0, {}, {}};
 
     /*
      * Cache for Closure subclass scopings.

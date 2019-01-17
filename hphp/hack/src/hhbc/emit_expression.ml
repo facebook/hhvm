@@ -684,7 +684,7 @@ and emit_as env pos e h is_nullable =
     (* (e is h) ? e : (e as h) *)
     emit_as_if_then_else_block @@
       Local.scope @@ fun () -> begin
-        let ts_instrs, is_static = emit_reified_arg env h in
+        let ts_instrs, is_static = emit_reified_arg env pos h in
         begin if is_static then
           gather [
             get_type_structure_for_hint env ~targ_map:SMap.empty h;
@@ -698,8 +698,8 @@ and emit_as env pos e h is_nullable =
         end
       end
 
-and emit_is env _pos h =
-  let ts_instrs, is_static = emit_reified_arg env h in
+and emit_is env pos h =
+  let ts_instrs, is_static = emit_reified_arg env pos h in
   if is_static then
     gather [
       get_type_structure_for_hint env ~targ_map:SMap.empty h;
@@ -788,7 +788,7 @@ and emit_reified_targs env pos targs =
     | (_, false) ->
       get_type_structure_for_hint env ~targ_map:SMap.empty
         (pos, A.Happly ((pos, "_"), []))
-    | (h, true) -> fst @@ emit_reified_arg env h)
+    | (h, true) -> fst @@ emit_reified_arg env pos h)
 
 and emit_new env pos expr targs args uargs =
   let has_reified_args = List.exists ~f:(fun (_, b) -> b) targs in
@@ -814,8 +814,8 @@ and emit_new env pos expr targs args uargs =
   let cexpr, has_generics = match cexpr with
     | Class_id (_, name) ->
       let cexpr =
-        Option.value ~default:cexpr (get_reified_var_cexpr env name) in
-      begin match emit_reified_type_opt env name with
+        Option.value ~default:cexpr (get_reified_var_cexpr env pos name) in
+      begin match emit_reified_type_opt env pos name with
       | Some instrs ->
         if has_reified_args then Emit_fatal.raise_fatal_parse pos
           "Cannot have higher kinded reified generics";
@@ -952,7 +952,7 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     emit_pos_then pos @@ emit_exit env (Some arg1)
   | A.Id (_, "__hhvm_intrinsics\\get_reified_type"), _, [ (_, A.Id (_, s)) ], []
     when enable_intrinsics_extension () ->
-    emit_pos_then pos @@ emit_reified_type env s
+    emit_pos_then pos @@ emit_reified_type env pos s
   | _, _, _, _ ->
     let instrs = emit_call env pos e targs args uargs async_eager_label in
     emit_pos_then pos instrs
@@ -1093,7 +1093,7 @@ and emit_class_const env pos cid (_, id) =
     (Emit_env.get_scope env) cid in
   let cexpr = match cexpr with
     | Class_id (_, name) ->
-      Option.value ~default:cexpr (get_reified_var_cexpr env name)
+      Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
     | _ -> cexpr in
   match cexpr with
   | Class_id cid ->
@@ -1745,19 +1745,24 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
-(* Returns either Some index or None *)
+(* Returns either Some (index, is_soft) or None *)
 and is_reified_tparam ~is_fun env name =
   let scope = Emit_env.get_scope env in
   let tparams =
     if is_fun then Ast_scope.Scope.get_fun_tparams scope
     else Ast_scope.Scope.get_class_tparams scope
   in
+  let is_soft =
+    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
   List.find_mapi tparams
-    ~f:(fun i { A.tp_name = (_, id); A.tp_reified = b; _ } ->
-      if b && id = name then Some i else None)
+    ~f:(fun i { A.tp_name = (_, id)
+              ; A.tp_reified = is_reified
+              ; A.tp_user_attributes = ual
+              ; _ } ->
+      if is_reified && id = name then Some (i, is_soft ual) else None)
 
-and get_reified_var_cexpr env name =
-  match emit_reified_type_opt env name with
+and get_reified_var_cexpr env pos name =
+  match emit_reified_type_opt env pos name with
   | None -> None
   | Some instrs -> Some (Class_reified (
     gather [
@@ -1766,24 +1771,32 @@ and get_reified_var_cexpr env name =
       instr_querym 1 QueryOp.CGet (MemberKey.ET "classname");
     ]))
 
-and emit_reified_type_opt env name =
+and emit_reified_type_opt env pos name =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   let cget_instr is_fun i =
     instr_cgetl (Local.Named (SU.Reified.reified_generic_captured_name is_fun i))
   in
+  let check is_soft = if not is_soft then () else
+    Emit_fatal.raise_fatal_parse pos
+      (name
+       ^ " is annotated to be a soft reified generic,"
+       ^ " it cannot be used until the __Soft annotation is removed")
+  in
   match is_reified_tparam ~is_fun:true env name with
-  | Some i ->
+  | Some (i, is_soft) ->
+    check is_soft;
     Some (if is_in_lambda then cget_instr true i
           else instr_reified_generic FunGeneric i)
   | None ->
     match is_reified_tparam ~is_fun:false env name with
-    | Some i ->
+    | Some (i, is_soft) ->
+      check is_soft;
       Some (if is_in_lambda then cget_instr false i
             else instr_reified_generic ClsGeneric i)
     | None -> None
 
-and emit_reified_type env name =
-  match emit_reified_type_opt env name with
+and emit_reified_type env pos name =
+  match emit_reified_type_opt env pos name with
   | Some instrs -> instrs
   | None -> Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
@@ -3028,7 +3041,7 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
       emit_pos_then pop_pos @@ instr_pop flavor;
     ]
 
-and emit_reified_arg env hint =
+and emit_reified_arg env pos hint =
   let scope = Emit_env.get_scope env in
   let f is_fun tparam acc =
     match tparam with
@@ -3058,7 +3071,7 @@ and emit_reified_arg env hint =
   else
   match snd hint with
   | A.Happly ((_, name), []) when SMap.mem name current_targs ->
-    emit_reified_type env name, false
+    emit_reified_type env pos name, false
   | _ ->
     let ts = get_type_structure_for_hint env ~targ_map hint in
     let ts_list = if count = 0 then ts else
@@ -3066,7 +3079,7 @@ and emit_reified_arg env hint =
       let values =
         SMap.bindings targ_map
         |> List.sort ~compare:(fun (_, x) (_, y) -> Pervasives.compare x y)
-        |> List.map ~f:(fun (v, _) -> emit_reified_type env v)
+        |> List.map ~f:(fun (v, _) -> emit_reified_type env pos v)
       in
       gather [
         gather values;
@@ -3284,7 +3297,7 @@ and emit_call_lhs
     let method_id_string = Hhbc_id.Method.to_raw_string method_id in
     let cexpr = match cexpr with
       | Class_id (_, name) ->
-        Option.value ~default:cexpr (get_reified_var_cexpr env name)
+        Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
       | _ -> cexpr in
     begin match cexpr with
     (* Statically known *)
@@ -3330,7 +3343,7 @@ and emit_call_lhs
     let expr_instrs = emit_expr ~need_ref:false env e in
     let cexpr = match cexpr with
       | Class_id (_, name) ->
-        Option.value ~default:cexpr (get_reified_var_cexpr env name)
+        Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
       | _ -> cexpr in
     begin match cexpr with
     | Class_static ->

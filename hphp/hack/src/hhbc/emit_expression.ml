@@ -2680,13 +2680,6 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_ex
   (* Special case for class name *)
   | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
     when is_special_class_constant_accessed_with_class_id cid id ->
-    let cName =
-      match SU.is_self cName,
-            Ast_scope.Scope.get_class (Emit_env.get_scope env)
-      with
-      | true, Some cd -> SU.strip_global_ns @@ snd cd.A.c_name
-      | _ -> cName
-    in
     let fq_id, _ =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, cName) in
     MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)

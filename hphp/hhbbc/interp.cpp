@@ -3342,25 +3342,19 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
 
 void ctorHelper(ISS& env, SString name, int32_t nargs) {
   auto const rcls = env.index.resolve_class(env.ctx, name);
-  auto const rfunc = rcls ?
-    env.index.resolve_ctor(env.ctx, *rcls, true) : folly::none;
-  auto ctxType = false;
-  if (rcls && env.ctx.cls && rcls->same(env.index.resolve_class(env.ctx.cls)) &&
-      !rcls->couldBeOverriden()) {
-    ctxType = true;
+  if (!rcls) {
+    push(env, TObj);
+    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, nargs, false);
+    return;
   }
-  fpiPush(
-    env,
-    ActRec {
-      FPIKind::Ctor,
-      setctx(rcls ? clsExact(*rcls) : TCls, ctxType),
-      rcls,
-      rfunc
-    },
-    nargs,
-    false
-  );
-  push(env, setctx(rcls ? objExact(*rcls) : TObj, ctxType));
+
+  auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
+    rcls->same(env.index.resolve_class(env.ctx.cls));
+  auto const obj = setctx(objExact(*rcls), isCtx);
+  push(env, obj);
+
+  auto const rfunc = env.index.resolve_ctor(env.ctx, *rcls, true);
+  fpiPush(env, ActRec { FPIKind::Ctor, obj, rcls, rfunc }, nargs, false);
 }
 
 void in(ISS& env, const bc::FPushCtorD& op) {
@@ -3374,48 +3368,53 @@ void in(ISS& env, const bc::FPushCtorI& op) {
 
 void in(ISS& env, const bc::FPushCtorS& op) {
   auto const cls = specialClsRefToCls(env, op.subop2);
-  if (is_specialized_cls(cls)) {
-    auto const dcls = dcls_of(cls);
-    auto const exact = dcls.type == DCls::Exact;
-    if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
-        (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))
-    ) {
-      return reduce(
-        env,
-        bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
-      );
-    }
-    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
-    push(env, toobj(cls));
-    // PHP doesn't forward the context to constructors.
-    fpiPush(env, ActRec { FPIKind::Ctor, unctx(cls), dcls.cls, rfunc },
-            op.arg1,
-            false);
+  if (!is_specialized_cls(cls)) {
+    push(env, TObj);
+    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, op.arg1, false);
     return;
   }
-  push(env, TObj);
-  fpiPush(env, ActRec { FPIKind::Ctor, TCls }, op.arg1, false);
+
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type == DCls::Exact;
+  if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
+      (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))) {
+    return reduce(
+      env,
+      bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
+    );
+  }
+
+  auto const obj = toobj(cls);
+  push(env, obj);
+
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
+  fpiPush(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc }, op.arg1, false);
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
-  auto const& t1 = peekClsRefSlot(env, op.slot);
-  if (is_specialized_cls(t1) && op.subop3 == HasGenericsOp::NoGenerics) {
-    auto const dcls = dcls_of(t1);
-    auto const exact = dcls.type == DCls::Exact;
-    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
-    if (exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
-      return reduce(env, bc::DiscardClsRef { op.slot },
-                    bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
-    }
-
-    auto const& t2 = takeClsRefSlot(env, op.slot);
-    push(env, toobj(t2));
-    fpiPushNoFold(env, ActRec { FPIKind::Ctor, t2, dcls.cls, rfunc });
+  auto const cls = peekClsRefSlot(env, op.slot);
+  if (!is_specialized_cls(cls) || op.subop3 != HasGenericsOp::NoGenerics) {
+    takeClsRefSlot(env, op.slot);
+    push(env, TObj);
+    fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
     return;
   }
+
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type == DCls::Exact;
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
+  if (exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
+    return reduce(
+      env,
+      bc::DiscardClsRef { op.slot },
+      bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
+    );
+  }
+
+  auto const obj = toobj(cls);
   takeClsRefSlot(env, op.slot);
-  push(env, TObj);
-  fpiPushNoFold(env, ActRec { FPIKind::Ctor, TCls });
+  push(env, obj);
+  fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc });
 }
 
 void in(ISS& env, const bc::FPushCufIter&) {

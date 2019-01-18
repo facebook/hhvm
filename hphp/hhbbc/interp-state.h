@@ -79,6 +79,7 @@ struct ActRec {
   folly::Optional<res::Func> func;
   // Possible fallback func if we cannot determine which will be called.
   folly::Optional<res::Func> fallbackFunc;
+  // isCtx of context is whether it matches caller's context
   Type context;
 };
 

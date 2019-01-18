@@ -85,7 +85,9 @@ State entry_state(const Index& index, Context const ctx,
   ret.thisType = [&] {
     if (!ctx.cls) return TNull;
     if (knownArgs && !knownArgs->context.subtypeOf(BBottom)) {
-      if (knownArgs->context.subtypeOf(BOptObj)) return knownArgs->context;
+      if (knownArgs->context.subtypeOf(BOptObj)) {
+        return setctx(knownArgs->context);
+      }
       if (is_specialized_cls(knownArgs->context)) {
         auto const dcls = dcls_of(knownArgs->context);
         return setctx(dcls.type == DCls::Exact ?

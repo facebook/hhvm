@@ -108,7 +108,7 @@ hphp/system/php/async/vectors.ns.php
 # If you have no inheritance relationship, go here in alphabetical order
 hphp/system/php/array_filter.php
 hphp/system/php/array_map.php
-hphp/system/php/array_reduce.hhas
+hphp/system/php/array_reduce.php
 hphp/system/php/apc/APCIterator.php
 hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/async/EntryPoint.ns.php

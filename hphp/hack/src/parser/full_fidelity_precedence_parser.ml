@@ -73,7 +73,7 @@ let env parser =
 let allow_as_expressions parser =
   parser.allow_as_expressions
 
-let with_as_expresssions parser ~enabled f =
+let with_as_expressions parser ~enabled f =
   let old_enabled = allow_as_expressions parser in
   let parser =
     if old_enabled <> enabled

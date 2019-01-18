@@ -336,7 +336,7 @@ module WithExpressionAndDeclAndTypeParser
     let parser = Parser.expect_in_new_scope parser [ RightParen ] in
     let parser, foreach_collection_name =
       with_expr_parser parser (fun p ->
-        ExpressionParser.with_as_expresssions p ~enabled:false ExpressionParser.parse_expression
+        ExpressionParser.with_as_expressions p ~enabled:false ExpressionParser.parse_expression
       ) in
     let parser, await_token = optional_token parser Await in
     let parser, as_token = require_as parser in

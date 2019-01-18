@@ -30,7 +30,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val parse_simple_variable: t -> t * SC.r
       val parse_constructor_call: t -> t * SC.r
       val parse_cast_or_parenthesized_or_lambda_expression: t -> t * SC.r
-      val with_as_expresssions: t
+      val with_as_expressions: t
         -> enabled: bool
         -> (t -> t * SC.r)
         -> t * SC.r

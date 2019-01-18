@@ -1165,7 +1165,9 @@ module WithStatementAndDeclAndTypeParser
     | _ ->
     begin
       let (parser, left_token) = Make.token parser left in
-      let (parser, index) = with_reset_precedence parser parse_expression in
+      let (parser, index) = with_as_expressions parser
+        ~enabled:true (fun parser -> with_reset_precedence parser parse_expression)
+      in
       let (parser, right) = match Token.kind left with
       | LeftBracket -> require_right_bracket parser
       | _ -> require_right_brace parser in
@@ -1375,7 +1377,7 @@ module WithStatementAndDeclAndTypeParser
       function-call-expression:
         postfix-expression  (  argument-expression-list-opt  )
     *)
-    let (parser, result) = with_as_expresssions parser ~enabled:true (fun parser ->
+    let (parser, result) = with_as_expressions parser ~enabled:true (fun parser ->
       let (parser, left, args, right) = parse_expression_list_opt parser in
         Make.function_call_expression parser receiver left args right) in
     parse_remaining_expression parser result
@@ -1562,7 +1564,7 @@ module WithStatementAndDeclAndTypeParser
   and parse_parenthesized_expression parser =
     let (parser, left_paren) = assert_token parser LeftParen in
     let (parser, expression) =
-      with_as_expresssions parser ~enabled:true (fun p ->
+      with_as_expressions parser ~enabled:true (fun p ->
         with_reset_precedence p parse_expression
       ) in
     let (parser, right_paren) = require_right_paren parser in
@@ -2095,7 +2097,7 @@ module WithStatementAndDeclAndTypeParser
       parser
       keyword_token
       parse_element_function
-      make_intrinsinc_function =
+      make_intrinsic_function =
     let (parser1, keyword) = assert_token parser keyword_token in
     let (parser1, explicit_type) =
       match peek_token_kind parser1 with
@@ -2118,7 +2120,7 @@ module WithStatementAndDeclAndTypeParser
           SyntaxError.error1015
           parse_element_function in
       let (parser, right_bracket) = require_right_bracket parser in
-      make_intrinsinc_function parser keyword explicit_type left_bracket members right_bracket
+      make_intrinsic_function parser keyword explicit_type left_bracket members right_bracket
 
 
   and parse_darray_intrinsic_expression parser =

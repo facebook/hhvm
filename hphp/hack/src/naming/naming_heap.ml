@@ -56,9 +56,9 @@ module TypeIdHeap = struct
     if not @@ LocalChanges.has_local_changes () then check_valid x (fst y);
     add x y
 
-  let write_through x y =
+  let write_around x y =
     if not @@ LocalChanges.has_local_changes () then check_valid x (fst y);
-    write_through x y
+    write_around x y
 end
 
 module FunPosHeap = struct

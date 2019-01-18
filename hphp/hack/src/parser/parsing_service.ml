@@ -55,9 +55,9 @@ let process_parse_result
     (* We only have to write to the disk heap on initialization, and only *)
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
-    if quick then File_heap.FileHeap.write_through fn content;
+    if quick then File_heap.FileHeap.write_around fn content;
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
-    Parser_heap.ParserHeap.write_through fn (ast, mode);
+    Parser_heap.ParserHeap.write_around fn (ast, mode);
     let comments = None in
     let hash = Some (Ast_utils.generate_ast_decl_hash ast) in
     let defs =
@@ -73,7 +73,7 @@ let process_parse_result
     acc, errorl, error_files
   end
   else begin
-    File_heap.FileHeap.write_through fn content;
+    File_heap.FileHeap.write_around fn content;
     let info = try !legacy_php_file_info fn with _ -> empty_file_info in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build

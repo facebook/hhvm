@@ -165,7 +165,7 @@ module Env = struct
         TypeCanonHeap.add name_key name;
         (* We store redundant info in this case, but if the position is a *)
         (* Full position, we don't store the kind, so this is necessary *)
-        TypeIdHeap.write_through name ((FileInfo.File (mode, fn)), cid_kind)
+        TypeIdHeap.write_around name ((FileInfo.File (mode, fn)), cid_kind)
 
   let new_class_fast fn name = new_cid_fast fn name `Class
   let new_typedef_fast fn name = new_cid_fast fn name `Typedef
@@ -222,7 +222,7 @@ module Env = struct
         validate alt_canonical Errors.error_class_attribute_already_bound
       | None ->
         () end;
-      TypeIdHeap.write_through name (p, cid_kind);
+      TypeIdHeap.write_around name (p, cid_kind);
       TypeCanonHeap.add name_key name
 
   let new_class popt = new_cid popt `Class

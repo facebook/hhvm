@@ -3376,7 +3376,8 @@ void in(ISS& env, const bc::FPushCtorS& op) {
   auto const cls = specialClsRefToCls(env, op.subop2);
   if (is_specialized_cls(cls)) {
     auto const dcls = dcls_of(cls);
-    if (dcls.type == DCls::Exact && !dcls.cls.couldHaveReifiedGenerics() &&
+    auto const exact = dcls.type == DCls::Exact;
+    if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
         (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))
     ) {
       return reduce(
@@ -3384,7 +3385,7 @@ void in(ISS& env, const bc::FPushCtorS& op) {
         bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
       );
     }
-    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
+    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
     push(env, toobj(cls));
     // PHP doesn't forward the context to constructors.
     fpiPush(env, ActRec { FPIKind::Ctor, unctx(cls), dcls.cls, rfunc },
@@ -3400,8 +3401,9 @@ void in(ISS& env, const bc::FPushCtor& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
   if (is_specialized_cls(t1) && op.subop3 == HasGenericsOp::NoGenerics) {
     auto const dcls = dcls_of(t1);
-    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
-    if (dcls.type == DCls::Exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
+    auto const exact = dcls.type == DCls::Exact;
+    auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
+    if (exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
       return reduce(env, bc::DiscardClsRef { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }

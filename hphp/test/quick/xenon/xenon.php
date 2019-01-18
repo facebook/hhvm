@@ -70,6 +70,7 @@ $required_functions = array(
 );
 $optional_functions = array(
   'include',
+  'is_callable',
   AwaitAllWaitHandle::class.'::fromArray',
   RescheduleWaitHandle::class.'::create',
   Awaitable::class.'::result',

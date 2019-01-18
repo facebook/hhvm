@@ -70,6 +70,8 @@ Finished in gen2
 ** exit gen2
 ** resume genList
 ** enter array_map
+** enter is_callable
+** exit is_callable
 ** enter __invoke
 ** enter HH\Asio\result
 ** exit HH\Asio\result

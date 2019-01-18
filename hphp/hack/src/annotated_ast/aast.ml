@@ -301,6 +301,14 @@ and static_var = class_var
 and static_method = method_
 and constructor = method_
 
+and class_tparams = {
+  c_tparam_list: tparam list;
+  (* TODO: remove this and use tp_constraints *)
+  (* keeping around the ast version of the constraint only
+   * for the purposes of Naming.class_meth_bodies *)
+  c_tparam_constraints: ((Ast.constraint_kind * Ast.hint) list SMap.t) [@opaque]
+}
+
 and class_ = {
   c_span           : pos              ;
   c_annotation     : env_annotation   ;
@@ -310,11 +318,7 @@ and class_ = {
   c_kind           : Ast.class_kind   ;
   c_name           : sid              ;
   (* The type parameters of a class A<T> (T is the parameter) *)
-  c_tparams :
-    tparam list *
-    (* keeping around the ast version of the constraint only
-     * for the purposes of Naming.class_meth_bodies *)
-    ((Ast.constraint_kind * Ast.hint) list SMap.t) [@opaque];
+  c_tparams        : class_tparams    ;
   c_extends        : hint list        ;
   c_uses           : hint list        ;
   c_method_redeclarations : method_redeclaration list;

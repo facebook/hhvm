@@ -1,12 +1,13 @@
 [(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = <opaque>;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-      c_name = ([3:7-12], "\\Three"); c_tparams = <opaque>; c_extends = [];
-      c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-      c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-      c_implements = []; c_consts = []; c_typeconsts = [];
-      c_static_vars = []; c_vars = []; c_constructor = None;
-      c_static_methods = [];
+      c_name = ([3:7-12], "\\Three");
+      c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+      c_req_implements = []; c_implements = []; c_consts = [];
+      c_typeconsts = []; c_static_vars = []; c_vars = [];
+      c_constructor = None; c_static_methods = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;

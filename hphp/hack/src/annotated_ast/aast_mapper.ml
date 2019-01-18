@@ -172,6 +172,12 @@ struct
     T.tp_user_attributes = List.map t.S.tp_user_attributes (map_user_attribute menv);
   }
 
+  and map_class_tparams menv ct =
+  {
+    T.c_tparam_list = List.map ~f:(map_tparam menv) ct.S.c_tparam_list;
+    T.c_tparam_constraints = ct.S.c_tparam_constraints;
+  }
+
   and map_func_body menv b =
     match b with
     | S.UnnamedBody fub ->
@@ -273,8 +279,7 @@ struct
     T.c_is_xhp = c.S.c_is_xhp;
     T.c_kind = c.S.c_kind;
     T.c_name = c.S.c_name;
-    T.c_tparams =
-      Tuple.T2.map_fst c.S.c_tparams ~f:(List.map ~f:(map_tparam menv));
+    T.c_tparams = map_class_tparams menv c.S.c_tparams;
     T.c_extends = c.S.c_extends;
     T.c_uses = c.S.c_uses;
     T.c_method_redeclarations =

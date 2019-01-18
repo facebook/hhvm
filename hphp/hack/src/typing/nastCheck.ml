@@ -669,10 +669,10 @@ and class_ tenv c =
               tenv = tenv } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
-               tenv (fst c.c_tparams)
+               tenv c.c_tparams.c_tparam_list
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
-  Typing_instantiability.check_tparams_instantiable tenv (fst c.c_tparams);
+  Typing_instantiability.check_tparams_instantiable tenv c.c_tparams.c_tparam_list;
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
   error_if_has_atmost_rx_as_rxfunc_attribute env c.c_user_attributes;
@@ -703,11 +703,11 @@ and class_ tenv c =
   else begin
     maybe method_ (env, true) c.c_constructor;
   end;
-  List.iter (fst c.c_tparams) (tparam env);
+  List.iter c.c_tparams.c_tparam_list (tparam env);
   List.iter c.c_extends (hint env);
   List.iter c.c_implements (hint env);
   List.iter c.c_consts (class_const env);
-  List.iter c.c_typeconsts (typeconst (env, (fst c.c_tparams)));
+  List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
   List.iter c.c_static_vars (class_var env);
   List.iter c.c_vars (class_var env);
   List.iter c.c_static_methods (method_ (env, true));

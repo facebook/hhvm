@@ -6032,7 +6032,7 @@ and class_def_ env c tc =
     (c.c_extends @ c.c_implements @ c.c_uses)
     (Decl_hint.hint env.Env.decl_env) in
   let env, constraints =
-    Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
+    Phase.localize_generic_parameters_with_bounds env c.c_tparams.c_tparam_list
       ~ety_env:(Phase.env_with_self env) in
   let env = add_constraints (fst c.c_name) env constraints in
   Typing_variance.class_ (Env.get_tcopt env) (snd c.c_name) tc impl;
@@ -6107,7 +6107,7 @@ and class_def_ env c tc =
     T.c_is_xhp = c.c_is_xhp;
     T.c_kind = c.c_kind;
     T.c_name = c.c_name;
-    T.c_tparams = Tuple.T2.map_fst c.c_tparams ~f:(List.map ~f:(type_param env));
+    T.c_tparams = class_type_param env c.c_tparams;
     T.c_extends = c.c_extends;
     T.c_uses = c.c_uses;
     T.c_method_redeclarations = typed_method_redeclarations;
@@ -6248,7 +6248,7 @@ and class_constr_def env c =
 
 and class_implements_type env c1 removals ctype2 =
   let params =
-    List.map (fst c1.c_tparams) begin fun { tp_name = (p, s); _ } ->
+    List.map c1.c_tparams.c_tparam_list begin fun { tp_name = (p, s); _ } ->
       (Reason.Rwitness p, Tgeneric s)
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
@@ -6401,6 +6401,12 @@ and type_param env t =
     T.tp_constraints = t.tp_constraints;
     T.tp_reified = t.tp_reified;
     T.tp_user_attributes = List.map t.tp_user_attributes (user_attribute env);
+  }
+
+and class_type_param env ct =
+  {
+    T.c_tparam_list = List.map ~f:(type_param env) ct.c_tparam_list;
+    T.c_tparam_constraints = ct.c_tparam_constraints;
   }
 
 and method_def env m =

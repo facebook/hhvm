@@ -541,7 +541,10 @@ and on_method m : Aast.method_ =
   }
 
 and on_class c : Aast.class_ =
-  let tparams = on_list on_tparam c.c_tparams in
+  let c_tparams = {
+    Aast.c_tparam_list = on_list on_tparam c.c_tparams;
+    Aast.c_tparam_constraints = SMap.empty;
+  } in
   let body = List.fold_left on_class_elt make_empty_class_body c.c_body in
   let named_class =
   Aast.{
@@ -552,7 +555,7 @@ and on_class c : Aast.class_ =
       c_is_xhp                = c.c_is_xhp;
       c_kind                  = c.c_kind;
       c_name                  = c.c_name;
-      c_tparams               = (tparams, SMap.empty);
+      c_tparams               = c_tparams;
       c_extends               = on_list on_hint c.c_extends;
       c_uses                  = body.c_uses;
       c_method_redeclarations = body.c_method_redeclarations;

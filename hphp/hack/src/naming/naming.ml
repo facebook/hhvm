@@ -1206,6 +1206,10 @@ module Make (GetLocals : GetLocals) = struct
      * so lets forbid it for now.
      *)
     let tparam_l  = type_paraml ~forbid_this:true env c.c_tparams in
+    let c_tparams = {
+      N.c_tparam_list = tparam_l;
+      N.c_tparam_constraints = constraints;
+    } in
     let consts   = List.fold_right ~f:(class_const env) c.c_body ~init:[] in
     let typeconsts =
       List.fold_right ~f:(class_typeconst env) c.c_body ~init:[] in
@@ -1229,7 +1233,7 @@ module Make (GetLocals : GetLocals) = struct
         N.c_is_xhp                = c.c_is_xhp;
         N.c_kind                  = c.c_kind;
         N.c_name                  = name;
-        N.c_tparams               = (tparam_l, constraints);
+        N.c_tparams               = c_tparams;
         N.c_extends               = parents;
         N.c_uses                  = uses;
         N.c_method_redeclarations = redeclarations;
@@ -2953,7 +2957,7 @@ module Make (GetLocals : GetLocals) = struct
     {m with N.m_body = named_body}
 
   let class_meth_bodies nenv nc =
-    let _n_tparams, cstrs = nc.N.c_tparams in
+    let { N.c_tparam_constraints = cstrs; _ } = nc.N.c_tparams in
     let genv  = Env.make_class_genv nenv cstrs
       nc.N.c_mode (nc.N.c_name, nc.N.c_kind)
       Namespace_env.empty_with_default_popt

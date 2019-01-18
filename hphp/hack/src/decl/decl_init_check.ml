@@ -52,6 +52,7 @@ let prop_needs_init sp =
   else if sp.sp_lateinit then false
   else match sp.sp_type with
     | None
+    | Some (_, Tprim Tnull)
     | Some (_, Toption _)
     | Some (_, Tmixed) -> false
     | Some _ -> sp.sp_needs_init

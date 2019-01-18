@@ -56,6 +56,7 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   , m_persistent{0}
   , m_no_wakeup{0}
   , m_fast_init{0}
+  , m_no_verify_prop_types{0}
 {}
 
 APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
@@ -89,6 +90,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   auto const objPropVec = objectData->propVec();
   const TypedValueAux* propInit = nullptr;
 
+  auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
   for (unsigned i = 0; i < numRealProps; ++i) {
     auto const attrs = propInfo[i].attrs;
     assertx((attrs & AttrStatic) == 0);
@@ -130,10 +132,20 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
       }
     }
 
+    // If the property value satisfies its type-hint in all contexts, we don't
+    // need to do any validation when we re-create the object.
+    if (propsDontNeedCheck) {
+      propsDontNeedCheck = propInfo[i].typeConstraint.alwaysPasses(objProp);
+    }
+
     auto val = APCHandle::Create(const_variant_ref{objProp}, false,
                                  APCHandleLevel::Inner, true);
     size += val.size;
     apcPropVec[i] = val.handle;
+  }
+
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propsDontNeedCheck) {
+    apcObj->m_no_verify_prop_types = 1;
   }
 
   if (UNLIKELY(hasDynProps)) {
@@ -287,8 +299,10 @@ Object APCObject::createObject() const {
     }
   }
 
-  // Make sure the unserialized values don't violate any type-hints.
-  obj->verifyPropTypeHints();
+  // Make sure the unserialized values don't violate any type-hints if they
+  // require validation.
+  if (!m_no_verify_prop_types) obj->verifyPropTypeHints();
+  assertx(obj->assertPropTypeHints());
 
   if (UNLIKELY(numProps < m_propCount)) {
     auto dynProps = apcProp[numProps];

@@ -204,6 +204,15 @@ inline void ObjectData::verifyPropTypeHints() const {
   verifyPropTypeHints(m_cls->declProperties().size());
 }
 
+inline bool ObjectData::assertPropTypeHints() const {
+  auto const props = propVec();
+  auto const end = m_cls->declProperties().size();
+  for (size_t idx = 0; idx < end; ++idx) {
+    if (!assertTypeHint(&props[idx], idx)) return false;
+  }
+  return true;
+}
+
 inline Class* ObjectData::getVMClass() const {
   assertx(kindIsValid());
   return m_cls;

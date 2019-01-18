@@ -123,11 +123,15 @@ void unsetTypeHint(const Class::Prop* prop) {
   );
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Check that the given property's type matches its type-hint.
-bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
+bool ObjectData::assertTypeHint(tv_rval prop, Slot propIdx) const {
   assertx(tvIsPlausible(*prop));
-  assertx(propIdx < cls->numDeclProperties());
-  auto const& propDecl = cls->declProperties()[propIdx];
+  assertx(propIdx < m_cls->numDeclProperties());
+  auto const& propDecl = m_cls->declProperties()[propIdx];
 
   // AttrLateInitSoft properties can be potentially anything due to default
   // values, so don't assume anything.
@@ -155,8 +159,6 @@ bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
     return propDecl.typeConstraint.maybeMixed();
   }
   return propDecl.typeConstraint.assertCheck(prop);
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -603,7 +605,7 @@ void ObjectData::o_getArray(Array& props,
   IteratePropToArrayOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
-      assertx(assertTypeHint(cls, val, slot));
+      assertx(assertTypeHint(val, slot));
       if (UNLIKELY(val.type() == KindOfUninit)) {
         if (!ignoreLateInit) {
           if (prop.attrs & AttrLateInitSoft) {
@@ -967,7 +969,7 @@ ObjectData* ObjectData::clone() {
   auto const clonePropVec = clone->propVecForConstruct();
   for (auto i = Slot{0}; i < nProps; i++) {
     tvDupWithRef(propVec()[i], clonePropVec[i]);
-    assertx(assertTypeHint(m_cls, &clonePropVec[i], i));
+    assertx(assertTypeHint(&clonePropVec[i], i));
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -1351,7 +1353,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
     auto const prop = const_cast<TypedValue*>(&propVec()[propIdx]);
-    assertx(assertTypeHint(m_cls, prop, propIdx));
+    assertx(assertTypeHint(prop, propIdx));
 
     auto const& declProp = m_cls->declProperties()[propIdx];
     if (!ignoreLateInit && lookup.accessible) {

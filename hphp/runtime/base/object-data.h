@@ -433,6 +433,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void verifyPropTypeHints() const;
   void verifyPropTypeHints(size_t end) const;
 
+  bool assertPropTypeHints() const;
+
   // Accessors for declared properties at statically known offsets. In the lval
   // case, the property must be statically known to be mutable. If the caller
   // modifies the lval, they are responsible for validating the value with any
@@ -568,6 +570,8 @@ private:
   double toDoubleImpl() const noexcept;
 
   bool slowDestroyCheck() const;
+
+  bool assertTypeHint(tv_rval, Slot) const;
 
 // offset:  0        8       12   16   20          32
 // 64bit:   header   cls          id   [subclass]  [props...]

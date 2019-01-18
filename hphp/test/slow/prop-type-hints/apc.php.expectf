@@ -1,0 +1,30 @@
+Count: 0
+store()
+Count: 1
+get()
+
+Warning: Property 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 36
+Count: 2
+get()
+Count: 3
+get()
+
+Warning: Property 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 36
+Count: 4
+get()
+Count: 5
+get()
+
+Warning: Property 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 36
+Count: 6
+get()
+Count: 7
+get()
+
+Warning: Property 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 36
+Count: 8
+get()
+Count: 9
+get()
+
+Warning: Property 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 36

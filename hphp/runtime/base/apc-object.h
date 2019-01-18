@@ -114,6 +114,7 @@ private:
   uint8_t m_persistent:1;
   uint8_t m_no_wakeup:1;
   uint8_t m_fast_init:1;
+  uint8_t m_no_verify_prop_types:1;
 };
 
 //////////////////////////////////////////////////////////////////////

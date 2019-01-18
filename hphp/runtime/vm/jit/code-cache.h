@@ -94,6 +94,10 @@ struct CodeCache {
     body("data");
   }
 
+  static uint32_t maxUsage(uint32_t total) {
+    return total - total / 128;
+  }
+
   size_t codeSize() const { return m_codeSize; }
 
   /*

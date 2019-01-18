@@ -1523,20 +1523,15 @@ void RuntimeOption::Load(
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
                  "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
 
-    // The MaxUsage should be slightly smaller than the max capacity, to avoid
-    // overflow.
-    auto constexpr maxUsage = [] (uint32_t size) {
-      return size - size / 128;
-    };
-
-    Config::Bind(CodeCache::AMaxUsage, ini, config,
-                 "Eval.JitAMaxUsage", maxUsage(CodeCache::ASize));
-    Config::Bind(CodeCache::AProfMaxUsage, ini, config,
-                 "Eval.JitAProfMaxUsage", maxUsage(CodeCache::AProfSize));
-    Config::Bind(CodeCache::AColdMaxUsage, ini, config,
-                 "Eval.JitAColdMaxUsage", maxUsage(CodeCache::AColdSize));
+    Config::Bind(CodeCache::AMaxUsage, ini, config, "Eval.JitAMaxUsage",
+                 CodeCache::maxUsage(CodeCache::ASize));
+    Config::Bind(CodeCache::AProfMaxUsage, ini, config, "Eval.JitAProfMaxUsage",
+                 CodeCache::maxUsage(CodeCache::AProfSize));
+    Config::Bind(CodeCache::AColdMaxUsage, ini, config, "Eval.JitAColdMaxUsage",
+                 CodeCache::maxUsage(CodeCache::AColdSize));
     Config::Bind(CodeCache::AFrozenMaxUsage, ini, config,
-                 "Eval.JitAFrozenMaxUsage", maxUsage(CodeCache::AFrozenSize));
+                 "Eval.JitAFrozenMaxUsage",
+                 CodeCache::maxUsage(CodeCache::AFrozenSize));
 
     Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
                  hugePagesSoundNice());

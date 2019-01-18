@@ -108,10 +108,10 @@ CodeCache::CodeCache()
     AFrozenSize = rd(AFrozenSize * targetSize / total);
     GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
-    AMaxUsage = ASize - ASize / 128;
-    AProfMaxUsage = AProfSize - ASize / 128;
-    AColdMaxUsage = AColdSize - AColdSize / 128;
-    AFrozenMaxUsage = AFrozenSize - AFrozenSize / 128;
+    AMaxUsage = maxUsage(ASize);
+    AProfMaxUsage = maxUsage(AProfSize);
+    AColdMaxUsage = maxUsage(AColdSize);
+    AFrozenMaxUsage = maxUsage(AFrozenSize);
 
     assertx(static_cast<size_t>(AHotSize) + ASize + AProfSize + AColdSize +
             AFrozenSize + GlobalDataSize <= targetSize);

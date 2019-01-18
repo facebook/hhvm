@@ -152,6 +152,7 @@ let get_language_and_mode text =
   let hh = FileInfo.HhFile in
   let suffix = Relative_path.suffix (SourceText.file_path text) in
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
+  let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
   let header = Parser.parse_header_only (Env.make ()) text in
   match syntax header with
   | MarkupSection
@@ -198,4 +199,4 @@ let get_language_and_mode text =
         in
         language, mode
       )
-  | _ -> php, None
+  | _ -> if has_dot_hack_extension then hh, Some FileInfo.Mstrict else php, None

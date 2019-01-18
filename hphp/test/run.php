@@ -691,7 +691,11 @@ function find_tests($files, array $options = null) {
   $files = implode(' ', $files);
   if (isset($options['typechecker'])) {
     $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.php.type-errors'"
+      "find $files ".
+      "-name '*.php' ".
+      "-o -name '*.php.type-errors' ".
+      "-o -name '*.hack' ".
+      "-o -name '*.hack.type-errors'"
     ));
     // The above will get all the php files. Now filter out only the ones
     // that have a .hhconfig associated with it.
@@ -707,8 +711,10 @@ function find_tests($files, array $options = null) {
     $tests = explode("\n", shell_exec(
       "find $files '(' " .
           "-name '*.php' " .
+          "-o -name '*.hack' " .
           "-o -name '*.js' " .
           "-o -name '*.php.type-errors' " .
+          "-o -name '*.hack.type-errors' " .
           "-o -name '*.hhas' " .
         "')' " .
         "-not -regex '.*round_trip[.]hhas'"

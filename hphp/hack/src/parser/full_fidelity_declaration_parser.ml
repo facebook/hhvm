@@ -1876,17 +1876,24 @@ module WithExpressionAndStatementAndTypeParser
         p, (s, has_suffix)
       )
     in
-      (* proceed successfully if we've consumed <?... *)
+      (* proceed successfully if we've consumed <?..., or dont need it *)
       (* We purposefully ignore leading trivia before the <?hh, and handle
       the error on a later pass *)
       (* TODO: Handle the case where the langauge is not a Name. *)
+    let has_dot_hack_extension = Env.has_dot_hack_extension (env parser) in
+    if has_dot_hack_extension && has_suffix then
+      let parser = with_error parser SyntaxError.error1060 in
+      parser, markup_section
     (* Do not attempt to recover in HHVM compatibility mode *)
-    if has_suffix || Env.hhvm_compat_mode (env parser) then
+    else if (has_suffix || Env.hhvm_compat_mode (env parser)) &&
+      not has_dot_hack_extension then
       parser1, markup_section
     else
-      (* ERROR RECOVERY *)
-      (* Make no progress; try parsing the file without a header *)
-      let parser = with_error parser SyntaxError.error1001 in
+      (* no markup sections for .hack files, error recovery for other files *)
+      let parser =
+        if has_dot_hack_extension then parser
+        else with_error parser SyntaxError.error1001
+      in
       let (parser, missing1) = Make.missing parser (pos parser) in
       let (parser, missing2) = Make.missing parser (pos parser) in
       let (parser, missing3) = Make.missing parser (pos parser) in

@@ -3497,8 +3497,8 @@ let lateinit_with_default pos =
 let bad_lateinit_override parent_is_lateinit parent_pos child_pos =
   let verb = if parent_is_lateinit then "is" else "is not" in
   add_list (Typing.err_code Typing.BadLateInitOverride) [
-    child_pos, "Redeclared properties must be consistently declared __LateInit";
-    parent_pos, "The property "^verb^" declared __LateInit here";
+    child_pos, "Redeclared properties must be consistently declared as late-initialized";
+    parent_pos, "The property "^verb^" late-initialized here";
   ]
 
 let invalid_truthiness_test pos ty =

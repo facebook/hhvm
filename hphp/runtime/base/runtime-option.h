@@ -724,7 +724,7 @@ struct RuntimeOption {
   F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \
-  F(bool, AllowScopeBinding,           true)                            \
+  F(bool, AllowScopeBinding,           false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

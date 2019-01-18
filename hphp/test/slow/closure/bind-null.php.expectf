@@ -1,1 +1,3 @@
+Deprecated: Closure::bindto: This function is scheduled for removal in %s/test/slow/closure/bind-null.php on line 6
+
 Warning: get_called_class() called from outside a class in %s/test/slow/closure/bind-null.php on line 5

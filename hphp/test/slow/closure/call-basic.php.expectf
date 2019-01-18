@@ -1,0 +1,3 @@
+
+Deprecated: Closure::call: This function is scheduled for removal in %s/test/slow/closure/call-basic.php on line 14
+int(7)

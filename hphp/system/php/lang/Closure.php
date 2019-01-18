@@ -50,6 +50,7 @@ class Closure {
    * @param (object | classname | null) $newscope
    * @return object
    */
+  <<__Deprecated('This function is scheduled for removal')>>
   public final static function bind(Closure $closure,
                                     $newthis,
                                     $newscope = "static") {
@@ -60,7 +61,7 @@ class Closure {
    * @param (object | classname | null) $newscope
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Deprecated('This function is scheduled for removal')>>
   public final function bindto(?object $newthis,
                                mixed $newscope = "static"): ?object;
 
@@ -70,7 +71,7 @@ class Closure {
    * of the call.
    * @return mixed - Returns the return value of the closure.
    */
-  <<__Native>>
+  <<__Native, __Deprecated('This function is scheduled for removal')>>
   public final function call(mixed $newthis,
                              ...$argv): mixed;
 }

@@ -1,1 +1,3 @@
+
+Deprecated: Closure::call: This function is scheduled for removal in %s/test/slow/closure/call-stdclass.php on line 10
 int(7)

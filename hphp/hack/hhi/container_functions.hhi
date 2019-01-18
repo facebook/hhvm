@@ -23,13 +23,13 @@ function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
 <<__PHPStdLib>>
-function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function arsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR, bool $intl_sort = false): bool;
+function arsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
 function ksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>

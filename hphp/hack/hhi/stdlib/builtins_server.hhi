@@ -17,29 +17,29 @@ function dangling_server_proxy_old_request();
 <<__PHPStdLib>>
 function pagelet_server_is_enabled();
 <<__PHPStdLib>>
-function pagelet_server_task_start($url, $headers = null, $post_data = null, $files = null, int $timeout_seconds = 0);
+function pagelet_server_task_start(string $url, $headers = null, string $post_data = "", $files = null, int $timeout_seconds = 0);
 <<__PHPStdLib>>
-function pagelet_server_task_status($task);
+function pagelet_server_task_status(resource $task);
 <<__PHPStdLib>>
-function pagelet_server_task_result($task, &$headers, &$code, $timeout_ms = 0): string;
+function pagelet_server_task_result(resource $task, &$headers, &$code, int $timeout_ms = 0): string;
 <<__PHPStdLib>>
 function pagelet_server_flush();
 <<__PHPStdLib>>
-function xbox_send_message($msg, &$ret, $timeout_ms, $host = "localhost");
+function xbox_send_message(string $msg, &$ret, int $timeout_ms, string $host = "localhost");
 <<__PHPStdLib>>
-function xbox_post_message($msg, $host = "localhost");
+function xbox_post_message(string $msg, string $host = "localhost");
 <<__PHPStdLib>>
-function xbox_task_start($message);
+function xbox_task_start(string $message);
 <<__PHPStdLib>>
-function xbox_task_status($task);
+function xbox_task_status(resource $task);
 <<__PHPStdLib>>
-function xbox_task_result($task, $timeout_ms, &$ret);
+function xbox_task_result(resource $task, int $timeout_ms, &$ret);
 <<__PHPStdLib>>
-function xbox_process_call_message($msg);
+function xbox_process_call_message(string $msg);
 <<__PHPStdLib>>
 function xbox_get_thread_timeout();
 <<__PHPStdLib>>
-function xbox_set_thread_timeout($timeout);
+function xbox_set_thread_timeout(int $timeout);
 <<__PHPStdLib>>
 function xbox_schedule_thread_reset();
 <<__PHPStdLib>>

@@ -37,7 +37,7 @@ function func_get_args(): varray;
 <<__PHPStdLib, __Rx>>
 function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib, __Rx>>
-function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
+function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 <<__Rx>>
 function is_array(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
@@ -52,7 +52,7 @@ function ord(string $string): int;
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
 <<__PHPStdLib, __Rx>>
-function intval($v, $base = 10): int;
+function intval($v, int $base = 10): int;
 <<__PHPStdLib, __Rx>>
 function doubleval($v): float;
 <<__PHPStdLib, __Rx>>
@@ -63,7 +63,7 @@ function strval($v): string;
 function boolval($v): bool;
 
 <<__PHPStdLib>>
-function get_class_constants($class_name): array;
+function get_class_constants(string $class_name): array;
 
 // the return value is an instance with class $class
 // do **not** use this in your code, call newv() instead

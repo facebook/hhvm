@@ -17,29 +17,29 @@ function hphp_object_pointer($obj);
 <<__PHPStdLib>>
 function hphp_get_this();
 <<__PHPStdLib>>
-function class_implements($obj, $autoload = true);
+function class_implements($obj, bool $autoload = true);
 <<__PHPStdLib>>
-function class_parents($obj, $autoload = true);
+function class_parents($obj, bool $autoload = true);
 <<__PHPStdLib>>
-function class_uses($obj, $autoload = true);
+function class_uses($obj, bool $autoload = true);
 <<__PHPStdLib>>
 function iterator_apply($obj, $func, $params = null);
 <<__PHPStdLib>>
 function iterator_count($obj);
 <<__PHPStdLib>>
-function iterator_to_array($obj, $use_keys = true);
+function iterator_to_array($obj, bool $use_keys = true);
 <<__PHPStdLib>>
-function spl_autoload_call($class_name);
+function spl_autoload_call(string $class_name);
 <<__PHPStdLib>>
-function spl_autoload_extensions($file_extensions = null);
+function spl_autoload_extensions(string $file_extensions = "");
 <<__PHPStdLib>>
 function spl_autoload_functions();
 <<__PHPStdLib>>
-function spl_autoload_register($autoload_function = null, $throws = true, $prepend = false);
+function spl_autoload_register($autoload_function = null, bool $throws = true, bool $prepend = false);
 <<__PHPStdLib>>
 function spl_autoload_unregister($autoload_function);
 <<__PHPStdLib>>
-function spl_autoload($class_name, $file_extensions = null);
+function spl_autoload(string $class_name, $file_extensions = null);
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;

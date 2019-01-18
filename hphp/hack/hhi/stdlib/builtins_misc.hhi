@@ -22,31 +22,31 @@ function connection_status();
 <<__PHPStdLib>>
 function connection_timeout();
 <<__PHPStdLib>>
-function constant($name);
+function constant(string $name);
 <<__PHPStdLib>>
-function define($name, $value, $case_insensitive = false);
+function define(string $name, $value, bool $case_insensitive = false);
 <<__PHPStdLib>>
-function defined(string $name, $autoload = true);
+function defined(string $name, bool $autoload = true);
 <<__PHPStdLib>>
 function get_browser($user_agent = null, $return_array = false);
 <<__PHPStdLib>>
-function ignore_user_abort($setting = false);
+function ignore_user_abort(bool $setting = false);
 <<__PHPStdLib, __Rx>>
-function pack($format, ...);
+function pack(string $format, ...);
 <<__PHPStdLib>>
 function php_check_syntax($filename, &$error_message = null);
 <<__PHPStdLib>>
-function sleep($seconds);
+function sleep(int $seconds);
 <<__PHPStdLib>>
-function usleep($micro_seconds);
+function usleep(int $micro_seconds);
 <<__PHPStdLib>>
-function time_nanosleep($seconds, $nanoseconds);
+function time_nanosleep(int $seconds, int $nanoseconds);
 <<__PHPStdLib>>
-function time_sleep_until($timestamp);
+function time_sleep_until(float $timestamp);
 <<__PHPStdLib>>
-function uniqid($prefix = null, $more_entropy = false);
+function uniqid(string $prefix = "", bool $more_entropy = false);
 <<__PHPStdLib, __Rx>>
-function unpack($format, $data);
+function unpack(string $format, string $data);
 <<__PHPStdLib>>
 function sys_getloadavg();
 <<__PHPStdLib>>

@@ -161,56 +161,56 @@ define('SOCKET_EDQUOT', 0);
 define('SOCKET_ENOMEDIUM', 0);
 define('SOCKET_EMEDIUMTYPE', 0);
 <<__PHPStdLib>>
-function socket_create($domain, $type, $protocol) { }
+function socket_create(int $domain, int $type, int $protocol) { }
 <<__PHPStdLib>>
-function socket_create_listen($port, $backlog = 128) { }
+function socket_create_listen(int $port, int $backlog = 128) { }
 <<__PHPStdLib>>
-function socket_create_pair($domain, $type, $protocol, &$fd) { }
+function socket_create_pair(int $domain, int $type, int $protocol, &$fd) { }
 <<__PHPStdLib>>
-function socket_get_option($socket, $level, $optname) { }
+function socket_get_option(resource $socket, int $level, int $optname) { }
 <<__PHPStdLib>>
-function socket_getpeername($socket, &$address, &$port = null) { }
+function socket_getpeername(resource $socket, &$address, &$port = null) { }
 <<__PHPStdLib>>
-function socket_getsockname($socket, &$address, &$port = null) { }
+function socket_getsockname(resource $socket, &$address, &$port = null) { }
 <<__PHPStdLib>>
-function socket_set_block($socket) { }
+function socket_set_block(resource $socket) { }
 <<__PHPStdLib>>
-function socket_set_nonblock($socket) { }
+function socket_set_nonblock(resource $socket) { }
 <<__PHPStdLib>>
-function socket_set_option($socket, $level, $optname, $optval) { }
+function socket_set_option(resource $socket, int $level, int $optname, $optval) { }
 <<__PHPStdLib>>
-function socket_connect($socket, $address, $port = 0) { }
+function socket_connect(resource $socket, string $address, int $port = 0) { }
 <<__PHPStdLib>>
-function socket_bind($socket, $address, $port = 0) { }
+function socket_bind(resource $socket, string $address, int $port = 0) { }
 <<__PHPStdLib>>
-function socket_listen($socket, $backlog = 0) { }
+function socket_listen(resource $socket, int $backlog = 0) { }
 <<__PHPStdLib>>
-function socket_select(&$read, &$write, &$except, $vtv_sec, $tv_usec = 0) { }
+function socket_select(&$read, &$write, &$except, $vtv_sec, int $tv_usec = 0) { }
 <<__PHPStdLib>>
-function socket_server($hostname, $port = -1, &$errnum = null, &$errstr = null) { }
+function socket_server(string $hostname, int $port = -1, &$errnum = null, &$errstr = null) { }
 <<__PHPStdLib>>
-function socket_accept($socket) { }
+function socket_accept(resource $socket) { }
 <<__PHPStdLib>>
-function socket_read($socket, $length, $type = 0) { }
+function socket_read(resource $socket, int $length, int $type = 0) { }
 <<__PHPStdLib>>
-function socket_write($socket, $buffer, $length = 0) { }
+function socket_write(resource $socket, string $buffer, int $length = 0) { }
 <<__PHPStdLib>>
-function socket_send($socket, $buf, $len, $flags) { }
+function socket_send(resource $socket, string $buf, int $len, int $flags) { }
 <<__PHPStdLib>>
-function socket_sendto($socket, $buf, $len, $flags, $addr, $port = 0) { }
+function socket_sendto(resource $socket, string $buf, int $len, int $flags, string $addr, int $port = 0) { }
 <<__PHPStdLib>>
-function socket_recv($socket, &$buf, $len, $flags) { }
+function socket_recv(resource $socket, &$buf, int $len, int $flags) { }
 <<__PHPStdLib>>
-function socket_recvfrom($socket, &$buf, $len, $flags, &$name, &$port = 0) { }
+function socket_recvfrom(resource $socket, &$buf, int $len, int $flags, &$name, &$port = 0) { }
 <<__PHPStdLib>>
-function socket_shutdown($socket, $how = 0) { }
+function socket_shutdown(resource $socket, int $how = 0) { }
 <<__PHPStdLib>>
-function socket_close($socket) { }
+function socket_close(resource $socket) { }
 <<__PHPStdLib>>
-function socket_strerror($errnum) { }
+function socket_strerror(int $errnum) { }
 <<__PHPStdLib>>
 function socket_last_error($socket = null) { }
 <<__PHPStdLib>>
 function socket_clear_error($socket = null) { }
 <<__PHPStdLib>>
-function getaddrinfo($host, $port, $family = 0, $socktype = 0, $protocol = 0, $flags = 0) { }
+function getaddrinfo(string $host, string $port, int $family = 0, int $socktype = 0, int $protocol = 0, int $flags = 0);

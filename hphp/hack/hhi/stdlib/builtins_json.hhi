@@ -49,9 +49,9 @@ const int JSON_FB_WARN_VEC_LIKE_DARRAYS = 0;
 const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 
 <<__PHPStdLib>>
-function json_encode($value, $options = 0, $depth = 512);
+function json_encode($value, int $options = 0, int $depth = 512);
 <<__PHPStdLib>>
-function json_decode($json, $assoc = false, $depth = 512, $options = 0);
+function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0);
 <<__PHPStdLib>>
 function json_last_error();
 <<__PHPStdLib>>

@@ -29,103 +29,103 @@ const DAY_6 = 131084;
 const DAY_7 = 131085;
 
 <<__PHPStdLib>>
-function checkdate($month, $day, $year) { }
+function checkdate(int $month, int $day, int $year);
 <<__PHPStdLib>>
-function date_add($datetime, $interval) { }
+function date_add($datetime, $interval);
 <<__PHPStdLib>>
-function date_create_from_format($format, $time, $timezone = null) { }
+function date_create_from_format(string $format, string $time, $timezone = null);
 <<__PHPStdLib>>
-function date_create($time = null, $timezone = null) { }
+function date_create($time = null, $timezone = null);
 <<__PHPStdLib>>
-function date_date_set($object, $year, $month, $day) { }
+function date_date_set($object, int $year, int $month, int $day);
 <<__PHPStdLib>>
-function date_default_timezone_get() { }
+function date_default_timezone_get();
 <<__PHPStdLib>>
-function date_default_timezone_set($name) { }
+function date_default_timezone_set(string $name);
 <<__PHPStdLib>>
-function date_diff($datetime, $datetime2, $absolute = false) { }
+function date_diff($datetime, $datetime2, bool $absolute = false);
 <<__PHPStdLib>>
-function date_format($object, $format) { }
+function date_format($object, string $format);
 <<__PHPStdLib>>
-function date_get_last_errors() { }
+function date_get_last_errors();
 <<__PHPStdLib>>
-function date_interval_create_from_date_string($time) { }
+function date_interval_create_from_date_string(string $time);
 <<__PHPStdLib>>
-function date_interval_format($interval, $format_spec) { }
+function date_interval_format($interval, string $format_spec);
 <<__PHPStdLib>>
-function date_isodate_set($object, $year, $week, $day = 1) { }
+function date_isodate_set($object, int $year, int $week, int $day = 1);
 <<__PHPStdLib>>
-function date_modify($object, $modify) { }
+function date_modify($object, string $modify);
 <<__PHPStdLib>>
-function date_offset_get($object) { }
+function date_offset_get($object);
 <<__PHPStdLib>>
-function date_parse($date) { }
+function date_parse(string $date);
 <<__PHPStdLib>>
-function date_sub($datetime, $interval) { }
+function date_sub($datetime, $interval);
 <<__PHPStdLib>>
-function date_sun_info($ts, $latitude, $longitude) { }
+function date_sun_info(int $ts, float $latitude, float $longitude);
 <<__PHPStdLib>>
-function date_sunrise($timestamp, $format = 0, $latitude = 0.0, $longitude = 0.0, $zenith = 0.0, $gmt_offset = 99999.0) { }
+function date_sunrise(int $timestamp, int $format = 0, float $latitude = 0.0, float $longitude = 0.0, float $zenith = 0.0, float $gmt_offset = 99999.0);
 <<__PHPStdLib>>
-function date_sunset($timestamp, $format = 0, $latitude = 0.0, $longitude = 0.0, $zenith = 0.0, $gmt_offset = 99999.0) { }
+function date_sunset(int $timestamp, int $format = 0, float $latitude = 0.0, float $longitude = 0.0, float $zenith = 0.0, float $gmt_offset = 99999.0);
 <<__PHPStdLib>>
-function date_time_set($object, $hour, $minute, $second = 0) { }
+function date_time_set($object, int $hour, int $minute, int $second = 0);
 <<__PHPStdLib>>
-function date_timestamp_get($datetime) { }
+function date_timestamp_get($datetime);
 <<__PHPStdLib>>
-function date_timestamp_set($datetime, $timestamp) { }
+function date_timestamp_set($datetime, int $timestamp);
 <<__PHPStdLib>>
-function date_timezone_get($object) { }
+function date_timezone_get($object);
 <<__PHPStdLib>>
-function date_timezone_set($object, $timezone) { }
+function date_timezone_set($object, $timezone);
 <<__PHPStdLib>>
-function date($format, $timestamp = null)/*: string*/ { }
+function date(string $format, int $timestamp = -1)/*: string*/ { }
 <<__PHPStdLib>>
-function getdate($timestamp = null) { }
+function getdate(int $timestamp = -1);
 <<__PHPStdLib>>
-function gettimeofday($return_float = false) { }
+function gettimeofday(bool $return_float = false);
 <<__PHPStdLib>>
-function gmdate($format, $timestamp = null) { }
+function gmdate(string $format, int $timestamp = -1);
 <<__PHPStdLib>>
-function gmmktime($hour = PHP_INT_MAX, $minute = PHP_INT_MAX, $second = PHP_INT_MAX, $month = PHP_INT_MAX, $day = PHP_INT_MAX, $year = PHP_INT_MAX) { }
+function gmmktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX);
 <<__PHPStdLib>>
-function gmstrftime($format, $timestamp = null) { }
+function gmstrftime(string $format, int $timestamp = -1);
 <<__PHPStdLib>>
-function idate($format, $timestamp = null) { }
+function idate(string $format, int $timestamp = -1);
 <<__PHPStdLib>>
-function localtime($timestamp = null, $is_associative = false) { }
+function localtime(int $timestamp = -1, bool $is_associative = false);
 <<__PHPStdLib>>
-function microtime($get_as_float = false) { }
+function microtime(bool $get_as_float = false);
 <<__PHPStdLib>>
-function mktime($hour = PHP_INT_MAX, $minute = PHP_INT_MAX, $second = PHP_INT_MAX, $month = PHP_INT_MAX, $day = PHP_INT_MAX, $year = PHP_INT_MAX) { }
+function mktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX);
 <<__PHPStdLib>>
-function strftime($format, $timestamp = null) { }
+function strftime(string $format, int $timestamp = -1);
 <<__PHPStdLib>>
-function strptime($date, $format) { }
+function strptime(string $date, string $format);
 <<__PHPStdLib>>
-function strtotime($input, $timestamp = null) { }
+function strtotime(string $input, int $timestamp = -1);
 <<__PHPStdLib>>
 function time(): int { }
 <<__PHPStdLib>>
-function timezone_abbreviations_list() { }
+function timezone_abbreviations_list();
 <<__PHPStdLib>>
-function timezone_identifiers_list(int $what = 2047, string $country = '') { }
+function timezone_identifiers_list(int $what = 2047, string $country = '');
 <<__PHPStdLib>>
-function timezone_location_get($timezone) { }
+function timezone_location_get($timezone);
 <<__PHPStdLib>>
-function timezone_name_from_abbr($abbr, $gmtoffset = -1, $isdst = true) { }
+function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = 1);
 <<__PHPStdLib>>
-function timezone_name_get($object) { }
+function timezone_name_get($object);
 <<__PHPStdLib>>
-function timezone_offset_get($object, $dt) { }
+function timezone_offset_get($object, $dt);
 <<__PHPStdLib>>
-function timezone_open($timezone) { }
+function timezone_open(string $timezone);
 <<__PHPStdLib>>
 function timezone_transitions_get(DateTimeZone $object,
                                   int $timestamp_begin = PHP_INT_MIN,
-                                  int $timestamp_end = PHP_INT_MAX) { }
+                                  int $timestamp_end = PHP_INT_MAX);
 <<__PHPStdLib>>
-function timezone_version_get() { }
+function timezone_version_get();
 
 interface DateTimeInterface {
   public function diff(DateTimeInterface $datetime2, bool $absolute = false);
@@ -158,7 +158,7 @@ class DateTime implements DateTimeInterface {
   public function setTime(int $hour, int $minute, int $second = 0);
   public function setTimestamp(int $unixtimestamp);
   public function setTimezone(DateTimeZone $timezone);
-  public function sub(DateInterval $interval) { }
+  public function sub(DateInterval $interval);
   public function diff(DateTimeInterface $datetime2, bool $absolute = false);
   public function format(string $format);
   public static function createFromFormat(

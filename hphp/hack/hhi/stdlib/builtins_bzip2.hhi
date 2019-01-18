@@ -9,22 +9,22 @@
  */
 
 <<__PHPStdLib>>
-function bzclose($bz) { }
+function bzclose(resource $bz);
 <<__PHPStdLib>>
-function bzopen($filename, $mode) { }
+function bzopen($filename, string $mode);
 <<__PHPStdLib>>
-function bzread($bz, $length = 1024) { }
+function bzread(resource $bz, int $length = 1024);
 <<__PHPStdLib>>
-function bzwrite($bz, $data, $length = 0) { }
+function bzwrite(resource $bz, string $data, int $length = 0);
 <<__PHPStdLib>>
-function bzflush($bz) { }
+function bzflush(resource $bz);
 <<__PHPStdLib>>
-function bzerrstr($bz) { }
+function bzerrstr(resource $bz);
 <<__PHPStdLib>>
-function bzerror($bz) { }
+function bzerror(resource $bz);
 <<__PHPStdLib>>
-function bzerrno($bz) { }
+function bzerrno(resource $bz);
 <<__PHPStdLib, __Rx>>
-function bzcompress($source, $blocksize = 4, $workfactor = 0) { }
+function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0);
 <<__PHPStdLib, __Rx>>
-function bzdecompress($source, $small = 0) { }
+function bzdecompress(string $source, int $small = 0);

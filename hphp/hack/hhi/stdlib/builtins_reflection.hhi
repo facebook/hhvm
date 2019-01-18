@@ -9,24 +9,24 @@
  */
 
 <<__PHPStdLib>>
-function hphp_get_extension_info($name) { }
+function hphp_get_extension_info(string $name);
 <<__PHPStdLib>>
 function hphp_get_class_constant($cls, $name) { }
 <<__PHPStdLib>>
-function hphp_invoke($name, $params) { }
+function hphp_invoke(string $name, $params);
 <<__PHPStdLib>>
-function hphp_invoke_method($obj, $cls, $name, $params) { }
+function hphp_invoke_method($obj, string $cls, string $name, $params);
 <<__PHPStdLib>>
 function hphp_instanceof($obj, $name) { }
 <<__PHPStdLib>>
-function hphp_create_object_without_constructor($name) { }
+function hphp_create_object_without_constructor(string $name);
 <<__PHPStdLib>>
-function hphp_get_property($obj, $cls, $prop) { }
+function hphp_get_property($obj, string $cls, string $prop);
 <<__PHPStdLib>>
-function hphp_set_property($obj, $cls, $prop, $value) { }
+function hphp_set_property($obj, string $cls, string $prop, $value);
 <<__PHPStdLib>>
-function hphp_get_static_property($cls, $prop, $force) { }
+function hphp_get_static_property(string $cls, string $prop, bool $force);
 <<__PHPStdLib>>
-function hphp_set_static_property($cls, $prop, $value, $force) { }
+function hphp_set_static_property(string $cls, string $prop, $value, bool $force);
 <<__PHPStdLib>>
 function hphp_scalar_typehints_enabled() { }

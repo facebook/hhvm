@@ -35,9 +35,9 @@ function memcache_get_version($memcache) { }
 <<__PHPStdLib>>
 function memcache_flush($memcache, $timestamp = 0) { }
 <<__PHPStdLib>>
-function memcache_setoptimeout($memcache, $timeoutms) { }
+function memcache_setoptimeout($memcache, int $timeoutms) { }
 <<__PHPStdLib>>
-function memcache_get_server_status($memcache, $host, $port = 0) { }
+function memcache_get_server_status($memcache, string $host, int $port = 0) { }
 <<__PHPStdLib>>
 function memcache_set_compress_threshold($memcache, $threshold, $min_savings = 0.2) { }
 <<__PHPStdLib>>

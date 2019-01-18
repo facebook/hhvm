@@ -520,53 +520,53 @@ const int CURLSHOPT_UNSHARE = 0;
 <<__PHPStdLib>>
 function curl_init($url = null);
 <<__PHPStdLib>>
-function curl_init_pooled($pool_name, $url = null);
+function curl_init_pooled(string $pool_name, $url = null);
 <<__PHPStdLib>>
-function curl_copy_handle($ch);
+function curl_copy_handle(resource $ch);
 <<__PHPStdLib>>
-function curl_version($uversion = CURLVERSION_NOW);
+function curl_version(int $uversion = CURLVERSION_NOW);
 <<__PHPStdLib>>
-function curl_setopt($ch, $option, $value);
+function curl_setopt(resource $ch, int $option, $value);
 <<__PHPStdLib>>
-function curl_setopt_array($ch, $options);
+function curl_setopt_array(resource $ch, $options);
 <<__PHPStdLib>>
-function curl_exec($ch);
+function curl_exec(resource $ch);
 <<__PHPStdLib>>
-function curl_getinfo($ch, $opt = 0);
+function curl_getinfo(resource $ch, int $opt = 0);
 <<__PHPStdLib>>
-function curl_errno($ch);
+function curl_errno(resource $ch);
 <<__PHPStdLib>>
-function curl_error($ch);
+function curl_error(resource $ch);
 <<__PHPStdLib>>
-function curl_strerror($code);
+function curl_strerror(int $code);
 <<__PHPStdLib>>
-function curl_close($ch);
+function curl_close(resource $ch);
 <<__PHPStdLib>>
 function curl_multi_init();
 <<__PHPStdLib>>
-function curl_multi_strerror($errornum);
+function curl_multi_strerror(int $errornum);
 <<__PHPStdLib>>
-function curl_multi_add_handle($mh, $ch);
+function curl_multi_add_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_remove_handle($mh, $ch);
+function curl_multi_remove_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_exec($mh, &$still_running);
+function curl_multi_exec(resource $mh, &$still_running);
 <<__PHPStdLib>>
-function curl_multi_select($mh, $timeout = 1.0);
+function curl_multi_select(resource $mh, float $timeout = 1.0);
 <<__PHPStdLib>>
-function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
+function curl_multi_await(resource $mh, float $timeout = 1.0): Awaitable<int>;
 <<__PHPStdLib>>
-function curl_multi_getcontent($ch);
+function curl_multi_getcontent(resource $ch);
 <<__PHPStdLib>>
-function curl_multi_info_read($mh, &$msgs_in_queue = null);
+function curl_multi_info_read(resource $mh, &$msgs_in_queue = null);
 <<__PHPStdLib>>
-function curl_multi_close($mh);
+function curl_multi_close(resource $mh);
 <<__PHPStdLib>>
 function curl_share_init();
 <<__PHPStdLib>>
-function curl_share_close($sh);
+function curl_share_close(resource $sh);
 <<__PHPStdLib>>
-function curl_share_setopt($sh, $option, $value);
+function curl_share_setopt(resource $sh, int $option, $value);
 
 class CURLFile {
   public string $name = '';

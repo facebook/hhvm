@@ -9,89 +9,90 @@
  */
 
 <<__PHPStdLib>>
-function xmlwriter_open_memory() { }
+function xmlwriter_open_memory();
 <<__PHPStdLib>>
-function xmlwriter_open_uri($uri) { }
+function xmlwriter_open_uri(string $uri);
 <<__PHPStdLib>>
-function xmlwriter_set_indent_string($xmlwriter, $indentstring) { }
+function xmlwriter_set_indent_string(resource $xmlwriter, $indentstring);
 <<__PHPStdLib>>
-function xmlwriter_set_indent($xmlwriter, $indent) { }
+function xmlwriter_set_indent(resource $xmlwriter, bool $indent);
 <<__PHPStdLib>>
-function xmlwriter_start_document($xmlwriter, $version = "1.0", $encoding = null, $standalone = null) { }
+function xmlwriter_start_document(resource $xmlwriter, $version = "1.0", $encoding = null, $standalone = null);
 <<__PHPStdLib>>
-function xmlwriter_start_element($xmlwriter, $name) { }
+function xmlwriter_start_element(resource $xmlwriter, string $name);
 <<__PHPStdLib>>
-function xmlwriter_start_element_ns($xmlwriter, $prefix, $name, $uri) { }
+function xmlwriter_start_element_ns(resource $xmlwriter, $prefix, string $name, $uri);
 <<__PHPStdLib>>
-function xmlwriter_write_element_ns($xmlwriter, $prefix, $name, $uri, $content = null) { }
+function xmlwriter_write_element_ns(resource $xmlwriter, $prefix, string $name, $uri, $content = null);
 <<__PHPStdLib>>
-function xmlwriter_write_element($xmlwriter, $name, $content = null) { }
+function xmlwriter_write_element(resource $xmlwriter, string $name, $content = null);
 <<__PHPStdLib>>
-function xmlwriter_end_element($xmlwriter) { }
+function xmlwriter_end_element(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_full_end_element($xmlwriter) { }
+function xmlwriter_full_end_element(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_attribute_ns($xmlwriter, $prefix, $name, $uri) { }
+function xmlwriter_start_attribute_ns(resource $xmlwriter, string $prefix, string $name, string $uri);
 <<__PHPStdLib>>
-function xmlwriter_start_attribute($xmlwriter, $name) { }
+function xmlwriter_start_attribute(resource $xmlwriter, string $name);
 <<__PHPStdLib>>
-function xmlwriter_write_attribute_ns($xmlwriter, $prefix, $name, $uri, $content) { }
+function xmlwriter_write_attribute_ns(resource $xmlwriter, string $prefix, string $name, string $uri, string $content);
 <<__PHPStdLib>>
-function xmlwriter_write_attribute($xmlwriter, $name, $value) { }
+function xmlwriter_write_attribute(resource $xmlwriter, string $name, string $value);
 <<__PHPStdLib>>
-function xmlwriter_end_attribute($xmlwriter) { }
+function xmlwriter_end_attribute(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_cdata($xmlwriter) { }
+function xmlwriter_start_cdata(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_write_cdata($xmlwriter, $content) { }
+function xmlwriter_write_cdata(resource $xmlwriter, string $content);
 <<__PHPStdLib>>
-function xmlwriter_end_cdata($xmlwriter) { }
+function xmlwriter_end_cdata(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_comment($xmlwriter) { }
+function xmlwriter_start_comment(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_write_comment($xmlwriter, $content) { }
+function xmlwriter_write_comment(resource $xmlwriter, string $content);
 <<__PHPStdLib>>
-function xmlwriter_end_comment($xmlwriter) { }
+function xmlwriter_end_comment(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_end_document($xmlwriter) { }
+function xmlwriter_end_document(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_pi($xmlwriter, $target) { }
+function xmlwriter_start_pi(resource $xmlwriter, string $target);
 <<__PHPStdLib>>
-function xmlwriter_write_pi($xmlwriter, $target, $content) { }
+function xmlwriter_write_pi(resource $xmlwriter, string $target, string $content);
 <<__PHPStdLib>>
-function xmlwriter_end_pi($xmlwriter) { }
+function xmlwriter_end_pi(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_text($xmlwriter, $content) { }
+function xmlwriter_text(resource $xmlwriter, string $content);
 <<__PHPStdLib>>
-function xmlwriter_write_raw($xmlwriter, $content) { }
+function xmlwriter_write_raw(resource $xmlwriter, string $content);
 <<__PHPStdLib>>
-function xmlwriter_start_dtd($xmlwriter, $qualifiedname, $publicid = null, $systemid = null) { }
+function xmlwriter_start_dtd(resource $xmlwriter, string $qualifiedname, $publicid = null, $systemid = null);
 <<__PHPStdLib>>
-function xmlwriter_write_dtd($xmlwriter, $name, $publicid = null, $systemid = null, $subset = null) { }
+function xmlwriter_write_dtd(resource $xmlwriter, string $name, $publicid = null, $systemid = null, $subset = null);
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_element($xmlwriter, $qualifiedname) { }
+function xmlwriter_start_dtd_element(resource $xmlwriter, string $qualifiedname);
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_element($xmlwriter, $name, $content) { }
+function xmlwriter_write_dtd_element(resource $xmlwriter, string $name, string $content);
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_element($xmlwriter) { }
+function xmlwriter_end_dtd_element(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_attlist($xmlwriter, $name) { }
+function xmlwriter_start_dtd_attlist(resource $xmlwriter, string $name);
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_attlist($xmlwriter, $name, $content) { }
+function xmlwriter_write_dtd_attlist(resource $xmlwriter, string $name, string $content);
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_attlist($xmlwriter) { }
+function xmlwriter_end_dtd_attlist(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_entity($xmlwriter, $name, $isparam) { }
+function xmlwriter_start_dtd_entity(resource $xmlwriter, string $name, bool $isparam);
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_entity($xmlwriter, $name, $content, $pe = false, $publicid = null, $systemid = null, $ndataid = null) { }
+function xmlwriter_write_dtd_entity(resource $xmlwriter, string $name, string $content, bool $pe = false, string $publicid = "", string $systemid = "", string $ndataid = "");
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_entity($xmlwriter) { }
+function xmlwriter_end_dtd_entity(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_end_dtd($xmlwriter) { }
+function xmlwriter_end_dtd(resource $xmlwriter);
 <<__PHPStdLib>>
-function xmlwriter_flush($xmlwriter, $empty = true) { }
+function xmlwriter_flush(resource $xmlwriter, $empty = true);
 <<__PHPStdLib>>
-function xmlwriter_output_memory($xmlwriter, $flush = true) { }
+function xmlwriter_output_memory(resource $xmlwriter, $flush = true);
+
 class XMLWriter {
   public function __construct() { }
   public function openMemory() { }

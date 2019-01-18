@@ -50,9 +50,9 @@ const int UCOL_STRENGTH = 0;
 const int UCOL_HIRAGANA_QUATERNARY_MODE = 0;
 const int UCOL_NUMERIC_COLLATION = 0;
 <<__PHPStdLib, __Rx>>
-function array_change_key_case($input, $upper = false);
+function array_change_key_case($input, int $upper = CASE_LOWER);
 <<__PHPStdLib, __Rx>>
-function array_chunk($input, $size, $preserve_keys = false);
+function array_chunk($input, int $size, bool $preserve_keys = false);
 <<__PHPStdLib, __Rx>>
 function array_combine($keys, $values);
 <<__PHPStdLib, __Rx>>
@@ -126,26 +126,26 @@ function array_replace($array1, ...);
 /* HH_IGNORE_ERROR[3068] this is a builtin */
 function array_multisort(&$arr1, &...$rest);
 <<__PHPStdLib, __Rx>>
-function array_pad($input, $pad_size, $pad_value);
+function array_pad($input, int $pad_size, $pad_value);
 <<__PHPStdLib>>
 function array_pop(&$array);
 <<__PHPStdLib>>
 function array_push(&$array, $var, ...);
 <<__PHPStdLib>>
-function array_rand($input, $num_req = 1);
+function array_rand($input, int $num_req = 1);
 function array_reduce($input, $callback, $initial = null);
 <<__PHPStdLib, __Rx>>
-function array_reverse($array, $preserve_keys = false);
+function array_reverse($array, bool $preserve_keys = false);
 <<__PHPStdLib, __Rx>>
-function array_search($needle, $haystack, $strict = false);
+function array_search($needle, $haystack, bool $strict = false);
 <<__PHPStdLib>>
 function array_shift(&$array);
 <<__PHPStdLib, __Rx>>
-function array_slice($array, $offset, $length = null, $preserve_keys = false);
+function array_slice($array, int $offset, $length = null, bool $preserve_keys = false);
 <<__PHPStdLib>>
-function array_splice(&$input, $offset, $length = null, $replacement = null);
+function array_splice(&$input, int $offset, $length = null, $replacement = null);
 <<__PHPStdLib, __Rx>>
-function array_unique($array, $sort_flags = 2);
+function array_unique($array, int $sort_flags = 2);
 <<__PHPStdLib>>
 function array_unshift(&$array, $var, ...);
 <<__PHPStdLib, __Rx>>
@@ -156,7 +156,7 @@ function compact($varname, ...);
 function shuffle(&$array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>
-function sizeof($var, $recursive = false);
+function sizeof($var, int $recursive = COUNT_NORMAL);
 <<__PHPStdLib>>
 function each(&$array);
 <<__PHPStdLib>>
@@ -180,7 +180,7 @@ function hphp_get_iterator($iterable);
 <<__PHPStdLib>>
 function hphp_get_mutable_iterator(&$iterable);
 <<__PHPStdLib, __Rx>>
-function in_array($needle, $haystack, $strict = false);
+function in_array($needle, $haystack, bool $strict = false);
 <<__PHPStdLib, __Rx>>
 function range($low, $high, $step = 1);
 <<__PHPStdLib, __Rx>>
@@ -222,10 +222,10 @@ function natcasesort(&$array);
 <<__PHPStdLib>>
 function i18n_loc_get_default();
 <<__PHPStdLib>>
-function i18n_loc_set_default($locale);
+function i18n_loc_set_default(string $locale);
 <<__PHPStdLib>>
-function i18n_loc_set_attribute($attr, $val);
+function i18n_loc_set_attribute(int $attr, int $val);
 <<__PHPStdLib>>
-function i18n_loc_set_strength($strength);
+function i18n_loc_set_strength(int $strength);
 <<__PHPStdLib>>
 function i18n_loc_get_error_code();

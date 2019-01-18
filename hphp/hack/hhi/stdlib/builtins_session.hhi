@@ -27,7 +27,7 @@ function session_save_path($newname = null) { }
 <<__PHPStdLib>>
 function session_id($newid = null) { }
 <<__PHPStdLib>>
-function session_regenerate_id($delete_old_session = false) { }
+function session_regenerate_id(bool $delete_old_session = false) { }
 <<__PHPStdLib>>
 function session_cache_limiter($new_cache_limiter = null) { }
 <<__PHPStdLib>>
@@ -35,7 +35,7 @@ function session_cache_expire($new_cache_expire = null) { }
 <<__PHPStdLib>>
 function session_encode() { }
 <<__PHPStdLib>>
-function session_decode($data) { }
+function session_decode(string $data) { }
 <<__PHPStdLib>>
 function session_start() { }
 <<__PHPStdLib>>

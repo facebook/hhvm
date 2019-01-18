@@ -11,9 +11,9 @@
 <<__PHPStdLib>>
 function get_defined_functions(): array<string, array<string>>;
 <<__PHPStdLib>>
-function function_exists(string $function_name, $autoload = true): bool;
+function function_exists(string $function_name, bool $autoload = true): bool;
 <<__PHPStdLib>>
-function is_callable($v, $syntax = false, &$name = null): bool;
+function is_callable($v, bool $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
 <<__PHPStdLib>>
@@ -24,7 +24,7 @@ function forward_static_call($function, ...);
 <<__Rx>>
 function get_called_class(): string; // false if called from outside class
 <<__Deprecated('Use an anonymous function instead.')>>
-function create_function($args, $code);
+function create_function(string $args, string $code);
 function func_get_arg(int $arg_num);
 function func_num_args(): int;
 <<__PHPStdLib>>

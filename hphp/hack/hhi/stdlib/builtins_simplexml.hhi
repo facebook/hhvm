@@ -40,18 +40,18 @@ function libxml_get_last_error();
 <<__PHPStdLib>>
 function libxml_clear_errors();
 <<__PHPStdLib>>
-function libxml_use_internal_errors($use_errors = null);
+function libxml_use_internal_errors(bool $use_errors = false);
 <<__PHPStdLib>>
-function libxml_suppress_errors($suppress_errors);
+function libxml_suppress_errors(bool $suppress_errors);
 <<__PHPStdLib>>
-function libxml_set_streams_context($streams_context);
+function libxml_set_streams_context(resource $streams_context);
 <<__PHPStdLib>>
-function libxml_disable_entity_loader($disable = true);
+function libxml_disable_entity_loader(bool $disable = true);
 
 <<__PHPStdLib>>
-function simplexml_load_string($data, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
+function simplexml_load_string(string $data, string $class_name = "SimpleXMLElement", int $options = 0, string $ns = "", bool $is_prefix = false);
 <<__PHPStdLib>>
-function simplexml_load_file($filename, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
+function simplexml_load_file(string $filename, string $class_name = "SimpleXMLElement", int $options = 0, string $ns = "", bool $is_prefix = false);
 class SimpleXMLElement {
   public function __construct($data, $options = 0, $data_is_url = false, $ns = "", $is_prefix = false);
   public function offsetExists($index);

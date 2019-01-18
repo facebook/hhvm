@@ -17,7 +17,7 @@ const int FORCE_GZIP = 0;
 const int FORCE_DEFLATE = 0;
 
 <<__PHPStdLib>>
-function gzclose($zp);
+function gzclose(resource $zp);
 <<__PHPStdLib, __Rx>>
 function gzcompress(string $data, int $level = -1): mixed;
 <<__PHPStdLib, __Rx>>
@@ -27,45 +27,45 @@ function gzdeflate(string $data, int $level = -1): mixed;
 <<__PHPStdLib, __Rx>>
 function gzencode(string $data, int $level = -1): mixed;
 <<__PHPStdLib>>
-function gzeof($zp);
+function gzeof(resource $zp);
 <<__PHPStdLib>>
-function gzfile($filename, $use_include_path = false);
+function gzfile(string $filename, int $use_include_path = 0);
 <<__PHPStdLib>>
-function gzgetc($zp);
+function gzgetc(resource $zp);
 <<__PHPStdLib>>
-function gzgets($zp, $length = 1024);
+function gzgets(resource $zp, int $length = 1024);
 <<__PHPStdLib>>
-function gzgetss($zp, $length = 0, $allowable_tags = null);
+function gzgetss(resource $zp, int $length = 0, string $allowable_tags = "");
 <<__PHPStdLib, __Rx>>
 function gzinflate(string $data, int $length = 0): mixed;
 <<__PHPStdLib>>
-function gzopen($filename, $mode, $use_include_path = false);
+function gzopen(string $filename, string $mode, int $use_include_path = 0);
 <<__PHPStdLib>>
-function gzpassthru($zp);
+function gzpassthru(resource $zp);
 <<__PHPStdLib>>
-function gzputs($zp, $str, $length = 0);
+function gzputs(resource $zp, string $str, int $length = 0);
 <<__PHPStdLib>>
-function gzread($zp, $length = 0);
+function gzread(resource $zp, int $length = 0);
 <<__PHPStdLib>>
-function gzrewind($zp);
+function gzrewind(resource $zp);
 <<__PHPStdLib>>
-function gzseek($zp, $offset, $whence = SEEK_SET);
+function gzseek(resource $zp, int $offset, int $whence = SEEK_SET);
 <<__PHPStdLib>>
-function gztell($zp);
+function gztell(resource $zp);
 <<__PHPStdLib>>
 function gzuncompress(string $data, int $length = 0): mixed;
 <<__PHPStdLib>>
-function gzwrite($zp, $str, $length = 0);
+function gzwrite(resource $zp, string $str, int $length = 0);
 <<__PHPStdLib, __Rx>>
-function nzcompress($uncompressed);
+function nzcompress(string $uncompressed);
 <<__PHPStdLib, __Rx>>
-function nzuncompress($compressed);
+function nzuncompress(string $compressed);
 <<__PHPStdLib>>
-function qlzcompress($data, $level = 1);
+function qlzcompress(string $data, int $level = 1);
 <<__PHPStdLib>>
 function qlzuncompress(string $data, int $level = 1): mixed;
 <<__PHPStdLib>>
-function readgzfile($filename, $use_include_path = false);
+function readgzfile(string $filename, int $use_include_path = 0);
 <<__PHPStdLib, __Rx>>
 function zlib_decode(string $data, int $max_len = 0): mixed; // string or false
 <<__PHPStdLib, __Rx>>

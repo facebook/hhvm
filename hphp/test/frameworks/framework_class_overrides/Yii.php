@@ -42,7 +42,7 @@ XML;
       $this->getTestPath()."/phpunit.xml.dist",
     };
 
-    if (file_exists($this->getInstallRoot())) {
+    if (file_exists($this->getInstallRoot() ?? '')) {
       // Make sure all the pull requests that have been added along the way
       // are there; otherwise we need a redownload.
       foreach ($extra_files as $file) {

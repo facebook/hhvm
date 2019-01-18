@@ -464,7 +464,7 @@ class Runner {
       remove_dir_recursive($temp_dir);
     }
 
-    return proc_close($this->process) === -1 ? -1 : 0;
+    return proc_close(nullthrows($this->process)) === -1 ? -1 : 0;
   }
 
   private function checkReadStream(): bool {

@@ -26,7 +26,7 @@ class Typo3 extends Framework {
   protected function isInstalled(): bool {
     foreach($this->additionalFolders as $folder) {
       if(!file_exists($this->getInstallRoot() . '/' . $folder)) {
-        if(file_exists($this->getInstallRoot())) {
+        if(file_exists($this->getInstallRoot() ?? '')) {
 
           remove_dir_recursive(nullthrows($this->getInstallRoot()));
         }

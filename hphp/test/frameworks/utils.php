@@ -310,12 +310,12 @@ function get_runtime_build(bool $use_php = false): string {
     }
   }
   invariant(
-    file_exists($executable),
+    file_exists($executable ?? ''),
     '%s does not exist',
     $executable,
   );
   invariant(
-    is_executable($executable),
+    is_executable($executable ?? ''),
     '%s is not executable',
     $executable,
   );
@@ -337,7 +337,7 @@ function error_and_exit(
           'status' => $fbmake_action,
           'details' => 'ERROR: '.$message,
         ],
-        /* assoc array = */ true,
+        /* assoc array = */ 1,
       )
     );
     exit(0);

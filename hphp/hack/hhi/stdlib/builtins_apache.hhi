@@ -9,13 +9,13 @@
  */
 
 <<__PHPStdLib>>
-function apache_note($note_name, $note_value = "") { }
+function apache_note(string $note_name, $note_value = "") { }
 <<__PHPStdLib>>
 function apache_request_headers(): darray<string, string> { }
 <<__PHPStdLib>>
 function apache_response_headers(): darray<string, string> { }
 <<__PHPStdLib>>
-function apache_setenv($variable, $value, $walk_to_top = false) { }
+function apache_setenv(string $variable, string $value, bool $walk_to_top = false) { }
 <<__PHPStdLib>>
 function getallheaders() { }
 <<__PHPStdLib>>

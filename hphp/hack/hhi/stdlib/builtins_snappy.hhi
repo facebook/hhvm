@@ -9,9 +9,9 @@
  */
 
 <<__PHPStdLib>>
-function sncompress($data);
+function sncompress(string $data);
 <<__PHPStdLib>>
-function snuncompress($data);
+function snuncompress(string $data);
 <<__PHPStdLib>>
 function snappy_compress(string $data): mixed;
 <<__PHPStdLib>>

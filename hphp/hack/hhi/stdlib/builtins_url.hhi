@@ -21,22 +21,22 @@ const int PHP_QUERY_RFC1738 = 1;
 const int PHP_QUERY_RFC3986 = 2;
 
 <<__PHPStdLib, __Rx>>
-function base64_decode($data, $strict = false);
+function base64_decode(string $data, bool $strict = false);
 <<__PHPStdLib, __Rx>>
-function base64_encode($data);
+function base64_encode(string $data);
 <<__PHPStdLib>>
-function get_headers($url, $format = 0);
+function get_headers(string $url, int $format = 0);
 <<__PHPStdLib>>
-function get_meta_tags($filename, $use_include_path = false);
+function get_meta_tags(string $filename, bool $use_include_path = false);
 <<__PHPStdLib, __Rx>>
-function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null, $enc_type = PHP_QUERY_RFC1738): string;
+function http_build_query($formdata, $numeric_prefix = null, string $arg_separator = "", int $enc_type = PHP_QUERY_RFC1738): string;
 <<__PHPStdLib>>
-function parse_url($url, $component = -1);
+function parse_url(string $url, int $component = -1);
 <<__PHPStdLib, __Rx>>
-function rawurldecode($str);
+function rawurldecode(string $str);
 <<__PHPStdLib, __Rx>>
-function rawurlencode($str);
+function rawurlencode(string $str);
 <<__PHPStdLib, __Rx>>
-function urldecode($str);
+function urldecode(string $str);
 <<__PHPStdLib, __Rx>>
-function urlencode($str);
+function urlencode(string $str);

@@ -9,93 +9,93 @@
  */
 
 <<__PHPStdLib>>
-function ldap_connect($hostname = null, $port = 389) { }
+function ldap_connect($hostname = null, int $port = 389);
 <<__PHPStdLib>>
-function ldap_explode_dn($dn, $with_attrib) { }
+function ldap_explode_dn(string $dn, int $with_attrib);
 <<__PHPStdLib>>
-function ldap_dn2ufn($db) { }
+function ldap_dn2ufn(string $db);
 <<__PHPStdLib>>
-function ldap_err2str($errnum) { }
+function ldap_err2str(int $errnum);
 <<__PHPStdLib>>
-function ldap_add($link, $dn, $entry) { }
+function ldap_add(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_mod_add($link, $dn, $entry) { }
+function ldap_mod_add(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_mod_del($link, $dn, $entry) { }
+function ldap_mod_del(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_mod_replace($link, $dn, $entry) { }
+function ldap_mod_replace(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_modify($link, $dn, $entry) { }
+function ldap_modify(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_modify_batch($link, string $dn, array $modifs) { }
+function ldap_modify_batch(resource $link, string $dn, array $modifs);
 <<__PHPStdLib>>
-function ldap_bind($link, $bind_rdn = null, $bind_password = null) { }
+function ldap_bind(resource $link, $bind_rdn = null, $bind_password = null);
 <<__PHPStdLib>>
-function ldap_set_rebind_proc($link, $callback) { }
+function ldap_set_rebind_proc(resource $link, $callback);
 <<__PHPStdLib>>
-function ldap_sort($link, $result, $sortfilter) { }
+function ldap_sort(resource $link, resource $result, string $sortfilter);
 <<__PHPStdLib>>
-function ldap_start_tls($link) { }
+function ldap_start_tls(resource $link);
 <<__PHPStdLib>>
-function ldap_unbind($link) { }
+function ldap_unbind(resource $link);
 <<__PHPStdLib>>
-function ldap_get_option($link, $option, &$retval) { }
+function ldap_get_option(resource $link, int $option, &$retval);
 <<__PHPStdLib>>
-function ldap_set_option($link, $option, $newval) { }
+function ldap_set_option($link, int $option, $newval);
 <<__PHPStdLib>>
-function ldap_close($link) { }
+function ldap_close(resource $link);
 <<__PHPStdLib>>
-function ldap_list($link, $base_dn, $filter, $attributes = null, $attrsonly = 0, $sizelimit = -1, $timelimit = -1, $deref = -1) { }
+function ldap_list($link, $base_dn, $filter, $attributes = null, int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = -1);
 <<__PHPStdLib>>
-function ldap_read($link, $base_dn, $filter, $attributes = null, $attrsonly = 0, $sizelimit = -1, $timelimit = -1, $deref = -1) { }
+function ldap_read($link, $base_dn, $filter, $attributes = null, int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = -1);
 <<__PHPStdLib>>
-function ldap_search($link, $base_dn, $filter, $attributes = null, $attrsonly = 0, $sizelimit = -1, $timelimit = -1, $deref = -1) { }
+function ldap_search($link, $base_dn, $filter, $attributes = null, int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = -1);
 <<__PHPStdLib>>
-function ldap_rename($link, $dn, $newrdn, $newparent, $deleteoldrdn) { }
+function ldap_rename(resource $link, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn);
 <<__PHPStdLib>>
-function ldap_delete($link, $dn) { }
+function ldap_delete(resource $link, string $dn);
 <<__PHPStdLib>>
-function ldap_compare($link, $dn, $attribute, $value) { }
+function ldap_compare(resource $link, string $dn, string $attribute, string $value);
 <<__PHPStdLib>>
-function ldap_errno($link) { }
+function ldap_errno(resource $link);
 <<__PHPStdLib>>
-function ldap_error($link) { }
+function ldap_error(resource $link);
 <<__PHPStdLib>>
-function ldap_get_dn($link, $result_entry) { }
+function ldap_get_dn(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_count_entries($link, $result) { }
+function ldap_count_entries(resource $link, resource $result);
 <<__PHPStdLib>>
-function ldap_get_entries($link, $result) { }
+function ldap_get_entries(resource $link, resource $result);
 <<__PHPStdLib>>
-function ldap_first_entry($link, $result) { }
+function ldap_first_entry(resource $link, resource $result);
 <<__PHPStdLib>>
-function ldap_next_entry($link, $result_entry) { }
+function ldap_next_entry(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_get_attributes($link, $result_entry) { }
+function ldap_get_attributes(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_first_attribute($link, $result_entry) { }
+function ldap_first_attribute(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_next_attribute($link, $result_entry) { }
+function ldap_next_attribute(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_first_reference($link, $result) { }
+function ldap_first_reference(resource $link, resource $result);
 <<__PHPStdLib>>
-function ldap_next_reference($link, $result_entry) { }
+function ldap_next_reference(resource $link, resource $result_entry);
 <<__PHPStdLib>>
-function ldap_parse_reference($link, $result_entry, &$referrals) { }
+function ldap_parse_reference(resource $link, resource $result_entry, &$referrals);
 <<__PHPStdLib>>
-function ldap_parse_result($link, $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null) { }
+function ldap_parse_result(resource $link, resource $result, &$errcode, &$matcheddn = null, &$errmsg = null, &$referrals = null);
 <<__PHPStdLib>>
-function ldap_free_result($result) { }
+function ldap_free_result(resource $result);
 <<__PHPStdLib>>
-function ldap_get_values_len($link, $result_entry, $attribute) { }
+function ldap_get_values_len(resource $link, resource $result_entry, string $attribute);
 <<__PHPStdLib>>
-function ldap_get_values($link, $result_entry, $attribute) { }
+function ldap_get_values(resource $link, resource $result_entry, string $attribute);
 <<__PHPStdLib>>
-function ldap_control_paged_result($link, $pagesize, $iscritical = false, $cookie = '') { }
+function ldap_control_paged_result(resource $link, int $pagesize, bool $iscritical = false, string $cookie = '');
 <<__PHPStdLib>>
-function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null) { }
+function ldap_control_paged_result_response(resource $link, resource $result, &$cookie = null, &$estimated = null);
 <<__PHPStdLib>>
-function ldap_escape(string $value, string $ignore = '', int $flags = 0) { }
+function ldap_escape(string $value, string $ignore = '', int $flags = 0);
 
 const int LDAP_ESCAPE_FILTER = 1;
 const int LDAP_ESCAPE_DN = 2;

@@ -336,15 +336,16 @@ class Framework {
       $this->config_file = Options::$frameworks_root."/".$config_file;
     }
 
-    if ($this->config_file !== null) {
-      verbose("Using phpunit xml file in: ".$this->config_file."\n");
+    $config_file = $this->config_file;
+    if ($config_file !== null) {
+      verbose("Using phpunit xml file in: ".$config_file."\n");
       // For now, remove any logging and code coverage settings from
       // the configuration file.
-      $config_data = simplexml_load_file($this->config_file);
+      $config_data = simplexml_load_file($config_file);
       if ($config_data->logging !== null) {
         unset($config_data->logging);
       }
-      file_put_contents($this->config_file, $config_data->saveXML());
+      file_put_contents($config_file, $config_data->saveXML());
     } else {
       verbose("No phpunit xml file found for: ".$this->name.".\n");
     }
@@ -572,7 +573,7 @@ class Framework {
         $this->name.'-'.$this->git_commit.'.tar.bz2';
       if (file_exists($cache_tarball)) {
         $pd = new PharData($cache_tarball);
-        $pd->extractTo(dirname($this->install_root));
+        $pd->extractTo(dirname($this->install_root ?? ''));
         $this->disableTestFiles();
         return;
       }
@@ -592,7 +593,7 @@ class Framework {
       // Remove data we don't need as otherwise the caches get huge.
       // We switch to the shallow clone first so that generated files like
       // vendor/ go into the new checkout, not the original one.
-      rename($this->install_root, $this->install_root.'-orig');
+      rename($this->install_root ?? '', $this->install_root.'-orig');
       // prepend file:// as git refuses to do a shallow clone of 'local' repos
       run_install(
         'git clone --depth 1 '.
@@ -632,8 +633,8 @@ class Framework {
         }
       }
       run_install(
-        'tar jcf '.$cache_tarball.' '.basename($this->install_root),
-        dirname($this->install_root)
+        'tar jcf '.$cache_tarball.' '.basename($this->install_root ?? ''),
+        dirname($this->install_root ?? '')
       );
     }
 
@@ -661,13 +662,13 @@ class Framework {
     /*****************************************
      *  See if framework is already installed.
      *****************************************/
-    if (!(file_exists($this->install_root))) {
+    if (!(file_exists($this->install_root ?? ''))) {
       return false;
     }
 
     // Get current branch/hash information
     $git_head_info = trim(
-      exec("cd ".escapeshellarg($this->install_root)." && git rev-parse HEAD")
+      exec("cd ".escapeshellarg($this->install_root ?? '')." && git rev-parse HEAD")
     );
 
     // The commit hash has changed and we need to download new code
@@ -782,8 +783,8 @@ class Framework {
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_close($proc);
-        if (!pcntl_wifexited($child_status) ||
-            pcntl_wexitstatus($child_status) !== 0) {
+        if (!pcntl_wifexited($child_status ?? 0) ||
+            pcntl_wexitstatus($child_status ?? 0) !== 0) {
           delete_file($this->tests_file);
           delete_file($this->test_files_file);
           error_and_exit("Could not get tests for ".$this->name);

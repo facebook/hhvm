@@ -38,13 +38,13 @@ function is_null($var): bool;
 <<__PHPStdLib, __Rx>>
 function gettype($v);
 <<__PHPStdLib, __Rx>>
-function get_resource_type($handle);
+function get_resource_type(resource $handle);
 <<__PHPStdLib>>
-function settype(&$var, $type);
+function settype(&$var, string $type);
 <<__PHPStdLib>>
-function print_r($expression, $ret = false);
+function print_r($expression, bool $ret = false);
 <<__PHPStdLib>>
-function var_export($expression, $ret = false);
+function var_export($expression, bool $ret = false);
 <<__PHPStdLib>>
 function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...$rest);
 <<__PHPStdLib>>
@@ -52,11 +52,11 @@ function debug_zval_dump(<<__AcceptDisposable>> $variable);
 <<__PHPStdLib, __Rx>>
 function serialize($value);
 <<__PHPStdLib>>
-function unserialize($str, $class_whitelist = array());
+function unserialize(string $str, $class_whitelist = array());
 <<__Rx>>
 function get_defined_vars();
 <<__PHPStdLib>>
-function import_request_variables($types, $prefix = "");
+function import_request_variables(string $types, string $prefix = "");
 }
 
 namespace HH\Lib\_Private\Native {

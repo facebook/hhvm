@@ -63,8 +63,10 @@ class TestFinder {
         if ($class->isSubclassOf("PHPUnit_Framework_TestCase")) {
           $class_methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
           foreach($class_methods as $method) {
-            if (strpos($method->getShortName(), "test") === 0 ||
-                strpos($method->getDocComment(), "@test") !== false) {
+            $shortname = $method->getShortName();
+            $doccomment = $method->getDocComment();
+            if (($shortname is string && strpos($shortname, "test") === 0) ||
+                ($doccomment is string && strpos($doccomment, "@test") !== false)) {
               $tests .= $class->getName()."::".$method->getShortName().PHP_EOL;
             }
           }

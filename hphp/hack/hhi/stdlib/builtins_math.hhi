@@ -40,9 +40,9 @@ function max($value, ...);
 <<__PHPStdLib, __Rx>>
 function abs($number);
 <<__PHPStdLib, __Rx>>
-function is_finite($val);
+function is_finite(float $val);
 <<__PHPStdLib, __Rx>>
-function is_infinite($val);
+function is_infinite(float $val);
 <<__PHPStdLib, __Rx>>
 function is_nan(float $val): bool;
 <<__PHPStdLib, __Rx>>
@@ -50,11 +50,11 @@ function ceil($value);
 <<__PHPStdLib, __Rx>>
 function floor($value): float;
 <<__PHPStdLib, __Rx>>
-function round($val, $precision = 0, $mode = 1);
+function round($val, int $precision = 0, int $mode = 1);
 <<__PHPStdLib, __Rx>>
-function deg2rad($number);
+function deg2rad(float $number);
 <<__PHPStdLib, __Rx>>
-function rad2deg($number);
+function rad2deg(float $number);
 <<__PHPStdLib, __Rx>>
 function decbin($number);
 <<__PHPStdLib, __Rx>>
@@ -66,63 +66,63 @@ function hexdec($hex_string);
 <<__PHPStdLib, __Rx>>
 function octdec($octal_string);
 <<__PHPStdLib, __Rx>>
-function base_convert($number, $frombase, $tobase);
+function base_convert($number, int $frombase, int $tobase);
 <<__PHPStdLib, __Rx>>
 function pow($base, $exp);
 <<__PHPStdLib, __Rx>>
-function exp($arg);
+function exp(float $arg);
 <<__PHPStdLib, __Rx>>
-function expm1($arg);
+function expm1(float $arg);
 <<__PHPStdLib, __Rx>>
-function log10($arg);
+function log10(float $arg);
 <<__PHPStdLib, __Rx>>
-function log1p($number);
+function log1p(float $number);
 <<__PHPStdLib, __Rx>>
-function log($arg, $base = 0);
+function log(float $arg, float $base = 0.0);
 <<__PHPStdLib, __Rx>>
-function cos($arg);
+function cos(float $arg);
 <<__PHPStdLib, __Rx>>
-function cosh($arg);
+function cosh(float $arg);
 <<__PHPStdLib, __Rx>>
-function sin($arg);
+function sin(float $arg);
 <<__PHPStdLib, __Rx>>
-function sinh($arg);
+function sinh(float $arg);
 <<__PHPStdLib, __Rx>>
-function tan($arg);
+function tan(float $arg);
 <<__PHPStdLib, __Rx>>
-function tanh($arg);
+function tanh(float $arg);
 <<__PHPStdLib, __Rx>>
-function acos($arg);
+function acos(float $arg);
 <<__PHPStdLib, __Rx>>
-function acosh($arg);
+function acosh(float $arg);
 <<__PHPStdLib, __Rx>>
-function asin($arg);
+function asin(float $arg);
 <<__PHPStdLib, __Rx>>
-function asinh($arg);
+function asinh(float $arg);
 <<__PHPStdLib, __Rx>>
-function atan($arg);
+function atan(float $arg);
 <<__PHPStdLib, __Rx>>
-function atanh($arg);
+function atanh(float $arg);
 <<__PHPStdLib, __Rx>>
-function atan2($y, $x);
+function atan2(float $y, float $x);
 <<__PHPStdLib, __Rx>>
-function hypot($x, $y);
+function hypot(float $x, float $y);
 <<__PHPStdLib, __Rx>>
-function fmod($x, $y);
+function fmod(float $x, float $y);
 <<__PHPStdLib, __Rx>>
-function sqrt($arg);
+function sqrt(float $arg);
 <<__PHPStdLib, __Rx>>
 function getrandmax();
 <<__PHPStdLib>>
 function srand($seed = null);
 <<__PHPStdLib>>
-function rand($min = 0, $max = -1 /* getrandmax */ );
+function rand(int $min = 0, $max = -1 /* getrandmax */ );
 <<__PHPStdLib, __Rx>>
 function mt_getrandmax();
 <<__PHPStdLib>>
 function mt_srand($seed = null);
 <<__PHPStdLib>>
-function mt_rand($min = 0, $max = -1 /* mt_getrandmax */ );
+function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ );
 <<__PHPStdLib>>
 function lcg_value();
 <<__PHPStdLib, __Rx>>

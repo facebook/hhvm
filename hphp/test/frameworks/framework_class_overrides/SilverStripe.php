@@ -61,7 +61,7 @@ ENV_FILE;
       $this->getInstallRoot()."/_ss_environment.php",
     };
 
-    if (file_exists($this->getInstallRoot())) {
+    if (file_exists($this->getInstallRoot() ?? '')) {
       foreach ($extra_files as $file) {
         if (!file_exists($file)) {
           remove_dir_recursive(nullthrows($this->getInstallRoot()));

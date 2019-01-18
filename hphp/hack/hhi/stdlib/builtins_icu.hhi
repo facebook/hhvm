@@ -8,15 +8,16 @@
  *
  */
 
-define('UREGEX_CASE_INSENSITIVE', 0);
-define('UREGEX_COMMENTS', 0);
-define('UREGEX_DOTALL', 0);
-define('UREGEX_MULTILINE', 0);
-define('UREGEX_UWORD', 0);
-define('UREGEX_OFFSET_CAPTURE', 0);
+const int UREGEX_CASE_INSENSITIVE = 0;
+const int UREGEX_COMMENTS = 0;
+const int UREGEX_DOTALL = 0;
+const int UREGEX_MULTILINE = 0;
+const int UREGEX_UWORD = 0;
+const int UREGEX_OFFSET_CAPTURE = 0;
+
 <<__PHPStdLib>>
-function icu_match($pattern, $subject, &$matches = null, $flags = 0) { }
+function icu_match(string $pattern, string $subject, &$matches = null, int $flags = 0);
 <<__PHPStdLib>>
-function icu_transliterate($str, $remove_accents) { }
+function icu_transliterate(string $str, bool $remove_accents);
 <<__PHPStdLib>>
-function icu_tokenize($text) { }
+function icu_tokenize(string $text);

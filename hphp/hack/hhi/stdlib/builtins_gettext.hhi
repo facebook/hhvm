@@ -9,20 +9,20 @@
  */
 
 <<__PHPStdLib>>
-function bind_textdomain_codeset($domain, $codeset) {}
+function bind_textdomain_codeset(string $domain, string $codeset);
 <<__PHPStdLib>>
-function bindtextdomain($domain_name, $dir) {}
+function bindtextdomain(string $domain_name, string $dir);
 <<__PHPStdLib>>
-function dcgettext($domain_name, $msgid, $category) {}
+function dcgettext(string $domain_name, string $msgid, int $category);
 <<__PHPStdLib>>
-function dcngettext($domain, $msgid1, $msgid2, $count, $category) {}
+function dcngettext(string $domain, string $msgid1, string $msgid2, int $count, int $category);
 <<__PHPStdLib>>
-function dgettext($domain_name, $msgid) {}
+function dgettext(string $domain_name, string $msgid);
 <<__PHPStdLib>>
-function dngettext($domain, $msgid1, $msgid2, $count) {}
+function dngettext(string $domain, string $msgid1, string $msgid2, int $count);
 <<__PHPStdLib>>
-function gettext($msgid) {}
+function gettext(string $msgid);
 <<__PHPStdLib>>
-function ngettext($msgid1, $msgid2, $count) {}
+function ngettext(string $msgid1, string $msgid2, int $count);
 <<__PHPStdLib>>
-function textdomain($domain) {}
+function textdomain(string $domain);

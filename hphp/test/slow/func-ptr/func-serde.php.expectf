@@ -1,0 +1,18 @@
+function(test)
+fun('test')
+function(test)
+function(test)
+
+* serialize result:
+string(11) "s:4:"test";"
+* unserialize result:
+string(4) "test"
+* fb_serialize result:
+string(6) "test"
+* fb_unserialize result:
+bool(true)
+string(4) "test"
+* json_encode result:
+string(6) ""test""
+* json_decode result:
+string(4) "test"

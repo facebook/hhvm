@@ -48,6 +48,8 @@ struct VariantControllerImpl {
       case KindOfBoolean:    return HPHP::serialize::Type::BOOL;
       case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
+      case KindOfFunc:
+      case KindOfClass:
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
@@ -80,8 +82,6 @@ struct VariantControllerImpl {
         throw HPHP::serialize::KeysetSerializeError{};
       case KindOfResource:
       case KindOfRef:
-      case KindOfFunc:
-      case KindOfClass:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
     }
@@ -90,9 +90,7 @@ struct VariantControllerImpl {
   static int64_t asInt64(const_variant_ref obj) { return obj.toInt64(); }
   static bool asBool(const_variant_ref obj) { return obj.toInt64() != 0; }
   static double asDouble(const_variant_ref obj) { return obj.toDouble(); }
-  static const String& asString(const_variant_ref obj) {
-    return obj.toCStrRef();
-  }
+  static String asString(const_variant_ref obj) { return obj.toString(); }
   static const Array& asMap(const_variant_ref obj) { return obj.toCArrRef(); }
   static const Array& asVector(const_variant_ref obj) { return obj.toCArrRef(); }
 

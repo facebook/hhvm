@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -15,10 +15,6 @@ $input = array(0, 1, -1, 10, 100, 1000, 'Hello', null);
 // anonymous callback function
 echo "Anonymous callback function with regular parameter and statement\n";
 var_dump( array_filter($input, create_function('$input', 'return ($input > 1);') ) );
-
-// anonymous callback function with reference
-echo "Anonymous callback function with reference parameter\n";
-var_dump( array_filter($input, create_function('&$input', 'return ($input < 1);') ) );
 
 // anonymous callback function with null argument
 echo "Anonymous callback funciton with null argument\n";

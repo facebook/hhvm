@@ -1,14 +1,10 @@
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
 echo "*** Testing array_filter() : error conditions ***\n";
-
-// zero arguments
-echo "-- Testing array_filter() function with Zero arguments --";
-var_dump( array_filter() );
 
 $input = array(0, 1, 2, 3, 5);
 /*  callback function
@@ -22,10 +18,6 @@ function odd($input)
   return ($input % 2 != 0);
 }
 $extra_arg = 10;
-
-// with one more than the expected number of arguments
-echo "-- Testing array_filter() function with more than expected no. of arguments --";
-var_dump( array_filter($input, "odd", $extra_arg, $extra_arg) );
 
 // with incorrect callback function
 echo "-- Testing array_filter() function with incorrect callback --";

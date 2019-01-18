@@ -8,17 +8,6 @@ array(3) {
   [5]=>
   int(1000)
 }
-Anonymous callback function with reference parameter
-array(4) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(-1)
-  [6]=>
-  string(5) "Hello"
-  [7]=>
-  NULL
-}
 Anonymous callback funciton with null argument
 array(8) {
   [0]=>

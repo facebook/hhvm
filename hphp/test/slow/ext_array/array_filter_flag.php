@@ -26,8 +26,6 @@ array_filter($a, $v ==> {
   var_dump($v);
 }, 3); // unknown use is defaulted to value
 
-array_filter($a, $k ==> {}, ARRAY_FILTER_USE_KEY, 5); // too many params
-
 // --------------------------------
 // KeyedTraversable
 // --------------------------------

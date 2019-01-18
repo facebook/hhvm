@@ -24,8 +24,7 @@ var_dump(array_filter($array3, "even"));
 
 var_dump(array_filter(array()));
 var_dump(array_filter(array(), array()));
-var_dump(array_filter("", null));
 var_dump(array_filter($array1, 1));
 
 echo '== DONE ==';
-?> 
+?>

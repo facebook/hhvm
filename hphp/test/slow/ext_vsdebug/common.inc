@@ -285,11 +285,15 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   $client = $GLOBALS['client'];
   $tries = 0;
   while ($client === false) {
+    unset($errno);
+    unset($errorMessage);
     try {
       $client = @stream_socket_client($uri, &$errno, &$errorMessage);
     } catch (Exception $e) {
     }
     if ($client === false && $tries > 5) {
+      proc_terminate($process, 9);
+      proc_close($process);
       throw new UnexpectedValueException("Failed to connect: $errorMessage");
     }
 

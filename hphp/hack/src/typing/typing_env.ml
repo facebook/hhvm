@@ -1054,7 +1054,7 @@ let get_locals env =
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   let not_found_is_ok x =
     let x = LID.to_string x in
-    SG.is_superglobal x ||
+    SG.is_superglobal x && not (is_strict env) ||
     SSet.mem x env.lenv.fake_members.valid in
   let error_if_pos_provided posopt =
     match posopt with

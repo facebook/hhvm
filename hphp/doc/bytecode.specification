@@ -4048,6 +4048,25 @@ MemoSetEager  <local range>  [C]  -> [C]
   being stored represents an eager return from the wrapped async function (and
   is not a suspended wait-handle).
 
+ResolveFunc <litstr id>   []  ->  [C]
+
+  Resolve %1 as a function name to a function pointer value, then push the
+  pointer onto the top of stack. When resolution fails, raise an error.
+
+ResolveObjMethod [C C] -> [C]
+
+  Resolve $1 as a method of $2 to a method array, then push the array onto the
+  top of stack. When $1 represents a class method of $2, the first element of
+  the resulting array is the class pointer of $2, otherwise the first element is
+  always $2. Fatal if the function resolves to a magic __call method. When
+  resolution fails, raise an error.
+
+ResolveClsMethod [C C] -> [C]
+
+  Resolve $1 as a class method of $2 to a method array, then push the array onto
+  the top of stack. Fatal if there is an invoke name for PHP magic call. When
+  resolution fails, raise an error.
+
 14. Generator creation and execution
 ---------------------------------------
 
@@ -4201,25 +4220,6 @@ ContUnsetDelegate <free iterator> [] -> []
   If "IgnoreIter" then it is expected that the iterator is freed elsewhere.
   When the delegate is another generator then it assumes that the iterator was
   never initialized in the first place.
-
-ResolveFunc <litstr id>   []  ->  [C]
-
-  Resolve %1 as a function name to a function pointer value, then push the
-  pointer onto the top of stack. When resolution fails, raise an error.
-
-ResolveObjMethod [C C] -> [C]
-
-  Resolve $1 as a method of $2 to a method array, then push the array onto the
-  top of stack. When $1 represents a class method of $2, the first element of
-  the resulting array is the class pointer of $2, otherwise the first element is
-  always $2. Fatal if the function resolves to a magic __call method. When
-  resolution fails, raise an error.
-
-ResolveClsMethod [C C] -> [C]
-
-  Resolve $1 as a class method of $2 to a method array, then push the array onto
-  the top of stack. Fatal if there is an invoke name for PHP magic call. When
-  resolution fails, raise an error.
 
 15. Async functions
 -------------------

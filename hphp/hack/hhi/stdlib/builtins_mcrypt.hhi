@@ -81,9 +81,9 @@ function mcrypt_decrypt(string $cipher, string $key, string $data, string $mode,
 <<__PHPStdLib>>
 function mcrypt_cbc(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_cfb(string $cipher, string $key, string $data, $iv = null);
+function mcrypt_cfb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_ecb(string $cipher, string $key, string $data, $iv = null);
+function mcrypt_ecb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
 function mcrypt_ofb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>

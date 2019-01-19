@@ -804,18 +804,17 @@ FCall* may consume any of the values from the evaluation stack that were
 pushed onto the stack before the FPush* instruction.
 
 13) The initialization state of each iterator variable must be known at every
-point in the code and must be the same for all control paths. There are three
-possible states: (1) uninitialized, (2) "iter-initialized" (initialized via
-IterInit*), and (3) "cuf-initialized" (initialized via DecodeCufIter). Every
-range of bytecode for which an iterator variable i is initialized must be
-protected by a fault funclet that unsets i by calling IterFree, or CIterFree.
+point in the code and must be the same for all control paths. There are two
+possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
+via IterInit*). Every range of bytecode for which an iterator variable i is
+initialized must be protected by a fault funclet that unsets i by calling
+IterFree.
 
-14) The iterator variable referenced by IterInit* or DecodeCufIter must be in
-the uninitialized state when the instruction executes. An iterator variable
-referenced by IterNext* and IterFree must be in the "iter-initialized" state,
-and an iterator variable referenced by FPushCufIter or CIterFree must be in
-the citer-initialized state. Note that IterInit* conditionally initialize the
-iterator variable, and IterNext* conditionally free the iterator variable.
+14) The iterator variable referenced by IterInit* must be in the uninitialized
+state when the instruction executes. An iterator variable referenced by
+IterNext* and IterFree must be in the "iter-initialized" state. Note that
+IterInit* conditionally initialize the iterator variable, and IterNext*
+conditionally free the iterator variable.
 
 15) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
@@ -2227,17 +2226,6 @@ FPushCtorS <num params> <mode>                             []  ->  [C]
   If MaybeGenerics is passed to FPushCtor, this indicates that data at cls-ref
   slot's reified generics portion will be nulled out when there are no reified
   generics.
-
-DecodeCufIter <iterator id> <rel offset>   [C]  ->  []
-
-  This instruction looks up $1 as a callable, and writes enough information to
-  iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
-  given the callable. If the function is not successfully decoded, branches to
-  the given offset without raising a warning. No surprise check is performed.
-
-FPushCufIter <num params> <iterator id>   []  ->  []
-
-  FPI push the result of a previous DecodeCufIter. No warning is raised.
 
 FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
@@ -3657,10 +3645,6 @@ IterFree <iterator id>    []  ->  []
   guarding against exceptions and implementing break and return control flow
   statements inside iterator loops.
 
-CIterFree <iterator id>    []  ->  []
-
-  Cuf iterator free. This instruction frees the specified iterator variable.
-
 LIterFree <iterator id> <local id>   []  ->  []
 
   Iterator free with local. This instruction frees the specified iterator
@@ -4303,11 +4287,11 @@ instructions. Each foreach loop must be protected by a fault funclet to
 ensure that the iterator variable is freed when a foreach loop exits abnormally
 through an exception.
 
-Simple break statements and continue statements are implemented using the Jmp*,
-IterFree and CIterFree instructions. Dynamic break is implemented using an
-unnamed local (to store the 'break count') and a chain of basic blocks, where
-each block decrements the unnamed local variable and compares it with 0, and
-then decides where to jump next.
+Simple break statements and continue statements are implemented using the Jmp*
+and IterFree instructions. Dynamic break is implemented using an unnamed local
+(to store the 'break count') and a chain of basic blocks, where each block
+decrements the unnamed local variable and compares it with 0, and then decides
+where to jump next.
 
 
 Basic expression transformations

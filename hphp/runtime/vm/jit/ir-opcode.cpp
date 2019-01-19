@@ -396,7 +396,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvVecToKeyset:
   case Count:
   case CreateAAWH:
-  case DecodeCufIter:
   case DefCls:
   case DictAddElemIntKey:
   case DictAddElemStrKey:
@@ -806,7 +805,6 @@ bool opcodeMayRaise(Opcode opc) {
   case KillARReifiedGenerics:
   case KillClsRefCls:
   case KillClsRefTS:
-  case KillCufIter:
   case LdAFWHActRec:
   case LdARCtx:
   case LdARFuncPtr:
@@ -842,10 +840,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdContField:
   case LdContResumeAddr:
   case LdCtx:
-  case LdCufIterCtx:
-  case LdCufIterDynamic:
-  case LdCufIterFunc:
-  case LdCufIterInvName:
   case LdElem:
   case LdFuncNumParams:
   case LdFuncName:
@@ -996,10 +990,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StContArKey:
   case StContArState:
   case StContArValue:
-  case StCufIterCtx:
-  case StCufIterDynamic:
-  case StCufIterFunc:
-  case StCufIterInvName:
   case StElem:
   case StLoc:
   case StLocPseudoMain:

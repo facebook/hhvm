@@ -272,69 +272,10 @@ void emitIterBreak(IRGS& env, Offset relOffset, const IterTable& it) {
     switch (ent.kind) {
     case KindOfIter:  emitIterFree(env, ent.id);  break;
     case KindOfLIter: emitLIterFree(env, ent.id, ent.local); break;
-    case KindOfCIter: emitCIterFree(env, ent.id); break;
     }
   }
 
   jmpImpl(env, bcOff(env) + relOffset);
-}
-
-void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
-  auto const src        = topC(env);
-  auto const type       = src->type();
-
-  if (type <= TObj) {
-    auto const slowExit = makeExitSlow(env);
-    auto const cls      = gen(env, LdObjClass, src);
-    auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-    gen(env, StCufIterFunc, IterId(iterId), fp(env), func);
-    gen(env, StCufIterCtx, IterId(iterId), fp(env), src);
-    gen(env, StCufIterInvName, IterId(iterId), fp(env), cns(env, TNullptr));
-    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, false));
-    discard(env, 1);
-    return;
-  }
-
-  if (type.subtypeOfAny(TArr, TVec, TStr, TFunc)) {
-    // Do this first, because DecodeCufIter will do a sanity check on the flag.
-    auto const isDynamic = !(type <= TFunc);
-    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, isDynamic));
-    auto const res = gen(
-      env,
-      DecodeCufIter,
-      TBool,
-      IterId(iterId),
-      src,
-      fp(env)
-    );
-    discard(env, 1);
-    decRef(env, src);
-    implCondJmp(env, bcOff(env) + relOffset, true, res);
-  } else {
-    discard(env, 1);
-    decRef(env, src);
-    jmpImpl(env, bcOff(env) + relOffset);
-  }
-}
-
-void emitCIterFree(IRGS& env, int32_t iterId) {
-  auto const ctx = gen(
-    env,
-    LdCufIterCtx,
-    TCtx | TNullptr,
-    IterId(iterId),
-    fp(env)
-  );
-  auto const invName = gen(
-    env,
-    LdCufIterInvName,
-    TStr | TNullptr,
-    IterId(iterId),
-    fp(env)
-  );
-  ifNonNull(env, ctx, [&](SSATmp* t) { decRef(env, t); });
-  ifNonNull(env, invName, [&](SSATmp* t) { decRef(env, t); });
-  gen(env, KillCufIter, IterId(iterId), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

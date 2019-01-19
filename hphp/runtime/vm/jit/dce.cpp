@@ -272,10 +272,6 @@ bool canDCE(IRInstruction* inst) {
   case GetTimeNs:
   case Select:
   case LdARCtx:
-  case LdCufIterFunc:
-  case LdCufIterCtx:
-  case LdCufIterInvName:
-  case LdCufIterDynamic:
   case LdStaticLoc:
   case LdARNumArgsAndFlags:
   case LdARReifiedGenerics:
@@ -611,11 +607,6 @@ bool canDCE(IRInstruction* inst) {
   case LIterNext:
   case LIterNextK:
   case IterFree:
-  case DecodeCufIter:
-  case StCufIterFunc:
-  case StCufIterCtx:
-  case StCufIterInvName:
-  case StCufIterDynamic:
   case BaseG:
   case PropX:
   case PropQ:
@@ -747,7 +738,6 @@ bool canDCE(IRInstruction* inst) {
   case MemoSetInstanceCache:
   case KillClsRefCls:
   case KillClsRefTS:
-  case KillCufIter:
   case BoxPtr:
   case AsTypeStruct:
   case ResolveTypeStruct:

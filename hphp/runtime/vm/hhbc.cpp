@@ -634,7 +634,6 @@ bool pushesActRec(Op opcode) {
     case OpFPushCtorD:
     case OpFPushCtorI:
     case OpFPushCtorS:
-    case OpFPushCufIter:
       return true;
     default:
       return false;
@@ -845,7 +844,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
     auto const k = (IterKind)decode_iva(it);            \
     switch (k) {                                        \
       case KindOfIter:  out += "(Iter) ";  break;       \
-      case KindOfCIter: out += "(CIter) "; break;       \
       case KindOfLIter: out += "(LIter) "; break;       \
     }                                                   \
     folly::format(&out, "{}", decode_iva(it));           \

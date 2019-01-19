@@ -304,9 +304,7 @@ private:
   // in the array. Beware that when m_data is null, m_pos is uninitialized.
   ssize_t m_pos;
  private:
-  // we don't use this pointer, but it gives ArrayIter the same layout
-  // as CufIter, allowing Iter to be scanned without a union
-  // descriminator.
+  // to be removed in the next diff
   MaybeCountable* m_unused;
   UNUSED int m_alsoUnused;
   // This is unioned so new_iter_array can initialize it more
@@ -324,60 +322,19 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct CufIter {
-  CufIter() : m_obj_or_cls(nullptr), m_func(nullptr),
-              m_name(nullptr), m_dynamic{false} {}
-  ~CufIter();
-  const Func* func() const { return m_func; }
-  void* ctx() const { return m_obj_or_cls; }
-  StringData* name() const { return m_name; }
-  bool dynamic() const { return m_dynamic; }
-
-  void setFunc(const Func* f) { m_func = f; }
-  void setCtx(ObjectData* obj) { m_obj_or_cls = obj; }
-  void setCtx(const Class* cls) {
-    m_obj_or_cls = !cls ? nullptr :
-                   reinterpret_cast<ObjectData*>((char*)cls + 1);
-  }
-  void setName(StringData* name) { m_name = name; }
-  void setDynamic(bool dynamic) { m_dynamic = dynamic; }
-
-  static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
-  static constexpr uint32_t ctxOff() { return offsetof(CufIter, m_obj_or_cls); }
-  static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
-  static constexpr uint32_t dynamicOff() {
-    return offsetof(CufIter, m_dynamic);
-  }
-
- private:
-  ObjectData* m_obj_or_cls; // maybe a Class* if lsb set.
-  const Func* m_func;
-  StringData* m_name;
-  bool m_dynamic;
-  friend struct Iter;
-};
-
 struct alignas(16) Iter {
   const ArrayIter&   arr() const { return m_u.aiter; }
-  const CufIter&     cuf() const { return m_u.cufiter; }
         ArrayIter&   arr()       { return m_u.aiter; }
-        CufIter&     cuf()       { return m_u.cufiter; }
 
   template <bool Local> bool init(TypedValue* c1);
   bool next();
   bool nextLocal(const ArrayData*);
   void free();
-  void cfree();
 
 private:
-  // ArrayIter and CufIter all declare pointers at the same offsets, allowing
-  // gen-type-scanners to generate a scanner automatically, for the union. If
-  // the layouts become incompatible, gen-type-scanners will report a build-time
-  // error.
   union Data {
     Data() {}
     ArrayIter aiter;
-    CufIter cufiter;
   } m_u;
 };
 

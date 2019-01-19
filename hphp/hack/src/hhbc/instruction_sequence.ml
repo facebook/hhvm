@@ -775,9 +775,9 @@ let get_input_output_count i =
     end
   | ICall i ->
     begin match i with
-    | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _ | DecodeCufIter _
+    | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _
     | FPushFunc _ -> (1, 0)
-    | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _ | FPushCufIter _
+    | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _
     | FPushFuncD _ | FThrowOnRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _ -> (0, 1)
@@ -847,7 +847,7 @@ let get_input_output_count i =
     | IterInit _ | IterInitK _ -> (1, 0)
     | LIterInit _ | LIterInitK _
     | IterNext _ | IterNextK _ | LIterNext _ | LIterNextK _
-    | IterFree _ | CIterFree _ | LIterFree _ | IterBreak _ -> (0, 0)
+    | IterFree _ | LIterFree _ | IterBreak _ -> (0, 0)
     end
   | IContFlow _
   | ILabel _

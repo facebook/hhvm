@@ -1052,18 +1052,16 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   return ok;
 }
 
-// Check that the initialization state of the iterator referenced by
-// the current iterator instruction is valid. For *IterInit and DecodeCufIter,
-// it must not already be initialized; for *IterNext and *IterFree, it must
-// be initialized.
+// Check that the initialization state of the iterator referenced by the current
+// iterator instruction is valid. For *IterInit, it must not already be
+// initialized; for *IterNext and *IterFree, it must be initialized.
 bool FuncChecker::checkIter(State* cur, PC const pc) {
   assertx(isIter(pc));
   int id = getImmIva(pc);
   bool ok = true;
   auto op = peek_op(pc);
   if (op == Op::IterInit || op == Op::IterInitK ||
-      op == Op::LIterInit || op == Op::LIterInitK ||
-      op == Op::DecodeCufIter) {
+      op == Op::LIterInit || op == Op::LIterInitK) {
     if (cur->iters[id]) {
       error(
         "IterInit* <%d> trying to double-initialize\n", id);
@@ -1074,9 +1072,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
       error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (op == Op::IterFree ||
-        op == Op::CIterFree ||
-        op == Op::LIterFree) {
+    if (op == Op::IterFree || op == Op::LIterFree) {
       cur->iters[id] = false;
     }
   }
@@ -1828,9 +1824,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushCtorD:
     case Op::FPushCtorI:
     case Op::FPushCtorS:
-    case Op::DecodeCufIter:
-    case Op::FPushCufIter:
-    case Op::CIterFree:
     case Op::FThrowOnRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:

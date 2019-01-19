@@ -523,10 +523,6 @@ let string_of_call instruction =
     sep ["FPushCtorI"; string_of_int n; string_of_classref id]
   | FPushCtorS (n, r) ->
     sep ["FPushCtorS"; string_of_int n; SpecialClsRef.to_string r]
-  | DecodeCufIter (id, l) ->
-    sep ["DecodeCufIter"; string_of_iterator_id id; string_of_label l]
-  | FPushCufIter (n, id) ->
-    sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FCall (fcall_args, c, f) ->
@@ -626,7 +622,6 @@ let iterator_instruction_name_prefix instruction =
     | IterNextK _ -> "IterNextK"
     | LIterNextK _ -> "LIterNextK"
     | IterFree _ -> "IterFree"
-    | CIterFree _ -> "CIterFree"
     | LIterFree _ -> "LIterFree"
     | _ -> failwith "invalid iterator instruction"
   in
@@ -682,8 +677,7 @@ let string_of_iterator instruction =
      (string_of_label label) ^ " " ^
      (string_of_local_id key) ^ " " ^
      (string_of_local_id value)
-  | IterFree id
-  | CIterFree id ->
+  | IterFree id ->
     (iterator_instruction_name_prefix instruction) ^
       (string_of_iterator_id id)
   | LIterFree (id, base) ->
@@ -695,7 +689,6 @@ let string_of_iterator instruction =
         let id = string_of_iterator_id id in
         match kind with
         | Iter -> "(Iter) " ^ id
-        | CIter -> "(CIter) " ^ id
         | LIter -> "(LIter) " ^ id
       in
       let values =

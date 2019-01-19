@@ -339,7 +339,7 @@ let mut_imms (is : IS.t) : IS.t =
     | InitProp (p, NonStatic) ->
         InitProp(p, if should_mutate() then Static else NonStatic)
     | _ -> s in
-  let mutate_call data s =
+  let mutate_call s =
     match s with (*It's not worth mutating arg numbers for Push* or Call*,
                    because we already know it will fail the verifier/assembler*)
     | FPushObjMethod   (i, Ast_defs.OG_nullthrows, pl)    ->
@@ -363,7 +363,6 @@ let mut_imms (is : IS.t) : IS.t =
     | FPushCtor     (i, id, op) -> FPushCtor     (i, mutate_int        id !mag,
                                                   op)
     | FPushCtorI    (i, id)     -> FPushCtorI    (i, mutate_int        id !mag)
-    | DecodeCufIter (i, id)     -> DecodeCufIter (i, mutate_label data id)
     | _ -> s in
   let mutate_base s =
     match s with
@@ -467,7 +466,7 @@ let mut_imms (is : IS.t) : IS.t =
      | IMutator  s -> IMutator  (mutate_mutator        s)
      | IGet      s -> IGet      (mutate_get            s)
      | IIsset    s -> IIsset    (mutate_isset          s)
-     | ICall     s -> ICall     (mutate_call      data s)
+     | ICall     s -> ICall     (mutate_call           s)
      | IBase     s -> IBase     (mutate_base           s)
      | IFinal    s -> IFinal    (mutate_final          s)
      | IIterator s -> IIterator (mutate_iterator  data s)

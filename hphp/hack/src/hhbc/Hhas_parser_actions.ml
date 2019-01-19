@@ -787,7 +787,6 @@ let iterwithkindofiarg arg =
   | IAIteratorid (kind, id) ->
     let kind = match kind with
     | "Iter" -> Iter
-    | "CIter" -> CIter
     | "LIter" -> LIter
     | _ -> report_error ("bad iterator kind " ^ kind)
     in
@@ -1024,7 +1023,6 @@ let makeunaryinst s arg = match s with
 
    (* instruct_iterator *)
    | "IterFree" -> IIterator(IterFree (Iterator.Id (intofiarg arg)))
-   | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
 
    (* async_functions
       TODO: double-check the +1 in this case
@@ -1098,8 +1096,6 @@ match s with
  | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
  | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
- | "DecodeCufIter" -> ICall (DecodeCufIter (iterofiarg arg1, labelofiarg arg2))
- | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
 
  (* instruct_base *)
  | "BaseNC" -> IBase (BaseNC (intofiarg arg1, memberopmodeofiarg arg2))

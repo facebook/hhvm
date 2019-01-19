@@ -37,7 +37,6 @@ let get_regular_labels instr =
   | IIterator (LIterNext (_, _, l, _))
   | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
-  | ICall (DecodeCufIter (_, l))
   | ICall (FCall ((_, _, _, Some l), _, _))
   | IGenDelegation (YieldFromDelegate (_, l))
   | IMisc (MemoGet (l, _))
@@ -124,8 +123,6 @@ let rewrite_params_and_body defs used refs params body =
       Some (IIterator (IterBreak (relabel l, x)))
     | IGenDelegation (YieldFromDelegate (i, l)) ->
       Some (IGenDelegation (YieldFromDelegate (i, relabel l)))
-    | ICall (DecodeCufIter (x, l)) ->
-      Some (ICall (DecodeCufIter (x, relabel l)))
     | ICall (FCall ((fl, na, nr, Some l), c, f)) ->
       Some (ICall (FCall ((fl, na, nr, Some (relabel l)), c, f)))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
@@ -214,8 +211,6 @@ let clone_with_fresh_regular_labels block =
       IIterator (LIterNextK (id, b, relabel l, k, v))
     | IIterator (IterBreak (l, x)) ->
       IIterator (IterBreak (relabel l, x))
-    | ICall (DecodeCufIter (x, l)) ->
-      ICall (DecodeCufIter (x, relabel l))
     | ICall (FCall ((fl, na, nr, Some l), c, f)) ->
       ICall (FCall ((fl, na, nr, Some (relabel l)), c, f))
     | IContFlow (Jmp l)   -> IContFlow (Jmp (relabel l))

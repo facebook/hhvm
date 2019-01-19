@@ -293,9 +293,6 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdStk:
     case LdMBase:
     case LdClsRefCls:
-    case LdCufIterFunc:
-    case LdCufIterCtx:
-    case LdCufIterInvName:
     case LdMem:
     case LdARFuncPtr:
     case LdARCtx:
@@ -562,11 +559,7 @@ Flags handle_call_effects(Local& env,
   auto const keep = env.global.ainfo.all_stack          |
                     env.global.ainfo.all_frame          |
                     env.global.ainfo.all_clsRefClsSlot  |
-                    env.global.ainfo.all_clsRefTSSlot   |
-                    env.global.ainfo.all_cufIterFunc    |
-                    env.global.ainfo.all_cufIterCtx     |
-                    env.global.ainfo.all_cufIterInvName |
-                    env.global.ainfo.all_cufIterDynamic;
+                    env.global.ainfo.all_clsRefTSSlot;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();

@@ -638,7 +638,6 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
 
   switch (op) {
     case OpFPushFunc:
-    case OpFPushCufIter:
       // Dynamic calls.  If we've forbidden dynamic calls to functions which
       // access the caller's frame, we know this can't be one.
       return !disallowDynamicVarEnvFuncs();
@@ -762,41 +761,6 @@ void fpushActRec(IRGS& env,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
-  auto const func = gen(env, LdCufIterFunc, TFunc, IterId(itId), fp(env));
-  auto const ctx = gen(
-    env,
-    LdCufIterCtx,
-    TCtx | TNullptr,
-    IterId(itId),
-    fp(env)
-  );
-  auto const invName = gen(
-    env,
-    LdCufIterInvName,
-    TStr | TNullptr,
-    IterId(itId),
-    fp(env)
-  );
-  auto const dynamic = gen(
-    env,
-    LdCufIterDynamic,
-    IterId(itId),
-    fp(env)
-  );
-
-  ActRecInfo info;
-  info.spOffset = offsetFromIRSP(
-    env,
-    BCSPRelOffset{-int32_t{kNumActRecCells}}
-  );
-  info.numArgs = numParams;
-
-  ifNonNull(env, ctx, [&](SSATmp* t) { gen(env, IncRef, t); });
-  ifNonNull(env, invName, [&](SSATmp* t) { gen(env, IncRef, t); });
-  gen(env, SpillFrame, info, sp(env), func, ctx, invName, dynamic);
-}
 
 void emitFPushCtor(
   IRGS& env, uint32_t numParams, uint32_t slot, HasGenericsOp op

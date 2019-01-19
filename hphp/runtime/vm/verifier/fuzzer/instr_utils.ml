@@ -71,7 +71,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator UnsetL _
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _
-  | ICall FPushCufIter _
   | ICall FPushFuncU _
   | IIncludeEvalDefine DefFunc _
   | IIncludeEvalDefine DefClsNop _
@@ -95,7 +94,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator InitProp _
   | ICall FPushFunc _
   | ICall FPushObjMethodD _
-  | ICall DecodeCufIter _
   | IIterator IterInit _
   | IIterator IterInitK _
   | IMisc StaticLocInit _

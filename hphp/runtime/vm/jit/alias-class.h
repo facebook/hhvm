@@ -124,26 +124,6 @@ struct AIterPos  { SSATmp* fp; uint32_t id; };
 struct AIterBase { SSATmp* fp; uint32_t id; };
 
 /*
- * A specific CufIter's func value (m_func).
- */
-struct ACufIterFunc { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's ctx value (m_ctx).
- */
-struct ACufIterCtx { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's invoke name value (m_name).
- */
-struct ACufIterInvName { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's dynamic value (m_dynamic).
- */
-struct ACufIterDynamic { SSATmp* fp; uint32_t id; };
-
-/*
  * A location inside of an object property, with base `obj' and byte offset
  * `offset' from the ObjectData*.
  */
@@ -233,18 +213,14 @@ struct AliasClass {
     BRef            = 1U << 7,
     BClsRefClsSlot  = 1U << 8,
     BClsRefTSSlot   = 1U << 9,
-    BCufIterFunc    = 1U << 10,
-    BCufIterCtx     = 1U << 11,
-    BCufIterInvName = 1U << 12,
-    BCufIterDynamic = 1U << 13,
-    BRds            = 1U << 14,
+    BRds            = 1U << 10,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 15,
-    BMITvRef    = 1U << 16,
-    BMITvRef2   = 1U << 17,
-    BMIBase     = 1U << 18,
-    BMIPropS    = 1U << 19,
+    BMITempBase = 1U << 11,
+    BMITvRef    = 1U << 12,
+    BMITvRef2   = 1U << 13,
+    BMIBase     = 1U << 14,
+    BMIPropS    = 1U << 15,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
@@ -252,11 +228,9 @@ struct AliasClass {
     BMIState   = BMIStateTV | BMIBase | BMIPropS,
 
     BIter      = BIterPos | BIterBase,
-    BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName | BCufIterDynamic,
-    BIterSlot  = BIter | BCufIter,
 
     BUnknownTV =
-      ~(BIterSlot | BMIBase | BMIPropS | BClsRefClsSlot | BClsRefTSSlot),
+      ~(BIter | BMIBase | BMIPropS | BClsRefClsSlot | BClsRefTSSlot),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -279,10 +253,6 @@ struct AliasClass {
   /* implicit */ AliasClass(AFrame);
   /* implicit */ AliasClass(AIterPos);
   /* implicit */ AliasClass(AIterBase);
-  /* implicit */ AliasClass(ACufIterFunc);
-  /* implicit */ AliasClass(ACufIterCtx);
-  /* implicit */ AliasClass(ACufIterInvName);
-  /* implicit */ AliasClass(ACufIterDynamic);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -345,10 +315,6 @@ struct AliasClass {
   folly::Optional<AFrame>          frame() const;
   folly::Optional<AIterPos>        iterPos() const;
   folly::Optional<AIterBase>       iterBase() const;
-  folly::Optional<ACufIterFunc>    cufIterFunc() const;
-  folly::Optional<ACufIterCtx>     cufIterCtx() const;
-  folly::Optional<ACufIterInvName> cufIterInvName() const;
-  folly::Optional<ACufIterDynamic> cufIterDynamic() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
@@ -369,10 +335,6 @@ struct AliasClass {
   folly::Optional<AFrame>          is_frame() const;
   folly::Optional<AIterPos>        is_iterPos() const;
   folly::Optional<AIterBase>       is_iterBase() const;
-  folly::Optional<ACufIterFunc>    is_cufIterFunc() const;
-  folly::Optional<ACufIterCtx>     is_cufIterCtx() const;
-  folly::Optional<ACufIterInvName> is_cufIterInvName() const;
-  folly::Optional<ACufIterDynamic> is_cufIterDynamic() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
@@ -395,10 +357,6 @@ private:
     Frame,
     IterPos,
     IterBase,
-    CufIterFunc,
-    CufIterCtx,
-    CufIterInvName,
-    CufIterDynamic,
     Prop,
     ElemI,
     ElemS,
@@ -409,10 +367,8 @@ private:
     Rds,
 
     IterBoth,  // A union of base and pos for the same iter.
-    CufIterAll, // A union of all fields for the same CufIter.
   };
   struct UIterBoth   { SSATmp* fp; uint32_t id; };
-  struct UCufIterAll { SSATmp* fp; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
@@ -424,9 +380,7 @@ private:
   bool maybeData(AliasClass) const;
   bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
   folly::Optional<UIterBoth> asUIter() const;
-  folly::Optional<UCufIterAll> asUCufIter() const;
   bool refersToSameIterHelper(AliasClass) const;
-  bool refersToSameCufIterHelper(AliasClass) const;
   static folly::Optional<AliasClass>
     precise_diffSTag_unionData(rep newBits, AliasClass, AliasClass);
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
@@ -439,10 +393,6 @@ private:
     AFrame          m_frame;
     AIterPos        m_iterPos;
     AIterBase       m_iterBase;
-    ACufIterFunc    m_cufIterFunc;
-    ACufIterCtx     m_cufIterCtx;
-    ACufIterInvName m_cufIterInvName;
-    ACufIterDynamic m_cufIterDynamic;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
@@ -453,7 +403,6 @@ private:
     ARds            m_rds;
 
     UIterBoth       m_iterBoth;
-    UCufIterAll     m_cufIterAll;
   };
 };
 
@@ -464,11 +413,6 @@ auto const AEmpty             = AliasClass{AliasClass::BEmpty};
 auto const AFrameAny          = AliasClass{AliasClass::BFrame};
 auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
 auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
-auto const ACufIterFuncAny    = AliasClass{AliasClass::BCufIterFunc};
-auto const ACufIterCtxAny     = AliasClass{AliasClass::BCufIterCtx};
-auto const ACufIterInvNameAny = AliasClass{AliasClass::BCufIterInvName};
-auto const ACufIterDynamicAny = AliasClass{AliasClass::BCufIterDynamic};
-auto const ACufIterAny        = AliasClass{AliasClass::BCufIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
 auto const ARefAny            = AliasClass{AliasClass::BRef};

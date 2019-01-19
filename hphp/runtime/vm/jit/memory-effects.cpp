@@ -663,7 +663,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AClsRefSlotAny | ACufIterAny | AMIStateAny
+      AStackAny | AFrameAny | AClsRefSlotAny | AMIStateAny
     };
 
   case AsyncFuncRet:
@@ -736,10 +736,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * stores must not be sunk past DefInlineFP where they could clobber a
        * local.
        */
-      AFrameAny | AClsRefSlotAny | ACufIterAny |
+      AFrameAny | AClsRefSlotAny |
         stack_below(inst.dst(), FPRelOffset{0}) |
         inline_fp_frame(&inst),
-      AFrameAny | AClsRefSlotAny | ACufIterAny |
+      AFrameAny | AClsRefSlotAny |
         stack_below(inst.dst(), FPRelOffset{0})
     );
 
@@ -777,8 +777,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InlineSuspend:
   case InlineReturn: {
     auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
-                        AMIStateAny | AFrameAny | AClsRefSlotAny |
-                        ACufIterAny;
+                        AMIStateAny | AFrameAny | AClsRefSlotAny;
     return may_load_store_kill(AEmpty, callee, callee);
   }
 
@@ -942,9 +941,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAFWH:
   case CreateAFWHNoVV:
     return may_load_store_move(
-      AFrameAny | AClsRefSlotAny | ACufIterAny,
+      AFrameAny | AClsRefSlotAny,
       AHeapAny,
-      AFrameAny | AClsRefSlotAny | ACufIterAny
+      AFrameAny | AClsRefSlotAny
     );
 
   // AGWH construction updates the AsyncGenerator object.
@@ -1100,63 +1099,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty, AEmpty,
       AClsRefTSSlot { inst.src(0), inst.extra<KillClsRefTS>()->slot }
     );
-
-  //////////////////////////////////////////////////////////////////////
-  // Instructions that manipulate cuf-iter slots
-
-  case DecodeCufIter: {
-    auto const iterId = inst.extra<DecodeCufIter>()->iterId;
-    auto const func = AliasClass { ACufIterFunc { inst.src(1), iterId } };
-    auto const ctx = AliasClass { ACufIterCtx { inst.src(1), iterId } };
-    auto const invName = AliasClass { ACufIterInvName { inst.src(1), iterId } };
-    return may_load_store(AHeapAny, AHeapAny | func | ctx | invName);
-  }
-
-  case StCufIterFunc:
-    return PureStore {
-      ACufIterFunc { inst.src(0), inst.extra<StCufIterFunc>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterCtx:
-    return PureStore {
-      ACufIterCtx { inst.src(0), inst.extra<StCufIterCtx>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterInvName:
-    return PureStore {
-      ACufIterInvName { inst.src(0), inst.extra<StCufIterInvName>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterDynamic:
-    return PureStore {
-      ACufIterDynamic { inst.src(0), inst.extra<StCufIterDynamic>()->iterId },
-      inst.src(1)
-    };
-  case LdCufIterFunc:
-    return PureLoad {
-      ACufIterFunc { inst.src(0), inst.extra<LdCufIterFunc>()->iterId }
-    };
-  case LdCufIterCtx:
-    return PureLoad {
-      ACufIterCtx { inst.src(0), inst.extra<LdCufIterCtx>()->iterId }
-    };
-  case LdCufIterInvName:
-    return PureLoad {
-      ACufIterInvName { inst.src(0), inst.extra<LdCufIterInvName>()->iterId }
-    };
-  case LdCufIterDynamic:
-    return PureLoad {
-      ACufIterDynamic { inst.src(0), inst.extra<LdCufIterDynamic>()->iterId }
-    };
-
-  case KillCufIter: {
-    auto const iterId = inst.extra<KillCufIter>()->iterId;
-    auto const func = AliasClass { ACufIterFunc { inst.src(0), iterId } };
-    auto const ctx = AliasClass { ACufIterCtx { inst.src(0), iterId } };
-    auto const invName = AliasClass { ACufIterInvName { inst.src(0), iterId } };
-    auto const dynamic = AliasClass { ACufIterDynamic { inst.src(0), iterId } };
-    return may_load_store_kill(AEmpty, AEmpty, func | ctx | invName | dynamic);
-  }
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores

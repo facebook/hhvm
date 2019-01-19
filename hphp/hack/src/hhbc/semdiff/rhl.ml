@@ -407,19 +407,15 @@ let check_instruct_mutator asn i i' =
 
 let check_instruct_call asn i i' =
   match i, i' with
-  | DecodeCufIter _ , DecodeCufIter _ ->
-    (* should be handled in check *)
-    None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
   | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
-  | FPushCtorS _, _ | FPushCufIter _, _ | FThrowOnRefMismatch _, _ | FCall _, _
+  | FPushCtorS _, _ | FThrowOnRefMismatch _, _ | FCall _, _
   | FCallBuiltin _, _ ->
     if i=i' then Some asn else None
-  | _, _ -> None
 
 (* Asserts equivalence for reading from member keys. For example, checks
   equivalence for reading an element or property via a local variable. *)
@@ -521,7 +517,7 @@ let check_instruct_iterator asn i i' =
     (None, [])
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | IterFree _, _ | CIterFree _, _ | LIterFree _, _ ->
+  | IterFree _, _ | LIterFree _, _ ->
     if i=i' then (Some asn,[]) else (None,[])
 
 let check_instruct_misc asn i i' =
@@ -907,19 +903,6 @@ let equiv prog prog' startlabelpairs =
     (* NativeImpl behaves like return - we don't want to look at the next instruction *)
     | IMisc NativeImpl, IMisc NativeImpl ->
           donext assumed todo
-
-    | ICall (DecodeCufIter (i1, l1)), ICall (DecodeCufIter (i2, l2))
-      when i1 = i2 ->
-      (* This instruction looks up $1 as a callable, and writes enough information to
-         iterator %1 for FPushCufIter to be able to push an actrec, as if it had been
-         given the callable. If the function is not successfully decoded, branches to
-         the given offset without raising a warning.
-         Since this instruction can either transfer control to label or fallthrough
-         treat it as conditional jump *)
-      check (succ pc) (succ pc') asn
-        (add_assumption (pc,pc') asn assumed)
-        (add_todo ((hs_of_pc pc, LabelMap.find l1 labelmap),
-          (hs_of_pc pc', LabelMap.find l2 labelmap')) asn todo)
 
     | IContFlow ins, IContFlow ins' ->
         begin match ins, ins' with

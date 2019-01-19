@@ -3417,11 +3417,6 @@ void in(ISS& env, const bc::FPushCtor& op) {
   fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc });
 }
 
-void in(ISS& env, const bc::FPushCufIter&) {
-  nothrow(env);
-  fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
-}
-
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
   auto& ar = fpiTop(env);
   if (!ar.func || ar.fallbackFunc) return;
@@ -3693,11 +3688,6 @@ void in(ISS& env, const bc::FCall& op) {
   for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::DecodeCufIter& op) {
-  popC(env); // func
-  env.propagate(op.target2, &env.state); // before iter is modifed
-}
-
 namespace {
 
 void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
@@ -3943,10 +3933,6 @@ void in(ISS& env, const bc::IterFree& op) {
 void in(ISS& env, const bc::LIterFree& op) {
   nothrow(env);
   mayReadLocal(env, op.loc2);
-  freeIter(env, op.iter1);
-}
-void in(ISS& env, const bc::CIterFree& op) {
-  nothrow(env);
   freeIter(env, op.iter1);
 }
 

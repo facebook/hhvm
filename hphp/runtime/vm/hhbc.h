@@ -273,8 +273,7 @@ enum class InitPropOp : uint8_t {
 
 enum IterKind {
   KindOfIter  = 0,
-  KindOfCIter = 1,
-  KindOfLIter = 2,
+  KindOfLIter = 1,
 };
 
 #define FATAL_OPS                               \
@@ -670,7 +669,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
   O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    PF) \
-  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
@@ -682,9 +680,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(LIterNext,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
   O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
   O(LIterNextK,      FIVE(IA,LA,BA,LA,LA),NOV,          NOV,        CF) \
-  O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
-  O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
   O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
   O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
@@ -1054,10 +1050,6 @@ constexpr bool isJmp(Op opcode) {
 
 constexpr bool isFPush(Op opcode) {
   return (instrFlags(opcode) & PF) != 0;
-}
-
-constexpr bool isFPushCufIter(Op opcode) {
-  return opcode == OpFPushCufIter;
 }
 
 constexpr bool isFPushClsMethod(Op opcode) {

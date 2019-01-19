@@ -315,7 +315,6 @@ static const struct {
   { OpFPushCtorD,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
   { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
-  { OpFPushCufIter,{None,             FStack,       OutFDesc        }},
   { OpFThrowOnRefMismatch,
                    {None,             None,         OutNone         }},
   /*
@@ -325,7 +324,6 @@ static const struct {
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
-  { OpDecodeCufIter,{Stack1,          None,         OutNone         }},
 
   /*** 11. Iterator instructions ***/
 
@@ -338,7 +336,6 @@ static const struct {
   { OpIterNextK,   {None,             Local,        OutUnknown      }},
   { OpLIterNextK,  {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
-  { OpCIterFree,   {None,             None,         OutNone         }},
   { OpLIterFree,   {Local,            None,         OutNone         }},
   { OpIterBreak,   {Local,            None,         OutNone         }},
 
@@ -838,7 +835,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   switch (ni.op()) {
   case Op::IterBreak:
-  case Op::DecodeCufIter:
   case Op::IterNext:
   case Op::IterNextK:
   case Op::LIterNext:
@@ -921,7 +917,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CGetL2:
   case Op::CGetS:
   case Op::CUGetL:
-  case Op::CIterFree:
   case Op::CastArray:
   case Op::CastDouble:
   case Op::CastInt:
@@ -970,7 +965,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushCtorD:
   case Op::FPushCtorI:
   case Op::FPushCtorS:
-  case Op::FPushCufIter:
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushFuncU:

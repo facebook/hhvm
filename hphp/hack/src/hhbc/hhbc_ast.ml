@@ -424,8 +424,6 @@ type instruct_call =
   | FPushCtorD of num_params * class_id
   | FPushCtorI of num_params * classref_id
   | FPushCtorS of num_params * SpecialClsRef.t
-  | DecodeCufIter of Iterator.t * Label.t
-  | FPushCufIter of num_params * Iterator.t
   | FThrowOnRefMismatch of bool list
   | FCall of fcall_args * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
@@ -454,7 +452,6 @@ type instruct_final =
 
 type iter_kind =
   | Iter
-  | CIter
   | LIter
 
 type instruct_iterator =
@@ -467,7 +464,6 @@ type instruct_iterator =
   | LIterNext of Iterator.t * local_id * Label.t * local_id
   | LIterNextK of Iterator.t * local_id * Label.t * local_id * local_id
   | IterFree of Iterator.t
-  | CIterFree of Iterator.t
   | LIterFree of Iterator.t * local_id
   | IterBreak of Label.t * (iter_kind * Iterator.t) list
 

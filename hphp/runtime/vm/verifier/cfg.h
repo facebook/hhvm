@@ -113,9 +113,7 @@ inline bool isIter(PC pc) {
   case Op::LIterNext:
   case Op::IterNextK:
   case Op::LIterNextK:
-  case Op::DecodeCufIter:
   case Op::IterFree:
-  case Op::CIterFree:
   case Op::LIterFree:
     return true;
   default:

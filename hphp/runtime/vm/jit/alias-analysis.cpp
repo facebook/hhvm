@@ -268,14 +268,6 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
                         all_iterBase);
-  ret |= may_alias_part(*this, acls, acls.cufIterFunc(), ACufIterFuncAny,
-                        all_cufIterFunc);
-  ret |= may_alias_part(*this, acls, acls.cufIterCtx(), ACufIterCtxAny,
-                        all_cufIterCtx);
-  ret |= may_alias_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
-                        all_cufIterInvName);
-  ret |= may_alias_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
-                        all_cufIterDynamic);
 
   return ret;
 }
@@ -330,14 +322,6 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
-  ret |= expand_part(*this, acls, acls.cufIterFunc(), ACufIterFuncAny,
-                     all_cufIterFunc);
-  ret |= expand_part(*this, acls, acls.cufIterCtx(), ACufIterCtxAny,
-                     all_cufIterCtx);
-  ret |= expand_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
-                     all_cufIterInvName);
-  ret |= expand_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
-                     all_cufIterDynamic);
 
   return ret;
 }
@@ -389,14 +373,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     }
 
     if (acls.is_iterPos() || acls.is_iterBase()) {
-      add_class(ret, acls);
-      return;
-    }
-
-    if (acls.is_cufIterFunc() ||
-        acls.is_cufIterCtx() ||
-        acls.is_cufIterInvName() ||
-        acls.is_cufIterDynamic()) {
       add_class(ret, acls);
       return;
     }
@@ -505,26 +481,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (acls.is_iterBase()) {
       ret.all_iterBase.set(meta.index);
-      return;
-    }
-
-    if (acls.is_cufIterFunc()) {
-      ret.all_cufIterFunc.set(meta.index);
-      return;
-    }
-
-    if (acls.is_cufIterCtx()) {
-      ret.all_cufIterCtx.set(meta.index);
-      return;
-    }
-
-    if (acls.is_cufIterInvName()) {
-      ret.all_cufIterInvName.set(meta.index);
-      return;
-    }
-
-    if (acls.is_cufIterDynamic()) {
-      ret.all_cufIterDynamic.set(meta.index);
       return;
     }
 
@@ -661,10 +617,6 @@ std::string show(const AliasAnalysis& ainfo) {
       "all refs",           show(ainfo.all_ref),
       "all iterPos",        show(ainfo.all_iterPos),
       "all iterBase",       show(ainfo.all_iterBase),
-      "all cufIterFunc",    show(ainfo.all_cufIterFunc),
-      "all cufIterCtx",     show(ainfo.all_cufIterCtx),
-      "all cufIterInvName", show(ainfo.all_cufIterInvName),
-      "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
       "all frame",          show(ainfo.all_frame),
       "all clsRefClsSlot",  show(ainfo.all_clsRefClsSlot),
       "all clsRefTSSlot",   show(ainfo.all_clsRefTSSlot),

@@ -245,13 +245,6 @@ tv_rval ArrayIter::secondRvalPlus() {
 
 //////////////////////////////////////////////////////////////////////
 
-CufIter::~CufIter() {
-  if (m_obj_or_cls && !(uintptr_t(m_obj_or_cls) & 1)) {
-    decRefObj(m_obj_or_cls);
-  }
-  if (m_name) decRefStr(m_name);
-}
-
 template <bool Local>
 bool Iter::init(TypedValue* c1) {
   assertx(!isRefType(c1->m_type));
@@ -343,10 +336,6 @@ void Iter::free() {
   assertx(arr().getIterType() == ArrayIter::TypeArray ||
           arr().getIterType() == ArrayIter::TypeIterator);
   arr().~ArrayIter();
-}
-
-void Iter::cfree() {
-  cuf().~CufIter();
 }
 
 /*

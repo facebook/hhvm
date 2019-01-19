@@ -934,9 +934,6 @@ static std::string toStringElm(const TypedValue* tv) {
 }
 
 static std::string toStringIter(const Iter* it) {
-  // TODO(#2458166): it might be a CufIter, but we're just lucky that
-  // the bit pattern for the CufIter is going to have a 0 in
-  // getIterType for now.
   switch (it->arr().getIterType()) {
   case ArrayIter::TypeUndefined:
     return "I:Undefined";
@@ -2983,7 +2980,6 @@ void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
     auto iter = frame_iter(vmfp(), ent.id);
     switch (ent.kind) {
       case KindOfIter:  iter->free();  break;
-      case KindOfCIter: iter->cfree(); break;
       case KindOfLIter: iter->free();  break;
     }
   }
@@ -5747,68 +5743,6 @@ OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
   fpushCtorImpl(numArgs, cls, reified_generics, false);
 }
 
-OPTBLD_INLINE
-void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
-  CufIter &cit = it->cuf();
-
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool dynamic = false;
-  ArrayData* reifiedGenerics = nullptr;
-  TypedValue *func = vmStack().topTV();
-
-  ActRec* ar = vmfp();
-  if (vmfp()->m_func->isBuiltin()) {
-    ar = g_context->getOuterVMFrame(ar);
-  }
-  const Func* f = vm_decode_function(tvAsVariant(func),
-                                     ar, false,
-                                     obj, cls, invName,
-                                     dynamic, reifiedGenerics,
-                                     DecodeFlags::NoWarn);
-
-  if (f == nullptr) {
-    pc = takenpc;
-  } else {
-    cit.setFunc(f);
-    if (obj) {
-      cit.setCtx(obj);
-      obj->incRefCount();
-    } else {
-      cit.setCtx(cls);
-    }
-    cit.setName(invName);
-    cit.setDynamic(dynamic);
-  }
-  vmStack().popC();
-}
-
-OPTBLD_INLINE void iopFPushCufIter(uint32_t numArgs, Iter* it) {
-  auto f = it->cuf().func();
-  auto o = it->cuf().ctx();
-  auto n = it->cuf().name();
-  auto d = it->cuf().dynamic();
-
-  ActRec* ar = vmStack().allocA();
-  ar->m_func = f;
-  assertx((f->implCls() != nullptr) == (o != nullptr));
-  if (o) {
-    ar->setThisOrClass(o);
-    if (ActRec::checkThis(o)) ar->getThis()->incRefCount();
-  } else {
-    ar->trashThis();
-  }
-  ar->initNumArgs(numArgs);
-  if (d) ar->setDynamicCall();
-  if (n) {
-    ar->setMagicDispatch(n);
-    n->incRefCount();
-  } else {
-    ar->trashVarEnv();
-  }
-}
-
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
   assertx(byRefs.size <= ar->numArgs());
   auto const func = ar->func();
@@ -6070,10 +6004,6 @@ OPTBLD_INLINE void iopIterFree(Iter* it) {
 
 OPTBLD_INLINE void iopLIterFree(Iter* it, local_var) {
   it->free();
-}
-
-OPTBLD_INLINE void iopCIterFree(Iter* it) {
-  it->cfree();
 }
 
 OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,

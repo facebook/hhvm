@@ -32,6 +32,27 @@ namespace HPHP {
 bool is_valid_class_name(folly::StringPiece className);
 
 struct AutoloadHandler final : RequestEventHandler {
+  struct DecodedHandler {
+    DecodedHandler(ObjectData* obj, Class* cls, const Func* func,
+                   StringData* name, bool dynamic) :
+      m_obj(obj), m_cls(cls), m_func(func), m_name(name), m_dynamic(dynamic) {
+      assertx(!m_obj || !m_cls);
+      if (m_obj) m_obj->incRefCount();
+      if (m_name) m_name->incRefCount();
+    }
+
+    ~DecodedHandler() {
+      if (m_obj) decRefObj(m_obj);
+      if (m_name) decRefStr(m_name);
+    }
+
+    ObjectData* m_obj;
+    Class* m_cls;
+    const Func* m_func;
+    StringData* m_name;
+    bool m_dynamic;
+  };
+
 private:
   enum Result {
     Failure,
@@ -44,19 +65,19 @@ private:
   struct HandlerBundle {
     HandlerBundle() = delete;
     HandlerBundle(const Variant& handler,
-                  req::unique_ptr<CufIter>& cufIter) :
+                  req::unique_ptr<DecodedHandler>& decodedHandler) :
       m_handler(handler) {
-      m_cufIter = std::move(cufIter);
+      m_decodedHandler = std::move(decodedHandler);
     }
     Variant m_handler; // used to respond to f_spl_autoload_functions
-    req::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
+    req::unique_ptr<DecodedHandler> m_decodedHandler; // used to invoke handlers
   };
 
   struct CompareBundles {
-    explicit CompareBundles(CufIter* cufIter) : m_cufIter(cufIter) { }
+    explicit CompareBundles(DecodedHandler* h) : m_decodedHandler(h) { }
     bool operator()(const HandlerBundle& hb);
    private:
-    CufIter* m_cufIter;
+    DecodedHandler* m_decodedHandler;
   };
 
 public:

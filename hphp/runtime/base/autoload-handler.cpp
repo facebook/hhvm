@@ -47,7 +47,7 @@ const StaticString
   s_error("Error"),
   s_previous("previous");
 
-using CufIterPtr = req::unique_ptr<CufIter>;
+using DecodedHandlerPtr = req::unique_ptr<AutoloadHandler::DecodedHandler>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -62,21 +62,14 @@ Variant invoke_for_autoload(const String& function, const Variant& params) {
 }
 
 /*
- * Wraps calling an (autoload) PHP function from a CufIter.
+ * Wraps calling an (autoload) PHP function from a DecodedHandler.
  */
-Variant vm_call_user_func_cufiter(const CufIter& cufIter,
-                                  const Array& params) {
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = cufIter.name();
-  const HPHP::Func* f = cufIter.func();
-  if (cufIter.ctx()) {
-    if (uintptr_t(cufIter.ctx()) & 1) {
-      cls = (Class*)(uintptr_t(cufIter.ctx()) & ~1);
-    } else {
-      obj = (ObjectData*)cufIter.ctx();
-    }
-  }
+Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
+                                const Array& params) {
+  ObjectData* obj = handler.m_obj;
+  Class* cls = handler.m_cls;
+  const Func* f = handler.m_func;
+  StringData* invName = handler.m_name;
   assertx(!obj || !cls);
   if (invName) {
     invName->incRefCount();
@@ -84,39 +77,30 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   return Variant::attach(
     g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
                           ExecutionContext::InvokeNormal, false,
-                          cufIter.dynamic())
+                          handler.m_dynamic)
   );
 }
 
 /*
- * Helper method from converting between a PHP function and a CufIter.
+ * Helper method from converting between a PHP function and a DecodedHandler.
  */
-bool vm_decode_function_cufiter(const Variant& function,
-                                CufIterPtr& cufIter) {
+bool vm_decode_handler(const Variant& function, DecodedHandlerPtr& handler) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
-  StringData* invName = nullptr;
+  StringData* name = nullptr;
   ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
-  const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
-                                              obj, cls, invName, dynamic,
-                                              reifiedGenerics,
-                                              DecodeFlags::NoWarn);
+  auto const func = vm_decode_function(function, GetCallerFrame(), false,
+                                       obj, cls, name, dynamic,
+                                       reifiedGenerics,
+                                       DecodeFlags::NoWarn);
   if (func == nullptr) {
     return false;
   }
 
-  cufIter = req::make_unique<CufIter>();
-  cufIter->setFunc(func);
-  cufIter->setName(invName);
-  if (obj) {
-    cufIter->setCtx(obj);
-    obj->incRefCount();
-  } else {
-    cufIter->setCtx(cls);
-  }
-  cufIter->setDynamic(dynamic);
+  handler = req::make_unique<AutoloadHandler::DecodedHandler>(
+    obj, obj ? nullptr : cls, func, name, dynamic);
   return true;
 }
 
@@ -430,7 +414,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   Object autoloadException;
   for (const HandlerBundle& hb : m_handlers) {
     try {
-      vm_call_user_func_cufiter(*hb.m_cufIter, params);
+      vm_call_decoded_handler(*hb.m_decodedHandler, params);
     } catch (Object& ex) {
       assertx(ex.instanceof(SystemLib::s_ThrowableClass));
       if (autoloadException.isNull()) {
@@ -563,22 +547,19 @@ Array AutoloadHandler::getHandlers() {
   PackedArrayInit handlers(m_handlers.size());
 
   for (const HandlerBundle& hb : m_handlers) {
-    CufIter* cufIter = hb.m_cufIter.get();
-    ObjectData* obj = nullptr;
-    HPHP::Class* cls = nullptr;
-    const HPHP::Func* f = cufIter->func();
+    DecodedHandler* decodedHandler = hb.m_decodedHandler.get();
+    const HPHP::Func* f = decodedHandler->m_func;
 
     if (hb.m_handler.isObject()) {
       handlers.append(hb.m_handler);
-    } else if (cufIter->ctx()) {
+    } else if (decodedHandler->m_cls) {
       PackedArrayInit callable(2);
-      if (uintptr_t(cufIter->ctx()) & 1) {
-        cls = (Class*)(uintptr_t(cufIter->ctx()) & ~1);
-        callable.append(String(cls->nameStr()));
-      } else {
-        obj = (ObjectData*)cufIter->ctx();
-        callable.append(Variant{obj});
-      }
+      callable.append(String(decodedHandler->m_cls->nameStr()));
+      callable.append(String(f->nameStr()));
+      handlers.append(callable.toArray());
+    } else if (decodedHandler->m_obj) {
+      PackedArrayInit callable(2);
+      callable.append(Variant{decodedHandler->m_obj});
       callable.append(String(f->nameStr()));
       handlers.append(callable.toArray());
     } else {
@@ -589,25 +570,16 @@ Array AutoloadHandler::getHandlers() {
   return handlers.toArray();
 }
 
-bool AutoloadHandler::CompareBundles::operator()(
-  const HandlerBundle& hb) {
-  auto const& lhs = *m_cufIter;
-  auto const& rhs = *hb.m_cufIter;
+bool AutoloadHandler::CompareBundles::operator()(const HandlerBundle& hb) {
+  auto const& lhs = *m_decodedHandler;
+  auto const& rhs = *hb.m_decodedHandler;
 
-  if (lhs.ctx() != rhs.ctx()) {
-    // We only consider ObjectData* for equality (not a Class*) so if either is
-    // an object these are not considered equal.
-    if (!(uintptr_t(lhs.ctx()) & 1) || !(uintptr_t(rhs.ctx()) & 1)) {
-      return false;
-    }
-  }
-
-  return lhs.func() == rhs.func();
+  return lhs.m_func == rhs.m_func && lhs.m_obj == rhs.m_obj;
 }
 
 bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
-  CufIterPtr cufIter = nullptr;
-  if (!vm_decode_function_cufiter(handler, cufIter)) {
+  DecodedHandlerPtr decodedHandler = nullptr;
+  if (!vm_decode_handler(handler, decodedHandler)) {
     return false;
   }
 
@@ -615,16 +587,16 @@ bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
 
   // Zend doesn't modify the order of the list if the handler is already
   // registered.
-  auto const& compareBundles = CompareBundles(cufIter.get());
+  auto const& compareBundles = CompareBundles(decodedHandler.get());
   if (std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles) !=
       m_handlers.end()) {
     return true;
   }
 
   if (!prepend) {
-    m_handlers.emplace_back(handler, cufIter);
+    m_handlers.emplace_back(handler, decodedHandler);
   } else {
-    m_handlers.emplace_front(handler, cufIter);
+    m_handlers.emplace_front(handler, decodedHandler);
   }
 
   return true;
@@ -635,14 +607,14 @@ bool AutoloadHandler::isRunning() {
 }
 
 void AutoloadHandler::removeHandler(const Variant& handler) {
-  CufIterPtr cufIter = nullptr;
-  if (!vm_decode_function_cufiter(handler, cufIter)) {
+  DecodedHandlerPtr decodedHandler = nullptr;
+  if (!vm_decode_handler(handler, decodedHandler)) {
     return;
   }
 
   // Use find_if instead of remove_if since we know there can only be one match
   // in the vector.
-  auto const& compareBundles = CompareBundles(cufIter.get());
+  auto const& compareBundles = CompareBundles(decodedHandler.get());
   auto it = std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles);
   if (it != m_handlers.end()) {
     m_handlers.erase(it);

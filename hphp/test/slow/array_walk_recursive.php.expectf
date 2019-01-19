@@ -1,0 +1,180 @@
+==== nonref_nodata ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 27
+int(0)
+int(1)
+int(1)
+int(2)
+int(0)
+int(3)
+int(1)
+int(4)
+int(2)
+int(5)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+    [2]=>
+    int(5)
+  }
+}
+==== byref_nodata ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 32
+int(0)
+int(1)
+int(1)
+int(2)
+int(0)
+int(3)
+int(1)
+int(4)
+int(2)
+int(5)
+array(3) {
+  [0]=>
+  string(3) "wat"
+  [1]=>
+  string(3) "wat"
+  [2]=>
+  array(3) {
+    [0]=>
+    string(3) "wat"
+    [1]=>
+    string(3) "wat"
+    [2]=>
+    string(3) "wat"
+  }
+}
+==== nonref_data ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 37
+int(0)
+int(1)
+int(1)
+int(2)
+int(0)
+int(3)
+int(1)
+int(4)
+int(2)
+int(5)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  array(3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+    [2]=>
+    int(5)
+  }
+}
+==== byref_data ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 42
+int(0)
+int(1)
+int(1)
+int(2)
+int(0)
+int(3)
+int(1)
+int(4)
+int(2)
+int(5)
+array(3) {
+  [0]=>
+  string(3) "wat"
+  [1]=>
+  string(3) "wat"
+  [2]=>
+  array(3) {
+    [0]=>
+    string(3) "wat"
+    [1]=>
+    string(3) "wat"
+    [2]=>
+    string(3) "wat"
+  }
+}
+==== closure ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 50
+int(0)
+int(1)
+int(1)
+int(2)
+int(0)
+int(3)
+int(1)
+int(4)
+int(2)
+int(5)
+array(3) {
+  [0]=>
+  string(3) "lol"
+  [1]=>
+  string(3) "lol"
+  [2]=>
+  array(3) {
+    [0]=>
+    string(3) "lol"
+    [1]=>
+    string(3) "lol"
+    [2]=>
+    string(3) "lol"
+  }
+}
+==== hack array ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 55
+
+Warning: Invalid operand type was used: array_walk_recursive expects array(s) in %s/test/slow/array_walk_recursive.php on line 55
+bool(false)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+==== nested hack array ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 60
+
+Warning: Invalid operand type was used: array_walk_recursive expects array(s) in %s/test/slow/array_walk_recursive.php on line 60
+bool(false)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(3)
+  }
+  [2]=>
+  vec(2) {
+    int(4)
+    int(5)
+  }
+}
+==== non-array ====
+
+Deprecated: array_walk_recursive: This function is scheduled for removal in %s/test/slow/array_walk_recursive.php on line 65
+
+Warning: Invalid operand type was used: array_walk_recursive expects array(s) in %s/test/slow/array_walk_recursive.php on line 65
+bool(false)
+float(4.6)

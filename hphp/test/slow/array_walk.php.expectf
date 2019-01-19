@@ -1,0 +1,106 @@
+==== nonref_nodata ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 27
+int(0)
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+==== byref_nodata ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 32
+int(0)
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+array(3) {
+  [0]=>
+  string(3) "wat"
+  [1]=>
+  string(3) "wat"
+  [2]=>
+  string(3) "wat"
+}
+==== nonref_data ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 37
+int(0)
+int(1)
+string(4) "whut"
+int(1)
+int(2)
+string(4) "whut"
+int(2)
+int(3)
+string(4) "whut"
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+==== byref_nodata ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 42
+int(0)
+int(1)
+string(4) "whut"
+int(1)
+int(2)
+string(4) "whut"
+int(2)
+int(3)
+string(4) "whut"
+array(3) {
+  [0]=>
+  string(4) "whut"
+  [1]=>
+  string(4) "whut"
+  [2]=>
+  string(4) "whut"
+}
+==== closure ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 50
+int(0)
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+array(3) {
+  [0]=>
+  string(3) "lol"
+  [1]=>
+  string(3) "lol"
+  [2]=>
+  string(3) "lol"
+}
+==== hack-array ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 55
+
+Warning: Invalid operand type was used: array_walk expects array(s) in %s/test/slow/array_walk.php on line 55
+bool(false)
+dict(0) {
+}
+==== non-array ====
+
+Deprecated: array_walk: This function is scheduled for removal in %s/test/slow/array_walk.php on line 60
+
+Warning: Invalid operand type was used: array_walk expects array(s) in %s/test/slow/array_walk.php on line 60
+bool(false)
+float(5.7)

@@ -597,6 +597,171 @@ function array_values(
 ): mixed;
 
 /**
+ * Applies the user-defined function funcname to each element of the input
+ *   array. This function will recur into deeper arrays.
+ *
+ * @param mixed $input - The input array.
+ * @param mixed $funcname - Typically, funcname takes on two parameters. The
+ *   input parameter's value being the first, and the key/index second. If
+ *   funcname needs to be working with the actual values of the array, specify
+ *   the first parameter of funcname as a reference. Then, any changes made to
+ *   those elements will be made in the original array itself.
+ * @param mixed $userdata - If the optional userdata parameter is supplied, it
+ *   will be passed as the third parameter to the callback funcname.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ */
+<<__Deprecated('This function is scheduled for removal')>>
+function array_walk_recursive(
+  mixed &$input,
+  mixed $funcname,
+  mixed $userdata = null,
+): bool {
+  $box = new stdClass();
+  $box->closure = $a ==> {
+    foreach ($a as $v) {
+      if (is_array($v)) {
+        $check_inner = $box->closure;
+        if (!$check_inner($v)) {
+          return false;
+        }
+      } else if (HH\is_any_array($v)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  $check_inner = $box->closure;
+  if (!is_array($input) || !$check_inner($input)) {
+    trigger_error(
+      "Invalid operand type was used: array_walk_recursive expects array(s)",
+      E_WARNING
+    );
+    return false;
+  }
+
+  $box = new stdClass();
+  $rf = new ReflectionFunction($funcname);
+  if ($rf->getParameters()[0]->isPassedByReference()) {
+    if ($userdata === null) {
+      $box->closure = (&$input) ==> {
+        foreach ($input as $k => $v) {
+          if (is_array($v)) {
+            $walk = $box->closure;
+            $walk(&$v);
+          } else {
+            $funcname(&$v, $k);
+          }
+          $input[$k] = $v;
+        }
+      };
+    } else {
+      $box->closure = (&$input) ==> {
+        foreach ($input as $k => $v) {
+          if (is_array($v)) {
+            $walk = $box->closure;
+            $walk(&$v);
+          } else {
+            $funcname(&$v, $k, $userdata);
+          }
+          $input[$k] = $v;
+        }
+      };
+    }
+    $walk = $box->closure;
+    $walk(&$input);
+  } else {
+    if ($userdata === null) {
+      $box->closure = ($input) ==> {
+        foreach ($input as $k => $v) {
+          if (is_array($v)) {
+            $walk = $box->closure;
+            $walk($v);
+          } else {
+            $funcname($v, $k);
+          }
+        }
+      };
+    } else {
+      $box->closure = ($input) ==> {
+        foreach ($input as $k => $v) {
+          if (is_array($v)) {
+            $walk = $box->closure;
+            $walk($v);
+          } else {
+            $funcname($v, $k, $userdata);
+          }
+        }
+      };
+    }
+    $walk = $box->closure;
+    $walk($input);
+  }
+
+  return true;
+}
+
+/**
+ * @param mixed $input - The input array.
+ *
+ * @param mixed $funcname - Typically, funcname takes on two parameters. The
+ *   array parameter's value being the first, and the key/index second. If
+ *   funcname needs to be working with the actual values of the array, specify
+ *   the first parameter of funcname as a reference. Then, any changes made to
+ *   those elements will be made in the original array itself. Users may not
+ *   change the array itself from the callback function. e.g. Add/delete
+ *   elements, unset elements, etc. If the array that array_walk() is applied to
+ *   is changed, the behavior of this function is undefined, and unpredictable.
+ * @param mixed $userdata - If the optional userdata parameter is supplied, it
+ *   will be passed as the third parameter to the callback funcname.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ */
+<<__Deprecated('This function is scheduled for removal')>>
+function array_walk(
+  mixed &$input,
+  mixed $funcname,
+  mixed $userdata = null,
+): bool {
+  if (!is_array($input)) {
+    trigger_error(
+      "Invalid operand type was used: array_walk expects array(s)",
+      E_WARNING
+    );
+    return false;
+  }
+
+  $rf = new ReflectionFunction($funcname);
+  if ($rf->getParameters()[0]->isPassedByReference()) {
+    if ($userdata === null) {
+      foreach ($input as $k => $v) {
+        $funcname(&$v, $k);
+        $input[$k] = $v;
+      }
+    } else {
+      foreach ($input as $k => $v) {
+        $funcname(&$v, $k, $userdata);
+        $input[$k] = $v;
+      }
+    }
+  } else {
+    if ($userdata === null) {
+      foreach ($input as $k => $v) {
+        $funcname($v, $k);
+      }
+    } else {
+      foreach ($input as $k => $v) {
+        $funcname($v, $k, $userdata);
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
  * Creates an array containing variables and their values. For each of these,
  *   compact() looks for a variable with that name in the current symbol table
  *   and adds it to the output array such that the variable name becomes the key

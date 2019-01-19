@@ -3785,8 +3785,11 @@ and is_abstract_ft fty = match fty with
         let env, fty, tyvars = Phase.localize_ft ~use_pos:p ~ety_env env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
+        (* Remove double nullables. This shouldn't be necessary, and currently
+         * interferes with new_inference because it "solves" before we set variance
+         *)
         let env, ty = match ty with
-          | r, Toption ty ->
+          | r, Toption ty when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
             let env, ty = TUtils.non_null env ty in
             env, (r, Toption ty)
           | _ -> env, ty in

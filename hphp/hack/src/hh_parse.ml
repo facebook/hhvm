@@ -330,12 +330,14 @@ let handle_existing_file args filename =
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
+  let suffix = Relative_path.suffix file in
   let source_text = SourceText.from_file file in
   let _, mode = Full_fidelity_parser.get_language_and_mode source_text in
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax
     ~enable_stronger_await_binding:args.enable_stronger_await_binding
+    ~has_dot_hack_extension:(String_utils.string_ends_with suffix ".hack")
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

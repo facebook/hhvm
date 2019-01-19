@@ -508,10 +508,12 @@ class local_finding_visitor = object(this)
     LocalMap.pop localmap
 end
 
-let parse tcopt content =
+let parse tcopt path content =
   Errors.ignore_ begin fun () ->
     let open Full_fidelity_ast in
-    let env = make_env ~parser_options:tcopt Relative_path.default in
+    (* path is needed because of different leading markup behavior in .hack *)
+    (* files vs .php files *)
+    let env = make_env ~parser_options:tcopt path in
     let {Parser_return.ast; _} = from_text_with_legacy env content in
     ast
   end
@@ -529,7 +531,7 @@ let go_from_ast ast line char =
   *)
 let go tcopt path content line char =
   try
-    let ast = parse tcopt content in
+    let ast = parse tcopt path content in
     let results_list = go_from_ast ast line char in
     List.map results_list (fun pos -> Pos.set_file path pos)
   with Failure error ->

@@ -47,6 +47,7 @@ type env =
   ; codegen                  : bool
   ; systemlib_compat_mode    : bool
   ; php5_compat_mode         : bool
+  ; has_dot_hack_extension   : bool
   ; elaborate_namespaces     : bool
   ; include_line_comments    : bool
   ; keep_errors              : bool
@@ -107,12 +108,15 @@ let make_env
     let enable_xhp = match enable_xhp with
       | Some b -> b
       | None -> enable_hh_syntax in
+    let has_dot_hack_extension =
+      (String_utils.string_ends_with (Relative_path.suffix file) ".hack") in
     let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
       (codegen && (enable_hh_syntax || is_hh_file)) in
     { is_hh_file
     ; codegen = codegen || systemlib_compat_mode
     ; systemlib_compat_mode
     ; php5_compat_mode
+    ; has_dot_hack_extension
     ; elaborate_namespaces
     ; include_line_comments
     ; keep_errors
@@ -2330,9 +2334,11 @@ and pMarkup node env =
   | MarkupSection { markup_prefix; markup_text; markup_expression; _ } ->
     let pos = pPos node env in
     if env.is_hh_file then
-      if (is_missing markup_prefix) &&
+      if (is_missing markup_prefix) && not env.has_dot_hack_extension &&
       (width markup_text) > 0 && not (is_hashbang markup_text) then
         raise_parsing_error env (`Node node) SyntaxError.error1001
+      else if env.has_dot_hack_extension && not (is_missing markup_prefix) then
+        raise_parsing_error env (`Node node) SyntaxError.error1060
       else if (token_kind markup_prefix) = Some TK.QuestionGreaterThan then
         raise_parsing_error env (`Node node) SyntaxError.error2067;
     let expr =
@@ -3491,6 +3497,7 @@ let parse_text
     let env' =
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.codegen
+        ~has_dot_hack_extension:env.has_dot_hack_extension
         ~codegen:env.codegen
         ~force_hh:env.enable_hh_syntax
         ~enable_xhp:env.enable_xhp

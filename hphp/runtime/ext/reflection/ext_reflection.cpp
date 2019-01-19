@@ -714,10 +714,6 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, isVariadic) {
   return func->hasVariadicCaptureParam();
 }
 
-static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReference) {
-  return false;
-}
-
 static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getNumberOfParameters) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->numParams();
@@ -2105,7 +2101,6 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getEndLine);
     HHVM_ME(ReflectionFunctionAbstract, getDocComment);
     HHVM_ME(ReflectionFunctionAbstract, getStaticVariables);
-    HHVM_ME(ReflectionFunctionAbstract, returnsReference);
     HHVM_ME(ReflectionFunctionAbstract, getReturnTypeHint);
     HHVM_ME(ReflectionFunctionAbstract, getNumberOfParameters);
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);

@@ -236,8 +236,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     mixed   TRUE if it returns a reference, otherwise FALSE
    */
-  <<__Native>>
-  public function returnsReference(): bool;
+  public function returnsReference(): bool {
+    return false;
+  }
 
   <<__Native>>
   private function getRetTypeInfo(): array;
@@ -461,9 +462,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       $ret .= implode(' ', $funcAttrs) . ' ';
     }
     $ret .= ($type == 'Method') ? 'method ' : 'function ';
-    if ($this->returnsReference()) {
-      $ret .= '&';
-    }
     $ret .= $this->getName() . " ] {\n";
 
     if ($this->getStartLine() > 0) {

@@ -63,7 +63,6 @@
   (libraries
     ast
     global_autocomplete
-    global_ide
     common
     naming_attributes
     naming_heap

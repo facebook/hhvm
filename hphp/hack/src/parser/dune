@@ -191,7 +191,6 @@
     little_magic_cache
     parserSig)
   (libraries
-    global_ide
     parser_env
     parser_smart_constructor)
   (preprocess (pps ppx_deriving.std)))

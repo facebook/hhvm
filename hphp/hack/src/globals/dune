@@ -14,9 +14,3 @@
     find
     heap_shared_mem
     sys_utils))
-
-(library
-  (name global_ide)
-  (wrapped false)
-  (modules
-    ide))

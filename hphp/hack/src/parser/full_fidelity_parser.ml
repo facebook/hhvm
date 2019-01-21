@@ -188,14 +188,10 @@ let get_language_and_mode text =
             if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
               String.trim (String.sub s 2 (l - 2))
           in
-          let mode =
-            try
-              let mode = List.hd (Str.split (Str.regexp " +") mode) in
-              FileInfo.parse_mode mode
-            with _ -> if language = hh then Some FileInfo.Mpartial else None in
-          match mode with
-          | Some FileInfo.Mstrict when !Ide.is_ide_mode -> Some FileInfo.Mpartial
-          | _ -> mode
+          try
+            let mode = List.hd (Str.split (Str.regexp " +") mode) in
+            FileInfo.parse_mode mode
+          with _ -> if language = hh then Some FileInfo.Mpartial else None
         in
         language, mode
       )

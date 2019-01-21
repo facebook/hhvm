@@ -282,7 +282,7 @@ end = struct
     env
 
   let make_typedef_genv tcopt cstrs tdef = {
-    in_mode       = FileInfo.(if !Ide.is_ide_mode then Mpartial else Mstrict);
+    in_mode       = FileInfo.Mstrict;
     tcopt;
     in_try        = false;
     in_finally    = false;

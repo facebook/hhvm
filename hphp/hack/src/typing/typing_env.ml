@@ -1357,6 +1357,26 @@ let set_tyvar_variance ~tyvars env ty =
    then update_variance_of_tyvars_occurring_in_upper_bound env ty
    else env
 
+(* Remove type variable `upper_var` from the upper bounds on `var`, if it exists
+ *)
+let remove_tyvar_upper_bound env var upper_var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  let upper_bounds = TySet.filter
+    (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> upper_var | _ -> true)
+    tvinfo.upper_bounds in
+  env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } env.tvenv)
+
+
+(* Remove type variable `lower_var` from the lower bounds on `var`, if it exists
+ *)
+let remove_tyvar_lower_bound env var lower_var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  let lower_bounds = TySet.filter
+    (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> lower_var | _ -> true)
+    tvinfo.lower_bounds in
+  env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } env.tvenv)
+
+
 (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
  * adding redundant bounds by merging the type with existing bounds. This makes

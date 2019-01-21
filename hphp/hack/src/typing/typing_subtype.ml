@@ -2415,7 +2415,7 @@ and freshen_tparams_wrt_variance env variancel tyl =
 let bind env r var ty =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
   log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
+    [Log_head (Printf.sprintf "Typing_subtype.bind #%d" var,
     [Log_type ("ty", ty)])]));
 
   (* Update the variance *)
@@ -2447,10 +2447,30 @@ let bind_to_lower_bound ~freshen env r var =
     if List.is_empty nulls
     then ty
     else (fst ty, Toption ty) in
+  (* Freshen components of the types in the union wrt their variance.
+   * For example, if we have
+   *   Cov<C>, Contra<D> <: v
+   * then we actually construct the union
+   *   Cov<#1> | Contra<#2> with C <: #1 and #2 <: D
+   *)
   let env, ty =
     if freshen
     then freshen_inside_ty_wrt_variance env ty
     else env, ty in
+  (* If any of the components of the union are type variables, then remove
+   * var from their upper bounds. Why? Because if we construct
+   *   v1 , ... , vn , t <: var
+   * for type variables v1, ..., vn and non-type variable t
+   * then necessarily we must have var as an upper bound on each of vi
+   * so after binding var we end up with redundant bounds
+   *   vi <: v1 | ... | vn | t
+   *)
+  let env =
+    List.fold_left ~f:(fun env ty ->
+      match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_upper_bound env v var
+      | env, _ -> env) ~init:env nonnulls in
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 

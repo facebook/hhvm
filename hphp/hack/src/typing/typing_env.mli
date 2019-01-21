@@ -144,6 +144,10 @@ val add_tyvar_upper_bound :
 val add_tyvar_lower_bound :
   ?union:(locl ty -> locl ty list -> locl ty list) ->
   env -> int -> locl ty -> env
+val remove_tyvar_upper_bound :
+  env -> int -> int -> env
+val remove_tyvar_lower_bound :
+  env -> int -> int -> env
 val set_tyvar_appears_covariantly :
   env -> int -> env
 val set_tyvar_appears_contravariantly :

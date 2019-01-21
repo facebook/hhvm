@@ -2417,6 +2417,10 @@ let bind env r var ty =
   log_types (Reason.to_pos r) env
     [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
     [Log_type ("ty", ty)])]));
+
+  (* Update the variance *)
+  let env = Env.update_variance_after_bind env var ty in
+
   (* Unify the variable *)
   let env = Typing_unify_recursive.add env var ty in
   (* Remove the variable from the environment *)
@@ -2447,6 +2451,7 @@ let bind_to_lower_bound ~freshen env r var =
     if freshen
     then freshen_inside_ty_wrt_variance env ty
     else env, ty in
+  (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 
 let bind_to_upper_bound env r var =

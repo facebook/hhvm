@@ -1294,6 +1294,35 @@ and update_variance_of_tyvars_occurring_in_upper_bound env ty =
         negative env in
     env
 
+(* After a type variable var has been "solved", or bound to a type ty, we need
+ * to update the variance of type variables occurring in ty. Suppose that
+ * variable var is marked "appears covariantly", i.e. it appears (at least) in
+ * positive positions in the type of an expression. Then when we substitute ty
+ * for var, variables that appear positively in ty must now be marked as
+ * appearing covariantly; variables that appear negatively in ty must now be
+ * marked as appearing contravariantly. And the dual, if the variable var is marked
+ * "appears contravariantly".
+ *)
+and update_variance_after_bind env var ty =
+  let appears_contravariantly = get_tyvar_appears_contravariantly env var in
+  let appears_covariantly = get_tyvar_appears_covariantly env var in
+  let env, positive, negative = get_tyvars env ty in
+  let env =
+    ISet.fold
+      (fun var env ->
+        let env =
+          if appears_contravariantly then set_tyvar_appears_contravariantly env var else env in
+          if appears_covariantly then set_tyvar_appears_covariantly env var else env)
+      positive env in
+  let env =
+    ISet.fold
+      (fun var env ->
+        let env =
+          if appears_contravariantly then set_tyvar_appears_covariantly env var else env in
+          if appears_covariantly then set_tyvar_appears_contravariantly env var else env)
+      negative env in
+  env
+
 let set_tyvar_variance ~tyvars env ty =
   let env, positive, negative = get_tyvars env ty in
   let env =

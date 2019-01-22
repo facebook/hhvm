@@ -299,14 +299,8 @@ private:
     const ArrayData* m_data;
     ObjectData* m_obj;
   };
- public:
-  // m_pos is used by the array implementation to track the current position
-  // in the array. Beware that when m_data is null, m_pos is uninitialized.
+  // Current position. Beware that when m_data is null, m_pos is uninitialized.
   ssize_t m_pos;
- private:
-  // to be removed in the next diff
-  MaybeCountable* m_unused;
-  UNUSED int m_alsoUnused;
   // This is unioned so new_iter_array can initialize it more
   // efficiently.
   union {
@@ -316,26 +310,22 @@ private:
     };
     uint32_t m_itypeAndNextHelperIdx;
   };
-
-  friend struct Iter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct alignas(16) Iter {
-  const ArrayIter&   arr() const { return m_u.aiter; }
-        ArrayIter&   arr()       { return m_u.aiter; }
-
+  Iter() = delete;
+  ~Iter() = delete;
+  const ArrayIter& arr() const { return m_iter; }
+        ArrayIter& arr()       { return m_iter; }
   template <bool Local> bool init(TypedValue* c1);
   bool next();
   bool nextLocal(const ArrayData*);
   void free();
 
 private:
-  union Data {
-    Data() {}
-    ArrayIter aiter;
-  } m_u;
+  ArrayIter m_iter;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -62,7 +62,6 @@
     namingGlobal)
   (libraries
     ast
-    global_autocomplete
     common
     naming_attributes
     naming_heap

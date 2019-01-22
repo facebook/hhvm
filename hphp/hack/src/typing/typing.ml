@@ -14,7 +14,6 @@
  * consistent) *)
 open Core_kernel
 open Common
-open Autocomplete
 open Decl_defs
 open Nast
 open Typing_defs
@@ -561,8 +560,7 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
     let env =
       if not @@ LEnv.has_next env ||
         abstract ||
-        named_body.fnb_unsafe ||
-        !auto_complete
+        named_body.fnb_unsafe
       then env
       else fun_implicit_return env pos ret f_kind in
     debug_last_pos := Pos.none;
@@ -2763,7 +2761,7 @@ and anon_make tenv p f ft idl =
         let local_tpenv = env.Env.lenv.Env.tpenv in
         let env, tb, implicit_return = anon_block env nb.fnb_nast in
         let env =
-          if not implicit_return || nb.fnb_unsafe || !auto_complete
+          if not implicit_return || nb.fnb_unsafe
           then env
           else fun_implicit_return env p hret f.f_fun_kind
         in
@@ -6007,10 +6005,8 @@ and class_def tcopt c =
   let tc = Env.get_class env (snd c.c_name) in
   add_decl_errors (Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc))));
   let c = TNBody.class_meth_bodies tcopt c in
-  if not !auto_complete then begin
-    NastCheck.class_ env c;
-    NastInitCheck.class_ env c;
-  end;
+  NastCheck.class_ env c;
+  NastInitCheck.class_ env c;
   match tc with
   | None ->
       (* This can happen if there was an error during the declaration

@@ -22,7 +22,6 @@
 
 
 open Core_kernel
-open Autocomplete
 open Nast
 open String_utils
 open Typing_defs
@@ -456,19 +455,16 @@ let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let rec fun_ tenv f named_body =
-  if !auto_complete then ()
-  else begin
-    let env = { t_is_finally = false;
-                is_array_append_allowed = false;
-                class_name = None; class_kind = None;
-                imm_ctrl_ctx = Toplevel;
-                typedef_tparams = [];
-                tenv = tenv;
-                function_name = None;
-                is_reactive = fun_is_reactive f.f_user_attributes
-                } in
-    func env f named_body
-  end
+  let env = { t_is_finally = false;
+              is_array_append_allowed = false;
+              class_name = None; class_kind = None;
+              imm_ctrl_ctx = Toplevel;
+              typedef_tparams = [];
+              tenv = tenv;
+              function_name = None;
+              is_reactive = fun_is_reactive f.f_user_attributes
+              } in
+  func env f named_body
 
 and func env f named_body =
   let p, fname = f.f_name in
@@ -656,7 +652,6 @@ and check_happly unchecked_tparams env h =
   | _ -> ()
 
 and class_ tenv c =
-  if !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
   let env = { t_is_finally = false;
               is_array_append_allowed = false;
@@ -724,9 +719,7 @@ and class_ tenv c =
     begin
     List.iter c.c_static_methods (check_static_memoized_function);
     maybe (fun _ m -> check_static_memoized_function m) () c.c_constructor
-    end
-  end;
-  ()
+  end
 
 (** Make sure that the given hint points to an interface *)
 and check_is_interface (env, error_verb) (x : hint) =

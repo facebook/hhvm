@@ -1,10 +1,4 @@
 (library
-  (name global_autocomplete)
-  (wrapped false)
-  (modules
-    autocomplete))
-
-(library
   (name global_config)
   (wrapped false)
   (modules

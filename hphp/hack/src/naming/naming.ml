@@ -239,8 +239,7 @@ end = struct
   }
 
   let make_class_genv tcopt tparams mode (cid, ckind) namespace is_ppl =
-    { in_mode       =
-        (if !Autocomplete.auto_complete then FileInfo.Mpartial else mode);
+    { in_mode       = mode;
       tcopt;
       in_try        = false;
       in_finally    = false;
@@ -530,10 +529,9 @@ end = struct
         let lcl = SMap.get x !(env.locals) in
         match lcl with
         | Some lcl -> p, snd lcl
-        | None when not !Autocomplete.auto_complete ->
+        | None ->
             check_variable_scoping env (p, x);
             handle_undefined_variable (genv, env) (p, x)
-        | None -> p, Local_id.tmp()
     in
     p, ident
 

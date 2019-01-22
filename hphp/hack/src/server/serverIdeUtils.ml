@@ -81,7 +81,6 @@ let path = Relative_path.default
 
 let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
-  Autocomplete.auto_complete := false;
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     Fixmes.DECL_HH_FIXMES.(remove_batch @@ KeySet.singleton path);

@@ -37,19 +37,12 @@ struct AutoloadHandler final : RequestEventHandler {
                    StringData* name, bool dynamic) :
       m_obj(obj), m_cls(cls), m_func(func), m_name(name), m_dynamic(dynamic) {
       assertx(!m_obj || !m_cls);
-      if (m_obj) m_obj->incRefCount();
-      if (m_name) m_name->incRefCount();
     }
 
-    ~DecodedHandler() {
-      if (m_obj) decRefObj(m_obj);
-      if (m_name) decRefStr(m_name);
-    }
-
-    ObjectData* m_obj;
+    Object m_obj;
     Class* m_cls;
     const Func* m_func;
-    StringData* m_name;
+    String m_name;
     bool m_dynamic;
   };
 

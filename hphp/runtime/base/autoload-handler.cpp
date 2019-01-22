@@ -66,10 +66,10 @@ Variant invoke_for_autoload(const String& function, const Variant& params) {
  */
 Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
                                 const Array& params) {
-  ObjectData* obj = handler.m_obj;
+  ObjectData* obj = handler.m_obj.get();
   Class* cls = handler.m_cls;
   const Func* f = handler.m_func;
-  StringData* invName = handler.m_name;
+  StringData* invName = handler.m_name.get();
   assertx(!obj || !cls);
   if (invName) {
     invName->incRefCount();
@@ -559,7 +559,7 @@ Array AutoloadHandler::getHandlers() {
       handlers.append(callable.toArray());
     } else if (decodedHandler->m_obj) {
       PackedArrayInit callable(2);
-      callable.append(Variant{decodedHandler->m_obj});
+      callable.append(decodedHandler->m_obj);
       callable.append(String(f->nameStr()));
       handlers.append(callable.toArray());
     } else {
@@ -574,7 +574,8 @@ bool AutoloadHandler::CompareBundles::operator()(const HandlerBundle& hb) {
   auto const& lhs = *m_decodedHandler;
   auto const& rhs = *hb.m_decodedHandler;
 
-  return lhs.m_func == rhs.m_func && lhs.m_obj == rhs.m_obj;
+  return lhs.m_func == rhs.m_func && lhs.m_cls == rhs.m_cls &&
+         lhs.m_obj.get() == rhs.m_obj.get();
 }
 
 bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {

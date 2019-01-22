@@ -19,7 +19,7 @@ module Type         = Typing_ops
 module MakeType     = Typing_make_type
 
 let rec refine_shape field_name env shape =
-  let env, shape = Env.expand_type env shape in
+  let env, shape = Typing_subtype.expand_type_and_solve env shape in
   match shape with
   | shape_r, Tshape (fields_known, fields) ->
     let refine_shape_field_type refined_sft_ty =

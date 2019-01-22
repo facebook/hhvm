@@ -646,6 +646,11 @@ and simplify_subtype
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tobject ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
 
+  | Tabstract (AKenum _, _), Tclass ((_, class_name), _, [ty_super'])
+    when class_name = SN.Classes.cHH_BuiltinEnum ->
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' &&&
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_super' ty_sub
   | Tabstract (AKenum enum_name, None), Tclass ((_, class_name), exact, _) ->
     if (enum_name = class_name || class_name = SN.Classes.cXHPChild) && exact = Nonexact
     then valid ()

@@ -25,11 +25,6 @@ TRACE_SET_MOD(debuggerflow);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PCFilter::PtrMapNode {
-  void **m_entries;
-  void clearImpl(unsigned short bits);
-};
-
 void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
   static_assert(sizeof(PCFilter::PtrMapNode) == sizeof(PCFilter::PtrMap) &&
                 sizeof(PCFilter::PtrMapNode) == sizeof(void*),
@@ -41,21 +36,24 @@ void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
     return;
   }
   for (int i = 0; i < PTRMAP_LEVEL_ENTRIES; i++) {
-    if (m_entries[i]) {
-      ((PCFilter::PtrMapNode*)&m_entries[i])->clearImpl(bits -
-                                                        PTRMAP_LEVEL_BITS);
-      free(m_entries[i]);
-      m_entries[i] = nullptr;
+    if (m_entries[i].m_entries) {
+      m_entries[i].clearImpl(bits - PTRMAP_LEVEL_BITS);
+      free(m_entries[i].m_entries);
+      m_entries[i].m_entries = nullptr;
     }
   }
 }
 
-static void* MakeNode() {
-  return calloc(PTRMAP_LEVEL_ENTRIES, sizeof(void*));
+auto PCFilter::PtrMap::makeNode() -> PtrMapNode {
+  return {
+    static_cast<PtrMapNode*>(
+      calloc(PCFilter::PTRMAP_LEVEL_ENTRIES, sizeof(PtrMapNode))
+    )
+  };
 }
 
 void* PCFilter::PtrMap::getPointerImpl(void* ptr) const {
-  auto current = (PtrMapNode*)&m_root;
+  auto current = &m_root;
   assertx(current->m_entries);
   unsigned short cursor = PTRMAP_PTR_SIZE;
   do {
@@ -63,19 +61,19 @@ void* PCFilter::PtrMap::getPointerImpl(void* ptr) const {
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
     assertx(index < PTRMAP_LEVEL_ENTRIES);
-    current = (PtrMapNode*)&current->m_entries[index];
-  } while (current->m_entries && cursor);
-  return current->m_entries;
+    current = &current->m_entries[index];
+    if (!cursor) return current->m_value;
+  } while (current->m_entries);
+  return nullptr;
 }
 
 void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
-  PtrMapNode* current = (PtrMapNode*)&m_root;
-  if (!current->m_entries) {
+  if (!m_root.m_entries) {
     if (!val) return;
-    m_root = MakeNode();
+    m_root = makeNode();
   }
-  assertx(current->m_entries == m_root);
 
+  auto current = &m_root;
   unsigned short cursor = PTRMAP_PTR_SIZE;
   while (true) {
     cursor -= PTRMAP_LEVEL_BITS;
@@ -83,22 +81,21 @@ void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
                           >> cursor;
     assertx(index < PTRMAP_LEVEL_ENTRIES);
     if (!cursor) {
-      current->m_entries[index] = val;
+      current->m_entries[index].m_value = val;
       break;
     }
-    if (!current->m_entries[index])  {
-      current->m_entries[index] = MakeNode();
+    if (!current->m_entries[index].m_entries)  {
+      current->m_entries[index] = makeNode();
     }
-    current = (PtrMapNode*)&current->m_entries[index];
+    current = &current->m_entries[index];
   }
 }
 
 void PCFilter::PtrMap::clear() {
-  if (m_root) {
-    auto current = (PtrMapNode*)&m_root;
-    current->clearImpl(PTRMAP_PTR_SIZE);
-    free(m_root);
-    m_root = nullptr;
+  if (m_root.m_entries) {
+    m_root.clearImpl(PTRMAP_PTR_SIZE);
+    free(m_root.m_entries);
+    m_root.m_entries = nullptr;
   }
 }
 

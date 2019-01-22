@@ -854,6 +854,8 @@ struct CompactReader {
       switch (type) {
         case T_STOP:
         case T_VOID:
+          thrift_error("Encountered invalid type for skipping T_STOP/T_VOID",
+                       ERR_INVALID_DATA);
           break;
 
         case T_STRUCT: {

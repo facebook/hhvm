@@ -153,6 +153,10 @@ val is_fresh_generic_parameter: string -> bool
     as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
 
+val is_untyped: env -> Tast.ty -> bool
+(** Return {true} when the given type is {Tany}, {Tdynamic}, etc. See:
+    {Typing_utils.is_any} and {Typing_utils.is_dynamic}. *)
+
 val subtype: env -> Tast.ty -> Tast.ty -> env * bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any), and an

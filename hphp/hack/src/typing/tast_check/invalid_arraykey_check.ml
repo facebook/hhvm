@@ -14,28 +14,30 @@ open Typing_defs
 
 module Env = Tast_env
 module TCO = TypecheckerOptions
-module Subtype = Typing_subtype
 
-let should_enforce env =
-  TCO.disallow_invalid_arraykey (Env.get_tcopt env)
+let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
 let info_of_type (reason, typ): Pos.t * string =
   (Reason.to_pos reason, Typing_print.error typ)
 
 let is_valid_arraykey env tcontainer tkey =
-  let is_vector_container env e =
+  let is_maplike_container env e =
     List.exists
-      [SN.Collections.cVector;
-       SN.Collections.cImmVector;
-       SN.Collections.cVec;
-       SN.Collections.cConstVector]
+      [SN.Collections.cMap;
+       SN.Collections.cImmMap;
+       SN.Collections.cConstMap;
+       SN.Collections.cDict]
       ~f:begin fun cls ->
         Env.can_subtype env e
           (Reason.Rnone,
-           Tclass ((Pos.none, cls), Nonexact, [Reason.Rnone, Tany]))
-      end
-      in
-  is_vector_container env tcontainer ||
+           Tclass ((Pos.none, cls),
+                   Nonexact,
+                   [Reason.Rnone, Tany; Reason.Rnone, Tany;]))
+      end ||
+      Env.can_subtype env tcontainer (Reason.Rnone, Tarraykind AKany)
+    in
+  Env.is_untyped env tcontainer ||
+  (not @@ is_maplike_container env tcontainer) ||
   Env.can_subtype env tkey (Reason.Rnone, Tprim Tarraykey)
 
 let handler = object

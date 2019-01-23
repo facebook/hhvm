@@ -1,6 +1,6 @@
 <?hh
 
-function main($untyped) {
+function main($untyped, $arr) {
   $x = array();
   $x['foo'] = 0;
   $x[null] = 0;
@@ -26,4 +26,8 @@ function main($untyped) {
   $x[null] = 0;
   $x[4.2] = 0;
   $x[$untyped] = 0;
+  $arr[0] = 0;
+  $arr[null] = 0;
+  $arr[4.2] = 0;
+  $arr[$untyped] = 0;
 }

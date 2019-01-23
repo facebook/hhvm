@@ -111,6 +111,8 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
   not_reached();
 }
 
+namespace {
+
 ALWAYS_INLINE
 bool shapeAllowsUnknownFields(const Array& ts) {
   return
@@ -142,28 +144,19 @@ folly::Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   return generics_field.val().parr;
 }
 
-bool isTSAllWildcards(const ArrayData* ts) {
-  if (!ts->exists(s_generic_types.get())) return true;
-  auto const generics = ts->at(s_generic_types.get());
-  assertx(isArrayLikeType(generics.m_type));
-  auto allWildcard = true;
-  IterateV(
-    generics.m_data.parr,
-    [&](TypedValue v) {
-      assertx(isArrayLikeType(v.m_type));
-      if (get_ts_kind(v.m_data.parr) == TypeStructure::Kind::T_typevar &&
-        v.m_data.parr->exists(s_name.get())) {
-        allWildcard &=
-          (get_ts_name(v.m_data.parr)->equal(s_wildcard.get()));
-      } else {
-        allWildcard = false;
-      }
-    }
-  );
-  return allWildcard;
+ALWAYS_INLINE
+bool isWildCard(const ArrayData* ts) {
+  return get_ts_kind(ts) == TypeStructure::Kind::T_typevar &&
+         ts->exists(s_name.get()) &&
+         get_ts_name(ts)->equal(s_wildcard.get());
 }
 
-bool typeStructureIsTypeList(const ArrayData*, const ArrayData*);
+bool typeStructureIsTypeList(
+  const ArrayData*,
+  const ArrayData*,
+  const StringData*,
+  bool
+);
 
 /*
  * Checks whether the `input` type structure is of the type denoted by the type
@@ -176,11 +169,23 @@ bool typeStructureIsTypeList(const ArrayData*, const ArrayData*);
  *
  * This is similar to instanceof check but also works with wildcards but it
  * currently does not implement subtyping checks (TODO(T31677864))
+ *
+ * Strict parameter dictates whether to return false on erased generics and
+ * whether to treat unresolved as a class name.
+ * If class C takes an erased generic T, then
+ * if strict, then typeStructureIsType(C<_>, C<int>) return false,
+ * if not strict, then typeStructureIsType(C<_>, C<int>) returns true.
  */
-bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
+bool typeStructureIsType(
+  const ArrayData* input,
+  const ArrayData* type,
+  bool strict
+) {
   assertx(input && type);
   if (input == type) return true; // shortcut
-  switch (get_ts_kind(type)) {
+  if (!strict && isWildCard(input)) return true;
+  auto tsKind = get_ts_kind(type);
+  switch (tsKind) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
     case TypeStructure::Kind::T_float:
@@ -199,23 +204,32 @@ bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
+      if (is_ts_nullable(type)) {
+        auto const inputT = get_ts_kind(input);
+        return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
+      }
       return type->equal(input, true);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
-      if (!get_ts_classname(input)->equal(get_ts_classname(type))) return false;
+      auto const name = get_ts_classname(input);
+      if (!name->isame(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
       if (!inputGenerics) {
-        return !typeGenerics && type->equal(input, true);
+        return !strict || (!typeGenerics && type->equal(input, true));
       }
-      return
-        typeGenerics && typeStructureIsTypeList(*inputGenerics, *typeGenerics);
+      return typeGenerics && typeStructureIsTypeList(*inputGenerics,
+                                                     *typeGenerics,
+                                                     name,
+                                                     strict);
     }
     case TypeStructure::Kind::T_tuple:
       return typeStructureIsTypeList(
         get_ts_elem_types(input),
-        get_ts_elem_types(type)
+        get_ts_elem_types(type),
+        nullptr,
+        strict
       );
     case TypeStructure::Kind::T_shape: {
       auto const inputFields = get_ts_fields(input);
@@ -243,7 +257,7 @@ bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
             return true; // short circuit
           }
           auto inputField = getShapeFieldElement(inputFields->at(k));
-          if (!typeStructureIsType(inputField, typeField)) {
+          if (!typeStructureIsType(inputField, typeField, strict)) {
             result = false;
             return true; // short circuit
           }
@@ -260,25 +274,49 @@ bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_unresolved:
       raise_error("Invalid generics for type structure");
   }
   not_reached();
 }
 
-bool typeStructureIsTypeList(const ArrayData* inputL, const ArrayData* typeL) {
+bool typeStructureIsTypeList(
+  const ArrayData* inputL,
+  const ArrayData* typeL,
+  const StringData* clsname,
+  bool strict
+) {
   assertx(inputL && typeL);
   auto const size = typeL->size();
   if (inputL->size() != size) return false;
+  std::vector<size_t> positions;
+  bool found = false;
+  if (!strict && clsname) {
+    auto const ne = NamedEntity::get(clsname);
+    if (auto const cls = Unit::lookupClass(ne)) {
+      found = true;
+      positions = cls->getReifiedGenericsInfo().m_reifiedGenericPositions;
+      if (positions.size() == 0) return true;
+    }
+  }
+  auto it = positions.begin();
   for (size_t i = 0; i < size; ++i) {
+    if (found) {
+      if (it == positions.end()) return true;
+      if (*it > i) {
+        continue;
+      }
+      if (*it == i) it++;
+    }
     auto const inputElem = inputL->rval(i);
     auto const typeElem = typeL->rval(i);
     assertx(tvIsDictOrDArray(inputElem) && tvIsDictOrDArray(typeElem));
-    if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr)) {
+    if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
+                             strict)) {
       return false;
     }
   }
@@ -289,7 +327,8 @@ ALWAYS_INLINE
 bool checkReifiedGenericsMatch(
   const Array& ts,
   Cell c1,
-  const NamedEntity* ne
+  const NamedEntity* ne,
+  bool strict // whether to return false on erased generics
 ) {
   if (!ts.exists(s_generic_types)) return true;
   // TODO(T31677864): Handle non KindOfObject types
@@ -298,6 +337,7 @@ bool checkReifiedGenericsMatch(
   auto const cls = Unit::lookupClass(ne);
   assertx(cls);
   if (!cls->hasReifiedGenerics()) {
+    if (!strict) return true;
     // Before returning false, lets check if all the generics are wildcards
     // If not all wildcard, since this is not a reified class, then it is false
     // TODO(T31677864): `!RuntimeOption::EnableReifiedGenerics ||` needs to be
@@ -320,9 +360,68 @@ bool checkReifiedGenericsMatch(
         get_ts_name(tsvalue)->equal(s_wildcard.get())) {
       continue;
     }
-    if (!typeStructureIsType(objrg.val().parr, tsvalue)) return false;
+    if (!typeStructureIsType(objrg.val().parr, tsvalue, strict)) return false;
   }
   return true;
+}
+
+} // namespace
+
+bool isTSAllWildcards(const ArrayData* ts) {
+  if (!ts->exists(s_generic_types.get())) return true;
+  auto const generics = ts->at(s_generic_types.get());
+  assertx(isArrayLikeType(generics.m_type));
+  auto allWildcard = true;
+  IterateV(
+    generics.m_data.parr,
+    [&](TypedValue v) {
+      assertx(isArrayLikeType(v.m_type));
+      allWildcard &= isWildCard(v.m_data.parr);
+      // if there is at least one not wildcard, then we can short circuit
+      return !allWildcard;
+    }
+  );
+  return allWildcard;
+}
+
+bool verifyReifiedLocalType(const ArrayData* type_, const TypedValue* param) {
+  if (tvIsNull(param) && is_ts_nullable(type_)) return true;
+  // If it is not an object, it can't be reified, type annotation check should
+  // have failed already if we are checking for something reified
+  if (!tvIsObject(param)) return true;
+  auto const obj = param->m_data.pobj;
+  auto const objcls = obj->getVMClass();
+  // Since we already checked from the type annotation that the class matches
+  if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) return true;
+  Array type;
+  try {
+    bool persistent = true;
+    type = TypeStructure::resolve(ArrNR(type_), nullptr, nullptr,
+                                  req::vector<Array>(), persistent);
+  } catch (Exception& e) {
+    return false;
+  } catch (Object& e) {
+    return false;
+  }
+  assertx(type.exists(s_kind));
+  auto const ts_kind =
+    static_cast<TypeStructure::Kind>(type[s_kind].toInt64Val());
+  switch (ts_kind) {
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp: {
+      assertx(type.exists(s_classname));
+      auto const classname = type[s_classname].asStrRef().get();
+      auto const ne = NamedEntity::get(classname);
+      auto const cls = Unit::lookupClass(ne);
+      if (!cls || !obj->instanceof(cls)) return false;
+      return
+        checkReifiedGenericsMatch(type, *tvToCell(param), ne, false);
+    }
+    default: return true;
+  }
+  not_reached();
 }
 
 template <bool genErrorMessage>
@@ -439,7 +538,7 @@ bool checkTypeStructureMatchesCellImpl(
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
       result = cellInstanceOf(&c1, ne);
-      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne);
+      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne, true);
       break;
     }
     case TypeStructure::Kind::T_null:

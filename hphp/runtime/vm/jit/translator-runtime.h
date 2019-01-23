@@ -155,6 +155,8 @@ void VerifyRetTypeSlow(int32_t id,
 void VerifyRetTypeCallable(int32_t id, TypedValue value);
 void VerifyRetTypeFail(int32_t id, TypedValue* value);
 
+void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
+
 void raise_error_sd(const StringData* sd);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);

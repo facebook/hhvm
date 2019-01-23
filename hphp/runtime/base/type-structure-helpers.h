@@ -42,6 +42,13 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
 bool isTSAllWildcards(const ArrayData* ts);
 
 /*
+ * Returns whether the typed value matches the type structure. This function
+ * checks whether the reified generics match as well.
+ * Currently only checks for classes and interfaces.
+ */
+bool verifyReifiedLocalType(const ArrayData* type, const TypedValue* param);
+
+/*
  * Resolves the given Array as a type structure.
  *
  * Raises an error if the type structure contains a trait, typevar or a function

@@ -6344,6 +6344,19 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
 
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
+  auto const cell = vmStack().topC();
+  assertx(tvIsDictOrDArray(cell));
+  if (!verifyReifiedLocalType(cell->m_data.parr, param.ptr)) {
+    raise_typehint_error(
+      folly::sformat(
+        "Argument {} passed to {}() must be an instance of {}, given {}",
+        param.index + 1,
+        vmfp()->m_func->fullName()->data(),
+        TypeStructure::toStringForDisplay(ArrNR(cell->m_data.parr)).c_str(),
+        describe_actual_type(param.ptr, true)
+      )
+    );
+  }
   vmStack().popC();
 }
 

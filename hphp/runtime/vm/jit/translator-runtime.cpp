@@ -683,6 +683,23 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
   }
 }
 
+void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  TypedValue* param = frame_local(ar, id);
+  if (verifyReifiedLocalType(ts, param)) return;
+  raise_typehint_error(
+    folly::sformat(
+      "Argument {} passed to {}() must be an instance of {}, given {}",
+      id + 1,
+      func->fullName()->data(),
+      TypeStructure::toStringForDisplay(ArrNR(ts)).c_str(),
+      describe_actual_type(param, true)
+    )
+  );
+}
+
 namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {

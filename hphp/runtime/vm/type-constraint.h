@@ -488,7 +488,7 @@ enum class MemoKeyConstraint {
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
-const char* describe_actual_type(tv_rval val, bool isHHType);
+std::string describe_actual_type(tv_rval val, bool isHHType);
 
 bool call_uses_strict_types(const Func* func);
 

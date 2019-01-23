@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -816,7 +817,7 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
   }
 }
 
-const char* describe_actual_type(tv_rval val, bool isHHType) {
+std::string describe_actual_type(tv_rval val, bool isHHType) {
   val = tvToCell(val);
   switch (val.type()) {
     case KindOfUninit:        return "undefined variable";
@@ -837,13 +838,20 @@ const char* describe_actual_type(tv_rval val, bool isHHType) {
       return RuntimeOption::EvalHackArrDVArrs ? "HH\\dict" : "array";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
-    case KindOfObject:        return val.val().pobj->getClassName().c_str();
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
     case KindOfRef:
       break;
+    case KindOfObject: {
+      auto const obj = val.val().pobj;
+      auto const cls = obj->getVMClass();
+      auto const name = cls->name()->toCppString();
+      if (!cls->hasReifiedGenerics()) return name;
+      auto const generics = getClsReifiedGenericsProp(cls, obj);
+      return folly::sformat("{}{}", name, mangleReifiedGenericsName(generics));
+    }
   }
   not_reached();
 }

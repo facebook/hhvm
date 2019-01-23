@@ -605,6 +605,8 @@ static CallMap s_callMap {
     {CheckFunReifiedGenericMismatch, checkFunReifiedGenericMismatch,
                                      DNone, SSync,
                                      {{extra(&FuncData::func)}, {SSA, 0}}},
+    {VerifyReifiedLocalType, VerifyReifiedLocalTypeImpl, DNone, SSync,
+                             {{extra(&ParamData::paramId)}, {SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

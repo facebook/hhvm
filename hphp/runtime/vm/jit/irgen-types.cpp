@@ -1336,7 +1336,8 @@ void emitVerifyParamType(IRGS& env, int32_t paramId) {
 
 void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
   verifyParamTypeImpl(env, paramId);
-  popC(env);
+  auto const ts = popC(env);
+  gen(env, VerifyReifiedLocalType, ParamData { paramId }, ts);
 }
 
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {

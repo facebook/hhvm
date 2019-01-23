@@ -1768,6 +1768,7 @@ X(VerifyRetCallable,            ParamData);
 X(VerifyRetCls,                 ParamData);
 X(VerifyRetFail,                ParamData);
 X(VerifyRetFailHard,            ParamData);
+X(VerifyReifiedLocalType,       ParamData);
 
 #undef X
 

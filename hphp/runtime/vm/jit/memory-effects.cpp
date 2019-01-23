@@ -825,6 +825,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stores = AHeapAny | AFrame{inst.marker().fp(), localId};
     return may_load_store(AUnknown, stores);
   }
+  case VerifyReifiedLocalType: {
+    auto const extra = inst.extra<ParamData>();
+    auto const stores = AHeapAny | AFrame{inst.marker().fp(), extra->paramId};
+    return may_load_store(AUnknown, stores);
+  }
   // However the following ones can't read locals from our frame on the way
   // out, except as a side effect of raising a warning.
   case VerifyRetCallable:

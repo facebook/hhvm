@@ -3649,6 +3649,10 @@ let assignment_errors _env node errors =
       | DecoratedExpression { decorated_expression_decorator = op; _ }
         when token_kind op = Some TokenKind.Inout ->
         err (SyntaxError.not_allowed_in_write "Inout")
+      | ParenthesizedExpression { parenthesized_expression_expression = e; _} ->
+        check_lvalue ~allow_reassign_this e errors
+      | SubscriptExpression { subscript_receiver = e; _ } ->
+        check_lvalue ~allow_reassign_this:true e errors
       | LambdaExpression _ | AnonymousFunction _ | Php7AnonymousFunction _
       | ArrayIntrinsicExpression _ | ArrayCreationExpression _
       | DarrayIntrinsicExpression _

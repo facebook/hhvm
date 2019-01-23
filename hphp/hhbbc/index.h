@@ -627,6 +627,12 @@ struct Index {
                             const TypeConstraint& tc) const;
 
   /*
+   * Returns true if the type constraint can contain a reified type
+   * Currently, only classes and interfaces are supported
+   */
+  bool could_have_reified_type(const TypeConstraint& tc) const;
+
+  /*
    * Lookup what the best known Type for a class constant would be,
    * using a given Index and Context, if a class of that name were
    * loaded.

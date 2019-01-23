@@ -507,6 +507,7 @@ type instruct_misc =
   | ChainFaults
   | OODeclExists of class_kind
   | VerifyParamType of param_id
+  | VerifyParamTypeTS of param_id
   | VerifyOutType of param_id
   | VerifyRetTypeC
   | Self of classref_id

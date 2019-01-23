@@ -51,7 +51,7 @@ let make_memoize_function_no_params_code
   ]
 
 let make_memoize_function_with_params_code
-  ~pos ~deprecation_info env params renamed_method_id is_async =
+  ~pos ~deprecation_info env params ast_params renamed_method_id is_async =
   let param_count = List.length params in
   let notfound = Label.next_regular() in
   let suspended_get = Label.next_regular() in
@@ -70,7 +70,8 @@ let make_memoize_function_with_params_code
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
+    Emit_body.emit_method_prolog
+      ~env ~pos ~params ~ast_params ~should_emit_init_this:false;
     deprecation_body;
     param_code_sets params param_count;
     if is_async then
@@ -101,13 +102,13 @@ let make_memoize_function_with_params_code
   ]
 
 let make_memoize_function_code
-  ~pos ~deprecation_info env params renamed_method_id is_async =
+  ~pos ~deprecation_info env params ast_params renamed_method_id is_async =
   Emit_pos.emit_pos_then pos @@
   if List.is_empty params
   then make_memoize_function_no_params_code
          ~deprecation_info env renamed_method_id is_async
   else make_memoize_function_with_params_code
-        ~pos ~deprecation_info env params renamed_method_id
+        ~pos ~deprecation_info env params ast_params renamed_method_id
         is_async
 
 (* Construct the wrapper function body *)
@@ -147,7 +148,7 @@ let emit_wrapper_function
       ~scope ~skipawaitable:function_is_async ~namespace ast_fun.Ast.f_ret in
   let body_instrs =
     make_memoize_function_code
-      ~pos ~deprecation_info env params renamed_id function_is_async
+      ~pos ~deprecation_info env params ast_fun.Ast.f_params renamed_id function_is_async
   in
   let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes
     |> Option.value ~default:Rx.NonRx in

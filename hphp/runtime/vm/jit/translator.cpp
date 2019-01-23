@@ -370,6 +370,8 @@ static const struct {
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
+  { OpVerifyParamTypeTS,
+                   {Local|Stack1,     Local,        OutUnknown      }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyRetNonNullC,
@@ -1037,6 +1039,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::VGetL:
   case Op::VGetS:
   case Op::VerifyParamType:
+  case Op::VerifyParamTypeTS:
   case Op::VerifyRetTypeC:
   case Op::VerifyRetNonNullC:
   case Op::VerifyOutType:
@@ -1123,8 +1126,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpAwaitAll || // similar to Await
       inst->op() == OpClsCnsD || // side exits if misses in the RDS
-      inst->op() == OpVerifyParamType) { // avoids combinatorial explosion with
-                                         // nullable types
+      inst->op() == OpVerifyParamTypeTS || // avoids combinatorial explosion
+      inst->op() == OpVerifyParamType) {   // with nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,

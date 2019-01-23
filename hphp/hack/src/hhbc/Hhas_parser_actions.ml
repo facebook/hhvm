@@ -1044,6 +1044,7 @@ let makeunaryinst s arg = match s with
    | "InitThisLoc" -> IMisc(InitThisLoc (localidofiarg arg))
    | "OODeclExists" -> IMisc(OODeclExists (classkindofiarg arg))
    | "VerifyParamType" -> IMisc(VerifyParamType (paramidofiarg arg))
+   | "VerifyParamTypeTS" -> IMisc(VerifyParamTypeTS (paramidofiarg arg))
    | "VerifyOutType" -> IMisc(VerifyOutType (paramidofiarg arg))
    | "Self" -> IMisc(Self (intofiarg arg))
    | "Parent" -> IMisc(Parent (intofiarg arg))

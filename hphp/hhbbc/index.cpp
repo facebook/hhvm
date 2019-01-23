@@ -4580,6 +4580,15 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
   return false;
 }
 
+bool Index::could_have_reified_type(const TypeConstraint& tc) const {
+  if (!tc.isObject()) return false;
+  auto const name = tc.typeName();
+  auto const resolved = resolve_type_name(name);
+  if (resolved.type != AnnotType::Object) return false;
+  res::Class rcls{this, resolved.value};
+  return rcls.couldHaveReifiedGenerics();
+}
+
 folly::Optional<bool>
 Index::supports_async_eager_return(res::Func rfunc) const {
   auto const supportsAER = [] (const php::Func* func) {

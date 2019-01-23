@@ -788,7 +788,8 @@ let get_input_output_count i =
     begin match i with
     | This | BareThis _ | StaticLocCheck _ | Catch | ChainFaults | ClsRefName _
     | GetMemoKeyL _ | ReifiedGeneric _ -> (0, 1)
-    | CheckThis | InitThisLoc _ | VerifyParamType _ | Self _ | Parent _
+    | CheckThis | InitThisLoc _ | VerifyParamType _ | VerifyParamTypeTS _
+    | Self _ | Parent _
     | LateBoundCls _ | NativeImpl | AssertRATL _ | AssertRATStk _
     | BreakTraceHint| Silence _ -> (0, 0)
     | StaticLocDef _ | StaticLocInit _ | CheckReifiedGenericMismatch -> (1, 0)

@@ -312,6 +312,7 @@ interpOutputLocals(IRGS& env,
       setImmLocType(3, TGen);
       break;
 
+    case OpVerifyParamTypeTS:
     case OpVerifyParamType: {
       auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       setImmLocType(0, handleBoxiness(locType, TCell));

@@ -115,7 +115,7 @@ let make_memoize_instance_method_no_params_code
 
 (* md is the already-renamed memoize method that must be wrapped *)
 let make_memoize_instance_method_with_params_code ~pos
-  env scope deprecation_info method_id params is_async =
+  env scope deprecation_info method_id params ast_params is_async =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   let param_count = List.length params in
@@ -137,7 +137,8 @@ let make_memoize_instance_method_with_params_code ~pos
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params ~should_emit_init_this:false;
+    Emit_body.emit_method_prolog
+      ~env ~pos ~params ~ast_params ~should_emit_init_this:false;
     deprecation_body;
     instr_checkthis;
     param_code_sets params param_count;
@@ -209,7 +210,7 @@ let make_memoize_static_method_no_params_code
   ]
 
 let make_memoize_static_method_with_params_code ~pos
-  env info scope deprecation_info method_id with_lsb params is_async =
+  env info scope deprecation_info method_id with_lsb params ast_params is_async =
   let param_count = List.length params in
   let notfound = Label.next_regular() in
   let suspended_get = Label.next_regular() in
@@ -229,7 +230,8 @@ let make_memoize_static_method_with_params_code ~pos
   in
   gather [
     begin_label;
-    Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
+    Emit_body.emit_method_prolog
+      ~env ~pos ~params ~ast_params ~should_emit_init_this:false;
     deprecation_body;
     param_code_sets params param_count;
     if is_async then
@@ -260,22 +262,22 @@ let make_memoize_static_method_with_params_code ~pos
   ]
 
 let make_memoize_static_method_code
-      ~pos env info scope deprecation_info method_id with_lsb params is_async =
+  ~pos env info scope deprecation_info method_id with_lsb params ast_params is_async =
   if List.is_empty params then
     make_memoize_static_method_no_params_code
       info scope deprecation_info method_id with_lsb is_async
   else
     make_memoize_static_method_with_params_code
       ~pos env info scope
-      deprecation_info method_id with_lsb params is_async
+      deprecation_info method_id with_lsb params ast_params is_async
 
 let make_memoize_instance_method_code
-      ~pos env scope deprecation_info method_id params is_async =
+      ~pos env scope deprecation_info method_id params ast_params is_async =
   if List.is_empty params
   then make_memoize_instance_method_no_params_code
          scope deprecation_info method_id is_async
   else make_memoize_instance_method_with_params_code
-         ~pos env scope deprecation_info method_id params is_async
+         ~pos env scope deprecation_info method_id params ast_params is_async
 
 (* Construct the wrapper function *)
 let make_wrapper env return_type params instrs with_lsb =
@@ -291,14 +293,14 @@ let make_wrapper env return_type params instrs with_lsb =
     (Some env)
 
 let emit ~pos env info return_type_info scope
-         deprecation_info params is_static method_id with_lsb is_async =
+         deprecation_info params ast_params is_static method_id with_lsb is_async =
   let instrs =
     Emit_pos.emit_pos_then pos @@
     if is_static
     then make_memoize_static_method_code
-      ~pos env info scope deprecation_info method_id with_lsb params is_async
+      ~pos env info scope deprecation_info method_id with_lsb params ast_params is_async
     else make_memoize_instance_method_code
-      ~pos env scope deprecation_info method_id params is_async
+      ~pos env scope deprecation_info method_id params ast_params is_async
   in
   make_wrapper env return_type_info params instrs with_lsb
 
@@ -318,7 +320,7 @@ let emit_memoize_wrapper_body env memoize_info ast_method
     let with_lsb =
       Emit_attribute.ast_any_is_memoize_lsb ast_method.Ast.m_user_attributes in
     emit ~pos env memoize_info return_type_info scope deprecation_info
-         params is_static method_id with_lsb is_async
+         params ast_method.Ast.m_params is_static method_id with_lsb is_async
 
 let make_memoize_wrapper_method env info ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for

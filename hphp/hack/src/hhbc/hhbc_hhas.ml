@@ -557,6 +557,7 @@ let string_of_misc instruction =
     | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
     | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
+    | VerifyParamTypeTS id -> sep ["VerifyParamTypeTS"; string_of_param_id id]
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"

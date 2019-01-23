@@ -1334,6 +1334,11 @@ void emitVerifyParamType(IRGS& env, int32_t paramId) {
   verifyParamTypeImpl(env, paramId);
 }
 
+void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
+  verifyParamTypeImpl(env, paramId);
+  popC(env);
+}
+
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   auto const tAutoload = topC(env);
   auto const tCls = topC(env);

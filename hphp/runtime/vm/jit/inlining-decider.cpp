@@ -266,6 +266,7 @@ bool isInlinableCPPBuiltin(const Func* f) {
  */
 bool isInliningVVSafe(Op op) {
   switch (op) {
+    case Op::Array:
     case Op::Null:
     case Op::PopC:
     case Op::PopL:
@@ -278,6 +279,7 @@ bool isInliningVVSafe(Op op) {
     case Op::AssertRATL:
     case Op::AssertRATStk:
     case Op::VerifyParamType:
+    case Op::VerifyParamTypeTS:
     case Op::VerifyRetTypeC:
     case Op::RetC:
     case Op::RetCSuspended:

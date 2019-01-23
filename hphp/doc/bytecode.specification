@@ -3861,6 +3861,14 @@ VerifyRetNonNullC [C] -> [C]
   can statically verify that return value will pass the function's type
   annotation if it is non null.
 
+VerifyParamTypeTS <parameter id>    [C]  ->  []
+
+  VerifyParamTypeTS pops a type structure from the stack and checks the
+  specified parameter against this type structure. In case of a mismatch, a
+  recoverable error is raised. If the popped cell is not a type structure,
+  an error is raised. This instruction also verifies the reified generic type
+  parameters of the specified parameter.
+
 Self <class-ref slot>    []  ->  []
 
   Creates a classref that refers to the class in which the current function is

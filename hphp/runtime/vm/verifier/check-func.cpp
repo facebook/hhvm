@@ -540,13 +540,17 @@ bool FuncChecker::checkImmLA(PC& pc, PC const instr) {
   auto ok = true;
   auto const k = decode_iva(pc);
   ok &= checkLocal(pc, k);
-  if (peek_op(instr) == Op::VerifyParamType) {
-    if (k >= numParams()) {
-      error("invalid parameter id %d at %d\n", k, offset(instr));
-      ok = false;
-    }
+  switch (peek_op(instr)) {
+    case Op::VerifyParamType:
+    case Op::VerifyParamTypeTS:
+      if (k >= numParams()) {
+        error("invalid parameter id %d at %d\n", k, offset(instr));
+        ok = false;
+      }
+      break;
+    default:
+      break;
   }
-
   return ok;
 }
 
@@ -1732,6 +1736,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CheckReifiedGenericMismatch:
     case Op::VerifyOutType:
     case Op::VerifyParamType:
+    case Op::VerifyParamTypeTS:
     case Op::VerifyRetTypeC:
     case Op::VerifyRetNonNullC:
     case Op::AssertRATL:

@@ -4200,6 +4200,23 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   }
 }
 
+void in(ISS& env, const bc::VerifyParamTypeTS& op) {
+  auto const a = topC(env);
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  if (!a.couldBe(requiredTSType)) {
+    unreachable(env);
+    return;
+  }
+  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
+  // TODO(T31677864): We are being extremely pessimistic here, relax it
+  if (!env.ctx.func->isReified &&
+      (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
+      !env.index.could_have_reified_type(constraint)) {
+    return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
+  }
+  popC(env);
+}
+
 void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   auto stackT = topC(env);
 

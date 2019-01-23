@@ -44,8 +44,10 @@ val emit_body:
 val tparams_to_strings : Ast.tparam list -> string list
 
 val emit_method_prolog :
+  env: Emit_env.t ->
   pos: Pos.t ->
   params: Hhas_param.t list ->
+  ast_params: Ast.fun_param list ->
   should_emit_init_this:bool ->
   Instruction_sequence.t
 

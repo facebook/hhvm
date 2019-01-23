@@ -9,27 +9,46 @@
 open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
+module A = Ast
 module SU = Hhbc_string_utils
+module RGH = Reified_generics_helpers
 
-let has_type_constraint ti =
-  match ti with
-  | Some ti when (Hhas_type_info.has_type_constraint ti) -> true
-  | _ -> false
+let has_type_constraint env ti ast_param =
+  match ti, ast_param.A.param_hint with
+  | Some ti, Some h when (Hhas_type_info.has_type_constraint ti) ->
+    RGH.has_reified_type_constraint env h
+  | _ -> RGH.NoConstraint
 
-let emit_method_prolog ~pos ~params ~should_emit_init_this =
+let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
   let instr_list =
-    (if should_emit_init_this
-    then instr (IMisc (InitThisLoc (Local.Named "$this")))
-    else empty)
-    ::
-    List.filter_map params (fun p ->
+    let init_this = if not should_emit_init_this then empty else
+      instr (IMisc (InitThisLoc (Local.Named "$this"))) in
+    let ast_params = List.filter ast_params
+      ~f:(fun p -> not (p.A.param_is_variadic && snd p.A.param_id = "..."))
+    in
+    init_this ::
+    List.filter_map (List.zip_exn params ast_params) (fun (p, ast_p) ->
       if Hhas_param.is_variadic p
       then None else
       let param_type_info = Hhas_param.type_info p in
-      let param_name = Hhas_param.name p in
-      if has_type_constraint param_type_info
-      then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
-      else None) in
+      let param_name = Param_named (Hhas_param.name p) in
+      begin match has_type_constraint env param_type_info ast_p with
+      | RGH.NoConstraint -> None
+      | RGH.NotReified ->
+        Some (instr (IMisc (VerifyParamType param_name)))
+      | RGH.MaybeReified ->
+        Some (gather [
+          Emit_expression.get_type_structure_for_hint env ~targ_map:SMap.empty
+            @@ Option.value_exn ast_p.A.param_hint;
+          instr (IMisc (VerifyParamTypeTS param_name))
+        ])
+      | RGH.DefinitelyReified ->
+        Some (gather [
+          fst @@ Emit_expression.emit_reified_arg env pos
+            @@ Option.value_exn ast_p.A.param_hint;
+          instr (IMisc (VerifyParamTypeTS param_name))
+        ])
+      end) in
   if List.is_empty instr_list
   then empty
   else gather (Emit_pos.emit_pos pos :: instr_list)
@@ -318,7 +337,7 @@ let emit_body
   ~default_dropthrough
   ~return_value
   ~namespace
-  ~doc_comment immediate_tparams params ret body =
+  ~doc_comment immediate_tparams ast_params ret body =
   if is_async && skipawaitable
   then begin
     let report_error =
@@ -364,7 +383,7 @@ let emit_body
   in
   let params =
     Emit_param.from_asts
-      ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
+      ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope ast_params
   in
   let params = if is_closure_body
     then List.map ~f:Hhas_param.switch_inout_to_reference params else params in
@@ -510,7 +529,7 @@ let emit_body
      * and header content is empty *)
     let header_content = gather [
       if is_native then empty else
-        emit_method_prolog ~pos ~params ~should_emit_init_this;
+        emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this;
       emit_deprecation_warning scope deprecation_info;
       generator_instr;
     ] in

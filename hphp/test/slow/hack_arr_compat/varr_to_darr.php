@@ -24,6 +24,11 @@ function test_implicit_append() {
   $x[0] = 1;
 }
 
+function test_sort() {
+  $x = varray[1, 2, 3];
+  asort(&$x);
+}
+
 <<__EntryPoint>>
 function main_varr_to_darr() {
   test(varray[]);
@@ -41,4 +46,6 @@ function main_varr_to_darr() {
   literals();
 
   test_implicit_append();
+
+  test_sort();
 }

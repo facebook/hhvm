@@ -2483,7 +2483,21 @@ let bind_to_upper_bound env r var =
   let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
   match upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
-  | [ty] -> bind env r var ty
+  | [ty] ->
+    (* If ty is a variable (in future, if any of the types in the list are variables),
+     * then remove var from their lower bounds. Why? Because if we construct
+     *   var <: v1 , ... , vn , t
+     * for type variables v1 , ... , vn and non-type variable t
+     * then necessarily we must have var as a lower bound on each of vi
+     * so after binding var we end up with redundant bounds
+     *   v1 & ... & vn & t <: vi
+     *)
+    let env =
+      (match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_lower_bound env v var
+      | env, _ -> env) in
+    bind env r var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env
 
@@ -2502,6 +2516,10 @@ let bind_to_upper_bound env r var =
  *   us to set v := ti.
  *)
 let solve_tyvar ~freshen ~solve_invariant env r var =
+  Typing_log.(log_with_level env "prop" 2 (fun () ->
+    log_types (Reason.to_pos r) env
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar #%d" var, [])]));
+
   (* Don't try and solve twice *)
   if Env.tyvar_is_solved env var
   then env
@@ -2548,8 +2566,8 @@ let solve_tyvars ?(solve_invariant = false) ~tyvars env =
 let expand_type_and_solve env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | (_, Tvar v) when not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) ->
-    let env = solve_tyvar ~freshen:true ~solve_invariant:true env Reason.Rnone v in
+  | (r, Tvar v) when not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) ->
+    let env = solve_tyvar ~freshen:true ~solve_invariant:true env r v in
     Env.expand_type env ty
   | _ ->
     env, ety

@@ -372,16 +372,33 @@ void Debugger::executeForEachAttachedRequest(
 ) {
   m_lock.assertOwnedBySelf();
 
-  for (auto it = m_requests.begin(); it != m_requests.end(); it++) {
-    assertx(it->second != nullptr);
-    callback(it->first, it->second);
+  DebuggerRequestInfo* dummyRequestInfo = getDummyRequestInfo();
+  std::for_each(m_requests.begin(), m_requests.end(), [](auto &it) {
+    it.second->m_flags.alive = false;
+  });
+
+
+  RequestInfo::ExecutePerRequest([&] (RequestInfo* ti) {
+    auto it = m_requests.find(ti);
+    if (it != m_requests.end() && it->second != dummyRequestInfo) {
+      it->second->m_flags.alive = true;
+      callback(it->first, it->second);
+    }
+  });
+
+  // This is to catch requests that have fallen out of the list without a
+  // requestShutdown notification.
+  auto it = m_requests.begin();
+  while (it != m_requests.end()) {
+    if (it->second->m_flags.alive) {
+      it++;
+      continue;
+    }
+    it = m_requests.erase(it);
   }
 
-  if (includeDummyRequest) {
-    DebuggerRequestInfo* dummyRequestInfo = getDummyRequestInfo();
-    if (dummyRequestInfo != nullptr) {
-      callback(nullptr, dummyRequestInfo);
-    }
+  if (includeDummyRequest && dummyRequestInfo != nullptr) {
+    callback(nullptr, dummyRequestInfo);
   }
 }
 

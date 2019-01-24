@@ -89,7 +89,8 @@ struct DebuggerRequestInfo {
       uint32_t requestUrlInitialized : 1;
       uint32_t terminateRequest : 1;
       uint32_t unresolvedBps : 1;
-      uint32_t unused : 25;
+      uint32_t alive : 1;
+      uint32_t unused : 24;
     } m_flags;
     uint32_t m_allFlags;
   };

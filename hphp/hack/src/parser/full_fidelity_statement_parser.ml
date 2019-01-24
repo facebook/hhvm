@@ -128,7 +128,14 @@ module WithExpressionAndDeclAndTypeParser
     | Final
     | Interface
     | Trait
-    | Class -> parse_php_class parser
+    | Class ->
+      let parser =
+        if Env.is_strict (env parser) then
+          with_error parser SyntaxError.decl_outside_global_scope
+        else
+          parser
+      in
+      parse_php_class parser
     | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser

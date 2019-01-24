@@ -2902,7 +2902,7 @@ let class_reified_param_errors env node errors =
 let attr_spec_contains_sealed node =
   attribute_specification_contains node SN.UserAttributes.uaSealed
 
-let classish_errors env node parents namespace_name names errors =
+let classish_errors env node namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
     (* Given a ClassishDeclaration node, test whether or not it's a trait
@@ -2911,17 +2911,6 @@ let classish_errors env node parents namespace_name names errors =
       (* Invalid if uses 'extends' and is a trait. *)
       token_kind cd.classish_extends_keyword = Some TokenKind.Extends &&
         token_kind cd.classish_keyword = Some TokenKind.Trait in
-
-    (* Given a ClassishDeclaration node, test whether it's declared in the
-       global scope. *)
-    let classish_declaration_check _ =
-      (* Only check this in strict mode. *)
-      if not @@ is_strict env then false else
-      match List.map ~f:syntax parents with
-      | [SyntaxList _; Script _]
-      | [SyntaxList _; NamespaceBody _; NamespaceDeclaration _; SyntaxList _; Script _] -> false
-      | _ -> true
-    in
 
     (* Given a sealed ClassishDeclaration node, test whether all the params
      * are classnames. *)
@@ -2994,10 +2983,6 @@ let classish_errors env node parents namespace_name names errors =
       (cant_be_classish_name env) classish_name
       (SyntaxError.reserved_keyword_as_class_name classish_name)
       cd.classish_name in
-    let errors =
-      produce_error errors
-      classish_declaration_check ()
-      SyntaxError.decl_outside_global_scope cd.classish_name in
     let errors =
       if is_token_kind cd.classish_keyword TokenKind.Interface &&
         not (is_missing cd.classish_implements_keyword)
@@ -3931,7 +3916,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | ClassishDeclaration _ ->
         let names, errors =
-          classish_errors env node parents namespace_name names errors in
+          classish_errors env node namespace_name names errors in
         let errors = class_reified_param_errors env node errors in
         trait_require_clauses, names, errors
       | ConstDeclaration _ ->

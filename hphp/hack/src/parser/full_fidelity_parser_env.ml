@@ -69,3 +69,4 @@ let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
+let is_strict e = e.mode = Some FileInfo.Mstrict

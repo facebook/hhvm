@@ -53,23 +53,6 @@ type env = {
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
-
-let coroutines_enabled env =
-  TypecheckerOptions.experimental_feature_enabled
-    (Env.get_tcopt env.tenv)
-    TypecheckerOptions.experimental_coroutines
-
-let report_coroutines_not_enabled p =
-  Errors.experimental_feature p "coroutines"
-
-let check_coroutines_enabled condition env p =
-  if condition && not (coroutines_enabled env)
-  then report_coroutines_not_enabled p
-
-let check_coroutine_constructor name is_coroutine p =
-  if name = SN.Members.__construct && is_coroutine
-  then Errors.coroutine_in_constructor p
-
 let error_on_attr env attrs attr f =
   if not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
   then match Attributes.find attr attrs with
@@ -383,14 +366,10 @@ module CheckFunctionBody = struct
     | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _) ->
       Errors.yield_in_coroutine p
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
-      if not (coroutines_enabled env)
-      then report_coroutines_not_enabled p
-      else Errors.suspend_outside_of_coroutine p
+      Errors.suspend_outside_of_coroutine p
     | Ast.FCoroutine, Suspend _ ->
-      if not (coroutines_enabled env)
-      then report_coroutines_not_enabled p
-      else if env.t_is_finally
-      then Errors.suspend_in_finally p;
+      if env.t_is_finally
+      then Errors.suspend_in_finally p
     | _, Special_func func ->
         (match func with
           | Gena e
@@ -471,7 +450,6 @@ and func env f named_body =
   let fname_lower = String.lowercase (strip_ns fname) in
   if fname_lower = SN.Members.__construct || fname_lower = "using"
   then Errors.illegal_function_name p fname;
-  check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
@@ -544,8 +522,7 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (_, is_coroutine, hl, _, _, variadic_hint, h, _) ->
-      check_coroutines_enabled is_coroutine env p;
+  | Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
       List.iter hl (hint env);
       hint env h;
       begin match variadic_hint with
@@ -993,9 +970,6 @@ and method_ (env, is_static) m =
   check__toString m is_static;
   let env = { env with function_name = Some (snd m.m_name) } in
   let p, name = m.m_name in
-  let is_coroutine = m.m_fun_kind = Ast.FCoroutine in
-  check_coroutines_enabled is_coroutine env p;
-  check_coroutine_constructor name is_coroutine p;
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
@@ -1412,7 +1386,6 @@ and expr_ env p = function
       List.iter uel (expr env);
       ()
   | Efun (f, _) ->
-      check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
       let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()

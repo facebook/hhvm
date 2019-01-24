@@ -1,0 +1,6 @@
+File "t30337175.php", line 18, characters 7-7:
+Invalid argument (Typing[4110])
+  File "t30337175.php", line 14, characters 24-24:
+  This is an object of type D
+  File "t30337175.php", line 18, characters 7-7:
+  It is incompatible with an int

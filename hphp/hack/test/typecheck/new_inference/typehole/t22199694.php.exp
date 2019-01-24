@@ -1,0 +1,6 @@
+File "t22199694.php", line 12, characters 15-38:
+Invalid argument (Typing[4110])
+  File "t22199694.php", line 5, characters 35-37:
+  This is a num (int/float)
+  File "t22199694.php", line 12, characters 15-38:
+  It is incompatible with an object of type vec

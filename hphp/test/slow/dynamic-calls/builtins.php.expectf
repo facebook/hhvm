@@ -16,7 +16,7 @@ Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 22
 
 Notice: 'HH\Vector::toArray' called dynamically in %s/builtins.php on line 23
 
-Notice: 'HH\Vector::__construct' called dynamically in %s/builtins.php on line 24
+Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
 
 Notice: 'DateTime::createFromFormat' called dynamically in %s/builtins.php on line 6
 
@@ -78,7 +78,7 @@ Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line
 
 Notice: 'SplFixedArray::toArray' called dynamically in %s/builtins.php on line 35
 
-Notice: 'SplFixedArray::__construct' called dynamically in %s/builtins.php on line 36
+Notice: 'SplFixedArray' constructed dynamically in %s/builtins.php on line 36
 
 Notice: 'array_map' called dynamically in %s/builtins.php on line 38
 ======================================================
@@ -101,7 +101,7 @@ Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 22
 
 Notice: 'HH\Vector::toArray' called dynamically in %s/builtins.php on line 23
 
-Notice: 'HH\Vector::__construct' called dynamically in %s/builtins.php on line 24
+Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
 
 Notice: 'DateTime::createFromFormat' called dynamically in %s/builtins.php on line 6
 
@@ -163,6 +163,6 @@ Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line
 
 Notice: 'SplFixedArray::toArray' called dynamically in %s/builtins.php on line 35
 
-Notice: 'SplFixedArray::__construct' called dynamically in %s/builtins.php on line 36
+Notice: 'SplFixedArray' constructed dynamically in %s/builtins.php on line 36
 
 Notice: 'array_map' called dynamically in %s/builtins.php on line 38

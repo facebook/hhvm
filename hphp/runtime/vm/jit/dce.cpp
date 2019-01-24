@@ -278,6 +278,7 @@ bool canDCE(IRInstruction* inst) {
   case KillARReifiedGenerics:
   case FuncSupportsAsyncEagerReturn:
   case IsFuncDynCallable:
+  case IsClsDynConstructible:
   case LdFuncRxLevel:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
@@ -541,6 +542,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseHackArrCompatNotice:
   case RaiseParamRefMismatchForFunc:
   case RaiseForbiddenDynCall:
+  case RaiseForbiddenDynConstruct:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case InitStaticLoc:

@@ -38,9 +38,9 @@ function test() {
   $x = 'array_map'; $x($a ==> $a, []);
 }
 
-<<__EntryPoint>>
+<<__EntryPoint, __DynamicallyCallable>>
 function main_builtins() {
-test();
-echo "======================================================\n";
-test();
+  test();
+  echo "======================================================\n";
+  test();
 }

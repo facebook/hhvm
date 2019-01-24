@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
@@ -361,6 +362,7 @@ const Object& SystemlibSessionModule::getObject() {
   if (!m_cls) {
     lookupClass();
   }
+  callerDynamicConstructChecks(m_cls);
   s_obj->setObject(Object{m_cls});
   const auto& obj = s_obj->getObject();
   tvDecRefGen(

@@ -172,6 +172,10 @@ inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }
 
+inline bool Class::isDynamicallyConstructible() const {
+  return attrs() & AttrDynamicallyConstructible;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Magic methods.
 

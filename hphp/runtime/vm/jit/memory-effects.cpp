@@ -1752,6 +1752,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckFuncStatic:
   case FuncSupportsAsyncEagerReturn:
   case IsFuncDynCallable:
+  case IsClsDynConstructible:
   case LdFuncRxLevel:
   case IsReifiedName:
   case LdARNumParams:
@@ -2035,6 +2036,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseHackArrPropNotice:
   case RaiseParamRefMismatchForFunc:
   case RaiseForbiddenDynCall:
+  case RaiseForbiddenDynConstruct:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case ConvCellToStr:

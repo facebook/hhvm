@@ -41,7 +41,7 @@ Exception: 'B::static_async_func' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'D::__callStatic' called dynamically
-Exception: 'A::__construct' called dynamically
+Exception: 'A' constructed dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically

@@ -230,10 +230,10 @@ struct Class {
   bool couldHaveReifiedGenerics() const;
 
   /*
-   * Whether initializing this class (which sets up the class' properties and is
-   * a side-effect of several different bytecodes) can potentially raise.
+   * Returns whether this resolved class might distinguish being constructed
+   * dynamically versus being constructed normally (IE, might raise a notice).
    */
-  bool initMightRaise() const;
+  bool mightCareAboutDynConstructs() const;
 
   /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.

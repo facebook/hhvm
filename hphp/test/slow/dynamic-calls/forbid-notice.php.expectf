@@ -84,7 +84,7 @@ Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 25
 
 Notice: 'D::__callStatic' called dynamically in %s/forbid-notice.php on line 26
 
-Notice: 'A::__construct' called dynamically in %s/forbid-notice.php on line 247
+Notice: 'A' constructed dynamically in %s/forbid-notice.php on line 247
 
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 248
 
@@ -267,7 +267,7 @@ Exception: 'B::static_async_func' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'C::__callStatic' called dynamically
 Exception: 'D::__callStatic' called dynamically
-Exception: 'A::__construct' called dynamically
+Exception: 'A' constructed dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically

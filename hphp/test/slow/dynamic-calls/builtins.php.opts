@@ -1,1 +1,1 @@
--vEval.NoticeOnBuiltinDynamicCalls=1
+-vEval.NoticeOnBuiltinDynamicCalls=1 -vEval.ForbidDynamicCalls=1

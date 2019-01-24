@@ -534,6 +534,11 @@ public:
    */
   bool isPersistent() const;
 
+  /*
+   * Is this class allowed to be constructed dynamically?
+   */
+  bool isDynamicallyConstructible() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
@@ -1203,6 +1208,7 @@ public:
   static constexpr ptrdiff_t f##Off() { \
     return offsetof(Class, m_##f);      \
   }
+  OFF(attrCopy)
   OFF(classVec)
   OFF(classVecLen)
   OFF(instanceBits)

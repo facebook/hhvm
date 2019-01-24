@@ -344,6 +344,13 @@ SSATmp* simplifyIsFuncDynCallable(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
+SSATmp* simplifyIsClsDynConstructible(State& env, const IRInstruction* inst) {
+  auto const clsTmp = inst->src(0);
+  return clsTmp->hasConstVal(TCls)
+    ? cns(env, clsTmp->clsVal()->isDynamicallyConstructible())
+    : nullptr;
+}
+
 SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -3902,6 +3909,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckFuncStatic)
   X(FuncSupportsAsyncEagerReturn)
   X(IsFuncDynCallable)
+  X(IsClsDynConstructible)
   X(LdFuncRxLevel)
   X(RaiseMissingThis)
   X(LdObjClass)

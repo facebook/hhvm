@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/array/ext_array.h"
@@ -513,6 +514,7 @@ static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
   if (!cls) {
     return Object();
   }
+  callerDynamicConstructChecks(cls);
   return Object{cls};
 }
 

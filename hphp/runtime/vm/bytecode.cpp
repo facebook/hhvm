@@ -5682,9 +5682,7 @@ OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
 
 namespace {
 
-void fpushCtorImpl(
-  uint32_t numArgs, Class* cls, ArrayData* reified_types, bool dynamic
-) {
+void fpushCtorImpl(uint32_t numArgs, Class* cls, ArrayData* reified_types) {
   const Func* f;
   auto const res UNUSED =
     lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
@@ -5700,7 +5698,6 @@ void fpushCtorImpl(
   ar->m_func = f;
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
-  if (dynamic) ar->setDynamicCall();
   ar->trashVarEnv();
 }
 
@@ -5710,9 +5707,10 @@ OPTBLD_INLINE void iopFPushCtor(
   uint32_t numArgs, clsref_slot slot, HasGenericsOp op
 ) {
   auto cls_ref = slot.take();
+  callerDynamicConstructChecks(cls_ref.second);
   auto const reified_types =
     HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
-  fpushCtorImpl(numArgs, cls_ref.second, reified_types, true);
+  fpushCtorImpl(numArgs, cls_ref.second, reified_types);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
@@ -5723,14 +5721,14 @@ OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  fpushCtorImpl(numArgs, cls, nullptr, false);
+  fpushCtorImpl(numArgs, cls, nullptr);
 }
 
 OPTBLD_INLINE void iopFPushCtorI(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
-  fpushCtorImpl(numArgs, cls, nullptr, false);
+  fpushCtorImpl(numArgs, cls, nullptr);
 }
 
 OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
@@ -5740,7 +5738,7 @@ OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
   }
   auto const reified_generics = cls->hasReifiedGenerics()
     ? getClsReifiedGenericsProp(cls, vmfp()) : nullptr;
-  fpushCtorImpl(numArgs, cls, reified_generics, false);
+  fpushCtorImpl(numArgs, cls, reified_generics);
 }
 
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {

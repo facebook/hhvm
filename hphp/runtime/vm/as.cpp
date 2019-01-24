@@ -2109,7 +2109,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
  *            |  ".try" directive-try-catch
  *            |  ".ismemoizewrapper"
  *            |  ".ismemoizewrapperlsb"
- *            |  ".dynamicallycallable"
  *            |  ".srcloc" directive-srcloc
  *            |  ".doc" directive-doccomment
  *            |  label-name

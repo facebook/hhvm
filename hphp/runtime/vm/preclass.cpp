@@ -110,6 +110,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
     if (m_attrs & AttrHasImmutable) out << " (has-immutable)";
     if (m_attrs & AttrForbidDynamicProps) out << " (no-dynamic-props)";
   }
+  if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
   if (m_id != -1) {
     out << " (ID " << m_id << ")";
   }

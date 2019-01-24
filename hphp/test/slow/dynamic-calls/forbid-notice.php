@@ -208,8 +208,8 @@ class A extends B {
   }
 }
 
+<<__DynamicallyConstructible>>
 class F extends A {
-  <<__DynamicallyCallable>> public function __construct() {}
 }
 
 async function positive_tests() {
@@ -361,7 +361,6 @@ async function negative_tests() {
   call_user_func('count', []);
   call_user_func_array('count', [[]]);
 
-  $x = 'HH\Vector'; new $x();
   $x = 'HH\Vector::fromItems'; $x([]);
   $x = ['HH\Vector', 'fromItems']; $x([]);
   $x = [new Vector, 'fromItems']; $x([]);

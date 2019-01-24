@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
@@ -37,6 +38,7 @@ UserFSNode::UserFSNode(Class* cls,
     raise_error("Unable to call %s'n constructor", m_cls->name()->data());
   }
 
+  callerDynamicConstructChecks(m_cls);
   m_obj = Object{m_cls};
   if (context.get()) {
     m_obj->setProp(nullptr, s_context.get(),

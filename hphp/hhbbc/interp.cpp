@@ -3402,8 +3402,7 @@ void in(ISS& env, const bc::FPushCtor& op) {
 
   auto const dcls = dcls_of(cls);
   auto const exact = dcls.type == DCls::Exact;
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
-  if (exact && rfunc && !rfunc->mightCareAboutDynCalls()) {
+  if (exact && !dcls.cls.mightCareAboutDynConstructs()) {
     return reduce(
       env,
       bc::DiscardClsRef { op.slot },
@@ -3414,6 +3413,8 @@ void in(ISS& env, const bc::FPushCtor& op) {
   auto const obj = toobj(cls);
   takeClsRefSlot(env, op.slot);
   push(env, obj);
+
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
   fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc });
 }
 

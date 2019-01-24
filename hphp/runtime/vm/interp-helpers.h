@@ -50,6 +50,26 @@ inline void callerDynamicCallChecks(const Func* func) {
   }
 }
 
+inline void callerDynamicConstructChecks(const Class* cls) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (cls->isDynamicallyConstructible()) return;
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
+    );
+  }
+}
+
 inline void calleeDynamicCallChecks(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();

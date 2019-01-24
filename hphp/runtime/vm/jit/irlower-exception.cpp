@@ -113,8 +113,33 @@ static void raiseForbiddenDynCall(const Func* func) {
   }
 }
 
+static void raiseForbiddenDynConstruct(const Class* cls) {
+  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
+  assertx(!cls->isDynamicallyConstructible());
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
+    );
+  }
+}
+
 void cgRaiseForbiddenDynCall(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, CallSpec::direct(raiseForbiddenDynCall),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+void cgRaiseForbiddenDynConstruct(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseForbiddenDynConstruct),
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 

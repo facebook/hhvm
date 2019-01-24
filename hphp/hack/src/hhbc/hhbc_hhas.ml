@@ -1584,6 +1584,10 @@ let class_special_attributes c =
     if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs = if Emit_env.is_systemlib ()
     then "unique" :: "builtin" :: "persistent" :: attrs else attrs in
+  let attrs =
+    if Hhas_attribute.has_dynamically_constructible user_attrs
+    then "dyn_constructible" :: attrs else attrs
+  in
   let attrs = if not (Hhas_class.is_top c) then "nontop" :: attrs else attrs in
   let attrs =
     if Hhas_class.is_closure_class c && not @@ Emit_env.is_systemlib ()

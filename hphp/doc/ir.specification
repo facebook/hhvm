@@ -1546,6 +1546,10 @@ To string conversions:
 
   Tests for Func::m_attrs & AttrDynamicallyCallable.
 
+| IsClsDynConstructible, D(Bool), S(Cls), NF
+
+  Tests for Class::m_attrCopy & AttrDynamicallyConstructible.
+
 | LdFuncRxLevel, D(Int), S(Func), NF
 
   Returns the value of func->rxLevel().
@@ -2252,6 +2256,12 @@ To string conversions:
   Depending on the setting of the `ForbidDynamicCalls` runtime option, either
   raise a warning or throw an exception indicating that the func specified in
   S0 was called dynamically (and should not be).
+
+| RaiseForbiddenDynConstruct, ND, S(Cls), NF
+
+  Depending on the setting of the `ForbidDynamicCalls` runtime option, either
+  raise a warning or throw an exception indicating that the class specified in
+  S0 was constructed dynamically (and should not be).
 
 | CheckClsReifiedGenericMismatch<cls>, ND, SVArr, NF
 

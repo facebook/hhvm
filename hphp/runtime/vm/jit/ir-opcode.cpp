@@ -499,6 +499,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseArrayKeyNotice:
   case RaiseError:
   case RaiseForbiddenDynCall:
+  case RaiseForbiddenDynConstruct:
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
@@ -784,6 +785,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsCol:
   case IsDVArray:
   case IsFuncDynCallable:
+  case IsClsDynConstructible:
   case IsReifiedName:
   case IsNType:
   case IsNTypeMem:

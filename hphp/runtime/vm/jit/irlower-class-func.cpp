@@ -219,6 +219,20 @@ void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
+void cgIsClsDynConstructible(IRLS& env, const IRInstruction* inst) {
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testlim{
+    static_cast<int32_t>(AttrDynamicallyConstructible),
+    cls[Class::attrCopyOff()],
+    sf
+  };
+  v << setcc{CC_NZ, sf, dst};
+}
+
 void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

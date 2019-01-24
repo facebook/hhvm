@@ -1149,6 +1149,7 @@ ObjectData* ExecutionContext::createObject(StringData* clsName,
 ObjectData* ExecutionContext::createObject(const Class* class_,
                                            const Variant& params,
                                            bool init) {
+  callerDynamicConstructChecks(class_);
   auto o = Object::attach(newInstance(const_cast<Class*>(class_)));
   if (init) {
     initObject(class_, params, o.get());

@@ -1007,8 +1007,8 @@ struct RuntimeOption {
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
   /*                                                                    \
-   * Control dynamic calls to functions which haven't opted into being called \
-   * that way.                                                          \
+   * Control dynamic calls to functions and dynamic constructs of       \
+   * classes which haven't opted into being called that way.            \
    *                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \

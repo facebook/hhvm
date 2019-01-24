@@ -692,6 +692,18 @@ bool Class::couldHaveReifiedGenerics() const {
   );
 }
 
+bool Class::mightCareAboutDynConstructs() const {
+  if (RuntimeOption::EvalForbidDynamicCalls > 0) {
+    return val.match(
+      [] (SString) { return true; },
+      [] (ClassInfo* cinfo) {
+        return !(cinfo->cls->attrs & AttrDynamicallyConstructible);
+      }
+    );
+  }
+  return false;
+}
+
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();

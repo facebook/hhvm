@@ -157,6 +157,10 @@ enum Attr {
   // Set on functions to mark them as being able to be dynamically called
   AttrDynamicallyCallable  = (1u << 19), //       |          |    X    //
                                          //       |          |         //
+  // Set on classes to mark them as being able to be dynamically constructed
+  AttrDynamicallyConstructible
+                           = (1u << 19), //    X  |          |         //
+                                         //       |          |         //
   // Set on all builtin functions, whether PHP or C++.
   AttrBuiltin              = (1u << 20), //    X  |          |    X    //
                                          //       |          |         //

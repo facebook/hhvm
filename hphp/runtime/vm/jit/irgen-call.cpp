@@ -774,6 +774,7 @@ void emitFPushCtor(
   auto const ret = [&] {
     if (HasGenericsOp::NoGenerics == op) {
       auto const cls  = takeClsRefCls(env, slot);
+      emitCallerDynamicConstructChecks(env, cls);
       auto const func = gen(env, LdClsCtor, cls, fp(env));
       auto const obj  = gen(env, AllocObj, cls);
       return std::make_pair(func, obj);
@@ -781,6 +782,7 @@ void emitFPushCtor(
     auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
     auto const reified_generic = clsref.first;
     auto const cls  = clsref.second;
+    emitCallerDynamicConstructChecks(env, cls);
     auto const func = gen(env, LdClsCtor, cls, fp(env));
     auto const obj  = [&] {
       if (HasGenericsOp::HasGenerics == op) {
@@ -805,7 +807,7 @@ void emitFPushCtor(
   auto const func = ret.first;
   auto const obj  = ret.second;
   pushIncRef(env, obj);
-  fpushActRec(env, func, obj, numParams, nullptr, cns(env, true));
+  fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 
 void emitFPushCtorD(IRGS& env,
@@ -1517,6 +1519,27 @@ void emitCallerDynamicCallChecks(IRGS& env,
     [&] {
       hint(env, Block::Hint::Unlikely);
       gen(env, RaiseForbiddenDynCall, func);
+    }
+  );
+}
+
+void emitCallerDynamicConstructChecks(IRGS& env, SSATmp* cls) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (cls->hasConstVal()) {
+    if (cls->clsVal()->isDynamicallyConstructible()) return;
+    gen(env, RaiseForbiddenDynConstruct, cls);
+    return;
+  }
+
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const dynConstructible = gen(env, IsClsDynConstructible, cls);
+      gen(env, JmpNZero, skip, dynConstructible);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseForbiddenDynConstruct, cls);
     }
   );
 }

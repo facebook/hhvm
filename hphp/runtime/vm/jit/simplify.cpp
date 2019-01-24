@@ -2273,11 +2273,8 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   if (srcType <= TObj) {
     if (auto const cls = srcType.clsSpec().cls()) {
       // We need to exclude interfaces like ConstSet.  For now, just
-      // skip anything that's an interface.
+      // skip anything that's an interface or extension.
       if (!(cls->attrs() & AttrInterface)) {
-        // t3429711 we should test cls->m_ODAttr
-        // here, but currently it doesnt have all
-        // the flags set.
         if (!cls->instanceCtor()) {
           return cns(env, true);
         }
@@ -2572,9 +2569,7 @@ SSATmp* simplifyMarkRDSInitialized(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
   auto const cls = inst->extra<InitObjProps>()->cls;
-  if (cls->getODAttrs() == 0 &&
-      cls->numDeclProperties() == 0 &&
-      !cls->hasMemoSlots()) {
+  if (cls->numDeclProperties() == 0 && !cls->hasMemoSlots()) {
     return gen(env, Nop);
   }
   return nullptr;

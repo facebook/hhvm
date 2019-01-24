@@ -516,11 +516,6 @@ public:
   Attr attrs() const;
 
   /*
-   * ObjectData attributes, to be set during instance initialization.
-   */
-  int getODAttrs() const;
-
-  /*
    * Runtime class attributes, computed during class initialization.
    */
   bool rtAttribute(RuntimeAttribute) const;
@@ -1598,13 +1593,6 @@ private:
   uint8_t m_RTAttrs;
 
   /*
-   * Default ObjectData::Attribute bits for new instances
-   */
-  uint8_t m_ODAttrs;
-
-  mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
-
-  /*
    * Whether the Class requires initialization, because it has either
    * {p,s}init() methods or static members, or possibly has prop type invariance
    * violations.
@@ -1617,10 +1605,13 @@ private:
    * Whether this class has been serialized yet.
    */
   mutable bool m_serialized : 1;
+
+  mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
+
   /*
    * Cache of m_preClass->attrs().
    */
-  unsigned m_attrCopy : 28;
+  unsigned m_attrCopy;
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

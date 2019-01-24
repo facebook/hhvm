@@ -65,7 +65,7 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const index = MemoryManager::size2Index(size);
   auto const size_class = MemoryManager::sizeIndex2Size(index);
 
-  auto const attrs = cls->getODAttrs();
+  auto const attrs = cls->getDtor() ? 0 : ObjectData::NoDestructor;
 
   auto const target = [&]{
     if (attrs != ObjectData::DefaultAttrs) {

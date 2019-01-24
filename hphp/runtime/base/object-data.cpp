@@ -952,15 +952,17 @@ ObjectData* ObjectData::clone() {
       0,
       objOff - sizeof(MemoNode)
     );
+    auto const flags = m_cls->getDtor() ? 0 : ObjectData::NoDestructor;
     auto const obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
-      ObjectData(m_cls, InitRaw{}, m_cls->getODAttrs());
+      ObjectData(m_cls, InitRaw{}, flags);
     clone = Object::attach(obj);
     assertx(clone->hasExactlyOneRef());
     assertx(!clone->hasInstanceDtor());
   } else {
     auto const size = sizeForNProps(nProps);
+    auto const flags = m_cls->getDtor() ? 0 : ObjectData::NoDestructor;
     auto const obj = new (NotNull{}, tl_heap->objMalloc(size))
-      ObjectData(m_cls, InitRaw{}, m_cls->getODAttrs());
+      ObjectData(m_cls, InitRaw{}, flags);
     clone = Object::attach(obj);
     assertx(clone->hasExactlyOneRef());
     assertx(!clone->hasInstanceDtor());
@@ -1210,7 +1212,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 // called from jit code
 ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
                                             size_t index) {
-  assertx(cls->getODAttrs() == DefaultAttrs);
+  assertx(!cls->getDtor());
   assertx(size <= kMaxSmallSize);
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
@@ -1218,7 +1220,7 @@ ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  assertx(cls->getODAttrs() == DefaultAttrs);
+  assertx(!cls->getDtor());
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocBigSize(size);
   return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
@@ -1245,7 +1247,7 @@ ObjectData* ObjectData::newInstanceRawMemoSmall(Class* cls,
                                                 size_t size,
                                                 size_t index,
                                                 size_t objoff) {
-  assertx(cls->getODAttrs() == DefaultAttrs);
+  assertx(!cls->getDtor());
   assertx(size <= kMaxSmallSize);
   assertx(cls->hasMemoSlots());
   assertx(!cls->getNativeDataInfo());
@@ -1259,7 +1261,7 @@ ObjectData* ObjectData::newInstanceRawMemoSmall(Class* cls,
 ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
                                               size_t size,
                                               size_t objoff) {
-  assertx(cls->getODAttrs() == DefaultAttrs);
+  assertx(!cls->getDtor());
   assertx(cls->hasMemoSlots());
   assertx(!cls->getNativeDataInfo());
   assertx(objoff == ObjectData::objOffFromMemoNode(cls));

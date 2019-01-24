@@ -31,7 +31,8 @@ inline void ObjectData::resetMaxId() {
 inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  initHeader_16(kind, OneReference, flags | cls->getODAttrs());
+  flags |= cls->getDtor() ? 0 : ObjectData::NoDestructor;
+  initHeader_16(kind, OneReference, flags);
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
   assertx(!isCollection()); // collections use NoInit{}
@@ -46,7 +47,7 @@ inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
   initHeader_16(kind, OneReference, flags);
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
-  assertx(!(cls->getODAttrs() & ~static_cast<uint8_t>(flags)));
+  assertx((flags & ObjectData::NoDestructor) || cls->getDtor());
   o_id = ++os_max_id;
 }
 
@@ -127,10 +128,10 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
       objOff - sizeof(MemoNode)
     );
     obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
-      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+      ObjectData(cls, InitRaw{}, cls->getDtor() ? 0 : ObjectData::NoDestructor);
   } else {
     obj = new (NotNull{}, tl_heap->objMalloc(size))
-      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+      ObjectData(cls, InitRaw{}, cls->getDtor() ? 0 : ObjectData::NoDestructor);
   }
   assertx(obj->hasExactlyOneRef());
   return obj;

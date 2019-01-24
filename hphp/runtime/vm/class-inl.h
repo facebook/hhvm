@@ -160,10 +160,6 @@ inline Attr Class::attrs() const {
   return Attr(m_attrCopy);
 }
 
-inline int Class::getODAttrs() const {
-  return m_ODAttrs;
-}
-
 inline bool Class::rtAttribute(RuntimeAttribute a) const {
   return m_RTAttrs & a;
 }

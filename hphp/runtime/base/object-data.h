@@ -226,9 +226,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * uninitialized object of that class. These are meant to be called from the
    * JIT, where the cls, size, and attributes are constants at JIT time.
    *
-   * newInstanceRaw<> should be called only when and cls->getODAttrs() ==
-   * DefaultAttrs; otherwise, use newInstanceRawAttrs. The big=true versions
-   * should be called when size > kMaxSmallSize.
+   * newInstanceRaw<> should be called only when !cls->getDtor(); otherwise,
+   * use newInstanceRawAttrs. The big=true versions should be called when
+   * size > kMaxSmallSize.
    *
    * The memo versions should be used if the object has memo slots.
    *

@@ -2227,12 +2227,10 @@ void Class::setMethods() {
 }
 
 /*
- * Initialize m_RTAttrs and m_ODAttrs by inspecting the class methods
- * and parents.
+ * Initialize m_RTAttrs by inspecting the class methods and parents.
  */
 void Class::setRTAttributes() {
   m_RTAttrs = 0;
-  m_ODAttrs = 0;
   if (lookupMethod(s_sleep.get()     )) { m_RTAttrs |= Class::HasSleep; }
   if (markNonStatic(this, s_get      )) { m_RTAttrs |= Class::UseGet;   }
   if (markNonStatic(this, s_set      )) { m_RTAttrs |= Class::UseSet;   }
@@ -2245,8 +2243,6 @@ void Class::setRTAttributes() {
   if (!((attrs() & AttrAbstract) && (attrs() & AttrFinal))) {
     markNonStatic(m_ctor);
   }
-
-  if (m_dtor == nullptr) m_ODAttrs |= ObjectData::NoDestructor;
 
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||
       (m_parent && m_parent->hasNativePropHandler())) {

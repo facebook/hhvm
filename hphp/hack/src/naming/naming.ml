@@ -19,6 +19,8 @@ open Ast
 open Utils
 open String_utils
 
+(* Alias for Nast used by functions on potentially unnamed Aast values *)
+module Aast = Ast_to_nast.Aast
 module N = Nast
 module ShapeMap = N.ShapeMap
 module SN = Naming_special_names
@@ -773,18 +775,23 @@ module Make (GetLocals : GetLocals) = struct
   (************************************************************************)
   (* Naming of type hints *)
   (************************************************************************)
-  let rec hint
+  (**
+   * The existing hint function goes from Ast.hint -> Nast.hint
+   * This hint function goes from Aast.hint -> Nast.hint
+   * Used with with Ast_to_nast to go from Ast.hint -> Nast.hint
+   *)
+  let rec aast_hint
       ?(forbid_this=false)
       ?(allow_retonly=false)
       ?(allow_typedef=true)
       ?(allow_wildcard=false)
       ?(in_where_clause=false)
       ?(tp_depth=0)
-      env hh =
-    let mut, (p, h) = unwrap_mutability hh in
+      env (hh : Aast.hint) =
+    let mut, (p, h) = aast_unwrap_mutability hh in
     if Option.is_some mut
     then Errors.misplaced_mutability_hint p;
-    p, hint_
+    p, aast_hint_
       ~forbid_this
       ~allow_retonly
       ~allow_typedef
@@ -793,48 +800,28 @@ module Make (GetLocals : GetLocals) = struct
       ~tp_depth
       env h
 
-  and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
-    {
-      N.sfi_optional = sf_optional;
-      sfi_hint = hint env sf_hint;
-    }
-
-  and ast_shape_info_to_nast_shape_info
-      env
-      { si_allows_unknown_fields; si_shape_field_list } =
-    let f fdm shape_field =
-      let pos, name = convert_shape_name env shape_field.sf_name in
-      if ShapeMap.mem name fdm
-      then Errors.fd_name_already_bound pos;
-      ShapeMap.add
-        name (shape_field_to_shape_field_info env shape_field) fdm in
-    let nsi_field_map =
-      List.fold_left si_shape_field_list ~init:ShapeMap.empty ~f in
-    N.{
-      nsi_allows_unknown_fields=si_allows_unknown_fields;
-      nsi_field_map
-    }
-
-  and unwrap_mutability p =
+  and aast_unwrap_mutability p =
     match p with
-    | _, Happly ((_, "Mutable"), [t]) -> Some N.PMutable, t
-    | _, Happly ((_, "MaybeMutable"), [t]) -> Some N.PMaybeMutable, t
-    | _, Happly ((_, "OwnedMutable"), [t]) -> Some N.POwnedMutable, t
+    | _, Aast.Happly ((_, "Mutable"), [t]) -> Some N.PMutable, t
+    | _, Aast.Happly ((_, "MaybeMutable"), [t]) -> Some N.PMaybeMutable, t
+    | _, Aast.Happly ((_, "OwnedMutable"), [t]) -> Some N.POwnedMutable, t
     | t -> None, t
 
-  and hfun env reactivity is_coroutine hl kl variadic_hint h =
-    let variadic_hint = match variadic_hint with
-      | Hvariadic Some (h) -> N.Hvariadic (Some (hint env h))
-      | Hvariadic None -> N.Hvariadic (None)
-      | Hnon_variadic -> N.Hnon_variadic in
+  and aast_hfun env reactivity is_coroutine hl kl variadic_hint h =
+    let variadic_hint =
+      match variadic_hint with
+      | Aast.Hnon_variadic
+      | Aast.Hvariadic None -> variadic_hint
+      | Aast.Hvariadic (Some h) -> N.Hvariadic (Some (aast_hint env h)) in
     let muts, hl =
-      List.map hl ~f:(fun h ->
-        let mut, h1 = unwrap_mutability h in
+      List.map ~f:(fun h ->
+        let mut, h1 = aast_unwrap_mutability h in
         if Option.is_some mut && reactivity = N.FNonreactive
         then Errors.mutability_hint_in_non_rx_function (fst h);
-        mut, hint env h1)
+        mut, aast_hint env h1)
+        hl
       |> List.unzip in
-    let ret_mut, rh = unwrap_mutability h in
+    let ret_mut, rh = aast_unwrap_mutability h in
     let ret_mut =
       match ret_mut with
       | None -> false
@@ -842,37 +829,42 @@ module Make (GetLocals : GetLocals) = struct
       | Some _ ->
         Errors.invalid_mutability_in_return_type_hint (fst h);
         true in
-    N.Hfun (reactivity, is_coroutine, hl, kl,
-      muts, variadic_hint, hint ~allow_retonly:true env rh, ret_mut)
+    N.Hfun (reactivity, is_coroutine, hl, kl, muts,
+      variadic_hint, aast_hint ~allow_retonly:true env rh, ret_mut)
 
-  and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
+  and aast_hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
             ~in_where_clause ?(tp_depth=0)
         env x =
-    let hint =
-      hint ~forbid_this ~allow_typedef ~allow_wildcard in
+    let aast_hint =
+      aast_hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
-    | Htuple hl ->
-      N.Htuple (List.map hl (hint ~allow_retonly env))
-    | Hoption h ->
+    | Aast.Htuple hl ->
+      N.Htuple (List.map hl ~f:(aast_hint ~allow_retonly env))
+    | Aast.Hoption h ->
       (* void/noreturn are permitted for Typing.option_return_only_typehint *)
-      N.Hoption (hint ~allow_retonly env h)
-    | Hsoft h ->
-      let h = hint ~allow_retonly env h
+      N.Hoption (aast_hint ~allow_retonly env h)
+    | Aast.Hsoft h ->
+      let h = aast_hint ~allow_retonly env h
       in snd h
-    | Hfun (is_coroutine, hl, kl, variadic_hint, h) ->
-      hfun env N.FNonreactive is_coroutine hl kl variadic_hint h
+    | Aast.Hfun (reactivity, coroutine, hl, kl, _, variadic_hint, h, _) ->
+      aast_hfun env reactivity coroutine hl kl variadic_hint h
     (* Special case for Rx<function> *)
-    | Happly ((_, "Rx"), [(_, Hfun (is_coroutine, hl, kl, variadic_hint, h))]) ->
-      hfun env N.FReactive is_coroutine hl kl variadic_hint h
+    | Aast.Happly
+      ((_, "Rx"), [(_, Aast.Hfun (_, is_coroutine, hl, kl, _, variadic_hint, h, _))]) ->
+        aast_hfun env N.FReactive is_coroutine hl kl variadic_hint h
     (* Special case for RxShallow<function> *)
-    | Happly ((_, "RxShallow"), [(_, Hfun (is_coroutine, hl, kl, variadic_hint, h))]) ->
-      hfun env N.FShallow is_coroutine hl kl variadic_hint h
+    | Aast.Happly
+      ((_, "RxShallow"),
+      [(_, Aast.Hfun (_, is_coroutine, hl, kl, _, variadic_hint, h, _))]) ->
+        aast_hfun env N.FShallow is_coroutine hl kl variadic_hint h
     (* Special case for RxLocal<function> *)
-    | Happly ((_, "RxLocal"), [(_, Hfun (is_coroutine, hl, kl, variadic_hint, h))]) ->
-      hfun env N.FLocal is_coroutine hl kl variadic_hint h
-    | Happly ((p, _x) as id, hl) ->
+    | Aast.Happly
+      ((_, "RxLocal"),
+      [(_, Aast.Hfun (_, is_coroutine, hl, kl, _, variadic_hint, h, _))]) ->
+        aast_hfun env N.FLocal is_coroutine hl kl variadic_hint h
+    | Aast.Happly ((p, _x) as id, hl) ->
       let hint_id =
-        hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
+        aast_hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
           env id
           hl in
       (match hint_id with
@@ -881,42 +873,66 @@ module Make (GetLocals : GetLocals) = struct
       | _ -> ()
       );
       hint_id
-    | Haccess ((pos, root_id) as root, id, ids) ->
+    | Aast.Haccess ((pos, root_id), ids) ->
       let root_ty =
         match root_id with
-        | x when x = SN.Classes.cSelf ->
-            (match (fst env).current_cls with
-            | None ->
-               Errors.self_outside_class pos;
-               N.Hany
-            | Some (cid, _) ->
-               N.Happly (cid, [])
-            )
-        | x when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
-            Errors.invalid_type_access_root root; N.Hany
+        | Aast.Happly ((pos, x), _) when x = SN.Classes.cSelf ->
+          begin
+            match (fst env).current_cls with
+            | None -> Errors.self_outside_class pos; N.Hany
+            | Some (cid, _) -> N.Happly (cid, [])
+          end
+        | Aast.Happly ((pos, x), _) when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
+          Errors.invalid_type_access_root (pos, x); N.Hany
+        | Aast.Happly (root, _) ->
+          let h = aast_hint_id ~forbid_this ~allow_retonly ~allow_typedef
+            ~allow_wildcard:false ~tp_depth env root [] in
+          begin
+            match h with
+            | N.Hthis
+            | N.Happly _ -> h
+            | N.Habstr _ when in_where_clause -> h
+            | _ -> Errors.invalid_type_access_root root; N.Hany
+          end
         | _ ->
-          let h =
-            hint_id ~forbid_this ~allow_retonly
-              ~allow_typedef ~allow_wildcard:false ~tp_depth env root [] in
-          (match h with
-          | N.Hthis | N.Happly _ as h -> h
-          | N.Habstr _ when in_where_clause ->
-            h
-          | _ -> Errors.invalid_type_access_root root; N.Hany
-          )
+          Errors.internal_error
+            pos
+            "Malformed hint: expected Haccess (Happly ...) from ast_to_nast";
+          N.Hany
       in
-      N.Haccess ((pos, root_ty), id :: ids)
-    | Hshape ast_shape_info ->
-      N.Hshape (ast_shape_info_to_nast_shape_info env ast_shape_info)
-    | Hreified h ->
+      N.Haccess ((pos, root_ty), ids)
+    | Aast.Hshape { Aast.nsi_allows_unknown_fields; nsi_field_map } ->
+      let nsi_field_map =
+        ShapeMap.fold
+          (fun key { Aast.sfi_optional; sfi_hint } acc ->
+            let _pos, new_key = convert_shape_name env key in
+            let new_field = { N.sfi_optional; sfi_hint = aast_hint ~allow_retonly env sfi_hint } in
+            ShapeMap.add new_key new_field acc)
+          nsi_field_map
+          ShapeMap.empty in
+      N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
+    | Aast.Hreified h ->
       if not (TypecheckerOptions.experimental_feature_enabled
           (fst env).tcopt
-        TypecheckerOptions.experimental_reified_generics)
+          TypecheckerOptions.experimental_reified_generics)
       then
         Errors.experimental_feature Pos.none "reified generics";
-      snd @@ hint ~allow_retonly env h
+        snd @@ aast_hint ~allow_retonly env h
+    | Aast.Hany
+    | Aast.Hmixed
+    | Aast.Hnonnull
+    | Aast.Habstr _
+    | Aast.Harray _
+    | Aast.Hdarray _
+    | Aast.Hvarray _
+    | Aast.Hvarray_or_darray _
+    | Aast.Hprim _
+    | Aast.Hthis
+    | Aast.Hdynamic ->
+      Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
+      N.Hany
 
-  and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
+  and aast_hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =
     let params = (fst env).type_params in
     let allow_null = TypecheckerOptions.experimental_feature_enabled
@@ -926,7 +942,7 @@ module Make (GetLocals : GetLocals) = struct
     (* some common Xhp screw ups *)
     if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
     then Errors.disallowed_xhp_type p x;
-    match try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
+    match aast_try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
     | Some h -> h
     | None -> begin
       match x with
@@ -1008,7 +1024,7 @@ module Make (GetLocals : GetLocals) = struct
         (* Note that we are intentionally setting allow_typedef to `true` here.
          * In general, generics arguments can be typedefs -- there is no
          * runtime restriction. *)
-        N.Happly (name, hintl ~allow_wildcard ~forbid_this ~allow_typedef:true
+        N.Happly (name, aast_hintl ~allow_wildcard ~forbid_this ~allow_typedef:true
           ~allow_retonly:true ~tp_depth:(tp_depth+1) env hl)
     end
 
@@ -1016,8 +1032,9 @@ module Make (GetLocals : GetLocals) = struct
    * casts nor annotations are a strict subset of the other: For
    * instance, 'object' is not a valid annotation.  Thus callers will
    * have to handle the remaining cases. *)
-  and try_castable_hint ?(forbid_this=false) ?(allow_wildcard=false) ~tp_depth env p x hl =
-    let hint = hint ~forbid_this ~tp_depth:(tp_depth+1) ~allow_wildcard ~allow_retonly:false in
+  and aast_try_castable_hint ?(forbid_this=false) ?(allow_wildcard=false) ~tp_depth env p x hl =
+    let aast_hint =
+      aast_hint ~forbid_this ~tp_depth:(tp_depth+1) ~allow_wildcard ~allow_retonly:false in
     let canon = String.lowercase x in
     let opt_hint = match canon with
       | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
@@ -1032,9 +1049,9 @@ module Make (GetLocals : GetLocals) = struct
         then Errors.array_typehints_disallowed p;
         Some (match hl with
           | [] -> N.Harray (None, None)
-          | [val_] -> N.Harray (Some (hint env val_), None)
+          | [val_] -> N.Harray (Some (aast_hint env val_), None)
           | [key_; val_] ->
-            N.Harray (Some (hint env key_), Some (hint env val_))
+            N.Harray (Some (aast_hint env key_), Some (aast_hint env val_))
           | _ -> Errors.too_many_type_arguments p; N.Hany
         )
       | nm when nm = SN.Typehints.darray ->
@@ -1044,7 +1061,7 @@ module Make (GetLocals : GetLocals) = struct
                 Errors.too_few_type_arguments p;
               N.Hdarray ((p, N.Hany), (p, N.Hany))
           | [_] -> Errors.too_few_type_arguments p; N.Hany
-          | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
+          | [key_; val_] -> N.Hdarray (aast_hint env key_, aast_hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.varray ->
         Some (match hl with
@@ -1052,7 +1069,7 @@ module Make (GetLocals : GetLocals) = struct
               if (fst env).in_mode = FileInfo.Mstrict then
                 Errors.too_few_type_arguments p;
               N.Hvarray (p, N.Hany)
-          | [val_] -> N.Hvarray (hint env val_)
+          | [val_] -> N.Hvarray (aast_hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.varray_or_darray ->
         Some (match hl with
@@ -1060,7 +1077,7 @@ module Make (GetLocals : GetLocals) = struct
               if (fst env).in_mode = FileInfo.Mstrict then
                 Errors.too_few_type_arguments p;
               N.Hvarray_or_darray (p, N.Hany)
-          | [val_] -> N.Hvarray_or_darray (hint env val_)
+          | [val_] -> N.Hvarray_or_darray (aast_hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.integer ->
         Errors.primitive_invalid_alias p nm SN.Typehints.int;
@@ -1078,17 +1095,26 @@ module Make (GetLocals : GetLocals) = struct
       | _ -> ()
     in opt_hint
 
-  and constraint_ ?(forbid_this=false) env (ck, h) = ck, hint ~forbid_this env h
+  and aast_hintl ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env l =
+      List.map
+        ~f:(aast_hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
+        l
 
-  and hintl ~forbid_this ~allow_retonly
-            ~allow_typedef ~allow_wildcard ~tp_depth env l =
-    List.map l
-      (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
-  and targl env p tal =
+  let aast_constraint_ ?(forbid_this=false) env (ck, h) = ck, aast_hint ~forbid_this env h
+
+  let check_type_args_for_reified env p tal =
+    if not (TypecheckerOptions.experimental_feature_enabled
+        (fst env).tcopt
+      TypecheckerOptions.experimental_reified_generics)
+      && List.exists tal ~f:snd
+    then
+      Errors.experimental_feature p "reified generics"
+
+  let aast_targl env p tal =
     check_type_args_for_reified env p tal;
     List.map ~f:(fun (h, is_reified) ->
       let h =
-        hint
+        aast_hint
         ~allow_wildcard:true
         ~forbid_this:false
         ~allow_typedef:true
@@ -1097,13 +1123,45 @@ module Make (GetLocals : GetLocals) = struct
         env h in
       h, is_reified) tal
 
-  and check_type_args_for_reified env p tal =
-    if not (TypecheckerOptions.experimental_feature_enabled
-        (fst env).tcopt
-      TypecheckerOptions.experimental_reified_generics)
-      && List.exists tal ~f:snd
-    then
-      Errors.experimental_feature p "reified generics"
+  (************************************************************************)
+  (* Naming of type hints                                                 *)
+  (* These are shells of the aast_versions and can be killed with the ast *)
+  (* See: T39437714                                                       *)
+  (************************************************************************)
+  let hint
+      ?(forbid_this=false)
+      ?(allow_retonly=false)
+      ?(allow_typedef=true)
+      ?(allow_wildcard=false)
+      ?(in_where_clause=false)
+      ?(tp_depth=0)
+      env hh =
+    let hh = Ast_to_nast.on_hint hh in
+    aast_hint
+      ~forbid_this
+      ~allow_retonly
+      ~allow_typedef
+      ~allow_wildcard
+      ~in_where_clause
+      ~tp_depth
+      env
+      hh
+
+  (* Hints that are valid both as casts and type annotations.  Neither
+   * casts nor annotations are a strict subset of the other: For
+   * instance, 'object' is not a valid annotation.  Thus callers will
+   * have to handle the remaining cases. *)
+  let try_castable_hint ?(forbid_this=false) ?(allow_wildcard=false) ~tp_depth env p x hl =
+    let hl = List.map ~f:Ast_to_nast.on_hint hl in
+    aast_try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl
+
+  let constraint_ ?(forbid_this=false) env (ck, h) =
+    let h = Ast_to_nast.on_hint h in
+    aast_constraint_ ~forbid_this env (ck, h)
+
+  let targl env p tal =
+    let tal = List.map ~f:(fun (h, b) -> (Ast_to_nast.on_hint h, b)) tal in
+    aast_targl env p tal
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"

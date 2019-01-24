@@ -60,13 +60,23 @@ let rec on_variadic_hint h =
   | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
   | Hnon_variadic -> Aast.Hnon_variadic
 
+and get_pos_shape_name name =
+  match name with
+  | SFlit_int (pos, _)
+  | SFlit_str (pos, _)
+  | SFclass_const (_, (pos, _)) -> pos
+
 and on_shape_info info =
   let on_shape_field sf =
     Aast.{ sfi_optional = sf.sf_optional; sfi_hint = on_hint sf.sf_hint } in
-  let nfm = List.fold_left
-    (fun acc sf -> ShapeMap.add sf.sf_name (on_shape_field sf) acc)
-    ShapeMap.empty
-    info.si_shape_field_list in
+  let nfm =
+    List.fold_left
+      (fun acc sf ->
+        if ShapeMap.mem sf.sf_name acc
+        then Errors.fd_name_already_bound (get_pos_shape_name sf.sf_name);
+        ShapeMap.add sf.sf_name (on_shape_field sf) acc)
+      ShapeMap.empty
+      info.si_shape_field_list in
   Aast.{
     nsi_allows_unknown_fields = info.si_allows_unknown_fields;
     nsi_field_map = nfm;

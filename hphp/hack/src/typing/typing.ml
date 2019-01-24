@@ -4759,22 +4759,24 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
     )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
-      let rec resolve_ety ty =
+      let rec resolve_ety env ty =
         let env, ty = SubType.expand_type_and_solve env ty in
         let env, ty = TUtils.fold_unresolved env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
-            classname = SN.Classes.cClassname -> resolve_ety the_cls
+            classname = SN.Classes.cClassname -> resolve_ety env the_cls
         | _, Tabstract (AKgeneric _, _)
-        | _, Tclass _ -> ty
-        | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
-        | _, Tdynamic as ty -> ty
+        | _, Tclass _ -> env, ty
+        | r, Tunresolved tyl ->
+          let env, tyl = List.map_env env tyl resolve_ety in
+          env, (r, Tunresolved tyl)
+        | _, Tdynamic as ty -> env, ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
-          Reason.Rwitness p, Typing_utils.tany env
+          env, (Reason.Rwitness p, Typing_utils.tany env)
         | r, Tvar _ ->
           Errors.unknown_class p (Reason.to_string "It is unknown" r);
-          Reason.Rwitness p, Typing_utils.terr env
+          env, (Reason.Rwitness p, Typing_utils.terr env)
 
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
@@ -4782,8 +4784,8 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
                  | Tanon (_, _) | Tobject | Tshape _ as ty
         ) ->
           Errors.expected_class ~suffix:(", but got "^Typing_print.error ty) p;
-          Reason.Rwitness p, Typing_utils.terr env in
-      let result_ty = resolve_ety ty in
+          env, (Reason.Rwitness p, Typing_utils.terr env) in
+      let env, result_ty = resolve_ety env ty in
       make_result env (T.CIexpr te) result_ty
 
 and call_construct p env class_ params el uel cid =
@@ -5593,8 +5595,9 @@ and condition ?lhs_of_null_coalesce env tparamet
         TypecheckerOptions.experimental_feature_enabled
           (Env.get_tcopt env) TypecheckerOptions.experimental_instanceof in
       let rec resolve_obj env obj_ty =
-        (* Expand so that we don't modify x *)
-        let env, obj_ty = Env.expand_type env obj_ty in
+        (* Expand so that we don't modify x. Also, solve under new-inference
+         * if it's a type variable *)
+        let env, obj_ty = SubType.expand_type_and_solve env obj_ty in
         match obj_ty with
         (* If it's a generic that's expression dependent, we need to
           look at all of its upper bounds and create an unresolved type to

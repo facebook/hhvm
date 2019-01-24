@@ -163,15 +163,15 @@ bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
     }
     return false;
   }
-  auto newPageBase = state.frontier();
-  // Add some 4K pages before madvise()
+  auto newPageBase = reinterpret_cast<void*>(state.frontier());
+  // Add some normal pages, and then remap with huge pages.
   if (!Bump4KMapper::addMappingImpl(state, newSize)) {
     return false;
   }
   auto const nHugePages =
     std::min(static_cast<unsigned>(kChunkSize / size2m),
              m_maxNumPages - m_currNumPages);
-  hintHuge(reinterpret_cast<void*>(newPageBase), nHugePages * size2m);
+  remap_interleaved_2m_pages(newPageBase, nHugePages);
   m_currNumPages += nHugePages;
   return true;
 }

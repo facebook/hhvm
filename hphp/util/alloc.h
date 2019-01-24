@@ -151,11 +151,7 @@ extern unsigned high_arena;
 extern int low_arena_flags;
 extern __thread int high_arena_flags;
 
-#if !USE_JEMALLOC_EXTENT_HOOKS
-
-extern std::atomic<int> low_huge_pages;
-
-#else // USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 #ifndef MAX_MANAGED_ARENA_COUNT
 #define MAX_MANAGED_ARENA_COUNT 4
@@ -194,7 +190,8 @@ void high_arena_tcache_destroy();       // tcache.destroy
 
 #endif // USE_JEMALLOC
 
-void low_malloc_huge_pages(int pages);
+void low_2m_pages(uint32_t pages);
+void high_2m_pages(uint32_t pages);
 
 inline void* malloc_huge_internal(size_t size) {
 #if !USE_JEMALLOC_EXTENT_HOOKS

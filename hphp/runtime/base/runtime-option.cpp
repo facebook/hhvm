@@ -1433,7 +1433,8 @@ void RuntimeOption::Load(
       DumpPreciseProfData = false;
     }
     EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
-    low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    low_2m_pages(EvalMaxLowMemHugePages);
+    high_2m_pages(EvalMaxHighArenaHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),

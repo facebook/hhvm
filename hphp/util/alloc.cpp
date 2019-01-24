@@ -199,6 +199,7 @@ __thread int high_arena_flags = 0;
 std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::Bump2MMapper* low_2m_mapper = nullptr;
+alloc::Bump2MMapper* high_2m_mapper = nullptr;
 
 // Customized hooks to use 1g pages for jemalloc metadata.
 static extent_hooks_t huge_page_metadata_hooks;
@@ -383,8 +384,6 @@ void setup_low_arena(unsigned n1GPages) {
   assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
   auto mapper = getHugeMapperWithFallback(n1GPages, true, 0);
   if (n1GPages == 0) {
-    // If we are using 2M pages, save this so we can change how many 2M huge
-    // pages to use.
     low_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
   }
   auto ma = LowArena::CreateAt(&g_lowArena, kLowArenaMinAddr, kLowArenaMaxCap,
@@ -397,8 +396,11 @@ void setup_low_arena(unsigned n1GPages) {
 void setup_high_arena(unsigned n1GPages) {
   // If we use 1G huge pages on NUMA servers, start grabbing 1G huge pages from
   // a node different from the one for low arena.
-  auto mapper = getHugeMapperWithFallback(n1GPages, false,
+  auto mapper = getHugeMapperWithFallback(n1GPages, true,
                                           num_numa_nodes() / 2 + 1);
+  if (n1GPages == 0) {
+    high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
+  }
   auto ma = HighArena::CreateAt(&g_highArena,
                                 kLowArenaMaxAddr, kHighArenaMaxCap,
                                 LockPolicy::Blocking, mapper);
@@ -705,11 +707,18 @@ struct JEMallocInitializer {
 
 static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
-void low_malloc_huge_pages(int pages) {
+void low_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (pages <= 0) return;
   if (low_2m_mapper) {
     low_2m_mapper->setMaxPages(pages);
+  }
+#endif
+}
+
+void high_2m_pages(uint32_t pages) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (high_2m_mapper) {
+    high_2m_mapper->setMaxPages(pages);
   }
 #endif
 }

@@ -127,7 +127,6 @@ struct Bump4KMapper : public BumpMapper {
   bool addMappingImpl(BumpAllocState& state, size_t newSize) override;
 };
 
-// Bump4KMapper with transparent huge pages.
 struct Bump2MMapper : public Bump4KMapper {
   template<typename... Args>
   explicit Bump2MMapper(uint32_t numaMask = 0)

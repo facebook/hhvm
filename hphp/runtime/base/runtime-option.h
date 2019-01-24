@@ -876,7 +876,8 @@ struct RuntimeOption {
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
-  F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
+  F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
+  F(uint32_t, MaxHighArenaHugePages,   0)                               \
   F(uint32_t, Num1GPagesForSlabs,      0)                               \
   F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(bool, LowStaticArrays,             true)                            \

@@ -553,8 +553,12 @@ module Full = struct
     ]
 
   and tparam: type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
-    fun to_doc st env { tp_name = (_, x); tp_constraints = cstrl; _ } ->
-      Concat [text x; list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl]
+    fun to_doc st env { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } ->
+    Concat [
+      if r then text "reify" ^^ Space else Nothing;
+      text x;
+      list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl;
+    ]
 
   and tparam_constraint:
     type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =

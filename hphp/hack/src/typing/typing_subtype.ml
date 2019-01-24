@@ -2431,18 +2431,27 @@ let bind env r var ty =
   (* Remove the variable from the environment *)
   Env.remove_tyvar env var
 
+let expand_types env tys =
+  Typing_set.fold
+    (fun ty (env, etys) ->
+      let env, ety = Env.expand_type env ty in
+      env, Typing_set.add ety etys)
+    tys
+    (env, Typing_set.empty)
+
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var =
-  let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+  let env, lower_bounds =
+    expand_types env (Env.get_tyvar_lower_bounds env var) in
   (* Construct the union of the lower bounds, normalizing null|t to ?t because
    * some code is still sensitive to this representation.
    * Note that if there are no lower bounds then we will construct the empty
    * type, i.e. Tunresolved []. *)
   let (nulls, nonnulls) =
-    List.partition_tf lower_bounds
+    List.partition_tf (Typing_set.elements lower_bounds)
       (fun ty -> match ty with (_, Tprim Nast.Tnull) -> true | _ -> false) in
   let ty =
     match nonnulls with
@@ -2480,8 +2489,9 @@ let bind_to_lower_bound ~freshen env r var =
   bind env r var ty
 
 let bind_to_upper_bound env r var =
-  let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
-  match upper_bounds with
+  let env, upper_bounds =
+    expand_types env (Env.get_tyvar_upper_bounds env var) in
+  match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->
     (* If ty is a variable (in future, if any of the types in the list are variables),

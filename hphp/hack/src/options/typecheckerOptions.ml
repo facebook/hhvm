@@ -75,6 +75,7 @@ let disallow_stringish_magic = GlobalOptions.tco_disallow_stringish_magic
 let disallow_anon_use_capture_by_ref = GlobalOptions.tco_disallow_anon_use_capture_by_ref
 let new_inference = GlobalOptions.tco_new_inference
 let new_inference_no_eager_solve = GlobalOptions.tco_new_inference_no_eager_solve
+let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
 let forward_compatibility_level = GlobalOptions.forward_compatibility_level
 let log_levels = GlobalOptions.log_levels

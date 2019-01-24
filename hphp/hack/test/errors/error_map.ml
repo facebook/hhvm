@@ -535,4 +535,5 @@ RedundantRxCondition = 4300
 RedeclaringMissingMethod = 4301
 MismatchedReify = 4302
 RequireArgsReify = 4303
+TypecheckerTimeout = 4304
   |}]

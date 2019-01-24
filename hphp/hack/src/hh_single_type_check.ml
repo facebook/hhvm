@@ -191,6 +191,7 @@ let parse_options () =
   let log_inference_constraints = ref false in
   let new_inference = ref false in
   let new_inference_no_eager_solve = ref false in
+  let timeout = ref 0 in
   let all_errors = ref false in
   let batch_mode = ref false in
   let disallow_invalid_arraykey = ref false in
@@ -380,6 +381,9 @@ let parse_options () =
     "--new-inference-no-eager-solve",
         Arg.Set new_inference_no_eager_solve,
         " Do not eagerly solve invariant type variable constraints.";
+    "--timeout",
+        Arg.Int (fun secs -> timeout := secs),
+        " Timeout in seconds for checking a function or a class.";
     "--hh-log-level",
         Arg.Tuple ([
           Arg.String (fun x -> log_key := x);

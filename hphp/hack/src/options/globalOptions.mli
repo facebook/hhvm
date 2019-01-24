@@ -182,6 +182,11 @@ type t = {
  tco_new_inference_no_eager_solve : bool;
 
  (*
+  * If non-zero, give up type checking a class or function after this many seconds
+  *)
+ tco_timeout : int;
+
+ (*
   * Flag to disallow using values that get casted to array keys at runtime;
   * like bools, floats, or null; as array keys.
   *)
@@ -232,6 +237,7 @@ val make :
   tco_disallow_anon_use_capture_by_ref: bool ->
   tco_new_inference: float ->
   tco_new_inference_no_eager_solve: bool ->
+  tco_timeout: int ->
   tco_disallow_invalid_arraykey: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
@@ -270,6 +276,7 @@ val tco_disallow_stringish_magic : t -> bool
 val tco_disallow_anon_use_capture_by_ref : t -> bool
 val tco_new_inference : t -> bool
 val tco_new_inference_no_eager_solve : t -> bool
+val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
 val default : t
 val make_permissive : t -> t

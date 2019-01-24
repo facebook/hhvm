@@ -126,6 +126,7 @@ let () =
     ~tco_disallow_invalid_arraykey:false
     ~tco_new_inference:0.0
     ~tco_new_inference_no_eager_solve:false
+    ~tco_timeout:0
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
     ~log_levels: SMap.empty

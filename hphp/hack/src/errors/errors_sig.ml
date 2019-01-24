@@ -619,4 +619,6 @@ module type S = sig
   val misplaced_mutability_hint: Pos.t -> unit
   val mutability_hint_in_non_rx_function: Pos.t -> unit
   val invalid_mutability_in_return_type_hint: Pos.t -> unit
+  val typechecker_timeout_on_class : Pos.t -> int -> unit
+  val typechecker_timeout_on_function : Pos.t -> int -> unit
 end

@@ -34,18 +34,38 @@ let neutral = Errors.empty
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
+let timeout_check opts ~(on_timeout: int -> 'a) ~(do_ : unit -> 'a) =
+  let timeout = opts.GlobalOptions.tco_timeout in
+  (* Just run it *)
+  if timeout = 0 then do_ ()
+  else
+    Timeout.with_timeout
+    ~timeout
+    ~on_timeout:(fun _ -> on_timeout timeout)
+    ~do_:(fun _ -> do_ ())
+
 let type_fun opts fn x =
   match Parser_heap.find_fun_in_file ~full:true opts fn x with
   | Some f ->
+    timeout_check opts
+      ~on_timeout: (fun t -> Errors.typechecker_timeout_on_function (fst f.Ast.f_name) t; None)
+      ~do_:
+    begin fun () ->
     let fun_ = Naming.fun_ opts f in
     let def = Tast.Fun (Typing.fun_def opts fun_) in
     Tast_check.def def;
     Some def
+    end
   | None -> None
 
 let type_class opts fn x =
   match Parser_heap.find_class_in_file ~full:true opts fn x with
   | Some cls ->
+    timeout_check opts
+      ~on_timeout: (fun t ->
+        Errors.typechecker_timeout_on_class (fst cls.Ast.c_name) t; None)
+      ~do_:
+    begin fun () ->
     let class_ = Naming.class_ opts cls in
     let def_opt =
       Typing.class_def opts class_
@@ -53,6 +73,7 @@ let type_class opts fn x =
     in
     Option.iter def_opt Tast_check.def;
     def_opt
+    end
   | None -> None
 
 let check_typedef opts fn x =

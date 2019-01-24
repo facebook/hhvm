@@ -130,12 +130,11 @@ let rec array_get ?(lhs_of_null_coalesce=false)
          * dict<string,int> <: dict<arraykey,int>
          *)
         let env, k = Env.expand_type env k in
-        let k =
+        let acc =
           if TypecheckerOptions.new_inference (Env.get_tcopt env)
           && (cn = SN.Collections.cDict || cn = SN.Collections.cKeyset)
-          then MakeType.mixed (fst k) (* TODO: enable arraykey checking here *)
-          else k in
-        let acc = type_index (env, tyvars) p ty2 k (Reason.index_class cn) in
+          then (env, tyvars) (* TODO: enable arraykey checking here *)
+          else type_index (env, tyvars) p ty2 k (Reason.index_class cn) in
         acc, v
   (* Certain container/collection types are intended to be immutable/const,
    * thus they should never appear as a lvalue when indexing i.e.
@@ -177,11 +176,10 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let env, ty2 = Env.unbind env ty2 in
       (* See comment for dict and keyset above *)
       let env, k = Env.expand_type env k in
-      let k =
+      let acc =
         if TypecheckerOptions.new_inference (Env.get_tcopt env)
-        then MakeType.mixed (fst k) (* TODO: enable arraykey checking here *)
-        else k in
-      let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
+        then (env, tyvars) (* TODO: enable arraykey checking here *)
+        else type_index (env, tyvars) p ty2 k Reason.index_array in
       acc, v
   | Terr -> acc, err_witness env p
   | Tdynamic -> acc, ety1

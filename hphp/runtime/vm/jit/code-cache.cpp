@@ -300,6 +300,19 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
+void CodeCache::freeProf() {
+  if (RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("Freeing code.prof");
+  }
+
+  if (madvise(m_prof.base(), m_prof.size(), MADV_DONTNEED) == -1) {
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Warning("code.prof madvise failure: %s\n",
+                      folly::errnoStr(errno).c_str());
+    }
+  }
+}
+
 CodeCache::View CodeCache::view(TransKind kind) {
   auto view = [&] {
     if (isProfiling(kind)) {

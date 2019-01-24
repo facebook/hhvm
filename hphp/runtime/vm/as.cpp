@@ -73,6 +73,7 @@
 #include <cstdio>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>

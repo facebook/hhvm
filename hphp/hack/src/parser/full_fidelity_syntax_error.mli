@@ -309,6 +309,7 @@ val pair_initializer_arity : string
 val nested_unary_reference : string
 val toplevel_statements : string
 val invalid_reified : string
+val reified_in_interface : string
 val shadowing_reified : string
 val static_property_in_reified_class : string
 val cls_reified_generic_in_static_method : string

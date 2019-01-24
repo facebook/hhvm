@@ -227,9 +227,6 @@ module Common = struct
       )
 end
 
-(** The mode abstracts away the underlying errors type so errors can be
- * stored either with backtraces (TracingErrors) or without
- * (NonTracingErrors). *)
 module type Errors_modes = sig
 
   type 'a error_
@@ -262,8 +259,7 @@ module type Errors_modes = sig
 
 end
 
-(** Errors don't have backtraces embedded. *)
-module NonTracingErrors: Errors_modes = struct
+module Errors: Errors_modes = struct
   type 'a error_ = error_code * 'a message list
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
@@ -360,102 +356,6 @@ module NonTracingErrors: Errors_modes = struct
   let currently_has_errors () =
     Common.get_current_list !error_map <> []
 
-end
-
-(** Errors with backtraces embedded. They are revealed with to_string. *)
-module TracingErrors: Errors_modes = struct
-  type 'a error_ = (Caml.Printexc.raw_backtrace * error_code * 'a message list)
-  type error = Pos.t error_
-  type applied_fixme = Pos.t * int
-
-  let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
-  let (error_map: error files_t ref) = ref Relative_path.Map.empty
-
-  let accumulate_errors = ref false
-  let in_lazy_decl = ref None
-
-  let try_with_result f1 f2 =
-    Common.try_with_result f1 f2 error_map accumulate_errors
-
-  let do_ f =
-    Common.do_ f error_map accumulate_errors applied_fixmes
-
-  let run_in_context = Common.run_in_context
-
-  let do_with_context path phase f =
-    run_in_context path phase (fun () -> do_ f)
-
-  (* Turn on lazy decl mode for the duration of the closure.
-     This runs without returning the original state,
-     since we collect it later in do_with_lazy_decls_
-  *)
-  let run_in_decl_mode filename f =
-    in_lazy_decl := Some filename;
-    Utils.try_finally ~f ~finally:begin fun () ->
-      in_lazy_decl := None;
-    end
-
-  let make_error code (x: (Pos.t * string) list) =
-    let bt = Caml.Printexc.get_callstack 25 in
-    ((bt, code, x): error)
-
-  let get_code ((_, c, _): 'a error_) = c
-
-  let get_pos ((_, _, msg_l): error) =
-    fst (List.hd_exn msg_l)
-
-  let get_severity (error: 'a error_) = get_code_severity (get_code error)
-
-  let get_bt ((bt, _, _): 'a error_) = bt
-
-  let to_list ((_, _, l): 'a error_) = l
-
-  let to_absolute (error: error) =
-    let bt, code, msg_l = (get_bt error), (get_code error), (to_list error) in
-    let msg_l = List.map msg_l (fun (p, s) -> Pos.to_absolute p, s) in
-    bt, code, msg_l
-
-  (** TODO: Much of this is copy-pasta. *)
-  let to_string ?(indent=false) (error : Pos.absolute error_) : string =
-    let bt, error_code, msgl = (get_bt error),
-      (get_code error), (to_list error) in
-    let buf = Buffer.create 50 in
-    (match msgl with
-    | [] -> assert false
-    | (pos1, msg1) :: rest_of_error ->
-        Buffer.add_string buf begin
-          let error_code = Common.error_code_to_string error_code in
-          Printf.sprintf "%s\n%s%s (%s)\n"
-            (Pos.string pos1) (Caml.Printexc.raw_backtrace_to_string bt)
-            msg1 error_code
-        end;
-        let indentstr = if indent then "  " else "" in
-        List.iter rest_of_error begin fun (p, w) ->
-          let msg = Printf.sprintf "%s%s\n%s%s\n"
-              indentstr (Pos.string p) indentstr w in
-          Buffer.add_string buf msg
-        end
-    );
-    Buffer.contents buf
-
-  let add_error error =
-    if !accumulate_errors then
-      begin
-        let error_list = Common.get_current_list !error_map in
-        Common.set_current_list error_map (error :: error_list)
-      end
-    else
-    (* We have an error, but haven't handled it in any way *)
-      let msg = error |> to_absolute |> to_string in
-      match !in_lazy_decl with
-      | Some _ ->
-        Common.lazy_decl_error_logging msg error_map to_absolute to_string
-      | None -> assert_false_log_backtrace (Some msg)
-
-  let sort = Common.sort get_pos
-  let get_sorted_error_list = Common.get_sorted_error_list get_pos
-  let currently_has_errors () =
-    Common.get_current_list !error_map <> []
 end
 
 (** The Errors functor which produces the Errors module.
@@ -3675,11 +3575,4 @@ let must_error f error_fun =
 
 end
 
-let errors_without_tracing =
-  (module Errors_with_mode(NonTracingErrors) : Errors_sig.S)
-let errors_with_tracing =
-  (module Errors_with_mode(TracingErrors) : Errors_sig.S)
-
-include (val (if Injector_config.use_error_tracing
-  then errors_with_tracing
-  else errors_without_tracing))
+include Errors_with_mode(Errors)

@@ -5,7 +5,7 @@ var_dump($a instanceof stdClass);
 
 var_dump(new stdCLass instanceof stdClass);
 
-$b = create_function('', 'return new stdClass;');
+$b = () ==> new stdClass;
 var_dump($b() instanceof stdClass);
 
 $c = array(new stdClass);

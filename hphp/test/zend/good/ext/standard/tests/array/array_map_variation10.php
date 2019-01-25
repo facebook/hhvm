@@ -14,19 +14,19 @@ $array1 = array(1, 2, 3);
 $array2 = array(3, 4, 5);
 
 echo "-- anonymous function with all parameters and body --\n";
-var_dump( array_map( create_function('$a, $b', 'return array($a, $b);'), $array1, $array2));
+var_dump( array_map( ($a, $b) ==> array($a, $b), $array1, $array2));
 
 echo "-- anonymous function with two parameters and passing one array --\n";
-var_dump( array_map( create_function('$a, $b', 'return array($a, $b);'), $array1));
+var_dump( array_map( ($a, $b) ==> array($a, $b), $array1));
 
 echo "-- anonymous function with NULL parameter --\n";
-var_dump( array_map( create_function(NULL, 'return NULL;'), $array1));
+var_dump( array_map( () ==> null, $array1));
 
 echo "-- anonymous function with NULL body --\n";
-var_dump( array_map( create_function('$a', NULL), $array1));
+var_dump( array_map( $a ==> {}, $array1));
 
 echo "-- passing NULL as 'arr1' --\n";
-var_dump( array_map( create_function('$a', 'return array($a);'), NULL));
+var_dump( array_map( $a ==> array($a), NULL));
 
 echo "Done";
 ?>

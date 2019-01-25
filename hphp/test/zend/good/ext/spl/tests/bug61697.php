@@ -5,8 +5,8 @@ function f2($class) { echo "f2: [[$class]]\n"; }
 
 spl_autoload_register('f1');
 spl_autoload_register('f2');
-spl_autoload_register(create_function('$class', 'echo "cf1: [[$class]]\n";'));
-spl_autoload_register(create_function('$class', 'echo "cf2: [[$class]]\n";'));
+spl_autoload_register($class ==> { echo "cf1: [[$class]]\n"; });
+spl_autoload_register($class ==> { echo "cf2: [[$class]]\n"; });
 
 foreach (spl_autoload_functions() AS $func)
 {

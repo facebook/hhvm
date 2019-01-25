@@ -1,5 +1,5 @@
 <?php
-	$foo = create_function('$s', 'return strtoupper($s);');
+	$foo = $s ==> strtoupper($s);
 	ob_start($foo);
 	echo $foo("bar\n");
 ?>

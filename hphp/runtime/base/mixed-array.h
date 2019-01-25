@@ -383,7 +383,7 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
-  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
+  static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToShape(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
@@ -732,6 +732,13 @@ private:
   static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
                                  uint32_t nElems);
 
+  /*
+   * Copy this from adIn, intish casting all the intish string keys in
+   * accordance with the value of the intishCast template parameter
+   */
+  template <IntishCast intishCast>
+  static ArrayData* copyWithIntishCast(MixedArray* adIn, bool asDArray = false);
+
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
@@ -790,6 +797,8 @@ private:
   }
 
   MixedArray* copyImpl(MixedArray* target) const;
+
+  bool hasIntishKeys() const;
 
   MixedArray* initRef(TypedValue& tv, tv_lval v);
   MixedArray* initWithRef(TypedValue& tv, TypedValue v);

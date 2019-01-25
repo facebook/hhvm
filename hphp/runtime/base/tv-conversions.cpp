@@ -736,17 +736,24 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfPersistentArray: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isPHPArray());
-        if (adIn->isNotDVArray()) return;
-        a = adIn->toPHPArray(true);
-        assertx(a != adIn);
+        if (intishCast == IntishCast::CastSilently) {
+          a = adIn->toPHPArrayIntishCast(true);
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = adIn->toPHPArray(true);
+        }
         continue;
       }
 
       case KindOfArray: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isPHPArray());
-        if (adIn->isNotDVArray()) return;
-        a = adIn->toPHPArray(adIn->cowCheck());
+        if (intishCast == IntishCast::CastSilently) {
+          a = adIn->toPHPArrayIntishCast(adIn->cowCheck());
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = adIn->toPHPArray(adIn->cowCheck());
+        }
         if (a != adIn) tvDecRefArr(tv);
         continue;
       }

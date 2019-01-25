@@ -1,0 +1,68 @@
+dict(2) {
+  ["10"]=>
+  string(8) "string_A"
+  [10]=>
+  string(5) "int_A"
+}
+dict(2) {
+  [10]=>
+  string(5) "int_B"
+  ["10"]=>
+  string(8) "string_B"
+}
+
+---- A alone ----
+array(1) {
+  [0]=>
+  string(5) "int_A"
+}
+array(1) {
+  [0]=>
+  string(5) "int_A"
+}
+
+---- B alone ----
+array(1) {
+  [0]=>
+  string(8) "string_B"
+}
+array(1) {
+  [0]=>
+  string(8) "string_B"
+}
+
+---- A first ----
+array(3) {
+  [0]=>
+  string(5) "int_A"
+  [1]=>
+  string(5) "int_B"
+  ["10"]=>
+  string(8) "string_B"
+}
+array(3) {
+  [0]=>
+  string(5) "int_A"
+  [1]=>
+  string(5) "int_B"
+  ["10"]=>
+  string(8) "string_B"
+}
+
+---- B first ----
+array(3) {
+  [0]=>
+  string(8) "string_B"
+  ["10"]=>
+  string(8) "string_A"
+  [1]=>
+  string(5) "int_A"
+}
+array(3) {
+  [0]=>
+  string(8) "string_B"
+  ["10"]=>
+  string(8) "string_A"
+  [1]=>
+  string(5) "int_A"
+}

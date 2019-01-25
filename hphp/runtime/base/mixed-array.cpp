@@ -1609,6 +1609,70 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   return ad;
 }
 
+bool MixedArray::hasIntishKeys() const {
+  auto const elms = data();
+  for (uint32_t i = 0, limit = m_used; i < limit; ++i) {
+    auto const& e = elms[i];
+    if (e.isTombstone()) continue;
+    if (e.hasStrKey()) {
+      int64_t ignore;
+      if (e.skey->isStrictlyInteger(ignore)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
+  * Copy this from adIn, intish casting all the intish string keys in
+  * accordance with the value of the intishCast template parameter
+  */
+template <IntishCast intishCast>
+ALWAYS_INLINE
+ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
+                                          bool asDArray /* = false */) {
+  auto size = adIn->size();
+  auto const elms = adIn->data();
+  auto out =
+    asMixed(asDArray ? MakeReserveDArray(size) : MakeReserveMixed(size));
+  for (uint32_t i = 0, limit = adIn->m_used; i < limit; ++i) {
+    auto const& e = elms[i];
+    if (e.isTombstone()) continue;
+    if (e.hasIntKey()) {
+      out->updateWithRef(e.ikey, e.data);
+    } else {
+      if (auto const intish = tryIntishCast<intishCast>(e.skey)) {
+        out->updateWithRef(*intish, e.data);
+      } else {
+        out->updateWithRef(e.skey, e.data);
+      }
+    }
+  }
+
+  assertx(out->isMixed());
+  assertx(out->checkInvariants());
+  assertx(out->hasExactlyOneRef());
+  return out;
+}
+
+ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
+  // the input array should already be a PHP-array so we just need to
+  // clear DV array bits and cast any intish strings that may appear
+  auto adIn = asMixed(in);
+  assertx(adIn->isPHPArray());
+  if (adIn->size() == 0) return staticEmptyArray();
+
+  if (copy || adIn->hasIntishKeys()) {
+    return copyWithIntishCast<IntishCast::CastSilently>(adIn);
+  } else {
+    // we don't need to CoW and there were no intish keys, so we can just update
+    // dv-arrayness in place and get on with our day
+    adIn->setDVArray(ArrayData::kNotDVArray);
+    return adIn;
+  }
+}
+
 template <IntishCast intishCast>
 ALWAYS_INLINE
 ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
@@ -1618,59 +1682,25 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
   auto a = asMixed(adIn);
 
   auto const size = a->size();
-  auto const elms = a->data();
 
   if (!size) return toDArray ? staticEmptyDArray() : staticEmptyArray();
 
   // If we don't necessarily have to make a copy, first scan the dict looking
   // for any int-like string keys. If we don't find any, we can transform the
   // dict in place.
-  if (!copy && RuntimeOption::EvalEnableIntishCast) {
-    for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
-      auto& e = elms[i];
-      if (e.isTombstone()) continue;
-      if (e.hasStrKey()) {
-        int64_t ignore;
-        if (e.skey->isStrictlyInteger(ignore)) {
-          copy = true;
-          break;
-        }
-      }
-    }
-  }
-
-  if (!copy) {
+  if (!copy && !a->hasIntishKeys()) {
     // No int-like string keys, so transform in place.
     a->m_kind = HeaderKind::Mixed;
     if (toDArray) a->setDVArray(ArrayData::kDArray);
     a->setLegacyArray(false);
     assertx(a->checkInvariants());
     return a;
+  } else {
+    // Either we need to make a copy anyways, or we don't, but there are
+    // int-like string keys. In either case, create the array from scratch,
+    // inserting each element one-by-one, doing key conversion as necessary.
+    return copyWithIntishCast<intishCast>(a, toDArray);
   }
-
-  // Either we need to make a copy anyways, or we don't, but there are int-like
-  // string keys. In either case, create the array from scratch, inserting each
-  // element one-by-one, doing key conversion as necessary.
-  auto out =
-    asMixed(toDArray ? MakeReserveDArray(size) : MakeReserveMixed(size));
-  for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
-    auto& e = elms[i];
-    if (e.isTombstone()) continue;
-    if (e.hasIntKey()) {
-      out->update(e.ikey, *tvAssertCell(&e.data));
-    } else {
-      if (auto const intish = tryIntishCast<intishCast>(e.skey)) {
-        out->update(*intish, *tvAssertCell(&e.data));
-      } else {
-        out->update(e.skey, *tvAssertCell(&e.data));
-      }
-    }
-  }
-
-  assertx(out->isMixed());
-  assertx(out->checkInvariants());
-  assertx(out->hasExactlyOneRef());
-  return out;
 }
 
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {

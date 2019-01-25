@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
@@ -72,6 +73,87 @@ String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
   return vs.serialize(thing, true);
 }
 
+namespace {
+
+timespec from_micros(int64_t us) {
+  struct timespec ts;
+  ts.tv_sec = us / 1000000;
+  ts.tv_nsec = (us % 1000000) * 1000;
+  return ts;
+}
+
+template<class T>
+void annotate_items(T& what, const ArrayData* annot) {
+  IterateKV(
+    annot,
+    [&] (Cell k, TypedValue v) {
+      if (!tvIsString(k) || !tvIsString(v)) return;
+      what.annotate(k.m_data.pstr->data(), v.m_data.pstr->data());
+    }
+  );
+}
+
+void HHVM_FUNCTION(
+  rqtrace_create_event,
+  StringArg name,
+  int64_t start_us,
+  int64_t end_us,
+  ArrayArg annot
+) {
+  rqtrace::ScopeGuard dummy("DUMMY_SCOPE", from_micros(start_us));
+  rqtrace::EventGuard g(name->data(), from_micros(start_us));
+  annotate_items(g, annot.get());
+  g.finish(from_micros(end_us));
+  dummy.finish(from_micros(end_us));
+}
+
+void HHVM_FUNCTION(
+  rqtrace_create_scope,
+  StringArg name,
+  int64_t start_us,
+  int64_t end_us,
+  ArrayArg annot
+) {
+  rqtrace::ScopeGuard g(name->data(), from_micros(start_us));
+  annotate_items(g, annot.get());
+  g.finish(from_micros(end_us));
+}
+
+void HHVM_FUNCTION(
+  rqtrace_create_scoped_events,
+  StringArg name,
+  int64_t start_us,
+  int64_t end_us,
+  StringArg prefix,
+  StringArg suffix,
+  ArrayArg annot,
+  ArrayArg events
+) {
+  rqtrace::ScopeGuard g(name->data(), from_micros(start_us));
+  annotate_items(g, annot.get());
+  g.setEventPrefix(prefix->data());
+  g.setEventSuffix(suffix->data());
+  IterateKV(
+    events.get(),
+    [&] (Cell k, TypedValue v) {
+      auto const arr = v.m_data.parr;
+      if (!tvIsString(k) || !tvIsArrayLike(v) || arr->size() != 3) return;
+      auto const elem0 = arr->rval(int64_t{0});
+      auto const elem1 = arr->rval(int64_t{1});
+      auto const elem2 = arr->rval(int64_t{2});
+      if (!elem0 || !elem1 || !elem2) return;
+      if (!tvIsInt(elem0) || !tvIsInt(elem1) || !tvIsDict(elem2)) return;
+      rqtrace::EventGuard g_event(
+        k.m_data.pstr->data(), from_micros(elem0.val().num));
+      annotate_items(g_event, elem2.val().parr);
+      g_event.finish(from_micros(elem1.val().num));
+    }
+  );
+  g.finish(from_micros(end_us));
+}
+
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
@@ -87,6 +169,11 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
 
   HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_event, rqtrace_create_event);
+  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scope, rqtrace_create_scope);
+  HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scoped_events,
+              rqtrace_create_scoped_events);
 
   loadSystemlib("std_intrinsics");
 }

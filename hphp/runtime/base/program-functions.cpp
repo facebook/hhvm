@@ -661,6 +661,8 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
+static RDS_LOCAL(rqtrace::Trace, tl_cmdTrace);
+
 void init_command_line_session(int argc, char** argv) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   std::string args;
@@ -673,6 +675,10 @@ void init_command_line_session(int argc, char** argv) {
   hphp_session_init(Treadmill::SessionKind::CLISession);
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
+  if (RuntimeOption::EvalTraceCommandLineRequest) {
+    tl_cmdTrace.destroy();
+    context->setRequestTrace(tl_cmdTrace.getCheck());
+  }
 }
 
 void

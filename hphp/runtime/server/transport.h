@@ -26,6 +26,7 @@
 #include "hphp/util/gzip.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/string-holder.h"
 #include "hphp/runtime/base/type-string.h"
 
@@ -130,6 +131,8 @@ public:
     m_nsleepTimeN %= 1000000000;
   }
 
+  void forceInitRequestTrace();
+  rqtrace::Trace* getRequestTrace() { return m_requestTrace.get_pointer(); }
   StructuredLogEntry* createStructuredLogEntry();
   StructuredLogEntry* getStructuredLogEntry();
   void resetStructuredLogEntry();
@@ -505,6 +508,8 @@ protected:
   bool m_isSSL;
 
   ThreadType m_threadType;
+
+  folly::Optional<rqtrace::Trace> m_requestTrace;
 
   // helpers
   void parseGetParams();

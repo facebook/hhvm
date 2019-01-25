@@ -177,11 +177,13 @@ public:
    */
   Transport* getTransport();
   void setTransport(Transport*);
+  void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
   String getCwd() const;
   void setCwd(const String&);
+  rqtrace::Trace* getRequestTrace();
 
   /**
    * Write to output.
@@ -611,6 +613,7 @@ public:
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
 private:
   ExcLoggerHook m_logger_hook;
+  rqtrace::Trace* m_requestTrace{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

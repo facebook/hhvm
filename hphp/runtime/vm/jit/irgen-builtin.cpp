@@ -1277,7 +1277,7 @@ SSATmp* coerce_value(IRGS& env,
     return result;
   }
 
-  always_assert(ty.subtypeOfAny(TArr, TStr, TObj, TRes) &&
+  always_assert(ty.subtypeOfAny(TArr, TStr, TObj, TRes, TDict, TKeyset, TVec) &&
                 callee->params()[paramIdx].nativeArg);
   auto const misAddr = gen(env, LdMIStateAddr,
                            cns(env, offsetof(MInstrState, tvBuiltinReturn)));

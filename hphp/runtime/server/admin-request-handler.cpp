@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -287,6 +288,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/status.xml:      show server status in XML\n"
         "/status.json:     show server status in JSON\n"
         "/status.html:     show server status in HTML\n"
+
+        "/rqtrace-stats:   show aggregate request trace stats in JSON\n"
 
         "/memory.xml:      show memory status in XML\n"
         "/memory.json:     show memory status in JSON\n"
@@ -986,6 +989,27 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 #endif // ENABLE_HHPROF
 #endif // USE_JEMALLOC
+
+    if (cmd == "rqtrace-stats") {
+      std::stringstream out;
+      bool first = true;
+      out << "{" << endl;
+      auto appendStat =
+        [&](folly::StringPiece name, folly::StringPiece kind, int64_t value) {
+          out << folly::format(
+            "{} \"{}_{}\":{}\n", first ? "" : ",", name, kind, value);
+          first = false;
+        };
+      rqtrace::visit_process_stats(
+        [&] (const StringData* name, rqtrace::EventStats stats) {
+          appendStat(name->data(), "duration", stats.total_duration);
+          appendStat(name->data(), "count", stats.total_count);
+        }
+      );
+      out << "}" << endl;
+      transport->sendString(out.str());
+      break;
+    }
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);

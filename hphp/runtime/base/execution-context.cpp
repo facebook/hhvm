@@ -1678,6 +1678,7 @@ void ExecutionContext::requestExit() {
   m_deferredErrors = Array::CreateVec();
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
+  if (m_requestTrace) record_trace(std::move(*m_requestTrace));
 }
 
 /*

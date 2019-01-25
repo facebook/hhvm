@@ -786,6 +786,7 @@ struct RuntimeOption {
    * implies all functions may be used with fb_intercept */             \
   F(bool, JitEnableRenameFunction,     EvalJitEnableRenameFunction)     \
   F(bool, JitUseVtuneAPI,              false)                           \
+  F(bool, TraceCommandLineRequest,     true)                            \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitPseudomain,               true)                            \
@@ -913,6 +914,7 @@ struct RuntimeOption {
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
+  F(uint32_t, TraceServerRequestRate,      0)                           \
   /* Log the sizes and metadata for all translations in the TC broken
    * down by function and inclusive/exclusive size for inlined regions.
    * When set to "" TC size data will be sampled on a per function basis

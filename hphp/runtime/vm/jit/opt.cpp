@@ -166,46 +166,55 @@ void optimize(IRUnit& unit, TransKind kind) {
   assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
+    rqtrace::EventGuard trace{"OPT_PRED"};
     doPass(unit, optimizePredictions, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRSimplification) {
+    rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
     doPass(unit, cleanCfg, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
 
   while (true) {
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
       printUnit(6, unit, " after optimizeLoads ");
     }
 
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      rqtrace::EventGuard trace{"OPT_STORE"};
       doPass(unit, optimizeStores, DCE::Full);
       printUnit(6, unit, " after optimizeStores ");
     }
 
     if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
+      rqtrace::EventGuard trace{"OPT_INLRET"};
       doPass(unit, optimizeInlineReturns, DCE::Full);
       printUnit(6, unit, " after optimizeInlineReturns ");
     }
 
+    rqtrace::EventGuard trace{"OPT_PHI"};
     if (!doPass(unit, optimizePhis, DCE::Full)) break;
     doPass(unit, cleanCfg, DCE::None);
     printUnit(6, unit, " after optimizePhis ");
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
+    rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
   }
 
   if (RuntimeOption::EvalHHIRLICM && cfgHasLoop(unit) &&
       kind != TransKind::Profile) {
+    rqtrace::EventGuard trace{"OPT_LICM"};
     doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
     printUnit(6, unit, " after optimizeLoopInvariantCode ");
   }
@@ -224,10 +233,12 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   if (kind != TransKind::Profile &&
       RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
+    rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
   }
   doPass(unit, fixBlockHints, DCE::None);

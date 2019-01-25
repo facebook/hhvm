@@ -20,10 +20,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -511,6 +513,55 @@ void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   }
 }
 
+namespace {
+
+ArrayData* from_stats(rqtrace::EventStats stats) {
+  return make_dict_array(
+    "duration", stats.total_duration, "count", stats.total_count).detach();
+}
+
+template<class T>
+ArrayData* from_stats_list(T stats) {
+  DictInit init(stats.size());
+  for (auto& pair : stats) {
+    init.set(String(pair.first), Array::attach(from_stats(pair.second)));
+  }
+  return init.create();
+}
+
+TypedValue HHVM_FUNCTION(all_request_stats) {
+  if (auto const trace = g_context->getRequestTrace()) {
+    return tvReturn(from_stats_list(trace->stats()));
+  }
+  return tvReturn(staticEmptyDArray());
+}
+
+TypedValue HHVM_FUNCTION(all_process_stats) {
+  req::vector<std::pair<StringData*, rqtrace::EventStats>> stats;
+
+  rqtrace::visit_process_stats(
+    [&] (const StringData* name, rqtrace::EventStats s) {
+      stats.emplace_back(const_cast<StringData*>(name), s);
+    }
+  );
+
+  return tvReturn(from_stats_list(stats));
+}
+
+TypedValue HHVM_FUNCTION(request_event_stats, StringArg event) {
+  if (auto const trace = g_context->getRequestTrace()) {
+    auto const stats = folly::get_default(trace->stats(), event->data());
+    return tvReturn(from_stats(stats));
+  }
+  return tvReturn(from_stats({}));
+}
+
+TypedValue HHVM_FUNCTION(process_event_stats, StringArg event) {
+  return tvReturn(from_stats(rqtrace::process_stats_for(event->data())));
+}
+
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -527,6 +578,13 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\clear_instance_memoization,
                   HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
+
+    HHVM_NAMED_FE(HH\\rqtrace\\all_request_stats, HHVM_FN(all_request_stats));
+    HHVM_NAMED_FE(HH\\rqtrace\\all_process_stats, HHVM_FN(all_process_stats));
+    HHVM_NAMED_FE(HH\\rqtrace\\request_event_stats,
+                  HHVM_FN(request_event_stats));
+    HHVM_NAMED_FE(HH\\rqtrace\\process_event_stats,
+                  HHVM_FN(process_event_stats));
     loadSystemlib();
   }
 } s_hh_extension;

@@ -41,6 +41,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
 
+#include <folly/Random.h>
 #include <folly/String.h>
 
 namespace HPHP {
@@ -85,6 +86,9 @@ void Transport::onRequestStart(const timespec &queueTime) {
    */
   HardwareCounter::Reset();
   m_instructions = HardwareCounter::GetInstructionCount();
+
+  auto const rate = RuntimeOption::EvalTraceServerRequestRate;
+  if (rate && folly::Random::rand32(rate) == 0) forceInitRequestTrace();
 }
 
 const char *Transport::getMethodName() {
@@ -958,6 +962,16 @@ void Transport::resetStructuredLogEntry() {
   m_structLogEntry.reset();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Request tracing
+
+void Transport::forceInitRequestTrace() {
+  if (m_requestTrace) return;
+  m_requestTrace.emplace();
+  rqtrace::ScopeGuard(
+    getRequestTrace(), "REQUEST_QUEUE", getQueueTime()
+  ).finish(getWallTime());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

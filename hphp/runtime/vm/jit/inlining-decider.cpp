@@ -387,6 +387,8 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     callerFPushOp
   };
 
+  rqtrace::DisableTracing notrace;
+
   auto const unit = irGenInlineRegion(ctx, region, annotations);
   if (!unit) return {0, true};
 

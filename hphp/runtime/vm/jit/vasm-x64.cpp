@@ -1085,11 +1085,16 @@ void lowerForX64(Vunit& unit) {
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize, unit.log_entry);
 
-  removeTrivialNops(unit);
-  optimizePhis(unit);
-  fuseBranches(unit);
-  optimizeJmps(unit);
-  optimizeExits(unit);
+  auto const doPass = [&] (const char* name, void fun(Vunit&)) {
+    rqtrace::EventGuard trace{name};
+    fun(unit);
+  };
+
+  doPass("VOPT_NOP",    removeTrivialNops);
+  doPass("VOPT_PHI",    optimizePhis);
+  doPass("VOPT_BRANCH", fuseBranches);
+  doPass("VOPT_JMP",    optimizeJmps);
+  doPass("VOPT_EXIT",   optimizeExits);
 
   assertx(checkWidths(unit));
 
@@ -1099,36 +1104,41 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     // non-profiling translations of PHP functions.  We also require that we
     // can spill, so that we can generate arbitrary profiling code, and also to
     // ensure we don't profile unique stubs and such.
-    profile_branches(unit);
+    doPass("VOPT_PROF_BRANCH", profile_branches);
   }
 
-  lowerForX64(unit);
-  simplify(unit);
-  lowerForX64(unit);
+  doPass("VOPT_X64",      lowerForX64);
+  doPass("VOPT_SIMPLIFY", simplify);
+  doPass("VOPT_X64",      lowerForX64);
 
   if (!unit.constToReg.empty()) {
-    foldImms<x64::ImmFolder>(unit);
+    doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
-  optimizeCopies(unit, abi);
+  {
+    rqtrace::EventGuard trace{"VOPT_COPY"};
+    optimizeCopies(unit, abi);
+  }
 
   if (unit.needsRegAlloc()) {
-    removeDeadCode(unit);
-    optimizeJmps(unit);
-    removeDeadCode(unit);
+    doPass("VOPT_DCE", removeDeadCode);
+    doPass("VOPT_JMP", optimizeJmps);
+    doPass("VOPT_DCE", removeDeadCode);
     if (regalloc) {
       if (RuntimeOption::EvalUseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {
+        rqtrace::EventGuard trace{"VOPT_GRAPH_COLOR"};
         allocateRegistersWithGraphColor(unit, abi);
       } else {
+        rqtrace::EventGuard trace{"VOPT_XLS"};
         allocateRegistersWithXLS(unit, abi);
       }
     }
   }
   if (unit.blocks.size() > 1) {
-    optimizeJmps(unit);
+    doPass("VOPT_JMP", optimizeJmps);
   }
 }
 

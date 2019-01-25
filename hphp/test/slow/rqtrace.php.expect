@@ -1,0 +1,54 @@
+array(8) {
+  [0]=>
+  string(24) "ALPHA_INNER_EVENT0_OMEGA"
+  [1]=>
+  string(24) "ALPHA_INNER_EVENT1_OMEGA"
+  [2]=>
+  string(24) "ALPHA_INNER_EVENT2_OMEGA"
+  [3]=>
+  string(24) "ALPHA_INNER_EVENT3_OMEGA"
+  [4]=>
+  string(6) "EVENT0"
+  [5]=>
+  string(6) "EVENT1"
+  [6]=>
+  string(6) "SCOPE0"
+  [7]=>
+  string(6) "SCOPE1"
+}
+dict(2) {
+  ["duration"]=>
+  int(100)
+  ["count"]=>
+  int(1)
+}
+dict(2) {
+  ["duration"]=>
+  int(150)
+  ["count"]=>
+  int(2)
+}
+dict(2) {
+  ["duration"]=>
+  int(50)
+  ["count"]=>
+  int(1)
+}
+dict(2) {
+  ["duration"]=>
+  int(50)
+  ["count"]=>
+  int(1)
+}
+dict(2) {
+  ["duration"]=>
+  int(50)
+  ["count"]=>
+  int(1)
+}
+dict(2) {
+  ["duration"]=>
+  int(50)
+  ["count"]=>
+  int(1)
+}

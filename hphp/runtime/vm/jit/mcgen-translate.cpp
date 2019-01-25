@@ -514,6 +514,11 @@ translate(TransArgs args, FPInvOffset spOff,
   Timer timer(Timer::mcg_translate);
   WorkloadStats guard(WorkloadStats::InTrans);
 
+  rqtrace::ScopeGuard trace{"JIT_TRANSLATE"};
+  trace.annotate("func_name", args.sk.func()->fullDisplayName()->data());
+  trace.annotate("trans_kind", show(args.kind));
+  trace.setEventPrefix("JIT_");
+
   auto const srcRec = tc::findSrcRec(args.sk);
   always_assert(srcRec);
 
@@ -528,6 +533,8 @@ translate(TransArgs args, FPInvOffset spOff,
     if (args.kind == TransKind::Profile || (profData() && transdb::enabled())) {
       env.transID = profData()->allocTransID();
     }
+    trace.annotate(
+      "region_size", folly::to<std::string>(args.region->instrSize()));
     auto const transContext =
       TransContext{env.transID, args.kind, args.flags, args.sk,
                    env.initSpOffset, args.optIndex};

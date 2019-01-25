@@ -142,3 +142,37 @@ interface IMemoizeParam extends \HH\IMemoizeParam {
   public function getInstanceKey(): string;
 }
 }
+
+namespace HH\rqtrace {
+
+type EventStats = shape('duration' => int, 'count' => int);
+
+/**
+ * Return a map of event_name->EventStats for all events which occurred up to
+ * the point that this function was called within the current request.
+ */
+<<__Native>>
+function all_request_stats(): mixed; /* darray<string, EventStats>*/
+
+/**
+ * Return a map of event_name->EventStats for all events which occurred during
+ * previously completed requests at the time this function was called.
+ */
+<<__Native>>
+function all_process_stats(): mixed; /*darray<string, EventStats>*/
+
+/**
+ * Return stats for occurences of $event during the current requests up to the
+ * call of this function.
+ */
+<<__Native>>
+function request_event_stats(string $event): mixed /* EventStats */;
+
+/**
+ * Return stats for all occurences of $event during previously completed
+ * requests when this function was called.
+ */
+<<__Native>>
+function process_event_stats(string $event): mixed /* EventStats */;
+
+}

@@ -57,4 +57,31 @@ function id_string(string $value): string {
 <<__Native>>
 function serialize_with_format(mixed $thing, int $format): string;
 
+<<__Native>>
+function rqtrace_create_event(
+  string $name,
+  int $start_us,
+  int $end_us,
+  dict<string, string> $annot
+): void;
+
+<<__Native>>
+function rqtrace_create_scope(
+  string $name,
+  int $start_us,
+  int $end_us,
+  dict<string, string> $annot
+): void;
+
+<<__Native>>
+function rqtrace_create_scoped_events(
+  string $name,
+  int $start_us,
+  int $end_us,
+  string $prefix,
+  string $suffix,
+  dict<string, string> $annot,
+  dict<string, (int, int, dict<string, string>)> $events
+): void;
+
 }

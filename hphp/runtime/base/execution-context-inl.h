@@ -42,8 +42,19 @@ inline Transport* ExecutionContext::getTransport() {
   return m_transport;
 }
 
+inline rqtrace::Trace* ExecutionContext::getRequestTrace() {
+  return m_requestTrace;
+}
+
 inline void ExecutionContext::setTransport(Transport* transport) {
   m_transport = transport;
+  if (transport && !m_requestTrace) {
+    if (auto trace = m_transport->getRequestTrace()) m_requestTrace = trace;
+  }
+}
+
+inline void ExecutionContext::setRequestTrace(rqtrace::Trace* trace) {
+  m_requestTrace = trace;
 }
 
 inline String ExecutionContext::getCwd() const {

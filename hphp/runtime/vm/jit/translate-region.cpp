@@ -930,10 +930,14 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   TranslateRetryContext retry;
   auto result = TranslateResult::Retry;
 
+  rqtrace::EventGuard trace{"IRGEN"};
+  uint32_t tries = 0;
+
   while (result == TranslateResult::Retry) {
     unit = std::make_unique<IRUnit>(context);
     unit->initLogEntry(context.func);
     irgen::IRGS irgs{*unit, &region};
+    tries++;
 
     // Set up inlining context, but disable it for profiling mode.
     InliningDecider inl(region.entry()->func());
@@ -981,6 +985,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     }
   }
 
+  trace.annotate("tries", folly::to<std::string>(tries));
+  trace.finish();
   irGenTimer.stop();
   if (result != TranslateResult::Success) return nullptr;
 

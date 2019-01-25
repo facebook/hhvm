@@ -117,6 +117,7 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
+  rqtrace::EventGuard trace{"VLOWER"};
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
   auto vunit = std::make_unique<Vunit>();
@@ -164,6 +165,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   printUnit(kInitialVasmLevel, "after initial vasm generation", *vunit);
   assertx(check(*vunit));
   timer.stop();
+  trace.finish();
 
   try {
     optimize(*vunit, kind, regAlloc);

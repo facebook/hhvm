@@ -290,6 +290,11 @@ bool isChanged(copy_ptr<CachedUnitWithFree> cachedUnit, const struct stat* s) {
 folly::Optional<String> readFileAsString(Stream::Wrapper* w,
                                          const StringData* path) {
   if (w) {
+    // Stream wrappers can reenter PHP via user defined callbacks. Roll this
+    // operation into a single event
+    rqtrace::EventGuard trace{"STREAM_WRAPPER_OPEN"};
+    rqtrace::DisableTracing disable;
+
     if (const auto f = w->open(StrNR(path), "r", 0, nullptr)) {
       return f->read();
     }
@@ -312,6 +317,8 @@ CachedUnit createUnitFromString(const char* path,
     return CachedUnit { unit.release(), rds::allocBit() };
   }
   LogTimer compileTimer("compile_ms", ent);
+  rqtrace::EventGuard trace{"COMPILE_UNIT"};
+  trace.annotate("file_size", folly::to<std::string>(contents.size()));
   auto const unit = compile_file(contents.data(), contents.size(), md5, path,
                                  nativeFuncs, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
@@ -320,11 +327,18 @@ CachedUnit createUnitFromString(const char* path,
 CachedUnit createUnitFromUrl(const StringData* const requestedPath,
                              const Native::FuncTable& nativeFuncs) {
   auto const w = Stream::getWrapperFromURI(StrNR(requestedPath));
-  if (!w) return CachedUnit{};
-  auto const f = w->open(StrNR(requestedPath), "r", 0, nullptr);
-  if (!f) return CachedUnit{};
   StringBuffer sb;
-  sb.read(f.get());
+  {
+    // Stream wrappers can reenter PHP via user defined callbacks. Roll this
+    // operation into a single event
+    rqtrace::EventGuard trace{"STREAM_WRAPPER_OPEN"};
+    rqtrace::DisableTracing disable;
+
+    if (!w) return CachedUnit{};
+    auto const f = w->open(StrNR(requestedPath), "r", 0, nullptr);
+    if (!f) return CachedUnit{};
+    sb.read(f.get());
+  }
   OptLog ent;
   return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent,
                               nativeFuncs);
@@ -377,6 +391,11 @@ NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
     // and using fstat the server verifies that the file it sees is identical
     // to the unit opened by the client.
     if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
+      // Stream wrappers can reenter PHP via user defined callbacks. Roll this
+      // operation into a single event
+      rqtrace::EventGuard trace{"STREAM_WRAPPER_OPEN"};
+      rqtrace::DisableTracing disable;
+
       struct stat local, remote;
       auto remoteFile = w->open(StrNR(rpath), "r", 0, nullptr);
       if (!remoteFile ||
@@ -406,6 +425,8 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     // caches them on disk.
     return createUnitFromUrl(requestedPath, nativeFuncs);
   }
+
+  rqtrace::EventGuard trace{"WRITE_UNIT"};
 
   // The string we're using as a key must be static, because we're using it as
   // a key in the cache (across requests).
@@ -480,6 +501,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
         if (ent) ent->setStr("type", "cache_miss");
       }
 
+      trace.finish();
       auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
                                          nativeFuncs);
       auto const isICE = cu.unit && cu.unit->isICE();
@@ -521,6 +543,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const Native::FuncTable& nativeFuncs) {
   // Steady state, its probably already in the cache. Try that first
   {
+    rqtrace::EventGuard trace{"READ_UNIT"};
     NonRepoUnitCache::const_accessor acc;
     if (s_nonRepoUnitCache.find(acc, requestedPath)) {
       auto const cachedUnit = acc->second.cachedUnit.copy();
@@ -565,8 +588,15 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
     return allow_dir || !S_ISDIR(s->st_mode);
   }
 
-  if (w && w->stat(StrNR(path), s) == 0) {
-    return allow_dir || !S_ISDIR(s->st_mode);
+  if (w) {
+    // Stream wrappers can reenter PHP via user defined callbacks. Roll this
+    // operation into a single event
+    rqtrace::EventGuard trace{"STREAM_WRAPPER_STAT"};
+    rqtrace::DisableTracing disable;
+
+    if (w->stat(StrNR(path), s) == 0) {
+      return allow_dir || !S_ISDIR(s->st_mode);
+    }
   }
   return false;
 }
@@ -577,6 +607,11 @@ bool findFileWrapper(const String& file, void* ctx) {
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
   if (w && !w->isNormalFileStream()) {
+    // Stream wrappers can reenter PHP via user defined callbacks. Roll this
+    // operation into a single event
+    rqtrace::EventGuard trace{"STREAM_WRAPPER_STAT"};
+    rqtrace::DisableTracing disable;
+
     if (w->stat(file, context->s) == 0) {
       context->path = file;
       return true;
@@ -830,6 +865,10 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
       StructuredLog::coinflip(RuntimeOption::EvalLogUnitLoadRate)) {
     ent.emplace();
   }
+
+  rqtrace::ScopeGuard trace{"LOOKUP_UNIT"};
+  trace.annotate("path", path->data());
+  trace.annotate("pwd", currentDir);
 
   LogTimer lookupTimer("lookup_ms", ent);
 

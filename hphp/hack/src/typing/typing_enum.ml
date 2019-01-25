@@ -60,7 +60,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
       | Tfun _ | Tunresolved _ | Tobject | Tshape _ ->
-        f_fail p (Reason.to_pos r) (Typing_print.error t') trail);
+        f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail);
   env
 
 let enum_check_const ty_exp env (_, (p, _), _) t =
@@ -97,7 +97,7 @@ let enum_class_check env tc consts const_types =
            * since switch uses == equality. *)
           | Tnonnull | Tprim Tarraykey when Cls.enum_type tc <> None ->
               Errors.enum_type_bad (Reason.to_pos r)
-                (Typing_print.error ty_exp') trail
+                (Typing_print.error env (r, ty_exp')) trail
           | Tnonnull when snd ty_exp <> Tnonnull ->
               Errors.enum_type_typedef_nonnull (Reason.to_pos r)
           | Tnonnull -> ()
@@ -111,7 +111,7 @@ let enum_class_check env tc consts const_types =
             | Tabstract (_, _) | Tclass _ | Ttuple _ | Tanon (_, _)
             | Tunresolved _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
               Errors.enum_type_bad (Reason.to_pos r)
-                (Typing_print.error ty_exp') trail);
+                (Typing_print.error env (r, ty_exp')) trail);
 
         (* If a constraint was given, make sure that it is a subtype
            of arraykey, and that the base type is actually a subtype

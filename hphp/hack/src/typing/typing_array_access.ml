@@ -20,17 +20,17 @@ module SubType = Typing_subtype
 
 let err_witness env p = Reason.Rwitness p, TUtils.terr env
 
-let error_array (env, tyvars) p (r, ty) =
-  Errors.array_access p (Reason.to_pos r) (Typing_print.error ty);
+let error_array (env, tyvars) p ty =
+  Errors.array_access p (Reason.to_pos (fst ty)) (Typing_print.error env ty);
   (env, tyvars), err_witness env p
 
-let error_const_mutation (env, tyvars) p (r, ty) =
-  Errors.const_mutation p (Reason.to_pos r) (Typing_print.error ty);
+let error_const_mutation (env, tyvars) p ty =
+  Errors.const_mutation p (Reason.to_pos (fst ty)) (Typing_print.error env ty);
   (env, tyvars), err_witness env p
 
-let error_assign_array_append (env, tyvars) p (r, ty) =
-  Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
-  (env, tyvars), ((r, ty), err_witness env p)
+let error_assign_array_append (env, tyvars) p ty =
+  Errors.array_append p (Reason.to_pos (fst ty)) (Typing_print.error env ty);
+  (env, tyvars), (ty, err_witness env p)
 
 let rec array_get ?(lhs_of_null_coalesce=false)
   is_lvalue p ((env, tyvars) as acc) ty1 e2 ty2 =
@@ -452,7 +452,7 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
          || cn = SN.Collections.cConstVector
          || cn = SN.Collections.cImmVector
          || cn = SN.Collections.cPair ->
-    Errors.const_mutation pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
+    Errors.const_mutation pos (Reason.to_pos (fst ety1)) (Typing_print.error env ety1);
     error
   | Tarraykind (AKdarray (tk, tv)) ->
     let env, tk' = Typing_union.union env tk tkey in
@@ -508,7 +508,7 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
   | Tobject ->
     if Env.is_strict env
     then
-      (Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
+      (Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error env ety1);
       error)
     else
       env, (ety1, ty2)
@@ -522,10 +522,10 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
       when List.for_all rest ~f:(fun (_, y) ->
         ty_equal (fst x) (fst y) && ty_equal (snd x) (snd y)) -> res
     | _ ->
-      Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
+      Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error env ety1);
       error
     end
   | (Toption _ | Tnonnull | Tprim _ |
      Tvar _ | Tfun _ | Tclass _ | Tanon _) ->
-    Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
+    Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error env ety1);
     error

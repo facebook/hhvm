@@ -7,4 +7,4 @@ Invalid argument (Typing[4110])
 File "tuple4.php", line 6, characters 9-54:
 Invalid "as" expression hint (Typing[4195])
   File "tuple4.php", line 6, characters 10-30:
-  The "as" operator cannot be used with a function
+  The "as" operator cannot be used with a function type

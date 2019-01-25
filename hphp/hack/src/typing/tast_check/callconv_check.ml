@@ -34,7 +34,7 @@ let check_types env ((p, _), te) =
       if iter ty1
       then check_types_helper te1
       else
-        let ty_str = Typing_print.error (snd ty1) in
+        let ty_str = Env.print_error_ty env ty1 in
         let msgl = Reason.to_string ("This is " ^ ty_str) (fst ty1) in
         Errors.inout_argument_bad_type p msgl
     (* Other invalid expressions are caught in NastCheck. *)

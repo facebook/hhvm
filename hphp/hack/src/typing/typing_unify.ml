@@ -62,7 +62,7 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   | (r, Tunresolved tyl), (_, ty_ as ty)
   | (_, ty_ as ty), (r, Tunresolved tyl) ->
       let r1 = TUtils.find_pos r tyl in
-      let str_ty = Typing_print.error ty_ in
+      let str_ty = Typing_print.error env ty in
       let r = Reason.Rcoerced (r1, env.Env.pos, str_ty) in
       let env = List.fold_left tyl
         ~f:(fun env x -> TUtils.sub_type env x ty) ~init:env in
@@ -83,7 +83,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   | Tprim x, Tprim y ->
     if phys_equal x y then env, Tprim x
     else
-      let () = TUtils.uerror r1 ty1 r2 ty2 in
+      let () = TUtils.uerror env r1 ty1 r2 ty2 in
       env, Terr
   | Tarraykind AKempty, (Tarraykind _ as ty)
   | (Tarraykind _ as ty), Tarraykind AKempty
@@ -94,7 +94,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       let safe_array =
         TypecheckerOptions.safe_array (Env.get_tcopt env) in
       if safe_array then
-        (TUtils.uerror r1 ty1 r2 ty2;
+        (TUtils.uerror env r1 ty1 r2 ty2;
         env, Terr)
       else
         env, ty
@@ -245,7 +245,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
        * two anonymous functions is when trying to normalize intersection -
        * saying that they never unify will just keep the intersection
        * unchanged, which is always a valid option. *)
-      TUtils.uerror r1 ty1 r2 ty2;
+      TUtils.uerror env r1 ty1 r2 ty2;
       env, Terr
   | Tfun ft, Tanon (anon_arity, id)
   | Tanon (anon_arity, id), Tfun ft ->
@@ -411,7 +411,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         if opts.TUtils.simplify_errors then
         TUtils.simplified_uerror env (r1, ty1) (r2, ty2)
         else
-        TUtils.uerror r1 ty1 r2 ty2;
+        TUtils.uerror env r1 ty1 r2 ty2;
         env, Terr
 
 (* Use unify to check if two types are the same. We use this in

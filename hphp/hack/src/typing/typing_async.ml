@@ -103,14 +103,14 @@ let gena (env, tyvars) p ty =
     let acc, tyl =
       overload_extract_from_awaitable_list acc p tyl in
     acc, (r, Ttuple tyl)
-  | r, ty ->
+  | r, _ ->
     (* Oh well...let's at least make sure it is array-ish *)
     let expected_ty = r, Tarraykind AKany in
     let env =
       Errors.try_
-        (fun () -> Type.sub_type p Reason.URawait env (r, ty) expected_ty)
+        (fun () -> Type.sub_type p Reason.URawait env ty expected_ty)
         (fun _ ->
-          let ty_str = Typing_print.error ty in
+          let ty_str = Typing_print.error env ty in
           Errors.gena_expects_array p (Reason.to_pos r) ty_str;
           env
         )

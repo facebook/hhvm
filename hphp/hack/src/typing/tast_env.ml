@@ -28,6 +28,8 @@ type t = env [@@deriving show]
 exception Not_in_class
 
 let print_ty = Typing_print.full_strip_ns
+
+let print_error_ty = Typing_print.error
 let print_ty_with_identity = Typing_print.full_with_identity
 let ty_to_json = Typing_print.to_json
 let json_to_locl_ty = Typing_print.json_to_locl_ty

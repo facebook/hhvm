@@ -18,7 +18,7 @@ module MakeType = Typing_make_type
 let check_param : Env.env -> Nast.fun_param -> unit =
   fun env {param_hint; param_pos; _} ->
   let error ty =
-    let ty_str = Typing_print.error (snd ty) in
+    let ty_str = Typing_print.error env ty in
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
     Errors.invalid_memoized_param param_pos msgl
   in

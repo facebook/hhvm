@@ -17,8 +17,8 @@ module TCO = TypecheckerOptions
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
-let info_of_type (reason, typ): Pos.t * string =
-  (Reason.to_pos reason, Typing_print.error typ)
+let info_of_type env ty : Pos.t * string =
+  (Reason.to_pos (fst ty), Env.print_error_ty env ty)
 
 let is_valid_arraykey env tcontainer tkey =
   let is_maplike_container env e =
@@ -50,6 +50,6 @@ let handler = object
     | Array_get (((_, tcontainer), _), Some ((_, tkey), _))
       when should_enforce env &&
         not (is_valid_arraykey env tcontainer tkey) ->
-      Errors.invalid_arraykey p (info_of_type tcontainer) (info_of_type tkey)
+      Errors.invalid_arraykey p (info_of_type env tcontainer) (info_of_type env tkey)
     | _ -> ()
 end

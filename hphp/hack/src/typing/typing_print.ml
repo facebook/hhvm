@@ -34,6 +34,7 @@ module Cls = Typing_classes_heap
 
 module ErrorString = struct
 
+  module Env = Typing_env
   let tprim = function
     | Nast.Tnull       -> "null"
     | Nast.Tvoid       -> "void"
@@ -167,6 +168,10 @@ module ErrorString = struct
     | Ast.Cinterface -> "an interface"
     | Ast.Ctrait -> "a trait"
     | Ast.Cenum -> "an enum"
+
+  and to_string env ty =
+    let _, ety = Env.expand_type env ty in
+    type_ (snd ety)
 end
 
 (*****************************************************************************)
@@ -1546,7 +1551,7 @@ end
 (* User API *)
 (*****************************************************************************)
 
-let error: type a. a ty_ -> _ = fun ty -> ErrorString.type_ ty
+let error env ty = ErrorString.to_string env ty
 let suggest: type a. a ty -> _ =  fun ty -> Suggest.type_ ty
 let full env ty = Full.to_string Doc.text env ty
 let full_rec env n ty = Full.to_string_rec env n ty

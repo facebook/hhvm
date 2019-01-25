@@ -317,9 +317,9 @@ let reactivity_to_string env r =
 (*****************************************************************************)
 (* Unification error *)
 (*****************************************************************************)
-let uerror r1 ty1 r2 ty2 =
-  let ty1 = Typing_print.error ty1 in
-  let ty2 = Typing_print.error ty2 in
+let uerror env r1 ty1 r2 ty2 =
+  let ty1 = Typing_print.error env (r1,ty1) in
+  let ty2 = Typing_print.error env (r2,ty2) in
   Errors.unify_error
     (Reason.to_string ("This is " ^ ty1) r1)
     (Reason.to_string ("It is incompatible with " ^ ty2) r2)
@@ -354,9 +354,9 @@ let simplified_uerror env ty1 ty2 =
       (fun _ ->
           ignore @@ unify ~opts env (get_base_type env ty1) (get_base_type env ty2)
       )
-      (fun _ -> uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2))
+      (fun _ -> uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2))
   else
-    uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)
+    uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
 (* Find the first reason with defined position in a list of types *)
 let rec find_pos r_default tyl =

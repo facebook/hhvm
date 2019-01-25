@@ -15,6 +15,8 @@ exception Not_in_class
 val print_ty : env -> 'a Typing_defs.ty -> string
 (** Return a string representation of the given type using Hack-like syntax. *)
 
+val print_error_ty : env -> Typing_defs.locl Typing_defs.ty -> string
+
 val print_ty_with_identity :
   env ->
   'a Typing_defs.ty ->

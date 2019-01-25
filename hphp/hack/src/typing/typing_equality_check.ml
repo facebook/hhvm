@@ -26,21 +26,21 @@ let trivial_result_str bop =
     | Ast.Diff2 -> "true"
     | _ -> assert false
 
-let trivial_comparison_error p bop (r1, ty1) (r2, ty2) trail1 trail2 =
+let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
   let trivial_result = trivial_result_str bop in
-  let tys1 = Typing_print.error ty1 in
-  let tys2 = Typing_print.error ty2 in
+  let tys1 = Typing_print.error env ty1 in
+  let tys2 = Typing_print.error env ty2 in
   Errors.trivial_strict_eq p trivial_result
-    (Reason.to_string ("This is " ^ tys1) r1)
-    (Reason.to_string ("This is " ^ tys2) r2)
+    (Reason.to_string ("This is " ^ tys1) (fst ty1))
+    (Reason.to_string ("This is " ^ tys2) (fst ty2))
     trail1 trail2
 
-let eq_incompatible_types p (r1, ty1) (r2, ty2) =
-  let tys1 = Typing_print.error ty1 in
-  let tys2 = Typing_print.error ty2 in
+let eq_incompatible_types env p ty1 ty2 =
+  let tys1 = Typing_print.error env ty1 in
+  let tys2 = Typing_print.error env ty2 in
   Errors.eq_incompatible_types p
-    (Reason.to_string ("This is " ^ tys1) r1)
-    (Reason.to_string ("This is " ^ tys2) r2)
+    (Reason.to_string ("This is " ^ tys1) (fst ty1))
+    (Reason.to_string ("This is " ^ tys2) (fst ty2))
 
 let rec assert_nontrivial p bop env ty1 ty2 =
   let ety_env = Phase.env_with_self env in
@@ -53,7 +53,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   (* Future: consider putting this in typed lint not type checking *)
   | (_, Tabstract (AKenum e1, None)), (_, Tabstract (AKenum e2, None)) ->
     if e1=e2 then ()
-    else eq_incompatible_types p ety1 ety2
+    else eq_incompatible_types env p ety1 ety2
   | _ ->
   match ety1, ety2 with
   | (_, Tprim N.Tnum),               (_, Tprim (N.Tint | N.Tfloat))
@@ -70,7 +70,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string ("This is void") r)
   | (_, Tprim a), (_, Tprim b) when a <> b ->
-      trivial_comparison_error p bop ty1 ty2 trail1 trail2
+      trivial_comparison_error env p bop ty1 ty2 trail1 trail2
   | (_, Toption ty1), (_, Tprim _ as ty2)
   | (_, Tprim _ as ty1), (_, Toption ty2) ->
       assert_nontrivial p bop env ty1 ty2
@@ -84,7 +84,7 @@ let assert_nullable p bop env ty =
   match ty with
   | r, Tarraykind _ ->
     let trivial_result = trivial_result_str bop in
-    let ty_str = Typing_print.error (snd ty) in
+    let ty_str = Typing_print.error env ty in
     let msgl = Reason.to_string ("This is "^ty_str^" and cannot be null") r in
     Errors.trivial_strict_not_nullable_compare_null p trivial_result msgl
   | _, _ ->

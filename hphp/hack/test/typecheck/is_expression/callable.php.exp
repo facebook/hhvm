@@ -9,4 +9,4 @@ Invalid argument (Typing[4110])
 File "callable.php", line 6, characters 13-33:
 Invalid "is" expression hint (Typing[4195])
   File "callable.php", line 6, characters 13-33:
-  The "is" operator cannot be used with a function
+  The "is" operator cannot be used with a function type

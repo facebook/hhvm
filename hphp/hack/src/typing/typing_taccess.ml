@@ -149,7 +149,7 @@ and expand env (root_reason, root_ty as root) =
         begin match tyl with
         | [] ->
           let pos, tconst = head in
-          let ty = Typing_print.error root_ty in
+          let ty = Typing_print.error env.tenv root in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;
           env, (root_reason, Terr)
         | ty::_ ->
@@ -181,7 +181,7 @@ and expand env (root_reason, root_ty as root) =
       | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
           let pos, tconst = head in
-          let ty = Typing_print.error root_ty in
+          let ty = Typing_print.error env.tenv root in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;
           env, (root_reason, Terr)
      end

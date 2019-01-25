@@ -244,7 +244,7 @@ and simplify_subtype
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  let uerror () = TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
+  let uerror () = TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
   let invalid () = invalid_with uerror in
@@ -1748,7 +1748,7 @@ and sub_type_inner
       Env.add_subtype_prop env prop
     end
     else env in
-  let fail () = TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+  let fail () = TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
   process_simplify_subtype_result ~this_ty ~fail env prop
 
 (* Deal with the cases not dealt with by simplify_subtype *)
@@ -1761,7 +1761,7 @@ and sub_type_inner_helper env ~this_ty
   (* Default error *)
 
   let _fail () =
-    TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
+    TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
     env in
 
   log_subtype ~this_ty "sub_type_inner_helper" env ty_sub ty_super;
@@ -1974,7 +1974,7 @@ let rec sub_string
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
   let fail () =
-    TUtils.uerror (Reason.Rwitness p) (Tprim Nast.Tstring) (fst ety2) (snd ety2);
+    TUtils.uerror env (Reason.Rwitness p) (Tprim Nast.Tstring) (fst ety2) (snd ety2);
     env in
 
   match ety2 with

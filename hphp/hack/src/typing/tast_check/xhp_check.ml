@@ -21,7 +21,7 @@ let check_xhp_children env pos ty =
     | _ -> [ty] in
   if not @@ List.for_all ~f:(Env.is_xhp_child env pos) tys
   then
-    let ty_str = Typing_print.error (snd ty) in
+    let ty_str = Env.print_error_ty env ty in
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
     Errors.illegal_xhp_child pos msgl
 

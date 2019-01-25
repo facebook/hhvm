@@ -12,7 +12,7 @@
 (* Pretty printing of types *)
 (*****************************************************************************)
 
-val error: 'a Typing_defs.ty_ -> string
+val error: Typing_env.env -> Typing_defs.locl Typing_defs.ty -> string
 val suggest: 'a Typing_defs.ty -> string
 val full: Typing_env.env -> 'a Typing_defs.ty -> string
 val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string

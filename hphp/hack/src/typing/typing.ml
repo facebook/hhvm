@@ -2180,12 +2180,12 @@ and expr_
           check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
-          let env, te, (r, ty) = expr env e in
+          let env, te, ty = expr env e in
           (* not a call - report an error *)
           Errors.non_call_argument_in_suspend
             epos
-            (Reason.to_string ("This is " ^ Typing_print.error ty) r);
-          env, te, (r, ty) in
+            (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
+          env, te, ty in
       make_result env p (T.Suspend te) ty
 
   | Special_func func -> special_func env p func
@@ -2208,10 +2208,7 @@ and expr_
         (Env.get_tcopt env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
         && TUtils.is_option_non_mixed env ty2
-      then begin
-        let (r, ty2) = ty2 in
-        Errors.nullable_cast p (Typing_print.error ty2) (Reason.to_pos r)
-      end;
+      then Errors.nullable_cast p (Typing_print.error env ty2) (Reason.to_pos (fst ty2));
       let env, ty = Phase.localize_hint_with_self env hint in
       make_result env p (T.Cast (hint, te)) ty
   | InstanceOf (e, (pos, cid)) ->
@@ -2886,7 +2883,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
     | (cname, class_info, c_ty)::classes ->
       if check_not_abstract && (Cls.abstract class_info)
         && not (requires_consistent_construct cid) then
-        uninstantiable_error p cid (Cls.pos class_info) (Cls.name class_info) p c_ty;
+        uninstantiable_error env p cid (Cls.pos class_info) (Cls.name class_info) p c_ty;
       let env, obj_ty_, params, tyvars =
         match cid, tal, snd c_ty with
         (* Explicit type arguments *)
@@ -2969,19 +2966,19 @@ and instantiable_cid ?(exact = Nonexact) p env cid tal =
       then
          match cid with
           | CIexpr _ | CI _ ->
-            uninstantiable_error p cid (Cls.pos class_info) name pos c_ty
+            uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
           | CIstatic | CIparent | CIself -> ()
       else if (Cls.kind class_info) = Ast.Cabstract && (Cls.final class_info)
       then
-        uninstantiable_error p cid (Cls.pos class_info) name pos c_ty
+        uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
       else () end;
     env, te, classes
   end
 
-and uninstantiable_error reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
+and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason_msgl = match cid with
     | CIexpr _ ->
-      let ty_str = "This would be "^Typing_print.error (snd c_ty) in
+      let ty_str = "This would be "^Typing_print.error env c_ty in
       [(reason_pos, ty_str)]
     | _ -> [] in
   Errors.uninstantiable_class c_usage_pos c_tc_pos c_name reason_msgl
@@ -3033,7 +3030,7 @@ and check_shape_keys_validity env pos keys =
           then
             Errors.shape_field_type_mismatch
               key_pos witness_pos
-              (Typing_print.error (snd ty2)) (Typing_print.error (snd ty1));
+              (Typing_print.error env ty2) (Typing_print.error env ty1);
           env
     in
 
@@ -3425,7 +3422,7 @@ and is_abstract_ft fty = match fty with
       (* non-coroutine call in suspend *)
       Errors.non_coroutine_call_in_suspend
         fpos
-        (Reason.to_string ("This is " ^ Typing_print.error (snd fty)) (fst fty));
+        (Reason.to_string ("This is " ^ Typing_print.error env fty) (fst fty));
     | false, _ ->
       (*coroutine call outside of suspend *)
       Errors.coroutine_call_outside_of_suspend p; in
@@ -3486,10 +3483,9 @@ and is_abstract_ft fty = match fty with
              else (Reason.Rnone, Tarraykind AKany);
            ] then env
            else begin
-             let env, (r, ety) = Env.expand_type env ty in
                unset_error
                p
-               (Reason.to_string ("This is " ^ Typing_print.error ety) r);
+               (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
              env
            end
          | _ -> unset_error p []; env)
@@ -4165,7 +4161,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       begin match resl with
       | [] ->
         Errors.non_class_member
-          mid p (Typing_print.error (snd cty))
+          mid p (Typing_print.error env cty)
           (Reason.to_pos (fst cty));
         (env, err_witness env p, ISet.empty, None)
       | ((_, (_, ty), _, _) as res)::rest ->
@@ -4173,7 +4169,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
         then
           begin
             Errors.ambiguous_member
-              mid p (Typing_print.error (snd cty))
+              mid p (Typing_print.error env cty)
               (Reason.to_pos (fst cty));
             (env, err_witness env p, ISet.empty, None)
           end
@@ -4475,7 +4471,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
     default ()
   | _ ->
     Errors.non_object_member
-      id_str id_pos (Typing_print.error (snd concrete_ty))
+      id_str id_pos (Typing_print.error env concrete_ty)
       (Reason.to_pos (fst concrete_ty));
     default ()
 
@@ -4538,7 +4534,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     begin match resl with
       | [] -> begin
           Errors.non_object_member
-            id_str id_pos (Typing_print.error (snd ety1))
+            id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
           k (env, err_witness env id_pos, ISet.empty, None)
         end
@@ -4547,7 +4543,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
         then
         begin
           Errors.ambiguous_member
-            id_str id_pos (Typing_print.error (snd ety1))
+            id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
           k (env, err_witness env id_pos, tyvars, None)
         end
@@ -4778,12 +4774,12 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           Errors.unknown_class p (Reason.to_string "It is unknown" r);
           env, (Reason.Rwitness p, Typing_utils.terr env)
 
-        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
+        | (_, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
                  | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)
-                 | Tanon (_, _) | Tobject | Tshape _ as ty
-        ) ->
-          Errors.expected_class ~suffix:(", but got "^Typing_print.error ty) p;
+                 | Tanon (_, _) | Tobject | Tshape _)) as ty
+          ->
+          Errors.expected_class ~suffix:(", but got "^Typing_print.error env ty) p;
           env, (Reason.Rwitness p, Typing_utils.terr env) in
       let env, result_ty = resolve_ety env ty in
       make_result env (T.CIexpr te) result_ty
@@ -5132,8 +5128,8 @@ and call_ ~expected ~method_call_info pos env fty el uel =
     (* Relaxing call_user_func to work with an array in partial mode *)
     let env = call_untyped_unpack env uel in
     env, [], [], (Reason.Rnone, Typing_utils.tany env)
-  | _, ty ->
-    bad_call pos ty;
+  | ty ->
+    bad_call env pos ty;
     let env = call_untyped_unpack env uel in
     env, [], [], err_witness env pos
   )
@@ -5172,8 +5168,8 @@ and call_untyped_unpack env uel = match uel with
     end
   end
 
-and bad_call p ty =
-  Errors.bad_call p (Typing_print.error ty)
+and bad_call env p ty =
+  Errors.bad_call p (Typing_print.error env ty)
 
 (* to be used to throw typing error if failing to satisfy subtype relation *)
 and enforce_sub_ty env p ty1 ty2 =
@@ -5423,8 +5419,8 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       then begin
         let ty1 = Typing_expand.fully_expand env ty1 in
         let ty2 = Typing_expand.fully_expand env ty2 in
-        let tys1 = Typing_print.error (snd ty1) in
-        let tys2 = Typing_print.error (snd ty2) in
+        let tys1 = Typing_print.error env ty1 in
+        let tys2 = Typing_print.error env ty2 in
         Errors.comparison_invalid_types p
           (Reason.to_string ("This is " ^ tys1) (fst ty1))
           (Reason.to_string ("This is " ^ tys2) (fst ty2))

@@ -23,7 +23,7 @@ let rec truthiness_test env ((p, ty), e) =
   | Expr_list el -> truthiness_test env (List.last_exn el)
   | _ ->
     let open Tast_utils in
-    let prim_to_string prim = Typing_print.error (Typing_defs.Tprim prim) in
+    let prim_to_string prim = Env.print_error_ty env (fst ty, Typing_defs.Tprim prim) in
     List.iter (find_sketchy_types env ty) begin function
       | String ->
         let tystr = prim_to_string Aast_defs.Tstring in

@@ -18,7 +18,9 @@
     Print
     PopC
 
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     CGetL $msg
     FCall <> 1 1 - "" ""
     PopC
@@ -76,15 +78,21 @@ repeat:
              CGetL $counter
              Switch Unbounded 0 <make_one make_two make_three>
 
-make_one:    FPushCtorD 0 "One"
+make_one:    NewObjD "One"
+             Dup
+             FPushCtor 0
              FCall <> 0 1 - "" ""
              PopC
              Throw
-make_two:    FPushCtorD 0 "Two"
+make_two:    NewObjD "Two"
+             Dup
+             FPushCtor 0
              FCall <> 0 1 - "" ""
              PopC
              Throw
-make_three:  FPushCtorD 1 "Three"
+make_three:  NewObjD "Three"
+             Dup
+             FPushCtor 1
              String "third exception from throw_various"
              FCall <> 1 1 - "" ""
              PopC

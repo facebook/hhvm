@@ -81,7 +81,9 @@
   PopC
 
   ClsRefGetL $who 0
-  FPushCtor 0 0 NoGenerics
+  NewObj 0 NoGenerics
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj

@@ -59,7 +59,9 @@ end:
   CGetL $type
   JmpZ cls2
 
-  FPushCtorD 0 "Cls1"
+  NewObjD "Cls1"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj
@@ -72,7 +74,9 @@ end:
   RetC
 
 cls2:
-  FPushCtorD 0 "Cls2"
+  NewObjD "Cls2"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj

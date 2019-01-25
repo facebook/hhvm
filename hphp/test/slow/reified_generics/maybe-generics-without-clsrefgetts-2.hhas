@@ -28,7 +28,9 @@ L0:
   NewArray 0
   ClsRefGetTS 0
 L1:
-  FPushCtor 0 0 MaybeGenerics
+  NewObj 0 MaybeGenerics
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   RetC

@@ -7,13 +7,17 @@
   FCall <> 0 1 - "" ""
   PopC
 
-  FPushCtorD 0 "Foo"
+  NewObjD "Foo"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $x
   PopC
 
-  FPushCtorD 0 "Bar"
+  NewObjD "Bar"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $y
@@ -62,7 +66,9 @@
 }
 
 .function make_bar() {
-  FPushCtorD 0 "Bar"
+  NewObjD "Bar"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   AssertRATStk 0 InitNull
   AssertRATStk 1 Obj
@@ -92,7 +98,9 @@ out:
   RetC
 
 stuff:
-  FPushCtorD 0 "Foo"
+  NewObjD "Foo"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj

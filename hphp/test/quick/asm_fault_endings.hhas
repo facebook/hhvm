@@ -18,7 +18,9 @@
     PopC
 
     .try {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "ex"
       FCall <> 1 1 - "" ""
       PopC

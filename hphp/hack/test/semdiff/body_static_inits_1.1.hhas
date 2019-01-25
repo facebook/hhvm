@@ -102,7 +102,9 @@ L1:
   CGetS 0
   Print
   PopC
-  FPushCtorD 0 "foo"
+  NewObjD "foo"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $v

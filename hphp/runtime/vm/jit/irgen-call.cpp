@@ -656,9 +656,6 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     case OpFPushClsMethodSD:
     case OpFPushClsMethodD:
     case OpFPushCtor:
-    case OpFPushCtorD:
-    case OpFPushCtorI:
-    case OpFPushCtorS:
       // None of these access the caller's frame because they all call methods,
       // not top-level functions. However, they might still be marked as
       // skip-frame and therefore something they call can affect our frame. We
@@ -762,128 +759,6 @@ void fpushActRec(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitFPushCtor(
-  IRGS& env, uint32_t numParams, uint32_t slot, HasGenericsOp op
-) {
-  /*
-   * NoGenerics:    Do not read the generic part of clsref and emit AllocObj
-   * HasGenerics:   Read the full clsref and emit AllocObjReified
-   * MaybeGenerics: Read the full clsref, if generic part is not nullptr,
-   *                emit AllocObjReified, otherwise use AllocObj
-   */
-  auto const ret = [&] {
-    if (HasGenericsOp::NoGenerics == op) {
-      auto const cls  = takeClsRefCls(env, slot);
-      emitCallerDynamicConstructChecks(env, cls);
-      auto const func = gen(env, LdClsCtor, cls, fp(env));
-      auto const obj  = gen(env, AllocObj, cls);
-      return std::make_pair(func, obj);
-    }
-    auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
-    auto const reified_generic = clsref.first;
-    auto const cls  = clsref.second;
-    emitCallerDynamicConstructChecks(env, cls);
-    auto const func = gen(env, LdClsCtor, cls, fp(env));
-    auto const obj  = [&] {
-      if (HasGenericsOp::HasGenerics == op) {
-        return gen(env, AllocObjReified, cls, reified_generic);
-      }
-      assertx(HasGenericsOp::MaybeGenerics == op);
-      return cond(
-        env,
-        [&] (Block* taken) {
-          return gen(env, CheckNonNull, taken, reified_generic);
-        },
-        [&] (SSATmp* generics) {
-          return gen(env, AllocObjReified, cls, generics);
-        },
-        [&] {
-          return gen(env, AllocObj, cls);
-        }
-      );
-    }();
-    return std::make_pair(func, obj);
-  }();
-  auto const func = ret.first;
-  auto const obj  = ret.second;
-  pushIncRef(env, obj);
-  fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
-}
-
-void emitFPushCtorD(IRGS& env,
-                    uint32_t numParams,
-                    const StringData* className) {
-  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
-  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = canInstantiateClass(cls);
-  bool const fastAlloc =
-    persistentCls &&
-    canInstantiate &&
-    !cls->hasNativePropHandler();
-
-  auto const func = lookupImmutableCtor(cls, curClass(env));
-
-  // We don't need to actually do the load if we have a persistent class
-  auto const cachedCls = persistentCls ? nullptr :
-    gen(env, LdClsCached, cns(env, className));
-
-  // If we know the Class*, we can use it; if its not persistent,
-  // we will have loaded it above.
-  auto const ssaCls = cls ? cns(env, cls) : cachedCls;
-
-  auto const ssaFunc = func ? cns(env, func)
-                            : gen(env, LdClsCtor, ssaCls, fp(env));
-  auto const obj = fastAlloc ? allocObjFast(env, cls)
-                             : gen(env, AllocObj, ssaCls);
-  pushIncRef(env, obj);
-  fpushActRec(env, ssaFunc, obj, numParams, nullptr, cns(env, false));
-}
-
-void emitFPushCtorI(IRGS& env,
-                    uint32_t numParams,
-                    uint32_t clsIx) {
-  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto const cls = [&] () -> Class* {
-    auto const c = preClass->namedEntity()->clsList();
-    if (c && (c->attrs() & AttrUnique)) return c;
-    return nullptr;
-  }();
-  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = canInstantiateClass(cls);
-  bool const fastAlloc =
-    persistentCls &&
-    canInstantiate &&
-    !cls->hasNativePropHandler();
-
-  auto const func = lookupImmutableCtor(cls, curClass(env));
-
-  auto const ssaCls = [&] {
-    if (!persistentCls) {
-      auto const cachedCls = cond(
-        env,
-        [&] (Block* taken) {
-          return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
-        },
-        [&] (SSATmp* val) {
-          return val;
-        },
-        [&] {
-          return gen(env, DefCls, cns(env, clsIx));
-        }
-      );
-      if (!cls) return cachedCls;
-    }
-    return cns(env, cls);
-  }();
-
-  auto const ssaFunc = func ? cns(env, func)
-                            : gen(env, LdClsCtor, ssaCls, fp(env));
-  auto const obj = fastAlloc ? allocObjFast(env, cls)
-                             : gen(env, AllocObj, ssaCls);
-  pushIncRef(env, obj);
-  fpushActRec(env, ssaFunc, obj, numParams, nullptr, cns(env, false));
-}
-
 namespace {
 
 SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
@@ -969,25 +844,125 @@ folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
 
 } // namespace
 
-void emitFPushCtorS(IRGS& env, uint32_t numParams, SpecialClsRef ref) {
-  auto const cls  = specialClsRefToCls(env, ref);
-  auto const func = gen(env, LdClsCtor, cls, fp(env));
-  auto const obj = [&] {
-    auto const slot = specialClsReifiedPropSlot(env, ref);
-    if (slot == folly::none) return gen(env, AllocObj, cls);
-    auto const this_ = checkAndLoadThis(env);
-    auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
-    auto const addr = gen(
-      env,
-      LdPropAddr,
-      ByteOffsetData { (ptrdiff_t)curClass(env)->declPropOffset(*slot) },
-      ty.lval(Ptr::Prop),
-      this_
-    );
-    auto const reified_generic = gen(env, LdMem, ty, addr);
-    return gen(env, AllocObjReified, cls, reified_generic);
+void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
+  /*
+   * NoGenerics:    Do not read the generic part of clsref and emit AllocObj
+   * HasGenerics:   Read the full clsref and emit AllocObjReified
+   * MaybeGenerics: Read the full clsref, if generic part is not nullptr,
+   *                emit AllocObjReified, otherwise use AllocObj
+   */
+  if (HasGenericsOp::NoGenerics == op) {
+    auto const cls  = takeClsRefCls(env, slot);
+    emitCallerDynamicConstructChecks(env, cls);
+    push(env, gen(env, AllocObj, cls));
+    return;
+  }
+
+  auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
+  auto const reified_generic = clsref.first;
+  auto const cls  = clsref.second;
+  emitCallerDynamicConstructChecks(env, cls);
+  if (HasGenericsOp::HasGenerics == op) {
+    push(env, gen(env, AllocObjReified, cls, reified_generic));
+    return;
+  }
+  assertx(HasGenericsOp::MaybeGenerics == op);
+  push(env, cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, CheckNonNull, taken, reified_generic);
+    },
+    [&] (SSATmp* generics) { return gen(env, AllocObjReified, cls, generics); },
+    [&] { return gen(env, AllocObj, cls); }
+  ));
+}
+
+void emitNewObjD(IRGS& env, const StringData* className) {
+  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
+  bool const canInstantiate = canInstantiateClass(cls);
+  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()) {
+    push(env, allocObjFast(env, cls));
+    return;
+  }
+
+  if (persistentCls) {
+    push(env, gen(env, AllocObj, cns(env, cls)));
+    return;
+  }
+
+  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
+  push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
+}
+
+void emitNewObjI(IRGS& env, uint32_t clsIx) {
+  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
+  auto const cls = [&] () -> Class* {
+    auto const c = preClass->namedEntity()->clsList();
+    if (c && (c->attrs() & AttrUnique)) return c;
+    return nullptr;
   }();
-  pushIncRef(env, obj);
+  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
+  bool const canInstantiate = canInstantiateClass(cls);
+  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()) {
+    push(env, allocObjFast(env, cls));
+    return;
+  }
+
+  if (persistentCls) {
+    push(env, gen(env, AllocObj, cns(env, cls)));
+    return;
+  }
+
+  auto const cachedCls = cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
+    },
+    [&] (SSATmp* val) { return val; },
+    [&] { return gen(env, DefCls, cns(env, clsIx)); }
+  );
+
+  push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
+}
+
+void emitNewObjS(IRGS& env, SpecialClsRef ref) {
+  auto const cls  = specialClsRefToCls(env, ref);
+  auto const slot = specialClsReifiedPropSlot(env, ref);
+  if (slot == folly::none) {
+    push(env, gen(env, AllocObj, cls));
+    return;
+  }
+
+  auto const this_ = checkAndLoadThis(env);
+  auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+  auto const addr = gen(
+    env,
+    LdPropAddr,
+    ByteOffsetData { (ptrdiff_t)curClass(env)->declPropOffset(*slot) },
+    ty.lval(Ptr::Prop),
+    this_
+  );
+  auto const reified_generic = gen(env, LdMem, ty, addr);
+  push(env, gen(env, AllocObjReified, cls, reified_generic));
+}
+
+void emitFPushCtor(IRGS& env, uint32_t numParams) {
+  auto const obj = popC(env);
+  if (!obj->isA(TObj)) PUNT(FPushCtor-NonObj);
+
+  auto const func = [&] {
+    auto const exactCls = obj->type().clsSpec().exactCls();
+    if (!exactCls) {
+      auto const cls = gen(env, LdObjClass, obj);
+      return gen(env, LdClsCtor, cls, fp(env));
+    }
+
+    auto const ctor = lookupImmutableCtor(exactCls, curClass(env));
+    if (ctor) return cns(env, ctor);
+    return gen(env, LdClsCtor, cns(env, exactCls), fp(env));
+  }();
+
   fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 

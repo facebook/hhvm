@@ -1,0 +1,1 @@
+Fatal error: Cannot instantiate abstract class Asd in %s/slow/object/ctor_fail_abstract.php on line 9

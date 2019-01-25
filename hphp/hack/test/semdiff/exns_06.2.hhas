@@ -28,7 +28,9 @@
 .function <"" N  > lop() {
   .try_fault F0 {
     .try {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "one"
       FCall <> 1 1 - "" ""
       PopC
@@ -36,7 +38,9 @@
     } .catch {
       UnsetL _0
       UnsetL _1
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "two"
       FCall <> 1 1 - "" ""
       PopC
@@ -53,7 +57,9 @@ F0:
 .function <"" N  > goo() {
   .declvars $e;
   .try {
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "one"
     FCall <> 1 1 - "" ""
     PopC
@@ -111,7 +117,9 @@ F2:
     String "begin try\n"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "one"
     FCall <> 1 1 - "" ""
     PopC
@@ -121,7 +129,9 @@ F2:
     String "end outer loop\n"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "two"
     FCall <> 1 1 - "" ""
     PopC
@@ -149,7 +159,9 @@ F2:
 
 .function <"" N  > baz() {
   .try {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "one"
       FCall <> 1 1 - "" ""
       PopC
@@ -157,7 +169,9 @@ F2:
   } .catch {
       .try_fault F1 {
         UnsetL _1
-        FPushCtorD 1 "Exception"
+        NewObjD "Exception"
+        Dup
+        FPushCtor 1
         String "two"
         FCall <> 1 1 - "" ""
         PopC
@@ -177,7 +191,9 @@ F1:
 .function <"" N  > bar() {
   .declvars $e;
   .try {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "bar"
       FCall <> 1 1 - "" ""
       PopC

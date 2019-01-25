@@ -85,7 +85,7 @@ void discardStackTemps(const ActRec* const fp,
       assertx(ar == reinterpret_cast<ActRec*>(stack.top()));
       // ar is a pre-live ActRec in fp's scope, and pushOff
       // is the offset of the corresponding FPush* opcode.
-      if (isFPushCtor(fp->func()->unit()->getOp(pushOff))) {
+      if (fp->func()->unit()->getOp(pushOff) == Op::FPushCtor) {
         assertx(ar->hasThis());
         ar->getThis()->setNoDestruct();
       }
@@ -210,7 +210,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     auto outer = g_context->getPrevVMState(fp, &prevPc);
     if (outer) {
       auto fe = outer->func()->findFPI(prevPc);
-      if (fe && isFPushCtor(outer->func()->unit()->getOp(fe->m_fpushOff))) {
+      if (fe && outer->func()->unit()->getOp(fe->m_fpushOff) == Op::FPushCtor) {
         fp->getThis()->setNoDestruct();
       }
     }

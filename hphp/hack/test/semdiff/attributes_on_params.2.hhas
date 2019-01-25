@@ -45,7 +45,9 @@ L1:
 
 .function <"" N  > run() {
   .declvars $cls $ctor $func;
-  FPushCtorD 1 "ReflectionClass"
+  NewObjD "ReflectionClass"
+  Dup
+  FPushCtor 1
   String "A"
   FCall <> 1 1 - "" ""
   PopC
@@ -74,7 +76,9 @@ L1:
   String "Annotation-missing"
   FCall <> 4 1 - "" ""
   PopC
-  FPushCtorD 1 "ReflectionFunction"
+  NewObjD "ReflectionFunction"
+  Dup
+  FPushCtor 1
   String "f"
   FCall <> 1 1 - "" ""
   PopC

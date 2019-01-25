@@ -13,7 +13,9 @@
 }
 
 .function main() isAsync {
-  FPushCtorD 0 "heh"
+  NewObjD "heh"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $x

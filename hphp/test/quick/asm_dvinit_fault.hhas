@@ -32,7 +32,9 @@ dv_init2:
       SetL $y
       PopC
 
-      FPushCtorD 0 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 0
       FCall <> 0 1 - "" ""
       PopC
       Throw

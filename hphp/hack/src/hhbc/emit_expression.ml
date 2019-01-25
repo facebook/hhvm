@@ -847,28 +847,36 @@ and emit_new env pos expr targs args uargs =
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [
       emit_pos pos;
-      instr_fpushctord nargs fq_id;
+      instr_newobjd fq_id;
+      instr_dup;
+      instr_fpushctor nargs;
       emit_args_and_call env pos args uargs None;
       instr_popc
       ]
   | Class_static ->
     gather [
       emit_pos pos;
-      instr_fpushctors nargs SpecialClsRef.Static;
+      instr_newobjs SpecialClsRef.Static;
+      instr_dup;
+      instr_fpushctor nargs;
       emit_args_and_call env pos args uargs None;
       instr_popc
       ]
   | Class_self ->
     gather [
       emit_pos pos;
-      instr_fpushctors nargs SpecialClsRef.Self;
+      instr_newobjs SpecialClsRef.Self;
+      instr_dup;
+      instr_fpushctor nargs;
       emit_args_and_call env pos args uargs None;
       instr_popc
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
-      instr_fpushctors nargs SpecialClsRef.Parent;
+      instr_newobjs SpecialClsRef.Parent;
+      instr_dup;
+      instr_fpushctor nargs;
       emit_args_and_call env pos args uargs None;
       instr_popc
       ]
@@ -879,7 +887,9 @@ and emit_new env pos expr targs args uargs =
       | _ -> emit_load_class_ref env pos cexpr in
     gather [
       instrs;
-      instr_fpushctor nargs 0 has_generics;
+      instr_newobj 0 has_generics;
+      instr_dup;
+      instr_fpushctor nargs;
       emit_args_and_call env pos args uargs None;
       instr_popc
     ]
@@ -887,7 +897,9 @@ and emit_new env pos expr targs args uargs =
 and emit_new_anon env pos cls_idx args uargs =
   let nargs = List.length args + List.length uargs in
   gather [
-    instr_fpushctori nargs cls_idx;
+    instr_newobji cls_idx;
+    instr_dup;
+    instr_fpushctor nargs;
     emit_args_and_call env pos args uargs None;
     instr_popc
     ]

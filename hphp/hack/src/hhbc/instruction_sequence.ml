@@ -178,10 +178,11 @@ let instr_add_elemv = instr (ILitConst (AddElemV))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 let instr_add_new_elemv = instr (ILitConst (AddNewElemV))
 let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
-let instr_fpushctord nargs id = instr (ICall (FPushCtorD (nargs, id)))
-let instr_fpushctor nargs id op = instr (ICall (FPushCtor (nargs, id, op)))
-let instr_fpushctors nargs scref = instr (ICall (FPushCtorS (nargs, scref)))
-let instr_fpushctori nargs clsnum = instr (ICall (FPushCtorI (nargs, clsnum)))
+let instr_newobj id op = instr (ICall (NewObj (id, op)))
+let instr_newobjd id = instr (ICall (NewObjD id))
+let instr_newobjs scref = instr (ICall (NewObjS scref))
+let instr_newobji clsnum = instr (ICall (NewObjI clsnum))
+let instr_fpushctor nargs = instr (ICall (FPushCtor nargs))
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
@@ -541,7 +542,7 @@ let rewrite_class_refs_instr num = function
 | IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _, m)) -> (num - 1, IBase (BaseSC (si, num, m)))
 | IBase (BaseSL (l, _, m)) -> (num - 1, IBase (BaseSL (l, num, m)))
-| ICall (FPushCtor (np, _, op)) -> (num - 1, ICall (FPushCtor (np, num, op)))
+| ICall (NewObj (_, op)) -> (num - 1, ICall (NewObj (num, op)))
 | ICall (FPushClsMethod (np, _, pl)) ->
   (num - 1, ICall (FPushClsMethod (np, num, pl)))
 | IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
@@ -776,11 +777,11 @@ let get_input_output_count i =
   | ICall i ->
     begin match i with
     | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _
-    | FPushFunc _ -> (1, 0)
+    | FPushFunc _ | FPushCtor _ -> (1, 0)
     | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _
     | FPushFuncD _ | FThrowOnRefMismatch _ -> (0, 0)
     | FPushObjMethod _ -> (2, 0)
-    | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _ -> (0, 1)
+    | NewObj _ | NewObjD _ | NewObjI _ | NewObjS _ -> (0, 1)
     | FCall ((f, n1, n2, _), _, _) -> (n1 + (if f.has_unpack then 1 else 0), n2)
     | FCallBuiltin (n, _, _) -> (n, 1)
     end

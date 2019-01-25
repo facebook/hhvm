@@ -1477,15 +1477,14 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
 
-    case Op::FPushCtor: {
+    case Op::NewObj: {
       auto new_pc = pc;
       decode_op(new_pc);
-      decode_iva(new_pc);
       auto const slot = decode_iva(new_pc);
       auto const has_generic_op = decode_oa<HasGenericsOp>(new_pc);
       if (has_generic_op == HasGenericsOp::MaybeGenerics &&
           !cur->writtenByClsRefGetTSSlots[slot]) {
-        ferror("FPushCtor uses MaybeGenerics flavor but a cls-ref slot that "
+        ferror("NewObj uses MaybeGenerics flavor but a cls-ref slot that "
                "was not written by ClsRefGetTS\n");
         return false;
       }
@@ -1826,13 +1825,14 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
     case Op::FPushCtor:
-    case Op::FPushCtorD:
-    case Op::FPushCtorI:
-    case Op::FPushCtorS:
     case Op::FThrowOnRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:
     case Op::NativeImpl:
+    case Op::NewObj:
+    case Op::NewObjD:
+    case Op::NewObjI:
+    case Op::NewObjS:
     case Op::ResolveFunc:
     case Op::ResolveObjMethod:
     case Op::ResolveClsMethod:

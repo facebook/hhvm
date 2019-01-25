@@ -1,7 +1,9 @@
 # test weird characters in names (like those used in closures)
 
 .main {
-  FPushCtorI 0 0
+  NewObjI 0
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   FPushObjMethodD 0 "print$foo" NullThrows

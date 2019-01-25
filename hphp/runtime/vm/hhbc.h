@@ -663,12 +663,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
                                        NOV,             NOV,        PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushCtor,       THREE(IVA,CAR,OA(HasGenericsOp)),                  \
-                                       NOV,             ONE(CV),    PF) \
-  O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
-  O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
-  O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
-                                       NOV,             ONE(CV),    PF) \
+  O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                  \
+                                       NOV,             ONE(CV),    NF) \
+  O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(NewObjI,         ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewObjS,         ONE(OA(SpecialClsRef)),                        \
+                                       NOV,             ONE(CV),    NF) \
+  O(FPushCtor,       ONE(IVA),         ONE(CV),         NOV,        PF) \
   O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
@@ -1065,14 +1066,6 @@ constexpr bool isFPushObjMethod(Op opcode) {
   return
     opcode == OpFPushObjMethod ||
     opcode == OpFPushObjMethodD;
-}
-
-constexpr bool isFPushCtor(Op opcode) {
-  return
-    opcode == OpFPushCtor  ||
-    opcode == OpFPushCtorD ||
-    opcode == OpFPushCtorI ||
-    opcode == OpFPushCtorS;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

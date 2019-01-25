@@ -1,7 +1,9 @@
 
 .main {
   DefCls 0
-  FPushCtorD 0 "C"
+  NewObjD "C"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
 
   CheckProp "foo"

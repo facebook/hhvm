@@ -1014,6 +1014,10 @@ let makeunaryinst s arg = match s with
    | "CheckProp" -> IMutator(CheckProp (prop_id_of_iarg arg))
 
    (* instruct_call *)
+   | "NewObjD" -> ICall (NewObjD (class_id_of_iarg arg))
+   | "NewObjI" -> ICall (NewObjI (intofiarg arg))
+   | "NewObjS" -> ICall (NewObjS (specialclsrefofiarg arg))
+   | "FPushCtor" -> ICall (FPushCtor (intofiarg arg))
    | "FPushFunc" -> ICall(FPushFunc (intofiarg arg, []))
    | "FThrowOnRefMismatch" -> ICall(FThrowOnRefMismatch (listofboolofiarg arg))
    | "RetM" -> IContFlow(RetM (intofiarg arg))
@@ -1088,15 +1092,13 @@ match s with
    IMutator (InitProp (prop_id_of_iarg arg1, initpropopofiarg arg2))
 
  (* instruct_call *)
+ | "NewObj" -> ICall (NewObj (intofiarg arg1, hasgenericsopofiarg arg2))
  | "FPushObjMethod" ->
     ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2, []))
  | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2, []))
  | "FPushFunc" -> ICall(FPushFunc (intofiarg arg1, listofintofiarg arg2))
  | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, function_id_of_iarg arg2))
  | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))
- | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
- | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
- | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
 
  (* instruct_base *)
  | "BaseNC" -> IBase (BaseNC (intofiarg arg1, memberopmodeofiarg arg2))
@@ -1161,7 +1163,6 @@ let maketernaryinst s arg1 arg2 arg3 =
                                              listoflabelsofiarg arg3))
 
  (* instruct_call *)
- | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2, hasgenericsopofiarg arg3))
  | "FPushFuncU" ->
     ICall(FPushFuncU (intofiarg arg1, function_id_of_iarg arg2, stringofiarg arg3))
  | "FPushObjMethod" ->

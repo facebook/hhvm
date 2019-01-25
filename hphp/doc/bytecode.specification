@@ -2194,38 +2194,43 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
 
-FPushCtor <num params> <class-ref slot> <has-generics-op>  []  ->  [C]
-FPushCtorD <num params> <litstr id>                        []  ->  [C]
-FPushCtorI <num params> <class id>                         []  ->  [C]
-FPushCtorS <num params> <mode>                             []  ->  [C]
+NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
+NewObjD <litstr id>                        []  ->  [C:Obj]
+NewObjI <class id>                         []  ->  [C:Obj]
+NewObjS <mode>                             []  ->  [C:Obj]
 
-  FPI push constructor. First, these instructions load a value into x as given
+  New object. First, these instructions load a value into x as given
   by the following table:
 
-    instruction     x
-    --------------+----
-      FPushCtor   | %2
-      FPushCtorD  | %2
-      FPushCtorI  | %2
-      FPushCtorS  | %2
+    instruction   x
+    ------------+----
+      NewObj    | %1
+      NewObjD   | %1
+      NewObjI   | %1
+      NewObjS   | %1
 
-  When loading %2 into x, FPushCtorD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %2 into a classref, and
-  FPushCtorI will load the class in the current unit with id %2. FPushCtorS
-  will perform the same work as LateBoundCls/Self/Parent depending on the
-  specified mode.
+  When loading %1 into x, NewObjD will perform the work performed by the
+  ClsRefGetC instruction to convert the name given by %1 into a classref, and
+  NewObjI will load the class in the current unit with id %1. NewObjS will
+  perform the same work as LateBoundCls/Self/Parent depending on the specified
+  mode.
 
-  This instruction pushes an uninitialized object onto the stack (to be
-  initialized during FCall*) prior to entering the FPI region, then pushes a
-  new entry on the FPI stack, initializing it with the number of parameters
-  being passed (given by %1) and a reference to the FPI structure for the
-  constructor for class x.
+  This instruction pushes an uninitialized object onto the stack, to be
+  initialized during FCall*.
 
-  If HasGenerics is passed to FPushCtor, this indicates that the data at cls-ref
+  If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
   slot's reified generics portion is valid.
-  If MaybeGenerics is passed to FPushCtor, this indicates that data at cls-ref
+  If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
   slot's reified generics portion will be nulled out when there are no reified
   generics.
+
+FPushCtor <num params>  [C:Obj]  ->  []
+
+  FPI push constructor.
+
+  This instruction pushes a new entry on the FPI stack, initializing it with
+  the number of parameters being passed (given by %1) and a reference to the
+  FPI structure for the constructor for class of the object given by $1.
 
 FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
 
@@ -4328,7 +4333,7 @@ short-circuit semantics correctly. All Jmp* instructions used to implement
 "and" and "or" operators will be forward jumps.
 
 5) The new expression
-The new expression is implemented by using the FPushCtor* and FCall
+The new expression is implemented by using the NewObj*, FPushCtor and FCall
 instructions.
 
 6) The ternary operator (?:)

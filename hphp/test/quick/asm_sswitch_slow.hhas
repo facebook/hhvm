@@ -61,7 +61,9 @@ fail:
 }
 
 .function with_obj() {
-  FPushCtorD 0 "Obj"
+  NewObjD "Obj"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj

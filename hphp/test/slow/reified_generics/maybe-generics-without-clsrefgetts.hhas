@@ -19,7 +19,9 @@
   String "C"
   ReifiedName 1
   ClsRefGetC 0
-  FPushCtor 0 0 MaybeGenerics
+  NewObj 0 MaybeGenerics
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   RetC

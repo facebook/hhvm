@@ -311,10 +311,11 @@ static const struct {
                    {None,             FStack,       OutFDesc        }},
   { OpFPushClsMethodD,
                    {None,             FStack,       OutFDesc        }},
-  { OpFPushCtor,   {None,             Stack1|FStack,OutObject       }},
-  { OpFPushCtorD,  {None,             Stack1|FStack,OutObject       }},
-  { OpFPushCtorI,  {None,             Stack1|FStack,OutObject       }},
-  { OpFPushCtorS,  {None,             Stack1|FStack,OutObject       }},
+  { OpNewObj,      {None,             Stack1,       OutObject       }},
+  { OpNewObjD,     {None,             Stack1,       OutObject       }},
+  { OpNewObjI,     {None,             Stack1,       OutObject       }},
+  { OpNewObjS,     {None,             Stack1,       OutObject       }},
+  { OpFPushCtor,   {Stack1,           FStack,       OutFDesc        }},
   { OpFThrowOnRefMismatch,
                    {None,             None,         OutNone         }},
   /*
@@ -964,9 +965,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
   case Op::FPushCtor:
-  case Op::FPushCtorD:
-  case Op::FPushCtorI:
-  case Op::FPushCtorS:
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushFuncU:
@@ -1006,6 +1004,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewKeysetArray:
   case Op::NewVArray:
   case Op::NewDArray:
+  case Op::NewObj:
+  case Op::NewObjD:
+  case Op::NewObjI:
+  case Op::NewObjS:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:

@@ -412,8 +412,8 @@ let check_instruct_call asn i i' =
   | FPushFunc _, _ | FPushFuncD _, _ | FPushFuncU _, _ | FPushObjMethod _, _
   | FPushObjMethodD _, _ | FPushClsMethod _, _
   | FPushClsMethodS _, _ | FPushClsMethodSD _, _
-  | FPushClsMethodD _, _ | FPushCtor _, _ | FPushCtorD _, _ | FPushCtorI _, _
-  | FPushCtorS _, _ | FThrowOnRefMismatch _, _ | FCall _, _
+  | FPushClsMethodD _, _ | NewObj _, _ | NewObjD _, _ | NewObjI _, _
+  | NewObjS _, _ | FPushCtor _, _ | FThrowOnRefMismatch _, _ | FCall _, _
   | FCallBuiltin _, _ ->
     if i=i' then Some asn else None
 

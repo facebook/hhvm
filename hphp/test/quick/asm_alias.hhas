@@ -17,7 +17,9 @@
   FCall <> 1 1 - "" ""
   PopC
 
-  FPushCtorD 0 "C"
+  NewObjD "C"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $x

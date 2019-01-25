@@ -31,13 +31,17 @@
 .function <"" N  > lop() {
   .try_fault F0 {
     .try_fault F1 {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "one"
       FCall <> 1 1 - "" ""
       PopC
       Throw
     }
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "two"
     FCall <> 1 1 - "" ""
     PopC
@@ -51,7 +55,9 @@
 F1:
   UnsetL _0
   UnsetL _1
-  FPushCtorD 1 "Exception"
+  NewObjD "Exception"
+  Dup
+  FPushCtor 1
   String "two"
   FCall <> 1 1 - "" ""
   PopC
@@ -71,7 +77,9 @@ F0:
   .try_fault F2 {
     .try {
       .try_fault F3 {
-        FPushCtorD 1 "Exception"
+        NewObjD "Exception"
+        Dup
+        FPushCtor 1
         String "one"
         FCall <> 1 1 - "" ""
         PopC
@@ -123,7 +131,9 @@ F2:
     String "begin try\n"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "one"
     FCall <> 1 1 - "" ""
     PopC
@@ -133,7 +143,9 @@ F2:
     String "end outer loop\n"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "two"
     FCall <> 1 1 - "" ""
     PopC
@@ -167,7 +179,9 @@ F4:
     String "end outer loop\n"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "two"
     FCall <> 1 1 - "" ""
     PopC
@@ -198,13 +212,17 @@ L2:
 .function <"" N  > baz() {
   .try_fault F0 {
     .try_fault F1 {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "one"
       FCall <> 1 1 - "" ""
       PopC
       Throw
     }
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "two"
     FCall <> 1 1 - "" ""
     PopC
@@ -218,7 +236,9 @@ L2:
 F1:
   UnsetL _0
   UnsetL _1
-  FPushCtorD 1 "Exception"
+  NewObjD "Exception"
+  Dup
+  FPushCtor 1
   String "two"
   FCall <> 1 1 - "" ""
   PopC
@@ -237,7 +257,9 @@ F0:
   .declvars $e;
   .try {
     .try_fault F2 {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "bar"
       FCall <> 1 1 - "" ""
       PopC

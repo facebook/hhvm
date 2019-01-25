@@ -360,9 +360,8 @@ let mut_imms (is : IS.t) : IS.t =
         FPushObjMethodD(i, m, if should_mutate()
                               then Ast_defs.OG_nullthrows
                               else Ast_defs.OG_nullsafe)
-    | FPushCtor     (i, id, op) -> FPushCtor     (i, mutate_int        id !mag,
-                                                  op)
-    | FPushCtorI    (i, id)     -> FPushCtorI    (i, mutate_int        id !mag)
+    | NewObj    (id, op) -> NewObj    (mutate_int        id !mag, op)
+    | NewObjI   (id)     -> NewObjI   (mutate_int        id !mag)
     | _ -> s in
   let mutate_base s =
     match s with

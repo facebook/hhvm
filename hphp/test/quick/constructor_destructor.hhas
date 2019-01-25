@@ -4,7 +4,9 @@
 .main {
   .declvars $x;
   DefCls 0
-  FPushCtorD 1 "A"
+  NewObjD "A"
+  Dup
+  FPushCtor 1
   String "foo"
   FCall <> 1 1 - "" ""
   PopC

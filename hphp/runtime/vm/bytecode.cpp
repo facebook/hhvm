@@ -5682,38 +5682,26 @@ OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
 
 namespace {
 
-void fpushCtorImpl(uint32_t numArgs, Class* cls, ArrayData* reified_types) {
-  const Func* f;
-  auto const res UNUSED =
-    lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
-  assertx(res == LookupResult::MethodFoundWithThis);
+void newObjImpl(Class* cls, ArrayData* reified_types) {
   // Replace input with uninitialized instance.
   auto this_ = !reified_types ? newInstance(cls)
                               : newInstanceReified(cls, reified_types);
-  TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
+  TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
-  vmStack().pushObject(this_);
-  // Push new activation record.
-  auto ar = vmStack().allocA();
-  ar->m_func = f;
-  ar->setThis(this_);
-  ar->initNumArgs(numArgs);
-  ar->trashVarEnv();
+  vmStack().pushObjectNoRc(this_);
 }
 
 }
 
-OPTBLD_INLINE void iopFPushCtor(
-  uint32_t numArgs, clsref_slot slot, HasGenericsOp op
-) {
+OPTBLD_INLINE void iopNewObj(clsref_slot slot, HasGenericsOp op) {
   auto cls_ref = slot.take();
   callerDynamicConstructChecks(cls_ref.second);
   auto const reified_types =
     HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
-  fpushCtorImpl(numArgs, cls_ref.second, reified_types);
+  newObjImpl(cls_ref.second, reified_types);
 }
 
-OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
+OPTBLD_INLINE void iopNewObjD(Id id) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   auto cls = Unit::loadClass(nep.second, nep.first);
@@ -5721,24 +5709,44 @@ OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  fpushCtorImpl(numArgs, cls, nullptr);
+  newObjImpl(cls, nullptr);
 }
 
-OPTBLD_INLINE void iopFPushCtorI(uint32_t numArgs, uint32_t clsIx) {
+OPTBLD_INLINE void iopNewObjI(uint32_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
-  fpushCtorImpl(numArgs, cls, nullptr);
+  newObjImpl(cls, nullptr);
 }
 
-OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
+OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(ref);
   if (ref == SpecialClsRef::Static && cls->hasReifiedGenerics()) {
     raise_error(Strings::NEW_STATIC_ON_REIFIED_CLASS, cls->name()->data());
   }
   auto const reified_generics = cls->hasReifiedGenerics()
     ? getClsReifiedGenericsProp(cls, vmfp()) : nullptr;
-  fpushCtorImpl(numArgs, cls, reified_generics);
+  newObjImpl(cls, reified_generics);
+}
+
+OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
+  assertx(tvIsObject(vmStack().topC()));
+  auto const obj = vmStack().topC()->m_data.pobj;
+
+  const Func* func;
+  auto const ctx = arGetContextClass(vmfp());
+  auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
+  assertx(res == LookupResult::MethodFoundWithThis);
+
+  // Pop the object (ownership to be transferred to the ActRec).
+  vmStack().discard();
+
+  // Push new activation record.
+  auto ar = vmStack().allocA();
+  ar->m_func = func;
+  ar->setThis(obj);
+  ar->initNumArgs(numArgs);
+  ar->trashVarEnv();
 }
 
 OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {

@@ -17,7 +17,9 @@
         CGetL2 $n
         Eq
         JmpZ L0
-        FPushCtorD 1 "Exception"
+        NewObjD "Exception"
+        Dup
+        FPushCtor 1
         String "exception 1"
         FCall <> 1 1 - "" ""
         PopC
@@ -39,7 +41,9 @@
             CGetL2 $n
             Eq
             JmpZ L3
-            FPushCtorD 1 "Exception"
+            NewObjD "Exception"
+            Dup
+            FPushCtor 1
             String "exception 3"
             FCall <> 1 1 - "" ""
             PopC
@@ -78,7 +82,9 @@
       CGetL2 $n
       Eq
       JmpZ L7
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "exception 2"
       FCall <> 1 1 - "" ""
       PopC
@@ -108,7 +114,9 @@ F9:
     CGetL2 $n
     Eq
     JmpZ L6
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "exception 2"
     FCall <> 1 1 - "" ""
     PopC

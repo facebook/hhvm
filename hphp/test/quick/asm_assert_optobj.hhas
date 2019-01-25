@@ -1,7 +1,9 @@
 .main {
   DefCls 0
 
-  FPushCtorD 0 "Foo"
+  NewObjD "Foo"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $object
@@ -9,7 +11,9 @@
 
   CGetL $object
   FPushObjMethodD 1 "main" NullThrows
-   FPushCtorD 0 "Foo"
+   NewObjD "Foo"
+   Dup
+   FPushCtor 0
    FCall <> 0 1 - "" ""
    PopC
   FCall <> 1 1 - "" ""

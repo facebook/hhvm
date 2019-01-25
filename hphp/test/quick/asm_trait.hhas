@@ -68,7 +68,9 @@
 }
 
 .function main() {
-  FPushCtorD 0 "UseFrob"
+  NewObjD "UseFrob"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj
@@ -79,7 +81,9 @@
   FCall <> 0 1 - "" ""
   PopC
 
-  FPushCtorD 0 "AliasFrob"
+  NewObjD "AliasFrob"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj
@@ -90,7 +94,9 @@
   FCall <> 0 1 - "" ""
   PopC
 
-  FPushCtorD 0 "Publicize"
+  NewObjD "Publicize"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj
@@ -101,7 +107,9 @@
   FCall <> 0 1 - "" ""
   PopC
 
-  FPushCtorD 0 "Resolution"
+  NewObjD "Resolution"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj

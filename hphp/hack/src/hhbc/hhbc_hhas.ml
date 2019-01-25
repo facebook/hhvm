@@ -512,17 +512,16 @@ let string_of_call instruction =
           string_of_int n;
           SpecialClsRef.to_string r;
           string_of_method_id id]
-  | FPushCtor (n, id, op) ->
-    sep ["FPushCtor";
-         string_of_int n;
-         string_of_int id;
-         string_of_has_generics_op op]
-  | FPushCtorD (n, cid) ->
-    sep ["FPushCtorD"; string_of_int n; string_of_class_id cid]
-  | FPushCtorI (n, id) ->
-    sep ["FPushCtorI"; string_of_int n; string_of_classref id]
-  | FPushCtorS (n, r) ->
-    sep ["FPushCtorS"; string_of_int n; SpecialClsRef.to_string r]
+  | NewObj (id, op) ->
+    sep ["NewObj"; string_of_int id; string_of_has_generics_op op]
+  | NewObjD cid ->
+    sep ["NewObjD"; string_of_class_id cid]
+  | NewObjI id ->
+    sep ["NewObjI"; string_of_classref id]
+  | NewObjS r ->
+    sep ["NewObjS"; SpecialClsRef.to_string r]
+  | FPushCtor n ->
+    sep ["FPushCtor"; string_of_int n]
   | FThrowOnRefMismatch l ->
     sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FCall (fcall_args, c, f) ->

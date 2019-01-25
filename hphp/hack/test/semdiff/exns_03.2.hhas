@@ -15,7 +15,9 @@
   .try_fault F8 {
     .try_fault F9 {
       .try {
-        FPushCtorD 2 "Exception"
+        NewObjD "Exception"
+        Dup
+        FPushCtor 2
         String "Error Processing Request"
         Int 1
         FCall <> 2 1 - "" ""
@@ -41,7 +43,9 @@
       String "inner finally"
       Print
       PopC
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      FPushCtor 1
       String "exn thrown after inner"
       FCall <> 1 1 - "" ""
       PopC
@@ -86,7 +90,9 @@ F9:
     String "inner finally"
     Print
     PopC
-    FPushCtorD 1 "Exception"
+    NewObjD "Exception"
+    Dup
+    FPushCtor 1
     String "exn thrown after inner"
     FCall <> 1 1 - "" ""
     PopC

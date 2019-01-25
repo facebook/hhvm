@@ -129,7 +129,9 @@
 }
 
 .function prop_test {
-  FPushCtorD 0 "WithProps"
+  NewObjD "WithProps"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $obj
@@ -158,7 +160,9 @@
 .function main {
   .numclsrefslots 1;
 
-  FPushCtorD 0 "Base"
+  NewObjD "Base"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $base
@@ -172,7 +176,9 @@
   FCall <> 1 1 - "" ""
   PopC
 
-  FPushCtorD 0 "Derived"
+  NewObjD "Derived"
+  Dup
+  FPushCtor 0
   FCall <> 0 1 - "" ""
   PopC
   SetL $derived

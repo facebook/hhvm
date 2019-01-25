@@ -3340,37 +3340,30 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 }
 
-void ctorHelper(ISS& env, SString name, int32_t nargs) {
+void newObjHelper(ISS& env, SString name) {
   auto const rcls = env.index.resolve_class(env.ctx, name);
   if (!rcls) {
     push(env, TObj);
-    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, nargs, false);
     return;
   }
 
   auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
     rcls->same(env.index.resolve_class(env.ctx.cls));
-  auto const obj = setctx(objExact(*rcls), isCtx);
-  push(env, obj);
-
-  auto const rfunc = env.index.resolve_ctor(env.ctx, *rcls, true);
-  fpiPush(env, ActRec { FPIKind::Ctor, obj, rcls, rfunc }, nargs, false);
+  push(env, setctx(objExact(*rcls), isCtx));
 }
 
-void in(ISS& env, const bc::FPushCtorD& op) {
-  ctorHelper(env, op.str2, op.arg1);
+void in(ISS& env, const bc::NewObjD& op) {
+  newObjHelper(env, op.str1);
 }
 
-void in(ISS& env, const bc::FPushCtorI& op) {
-  auto const name = env.ctx.unit->classes[op.arg2]->name;
-  ctorHelper(env, name, op.arg1);
+void in(ISS& env, const bc::NewObjI& op) {
+  newObjHelper(env, env.ctx.unit->classes[op.arg1]->name);
 }
 
-void in(ISS& env, const bc::FPushCtorS& op) {
-  auto const cls = specialClsRefToCls(env, op.subop2);
+void in(ISS& env, const bc::NewObjS& op) {
+  auto const cls = specialClsRefToCls(env, op.subop1);
   if (!is_specialized_cls(cls)) {
     push(env, TObj);
-    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, op.arg1, false);
     return;
   }
 
@@ -3378,25 +3371,17 @@ void in(ISS& env, const bc::FPushCtorS& op) {
   auto const exact = dcls.type == DCls::Exact;
   if (exact && !dcls.cls.couldHaveReifiedGenerics() &&
       (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))) {
-    return reduce(
-      env,
-      bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
-    );
+    return reduce(env, bc::NewObjD { dcls.cls.name() });
   }
 
-  auto const obj = toobj(cls);
-  push(env, obj);
-
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
-  fpiPush(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc }, op.arg1, false);
+  push(env, toobj(cls));
 }
 
-void in(ISS& env, const bc::FPushCtor& op) {
+void in(ISS& env, const bc::NewObj& op) {
   auto const cls = peekClsRefSlot(env, op.slot);
-  if (!is_specialized_cls(cls) || op.subop3 != HasGenericsOp::NoGenerics) {
+  if (!is_specialized_cls(cls) || op.subop2 != HasGenericsOp::NoGenerics) {
     takeClsRefSlot(env, op.slot);
     push(env, TObj);
-    fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
     return;
   }
 
@@ -3406,16 +3391,29 @@ void in(ISS& env, const bc::FPushCtor& op) {
     return reduce(
       env,
       bc::DiscardClsRef { op.slot },
-      bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }
+      bc::NewObjD { dcls.cls.name(), }
     );
   }
 
-  auto const obj = toobj(cls);
   takeClsRefSlot(env, op.slot);
-  push(env, obj);
+  push(env, toobj(cls));
+}
 
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, exact);
-  fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dcls.cls, rfunc });
+void in(ISS& env, const bc::FPushCtor& op) {
+  auto const obj = popC(env);
+  if (!is_specialized_obj(obj)) {
+    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, op.arg1, false);
+    return;
+  }
+
+  auto const dobj = dobj_of(obj);
+  auto const exact = dobj.type == DObj::Exact;
+  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls, exact);
+  if (!rfunc || !rfunc->exactFunc()) {
+    fpiPush(env, ActRec { FPIKind::Ctor, obj }, op.arg1, false);
+    return;
+  }
+  fpiPush(env, ActRec { FPIKind::Ctor, obj, dobj.cls, rfunc }, op.arg1, false);
 }
 
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
@@ -3437,7 +3435,9 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
 
       return reduce(
         env,
-        bc::FPushCtorD { 1, exCls, false },
+        bc::NewObjD { exCls },
+        bc::Dup {},
+        bc::FPushCtor { 1, false },
         bc::String { err },
         bc::FCall { FCallArgs(1), staticEmptyString(), staticEmptyString() },
         bc::PopC {},

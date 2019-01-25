@@ -39,7 +39,9 @@
 }
 
 .function thrower() {
-  FPushCtorD 1 "Exception"
+  NewObjD "Exception"
+  Dup
+  FPushCtor 1
     String "hi"
   FCall <> 1 1 - "" ""
   PopC
@@ -81,7 +83,9 @@
 }
 
 .function make_obj($id) {
-  FPushCtorD 1 "DtorPrinter"
+  NewObjD "DtorPrinter"
+  Dup
+  FPushCtor 1
     CGetL $id
   FCall <> 1 1 - "" ""
   PopC

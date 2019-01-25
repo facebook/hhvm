@@ -92,6 +92,7 @@ let stk_data : instruct -> stack_sig = function
   | IMutator UnsetG
   | IMutator UnsetN
   | IMutator InitProp _
+  | ICall FPushCtor _
   | ICall FPushFunc _
   | ICall FPushObjMethodD _
   | IIterator IterInit _
@@ -148,9 +149,9 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator ContValid
   | IGenerator ContKey
   | IGenerator ContGetReturn
-  | ICall FPushCtor _
-  | ICall FPushCtorD _
-  | ICall FPushCtorI _
+  | ICall NewObj _
+  | ICall NewObjD _
+  | ICall NewObjI _
   | IGet CGetQuietL _                      -> [], ["C"]
   | IMutator SetN
   | IMutator SetG

@@ -1,2 +1,0 @@
-
-Fatal error: You can't use create_function in RepoAuthoritative mode; use a closure instead in %s/test/slow/authmode/create_function.php on line %d

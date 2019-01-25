@@ -49,19 +49,6 @@ function call_user_func(mixed $callback,
                         ...$parameters): mixed;
 
 /**
- * Create an anonymous (lambda-style) function
- *
- * @param string $args - The function arguments.
- * @param string $code - The function code.
- *
- * @return string - Returns a unique function name as a string, or FALSE
- *   on error.
- */
-<<__Native>>
-function create_function(string $args,
-                         string $code): string;
-
-/**
  * Call a static method and pass the arguments as array
  *
  * @param callable $function - The function or method to be called. This

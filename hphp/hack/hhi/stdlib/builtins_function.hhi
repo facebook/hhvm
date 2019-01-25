@@ -23,8 +23,6 @@ function forward_static_call($function, ...);
 /* A get_called_class is treated at static::class */
 <<__Rx>>
 function get_called_class(): string; // false if called from outside class
-<<__Deprecated('Use an anonymous function instead.')>>
-function create_function(string $args, string $code);
 function func_get_arg(int $arg_num);
 function func_num_args(): int;
 <<__PHPStdLib>>

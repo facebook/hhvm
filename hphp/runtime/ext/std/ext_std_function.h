@@ -33,7 +33,6 @@ Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
   const Array& params);
 Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
   const Array& params = null_array);
-String HHVM_FUNCTION(create_function, const String& args, const String& code);
 
 ///////////////////////////////////////////////////////////////////////////////
 

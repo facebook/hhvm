@@ -381,7 +381,6 @@ public:
   TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
-  StrNR createFunction(const String& args, const String& code);
 
   struct EvaluationResult {
     bool failed;
@@ -590,7 +589,6 @@ public:
   req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
-  req::vector<Unit*> m_createdFuncs;
   req::vector<Fault> m_faults;
   int m_lambdaCounter;
   using VMStateVec = req::TinyVector<VMState, 32>;

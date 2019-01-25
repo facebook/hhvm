@@ -131,10 +131,6 @@ Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
   return vm_call_user_func(function, params, true, /* check ref */ true);
 }
 
-String HHVM_FUNCTION(create_function, const String& args, const String& code) {
-  return g_context->createFunction(args, code);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
@@ -292,7 +288,6 @@ void StandardExtension::initFunction() {
   HHVM_FE(end_user_func_async);
   HHVM_FE(forward_static_call_array);
   HHVM_FE(forward_static_call);
-  HHVM_FE(create_function);
   HHVM_FE(func_get_arg);
   HHVM_FE(func_get_args);
   HHVM_FALIAS(__SystemLib\\func_slice_args, SystemLib_func_slice_args);

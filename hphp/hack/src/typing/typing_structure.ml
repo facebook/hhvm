@@ -19,6 +19,7 @@ module Reason = Typing_reason
 module SN = Naming_special_names
 module Subst = Decl_subst
 module TUtils = Typing_utils
+module SubType = Typing_subtype
 
 let make_ts env ty =
   match Env.get_typedef env SN.FB.cTypeStructure with
@@ -36,6 +37,7 @@ let make_ts env ty =
       env, (fst ty, Tany)
 
 let rec transform_shapemap ?(nullable = false) env ty shape =
+  let env, ty = SubType.expand_type_and_solve env ty in
   let env, ty = TUtils.fold_unresolved env ty in
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely

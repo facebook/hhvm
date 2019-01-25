@@ -264,9 +264,11 @@ let to_collection env shape_ty res return_type =
   env, ty, ISet.empty
 
 let to_array env shape_ty res =
+  let env, shape_ty = Typing_subtype.expand_type_and_solve env shape_ty in
   to_collection env shape_ty res (fun r key value ->
     (r, Tarraykind (AKmap (key, value))))
 
 let to_dict env shape_ty res =
+  let env, shape_ty = Typing_subtype.expand_type_and_solve env shape_ty in
   to_collection env shape_ty res (fun r key value ->
     MakeType.dict r key value)

@@ -3600,13 +3600,13 @@ let lower_tree
       | e::_ ->
         Errors.parsing_error (pos_and_message_of e);
   in
-  let mode =
-    match mode with
-    | None -> FileInfo.Mphp
-    | Some FileInfo.Mdecl when env.codegen -> FileInfo.Mphp
-    | Some _ when lang = FileInfo.PhpFile -> FileInfo.Mphp
-    | Some m -> m
-  in
+  let mode = FileInfo.(
+    match lang, mode with
+    | PhpFile, _ -> Mphp
+    | HhFile, None -> Mpartial
+    | HhFile, Some Mdecl when env.codegen -> Mphp
+    | HhFile, Some m -> m
+  ) in
   let env = { env with fi_mode = mode } in
   let env = { env with is_hh_file = lang = FileInfo.HhFile } in
   let popt = env.parser_options in

@@ -123,7 +123,7 @@ module WithExpressionAndDeclAndTypeParser
     match peek_token_kind parser with
     | Async
     | Coroutine
-    | Function -> parse_possible_php_function parser
+    | Function -> parse_possible_php_function ~toplevel:false parser
     | Abstract
     | Final
     | Interface
@@ -249,7 +249,7 @@ module WithExpressionAndDeclAndTypeParser
     in
     (parser, s, has_suffix)
 
-  and parse_possible_php_function parser =
+  and parse_possible_php_function parser ~toplevel =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
     (Hack only supports anonymous nested functions as expressions.)
 
@@ -274,10 +274,17 @@ module WithExpressionAndDeclAndTypeParser
       -> parse_expression_statement parser
     | _ ->
       let (parser, missing) = Make.missing parser (pos parser) in
-      with_decl_parser
+      let (parser, missing) = with_decl_parser
         parser
         (fun p ->
           DeclParser.parse_function_declaration p missing)
+      in
+      let parser = if not toplevel && Env.is_typechecker (env parser) then
+        with_error parser SyntaxError.inline_function_def
+      else
+        parser
+      in
+      parser, missing
 
   and parse_php_class parser =
     (* PHP allows classes nested inside of functions, but hack does not *)

@@ -2304,9 +2304,6 @@ and pStmt : stmt parser = fun node env ->
     in
     let () = env.max_depth <- outer_max_depth in
     result
-  | FunctionDeclaration _ when is_typechecker env ->
-    raise_parsing_error env (`Node node) SyntaxError.inline_function_def;
-    pos, Noop
   | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
   result

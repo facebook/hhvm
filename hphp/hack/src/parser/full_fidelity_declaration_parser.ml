@@ -1786,7 +1786,7 @@ module WithExpressionAndStatementAndTypeParser
            we are currently in *)
         with_statement_parser
           parser
-          StatementParser.parse_possible_php_function
+          (StatementParser.parse_possible_php_function ~toplevel:true)
       else
         parse_function_declaration parser1 attribute_specification
     | Abstract
@@ -1844,7 +1844,7 @@ module WithExpressionAndStatementAndTypeParser
       | Function ->
         with_statement_parser
           parser
-          StatementParser.parse_possible_php_function
+          (StatementParser.parse_possible_php_function ~toplevel:true)
       | LessThanLessThan ->
         begin match peek_token_kind parser1 with
         | File when peek_token_kind ~lookahead:1 parser1 = Colon ->

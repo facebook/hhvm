@@ -73,5 +73,7 @@ let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats
+let is_hack e = (e.lang = Some FileInfo.HhFile || (force_hh e))
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
+let is_typechecker e = is_hack e && not (codegen e)

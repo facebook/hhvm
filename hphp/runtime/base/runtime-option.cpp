@@ -439,6 +439,7 @@ uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::EnableConcurrent = false;
 bool RuntimeOption::EnableAwaitAsAnExpression = false;
 bool RuntimeOption::EnableStrongerAwaitBinding = false;
+bool RuntimeOption::DisableNontoplevelDeclarations = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1254,6 +1255,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableAssert, ini, config,
                  "Hack.Lang.Phpism.DisableAssert",
                  DisableAssert);
+    Config::Bind(DisableNontoplevelDeclarations, ini, config,
+                 "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
+                 DisableNontoplevelDeclarations);
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);

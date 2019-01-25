@@ -34,6 +34,7 @@ let global_opts = GlobalOptions.make
   ~po_disallow_execution_operator:false
   ~po_disable_variable_variables: false
   ~po_disable_define:false
+  ~po_disable_nontoplevel_declarations:false
   ~po_allow_goto:false
   ~po_enable_concurrent:false
   ~po_enable_await_as_an_expression:false

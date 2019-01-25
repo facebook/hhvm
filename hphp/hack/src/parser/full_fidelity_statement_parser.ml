@@ -130,7 +130,7 @@ module WithExpressionAndDeclAndTypeParser
     | Trait
     | Class ->
       let parser =
-        if Env.is_strict (env parser) then
+        if Env.is_strict (env parser) || Env.disable_nontoplevel_declarations (env parser) then
           with_error parser SyntaxError.decl_outside_global_scope
         else
           parser

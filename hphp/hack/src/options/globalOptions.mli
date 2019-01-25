@@ -82,6 +82,9 @@ type t = {
  (* Flag to disable PHP's define method *)
  po_disable_define : bool;
 
+ (* Flag to disable PHP's non-top-level declarations *)
+ po_disable_nontoplevel_declarations : bool;
+
  (* Flag to enable PHP's `goto` operator *)
  po_allow_goto: bool;
 
@@ -212,6 +215,7 @@ val make :
   po_deregister_php_stdlib: bool ->
   po_disallow_execution_operator: bool ->
   po_disable_define: bool ->
+  po_disable_nontoplevel_declarations: bool ->
   po_allow_goto: bool ->
   po_enable_concurrent: bool ->
   po_enable_await_as_an_expression: bool ->
@@ -256,6 +260,7 @@ val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool
 val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool
+val po_disable_nontoplevel_declarations : t -> bool
 val po_allow_goto : t -> bool
 val po_enable_concurrent : t -> bool
 val po_enable_await_as_an_expression : t -> bool

@@ -18,6 +18,7 @@ let enable_concurrent = GlobalOptions.po_enable_concurrent
 let enable_await_as_an_expression = GlobalOptions.po_enable_await_as_an_expression
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
+let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
 let with_enable_await_as_an_expression po b =
@@ -32,6 +33,7 @@ let make
   ~disallow_execution_operator
   ~disable_variable_variables
   ~disable_define
+  ~disable_nontoplevel_declarations
   ~enable_stronger_await_binding = {
   default with
   GlobalOptions.po_auto_namespace_map = auto_namespace_map;
@@ -41,5 +43,6 @@ let make
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
   GlobalOptions.po_disable_variable_variables = disable_variable_variables;
   GlobalOptions.po_disable_define = disable_define;
+  GlobalOptions.po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
   GlobalOptions.po_enable_stronger_await_binding = enable_stronger_await_binding;
 }

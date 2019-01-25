@@ -551,6 +551,9 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableAssert;
+  // Disables non-top-level declarations
+  // true => error, false => default behaviour
+  static bool DisableNontoplevelDeclarations;
 
   // Disables the setting of reserved variable php_errorsmg
   // true => error, false => php_errormsg can be set

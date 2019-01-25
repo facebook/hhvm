@@ -3504,6 +3504,8 @@ let parse_text
         ~php5_compat_mode:env.php5_compat_mode
         ~enable_stronger_await_binding:
           (GlobalOptions.po_enable_stronger_await_binding env.parser_options)
+        ~disable_nontoplevel_declarations:
+          (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
         ~lang:lang
         ?mode
         ()

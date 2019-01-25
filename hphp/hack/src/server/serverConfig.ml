@@ -262,6 +262,7 @@ let load config_filename options =
     ~po_deregister_php_stdlib:(bool_ "deregister_php_stdlib" ~default:false config)
     ~po_disallow_execution_operator:false
     ~po_disable_define:false
+    ~po_disable_nontoplevel_declarations:false
     ~po_enable_concurrent:(bool_ "enable_concurrent" ~default:false config)
     ~po_enable_await_as_an_expression:(bool_ "enable_await_as_an_expression" ~default:false config)
     ~po_allow_goto:(not (bool_ "disallow_goto" ~default:false config))

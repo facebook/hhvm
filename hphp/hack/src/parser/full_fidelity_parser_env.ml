@@ -15,6 +15,7 @@ type t = {
   force_hh: bool;
   enable_xhp: bool;
   enable_stronger_await_binding: bool;
+  disable_nontoplevel_declarations: bool;
   lang: FileInfo.file_type option;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
@@ -28,6 +29,7 @@ let default = {
   force_hh = false;
   enable_xhp = false;
   enable_stronger_await_binding = false;
+  disable_nontoplevel_declarations = false;
 
   lang = None;
   mode = None;
@@ -42,6 +44,7 @@ let make
   ?(force_hh = default.force_hh)
   ?(enable_xhp = default.enable_xhp)
   ?(enable_stronger_await_binding = default.enable_stronger_await_binding)
+  ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
   ?lang
   ?mode
   ?stats
@@ -53,6 +56,7 @@ let make
     force_hh;
     enable_xhp;
     enable_stronger_await_binding;
+    disable_nontoplevel_declarations;
     lang;
     mode;
     stats;
@@ -65,6 +69,7 @@ let codegen e = e.codegen
 let force_hh e = e.force_hh
 let enable_xhp e = e.enable_xhp
 let enable_stronger_await_binding e = e.enable_stronger_await_binding
+let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats

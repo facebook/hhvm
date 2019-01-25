@@ -621,7 +621,8 @@ struct RuntimeOption {
   F(bool, DisassemblerDocComments,     true)                            \
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
-  F(bool, WarnOnCoerceBuiltinParams, false)                             \
+  F(bool, WarnOnCoerceBuiltinParams,   false)                           \
+  F(bool, WarnOnSkipFrameLookup,       true)                            \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \
   /* Whether to trust existing versions of the extracted compiler */    \

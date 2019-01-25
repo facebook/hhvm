@@ -469,6 +469,16 @@ vm_decode_function(const_variant_ref function,
       }
     }
 
+    if (flags != DecodeFlags::NoWarn && !f->isPublic()) {
+      if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+        raise_warning(
+          "vm_decode_function() used to decode a %s method: %s",
+          f->attrs() & AttrPrivate ? "private" : "protected",
+          f->fullDisplayName()->data()
+        );
+      }
+    }
+
     return f;
   }
   if (function.isObject()) {

@@ -112,11 +112,6 @@ Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::nonMainFuncs() const {
   return { funcBegin() + 1, funcEnd() };
 }
 
-inline
-Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::hoistableFuncs() const {
-  return { funcHoistableBegin(), funcEnd() };
-}
-
 inline void*& Unit::MergeInfo::mergeableObj(int idx) {
   return m_mergeables[idx];
 }
@@ -271,10 +266,6 @@ inline folly::Range<PreClassPtr*> Unit::preclasses() {
 
 inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
   return { m_preClasses.data(), m_preClasses.size() };
-}
-
-inline Func* Unit::firstHoistable() const {
-  return *mergeInfo()->funcHoistableBegin();
 }
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {

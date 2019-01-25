@@ -240,11 +240,6 @@ struct Func final {
   void freeClone();
 
   /*
-   * Rename a function and reload it.
-   */
-  void rename(const StringData* name);
-
-  /*
    * Verify that a Func's data is coherent.
    *
    * FIXME: Currently this method does almost nothing.

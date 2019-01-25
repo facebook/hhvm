@@ -278,7 +278,6 @@ public:
     FuncRange funcs() const;
     MutableFuncRange mutableFuncs() const;
     MutableFuncRange nonMainFuncs() const;
-    MutableFuncRange hoistableFuncs() const;
 
     /*
      * Get a reference or pointer to the mergeable at index `idx'.
@@ -500,20 +499,6 @@ public:
 
   // Return the cached EntryPoint
   Func* getCachedEntryPoint() const;
-  /*
-   * The first hoistable Func in the Unit.
-   *
-   * This is only used for the create_function() implementation, to access the
-   * __lambda_func() we define for the user.
-   */
-  Func* firstHoistable() const;
-
-  /*
-   * Rename the Func in this Unit given by `oldName' to `newName'.
-   *
-   * This should only be called by ExecutionContext::createFunction().
-   */
-  void renameFunc(const StringData* oldName, const StringData* newName);
 
   /*
    * Visit all functions and methods in this unit.

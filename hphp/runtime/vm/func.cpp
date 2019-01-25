@@ -224,14 +224,6 @@ void Func::rescope(Class* ctx, Attr attrs) {
   setFullName(numParams());
 }
 
-void Func::rename(const StringData* name) {
-  m_name = name;
-  setFullName(numParams());
-  // bind the renamed function
-  Unit::bindFunc(this);
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization.
 

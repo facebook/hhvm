@@ -629,24 +629,6 @@ Func* Unit::getCachedEntryPoint() const {
   return m_cachedEntryPoint;
 }
 
-void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
-  // We do a linear scan over all the functions in the unit searching for the
-  // func with a given name; in practice this is okay because the units created
-  // by create_function() will always have the function being renamed at the
-  // beginning
-  assertx(oldName && oldName->isStatic());
-  assertx(newName && newName->isStatic());
-
-  for (auto& func : mergeInfo()->hoistableFuncs()) {
-    auto const name = func->name();
-    assertx(name);
-    if (name->same(oldName)) {
-      func->rename(newName);
-      break;
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Func lookup.
 

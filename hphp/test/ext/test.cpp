@@ -36,6 +36,19 @@ TestLogger Test::logger;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#if FOLLY_HAVE_WEAK_SYMBOLS
+// RunTestsImpl is generally expected to be defined by a separate module that
+// will be supplied at link time.  However, since that module will depend on us
+// as a library we need to supply a default implementation here to avoid link
+// errors.
+FOLLY_ATTR_WEAK void Test::RunTestsImpl(bool& allPassed, std::string& suite,
+                                        std::string& which, std::string&
+                                        /*set*/) {
+  printf("RunTestsImpl was not overridden when attempting to "
+         "run test suite: %s\n", suite.c_str());
+}
+#endif
+
 bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   bool allPassed = true;
   Option::Load();

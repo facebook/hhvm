@@ -216,11 +216,10 @@ void profileRequestStart() {
   // Force the request to use interpreter (not even running jitted code) when it
   // is of RequestKind::Profile, or during retranslateAll when we need to dump
   // out precise profile data.
-  auto const retranslateAllScheduled =
-    jit::mcgen::pendingRetranslateAllScheduled();
   auto const forceInterp =
-    (retranslateAllScheduled && RuntimeOption::DumpPreciseProfData) ||
-    (rl_typeProfileLocals->requestKind == RequestKind::Profile);
+    (rl_typeProfileLocals->requestKind == RequestKind::Profile) ||
+    (jit::mcgen::pendingRetranslateAllScheduled() &&
+     RuntimeOption::DumpPreciseProfData);
   bool okToJit = !forceInterp &&
                  (rl_typeProfileLocals->requestKind == RequestKind::Standard);
   if (!RequestInfo::s_requestInfo.isNull()) {
@@ -260,8 +259,8 @@ void profileRequestStart() {
   }
 
   // Force interpretation if needed.
-  if (rl_typeProfileLocals->standardRequest == forceInterp) {
-    rl_typeProfileLocals->standardRequest = !forceInterp;
+  if (rl_typeProfileLocals->forceInterpret != forceInterp) {
+    rl_typeProfileLocals->forceInterpret = forceInterp;
     if (!RequestInfo::s_requestInfo.isNull()) {
       RID().updateJit();
     }

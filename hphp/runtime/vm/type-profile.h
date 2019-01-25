@@ -62,7 +62,7 @@ void profileIncrementFuncCounter(const Func*);
 
 struct TypeProfileLocals {
   RequestKind requestKind = RequestKind::Warmup;
-  bool standardRequest = true;
+  bool forceInterpret = false;
   bool acquiredSingleJit = false;
   bool acquiredSingleJitConcurrent = false;
   bool nonVMThread = false;
@@ -75,7 +75,11 @@ inline bool isProfileRequest() {
 }
 
 inline bool isStandardRequest() {
-  return rl_typeProfileLocals->standardRequest;
+  return rl_typeProfileLocals->requestKind == RequestKind::Standard;
+}
+
+inline bool isForcedToInterpret() {
+  return rl_typeProfileLocals->forceInterpret;
 }
 
 void setRelocateRequests(int32_t n);

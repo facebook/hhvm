@@ -117,7 +117,8 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
   if (key.isInteger() || key.isDouble()) {
     key = key.toInt64();
     return true;
-  } else if (key.isString() || key.isObject()) {
+  } else if (key.isString() || key.isObject() || key.isFunc() ||
+    key.isClass()) {
     key = key.toString();
     return true;
   } else {
@@ -302,7 +303,8 @@ TypedValue HHVM_FUNCTION(array_flip,
   ArrayInit ret(getContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondRvalPlus().unboxed();
-    if (inner.type() == KindOfInt64 || isStringType(inner.type())) {
+    if (inner.type() == KindOfInt64 || isStringType(inner.type()) ||
+      isFuncType(inner.type())|| isClassType(inner.type())) {
       ret.setUnknownKey<IntishCast::CastSilently>(VarNR(inner.tv()),
                                                   iter.first());
     } else {

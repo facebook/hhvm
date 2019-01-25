@@ -1,0 +1,42 @@
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 9
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 10
+array(2) {
+  [0]=>
+  string(2) "t1"
+  [1]=>
+  string(2) "t2"
+}
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 11
+array(2) {
+  ["foo"]=>
+  int(2)
+  [1]=>
+  int(1)
+}
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 12
+bool(true)
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 13
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 13
+bool(true)
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 14
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 14
+array(1) {
+  ["foo"]=>
+  int(2)
+}
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 15
+
+Warning: Func to string conversion in %s/func-compact-builtins.php on line 15
+array(1) {
+  ["bar"]=>
+  string(3) "foo"
+}

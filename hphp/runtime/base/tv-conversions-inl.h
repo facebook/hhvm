@@ -113,20 +113,24 @@ template <IntishCast intishCast>
 inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   assertx(cellIsPlausible(cell));
 
-  auto strToKey = [&] (const StringData* str) {
+  auto coerceKey = [&] (const StringData* str) {
     int64_t n;
     if (ad->convertKey<intishCast>(str, n)) {
       return make_tv<KindOfInt64>(n);
     }
-    return cell;
+    return make_tv<KindOfString>(const_cast<StringData*>(str));
   };
 
   if (isStringType(cell.m_type)) {
-    return strToKey(cell.m_data.pstr);
+    int64_t n;
+    if (ad->convertKey<intishCast>(cell.m_data.pstr, n)) {
+      return make_tv<KindOfInt64>(n);
+    }
+    return cell;
   } else if (isFuncType(cell.m_type)) {
-    return strToKey(funcToStringHelper(cell.m_data.pfunc));
+    return coerceKey(funcToStringHelper(cell.m_data.pfunc));
   } else if (isClassType(cell.m_type)) {
-    return strToKey(classToStringHelper(cell.m_data.pclass));
+    return coerceKey(classToStringHelper(cell.m_data.pclass));
   }
 
   if (LIKELY(isIntType(cell.m_type))) return cell;

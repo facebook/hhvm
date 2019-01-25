@@ -1,0 +1,2 @@
+-vEval.EmitFuncPointers=1
+-vEval.CheckPropTypeHints=3 -vEval.IsStringNotices=1 -vEval.StringHintNotices=1 -vEval.RaiseFuncConversionWarning=1

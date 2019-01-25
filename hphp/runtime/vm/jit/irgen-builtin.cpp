@@ -2215,6 +2215,7 @@ void emitIdx(IRGS& env) {
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
   auto key = popC(env);
+  if (key->isA(TFunc) || key->isA(TCls)) PUNT(AKExists_func_cls_key);
 
   auto throwBadKey = [&] {
     // TODO(T11019533): Fix the underlying issue with unreachable code rather

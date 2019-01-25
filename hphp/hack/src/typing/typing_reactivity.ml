@@ -299,8 +299,7 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
 (* generate a name that uniquely identifies pair target_type * condition_type *)
 let generate_fresh_name_for_target_of_condition_type env target_type condition_type  =
   match condition_type with
-  | _, Tapply ((_, cond_name), []) ->
-    (* only if condition type is a Tapply with no type parameters *)
+  | _, Tapply ((_, cond_name), _) ->
     Some ((Typing_print.full env target_type) ^ "#" ^ cond_name)
   | _, Taccess _ ->
     Some ((Typing_print.full env target_type) ^ "#" ^ (Typing_print.full env condition_type))

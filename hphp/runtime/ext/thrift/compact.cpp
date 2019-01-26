@@ -243,7 +243,7 @@ struct CompactWriter {
       Class* cls = obj->getVMClass();
       Array spec(get_tspec(cls));
       SpecHolder specHolder;
-      const auto& fields = specHolder.getSpec(spec);
+      const auto& fields = specHolder.getSpec(spec, obj, false);
       auto prop = cls->declProperties().begin();
       auto objProp = obj->propVec();
       const size_t numProps = cls->numDeclProperties();
@@ -670,6 +670,7 @@ struct CompactReader {
         readFieldBegin(fieldNum, fieldType);
       }
       readStructEnd();
+      assertx(dest->assertPropTypeHints());
     }
 
     void readStruct(const Object& dest, const Array& spec) {
@@ -678,7 +679,7 @@ struct CompactReader {
       TType fieldType;
       readFieldBegin(fieldNum, fieldType);
       SpecHolder specHolder;
-      const auto& fields = specHolder.getSpec(spec);
+      const auto& fields = specHolder.getSpec(spec, dest, false);
       const size_t numFields = fields.size();
       Class* cls = dest->getVMClass();
       if (cls->numDeclProperties() < numFields) {
@@ -694,27 +695,26 @@ struct CompactReader {
         if (i == numFields ||
             prop[i].name != fields[i].name ||
             !typesAreCompatible(fieldType, fields[i].type)) {
-          // Verify everything we've set so far
-          dest->verifyPropTypeHints(i);
           return readStructSlow(dest, spec, fieldNum, fieldType);
         }
         if (fields[i].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
             tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
           } else {
-            // Verify everything we've set so far
-            dest->verifyPropTypeHints(i);
             return readStructSlow(dest, spec, fieldNum, fieldType);
           }
         }
         ArrNR fieldSpec(fields[i].spec);
         tvAsVariant(&objProp[i]) = readField(fieldSpec.asArray(), fieldType);
+        if (!fields[i].noTypeCheck) {
+          dest->verifyPropTypeHint(i);
+          if (fields[i].isUnion) dest->verifyPropTypeHint(numFields);
+        }
         readFieldEnd();
         readFieldBegin(fieldNum, fieldType);
       }
       readStructEnd();
-      // Verify everything we've set
-      dest->verifyPropTypeHints();
+      assertx(dest->assertPropTypeHints());
     }
 
   private:

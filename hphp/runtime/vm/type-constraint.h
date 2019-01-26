@@ -381,6 +381,10 @@ struct TypeConstraint {
     if (!isCheckable()) return true;
     return checkImpl<CheckMode::AlwaysPasses>(val, nullptr);
   }
+  // Same as the above, but uses a type instead of an actual value. The
+  // StringData* variant is for objects.
+  bool alwaysPasses(const StringData* clsName) const;
+  bool alwaysPasses(DataType dt) const;
 
   bool checkTypeAliasObj(const Class* cls) const {
     return checkTypeAliasObjImpl<false>(cls);
@@ -518,8 +522,7 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
   // allows a string, we don't need a check because the concat will always
   // produce a string, regardless of the rhs.
   if (LIKELY(isStringType(type(lhs)))) return false;
-  auto const dummy = make_tv<KindOfPersistentString>(staticEmptyString());
-  return !tc.alwaysPasses(&dummy);
+  return !tc.alwaysPasses(KindOfString);
 }
 
 }

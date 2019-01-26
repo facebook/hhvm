@@ -756,6 +756,87 @@ template bool TypeConstraint::checkImpl<TypeConstraint::CheckMode::Assert>(
   const Class*
 ) const;
 
+bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
+  if (!isCheckable()) return true;
+
+  if (isObject()) {
+    // Same name is always a match.
+    if (m_typeName->isame(clsName)) return true;
+
+    auto const result = annotCompat(KindOfObject, m_type, m_typeName);
+    switch (result) {
+      case AnnotAction::Pass:
+        return true;
+      case AnnotAction::Fail:
+      case AnnotAction::CallableCheck:
+      case AnnotAction::ObjectCheck:
+        return false;
+      case AnnotAction::VArrayCheck:
+      case AnnotAction::DArrayCheck:
+      case AnnotAction::VArrayOrDArrayCheck:
+      case AnnotAction::NonVArrayOrDArrayCheck:
+      case AnnotAction::WarnFunc:
+      case AnnotAction::ConvertFunc:
+      case AnnotAction::WarnClass:
+      case AnnotAction::ConvertClass:
+        // Can't get these with objects
+        break;
+    }
+    not_reached();
+  }
+
+  switch (metaType()) {
+    case MetaType::Self:
+    case MetaType::This:
+    case MetaType::Parent:
+    case MetaType::Callable:
+    case MetaType::Precise:
+    case MetaType::NoReturn:
+    case MetaType::Number:
+    case MetaType::ArrayKey:
+    case MetaType::VArray:
+    case MetaType::DArray:
+    case MetaType::VArrOrDArr:
+    case MetaType::VecOrDict:
+    case MetaType::ArrayLike:
+      return false;
+    case MetaType::Nonnull:
+      return true;
+    case MetaType::Mixed:
+      // We check at the top of this function that the metatype cannot be
+      // Mixed
+      break;
+  }
+  not_reached();
+}
+
+bool TypeConstraint::alwaysPasses(DataType dt) const {
+  // Use the StringData* overflow for objects.
+  assertx(dt != KindOfObject);
+  if (!isCheckable()) return true;
+
+  if (isNullable() && dt == KindOfNull) return true;
+
+  auto const result = annotCompat(dt, m_type, m_typeName);
+  switch (result) {
+    case AnnotAction::Pass:
+      return true;
+    case AnnotAction::Fail:
+    case AnnotAction::CallableCheck:
+    case AnnotAction::ObjectCheck:
+    case AnnotAction::VArrayCheck:
+    case AnnotAction::DArrayCheck:
+    case AnnotAction::VArrayOrDArrayCheck:
+    case AnnotAction::NonVArrayOrDArrayCheck:
+    case AnnotAction::WarnFunc:
+    case AnnotAction::ConvertFunc:
+    case AnnotAction::WarnClass:
+    case AnnotAction::ConvertClass:
+      return false;
+  }
+  not_reached();
+}
+
 void TypeConstraint::verifyParam(TypedValue* tv,
                                  const Func* func,
                                  int paramNum) const {

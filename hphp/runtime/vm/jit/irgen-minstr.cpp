@@ -2386,8 +2386,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       }
       if (op != SetOpOp::ConcatEqual) return false;
       if (propPtr->type().deref() <= TStr) return true;
-      auto const dummy = make_tv<KindOfPersistentString>(staticEmptyString());
-      return propInfo.typeConstraint->alwaysPasses(&dummy);
+      return propInfo.typeConstraint->alwaysPasses(KindOfString);
     }();
 
     if (!fast) {

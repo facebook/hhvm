@@ -109,6 +109,7 @@ Object createObject(const String& obj_typename, int nargs = 0,
   return create_object(obj_typename, args);
 }
 
+[[noreturn]] NEVER_INLINE
 void throw_tprotocolexception(const String& what, long errorcode) {
   throw_object(createObject(s_TProtocolException, 2, what, errorcode));
 }
@@ -123,8 +124,6 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       Variant val;
       if ((val = fieldspec[s_class]).isNull()) {
         throw_tprotocolexception("no class type in spec", INVALID_DATA);
-        skip_element(T_STRUCT, transport);
-        return init_null();
       }
       String structType = val.toString();
       Object ret(createObject(structType));
@@ -139,7 +138,6 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         snprintf(errbuf, 128, "spec for %s is wrong type: %s\n",
                  structType.data(), ret->getClassName().c_str());
         throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
-        return init_null();
       }
       binary_deserialize_spec(ret, transport, spec.toArray());
       return ret;
@@ -463,12 +461,13 @@ void binary_deserialize_slow(const Object& zthis, const Array& spec,
     if (ttype == T_STOP) return;
     fieldno = transport.readI16();
   }
+  assertx(zthis->assertPropTypeHints());
 }
 
 void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
                              const Array& spec) {
   SpecHolder specHolder;
-  const auto& fields = specHolder.getSpec(spec);
+  const auto& fields = specHolder.getSpec(spec, dest, true);
   const size_t numFields = fields.size();
   Class* cls = dest->getVMClass();
   if (cls->numDeclProperties() < numFields) {
@@ -490,7 +489,6 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
         prop[i].name != fields[i].name ||
         !ttypes_are_compatible(fieldType, fields[i].type)) {
       // Verify everything we've set so far
-      dest->verifyPropTypeHints(i);
       return binary_deserialize_slow(
         dest, spec, fieldNum, fieldType, transport);
     }
@@ -498,8 +496,6 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
       if (s__type.equal(prop[numFields].name)) {
         tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
       } else {
-        // Verify everything we've set so far
-        dest->verifyPropTypeHints(i);
         return binary_deserialize_slow(
           dest, spec, fieldNum, fieldType, transport);
       }
@@ -507,10 +503,13 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     ArrNR fieldSpec(fields[i].spec);
     tvAsVariant(&objProp[i]) =
       binary_deserialize(fieldType, transport, fieldSpec.asArray());
+    if (!fields[i].noTypeCheck) {
+      dest->verifyPropTypeHint(i);
+      if (fields[i].isUnion) dest->verifyPropTypeHint(numFields);
+    }
     fieldType = static_cast<TType>(transport.readI8());
   }
-  // Verify everything we've set
-  dest->verifyPropTypeHints();
+  assertx(dest->assertPropTypeHints());
 }
 
 void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
@@ -641,7 +640,7 @@ void binary_serialize_slow(const FieldSpec& field, const Object& obj,
 void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
                            const Array& spec) {
   SpecHolder specHolder;
-  const auto& fields = specHolder.getSpec(spec);
+  const auto& fields = specHolder.getSpec(spec, obj, true);
   Class* cls = obj->getVMClass();
   auto prop = cls->declProperties().begin();
   auto objProp = obj->propVec();

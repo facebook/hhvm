@@ -65,6 +65,11 @@ struct FixedVector {
     swap(fv);
   }
 
+  FixedVector& operator=(FixedVector<T>&& fv) {
+    swap(fv);
+    return *this;
+  }
+
   ~FixedVector() {
     T* p = m_impl.m_sp.ptr();
     for (uint32_t i = 0, sz = size(); i < sz; ++i) {

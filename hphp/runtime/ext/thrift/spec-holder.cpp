@@ -17,7 +17,9 @@
 
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 namespace HPHP { namespace thrift {
 
@@ -39,6 +41,81 @@ Array get_tspec(const Class* cls) {
     thrift_error("invalid type of spec", ERR_INVALID_DATA);
   }
   return structSpec.toArray();
+}
+
+bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
+                                         TType type,
+                                         const Array& spec,
+                                         bool isBinary) {
+  switch (type) {
+    case T_STOP:
+    case T_VOID:
+      return tc.alwaysPasses(KindOfNull);
+    case T_STRUCT: {
+      auto const className = spec.rvalAt(s_class).unboxed();
+      if (isNullType(className.type())) return false;
+      auto const classNameString = tvCastToString(className.tv());
+      // Binary deserializing can assign a null to an object, while compact
+      // won't (this might be a bug).
+      return tc.alwaysPasses(classNameString.get()) &&
+        (!isBinary || tc.alwaysPasses(KindOfNull));
+    }
+    case T_BOOL:
+      return tc.alwaysPasses(KindOfBoolean);
+    case T_BYTE:
+    case T_I16:
+    case T_I32:
+    case T_I64:
+    case T_U64:
+      return tc.alwaysPasses(KindOfInt64);
+    case T_DOUBLE:
+    case T_FLOAT:
+      return tc.alwaysPasses(KindOfDouble);
+    case T_UTF8:
+    case T_UTF16:
+    case T_STRING:
+      return tc.alwaysPasses(KindOfString);
+    case T_MAP: {
+      auto const format = tvCastToString(
+        spec.rvalAt(s_format, AccessFlags::None).tv()
+      );
+      if (format.equal(s_harray)) {
+        return tc.alwaysPasses(KindOfDict);
+      } else if (format.equal(s_collection)) {
+        return tc.alwaysPasses(c_Map::classof()->name());
+      } else {
+        return tc.alwaysPasses(KindOfArray);
+      }
+      break;
+    }
+    case T_LIST: {
+      auto const format = tvCastToString(
+        spec.rvalAt(s_format, AccessFlags::None).tv()
+      );
+      if (format.equal(s_harray)) {
+        return tc.alwaysPasses(KindOfVec);
+      } else if (format.equal(s_collection)) {
+        return tc.alwaysPasses(c_Vector::classof()->name());
+      } else {
+        return tc.alwaysPasses(KindOfArray);
+      }
+      break;
+    }
+    case T_SET: {
+      auto const format = tvCastToString(
+        spec.rvalAt(s_format, AccessFlags::None).tv()
+      );
+      if (format.equal(s_harray)) {
+        return tc.alwaysPasses(KindOfKeyset);
+      } else if (format.equal(s_collection)) {
+        return tc.alwaysPasses(c_Set::classof()->name());
+      } else {
+        return tc.alwaysPasses(KindOfArray);
+      }
+      break;
+    }
+  }
+  return false;
 }
 
 SpecCacheMap SpecHolder::s_specCacheMap(1000);

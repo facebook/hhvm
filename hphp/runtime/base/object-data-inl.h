@@ -158,6 +158,46 @@ inline void ObjectData::instanceInit(Class* cls) {
   }
 }
 
+inline void ObjectData::verifyPropTypeHintImpl(tv_rval val,
+                                               const Class::Prop& prop) const {
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(tvIsPlausible(val.tv()));
+
+  auto const& tc = prop.typeConstraint;
+  if (!tc.isCheckable()) return;
+
+  if (UNLIKELY(type(val) == KindOfRef)) {
+    if (tc.isMixedResolved()) return;
+    raise_property_typehint_binding_error(
+      prop.cls,
+      prop.name,
+      false,
+      tc.isSoft()
+    );
+    return;
+  }
+
+  if (UNLIKELY(type(val) == KindOfUninit)) {
+    if ((prop.attrs & AttrLateInit) || tc.isMixedResolved()) return;
+    raise_property_typehint_unset_error(
+      prop.cls,
+      prop.name,
+      tc.isSoft()
+    );
+    return;
+  }
+
+  tc.verifyProperty(val, m_cls, prop.cls, prop.name);
+
+  if (debug && RuntimeOption::RepoAuthoritative) {
+    // The fact that uninitialized LateInit props are uninint isn't
+    // reflected in the repo-auth-type.
+    if (type(val) != KindOfUninit || !(prop.attrs & AttrLateInit)) {
+      always_assert(tvMatchesRepoAuthType(val.tv(), prop.repoAuthType));
+    }
+  }
+}
+
 inline void ObjectData::verifyPropTypeHints(size_t end) const {
   assertx(end <= m_cls->declProperties().size());
 
@@ -166,43 +206,18 @@ inline void ObjectData::verifyPropTypeHints(size_t end) const {
   auto const declProps = m_cls->declProperties();
   auto const props = propVec();
   for (size_t idx = 0; idx < end; ++idx) {
-    auto const val = props[idx];
-    assertx(tvIsPlausible(val));
-    auto const& prop = declProps[idx];
-    auto const& tc = prop.typeConstraint;
-    if (tc.isCheckable()) {
-      if (UNLIKELY(val.m_type == KindOfRef)) {
-        raise_property_typehint_binding_error(
-          prop.cls,
-          prop.name,
-          false,
-          tc.isSoft()
-        );
-      } else if (UNLIKELY(val.m_type == KindOfUninit)) {
-        if (!(prop.attrs & AttrLateInit)) {
-          raise_property_typehint_unset_error(
-            prop.cls,
-            prop.name,
-            tc.isSoft()
-          );
-        }
-      } else {
-        tc.verifyProperty(&val, m_cls, prop.cls, prop.name);
-      }
-    }
-
-    if (debug && RuntimeOption::RepoAuthoritative) {
-      // The fact that uninitialized LateInit props are uninint isn't
-      // reflected in the repo-auth-type.
-      if (val.m_type != KindOfUninit || !(prop.attrs & AttrLateInit)) {
-        always_assert(tvMatchesRepoAuthType(val, prop.repoAuthType));
-      }
-    }
+    verifyPropTypeHintImpl(&props[idx], declProps[idx]);
   }
 }
 
 inline void ObjectData::verifyPropTypeHints() const {
   verifyPropTypeHints(m_cls->declProperties().size());
+}
+
+inline void ObjectData::verifyPropTypeHint(Slot slot) const {
+  assertx(slot < m_cls->declProperties().size());
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  verifyPropTypeHintImpl(&propVec()[slot], m_cls->declProperties()[slot]);
 }
 
 inline bool ObjectData::assertPropTypeHints() const {

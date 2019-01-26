@@ -432,6 +432,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void verifyPropTypeHints() const;
   void verifyPropTypeHints(size_t end) const;
+  void verifyPropTypeHint(Slot slot) const;
 
   bool assertPropTypeHints() const;
 
@@ -572,6 +573,8 @@ private:
   bool slowDestroyCheck() const;
 
   bool assertTypeHint(tv_rval, Slot) const;
+
+  void verifyPropTypeHintImpl(tv_rval, const Class::Prop&) const;
 
 // offset:  0        8       12   16   20          32
 // 64bit:   header   cls          id   [subclass]  [props...]

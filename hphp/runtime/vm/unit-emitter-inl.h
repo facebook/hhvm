@@ -96,6 +96,10 @@ inline void UnitEmitter::emitByte(unsigned char n, int64_t pos) {
   emitImpl(n, pos);
 }
 
+inline void UnitEmitter::emitInt16(uint16_t n, int64_t pos) {
+  emitImpl(n, pos);
+}
+
 inline void UnitEmitter::emitInt32(int n, int64_t pos) {
   emitImpl(n, pos);
 }

@@ -345,6 +345,7 @@ struct UnitEmitter {
   void emitOp(Op op);
   void emitByte(unsigned char n, int64_t pos = -1);
 
+  void emitInt16(uint16_t n, int64_t pos = -1);
   void emitInt32(int n, int64_t pos = -1);
   void emitInt64(int64_t n, int64_t pos = -1);
   void emitDouble(double n, int64_t pos = -1);

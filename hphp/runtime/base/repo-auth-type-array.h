@@ -97,7 +97,7 @@ ArrayTypeTable& globalArrayTypeTable();
  * structure.
  */
 struct RepoAuthType::Array {
-  enum class Tag : uint8_t {
+  enum class Tag : uint16_t {
     /*
      * Known size with zero-based contiguous integer keys.
      *

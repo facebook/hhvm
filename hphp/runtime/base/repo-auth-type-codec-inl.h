@@ -24,14 +24,15 @@ namespace HPHP {
  * We set the high bit in the tag if there's going to be a specialized
  * array id.  This should only be found when the tag is an array type.
  */
-constexpr uint8_t kRATArrayDataBit = 0x80;
+constexpr uint16_t kRATArrayDataBit = 0x8000;
 
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
 size_t encodedRATSize(const unsigned char* pc) {
   using T = RepoAuthType::Tag;
-  auto const rawTag = *pc;
+  auto const rawTag = (static_cast<uint16_t>(*(pc + 1)) << 8) |
+                       static_cast<uint16_t>(*pc);
   bool const highBitSet = rawTag & kRATArrayDataBit;
   auto const tag = static_cast<T>(rawTag & ~kRATArrayDataBit);
   switch (tag) {
@@ -72,7 +73,7 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::InitGen:
   case T::Gen:
     assertx(!highBitSet);
-    return 1;
+    return 2;
   case T::SArr:
   case T::OptSArr:
   case T::Arr:
@@ -97,13 +98,13 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-    return highBitSet ? 5 : 1;
+    return highBitSet ? 6 : 2;
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
     assertx(!highBitSet);
-    return 5;
+    return 6;
   }
   not_reached();
 }

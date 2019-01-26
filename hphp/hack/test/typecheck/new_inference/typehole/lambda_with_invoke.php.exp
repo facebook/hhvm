@@ -1,0 +1,6 @@
+File "lambda_with_invoke.php", line 21, characters 40-46:
+You are trying to access the member rubbish on a value whose class is unknown (Typing[4296])
+  File "lambda_with_invoke.php", line 21, characters 15-27:
+  It is unknown because a type could not be determined here
+  File "lambda_with_invoke.php", line 14, characters 49-49:
+    via this generic T

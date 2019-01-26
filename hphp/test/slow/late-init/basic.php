@@ -149,23 +149,23 @@ class B {
   public function set() {
     $this->{B::prop(1)} = 123;
     $this->{B::prop(2)} = 123;
-    B::${B::prop(3)} = 123;
-    B::${B::prop(4)} = 123;
-    B::${B::prop(5)} = new B();
-    B::${B::prop(6)} = new B();
-    B::${B::prop(7)} = new B();
-    B::${B::prop(7)}->{B::prop(9)} = new B();
-    B::${B::prop(7)}->{B::prop(9)}->{B::prop(10)} = 123;
-    B::${B::prop(8)} = new B();
-    B::${B::prop(8)}->{B::prop(9)} = new B();
-    B::${B::prop(8)}->{B::prop(9)}->{B::prop(10)} = 123;
+    B::$p3 = 123;
+    B::$p4 = 123;
+    B::$p5 = new B();
+    B::$p6 = new B();
+    B::$p7 = new B();
+    B::$p7->{B::prop(9)} = new B();
+    B::$p7->{B::prop(9)}->{B::prop(10)} = 123;
+    B::$p8 = new B();
+    B::$p8->{B::prop(9)} = new B();
+    B::$p8->{B::prop(9)}->{B::prop(10)} = 123;
   }
 
   public function unset() {
     unset($this->{B::prop(1)});
     unset($this->{B::prop(2)});
-    unset(B::${B::prop(7)}->{B::prop(9)}->{B::prop(10)});
-    unset(B::${B::prop(8)}->{B::prop(9)}->{B::prop(10)});
+    unset(B::$p7->{B::prop(9)}->{B::prop(10)});
+    unset(B::$p8->{B::prop(9)}->{B::prop(10)});
   }
 
   public function get1() { return $this->{B::prop(1)}; }
@@ -198,55 +198,55 @@ class B {
     return $x;
   }
 
-  public function get3() { return B::${B::prop(3)}; }
-  public function isset3() { return isset(B::${B::prop(3)}); }
-  public function empty3() { return empty(B::${B::prop(3)}); }
-  public function incdec3() { return ++B::${B::prop(3)}; }
-  public function setop3() { return B::${B::prop(3)} += 1000; }
+  public function get3() { return B::$p3; }
+  public function isset3() { return isset(B::$p3); }
+  public function empty3() { return empty(B::$p3); }
+  public function incdec3() { return ++B::$p3; }
+  public function setop3() { return B::$p3 += 1000; }
   public function bind3() {
     $b = 123;
-    B::${B::prop(3)} =& $b;
-    return B::${B::prop(3)};
+    B::$p3 =& $b;
+    return B::$p3;
   }
   public function vget3() {
-    $x =& B::${B::prop(3)};
+    $x =& B::$p3;
     return $x;
   }
 
-  public function get4() { return B::${B::prop(4)}; }
-  public function isset4() { return isset(B::${B::prop(4)}); }
-  public function empty4() { return empty(B::${B::prop(4)}); }
-  public function incdec4() { return ++B::${B::prop(4)}; }
-  public function setop4() { return B::${B::prop(4)} += 1000; }
+  public function get4() { return B::$p4; }
+  public function isset4() { return isset(B::$p4); }
+  public function empty4() { return empty(B::$p4); }
+  public function incdec4() { return ++B::$p4; }
+  public function setop4() { return B::$p4 += 1000; }
   public function bind4() {
     $b = 123;
-    B::${B::prop(4)} =& $b;
-    return B::${B::prop(4)};
+    B::$p4 =& $b;
+    return B::$p4;
   }
   public function vget4() {
-    $x =& B::${B::prop(4)};
+    $x =& B::$p4;
     return $x;
   }
 
-  public function get5() { return B::${B::prop(5)}->{B::prop(9)}->{B::prop(10)}; }
-  public function get6() { return B::${B::prop(6)}->{B::prop(9)}->{B::prop(10)}; }
-  public function get7() { return B::${B::prop(7)}->{B::prop(9)}->{B::prop(10)}; }
-  public function get8() { return B::${B::prop(8)}->{B::prop(9)}->{B::prop(10)}; }
+  public function get5() { return B::$p5->{B::prop(9)}->{B::prop(10)}; }
+  public function get6() { return B::$p6->{B::prop(9)}->{B::prop(10)}; }
+  public function get7() { return B::$p7->{B::prop(9)}->{B::prop(10)}; }
+  public function get8() { return B::$p8->{B::prop(9)}->{B::prop(10)}; }
 
   public function get9() { return $this->{B::prop(11)}; }
   public function get10() { return $this->{B::prop(12)}; }
-  public function get11() { return B::${B::prop(13)}; }
-  public function get12() { return B::${B::prop(14)}; }
+  public function get11() { return B::$p13; }
+  public function get12() { return B::$p14; }
 
   public function isset5() { return isset($this->{B::prop(11)}); }
   public function isset6() { return isset($this->{B::prop(12)}); }
-  public function isset7() { return isset(B::${B::prop(13)}); }
-  public function isset8() { return isset(B::${B::prop(14)}); }
+  public function isset7() { return isset(B::$p13); }
+  public function isset8() { return isset(B::$p14); }
 
   public function empty5() { return empty($this->{B::prop(11)}); }
   public function empty6() { return empty($this->{B::prop(12)}); }
-  public function empty7() { return empty(B::${B::prop(13)}); }
-  public function empty8() { return empty(B::${B::prop(14)}); }
+  public function empty7() { return empty(B::$p13); }
+  public function empty8() { return empty(B::$p14); }
 }
 
 const TESTS = vec[

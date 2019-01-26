@@ -13,11 +13,6 @@ function test() {
   C::$p *= 2;        // SetOpS
   C::$p++;           // IncDecS
                      // UnsetS does not exist
-
-  C::$p = array('a' => 'b');
-  $x = C::${__hhvm_intrinsics\launder_value('p')}['a']; // BaseSC
-  $l = 'p';
-  $x = (C::$$l)['a'];                                   // BaseSL
 }
 
 <<__EntryPoint>>

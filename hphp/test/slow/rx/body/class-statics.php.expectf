@@ -10,10 +10,4 @@ Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): stat
 
 Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: IncDecS
 
-Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: SetS
-
-Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: BaseSC
-
-Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: BaseSL
-
 Done

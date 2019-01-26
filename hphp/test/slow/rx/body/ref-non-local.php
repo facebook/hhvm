@@ -4,10 +4,6 @@ class C { public static $p; public static $q; }
 
 <<__Rx>>
 function test() {
-  $x = 'foo';
-  $y = 'bar';
-  $$x =& $$y; // VGetN, BindN
-
   $_GET =& $_POST; // VGetG, BindG (superglobals)
 
   C::$p =& C::$q; // VGetS, BindS

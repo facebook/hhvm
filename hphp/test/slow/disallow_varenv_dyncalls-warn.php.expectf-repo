@@ -92,58 +92,6 @@ compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc a
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) compact should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
 compact() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line %d
 test_compact_errors() done
-Running test_framemeta_dyncall() #1....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_dyncall() done
-Running test_framemeta_dyncall() #2....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_dyncall() done
-Running test_framemeta_cuf() #1....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_cuf() done
-Running test_framemeta_cuf() #2....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_cuf() done
-Running test_framemeta_cuf_array() #1....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_cuf_array() done
-Running test_framemeta_cuf_array() #2....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_cuf_array() done
-Running test_framemeta_map() #1....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_map() done
-Running test_framemeta_map() #2....
-int(100)
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-string(8) "metadata"
-test_framemeta_map() done
-Running test_framemeta_errors() #1....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line %d
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line %d
-test_framemeta_errors() done
-Running test_framemeta_errors() #2....
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-HH\set_frame_metadata() expects exactly 1 parameter, 0 given in disallow_varenv_dyncalls.inc at line %d
-(hhvm.hack.disallow_dynamic_var_env_funcs=warn) HH\set_frame_metadata should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
-HH\set_frame_metadata() expects exactly 1 parameter, 3 given in disallow_varenv_dyncalls.inc at line %d
-test_framemeta_errors() done
 Running test_getargs_dyncall() #1....
 (hhvm.hack.disallow_dynamic_var_env_funcs=warn) func_get_args should not be called dynamically in disallow_varenv_dyncalls.inc at line %d
 array(3) {

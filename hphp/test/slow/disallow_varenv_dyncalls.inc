@@ -42,48 +42,6 @@ function test_compact_errors() {
   call_user_func_array($f, []);
 }
 
-function test_framemeta_dyncall() {
-  $v = '86metadata';
-  $$v = 100;
-  var_dump($$v);
-  $f = 'HH\set_frame_metadata';
-  $f('metadata');
-  var_dump($$v);
-}
-
-function test_framemeta_cuf() {
-  $v = '86metadata';
-  $$v = 100;
-  var_dump($$v);
-  $f = 'HH\set_frame_metadata';
-  call_user_func($f, 'metadata');
-  var_dump($$v);
-}
-
-function test_framemeta_cuf_array() {
-  $v = '86metadata';
-  $$v = 100;
-  var_dump($$v);
-  $f = 'HH\set_frame_metadata';
-  call_user_func_array($f, ['metadata']);
-  var_dump($$v);
-}
-
-function test_framemeta_map() {
-  $v = '86metadata';
-  $$v = 100;
-  var_dump($$v);
-  $f = 'HH\set_frame_metadata';
-  array_map($f, ['metadata']);
-  var_dump($$v);
-}
-
-function test_framemeta_errors() {
-  $f = 'HH\set_frame_metadata';
-  $f();
-  $f('abc', 'def', 'ghi');
-}
-
 function test_getargs_dyncall_impl($a, $b, $c) {
   $f = 'func_get_args';
   var_dump($f());
@@ -144,12 +102,6 @@ function run_tests() {
     'test_compact_cuf_array',
     'test_compact_map',
     'test_compact_errors',
-
-    'test_framemeta_dyncall',
-    'test_framemeta_cuf',
-    'test_framemeta_cuf_array',
-    'test_framemeta_map',
-    'test_framemeta_errors',
 
     'test_getargs_dyncall',
     'test_getargs_cuf',

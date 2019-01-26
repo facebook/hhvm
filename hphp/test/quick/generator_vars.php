@@ -17,10 +17,10 @@ function create() {
   yield $x;
   $s = 'foo';
   yield $s;
-  $$s = 1234;
-  $z = $$s;
+  $foo = 1234;
+  $z = $foo;
   yield $z;
-  yield $$s;
+  yield $foo;
 }
 
 function unusedarg($x, $y) {
@@ -28,7 +28,7 @@ function unusedarg($x, $y) {
   yield compact('x', 'z');
   $s = 'foo';
   yield 'almost there';
-  $$s = 'inside foo';
+  $foo = 'inside foo';
   yield compact('foo', 's');
   yield compact('x', 'y', 'foo', 'z');
 }

@@ -1,9 +1,0 @@
-Warning: Static property 'A::s1' declared as type int, string assigned in %s/dynamic-static.php on line 21
-
-Warning: Static property 'A::s2' declared as type string, int assigned in %s/dynamic-static.php on line 22
-
-Warning: Static property 'A::s3' declared as type string, int assigned in %s/dynamic-static.php on line 23
-
-Warning: Static property 'A::s5' with type annotation binding to ref in %s/dynamic-static.php on line 27
-
-Warning: Static property 'A::s6' with type annotation binding to ref in %s/dynamic-static.php on line 28

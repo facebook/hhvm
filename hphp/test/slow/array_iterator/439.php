@@ -58,11 +58,6 @@ foreach ($it as $a => $b) {
   print "$a: $b
 ";
 }
-$itp = "it";
-foreach ($$itp as $a => $b) {
-  print "$a: $b
-";
-}
 foreach (getIter() as $a => $b) {
   print "$a: $b
 ";

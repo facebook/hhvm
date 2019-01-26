@@ -4,8 +4,7 @@ $a = 1;
  class A {
  public function t() {
  global $a;
- $b = 'a';
- var_dump($$b);
+ var_dump($a);
 }
 }
  $obj = new A();

@@ -1,20 +1,16 @@
 <?hh
 
 function f() {
-  $n = "x";
-  $g = "y";
-  global $$g;
+  global $y;
 
   $x = 0;
-  $$g = 0;
+  $y = 0;
   print ":".empty($x).":\n";
-  print ":".empty($$n).":\n";
-  print ":".empty($$g).":\n";
+  print ":".empty($y).":\n";
 
   $x = 1;
-  $$g = 1;
+  $y = 1;
   print ":".empty($x).":\n";
-  print ":".empty($$n).":\n";
-  print ":".empty($$g).":\n";
+  print ":".empty($y).":\n";
 }
 f();

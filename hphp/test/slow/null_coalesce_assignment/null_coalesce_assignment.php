@@ -124,7 +124,7 @@ function test_basic(): void {
   VS($x_string ??= 73, "forty_seven");
   VS($x_string, "forty_seven");
 
-  VS($$x_string ??= 48, 48);
+  VS($forty_seven ??= 48, 48);
   VS($forty_seven, 48);
 }
 

@@ -16,8 +16,7 @@ MyClass::$x = 1;
 
 // Any way to coerce the [ Obj ] -> [ Class ] variety?
 $foo = new MyClass();
-$varname = 'foo';
-${$varname}::$x = 1;
+$foo::$x = 1;
 
 // ClsH
 $refs[] = clsFact();

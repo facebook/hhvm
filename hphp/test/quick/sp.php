@@ -20,21 +20,6 @@ function b() {
   print $b . "\n";
 }
 
-function c() {
-  $yoo = 'goo';
-  $c = A::$$yoo;
-  A::$$yoo = 'coo';
-  print $c . "\n";
-}
-
-function d() {
-  $zoo = 'A';
-  $yoo = 'goo';
-  $d = $zoo::$$yoo;
-  $zoo::$$yoo = 'doo';
-  print $d . "\n";
-}
-
 if (1) {
   class B {
     public static $goo = 'bozo';
@@ -50,10 +35,6 @@ a();
 p();
 b();
 p();
-c();
-p();
-d();
-p();
 print "round 2\n";
 a();
 p();
@@ -61,8 +42,6 @@ A::$goo = 'foo';
 b();
 p();
 A::$goo = 'foo';
-c();
 p();
 A::$goo = 'foo';
-d();
 p();

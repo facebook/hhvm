@@ -24,21 +24,6 @@ function func_get_arg_arg($arg, $idx) {
   return func_get_arg($idx);
 }
 
-function func_num_args_varenv($dst, $src) {
-  $$dst = $src;
-  return func_num_args();
-}
-
-function func_get_args_varenv($dst, $src) {
-  $$dst = $src;
-  return func_get_args();
-}
-
-function func_get_arg_varenv($dst, $src, $idx) {
-  $$dst = $src;
-  return func_get_arg($idx);
-}
-
 function test(string $generator, array $args) {
   var_dump(call_user_func_array($generator, $args));
 }
@@ -92,10 +77,4 @@ foreach ($extra_args_set as $extra_args) {
   test_num_args('arg', $extra_args, 'defined_arg');
   test_get_args('arg', $extra_args, 'defined_arg');
   test_get_arg('arg', $extra_args, 'defined_arg');
-
-  foreach (array('dst', 'src', 'idx', 'undef') as $dst) {
-    test_num_args('varenv', $extra_args, $dst, 'replacement');
-    test_get_args('varenv', $extra_args, $dst, 'replacement');
-    test_get_arg('varenv', $extra_args, $dst, 'replacement');
-  }
 }

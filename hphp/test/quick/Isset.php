@@ -1,25 +1,20 @@
 <?hh
 
 function f() {
-  $n = "x";
-  $g = "y";
-  global $$g;
+  global $y;
 
   print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
+  print ":".isset($y).":\n";
 
   $x = 0;
-  $$g = 0;
+  $y = 0;
   print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
+  print ":".isset($y).":\n";
 
   unset($x);
-  unset($$g);
+  unset($y);
   print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
+  print ":".isset($y).":\n";
 
   $a = array();
   $a["foo"] = null;

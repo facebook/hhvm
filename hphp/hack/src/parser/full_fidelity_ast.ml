@@ -1130,6 +1130,11 @@ and pString2: expr_location -> node list -> env -> expr list =
           begin match convert_name_to_lvar loc env e with
           | Some e -> e
           | None ->
+            let disable_variable_variables = is_hack env &&
+              ParserOptions.disable_variable_variables env.parser_options in
+            if (is_typechecker env || disable_variable_variables) then
+              raise_parsing_error env (`Node expr_with_braces)
+                SyntaxError.invalid_variable_variable;
             let e = pExpr ~location:loc expr_with_braces env in
             fst e, Dollar (fst e, BracedExpr e)
           end in

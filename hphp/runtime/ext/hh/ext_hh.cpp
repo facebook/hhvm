@@ -42,7 +42,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_86metadata("86metadata"),
+  s_set_frame_metadata("HH\\set_frame_metadata"),
   // The following are used in serialize_memoize_tv to serialize objects that
   // implement the IMemoizeParam interface
   s_IMemoizeParam("HH\\IMemoizeParam"),
@@ -492,25 +492,10 @@ bool HHVM_FUNCTION(clear_instance_memoization, const Object& obj) {
   return true;
 }
 
-void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
-  VMRegAnchor _;
-  auto fp = vmfp();
-  if (UNLIKELY(!fp)) return;
-  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
-  if (UNLIKELY(!fp)) return;
-
-  if (LIKELY(!(fp->func()->attrs() & AttrMayUseVV)) ||
-      LIKELY(!fp->hasVarEnv())) {
-    auto const local = fp->func()->lookupVarId(s_86metadata.get());
-    if (LIKELY(local != kInvalidId)) {
-      cellSet(*metadata.toCell(), *tvAssertCell(frame_local(fp, local)));
-    } else {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Unsupported dynamic call of set_frame_metadata()");
-    }
-  } else {
-    fp->getVarEnv()->set(s_86metadata.get(), metadata.asTypedValue());
-  }
+void HHVM_FUNCTION(set_frame_metadata, const Variant&) {
+  raise_disallowed_dynamic_call(Unit::lookupFunc(s_set_frame_metadata.get()));
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Unsupported dynamic call of set_frame_metadata()");
 }
 
 namespace {

@@ -87,8 +87,6 @@ const StaticString
   s_count("count"),
   s_sizeof("sizeof"),
   s_ini_get("ini_get"),
-  s_86metadata("86metadata"),
-  s_set_frame_metadata("hh\\set_frame_metadata"),
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
@@ -567,21 +565,6 @@ SSATmp* opt_abs(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  if (params.forNativeImpl) return nullptr;
-  auto func = curFunc(env);
-  if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
-  auto const local = func->lookupVarId(s_86metadata.get());
-  if (local == kInvalidId) return nullptr;
-  auto oldVal = ldLoc(env, local, nullptr, DataTypeBoxAndCountness);
-  auto newVal = params[0].value;
-  stLocRaw(env, local, fp(env), newVal);
-  decRef(env, oldVal);
-  gen(env, IncRef, newVal);
-  return cns(env, TInitNull);
-}
-
 SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
@@ -945,7 +928,6 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(chr)
     X(func_num_args)
     X(min2)
-    X(set_frame_metadata)
     X(array_key_cast)
     X(type_structure)
     X(is_list_like)

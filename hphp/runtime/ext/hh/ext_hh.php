@@ -99,7 +99,7 @@ function clear_instance_memoization(object $obj) : bool;
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */
-<<__Native("WritesCallerFrame")>>
+ <<__Native>>
 function set_frame_metadata(mixed $metadata): void;
 
 // class-like

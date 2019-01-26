@@ -39,7 +39,6 @@ struct LocalRange;
 TRACE_SET_MOD(hhbbc);
 
 const StaticString s_assert("assert");
-const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 const StaticString s_86metadata("86metadata");
 const StaticString s_func_num_args("func_num_args");
 const StaticString s_func_get_args("func_get_args");
@@ -981,16 +980,6 @@ void killLocals(ISS& env) {
 // Special functions
 
 void specialFunctionEffects(ISS& env, const res::Func& func) {
-  if (func.name()->isame(s_set_frame_metadata.get())) {
-    /*
-     * HH\set_frame_metadata can write to the local named 86metadata,
-     * but doesn't require a VV.
-     */
-    auto const l = findLocal(env, s_86metadata.get());
-    if (l != NoLocalId) setLoc(env, l, TInitCell);
-    return;
-  }
-
   if (func.name()->isame(s_assert.get())) {
     /*
      * Assert is somewhat special. In the most general case, it can read and

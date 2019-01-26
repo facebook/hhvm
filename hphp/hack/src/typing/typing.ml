@@ -6546,7 +6546,7 @@ and typedef_def tcopt typedef  =
     t_mode = _;
     t_namespace = _;
   } = typedef in
-  let ty = TI.instantiable_hint env hint in
+  let ty = Decl_hint.hint env.Env.decl_env hint in
   let env, ty = Phase.localize_with_self env ty in
   let env = begin match tcstr with
     | Some tcstr ->

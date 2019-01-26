@@ -103,4 +103,7 @@ let check_tparams env tparams =
 
 let handler = object
   inherit Tast_visitor.handler_base
+
+  method! at_typedef env t =
+    check_hint env t.t_kind
 end

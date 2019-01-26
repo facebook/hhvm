@@ -94,7 +94,7 @@ let start_server env =
       Unix.create_process hh_server hh_server_args stdin stdout stderr in
     Unix.close out_fd;
 
-    match Unix.waitpid [] server_pid with
+    match Sys_utils.waitpid_non_intr [] server_pid with
     | _, Unix.WEXITED 0 ->
       assert (input_line ic = ServerMonitorUtils.ready);
       close_in ic

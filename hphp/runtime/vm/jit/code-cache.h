@@ -171,8 +171,6 @@ struct CodeCache {
 
   Address threadLocalStart() { return m_threadLocalStart; }
 
-  void freeProf();
-
 private:
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;

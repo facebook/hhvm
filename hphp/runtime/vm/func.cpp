@@ -585,11 +585,6 @@ void Func::resetPrologue(int numParams) {
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
-void Func::resetFuncBody() {
-  auto const& stubs = jit::tc::ustubs();
-  m_funcBody = stubs.funcBodyHelperThunk;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Reified Generics
 

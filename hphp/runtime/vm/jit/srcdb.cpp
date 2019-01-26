@@ -259,6 +259,7 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
     m_incomingBranches.end(),
     [toSmash] (const IncomingBranch& ib) { return ib.toSmash() == toSmash; }
   );
+  assertx(end != m_incomingBranches.end());
   m_incomingBranches.setEnd(end);
 }
 
@@ -277,18 +278,20 @@ void SrcRec::replaceOldTranslations() {
    * unconditionally retranslate this SrcKey and never patch the
    * incoming branch to do something else.
    *
-   * The reason this is OK is because this mechanism is only used in two
-   * scenarios, non-RepoAuthoritative mode and reoptimizing a function via PGO,
-   * and, in both cases, when a SrcKey is invalidated, all its incoming branches
-   * are invalidated as well because they belong to the same function.  This
-   * means that all these incoming branches are about to go away anyway...
+   * The reason this is ok is this mechanism is only used in
+   * non-RepoAuthoritative mode, and the granularity of code
+   * invalidation there is such that we'll only have incoming branches
+   * like this basically within the same file since we don't have
+   * whole program analysis.
+   *
+   * This means all these incoming branches are about to go away
+   * anyway ...
    *
    * If we ever change that we'll have to change this to patch to
    * some sort of rebind requests.
    */
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
-  m_incomingBranches.clear();
 
   // Now that we've smashed all the IBs for these translations they should be
   // unreachable-- to prevent a race we treadmill here and then reclaim their

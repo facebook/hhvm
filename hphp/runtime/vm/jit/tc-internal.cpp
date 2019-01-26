@@ -318,12 +318,6 @@ void checkFreeProfData() {
   }
 }
 
-void freeProfCode() {
-  if (!transdb::enabled()) {
-    Treadmill::enqueue([]{ code().freeProf(); });
-  }
-}
-
 bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 

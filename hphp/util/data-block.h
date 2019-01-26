@@ -212,9 +212,8 @@ struct DataBlock {
     alloc<uint8_t>(1, nbytes);
   }
 
-  Address     base() const { return m_base; }
+  Address base() const { return m_base; }
   Address frontier() const { return m_frontier; }
-  size_t      size() const { return m_size; }
   std::string name() const { return m_name; }
 
   /*

@@ -80,11 +80,15 @@ jit::vector<Vlabel> rpoLayout(Vunit& unit) {
              blk(b).code.back().op != Vinstr::fallthru;
     });
 
-  if (!RuntimeOption::EvalJitLayoutPrologueSplitHotCold &&
-      unit.context && isPrologue(unit.context->kind)) {
-    for (auto b : labels) {
-      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
-        unit.blocks[b].area_idx = AreaIndex::Main;
+  if (unit.context) {
+    auto const kind = unit.context->kind;
+    using RO = RuntimeOption;
+    if ((isPrologue(kind)  && !RO::EvalJitLayoutPrologueSplitHotCold) ||
+        (isProfiling(kind) && !RO::EvalJitLayoutProfileSplitHotCold)) {
+      for (auto b : labels) {
+        if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+          unit.blocks[b].area_idx = AreaIndex::Main;
+        }
       }
     }
   }

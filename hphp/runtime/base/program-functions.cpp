@@ -1794,7 +1794,7 @@ static int execute_program_impl(int argc, char** argv) {
   // ini/hdf/cli options.
   if (po.mode == "dumphhas" || po.mode == "verify") {
     if (po.file.empty() && po.args.empty()) {
-      std::cerr << "Nothing to do. Pass a php file to compile.\n";
+      std::cerr << "Nothing to do. Pass a hack file to compile.\n";
       return 1;
     }
 
@@ -2043,7 +2043,7 @@ static int execute_program_impl(int argc, char** argv) {
     std::string const cliFile = !po.file.empty() ? po.file :
                                 new_argv[0] ? new_argv[0] : "";
     if (po.mode != "debug" && cliFile.empty()) {
-      std::cerr << "Nothing to do. Either pass a .php file to run, or "
+      std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
       return 1;
     }

@@ -632,12 +632,13 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (m_typeName->isame(val.val().pobj->getVMClass()->name())) {
         return true;
       }
-      if (!isPasses) {
-        // We can't save the Class* since it moves around from request to
-        // request.
-        assertx(m_namedEntity);
-        c = Unit::lookupClass(m_namedEntity);
-      }
+      // We can't save the Class* since it might move around from request to
+      // request.
+      assertx(m_namedEntity);
+      c = Unit::lookupClass(m_namedEntity);
+      // If we're being conservative we can only use the class if its persistent
+      // (otherwise what we infer may not be valid in all requests).
+      if (isPasses && c && !classHasPersistentRDS(c)) c = nullptr;
     } else {
       switch (metaType()) {
         case MetaType::Self:
@@ -762,6 +763,16 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
   if (isObject()) {
     // Same name is always a match.
     if (m_typeName->isame(clsName)) return true;
+
+    assertx(m_namedEntity);
+    auto const c1 = Unit::lookupClass(clsName);
+    auto const c2 = Unit::lookupClass(m_namedEntity);
+    // If both names map to persistent classes we can just check for a subtype
+    // relationship.
+    if (c1 && c2 &&
+        classHasPersistentRDS(c1) &&
+        classHasPersistentRDS(c2) &&
+        c1->classof(c2)) return true;
 
     auto const result = annotCompat(KindOfObject, m_type, m_typeName);
     switch (result) {

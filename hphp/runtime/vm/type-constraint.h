@@ -373,9 +373,9 @@ struct TypeConstraint {
 
   /*
    * Check if this type-constraint is compatible with the given value in *all
-   * contexts*. That is, regardless of what classes or type-aliases are
-   * currently loaded. A type which passes this check will never need to be
-   * checked at run-time.
+   * contexts*. That is, regardless of which classes or type-aliases might be
+   * loaded. A type which passes this check will never need to be checked at
+   * run-time. This will utilize persistent classes but nothing else.
    */
   bool alwaysPasses(tv_rval val) const {
     if (!isCheckable()) return true;

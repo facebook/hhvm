@@ -725,7 +725,7 @@ String DateTime::rfcFormat(const String& format) const {
           char abbr[9] = {0};
           snprintf(abbr, 9, "GMT%c%02d%02d",
             ((offset < 0) ? '-' : '+'),
-            abs(offset / 3600),
+            abs(offset / 3600) % 100, // % 100 to convince compiler we have 2 digits
             abs((offset % 3600) / 60));
           s.append(abbr);
         }
@@ -742,7 +742,7 @@ String DateTime::rfcFormat(const String& format) const {
           char abbr[7] = {0};
           snprintf(abbr, 7, "%c%02d:%02d",
             ((offset < 0) ? '-' : '+'),
-            abs(offset / 3600),
+            abs(offset / 3600) % 100, // % 100 to convince compiler we have 2 digits
             abs((offset % 3600) / 60));
           s.append(abbr);
         }

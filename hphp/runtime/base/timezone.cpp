@@ -329,7 +329,7 @@ String TimeZone::name() const {
         sizeof("+00:00"),
         "%c%02d:%02d",
         (m_offset > 0 ? '-' : '+'),
-        abs(m_offset / 60),
+        abs(m_offset / 60) % 100, // % 100 to convince compiler we have 2 digits
         abs(m_offset % 60)
       );
       return String(buf, sizeof("+00:00") - 1, CopyString);

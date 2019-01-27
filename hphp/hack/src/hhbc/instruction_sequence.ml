@@ -103,7 +103,7 @@ let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
 let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
-let instr_reified_name i = instr (IMisc (ReifiedName i))
+let instr_reified_name i op = instr (IMisc (ReifiedName (i, op)))
 let instr_reified_generic op i = instr (IMisc (ReifiedGeneric (op, i)))
 let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
 let instr_check_reified_generic_mismatch =
@@ -801,7 +801,7 @@ let get_input_output_count i =
     | MemoGet _ -> (0, 1) | MemoGetEager _ -> (0, 1)
     | MemoSet _ -> (0, 0) | MemoSetEager _ -> (0, 0)
     | Idx | ArrayIdx -> (3, 1)
-    | ReifiedName n | RecordReifiedGeneric n -> (n, 1)
+    | ReifiedName (n, _) | RecordReifiedGeneric n -> (n, 1)
     end
   | IGet i ->
     begin match i with

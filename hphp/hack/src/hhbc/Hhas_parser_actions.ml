@@ -957,7 +957,6 @@ let makeunaryinst s arg = match s with
    | "AsTypeStructC" -> IOp (AsTypeStructC (typestructresolveofiarg arg))
    | "CombineAndResolveTypeStruct" ->
       IOp (CombineAndResolveTypeStruct (intofiarg arg))
-   | "ReifiedName" -> IMisc (ReifiedName (intofiarg arg))
    | "RecordReifiedGeneric" -> IMisc (RecordReifiedGeneric (intofiarg arg))
    | "ConcatN" -> IOp (ConcatN (intofiarg arg))
 
@@ -1152,6 +1151,8 @@ match s with
 
  | "ReifiedGeneric" ->
    IMisc (ReifiedGeneric (reifiedgenericopofiarg arg1, intofiarg arg2))
+ | "ReifiedName" ->
+   IMisc (ReifiedName (intofiarg arg1, reifiedgenericopofiarg arg2))
 
  | _ -> failwith ("NYI binary: " ^ s)
 

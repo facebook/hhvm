@@ -2800,7 +2800,7 @@ OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   }
 }
 
-OPTBLD_INLINE void iopReifiedName(uint32_t n) {
+OPTBLD_INLINE void iopReifiedName(uint32_t n, ReifiedGenericOp op) {
   assertx(n != 0);
   auto const name = vmStack().topC();
   if (!tvIsString(name)) raise_error("Reified name must be a string");

@@ -21,7 +21,7 @@
   FCall <> 1 1 - "" ""
   JmpZ L0
   String "C"
-  ReifiedName 1
+  ReifiedName 1 ClsGeneric
   ClsRefGetC 0
   Jmp L1
 L0:

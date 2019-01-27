@@ -3901,12 +3901,14 @@ RecordReifiedGeneric <num args> [C..C] -> [C:Arr|Vec]
   to the global reified generics table. Returns the resulting static list
   of type structures.
 
-ReifiedName <num args> [C:Str C..C] -> [C:Str]
+ReifiedName <num args> <op> [C:Str C..C] -> [C:Str]
 
-  Takes a name and (%1 - 1) amount of type structures from the stack and
-  mangles the type structures into the name. Returns this mangled name.
+  Takes a name and (%1 - 1) type structures from the stack and
+  mangles the type structures into the name. Returns the mangled name.
   This instruction also performs RecordReifiedGeneric instruction's recording
   duty but it can be implemented more efficiently subsumed in this instruction.
+  Op is used to denote whether this name is for a class or a function. This
+  information is used for optimizations only.
 
 ReifiedGeneric <op> <id>     []   ->   [C:Arr|Dict]
 

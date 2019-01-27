@@ -828,7 +828,7 @@ and emit_new env pos expr targs args uargs =
           gather [
             gather reified_targs;
             name;
-            instr_reified_name (List.length reified_targs + 1);
+            instr_reified_name (List.length reified_targs + 1) H.ClsGeneric;
           ]
         in
         let instrs = match cexpr with
@@ -3250,7 +3250,7 @@ and emit_call_lhs
     gather [
       gather reified_targs;
       instr_string name;
-      instr_reified_name (List.length reified_targs + 1);
+      instr_reified_name (List.length reified_targs + 1) H.FunGeneric;
     ] in
   let reified_fun_name_call name =
     gather [

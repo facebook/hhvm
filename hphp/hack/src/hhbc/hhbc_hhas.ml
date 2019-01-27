@@ -550,7 +550,8 @@ let string_of_misc instruction =
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
-    | ReifiedName n -> sep ["ReifiedName"; string_of_int n]
+    | ReifiedName (n, op) ->
+      sep ["ReifiedName"; string_of_int n; string_of_reifiedgeneric_op op]
     | ReifiedGeneric (op, n) ->
       sep ["ReifiedGeneric"; string_of_reifiedgeneric_op op; string_of_int n]
     | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]

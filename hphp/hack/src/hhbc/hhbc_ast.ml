@@ -515,7 +515,7 @@ type instruct_misc =
   | Parent of classref_id
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
-  | ReifiedName of int
+  | ReifiedName of int * reified_generic_op
   | ReifiedGeneric of reified_generic_op * int
   | RecordReifiedGeneric of int
   | CheckReifiedGenericMismatch

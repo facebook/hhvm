@@ -477,38 +477,6 @@ bool Func::byRef(int32_t arg) const {
   return *ref & (1ull << bit);
 }
 
-const StaticString s_extract("extract");
-const StaticString s_current("current");
-const StaticString s_key("key");
-const StaticString s_array_multisort("array_multisort");
-
-bool Func::mustBeRef(int32_t arg) const {
-  if (!byRef(arg)) return false;
-  if (arg == 0) {
-    if (UNLIKELY(m_attrs & AttrBuiltin)) {
-      // This hacks mustBeRef() to return false for the first parameter of
-      // extract(), current(), key(), and array_multisort(). These functions
-      // try to take their first parameter by reference but they also allow
-      // expressions that cannot be taken by reference (ex. an array literal).
-      // TODO Task #4442937: Come up with a cleaner way to do this.
-      if (cls()) return true;
-      auto const name = displayName();
-      if (name == s_extract.get()) return false;
-      if (name == s_current.get()) return false;
-      if (name == s_key.get()) return false;
-      if (name == s_array_multisort.get()) return false;
-    }
-  }
-
-  // We force mustBeRef() to return false for array_multisort(). It tries to
-  // pass all variadic arguments by reference, but it also allow expressions
-  // that cannot be taken by reference (ex. SORT_REGULAR flag).
-  return
-    arg < numParams() ||
-    !(m_attrs & AttrVariadicByRef) ||
-    !(name() == s_array_multisort.get() && !cls());
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and stack.

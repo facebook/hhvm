@@ -154,7 +154,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - GetVal:    Return the SSATmp of the value to test
  * - PredInner: When the value is a BoxedInitCell, return the predicted inner
  *              type of the value.
- * - ColToArr:  Emit code to deal with any collection to array conversions.
  * - FuncToStr: Emit code to deal with any func to string conversions.
  * - Fail:      Emit code to deal with the type check failing.
  * - HackArr:   Emit code to deal with a d/varray mismatch.
@@ -169,7 +168,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  */
 template <typename GetVal,
           typename PredInner,
-          typename ColToArr,
           typename FuncToStr,
           typename ClassToStr,
           typename Fail,
@@ -183,7 +181,6 @@ void verifyTypeImpl(IRGS& env,
                     SSATmp* propCls,
                     GetVal getVal,
                     PredInner predInner,
-                    ColToArr colToArr,
                     FuncToStr funcToStr,
                     ClassToStr classToStr,
                     Fail fail,
@@ -210,7 +207,6 @@ void verifyTypeImpl(IRGS& env,
   if (!valType.isKnownDataType()) return giveup();
 
   if (tc.isNullable() && valType <= TInitNull) return;
-  colToArr(valType);
 
   auto const genFail = [&] {
     auto const thisFailsHard = [&] {
@@ -1101,7 +1097,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
     [] (SSATmp*) -> Type { // Get boxed inner value
       PUNT(VerifyReturnTypeBoxed);
     },
-    [] (Type) {}, // Collection to array conversion
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
       discard(env, 1);
@@ -1175,12 +1170,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
     },
     [&] (SSATmp* val) { // Get boxed inner type
       return env.irb->predictedLocalInnerType(id);
-    },
-    [&] (Type valType) { // Collection to array conversion
-      if (tc.isArray() && !tc.isSoft() &&
-          !func->mustBeRef(id) && valType <= TObj) {
-        PUNT(VerifyParamType-collectionToArray);
-      }
     },
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
@@ -1265,7 +1254,6 @@ void verifyPropType(IRGS& env,
       // We've already asserted that the value is a Cell.
       always_assert(false);
     },
-    [&] (Type) {}, // No collection to array automatic conversions
     [&] (SSATmp*) { return false; }, // No func to string automatic conversions
     [&] (SSATmp*) { return false; }, // No class to string automatic conversions
     [&] (Type, bool hard) { // Check failure

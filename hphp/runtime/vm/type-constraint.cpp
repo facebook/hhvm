@@ -1218,26 +1218,6 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     return;
   }
 
-  // Handle implicit collection->array conversion for array parameter type
-  // constraints
-  if (isArray() && !isSoft() && !func->mustBeRef(id) &&
-      c->m_type == KindOfObject && c->m_data.pobj->isCollection()) {
-    // To ease migration, the 'array' type constraint will implicitly cast
-    // collections to arrays, provided the type constraint is not soft and
-    // the parameter is not by reference. We raise a notice to let the user
-    // know that there was a type mismatch and that an implicit conversion
-    // was performed.
-    raise_notice(
-      folly::format(
-        "Argument {} to {}() must be of type {}, {} given; argument {} was "
-        "implicitly cast to array",
-        id + 1, func->fullDisplayName(), name, givenType, id + 1
-      ).str()
-    );
-    tvCastToArrayInPlace(tv);
-    return;
-  }
-
   // Handle parameter type constraint failures
   if (isExtended() &&
       (isSoft() || (isThis() && RuntimeOption::EvalThisTypeHintLevel == 2))) {

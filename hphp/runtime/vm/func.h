@@ -527,22 +527,14 @@ struct Func final {
   uint32_t numNonVariadicParams() const;
 
   /*
-   * Whether the arg-th parameter /may/ be taken by reference.
+   * Whether the arg-th parameter are taken by reference.
    */
   bool byRef(int32_t arg) const;
 
   /*
-   * Whether any parameters /may/ be taken by reference.
+   * Whether any parameters are taken by reference.
    */
   bool anyByRef() const;
-
-  /*
-   * Whether the arg-th parameter /must/ be taken by reference.
-   *
-   * Some builtins take positional or variadic arguments only optionally by
-   * ref, hence the distinction.
-   */
-  bool mustBeRef(int32_t arg) const;
 
   /*
    * Whether the function is declared with a `...' parameter.

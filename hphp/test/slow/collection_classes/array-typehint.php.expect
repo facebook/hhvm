@@ -153,48 +153,12 @@ array(4) {
 }
 ==== Vector ====
 f1:
-Triggered E_NOTICE with message "Argument 1 to f1() must be of type array, HH\Vector given; argument 1 was implicitly cast to array"
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-}
+f1() threw an exception
 f2:
-Triggered E_NOTICE with message "Argument 1 to f2() must be of type ?array, HH\Vector given; argument 1 was implicitly cast to array"
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-}
+f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Vector given"
-object(HH\Vector)#6 (3) {
+object(HH\Vector)#10 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -202,7 +166,7 @@ object(HH\Vector)#6 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#6 (4) {
+object(HH\Vector)#10 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -214,7 +178,7 @@ object(HH\Vector)#6 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Vector given"
-object(HH\Vector)#6 (3) {
+object(HH\Vector)#10 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -222,7 +186,7 @@ object(HH\Vector)#6 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#6 (4) {
+object(HH\Vector)#10 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -238,7 +202,7 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Vector given"
-object(HH\Vector)#10 (3) {
+object(HH\Vector)#14 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -246,7 +210,7 @@ object(HH\Vector)#10 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#10 (4) {
+object(HH\Vector)#14 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -258,7 +222,7 @@ object(HH\Vector)#10 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Vector given"
-object(HH\Vector)#10 (3) {
+object(HH\Vector)#14 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -266,7 +230,7 @@ object(HH\Vector)#10 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#10 (4) {
+object(HH\Vector)#14 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -278,48 +242,12 @@ object(HH\Vector)#10 (4) {
 }
 ==== Map ====
 f1:
-Triggered E_NOTICE with message "Argument 1 to f1() must be of type array, HH\Map given; argument 1 was implicitly cast to array"
-array(3) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-}
-array(4) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-  [0]=>
-  int(4)
-}
+f1() threw an exception
 f2:
-Triggered E_NOTICE with message "Argument 1 to f2() must be of type ?array, HH\Map given; argument 1 was implicitly cast to array"
-array(3) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-}
-array(4) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-  [0]=>
-  int(4)
-}
+f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Map given"
-object(HH\Map)#10 (3) {
+object(HH\Map)#18 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -327,7 +255,7 @@ object(HH\Map)#10 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#10 (4) {
+object(HH\Map)#18 (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -339,7 +267,7 @@ object(HH\Map)#10 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Map given"
-object(HH\Map)#10 (3) {
+object(HH\Map)#18 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -347,7 +275,7 @@ object(HH\Map)#10 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#10 (4) {
+object(HH\Map)#18 (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -363,7 +291,7 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Map given"
-object(HH\Map)#14 (3) {
+object(HH\Map)#22 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -371,7 +299,7 @@ object(HH\Map)#14 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#14 (4) {
+object(HH\Map)#22 (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -383,7 +311,7 @@ object(HH\Map)#14 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Map given"
-object(HH\Map)#14 (3) {
+object(HH\Map)#22 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -391,7 +319,7 @@ object(HH\Map)#14 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#14 (4) {
+object(HH\Map)#22 (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -403,53 +331,17 @@ object(HH\Map)#14 (4) {
 }
 ==== Set ====
 f1:
-Triggered E_NOTICE with message "Argument 1 to f1() must be of type array, HH\Set given; argument 1 was implicitly cast to array"
-array(3) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-}
-array(4) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
+f1() threw an exception
 f2:
-Triggered E_NOTICE with message "Argument 1 to f2() must be of type ?array, HH\Set given; argument 1 was implicitly cast to array"
-array(3) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-}
-array(4) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
+f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Set given"
-object(HH\Set)#14 (3) {
+object(HH\Set)#26 (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#14 (4) {
+object(HH\Set)#26 (4) {
   int(1)
   int(2)
   int(3)
@@ -457,12 +349,12 @@ object(HH\Set)#14 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Set given"
-object(HH\Set)#14 (3) {
+object(HH\Set)#26 (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#14 (4) {
+object(HH\Set)#26 (4) {
   int(1)
   int(2)
   int(3)
@@ -474,12 +366,12 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Set given"
-object(HH\Set)#18 (3) {
+object(HH\Set)#30 (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#18 (4) {
+object(HH\Set)#30 (4) {
   int(1)
   int(2)
   int(3)
@@ -487,12 +379,12 @@ object(HH\Set)#18 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Set given"
-object(HH\Set)#18 (3) {
+object(HH\Set)#30 (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#18 (4) {
+object(HH\Set)#30 (4) {
   int(1)
   int(2)
   int(3)

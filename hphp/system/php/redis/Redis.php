@@ -170,10 +170,10 @@ class Redis {
     return $this->processBooleanResponse();
   }
 
-  public function client($cmd, $arg = '') {
+  public function client($cmd, ...$args) {
     $cmd = strtolower($cmd);
-    if (func_num_args() == 2) {
-      $this->processCommand('CLIENT', $cmd, $arg);
+    if ($args) {
+      $this->processCommand('CLIENT', $cmd, $args[0]);
     } else {
       $this->processCommand('CLIENT', $cmd);
     }
@@ -385,12 +385,17 @@ class Redis {
 
   /* zSets --------------------------------------------------------------- */
 
-  public function zAdd($key, $score, $value/*, $scoreN, $valueN */) {
-    $args = func_get_args();
+  public function zAdd($key, $score, $value, ...$more_scores) {
+    $args = varray[$key, $score, $value];
+    if ($more_scores) {
+      $args = array_merge($args, $more_scores);
+    }
+
     $count = count($args);
-    if (($count - 1) % 2) {
+    if ($count % 2 !== 1) {
       return false;
     }
+
     $args[0] = $this->_prefix($args[0]);
     for ($i = 1; $i < $count; $i += 2) {
       $args[$i  ] = (double)$args[$i];
@@ -653,8 +658,12 @@ class Redis {
     return $this;
   }
 
-  public function watch($key/* ... */) {
-    $args = array_map([$this, '_prefix'], func_get_args());
+  public function watch($key, ...$more_keys) {
+    $keys = varray[$key];
+    if ($more_keys) {
+      $keys = array_merge($keys, $more_keys);
+    }
+    $args = array_map(($key) ==> $this->_prefix($key), $keys);
     $this->processArrayCommand("WATCH", $args);
     return $this->processBooleanResponse();
   }
@@ -716,7 +725,7 @@ class Redis {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
-  public function script($subcmd/* ... */) {
+  public function script($subcmd, ...$args) {
     switch (strtolower($subcmd)) {
       case 'flush':
       case 'kill':
@@ -724,10 +733,10 @@ class Redis {
         $response = $this->processVariantResponse();
         return ($response !== NULL) ? true : false;
       case 'load':
-        if (func_num_args() < 2) {
+        if (!$args) {
           return false;
         }
-        $script = func_get_arg(1);
+        $script = $args[0];
         if (!is_string($script) or empty($script)) {
           return false;
         }
@@ -735,9 +744,7 @@ class Redis {
         $response = $this->processVariantResponse();
         return ($response !== NULL) ? $response : false;
       case 'exists':
-        $args = func_get_args();
-        $args[0] = 'EXISTS';
-        $this->processArrayCommand('SCRIPT', $args);
+        $this->processCommand('SCRIPT', 'EXISTS', ...$args);
         return $this->processVariantResponse();
       default:
         return false;
@@ -1221,9 +1228,7 @@ class Redis {
     return (bool)fwrite($this->connection, $cmd);
   }
 
-  protected function processCommand($cmd/* ... */) {
-    $args = func_get_args();
-    array_shift(&$args);
+  protected function processCommand($cmd, ...$args) {
     return $this->processArrayCommand($cmd, $args);
   }
 

@@ -60,7 +60,7 @@ let rec refine_shape field_name env shape =
 (*****************************************************************************)
 
 let rec shrink_shape ~seen_tyvars pos field_name env shape =
-  let _, shape = Env.expand_type env shape in
+  let env, shape = Typing_subtype.expand_type_and_solve env shape in
   match shape with
   | _, Tshape (fields_known, fields) ->
       (* remember that we have unset this field *)
@@ -77,17 +77,6 @@ let rec shrink_shape ~seen_tyvars pos field_name env shape =
         List.map_env env tyl (shrink_shape ~seen_tyvars pos field_name) in
       let result = Reason.Rwitness pos, Tunresolved tyl in
       env, result
-  | r, Tvar var ->
-      begin match IMap.get var seen_tyvars with
-      | Some var' ->
-        env, (r, Tvar var')
-      | None ->
-        let var' = Env.fresh () in
-        let seen_tyvars = IMap.add var var' seen_tyvars in
-        let env = Env.map_tyvar_bounds env var var'
-          (shrink_shape ~seen_tyvars pos field_name) in
-        env, (r, Tvar var')
-      end
   | x ->
       env, x
 

@@ -160,8 +160,6 @@ val remove_tyvar :
   env -> int -> env
 val remove_equivalent_tyvars :
   env -> int -> env
-val map_tyvar_bounds :
-  env -> int -> int -> (env -> locl ty -> env * locl ty) -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool

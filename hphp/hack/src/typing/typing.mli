@@ -13,7 +13,7 @@ val with_expr_hook:
 val debug_print_last_pos:
   'a -> unit
 
-val fun_def      : TypecheckerOptions.t -> Nast.fun_    -> Tast.fun_
+val fun_def      : TypecheckerOptions.t -> Nast.fun_    -> Tast.fun_ option
 val class_def    : TypecheckerOptions.t -> Nast.class_  -> Tast.class_ option
 val typedef_def  : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
 val gconst_def   : TypecheckerOptions.t -> Nast.gconst  -> Tast.gconst

@@ -211,6 +211,14 @@ let get_darray_inst ty =
   | (_, Tarraykind (AKdarray (kty, vty))) -> Some (kty, vty)
   | _ -> get_key_value_collection_inst ty
 
+let with_timeout opts fun_name ~(do_ : unit -> 'b): 'b option =
+  let timeout = opts.GlobalOptions.tco_timeout in
+  if timeout = 0 then Some (do_ ())
+  else
+    Timeout.with_timeout ~timeout
+      ~on_timeout:(fun _ -> Errors.typechecker_timeout fun_name timeout; None)
+      ~do_:(fun _ -> Some (do_ ()))
+
 (*****************************************************************************)
 (* Handling function/method arguments *)
 (*****************************************************************************)
@@ -445,7 +453,8 @@ and add_decl_errors = function
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
-and fun_def tcopt f =
+and fun_def tcopt f : Tast.fun_def option =
+  with_timeout tcopt f.f_name ~do_:begin fun () ->
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst f.f_name in
@@ -544,6 +553,7 @@ and fun_def tcopt f =
       Typing_lambda_ambiguous.suggest_fun_def env fundef
   ) in
   tfun_def
+  end (* with_timeout *)
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -6019,8 +6029,8 @@ and class_def tcopt c =
 and class_def_ env c tc =
   let env =
     let kind = match c.c_kind with
-    | Ast.Cenum -> SN.AttributeKinds.enum
-    | _ -> SN.AttributeKinds.cls in
+      | Ast.Cenum -> SN.AttributeKinds.enum
+      | _ -> SN.AttributeKinds.cls in
     Typing_attributes.check_def env new_object kind c.c_user_attributes in
   let env =
     { env with Env.inside_ppl_class =
@@ -6084,7 +6094,7 @@ and class_def_ env c tc =
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.map c.c_methods (method_def env) in
+  let typed_methods = List.filter_map c.c_methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
   let typed_consts, const_types =
     List.unzip (List.map c.c_consts (class_const_def env)) in
@@ -6093,7 +6103,7 @@ and class_def_ env c tc =
   let env = Env.set_static env in
   let typed_static_vars =
     List.map c.c_static_vars (class_var_def env ~is_static:true c) in
-  let typed_static_methods = List.map c.c_static_methods (method_def env) in
+  let typed_static_methods = List.filter_map c.c_static_methods (method_def env) in
   let filename = Pos.filename (fst c.c_name) in
   let droot = env.Env.decl_env.Decl_env.droot in
   let file_attrs =
@@ -6243,7 +6253,9 @@ and class_const_def env (h, id, e) =
 
 and class_constr_def env c =
   let env = { env with Env.inside_constructor = true } in
-  Option.map c.c_constructor (method_def env)
+  match Option.map c.c_constructor (method_def env) with
+  | Some (Some c) -> Some c
+  | Some None | None -> None
 
 and class_implements_type env c1 removals ctype2 =
   let params =
@@ -6409,6 +6421,7 @@ and class_type_param env ct =
   }
 
 and method_def env m =
+  with_timeout (Env.get_tcopt env) m.m_name ~do_:begin fun () ->
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst m.m_name in
@@ -6526,6 +6539,7 @@ and method_def env m =
     T.m_doc_comment = m.m_doc_comment;
   } in
   Typing_lambda_ambiguous.suggest_method_def env method_def
+  end (* with_timeout *)
 
 and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in
@@ -6651,7 +6665,12 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
 
 let nast_to_tast opts nast =
   let convert_def = function
-    | Nast.Fun f       -> T.Fun (fun_def opts f)
+    | Nast.Fun f ->
+      begin match fun_def opts f with
+      | Some f -> T.Fun f
+      | None -> failwith @@ Printf.sprintf
+          "Error when typechecking function: %s" (snd f.f_name)
+      end
     | Nast.Constant gc -> T.Constant (gconst_def opts gc)
     | Nast.Typedef td  -> T.Typedef (typedef_def opts td)
     | Nast.Class c -> begin

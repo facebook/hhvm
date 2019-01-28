@@ -3487,13 +3487,9 @@ let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
     kpos, (String.capitalize ktype) ^ " cannot be used as a key for " ^ ctype;
   ]
 
-let typechecker_timeout_on_class pos seconds =
+let typechecker_timeout (pos, fun_name) seconds =
   add (Typing.err_code Typing.TypecheckerTimeout) pos
-    (Printf.sprintf "Type checker timed out after %d seconds whilst checking this class" seconds)
-
-let typechecker_timeout_on_function pos seconds =
-  add (Typing.err_code Typing.TypecheckerTimeout) pos
-    (Printf.sprintf "Type checker timed out after %d seconds whilst checking this function" seconds)
+    (Printf.sprintf "Type checker timed out after %d seconds whilst checking function %s" seconds fun_name)
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

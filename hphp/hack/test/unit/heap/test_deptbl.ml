@@ -83,7 +83,8 @@ let populate_deptable () =
     ~f:(fun (key, values) -> List.iter values ~f:(fun x -> add key x))
 
 let init_shared_mem () =
-  let handle = SharedMem.init { SharedMem.
+  let num_workers = 0 in
+  let handle = SharedMem.init ~num_workers { SharedMem.
     global_size = 16;
     heap_size = 1024;
     dep_table_pow = 16;

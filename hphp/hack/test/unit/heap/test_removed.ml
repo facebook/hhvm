@@ -37,7 +37,8 @@ let tests () =
     "test_add_remove", test_add_remove (module TestNoCache);
   ] in
   let setup_test (name, test) = name, fun () ->
-    let handle = SharedMem.init { SharedMem.
+    let num_workers = 0 in
+    let handle = SharedMem.init ~num_workers { SharedMem.
       global_size = 16;
       heap_size = 1024;
       dep_table_pow = 2;

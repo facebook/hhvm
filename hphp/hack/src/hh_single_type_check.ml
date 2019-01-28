@@ -1193,7 +1193,8 @@ let main_hack ({files; mode; tcopt; _} as opts) =
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
-  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
+  ignore (handle: SharedMem.handle);
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
   match mode with

@@ -2,12 +2,13 @@ open Core_kernel
 
 let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
 
+let num_workers = 2
 let make_worker ?call_wrapper heap_handle =
   WorkerController.make
     ?call_wrapper
     ~saved_state:()
     ~entry
-    ~nbr_procs:2
+    ~nbr_procs:num_workers
     ~gc_control:(Gc.get())
     ~heap_handle
 
@@ -79,6 +80,6 @@ let make_tests handle = [
 
 let () =
   Daemon.check_entry_point (); (* this call might not return *)
-  let heap_handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  let heap_handle = SharedMem.init ~num_workers GlobalConfig.default_sharedmem_config in
   let tests = make_tests heap_handle in
   Unit_test.run_all tests

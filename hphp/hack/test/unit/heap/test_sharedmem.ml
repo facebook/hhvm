@@ -205,7 +205,8 @@ let tests () =
     "test_cache_behavior", test_cache_behavior (module TestWithCache);
   ] in
   let setup_test (name, test) = name, fun () ->
-    let handle = SharedMem.init { SharedMem.
+    let num_workers = 0 in
+    let handle = SharedMem.init ~num_workers { SharedMem.
       global_size = 16;
       heap_size = 409600;
       dep_table_pow = 2;

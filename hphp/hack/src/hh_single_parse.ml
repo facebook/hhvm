@@ -193,7 +193,8 @@ let () =
   in
   if String.length !filename = 0 && !benchmark_files = [] then failwith "No filename given";
   EventLogger.init EventLogger.Event_logger_fake 0.0;
-  let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
+  ignore (handle: SharedMem.handle);
   let dumper ast = !dumper (Ast.AProgram ast) in
   let parse_file fn =
     let file = Relative_path.create Relative_path.Dummy fn in

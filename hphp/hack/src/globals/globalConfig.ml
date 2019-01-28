@@ -15,8 +15,6 @@ open Core_kernel
 
 let program_name = "hh_server"
 
-let nbr_procs = Sys_utils.nbr_procs
-
 (* Configures only the workers. Workers can have more relaxed GC configs as
  * they are short-lived processes *)
 let gc_control = Gc.get ()

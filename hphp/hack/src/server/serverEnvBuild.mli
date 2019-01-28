@@ -11,8 +11,7 @@ val make_genv:
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
-  SharedMem.handle ->
-  logging_init:(unit -> unit) ->
+  MultiWorker.worker list ->
     ServerEnv.genv
 
 val default_genv: ServerEnv.genv

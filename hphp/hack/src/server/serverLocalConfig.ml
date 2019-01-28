@@ -34,7 +34,7 @@ type t = {
   saved_state_cache_limit: int;
   shm_dirs: string list;
   state_loader_timeouts : State_loader_config.timeouts;
-  max_workers : int;
+  max_workers : int option;
   max_bucket_size : int;
   (** See HhMonitorInformant. *)
   use_dummy_informant : bool;
@@ -100,7 +100,7 @@ let default = {
   cpu_priority = 10;
   saved_state_cache_limit = 20;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
-  max_workers = GlobalConfig.nbr_procs;
+  max_workers = None;
   max_bucket_size = Bucket.max_size ();
   state_loader_timeouts = State_loader_config.default_timeouts;
   use_dummy_informant = true;
@@ -210,12 +210,7 @@ let load_ fn ~silent =
     ~default:default.shm_dirs
     config
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
-  let max_workers = int_ "max_workers"
-    ~default:default.max_workers config in
-  (* Do not allow max workers to exceed the number of processors *)
-  if max_workers > GlobalConfig.nbr_procs then
-    Hh_logger.log "Warning: max_workers is higher than the number of processors. Ignoring.";
-  let max_workers = min GlobalConfig.nbr_procs max_workers in
+  let max_workers = int_opt "max_workers" config in
   let max_bucket_size = int_ "max_bucket_size"
     ~default:default.max_bucket_size config in
   let interrupt_on_watchman = bool_if_version "interrupt_on_watchman"

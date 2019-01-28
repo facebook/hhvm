@@ -46,7 +46,7 @@ module type S = sig
   val json_mode: options -> bool
   val load_state_canary: options -> bool
   val log_inference_constraints: options -> bool
-  val max_procs: options -> int
+  val max_procs: options -> int option
   val no_load: options -> bool
   val prechecked: options -> bool option
   val profile_log: options -> bool

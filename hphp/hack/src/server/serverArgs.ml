@@ -26,7 +26,7 @@ type options = {
   json_mode: bool;
   load_state_canary: bool;
   log_inference_constraints: bool;
-  max_procs: int;
+  max_procs: int option;
   no_load: bool;
   prechecked: bool option;
   profile_log: bool;
@@ -189,7 +189,7 @@ let parse_options () =
   let json_mode = ref false in
   let load_state_canary = ref false in
   let log_inference_constraints = ref false in
-  let max_procs = ref GlobalConfig.nbr_procs in
+  let max_procs = ref None in
   let no_load = ref false in
   let prechecked = ref None in
   let profile_log = ref false in
@@ -203,7 +203,7 @@ let parse_options () =
   let with_saved_state = ref None in
 
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
-  let set_max_procs = fun s -> max_procs := min !max_procs s in
+  let set_max_procs = fun n -> max_procs := Some n in
   let set_save_state = fun s -> save := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state = fun s -> with_saved_state := Some s in
@@ -318,7 +318,7 @@ let default_options ~root = {
   json_mode = false;
   load_state_canary = false;
   log_inference_constraints = false;
-  max_procs = GlobalConfig.nbr_procs;
+  max_procs = None;
   no_load = true;
   prechecked = None;
   profile_log = false;
@@ -417,6 +417,9 @@ let to_string
     let prechecked_str = match prechecked with
       | None -> "<>"
       | Some b -> string_of_bool b in
+    let max_procs_str = match max_procs with
+      | None -> "<>"
+      | Some n -> string_of_int n in
     let config_str = Printf.sprintf "[%s]"
       (String.concat ~sep:", " @@ List.map ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
     in
@@ -433,7 +436,7 @@ let to_string
         "json_mode: "; string_of_bool json_mode; ", ";
         "load_state_canary: "; string_of_bool load_state_canary; ", ";
         "log_inference_constraints: "; string_of_bool log_inference_constraints; ", ";
-        "maxprocs: "; string_of_int max_procs; ", ";
+        "maxprocs: "; max_procs_str; ", ";
         "no_load: "; string_of_bool no_load; ", ";
         "prechecked: "; prechecked_str;
         "profile_log: "; string_of_bool profile_log; ", ";

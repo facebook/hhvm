@@ -846,7 +846,30 @@ let program_init genv =
     ~approach_name ~init_error ~init_type;
   env
 
+let num_workers options local_config =
+  (* The number of workers is set both in hh.conf and as an optional server argument.
+    if the two numbers given in argument and in hh.conf are different, we always take the minimum
+    of the two.
+  *)
+  let max_procs_opt = Option.merge ~f:(fun a b ->
+    if Int.equal a b then a else begin
+      Hh_logger.log
+        ("Warning: both an argument --max-procs and a local config "
+          ^^"for max workers are given. Choosing minimum of the two.");
+      min a b
+    end
+  ) (ServerArgs.max_procs options) local_config.ServerLocalConfig.max_workers in
+  let nbr_procs = Sys_utils.nbr_procs in
+  match max_procs_opt with
+  | None -> nbr_procs
+  | Some max_procs ->
+    if max_procs <= nbr_procs then max_procs else begin
+      Hh_logger.log "Warning: max workers is higher than the number of processors. Ignoring.";
+      nbr_procs
+    end
+
 let setup_server ~informant_managed ~monitor_pid options config local_config =
+  let num_workers = num_workers options local_config in
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
@@ -862,7 +885,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     io_priority;
     enable_on_nfs;
     search_chunk_size;
-    max_workers;
     max_bucket_size;
     use_full_fidelity_parser;
     interrupt_on_watchman;
@@ -885,7 +907,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       ~informant_managed
       ~time:(Unix.gettimeofday ())
       ~search_chunk_size
-      ~max_workers
+      ~max_workers:num_workers
       ~max_bucket_size
       ~use_full_fidelity_parser
       ~interrupt_on_watchman
@@ -918,12 +940,15 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     if (ServerConfig.sharedmem_config config).SharedMem.sample_rate = 0.0
     then fun () -> ()
     else fun () -> logging_init (init_id ^ "." ^ Random_id.short_string ()) in
+  let workers =
+    let gc_control = ServerConfig.gc_control config in
+    ServerWorker.make ~nbr_procs:num_workers gc_control handle ~logging_init:worker_logging_init
+  in
   let genv = ServerEnvBuild.make_genv
     options
     config
     local_config
-    ~logging_init:worker_logging_init
-    handle
+    workers
   in
   genv, init_id
 

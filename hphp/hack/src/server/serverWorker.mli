@@ -9,7 +9,7 @@
 
 open Core_kernel
 val make :
-  ?nbr_procs:int ->
+  nbr_procs:int ->
   Gc.control ->
   SharedMem.handle ->
   logging_init:(unit -> unit) ->

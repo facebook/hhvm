@@ -46,27 +46,12 @@ let watchman_expression_terms = [
   ]
 ]
 
-let make_genv options config local_config handle ~logging_init =
+let make_genv options config local_config workers =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
     not check_mode || ServerArgs.save_filename options <> None;
-  (* The number of workers is set both in hh.conf and as an optional server argument.
-    if the two numbers given in argument and in hh.conf are different, we always take the minimum
-    of the two.
-  *)
 
-  let nbr_procs = ServerArgs.max_procs options in
-  (* If the number of processes is not equal to default, and the local config specifies differently
-     from the one given in ServerArgs, that means both an argument and a local config were passed in
-    *)
-  if nbr_procs <> local_config.SLC.max_workers && nbr_procs <> GlobalConfig.nbr_procs then
-    Hh_logger.log
-      ("Warning: both an argument --max-procs and a local config "
-        ^^"for max workers are given. Choosing minimum of the two.");
-  let nbr_procs = min nbr_procs local_config.SLC.max_workers in
-  let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle ~logging_init) in
   let (>>=) = Option.(>>=) in
   let since_clockspec = (ServerArgs.with_saved_state options) >>= function
     | ServerArgs.Saved_state_target_info _ -> None
@@ -99,7 +84,7 @@ let make_genv options config local_config handle ~logging_init =
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
         Hh_bucket.make_list
-          ~num_workers:nbr_procs
+          ~num_workers:(List.length workers)
           ~max_size:max_bucket_size
           (List.filter ~f:filter files)
       in
@@ -203,7 +188,7 @@ let make_genv options config local_config handle ~logging_init =
   { options;
     config;
     local_config;
-    workers;
+    workers = Some workers;
     indexer;
     notifier_async;
     notifier_async_reader;

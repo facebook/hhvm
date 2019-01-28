@@ -1378,7 +1378,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       if (op == Op::AssertRATL) break;
     }
-    case Op::BaseNC:
     case Op::BaseGC:
     case Op::BaseSC:
     case Op::BaseC: {
@@ -1573,7 +1572,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
-    if (op == Op::BaseSC || op == Op::BaseSL) {
+    if (op == Op::BaseSC) {
       if (pushes == 1) outs[0] = outs[1];
     } else if (op == Op::FCall) {
       for (int i = 0; i < pushes; ++i) {
@@ -1598,8 +1597,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
 
   if (isMemberBaseOp(op)) {
     cur->mbr_live = true;
-    if (op == Op::BaseNC || op == Op::BaseNL || op == Op::BaseGC ||
-        op == Op::BaseGL || op == Op::BaseL)  {
+    if (op == Op::BaseGC || op == Op::BaseGL || op == Op::BaseL)  {
       auto new_pc = pc;
       decode_op(new_pc);
       decode_iva(new_pc);
@@ -1971,11 +1969,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::AddElemV:
     case Op::AddNewElemV:
     case Op::VGetL:
-    case Op::VGetN:
     case Op::VGetG:
     case Op::VGetS:
     case Op::BindL:
-    case Op::BindN:
     case Op::BindG:
     case Op::BindS:
     case Op::VGetM:
@@ -2003,7 +1999,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
 
     // unsafe: class statics
     case Op::BaseSC:
-    case Op::BaseSL:
       cur->mbrMustContainMutableLocalOrThis = false;
       cur->afterDim = false;
       // fallthrough
@@ -2014,24 +2009,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::SetOpS:
     case Op::IncDecS:
       ferror("statics are forbidden in Rx functions: {}\n", opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
-
-    // unsafe: variable variables
-    case Op::BaseNC:
-    case Op::BaseNL:
-      cur->mbrMustContainMutableLocalOrThis = false;
-      cur->afterDim = false;
-      // fallthrough
-    case Op::CGetN:
-    case Op::CGetQuietN:
-    case Op::IssetN:
-    case Op::EmptyN:
-    case Op::SetN:
-    case Op::SetOpN:
-    case Op::IncDecN:
-    case Op::UnsetN:
-      ferror("variable variables are forbidden in Rx functions: {}\n",
-             opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: static locals

@@ -307,13 +307,10 @@ type instruct_get =
   | CGetL2 of local_id
   | CUGetL of local_id
   | PushL of local_id
-  | CGetN
-  | CGetQuietN
   | CGetG
   | CGetQuietG
   | CGetS of classref_id
   | VGetL of local_id
-  | VGetN
   | VGetG
   | VGetS of classref_id
   | ClsRefGetL of local_id * classref_id
@@ -340,11 +337,9 @@ type istype_op =
 type instruct_isset =
   | IssetC
   | IssetL of local_id
-  | IssetN
   | IssetG
   | IssetS of classref_id
   | EmptyL of local_id
-  | EmptyN
   | EmptyG
   | EmptyS of classref_id
   | IsTypeC of istype_op
@@ -389,23 +384,18 @@ type instruct_mutator =
   | SetL of local_id
   (* PopL is put in mutators since it behaves as SetL + PopC *)
   | PopL of Local.t
-  | SetN
   | SetG
   | SetS of classref_id
   | SetOpL of local_id * eq_op
-  | SetOpN of eq_op
   | SetOpG of eq_op
   | SetOpS of eq_op * classref_id
   | IncDecL of local_id * incdec_op
-  | IncDecN of incdec_op
   | IncDecG of incdec_op
   | IncDecS of incdec_op * classref_id
   | BindL of local_id
-  | BindN
   | BindG
   | BindS of classref_id
   | UnsetL of local_id
-  | UnsetN
   | UnsetG
   | CheckProp of prop_id
   | InitProp of prop_id * initprop_op
@@ -430,12 +420,9 @@ type instruct_call =
   | FCallBuiltin of num_params * num_params * string
 
 type instruct_base =
-  | BaseNC of stack_index * MemberOpMode.t
-  | BaseNL of local_id * MemberOpMode.t
   | BaseGC of stack_index * MemberOpMode.t
   | BaseGL of local_id * MemberOpMode.t
   | BaseSC of stack_index * classref_id * MemberOpMode.t
-  | BaseSL of local_id * stack_index * MemberOpMode.t
   | BaseL of local_id * MemberOpMode.t
   | BaseC of stack_index * MemberOpMode.t
   | BaseH

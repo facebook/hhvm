@@ -168,22 +168,16 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IOp Clone);
     (fun () -> IOp Hhbc_ast.Exit);
     (fun () -> IGet (CGetL2 (random_local ())));
-    (fun () -> IGet CGetN);
-    (fun () -> IGet CGetQuietN);
     (fun () -> IGet CGetG);
     (fun () -> IGet CGetQuietG);
     (*(fun () -> IIsset IssetC);*)
-    (fun () -> IIsset IssetN);
     (fun () -> IIsset IssetG);
-    (fun () -> IIsset EmptyN);
     (fun () -> IIsset EmptyG);
     (fun () -> IIsset (IsTypeC (random_op_type ())));
     (fun () -> IMutator (SetL (random_local ())));
     (fun () -> IMutator (SetOpL (random_local (), random_eq_op ())));
     (fun () -> IMutator (SetOpG (random_eq_op ())));
-    (fun () -> IMutator (SetOpN (random_eq_op ())));
     (fun () -> IBasic Box);
-    (fun () -> IGet VGetN);
     (fun () -> IGet VGetG);
     (fun () -> IBasic Unbox);
     (fun () -> IMisc UGetCUNop);
@@ -218,19 +212,15 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IOp Shl);
     (fun () -> IOp Shr);
     (fun () -> IOp InstanceOf);
-    (fun () -> IMutator SetN);
     (fun () -> IMutator SetG);
     (fun () -> ILitConst AddNewElemV);
     (fun () -> ILitConst AddElemC);
     (fun () -> ILitConst AddElemV);
     (fun () -> IMutator (IncDecL (random_local (), random_incdec_op ())));
     (fun () -> IMutator (IncDecG (random_incdec_op ())));
-    (fun () -> IMutator (IncDecN (random_incdec_op ())));
     (fun () -> IMutator (BindL (random_local ())));
-    (fun () -> IMutator BindN);
     (fun () -> IMutator BindG);
     (fun () -> IMutator (UnsetL (random_local ())));
-    (fun () -> IMutator UnsetN);
     (fun () -> IMutator UnsetG);
     (fun () -> IMutator (CheckProp (Prop.from_raw_string "")));
     (fun () -> IMutator (InitProp (Prop.from_raw_string "", random_p_op ())));
@@ -292,9 +282,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
 (* Generators for base instructions *)
 let base_instrs (fn : IS.t) : lazy_instruct list =
   let cls_ref_slts = IS.get_num_cls_ref_slots fn in
-  [(fun () -> IBase (BaseNC (Random.int 10, random_mode ())));
-   (fun () -> IBase (BaseNL (random_local (), random_mode ())));
-   (fun () -> IBase (BaseGC (Random.int 10, random_mode ())));
+  [(fun () -> IBase (BaseGC (Random.int 10, random_mode ())));
    (fun () -> IBase (BaseGL (random_local (), random_mode ())));
    (fun () -> IBase (BaseL (random_local (), random_mode ())));
    (fun () -> IBase (BaseC (Random.int 10, random_mode ())));
@@ -302,8 +290,7 @@ let base_instrs (fn : IS.t) : lazy_instruct list =
    (fun () -> IBase (Dim (random_mode(), random_key ())))] @
    begin
      if cls_ref_slts <= 0 then [] else
-     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10, random_mode ())));
-     (fun () -> IBase (BaseSL (random_local (), Random.int 10, random_mode ())))]
+     [(fun () -> IBase (BaseSC (Random.int 10, Random.int 10, random_mode ())))]
     end
 
 (* Generators for final instructions *)

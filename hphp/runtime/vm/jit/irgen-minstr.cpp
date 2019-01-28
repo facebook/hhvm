@@ -2038,14 +2038,6 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 }
 
-void emitBaseNC(IRGS& env, uint32_t /*idx*/, MOpMode /*mode*/) {
-  interpOne(env, *env.currentNormalizedInstruction);
-}
-
-void emitBaseNL(IRGS& env, int32_t /*locId*/, MOpMode /*mode*/) {
-  interpOne(env, *env.currentNormalizedInstruction);
-}
-
 void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
@@ -2062,13 +2054,6 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
 void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
-  baseSImpl(env, name, slot, mode);
-}
-
-void emitBaseSL(IRGS& env, int32_t locId, uint32_t slot, MOpMode mode) {
-  initTvRefs(env);
-  auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
-                         DataTypeSpecific);
   baseSImpl(env, name, slot, mode);
 }
 

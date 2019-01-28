@@ -221,15 +221,6 @@ interpOutputLocals(IRGS& env,
   auto const mDefine = static_cast<unsigned char>(MOpMode::Define);
 
   switch (inst.op()) {
-    case OpSetN:
-    case OpSetOpN:
-    case OpIncDecN:
-    case OpBindN:
-    case OpVGetN:
-    case OpUnsetN:
-      smashesAllLocals = true;
-      break;
-
     case OpSetOpL:
     case OpIncDecL: {
       assertx(pushedType.hasValue());
@@ -439,20 +430,10 @@ void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitUnwind(IRGS& env)                    { INTERP }
-void emitCGetN(IRGS& env)                     { INTERP }
-void emitCGetQuietN(IRGS& env)                { INTERP }
-void emitVGetN(IRGS& env)                     { INTERP }
-void emitIssetN(IRGS& env)                    { INTERP }
-void emitEmptyN(IRGS& env)                    { INTERP }
-void emitSetN(IRGS& env)                      { INTERP }
-void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
-void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
-void emitBindN(IRGS& env)                     { INTERP }
 void emitBindS(IRGS& env, uint32_t)           { INTERP }
-void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
 void emitVGetS(IRGS& env, uint32_t)           { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }

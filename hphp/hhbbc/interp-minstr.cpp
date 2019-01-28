@@ -1430,38 +1430,6 @@ namespace interp_step {
 //////////////////////////////////////////////////////////////////////
 // Base operations
 
-void in(ISS& env, const bc::BaseNC& op) {
-  topC(env, op.arg1);
-  readUnknownLocals(env);
-  mayUseVV(env);
-  startBase(
-    env,
-    Base {
-      TInitCell,
-      BaseLoc::Local,
-      TBottom,
-      SString{},
-      NoLocalId
-    }
-  );
-}
-
-void in(ISS& env, const bc::BaseNL& op) {
-  locAsCell(env, op.loc1);
-  readUnknownLocals(env);
-  mayUseVV(env);
-  startBase(
-    env,
-    Base {
-      TInitCell,
-      BaseLoc::Local,
-      TBottom,
-      SString{},
-      NoLocalId
-    }
-  );
-}
-
 void in(ISS& env, const bc::BaseGC& op) {
   topC(env, op.arg1);
   startBase(env, Base{TInitCell, BaseLoc::Global});
@@ -1474,12 +1442,6 @@ void in(ISS& env, const bc::BaseGL& op) {
 
 void in(ISS& env, const bc::BaseSC& op) {
   auto prop = topC(env, op.arg1);
-  auto cls = takeClsRefSlot(env, op.slot);
-  startBase(env, miBaseSProp(env, std::move(cls), prop));
-}
-
-void in(ISS& env, const bc::BaseSL& op) {
-  auto prop = locAsCell(env, op.loc1);
   auto cls = takeClsRefSlot(env, op.slot);
   startBase(env, miBaseSProp(env, std::move(cls), prop));
 }

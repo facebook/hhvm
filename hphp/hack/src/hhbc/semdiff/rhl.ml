@@ -341,7 +341,7 @@ let check_instruct_get asn i i' =
   | PushL _, _ | ClsRefGetL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | CGetN, _ | CGetQuietN, _ | CGetG, _ | CGetQuietG, _ | CGetS _, _ | VGetN, _
+  | CGetG, _ | CGetQuietG, _ | CGetS _, _
   | VGetG, _ | VGetS _, _ | ClsRefGetC _, _ | ClsRefGetTS _, _ ->
     if i = i' then Some asn else None
 
@@ -355,7 +355,7 @@ let check_instruct_isset asn i i' =
   | IssetL _, _ | EmptyL _, _ | IsTypeL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | IssetC, _ | IssetN, _ | IssetG, _ | IssetS _, _ | EmptyN, _ | EmptyG, _
+  | IssetC, _ | IssetG, _ | IssetS _, _ | EmptyG, _
   | EmptyS _, _ | IsTypeC _, _ ->
     if i=i' then Some asn else None
 
@@ -400,9 +400,9 @@ let check_instruct_mutator asn i i' =
   | IncDecL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | SetN, _ | SetG, _ | SetS _, _ | SetOpN _, _ | SetOpG _, _ | SetOpS _, _
-  | IncDecN _, _ | IncDecG _, _ | IncDecS _, _ | BindN, _ | BindG, _
-  | BindS _, _ | UnsetN, _ | UnsetG, _ | CheckProp _, _ | InitProp _, _  ->
+  | SetG, _ | SetS _, _ | SetOpG _, _ | SetOpS _, _
+  | IncDecG _, _ | IncDecS _, _ | BindG, _
+  | BindS _, _ | UnsetG, _ | CheckProp _, _ | InitProp _, _  ->
     if i=i' then Some asn else None
 
 let check_instruct_call asn i i' =
@@ -433,27 +433,21 @@ let reads_member_key asn m m' =
 
 let check_instruct_base asn i i' =
   match i,i' with
-  | BaseNL (l,op), BaseNL (l',op') ->
-    if op=op' then reads asn l l'
-    else None
     (* All these depend on the string names of locals never being the ones
     we're tracking with the analysis *)
   | BaseGL (l,mode), BaseGL(l',mode') ->
     if mode = mode' then reads asn l l'
     else None (* don't really know if this is right *)
-  | BaseSL (l,n,_), BaseSL (l',n',_) ->
-    if n=n' then reads asn l l'
-    else None
   | BaseL (l,mode), BaseL (l',mode') ->
     if mode=mode' then reads asn l l'
     else None
   | Dim (mode, mk), Dim (mode', mk') ->
     if mode=mode' then reads_member_key asn mk mk' else None
-  | BaseNL _, _ | BaseGL _, _ | BaseSL _, _ | BaseL _, _ | Dim _, _ ->
+  | BaseGL _, _ | BaseL _, _ | Dim _, _ ->
     None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
-  | BaseNC _, _ | BaseGC _, _ | BaseSC _, _ | BaseC _, _ | BaseH, _ ->
+  | BaseGC _, _ | BaseSC _, _ | BaseC _, _ | BaseH, _ ->
     if i=i' then Some asn else None
 
 let check_instruct_final asn i i' =
@@ -1412,53 +1406,6 @@ let equiv prog prog' startlabelpairs =
           end
       ) in
 
-    let vget_cget_pattern =
-      (vget_unnamed_pattern $$ uCGetL2 $> (fun (n,loc) -> (n, Some loc)))
-      $| (uCGetL $$ vget_unnamed_pattern $> (fun (loc,n) -> (n, Some loc)))
-      $| (vget_unnamed_pattern $> (fun n -> (n, None))) in
-    let vget_cget_bind_pattern =
-      (vget_cget_pattern
-        $$ uBindN
-        $$ uPopV
-        $$ uUnsetL)
-      $? (fun ((((n1,_optl),_),_),n2) -> Local.Unnamed n1 = n2)
-      $> (fun ((((n,optl),_),_),_) -> (n,optl)) in
-    let two_vget_cget_bind_pattern =
-      vget_cget_bind_pattern $*$ vget_cget_bind_pattern
-      $? (fun ((_n,optl),(_n',optl')) ->
-        match optl,optl' with
-        | None, None
-        | Some _, Some _ -> true
-        | _,_ -> false) in
-    let two_vget_cget_bind_action =
-      two_vget_cget_bind_pattern
-      $>> (fun ((n,optl),(n',optl')) ((_,ip),(_,ip')) ->
-        Log.debug (Tty.Normal Tty.Blue)
-          @@ Printf.sprintf "vget cget pattern %d to %d" n n';
-        match reads asn (Local.Unnamed n) (Local.Unnamed n') with
-        | None -> Some(pc,pc',asn,assumed,todo)
-        | Some new_asn ->
-          let continuation (some_props,some_vs,some_vs') =
-            let newpc =(hs_of_pc pc, ip) in
-            let newpc' = (hs_of_pc pc', ip') in
-            let newprops = PropSet.filter (fun (x,x') ->
-              x <> Local.Unnamed n && x' <> Local.Unnamed n') some_props in
-            let final_asn = (
-              newprops,
-              VarSet.remove (Local.Unnamed n) some_vs,
-              VarSet.remove (Local.Unnamed n') some_vs') in
-            check newpc newpc' final_asn
-              (add_assumption (pc,pc') asn assumed) todo in
-          begin match optl,optl' with
-          | None, None -> continuation new_asn
-          | Some l, Some l' ->
-            begin match reads new_asn l l' with
-            | None -> Some(pc,pc',asn,assumed,todo)
-            | Some new_asn2 -> continuation new_asn2
-            end
-          | _,_ -> failwith "vget cget can't happen"
-          end) in
-
     let vget_binds_pattern =
       (vget_unnamed_pattern $$ uBindS $$ uPopV $$ uUnsetL)
       $? (fun (((n1,_cn),_),n2) -> Local.Unnamed n1 = n2)
@@ -1525,7 +1472,6 @@ let equiv prog prog' startlabelpairs =
       two_string_fatal_action;
       two_cugetl_list_createcl_action;
       two_vget_base_action;
-      two_vget_cget_bind_action;
       two_vget_binds_action;
       issetl_jmpz_action_left;
       issetl_jmpz_action_right;

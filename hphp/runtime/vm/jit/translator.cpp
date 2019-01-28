@@ -239,13 +239,10 @@ static const struct {
   // values) instead of TInitCell.
   { OpCUGetL,      {Local,            Stack1,       OutCInputL      }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL      }},
-  { OpCGetN,       {Stack1,           Stack1,       OutUnknown      }},
-  { OpCGetQuietN,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetQuietG,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {Stack1,           Stack1,       OutUnknown      }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL      }},
-  { OpVGetN,       {Stack1,           Stack1|Local, OutVUnknown     }},
   // TODO: In pseudo-main, the VGetG instruction invalidates what we know
   // about the types of the locals because it could cause any one of the
   // local variables to become "boxed". We need to add logic to tracelet
@@ -260,11 +257,9 @@ static const struct {
 
   { OpAKExists,    {StackTop2,        Stack1,       OutBoolean      }},
   { OpIssetL,      {Local,            Stack1,       OutBoolean      }},
-  { OpIssetN,      {Stack1,           Stack1,       OutBoolean      }},
   { OpIssetG,      {Stack1,           Stack1,       OutBoolean      }},
   { OpIssetS,      {Stack1,           Stack1,       OutBoolean      }},
   { OpEmptyL,      {Local,            Stack1,       OutBoolean      }},
-  { OpEmptyN,      {Stack1,           Stack1,       OutBoolean      }},
   { OpEmptyG,      {Stack1,           Stack1,       OutBoolean      }},
   { OpEmptyS,      {Stack1,           Stack1,       OutBoolean      }},
   { OpIsTypeC,     {Stack1|
@@ -274,24 +269,19 @@ static const struct {
   /*** 7. Mutator instructions ***/
 
   { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
-  { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput1  }},
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetS,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
-  { OpSetOpN,      {StackTop2,        Stack1|Local, OutUnknown      }},
   { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown      }},
   { OpSetOpS,      {StackTop2,        Stack1,       OutUnknown      }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
-  { OpIncDecN,     {Stack1,           Stack1|Local, OutUnknown      }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
   { OpBindL,       {Stack1|Local|
                     IgnoreInnerType,  Stack1|Local, OutSameAsInput1  }},
-  { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput1  }},
   { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
-  { OpUnsetN,      {Stack1,           Local,        OutNone         }},
   { OpUnsetG,      {Stack1,           None,         OutNone         }},
 
   /*** 8. Call instructions ***/
@@ -439,12 +429,9 @@ static const struct {
 
   /*** 16. Member instructions ***/
 
-  { OpBaseNC,      {StackI,           MBase,        OutNone         }},
-  { OpBaseNL,      {Local,            MBase,        OutNone         }},
   { OpBaseGC,      {StackI,           MBase,        OutNone         }},
   { OpBaseGL,      {Local,            MBase,        OutNone         }},
   { OpBaseSC,      {StackI,           MBase,        OutNone         }},
-  { OpBaseSL,      {Local,            MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
@@ -1047,12 +1034,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::VerifyOutType:
   case Op::WHResult:
   case Op::Xor:
-  case Op::BaseNC:
-  case Op::BaseNL:
   case Op::BaseGC:
   case Op::BaseGL:
   case Op::BaseSC:
-  case Op::BaseSL:
   case Op::BaseL:
   case Op::BaseC:
   case Op::BaseH:
@@ -1085,20 +1069,10 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Exit:
   case Op::Fatal:
   case Op::Unwind:
-  case Op::CGetN:
-  case Op::CGetQuietN:
-  case Op::VGetN:
-  case Op::IssetN:
-  case Op::EmptyN:
-  case Op::SetN:
-  case Op::SetOpN:
   case Op::SetOpG:
   case Op::SetOpS:
-  case Op::IncDecN:
   case Op::IncDecG:
   case Op::IncDecS:
-  case Op::BindN:
-  case Op::UnsetN:
   case Op::UnsetG:
   case Op::FPushObjMethod:
   case Op::Incl:

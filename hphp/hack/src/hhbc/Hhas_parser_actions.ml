@@ -419,26 +419,18 @@ let make_nullary_inst s =
  | "Throw" -> IContFlow (Throw)
 
  (* instruct_get *)
- | "CGetN" -> IGet (CGetN)
- | "CGetQuietN" -> IGet (CGetQuietN)
  | "CGetG" -> IGet (CGetG)
  | "CGetQuietG" -> IGet (CGetQuietG)
- | "VGetN" -> IGet (VGetN)
  | "VGetG" -> IGet (VGetG)
 
  (* instruct_isset *)
  | "IssetC" -> IIsset (IssetC)
- | "IssetN" -> IIsset (IssetN)
  | "IssetG" -> IIsset (IssetG)
- | "EmptyN" -> IIsset (EmptyN)
  | "EmptyG" -> IIsset (EmptyG)
 
  (* instruct_mutator *)
- | "SetN" -> IMutator (SetN)
  | "SetG" -> IMutator (SetG)
- | "BindN" -> IMutator (BindN)
  | "BindG" -> IMutator (BindG)
- | "UnsetN" -> IMutator (UnsetN)
  | "UnsetG" -> IMutator (UnsetG)
 
  (* instruct_base *)
@@ -1003,9 +995,7 @@ let makeunaryinst s arg = match s with
    | "SetL" -> IMutator (SetL (localidofiarg arg))
    | "PopL" -> IMutator (PopL (localidofiarg arg))
    | "SetS" -> IMutator (SetS (intofiarg arg))
-   | "SetOpN" -> IMutator(SetOpN (eqopofiarg arg))
    | "SetOpG" -> IMutator(SetOpG (eqopofiarg arg))
-   | "IncDecN" -> IMutator(IncDecN (incdecopofiarg arg))
    | "IncDecG" -> IMutator(IncDecG (incdecopofiarg arg))
    | "BindL" -> IMutator(BindL (localidofiarg arg))
    | "BindS" -> IMutator(BindS (intofiarg arg))
@@ -1100,8 +1090,6 @@ match s with
  | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))
 
  (* instruct_base *)
- | "BaseNC" -> IBase (BaseNC (intofiarg arg1, memberopmodeofiarg arg2))
- | "BaseNL" -> IBase (BaseNL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGC" -> IBase (BaseGC (intofiarg arg1, memberopmodeofiarg arg2))
  | "BaseGL" -> IBase (BaseGL (localidofiarg arg1, memberopmodeofiarg arg2))
  | "BaseC" -> IBase(BaseC (intofiarg arg1, memberopmodeofiarg arg2))
@@ -1180,7 +1168,6 @@ let maketernaryinst s arg1 arg2 arg3 =
 
  (* instruct_base *)
  | "BaseSC" -> IBase(BaseSC (intofiarg arg1, intofiarg arg2, memberopmodeofiarg arg3))
- | "BaseSL" -> IBase (BaseSL (localidofiarg arg1, intofiarg arg2, memberopmodeofiarg arg3))
 
 (* instruct_final *)
  | "QueryM" ->

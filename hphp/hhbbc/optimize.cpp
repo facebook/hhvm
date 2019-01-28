@@ -157,7 +157,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
   // read.
   switch (bcode.op) {
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
-    case Op::BaseNC:      assert_stack(bcode.BaseNC.arg1);      break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
     case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
     case Op::Dim: {
@@ -264,11 +263,9 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Exit:
   case Op::AKExists:
   case Op::IssetL:
-  case Op::IssetN:
   case Op::IssetG:
   case Op::IssetS:
   case Op::EmptyL:
-  case Op::EmptyN:
   case Op::EmptyG:
   case Op::EmptyS:
   case Op::IsTypeC:

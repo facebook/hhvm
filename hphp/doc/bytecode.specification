@@ -1660,24 +1660,6 @@ PushL <local variable id>    []  ->  [C]
   defined and must not contain a reference. This instruction pushes the local's
   value on the stack, then unsets it, equivalent to the behavior of UnsetL.
 
-CGetN    [C]  ->  [C]
-
-  Get local as cell. This instruction first computes x = (string)$1. Next, this
-  instruction reads the local variable named x pushes its value onto the stack
-  as a cell.
-
-  If there is no local variable defined named x, this instruction pushes null
-  onto the stack and raises a warning.
-
-CGetQuietN    [C]  ->  [C]
-
-  Get local as cell. This instruction first computes x = (string)$1. Next, this
-  instruction reads the local variable named x pushes its value onto the stack
-  as a cell.
-
-  If there is no local variable defined named x, this instruction pushes null
-  onto the stack.
-
 CGetG    [C]  ->  [C]
 
   Get global as cell. This instruction first computes x = (string)$1. Next,
@@ -1709,15 +1691,6 @@ VGetL <local variable id>    []  ->  [V]
   necessary and pushes it onto the stack as a ref. If the given local variable
   is not defined, this instruction defines it, sets it to null, boxes it, and
   pushes a the value of the local variable onto the stack as a ref.
-
-VGetN    [C]  ->  [V]
-
-  Get local as ref. This instruction first computes x = (string)$1. Next, this
-  instruction boxes the local variable named x (if the local is a cell) and
-  pushes its value onto the stack as a ref. If there is no local variable
-  defined named x, this instruction defines a local variable named x, sets it
-  to null, boxes it, and pushes the value of the local variable onto the stack
-  as a ref.
 
 VGetG    [C]  ->  [V]
 
@@ -1780,12 +1753,6 @@ IssetL <local variable id>    []  ->  [C:Bool]
   local variable is undefined or null, this instruction pushes false onto the
   stack, otherwise it pushes true.
 
-IssetN    [C]  ->  [C:Bool]
-
-  Isset local. This instruction reads the local variable named (string)$1. If
-  the local variable is undefined or null, this instruction pushes false onto
-  the stack, otherwise it pushes true.
-
 IssetG    [C]  ->  [C:Bool]
 
   Isset global. This instruction reads the global variable named (string)$1. If
@@ -1807,12 +1774,6 @@ EmptyL <local variable id>     []  ->  [C:Bool]
   Empty local. This instruction reads the local variable named %1 into x. If
   the local variable is defined this instruction pushes !(x) onto the stack,
   otherwise it pushes true.
-
-EmptyN    [C]  ->  [C:Bool]
-
-  Empty local. This instruction reads the local variable named (string)$1 into
-  x. If the local variable is defined this instruction pushes !(x) onto the
-  stack, otherwise it pushes true.
 
 EmptyG    [C]  ->  [C:Bool]
 
@@ -1894,12 +1855,6 @@ SetL <local variable id>    [C]  ->  [C]
   stores the value $1 into the local variable, and then pushes $1 onto the
   stack.
 
-SetN    [C C]  ->  [C]
-
-  Set local. This instruction marks the local variable named (string)$2 as
-  defined, assigns the value $1 to the local variable, and then pushes $1 onto
-  the stack.
-
 SetG    [C C]  ->  [C]
 
   Set global. This instruction marks the global variable named (string)$2 as
@@ -1923,18 +1878,6 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
   The immediate value must be one of the following opcodes:
     Add, AddO, Sub, SubO, Mul, MulO, Div, Mod, Shl, Shr, Concat, BitAnd,
     BitOr, BitXor.
-
-SetOpN <op>    [C C]  ->  [C]
-
-  Set op local. This instruction first computes x = (string)$2. If the local
-  variable named n is not defined, this instruction marks it as defined, sets
-  it to null, and raises a warning.
-
-  Next, this instruction reads the local variable named x into y, executes z =
-  y <op> $1, assigns z into the local variable named x, and then pushes z onto
-  the stack as a cell. The immediate value must be one of the following
-  opcodes:
-    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
 SetOpG <op>    [C C]  ->  [C]
 
@@ -1977,13 +1920,11 @@ IncDecL <local variable id> <op>    []  ->  [C]
   If op is PostDec, this instruction pushes x onto the stack and then it
   executes --x.
 
-IncDecN <op>    [C]  ->  [C]
 IncDecG <op>    [C]  ->  [C]
 
   Increment/decrement. This instruction first computes x = (string)$1. Next, if
-  the local variable (IncDecN) or global variable (IncDecG) named x is not
-  defined, this instruction first defines it, sets it to null, and raises a
-  warning.
+  the global variable named x is not defined, this instruction first defines it,
+  sets it to null, and raises a warning.
 
   Where v is the local variable or global variable named x, this instruction
   performs the following:
@@ -2026,11 +1967,6 @@ BindL <local variable id>    [V]  ->  [V]
   Bind local. This instruction marks the local variable given by %1 as defined,
   binds the local variable to $1, and pushes $1 onto the stack.
 
-BindN    [C V]  ->  [V]
-
-  Bind local. This instruction marks the local variable named (string)$2 as
-  defined, binds the local variable to $1, and pushes $1 onto the stack.
-
 BindG    [C V]  ->  [V]
 
   Bind global. This instruction marks the global variable named (string)$2 as
@@ -2047,11 +1983,6 @@ UnsetL <local variable id>    []  ->  []
 
   Unset local. Breaks any bindings the local variable given by %1 may have and
   marks the local variable as undefined.
-
-UnsetN    [C]  ->  []
-
-  Unset local. This instruction breaks any bindings the local variable named
-  (string)$1 may have and marks the local variable as undefined.
 
 UnsetG    [C]  ->  []
 
@@ -2357,28 +2288,6 @@ BaseLD <local variable id>    []  ->  [B]
   Get base from local. This operation outputs a base that points to the local
   given by %1, whether or not it is defined.
 
-BaseNC                       [C]  ->  [B]
-BaseNL <local variable id>   []  ->  [B]
-
-  Get base from name. This operation outputs a base that points to the local
-  variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation outputs a base that points to null.
-
-BaseNCW                      [C]  ->  [B]
-BaseNLW <local variable id>  []  ->  [B]
-
-  Get base from name. This operation outputs a base that points to the local
-  variable whose name is given by (string)%1 or (string)$1. If the local is not
-  defined, this operation raises a warning and outputs a base that points to
-  null.
-
-BaseNCD                      [C]  ->  [B]
-BaseNLD <local variable id>  []  ->  [B]
-
-  Get base from name. This operation outputs a base that points to the local
-  variable whose name is given by (string)%1 or (string)$1, defining it first if
-  necessary.
-
 BaseGC                        [C]  ->  [B]
 BaseGL <local variable id>    []  ->  [B]
 
@@ -2402,19 +2311,10 @@ BaseGLD <local variable id>    []  ->  [B]
   first if necessary.
 
 BaseSC <class-ref slot>                        [C]  ->  [B]
-BaseSL <local variable id> <class-ref slot>    []   ->  [B]
 
-  Get base from static property. First, this operation loads a value into x as
-  given by the following table:
-
-       operation     x
-       -----------+----
-         BaseSC   | $1
-         BaseSL   | %1
-
-  Next this operation computes y = (string)x. Then this instruction checks if
-  class in %1 (for BaseSC) or %2 (for BaseSL) has an accessible property named
-  y. If it does, this operation outputs a base that points to the static
+  Get base from static property. First, this operation computes x = (string)$1.
+  Then this instruction checks if class in %1 has an accessible property named
+  x. If it does, this operation outputs a base that points to the static
   property. Otherwise, this operation throws a fatal error.
 
 BaseH     []  ->  [B]
@@ -3396,20 +3296,14 @@ described in the "Instruction set" introduction section.
 10.1 Base Operations
 ---------------------
 
-BaseNC <stack index> <member op mode>    []  ->  []
-BaseNL <local id>    <member op mode>    []  ->  []
-
-  BaseN{C,L}{,W,D} member operation.
-
 BaseGC <stack index> <member op mode>    []  ->  []
 BaseGL <local id>    <member op mode>    []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
 BaseSC <stack index> <class-ref slot> <member op mode>   []  ->  []
-BaseSL <local id>    <class-ref slot> <member op mode>   []  ->  []
 
-  BaseS{C,L} member operation. %1 gives the location of the static property
+  BaseSC member operation. %1 gives the location of the static property
   name, and %2 gives the class input. The class is consumed.
 
 BaseL <local id> <member op mode>    []  ->  []

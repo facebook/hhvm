@@ -90,7 +90,6 @@ let stk_data : instruct -> stack_sig = function
   | IGet ClsRefGetC _
   | IGet ClsRefGetTS _
   | IMutator UnsetG
-  | IMutator UnsetN
   | IMutator InitProp _
   | ICall FPushCtor _
   | ICall FPushFunc _
@@ -104,7 +103,6 @@ let stk_data : instruct -> stack_sig = function
   | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
-  | IGet VGetN
   | IGet VGetS _
   | IGet VGetG
   | IBasic Box                             -> ["C"], ["V"]
@@ -153,15 +151,12 @@ let stk_data : instruct -> stack_sig = function
   | ICall NewObjD _
   | ICall NewObjI _
   | IGet CGetQuietL _                      -> [], ["C"]
-  | IMutator SetN
   | IMutator SetG
-  | IMutator SetOpN _
   | IMutator SetOpG _
   | IMutator SetOpS _
   | IMisc OODeclExists _
   | IMisc AKExists
   | IGenerator YieldK                      -> ["C"; "C"], ["C"]
-  | IMutator BindN
   | IMutator BindG
   | IMutator BindS _
   | ILitConst AddNewElemV                  -> ["C"; "V"], ["V"]
@@ -187,7 +182,6 @@ let stk_data : instruct -> stack_sig = function
   | IOp BitNot
   | IOp Hhbc_ast.Exit
   | IBase BaseSC _
-  | IBase BaseSL _
   | IGet _
   | IIsset _
   | IMutator _

@@ -323,11 +323,9 @@ let mut_imms (is : IS.t) : IS.t =
     | SetL      id       -> SetL    (mutate_local_id id !mag)
     | SetS      i        -> SetS    (mutate_int      i  !mag)
     | SetOpL   (id, op)  -> SetOpL  (mutate_local_id id !mag, mutate_eq_op op)
-    | SetOpN    op       -> SetOpN  (mutate_eq_op op)
     | SetOpG    op       -> SetOpG  (mutate_eq_op op)
     | SetOpS   (op, i )  -> SetOpS  (mutate_eq_op op,         mutate_int i !mag)
     | IncDecL  (id, op)  -> IncDecL (mutate_local_id id !mag, mutate_inc_op op)
-    | IncDecN   op       -> IncDecN (mutate_inc_op op)
     | IncDecG   op       -> IncDecG (mutate_inc_op op)
     | IncDecS  (op, i )  -> IncDecS (mutate_inc_op op,        mutate_int i !mag)
     | BindL     id       -> BindL   (mutate_local_id id !mag)
@@ -365,10 +363,6 @@ let mut_imms (is : IS.t) : IS.t =
     | _ -> s in
   let mutate_base s =
     match s with
-    | BaseNC    (idx, mode) -> BaseNC (mutate_int      idx !mag,
-                                       mutate_mode         mode)
-    | BaseNL    (id,  mode) -> BaseNL (mutate_local_id id  !mag,
-                                       mutate_mode         mode)
     | BaseGC    (idx, mode) -> BaseGC (mutate_int      idx !mag,
                                        mutate_mode         mode)
     | BaseGL    (id,  mode) -> BaseGL (mutate_local_id id  !mag,
@@ -377,9 +371,6 @@ let mut_imms (is : IS.t) : IS.t =
                                        mutate_mode         mode)
     | BaseSC    (idx, i, mode)  -> BaseSC   (mutate_int      idx !mag,
                                              mutate_int      i   !mag,
-                                             mutate_mode     mode)
-    | BaseSL    (id, idx, mode) -> BaseSL   (mutate_local_id id  !mag,
-                                             mutate_int      idx !mag,
                                              mutate_mode     mode)
     | BaseC     (idx, mode)     -> BaseC    (mutate_int idx !mag,
                                              mutate_mode     mode)

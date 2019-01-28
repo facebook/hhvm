@@ -529,7 +529,6 @@ let rewrite_class_refs_instr num = function
 | IMutator (IncDecS (o, _)) -> (num - 1, IMutator (IncDecS (o, num)))
 | IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _, m)) -> (num - 1, IBase (BaseSC (si, num, m)))
-| IBase (BaseSL (l, _, m)) -> (num - 1, IBase (BaseSL (l, num, m)))
 | ICall (NewObj (_, op)) -> (num - 1, ICall (NewObj (num, op)))
 | ICall (FPushClsMethod (np, _, pl)) ->
   (num - 1, ICall (FPushClsMethod (np, num, pl)))
@@ -795,31 +794,30 @@ let get_input_output_count i =
     begin match i with
     | CGetL _ | CGetQuietL _ | CUGetL _ | PushL _ | VGetL _ -> (0, 1)
     | CGetL2 _ -> (1, 2)
-    | CGetN | CGetQuietN | CGetG | CGetQuietG | CGetS _ | VGetN
+    | CGetG | CGetQuietG | CGetS _
     | VGetG | VGetS _ -> (1, 1)
     | ClsRefGetL _ -> (0, 0)
     | ClsRefGetC _ | ClsRefGetTS _ -> (1, 0)
     end
   | IMutator i ->
     begin match i with
-    | SetL _ | PopL _ | SetOpL _ | IncDecN _ | IncDecG _ | IncDecS _
+    | SetL _ | PopL _ | SetOpL _ | IncDecG _ | IncDecS _
     | BindL _ -> (1, 1)
-    | SetN | SetG | SetS _ | SetOpN _ | SetOpG _ | SetOpS _ | BindN
+    | SetG | SetS _ | SetOpG _ | SetOpS _
     | BindG | BindS _ -> (2, 1)
     | IncDecL _ | CheckProp _ -> (0, 1)
     | UnsetL _ -> (0, 0)
-    | UnsetN | UnsetG | InitProp _ -> (1, 0)
+    | UnsetG | InitProp _ -> (1, 0)
     end
   | IIsset i ->
     begin match i with
-    | IssetC | IssetN | IssetG | IssetS _ | EmptyN | EmptyG | EmptyS _
+    | IssetC | IssetG | IssetS _ | EmptyG | EmptyS _
     | IsTypeC _ -> (1, 1)
     | IssetL _ | EmptyL _ | IsTypeL _ -> (0, 1)
     end
   | IBase i ->
     begin match i with
-    | BaseNC _ | BaseSC _ | BaseSL _ -> (1, 1)
-    | BaseNL _ -> (0, 1)
+    | BaseSC _ -> (1, 1)
     | BaseGC _ | BaseGL _ | BaseL _ | BaseC _ | BaseH
     | Dim _ -> (0, 0)
     end
@@ -987,7 +985,7 @@ let collect_locals f instrs =
     | IIsset (IssetL l | EmptyL l | IsTypeL (l, _))
     | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
                 UnsetL l)
-    | IBase (BaseNL (l, _) | BaseGL (l, _))
+    | IBase (BaseGL (l, _))
     | IIterator (IterInit (_, _, l) | IterNext (_, _, l) | LIterFree (_, l))
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |

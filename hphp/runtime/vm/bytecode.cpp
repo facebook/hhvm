@@ -1827,49 +1827,6 @@ static inline StringData* lookup_name(TypedValue* key) {
   return prepareKey(*key);
 }
 
-static inline void lookup_var(ActRec* fp,
-                              StringData*& name,
-                              TypedValue* key,
-                              TypedValue*& val) {
-  name = lookup_name(key);
-  const Func* func = fp->m_func;
-  Id id = func->lookupVarId(name);
-  if (id != kInvalidId) {
-    val = frame_local(fp, id);
-  } else {
-    assertx(fp->func()->attrs() & AttrMayUseVV);
-    if (fp->hasVarEnv()) {
-      val = fp->m_varEnv->lookup(name);
-    } else {
-      val = nullptr;
-    }
-  }
-}
-
-static inline void lookupd_var(ActRec* fp,
-                               StringData*& name,
-                               TypedValue* key,
-                               TypedValue*& val) {
-  name = lookup_name(key);
-  auto const func = fp->m_func;
-  Id id = func->lookupVarId(name);
-  if (id != kInvalidId) {
-    val = frame_local(fp, id);
-  } else {
-    assertx(func->attrs() & AttrMayUseVV);
-    if (!fp->hasVarEnv()) {
-      fp->setVarEnv(VarEnv::createLocal(fp));
-    }
-    val = fp->m_varEnv->lookup(name);
-    if (val == nullptr) {
-      TypedValue tv;
-      tvWriteNull(tv);
-      fp->m_varEnv->set(name, &tv);
-      val = fp->m_varEnv->lookup(name);
-    }
-  }
-}
-
 static inline void lookup_gbl(ActRec* /*fp*/, StringData*& name,
                               TypedValue* key, TypedValue*& val) {
   name = lookup_name(key);
@@ -3545,25 +3502,6 @@ OPTBLD_INLINE void iopPushL(local_var locVal) {
   locVal->m_type = KindOfUninit;
 }
 
-OPTBLD_INLINE void cgetn_body(bool warn) {
-  StringData* name;
-  TypedValue* to = vmStack().topTV();
-  TypedValue* fr = nullptr;
-  lookup_var(vmfp(), name, to, fr);
-  SCOPE_EXIT { decRefStr(name); };
-  if (fr == nullptr || fr->m_type == KindOfUninit) {
-    if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvDecRefGen(to);
-    tvWriteNull(*to);
-  } else {
-    tvDecRefGen(to);
-    cgetl_inner_body(fr, to);
-  }
-}
-
-OPTBLD_INLINE void iopCGetN() { cgetn_body(true); }
-OPTBLD_INLINE void iopCGetQuietN() { cgetn_body(false); }
-
 OPTBLD_INLINE void cgetg_body(bool warn) {
   StringData* name;
   TypedValue* to = vmStack().topTV();
@@ -3656,16 +3594,13 @@ static inline MInstrState& initMState() {
   return mstate;
 }
 
-using LookupNameFn = void (*)(ActRec*, StringData*&, TypedValue*, TypedValue*&);
-
-static inline void baseNGImpl(TypedValue* key, MOpMode mode,
-                              LookupNameFn lookupd, LookupNameFn lookup) {
+static inline void baseGImpl(TypedValue* key, MOpMode mode) {
   auto& mstate = initMState();
   StringData* name;
   TypedValue* baseVal;
 
-  if (mode == MOpMode::Define) lookupd(vmfp(), name, key, baseVal);
-  else                         lookup(vmfp(), name, key, baseVal);
+  if (mode == MOpMode::Define) lookupd_gbl(vmfp(), name, key, baseVal);
+  else                         lookup_gbl(vmfp(), name, key, baseVal);
   SCOPE_EXIT { decRefStr(name); };
 
   if (baseVal == nullptr) {
@@ -3679,22 +3614,6 @@ static inline void baseNGImpl(TypedValue* key, MOpMode mode,
   }
 
   mstate.base = baseVal;
-}
-
-static inline void baseNImpl(TypedValue* key, MOpMode mode) {
-  baseNGImpl(key, mode, lookupd_var, lookup_var);
-}
-
-OPTBLD_INLINE void iopBaseNC(uint32_t idx, MOpMode mode) {
-  baseNImpl(vmStack().indTV(idx), mode);
-}
-
-OPTBLD_INLINE void iopBaseNL(local_var loc, MOpMode mode) {
-  baseNImpl(tvToCell(loc.ptr), mode);
-}
-
-static inline void baseGImpl(TypedValue* key, MOpMode mode) {
-  baseNGImpl(key, mode, lookupd_gbl, lookup_gbl);
 }
 
 OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
@@ -3729,11 +3648,6 @@ static inline tv_lval baseSImpl(TypedValue* key,
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, clsref_slot slot, MOpMode mode) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot, mode);
-}
-
-OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot, MOpMode mode) {
-  auto& mstate = initMState();
-  mstate.base = baseSImpl(tvToCell(keyLoc.ptr), slot, mode);
 }
 
 OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
@@ -4483,17 +4397,6 @@ OPTBLD_INLINE void iopVGetL(local_var fr) {
   vgetl_body(fr.ptr, to);
 }
 
-OPTBLD_INLINE void iopVGetN() {
-  StringData* name;
-  TypedValue* to = vmStack().topTV();
-  TypedValue* fr = nullptr;
-  lookupd_var(vmfp(), name, to, fr);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(fr != nullptr);
-  tvDecRefGen(to);
-  vgetl_body(fr, to);
-}
-
 OPTBLD_INLINE void iopVGetG() {
   StringData* name;
   TypedValue* to = vmStack().topTV();
@@ -4507,21 +4410,6 @@ OPTBLD_INLINE void iopVGetG() {
 
 OPTBLD_INLINE void iopVGetS(clsref_slot slot) {
   getS<true>(slot);
-}
-
-OPTBLD_INLINE void iopIssetN() {
-  StringData* name;
-  TypedValue* tv1 = vmStack().topTV();
-  TypedValue* tv = nullptr;
-  bool e;
-  lookup_var(vmfp(), name, tv1, tv);
-  SCOPE_EXIT { decRefStr(name); };
-  if (tv == nullptr) {
-    e = false;
-  } else {
-    e = !cellIsNull(tvToCell(tv));
-  }
-  vmStack().replaceC<KindOfBoolean>(e);
 }
 
 OPTBLD_INLINE void iopIssetG() {
@@ -4684,21 +4572,6 @@ OPTBLD_INLINE void iopEmptyL(local_var loc) {
   vmStack().pushBool(e);
 }
 
-OPTBLD_INLINE void iopEmptyN() {
-  StringData* name;
-  TypedValue* tv1 = vmStack().topTV();
-  TypedValue* tv = nullptr;
-  bool e;
-  lookup_var(vmfp(), name, tv1, tv);
-  SCOPE_EXIT { decRefStr(name); };
-  if (tv == nullptr) {
-    e = true;
-  } else {
-    e = !cellToBool(*tvToCell(tv));
-  }
-  vmStack().replaceC<KindOfBoolean>(e);
-}
-
 OPTBLD_INLINE void iopEmptyG() {
   StringData* name;
   TypedValue* tv1 = vmStack().topTV();
@@ -4817,19 +4690,6 @@ OPTBLD_INLINE void iopSetL(local_var to) {
   tvSet(*fr, *to);
 }
 
-OPTBLD_INLINE void iopSetN() {
-  StringData* name;
-  Cell* fr = vmStack().topC();
-  TypedValue* tv2 = vmStack().indTV(1);
-  TypedValue* to = nullptr;
-  lookupd_var(vmfp(), name, tv2, to);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(to != nullptr);
-  tvSet(*fr, *to);
-  memcpy((void*)tv2, (void*)fr, sizeof(TypedValue));
-  vmStack().discard();
-}
-
 OPTBLD_INLINE void iopSetG() {
   StringData* name;
   Cell* fr = vmStack().topC();
@@ -4876,22 +4736,6 @@ OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
   setopBody(to, op, fr);
   tvDecRefGen(fr);
   cellDup(*to, *fr);
-}
-
-OPTBLD_INLINE void iopSetOpN(SetOpOp op) {
-  Cell* fr = vmStack().topC();
-  TypedValue* tv2 = vmStack().indTV(1);
-  TypedValue* to = nullptr;
-  // XXX We're probably not getting warnings totally correct here
-  StringData* name;
-  lookupd_var(vmfp(), name, tv2, to);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(to != nullptr);
-  setopBody(tvToCell(to), op, fr);
-  tvDecRefGen(fr);
-  tvDecRefGen(tv2);
-  cellDup(*tvToCell(to), *tv2);
-  vmStack().discard();
 }
 
 OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
@@ -4960,20 +4804,6 @@ OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
   cellCopy(IncDecBody(op, fr.ptr), *to);
 }
 
-OPTBLD_INLINE void iopIncDecN(IncDecOp op) {
-  StringData* name;
-  TypedValue* nameCell = vmStack().topTV();
-  TypedValue* local = nullptr;
-  lookupd_var(vmfp(), name, nameCell, local);
-  auto oldNameCell = *nameCell;
-  SCOPE_EXIT {
-    decRefStr(name);
-    tvDecRefGen(oldNameCell);
-  };
-  assertx(local != nullptr);
-  cellCopy(IncDecBody(op, tvToCell(local)), *nameCell);
-}
-
 OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   StringData* name;
   TypedValue* nameCell = vmStack().topTV();
@@ -5027,19 +4857,6 @@ OPTBLD_INLINE void iopBindL(local_var to) {
   tvBind(*fr, *to.ptr);
 }
 
-OPTBLD_INLINE void iopBindN() {
-  StringData* name;
-  TypedValue* fr = vmStack().topTV();
-  TypedValue* nameTV = vmStack().indTV(1);
-  TypedValue* to = nullptr;
-  lookupd_var(vmfp(), name, nameTV, to);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(to != nullptr);
-  tvBind(*fr, *to);
-  memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
-  vmStack().discard();
-}
-
 OPTBLD_INLINE void iopBindG() {
   StringData* name;
   TypedValue* fr = vmStack().topTV();
@@ -5091,18 +4908,6 @@ OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
 
 OPTBLD_INLINE void iopUnsetL(local_var loc) {
   tvUnset(*loc.ptr);
-}
-
-OPTBLD_INLINE void iopUnsetN() {
-  StringData* name;
-  TypedValue* tv1 = vmStack().topTV();
-  TypedValue* tv = nullptr;
-  lookup_var(vmfp(), name, tv1, tv);
-  SCOPE_EXIT { decRefStr(name); };
-  if (tv != nullptr) {
-    tvUnset(*tv);
-  }
-  vmStack().popC();
 }
 
 OPTBLD_INLINE void iopUnsetG() {

@@ -217,12 +217,9 @@ let string_of_get x =
   | CGetL2 id -> sep ["CGetL2"; string_of_local_id id]
   | CUGetL id -> sep ["CUGetL"; string_of_local_id id]
   | PushL id -> sep ["PushL"; string_of_local_id id]
-  | CGetN -> "CGetN"
-  | CGetQuietN -> "CGetQuietN"
   | CGetG -> "CGetG"
   | CGetQuietG -> "CGetQuietG"
   | CGetS id -> sep ["CGetS"; string_of_classref id]
-  | VGetN -> "VGetN"
   | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
@@ -304,26 +301,21 @@ let string_of_mutator x =
   match x with
   | SetL id -> sep ["SetL"; string_of_local_id id]
   | PopL id -> sep ["PopL"; string_of_local_id id]
-  | SetN -> "SetN"
   | SetG -> "SetG"
   | SetS id -> sep ["SetS"; string_of_classref id]
   | SetOpL (id, op) ->
     sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
-  | SetOpN op -> sep ["SetOpN"; string_of_eq_op op]
   | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
   | SetOpS (op, id) -> sep ["SetOpS"; string_of_eq_op op; string_of_classref id]
   | IncDecL (id, op) ->
     sep ["IncDecL"; string_of_local_id id; string_of_incdec_op op]
-  | IncDecN op -> sep ["IncDecN"; string_of_incdec_op op]
   | IncDecG op -> sep ["IncDecG"; string_of_incdec_op op]
   | IncDecS (op, id) ->
     sep ["IncDecS"; string_of_incdec_op op; string_of_classref id]
   | BindL id -> sep ["BindL"; string_of_local_id id]
-  | BindN -> "BindN"
   | BindG -> "BindG"
   | BindS id -> sep ["BindS"; string_of_classref id]
   | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
-  | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
   | CheckProp id -> sep ["CheckProp"; string_of_prop_id id]
   | InitProp (id, op) -> sep ["InitProp"; string_of_prop_id id;
@@ -407,11 +399,9 @@ let string_of_isset instruction =
   match instruction with
   | IssetC -> "IssetC"
   | IssetL id -> "IssetL " ^ string_of_local_id id
-  | IssetN -> "IssetN"
   | IssetG -> "IssetG"
   | IssetS cls -> "IssetS " ^ string_of_int cls
   | EmptyL id -> "EmptyL " ^ string_of_local_id id
-  | EmptyN -> "EmptyN"
   | EmptyG -> "EmptyG"
   | EmptyS cls -> "EmptyS " ^ string_of_int cls
   | IsTypeC op -> "IsTypeC " ^ string_of_istype_op op
@@ -420,10 +410,6 @@ let string_of_isset instruction =
 
 let string_of_base x =
   match x with
-  | BaseNC (si, m) ->
-    sep ["BaseNC"; string_of_stack_index si; MemberOpMode.to_string m]
-  | BaseNL (id, m) ->
-    sep ["BaseNL"; string_of_local_id id; MemberOpMode.to_string m]
   | BaseGC (si, m) ->
     sep ["BaseGC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseGL (id, m) ->
@@ -431,9 +417,6 @@ let string_of_base x =
   | BaseSC (si, id, m) ->
     sep ["BaseSC";
          string_of_stack_index si; string_of_classref id; MemberOpMode.to_string m]
-  | BaseSL (lid, si, m) ->
-    sep ["BaseSL";
-         string_of_local_id lid; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseL (lid, m) ->
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
   | BaseC (si, m) ->

@@ -939,32 +939,6 @@ void loseNonRefLocalTypes(ISS& env) {
   modifyLocalStatic(env, NoLocalId, TCell);
 }
 
-void boxUnknownLocal(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "   boxUnknownLocal\n");
-  for (auto& l : env.state.locals) {
-    if (!l.subtypeOf(BRef)) l = TGen;
-  }
-  killAllLocEquiv(env);
-  killAllStkEquiv(env);
-  killAllIterEquivs(env);
-  killThisLoc(env, NoLocalId);
-  // Don't update the local statics here; this is called both for
-  // boxing and binding, and the effects on local statics are
-  // different.
-}
-
-void unsetUnknownLocal(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "  unsetUnknownLocal\n");
-  for (auto& l : env.state.locals) l |= TUninit;
-  killAllLocEquiv(env);
-  killAllStkEquiv(env);
-  killAllIterEquivs(env);
-  killThisLoc(env, NoLocalId);
-  unbindLocalStatic(env, NoLocalId);
-}
-
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);

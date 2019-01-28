@@ -50,7 +50,6 @@ let uBaseL = pa (function | IBase (BaseL (loc, op)) -> Some (loc,op) | _ -> None
 let uBindM = pa (function | IFinal (BindM (n,key)) -> Some (n,key) | _ -> None)
 let uUnsetL = pa (function | IMutator (UnsetL loc) -> Some loc | _ -> None)
 let uPopV = pa (function | IBasic PopV -> Some () | _ -> None)
-let uBindN = pa (function | IMutator BindN -> Some () | _ -> None)
 let uCGetL = pa (function | IGet (CGetL loc) -> Some loc | _ -> None)
 let uCGetL2 = pa (function | IGet (CGetL2 loc) -> Some loc | _ -> None)
 let uPrint = pa (function | IOp Print -> Some () | _ -> None)

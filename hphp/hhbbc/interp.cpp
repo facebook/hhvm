@@ -1644,28 +1644,6 @@ void in(ISS& env, const bc::CGetL2& op) {
   push(env, std::move(top), topEquiv);
 }
 
-namespace {
-
-template <typename Op> void common_cgetn(ISS& env) {
-  auto const t1 = topC(env);
-  auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
-    auto const loc = findLocal(env, v1->m_data.pstr);
-    if (loc != NoLocalId) {
-      return reduce(env, bc::PopC {}, Op { loc });
-    }
-  }
-  readUnknownLocals(env);
-  mayUseVV(env);
-  popC(env); // conversion to string can throw
-  push(env, TInitCell);
-}
-
-}
-
-void in(ISS& env, const bc::CGetN&) { common_cgetn<bc::CGetL>(env); }
-void in(ISS& env, const bc::CGetQuietN&) { common_cgetn<bc::CGetQuietL>(env); }
-
 void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
 void in(ISS& env, const bc::CGetQuietG&) { popC(env); push(env, TInitCell); }
 
@@ -1724,23 +1702,6 @@ void in(ISS& env, const bc::CGetS& op) {
 void in(ISS& env, const bc::VGetL& op) {
   nothrow(env);
   setLocRaw(env, op.loc1, TRef);
-  push(env, TRef);
-}
-
-void in(ISS& env, const bc::VGetN&) {
-  auto const t1 = topC(env);
-  auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
-    auto const loc = findLocal(env, v1->m_data.pstr);
-    if (loc != NoLocalId) {
-      return reduce(env, bc::PopC {},
-                         bc::VGetL { loc });
-    }
-  }
-  modifyLocalStatic(env, NoLocalId, TRef);
-  popC(env);
-  boxUnknownLocal(env);
-  mayUseVV(env);
   push(env, TRef);
 }
 
@@ -2176,26 +2137,6 @@ void in(ISS& env, const bc::IssetS& op) {
   push(env, TBool);
 }
 
-template<class ReduceOp>
-void issetEmptyNImpl(ISS& env) {
-  auto const t1 = topC(env);
-  auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
-    auto const loc = findLocal(env, v1->m_data.pstr);
-    if (loc != NoLocalId) {
-      return reduce(env, bc::PopC {}, ReduceOp { loc });
-    }
-    // Can't push true in the non env.findLocal case unless we know
-    // whether this function can have a VarEnv.
-  }
-  readUnknownLocals(env);
-  mayUseVV(env);
-  popC(env);
-  push(env, TBool);
-}
-
-void in(ISS& env, const bc::IssetN&) { issetEmptyNImpl<bc::IssetL>(env); }
-void in(ISS& env, const bc::EmptyN&) { issetEmptyNImpl<bc::EmptyL>(env); }
 void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
@@ -2740,28 +2681,6 @@ void in(ISS& env, const bc::SetL& op) {
   }
 }
 
-void in(ISS& env, const bc::SetN&) {
-  // This isn't trivial to strength reduce, without a "flip two top
-  // elements of stack" opcode.
-  auto t1 = popC(env);
-  auto const t2 = popC(env);
-  auto const v2 = tv(t2);
-  // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
-
-  auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
-    ? findLocal(env, v2->m_data.pstr)
-    : NoLocalId;
-  if (knownLoc != NoLocalId) {
-    setLoc(env, knownLoc, t1);
-  } else {
-    // We could be changing the value of any local, but we won't
-    // change whether or not they are boxed or initialized.
-    loseNonRefLocalTypes(env);
-  }
-  mayUseVV(env);
-  push(env, std::move(t1));
-}
-
 void in(ISS& env, const bc::SetG&) {
   auto t1 = popC(env);
   popC(env);
@@ -2823,14 +2742,6 @@ void in(ISS& env, const bc::SetOpL& op) {
   push(env, std::move(resultTy));
 }
 
-void in(ISS& env, const bc::SetOpN&) {
-  popC(env);
-  popC(env);
-  loseNonRefLocalTypes(env);
-  mayUseVV(env);
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::SetOpG&) {
   popC(env); popC(env);
   push(env, TInitCell);
@@ -2874,22 +2785,6 @@ void in(ISS& env, const bc::IncDecL& op) {
   if (pre)  push(env, std::move(newT));
 }
 
-void in(ISS& env, const bc::IncDecN& op) {
-  auto const t1 = topC(env);
-  auto const v1 = tv(t1);
-  auto const knownLoc = v1 && v1->m_type == KindOfPersistentString
-    ? findLocal(env, v1->m_data.pstr)
-    : NoLocalId;
-  if (knownLoc != NoLocalId) {
-    return reduce(env, bc::PopC {},
-                       bc::IncDecL { knownLoc, op.subop1 });
-  }
-  popC(env);
-  loseNonRefLocalTypes(env);
-  mayUseVV(env);
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::IncDecS& op) {
@@ -2923,24 +2818,6 @@ void in(ISS& env, const bc::BindL& op) {
   nothrow(env);
   auto t1 = popV(env);
   setLocRaw(env, op.loc1, t1);
-  push(env, std::move(t1));
-}
-
-void in(ISS& env, const bc::BindN&) {
-  // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
-  auto t1 = popV(env);
-  auto const t2 = popC(env);
-  auto const v2 = tv(t2);
-  auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
-    ? findLocal(env, v2->m_data.pstr)
-    : NoLocalId;
-  unbindLocalStatic(env, knownLoc);
-  if (knownLoc != NoLocalId) {
-    setLocRaw(env, knownLoc, t1);
-  } else {
-    boxUnknownLocal(env);
-  }
-  mayUseVV(env);
   push(env, std::move(t1));
 }
 
@@ -2978,22 +2855,6 @@ void in(ISS& env, const bc::UnsetL& op) {
   }
   nothrow(env);
   setLocRaw(env, op.loc1, TUninit);
-}
-
-void in(ISS& env, const bc::UnsetN& /*op*/) {
-  auto const t1 = topC(env);
-  auto const v1 = tv(t1);
-  if (v1 && v1->m_type == KindOfPersistentString) {
-    auto const loc = findLocal(env, v1->m_data.pstr);
-    if (loc != NoLocalId) {
-      return reduce(env, bc::PopC {},
-                         bc::UnsetL { loc });
-    }
-  }
-  popC(env);
-  if (!t1.couldBe(BObj | BRes)) nothrow(env);
-  unsetUnknownLocal(env);
-  mayUseVV(env);
 }
 
 void in(ISS& env, const bc::UnsetG& /*op*/) {

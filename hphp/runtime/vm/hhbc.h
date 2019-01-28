@@ -594,13 +594,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
   O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(CGetN,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetQuietN,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
-  O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           ONE(CAR),         ONE(CV),         ONE(VV),    NF) \
   O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
@@ -609,11 +606,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
@@ -622,27 +617,22 @@ constexpr uint32_t kMaxConcatN = 4;
   O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
-  O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetS,            ONE(CAR),         TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
-  O(SetOpN,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          TWO(OA(SetOpOp),CAR),                              \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(IncDecL,         TWO(LA,                                            \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
-  O(IncDecN,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
                                        ONE(CV),         ONE(CV),    NF) \
   O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
-  O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindS,           ONE(CAR),         TWO(VV,CV),      ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
-  O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
   O(FPushFunc,       TWO(IVA,I32LA),   ONE(CV),         NOV,        PF) \
@@ -752,17 +742,11 @@ constexpr uint32_t kMaxConcatN = 4;
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseNC,          TWO(IVA, OA(MOpMode)),                             \
-                                       NOV,             NOV,        NF) \
-  O(BaseNL,          TWO(LA, OA(MOpMode)),                              \
-                                       NOV,             NOV,        NF) \
   O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
   O(BaseSC,          THREE(IVA, CAR, OA(MOpMode)),                      \
-                                       NOV,             NOV,        NF) \
-  O(BaseSL,          THREE(LA, CAR, OA(MOpMode)),                       \
                                        NOV,             NOV,        NF) \
   O(BaseL,           TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
@@ -1103,12 +1087,9 @@ constexpr bool isTypeAssert(Op op) {
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
-    case Op::BaseNC:
-    case Op::BaseNL:
     case Op::BaseGC:
     case Op::BaseGL:
     case Op::BaseSC:
-    case Op::BaseSL:
     case Op::BaseL:
     case Op::BaseC:
     case Op::BaseH:

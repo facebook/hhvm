@@ -1775,7 +1775,6 @@ void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
 }
 
 void dce(Env& env, const bc::BaseC& op)       { minstr_base(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseNC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseSC& op)      { minstr_base(env, op, op.arg1); }
 
@@ -1851,7 +1850,6 @@ void adjustMinstr(Op& /*op*/, MaskType /*mask*/) {
 }
 
 void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
-void adjustMinstr(bc::BaseNC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
 

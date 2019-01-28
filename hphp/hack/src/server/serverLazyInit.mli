@@ -9,10 +9,14 @@
 
 open ServerInitTypes
 
-val init :
-  load_state_approach: load_state_approach option ->
+val full_init :
   ServerEnv.genv ->
-  lazy_level ->
+  ServerEnv.env ->
+  (ServerEnv.env * float)
+
+val saved_state_init :
+  load_state_approach: load_state_approach ->
+  ServerEnv.genv ->
   ServerEnv.env ->
   Path.t ->
   (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing, error) result

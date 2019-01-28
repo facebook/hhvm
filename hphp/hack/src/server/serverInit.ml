@@ -96,10 +96,14 @@ let init
               errorl = init_errors
             } in
   let root = ServerArgs.root genv.options in
-  let (env, t), state = match lazy_lev with
-    | Init ->
-      ServerLazyInit.init ~load_state_approach genv lazy_lev env root
-    | Off | Decl | Parse ->
+  let (env, t), state = match lazy_lev, load_state_approach with
+    | Init, None ->
+      ServerLazyInit.full_init genv env, Error Lazy_init_no_load_approach
+    | Init, Some load_state_approach ->
+      ServerLazyInit.saved_state_init ~load_state_approach genv env root
+    | Off, _
+    | Decl, _
+    | Parse, _ ->
       Option.iter load_state_approach
         ~f:(fun _ -> Hh_logger.log "Eager init, hence ignoring saved-state option");
       ServerEagerInit.init genv lazy_lev env

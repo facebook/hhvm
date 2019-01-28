@@ -386,22 +386,12 @@ let matches_re re s =
   pos > -1
 
 (* If we fail to load a saved state, fall back to typechecking everything *)
-let fallback_init
+let full_init
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
-    (err: error)
   : ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
-  if err <> Lazy_init_no_load_approach then begin
-    let err_str = error_to_verbose_string err in
-    HackEventLogger.load_state_exn err_str;
-    Hh_logger.log "Could not load saved state: %s" err_str;
-    let warning = if matches_re tls_bug_re err_str
-      then ClientMessages.tls_bug_msg
-      else ClientMessages.load_state_not_found_msg
-    in
-    ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
-  end;
+  ServerProgress.send_progress_to_monitor "full initialization";
   let get_next, t = indexing genv in
   (* The full_fidelity_parser currently works better in both memory and time
      with a full parse rather than parsing decl asts and then parsing full ones *)
@@ -568,14 +558,12 @@ let post_saved_state_initialization
   type_check_dirty genv env old_fast fast
     dirty_master_files dirty_local_files similar_files t
 
-let init
-    ~(load_state_approach: load_state_approach option)
+let saved_state_init
+    ~(load_state_approach: load_state_approach)
     (genv: ServerEnv.genv)
-    (lazy_level: lazy_level)
     (env: ServerEnv.env)
     (root: Path.t)
   : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
-  assert(lazy_level = Init);
   ServerProgress.send_progress_to_monitor "loading saved state";
 
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
@@ -585,13 +573,11 @@ let init
   (* following function will be run under the timeout *)
   let do_ (_id: Timeout.t) : (loaded_info, error) result =
     match load_state_approach with
-    | None ->
-      Error Lazy_init_no_load_approach
-    | Some (Precomputed info) ->
+    | Precomputed info ->
       Ok (use_precomputed_state_exn genv info)
-    | Some (Load_state_natively use_canary) ->
+    | Load_state_natively use_canary ->
       download_and_load_state_exn ~use_canary ~target:None ~genv ~root
-    | Some (Load_state_natively_with_target target) ->
+    | Load_state_natively_with_target target ->
       download_and_load_state_exn ~use_canary: false ~target:(Some target) ~genv ~root in
 
   let state_result = try
@@ -606,9 +592,17 @@ let init
       Error (Lazy_init_unhandled_exception {exn; stack;}) in
 
   match state_result with
-  | Error error ->
+  | Error err ->
+    let err_str = error_to_verbose_string err in
+    HackEventLogger.load_state_exn err_str;
+    Hh_logger.log "Could not load saved state: %s" err_str;
+    let warning = if matches_re tls_bug_re err_str
+      then ClientMessages.tls_bug_msg
+      else ClientMessages.load_state_not_found_msg
+    in
+    ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
     (* Fall back to type-checking everything *)
-    fallback_init genv env error, state_result
+    full_init genv env, state_result
   | Ok (loaded_info, changed_while_parsing) ->
     ServerProgress.send_progress_to_monitor "loading saved state succeeded";
     post_saved_state_initialization ~loaded_info ~changed_while_parsing ~env ~genv, state_result

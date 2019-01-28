@@ -37,19 +37,17 @@ let tests () =
     "test_add_remove", test_add_remove (module TestNoCache);
   ] in
   let setup_test (name, test) = name, fun () ->
-  let handle = SharedMem.(
-      init {
-        global_size = 16;
-        heap_size = 1024;
-        dep_table_pow = 2;
-        hash_table_pow = 3;
-        shm_dirs = [];
-        shm_min_avail = 0;
-        log_level = 0;
-        sample_rate = 0.0;
-      }
-    ) in
-    SharedMem.connect handle ~is_master:true;
+    let handle = SharedMem.init { SharedMem.
+      global_size = 16;
+      heap_size = 1024;
+      dep_table_pow = 2;
+      hash_table_pow = 3;
+      shm_dirs = [];
+      shm_min_avail = 0;
+      log_level = 0;
+      sample_rate = 0.0;
+    } in
+    ignore (handle: SharedMem.handle);
     test ();
     true
   in

@@ -83,19 +83,17 @@ let populate_deptable () =
     ~f:(fun (key, values) -> List.iter values ~f:(fun x -> add key x))
 
 let init_shared_mem () =
-  let handle = SharedMem.(
-      init {
-        global_size = 16;
-        heap_size = 1024;
-        dep_table_pow = 16;
-        hash_table_pow = 3;
-        shm_dirs = [];
-        shm_min_avail = 0;
-        log_level = 0;
-        sample_rate = 0.0;
-      }
-    ) in
-  SharedMem.connect handle ~is_master:true
+  let handle = SharedMem.init { SharedMem.
+    global_size = 16;
+    heap_size = 1024;
+    dep_table_pow = 16;
+    hash_table_pow = 3;
+    shm_dirs = [];
+    shm_min_avail = 0;
+    log_level = 0;
+    sample_rate = 0.0;
+  } in
+  ignore (handle: SharedMem.handle)
 
 let run_daemon fn =
   let handle =

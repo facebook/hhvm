@@ -949,7 +949,6 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
   let config, _ = ServerConfig.(load filename options) in
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
-  SharedMem.connect handle ~is_master:true;
 
   let genv, init_id = setup_server
       ~informant_managed ~monitor_pid:(Some monitor_pid) options handle in

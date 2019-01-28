@@ -9,7 +9,6 @@ let entry = WorkerController.register_entry_point
 let make_workers n =
   let handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let workers = MultiWorker.make (!pipe_path) entry n GlobalConfig.gc_control handle in
-  SharedMem.connect handle ~is_master:true;
   workers
 
 module UnitVal = struct

@@ -87,7 +87,6 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
   if ServerArgs.check_mode options then
     let shared_config = ServerConfig.(sharedmem_config config) in
     let handle = SharedMem.init shared_config in
-    SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
     let current_version = ServerConfig.(version config) in

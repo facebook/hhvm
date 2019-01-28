@@ -45,7 +45,7 @@ struct TypeProfile {
   void deserialize(ProfDataDeserializer& ser) { type = Type::deserialize(ser); }
 
   Type type; // This gets initialized with 0, which is TBottom.
-  static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
+  static_assert(Type::kBottom.empty(), "Assuming TBottom is 0");
 
   // In RDS, but can't contain pointers to request-allocated data.
   TYPE_SCAN_IGNORE_ALL;

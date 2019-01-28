@@ -161,7 +161,7 @@ inline Type::Type(DataType outer, DataType inner)
 inline size_t Type::hash() const {
   return hash_int64_pair(
     hash_int64_pair(
-      m_bits,
+      m_bits.hash(),
       ((static_cast<uint64_t>(m_ptr) << sizeof(m_mem) * CHAR_BIT) |
        static_cast<uint64_t>(m_mem)) ^ m_hasConstVal
     ),
@@ -225,7 +225,7 @@ inline Type Type::unionAll(Type t, Types... ts) {
 
 inline bool Type::isUnion() const {
   // This will return true iff more than 1 bit is set in m_bits.
-  return (m_bits & (m_bits - 1)) != 0;
+  return m_bits.count() > 1;
 }
 
 inline bool Type::isKnownDataType() const {
@@ -505,9 +505,9 @@ inline bool Type::supports(bits_t bits, SpecKind kind) {
     case SpecKind::None:
       return true;
     case SpecKind::Array:
-      return bits & kArrSpecBits;
+      return (bits & kArrSpecBits) != kBottom;
     case SpecKind::Class:
-      return bits & kClsSpecBits;
+      return (bits & kClsSpecBits) != kBottom;
   }
   not_reached();
 }

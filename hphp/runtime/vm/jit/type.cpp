@@ -44,6 +44,36 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
+///////////////////////////////////////////////////////////////////////////////
+
+// Static member definitions.
+// This section can be safely deleted in C++17.
+constexpr Type::bits_t Type::kBottom;
+constexpr Type::bits_t Type::kTop;
+
+#define IRT(name, bits)       constexpr Type::bits_t Type::k##name;
+#define IRTP(name, ptr, bits)
+#define IRTL(name, ptr, bits)
+#define IRTM(name, ptr, bits)
+#define IRTX(name, ptr, bits)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
+
+constexpr Type::bits_t Type::kAnyArr;
+constexpr Type::bits_t Type::kAnyVec;
+constexpr Type::bits_t Type::kAnyDict;
+constexpr Type::bits_t Type::kAnyKeyset;
+constexpr Type::bits_t Type::kAnyArrLike;
+constexpr Type::bits_t Type::kArrSpecBits;
+constexpr Type::bits_t Type::kAnyObj;
+constexpr Type::bits_t Type::kClsSpecBits;
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string Type::constValString() const {
   if (*this <= TBottom)   return "Bottom";
   if (*this <= TUninit)   return "Uninit";
@@ -144,8 +174,8 @@ std::string Type::constValString() const {
 
   always_assert_flog(
     false,
-    "Bad type in constValString(): {:#16x}:{}:{}:{}:{:#16x}",
-    m_bits,
+    "Bad type in constValString(): {}:{}:{}:{}:{:#16x}",
+    m_bits.hexStr(),
     static_cast<ptr_t>(m_ptr),
     static_cast<ptr_t>(m_mem),
     m_hasConstVal,
@@ -291,14 +321,14 @@ std::string Type::toString() const {
       types.begin(), types.end(),
       [](const std::pair<Type, const char*>& a,
          const std::pair<Type, const char*>& b) {
-        auto const pop1 = folly::popcount(a.first.m_bits);
-        auto const pop2 = folly::popcount(b.first.m_bits);
+        auto const pop1 = a.first.m_bits.count();
+        auto const pop2 = b.first.m_bits.count();
         if (pop1 != pop2) return pop1 > pop2;
         return std::strcmp(a.second, b.second) < 0;
       }
     );
     // Remove Bottom
-    while (!types.back().first.m_bits) types.pop_back();
+    while (types.back().first.m_bits == kBottom) types.pop_back();
     return types;
   }();
 
@@ -437,20 +467,21 @@ bool Type::checkValid() const {
   // Note: be careful, the TFoo objects aren't all constructed yet in this
   // function.
   if (m_extra) {
-    assertx(((m_bits & kClsSpecBits) == 0 || (m_bits & kArrSpecBits) == 0) &&
+    assertx(((m_bits & kClsSpecBits) == kBottom ||
+             (m_bits & kArrSpecBits) == kBottom) &&
             "Conflicting specialization");
   }
 
   // We should have one canonical representation of Bottom.
   if (m_bits == kBottom) {
     assert_flog(*this == TBottom,
-                "Bottom m_bits but nonzero others in {:#16x}:{}:{}:{:#16x}",
-                m_bits, m_ptrVal, m_hasConstVal, m_extra);
+                "Bottom m_bits but nonzero others in {}:{}:{}:{:#16x}",
+                m_bits.hexStr(), m_ptrVal, m_hasConstVal, m_extra);
   }
 
   // m_ptr and m_mem should be Bottom iff we have no kGen bits.
-  assertx(((m_bits & kGen) == 0) == (m_ptr == Ptr::Bottom));
-  assertx(((m_bits & kGen) == 0) == (m_mem == Mem::Bottom));
+  assertx(((m_bits & kGen) == kBottom) == (m_ptr == Ptr::Bottom));
+  assertx(((m_bits & kGen) == kBottom) == (m_mem == Mem::Bottom));
 
   // Ptr::NotPtr and Mem::NotMem should imply one another.
   assertx((m_ptr == Ptr::NotPtr) == (m_mem == Mem::NotMem));
@@ -684,7 +715,7 @@ Type Type::operator&(Type rhs) const {
 
   // Ptr and Mem also depend on Gen bits. This must come after all possible
   // fixups of bits.
-  if ((bits & kGen) == 0) {
+  if ((bits & kGen) == kBottom) {
     ptr = Ptr::Bottom;
     mem = Mem::Bottom;
   } else {
@@ -741,7 +772,7 @@ Type Type::operator-(Type rhs) const {
   auto arrSpec = lhs.arrSpec() - rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() - rhs.clsSpec();
 
-  auto const have_gen_bits = (bits & kGen) != 0;
+  auto const have_gen_bits = (bits & kGen) != kBottom;
 
   auto const have_ptr     = (ptr & Ptr::Ptr) != Ptr::Bottom;
   auto const have_not_ptr = (ptr & Ptr::NotPtr) != Ptr::Bottom;

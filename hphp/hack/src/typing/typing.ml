@@ -6274,7 +6274,7 @@ and class_var_def env ~is_static c cv =
         if cv.cv_is_xhp && (Env.is_strict env)
           then Env.set_mode env FileInfo.Mpartial
           else env in
-      let cty = TI.instantiable_hint env cty in
+      let cty = Decl_hint.hint env.Env.decl_env cty in
       let env, cty = Phase.localize_with_self env cty in
       env, Some (p, Reason.URhint, cty) in
   (* Next check the expression, passing in expected type if present *)
@@ -6551,7 +6551,7 @@ and typedef_def tcopt typedef  =
   let env, ty = Phase.localize_with_self env ty in
   let env = begin match tcstr with
     | Some tcstr ->
-      let cstr = TI.instantiable_hint env tcstr in
+      let cstr = Decl_hint.hint env.Env.decl_env tcstr in
       let env, cstr = Phase.localize_with_self env cstr in
       Typing_ops.sub_type t_pos Reason.URnewtype_cstr env ty cstr
     | _ -> env

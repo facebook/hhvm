@@ -105,5 +105,12 @@ let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_typedef env t =
-    check_hint env t.t_kind
+    check_hint env t.t_kind;
+    Option.iter t.t_constraint (check_hint env)
+
+  method! at_class_ env c =
+    let check_class_vars cvar =
+      Option.iter cvar.cv_type (check_hint env) in
+    List.iter c.c_vars check_class_vars;
+    List.iter c.c_static_vars check_class_vars
 end

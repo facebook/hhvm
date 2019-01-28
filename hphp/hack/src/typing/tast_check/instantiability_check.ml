@@ -101,6 +101,9 @@ let check_tparams env tparams =
     List.iter t.tp_constraints ~f:begin fun (_ck, h) -> check_hint env h end
   end
 
+let check_param env param =
+  Option.iter param.param_hint (check_hint env)
+
 let handler = object
   inherit Tast_visitor.handler_base
 
@@ -115,9 +118,11 @@ let handler = object
     List.iter c.c_static_vars check_class_vars;
     check_tparams env c.c_tparams.c_tparam_list
 
-   method! at_fun_ env f =
-     check_tparams env f.f_tparams
+  method! at_fun_ env f =
+    check_tparams env f.f_tparams;
+    List.iter f.f_params (check_param env)
 
-   method! at_method_ env m =
-     check_tparams env m.m_tparams
+  method! at_method_ env m =
+    check_tparams env m.m_tparams;
+    List.iter m.m_params (check_param env)
  end

@@ -453,7 +453,6 @@ and func env f named_body =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
        ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints p tenv constraints in
-  Typing_instantiability.check_params_instantiable tenv f.f_params;
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
@@ -971,7 +970,6 @@ and method_ (env, is_static) m =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
-  Typing_instantiability.check_params_instantiable tenv m.m_params;
   let env = { env with tenv = tenv } in
 
   (* If this is a destructor make sure it is allowed *)

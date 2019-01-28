@@ -37,7 +37,7 @@ type conn = {
   conn_retries : int option;
   conn_progress_callback: string option -> unit;
   conn_start_time: float;
-  check_progress: unit -> unit;
+  conn_root: Path.t;
 }
 
 let tty_progress_reporter () =
@@ -56,12 +56,18 @@ let null_progress_reporter (_status: string option) : unit =
 let progress = ref None
 let progress_warning = ref None
 let default_progress_message = "processing"
+let check_progress (root: Path.t) : unit =
+  match ServerUtils.server_progress ~timeout:3 root with
+  | Ok (msg, warning) ->
+    progress := msg;
+    progress_warning := warning;
+  | _ -> ()
 
 let delta_t : float = 3.0
 
-let print_wait_msg progress_callback check_progress =
+let print_wait_msg (progress_callback: string option -> unit) (root: Path.t) : unit =
   let had_warning = Option.is_some !progress_warning in
-  check_progress ();
+  check_progress root;
   if not had_warning then
     Option.iter !progress_warning ~f:(Printf.eprintf "%s\n%!");
   let progress = Option.value !progress ~default:default_progress_message in
@@ -77,7 +83,7 @@ let rec wait_for_server_message
     ~(retries : int option)
     ~(progress_callback : string option -> unit)
     ~(start_time : float)
-    ~(check_progress : unit -> unit)
+    ~(root: Path.t)
   : 'a ServerCommandTypes.message_type Lwt.t =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
@@ -89,14 +95,14 @@ let rec wait_for_server_message
     let%lwt readable, _, _ = Lwt_utils.select
         [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
     if readable = [] then (
-      print_wait_msg progress_callback check_progress;
+      print_wait_msg progress_callback root;
       wait_for_server_message
         ~expected_message
         ~ic
         ~retries
         ~progress_callback
         ~start_time
-        ~check_progress
+        ~root
     ) else
       try%lwt
         let fd = Timeout.descr_of_in_channel ic in
@@ -109,9 +115,9 @@ let rec wait_for_server_message
             progress_callback None;
             Lwt.return msg
           end else begin
-          if not is_ping then print_wait_msg progress_callback check_progress;
+          if not is_ping then print_wait_msg progress_callback root;
           wait_for_server_message ~expected_message ~ic ~retries
-            ~progress_callback ~start_time ~check_progress
+            ~progress_callback ~start_time ~root
         end
       with
       | End_of_file
@@ -124,7 +130,7 @@ let wait_for_server_hello
     (retries : int option)
     (progress_callback : string option -> unit)
     (start_time : float)
-    (check_progress : unit -> unit)
+    (root: Path.t)
   : unit Lwt.t =
   let%lwt _ : 'a ServerCommandTypes.message_type =
     wait_for_server_message
@@ -133,7 +139,7 @@ let wait_for_server_hello
       ~retries
       ~progress_callback
       ~start_time
-      ~check_progress
+      ~root
   in
   Lwt.return_unit
 
@@ -175,24 +181,18 @@ let rec connect
            else if env.use_priority_pipe then HhServerMonitorConfig.Priority
            else HhServerMonitorConfig.Default)
     } in
-    let retries, conn, check_progress =
+    let retries, conn =
       let start_t = Unix.gettimeofday () in
       let timeout = (Option.value retries ~default:30) + 1 in
       let conn = ServerUtils.connect_to_monitor
           ~timeout
           env.root
-          handoff_options in
-      let check_progress () =
-        match ServerUtils.server_progress ~timeout:3 env.root with
-        | Ok (msg, warning) ->
-          progress := msg;
-          progress_warning := warning
-        | _ -> ()
+          handoff_options
       in
       let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
       let retries = Option.map retries
           ~f:(fun retries -> max 0 (retries - elapsed_t)) in
-      retries, conn, check_progress
+      retries, conn
     in
     HackEventLogger.client_connect_once connect_once_start_t;
     match conn with
@@ -200,8 +200,7 @@ let rec connect
       let%lwt () =
         if env.do_post_handoff_handshake then
           with_server_hung_up @@ fun () ->
-          wait_for_server_hello ic retries env.progress_callback start_time
-            check_progress
+          wait_for_server_hello ic retries env.progress_callback start_time env.root
         else
           Lwt.return_unit
       in
@@ -210,7 +209,7 @@ let rec connect
         conn_retries = retries;
         conn_progress_callback = env.progress_callback;
         conn_start_time = start_time;
-        check_progress;
+        conn_root = env.root;
       }
     | Error e ->
       if first_attempt then
@@ -329,7 +328,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
     conn_retries = retries;
     conn_progress_callback = progress_callback;
     conn_start_time = start_time;
-    check_progress
+    conn_root
   } cmd ->
     Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
     Out_channel.flush oc;
@@ -340,7 +339,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
         ~retries
         ~progress_callback
         ~start_time
-        ~check_progress
+        ~root:conn_root
     in
     match res with
     | ServerCommandTypes.Response (response, _) -> Lwt.return response

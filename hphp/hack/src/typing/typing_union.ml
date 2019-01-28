@@ -19,7 +19,6 @@ module Utils = Typing_utils
 module MakeType = Typing_make_type
 
 exception Not_equiv
-exception Arraykinds_dont_unify
 exception Dont_unify
 
 (* Two types are "equivalent" if when expanded they are equal.
@@ -51,24 +50,6 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
     | _ -> raise Not_equiv in
   env, ty
 
-let ty_opt_equiv env tyopt1 tyopt2 ~are_ty_param =
-  match tyopt1, tyopt2 with
-  | None, None -> env, None
-  | Some ty1, Some ty2 ->
-    let env, ty = ty_equiv env ty1 ty2 ~are_ty_param in env, Some ty
-  | _, _ -> raise Not_equiv
-
-(* Performs the union of two types.
- * The union is the least upper bound of the subtyping relation.
- *
- * There is however one approximation: if type A is covariant,
- * then
- *   A<T1> | A<T2> = A<T1|T2>
- *
- * This approximation is necessary to avoid type growing exponentially in size.
- * We have seen cases where it would otherwise generate unions involving all
- * the subsets of a set of types.
- *)
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
   else match ty1, ty2 with

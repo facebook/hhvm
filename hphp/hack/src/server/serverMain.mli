@@ -15,7 +15,12 @@ val entry:
   (bool * ServerGlobalState.t * ServerArgs.options * int * Unix.file_descr * Unix.file_descr,
     unit, unit) Daemon.entry
 
-val run_once: ServerArgs.options -> SharedMem.handle -> 'a
+val run_once:
+  ServerArgs.options ->
+  ServerConfig.t ->
+  ServerLocalConfig.t ->
+  SharedMem.handle ->
+    'a
 
 val serve_one_iteration:
   ServerEnv.genv ->

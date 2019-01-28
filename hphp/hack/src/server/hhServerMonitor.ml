@@ -87,9 +87,9 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
   if ServerArgs.check_mode options then
     let shared_config = ServerConfig.(sharedmem_config config) in
     let handle = SharedMem.init shared_config in
-    ServerMain.run_once options handle
+    ServerMain.run_once options config local_config handle
   else
-    let current_version = ServerConfig.(version config) in
+    let current_version = ServerConfig.version config in
     let waiting_client = ServerArgs.waiting_client options in
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;

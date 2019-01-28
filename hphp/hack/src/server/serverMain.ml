@@ -846,7 +846,7 @@ let program_init genv =
     ~approach_name ~init_error ~init_type;
   env
 
-let setup_server ~informant_managed ~monitor_pid options handle =
+let setup_server ~informant_managed ~monitor_pid options config local_config handle =
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
@@ -856,7 +856,6 @@ let setup_server ~informant_managed ~monitor_pid options handle =
    * overhead *)
   let gc_control = Caml.Gc.get () in
   Caml.Gc.set {gc_control with Caml.Gc.max_overhead = 200};
-  let config, local_config = ServerConfig.(load filename options) in
   let {ServerLocalConfig.
     cpu_priority;
     io_priority;
@@ -870,7 +869,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     predeclare_ide;
     max_typechecker_worker_memory_mb;
     _
-  } as local_config = local_config in
+  } = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
   List.iter (ServerConfig.coroutine_whitelist_paths config)
     ~f:Coroutine_check.whitelist_path;
@@ -927,8 +926,9 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   in
   genv, init_id
 
-let run_once options handle =
-  let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in
+let run_once options config local_config handle =
+  let genv, _ = setup_server options config local_config handle
+    ~informant_managed:false ~monitor_pid:None in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -947,11 +947,10 @@ let run_once options handle =
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
-  let config, _ = ServerConfig.(load filename options) in
+  let config, local_config = ServerConfig.(load filename options) in
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
-
-  let genv, init_id = setup_server
-      ~informant_managed ~monitor_pid:(Some monitor_pid) options handle in
+  let genv, init_id = setup_server options config local_config handle
+    ~informant_managed ~monitor_pid:(Some monitor_pid) in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));

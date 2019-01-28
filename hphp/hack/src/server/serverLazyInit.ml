@@ -61,7 +61,7 @@ let download_and_load_state_exn
     ~(target: ServerMonitorUtils.target_saved_state option)
     ~(genv: ServerEnv.genv)
     ~(root: Path.t)
-  : (loaded_info, error) result =
+  : (loaded_info, load_state_error) result =
   let open ServerMonitorUtils in
   let saved_state_handle = match target with
     | None -> None
@@ -84,7 +84,7 @@ let download_and_load_state_exn
 
   match state_future with
   | Error error ->
-    Error (Lazy_init_loader_failure error)
+    Error (Load_state_loader_failure error)
   | Ok result ->
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
@@ -95,7 +95,7 @@ let download_and_load_state_exn
     let t = Unix.time () in
     match result.State_loader.dirty_files |> Future.get ~timeout:200 with
     | Error error ->
-      Error (Lazy_init_dirty_files_failure error)
+      Error (Load_state_dirty_files_failure error)
     | Ok (dirty_master_files, dirty_local_files) -> begin
         let () = HackEventLogger.state_loader_dirty_files t in
         let list_to_set x =
@@ -556,7 +556,7 @@ let saved_state_init
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
     (root: Path.t)
-  : ((ServerEnv.env * float) * (loaded_info * Relative_path.Set.t), error) result =
+  : ((ServerEnv.env * float) * (loaded_info * Relative_path.Set.t), load_state_error) result =
   ServerProgress.send_progress_to_monitor "loading saved state";
 
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
@@ -564,7 +564,7 @@ let saved_state_init
   let timeout = 2 * genv.local_config.SLC.load_state_script_timeout in
 
   (* following function will be run under the timeout *)
-  let do_ (_id: Timeout.t) : (loaded_info, error) result =
+  let do_ (_id: Timeout.t) : (loaded_info, load_state_error) result =
     match load_state_approach with
     | Precomputed info ->
       Ok (use_precomputed_state_exn genv info)
@@ -574,7 +574,7 @@ let saved_state_init
       download_and_load_state_exn ~use_canary: false ~target:(Some target) ~genv ~root in
 
   let state_result = try
-      match Timeout.with_timeout ~timeout ~do_ ~on_timeout:(fun () -> Error Lazy_init_timeout) with
+      match Timeout.with_timeout ~timeout ~do_ ~on_timeout:(fun () -> Error Load_state_timeout) with
       | Error error ->
         Error error
       | Ok loaded_info ->
@@ -582,7 +582,7 @@ let saved_state_init
         Ok (loaded_info, changed_while_parsing)
     with exn ->
       let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-      Error (Lazy_init_unhandled_exception {exn; stack;}) in
+      Error (Load_state_unhandled_exception {exn; stack;}) in
 
   match state_result with
   | Error err ->

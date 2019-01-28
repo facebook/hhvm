@@ -823,9 +823,9 @@ let program_init genv =
     | Some load_state_approach ->
       let env, init_result = ServerInit.init ~load_state_approach genv in
       begin match init_result with
-        | ServerInit.State_loaded distance -> env, "state_load", None, distance
-        | ServerInit.State_load_failed err -> env, "state_load_failed", Some err, None
-        | ServerInit.State_load_declined reason -> env, "state_load_declined", Some reason, None
+        | ServerInit.Load_state_succeeded distance -> env, "state_load", None, distance
+        | ServerInit.Load_state_failed err -> env, "state_load_failed", Some err, None
+        | ServerInit.Load_state_declined reason -> env, "state_load_declined", Some reason, None
       end
   in
   let env = { env with

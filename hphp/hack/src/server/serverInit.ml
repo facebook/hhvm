@@ -105,15 +105,15 @@ let init
   let (env, t), init_result = match lazy_lev, load_state_approach with
     | Init, None ->
       ServerLazyInit.full_init genv env,
-      State_load_declined "No saved-state requested (for lazy init)"
+      Load_state_declined "No saved-state requested (for lazy init)"
 
     | Init, Some load_state_approach -> begin
       let result = ServerLazyInit.saved_state_init ~load_state_approach genv env root in
       (* Saved-state init is the only kind of init that might error... *)
       match result with
-      | Ok ((env, t), ({state_distance; _}, _)) -> (env, t), State_loaded state_distance
+      | Ok ((env, t), ({state_distance; _}, _)) -> (env, t), Load_state_succeeded state_distance
       | Error err ->
-        let err_str = error_to_verbose_string err in
+        let err_str = load_state_error_to_verbose_string err in
         HackEventLogger.load_state_exn err_str;
         Hh_logger.log "Could not load saved state: %s" err_str;
         let warning = if matches_re tls_bug_re err_str
@@ -122,7 +122,7 @@ let init
         in
         ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
         (* Fall back to type-checking everything *)
-        ServerLazyInit.full_init genv env, State_load_failed err_str
+        ServerLazyInit.full_init genv env, Load_state_failed err_str
       end
 
     | Off, Some _
@@ -130,13 +130,13 @@ let init
     | Parse, Some _ ->
       Hh_logger.log "Saved-state requested, but overridden by eager init";
       ServerEagerInit.init genv lazy_lev env,
-      State_load_declined "Saved-state requested, but overridden by eager init"
+      Load_state_declined "Saved-state requested, but overridden by eager init"
 
     | Off, None
     | Decl, None
     | Parse, None ->
       ServerEagerInit.init genv lazy_lev env,
-      State_load_declined "No saved-state requested"
+      Load_state_declined "No saved-state requested"
 
   in
   let env, t = ServerAiInit.ai_check genv env.files_info env t in

@@ -530,7 +530,7 @@ let load_state
     changes;
   } in
   match ServerInit.init ~load_state_approach !genv with
-  | env, ServerInit.State_loaded _ -> env
+  | env, ServerInit.Load_state_succeeded _ -> env
   | _ -> assert false
 
 let diagnostics_to_string x =

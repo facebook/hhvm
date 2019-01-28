@@ -13,4 +13,4 @@ val init :
   ServerEnv.genv ->
   lazy_level ->
   ServerEnv.env ->
-  (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing, error) result
+  (ServerEnv.env * float)

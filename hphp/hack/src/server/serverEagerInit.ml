@@ -28,7 +28,6 @@
 *)
 
 open Core_kernel
-open Result.Export
 open SearchServiceRunner
 open ServerEnv
 open ServerInitCommon
@@ -61,13 +60,11 @@ let init
     (genv: ServerEnv.genv)
     (lazy_level: lazy_level)
     (env: ServerEnv.env)
-  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
+  : (ServerEnv.env * float) =
   (* We don't support a saved state for eager init. *)
   let get_next, t = indexing genv in
   let lazy_parse = lazy_level = Parse in
-  (* Parsing entire repo, too many files to trace. TODO: why do we parse
-   * entire repo WHILE loading saved state that is supposed to prevent having
-   * to do that? *)
+  (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
   if not (ServerArgs.check_mode genv.options) then
@@ -85,4 +82,4 @@ let init
 
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();
-  type_check genv env fast t, Error Eager_init_saved_state_not_supported
+  type_check genv env fast t

@@ -8,10 +8,6 @@
  *)
 
 type error =
-  (* we did an eager init; saved states aren't implemented for that case *)
-  | Eager_init_saved_state_not_supported
-  (* we were asked for lazy init but no load_state_approach was provided *)
-  | Lazy_init_no_load_approach
   (* an error reported by mk_state_future for downloading saved-state *)
   | Lazy_init_loader_failure of State_loader.error
   (* an error fetching list of dirty files from hg *)
@@ -28,15 +24,12 @@ type load_state_approach =
 
 (** Docs are in .mli *)
 type init_result =
-  | State_load of int option
+  | State_loaded of int option
   | State_load_failed of string
+  | State_load_declined of string
 
 let error_to_verbose_string (err: error) : string =
   match err with
-  | Eager_init_saved_state_not_supported ->
-    Printf.sprintf "Eager init: saved-state not supported"
-  | Lazy_init_no_load_approach ->
-    Printf.sprintf "Lazy init, but load_state_approach = None"
   | Lazy_init_loader_failure err ->
     Printf.sprintf "Lazy init error downloading saved-state: %s"
       (State_loader.error_string_verbose err)

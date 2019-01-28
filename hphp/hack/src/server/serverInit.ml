@@ -16,6 +16,12 @@ module SLC = ServerLocalConfig
 
 include ServerInitTypes
 
+let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
+
+let matches_re re s =
+  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
+  pos > -1
+
 let run_search (genv: ServerEnv.genv) (t: float) : unit =
   if SearchServiceRunner.should_run_completely genv
   then begin
@@ -96,27 +102,45 @@ let init
               errorl = init_errors
             } in
   let root = ServerArgs.root genv.options in
-  let (env, t), state = match lazy_lev, load_state_approach with
+  let (env, t), init_result = match lazy_lev, load_state_approach with
     | Init, None ->
-      ServerLazyInit.full_init genv env, Error Lazy_init_no_load_approach
-    | Init, Some load_state_approach ->
-      ServerLazyInit.saved_state_init ~load_state_approach genv env root
-    | Off, _
-    | Decl, _
-    | Parse, _ ->
-      Option.iter load_state_approach
-        ~f:(fun _ -> Hh_logger.log "Eager init, hence ignoring saved-state option");
-      ServerEagerInit.init genv lazy_lev env
+      ServerLazyInit.full_init genv env,
+      State_load_declined "No saved-state requested (for lazy init)"
+
+    | Init, Some load_state_approach -> begin
+      let result = ServerLazyInit.saved_state_init ~load_state_approach genv env root in
+      (* Saved-state init is the only kind of init that might error... *)
+      match result with
+      | Ok ((env, t), ({state_distance; _}, _)) -> (env, t), State_loaded state_distance
+      | Error err ->
+        let err_str = error_to_verbose_string err in
+        HackEventLogger.load_state_exn err_str;
+        Hh_logger.log "Could not load saved state: %s" err_str;
+        let warning = if matches_re tls_bug_re err_str
+          then ClientMessages.tls_bug_msg
+          else ClientMessages.load_state_not_found_msg
+        in
+        ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
+        (* Fall back to type-checking everything *)
+        ServerLazyInit.full_init genv env, State_load_failed err_str
+      end
+
+    | Off, Some _
+    | Decl, Some _
+    | Parse, Some _ ->
+      Hh_logger.log "Saved-state requested, but overridden by eager init";
+      ServerEagerInit.init genv lazy_lev env,
+      State_load_declined "Saved-state requested, but overridden by eager init"
+
+    | Off, None
+    | Decl, None
+    | Parse, None ->
+      ServerEagerInit.init genv lazy_lev env,
+      State_load_declined "No saved-state requested"
+
   in
   let env, t = ServerAiInit.ai_check genv env.files_info env t in
   run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
-  let result = match state with
-    | Ok ({state_distance; _}, _) ->
-      State_load state_distance
-    | Error err ->
-      let err_str = error_to_verbose_string err in
-      State_load_failed err_str
-  in
-  env, result
+  env, init_result

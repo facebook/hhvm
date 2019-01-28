@@ -10,12 +10,11 @@
 (* Lazy Initialization:
 
    During Lazy initialization, hh_server tries to do as little work as possible.
-   If we load from saved state, our steps are:
+   The init_from_saved_state behavior is this:
 
      Load from saved state -> Parse dirty files -> Naming -> Dirty Typecheck
 
-   Otherwise, we fall back to something similar to eager init, but with lazy
-   decl and parse turned on:
+   The full_init behavior is this: (similar to eager init, but with lazy decl)
 
      Full Parsing -> Naming -> Full Typecheck (with lazy decl)
 *)
@@ -379,12 +378,6 @@ let get_updates_exn
     SSet.filter updates ~f:filter
     |> Relative_path.relativize_set Relative_path.Root
 
-let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
-
-let matches_re re s =
-  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
-  pos > -1
-
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init
     (genv: ServerEnv.genv)
@@ -412,9 +405,9 @@ let full_init
 let post_saved_state_initialization
     ~(genv: ServerEnv.genv)
     ~(env: ServerEnv.env)
-    ~(loaded_info: loaded_info)
-    ~(changed_while_parsing: Relative_path.Set.t)
+    ~(state_result: loaded_info * Relative_path.Set.t)
   : (ServerEnv.env * float) =
+  let (loaded_info, changed_while_parsing) = state_result in
   let trace = genv.local_config.SLC.trace_parsing in
   let hg_aware = genv.local_config.SLC.hg_aware in
   let {
@@ -563,7 +556,7 @@ let saved_state_init
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
     (root: Path.t)
-  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
+  : ((ServerEnv.env * float) * (loaded_info * Relative_path.Set.t), error) result =
   ServerProgress.send_progress_to_monitor "loading saved state";
 
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
@@ -593,16 +586,8 @@ let saved_state_init
 
   match state_result with
   | Error err ->
-    let err_str = error_to_verbose_string err in
-    HackEventLogger.load_state_exn err_str;
-    Hh_logger.log "Could not load saved state: %s" err_str;
-    let warning = if matches_re tls_bug_re err_str
-      then ClientMessages.tls_bug_msg
-      else ClientMessages.load_state_not_found_msg
-    in
-    ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
-    (* Fall back to type-checking everything *)
-    full_init genv env, state_result
-  | Ok (loaded_info, changed_while_parsing) ->
+    Error err
+  | Ok state_result ->
     ServerProgress.send_progress_to_monitor "loading saved state succeeded";
-    post_saved_state_initialization ~loaded_info ~changed_while_parsing ~env ~genv, state_result
+    let (env, t) = post_saved_state_initialization ~state_result ~env ~genv in
+    Ok ((env, t), state_result)

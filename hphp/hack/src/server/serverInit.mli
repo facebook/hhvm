@@ -23,9 +23,11 @@ val save_state: ServerEnv.genv -> ServerEnv.env -> string -> int option
 type init_result =
   (** Loaded a saved saved state of this distance. Note: for older load scripts
    * distance is unknown, thus None. *)
-  | State_load of int option
-  (** Loading a  *)
+  | State_loaded of int option
+  (** Loading error *)
   | State_load_failed of string
+  (** This option means we didn't even try to load a saved state *)
+  | State_load_declined of string
 
 (* will parse, name, typecheck, the next set of files
  * and refresh the environment and update the many shared heaps

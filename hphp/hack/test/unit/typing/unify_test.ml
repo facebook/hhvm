@@ -23,7 +23,6 @@ let global_options =
     ~tco_dynamic_view:false
     ~tco_disallow_array_as_tuple:false
     ~po_auto_namespace_map:[]
-    ~po_disable_variable_variables:false
     ~tco_disallow_ambiguous_lambda:false
     ~tco_disallow_array_typehint:false
     ~tco_disallow_array_literal:false

@@ -1,5 +1,4 @@
 $i=f(): good
-$$x=f(): good
 ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good

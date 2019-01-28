@@ -18,9 +18,21 @@
 	$m = array_combine($array4, $array1);
 	$n = array_combine($array4, $array2);
 	$o = array_combine($array4, $array3);
-	$p = array_combine($array4, $array4);
-	for($letter = "a"; $letter <= "p"; $letter++)
-	{
-	 print_r($$letter);
-	}
+  $p = array_combine($array4, $array4);
+  print_r($a);
+  print_r($b);
+  print_r($c);
+  print_r($d);
+  print_r($e);
+  print_r($f);
+  print_r($g);
+  print_r($h);
+  print_r($i);
+  print_r($j);
+  print_r($k);
+  print_r($l);
+  print_r($m);
+  print_r($n);
+  print_r($o);
+  print_r($p);
 ?>

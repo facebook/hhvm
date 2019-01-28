@@ -1,5 +1,5 @@
 <?php
 
-var_dump(isset($a, ${$b}, $$c, $$$$d, $e[$f->g]->d));
+var_dump(isset($a, $e[$f->g]->d));
 
 ?>

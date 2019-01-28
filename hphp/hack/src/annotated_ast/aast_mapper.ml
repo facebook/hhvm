@@ -88,7 +88,6 @@ struct
       T.Call(t, map_expr menv e1, hl, map_exprl menv el1, map_exprl menv el2)
     | S.String2 el -> T.String2 (map_exprl menv el)
     | S.PrefixedString (n, e) -> T.PrefixedString (n, map_expr menv e)
-    | S.Dollar e -> T.Dollar (map_expr menv e)
     | S.Yield af -> T.Yield (map_afield menv af)
     | S.Yield_from e -> T.Yield_from (map_expr menv e)
     | S.Await e -> T.Await (map_expr menv e)

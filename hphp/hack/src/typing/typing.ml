@@ -1814,10 +1814,6 @@ and expr_
   | ImmutableVar ((_, x) as id) ->
     let ty = Env.get_local env x in
     make_result env p (T.ImmutableVar id) ty
-  | Dollar e ->
-    let env, te, _ty = expr env e in
-    (** Can't easily track any typing information for variable variable. *)
-    make_result env p (T.Dollar te) (Reason.Rwitness p, Typing_utils.tany env)
   | List el ->
       let env, tel, tyl = match valkind with
         | `lvalue | `lvalue_subexpr -> lvalues env el

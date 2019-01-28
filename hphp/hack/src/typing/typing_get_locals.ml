@@ -251,7 +251,6 @@ and expr tcopt acc (_, e) =
     List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Shape fields ->
     List.fold_left fields ~init:acc ~f:(fun acc -> fun (_, e) -> expr tcopt acc e)
-  | Dollar e
   | Clone e
   | Await e
   | Is (e, _)

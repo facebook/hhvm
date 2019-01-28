@@ -227,7 +227,6 @@ and on_expr (p, e) : Aast.expr =
   | Lvar id ->
     let lid = Local_id.make_unscoped (snd id) in
     Aast.Lvar (p, lid)
-  | Dollar e -> Aast.Dollar (on_expr e)
   | Clone e -> Aast.Clone (on_expr e)
   | Obj_get (e1, e2, f) -> Aast.Obj_get (on_expr e1, on_expr e2, f)
   | Array_get (e, opt_e) -> Aast.Array_get (on_expr e, optional on_expr opt_e)

@@ -45,7 +45,6 @@ class type ['a] ast_visitor_type = object
   method on_darray : 'a -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
-  method on_dollar : 'a -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
@@ -425,7 +424,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Omitted                     -> this#on_omitted  acc
    | Suspend e  -> this#on_suspend acc e
    | Callconv    (kind, e)   -> this#on_callconv acc kind e
-   | Dollar      e -> this#on_dollar acc e
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
@@ -506,8 +504,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_await acc e = this#on_expr acc e
   method on_suspend acc e = this#on_expr acc e
   method on_list acc el = List.fold_left this#on_expr acc el
-
-  method on_dollar acc e = this#on_expr acc e
 
   method on_expr_list acc el =
     let acc = List.fold_left this#on_expr acc el in

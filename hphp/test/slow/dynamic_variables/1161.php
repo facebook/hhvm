@@ -5,7 +5,7 @@ function foo() {
   global $d;
   $a = 10;
   $b = 'c';
-  $$b = 20;
+  $c = 20;
   $gdv = get_defined_vars();
   var_dump(isset($gdv['a']) && $gdv['a'] === 10);
   var_dump(isset($gdv['b']) && $gdv['b'] === 'c');

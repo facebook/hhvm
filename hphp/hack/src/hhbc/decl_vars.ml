@@ -104,10 +104,9 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
   inherit [decl_vars_state] Ast_visitor.ast_visitor as super
 
   method! on_global_var acc exprs =
-    let rec add_local_from_expr acc e =
+    let add_local_from_expr acc e =
       match snd e with
       | (Ast.Id id | Ast.Lvar id) -> add_local ~barethis:Bare_this acc id
-      | Ast.Dollar e -> add_local_from_expr acc e
       | _ -> this#on_expr acc e in
     List.fold_left exprs ~init:acc ~f:add_local_from_expr
 
@@ -147,11 +146,6 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
 
   method! on_lvar acc id =
     add_local ~barethis:Bare_this acc id
-
-  method! on_dollar acc e =
-    match e with
-    | _, Ast.Lvar id -> with_dynamic_var_access (add_local ~barethis:Bare_this acc id)
-    | _ -> this#on_expr acc e
 
   method! on_class_get acc id prop =
     on_class_get this acc id prop ~is_call_target:false

@@ -102,7 +102,6 @@ let () =
     ~tco_disallow_array_as_tuple: false
     ~po_auto_namespace_map:
       [("ShortName", "HH\\LongName\\ShortName")]
-    ~po_disable_variable_variables: false
     ~po_deregister_php_stdlib: true
     ~po_disallow_execution_operator:false
     ~po_disable_define:false

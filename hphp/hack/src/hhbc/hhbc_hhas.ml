@@ -1225,9 +1225,7 @@ and string_of_param_default_value ~env expr =
         get_class_name_from_id
           ~env:env.codegen_env ~should_format:true ~is_class_constant:false s1
       | _ -> string_of_param_default_value ~env e1 in
-    let s2 = match snd e2 with
-      | A.Dollar e -> "$" ^ string_of_param_default_value ~env e
-      | _ -> string_of_param_default_value ~env e2 in
+    let s2 = string_of_param_default_value ~env e2 in
     s1 ^ "::" ^ s2
   | A.Class_const (e1, (_, s2)) ->
     let cexpr_o =
@@ -1285,8 +1283,6 @@ and string_of_param_default_value ~env expr =
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
   | A.Unsafeexpr e -> string_of_param_default_value ~env  e
   | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
-  | A.Dollar e ->
-    "${" ^ string_of_param_default_value ~env e ^ "}"
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->
     let h = string_of_hint ~ns: false h in

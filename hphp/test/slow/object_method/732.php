@@ -3,8 +3,6 @@
 class c {
   function x() {
     var_dump($this);
-    $t = 'this';
-    var_dump($$t);
   }
 }
 

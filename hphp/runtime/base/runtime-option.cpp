@@ -434,7 +434,6 @@ uint64_t RuntimeOption::UndefinedConstFallback = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisableReservedVariables = false;
 bool RuntimeOption::DisallowExecutionOperator = false;
-bool RuntimeOption::DisableVariableVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::EnableConcurrent = false;
 bool RuntimeOption::EnableAwaitAsAnExpression = false;
@@ -1246,9 +1245,6 @@ void RuntimeOption::Load(
     Config::Bind(DisallowExecutionOperator, ini, config,
                  "Hack.Lang.Phpism.DisallowExecutionOperator",
                  DisallowExecutionOperator);
-    Config::Bind(DisableVariableVariables, ini, config,
-                 "Hack.Lang.Phpism.DisableVariableVariables",
-                 DisableVariableVariables);
     Config::Bind(DisableDefine, ini, config,
                  "Hack.Lang.Phpism.DisableDefine",
                  DisableDefine);

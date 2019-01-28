@@ -8,7 +8,5 @@ function foo($i) {
 
  <<__EntryPoint>>
 function main_1504() {
-${
-foo(1)}
-[foo(2)][foo(3)] = foo(4);
+  $a1[foo(2)][foo(3)] = foo(4);
 }

@@ -32,7 +32,6 @@ let global_opts = GlobalOptions.make
   ~po_auto_namespace_map: []
   ~po_deregister_php_stdlib:true
   ~po_disallow_execution_operator:false
-  ~po_disable_variable_variables: false
   ~po_disable_define:false
   ~po_disable_nontoplevel_declarations:false
   ~po_allow_goto:false

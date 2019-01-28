@@ -266,8 +266,6 @@ module CheckFunctionBody = struct
         Errors.rx_is_enabled_invalid_location pos
     | _, Id _ -> ()
 
-    | _, Dollar e ->
-        expr f_type env e
     | _, ImmutableVar _
     | _, Lvar _ ->
         ()
@@ -819,7 +817,7 @@ and check_class_property_initialization prop =
         Option.iter optional_expr rec_assert_static_literal;
         rec_assert_static_literal expr2;
       | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
-      | Method_id _ | Dollar _
+      | Method_id _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _ | Yield_from _ | Suspend _
       | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
@@ -1239,9 +1237,6 @@ and expr_ env p = function
       (not(is_parent cid) || func_name <> Some m_name)
     then Errors.magic mid;
     ()
-  | Dollar e ->
-    let env' = {env with is_array_append_allowed = false} in
-    expr env' e
   | Pipe (_, e1, e2) ->
       expr env e1;
       expr env e2

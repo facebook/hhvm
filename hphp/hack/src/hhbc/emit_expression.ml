@@ -470,21 +470,6 @@ and get_local env (pos, str) =
     then Local.get_unnamed_local_for_tempname str
     else Local.Named str)
 
-and check_non_pipe_local e =
-  match e with
-  | _, A.Lvar (pos, str) when str = SN.SpecialIdents.dollardollar ->
-    Emit_fatal.raise_fatal_parse pos
-      "Cannot take indirect reference to a pipe variable"
-  | _ -> ()
-
-(*
-and get_non_pipe_local (pos, str) =
-  if str = SN.SpecialIdents.dollardollar
-  then Emit_fatal.raise_fatal_parse pos
-    "Cannot take indirect reference to a pipe variable"
-  else Local.Named str
-*)
-
 and emit_local ~notice ~need_ref env ((pos, str) as id) =
   if SN.Superglobals.is_superglobal str
   then gather [
@@ -1037,7 +1022,6 @@ and emit_load_class_const env pos cexpr id =
 and emit_class_expr env cexpr prop =
   match cexpr with
   | Class_expr ((pos, (A.BracedExpr _ |
-                     A.Dollar _ |
                      A.Call _ |
                      A.Lvar (_, "$this") |
                      A.Binop _ |
@@ -1073,23 +1057,19 @@ and emit_class_expr env cexpr prop =
         block
       ]
   | _ ->
-  let load_prop, load_prop_first =
+  let load_prop =
     match prop with
     | pos, A.Id (_, id) ->
       emit_pos_then pos @@
-      instr_string id, true
+      instr_string id
     | pos, A.Lvar (_, id) ->
       emit_pos_then pos @@
-      instr_string (SU.Locals.strip_dollar id), true
-    | _, A.Dollar (_, A.Lvar _ as e) ->
-      emit_expr ~need_ref:false env e, false
-      (* The outer dollar just says "class property" *)
-    | _, A.Dollar e | e ->
-      emit_expr ~need_ref:false env e, true
+      instr_string (SU.Locals.strip_dollar id)
+    | e ->
+      emit_expr ~need_ref:false env e
   in
   let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
-  if load_prop_first then load_prop, load_cls_ref
-  else load_cls_ref, load_prop
+  load_prop, load_cls_ref
 
 and emit_class_get env qop need_ref cid prop =
   let cexpr = expr_to_class_expr ~resolve_self:false
@@ -1339,11 +1319,6 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   | A.Lvar id ->
     emit_pos_then outer_pos @@
     instr (IIsset (IssetL (get_local env id)))
-  | A.Dollar e ->
-    gather [
-      emit_expr ~need_ref:false env e;
-      instr_issetn
-    ]
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
@@ -1384,12 +1359,6 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
         emit_pos outer_pos;
         instr_not
       ]
-  | A.Dollar e ->
-    gather [
-      emit_expr ~last_pos:outer_pos ~need_ref:false env e;
-      emit_pos outer_pos;
-      instr_emptyn
-    ]
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
@@ -1920,14 +1889,6 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   | A.String2 es ->
     emit_box_if_necessary pos need_ref @@ emit_string2 env pos es
   | A.BracedExpr e -> emit_expr ~need_ref:false env e
-  | A.Dollar e ->
-    check_non_pipe_local e;
-    let instr = emit_expr ?last_pos ~need_ref:false env e in
-    gather [
-      instr;
-      emit_pos (Option.value ~default:pos last_pos);
-      if need_ref then instr_vgetn else instr_cgetn
-    ]
   | A.Id id ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_id env id
@@ -2427,12 +2388,6 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr)
     ], None
   | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
     instr_cgetquietl (get_local env id), None
-  | A.Dollar e ->
-    gather [
-      emit_expr ~need_ref:false env e;
-      emit_pos pos;
-      instr_cgetquietn
-    ], None
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       emit_expr ~need_ref:false env e;
@@ -3004,16 +2959,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
          total_stack_size
      end
 
-   | A.Class_get(cid, (_, A.Dollar (_, A.Lvar id))) ->
-     let cexpr = expr_to_class_expr ~resolve_self:false
-       (Emit_env.get_scope env) cid in
-     (* special case for $x->$$y: use BaseSL *)
-     emit_default
-       (emit_load_class_ref env pos cexpr)
-       empty
-       (emit_pos_then pos @@
-       instr_basesl (get_local env id) base_mode)
-       0
    | A.Class_get(cid, prop) ->
      let cexpr = expr_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
@@ -3022,21 +2967,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        cexpr_begin
        cexpr_end
        (instr_basesc base_offset base_mode)
-       1
-   | A.Dollar (_, A.Lvar id as e) ->
-     check_non_pipe_local e;
-     let local = get_local env id in
-     emit_default
-       empty
-       empty
-       (emit_pos_then pos @@ instr_basenl local base_mode)
-       0
-   | A.Dollar e ->
-     let base_expr_instrs = emit_expr ~need_ref:false env e in
-     emit_default
-       base_expr_instrs
-       empty
-       (emit_pos_then pos @@ instr_basenc base_offset base_mode)
        1
    | _ ->
      let base_expr_instrs = emit_expr ~need_ref:false env expr in
@@ -3204,7 +3134,6 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
       else
         match snd expr with
         | A.Lvar _
-        | A.Dollar _
         | A.Array_get _
         | A.Obj_get _
         | A.Class_get _
@@ -3671,14 +3600,6 @@ and emit_final_local_op pos op lid =
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
   | LValOp.Unset -> instr (IMutator (UnsetL lid))
 
-and emit_final_named_local_op pos op =
-  match op with
-  | LValOp.Set -> emit_pos_then pos @@ instr (IMutator SetN)
-  | LValOp.SetRef -> instr (IMutator BindN)
-  | LValOp.SetOp op -> instr (IMutator (SetOpN op))
-  | LValOp.IncDec op -> instr (IMutator (IncDecN op))
-  | LValOp.Unset -> instr (IMutator UnsetN)
-
 and emit_final_global_op pos op =
   match op with
   | LValOp.Set -> emit_pos_then pos @@ instr (IMutator SetG)
@@ -3730,7 +3651,7 @@ and can_use_as_rhs_in_list_assignment expr =
   match expr with
   | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
-  | A.Lvar _ | A.Dollar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
+  | A.Lvar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
   | A.Call _ | A.New _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
   | A.Array _ | A.Varray _ | A.Darray _ | A.Collection _ | A.Clone _ | A.Unop _
   | A.As _ | A.Await _ -> true
@@ -3896,29 +3817,6 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
   | LValOp.SetOp _
   | LValOp.IncDec _ -> { env with Emit_env.env_allows_array_append = true }
   | _ -> env in
-  let handle_dollar e final_op =
-    match e with
-      _, A.Lvar id ->
-      let instruction =
-        let local = (get_local env id) in
-        match op with
-        | LValOp.Unset | LValOp.IncDec _ -> instr_cgetl local
-        | _ -> instr_cgetl2 local
-      in
-      empty,
-      rhs_instrs,
-      gather [
-        emit_pos outer_pos;
-        instruction;
-        final_op op
-      ]
-    | _ ->
-
-      let instrs = emit_expr ~need_ref:false env e in
-      instrs,
-      rhs_instrs,
-      final_op op
-  in
   match expr_ with
   | A.Lvar (name_pos, id) when SN.Superglobals.is_superglobal id ->
     emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar id,
@@ -3934,9 +3832,6 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     empty,
     rhs_instrs,
     emit_final_local_op outer_pos op (get_local env id)
-
-  | A.Dollar e ->
-    handle_dollar e (emit_final_named_local_op pos)
 
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op pos op in
@@ -4033,37 +3928,12 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
   | A.Class_get (cid, prop) ->
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
-    begin match snd prop with
-    | A.Dollar (_, A.Lvar _ as e) ->
-      let final_instr = emit_final_static_op cid prop op in
-      begin match op with
-      | LValOp.IncDec _ ->
-         emit_load_class_ref env pos cexpr,
-         rhs_instrs,
-         gather [
-           emit_expr ~need_ref:false env e;
-           final_instr
-         ]
-      | _ ->
-        let instrs, under_top = emit_first_expr env e in
-        if under_top
-        then
-          emit_load_class_ref env pos cexpr,
-          rhs_instrs,
-          gather [instrs; final_instr]
-        else
-          gather [instrs; emit_load_class_ref env pos cexpr],
-          rhs_instrs,
-          final_instr
-      end
-    | _ ->
-      let final_instr =
-        emit_pos_then pos @@
-        emit_final_static_op cid prop op in
-      of_pair @@ emit_class_expr env cexpr prop,
-      rhs_instrs,
-      final_instr
-    end
+    let final_instr =
+      emit_pos_then pos @@
+      emit_final_static_op cid prop op in
+    of_pair @@ emit_class_expr env cexpr prop,
+    rhs_instrs,
+    final_instr
 
   | A.Unop (uop, e) ->
     empty,

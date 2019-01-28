@@ -1,7 +1,6 @@
 <?php
 $x = array(1);
 $a = "x";
-$$a;
 
 $x = array(array(2));
 $x[0];

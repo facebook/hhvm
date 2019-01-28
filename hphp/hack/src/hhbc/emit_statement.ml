@@ -300,7 +300,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Static_var es ->
     emit_static_var pos es
   | A.Global_var es ->
-    emit_global_vars env pos es
+    emit_global_vars pos es
   | A.Awaitall el ->
     emit_awaitall env pos el
   | A.Markup ((_, s), echo_expr_opt) ->
@@ -343,7 +343,7 @@ and emit_if env pos condition consequence alternative =
       instr_label done_label;
     ]
 
-and emit_global_vars env p es =
+and emit_global_vars p es =
   let emit_global_var (_, e) =
     match e with
     | A.Id (_, name) when name.[0] = '$' ->
@@ -356,31 +356,6 @@ and emit_global_vars env p es =
           instr_bindl @@ Local.Named name;
           instr_popv;
         ]
-    | A.Dollar e ->
-      let rec emit_inner e =
-        match snd e with
-        | A.Lvar (name_pos, id) ->
-          if SN.Superglobals.is_superglobal id then
-            gather [
-              Emit_pos.emit_pos name_pos;
-              instr_string (SU.Locals.strip_dollar id);
-              Emit_pos.emit_pos (fst e);
-              instr_cgetg;
-            ]
-          else
-            instr_cgetl (Local.Named id)
-        | A.Dollar e ->
-          gather [emit_inner e; Emit_pos.emit_pos p; instr_cgetn]
-        | _ ->
-          emit_expr ~need_ref:false env e in
-      gather [
-        emit_inner e;
-        Emit_pos.emit_pos p;
-        instr_dup;
-        instr_vgetg;
-        instr_bindn;
-        instr_popv;
-      ]
     | _ ->
       failwith "Global var - impossible"
   in
@@ -950,17 +925,6 @@ and emit_load_list_element env path i v =
     ]
     in
     [], [load_value]
-  | _, A.Dollar (_, A.Lvar (_, id)) ->
-    let local = Local.Named id in
-    [empty], [gather [
-      query_value;
-      instr_cgetl2 local;
-      instr_setn;
-      instr_popc
-    ]]
-  | _, A.Dollar e ->
-    [emit_expr ~need_ref:false env e],
-    [gather [query_value; instr_setn; instr_popc]]
   | _, A.List exprs ->
     let dim_instr =
       instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))

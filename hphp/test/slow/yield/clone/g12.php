@@ -1,21 +1,19 @@
 <?php
 
 function foo($a, &$b) {
-  $var1 = 'x';
-  $var2 = 'y';
-  $$var1 = $a;
-  $$var2 =& $b;
+  $x = $a;
+  $y =& $b;
   unset($a);
   unset($b);
-  $$var1 += 10;
-  $$var2 += 100;
-  yield $$var1 * 10000 + $$var2;
-  $$var1 += 20;
-  $$var2 += 200;
-  yield $$var1 * 10000 + $$var2;
-  $$var1 += 30;
-  $$var2 += 300;
-  yield $$var1 * 10000 + $$var2;
+  $x += 10;
+  $y += 100;
+  yield $x * 10000 + $y;
+  $x += 20;
+  $y += 200;
+  yield $x * 10000 + $y;
+  $x += 30;
+  $y += 300;
+  yield $x * 10000 + $y;
 }
 
 <<__EntryPoint>>

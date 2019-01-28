@@ -22,14 +22,16 @@ foreach($files as $name => $cont)
 
 	// overwrite if array
 	if (is_array($cont))
-	{
-		foreach(array('comp','crc32','clen','ulen','time','flags','perm','meta','cont') as $what)
-		{
-			if (isset($cont[$what]))
-			{
-				$$what = $cont[$what];
-			}
-		}
+  {
+    if (isset($cont['comp']))  $comp  = $cont['comp'];
+    if (isset($cont['crc32'])) $crc32 = $cont['crc32'];
+    if (isset($cont['clen']))  $clen  = $cont['clen'];
+    if (isset($cont['ulen']))  $ulen  = $cont['ulen'];
+    if (isset($cont['time']))  $time  = $cont['time'];
+    if (isset($cont['flags'])) $flags = $cont['flags'];
+    if (isset($cont['perm']))  $perm  = $cont['perm'];
+    if (isset($cont['meta']))  $meta  = $cont['meta'];
+    if (isset($cont['cont']))  $cont  = $cont['cont'];
 	}
 
 	// create if not yet done

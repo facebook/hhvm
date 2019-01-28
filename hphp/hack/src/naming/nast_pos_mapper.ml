@@ -36,7 +36,6 @@ and expr_ f = function
   | Method_caller (sid, pstr) -> Method_caller (pstring f sid, pstring f pstr)
   | Smethod_id (sid, pstr) -> Smethod_id (pstring f sid, pstring f pstr)
   | Yield_break -> Yield_break
-  | Dollar e -> Dollar (expr f e)
   | Yield e -> Yield (afield f e)
   | Yield_from e -> Yield_from (expr f e)
   | Await e -> Await (expr f e)

@@ -13,8 +13,7 @@ print_r($array);
 $array = array("5"=>"bar");
 $foo = "10.0000";
 $foo /= 2; //Makes $foo = 5 but still gettype($foo) = "double"
-$name = "foo";
-unset($array[$$name]);
+unset($array[$foo]);
 print_r($array);
 
 ?>

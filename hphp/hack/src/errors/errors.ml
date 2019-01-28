@@ -1073,10 +1073,6 @@ let xhp_required_with_default pos id =
     pos
     ("XHP attribute " ^ id ^ " cannot be marked as required and provide a default")
 
-let variable_variables_disallowed pos =
-  add (Naming.err_code Naming.VariableVariablesDisallowed) pos
-    "Variable variables are not legal; all variable identifiers must be static strings."
-
 let array_typehints_disallowed pos =
   add (Naming.err_code Naming.ArrayTypehintsDisallowed) pos
     "Array typehints are no longer legal; use varray or darray instead"

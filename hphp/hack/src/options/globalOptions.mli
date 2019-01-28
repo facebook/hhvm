@@ -76,9 +76,6 @@ type t = {
  (* Flag to disable the backticks execution operator *)
  po_disallow_execution_operator : bool;
 
- (* Flag for disabling the use of variable variables *)
- po_disable_variable_variables : bool;
-
  (* Flag to disable PHP's define method *)
  po_disable_define : bool;
 
@@ -225,7 +222,6 @@ val make :
   tco_dynamic_view: bool ->
   tco_disallow_array_as_tuple: bool ->
   po_auto_namespace_map: (string * string) list ->
-  po_disable_variable_variables: bool ->
   tco_disallow_ambiguous_lambda: bool ->
   tco_disallow_array_typehint: bool ->
   tco_disallow_array_literal: bool ->
@@ -258,7 +254,6 @@ val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool
-val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 val po_allow_goto : t -> bool

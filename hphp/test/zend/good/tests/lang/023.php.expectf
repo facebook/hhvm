@@ -3,11 +3,6 @@ PHP Regression Test
 <html>
 <head>
 
-*** Testing assignments and variable aliasing: ***<br>
-This should read "blah": blah<br>
-This should read "this is nifty": this is nifty<br>
-*************************************************<br>
-
 *** Testing integer operators ***<br>
 Correct result - 8:  8<br>
 Correct result - 8:  8<br>
@@ -94,38 +89,6 @@ This should be displayed<br>
 38 is greater than 20<br>
 39 is greater than 20<br>
 *******************<br>
-
-
-*** Nested WHILEs ***<br>
-Each array variable should be equal to the sum of its indices:<br>
-${test00}[0] = 0<br>
-${test00}[1] = 1<br>
-${test00}[2] = 2<br>
-${test01}[0] = 1<br>
-${test01}[1] = 2<br>
-${test01}[2] = 3<br>
-${test02}[0] = 2<br>
-${test02}[1] = 3<br>
-${test02}[2] = 4<br>
-${test10}[0] = 1<br>
-${test10}[1] = 2<br>
-${test10}[2] = 3<br>
-${test11}[0] = 2<br>
-${test11}[1] = 3<br>
-${test11}[2] = 4<br>
-${test12}[0] = 3<br>
-${test12}[1] = 4<br>
-${test12}[2] = 5<br>
-${test20}[0] = 2<br>
-${test20}[1] = 3<br>
-${test20}[2] = 4<br>
-${test21}[0] = 3<br>
-${test21}[1] = 4<br>
-${test21}[2] = 5<br>
-${test22}[0] = 4<br>
-${test22}[1] = 5<br>
-${test22}[2] = 6<br>
-*********************<br>
 
 *** hash test... ***<br>
 commented out...

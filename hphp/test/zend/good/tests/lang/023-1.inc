@@ -9,20 +9,8 @@
  */
 ?>
 
-*** Testing assignments and variable aliasing: ***<br>
-<?php 
-  /* This test tests assignments to variables using other variables as variable-names */
-  $a = "b"; 
-  $$a = "test"; 
-  $$$a = "blah"; 
-  ${$$$a}["associative arrays work too"] = "this is nifty";
-?>
-This should read "blah": <?php echo "$test<br>\n"; ?>
-This should read "this is nifty": <?php echo $blah[$test="associative arrays work too"]."<br>\n"; ?>
-*************************************************<br>
-
 *** Testing integer operators ***<br>
-<?php 
+<?php
   /* test just about any operator possible on $i and $j (ints) */
   $i = 5;
   $j = 3;
@@ -38,7 +26,7 @@ Correct result - 3:  <?php echo $j%$i; ?><br>
 *********************************<br>
 
 *** Testing real operators ***<br>
-<?php 
+<?php
   /* test just about any operator possible on $i and $j (floats) */
   $i = 5.0;
   $j = 3.0;
@@ -55,7 +43,7 @@ Correct result - 3:  <?php echo $j%$i; ?><br>
 
 *** Testing if/elseif/else control ***<br>
 
-<?php 
+<?php
 /* sick if/elseif/else test by Andi :) */
 $a = 5;
 if ($a == "4") {
@@ -90,7 +78,7 @@ if ($a == "4") {
 
 *** Seriously nested if's test ***<br>
 ** spelling correction by kluzz **
-<?php 
+<?php
 /* yet another sick if/elseif/else test by Zeev */
 $i=$j=0;
 echo "Only two lines of text should follow:<br>\n";
@@ -98,7 +86,7 @@ if (0) { /* this code is not supposed to be executed */
   echo "hmm, this shouldn't be displayed #1<br>\n";
   $j++;
   if (1) {
-    $i 
+    $i
 +=
  $j;
     if (0) {
@@ -128,7 +116,7 @@ if (0) { /* this code is not supposed to be executed */
 } elseif (2-2) {  /* as long as 2-2==0, this isn't supposed to be executed either */
   $i = ++$j;
   echo "hmm, this shouldn't be displayed #2<br>\n";
-  if (1) { 
+  if (1) {
     $j = ++$i;
     if (0) {
       $j = $i*2+$j*($i++);
@@ -182,7 +170,7 @@ if (0) { /* this code is not supposed to be executed */
 ?>
 
 *** C-style else-if's ***<br>
-<?php 
+<?php
   /* looks like without we even tried, C-style else-if structure works fine! */
   if ($a=0) {
     echo "This shouldn't be displayed<br>\n";
@@ -199,7 +187,7 @@ if (0) { /* this code is not supposed to be executed */
 *************************<br>
 
 *** WHILE tests ***<br>
-<?php 
+<?php
 $i=0;
 $j=20;
 while ($i<(2*$j)) {
@@ -215,45 +203,8 @@ while ($i<(2*$j)) {
 ?>
 *******************<br>
 
-
-*** Nested WHILEs ***<br>
-<?php 
-$arr_len=3;
-
-$i=0;
-while ($i<$arr_len) {
-  $j=0;
-  while ($j<$arr_len) {
-    $k=0;
-    while ($k<$arr_len) {
-      ${"test$i$j"}[$k] = $i+$j+$k;
-      $k++;
-    }
-    $j++;
-  }
-  $i++;
-}
-
-echo "Each array variable should be equal to the sum of its indices:<br>\n";
-
-$i=0;
-while ($i<$arr_len) {
-  $j=0;
-  while ($j<$arr_len) {
-    $k=0;
-    while ($k<$arr_len) {
-      echo "\${test$i$j}[$k] = ".${"test$i$j"}[$k]."<br>\n";
-      $k++;
-    }
-    $j++;
-  }
-  $i++;
-}
-?>
-*********************<br>
-
 *** hash test... ***<br>
-<?php 
+<?php
 /*
 $i=0;
 
@@ -273,7 +224,7 @@ echo "commented out...";
 **************************<br>
 
 *** Hash resizing test ***<br>
-<?php 
+<?php
 $i = 10;
 $a = 'b';
 while ($i > 0) {
@@ -295,7 +246,7 @@ while ($i > 0) {
 
 
 *** break/continue test ***<br>
-<?php 
+<?php
 $i=0;
 
 echo "\$i should go from 0 to 2<br>\n";
@@ -349,7 +300,7 @@ while ($i<5) {
 <?php include("023-2.inc"); ?>
 ********************************<br>
 
-<?php 
+<?php
 {
   echo "Tests completed.<br>\n";  # testing some PHP style comment...
 }

@@ -2,7 +2,7 @@
 $b = "bb";
 $a = "aa";
 
-function foo() 
+function foo()
 {
 echo "Bad call\n";
 }
@@ -16,7 +16,8 @@ $bb = "baa";
 
 $aa = "foo";
 
-$c = ${$a=$b};
+$a = $b;
+$c = $bb;
 
 $c();
 
@@ -72,7 +73,7 @@ $x2 = array(array(2),2);
 $x3 = array(array(3),3);
 $bx = array(10);
 
-$x[mod($x1)][mod($x2)] = $bx[mod($x3)];  
+$x[mod($x1)][mod($x2)] = $bx[mod($x3)];
 
 // expecting 10,3
 

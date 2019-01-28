@@ -53,7 +53,6 @@ type t = {
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
   option_phpism_disallow_execution_operator: bool;
-  option_disable_variable_variables       : bool;
   option_phpism_disable_define            : bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_emit_func_pointers               : bool;
@@ -107,7 +106,6 @@ let default = {
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
   option_phpism_disallow_execution_operator = false;
-  option_disable_variable_variables = false;
   option_phpism_disable_define = true;
   option_phpism_disable_nontoplevel_declarations = false;
   option_emit_func_pointers = true;
@@ -157,7 +155,6 @@ let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
-let disable_variable_variables o = o.option_disable_variable_variables
 let phpism_disable_define o = o.option_phpism_disable_define
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let emit_func_pointers o = o.option_emit_func_pointers
@@ -212,7 +209,6 @@ let to_string o =
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
-    ; Printf.sprintf "disable_variable_variables: %B" @@ disable_variable_variables o
     ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
@@ -305,8 +301,6 @@ let set_option options name value =
     { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
-  | "hhvm.hack.lang.phpism.disablevariablevariables" ->
-    { options with option_disable_variable_variables = as_bool value }
   | "hack.lang.phpism.disabledefine" ->
     { options with option_phpism_disable_define = int_of_string value > 0 }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
@@ -464,8 +458,6 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
-  (set_value "hhvm.hack.lang.phpism.disable_variable_variables" get_value_from_config_int @@
-     fun opts v -> { opts with option_disable_variable_variables = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_define" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@

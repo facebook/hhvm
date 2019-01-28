@@ -793,9 +793,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     | _, Lvar _ | _, String _ -> st, e
     | _ -> st, (p, BracedExpr e)
     end
-  | Dollar e ->
-    let st, e = convert_expr env st e in
-    st, (p, Dollar e)
   | Import(flavor, e) ->
     let st, e = convert_expr env st e in
     st, (p, Import(flavor, e))

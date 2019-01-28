@@ -105,7 +105,6 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
   method! on_expr_ () e =
     let delta = self#update_gamma (parent#on_expr_ () e) in
     match e with
-      | Dollar _
       | Obj_get _
       | Array_get _
       | Class_get _

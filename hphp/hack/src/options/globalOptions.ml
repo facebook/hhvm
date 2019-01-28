@@ -19,7 +19,6 @@ type t = {
   po_enable_hh_syntax_for_hhvm : bool;
   po_deregister_php_stdlib : bool;
   po_disallow_execution_operator : bool;
-  po_disable_variable_variables : bool;
   po_disable_define : bool;
   po_disable_nontoplevel_declarations : bool;
   po_allow_goto: bool;
@@ -200,7 +199,6 @@ let default = {
  po_enable_hh_syntax_for_hhvm = false;
  po_disallow_execution_operator = false;
  po_deregister_php_stdlib = false;
- po_disable_variable_variables = false;
  po_disable_define = false;
  po_disable_nontoplevel_declarations = false;
  po_allow_goto = true;
@@ -258,7 +256,6 @@ let make ~tco_assume_php
          ~tco_dynamic_view
          ~tco_disallow_array_as_tuple
          ~po_auto_namespace_map
-         ~po_disable_variable_variables
          ~tco_disallow_ambiguous_lambda
          ~tco_disallow_array_typehint
          ~tco_disallow_array_literal
@@ -292,7 +289,6 @@ let make ~tco_assume_php
                    ignored_fixme_codes;
                    po_deregister_php_stdlib;
                    po_disallow_execution_operator;
-                   po_disable_variable_variables;
                    po_disable_define;
                    po_disable_nontoplevel_declarations;
                    po_allow_goto;
@@ -333,7 +329,6 @@ let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
-let po_disable_variable_variables t = t.po_disable_variable_variables
 let po_disable_define t = t.po_disable_define
 let po_disable_nontoplevel_declarations t = t.po_disable_nontoplevel_declarations
 let po_allow_goto t = t.po_allow_goto

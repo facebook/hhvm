@@ -202,7 +202,6 @@ class type ['a] visitor_type = object
   method on_id : 'a -> sid -> 'a
   method on_lvar : 'a -> id -> 'a
   method on_immutablevar : 'a -> id -> 'a
-  method on_dollar : 'a -> expr -> 'a
   method on_dollardollar : 'a -> id -> 'a
   method on_fun_id : 'a -> sid -> 'a
   method on_method_id : 'a -> expr -> pstring -> 'a
@@ -446,7 +445,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Dollardollar id -> this#on_dollardollar acc id
    | Lvar id     -> this#on_lvar acc id
    | ImmutableVar id -> this#on_immutablevar acc id
-   | Dollar e    -> this#on_dollar acc e
    | Fun_id sid  -> this#on_fun_id acc sid
    | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
    | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
@@ -578,7 +576,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_yield acc e = this#on_afield acc e
   method on_yield_from acc e = this#on_expr acc e
   method on_await acc e = this#on_expr acc e
-  method on_dollar acc e = this#on_expr acc e
   method on_suspend acc e = this#on_expr acc e
   method on_list acc el = List.fold_left el ~f:this#on_expr ~init:acc
 

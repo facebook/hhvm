@@ -418,12 +418,6 @@ and expr_ =
   | Id of id
   (* Special case: the pipe variable $$ *)
   | Lvar of id
-  (* General dollar expression e.g. ${"a" . $y}. Braced expression
-   * is a separate node, so we can distinguish $f->${x} from $f->{x}
-   * and $f->$x, each of which has different semantics. $$x is represented
-   * by Dollar (Lvar "$x")
-   *)
-  | Dollar of expr
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
@@ -453,6 +447,9 @@ and expr_ =
   | InstanceOf of expr * expr
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
+  (* Braced expression exists so we can distinguish $f->${x} from $f->{x}
+   * and $f->$x, each of which has different semantics.
+   *)
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   | New of expr * targ list * expr list * expr list

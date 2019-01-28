@@ -441,7 +441,6 @@ and expr_ env acc p e =
   | Yield e -> afield acc e
   | Yield_from e -> expr acc e
   | Yield_break -> acc
-  | Dollar e -> expr acc e
   | Await e -> expr acc e
   | Suspend e -> expr acc e
   | List _ ->

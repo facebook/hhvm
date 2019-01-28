@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -33,7 +33,7 @@ $inputs = array(
        12.3456789000e10,
        12.3456789000E-10,
        .5,
-       
+
        // empty data
 /*10*/ "",
        array(),
@@ -48,8 +48,8 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
 	echo "\n-- Iteration $iterator --\n";
 	$handle = "fp{$iterator}";
-	var_dump( $$handle = fopen(@"$dir_path$input.tmp", 'w') );
-	fclose($$handle);
+	var_dump( $handle = fopen(@"$dir_path$input.tmp", 'w') );
+	fclose($handle);
 	$iterator++;
 };
 

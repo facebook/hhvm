@@ -1130,13 +1130,9 @@ and pString2: expr_location -> node list -> env -> expr list =
           begin match convert_name_to_lvar loc env e with
           | Some e -> e
           | None ->
-            let disable_variable_variables = is_hack env &&
-              ParserOptions.disable_variable_variables env.parser_options in
-            if (is_typechecker env || disable_variable_variables) then
-              raise_parsing_error env (`Node expr_with_braces)
-                SyntaxError.invalid_variable_variable;
-            let e = pExpr ~location:loc expr_with_braces env in
-            fst e, Dollar (fst e, BracedExpr e)
+            raise_parsing_error env (`Node expr_with_braces)
+              SyntaxError.invalid_variable_variable;
+            pPos expr_with_braces env, Omitted
           end in
         aux loc tl env (e::acc)
     | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
@@ -1432,8 +1428,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
          * the two operatores for which AST /does/ differentiate between
          * fixities.
          *)
-        let disable_variable_variables =
-        is_hack env && ParserOptions.disable_variable_variables env.parser_options in
         let postfix = kind node = SyntaxKind.PostfixUnaryExpression in
         let kind = token_kind operator in
         (match kind with
@@ -1470,9 +1464,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             then raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_name;
             Lvar (p, "$" ^ s)
           | _ ->
-            if (is_typechecker env || disable_variable_variables) then
             raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_variable;
-            Dollar expr
+            Omitted
           )
 
         | _ -> missing_syntax "unary operator" node env

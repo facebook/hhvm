@@ -127,7 +127,6 @@ and expr_ =
   | Id of sid
   | Lvar of lid
   | ImmutableVar of lid
-  | Dollar of expr
   | Dollardollar of lid
   | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
@@ -479,7 +478,6 @@ let expr_to_string expr =
   | Id _ -> "Id"
   | Lvar _ -> "Lvar"
   | ImmutableVar _ -> "ImmutableVar"
-  | Dollar _ -> "Dollar"
   | Lplaceholder _ -> "Lplaceholder"
   | Dollardollar _ -> "Dollardollar"
   | Fun_id _ -> "Fun_id"

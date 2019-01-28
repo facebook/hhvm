@@ -13,11 +13,6 @@ function fn1() {
         fn2();
     }
 
-    // USING VARIABLE VARIABLE
-    foreach($$a as $$b) {
-        fn2();
-    }
-
     // THE MALFORMED ARRAY
     foreach($rows as $row) {
         fn2();

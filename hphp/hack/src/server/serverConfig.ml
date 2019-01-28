@@ -271,7 +271,6 @@ let load config_filename options =
     ~tco_dynamic_view:false (* option to set Tany as Tdynamic *)
     ~tco_disallow_array_as_tuple:(bool_ "disallow_array_as_tuple" ~default:false config)
     ~po_auto_namespace_map:(prepare_auto_namespace_map config)
-    ~po_disable_variable_variables:false
     ~tco_disallow_ambiguous_lambda:(bool_ "disallow_ambiguous_lambda" ~default:false config)
     ~tco_disallow_array_typehint:(bool_ "disallow_array_typehint" ~default:false config)
     ~tco_disallow_array_literal:(bool_ "disallow_array_literal" ~default:false config)

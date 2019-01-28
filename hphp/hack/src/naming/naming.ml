@@ -2832,9 +2832,6 @@ module Make (GetLocals : GetLocals) = struct
       N.Unsafe_expr (Errors.ignore_ (fun () -> expr env e))
     | BracedExpr _ ->
       N.Any
-    | Dollar _ ->
-      Errors.variable_variables_disallowed p;
-      N.Any
     | Yield_from e ->
       N.Yield_from (expr env e)
     | Import _ ->

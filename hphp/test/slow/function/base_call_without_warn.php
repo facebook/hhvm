@@ -3,11 +3,8 @@
 function increment(&$x) {
   $x++;
 }
-function name(){
-  return 'foo';
-}
 function foo(){
-  increment(&${name()}[0]);
+  increment(&$foo[0]);
   echo "done\n";
 }
 

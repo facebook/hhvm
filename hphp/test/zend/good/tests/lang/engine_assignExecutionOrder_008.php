@@ -9,11 +9,6 @@ echo "\n" . '$i=f(): ';
 echo $a[$i=f()][++$i];
 unset($i);
 
-echo "\n" . '$$x=f(): ';
-$x='i';
-echo $a[$$x=f()][++$$x];
-unset($i, $x);
-
 echo "\n" . '${\'i\'}=f(): ';
 echo $a[${'i'}=f()][++${'i'}];
 unset(${'i'});

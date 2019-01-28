@@ -1,9 +1,0 @@
-int(1)
-int(2)
-int(3)
-array(0) {
-}
-
-Notice: Undefined variable: l in %s/test/slow/dynamic_variables/1165.php on line 15
-NULL
-int(1)

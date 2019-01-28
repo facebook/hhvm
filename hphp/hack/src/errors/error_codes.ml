@@ -128,7 +128,7 @@ module Naming                               = struct
   | DynamicClassNameInStrictMode
   | XhpOptionalRequiredAttr
   | XhpRequiredWithDefault
-  | VariableVariablesDisallowed
+  | VariableVariablesDisallowedDEPRECATED
   | ArrayTypehintsDisallowed
   | ArrayLiteralsDisallowed
   | WildcardDisallowed

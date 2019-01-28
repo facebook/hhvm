@@ -48,9 +48,9 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
 	echo "\n-- Iteration $iterator --\n";
 	$handle = "fp{$iterator}";
-	var_dump( $$handle = fopen(@"$dir_path$input.tmp", 'w') );
-	var_dump( fwrite($$handle, $key));
-	fclose($$handle);
+	var_dump( $handle = fopen(@"$dir_path$input.tmp", 'w') );
+	var_dump( fwrite($handle, $key));
+	fclose($handle);
 	$iterator++;
 };
 

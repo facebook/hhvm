@@ -19,7 +19,6 @@ val run_once:
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
-  SharedMem.handle ->
     'a
 
 val serve_one_iteration:

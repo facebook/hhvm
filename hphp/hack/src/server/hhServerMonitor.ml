@@ -85,9 +85,7 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
 
   HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then
-    let shared_config = ServerConfig.(sharedmem_config config) in
-    let handle = SharedMem.init shared_config in
-    ServerMain.run_once options config local_config handle
+    ServerMain.run_once options config local_config
   else
     let current_version = ServerConfig.version config in
     let waiting_client = ServerArgs.waiting_client options in

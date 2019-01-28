@@ -846,7 +846,8 @@ let program_init genv =
     ~approach_name ~init_error ~init_type;
   env
 
-let setup_server ~informant_managed ~monitor_pid options config local_config handle =
+let setup_server ~informant_managed ~monitor_pid options config local_config =
+  let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
@@ -926,8 +927,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config han
   in
   genv, init_id
 
-let run_once options config local_config handle =
-  let genv, _ = setup_server options config local_config handle
+let run_once options config local_config =
+  let genv, _ = setup_server options config local_config
     ~informant_managed:false ~monitor_pid:None in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
@@ -948,8 +949,7 @@ let run_once options config local_config handle =
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
   let config, local_config = ServerConfig.(load filename options) in
-  let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
-  let genv, init_id = setup_server options config local_config handle
+  let genv, init_id = setup_server options config local_config
     ~informant_managed ~monitor_pid:(Some monitor_pid) in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";

@@ -53,9 +53,14 @@ let tty_progress_reporter () =
 let null_progress_reporter (_status: string option) : unit =
   ()
 
-let progress = ref None
-let progress_warning = ref None
+(* what is the server doing? or None if nothing *)
+let progress : string option ref = ref None
+
+(* if the server has something not going right, what? *)
+let progress_warning : string option ref = ref None
+
 let default_progress_message = "processing"
+
 let check_progress (root: Path.t) : unit =
   match ServerUtils.server_progress ~timeout:3 root with
   | Ok (msg, warning) ->

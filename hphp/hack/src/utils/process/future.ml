@@ -67,10 +67,31 @@ let error_to_string (info, e) =
   | Transformer_raised (e, _stack) ->
     Printf.sprintf "Transformer_raised(%s %s)" info (Exn.to_string e)
 
-let error_to_string_verbose (info, e) =
-  let {Process_types.name; args; stack=Utils.Callstack stack;} = info in
-  let msg = error_to_string (info, e) in
-  Printf.sprintf "%s\nNAME=%s\nARGS=%s\nSTACK=%s" msg name (String.concat ~sep:"," args) stack
+let error_to_string_verbose (error: error) : string * Utils.callstack =
+  let (invocation_info, error_mode) = error in
+  let {Process_types.name; args; stack=Utils.Callstack stack;} = invocation_info in
+  let cmd_and_args = Printf.sprintf "`%s %s`" name (String.concat ~sep:" " args) in
+  match error_mode with
+  | Process_failure {status; stderr;} ->
+    let status = match status with
+      | Unix.WEXITED i -> Printf.sprintf "exited with code %n" i
+      | Unix.WSIGNALED i -> Printf.sprintf "killed with signal %n" i
+      | Unix.WSTOPPED i -> Printf.sprintf "stopped with signal %n" i in
+    let stderrs = String_utils.split_on_newlines stderr in
+    let first_stderr = match stderrs with
+      | [] -> ""
+      | s::_ -> " - " ^ s in
+    Printf.sprintf "%s %s%s" cmd_and_args status first_stderr,
+    Utils.Callstack (Printf.sprintf "STDERR:\n%s\n\n%s" stderr stack)
+  | Timed_out {stdout; stderr;} ->
+    Printf.sprintf "%s timed out" cmd_and_args,
+    Utils.Callstack (Printf.sprintf "STDOUT:\n%s\n\nSTDERR:\n%s\n%s" stdout stderr stack)
+  | Process_aborted ->
+    Printf.sprintf "%s aborted" cmd_and_args,
+    Utils.Callstack stack
+  | Transformer_raised (exn, Utils.Callstack substack) ->
+    Printf.sprintf "%s - unable to process output - %s" cmd_and_args (Exn.to_string exn),
+    Utils.Callstack (substack ^ "\n" ^ stack)
 
 let error_to_exn e = raise (Failure e)
 

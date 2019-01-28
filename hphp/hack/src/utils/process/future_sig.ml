@@ -64,6 +64,6 @@ module type S = sig
   val start_t : 'a t -> float
 
   val error_to_string : error -> string
-  val error_to_string_verbose : error -> string
+  val error_to_string_verbose : error -> string * Utils.callstack
   val error_to_exn : error -> exn
 end

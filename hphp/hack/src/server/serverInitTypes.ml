@@ -28,20 +28,18 @@ type init_result =
   | Load_state_failed of string
   | Load_state_declined of string
 
-let load_state_error_to_verbose_string (err: load_state_error) : string =
+(** returns human-readable string, an indication of whether auto-retry is sensible, and stack *)
+let load_state_error_to_verbose_string (err: load_state_error) : string * bool * Utils.callstack =
   match err with
   | Load_state_loader_failure err ->
-    Printf.sprintf "Lazy init error downloading saved-state: %s"
-      (State_loader.error_string_verbose err)
+    State_loader.error_string_verbose err
   | Load_state_dirty_files_failure error ->
-    let ({Process_types.stack=Utils.Callstack stack; _}, _) = error in
-    Printf.sprintf "Lazy init error querying hg for dirty files: %s\n%s"
-      (Future.error_to_string error) stack
+    let (msg, stack) = Future.error_to_string_verbose error in
+    Printf.sprintf "Problem getting dirty files from hg: %s" msg, false, stack
   | Load_state_timeout ->
-    Printf.sprintf "Lazy init timeout"
-  | Load_state_unhandled_exception {exn; stack=Utils.Callstack stack;} ->
-    Printf.sprintf "Lazy init unhandled exception: %s\n%s"
-      (Printexc.to_string exn) stack
+    "Timed out trying to load state", false, Utils.Callstack ""
+  | Load_state_unhandled_exception {exn; stack;} ->
+    Printf.sprintf "Unexpected bug loading saved state - %s" (Printexc.to_string exn), false, stack
 
 type files_changed_while_parsing = Relative_path.Set.t
 

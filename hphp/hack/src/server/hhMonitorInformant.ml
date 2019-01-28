@@ -37,13 +37,17 @@ module State_loader_prefetcher_real = struct
       (** No need to fetch if catched. *)
       ()
     else
+      let error_to_string (error: State_loader.error) : string =
+        let (msg, _retry, Utils.Callstack stack) = State_loader.error_string_verbose error in
+        msg ^ "\n" ^ stack
+      in
       let result = State_loader.fetch_saved_state
         ~cache_limit
         ~config:(State_loader_config.default_timeouts)
         ~config_hash:hhconfig_hash
         handle in
       result
-      |> Result.map_error ~f:State_loader.error_string_verbose
+      |> Result.map_error ~f:error_to_string
       |> Result.ok_or_failwith
       |> ignore
 

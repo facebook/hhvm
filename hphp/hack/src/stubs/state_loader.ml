@@ -16,7 +16,7 @@ type saved_state_handle = {
 
 type error = unit
 
-let error_string_verbose _ = ""
+let error_string_verbose _ = "", false, Utils.Callstack ""
 
 let cached_state
   ?saved_state_handle:_

@@ -113,7 +113,8 @@ let init
       match result with
       | Ok ((env, t), ({state_distance; _}, _)) -> (env, t), Load_state_succeeded state_distance
       | Error err ->
-        let err_str = load_state_error_to_verbose_string err in
+        let (msg, _retry, Utils.Callstack stack) = load_state_error_to_verbose_string err in
+        let err_str = msg ^ "\n" ^ stack in
         HackEventLogger.load_state_exn err_str;
         Hh_logger.log "Could not load saved state: %s" err_str;
         let warning = if matches_re tls_bug_re err_str

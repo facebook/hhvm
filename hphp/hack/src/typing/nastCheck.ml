@@ -486,7 +486,6 @@ and func env f named_body =
   );
   (match f.f_variadic with
     | FVvariadicArg vparam ->
-      Typing_instantiability.check_param_instantiable tenv vparam;
       if vparam.param_is_reference then
         Errors.variadic_byref_param vparam.param_pos
     | _ -> ()
@@ -1019,7 +1018,6 @@ and method_ (env, is_static) m =
   );
   (match m.m_variadic with
     | FVvariadicArg vparam ->
-      Typing_instantiability.check_param_instantiable tenv vparam;
       if vparam.param_is_reference then
         Errors.variadic_byref_param vparam.param_pos
     | _ -> ()

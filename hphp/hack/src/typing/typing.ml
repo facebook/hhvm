@@ -1218,9 +1218,9 @@ and loop_forever env =
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
-and eif env ~expected ~coalesce p c e1 e2 =
-  let condition = condition ~lhs_of_null_coalesce:coalesce in
-  let env, tc, tyc = raw_expr ~lhs_of_null_coalesce:coalesce env c in
+and eif env ~expected p c e1 e2 =
+  let condition = condition ~lhs_of_null_coalesce:false in
+  let env, tc, tyc = raw_expr ~lhs_of_null_coalesce:false env c in
   let parent_lenv = env.Env.lenv in
 
   let env = condition env true tc in
@@ -1247,8 +1247,7 @@ and eif env ~expected ~coalesce p c e1 e2 =
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
   let env, ty = Union.union env ty1 ty2 in
-  let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
-  make_result env p te ty
+  make_result env p (T.Eif(tc, te1, te2)) ty
 
 and is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 and check_escaping_var env (pos, x) =
@@ -1899,11 +1898,17 @@ and expr_
         env p call_type e hl el uel ~in_suspend:false in
       env, te, ty
   | Binop (Ast.QuestionQuestion, e1, e2) ->
-      eif env ~expected ~coalesce:true p e1 None e2
-    (* For example, e1 += e2. This is typed and translated as if
-     * written e1 = e1 + e2.
-     * TODO TAST: is this right? e1 will get evaluated more than once
-     *)
+      let env, te1, ty1 = raw_expr ~lhs_of_null_coalesce:true env e1 in
+      let env, te2, ty2 = expr ?expected env e2 in
+      let env, ty1', tyvars =
+        Env.fresh_unresolved_type_add_tyvars env (fst e1) ISet.empty in
+      let env = SubType.sub_type env ty1 (Reason.Rnone, Toption ty1') in
+      let env, ty_result = Union.union env ty1' ty2 in
+      make_result ~tyvars env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
+  (* For example, e1 += e2. This is typed and translated as if
+   * written e1 = e1 + e2.
+   * TODO TAST: is this right? e1 will get evaluated more than once
+   *)
   | Binop (Ast.Eq (Some op), e1, e2) ->
       begin match op, snd e1 with
       | Ast.QuestionQuestion, Class_get _ ->
@@ -1998,7 +2003,7 @@ and expr_
       let env, te, ty = raw_expr env e in
       let env = save_and_merge_next_in_catch env in
       unop ~is_func_arg ~array_ref_ctx p env uop te ty
-  | Eif (c, e1, e2) -> eif env ~expected ~coalesce:false p c e1 e2
+  | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->

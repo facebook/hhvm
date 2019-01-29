@@ -16,7 +16,6 @@ type t = {
   enable_xhp: bool;
   enable_stronger_await_binding: bool;
   disable_nontoplevel_declarations: bool;
-  lang: FileInfo.file_type option;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
 } [@@deriving show]
@@ -31,7 +30,6 @@ let default = {
   enable_stronger_await_binding = false;
   disable_nontoplevel_declarations = false;
 
-  lang = None;
   mode = None;
   stats = None;
 }
@@ -45,7 +43,6 @@ let make
   ?(enable_xhp = default.enable_xhp)
   ?(enable_stronger_await_binding = default.enable_stronger_await_binding)
   ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
-  ?lang
   ?mode
   ?stats
   () = {
@@ -57,7 +54,6 @@ let make
     enable_xhp;
     enable_stronger_await_binding;
     disable_nontoplevel_declarations;
-    lang;
     mode;
     stats;
   }
@@ -70,10 +66,9 @@ let force_hh e = e.force_hh
 let enable_xhp e = e.enable_xhp
 let enable_stronger_await_binding e = e.enable_stronger_await_binding
 let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
-let lang e = e.lang
 let mode e = e.mode
 let stats e = e.stats
-let is_hack e = (e.lang = Some FileInfo.HhFile || (force_hh e))
+let is_hack e = e.mode <> Some FileInfo.Mphp || force_hh e
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
 let is_typechecker e = is_hack e && not (codegen e)

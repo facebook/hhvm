@@ -3473,8 +3473,8 @@ module FromEditablePositionedSyntax =
 let parse_text
   (env : env)
   (source_text : SourceText.t)
-: (FileInfo.file_type * FileInfo.mode option * PositionedSyntaxTree.t) =
-  let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
+: (FileInfo.mode option * PositionedSyntaxTree.t) =
+  let mode = Full_fidelity_parser.parse_mode source_text in
   let quick_mode = not env.codegen && (
     match mode with
     | None
@@ -3503,7 +3503,6 @@ let parse_text
           (GlobalOptions.po_enable_stronger_await_binding env.parser_options)
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
-        ~lang:lang
         ?mode
         ()
     in
@@ -3511,11 +3510,11 @@ let parse_text
       let parser = DeclModeParser.make env' source_text in
       let (parser, root) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      PositionedSyntaxTree.create source_text root errors lang mode false
+      PositionedSyntaxTree.create source_text root errors mode false
     else
       PositionedSyntaxTree.make ~env:env' source_text
   in
-  (lang, mode, tree)
+  (mode, tree)
 
 let scour_comments_and_add_fixmes (env : env) source_text script =
   let comments, fixmes =
@@ -3533,7 +3532,6 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
 let lower_tree
   (env : env)
   (source_text : SourceText.t)
-  (lang : FileInfo.file_type)
   (mode : FileInfo.mode option)
   (tree : PositionedSyntaxTree.t)
 : result =
@@ -3597,15 +3595,8 @@ let lower_tree
       | e::_ ->
         Errors.parsing_error (pos_and_message_of e);
   in
-  let mode = FileInfo.(
-    match lang, mode with
-    | PhpFile, _ -> Mphp
-    | HhFile, None -> Mpartial
-    | HhFile, Some Mdecl when env.codegen -> Mphp
-    | HhFile, Some m -> m
-  ) in
-  let env = { env with fi_mode = mode } in
-  let env = { env with is_hh_file = lang = FileInfo.HhFile } in
+  let mode = Option.value mode ~default:(FileInfo.Mpartial) in
+  let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
   (* If we are generating code and this is an hh file or hh syntax is enabled,
    * then we want to inject auto import types into HH namespace during namespace
@@ -3633,8 +3624,8 @@ let lower_tree
       comments
 
 let from_text (env : env) (source_text : SourceText.t) : result =
-  let (lang, mode, tree) = parse_text env source_text in
-  lower_tree env source_text lang mode tree
+  let (mode, tree) = parse_text env source_text in
+  lower_tree env source_text mode tree
 
 let from_file (env : env) : result =
   let source_text = SourceText.from_file env.file in
@@ -3693,7 +3684,7 @@ let defensive_program
     let mode =
     try
       let source = Full_fidelity_source_text.make fn content in
-      snd @@ Full_fidelity_parser.get_language_and_mode source
+      Full_fidelity_parser.parse_mode source
     with _ -> None in
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in

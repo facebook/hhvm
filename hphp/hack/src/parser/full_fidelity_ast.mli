@@ -70,13 +70,10 @@ end (* WithPositionedSyntax *)
 val parse_text
   :  env
   -> Full_fidelity_source_text.t
-  -> (FileInfo.file_type *
-      FileInfo.mode option *
-      PositionedSyntaxTree.t)
+  -> (FileInfo.mode option * PositionedSyntaxTree.t)
 val lower_tree
   :  env
   -> Full_fidelity_source_text.t
-  -> FileInfo.file_type
   -> FileInfo.mode option
   -> PositionedSyntaxTree.t
   -> result

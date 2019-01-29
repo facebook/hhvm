@@ -7,7 +7,7 @@
  *
  *)
 
-let go tcopt files_info f_in =
+let go tcopt naming_table f_in =
   let check, tast = ServerIdeUtils.check_file_input
-  tcopt files_info f_in in
+  tcopt naming_table f_in in
   Coverage_level.get_levels tast check

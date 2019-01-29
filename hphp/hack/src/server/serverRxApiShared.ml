@@ -73,7 +73,7 @@ type ('a, 'r, 's) handlers = {
   map_result: TypecheckerOptions.t -> 's -> 'a -> 'r
 }
 
-let prepare_pos_infos h pos_list files_info =
+let prepare_pos_infos h pos_list naming_table =
   let pos_info_results =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
@@ -85,7 +85,7 @@ let prepare_pos_infos h pos_list files_info =
     |> List.map ~f:begin fun (fn, line, char) ->
       let fn = Relative_path.create_detect_prefix fn in
       let pos = (fn, line, char) in
-      match Relative_path.Map.get files_info fn with
+      match Naming_table.get_file_info naming_table fn with
       | Some fileinfo -> Ok (pos, fileinfo)
       | None -> Error pos
     end
@@ -133,8 +133,8 @@ let go:
   (_ handlers) ->
   _ =
 fun workers pos_list env h ->
-  let {ServerEnv.tcopt; files_info; popt; _} = env in
-  let pos_infos, failure_msgs = prepare_pos_infos h pos_list files_info in
+  let {ServerEnv.tcopt; naming_table; popt; _} = env in
+  let pos_infos, failure_msgs = prepare_pos_infos h pos_list naming_table in
   let results =
     if (List.length pos_infos) < 10
     then helper h tcopt popt [] pos_infos

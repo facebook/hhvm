@@ -17,11 +17,11 @@ let go
     (env : ServerEnv.env)
     (threshold : int)
   : string =
-  let files_info = env.ServerEnv.files_info in
+  let naming_table = env.ServerEnv.naming_table in
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Generating hot classes file...";
   let classes_in_repo =
-    Relative_path.Map.fold files_info ~init:[] ~f:begin fun path info acc ->
+    Naming_table.fold naming_table ~init:[] ~f:begin fun path info acc ->
       match Relative_path.prefix path with
       | Relative_path.Root ->
         List.fold info.FileInfo.classes ~init:acc ~f:(fun acc (_,x) -> x::acc)

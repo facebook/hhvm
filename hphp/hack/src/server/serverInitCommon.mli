@@ -23,7 +23,7 @@ val parsing :
 
 val update_files :
   ServerEnv.genv ->
-  FileInfo.t Relative_path.Map.t ->
+  Naming_table.t ->
   float ->
   float
 

@@ -201,9 +201,9 @@ let get_files deps =
     with Not_found -> acc
   end deps ~init:Relative_path.Set.empty
 
-let update_files fileInfo =
+let update_files naming_table =
   (* TODO: Figure out if we need GConstName and FunName as well here *)
-  Relative_path.Map.iter fileInfo begin fun filename info ->
+  Naming_table.iter naming_table begin fun filename info ->
     let {FileInfo.funs; classes; typedefs;
          consts;
          comments = _;

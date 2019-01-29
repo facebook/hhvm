@@ -166,14 +166,14 @@ let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : flo
  * parsing hooks. During lazy init, need to do it manually from the fast
  * instead since we aren't parsing the codebase.
  *)
-let update_search (genv: ServerEnv.genv) (saved: FileInfo.saved_state_info) (t: float) : float =
+let update_search (genv: ServerEnv.genv) (saved: Naming_table.saved_state_info) (t: float) : float =
   (* Don't update search index when in check mode *)
   (* We can't use is_check_mode here because we want to
      skip this step even while saving saved states.
   *)
   if ServerArgs.check_mode genv.options then t else
     (* Only look at Hack files *)
-    let fast = FileInfo.saved_to_hack_files saved in
+    let fast = Naming_table.saved_to_fast saved in
     (* Filter out non php files *)
     let fast = Relative_path.Map.filter fast
         ~f:(fun s _ -> FindUtils.path_filter s) in
@@ -310,7 +310,7 @@ let type_check_dirty
      declarations may have changed, which affects error messages and FIXMEs. *)
   let get_files_to_recheck =
     get_files_to_recheck genv env old_fast new_fast @@
-    extend_fast dirty_fast env.files_info similar_files in
+    extend_fast dirty_fast env.naming_table similar_files in
 
   let env, to_recheck = if use_prechecked_files genv then begin
       (* Start with dirty files and fan-out of local changes only *)
@@ -341,7 +341,7 @@ let type_check_dirty
     end in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
-  let fast = extend_fast dirty_fast env.files_info to_recheck in
+  let fast = extend_fast dirty_fast env.naming_table to_recheck in
   let result = type_check genv env fast t in
   HackEventLogger.type_check_dirty ~start_t
     ~dirty_count:(Relative_path.Set.cardinal dirty_files)
@@ -393,10 +393,10 @@ let full_init
   let trace = false in
   let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.files_info;
-  let t = update_files genv env.files_info t in
+    SearchServiceRunner.update_fileinfo_map env.naming_table;
+  let t = update_files genv env.naming_table t in
   let env, t = naming env t in
-  let fast = FileInfo.simplify_fast env.files_info in
+  let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing  in
   let fast = Relative_path.Set.fold failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
@@ -475,20 +475,19 @@ let post_saved_state_initialization
   let parsing_files =
     Relative_path.Set.union dirty_files tracked_targets in
   let parsing_files_list = Relative_path.Set.elements parsing_files in
-  let old_fast = FileInfo.saved_to_fast old_saved in
+  let old_fast = Naming_table.saved_to_fast old_saved in
 
   (* Get only the hack files for global naming *)
-  let old_hack_files = FileInfo.saved_to_hack_files old_saved in
-  let old_info = FileInfo.saved_to_info old_saved in
+  let old_info = Naming_table.from_saved old_saved in
   (* Parse dirty files only *)
   let next = MultiWorker.next genv.workers parsing_files_list in
   let env, t = parsing genv env ~lazy_parse:true ~get_next:next
       ~count:(List.length parsing_files_list) t ~trace in
-  SearchServiceRunner.update_fileinfo_map env.files_info;
+  SearchServiceRunner.update_fileinfo_map env.naming_table;
 
-  let t = update_files genv env.files_info t in
+  let t = update_files genv env.naming_table t in
   (* Name all the files from the old fast (except the new ones we parsed) *)
-  let old_hack_names = Relative_path.Map.filter old_hack_files (fun k _v ->
+  let old_hack_names = Relative_path.Map.filter old_fast (fun k _v ->
       not (Relative_path.Set.mem parsing_files k)
     ) in
 
@@ -497,7 +496,7 @@ let post_saved_state_initialization
   let env, t = naming env t in
 
   (* Add all files from fast to the files_info object *)
-  let fast = FileInfo.simplify_fast env.files_info in
+  let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast = Relative_path.Set.fold failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
@@ -515,8 +514,8 @@ let post_saved_state_initialization
      We call these files "similar" to their previous versions. *)
   let partition_similar dirty_files = Relative_path.Set.partition
       (fun f ->
-         let info1 = Relative_path.Map.get old_info f in
-         let info2 = Relative_path.Map.get env.files_info f in
+         let info1 = Naming_table.get_file_info old_info f in
+         let info2 = Naming_table.get_file_info env.naming_table f in
          match info1, info2 with
          | Some x, Some y ->
            (match x.FileInfo.hash, y.FileInfo.hash with
@@ -537,14 +536,14 @@ let post_saved_state_initialization
     Relative_path.Set.union similar_master_files similar_local_files in
 
   let env = { env with
-              files_info=Relative_path.Map.union env.files_info old_info;
+              naming_table = Naming_table.combine env.naming_table old_info;
               (* The only reason old_parsing_error_files are added to disk_needs_parsing
                  here is because of an issue that seems to be already tracked in T30786759 *)
               disk_needs_parsing = old_parsing_error_files;
               needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
             } in
   (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t = update_files genv env.files_info t in
+  let t = update_files genv env.naming_table t in
 
   let t = update_search genv old_saved t in
 

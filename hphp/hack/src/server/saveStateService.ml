@@ -20,10 +20,10 @@ let get_decls_filename (filename: string) : string = filename ^ ".decls"
     database that we save the dependency table into. The table's name is NAME_INFO *)
 let save_all_file_info_sqlite
     (db_name: string)
-    (files_info: FileInfo.t Relative_path.Map.t) : unit =
+    (naming_table: Naming_table.t) : unit =
   begin
     SharedMem.save_file_info_init db_name;
-    Relative_path.Map.iter files_info (
+    Naming_table.iter naming_table (
       fun path file_info ->
         let funs = file_info.FileInfo.funs in
         let classes = file_info.FileInfo.classes in
@@ -108,9 +108,9 @@ let load_class_decls (input_filename: string) : unit =
 let load_saved_state
     ~(load_decls: bool)
     (saved_state_filename: string)
-  : FileInfo.saved_state_info * saved_state_errors =
+  : Naming_table.saved_state_info * saved_state_errors =
   let chan = In_channel.create ~binary:true saved_state_filename in
-  let (old_saved: FileInfo.saved_state_info) =
+  let (old_saved: Naming_table.saved_state_info) =
     Marshal.from_channel chan in
   Sys_utils.close_in_no_fail saved_state_filename chan;
 
@@ -181,10 +181,12 @@ let dump_saved_state
     ~(tcopt: TypecheckerOptions.t)
     ~(save_decls: bool)
     (output_filename: string)
-    (files_info: FileInfo.t Relative_path.Map.t)
+    (naming_table: Naming_table.t)
     (errors: Errors.t) : unit =
-  let (files_info_saved: FileInfo.saved_state_info) = FileInfo.info_to_saved files_info in
-  dump_contents output_filename files_info_saved;
+  let (naming_table_saved: Naming_table.saved_state_info) =
+    Naming_table.to_saved naming_table
+  in
+  dump_contents output_filename naming_table_saved;
 
   (* Let's not write empty error files. *)
   if Errors.is_empty errors then () else begin
@@ -202,7 +204,7 @@ let update_save_state
     ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
-    (files_info: FileInfo.t Relative_path.Map.t)
+    (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
     (replace_state_after_saving: bool) : int =
@@ -210,7 +212,7 @@ let update_save_state
   let db_name = output_filename ^ ".sql" in
   if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
-  dump_saved_state ~tcopt ~save_decls output_filename files_info errors;
+  dump_saved_state ~tcopt ~save_decls output_filename naming_table errors;
   let () = if file_info_on_disk then begin
     failwith "incrementally updating file info on disk not yet implemented"
   end else begin
@@ -229,7 +231,7 @@ let save_state
     ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
-    (files_info: FileInfo.t Relative_path.Map.t)
+    (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
     ~(replace_state_after_saving: bool): int =
@@ -244,10 +246,10 @@ let save_state
   match SharedMem.loaded_dep_table_filename () with
   | None ->
     let t = Unix.gettimeofday () in
-    dump_saved_state ~tcopt ~save_decls output_filename files_info errors;
+    dump_saved_state ~tcopt ~save_decls output_filename naming_table errors;
     let () = if file_info_on_disk then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
-      (save_all_file_info_sqlite db_name files_info : unit)
+      (save_all_file_info_sqlite db_name naming_table : unit)
     end in
     let dep_table_edges_added =
       SharedMem.save_dep_table_sqlite
@@ -270,7 +272,7 @@ let save_state
       ~file_info_on_disk
       ~tcopt
       ~save_decls
-      files_info
+      naming_table
       errors
       output_filename
       replace_state_after_saving
@@ -286,7 +288,7 @@ let go
     ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
-    (files_info: FileInfo.t Relative_path.Map.t)
+    (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
     ~(replace_state_after_saving: bool): (int, string) result =
@@ -296,7 +298,7 @@ let go
       ~file_info_on_disk
       ~tcopt
       ~save_decls
-      files_info errors
+      naming_table errors
       output_filename
       ~replace_state_after_saving
   end

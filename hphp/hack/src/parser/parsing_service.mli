@@ -15,7 +15,7 @@ val go:
   get_next: Relative_path.t list Bucket.next ->
   ParserOptions.t ->
   trace: bool ->
-  FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
+  Naming_table.t * Errors.t * Relative_path.Set.t
 
 (* used by hack build *)
 val legacy_php_file_info: (Relative_path.t -> FileInfo.t) ref

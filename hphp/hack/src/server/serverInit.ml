@@ -65,7 +65,7 @@ let save_state
         ~tcopt
         ~file_info_on_disk
         ~save_decls
-        env.ServerEnv.files_info
+        env.ServerEnv.naming_table
         env.errorl
         output_filename
         ~replace_state_after_saving in
@@ -140,7 +140,7 @@ let init
       Load_state_declined "No saved-state requested"
 
   in
-  let env, t = ServerAiInit.ai_check genv env.files_info env t in
+  let env, t = ServerAiInit.ai_check genv env.naming_table env t in
   run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();

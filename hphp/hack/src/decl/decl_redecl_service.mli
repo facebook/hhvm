@@ -16,7 +16,7 @@ val redo_type_decl :
   conservative_redecl:bool ->
   TypecheckerOptions.t ->
   FileInfo.names ->
-  FileInfo.fast ->
+  Naming_table.fast ->
   Errors.t * DepSet.t * DepSet.t * DepSet.t
 
 (**

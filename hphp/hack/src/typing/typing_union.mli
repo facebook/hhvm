@@ -22,3 +22,7 @@ This approximation is necessary to avoid type growing exponentially in size.
 We have seen cases where it would otherwise generate unions involving all
 the subsets of a set of types. *)
 val union: Env.env -> locl ty -> locl ty -> Env.env * locl ty
+(** Since computing the union of a list is quadratic, this is a linear
+approximation which simply removes duplicates from the list.
+If the result is a singleton union, discard the union constructor. *)
+val union_list_approx: locl ty list -> Typing_reason.t -> locl ty

@@ -15,6 +15,7 @@ open Typing_defs
 module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
+module Union = Typing_union
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
 
@@ -87,7 +88,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let acc, tyl = List.map_env acc tyl begin fun acc ty1 ->
         array_get ~lhs_of_null_coalesce is_lvalue p acc ty1 e2 ty2
       end in
-      acc, (fst ety1, Tunresolved tyl)
+      acc, Union.union_list_approx tyl (fst ety1)
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = MakeType.int (Reason.Ridx (fst e2, fst ety1)) in
       let acc = type_index acc p ty2 ty1 Reason.index_array in

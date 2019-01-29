@@ -13,6 +13,7 @@ open Typing_defs
 module TO = TypecheckerOptions
 module Env = Typing_env
 module Reason = Typing_reason
+module TySet = Typing_set
 module Unify = Typing_unify
 module URec = Typing_unify_recursive
 module Utils = Typing_utils
@@ -407,5 +408,11 @@ and union_reason r1 r2 =
     if r2 = Reason.none then r1 else
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
+
+let union_list_approx tyl r =
+  let tyl = TySet.elements (TySet.of_list tyl) in
+  match tyl with
+  | [ty] -> ty
+  | _ -> (r, Tunresolved tyl)
 
 let () = Typing_utils.union_ref := union

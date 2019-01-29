@@ -147,9 +147,7 @@ module Parser = WithSyntax(Syntax)
 open Syntax
 
 (* Parsing only the header of the file for language and mode information *)
-let get_language_and_mode text =
-  let php = FileInfo.PhpFile in
-  let hh = FileInfo.HhFile in
+let parse_mode text =
   let suffix = Relative_path.suffix (SourceText.file_path text) in
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
@@ -167,32 +165,34 @@ let get_language_and_mode text =
       }
     ; _
     } ->
-      (match syntax name with
-      | Missing -> php, None
-      | Token t when Token.kind t = Full_fidelity_token_kind.Equal -> php, None
+      begin match syntax name with
+      | Missing -> Some FileInfo.Mphp
+      | Token t when Token.kind t = Full_fidelity_token_kind.Equal -> Some FileInfo.Mphp
       | _ ->
         let skip_length =
-          full_width pfx + full_width txt + full_width ltq + leading_width name
+          full_width pfx +
+          full_width txt +
+          full_width ltq +
+          leading_width name
         in
         let language = width name
           |> SourceText.sub text skip_length
-          |> FileInfo.parse_file_type
+          |> String.lowercase_ascii
         in
-        if is_hhi then language, Some FileInfo.Mdecl else
+        if language = "php" then Some FileInfo.Mphp else
+        if is_hhi then Some FileInfo.Mdecl else
         let skip_length = skip_length + width name in
+        let s = SourceText.sub text skip_length (trailing_width name) in
+        let s = String.trim s in
+        let l = String.length s in
         let mode =
-          let s = SourceText.sub text skip_length (trailing_width name) in
-          let s = String.trim s in
-          let l = String.length s in
-          let mode =
-            if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
-              String.trim (String.sub s 2 (l - 2))
-          in
-          try
-            let mode = List.hd (Str.split (Str.regexp " +") mode) in
-            FileInfo.parse_mode mode
-          with _ -> if language = hh then Some FileInfo.Mpartial else None
+          if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
+            String.trim (String.sub s 2 (l - 2))
         in
-        language, mode
-      )
-  | _ -> if has_dot_hack_extension then hh, Some FileInfo.Mstrict else php, None
+        try
+          let mode = List.hd (Str.split (Str.regexp " +") mode) in
+          FileInfo.parse_mode mode
+        with _ -> Some FileInfo.Mpartial
+      end
+  | _ when has_dot_hack_extension -> Some FileInfo.Mstrict
+  | _ -> Some FileInfo.Mphp

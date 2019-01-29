@@ -38,7 +38,6 @@ type t = {
   text : SourceText.t;
   root : Syntax.t;
   errors : SyntaxError.t list;
-  language : FileInfo.file_type;
   mode : FileInfo.mode option;
   state : SCI.t;
 } [@@deriving show]
@@ -67,8 +66,8 @@ let analyze_header text script =
     markup_suffix_less_than_question;
     markup_suffix_name; _ } ->
     begin match syntax markup_suffix_name with
-    | Missing -> FileInfo.PhpFile, None
-    | Token t when Token.kind t = TK.Equal -> FileInfo.PhpFile, None
+    | Missing -> Some FileInfo.Mphp
+    | Token t when Token.kind t = TK.Equal -> Some FileInfo.Mphp
     | _ ->
       let prefix_width = full_width markup_prefix in
       let text_width = full_width markup_text in
@@ -79,23 +78,23 @@ let analyze_header text script =
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
-      let language = FileInfo.parse_file_type (String.lowercase language) in
+      let language = String.lowercase language in
+      if language = "php" then Some FileInfo.Mphp else
       let is_hhi = text
         |> SourceText.file_path
         |> Relative_path.suffix
         |> String.is_suffix ~suffix:".hhi" in
-      if is_hhi then language, Some FileInfo.Mdecl else
+      if is_hhi then Some FileInfo.Mdecl else
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in
-      let mode = FileInfo.parse_mode (parse_mode_comment mode) in
-      language, mode
+      FileInfo.parse_mode (parse_mode_comment mode)
     end
-  | _ -> FileInfo.PhpFile, None
+  | _ -> Some FileInfo.Mphp
   (* The parser never produces a leading markup section; it fills one in with zero
      width tokens if it needs to. *)
 
-let get_language_and_mode text root =
+let get_mode text root =
   match syntax root with
   | Script s -> analyze_header text s.script_declarations
   | _ -> failwith "unexpected missing script node"
@@ -123,10 +122,9 @@ let build
     (text: SourceText.t)
     (root: Syntax.t)
     (errors: SyntaxError.t list)
-    (language: FileInfo.file_type)
     (mode: FileInfo.mode option)
     (state: SCI.t): t =
-  { text; root; errors; language; mode; state }
+  { text; root; errors; mode; state }
 
 let process_errors errors =
   (* We've got the lexical errors and the parser errors together, both
@@ -137,13 +135,13 @@ let process_errors errors =
   let errors = List.stable_sort SyntaxError.compare errors in
   remove_duplicates errors SyntaxError.exactly_equal
 
-let create text root errors language mode state =
+let create text root errors mode state =
   let errors = process_errors errors in
-  build text root errors language mode state
+  build text root errors mode state
 
 let from_root text root errors state =
-  let (language, mode) = get_language_and_mode text root in
-  create text root errors language mode state
+  let mode = get_mode text root in
+  create text root errors mode state
 
 let make_impl ?(env = Env.default) text =
   let parser = Parser.make env text in
@@ -171,9 +169,6 @@ let remove_cascading errors =
   let equals e1 e2 = (SyntaxError.compare e1 e2) = 0 in
   remove_duplicates errors equals
 
-let language tree =
-  tree.language
-
 let mode tree =
   tree.mode
 
@@ -181,10 +176,10 @@ let sc_state tree =
   tree.state
 
 let is_hack tree =
-  tree.language = FileInfo.HhFile
+  tree.mode <> Some FileInfo.Mphp
 
 let is_php tree =
-  tree.language = FileInfo.PhpFile
+  tree.mode = Some FileInfo.Mphp
 
 let is_strict tree =
   (is_hack tree) && tree.mode = Some FileInfo.Mstrict
@@ -224,10 +219,10 @@ include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
 let from_root text root errors =
   from_root text root errors ()
 
-let create text root errors lang mode =
-  create text root errors lang mode ()
+let create text root errors mode =
+  create text root errors mode ()
 
-let build text root errors language mode =
-  build text root errors language mode ()
+let build text root errors mode =
+  build text root errors mode ()
 
 end (* WithSyntax *)

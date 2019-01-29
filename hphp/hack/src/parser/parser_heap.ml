@@ -33,10 +33,6 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let use_sqlite_fallback () = false
   end)
 
-let get_file_mode text =
-  match Full_fidelity_parser.get_language_and_mode text with
-  | _, m -> m
-
 let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
 
 let get_from_local_cache ~full popt file_name =
@@ -50,8 +46,9 @@ let get_from_local_cache ~full popt file_name =
       | Some ast -> ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
-        match get_file_mode source with
-        | None -> []
+        match Full_fidelity_parser.parse_mode source with
+        | None
+        | Some FileInfo.Mphp -> []
         | Some _ ->
           (Full_fidelity_ast.defensive_program
             ~quick:(not full)

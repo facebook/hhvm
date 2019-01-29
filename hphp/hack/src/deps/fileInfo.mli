@@ -23,14 +23,6 @@ open Prim_defs
 (* Parsing modes *)
 (*****************************************************************************)
 
-(* TODO(t16719394): kill off file_type *)
-type file_type =
-  | PhpFile
-  | HhFile [@@deriving show]
-
-val parse_file_type : string -> file_type
-val string_of_file_type : file_type -> string
-
 type mode =
   | Mphp          (* Do the best you can to support legacy PHP *)
   | Mdecl         (* just declare signatures, don't check anything *)

@@ -24,14 +24,6 @@ open Prim_defs
 (* Parsing modes *)
 (*****************************************************************************)
 
-type file_type =
-  | PhpFile
-  | HhFile [@@deriving show]
-
-let string_of_file_type = function
-  | PhpFile -> "php"
-  | HhFile  -> "hh"
-
 type mode =
   | Mphp          (* Do the best you can to support legacy PHP *)
   | Mdecl         (* just declare signatures, don't check anything *)
@@ -45,11 +37,6 @@ let parse_mode = function
   | "" | "partial" -> Some Mpartial
   | "experimental" -> Some Mexperimental
   | _ -> None
-
-let parse_file_type = function
-  | "php" -> PhpFile
-  | "hh" -> HhFile
-  | _ -> PhpFile (* Default choice; should become hh at some point *)
 
 let string_of_mode = function
   | Mphp          -> "php"

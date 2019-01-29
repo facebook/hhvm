@@ -41,5 +41,4 @@ let typed_from_positioned
     (PositionedTree.text tree)
     root
     (PositionedTree.all_errors tree)
-    (PositionedTree.language tree)
     (PositionedTree.mode tree)

@@ -332,7 +332,7 @@ let handle_existing_file args filename =
   let file = Relative_path.create Relative_path.Dummy filename in
   let suffix = Relative_path.suffix file in
   let source_text = SourceText.from_file file in
-  let _, mode = Full_fidelity_parser.get_language_and_mode source_text in
+  let mode = Full_fidelity_parser.parse_mode source_text in
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax

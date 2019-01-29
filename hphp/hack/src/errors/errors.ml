@@ -415,7 +415,8 @@ let add_ignored_fixme_code_error pos code =
   if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
     M.add_error (M.make_error code
-      [pos, Printf.sprintf "HH_FIXME cannot be used for error %d" code])
+      [pos, 
+       Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)

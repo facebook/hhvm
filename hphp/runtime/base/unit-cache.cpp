@@ -796,7 +796,6 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::EvalDumpHHJS ? '1' : '0')
     + (RuntimeOption::EvalHHJSUniqueFilenames ? '1' : '0')
-    + (RuntimeOption::EvalHHJSModules ? '1' : '0')
     + (RuntimeOption::EnableConcurrent ? '1' : '0')
     + (RuntimeOption::EnableAwaitAsAnExpression ? '1' : '0')
     + (RuntimeOption::EnableStrongerAwaitBinding ? '1' : '0')

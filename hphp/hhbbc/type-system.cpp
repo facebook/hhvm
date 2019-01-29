@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
 
@@ -5338,6 +5339,31 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(Gen)
 #undef X
   not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type adjust_type_for_prop(const Index& index,
+                          const php::Class& propCls,
+                          const TypeConstraint* tc,
+                          const Type& ty) {
+  // If the type-hint might not be enforced, we must be conservative.
+  if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ty;
+  auto const ctx = Context { nullptr, nullptr, &propCls };
+  // Otherwise lookup what we know about the constraint.
+  auto tcType = unctx(
+    loosen_dvarrayness(remove_uninit(index.lookup_constraint(ctx, *tc, ty)))
+  );
+  // For the same reason as property/return type enforcement, we have to be
+  // pessimistic with interfaces to ensure that types in the index always
+  // shrink.
+  if (is_specialized_obj(tcType) &&
+      dobj_of(tcType).cls.couldBeInterfaceOrTrait()) {
+    tcType = is_opt(tcType) ? TOptObj : TObj;
+  }
+  // The adjusted type is the intersection of the constraint and the type (which
+  // might not exist).
+  return intersection_of(tcType, ty);
 }
 
 //////////////////////////////////////////////////////////////////////

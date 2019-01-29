@@ -188,6 +188,7 @@ using DepMap =
 struct PublicSPropEntry {
   Type inferredType;
   Type initializerType;
+  const TypeConstraint* tc;
   uint32_t refinements;
   bool everModified;
 };
@@ -271,7 +272,7 @@ PropState make_unknown_propstate(const php::Class* cls,
   auto ret = PropState{};
   for (auto& prop : cls->properties) {
     if (filter(prop)) {
-      ret[prop.name] = TGen;
+      ret[prop.name].ty = TGen;
     }
   }
   return ret;
@@ -942,10 +943,12 @@ std::string show(const Func& f) {
 using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
 
 struct Index::IndexData {
-  IndexData() = default;
+  explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
   ~IndexData() = default;
+
+  Index* m_index;
 
   bool frozen{false};
   bool ever_frozen{false};
@@ -3327,12 +3330,12 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
 }
 
 template<typename F> auto
-visit_public_statics(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
+visit_parent_cinfo(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
   for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
     if (auto const ret = fun(ci)) return ret;
     if (ci->cls->attrs & AttrNoExpandTrait) continue;
     for (auto ct : ci->usedTraits) {
-      if (auto const ret = visit_public_statics(ct, fun)) {
+      if (auto const ret = visit_parent_cinfo(ct, fun)) {
         return ret;
       }
     }
@@ -3345,12 +3348,12 @@ PublicSPropEntry lookup_public_static_impl(
   const ClassInfo* cinfo,
   SString prop
 ) {
-  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, 0, true};
+  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, nullptr, 0, true};
 
   if (data.allPublicSPropsUnknown) return noInfo;
 
   const ClassInfo* knownCInfo = nullptr;
-  auto const knownClsPart = visit_public_statics(
+  auto const knownClsPart = visit_parent_cinfo(
     cinfo,
     [&] (const ClassInfo* ci) -> const PublicSPropEntry* {
       auto const it = ci->publicStaticProps.find(prop);
@@ -3374,23 +3377,20 @@ PublicSPropEntry lookup_public_static_impl(
     return noInfo;
   }
 
-  auto const maybeLateInit = [&]{
-    if (!knownCInfo) return true;
-    for (auto const& cprop : knownCInfo->cls->properties) {
-      if (cprop.name == prop) return bool(cprop.attrs & AttrLateInit);
-    }
-    return true;
-  };
+  // NB: Inferred type can be TBottom here if the property is never set to a
+  // value which can satisfy its type constraint. Such properties can't exist at
+  // runtime.
 
-  always_assert_flog(
-    !knownClsPart->inferredType.subtypeOf(BBottom) || maybeLateInit(),
-    "A public static property had type TBottom; probably "
-    "was marked uninit but didn't show up in the class 86sinit."
-  );
   if (unkPart != nullptr) {
     return PublicSPropEntry {
-      union_of(knownClsPart->inferredType, *unkPart),
-      union_of(knownClsPart->initializerType, *unkPart),
+      union_of(
+        knownClsPart->inferredType,
+        adjust_type_for_prop(
+          *data.m_index, *knownCInfo->cls, knownClsPart->tc, *unkPart
+        )
+      ),
+      knownClsPart->initializerType,
+      nullptr,
       0,
       true
     };
@@ -3406,9 +3406,47 @@ PublicSPropEntry lookup_public_static_impl(
   auto const classes = find_range(data.classInfo, cls->name);
   if (begin(classes) == end(classes) ||
       std::next(begin(classes)) != end(classes)) {
-    return PublicSPropEntry{TInitGen, TInitGen, 0, true};
+    return PublicSPropEntry{TInitGen, TInitGen, nullptr, 0, true};
   }
   return lookup_public_static_impl(data, begin(classes)->second, name);
+}
+
+Type lookup_public_prop_impl(
+  const IndexData& data,
+  const ClassInfo* cinfo,
+  SString propName
+) {
+  // Find a property declared in this class (or a parent) with the same name.
+  const php::Class* knownCls = nullptr;
+  auto const prop = visit_parent_cinfo(
+    cinfo,
+    [&] (const ClassInfo* ci) -> const php::Prop* {
+      for (auto const& prop : ci->cls->properties) {
+        if (prop.name == propName) {
+          knownCls = ci->cls;
+          return &prop;
+        }
+      }
+      return nullptr;
+    }
+  );
+
+  if (!prop) return TGen;
+  // Make sure its non-static and public. Otherwise its another function's
+  // problem.
+  if (prop->attrs & (AttrStatic | AttrPrivate | AttrLateInitSoft)) return TGen;
+
+  // Get a type corresponding to its declared type-hint (if any).
+  auto ty = adjust_type_for_prop(
+    *data.m_index, *knownCls, &prop->typeConstraint, TGen
+  );
+  // We might have to include the initial value which might be outside of the
+  // type-hint.
+  auto initialTy = loosen_all(from_cell(prop->val));
+  if (!initialTy.subtypeOf(TUninit) && (prop->attrs & AttrSystemInitialValue)) {
+    ty |= initialTy;
+  }
+  return ty;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3419,7 +3457,7 @@ PublicSPropEntry lookup_public_static_impl(
 
 Index::Index(php::Program* program,
              rebuild* rebuild_exception)
-  : m_data(std::make_unique<IndexData>())
+  : m_data(std::make_unique<IndexData>(this))
 {
   trace_time tracer("create index");
 
@@ -4442,9 +4480,7 @@ template<bool getSuperType>
 Type Index::get_type_for_constraint(Context ctx,
                                     const TypeConstraint& tc,
                                     const Type& candidate) const {
-  assert(IMPLIES(
-    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
-    tc.isMixed()));
+  assertx(IMPLIES(!tc.isCheckable(), tc.isMixed()));
 
   if (getSuperType) {
     /*
@@ -4464,6 +4500,22 @@ Type Index::get_type_for_constraint(Context ctx,
   // If the type constraint might be mixed, then the value could be
   // uninit. Any other type constraint implies TInitCell.
   return getSuperType ? (res.maybeMixed ? TCell : TInitCell) : TBottom;
+}
+
+bool Index::prop_tc_maybe_unenforced(const php::Class& propCls,
+                                     const TypeConstraint& tc) const {
+  assertx(tc.validForProp());
+  if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
+  if (!tc.isCheckable()) return true;
+  if (tc.isSoft()) return true;
+  auto const res = get_type_for_annotated_type(
+    Context { nullptr, nullptr, &propCls },
+    tc.type(),
+    tc.isNullable(),
+    tc.typeName(),
+    TGen
+  );
+  return res.maybeMixed;
 }
 
 Index::ConstraintResolution Index::get_type_for_annotated_type(
@@ -4989,26 +5041,38 @@ Index::lookup_private_statics(const php::Class* cls,
 Type Index::lookup_public_static(Context ctx,
                                  const Type& cls,
                                  const Type& name) const {
-  auto const cinfo = [&] () -> const ClassInfo* {
-    if (!is_specialized_cls(cls)) {
-      return nullptr;
-    }
-    auto const dcls = dcls_of(cls);
-    switch (dcls.type) {
-    case DCls::Sub:   return nullptr;
-    case DCls::Exact: return dcls.cls.val.right();
-    }
-    not_reached();
-  }();
+  if (!is_specialized_cls(cls)) return TInitGen;
 
   auto const vname = tv(name);
-  if (!vname || (vname && vname->m_type != KindOfPersistentString)) {
-    return TInitGen;
-  }
+  if (!vname || vname->m_type != KindOfPersistentString) return TInitGen;
   auto const sname = vname->m_data.pstr;
 
   if (ctx.unit) add_dependency(*m_data, sname, ctx, Dep::PublicSPropName);
-  return lookup_public_static_impl(*m_data, cinfo, sname).inferredType;
+
+  auto const dcls = dcls_of(cls);
+  if (dcls.cls.val.left()) return TInitGen;
+  auto const cinfo = dcls.cls.val.right();
+
+  switch (dcls.type) {
+    case DCls::Sub: {
+      auto ty = TBottom;
+      for (auto const sub : cinfo->subclassList) {
+        ty |= lookup_public_static_impl(
+          *m_data,
+          sub,
+          sname
+        ).inferredType;
+      }
+      return ty;
+    }
+    case DCls::Exact:
+      return lookup_public_static_impl(
+        *m_data,
+        cinfo,
+        sname
+      ).inferredType;
+  }
+  always_assert(false);
 }
 
 Type Index::lookup_public_static(Context ctx,
@@ -5045,7 +5109,7 @@ bool Index::lookup_public_static_maybe_late_init(const Type& cls,
   auto const sname = vname->m_data.pstr;
 
   auto isLateInit = false;
-  visit_public_statics(
+  visit_parent_cinfo(
     cinfo,
     [&] (const ClassInfo* ci) -> bool {
       for (auto const& prop : ci->cls->properties) {
@@ -5058,6 +5122,48 @@ bool Index::lookup_public_static_maybe_late_init(const Type& cls,
     }
   );
   return isLateInit;
+}
+
+Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
+  if (!is_specialized_cls(cls)) return TGen;
+
+  auto const vname = tv(name);
+  if (!vname || vname->m_type != KindOfPersistentString) return TGen;
+  auto const sname = vname->m_data.pstr;
+
+  auto const dcls = dcls_of(cls);
+  if (dcls.cls.val.left()) return TGen;
+  auto const cinfo = dcls.cls.val.right();
+
+  switch (dcls.type) {
+    case DCls::Sub: {
+      auto ty = TBottom;
+      for (auto const sub : cinfo->subclassList) {
+        ty |= lookup_public_prop_impl(
+          *m_data,
+          sub,
+          sname
+        );
+      }
+      return ty;
+    }
+    case DCls::Exact:
+      return lookup_public_prop_impl(
+        *m_data,
+        cinfo,
+        sname
+      );
+  }
+  always_assert(false);
+}
+
+Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  if (begin(classes) == end(classes) ||
+      std::next(begin(classes)) != end(classes)) {
+    return TGen;
+  }
+  return lookup_public_prop_impl(*m_data, begin(classes)->second, name);
 }
 
 bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
@@ -5114,17 +5220,34 @@ void Index::init_public_static_prop_types() {
        * much.
        *
        * If the property is AttrLateInitSoft, it can be anything because of the
-       * default value, so give the initial value as TInitGen, which will keep
-       * us from inferring anything.
+       * default value, so give the initial value as TInitGen and don't honor
+       * the type-constraint, which will keep us from inferring anything.
        */
-      auto const tyRaw = from_cell(prop.val);
-      auto const ty = (prop.attrs & AttrLateInitSoft)
-        ? TInitGen
-        : tyRaw.subtypeOf(BUninit)
-          ? TBottom
-          : tyRaw;
+      auto const initial = [&] {
+        if (prop.attrs & AttrLateInitSoft) return TInitGen;
+        auto const tyRaw = from_cell(prop.val);
+        if (tyRaw.subtypeOf(BUninit)) return TBottom;
+        if (prop.attrs & AttrSystemInitialValue) return tyRaw;
+        return adjust_type_for_prop(
+          *this, *cinfo->cls, &prop.typeConstraint, tyRaw
+        );
+      }();
+
+      auto const tc = (prop.attrs & AttrLateInitSoft)
+        ? nullptr
+        : &prop.typeConstraint;
+
       cinfo->publicStaticProps[prop.name] =
-        PublicSPropEntry { TInitGen, ty, 0, true };
+        PublicSPropEntry {
+          union_of(
+            adjust_type_for_prop(*this, *cinfo->cls, tc, TInitGen),
+            initial
+          ),
+          initial,
+          tc,
+          0,
+          true
+        };
     }
   }
 }
@@ -5425,16 +5548,17 @@ void refine_private_propstate(Container& cont,
     return;
   }
   for (auto& kv : state) {
-    auto& target = it->second[kv.first];
+    auto& target = it->second[kv.first].ty;
+    assertx(it->second[kv.first].tc == kv.second.tc);
     always_assert_flog(
-      kv.second.moreRefined(target),
+      kv.second.ty.moreRefined(target),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),
-      show(kv.second),
+      show(kv.second.ty),
       show(target)
     );
-    target = kv.second;
+    target = kv.second.ty;
   }
 }
 
@@ -5448,8 +5572,10 @@ void Index::refine_private_statics(const php::Class* cls,
   // We can't store context dependent types in private statics since they
   // could be accessed using different contexts.
   auto cleanedState = PropState{};
-  for (auto& prop : state) {
-    cleanedState[prop.first] = unctx(prop.second);
+  for (auto const& prop : state) {
+    auto& elem = cleanedState[prop.first];
+    elem.ty = unctx(prop.second.ty);
+    elem.tc = prop.second.tc;
   }
 
   refine_private_propstate(m_data->privateStaticPropInfo, cls, cleanedState);
@@ -5590,7 +5716,9 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
         // If we didn't see a mutation, the type is TBottom.
         if (it == end(known)) return TBottom;
         // We can't keep context dependent types in public properties.
-        return unctx(it->second);
+        return adjust_type_for_prop(
+          *this, *cinfo->cls, kv.second.tc, unctx(it->second)
+        );
       }();
 
       // The type from the indexer doesn't contain the in-class initializer
@@ -5833,7 +5961,7 @@ void PublicSPropMutations::merge(const Index& index,
    * merge the type for every property in the class hierarchy.
    */
   if (unknownName) {
-    visit_public_statics(cinfo,
+    visit_parent_cinfo(cinfo,
                          [&] (const ClassInfo* ci) {
                            for (auto& kv : ci->publicStaticProps) {
                              merge(index, ctx, cinfo, sval(kv.first), val);
@@ -5855,31 +5983,42 @@ void PublicSPropMutations::merge(const Index& index,
    * is a fatal at class declaration time (you can't redeclare a public static
    * property with narrower access in a subclass).
    */
-  auto const affectedCInfo = const_cast<ClassInfo*>(
-    visit_public_statics(
+  auto const affectedInfo = (
+    visit_parent_cinfo(
       cinfo,
-      [&] (const ClassInfo* ci) -> const ClassInfo* {
-        if (ci->publicStaticProps.count(vname->m_data.pstr)) {
-          return ci;
+      [&] (const ClassInfo* ci) ->
+          folly::Optional<std::pair<ClassInfo*, const TypeConstraint*>> {
+        auto const it = ci->publicStaticProps.find(vname->m_data.pstr);
+        if (it != end(ci->publicStaticProps)) {
+          return std::make_pair(
+            const_cast<ClassInfo*>(ci),
+            it->second.tc
+          );
         }
-        return nullptr;
+        return folly::none;
       }
     )
   );
 
-  if (!affectedCInfo) {
+  if (!affectedInfo) {
     // Either this was a mutation that's going to fatal (property doesn't
     // exist), or it's a private static or a protected static.  We aren't in
     // that business here, so we don't need to record anything.
     return;
   }
 
+  auto const affectedCInfo = affectedInfo->first;
+  auto const affectedTC = affectedInfo->second;
+
+  auto const adjusted =
+    adjust_type_for_prop(index, *affectedCInfo->cls, affectedTC, val);
+
   // Merge the property type.
   auto const res = get().m_known.emplace(
     KnownKey { affectedCInfo, vname->m_data.pstr },
-    val
+    adjusted
   );
-  if (!res.second) res.first->second |= val;
+  if (!res.second) res.first->second |= adjusted;
 }
 
 void PublicSPropMutations::merge(const Index& index,

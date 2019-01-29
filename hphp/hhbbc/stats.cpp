@@ -467,10 +467,10 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   stats.totalMethods += cls.methods.size();
 
   for (auto& kv : index.lookup_private_props(&cls)) {
-    add_type(stats.privateProps, kv.second);
+    add_type(stats.privateProps, kv.second.ty);
   }
   for (auto& kv : index.lookup_private_statics(&cls)) {
-    add_type(stats.privateStatics, kv.second);
+    add_type(stats.privateStatics, kv.second.ty);
   }
 
   for (auto& prop : cls.properties) {

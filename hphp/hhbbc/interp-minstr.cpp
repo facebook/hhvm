@@ -805,8 +805,8 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
    */
   if (isUnset && couldBeThisObj(env, env.state.mInstrState.base)) {
     if (name) {
-      auto const ty = thisPropRaw(env, name);
-      if (ty && ty->couldBe(BUninit)) {
+      auto const elem = thisPropRaw(env, name);
+      if (elem && elem->ty.couldBe(BUninit)) {
         mergeThisProp(env, name, TInitNull);
       }
     } else {
@@ -826,13 +826,18 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
     auto const optThisTy = thisType(env);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
-      auto const propTy = thisPropAsCell(env, name);
-      moveBase(env,
-               Base { propTy ? *propTy : TInitCell,
-                      BaseLoc::Prop,
-                      thisTy,
-                      name },
-               update);
+      auto const ty = [&] {
+        if (auto const propTy = thisPropAsCell(env, name)) return *propTy;
+        return to_cell(
+          env.index.lookup_public_prop(objcls(thisTy), sval(name))
+        );
+      }();
+
+      moveBase(
+        env,
+        Base { ty, BaseLoc::Prop, thisTy, name },
+        update
+      );
     } else {
       moveBase(env,
                Base { TInitCell, BaseLoc::Prop, thisTy },
@@ -843,8 +848,14 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
 
   // We know for sure we're going to be in an object property.
   if (env.state.mInstrState.base.type.subtypeOf(BObj)) {
+    auto const ty = to_cell(
+      env.index.lookup_public_prop(
+        objcls(env.state.mInstrState.base.type),
+        name ? sval(name) : TStr
+      )
+    );
     moveBase(env,
-             Base { TInitCell,
+             Base { ty,
                     BaseLoc::Prop,
                     env.state.mInstrState.base.type,
                     name },
@@ -959,13 +970,22 @@ void miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
 void miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
-  if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
-    if (auto const t = thisPropAsCell(env, name)) {
-      if (t->subtypeOf(BBottom)) unreachable(env);
-      return push(env, *t);
+
+  auto const ty = [&] {
+    if (name) {
+      if (mustBeThisObj(env, env.state.mInstrState.base)) {
+        if (auto const t = thisPropAsCell(env, name)) return *t;
+      }
+      return to_cell(
+        env.index.lookup_public_prop(
+          objcls(env.state.mInstrState.base.type), sval(name)
+        )
+      );
     }
-  }
-  push(env, TInitCell);
+    return TInitCell;
+  }();
+  if (ty.subtypeOf(BBottom)) unreachable(env);
+  push(env, ty);
 }
 
 void miFinalVGetProp(ISS& env, int32_t nDiscard,
@@ -1034,15 +1054,24 @@ void miFinalSetOpProp(ISS& env, int32_t nDiscard,
   handleInPublicStaticPropD(env, false);
   promoteBasePropD(env, false);
 
-  auto resultTy = TInitCell;
-
-  if (couldBeThisObj(env, env.state.mInstrState.base)) {
-    if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
-      if (auto const lhsTy = thisPropAsCell(env, name)) {
-        resultTy = typeSetOp(subop, *lhsTy, rhsTy);
+  auto const lhsTy = [&] {
+    if (name) {
+      if (mustBeThisObj(env, env.state.mInstrState.base)) {
+        if (auto const t = thisPropAsCell(env, name)) return *t;
       }
+      return to_cell(
+        env.index.lookup_public_prop(
+          objcls(env.state.mInstrState.base.type), sval(name)
+        )
+      );
     }
+    return TInitCell;
+  }();
 
+  auto const resultTy = env.state.mInstrState.base.type.subtypeOf(TObj)
+    ? typeSetOp(subop, lhsTy, rhsTy)
+    : TInitCell;
+  if (couldBeThisObj(env, env.state.mInstrState.base)) {
     if (name) {
       mergeThisProp(env, name, resultTy);
     } else {
@@ -1063,17 +1092,24 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard,
   handleInPublicStaticPropD(env, false);
   promoteBasePropD(env, false);
 
-  auto prePropTy  = TInitCell;
-  auto postPropTy = TInitCell;
+  auto const postPropTy = [&] {
+    if (name) {
+      if (mustBeThisObj(env, env.state.mInstrState.base)) {
+        if (auto const t = thisPropAsCell(env, name)) return *t;
+      }
+      return to_cell(
+        env.index.lookup_public_prop(
+          objcls(env.state.mInstrState.base.type), sval(name)
+        )
+      );
+    }
+    return TInitCell;
+  }();
+  auto const prePropTy = env.state.mInstrState.base.type.subtypeOf(TObj)
+    ? typeIncDec(subop, postPropTy)
+    : TInitCell;
 
   if (couldBeThisObj(env, env.state.mInstrState.base)) {
-    if (name && mustBeThisObj(env, env.state.mInstrState.base)) {
-      if (auto const propTy = thisPropAsCell(env, name)) {
-        prePropTy  = typeIncDec(subop, *propTy);
-        postPropTy = *propTy;
-      }
-    }
-
     if (name) {
       mergeThisProp(env, name, prePropTy);
     } else {

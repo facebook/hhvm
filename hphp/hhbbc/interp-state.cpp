@@ -260,7 +260,7 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 
 void widen_props(PropState& props) {
   for (auto& prop : props) {
-    prop.second = widen_type(std::move(prop.second));
+    prop.second.ty = widen_type(std::move(prop.second.ty));
   }
 }
 
@@ -641,10 +641,10 @@ std::string property_state_string(const PropertiesInfo& props) {
   std::string ret;
 
   for (auto& kv : props.privateProperties()) {
-    folly::format(&ret, "$this->{: <14} :: {}\n", kv.first, show(kv.second));
+    folly::format(&ret, "$this->{: <14} :: {}\n", kv.first, show(kv.second.ty));
   }
   for (auto& kv : props.privateStatics()) {
-    folly::format(&ret, "self::${: <14} :: {}\n", kv.first, show(kv.second));
+    folly::format(&ret, "self::${: <14} :: {}\n", kv.first, show(kv.second.ty));
   }
 
   return ret;

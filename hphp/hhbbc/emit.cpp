@@ -1504,10 +1504,10 @@ void emit_class(EmitUnitState& state,
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
       if (!ty.subtypeOf(BGen)) return RepoAuthType{};
       if (ty.subtypeOf(BBottom)) {
-        // Properties are only allowed to be TBottom if they're LateInit. The
-        // repo auth type here doesn't particularly matter, since every access
-        // of it is guaranteed to throw.
-        always_assert(prop.attrs & AttrLateInit);
+        // A property can be TBottom if no sets (nor its initial value) is
+        // compatible with its type-constraint, or if its LateInit and there's
+        // no sets to it. The repo auth type here doesn't particularly matter,
+        // since such a prop will be inaccessible.
         return RepoAuthType{};
       }
 
@@ -1526,7 +1526,7 @@ void emit_class(EmitUnitState& state,
 
       auto it = ps.find(prop.name);
       if (it == end(ps)) return Type{};
-      return it->second;
+      return it->second.ty;
     };
 
     Type propTy;

@@ -127,7 +127,16 @@ using ConstantMap = hphp_hash_map<SString, Cell>;
  * State of properties on a class.  Map from property name to its
  * Type.
  */
-using PropState = std::map<LSString,Type>;
+template <typename T = Type>
+struct PropStateElem {
+  T ty;
+  const TypeConstraint* tc = nullptr;
+
+  bool operator==(const PropStateElem<T>& o) const {
+    return ty == o.ty && tc == o.tc;
+  }
+};
+using PropState = std::map<LSString,PropStateElem<>>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -627,6 +636,13 @@ struct Index {
                             const TypeConstraint& tc) const;
 
   /*
+   * Returns true if the given type-hint (declared on the given class) might not
+   * be enforced at runtime (IE, it might map to mixed or be soft).
+   */
+  bool prop_tc_maybe_unenforced(const php::Class& propCls,
+                                const TypeConstraint& tc) const;
+
+  /*
    * Returns true if the type constraint can contain a reified type
    * Currently, only classes and interfaces are supported
    */
@@ -791,6 +807,14 @@ struct Index {
    */
   bool lookup_public_static_immutable(const php::Class*,
                                       SString name) const;
+
+  /*
+   * Lookup the best known type for a public (non-static) property. Since we
+   * don't do analysis on public properties, this just inferred from the
+   * property's type-hint (if enforced).
+   */
+  Type lookup_public_prop(const Type& cls, const Type& name) const;
+  Type lookup_public_prop(const php::Class* cls, SString name) const;
 
   /*
    * Returns the computed vtable slot for the given class, if it's an interface

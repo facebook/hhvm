@@ -586,21 +586,20 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
       clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.userType);
-    if (it->second.subtypeOf(hniTy)) {
-      it->second = hniTy;
+    if (it->second.ty.subtypeOf(hniTy)) {
+      it->second.ty = hniTy;
       return;
     }
 
-    std::fprintf(
-      stderr,
-      "HNI class %s::%s inferred property type (%s) doesn't "
-        "match annotation (%s)\n",
-      clsAnalysis.ctx.cls->name->data(),
-      prop.name->data(),
-      show(it->second).c_str(),
-      show(hniTy).c_str()
+    always_assert_flog(
+      false,
+      "HNI class {}::{} inferred property type ({}) doesn't "
+        "match annotation ({})\n",
+      clsAnalysis.ctx.cls->name,
+      prop.name,
+      show(it->second.ty),
+      show(hniTy)
     );
-    always_assert(!"HNI property type annotation was wrong");
   };
 
   for (auto& prop : clsAnalysis.ctx.cls->properties) {
@@ -699,28 +698,29 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (!(prop.attrs & AttrPrivate)) continue;
 
     // LateInitSoft properties can be anything because of the default value, so
-    // don't try to infer its type.
+    // don't try to infer its type or use its type-constraint.
     if (prop.attrs & AttrLateInitSoft) {
-      if (prop.attrs & AttrStatic) {
-        clsAnalysis.privateStatics[prop.name] = TGen;
-      } else {
-        clsAnalysis.privateProperties[prop.name] = TGen;
-      }
+      auto& elem = (prop.attrs & AttrStatic)
+        ? clsAnalysis.privateStatics[prop.name]
+        : clsAnalysis.privateProperties[prop.name];
+      elem.ty = TGen;
+      elem.tc = nullptr;
       continue;
     }
 
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.userType);
       if (!cellTy.subtypeOf(hniTy)) {
-        std::fprintf(stderr, "hni %s::%s has impossible type. "
-                     "The annotation says it is type (%s) "
-                     "but the default value is type (%s).\n",
-                     ctx.cls->name->data(),
-                     prop.name->data(),
-                     show(hniTy).c_str(),
-                     show(cellTy).c_str()
-                     );
-        always_assert(0 && "HNI systemlib has invalid type annotations");
+        always_assert_flog(
+          false,
+          "hni {}::{} has impossible type. "
+          "The annotation says it is type ({}) "
+          "but the default value is type ({}).\n",
+          ctx.cls->name,
+          prop.name,
+          show(hniTy),
+          show(cellTy)
+        );
       }
     }
 
@@ -740,18 +740,25 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
          * don't want to touch those.
          */
         t = TBottom;
+      } else if (!(prop.attrs & AttrSystemInitialValue)) {
+        t = adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, t);
       }
-      clsAnalysis.privateProperties[prop.name] = t;
+      auto& elem = clsAnalysis.privateProperties[prop.name];
+      elem.ty = std::move(t);
+      elem.tc = &prop.typeConstraint;
     } else {
       // Same thing as the above regarding TUninit and TBottom.
       // Static properties don't need to exclude closures for this,
       // though---we use instance properties for the closure
       // 86static_* properties.
-      auto t = cellTy;
-      if (t.subtypeOf(BUninit)) {
-        t = TBottom;
-      }
-      clsAnalysis.privateStatics[prop.name] = t;
+      auto t = cellTy.subtypeOf(BUninit)
+        ? TBottom
+        : (prop.attrs & AttrSystemInitialValue)
+          ? cellTy
+          : adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, cellTy);
+      auto& elem = clsAnalysis.privateStatics[prop.name];
+      elem.ty = std::move(t);
+      elem.tc = &prop.typeConstraint;
     }
   }
 
@@ -787,17 +794,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
    */
   analyze_86init(s_86cinit);
 
-  // Verify that none of the non-LateInit class properties are TBottom, i.e.
-  // any property of type KindOfUninit has been initialized (by 86pinit or
-  // 86sinit).
-  for (auto& prop : ctx.cls->properties) {
-    if (!(prop.attrs & AttrPrivate) || (prop.attrs & AttrLateInit)) continue;
-    if (prop.attrs & AttrStatic) {
-      assert(!clsAnalysis.privateStatics[prop.name].subtypeOf(BBottom));
-    } else {
-      assert(!clsAnalysis.privateProperties[prop.name].subtypeOf(BBottom));
-    }
-  }
+  // NB: Properties can still be TBottom at this point if their initial values
+  // cannot possibly satisfy their type-constraints. The classes of such
+  // properties cannot be instantiated.
 
   /*
    * Similar to the function case in do_analyze, we have to handle the
@@ -922,14 +921,14 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       ret += folly::format(
         "private ${: <14} :: {}\n",
         kv.first,
-        show(kv.second)
+        show(kv.second.ty)
       ).str();
     }
     for (auto& kv : clsAnalysis.privateStatics) {
       ret += folly::format(
         "private static ${: <14} :: {}\n",
         kv.first,
-        show(kv.second)
+        show(kv.second.ty)
       ).str();
     }
     ret += bsep;

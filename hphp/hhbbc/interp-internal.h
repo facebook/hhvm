@@ -1098,7 +1098,7 @@ bool iterIsDead(ISS& env, IterId iter) {
  * here actually just union the new type into what we already had.
  */
 
-Type* thisPropRaw(ISS& env, SString name) {
+PropStateElem<>* thisPropRaw(ISS& env, SString name) {
   auto& privateProperties = env.collect.props.privateProperties();
   auto const it = privateProperties.find(name);
   if (it != end(privateProperties)) {
@@ -1128,7 +1128,8 @@ bool isMaybeLateInitThisProp(ISS& env, SString name) {
 void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
   for (auto& kv : env.collect.props.privateProperties()) {
-    kv.second = TGen;
+    kv.second.ty |=
+      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TGen);
   }
 }
 
@@ -1140,15 +1141,15 @@ void killThisProps(ISS& env) {
  * actually contain, due to the effects of a possible __get function.
  */
 folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
-  auto const t = thisPropRaw(env, name);
-  if (!t) return folly::none;
-  if (t->couldBe(BUninit)) {
+  auto const elem = thisPropRaw(env, name);
+  if (!elem) return folly::none;
+  if (elem->ty.couldBe(BUninit)) {
     auto const rthis = thisType(env);
     if (!rthis || dobj_of(*rthis).cls.couldHaveMagicGet()) {
       return TInitCell;
     }
   }
-  return to_cell(*t);
+  return to_cell(elem->ty);
 }
 
 /*
@@ -1162,9 +1163,11 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
  * property type.
  */
 void mergeThisProp(ISS& env, SString name, Type type) {
-  auto const t = thisPropRaw(env, name);
-  if (!t) return;
-  *t |= loosen_all(type);
+  auto const elem = thisPropRaw(env, name);
+  if (!elem) return;
+  auto const adjusted =
+    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, loosen_all(type));
+  elem->ty |= adjusted;
 }
 
 /*
@@ -1177,7 +1180,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
 template<class MapFn>
 void mergeEachThisPropRaw(ISS& env, MapFn fn) {
   for (auto& kv : env.collect.props.privateProperties()) {
-    mergeThisProp(env, kv.first, fn(kv.second));
+    mergeThisProp(env, kv.first, fn(kv.second.ty));
   }
 }
 
@@ -1192,9 +1195,10 @@ void unsetUnknownThisProp(ISS& env) {
 }
 
 void boxThisProp(ISS& env, SString name) {
-  auto const t = thisPropRaw(env, name);
-  if (!t) return;
-  *t |= TRef;
+  auto const elem = thisPropRaw(env, name);
+  if (!elem) return;
+  elem->ty |=
+    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TRef);
 }
 
 /*
@@ -1206,7 +1210,10 @@ void boxThisProp(ISS& env, SString name) {
 void loseNonRefThisPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefThisPropTypes\n");
   for (auto& kv : env.collect.props.privateProperties()) {
-    if (kv.second.subtypeOf(BCell)) kv.second = TCell;
+    if (kv.second.ty.subtypeOf(BCell)) {
+      kv.second.ty |=
+        adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
+    }
   }
 }
 
@@ -1216,7 +1223,7 @@ void loseNonRefThisPropTypes(ISS& env) {
 // Similar to $this properties above, we only track control-flow
 // insensitive types for these.
 
-Type* selfPropRaw(ISS& env, SString name) {
+PropStateElem<>* selfPropRaw(ISS& env, SString name) {
   auto& privateStatics = env.collect.props.privateStatics();
   auto it = privateStatics.find(name);
   if (it != end(privateStatics)) {
@@ -1228,21 +1235,24 @@ Type* selfPropRaw(ISS& env, SString name) {
 void killSelfProps(ISS& env) {
   FTRACE(2, "    killSelfProps\n");
   for (auto& kv : env.collect.props.privateStatics()) {
-    kv.second = TGen;
+    kv.second.ty |=
+      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TGen);
   }
 }
 
 void killSelfProp(ISS& env, SString name) {
   FTRACE(2, "    killSelfProp {}\n", name->data());
-  if (auto t = selfPropRaw(env, name)) *t = TGen;
+  if (auto elem = selfPropRaw(env, name)) {
+    elem->ty |= adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TGen);
+  }
 }
 
 // TODO(#3684136): self::$foo can't actually ever be uninit.  Right
 // now uninits may find their way into here though.
 folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
-  auto const t = selfPropRaw(env, name);
-  if (!t) return folly::none;
-  return to_cell(*t);
+  auto const elem = selfPropRaw(env, name);
+  if (!elem) return folly::none;
+  return to_cell(elem->ty);
 }
 
 /*
@@ -1250,10 +1260,12 @@ folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
  * sense of tvSet (i.e. setting the inner type on possible refs).
  */
 void mergeSelfProp(ISS& env, SString name, Type type) {
-  auto const t = selfPropRaw(env, name);
-  if (!t) return;
+  auto const elem = selfPropRaw(env, name);
+  if (!elem) return;
   // Context types might escape to other contexts here.
-  *t |= unctx(type);
+  auto const adjusted =
+    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, unctx(type));
+  elem->ty |= adjusted;
 }
 
 /*
@@ -1262,7 +1274,7 @@ void mergeSelfProp(ISS& env, SString name, Type type) {
 template<class MapFn>
 void mergeEachSelfPropRaw(ISS& env, MapFn fn) {
   for (auto& kv : env.collect.props.privateStatics()) {
-    mergeSelfProp(env, kv.first, fn(kv.second));
+    mergeSelfProp(env, kv.first, fn(kv.second.ty));
   }
 }
 
@@ -1282,7 +1294,10 @@ void boxSelfProp(ISS& env, SString name) {
 void loseNonRefSelfPropTypes(ISS& env) {
   FTRACE(2, "    loseNonRefSelfPropTypes\n");
   for (auto& kv : env.collect.props.privateStatics()) {
-    if (kv.second.subtypeOf(BInitCell)) kv.second = TCell;
+    if (kv.second.ty.subtypeOf(BInitCell)) {
+      kv.second.ty |=
+        adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
+    }
   }
 }
 

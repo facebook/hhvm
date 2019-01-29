@@ -74,7 +74,7 @@ void dump_representation(fs::path dir, const php::Program& program) {
   );
 }
 
-using NameTy = std::pair<SString,Type>;
+using NameTy = std::pair<SString,PropStateElem<>>;
 std::vector<NameTy> sorted_prop_state(const PropState& ps) {
   std::vector<NameTy> ret(begin(ps), end(ps));
   std::sort(
@@ -102,7 +102,7 @@ void dump_class_state(std::ostream& out,
     );
     for (auto const& kv : pprops) {
       out << clsName << "->" << kv.first->data() << " :: "
-          << show(kv.second) << '\n';
+          << show(kv.second.ty) << '\n';
     }
 
     auto const sprops = sorted_prop_state(
@@ -110,7 +110,7 @@ void dump_class_state(std::ostream& out,
     );
     for (auto const& kv : sprops) {
       out << clsName << "::$" << kv.first->data() << " :: "
-          << show(kv.second) << '\n';
+          << show(kv.second.ty) << '\n';
     }
 
     for (auto const& prop : c->properties) {

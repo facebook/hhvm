@@ -2560,6 +2560,11 @@ let require_args_reify def_pos arg_pos =
     def_pos, "Definition is here"
   ]
 
+let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) =
+  add_list (Typing.err_code Typing.ErasedGenericPassedToReified) [
+    arg_pos, arg_name ^ " is not reified, it cannot be used as a reified type argument";
+    def_pos, def_name ^ " is reified"
+  ]
 
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos

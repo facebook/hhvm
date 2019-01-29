@@ -115,8 +115,10 @@ val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
 val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
+val get_tpenv_reified: tpenv -> string -> bool
 val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
+val get_reified: env -> string -> bool
 val add_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->
   env -> string -> locl ty -> env
@@ -164,7 +166,7 @@ val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool
 val error_if_forward_compat_ge : env -> int -> (unit -> unit) -> unit
-val add_fresh_generic_parameter : env -> string -> env * string
+val add_fresh_generic_parameter : env -> string -> bool -> env * string
 val is_fresh_generic_parameter : string -> bool
 val get_tpenv_size : env -> int
 val get_tpenv_tparams : env -> SSet.t

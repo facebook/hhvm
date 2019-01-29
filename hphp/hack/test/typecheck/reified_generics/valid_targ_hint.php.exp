@@ -1,0 +1,4 @@
+File "valid_targ_hint.php", line 11, characters 19-22:
+Tcat is not reified, it cannot be used as a reified type argument (Typing[4305])
+  File "valid_targ_hint.php", line 7, characters 9-12:
+  Trex is reified

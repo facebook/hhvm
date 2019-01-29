@@ -150,6 +150,9 @@ val localize_with_dty_validator:
 val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
 (** Get the upper bounds of the type parameter with the given name. *)
 
+val get_reified: env -> string -> bool
+(** Get the reification of the type parameter with the given name. *)
+
 val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being

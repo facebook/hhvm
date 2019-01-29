@@ -607,6 +607,7 @@ module type S = sig
   val invalid_move_use : Pos.t -> unit
   val mismatched_reify : (Pos.t * string) -> Pos.t -> int -> unit
   val require_args_reify : Pos.t -> Pos.t -> unit
+  val erased_generic_passed_to_reified : (Pos.t * string) -> (Pos.t * string) -> unit
   val ignored_result_of_freeze : Pos.t -> unit
   val ignored_result_of_move : Pos.t -> unit
   val mutably_owned_argument_mismatch: arg_is_owned_local: bool -> Pos.t -> Pos.t -> unit

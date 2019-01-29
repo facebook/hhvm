@@ -92,6 +92,8 @@ let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 let is_untyped env ty =
   Typing_utils.is_any env ty || Typing_utils.is_dynamic env ty
 
+let get_reified = Typing_env.get_reified
+
 let subtype env ty_sub ty_super =
   Errors.ignore_ (fun () ->
     Errors.try_

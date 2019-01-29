@@ -2599,6 +2599,8 @@ and pClassElt : class_elt list parser = fun node env ->
     ; type_const_type_constraint
     ; type_const_type_specifier
     ; _ } ->
+      if not @@ is_missing (type_const_type_parameters)
+      then raise_parsing_error env (`Node node) SyntaxError.tparams_in_tconst;
       [ TypeConst
         { tconst_abstract   = not (is_missing type_const_abstract)
         ; tconst_name       = pos_name type_const_name env

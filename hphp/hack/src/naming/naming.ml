@@ -1849,8 +1849,6 @@ module Make (GetLocals : GetLocals) = struct
       | h -> h
     in
     let type_ = Option.map hint_ (hint env) in
-    if not @@ List.is_empty t.tconst_tparams then
-      Errors.no_tparams_on_type_consts (fst t.tconst_name);
     N.({ c_tconst_name = t.tconst_name;
          c_tconst_constraint = constr;
          c_tconst_type = type_;

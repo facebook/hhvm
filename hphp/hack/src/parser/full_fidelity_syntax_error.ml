@@ -702,3 +702,5 @@ let vararg_and_mutable =
   variadic parameters."
 
 let expected_user_attribute = "A user attribute is expected here."
+
+let tparams_in_tconst = "Type parameters are not allowed on class type constants"

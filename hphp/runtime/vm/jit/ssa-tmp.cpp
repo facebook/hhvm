@@ -106,6 +106,10 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentArray:
       return Variant{arrVal(), KindOfPersistentArray,
                      Variant::PersistentArrInit{}};
+    case KindOfClass:
+      return Variant{const_cast<Class*>(clsVal())};
+    case KindOfFunc:
+      return Variant{funcVal()};
     case KindOfString:
     case KindOfVec:
     case KindOfDict:
@@ -115,9 +119,6 @@ Variant SSATmp::variantVal() const {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    // TODO (T29639296)
-    case KindOfFunc:
-    case KindOfClass:
       break;
   }
   always_assert(false);

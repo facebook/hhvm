@@ -40,10 +40,6 @@ function set_include_path($new_include_path);
 <<__PHPStdLib>>
 function get_included_files();
 <<__PHPStdLib>>
-function get_magic_quotes_gpc();
-<<__PHPStdLib>>
-function get_magic_quotes_runtime();
-<<__PHPStdLib>>
 function get_required_files();
 <<__PHPStdLib>>
 function getenv(string $varname);
@@ -109,8 +105,6 @@ function phpinfo(int $what = 0);
 function phpversion(string $extension = "");
 <<__PHPStdLib>>
 function putenv(string $setting);
-<<__PHPStdLib>>
-function set_magic_quotes_runtime($new_setting);
 <<__PHPStdLib>>
 function set_time_limit(int $seconds);
 <<__PHPStdLib>>

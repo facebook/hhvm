@@ -824,60 +824,28 @@ and emit_new env pos expr targs args uargs =
         Class_reified instrs, H.HasGenerics
       end
     | _ -> cexpr, H.NoGenerics in
-  match cexpr with
+  let newobj_instrs = match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
     let fq_id, _id_opt =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-    gather [
-      emit_pos pos;
-      instr_newobjd fq_id;
-      instr_dup;
-      instr_fpushctor nargs;
-      emit_args_and_call env pos args uargs None;
-      instr_popc
-      ]
-  | Class_static ->
-    gather [
-      emit_pos pos;
-      instr_newobjs SpecialClsRef.Static;
-      instr_dup;
-      instr_fpushctor nargs;
-      emit_args_and_call env pos args uargs None;
-      instr_popc
-      ]
-  | Class_self ->
-    gather [
-      emit_pos pos;
-      instr_newobjs SpecialClsRef.Self;
-      instr_dup;
-      instr_fpushctor nargs;
-      emit_args_and_call env pos args uargs None;
-      instr_popc
-      ]
-  | Class_parent ->
-    gather [
-      emit_pos pos;
-      instr_newobjs SpecialClsRef.Parent;
-      instr_dup;
-      instr_fpushctor nargs;
-      emit_args_and_call env pos args uargs None;
-      instr_popc
-      ]
+    gather [ emit_pos pos; instr_newobjd fq_id ]
+  | Class_static -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Static ]
+  | Class_self -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Self ]
+  | Class_parent -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Parent ]
+  | Class_reified instrs when has_generics = H.MaybeGenerics ->
+    gather [ instrs; instr_clsrefgetts; instr_newobj 0 has_generics ]
   | _ ->
-    let instrs = match cexpr with
-      | Class_reified instrs when has_generics = H.MaybeGenerics ->
-        gather [ instrs; instr_clsrefgetts ]
-      | _ -> emit_load_class_ref env pos cexpr in
-    gather [
-      instrs;
-      instr_newobj 0 has_generics;
-      instr_dup;
-      instr_fpushctor nargs;
-      emit_args_and_call env pos args uargs None;
-      instr_popc
-    ]
+    gather [ emit_load_class_ref env pos cexpr; instr_newobj 0 has_generics ]
+  in
+  gather [
+    newobj_instrs;
+    instr_dup;
+    instr_fpushctor nargs;
+    emit_args_and_call env pos args uargs None;
+    instr_popc
+  ]
 
 and emit_new_anon env pos cls_idx args uargs =
   let nargs = List.length args + List.length uargs in
@@ -887,7 +855,7 @@ and emit_new_anon env pos cls_idx args uargs =
     instr_fpushctor nargs;
     emit_args_and_call env pos args uargs None;
     instr_popc
-    ]
+  ]
 
 and emit_clone env expr =
   gather [

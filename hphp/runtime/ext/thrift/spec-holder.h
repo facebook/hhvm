@@ -61,7 +61,7 @@ struct SpecCacheCompare {
 
 using SpecCacheMap = tbb::concurrent_hash_map<
   SpecCacheKey,
-  std::unique_ptr<StructSpec>,
+  StructSpec*,
   SpecCacheCompare
 >;
 
@@ -94,9 +94,7 @@ struct SpecHolder {
       // Static specs are kept by the cache.
       SpecCacheMap::accessor acc;
       if (s_specCacheMap.insert(acc, key)) {
-        acc->second = std::make_unique<StructSpec>(
-          compileSpec(spec, cls, isBinary)
-        );
+        acc->second = new StructSpec{compileSpec(spec, cls, isBinary)};
       }
       return *acc->second;
     } else {

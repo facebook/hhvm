@@ -38,8 +38,6 @@ struct LocalRange;
 
 TRACE_SET_MOD(hhbbc);
 
-const StaticString s_assert("assert");
-const StaticString s_86metadata("86metadata");
 const StaticString s_func_num_args("func_num_args");
 const StaticString s_func_get_args("func_get_args");
 const StaticString s_func_get_arg("func_get_arg");
@@ -954,22 +952,6 @@ void killLocals(ISS& env) {
 // Special functions
 
 void specialFunctionEffects(ISS& env, const res::Func& func) {
-  if (func.name()->isame(s_assert.get())) {
-    /*
-     * Assert is somewhat special. In the most general case, it can read and
-     * write to the caller's frame (and is marked as such). The first parameter,
-     * if a string, will be evaled and can have arbitrary effects. Luckily this
-     * is forbidden in RepoAuthoritative mode, so we can ignore that here. If
-     * the assert fails, it may execute an arbitrary pre-registered callback
-     * which still might try to write to the assert caller's frame. This can't
-     * happen if calling such frame accessing functions dynamically is
-     * forbidden.
-     */
-    if (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON) {
-      return;
-    }
-  }
-
   /*
    * Skip-frame functions won't write or read to the caller's frame, but they
    * might dynamically call a function which can. So, skip-frame functions kill

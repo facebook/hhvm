@@ -1041,8 +1041,6 @@ FuncSet s_ignores_frame = {
   "HH\\array_key_cast"
 };
 
-const StaticString s_assert("assert");
-
 }
 
 bool disallowDynamicVarEnvFuncs() {
@@ -1059,22 +1057,7 @@ bool funcWritesLocals(const Func* callee) {
     return true;
   }
 
-  if (!callee->writesCallerFrame()) return false;
-
-  if (callee->fullName()->isame(s_assert.get())) {
-    /*
-     * Assert is somewhat special.  If RepoAuthoritative isn't set and the
-     * first parameter is a string, it will be evaled and can have arbitrary
-     * effects.  If the assert fails, it may execute an arbitrary
-     * pre-registered callback which still might try to write to the assert
-     * caller's frame.
-     *
-     * This can't happen if calling such frame accessing functions dynamically
-     * is forbidden.
-     */
-    return !RuntimeOption::RepoAuthoritative || !disallowDynamicVarEnvFuncs();
-  }
-  return true;
+  return callee->writesCallerFrame();
 }
 
 bool funcReadsLocals(const Func* callee) {
@@ -1090,21 +1073,7 @@ bool funcReadsLocals(const Func* callee) {
     return true;
   }
 
-  if (!callee->readsCallerFrame()) return false;
-
-  if (callee->fullName()->isame(s_assert.get())) {
-    /*
-     * Assert is somewhat special.  If RepoAuthoritative isn't set and the first
-     * parameter is a string, it will be evaled and can have arbitrary effects.
-     * If the assert fails, it may execute an arbitrary pre-registered callback
-     * which still might try to read from the assert caller's frame.
-     *
-     * This can't happen if calling such frame accessing functions dynamically
-     * is forbidden.
-     */
-    return !RuntimeOption::RepoAuthoritative || !disallowDynamicVarEnvFuncs();
-  }
-  return true;
+  return callee->readsCallerFrame();
 }
 
 bool funcNeedsCallerFrame(const Func* callee) {

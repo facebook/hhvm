@@ -6,7 +6,7 @@
 
 /* Creating soft and hard links to a file and applying fileowner() on links */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 fclose( fopen($file_path."/fileowner_variation1.tmp", "w") );
 
 echo "*** Testing fileowner() with links ***\n";
@@ -24,7 +24,7 @@ echo "\n*** Done ***";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/fileowner_variation1_symlink.tmp");
 unlink($file_path."/fileowner_variation1_link.tmp");
 unlink($file_path."/fileowner_variation1.tmp");

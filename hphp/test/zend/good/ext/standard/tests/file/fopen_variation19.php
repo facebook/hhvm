@@ -5,15 +5,17 @@
  * Alias to functions: 
  */
 
-$tmpDir = 'fopenVar19.Dir';
-$realFilename = __FILE__.'.real';
-$sortFilename = __FILE__.'.soft';
-$hardFilename = __FILE__.'.hard';
-$linkOfLink = __FILE__.'.soft2';
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$tmpDir = $file_path.'/fopenVar19.Dir';
+$realFilename = basename(__FILE__).'.real';
+$sortFilename = basename(__FILE__).'.soft';
+$hardFilename = basename(__FILE__).'.hard';
+$linkOfLink = basename(__FILE__).'.soft2';
 
 echo "*** Testing fopen() : variation ***\n";
 // start the test
 mkdir($tmpDir);
+$oldDirPath = getcwd();
 chdir($tmpDir);
 
 $h = fopen($realFilename, "w");
@@ -54,7 +56,7 @@ unlink($linkOfLink);
 unlink($sortFilename);
 unlink($hardFilename);
 unlink($realFilename);
-chdir("..");
+chdir($oldDirPath);
 rmdir($tmpDir);
 
 function readFile2($file) {

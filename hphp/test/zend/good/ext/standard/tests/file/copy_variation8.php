@@ -9,7 +9,7 @@
 
 echo "*** Testing copy() function: copying links across different directories ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 $base_dir = $file_path."/copy_variation8";
 mkdir($base_dir);

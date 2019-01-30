@@ -14,7 +14,8 @@ $file_modes = array( "a+", "a+b", "a+t",
                      "x+", "x+b", "x+t", 
                      "w+", "w+b", "w+t" );
 
-$filename = dirname(__FILE__)."/fgetc_variation4.tmp";
+$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$filename = $test_dir."/fgetc_variation4.tmp";
 foreach ($file_modes as $file_mode ) {
   echo "-- File opened in mode : $file_mode --\n";
 

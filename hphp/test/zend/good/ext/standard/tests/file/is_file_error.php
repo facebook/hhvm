@@ -5,7 +5,7 @@
 */
 
 echo "*** Testing is_file() error conditions ***";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 var_dump( is_file() );  // Zero No. of args
 
 /* no of args > expected */
@@ -25,7 +25,7 @@ echo "\n*** Done ***";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 if(file_exists($file_path."/is_file_error.tmp")) {
   unlink($file_path."/is_file_error.tmp");
 }

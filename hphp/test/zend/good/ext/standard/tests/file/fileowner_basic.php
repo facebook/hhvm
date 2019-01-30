@@ -12,7 +12,7 @@ var_dump( fileowner(".") );
 var_dump( fileowner("./..") );
 
 /* Newly created files and dirs */
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_name = $file_path."/fileowner_basic.tmp";
 $file_handle = fopen($file_name, "w");
 $string = "Hello, world\n1234\n123Hello";
@@ -29,7 +29,7 @@ echo "*** Done ***\n";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_name = $file_path."/fileowner_basic.tmp";
 $dir_name = $file_path."/fileowner_basic";
 unlink($file_name);

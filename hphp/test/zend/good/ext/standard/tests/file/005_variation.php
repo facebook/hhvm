@@ -35,7 +35,7 @@ function stat_fn( $filename ) {
 }
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // create files
 $file_handle = fopen("$file_path/005_variation1.tmp", "w");
 fclose($file_handle);
@@ -146,7 +146,7 @@ echo "Done\n";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 if(file_exists($file_path."/005_variation_softlink.tmp")) {
   unlink($file_path."/005_variation_softlink.tmp");
 }

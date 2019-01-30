@@ -10,7 +10,8 @@
 echo "*** Testing rename() with absolute and relative paths ***\n";
 $mainDir = "renameVar11";
 $subDir = "renameVar11Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$testDir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$absMainDir = $testDir."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -19,7 +20,7 @@ $fromFile = "renameMe.tmp";
 $toFile = "IwasRenamed.tmp";
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir($testDir);
 
 $allDirs = array(
   // absolute paths

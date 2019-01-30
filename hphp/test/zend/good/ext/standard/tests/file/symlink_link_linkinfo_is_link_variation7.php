@@ -15,7 +15,7 @@
 /* Variation 7 : Create soft/hard link to itself */
 
 // temp file used
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
 // link name used
@@ -56,7 +56,7 @@ echo "Done\n";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
 unlink($filename);

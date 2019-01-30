@@ -10,7 +10,7 @@ second line of string
 third line of string
 EOD;
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = "$file_path/fflush_basic.tmp";
 
 // opening a file
@@ -36,7 +36,7 @@ echo "\n*** Done ***";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = "$file_path/fflush_basic.tmp";
 unlink($filename);
 ?>

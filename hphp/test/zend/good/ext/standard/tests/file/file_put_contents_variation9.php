@@ -7,10 +7,11 @@
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
-$filename = dirname(__FILE__).'/filePutContentsVar9.tmp';
-$softlink = dirname(__FILE__).'/filePutContentsVar9.SoftLink';
-$hardlink = dirname(__FILE__).'/filePutContentsVar9.HardLink';
-$chainlink = dirname(__FILE__).'/filePutContentsVar9.ChainLink';
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$filename = $file_path.'/filePutContentsVar9.tmp';
+$softlink = $file_path.'/filePutContentsVar9.SoftLink';
+$hardlink = $file_path.'/filePutContentsVar9.HardLink';
+$chainlink = $file_path.'/filePutContentsVar9.ChainLink';
 
 
 // link files even though it original file doesn't exist yet

@@ -1,8 +1,10 @@
 <?php
 
 
-$thisTestDir = dirname(__FILE__) . '/' .basename(__FILE__, ".php") . ".directory";
+$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$thisTestDir = $test_dir . '/' .basename(__FILE__, ".php") . ".directory";
 mkdir($thisTestDir);
+$oldDirPath = getcwd();
 chdir($thisTestDir);
 
 $filename = basename(__FILE__, ".php") . ".tmp"; 
@@ -19,7 +21,7 @@ runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
 
-chdir(dirname(__FILE__));
+chdir($oldDirPath);
 rmdir($thisTestDir);
 
 

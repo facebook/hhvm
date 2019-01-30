@@ -9,8 +9,10 @@ echo "*** Testing file_put_contents() : variation ***\n";
 
 require_once('fopen_include_path.inc');
 
-$thisTestDir = basename(__FILE__, ".php") . ".dir";
+$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$thisTestDir = $test_dir.'/'.basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
+$oldDirPath = getcwd();
 chdir($thisTestDir);
 
 $filename = basename(__FILE__, ".php") . ".tmp";
@@ -25,7 +27,7 @@ runtest();
 
 teardown_include_path();
 restore_include_path();
-chdir("..");
+chdir($oldDirPath);
 rmdir($thisTestDir);
 
 

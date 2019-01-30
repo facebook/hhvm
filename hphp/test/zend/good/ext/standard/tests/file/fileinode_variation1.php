@@ -6,7 +6,7 @@ Description: Returns the inode number of the file, or FALSE in case of an error.
 
 /* Creating soft and hard links to a file and applying fileinode() on links */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 fclose( fopen($file_path."/fileinode_variation1.tmp", "w") );
 
 echo "*** Testing fileinode() with links ***\n";
@@ -24,7 +24,7 @@ echo "\n*** Done ***";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/fileinode_variation1_symlink.tmp");
 unlink($file_path."/fileinode_variation1_link.tmp");
 unlink($file_path."/fileinode_variation1.tmp");

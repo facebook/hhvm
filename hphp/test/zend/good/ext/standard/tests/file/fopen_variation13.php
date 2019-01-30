@@ -20,9 +20,10 @@ restore_include_path();
 
 
 function runtest() {
-    $tempDir = 'fopen_variation13.dir.tmp';
+	$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+	$tempDir = $test_dir.'/fopen_variation13.dir.tmp';
 	$tmpfile = 'fopen_variation13.tmp';
-	$absFile = getcwd().'/'.$tempDir.'/'.$tmpfile;
+	$absFile = $tempDir.'/'.$tmpfile;
 
 	mkdir($tempDir);
 	$h = fopen($absFile, "w", true);
@@ -38,8 +39,8 @@ function runtest() {
 	   echo "Created in correct location\n";
 	   fclose($h);
 	}
-    unlink($absFile);
-    rmdir($tempDir);
+	unlink($absFile);
+	rmdir($tempDir);
 
 }
 ?>

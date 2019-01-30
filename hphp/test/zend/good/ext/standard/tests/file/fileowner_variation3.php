@@ -6,7 +6,7 @@
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing fileowner() with different notations of file names ***\n";
 $dir_name = $file_path."/fileowner_variation3";
@@ -44,7 +44,7 @@ echo "\n*** Done ***";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/fileowner_variation3";
 unlink($dir_name."/fileowner_variation3.tmp");
 rmdir($dir_name);

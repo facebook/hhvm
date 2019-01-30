@@ -3,7 +3,7 @@
 /* test rename() by trying to rename an existing file/dir/link to the same name
   and one another */
 // create a dir 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = "$file_path/rename_variation5_dir"; 
 mkdir($dirname);
 //create a file
@@ -44,7 +44,7 @@ echo "Done\n";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/rename_variation5_link.tmp");
 unlink($file_path."/rename_variation5.tmp");
 rmdir($file_path."/rename_variation5_dir");

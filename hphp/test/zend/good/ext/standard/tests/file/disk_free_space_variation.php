@@ -6,7 +6,7 @@
  *               filesystem or disk partition
  */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") ); 
@@ -55,7 +55,7 @@ echo"\n--- Done ---";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/disk_free_space");
 ?>
 

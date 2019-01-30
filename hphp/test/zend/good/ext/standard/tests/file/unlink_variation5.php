@@ -5,7 +5,7 @@
 
 /* delete files with different file permission(0000 to 0777) */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp file used
 $filename = "$file_path/unlink_variation5.tmp";

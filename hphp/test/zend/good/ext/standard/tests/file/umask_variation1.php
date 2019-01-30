@@ -3,7 +3,7 @@
    Description: Changes the current umask
 */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 /* Check umask() on file/dir */
 

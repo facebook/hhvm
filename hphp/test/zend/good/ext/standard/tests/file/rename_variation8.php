@@ -4,7 +4,7 @@
 */
 
 echo "\n*** Testing rename() on non-existing file ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // try renaming a non existing file
 $src_name = $file_path."/non_existent_file.tmp";
@@ -38,6 +38,7 @@ echo "Done\n";
 ?>
 <?php error_reporting(0); ?>
 <?php
-unlink(dirname(__FILE__)."/rename_basic_new2.tmp");
-rmdir(dirname(__FILE__)."/rename_basic_dir1");
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+unlink($file_path."/rename_basic_new2.tmp");
+rmdir($file_path."/rename_basic_dir1");
 ?>

@@ -5,7 +5,7 @@
 */
 
 echo "*** Testing is_dir(): basic functionality ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 var_dump( is_dir($file_path) );
 clearstatcache();
 var_dump( is_dir(".") );
@@ -23,7 +23,7 @@ echo "*** Done ***";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/is_dir_basic";
 rmdir($dir_name);
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 $dest_dir = "$file_path/rename_variation2_dir";
 // create the $dest_dir
@@ -39,7 +39,7 @@ echo "Done\n";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/rename_variation2.phpt2.tmp");
 rmdir($file_path."/rename_variation2_dir");
 ?>

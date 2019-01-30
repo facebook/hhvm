@@ -7,7 +7,7 @@
  */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 var_dump( disk_total_space() ); // Zero Arguments
 
 var_dump( disk_total_space( $file_path, "extra argument") ); // More than valid number of arguments
@@ -24,6 +24,6 @@ echo"\n--- Done ---";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/disk_total_space.tmp");
 ?>

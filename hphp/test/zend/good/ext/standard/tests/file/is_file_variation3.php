@@ -6,7 +6,7 @@
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
@@ -36,6 +36,6 @@ echo "\n*** Done ***";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/is_file_variation3.tmp");
 ?>

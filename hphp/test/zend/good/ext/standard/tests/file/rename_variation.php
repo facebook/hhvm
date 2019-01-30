@@ -1,7 +1,7 @@
 <?php
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 mkdir("$file_path/rename_variation");
 
 /* rename files across directories */

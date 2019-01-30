@@ -5,7 +5,7 @@
 */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // zero argument
 echo "-- Testing fflush(): with zero argument --\n";
@@ -43,6 +43,6 @@ echo "\n*** Done ***";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink("$file_path/fflush_error.tmp");
 ?>

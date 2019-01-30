@@ -7,8 +7,10 @@
 
 require_once('fopen_include_path.inc');
 
-$thisTestDir = "fopenVariation16.dir";
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$thisTestDir = $file_path."/fopenVariation16.dir";
 mkdir($thisTestDir);
+$oldDirPath = getcwd();
 chdir($thisTestDir);
 
 $newpath = create_include_path();
@@ -21,7 +23,7 @@ runtest();
 
 teardown_include_path();
 restore_include_path();
-chdir("..");
+chdir($oldDirPath);
 rmdir($thisTestDir);
 
 function runtest() {

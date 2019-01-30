@@ -7,7 +7,7 @@
 /* Testing is_file() with file containing data, truncating its size 
      and the file created by touch() */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "-- Testing is_file() with file containing data --\n";
 $filename = $file_path."/is_file_variation1.tmp";

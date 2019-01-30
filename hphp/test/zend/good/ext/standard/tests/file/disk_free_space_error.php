@@ -7,7 +7,7 @@
  */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 var_dump( disk_free_space() ); // Zero Arguments
 var_dump( diskfreespace() );
 
@@ -28,7 +28,7 @@ echo"\n-- Done --";
 ?>
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/disk_free_space.tmp");
 
 ?>

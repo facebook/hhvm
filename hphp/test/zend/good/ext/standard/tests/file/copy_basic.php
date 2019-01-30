@@ -9,7 +9,7 @@ echo "*** Testing copy() function: to copy file from source to destination --\n"
 var_dump( file_exists(__FILE__) );
 
 /* copying the file */
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_name1 = $file_path."/copy_basic1.tmp";
 $file_name2 = $file_path."/copy_basic2.tmp";
 var_dump( copy(__FILE__, $file_name1) );
@@ -32,7 +32,7 @@ echo "*** Done ***\n";
 
 <?php error_reporting(0); ?>
 <?php
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_name1 = $file_path."/copy_basic1.tmp";
 $file_name2 = $file_path."/copy_basic2.tmp";
 unlink($file_name1);

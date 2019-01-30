@@ -3,7 +3,7 @@
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__);
+$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing unlink() on a file ***\n";
 $filename = "$file_path/unlink_basic.tmp";  // temp file name used here

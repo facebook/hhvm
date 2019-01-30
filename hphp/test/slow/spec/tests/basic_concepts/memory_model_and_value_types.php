@@ -98,7 +98,7 @@ $a = 123;
 
 echo "After '\$a = 123', \$a is $a\n";
 
-g1($a);
+g1(&$a);
 
 echo "After 'g1(\$a)', \$a is $a\n";
 

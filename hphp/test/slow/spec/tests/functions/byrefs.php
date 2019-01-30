@@ -98,6 +98,6 @@ function f(&$p)
 
 $a = 10;
 var_dump($a);
-f($a);   // change $a from 10 to 200
+f(&$a);   // change $a from 10 to 200
 var_dump($a);
 //*/

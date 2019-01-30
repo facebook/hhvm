@@ -112,7 +112,7 @@ function g3($p1, &$p2)
 
 $v1 = 10;
 $v2 = 20;
-g3($v1, $v2);
+g3($v1, &$v2);
 var_dump(isset($v1));       // still set
 var_dump($v1);
 var_dump(isset($v2));       // still set, even though passed in by reference and unset
@@ -177,7 +177,7 @@ class D
     private function g()
     {
         echo "Inside ". __METHOD__ . "\n";
-        
+
         var_dump(isset($this));
     }
 }

@@ -57,44 +57,23 @@ function g(&$p1)
 $a2 = 0;
 // g(TRUE);             // PHP5 32/64, Error: Only variables can be passed by reference
                            // HHVM,       Error: Cannot pass parameter 1 by reference
-   g($a2 = TRUE);       // Suspicious "behavior"
-                        // PHP5 32, allowed quietly, but does not change the original argument
-                        // PHP5 64  allowed with warning "PHP Strict standards:  Only variables
-                        //     should be passed by reference", but does not change the original argument
-                           // HHVM, allowed quietly, but does not change the original argument
-var_dump($a2);
    $a2 = TRUE;
    g(&$a2);              // OK; passing a modifiable lvalue by reference
    var_dump($a2);
 
 // following tests have different values for $a2, and give results like the case above
 
-// g(-123);
-   g($a2 = -123);
-var_dump($a2);
    $a2 = -123;
    g(&$a2);
-var_dump($a2);
-// g(1.23e3);
-   g($a2 = 1.23e3);
 var_dump($a2);
    $a2 = 1.23e3;
    g(&$a2);
 var_dump($a2);
-// g(NULL);
-   g($a2 = NULL);
-var_dump($a2);
    $a2 = NULL;
    g(&$a2);
 var_dump($a2);
-// g("abc");
-   g($a2 = "abc");
-var_dump($a2);
    $a2 = "abc";
    g(&$a2);
-var_dump($a2);
-// g([1,2,3]);
-   g($a2 = [1,2,3]);
 var_dump($a2);
    $a2 = [1,2,3];
    g(&$a2);
@@ -113,24 +92,6 @@ $z = 10;
 ///*
 $z = 10;
 g(&$z);              // create a reference to a modifiable lvalue
-var_dump($z);
-// g($z + 1);       // PHP5 32/64, Error: Only variables can be passed by reference
-                  // HHVM,       Error: Cannot pass parameter 1 by reference
-g($z -= 2);         // PHP5 32, allowed quietly, but does not change the original argument
-                    // PHP5 64  allowed with warning "PHP Strict standards:  Only variables
-                    //     should be passed by reference", but does not change the original argument
-                  // HHVM, allowed quietly, but does not change the original argument
-var_dump($z);
-g($z = $z - 2);   // same as above
-var_dump($z);
-// g($z++);         // PHP5 32/64, Error: Only variables can be passed by reference
-                  // HHVM,       Error: Cannot pass parameter 1 by reference
-// ($z++)++;        // All 3, Error: unexpected '++'
-g(--$z);          // PHP5 32, allowed quietly, but does not change the original argument
-                    // PHP5 64  allowed with warning "PHP Strict standards:  Only variables
-                    //     should be passed by reference", but does not change the original argument
-                  // HHVM, allowed quietly, but does not change the original argument
-// ----$z;          // All 3, Error: unexpected '--'
 var_dump($z);
 //*/
 

@@ -21,7 +21,7 @@ $a1 = 1.23e27;
 $a2 = [10,TRUE,NULL];
 var_dump($a1);
 var_dump($a2);
-swap($a1, $a2);
+swap(&$a1, &$a2);
 var_dump($a1);
 var_dump($a2);
 
@@ -40,7 +40,7 @@ function f(&$p)
 
 $a = 10;
 var_dump($a);
-f($a);   // change $a from 10 to 200
+f(&$a);   // change $a from 10 to 200
 var_dump($a);
 // f(&$a);  // PHP5 32/62, Fatal error: Call-time pass-by-reference has been removed
          // HHVM accepts the & as being redundant
@@ -72,6 +72,6 @@ g();           // like the f() call above
 
 $a = 10;
 var_dump($a);
-g($a);
+g(&$a);
 var_dump($a);
 //*/

@@ -12,5 +12,6 @@ slow/objprof/objprof-props.php
 slow/objprof/objprof-user-types.php
 slow/objprof/objprof.php
 slow/objprof/strings.php
+slow/spec/tests/functions/passing_arguments.php
 slow/unserialize-reference-overwritten.php
 slow/vec/ref-fail-leak.php

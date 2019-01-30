@@ -93,8 +93,8 @@ Examples:
   # Slow tests in interp mode:
   % $argv[0] -m interp test/slow
 
-  # PHP specificaion tests in JIT mode:
-  % $argv[0] test/spec
+  # PHP specification tests in JIT mode:
+  % $argv[0] test/slow/spec
 
   # Slow closure tests in JIT mode:
   % $argv[0] test/slow/closure
@@ -613,7 +613,6 @@ function find_test_files($file) {
   $mappage = array(
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
-    'spec'       => 'hphp/test/spec',
     'debugger'   => 'hphp/test/server/debugger/tests',
     'http'       => 'hphp/test/server/http/tests',
     'fastcgi'    => 'hphp/test/server/fastcgi/tests',
@@ -669,7 +668,7 @@ function find_tests($files, array $options = null) {
     $files = array('quick');
   }
   if ($files == array('all')) {
-    $files = array('quick', 'slow', 'spec', 'zend', 'fastcgi');
+    $files = array('quick', 'slow', 'zend', 'fastcgi');
     if (is_dir(hphp_home() . '/hphp/facebook/test')) {
       $files[] = 'facebook';
     }

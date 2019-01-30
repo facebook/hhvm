@@ -84,7 +84,7 @@ $a = STDIN;
 
 echo "After '\$a = STDIN', \$a is $a\n";
 
-g1($a);
+g1(&$a);
 
 echo "After 'g1(\$a)', \$a is $a\n";
 echo "Done\n";

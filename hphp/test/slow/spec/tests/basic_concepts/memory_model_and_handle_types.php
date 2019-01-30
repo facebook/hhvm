@@ -172,7 +172,7 @@ $a = new Point(1, 3);   // create first new point, and make $a an alias to it
 
 echo "After '\$a = new Point(1, 3)', \$a is $a\n";
 
-g1($a);     // $a is changed via change to $b
+g1(&$a);     // $a is changed via change to $b
 
 echo "After 'g1(\$a)', \$a is $a\n";
 unset($a);  // remove only alias from point, so destructor runs

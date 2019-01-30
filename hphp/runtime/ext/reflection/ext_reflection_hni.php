@@ -729,8 +729,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @class_and_method string  Class name and method, separated by ::
    */
-  public function __construct(...) {
-    $args = func_get_args();
+  public function __construct(...$args) {
     if (count($args) == 0 || count($args) > 2) {
       throw new Exception(
         'ReflectionMethod::__construct() takes either 1 or 2 arguments');
@@ -1990,22 +1989,21 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   The value of the static property.
    */
-  public function getStaticPropertyValue($name /*, $default */) {
+  public function getStaticPropertyValue($name, ...$args) {
     // We can't check if a parameter isn't passed,
     // we can only check its default value, but that fails
     // if I want to pass the default value.
-    // Use func_get_args() for this.
-    $args = func_get_args();
+    // Use variadic args for this.
     if ($this->hasProperty($name) &&
         $this->getProperty($name)->isStatic()) {
       return hphp_get_static_property($this->getName(), $name, false);
-    } else if (!array_key_exists(1, $args)) {
+    } else if (!array_key_exists(0, $args)) {
       throw new ReflectionException(
         sprintf("Class %s does not have a property named %s",
                 $this->getName(), $name)
       );
     }
-    return $args[1];
+    return $args[0];
   }
 
   /**

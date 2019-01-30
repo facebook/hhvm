@@ -325,12 +325,8 @@ class SplFileObject extends SplFileInfo
    *                     function will return the number of assigned values.
    *                     The optional parameters must be passed by reference.
    */
-  public function fscanf($format) {
-    $argv = varray[$this->rsrc];
-    for ($i = 0; $i < func_num_args(); $i++) {
-      $argv[] = func_get_arg($i);
-    }
-    $ret = call_user_func_array('fscanf', $argv);
+  public function fscanf($format, ...$args) {
+    $ret = fscanf($this->rsrc, $format, ...$args);
     return is_int($ret)
       ? $ret
       : varray($ret);

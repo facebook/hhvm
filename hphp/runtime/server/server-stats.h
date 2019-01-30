@@ -17,16 +17,15 @@
 #ifndef incl_HPHP_SERVERSTATS_H_
 #define incl_HPHP_SERVERSTATS_H_
 
-#include <set>
-
-#include <curl/curl.h>
-#include <time.h>
-
+#include "hphp/runtime/base/execution-profiler.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/server/writer.h"
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/execution-profiler.h"
-#include "hphp/runtime/server/writer.h"
+
+#include <curl/curl.h>
+#include <time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,9 +120,6 @@ private:
   int64_t m_min;  // earliest timepoint
   int64_t m_max;  // latest timepoint
   CounterMap m_values;  // current page's name value pairs
-
-  // general health-level of local server
-  static HealthLevel m_ServerHealthLevel;
 
   void log(const std::string& name, int64_t value);
   int64_t get(const std::string& name);

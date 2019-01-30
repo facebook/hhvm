@@ -1090,7 +1090,7 @@ and catch catchctx env (sid, exn, b) =
   let cid = CI sid in
   let ety_p = (fst sid) in
   let env, _, _ = instantiable_cid ety_p env cid [] in
-  let env, _te, ety = static_class_id ~check_constraints:false ety_p env [] cid in
+  let env, _te, ety, _tyvars = static_class_id ~check_constraints:false ety_p env [] cid in
   let env = exception_ty ety_p env ety in
   let env = set_local env exn ety in
   let env, tb = block env b in
@@ -1769,7 +1769,8 @@ and expr_
         expr_error env p Reason.Rnone
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
         let cid = CI c in
-        let env, _te, cid_ty = static_class_id ~check_constraints:true (fst c) env [] cid in
+        let env, _te, cid_ty, tyvars' =
+          static_class_id ~check_constraints:true (fst c) env [] cid in
         let tyargs =
           match cid_ty with
           | (_, Tclass(_, _, tyargs)) -> tyargs
@@ -1784,12 +1785,13 @@ and expr_
         match ty with
         | (r, Tfun ft) ->
           begin
-            let env, ft, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let env, ft, tyvars = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let tyvars = ISet.union tyvars tyvars' in
             let ty = r, Tfun ft in
             check_deprecated p ft;
             match ce_visibility with
             | Vpublic ->
-              make_result env p (T.Smethod_id(c, meth)) ty
+              make_result ~tyvars env p (T.Smethod_id(c, meth)) ty
             | Vprivate _ ->
               Errors.private_class_meth (Reason.to_pos r) p;
               expr_error env p r
@@ -2044,22 +2046,23 @@ and expr_
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, te, _ = static_class_id ~check_constraints:false px env [] x in
-        make_result env p (T.Class_get (te, T.CGstring (py, y))) ty
+        let env, te, _, tyvars = static_class_id ~check_constraints:false px env [] x in
+        make_result ~tyvars env p (T.Class_get (te, T.CGstring (py, y))) ty
   | Class_get ((cpos, cid), CGstring mid) ->
-      let env, te, cty = static_class_id ~check_constraints:false cpos env [] cid in
+      let env, te, cty, tyvars = static_class_id ~check_constraints:false cpos env [] cid in
       let env = save_and_merge_next_in_catch env in
       (* We don't expect type variables to be generated because class properties
        * can't be generic *)
-      let env, ty, _tyvars, _ =
+      let env, ty, tyvars', _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
+      let tyvars = ISet.union tyvars tyvars' in
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
       then
         let fake_name = Env.FakeMembers.make_static_id cid (snd mid) in
         let env, ty = Env.lost_info fake_name env ty in
-        make_result env p (T.Class_get (te, T.CGstring mid)) ty
+        make_result ~tyvars env p (T.Class_get (te, T.CGstring mid)) ty
       else
-        make_result env p (T.Class_get (te, T.CGstring mid)) ty
+        make_result ~tyvars env p (T.Class_get (te, T.CGstring mid)) ty
     (* Fake member property access. For example:
      *   if ($x->f !== null) { ...$x->f... }
      *)
@@ -2495,9 +2498,10 @@ and expr_
     expr_any env p (Reason.Rwitness p)
 
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
-  let env, ce, cty = static_class_id ~check_constraints:false cpos env [] cid in
+  let env, ce, cty, tyvars' = static_class_id ~check_constraints:false cpos env [] cid in
   let env, const_ty, tyvars, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
+  let tyvars = ISet.union tyvars tyvars' in
   match cc_abstract_info with
     | Some (cc_pos, cc_name) ->
       let () = match cid with
@@ -3888,15 +3892,16 @@ and is_abstract_ft fty = match fty with
 
   (* Calling parent method *)
   | Class_const ((pos, CIparent), m) ->
-      let env, tcid, ty1 = static_class_id ~check_constraints:false pos env [] CIparent in
+      let env, tcid, ty1, tyvars = static_class_id ~check_constraints:false pos env [] CIparent in
       let this_ty = (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
       if Env.is_static env
       then begin
         (* in static context, you can only call parent::foo() on static
          * methods *)
         let hl, _is_reified_list = List.unzip tal in
-        let env, fty, tyvars, _ =
+        let env, fty, tyvars', _ =
           class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
+        let tyvars = ISet.union tyvars tyvars' in
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
         let env, tel, tuel, ty =
@@ -3918,7 +3923,7 @@ and is_abstract_ft fty = match fty with
              * calculates the SN.Typehints.this type *)
             let k_lhs _ = this_ty in
             let ftys = ref [] in
-            let env, method_, tyvars, _ =
+            let env, method_, tyvars', _ =
               obj_get_ ~is_method:true ~nullsafe:None ~pos_params:(Some el) ~valkind:`other env ty1
                        CIparent m
               begin fun (env, fty, tyvars, _) ->
@@ -3937,12 +3942,14 @@ and is_abstract_ft fty = match fty with
               match !ftys with
               | [fty] -> fty
               | l -> (Reason.none, Tunresolved l) in
+            let tyvars = ISet.union tyvars tyvars' in
             make_call ~tyvars env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
               tal [] [] method_
         else
             let hl, _is_reified_list = List.unzip tal in
-            let env, fty, tyvars, _ =
+            let env, fty, tyvars', _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
+            let tyvars = ISet.union tyvars tyvars' in
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
             let env, tel, tuel, ty =
@@ -3954,11 +3961,12 @@ and is_abstract_ft fty = match fty with
       end
   (* Call class method *)
   | Class_const ((pid, e1), m) ->
-      let env, te1, ty1 = static_class_id ~check_constraints:true pid env [] e1 in
+      let env, te1, ty1, tyvars = static_class_id ~check_constraints:true pid env [] e1 in
       let hl, _is_reified_list = List.unzip tal in
-      let env, fty, tyvars, _ =
+      let env, fty, tyvars', _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
         ~pos_params:el env ty1 m e1 in
+      let tyvars = ISet.union tyvars tyvars' in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
           begin match Env.get_self env with
@@ -4004,7 +4012,7 @@ and is_abstract_ft fty = match fty with
       let m = (pos, String_utils.lstrip id "\\") in
       (* Mock these as type equivalent to \Infer -> sample... *)
       let infer_e = CI (p, "\\Infer") in
-      let env, _, ty1 = static_class_id ~check_constraints:true p env [] infer_e in
+      let env, _, ty1, tyvars' = static_class_id ~check_constraints:true p env [] infer_e in
       let nullsafe = None in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let fn = (fun (env, fty, tyvars, _) ->
@@ -4020,6 +4028,7 @@ and is_abstract_ft fty = match fty with
       let hl, _is_reified_list = List.unzip tal in
       let env, ty, tyvars = obj_get ~is_method:true ~nullsafe ~pos_params:el
                       ~explicit_tparams:hl env ty1 infer_e m fn in
+      let tyvars = ISet.union tyvars tyvars' in
       let tfty =
         match !tftyl with
         | [fty] -> fty
@@ -4573,7 +4582,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
 
 and class_id_for_new ~exact p env cid tal =
-  let env, te, ty = static_class_id ~exact ~check_constraints:false p env tal cid in
+  let env, te, ty, _tyvars = static_class_id ~exact ~check_constraints:false p env tal cid in
   (* Need to deal with union case *)
   let rec get_info res tyl =
     match tyl with
@@ -4631,29 +4640,36 @@ and trait_most_concrete_req_class trait env =
 and resolve_type_arguments env p class_id tparaml hintl =
   (* For explicit type arguments we support a wildcard syntax `_` for which
    * Hack will generate a fresh type variable *)
-  let resolve_type_argument env hint =
+  let resolve_type_argument (env, tyvars) hint =
     match hint with
-    | (_, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
-      Env.fresh_unresolved_type env
+    | (p, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
+      let env, ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
+      (env, tyvars), ty
     | _ ->
-      Phase.localize_hint_with_self env hint in
+      let env, ty = Phase.localize_hint_with_self env hint in
+      (env, tyvars), ty in
   let length_hintl = List.length hintl in
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml
   then begin
     if length_hintl <> 0
     then Errors.type_arity p (snd class_id) (string_of_int length_tparaml);
-    List.map_env env tparaml begin fun env _ ->
-    Env.fresh_unresolved_type env end
+    let (env, tyvars), tyl =
+      List.map_env (env, ISet.empty) tparaml begin fun (env, tyvars) _ ->
+        let env, ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
+        (env, tyvars), ty end in
+    env, tyl, tyvars
   end
   else
-    List.map_env env hintl resolve_type_argument
+    let (env, tyvars), tyl =
+      List.map_env (env, ISet.empty) hintl resolve_type_argument in
+    env, tyl, tyvars
 
 (* Do all of the above, and also check any constraints associated with the type parameters.
  *)
 and resolve_type_arguments_and_check_constraints ~exact ~check_constraints
   env p class_id from_class tparaml hintl =
-  let env, type_argl = resolve_type_arguments env p class_id tparaml hintl in
+  let env, type_argl, tyvars = resolve_type_arguments env p class_id tparaml hintl in
   let this_ty = (Reason.Rwitness (fst class_id), Tclass (class_id, exact, type_argl)) in
   let env =
     if check_constraints
@@ -4666,7 +4682,7 @@ and resolve_type_arguments_and_check_constraints ~exact ~check_constraints
     } in
       Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
     else env in
-  env, this_ty
+  env, this_ty, tyvars
 
 (* When invoking a method the class_id is used to determine what class we
  * lookup the method in, but the type of 'this' will be the late bound type.
@@ -4694,14 +4710,14 @@ and resolve_type_arguments_and_check_constraints ~exact ~check_constraints
 and this_for_method env cid default_ty = match cid with
   | CIparent | CIself | CIstatic ->
       let p = Reason.to_pos (fst default_ty) in
-      let env, _te, ty = static_class_id ~check_constraints:false p env [] CIstatic in
+      let env, _te, ty, _tyvars = static_class_id ~check_constraints:false p env [] CIstatic in
       ExprDepTy.make env CIstatic ty
   | _ ->
       env, default_ty
 
 and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
-  let make_result env te ty =
-    env, ((p, ty), te), ty in
+  let make_result env te ty tyvars =
+    env, ((p, ty), te), ty, tyvars in
   function
   | CIparent ->
     (match Env.get_self env with
@@ -4711,14 +4727,14 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
             (match trait_most_concrete_req_class trait env with
               | None ->
                 Errors.parent_in_trait p;
-                make_result env T.CIparent (Reason.Rwitness p, Typing_utils.terr env)
+                make_result env T.CIparent (Reason.Rwitness p, Typing_utils.terr env) ISet.empty
               | Some (_, parent_ty) ->
                 (* inside a trait, parent is SN.Typehints.this, but with the
                  * type of the most concrete class that the trait has
                  * "require extend"-ed *)
                 let r = Reason.Rwitness p in
                 let env, parent_ty = Phase.localize_with_self env parent_ty in
-                make_result env T.CIparent (r, TUtils.this_of parent_ty)
+                make_result env T.CIparent (r, TUtils.this_of parent_ty) ISet.empty
             )
           | _ ->
             let parent = Env.get_parent env in
@@ -4728,7 +4744,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
             let r = Reason.Rwitness p in
             let env, parent = Phase.localize_with_self env parent in
             (* parent is still technically the same object. *)
-            make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
+            make_result env T.CIparent (r, TUtils.this_of (r, snd parent)) ISet.empty
           )
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
@@ -4741,28 +4757,28 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         let r = Reason.Rwitness p in
         let env, parent = Phase.localize_with_self env parent in
         (* parent is still technically the same object. *)
-        make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
+        make_result env T.CIparent (r, TUtils.this_of (r, snd parent)) ISet.empty
     )
   | CIstatic ->
     let this = (Reason.Rwitness p, TUtils.this_of (Env.get_self env)) in
-    make_result env T.CIstatic this
+    make_result env T.CIstatic this ISet.empty
   | CIself ->
     let self =
       match snd (Env.get_self env) with
       | Tclass(c, _, tyl) -> Tclass(c, exact, tyl)
       | self -> self in
-    make_result env T.CIself (Reason.Rwitness p, self)
+    make_result env T.CIself (Reason.Rwitness p, self) ISet.empty
   | CI c as e1 ->
     let class_ = Env.get_class env (snd c) in
     (match class_ with
       | None ->
-        make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
+        make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env) ISet.empty
       | Some class_ ->
         let hint_list, _ = List.unzip tal in
-        let env, ty =
+        let env, ty, tyvars =
           resolve_type_arguments_and_check_constraints ~exact ~check_constraints
             env p c e1 (Cls.tparams class_) hint_list in
-        make_result env (T.CI c) ty
+        make_result env (T.CI c) ty tyvars
     )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
@@ -4793,11 +4809,11 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           Errors.expected_class ~suffix:(", but got "^Typing_print.error env ty) p;
           env, (Reason.Rwitness p, Typing_utils.terr env) in
       let env, result_ty = resolve_ety env ty in
-      make_result env (T.CIexpr te) result_ty
+      make_result env (T.CIexpr te) result_ty ISet.empty
 
 and call_construct p env class_ params el uel cid =
   let cid = if cid = CIparent then CIstatic else cid in
-  let env, tcid, cid_ty = static_class_id ~check_constraints:false p env [] cid in
+  let env, tcid, cid_ty, _tyvars = static_class_id ~check_constraints:false p env [] cid in
   let ety_env = {
     type_expansions = [];
     this_ty = cid_ty;
@@ -5595,7 +5611,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       (* The position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
        * position data for the latter. *)
-      let env, _te, obj_ty = static_class_id ~check_constraints:false p env []
+      let env, _te, obj_ty, _tyvars = static_class_id ~check_constraints:false p env []
         (T.to_nast_class_id_ cid) in
 
       let safe_instanceof_enabled =
@@ -6621,7 +6637,7 @@ and gconst_def tcopt cst =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
-  let env, tcid, ty = static_class_id ~check_constraints:false cpos env [] class_id in
+  let env, tcid, ty, tyvars' = static_class_id ~check_constraints:false cpos env [] class_id in
   let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty, _, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in
@@ -6637,6 +6653,7 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
   then env, T.make_typed_expr p res T.Any, res
   else
     let env, ty, tyvars = f env fty res el in
+    let tyvars = ISet.union tyvars tyvars' in
     let fty =
       match fty with
       | r, Tfun ft -> r, Tfun {ft with ft_ret = ty}

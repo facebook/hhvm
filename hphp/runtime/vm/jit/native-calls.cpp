@@ -607,6 +607,8 @@ static CallMap s_callMap {
                                      {{extra(&FuncData::func)}, {SSA, 0}}},
     {VerifyReifiedLocalType, VerifyReifiedLocalTypeImpl, DNone, SSync,
                              {{extra(&ParamData::paramId)}, {SSA, 0}}},
+    {VerifyReifiedReturnType, VerifyReifiedReturnTypeImpl, DNone, SSync,
+                              {{TV, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

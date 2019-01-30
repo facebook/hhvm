@@ -156,6 +156,7 @@ void VerifyRetTypeCallable(int32_t id, TypedValue value);
 void VerifyRetTypeFail(int32_t id, TypedValue* value);
 
 void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
+void VerifyReifiedReturnTypeImpl(TypedValue, ArrayData*);
 
 void raise_error_sd(const StringData* sd);
 

@@ -276,7 +276,8 @@ struct BlockInfo {
 bool isDangerousActRecInst(IRInstruction& inst) {
   if (debug && inst.is(InitThrowableFileAndLine)) return true;
   return inst.is(VerifyParamCls, VerifyParamCallable,
-                 VerifyParamFail, VerifyRetFail, VerifyReifiedLocalType);
+                 VerifyParamFail, VerifyRetFail,
+                 VerifyReifiedLocalType, VerifyReifiedReturnType);
 }
 
 /*

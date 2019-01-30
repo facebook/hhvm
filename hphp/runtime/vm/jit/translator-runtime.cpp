@@ -700,6 +700,21 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
   );
 }
 
+void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
+  VMRegAnchor _;
+  const ActRec* ar = liveFrame();
+  const Func* func = ar->m_func;
+  if (verifyReifiedLocalType(ts, &cell)) return;
+  raise_typehint_error(
+    folly::sformat(
+      "Value returned from function {}() must be of type {}, {} given",
+      func->fullName()->data(),
+      TypeStructure::toStringForDisplay(ArrNR(ts)).c_str(),
+      describe_actual_type(&cell, true)
+    )
+  );
+}
+
 namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {

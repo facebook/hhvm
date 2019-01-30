@@ -1,0 +1,3 @@
+ERROR: string(72) "Value returned from function f() must be of type C<int>, C<string> given"
+
+Catchable fatal error: Value returned from function f() must be of type C<int>, C<string> given in %s on line 22

@@ -249,6 +249,7 @@ IMPL_OPCODE_CALL(VerifyParamFailHard)
 IMPL_OPCODE_CALL(VerifyRetFail)
 IMPL_OPCODE_CALL(VerifyRetFailHard)
 IMPL_OPCODE_CALL(VerifyReifiedLocalType)
+IMPL_OPCODE_CALL(VerifyReifiedReturnType)
 
 void cgVerifyParamCls(IRLS& env, const IRInstruction* inst) {
   implVerifyCls(env, inst);

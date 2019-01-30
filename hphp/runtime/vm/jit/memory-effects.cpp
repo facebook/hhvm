@@ -834,6 +834,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // out, except as a side effect of raising a warning.
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyReifiedReturnType:
     return may_load_store(AHeapAny, AHeapAny);
   // In PHP 7 VerifyRetFail can coerce the return type in weak files-- even in
   // a strict file we may still coerce int to float. This is not true of HH

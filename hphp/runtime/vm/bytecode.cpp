@@ -6202,7 +6202,20 @@ OPTBLD_INLINE void iopVerifyRetTypeC() {
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
-  verifyRetTypeImpl(1); // Cell is the second elemnt on the stack
+  verifyRetTypeImpl(1); // Cell is the second element on the stack
+  auto const ts = vmStack().topC();
+  assertx(tvIsDictOrDArray(ts));
+  auto const cell = vmStack().indC(1);
+  if (!verifyReifiedLocalType(ts->m_data.parr, cell)) {
+    raise_typehint_error(
+      folly::sformat(
+        "Value returned from function {}() must be of type {}, {} given",
+        vmfp()->m_func->fullName()->data(),
+        TypeStructure::toStringForDisplay(ArrNR(ts->m_data.parr)).c_str(),
+        describe_actual_type(cell, true)
+      )
+    );
+  }
   vmStack().popC();
 }
 

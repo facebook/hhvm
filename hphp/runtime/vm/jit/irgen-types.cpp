@@ -1311,7 +1311,9 @@ void emitVerifyRetTypeC(IRGS& env) {
 
 void emitVerifyRetTypeTS(IRGS& env) {
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 1, false);
-  popC(env);
+  auto const ts = popC(env);
+  auto const cell = topC(env);
+  gen(env, VerifyReifiedReturnType, cell, ts);
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {

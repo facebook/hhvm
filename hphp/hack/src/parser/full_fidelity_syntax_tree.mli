@@ -15,12 +15,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
 
   type t [@@deriving show]
   val make : ?env:Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
-  val from_root :
-    Full_fidelity_source_text.t ->
-    Syntax.t ->
-    Full_fidelity_syntax_error.t list ->
-    SmartConstructors.t ->
-    t
   val create :
     Full_fidelity_source_text.t ->
     Syntax.t ->
@@ -51,12 +45,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
 end (* WithSmartConstructors *)
 
 include module type of WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
-
-val from_root :
-  Full_fidelity_source_text.t ->
-  Syntax.t ->
-  Full_fidelity_syntax_error.t list ->
-  t
 
 val create :
   Full_fidelity_source_text.t ->

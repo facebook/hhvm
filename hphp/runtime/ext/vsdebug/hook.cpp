@@ -62,6 +62,10 @@ void VSDebugHook::onFuncEntryBreak(const Func* func) {
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
 
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
+
     breakContext.m_debugger->onFuncBreakpointHit(
       breakContext.m_requestInfo,
       func
@@ -78,6 +82,10 @@ void VSDebugHook::onLineBreak(const Unit* unit, int line) {
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
 
     breakContext.m_debugger->onLineBreakpointHit(
       breakContext.m_requestInfo,
@@ -96,6 +104,10 @@ void VSDebugHook::onExceptionThrown(ObjectData* exception) {
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
 
     breakContext.m_debugger->onExceptionBreakpointHit(
       breakContext.m_requestInfo,
@@ -116,6 +128,10 @@ void VSDebugHook::onError(
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
 
     breakContext.m_debugger->onError(
       breakContext.m_requestInfo,

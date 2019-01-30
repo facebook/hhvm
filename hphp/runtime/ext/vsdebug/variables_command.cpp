@@ -66,6 +66,13 @@ DebugSummaryPHPExecutor::DebugSummaryPHPExecutor(
 void DebugSummaryPHPExecutor::callPHPCode()
 {
   try {
+    DebuggerRequestInfo* info = m_debugger->getRequestInfo();
+    bool prev = info->m_flags.doNotBreak;
+    info->m_flags.doNotBreak = true;
+    SCOPE_EXIT {
+      info->m_flags.doNotBreak = prev;
+    };
+
     m_debugDisplay = m_obj->invokeToDebugDisplay();
   } catch (...) {
     // NB if we get here it's because __toDebugDisplay threw, so we'll

@@ -4099,6 +4099,37 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
     return;
   }
 
+  // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
+  // We can safely assume that either VerifyRetTypeC will
+  // throw or it will produce a value whose type is compatible with the
+  // return type constraint.
+  auto tcT = remove_uninit(
+    loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint)));
+
+  // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
+  // Why?  Because we want uphold the invariant that we only refine return
+  // types and never widen them, and if we allow tcT to be an interface then
+  // it's possible for violations of this invariant to arise.  For an example,
+  // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
+  // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
+  // returns classes or interfaces or traits (it never returns something that
+  // could be an enum or type alias) and it never returns anything that could
+  // be a "magic" interface that supports non-objects.  (For traits the return
+  // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
+  if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+    tcT = is_opt(tcT) ? TOptObj : TObj;
+  }
+
+  if (!constraint.isSoft()) {
+    // VerifyRetType will convert a TFunc to a TStr implicitly
+    // (and possibly warn)
+    if (tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls)) {
+      stackT |= TStr;
+      popC(env);
+      push(env, stackT);
+    }
+  }
+
   // If CheckReturnTypeHints < 3 OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
@@ -4124,35 +4155,7 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
     }
   }
 
-  // If we reach here, then CheckReturnTypeHints >= 3 AND the constraint
-  // is not soft.  We can safely assume that either VerifyRetTypeC will
-  // throw or it will produce a value whose type is compatible with the
-  // return type constraint.
-  auto tcT =
-    remove_uninit(
-      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint))
-    );
-
-  // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
-  // Why?  Because we want uphold the invariant that we only refine return
-  // types and never widen them, and if we allow tcT to be an interface then
-  // it's possible for violations of this invariant to arise.  For an example,
-  // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
-  // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
-  // returns classes or interfaces or traits (it never returns something that
-  // could be an enum or type alias) and it never returns anything that could
-  // be a "magic" interface that supports non-objects.  (For traits the return
-  // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
-  if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
-    tcT = is_opt(tcT) ? TOptObj : TObj;
-  }
-
-  // VerifyRetType will convert a TFunc to a TStr implicitly (and possibly warn)
-  auto const convToStr = tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls);
-
   auto retT = intersection_of(std::move(tcT), std::move(stackT));
-  if (convToStr) retT |= TStr;
-
   if (retT.subtypeOf(BBottom)) {
     unreachable(env);
     if (ts_flavor) popC(env); // the type structure

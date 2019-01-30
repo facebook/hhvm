@@ -158,7 +158,10 @@ let rec array_get ?(lhs_of_null_coalesce=false)
             let any = err_witness env p in
             any, any
       in
-      let acc = type_index acc p ty2 k (Reason.index_class cn) in
+      let acc =
+        if TypecheckerOptions.new_inference (Env.get_tcopt env)
+        then acc
+        else type_index acc p ty2 k (Reason.index_class cn) in
       acc, v
   | Tclass ((_, cn) as id, _, argl)
       when not is_lvalue &&

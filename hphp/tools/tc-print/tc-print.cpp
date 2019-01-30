@@ -133,8 +133,12 @@ void usage() {
     "<= <ADDR>\n"
     "    -T <NUMBER>     : prints top <NUMBER> functions according to "
     "profiling info\n"
-    "    -e <EVENT_TYPE> : sorts by the specified perf event. Pass '%s' "
-    "to get a list of valid event types.\n"
+    "    -e <EVENT>      : sorts by the specified perf event. Should either "
+    "be one of the predefined events or one passed with -E.\n"
+    "                      Pass '%s' to get a list of valid predefined event "
+    "types.\n"
+    "    -E <EVENTS>     : specifies a new replacement set of perf events. "
+    "Pass a comma-separated list of events to replace the default set.\n"
     "    -b              : prints bytecode stats\n"
     "    -B <OPCODE>     : used in conjunction with -e, prints the top "
     "bytecode translationc event type. Pass '%s' to get a "
@@ -165,8 +169,10 @@ void printValidBytecodes() {
 }
 
 void printValidEventTypes() {
-  g_logger->printGeneric("<EVENT_TYPE>:\n");
-  for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+  g_logger->printGeneric("<EVENT>:\n");
+  // Note: The -e list option is only for printing the predefined (default)
+  //       event types; thus ranging from [0,NUM_PREDEFINED_EVENT_TYPES).
+  for (size_t i = 0; i < NUM_PREDEFINED_EVENT_TYPES; i++) {
     g_logger->printGeneric("  * %s\n",
                            eventTypeToCommandLineArgument((PerfEventType)i));
   }
@@ -175,7 +181,8 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:bB:v:k:a:A:n:x"))
+  char* sortByArg = NULL;
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:x"))
          != -1) {
     switch (c) {
       case 'A':
@@ -252,10 +259,16 @@ void parseOptions(int argc, char *argv[]) {
           printValidEventTypes();
           exit(0);
         }
-        sortBy = commandLineArgumentToEventType(optarg);
-        if (sortBy == NUM_EVENT_TYPES) {
-          usage();
-          exit(1);
+        // Will lookup event type after parsing all args
+        sortByArg = optarg;
+        break;
+      case 'E':
+        {
+          char* p = strtok(optarg, ",");
+          while (p) {
+            addEventType(std::string(p));
+            p = strtok(NULL, ",");
+          }
         }
         break;
       case 'b':
@@ -307,6 +320,19 @@ void parseOptions(int argc, char *argv[]) {
         exit(1);
     }
   }
+
+  // Lookup the event type of a event to sort by was specified with -e
+  if (sortByArg) {
+    sortBy = commandLineArgumentToEventType(sortByArg);
+    if (sortBy < getFirstEventType() || sortBy >= getNumEventTypes()) {
+      usage();
+      exit(1);
+    }
+  } else {
+    // If not specified, then default the sorting to the first event type.
+    // If using predefined events, then EVENT_CYCLES.
+    sortBy = static_cast<PerfEventType>(getFirstEventType());
+  }
 }
 
 void sortTrans() {
@@ -334,13 +360,13 @@ void loadPerfEvents() {
   char   eventCaption[MAX_SYM_LEN];
   char   line[2*MAX_SYM_LEN];
   TCA    addr;
-  uint32_t tcSamples[NUM_EVENT_TYPES];
-  uint32_t hhvmSamples[NUM_EVENT_TYPES];
+  uint32_t tcSamples[getNumEventTypes()];
+  uint32_t hhvmSamples[getNumEventTypes()];
   size_t numEntries = 0;
-  PerfEventType eventType = NUM_EVENT_TYPES;
+  PerfEventType eventType = EVENT_NULL;
   // samplesPerKind[event][kind]
-  uint32_t samplesPerKind[NUM_EVENT_TYPES][NumTransKinds];
-  uint32_t samplesPerTCRegion[NUM_EVENT_TYPES][TCRCount];
+  uint32_t samplesPerKind[getNumEventTypes()][NumTransKinds];
+  uint32_t samplesPerTCRegion[getNumEventTypes()][TCRCount];
 
   memset(tcSamples  , 0, sizeof(tcSamples));
   memset(hhvmSamples, 0, sizeof(hhvmSamples));
@@ -366,7 +392,7 @@ void loadPerfEvents() {
 
     if (strncmp(program, "hhvm", 4) == 0) {
       eventType = perfScriptOutputToEventType(eventCaption);
-      if (eventType == NUM_EVENT_TYPES) {
+      if (eventType == EVENT_NULL) {
         error(folly::sformat("loadProfData: invalid event caption {}",
                              eventCaption));
       }
@@ -427,7 +453,7 @@ void loadPerfEvents() {
                          "(%% in TC) from file %s\n",
                          profFileName.c_str());
 
-  for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+  for (size_t i = getFirstEventType(); i < getNumEventTypes(); i++) {
     if (!hhvmSamples[i]) continue;
 
     g_logger->printGeneric("#  %-19s TOTAL: %10u (%u in TC = %5.2lf%%)\n",
@@ -451,7 +477,7 @@ void loadPerfEvents() {
 
   // header
   g_logger->printGeneric("# TCRegion ");
-  for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+  for (size_t i = getFirstEventType(); i < getNumEventTypes(); i++) {
     g_logger->printGeneric("%17s ",
                            eventTypeToCommandLineArgument((PerfEventType)i));
   }
@@ -461,7 +487,7 @@ void loadPerfEvents() {
   for (size_t i = 0; i < TCRCount; i++) {
     g_logger->printGeneric("# %8s ",
                            tcRegionToString(static_cast<TCRegion>(i)).c_str());
-    for (size_t j = 0; j < NUM_EVENT_TYPES; j++) {
+    for (size_t j = getFirstEventType(); j < getNumEventTypes(); j++) {
       auto ct = samplesPerTCRegion[j][i];
       g_logger->printGeneric("%8u (%5.2lf%%) ", ct,
                              ct ? (100.0 * ct / tcSamples[j]) : 0);
@@ -754,7 +780,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
                        PerfEventType etype,
                        ExtOpcode filterBy) {
 
-  always_assert(etype < NUM_EVENT_TYPES);
+  always_assert(etype >= getFirstEventType() && etype < getNumEventTypes());
 
   AddrToTransFragmentMapper mapper(tdata, filterBy);
   PerfEventsMap<TransFragment> tfragPerfEvents = samples.mapTo(mapper);
@@ -831,11 +857,11 @@ int main(int argc, char *argv[]) {
 
   g_transData = new OfflineTransData(dumpDir);
   transCode = new OfflineCode(dumpDir,
-                                 g_transData->getHotBase(),
-                                 g_transData->getMainBase(),
-                                 g_transData->getProfBase(),
-                                 g_transData->getColdBase(),
-                                 g_transData->getFrozenBase());
+                              g_transData->getHotBase(),
+                              g_transData->getMainBase(),
+                              g_transData->getProfBase(),
+                              g_transData->getColdBase(),
+                              g_transData->getFrozenBase());
   g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile);
 
   loadProfData();

@@ -1289,6 +1289,22 @@ class Status {
     mkdir(self::$tempdir);
   }
 
+  private static function removeDirectory($dir) {
+    $files = scandir($dir);
+    foreach ($files as $file) {
+      if ($file == '.' || $file == '..') {
+        continue;
+      }
+      $path = $dir . "/" . $file;
+      if (is_dir($path)) {
+        self::removeDirectory($path);
+      } else {
+        unlink($path);
+      }
+    }
+    rmdir($dir);
+  }
+
   public static function setMode($mode) {
     self::$mode = $mode;
   }
@@ -1338,6 +1354,7 @@ class Status {
   public static function finished() {
     self::$overall_end_time = microtime(true);
     self::send(self::MSG_FINISHED, null);
+    self::removeDirectory(self::$tempdir);
   }
 
   public static function killQueue() {

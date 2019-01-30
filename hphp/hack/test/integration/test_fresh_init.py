@@ -16,7 +16,14 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         # just use the default .hhconfig in the template repo
         pass
 
-    def check_cmd(self, expected_output, stdin=None, options=(), retries=3):
+    def check_cmd(
+            self,
+            expected_output,
+            stdin=None,
+            options=(),
+            retries=3,
+            assert_loaded_saved_state=False
+    ):
         time.sleep(2)  # wait for Hack to catch up with file system changes
 
         root = self.repo_dir + os.path.sep

@@ -34,7 +34,7 @@ let error_assign_array_append (env, tyvars) p ty =
   (env, tyvars), (ty, err_witness env p)
 
 let rec array_get ?(lhs_of_null_coalesce=false)
-  is_lvalue p ((env, tyvars) as acc) ty1 e2 ty2 =
+  is_lvalue p (env, tyvars) ty1 e2 ty2 =
   Typing_log.(log_with_level env "typing" 1 (fun () ->
     log_types p env
       [Log_head ("array_get",
@@ -50,21 +50,21 @@ let rec array_get ?(lhs_of_null_coalesce=false)
    * give a more useful error message. *)
   let arity_error (_, name) =
     Errors.array_get_arity p name (Reason.to_pos (fst ety1)) in
-  let nullable_container_get ty =
+  let nullable_container_get (env, _ as acc) ty =
     if lhs_of_null_coalesce
     (* Normally, we would not allow indexing into a nullable container,
        however, because the pattern shows up so frequently, we are allowing
        indexing into a nullable container as long as it is on the lhs of a
        null coalesce *)
     then
-      array_get ~lhs_of_null_coalesce is_lvalue p (env, tyvars) ty e2 ty2
+      array_get ~lhs_of_null_coalesce is_lvalue p acc ty e2 ty2
     else begin
       Errors.null_container p
         (Reason.to_string
           "This is what makes me believe it can be null"
           (fst ety1)
         );
-      (env, tyvars), err_witness env p
+      acc, err_witness env p
     end in
   let type_index (env, tyvars) p ty_have ty_expect reason =
   Typing_log.(log_with_level env "typing" 1 (fun () ->
@@ -83,6 +83,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
           let env = Typing_ops.sub_type p reason env ty_have ty_expect in
           env, tyvars
   in
+  let acc = env, tyvars in
   match snd ety1 with
   | Tunresolved tyl ->
       let acc, tyl = List.map_env acc tyl begin fun acc ty1 ->
@@ -262,9 +263,9 @@ let rec array_get ?(lhs_of_null_coalesce=false)
           acc, err_witness env p
         | Some { sft_optional = _; sft_ty } -> acc, sft_ty)
     )
-  | Toption ty -> nullable_container_get ty
+  | Toption ty -> nullable_container_get acc ty
   | Tprim Tnull ->
-      nullable_container_get (Reason.Rnone, Tany)
+      nullable_container_get acc (Reason.Rnone, Tany)
   | Tobject ->
       if Env.is_strict env
       then error_array acc p ety1

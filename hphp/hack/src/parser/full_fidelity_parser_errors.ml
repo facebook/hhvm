@@ -3786,6 +3786,21 @@ let reified_function_call_errors node errors =
     end
   | _ -> errors
 
+let dynamic_method_call_errors node errors =
+  match syntax node with
+  | FunctionCallWithTypeArgumentsExpression
+    { function_call_with_type_arguments_receiver = receiver; _ } ->
+    let is_dynamic = match syntax receiver with
+      | ScopeResolutionExpression { scope_resolution_name = name; _ }
+      | MemberSelectionExpression { member_name = name; _ }
+      | SafeMemberSelectionExpression { safe_member_name = name; _ } ->
+        is_token_kind name TokenKind.Variable
+      | _ -> false
+    in
+    if not is_dynamic then errors else
+    (make_error_from_node node SyntaxError.no_type_parameters_on_dynamic_method_calls) :: errors
+  | _ -> errors
+
 let get_namespace_name context current_namespace_name =
   match context.nested_namespaces with
   | { syntax = NamespaceDeclaration { namespace_name = ns; _ }; _ } :: _ ->
@@ -3879,6 +3894,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | FunctionCallWithTypeArgumentsExpression _ ->
         let errors = reified_function_call_errors node errors in
+        let errors = dynamic_method_call_errors node errors in
         trait_require_clauses, names, errors
       | InstanceofExpression _
       | LiteralExpression _

@@ -588,6 +588,8 @@ let non_invariant_reified_generic =
   "Reified generics cannot be covariant or contravariant"
 let no_generics_on_constructors =
   "Generic type parameters are not allowed on constructors. Consider adding a type parameter to the class"
+let no_type_parameters_on_dynamic_method_calls =
+  "Generics type parameters are disallowed on dynamic method calls"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

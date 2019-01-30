@@ -33,8 +33,6 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/zend-collator.h"
-#include "hphp/runtime/base/zend-sort.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -1708,24 +1706,13 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   return vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt32();
 }
 
-// PHP 5.x does different things when diffing against the same array,
-// particularly when the comparison function is outside the norm of
-// return -1, 0, 1 specification. To do what PHP 5.x in these cases,
-// use the RuntimeOption
 #define COMMA ,
 #define diff_intersect_body(type, vararg, intersect_params)     \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) {                                     \
     return tvReturn(empty_array());                             \
   }                                                             \
-  Array ret = Array::Create();                                  \
-  if (RuntimeOption::EnableZendSorting) {                       \
-    getCheckedArray(array2);                                    \
-    if (arr_array1.same(arr_array2)) {                          \
-      return tvReturn(std::move(ret));                          \
-    }                                                           \
-  }                                                             \
-  ret = arr_array1.type(array2, intersect_params);              \
+  auto ret = arr_array1.type(array2, intersect_params);         \
   if (ret.size()) {                                             \
     for (ArrayIter iter(vararg); iter; ++iter) {                \
       ret = ret.type(iter.second(), intersect_params);          \
@@ -2542,14 +2529,10 @@ struct ArraySortTmp {
 }
 
 static bool
-php_sort(VRefParam container, int sort_flags,
-         bool ascending, bool use_zend_sort) {
+php_sort(VRefParam container, int sort_flags, bool ascending) {
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    if (use_zend_sort) {
-      return zend_sort(*ref, sort_flags, ascending);
-    }
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
     ArraySortTmp ast(ref->asTypedValue(), sf);
     ast->sort(sort_flags, ascending);
@@ -2573,14 +2556,10 @@ php_sort(VRefParam container, int sort_flags,
 }
 
 static bool
-php_asort(VRefParam container, int sort_flags,
-          bool ascending, bool use_zend_sort) {
+php_asort(VRefParam container, int sort_flags, bool ascending) {
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    if (use_zend_sort) {
-      return zend_asort(*ref, sort_flags, ascending);
-    }
     SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
     ArraySortTmp ast(ref->asTypedValue(), sf);
     ast->asort(sort_flags, ascending);
@@ -2603,14 +2582,10 @@ php_asort(VRefParam container, int sort_flags,
 }
 
 static bool
-php_ksort(VRefParam container, int sort_flags, bool ascending,
-          bool use_zend_sort) {
+php_ksort(VRefParam container, int sort_flags, bool ascending) {
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    if (use_zend_sort) {
-      return zend_ksort(*ref, sort_flags, ascending);
-    }
     SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
     ArraySortTmp ast(ref->asTypedValue(), sf);
     ast->ksort(sort_flags, ascending);
@@ -2635,43 +2610,37 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
 bool HHVM_FUNCTION(sort,
                   VRefParam array,
                   int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_sort(array, sort_flags, true, use_zend_sort);
+  return php_sort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(rsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_sort(array, sort_flags, false, use_zend_sort);
+  return php_sort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(asort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_asort(array, sort_flags, true, use_zend_sort);
+  return php_asort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(arsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_asort(array, sort_flags, false, use_zend_sort);
+  return php_asort(array, sort_flags, false);
 }
 
 bool HHVM_FUNCTION(ksort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_ksort(array, sort_flags, true, use_zend_sort);
+  return php_ksort(array, sort_flags, true);
 }
 
 bool HHVM_FUNCTION(krsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  bool use_zend_sort = RuntimeOption::EnableZendSorting;
-  return php_ksort(array, sort_flags, false, use_zend_sort);
+  return php_ksort(array, sort_flags, false);
 }
 
 // NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess
@@ -2679,11 +2648,11 @@ bool HHVM_FUNCTION(krsort,
 // here.
 
 bool HHVM_FUNCTION(natsort, VRefParam array) {
-  return php_asort(array, SORT_NATURAL, true, false);
+  return php_asort(array, SORT_NATURAL, true);
 }
 
 bool HHVM_FUNCTION(natcasesort, VRefParam array) {
-  return php_asort(array, SORT_NATURAL_CASE, true, false);
+  return php_asort(array, SORT_NATURAL_CASE, true);
 }
 
 bool HHVM_FUNCTION(usort,
@@ -2691,14 +2660,8 @@ bool HHVM_FUNCTION(usort,
                    const Variant& cmp_function) {
   if (container.isArray()) {
     auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
-      if (RuntimeOption::EnableZendSorting) {
-        tvAsVariant(arr_array).asArrRef().sort(cmp_func, false, true,
-                                               &cmp_function);
-        return true;
-      } else {
-        ArraySortTmp ast(arr_array, SORTFUNC_USORT);
-        return ast->usort(cmp_function);
-      }
+      ArraySortTmp ast(arr_array, SORTFUNC_USORT);
+      return ast->usort(cmp_function);
     };
     auto ref = container.getVariantOrNull();
     if (LIKELY(ref != nullptr)) {
@@ -2728,14 +2691,8 @@ bool HHVM_FUNCTION(uasort,
                    const Variant& cmp_function) {
   if (container.isArray()) {
     auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
-      if (RuntimeOption::EnableZendSorting) {
-        tvAsVariant(arr_array).asArrRef().sort(cmp_func, false, false,
-                                               &cmp_function);
-        return true;
-      } else {
-        ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
-        return ast->uasort(cmp_function);
-      }
+      ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
+      return ast->uasort(cmp_function);
     };
     auto ref = container.getVariantOrNull();
     if (LIKELY(ref != nullptr)) {

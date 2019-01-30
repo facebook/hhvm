@@ -3035,9 +3035,10 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
-  auto const t1 = topC(env);
+  auto const t1 = topC(env); // meth name
   auto const v1 = tv(t1);
-  auto const clsTy = objcls(t1);
+  auto const t2 = topC(env, 1); // object
+  auto const clsTy = objcls(t2);
   folly::Optional<res::Func> rfunc;
   if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
     rfunc = env.index.resolve_method(env.ctx, clsTy, v1->m_data.pstr);

@@ -12,6 +12,7 @@ open Hhbc_ast
 open Instruction_sequence
 
 module JT = Jump_targets
+module RGH = Reified_generics_helpers
 
 (* Collect list of Ret* and non rewritten Break/Continue instructions inside
    try body. *)
@@ -159,8 +160,24 @@ let emit_return
   (* no finally blocks, but there might be some iterators that should be
       released before exit - do it *)
   | None ->
-    let verify_return_instr =
-      if verify_return then instr_verifyRetTypeC else empty
+    let verify_return_instr () = match verify_return with
+      | None -> empty
+      | Some h ->
+        let h = RGH.convert_awaitable env h in
+        match RGH.has_reified_type_constraint env h with
+        | RGH.NoConstraint -> empty
+        | RGH.NotReified -> instr_verifyRetTypeC
+        | RGH.MaybeReified ->
+          gather [
+            Emit_expression.get_type_structure_for_hint
+              env ~targ_map:SMap.empty h;
+            instr_verifyRetTypeTS
+          ]
+        | RGH.DefinitelyReified ->
+          gather [
+            fst @@ Emit_expression.emit_reified_arg env Pos.none h;
+            instr_verifyRetTypeTS
+          ]
     in
     let release_iterators_instr =
       let iterators_to_release = JT.collect_iterators jump_targets in
@@ -171,13 +188,13 @@ let emit_return
       let load_retval_instr = instr_cgetl (Local.get_retval_local ()) in
       gather [
         load_retval_instr;
-        verify_return_instr;
+        verify_return_instr ();
         verify_out;
         release_iterators_instr;
         if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
       ]
     else gather [
-      verify_return_instr;
+      verify_return_instr ();
       verify_out;
       release_iterators_instr;
       if num_out <> 0 then instr_retm (num_out + 1) else instr_retc

@@ -449,6 +449,7 @@ let make_nullary_inst s =
  | "Catch" -> IMisc(Catch)
  | "ChainFaults" -> IMisc(ChainFaults)
  | "VerifyRetTypeC" -> IMisc(VerifyRetTypeC)
+ | "VerifyRetTypeTS" -> IMisc(VerifyRetTypeTS)
  | "NativeImpl" -> IMisc(NativeImpl)
  | "AKExists" -> IMisc(AKExists)
  | "Idx" -> IMisc(Idx)

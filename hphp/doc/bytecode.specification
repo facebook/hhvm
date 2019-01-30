@@ -3768,6 +3768,14 @@ VerifyParamTypeTS <parameter id>    [C]  ->  []
   an error is raised. This instruction also verifies the reified generic type
   parameters of the specified parameter.
 
+VerifyRetTypeTS [C C]  ->  [C]
+
+  VerifyRetTypeTS pops a type structure from the stack and checks whether
+  $2 is compatible with this type structure. In case of a mismatch, a
+  recoverable error is raised. If the popped cell is not a type structure,
+  an error is raised. This instruction also verifies the reified generic type
+  parameters of $2.
+
 Self <class-ref slot>    []  ->  []
 
   Creates a classref that refers to the class in which the current function is

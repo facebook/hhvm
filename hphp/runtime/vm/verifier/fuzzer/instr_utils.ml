@@ -187,6 +187,7 @@ let stk_data : instruct -> stack_sig = function
   | IMutator _
   | IIncludeEvalDefine _
   | IMisc VerifyRetTypeC
+  | IMisc VerifyRetTypeTS
   | IGenerator _
   | IAsync _
   | ILitConst ColFromArray _               -> ["C"], ["C"]

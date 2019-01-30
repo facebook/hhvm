@@ -572,7 +572,7 @@ let check_instruct_misc asn i i' =
     (e.g. they do not access locals). *)
   | This, _ | BareThis _, _ | CheckThis, _ | Catch, _ | ChainFaults, _
   | OODeclExists _, _ | VerifyParamTypeTS _, _
-  | VerifyParamType _, _ | VerifyRetTypeC, _ | Self _, _
+  | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeTS, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _ | ReifiedName _, _ | ReifiedGeneric _, _
   | RecordReifiedGeneric _, _ | AKExists, _ | Idx, _ | ArrayIdx, _

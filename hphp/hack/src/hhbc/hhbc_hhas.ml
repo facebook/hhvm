@@ -543,6 +543,7 @@ let string_of_misc instruction =
     | VerifyParamTypeTS id -> sep ["VerifyParamTypeTS"; string_of_param_id id]
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
+    | VerifyRetTypeTS -> "VerifyRetTypeTS"
     | Catch -> "Catch"
     | ChainFaults -> "ChainFaults"
     | CheckThis -> "CheckThis"

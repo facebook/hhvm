@@ -247,6 +247,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (OODeclExists (random_class_kind ())));
     (fun () -> IMisc (VerifyParamType (random_param_id ())));
     (fun () -> IMisc VerifyRetTypeC);
+    (fun () -> IMisc VerifyRetTypeTS);
     (*(fun () -> IMisc NativeImpl);*)
     (fun () -> IMisc AKExists);
     (fun () -> IMisc (CreateCl (Random.int 10, Random.int 10)));

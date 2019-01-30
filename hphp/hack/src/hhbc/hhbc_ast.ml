@@ -498,6 +498,7 @@ type instruct_misc =
   | VerifyParamTypeTS of param_id
   | VerifyOutType of param_id
   | VerifyRetTypeC
+  | VerifyRetTypeTS
   | Self of classref_id
   | Parent of classref_id
   | LateBoundCls of classref_id

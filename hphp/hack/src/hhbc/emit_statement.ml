@@ -23,7 +23,7 @@ module Opts = Hhbc_options
 
 (* Context for code generation. It would be more elegant to pass this
  * around in an environment parameter. *)
-let verify_return = ref false
+let verify_return = ref None
 let default_return_value = ref instr_null
 let default_dropthrough = ref None
 let verify_out = ref empty

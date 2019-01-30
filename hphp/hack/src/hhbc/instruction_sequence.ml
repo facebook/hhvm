@@ -211,6 +211,7 @@ let instr_memoset_eager range =
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
+let instr_verifyRetTypeTS = instr (IMisc VerifyRetTypeTS)
 let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
@@ -784,6 +785,7 @@ let get_input_output_count i =
     | OODeclExists _ | AKExists -> (2, 1)
     | VerifyOutType _ | VerifyRetTypeC | CGetCUNop
     | UGetCUNop -> (1, 1)
+    | VerifyRetTypeTS -> (2, 1)
     | CreateCl (n, _) -> (n, 1)
     | MemoGet _ -> (0, 1) | MemoGetEager _ -> (0, 1)
     | MemoSet _ -> (0, 0) | MemoSetEager _ -> (0, 0)

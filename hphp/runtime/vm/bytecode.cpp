@@ -6182,16 +6182,28 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopVerifyRetTypeC() {
+namespace {
+
+OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
     return;
   }
-
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().topC(), func);
+    tc.verifyReturn(vmStack().indC(ind), func);
   }
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopVerifyRetTypeC() {
+  verifyRetTypeImpl(0); // Cell is on the top of the stack
+}
+
+OPTBLD_INLINE void iopVerifyRetTypeTS() {
+  verifyRetTypeImpl(1); // Cell is the second elemnt on the stack
+  vmStack().popC();
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {

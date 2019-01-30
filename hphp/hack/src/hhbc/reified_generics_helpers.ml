@@ -47,3 +47,20 @@ let rec has_reified_type_constraint env h =
   | A.Hreified _
   | A.Haccess _
   | A.Hsoft _ -> NotReified
+
+let rec remove_awaitable (pos, _h as h) = match _h with
+  | A.Happly ((_, id), [h]) when String.lowercase id = "awaitable" -> h
+  (* For @Awaitable<T>, the soft type hint is moved to the inner type, i.e @T *)
+  | A.Hsoft h -> pos, A.Hsoft (remove_awaitable h)
+  (* For ?Awaitable<T>, the optional is dropped *)
+  | A.Hoption h -> remove_awaitable h
+  | A.Htuple _
+  | A.Hshape _
+  | A.Hfun _
+  | A.Hreified _
+  | A.Haccess _
+  | A.Happly _ -> h
+
+let convert_awaitable env h =
+  if Ast_scope.Scope.is_in_async (Emit_env.get_scope env)
+  then remove_awaitable h else h

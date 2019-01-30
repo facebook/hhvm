@@ -1735,6 +1735,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::VerifyParamType:
     case Op::VerifyParamTypeTS:
     case Op::VerifyRetTypeC:
+    case Op::VerifyRetTypeTS:
     case Op::VerifyRetNonNullC:
     case Op::AssertRATL:
     case Op::AssertRATStk:

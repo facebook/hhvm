@@ -372,11 +372,12 @@ let emit_body
   in
   let is_generator, is_pair_generator = Generator.is_function_generator body in
   let verify_return =
-    return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
-    Hhas_type_info.has_type_constraint return_type_info && not is_generator in
+    if return_type_info.Hhas_type_info.type_info_user_type <> Some "" &&
+       Hhas_type_info.has_type_constraint return_type_info && not is_generator
+    then ret else None in
   let default_dropthrough =
     if default_dropthrough <> None then default_dropthrough else begin
-      if is_async && verify_return
+      if is_async && Option.is_some verify_return
       then Some (gather [instr_null; instr_verifyRetTypeC; instr_retc])
       else None
     end

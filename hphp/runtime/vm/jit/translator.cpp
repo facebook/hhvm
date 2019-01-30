@@ -365,6 +365,8 @@ static const struct {
                    {Local|Stack1,     Local,        OutUnknown      }},
   { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
+  { OpVerifyRetTypeTS,
+                   {StackTop2,        Stack1,       OutSameAsInput2  }},
   { OpVerifyRetNonNullC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyOutType,
@@ -473,6 +475,11 @@ void initInstrInfo() {
       auto& ii = instrInfo[OpVerifyRetTypeC];
       ii.in = ii.out = None;
       ii.type = OutNone;
+
+      auto& ii2 = instrInfo[OpVerifyRetTypeTS];
+      ii2.in = Stack1;
+      ii2.out = None;
+      ii2.type = OutNone;
     }
     instrInfoInited = true;
   }
@@ -1030,6 +1037,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::VerifyParamType:
   case Op::VerifyParamTypeTS:
   case Op::VerifyRetTypeC:
+  case Op::VerifyRetTypeTS:
   case Op::VerifyRetNonNullC:
   case Op::VerifyOutType:
   case Op::WHResult:

@@ -4068,6 +4068,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   if (!a.couldBe(requiredTSType)) {
     unreachable(env);
+    popC(env);
     return;
   }
   auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
@@ -4080,13 +4081,20 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   popC(env);
 }
 
-void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
-  auto stackT = topC(env);
+void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
+                   bool reduce_this, bool ts_flavor) {
+  // If it is the ts flavor, then second thing on the stack, otherwise first
+  auto stackT = topC(env, (int)ts_flavor);
 
   // If there is no return type constraint, or if the return type
   // constraint is a typevar, or if the top of stack is the same
   // or a subtype of the type constraint, then this is a no-op.
   if (env.index.satisfies_constraint(env.ctx, stackT, constraint)) {
+    if (ts_flavor) {
+      // this is handled differently in ts flavor
+      popC(env);
+      return;
+    }
     reduce(env, bc::Nop {});
     return;
   }
@@ -4096,6 +4104,7 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   // just leave the top of stack as is.
   if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
       || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
+    if (ts_flavor) popC(env);
     return;
   }
 
@@ -4106,6 +4115,10 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
   if (constraint.isThis() && !constraint.isNullable() && is_opt(stackT) &&
       env.index.satisfies_constraint(env.ctx, unopt(stackT), constraint)) {
     if (reduce_this) {
+      if (ts_flavor) {
+        reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
+        return;
+      }
       reduce(env, bc::VerifyRetNonNullC {});
       return;
     }
@@ -4142,19 +4155,40 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
 
   if (retT.subtypeOf(BBottom)) {
     unreachable(env);
+    if (ts_flavor) popC(env); // the type structure
     return;
   }
 
+  if (ts_flavor) popC(env); // the type structure
   popC(env);
   push(env, std::move(retT));
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
-  verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint, false);
+  verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint,
+                false, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
-  verifyRetImpl(env, env.ctx.func->retTypeConstraint, true);
+  verifyRetImpl(env, env.ctx.func->retTypeConstraint, true, false);
+}
+
+void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
+  auto const a = topC(env);
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  if (!a.couldBe(requiredTSType)) {
+    unreachable(env);
+    popC(env);
+    return;
+  }
+  auto const constraint = env.ctx.func->retTypeConstraint;
+  // TODO(T31677864): We are being extremely pessimistic here, relax it
+  if (!env.ctx.func->isReified &&
+      (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
+      !env.index.could_have_reified_type(constraint)) {
+    return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+  }
+  verifyRetImpl(env, constraint, true, true);
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {

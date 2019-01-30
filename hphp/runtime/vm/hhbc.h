@@ -702,6 +702,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
   O(VerifyParamTypeTS, ONE(LA),        ONE(CV),         NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
+  O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
   O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
   O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \

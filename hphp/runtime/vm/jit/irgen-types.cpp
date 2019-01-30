@@ -1078,13 +1078,15 @@ void emitAsTypeStructC(IRGS& env, TypeStructResolveOp op) {
 
 namespace {
 
-void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
+void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
+                       bool onlyCheckNullability) {
   if (!RuntimeOption::EvalCheckReturnTypeHints) return;
 
   auto const func = curFunc(env);
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
+  assertx(ind >= 0);
 
   verifyTypeImpl(
     env,
@@ -1092,7 +1094,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
     onlyCheckNullability,
     nullptr,
     [&] { // Get value to test
-      return topC(env);
+      return topC(env, BCSPRelOffset { ind });
     },
     [] (SSATmp*) -> Type { // Get boxed inner value
       PUNT(VerifyReturnTypeBoxed);
@@ -1118,7 +1120,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
         env,
         failHard ? VerifyRetFailHard : VerifyRetFail,
         ParamData { id },
-        ldStkAddr(env, BCSPRelOffset{0})
+        ldStkAddr(env, BCSPRelOffset { ind })
       );
     },
     [&] (SSATmp* val) { // d/varray mismatch notice
@@ -1304,18 +1306,23 @@ void verifyPropType(IRGS& env,
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
-  verifyRetTypeImpl(env, TypeConstraint::ReturnId, false);
+  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, false);
+}
+
+void emitVerifyRetTypeTS(IRGS& env) {
+  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 1, false);
+  popC(env);
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {
   auto const func = curFunc(env);
   auto const& tc = func->returnTypeConstraint();
   always_assert(!tc.isNullable());
-  verifyRetTypeImpl(env, TypeConstraint::ReturnId, true);
+  verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 
 void emitVerifyOutType(IRGS& env, uint32_t paramId) {
-  verifyRetTypeImpl(env, paramId, false);
+  verifyRetTypeImpl(env, paramId, 0, false);
 }
 
 void emitVerifyParamType(IRGS& env, int32_t paramId) {

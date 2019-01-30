@@ -76,6 +76,16 @@ struct
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method _ :: _ -> true
 
+  let rec is_in_async scope =
+    match scope with
+    | [] -> false
+    | ScopeItem.Lambda _ :: scope
+    | ScopeItem.LongLambda _ :: scope -> is_in_async scope
+    | ScopeItem.Class _ :: _ -> false
+    | ScopeItem.Function { Ast.f_fun_kind = kind; _ } :: _
+    | ScopeItem.Method { Ast.m_fun_kind = kind; _ } :: _ ->
+      kind = Ast.FAsync || kind = Ast.FAsyncGenerator
+
   let is_toplevel scope = scope = []
 
   let rec is_in_static_method scope =

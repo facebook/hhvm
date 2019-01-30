@@ -244,16 +244,20 @@ let send_input_and_form_result
   }
 
 
+(**
+ * This method augments the environment
+ *)
 let exec_no_chdir
     (prog: string)
     ?(input: string option)
-    ?(env: string list option)
+    ?(augments_to_env: string list option)
     (args: string list)
   : Process_types.t =
   let info = {
     Process_types.name = prog;
     args = args;
-    stack = Utils.Callstack (Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string);
+    stack = Utils.Callstack
+      (Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string);
   } in
   let args = Array.of_list (prog :: args) in
   let stdin_child, stdin_parent = Unix.pipe () in
@@ -262,13 +266,13 @@ let exec_no_chdir
   Unix.set_close_on_exec stdin_parent;
   Unix.set_close_on_exec stdout_parent;
   Unix.set_close_on_exec stderr_parent;
-  let pid = match env with
+  let pid = match augments_to_env with
   | None ->
     Unix.create_process prog args stdin_child stdout_child stderr_child
-  | Some env ->
+  | Some augments_to_env ->
     (* deduping the env is not necessary. glibc putenv/getenv will grab the first
      * one *)
-    let fullenv = Array.append (Array.of_list env) (Unix.environment ()) in
+    let fullenv = Array.append (Array.of_list augments_to_env) (Unix.environment ()) in
     Unix.create_process_env prog args
       fullenv stdin_child stdout_child stderr_child
   in
@@ -283,7 +287,6 @@ let register_entry_point = Entry.register
 type chdir_params = {
   cwd: string;
   prog: string;
-  env: string list option;
   args: string list;
 }
 
@@ -312,7 +315,9 @@ let run_entry
 let chdir_main (p: chdir_params) : 'a =
   Unix.chdir p.cwd;
   let args = Array.of_list (p.prog :: p.args) in
-  Unix.execvpe p.prog args (Array.of_list @@ Option.value p.env ~default:[])
+  (* It's not clear whether this replaces the environment with an empty one, *)
+  (* or augments it, nor whether the behavior on Windows differs from Linux... *)
+  Unix.execvpe p.prog args [| |]
 
 let chdir_entry: (chdir_params, 'a, 'b) Daemon.entry = Entry.register "chdir_main" chdir_main
 
@@ -321,14 +326,13 @@ let exec_
     ~(cwd: string option)
     ~(prog: string)
     ~(input:string option)
-    ~(env: string list option)
     ~(args: string list)
   : Process_types.t =
   match cwd with
   | None ->
-    exec_no_chdir prog ?input ?env args
+    exec_no_chdir prog ?input args
   | Some cwd ->
-    run_entry ?input chdir_entry {cwd; prog; env; args;}
+    run_entry ?input chdir_entry {cwd; prog; args;}
 
 (** Exec the given program with these args. If input is set, send it to
  * the stdin on the spawned program and then close the file descriptor.
@@ -339,19 +343,17 @@ let exec
     ?(cwd: string option)
     (prog: string)
     ?(input: string option)
-    ?(env: string list option)
     (args: string list)
   : Process_types.t =
-  exec_ ~cwd ~prog ~input ~env ~args
+  exec_ ~cwd ~prog ~input ~args
 
-(* spawns a process just like exec, EXCEPT that the environment is REPLACED instead
- * of AUGMENTED. This is almost certainly not what you want to do. The program you
- * are calling or one of the things it calls probably depends on "PATH". *)
-let exec_with_replacement_env
-    ?(cwd: string option)
+let exec_with_augmented_env
     (prog: string)
     ~(env: string list)
-    ?(input: string option)
     (args: string list)
   : Process_types.t =
-  exec_ ~cwd ~prog ~input ~env:(Some env) ~args
+  (* I'm suspicious whether the exec_ behavior handles env correctly in all cases. *)
+  (* I'm confident that exec_no_chdir does it right. That's why this method *)
+  (* only ever calls into exec_no_chdir. *)
+  let augments_to_env = env in
+  exec_no_chdir prog ~augments_to_env args

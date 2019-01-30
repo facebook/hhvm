@@ -38,11 +38,17 @@ let test_process_read_idempotent () =
     false
 
 let test_env_variable () =
-  let process = Process.exec_with_replacement_env "printenv" ~env:[ "NAME=world" ] [ ] in
+  let process = Process.exec_with_augmented_env "printenv" ~env:[ "NAME=world" ] [ ] in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok {Process_types.stdout; _} ->
-    let () = String_asserter.assert_equals "NAME=world\n" stdout "" in
-    true
+    let env = String_utils.split_into_lines stdout in
+    let name_env = List.filter (fun s -> String_utils.string_starts_with s "NAME=") env in
+    begin match name_env with
+      | [] -> false
+      | (n::_) ->
+        let () = String_asserter.assert_equals "NAME=world" n "" in
+        true
+    end
   | _ ->
     false
 

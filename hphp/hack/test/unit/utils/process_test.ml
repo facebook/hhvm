@@ -24,7 +24,8 @@ open Process
  * *)
 let test_proc_env () =
   let () = Unix.putenv "B" "1" in
-  let proc_t = exec "bash" ~env:["A=1"] ["-c"; "case \"$B\" in 1) exit 0;; *) exit 1;; esac"] in
+  let proc_t = exec_with_augmented_env
+    "bash" ~env:["A=1"] ["-c"; "case \"$B\" in 1) exit 0;; *) exit 1;; esac"] in
   let proc_stat_ref = proc_t.Process_types.lifecycle in
   let proc_stat = !proc_stat_ref in
   match proc_stat with

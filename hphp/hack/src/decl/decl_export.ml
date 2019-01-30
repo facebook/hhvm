@@ -138,7 +138,9 @@ let rec collect_class
               Relative_path.Map.add decls.decl_fixmes filename fixmes}
           | None -> decls
     in
-    let ancestors = keys_to_sset data.dc_ancestors in
+    let ancestors =
+      SSet.union (keys_to_sset data.dc_ancestors) data.dc_xhp_attr_deps
+    in
     collect_classes tcopt requested_classes decls ancestors
 
 and collect_classes tcopt requested_classes decls =

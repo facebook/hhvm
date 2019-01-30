@@ -682,14 +682,6 @@ and class_ tenv c =
     (check_is_interface (env, "require implementation of"));
   List.iter c.c_req_extends (check_is_class env);
   List.iter c.c_uses (check_is_trait env);
-  let disallow_static_memoized = TypecheckerOptions.experimental_feature_enabled
-    (Env.get_tcopt env.tenv)
-    TypecheckerOptions.experimental_disallow_static_memoized in
-  if disallow_static_memoized && not c.c_final then
-    begin
-    List.iter c.c_static_methods (check_static_memoized_function);
-    maybe (fun _ m -> check_static_memoized_function m) () c.c_constructor
-  end
 
 (** Make sure that the given hint points to an interface *)
 and check_is_interface (env, error_verb) (x : hint) =

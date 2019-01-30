@@ -1287,18 +1287,6 @@ TypedValue HHVM_FUNCTION(array_values,
   return tvReturn(array_values(input));
 }
 
-static void walk_func(Variant& value,
-                      const Variant& key,
-                      const Variant& userdata,
-                      const void *data) {
-  CallCtx* ctx = (CallCtx*)data;
-  int nargs = userdata.isInitialized() ? 3 : 2;
-  TypedValue args[3] = { *value.asRef(), *key.toCell(), *userdata.toCell() };
-  tvDecRefGen(
-    g_context->invokeFuncFew(*ctx, nargs, args)
-  );
-}
-
 static void compact(PointerSet& seen, VarEnv* v, Array& ret,
                     const Variant& var) {
   if (var.isArray()) {

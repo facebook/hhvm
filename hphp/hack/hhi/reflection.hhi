@@ -340,5 +340,5 @@ class ReflectionFile implements Reflector {
   public function getName(): string;
   final public function getAttributes(): darray;
   final public function getAttribute(string $name);
-  final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
+  final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c): ?T;
 }

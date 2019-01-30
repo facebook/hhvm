@@ -543,7 +543,6 @@ and hint_ env p = function
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
       let compute_hint_for_shape_field_info _ { sfi_hint; _; } =
-        Typing_instantiability.check_instantiable env.tenv sfi_hint;
         hint env sfi_hint in
 
       ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map

@@ -133,4 +133,8 @@ let handler = object
     List.iter m.m_params (check_param env);
     check_variadic_param env m.m_variadic;
 
+  method! at_hint env (_, h) =
+    match h with
+    | Aast.Hshape hm -> check_shape env hm
+    | _ -> ()
 end

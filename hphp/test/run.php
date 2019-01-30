@@ -1289,6 +1289,12 @@ class Status {
     mkdir(self::$tempdir);
   }
 
+  public static function getTestTmpDir() {
+    $test_tmp_dir = self::$tempdir . "/test-data";
+    mkdir($test_tmp_dir);
+    return $test_tmp_dir;
+  }
+
   private static function removeDirectory($dir) {
     $files = scandir($dir);
     foreach ($files as $file) {
@@ -3086,6 +3092,8 @@ function main($argv) {
   }
 
   Status::started();
+  $_ENV['HPHP_TEST_TMPDIR'] = Status::getTestTmpDir();
+
   // Spawn off worker threads.
   $children = array();
   // A poor man's shared memory.

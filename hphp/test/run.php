@@ -847,11 +847,7 @@ function extra_args($options): string {
   return $args;
 }
 
-function hhvm_cmd_impl() {
-  $args = func_get_args();
-  $options = array_shift(&$args);
-  $config = array_shift(&$args);
-  $extra_args = $args;
+function hhvm_cmd_impl($options, $config, ...$extra_args) {
   $modes = (array)mode_cmd($options);
   $cmds = array();
   foreach ($modes as $mode) {
@@ -1553,8 +1549,7 @@ class Status {
    * and any one of the arguments is preceded by an integer (see the color
    * constants above), that argument will be given the indicated color.
    */
-  public static function sayColor() {
-    $args = func_get_args();
+  public static function sayColor(...$args) {
     while (count($args)) {
       $color = null;
       $str = array_shift(&$args);
@@ -1589,10 +1584,11 @@ class Status {
   }
 
   /** Output is in the format expected by JsonTestRunner. */
-  public static function say(/* ... */) {
-    $data = array_map(function($row) {
-      return self::jsonEncode($row) . "\n";
-    }, func_get_args());
+  public static function say(...$args) {
+    $data = array_map(
+      $row ==> self::jsonEncode($row) . "\n",
+      $args
+    );
     fwrite(STDERR, implode("", $data));
   }
 

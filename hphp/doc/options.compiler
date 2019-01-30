@@ -164,11 +164,6 @@ Default is false. Enables new syntax, including yield, new type names for
 function parameter, function return and class variable type hints (string,
 int, boolean, etc..), new array types (vector, map, set).
 
-= EnableHipHopExperimentalSyntax
-
-Default is false. Enables experimental syntax, including type hints for local
-variables and global variables.
-
 = EnableShortTags
 
 Default is true. Is &lt;? allowed with PHP code?

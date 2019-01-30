@@ -83,7 +83,6 @@ bool Option::KeepStatementsWithNoEffect = false;
 std::string Option::ProgramName;
 
 bool Option::ParseTimeOpts = true;
-bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 int Option::ParserThreadCount = 0;
 
@@ -229,8 +228,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(EnableHipHopExperimentalSyntax, ini,
-               config, "EnableHipHopExperimentalSyntax");
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
 
 #define BIND_HAC_OPTION(Name, Def)                      \

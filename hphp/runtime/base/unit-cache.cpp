@@ -761,7 +761,6 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::EnableCoroutines ? '1' : '0')
     + (RuntimeOption::EnableIsExprPrimitiveMigration ? '1' : '0')
-    + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableReifiedGenerics ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')

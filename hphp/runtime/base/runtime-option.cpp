@@ -95,7 +95,6 @@ std::string RuntimeOption::PidFile = "www.pid";
 bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
-bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnablePHP = true;
 bool RuntimeOption::EnableXHP = false;
@@ -1332,8 +1331,6 @@ void RuntimeOption::Load(
     // Eval
     Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax",
                  EnableHipHopSyntax);
-    Config::Bind(EnableHipHopExperimentalSyntax, ini,
-                 config, "Eval.EnableHipHopExperimentalSyntax");
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
     Config::Bind(EnablePHP, ini, config, "Eval.EnablePHP", EnablePHP);
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);

@@ -110,7 +110,6 @@ function determine_flags(OptionMap $opts): string {
   if (!$opts->containsKey('no-defaults')) {
     $flags .=
       '-v Eval.EnableHipHopSyntax=true '.
-      '-v Eval.EnableHipHopExperimentalSyntax=true '.
       '-v Eval.JitEnableRenameFunction=0 '.
       '-v Eval.GdbSyncChunks=1 '.
       '-v Eval.AllowHhas=true '.
@@ -228,7 +227,6 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $hphp_out='/tmp/hphp_out'.posix_getpid();
   $cmd = get_paths($opts)['hphp'].' '.
     '-v EnableHipHopSyntax=1 '.
-    '-v EnableHipHopExperimentalSyntax=1 '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
     ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
     '-t hhbc -k1 -l3 '.

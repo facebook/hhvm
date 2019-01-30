@@ -21,7 +21,6 @@ open Core_kernel
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module SyntaxError = Full_fidelity_syntax_error
-module TK = Full_fidelity_token_kind
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 module WithSmartConstructors(SCI : SmartConstructors.SmartConstructors_S
@@ -41,64 +40,6 @@ type t = {
   mode : FileInfo.mode option;
   state : SCI.t;
 } [@@deriving show]
-
-let parse_mode_comment s =
-  let s = String.strip s in
-  let len = String.length s in
-  if len >= 2 && (String.get s 0) = '/' && (String.get s 1) = '/' then
-    String.strip @@ String.sub s 2 (len - 2)
-  else
-    ""
-
-let first_section script_declarations =
-  match syntax script_declarations with
-  | SyntaxList (h :: _) ->
-    begin match syntax h with
-    | MarkupSection ms -> (ms.markup_prefix, ms.markup_text, ms.markup_suffix)
-    | _ -> failwith "unexpected: first element in a script should be markup"
-    end
-  | _ -> failwith "unexpected: script content should be list"
-
-let analyze_header text script =
-  let (markup_prefix, markup_text, markup_suffix) = first_section script in
-  match syntax markup_suffix with
-  | MarkupSuffix {
-    markup_suffix_less_than_question;
-    markup_suffix_name; _ } ->
-    begin match syntax markup_suffix_name with
-    | Missing -> Some FileInfo.Mphp
-    | Token t when Token.kind t = TK.Equal -> Some FileInfo.Mphp
-    | _ ->
-      let prefix_width = full_width markup_prefix in
-      let text_width = full_width markup_text in
-      let ltq_width = full_width markup_suffix_less_than_question in
-      let name_leading = leading_width markup_suffix_name in
-      let name_width = Syntax.width markup_suffix_name in
-      let name_trailing = trailing_width markup_suffix_name in
-      let language = SourceText.sub text (prefix_width + text_width +
-        ltq_width + name_leading) name_width
-      in
-      let language = String.lowercase language in
-      if language = "php" then Some FileInfo.Mphp else
-      let is_hhi = text
-        |> SourceText.file_path
-        |> Relative_path.suffix
-        |> String.is_suffix ~suffix:".hhi" in
-      if is_hhi then Some FileInfo.Mdecl else
-      let mode = SourceText.sub text (prefix_width + text_width +
-        ltq_width + name_leading + name_width) name_trailing
-      in
-      FileInfo.parse_mode (parse_mode_comment mode)
-    end
-  | _ -> Some FileInfo.Mphp
-  (* The parser never produces a leading markup section; it fills one in with zero
-     width tokens if it needs to. *)
-
-let get_mode text root =
-  match syntax root with
-  | Script s -> analyze_header text s.script_declarations
-  | _ -> failwith "unexpected missing script node"
-    (* The parser never produces a missing script, even if the file is empty *)
 
 let remove_duplicates errors equals =
   (* Assumes the list is sorted so that equal items are together. *)
@@ -139,16 +80,13 @@ let create text root errors mode state =
   let errors = process_errors errors in
   build text root errors mode state
 
-let from_root text root errors state =
-  let mode = get_mode text root in
-  create text root errors mode state
-
 let make_impl ?(env = Env.default) text =
+  let mode = Full_fidelity_parser.parse_mode text in
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   let errors = Parser.errors parser in
   let state = Parser.sc_state parser in
-  from_root text root errors state
+  create text root errors mode state
 
 let make ?(env = Env.default) text =
   Stats_container.wrap_nullary_fn_timing
@@ -215,9 +153,6 @@ let to_json ?with_value tree =
 end (* WithSmartConstructors *)
 
 include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
-
-let from_root text root errors =
-  from_root text root errors ()
 
 let create text root errors mode =
   create text root errors mode ()

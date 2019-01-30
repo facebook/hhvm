@@ -17,12 +17,13 @@ exception MoreThanOneElementInTheState of Syntax.t list
 let verify ?(env = Env.default) text =
   let parser = VerifyParser.make env text in
   try
+    let mode = Full_fidelity_parser.parse_mode text in
     let (parser, root) = VerifyParser.parse_script parser in
     let sc_state = VerifyParser.sc_state parser in
     if List.length sc_state > 1 then
       raise (MoreThanOneElementInTheState sc_state);
     let errors = VerifyParser.errors parser in
-    SyntaxTree.from_root text root errors
+    SyntaxTree.create text root errors mode
   with
   | VerifySC.NotPhysicallyEquals (cons_name, stack, params, args) ->
     failwith @@ Printf.sprintf

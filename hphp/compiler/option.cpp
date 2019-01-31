@@ -180,10 +180,12 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   {
     // AutoloadMap
-    Config::Bind(AutoloadClassMap, ini, config, "AutoloadMap.class");
-    Config::Bind(AutoloadFuncMap, ini, config, "AutoloadMap.function");
-    Config::Bind(AutoloadConstMap, ini, config, "AutoloadMap.constant");
-    Config::Bind(AutoloadRoot, ini, config, "AutoloadMap.root");
+    // not using Bind here because those maps are enormous and cause performance
+    // problems when showing up later
+    AutoloadClassMap = Config::GetMapC(ini, config, "AutoloadMap.class");
+    AutoloadFuncMap = Config::GetMapC(ini, config, "AutoloadMap.function");
+    AutoloadConstMap = Config::GetMap(ini, config, "AutoloadMap.constant");
+    AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
   Config::Bind(RuntimeOption::EvalHardTypeHints, ini, config,

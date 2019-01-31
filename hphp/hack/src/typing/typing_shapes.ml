@@ -172,9 +172,9 @@ let is_shape_field_required env field_name shape_ty =
  *)
 let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res, tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+  let env, res, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
   match TUtils.shape_field_name env field with
-  | None -> env, (Reason.Rwitness (fst field), TUtils.tany env), tyvars
+  | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
     let fake_super_shape_ty =
       make_idx_fake_super_shape
@@ -191,8 +191,7 @@ let idx env p fty shape_ty field default =
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
          is_shape_field_required env field_name shape_ty
       then res
-      else TUtils.ensure_option env (fst fty) res),
-      tyvars
+      else TUtils.ensure_option env (fst fty) res)
     | Some (default_pos, default_ty) ->
       let env =
         Type.sub_type (fst field) Reason.URparam env
@@ -202,7 +201,7 @@ let idx env p fty shape_ty field default =
         Type.sub_type default_pos Reason.URparam env
           default_ty
           res in
-      env, res, tyvars
+      env, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with
@@ -248,9 +247,7 @@ let to_collection env shape_ty res return_type =
       | _ -> env, res
 
   end in
-  let env, ty =
-    mapper#on_type (Type_mapper.fresh_env env) shape_ty in
-  env, ty, ISet.empty
+  mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
 let to_array env shape_ty res =
   let env, shape_ty = Typing_subtype.expand_type_and_solve env shape_ty in

@@ -299,7 +299,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
-    ParserThreadCount = std::max(1, Process::GetCPUCount() / 2);
+    ParserThreadCount = Process::GetCPUCount();
   }
 
   // Just to silence warnings until we remove them from various config files

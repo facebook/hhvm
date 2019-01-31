@@ -99,27 +99,28 @@ mergedriver = python:scripts/mergedriver.py
         cmd = ['hg', 'commit', '-m', msg]
         self.check_call(cmd)
 
-    foo_1_start = r"""
-        <?hh
-        function f() {
-            return 1;
-        }
+    foo_1_start = """\
+<?hh
+function f() {
+    return 1;
+}
 """
 
     foo_1_first_append = r"""
-        function returns_int() {
-            return 5;
-        }
+function returns_int() {
+    return 5;
+}
 """
 
     foo_1_second_append = r"""
-        function returns_string() {
-            return "hello";
-        }
+function returns_string() {
+    return "hello";
+}
 """
 
     def write_foo_1_and_commit(self, content, commit_msg):
-        with open(os.path.join(self.repo_dir, 'foo_1.php'), 'w') as f:
+        foo_1_path = os.path.join(self.repo_dir, 'foo_1.php')
+        with open(foo_1_path, 'w') as f:
             f.write(content)
         self.hg_commit(commit_msg)
 

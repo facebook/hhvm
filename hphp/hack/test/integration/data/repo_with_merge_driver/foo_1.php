@@ -1,4 +1,4 @@
-        <?hh
-        function f() {
-            return g() + 1;
-        }
+<?hh
+function f() {
+    return g() + 1;
+}

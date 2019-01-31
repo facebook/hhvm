@@ -579,36 +579,36 @@ TypedValue HHVM_FUNCTION(array_map,
 }
 
 TypedValue HHVM_FUNCTION(array_merge,
-                         int64_t numArgs,
                          const Variant& array1,
-                         const Variant& array2 /* = uninit_variant */,
-                         const Array& args /* = null array */) {
+                         const Array& arrays /* = null array */) {
   getCheckedContainer(array1);
   Array ret = Array::Create();
   ret.merge(arr_array1);
 
-  if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
+  bool success = true;
+  IterateV(
+    arrays.get(),
+    [&](TypedValue v) -> bool {
+      if (!tvIsArrayLike(v)) {
+        throw_expected_array_exception("array_merge");
+        success = false;
+        return true;
+      }
 
-  getCheckedArray(array2);
-  ret.merge(arr_array2);
-
-  for (ArrayIter iter(args); iter; ++iter) {
-    Variant v = iter.second();
-    if (!v.isArray()) {
-      throw_expected_array_exception("array_merge");
-      return make_tv<KindOfNull>();
+      ret.merge(asCArrRef(&v));
+      return false;
     }
-    const Array& arr_v = v.asCArrRef();
-    ret.merge(arr_v);
+  );
+
+  if (UNLIKELY(!success)) {
+    return make_tv<KindOfNull>();
   }
   return tvReturn(std::move(ret));
 }
 
 TypedValue HHVM_FUNCTION(array_merge_recursive,
-                         int64_t numArgs,
                          const Variant& array1,
-                         const Variant& array2 /* = uninit_variant */,
-                         const Array& args /* = null array */) {
+                         const Array& arrays /* = null array */) {
   getCheckedArray(array1);
   auto in1 = array1.asCArrRef();
   Array ret = Array::Create();
@@ -616,21 +616,24 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assertx(seen.empty());
 
-  if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
+  bool success = true;
+  IterateV(
+    arrays.get(),
+    [&](TypedValue v) -> bool {
+      if (!tvIsArrayLike(v)) {
+        throw_expected_array_exception("array_merge_recursive");
+        success = false;
+        return true;
+      }
 
-  getCheckedArray(array2);
-  php_array_merge_recursive(seen, false, ret, arr_array2);
-  assertx(seen.empty());
-
-  for (ArrayIter iter(args); iter; ++iter) {
-    Variant v = iter.second();
-    if (!v.isArray()) {
-      throw_expected_array_exception("array_merge_recursive");
-      return make_tv<KindOfNull>();
+      php_array_merge_recursive(seen, false, ret, asCArrRef(&v));
+      assertx(seen.empty());
+      return false;
     }
-    const Array& arr_v = v.asCArrRef();
-    php_array_merge_recursive(seen, false, ret, arr_v);
-    assertx(seen.empty());
+  );
+
+  if (UNLIKELY(!success)) {
+    return make_tv<KindOfNull>();
   }
   return tvReturn(std::move(ret));
 }

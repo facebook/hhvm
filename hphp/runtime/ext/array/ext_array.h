@@ -55,11 +55,6 @@ TypedValue HHVM_FUNCTION(array_map,
                          const Variant& callback,
                          const Variant& arr1,
                          const Array& _argv = null_array);
-TypedValue HHVM_FUNCTION(array_merge_recursive,
-                         int64_t numArgs,
-                         const Variant& array1,
-                         const Variant& array2 = uninit_variant,
-                         const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_replace_recursive,
                          const Variant& array1,
                          const Variant& array2 = uninit_variant,

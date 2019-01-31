@@ -214,12 +214,8 @@ function array_keys(
  *   together.
  *
  */
-<<__Native("NumArgs"), __IsFoldable>>
-function array_merge_recursive(
-  mixed $array1,
-  mixed $array2 = null,
-  ...$argv
-): mixed;
+<<__Native, __IsFoldable>>
+function array_merge_recursive(mixed $array1, ...$arrays): mixed;
 
 /**
  * Merges the elements of one or more arrays together so that the values of
@@ -236,8 +232,8 @@ function array_merge_recursive(
  * @return mixed - Returns the resulting array.
  *
  */
-<<__Native("NumArgs"), __IsFoldable>>
-function array_merge(mixed $array1, mixed $array2 = null, ...$argv): mixed;
+<<__Native, __IsFoldable>>
+function array_merge(mixed $array1, ...$arrays): mixed;
 
 /**
  * array_replace_recursive() replaces the values of the first array with the

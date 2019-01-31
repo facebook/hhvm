@@ -304,8 +304,8 @@ static void sock_array_from_fd_set(Variant &sockets,
                                    const std::vector<pollfd>& fds,
                                    int &nfds, int &count, short flag) {
   assertx(sockets.isArray());
-  Array sock_array = sockets.toArray();
-  Array ret = Array::Create();
+  const Array sock_array = sockets.toArray();
+  Array ret = Array::CreateDArray();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     const pollfd &fd = fds.at(nfds++);
     assertx(fd.fd == cast<File>(iter.second())->fd());
@@ -638,14 +638,14 @@ bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
   }
 
   if (asStream) {
-    fd.assignIfRef(make_packed_array(
+    fd.assignIfRef(make_varray(
       Variant(req::make<StreamSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                       s_socktype_generic)),
       Variant(req::make<StreamSocket>(fds_array[1], domain, nullptr, 0, 0.0,
                                       s_socktype_generic))
     ));
   } else {
-    fd.assignIfRef(make_packed_array(
+    fd.assignIfRef(make_varray(
       Variant(req::make<ConcreteSocket>(fds_array[0], domain, nullptr, 0, 0.0,
                                         s_socktype_generic)),
       Variant(req::make<ConcreteSocket>(fds_array[1], domain, nullptr, 0, 0.0,
@@ -986,7 +986,9 @@ Variant HHVM_FUNCTION(socket_select,
    * read buffer of any of the streams in the read array, let's pretend
    * that we selected, but return only the readable sockets */
   if (!read.isNull()) {
-    auto hasData = Array::Create();
+    // sock_array_from_fd_set can set a sparsely indexed array, so
+    // we use darray everywhere.
+    auto hasData = Array::CreateDArray();
     for (ArrayIter iter(read.toArray()); iter; ++iter) {
       auto file = cast<File>(iter.second());
       if (file->bufferedLen() > 0) {
@@ -995,10 +997,10 @@ Variant HHVM_FUNCTION(socket_select,
     }
     if (hasData.size() > 0) {
       if (!write.isNull()) {
-        write.assignIfRef(empty_array());
+        write.assignIfRef(empty_darray());
       }
       if (!except.isNull()) {
-        except.assignIfRef(empty_array());
+        except.assignIfRef(empty_darray());
       }
       read.assignIfRef(hasData);
       return hasData.size();
@@ -1583,10 +1585,10 @@ Variant HHVM_FUNCTION(getaddrinfo,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
 
   for (res = res0; res; res = res->ai_next) {
-    Array data = make_map_array(
+    Array data = make_darray(
       s_family, res->ai_family,
       s_socktype, res->ai_socktype,
       s_protocol, res->ai_protocol
@@ -1601,7 +1603,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
           a = (struct sockaddr_in *)res->ai_addr;
           data.set(
             s_sockaddr,
-            make_map_array(
+            make_darray(
               s_address, buffer,
               s_port, ntohs(a->sin_port)
             )
@@ -1617,7 +1619,7 @@ Variant HHVM_FUNCTION(getaddrinfo,
           a = (struct sockaddr_in6 *)res->ai_addr;
           data.set(
             s_sockaddr,
-            make_map_array(
+            make_darray(
               s_address, buffer,
               s_port, ntohs(a->sin6_port),
               s_flow_info, (int32_t)a->sin6_flowinfo,

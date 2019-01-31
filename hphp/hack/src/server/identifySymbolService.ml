@@ -134,6 +134,18 @@ let typed_class_id env ty pos =
   |> List.map ~f:(fun cid -> process_class_id (pos, cid))
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 
+(* When we detect a function reference encapsulated in a string,
+ * we want to update the function reference without removing the apostrophes.
+ *
+ * Example: class_meth(myclass::class, 'myfunc');
+ *
+ * In this case, we only want to replace the text 'myfunc' - so we need
+ * to shrink our positional data by the apostrophes. *)
+let remove_apostrophes_from_function_eval (mid: Ast_defs.pstring): Ast_defs.pstring =
+  let pos, member_name = mid in
+  let new_pos = (Pos.shrink_by_one_char_both_sides pos) in
+  (new_pos, member_name)
+
 let visitor = object (self)
   inherit [_] Tast_visitor.reduce as super
 
@@ -157,18 +169,20 @@ let visitor = object (self)
         process_class_id cid
       | Tast.Fun_id id ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.fun_) +
-        process_fun_id id
+        process_fun_id (remove_apostrophes_from_function_eval id)
       | Tast.Method_id (((_, ty), _), mid) ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.inst_meth) +
-        typed_method env ty mid
+        typed_method env ty (remove_apostrophes_from_function_eval mid)
       | Tast.Smethod_id ((_, cid) as pcid, mid) ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.class_meth) +
         process_class_id pcid +
-        process_member cid mid ~is_method:true ~is_const:false
+        process_member cid (remove_apostrophes_from_function_eval mid)
+        ~is_method:true ~is_const:false
       | Tast.Method_caller ((_, cid) as pcid, mid) ->
         process_fun_id (pos, "\\"^SN.SpecialFunctions.meth_caller) +
         process_class_id pcid +
-        process_member cid mid ~is_method:true ~is_const:false
+        process_member cid (remove_apostrophes_from_function_eval mid)
+        ~is_method:true ~is_const:false
       | _ -> self#zero
     in
     acc + super#on_expr env expr

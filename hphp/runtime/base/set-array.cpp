@@ -749,11 +749,12 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
 }
 
 ArrayData* SetArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
   if (isIntType(v.m_type)) {
+    auto a = asSet(ad)->prepareForInsert(copy);
     a->insert(v.m_data.num);
     return a;
   } else if (isStringType(v.m_type)) {
+    auto a = asSet(ad)->prepareForInsert(copy);
     a->insert(v.m_data.pstr);
     return a;
   } else {

@@ -5031,7 +5031,8 @@ and call_ ~expected ~method_call_info pos env fty el uel =
       | e :: _ ->
         (* Enforces that e is unpackable. If e is a tuple, check types against
          * parameter types *)
-        let env, te, ety = expr env e in
+        let env, te, ty = expr env e in
+        let env, ety = SubType.expand_type_and_solve env ty in
         match ety with
         | _, Ttuple tyl ->
           let rec check_elements env tyl paraml =

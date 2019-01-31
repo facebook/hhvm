@@ -137,4 +137,10 @@ let handler = object
     match h with
     | Aast.Hshape hm -> check_shape env hm
     | _ -> ()
+
+  method! at_gconst env cst =
+    match cst.cst_value with
+    | Some _ -> Option.iter cst.cst_type (check_hint env)
+    | _ -> ()
+
 end

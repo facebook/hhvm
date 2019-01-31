@@ -6584,7 +6584,7 @@ and gconst_def tcopt cst =
     | Some value ->
       match cst.cst_type with
       | Some hint ->
-        let ty = TI.instantiable_hint env hint in
+        let ty = Decl_hint.hint env.Env.decl_env hint in
         let env, dty = Phase.localize_with_self env ty in
         let env, te, value_type =
           expr ~expected:(fst hint, Reason.URhint, dty) env value in

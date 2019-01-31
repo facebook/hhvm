@@ -36,6 +36,7 @@
 
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
@@ -282,38 +283,45 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
 }
 
 static void sock_array_to_fd_set(const Array& sockets, std::vector<pollfd>& fds,
-                                 short flag) {
-  for (ArrayIter iter(sockets); iter; ++iter) {
-    auto sock = cast<File>(iter.second());
-    int intfd = sock->fd();
-    if (intfd < 0) {
-      raise_warning(
-        "cannot represent a stream of type user-space as a file descriptor"
-      );
-      continue;
+                                 const short flag) {
+  IterateVNoInc(
+    sockets.get(),
+    [&](TypedValue v) {
+      assertx(v.m_type == KindOfResource);
+      auto const intfd = static_cast<File*>(v.m_data.pres->data())->fd();
+      if (intfd < 0) {
+        raise_warning(
+          "cannot represent a stream of type user-space as a file descriptor"
+        );
+        return;
+      }
+      fds.emplace_back();
+      auto& fd = fds.back();
+      fd.fd = intfd;
+      fd.events = flag;
+      fd.revents = 0;
     }
-    fds.emplace_back();
-    auto& fd = fds.back();
-    fd.fd = intfd;
-    fd.events = flag;
-    fd.revents = 0;
-  }
+  );
 }
 
 static void sock_array_from_fd_set(Variant &sockets,
                                    const std::vector<pollfd>& fds,
-                                   int &nfds, int &count, short flag) {
-  assertx(sockets.isArray());
-  const Array sock_array = sockets.toArray();
+                                   int &nfds, int &count, const short flag) {
   Array ret = Array::CreateDArray();
-  for (ArrayIter iter(sock_array); iter; ++iter) {
-    const pollfd &fd = fds.at(nfds++);
-    assertx(fd.fd == cast<File>(iter.second())->fd());
-    if (fd.revents & flag) {
-      ret.set(iter.first(), iter.second());
-      count++;
+  assertx(sockets.isArray());
+  const auto& sock_array = sockets.asCArrRef();
+  IterateKVNoInc(
+    sock_array.get(),
+    [&](Cell k, TypedValue v) {
+      const pollfd &fd = fds.at(nfds++);
+      assertx(v.m_type == KindOfResource);
+      assertx(fd.fd == static_cast<File*>(v.m_data.pres->data())->fd());
+      if (fd.revents & flag) {
+        ret.set(k, v);
+        count++;
+      }
     }
-  }
+  );
   sockets = ret;
 }
 
@@ -989,12 +997,16 @@ Variant HHVM_FUNCTION(socket_select,
     // sock_array_from_fd_set can set a sparsely indexed array, so
     // we use darray everywhere.
     auto hasData = Array::CreateDArray();
-    for (ArrayIter iter(read.toArray()); iter; ++iter) {
-      auto file = cast<File>(iter.second());
-      if (file->bufferedLen() > 0) {
-        hasData.append(iter.second());
+    IterateVNoInc(
+      read->toCArrRef().get(),
+      [&](TypedValue v) {
+        assertx(v.m_type == KindOfResource);
+        auto file = static_cast<File*>(v.m_data.pres->data());
+        if (file->bufferedLen() > 0) {
+          hasData.append(v);
+        }
       }
-    }
+    );
     if (hasData.size() > 0) {
       if (!write.isNull()) {
         write.assignIfRef(empty_darray());

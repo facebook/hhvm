@@ -186,7 +186,7 @@ function stream_get_transports(): vec<string>;
  *
  */
 <<__Native>>
-function stream_get_wrappers(): array;
+function stream_get_wrappers(): varray<string>;
 
 /**
  * Checks if a stream is a local stream

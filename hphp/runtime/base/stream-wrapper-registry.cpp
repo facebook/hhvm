@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -131,21 +132,22 @@ bool registerRequestWrapper(const String& scheme,
 }
 
 Array enumWrappers() {
-  Array ret = Array::Create();
+  auto const& local_wrappers = s_request_wrappers->wrappers();
+  VArrayInit ret{local_wrappers.size() + s_wrappers.size()};
 
   // Enum global wrappers which are not disabled
-  auto& disabled = s_request_wrappers->disabled();
-  for (auto& e : s_wrappers) {
+  auto const& disabled = s_request_wrappers->disabled();
+  for (auto const& e : s_wrappers) {
     if (!disabled.count(e.first)) {
       ret.append(e.first);
     }
   }
 
   // Enum request local wrappers
-  for (auto& e : s_request_wrappers->wrappers()) {
+  for (auto const& e : local_wrappers) {
     ret.append(e.first);
   }
-  return ret;
+  return ret.toArray();
 }
 
 Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {

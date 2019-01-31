@@ -270,7 +270,7 @@ Variant HHVM_FUNCTION(stream_context_get_default,
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   auto context = g_context->getStreamContext();
   if (!context) {
-    context = req::make<StreamContext>(Array::Create(), Array::Create());
+    context = req::make<StreamContext>(empty_darray(), empty_darray());
     g_context->setStreamContext(context);
   }
   if (!arrOptions.isNull() &&
@@ -907,8 +907,8 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   auto file = dyn_cast_or_null<File>(resource);
   if (file != nullptr) {
     auto context = file->getStreamContext();
-    if (!file->getStreamContext()) {
-      context = req::make<StreamContext>(Array::Create(), Array::Create());
+    if (!context) {
+      context = req::make<StreamContext>(empty_darray(), empty_darray());
       file->setStreamContext(context);
     }
     return context;
@@ -937,16 +937,16 @@ bool StreamContext::validateOptions(const Variant& options) {
 
 void StreamContext::mergeOptions(const Array& options) {
   if (m_options.isNull()) {
-    m_options = Array::Create();
+    m_options = Array::CreateDArray();
   }
   for (ArrayIter it(options); it; ++it) {
     Variant wrapper = it.first();
     if (!m_options.exists(wrapper)) {
-      m_options.set(wrapper, Array::Create());
+      m_options.set(wrapper, Array::CreateDArray());
     }
     assertx(m_options[wrapper].isArray());
     Array& opts = asArrRef(m_options.lvalAt(wrapper));
-    Array new_opts = it.second().toArray();
+    const Array& new_opts = it.second().toArray();
     for (ArrayIter it2(new_opts); it2; ++it2) {
       opts.set(it2.first(), it2.second());
     }
@@ -957,10 +957,10 @@ void StreamContext::setOption(const String& wrapper,
                                const String& option,
                                const Variant& value) {
   if (m_options.isNull()) {
-    m_options = Array::Create();
+    m_options = Array::CreateDArray();
   }
   if (!m_options.exists(wrapper)) {
-    m_options.set(wrapper, Array::Create());
+    m_options.set(wrapper, Array::CreateDArray());
   }
   assertx(m_options[wrapper].isArray());
   Array& opts = asArrRef(m_options.lvalAt(wrapper));
@@ -969,7 +969,7 @@ void StreamContext::setOption(const String& wrapper,
 
 Array StreamContext::getOptions() const {
   if (m_options.isNull()) {
-    return empty_array();
+    return empty_darray();
   }
   return m_options;
 }
@@ -994,7 +994,7 @@ bool StreamContext::validateParams(const Variant& params) {
 
 void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
-    m_params = Array::Create();
+    m_params = Array::CreateDArray();
   }
   if (params.exists(s_notification)) {
     m_params.set(s_notification, params[s_notification]);
@@ -1008,7 +1008,7 @@ void StreamContext::mergeParams(const Array& params) {
 Array StreamContext::getParams() const {
   Array params = m_params;
   if (params.isNull()) {
-    params = Array::Create();
+    params = Array::CreateDArray();
   }
   params.set(s_options, getOptions());
   return params;

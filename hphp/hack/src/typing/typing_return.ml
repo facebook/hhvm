@@ -82,17 +82,16 @@ let force_awaitable env p ty =
   match Env.expand_type env ty with
   | env, (_, Tclass ((_, class_name), _, _))
     when fun_kind = Ast.FAsync && class_name = Naming_special_names.Classes.cAwaitable ->
-    env, ty, ISet.empty
+    env, ty
   | env, (_, Tany) when fun_kind = Ast.FAsync ->
-    env, wrap_awaitable env p ty, ISet.empty
+    env, wrap_awaitable env p ty
   | _ when fun_kind = Ast.FAsync ->
-    let env, underlying_ty, tyvars =
-      Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+    let env, underlying_ty = Env.fresh_unresolved_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
     let env = Typing_subtype.sub_type env wrapped_ty ty in
-    env, wrapped_ty, tyvars
+    env, wrapped_ty
   | _ ->
-    env, ty, ISet.empty
+    env, ty
 
 let make_default_return env name =
   if snd name = SN.Members.__destruct

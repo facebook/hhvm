@@ -2085,9 +2085,9 @@ let subtype_method
     Errors.abstract_concrete_override ft_sub.ft_pos ft_super.ft_pos `method_;
   let ety_env =
     Phase.env_with_self env in
-  let env, ft_super_no_tvars, _ =
+  let env, ft_super_no_tvars =
     Phase.localize_ft ~use_pos:ft_super.ft_pos ~ety_env ~instantiate_tparams:false env ft_super in
-  let env, ft_sub_no_tvars, _ =
+  let env, ft_sub_no_tvars =
     Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
   let old_tpenv = env.Env.lenv.Env.tpenv in
 

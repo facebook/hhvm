@@ -336,9 +336,7 @@ let make_param_local_ty env param =
       env, (r, TUtils.tany env)
     | None ->
       (* if the type is missing, use an unbound type variable *)
-      let _r, ty = Env.fresh_type () in
-      let r = Reason.Rwitness param.param_pos in
-      env, (r, ty)
+      Env.fresh_type env param.param_pos
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
       let condition_type =
@@ -1099,22 +1097,19 @@ and as_expr env ty1 pe e =
     let env = Env.set_tyvar_variance ~tyvars env ty in
     let env = SubType.solve_tyvars ~tyvars env in
   Env.close_tyvars env, tk, tv) @@
+  let env, tv = Env.fresh_unresolved_type env pe in
   match e with
   | As_v _ ->
       let tk = MakeType.mixed Reason.Rnone in
-      let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
       env, MakeType.traversable (Reason.Rforeach pe) tv, tk, tv
   | As_kv _ ->
-      let env, tk, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
-      let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
+      let env, tk = Env.fresh_unresolved_type env pe in
       env, MakeType.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv
   | Await_as_v _ ->
       let tk = MakeType.mixed Reason.Rnone in
-      let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
       env, MakeType.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv
   | Await_as_kv _ ->
-      let env, tk, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
-      let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env pe ISet.empty in
+      let env, tk = Env.fresh_unresolved_type env pe in
       env, MakeType.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv, tk, tv
 
 and bind_as_expr env loop_ty p ty1 ty2 aexpr =
@@ -1329,10 +1324,10 @@ and expr_
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
   let compute_supertype ~expected ~reason p env tys =
-    let env, supertype, _tyvars =
+    let env, supertype =
       match expected with
-      | None -> Env.fresh_unresolved_type_add_tyvars env p ISet.empty
-      | Some (_, _, ty) -> env, ty, ISet.empty in
+      | None -> Env.fresh_unresolved_type env p
+      | Some (_, _, ty) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
       | (_, Tany) -> env, supertype
@@ -1783,7 +1778,7 @@ and expr_
         match ty with
         | (r, Tfun ft) ->
           begin
-            let env, ft, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let env, ft = Phase.localize_ft ~use_pos:p ~ety_env env ft in
             let ty = r, Tfun ft in
             check_deprecated p ft;
             match ce_visibility with
@@ -1894,13 +1889,14 @@ and expr_
         else
         if s = SN.PseudoFunctions.hh_loop_forever then (loop_forever env; env)
         else env in
+      let env, ty = Env.fresh_type env p in
       make_result env p
         (T.Call(
           Cnormal,
           T.make_typed_expr pos_id (Reason.Rnone, TUtils.tany env) (T.Id id),
           hl,
           tel,
-          [])) (Env.fresh_type())
+          [])) ty
   | Call (call_type, e, hl, el, uel) ->
       let env = save_and_merge_next_in_catch env in
       let env, te, ty = check_call ~is_using_clause ~expected
@@ -1909,8 +1905,7 @@ and expr_
   | Binop (Ast.QuestionQuestion, e1, e2) ->
       let env, te1, ty1 = raw_expr ~lhs_of_null_coalesce:true env e1 in
       let env, te2, ty2 = expr ?expected env e2 in
-      let env, ty1', _tyvars =
-        Env.fresh_unresolved_type_add_tyvars env (fst e1) ISet.empty in
+      let env, ty1' = Env.fresh_unresolved_type env (fst e1) in
       let env = SubType.sub_type env ty1 (Reason.Rnone, Toption ty1') in
       let env, ty_result = Union.union env ty1' ty2 in
       make_result env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
@@ -2023,8 +2018,8 @@ and expr_
             let tdef = Reason.Rwitness (fst sid), Tapply (sid, params) in
             let typename =
               Reason.Rwitness p, Tapply((p, SN.Classes.cTypename), [tdef]) in
-            let env, tparams = List.map_env env tparaml begin fun env _ ->
-              Env.fresh_unresolved_type env
+            let env, tparams = List.map_env env tparaml begin fun env tp ->
+              Env.fresh_unresolved_type env (fst tp.tp_name)
             end in
             let ety_env = { (Phase.env_with_self env) with
                             substs = Subst.make tparaml tparams } in
@@ -2108,7 +2103,7 @@ and expr_
       make_result env p T.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
   | Yield af ->
       let env, (taf, opt_key, value) = array_field env af in
-      let env, send, _tyvars = Env.fresh_type_add_tyvars env p ISet.empty in
+      let env, send = Env.fresh_type env p in
       let env, key = match af, opt_key with
         | Nast.AFvalue (p, _), None ->
           begin match Env.get_fn_kind env with
@@ -2120,7 +2115,7 @@ and expr_
           | Ast.FGenerator ->
             env, MakeType.int (Reason.Rwitness p)
           | Ast.FAsyncGenerator ->
-            let env, ty, _tyvars = Env.fresh_type_add_tyvars env p ISet.empty in
+            let env, ty = Env.fresh_type env p in
             env, (Reason.Ryield_asyncnull p, Toption ty)
           end
         | _, Some x ->
@@ -2144,8 +2139,8 @@ and expr_
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       make_result env p (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Yield_from e ->
-    let env, key, _tyvars = Env.fresh_type_add_tyvars env p ISet.empty in
-    let env, value, _tyvars = Env.fresh_type_add_tyvars env p ISet.empty in
+    let env, key = Env.fresh_type env p in
+    let env, value = Env.fresh_type env p in
     let env, te, yield_from_ty =
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
@@ -2263,7 +2258,7 @@ and expr_
        *)
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
-      let env, declared_ft, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
+      let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
@@ -2735,14 +2730,15 @@ and anon_make tenv p f ft idl =
             iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let env, hret, tyvars =
+        let env = Env.open_tyvars env in
+        let env, hret =
           match f.f_ret with
           | None ->
             (* Do we have a contextual return type? *)
             begin match ret_ty with
             | None ->
-              let env, ret_ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-              env, Typing_return.wrap_awaitable env p ret_ty, tyvars
+              let env, ret_ty = Env.fresh_unresolved_type env p in
+              env, Typing_return.wrap_awaitable env p ret_ty
             | Some ret_ty ->
               (* We might need to force it to be Awaitable if it is a type variable *)
               Typing_return.force_awaitable env p ret_ty
@@ -2755,8 +2751,7 @@ and anon_make tenv p f ft idl =
             let ety_env =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
-            let env, ty = Phase.localize ~ety_env env ret in
-            env, ty, ISet.empty in
+            Phase.localize ~ety_env env ret in
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
@@ -2795,8 +2790,10 @@ and anon_make tenv p f ft idl =
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
+        let tyvars = Env.get_current_tyvars env in
         let env = Env.set_tyvar_variance ~tyvars env ty in
         let env = SubType.solve_tyvars ~tyvars env in
+        let env = Env.close_tyvars env in
         env, te, hret
       end
     end
@@ -2896,9 +2893,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         | CI _, (_::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl
         | _ ->
           let env, params = List.map_env env (Cls.tparams class_info)
-            (fun env _ ->
-              let env, ty, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-              env, ty) in
+            (fun env _ -> Env.fresh_unresolved_type env p) in
           begin match snd c_ty with
           | Tclass(_, Exact, _) ->
             env, (Tclass (cname, Exact, params)), params
@@ -3126,15 +3121,15 @@ and assign_ p ur env e1 ty2 =
          * side and attempt subtype against it. In particular this deals with
          * types such as (string,int) | (int,bool) *)
         | (r, _) ->
-          let (env, tyvars), tyl = List.map_env (env, ISet.empty) el
-             ~f:(fun (env, tyvars) _ ->
-               let env, ty, tyvars =
-                 Env.fresh_unresolved_type_add_tyvars env (Reason.to_pos r) tyvars in
-               (env, tyvars), ty) in
-          let env = Type.sub_type p ur env folded_ty2
-              (Reason.Rwitness (fst e1), Ttuple tyl) in
-          let env = ISet.fold (fun var env -> Env.set_tyvar_appears_covariantly env var) tyvars env in
+          let env = Env.open_tyvars env in
+          let env, tyl = List.map_env env el
+             ~f:(fun env _ -> Env.fresh_unresolved_type env (Reason.to_pos r)) in
+          let tuple_ty = (Reason.Rwitness (fst e1), Ttuple tyl) in
+          let env = Type.sub_type p ur env folded_ty2 tuple_ty in
+          let tyvars = Env.get_current_tyvars env in
+          let env = Env.set_tyvar_variance ~tyvars env tuple_ty in
           let env = SubType.solve_tyvars ~tyvars env in
+          let env = Env.close_tyvars env in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
             let env, te, _ = assign p env lvalue ty2 in
@@ -3546,8 +3541,8 @@ and is_abstract_ft fty = match fty with
         | (r, Terr) ->
             env, (r, Typing_utils.terr env)
         | (r, _) ->
-            let env, tk, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-            let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+            let env, tk = Env.fresh_unresolved_type env p in
+            let env, tv = Env.fresh_unresolved_type env p in
             Errors.try_
               (fun () ->
                 let keyed_container_type = MakeType.keyed_container Reason.Rnone tk tv in
@@ -3618,20 +3613,16 @@ and is_abstract_ft fty = match fty with
                * those directly. *)
               if List.is_empty tal
               then
-                let env, tr, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+                let env, tr = Env.fresh_unresolved_type env p in
                 let env, vars = List.map_env env args
-                  ~f:(fun env _ ->
-                    let env, ty, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-                    env, ty) in
+                  ~f:(fun env _ -> Env.fresh_unresolved_type env p) in
                 env, vars, tr
               else if List.length tal <> List.length args + 1 then begin
-                let env, tr, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+                let env, tr = Env.fresh_unresolved_type env p in
                 Errors.expected_tparam ~use_pos:fpos ~definition_pos:fty.ft_pos
                   (1 + (List.length args));
                 let env, vars = List.map_env env args
-                  ~f:(fun env _ ->
-                    let env, ty, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-                    env, ty) in
+                  ~f:(fun env _ -> Env.fresh_unresolved_type env p) in
                 env, vars, tr end
               else
               let hl, _is_reified_list = List.unzip tal in
@@ -3700,8 +3691,8 @@ and is_abstract_ft fty = match fty with
                 let env, x = List.map_env env x build_output_container in
                 env, (fun tr -> (r, Tunresolved (List.map x (fun f -> f tr))))
               | (r, _) ->
-                let env, tk, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-                let env, tv, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+                let env, tk = Env.fresh_unresolved_type env p in
+                let env, tv = Env.fresh_unresolved_type env p in
                 let try_vector env =
                   let vector_type = MakeType.const_vector r_fty tv in
                   let env = SubType.sub_type env x vector_type in
@@ -3782,7 +3773,7 @@ and is_abstract_ft fty = match fty with
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
-        let env, fty, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env fty in
+        let env, fty = Phase.localize_ft ~use_pos:p ~ety_env env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
         (* Remove double nullables. This shouldn't be necessary, and currently
@@ -4100,7 +4091,7 @@ and fun_type_of_id env x tal =
   | Some fty ->
       let ety_env = Phase.env_with_self env in
       let hl, _is_reified_list = List.unzip tal in
-      let env, fty, _tyvars =
+      let env, fty =
         Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty)
 
@@ -4222,7 +4213,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
               | Some {ce_visibility = vis; ce_lsb = lsb; ce_type = lazy (r, Tfun ft); _} ->
                 let p_vis = Reason.to_pos r in
                 TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-                let env, ft, _tyvars =
+                let env, ft =
                   Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
                 let arity_pos = match ft.ft_params with
                   | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
@@ -4242,7 +4233,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
               begin match method_ with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
-                  let env, ft, _tyvars =
+                  let env, ft =
                     Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft
                   in env, (r, Tfun ft)
                 | _ ->
@@ -4406,7 +4397,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x exact paraml in
-          let env, ft, _tyvars = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
+          let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
           let arity_pos = match ft.ft_params with
           | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
@@ -4448,7 +4439,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             | (r, Tfun ft) ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
-              let env, ft, _tyvars =
+              let env, ft =
                 Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
               env, (r, Tfun ft)
             | _ ->
@@ -4625,8 +4616,7 @@ and resolve_type_arguments env p class_id tparaml hintl =
   let resolve_type_argument env hint =
     match hint with
     | (p, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
-      let env, ty, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-      env, ty
+      Env.fresh_unresolved_type env p
     | _ ->
       Phase.localize_hint_with_self env hint in
   let length_hintl = List.length hintl in
@@ -4636,8 +4626,7 @@ and resolve_type_arguments env p class_id tparaml hintl =
     if length_hintl <> 0
     then Errors.type_arity p (snd class_id) (string_of_int length_tparaml);
     List.map_env env tparaml begin fun env _ ->
-      let env, ty, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
-      env, ty end
+      Env.fresh_unresolved_type env p end
   end
   else List.map_env env hintl resolve_type_argument
 
@@ -5079,7 +5068,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
          * we can infer the underlying type and create the correct param for
          * Fvariadic.
          *)
-        let ty = Env.fresh_type() in
+        let env, ty = Env.fresh_type env pos in
         let traversable_ty = make_unpacked_traversable_ty pos ty in
         let env = Type.sub_type pos Reason.URparam env ety traversable_ty in
         let param =
@@ -5164,7 +5153,7 @@ and call_untyped_unpack env uel = match uel with
     | _, Ttuple _ -> env (* tuples are always fine *)
     | _ -> begin
       let pos = fst e in
-      let ty = Env.fresh_type () in
+      let env, ty = Env.fresh_type env pos in
       let unpack_r = Reason.Runpack_param pos in
       let unpack_ty = MakeType.traversable unpack_r ty in
       Type.coerce_type pos Reason.URparam env ety unpack_ty
@@ -6230,7 +6219,9 @@ and typeconst_def env {
 and class_const_def env (h, id, e) =
   let env, ty, opt_expected =
     match h with
-    | None -> env, Env.fresh_type(), None
+    | None ->
+      let env, ty = Env.fresh_type env (fst id) in
+      env, ty, None
     | Some h ->
       let env, ty = Phase.localize_hint_with_self env h in
       env, ty, Some (fst id, Reason.URhint, ty)
@@ -6284,7 +6275,9 @@ and class_var_def env ~is_static c cv =
   (* Next check the expression, passing in expected type if present *)
   let env, typed_cv_expr, ty =
     match cv.cv_expr with
-    | None -> env, None, Env.fresh_type()
+    | None ->
+      let env, ty = Env.fresh_type env (fst cv.cv_id) in
+      env, None, ty
     | Some e ->
       let env, te, ty = expr ?expected env e in
       (* Check that the inferred type is a subtype of the expected type.

@@ -51,6 +51,7 @@ let get_self env =
   try Some (get_self_exn env) with
   | Not_in_class -> None
 
+let fresh_type = Typing_env.fresh_type
 let get_class = Typing_env.get_class
 let is_static = Typing_env.is_static
 let is_strict = Typing_env.is_strict

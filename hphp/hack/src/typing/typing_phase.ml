@@ -169,7 +169,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
            Toption ty in
        env, (ety_env, (r, ty_))
   | r, Tfun ft ->
-      let env, ft, _ = localize_ft ~use_pos:ft.ft_pos ~ety_env env ft in
+      let env, ft = localize_ft ~use_pos:ft.ft_pos ~ety_env env ft in
       env, (ety_env, (r, Tfun ft))
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
       let env, argl = List.map_env env argl (localize ~ety_env) in
@@ -260,7 +260,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
    * something like "mixed".
    * If explicit type parameters are provided, just instantiate tvarl to them.
    *)
-  let env, substs, tvarl =
+  let env, substs =
     let (tparams, _) = ft.ft_tparams in
     if instantiate_tparams
     then
@@ -284,11 +284,11 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
           List.map_env env explicit_tparams type_argument
       in
       let ft_subst = Subst.make tparams tvarl in
-      env, SMap.union ft_subst ety_env.substs, tvarl
+      env, SMap.union ft_subst ety_env.substs
     else
       env, List.fold_left tparams ~f:begin fun subst t ->
         SMap.remove (snd t.tp_name) subst
-      end ~init:ety_env.substs, []
+      end ~init:ety_env.substs
   in
   let ety_env = {ety_env with substs = substs} in
   let env, params = List.map_env env ft.ft_params begin fun env param ->
@@ -367,12 +367,9 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
        env, Fvariadic (min, { param with fp_type = var_ty })
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
-  let vars = List.fold_left
-    ~f:(fun vars ty -> match ty with (_, Tvar i) -> ISet.add i vars | _ -> vars)
-    ~init:ISet.empty tvarl in
   env, { ft with ft_arity = arity; ft_params = params;
                  ft_ret = ret; ft_tparams = ft_tparams;
-                 ft_where_constraints = where_constraints }, vars
+                 ft_where_constraints = where_constraints }
 
 (* Given a list of generic parameters [tparams] and a substitution
  * in [ety_env.substs] whose domain is at least these generic parameters,

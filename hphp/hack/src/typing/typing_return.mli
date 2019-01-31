@@ -50,7 +50,7 @@ val force_awaitable:
   Env.env ->
   Ast_defs.pos ->
   Typing_defs.locl Typing_defs.ty ->
-  Env.env * Typing_defs.locl Typing_defs.ty * ISet.t
+  Env.env * Typing_defs.locl Typing_defs.ty
 
 (** If there is no return type annotation on method, assume `void` for the
 special functions `__destruct` and `__construct`, otherwise Tany *)

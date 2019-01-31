@@ -52,7 +52,7 @@ class virtual downcast_tabstract_to_array_type_mapper = object(this)
 end
 
 let union env tyl = match tyl with
-  | [] -> Env.fresh_unresolved_type env
+  | [] -> Env.fresh_unresolved_type env Pos.none (* TODO: position *)
   | ty::tyl' -> List.fold_left_env env tyl' ~init:ty ~f:TUtils.union
 
 let union_keys = union
@@ -74,11 +74,11 @@ let update_array_type p ~is_map env ty =
     method! on_tarraykind_akempty env _ =
       if is_map
       then
-        let env, tk = Env.fresh_unresolved_type env in
-        let env, tv = Env.fresh_unresolved_type env in
+        let env, tk = Env.fresh_unresolved_type env p in
+        let env, tv = Env.fresh_unresolved_type env p in
         env, (Reason.Rused_as_map p, Tarraykind (AKmap (tk, tv)))
       else
-        let env, tv = Env.fresh_unresolved_type env in
+        let env, tv = Env.fresh_unresolved_type env p in
         env, (Reason.Rappend p, Tarraykind (AKvec tv))
 
   end in

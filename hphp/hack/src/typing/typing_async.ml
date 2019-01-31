@@ -52,7 +52,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
   | _, (Terr | Tany | Tarraykind _ | Tnonnull | Tprim _
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _ ) ->
-    let env, type_var, _tyvars = Env.fresh_type_add_tyvars env p ISet.empty in
+    let env, type_var = Env.fresh_type env p in
     let expected_type = MakeType.awaitable r type_var in
     let return_type = match e_opt_ty with
       | _, Tany -> r, Tany

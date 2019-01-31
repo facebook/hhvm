@@ -16,10 +16,8 @@ val show_env : env -> string
 val pp_env : Format.formatter -> env -> unit
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
-val fresh_type : unit -> locl ty
-val fresh_type_add_tyvars : env -> Pos.t -> ISet.t ->env *  locl ty * ISet.t
-val fresh_unresolved_type : env -> env * locl ty
-val fresh_unresolved_type_add_tyvars : env -> Pos.t -> ISet.t -> env * locl ty * ISet.t
+val fresh_type : env -> Pos.t -> env *  locl ty
+val fresh_unresolved_type : env -> Pos.t -> env * locl ty
 val open_tyvars : env -> env
 val get_current_tyvars : env -> ISet.t
 val add_current_tyvar : env -> int -> env

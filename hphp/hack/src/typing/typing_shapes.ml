@@ -172,7 +172,7 @@ let is_shape_field_required env field_name shape_ty =
  *)
 let idx env p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+  let env, res = Env.fresh_unresolved_type env p in
   match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->

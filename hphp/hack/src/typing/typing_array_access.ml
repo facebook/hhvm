@@ -294,7 +294,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
    * Tk does not appear in the result of the call)
    *)
   | Tvar _ ->
-    let env, value, _tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+    let env, value = Env.fresh_unresolved_type env p in
     let keyed_container = MakeType.keyed_container (fst ety1) ty2 value in
     let env = SubType.sub_type env ty1 keyed_container in
     env, value

@@ -34,9 +34,6 @@ let get_tcopt env = env.genv.tcopt
 let fresh () =
   Ident.tmp()
 
-let fresh_type () =
-  Reason.none, Tvar (Ident.tmp())
-
 let add_subst env x x' =
   if x <> x'
   then { env with subst = IMap.add x x' env.subst }
@@ -69,14 +66,6 @@ let add env x ty =
   | _, Tvar x' -> add_subst env x x'
   | _ -> { env with tenv = IMap.add x ty env.tenv }
 
-let fresh_unresolved_type env =
-  let v = Ident.tmp () in
-  let env =
-    if TypecheckerOptions.new_inference env.genv.tcopt
-    then env
-    else add env v (Reason.Rnone, Tunresolved []) in
-  env, (Reason.Rnone, Tvar v)
-
 let add_current_tyvar env v =
   if TypecheckerOptions.new_inference env.genv.tcopt
   then
@@ -86,13 +75,13 @@ let add_current_tyvar env v =
     | _ -> env
   else env
 
-let fresh_unresolved_type_add_tyvars env p tyvars =
+let fresh_unresolved_type env p =
   let v = Ident.tmp () in
   let env =
     if TypecheckerOptions.new_inference env.genv.tcopt
     then add_current_tyvar env v
     else add env v (Reason.Rnone, Tunresolved []) in
-  env, (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
+  env, (Reason.Rtype_variable p, Tvar v)
 
 let open_tyvars env =
   { env with tyvars_stack = ISet.empty :: env.tyvars_stack }
@@ -107,10 +96,10 @@ let get_current_tyvars env =
   | [] -> ISet.empty
   | tyvars::_ -> tyvars
 
-let fresh_type_add_tyvars env p tyvars =
+let fresh_type env p =
   let v = Ident.tmp () in
   let env = add_current_tyvar env v in
-  env, (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
+  env, (Reason.Rtype_variable p, Tvar v)
 
 let get_type env x_reason x =
   let env, x = get_var env x in
@@ -545,7 +534,8 @@ let empty tcopt file ~droot = {
   genv    = {
     tcopt   = tcopt;
     return  = {
-      return_type = fresh_type ();
+      (* Actually should get set straight away anyway *)
+      return_type = (Reason.Rnone, Tunresolved []);
       return_disposable = false;
       return_mutable = false;
       return_explicit = false;

@@ -54,6 +54,9 @@ val get_self : env -> Tast.ty option
 (** Return the type of the enclosing class definition.
     When not in a class definition, return {!None}. *)
 
+val fresh_type : env -> Pos.t -> env * Tast.ty
+(** Return a type consisting of a fresh type variable *)
+
 val get_class : env -> Typing_heap.Classes.key -> Typing_heap.Classes.t option
 (** Return the info of the given class from the typing heap. *)
 

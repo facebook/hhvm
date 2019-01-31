@@ -1413,6 +1413,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           env,
           RaiseHackArrParamNotice,
           RaiseHackArrParamNoticeData { tc.type(), int32_t(param), false },
+          maker.makeUnusualCatch(),
           val,
           cns(env, callee)
         );

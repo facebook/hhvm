@@ -78,7 +78,6 @@ RepoWrapper*      g_repo;
 OfflineTransData* g_transData;
 OfflineCode*   transCode;
 
-char errMsgBuff[MAX_SYM_LEN];
 const char* kListKeyword = "list";
 TCPrintLogger* g_logger;
 
@@ -367,11 +366,8 @@ void loadPerfEvents() {
     if (strncmp(program, "hhvm", 4) == 0) {
       eventType = perfScriptOutputToEventType(eventCaption);
       if (eventType == NUM_EVENT_TYPES) {
-        snprintf(errMsgBuff,
-                 MAX_SYM_LEN,
-                 "loadProfData: invalid event caption '%s'",
-                 eventCaption);
-        error(errMsgBuff);
+        error(folly::sformat("loadProfData: invalid event caption {}",
+                             eventCaption));
       }
 
       hhvmSamples[eventType]++;

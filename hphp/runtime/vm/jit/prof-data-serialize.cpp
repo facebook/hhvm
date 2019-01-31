@@ -645,6 +645,8 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
     }
   );
   write_raw(ser, kInvalidTransID);
+  write_raw<uint64_t>(ser, pd->baseProfCount());
+  write_container(ser, pd->sortedFuncs(), write_raw<FuncId>);
 }
 
 void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
@@ -659,6 +661,15 @@ void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
     pd->addProfTrans(transID, read_prof_trans_rec(ser));
     *pd->transCounterAddr(transID) = read_raw<int64_t>(ser);
   }
+  pd->setBaseProfCount(read_raw<uint64_t>(ser));
+  auto const sz = read_raw<uint32_t>(ser);
+  std::vector<FuncId> order;
+  order.reserve(sz);
+  for (auto i = sz; i > 0; --i) {
+    auto const origId = read_raw<FuncId>(ser);
+    order.push_back(ser.getFid(origId));
+  }
+  pd->setFuncOrder(std::move(order));
 }
 
 template<typename T>
@@ -1373,6 +1384,8 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     // the unit to be loaded the implementation might never get pulled
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
+
+    // Read function orders for optimized translation
 
     return "";
   } catch (std::runtime_error& err) {

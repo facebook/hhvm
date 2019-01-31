@@ -311,7 +311,8 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * ProfData encapsulates the profiling data kept by the JIT.
+ * ProfData encapsulates the profiling data kept by the JIT.  It also includes
+ * data derived from profiling counters.
  *
  * Thread safety: All of ProfData's member functions may be called with no
  * external synchronization, with the caveat that care must be taken to not
@@ -615,6 +616,23 @@ struct ProfData {
   void addTargetProfile(const TargetProfileInfo& info);
   std::vector<TargetProfileInfo> getTargetProfiles(TransID transID) const;
 
+  /*
+   * Access base profile count and function ordering. Set in hfsortFuncs().
+   */
+  uint64_t baseProfCount() const {
+    return m_baseProfCount;
+  }
+  void setBaseProfCount(uint64_t c) {
+    m_baseProfCount = c;
+  }
+  const std::vector<FuncId>& sortedFuncs() const {
+    return m_sortedFuncIds;
+  }
+  void setFuncOrder(std::vector<FuncId>&& order) {
+    assertx(m_sortedFuncIds.empty());
+    m_sortedFuncIds = order;
+  }
+
 private:
   struct PrologueID {
     FuncId func;
@@ -694,6 +712,17 @@ private:
   jit::fast_map<TransID, jit::vector<TargetProfileInfo>> m_targetProfiles;
 
   bool m_wasDeserialized{false};
+
+  /*
+   * Base profile count for inlining.
+   */
+  uint64_t m_baseProfCount;
+
+  /*
+   * Order of optimized translations in the TC, obtained from hfsort on the
+   * callg graph.
+   */
+  std::vector<FuncId> m_sortedFuncIds;
 };
 
 //////////////////////////////////////////////////////////////////////

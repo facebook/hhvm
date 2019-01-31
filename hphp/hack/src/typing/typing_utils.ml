@@ -608,7 +608,10 @@ let in_var env ty =
 
 let unresolved_tparam ~reason env =
   if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-  then env, (reason, Tvar (Env.fresh ()))
+  then
+    let v = Env.fresh () in
+    let env = Env.add_current_tyvar env v in
+    env, (reason, Tvar v)
   else in_var env (reason, Tunresolved [])
 
 (*****************************************************************************)

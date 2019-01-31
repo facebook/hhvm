@@ -200,6 +200,13 @@ let log_tvenv env =
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
       end env.Env.tvenv)
 
+let log_tyvars env =
+  indentEnv "tyvars_stack" (fun () ->
+    lprintf (Normal Green) "%s"
+      (String.concat ~sep:"/" (List.map ~f:(fun s -> "{" ^ String.concat ~sep:","
+        (List.map ~f:(fun i -> Printf.sprintf "#%d" i) (ISet.elements s)) ^ "}")
+        env.Env.tyvars_stack)))
+
 let log_fake_members env =
   let lenv = env.Env.lenv in
   let fakes = lenv.Env.fake_members in
@@ -247,6 +254,7 @@ let hh_show_env p env =
        log_env_diff (!lastenv) env;
        log_tpenv env;
        log_tvenv env;
+       log_tyvars env;
        log_subtype_prop env "subtype_prop" env.Env.subtype_prop);
   lastenv := env
 

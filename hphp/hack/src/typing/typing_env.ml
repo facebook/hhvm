@@ -77,17 +77,40 @@ let fresh_unresolved_type env =
     else add env v (Reason.Rnone, Tunresolved []) in
   env, (Reason.Rnone, Tvar v)
 
+let add_current_tyvar env v =
+  if TypecheckerOptions.new_inference env.genv.tcopt
+  then
+    match env.tyvars_stack with
+    | tyvars::rest ->
+      { env with tyvars_stack = ISet.add v tyvars :: rest }
+    | _ -> env
+  else env
+
 let fresh_unresolved_type_add_tyvars env p tyvars =
   let v = Ident.tmp () in
   let env =
     if TypecheckerOptions.new_inference env.genv.tcopt
-    then env
+    then add_current_tyvar env v
     else add env v (Reason.Rnone, Tunresolved []) in
   env, (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
 
-let fresh_type_add_tyvars p tyvars =
+let open_tyvars env =
+  { env with tyvars_stack = ISet.empty :: env.tyvars_stack }
+
+let close_tyvars env =
+  match env.tyvars_stack with
+  | [] -> failwith "close_tyvars: empty stack"
+  | _::rest -> { env with tyvars_stack = rest }
+
+let get_current_tyvars env =
+  match env.tyvars_stack with
+  | [] -> ISet.empty
+  | tyvars::_ -> tyvars
+
+let fresh_type_add_tyvars env p tyvars =
   let v = Ident.tmp () in
-  (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
+  let env = add_current_tyvar env v in
+  env, (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
 
 let get_type env x_reason x =
   let env, x = get_var env x in
@@ -544,6 +567,7 @@ let empty tcopt file ~droot = {
   subtype_prop = TL.valid;
   log_levels = TypecheckerOptions.log_levels tcopt;
   tvenv = IMap.empty;
+  tyvars_stack = [];
 }
 
 let set_env_reactive env reactive =

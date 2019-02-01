@@ -273,9 +273,6 @@
 /* Whether to build tokenizer as dynamic module */
 /* #undef COMPILE_DL_TOKENIZER */
 
-/* Whether to build wddx as dynamic module */
-/* #undef COMPILE_DL_WDDX */
-
 /* Whether to build xml as dynamic module */
 /* #undef COMPILE_DL_XML */
 
@@ -1965,9 +1962,6 @@
 
 /* Define to 1 if you have the <wchar.h> header file. */
 #define HAVE_WCHAR_H 1
-
-/* */
-/* #undef HAVE_WDDX */
 
 /* */
 #define HAVE_XML 1

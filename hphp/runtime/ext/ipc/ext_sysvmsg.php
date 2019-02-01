@@ -56,8 +56,7 @@ function msg_queue_exists(int $key): bool;
  *   sent. serialize defaults to TRUE which means that the message is serialized
  *   using the same mechanism as the session module before being sent to the
  *   queue. This allows complex arrays and objects to be sent to other PHP
- *   scripts, or if you are using the WDDX serializer, to any WDDX compatible
- *   client.
+ *   scripts.
  * @param bool $blocking - If the message is too large to fit in the queue,
  *   your script will wait until another process reads messages from the queue
  *   and frees enough space for your message to be sent. This is called
@@ -106,8 +105,7 @@ function msg_send(resource $queue,
  *   it was serialized using the same mechanism as the session module. The
  *   message will be unserialized and then returned to your script. This allows
  *   you to easily receive arrays or complex object structures from other PHP
- *   scripts, or if you are using the WDDX serializer, from any WDDX compatible
- *   source.  If unserialize is FALSE, the message will be returned as a
+ *   scripts.  If unserialize is FALSE, the message will be returned as a
  *   binary-safe string.
  * @param int $flags - The optional flags allows you to pass flags to the
  *   low-level msgrcv system call. It defaults to 0, but you may specify one or

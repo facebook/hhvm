@@ -52,7 +52,6 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
-#include "hphp/runtime/ext/wddx/ext_wddx.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/interp-helpers.h"
@@ -1112,44 +1111,6 @@ struct PhpSerializeSessionSerializer : SessionSerializer {
   }
 };
 static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
-
-struct WddxSessionSerializer : SessionSerializer {
-  WddxSessionSerializer() : SessionSerializer("wddx") {}
-
-  virtual String encode() {
-    auto wddxPacket = req::make<WddxPacket>(empty_string_variant_ref,
-                                               true, true);
-    for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
-      Variant key = iter.first();
-      if (key.isString()) {
-        wddxPacket->recursiveAddVar(key.toString(), iter.second(), true);
-      } else {
-        raise_notice("Skipping numeric key %" PRId64, key.toInt64());
-      }
-    }
-
-    return wddxPacket->packet_end();
-  }
-
-  virtual bool decode(const String& value) {
-    Array params = Array::Create();
-    params.append(value);
-    Variant ret = vm_call_user_func("wddx_deserialize", params, true);
-    if (ret.isArray()) {
-      Array arr = ret.toArray();
-      auto session = php_global_exchange(s__SESSION, init_null());
-      for (ArrayIter iter(arr); iter; ++iter) {
-        auto const key = iter.first();
-        auto const value = iter.second();
-        forceToArray(session).set(key, value);
-      }
-      php_global_set(s__SESSION, std::move(session));
-    }
-
-    return true;
-  }
-};
-static WddxSessionSerializer s_wddx_session_serializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 

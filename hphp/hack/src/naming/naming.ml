@@ -1950,57 +1950,58 @@ module Make (GetLocals : GetLocals) = struct
   and func_body_had_unsafe env = Env.has_unsafe env
 
   and method_ genv m =
-    let genv = extend_params genv m.m_tparams in
+    let m = Ast_to_nast.on_method m in
+    aast_method_ genv m
+
+  and aast_method_ genv m =
+    let genv = aast_extend_params genv m.Aast.m_tparams in
     let env = genv, Env.empty_local None in
     (* Cannot use 'this' if it is a public instance method *)
-    let variadicity, paraml = fun_paraml env m.m_params in
-    let contains_visibility = List.exists m.m_kind ~f:(
-        function
-        | Private
-        | Public
-        | Protected -> true
-        | _ -> false
-      ) in
-    if not contains_visibility then
-      Errors.method_needs_visibility (fst m.m_name);
-    let acc = false, false, false, N.Public in
-    let final, abs, static, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
-    List.iter m.m_tparams check_constraint;
-    let tparam_l = type_paraml env m.m_tparams in
-    let where_constraints = type_where_constraints env m.m_constrs in
-    let ret = Option.map m.m_ret (hint ~allow_retonly:true env) in
-    let f_kind = m.m_fun_kind in
-    let body = (match genv.in_mode with
+    let variadicity, paraml = aast_fun_paraml env m.Aast.m_params in
+    let tparam_l = aast_type_paraml env m.Aast.m_tparams in
+    List.iter tparam_l aast_check_constraint;
+    let where_constraints = aast_type_where_constraints env m.Aast.m_where_constraints in
+    let ret = Option.map m.Aast.m_ret (aast_hint ~allow_retonly:true env) in
+    let body =
+      match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
         N.NamedBody {
           N.fnb_nast = [];
           fnb_unsafe = true;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        N.UnnamedBody {
-          N.fub_ast = Ast_to_nast.on_block m.m_body;
-          fub_tparams = type_paraml env m.m_tparams;
-          fub_namespace = genv.namespace;
-        }
-    ) in
-    let attrs = user_attributes env m.m_user_attributes in
-    { N.m_annotation      = ()          ;
-      N.m_span            = m.m_span    ;
-      N.m_final           = final       ;
-      N.m_visibility      = vis         ;
-      N.m_abstract        = abs         ;
-      N.m_static          = static      ;
-      N.m_name            = m.Ast.m_name;
-      N.m_tparams         = tparam_l    ;
-      N.m_where_constraints = where_constraints ;
-      N.m_params          = paraml      ;
-      N.m_body            = body        ;
-      N.m_fun_kind        = f_kind      ;
-      N.m_ret             = ret         ;
-      N.m_variadic        = variadicity ;
+        begin
+          match m.Aast.m_body with
+          | Aast.UnnamedBody _ -> failwith "ast_to_nast error unnamedbody in method_"
+          | Aast.NamedBody {
+              Aast.fnb_nast;
+              _ ;
+            } ->
+              N.UnnamedBody {
+                N.fub_ast = fnb_nast;
+                fub_tparams = tparam_l;
+                fub_namespace = genv.namespace;
+              }
+        end
+    in
+    let attrs = aast_user_attributes env m.Aast.m_user_attributes in
+    { N.m_annotation = ();
+      N.m_span = m.Aast.m_span;
+      N.m_final = m.Aast.m_final;
+      N.m_visibility = m.Aast.m_visibility;
+      N.m_abstract = m.Aast.m_abstract;
+      N.m_static = m.Aast.m_static;
+      N.m_name = m.Aast.m_name;
+      N.m_tparams = tparam_l;
+      N.m_where_constraints = where_constraints;
+      N.m_params = paraml;
+      N.m_body = body;
+      N.m_fun_kind = m.Aast.m_fun_kind;
+      N.m_ret = ret;
+      N.m_variadic = variadicity;
       N.m_user_attributes = attrs;
-      N.m_external        = m.m_external;
-      N.m_doc_comment     = m.m_doc_comment;
+      N.m_external = m.Aast.m_external;
+      N.m_doc_comment = m.Aast.m_doc_comment;
     }
 
   and method_redeclaration genv mt =

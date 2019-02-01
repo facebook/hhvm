@@ -483,8 +483,12 @@ and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)
 and on_constr (h1, k, h2) = (on_hint h1, k, on_hint h2)
 
 and on_method_trait_resolution res : Aast.method_redeclaration =
-  let acc = false, false, false, Aast.Public in
+  let acc = false, false, false, None in
   let final, abs, static, vis = List.fold_left kind acc res.mt_kind in
+  let vis =
+    match vis with
+    | None -> Aast.Public
+    | Some v -> v in
   Aast.{
     mt_final           = final;
     mt_abstract        = abs;
@@ -519,9 +523,9 @@ and kind (final, abs, static, vis) = function
   | Final -> true, abs, static, vis
   | Static -> final, abs, true, vis
   | Abstract -> final, true, static, vis
-  | Private -> final, abs, static, Aast.Private
-  | Public -> final, abs, static, Aast.Public
-  | Protected -> final, abs, static, Aast.Protected
+  | Private -> final, abs, static, Some Aast.Private
+  | Public -> final, abs, static, Some Aast.Public
+  | Protected -> final, abs, static, Some Aast.Protected
 
 and on_method m : Aast.method_ =
   let body = on_block m.m_body in
@@ -529,8 +533,12 @@ and on_method m : Aast.method_ =
         Aast.fnb_nast = body;
         fnb_unsafe = true;
   } in
-  let acc = false, false, false, Aast.Public in
+  let acc = false, false, false, None in
   let final, abs, static, vis = List.fold_left kind acc m.m_kind in
+  let vis =
+    match vis with
+    | None -> Errors.method_needs_visibility (fst m.m_name); Aast.Public
+    | Some v -> v in
   Aast.{
     m_span            = m.m_span;
     m_annotation      = ();

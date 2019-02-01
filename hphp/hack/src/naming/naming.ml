@@ -39,6 +39,12 @@ type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
 type type_constraint = (Ast.constraint_kind * Ast.hint) list
+type aast_type_constraint = (Ast.constraint_kind * Aast.hint) list
+
+let convert_type_constraints_to_aast tcl =
+  List.map
+    ~f:(fun (ck, h) -> (ck, Ast_to_nast.on_hint h))
+    tcl
 
 type genv = {
 
@@ -60,7 +66,7 @@ type genv = {
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
-  type_params: type_constraint SMap.t;
+  type_params: aast_type_constraint SMap.t;
 
   (* The current class, None if we are in a function *)
   current_cls: (Ast.id * Ast.class_kind) option;
@@ -105,9 +111,9 @@ module Env : sig
     TypecheckerOptions.t ->
     type_constraint SMap.t ->
     FileInfo.mode -> string -> Namespace_env.env -> genv
-  val make_fun_decl_genv :
+  val aast_make_fun_decl_genv :
     TypecheckerOptions.t ->
-    type_constraint SMap.t -> Ast.fun_ -> genv
+    aast_type_constraint SMap.t -> Aast.fun_ -> genv
   val make_file_attributes_env :
     TypecheckerOptions.t ->
     FileInfo.mode -> Ast.file_attributes -> genv * lenv
@@ -248,7 +254,7 @@ end = struct
       in_try        = false;
       in_finally    = false;
       in_ppl        = is_ppl;
-      type_params   = tparams;
+      type_params   = SMap.map convert_type_constraints_to_aast tparams;
       current_cls   = Some (cid, ckind);
       class_consts  = Caml.Hashtbl.create 0;
       class_props   = Caml.Hashtbl.create 0;
@@ -290,7 +296,7 @@ end = struct
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
-    type_params   = cstrs;
+    type_params   = SMap.map convert_type_constraints_to_aast cstrs;
     current_cls   = None;
     class_consts = Caml.Hashtbl.create 0;
     class_props = Caml.Hashtbl.create 0;
@@ -310,7 +316,7 @@ end = struct
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
-    type_params   = params;
+    type_params   = SMap.map convert_type_constraints_to_aast params;
     current_cls   = None;
     class_consts = Caml.Hashtbl.create 0;
     class_props = Caml.Hashtbl.create 0;
@@ -318,8 +324,22 @@ end = struct
     namespace     = f_namespace;
   }
 
-  let make_fun_decl_genv nenv params f =
-    make_fun_genv nenv params f.f_mode (snd f.f_name) f.f_namespace
+  let aast_make_fun_genv tcopt params f_mode f_name f_namespace =
+    { in_mode = f_mode
+    ; tcopt
+    ; in_try = false
+    ; in_finally = false
+    ; in_ppl = false
+    ; type_params = params
+    ; current_cls = None
+    ; class_consts = Caml.Hashtbl.create 0
+    ; class_props = Caml.Hashtbl.create 0
+    ; droot = Typing_deps.Dep.Fun f_name
+    ; namespace = f_namespace
+    }
+
+  let aast_make_fun_decl_genv nenv params f =
+    aast_make_fun_genv nenv params f.Aast.f_mode (snd f.Aast.f_name) f.Aast.f_namespace
 
   let make_const_genv tcopt cst = {
     in_mode       = cst.cst_mode;
@@ -720,6 +740,11 @@ end
 
 let check_constraint { tp_name = (pos, name); _ } =
   (* TODO refactor this in a separate module for errors *)
+  if String.lowercase name = "this"
+  then Errors.this_reserved pos
+  else if name.[0] <> 'T' then Errors.start_with_T pos
+
+and aast_check_constraint { Aast.tp_name = (pos, name); _ } =
   if String.lowercase name = "this"
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos
@@ -1349,12 +1374,6 @@ module Make (GetLocals : GetLocals) = struct
            attr :: acc
     end
 
-  and file_attributes tcopt mode file_attributes_list =
-    List.concat_map file_attributes_list ~f:begin fun fa ->
-      let env = Env.make_file_attributes_env tcopt mode fa in
-      user_attributes env fa.fa_user_attributes
-    end
-
   and aast_user_attributes env attrl =
     let seen = Caml.Hashtbl.create 0 in
     let validate_seen ua_name =
@@ -1380,6 +1399,12 @@ module Make (GetLocals : GetLocals) = struct
           } in
         attr :: acc in
     List.fold_left ~init:[] ~f:on_attr attrl
+
+  and file_attributes tcopt mode file_attributes_list =
+    List.concat_map file_attributes_list ~f:begin fun fa ->
+      let env = Env.make_file_attributes_env tcopt mode fa in
+      user_attributes env fa.fa_user_attributes
+    end
 
   and xhp_attribute_decl env h cv is_required maybe_enum =
     let p, (_, id), default = cv in
@@ -1447,6 +1472,20 @@ module Make (GetLocals : GetLocals) = struct
     in
     List.rev ret
 
+  and aast_type_paraml ?(forbid_this = false) env tparams =
+    let _, ret = List.fold_left tparams ~init:(SMap.empty, [])
+      ~f:(fun (seen, tparaml) tparam ->
+        let (p, name) = tparam.Aast.tp_name in
+        match SMap.get name seen with
+        | None ->
+          SMap.add name p seen, (aast_type_param ~forbid_this env tparam) :: tparaml
+        | Some pos ->
+          Errors.shadowed_type_param p pos name;
+          seen, tparaml
+      )
+    in
+    List.rev ret
+
   and type_param ~forbid_this env t =
     if t.tp_reified && not (TypecheckerOptions.experimental_feature_enabled
         (fst env).tcopt
@@ -1461,11 +1500,33 @@ module Make (GetLocals : GetLocals) = struct
       tp_user_attributes = user_attributes env t.tp_user_attributes;
     }
 
+  and aast_type_param ~forbid_this env t =
+    if t.Aast.tp_reified && not (TypecheckerOptions.experimental_feature_enabled
+        (fst env).tcopt
+      TypecheckerOptions.experimental_reified_generics)
+    then
+      Errors.experimental_feature (fst t.Aast.tp_name) "reified generics";
+    {
+      N.tp_variance = t.Aast.tp_variance;
+      tp_name = t.Aast.tp_name;
+      tp_constraints = List.map t.Aast.tp_constraints (aast_constraint_ ~forbid_this env);
+      tp_reified = t.Aast.tp_reified;
+      tp_user_attributes = aast_user_attributes env t.Aast.tp_user_attributes;
+    }
+
   and type_where_constraints env locl_cstrl =
     List.map locl_cstrl (fun (h1, ck, h2) ->
           let ty1 = hint ~in_where_clause:true env h1 in
           let ty2 = hint ~in_where_clause:true env h2 in
           (ty1, ck, ty2))
+
+  and aast_type_where_constraints env locl_cstrl =
+    List.map
+      ~f:(fun (h1, ck, h2) ->
+        let ty1 = aast_hint ~in_where_clause:true env h1 in
+        let ty2 = aast_hint ~in_where_clause:true env h2 in
+        (ty1, ck, ty2))
+      locl_cstrl
 
   and class_use env x acc =
     let (uses, redeclarations) = acc in
@@ -1917,8 +1978,8 @@ module Make (GetLocals : GetLocals) = struct
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
         N.UnnamedBody {
-          N.fub_ast = m.m_body;
-          fub_tparams = m.m_tparams;
+          N.fub_ast = Ast_to_nast.on_block m.m_body;
+          fub_tparams = type_paraml env m.m_tparams;
           fub_namespace = genv.namespace;
         }
     ) in
@@ -2073,25 +2134,44 @@ module Make (GetLocals : GetLocals) = struct
         SMap.add x cstr_list acc
       end
 
+  and aast_make_constraints paraml =
+    List.fold_right
+      ~init:SMap.empty
+      ~f:(fun { Aast.tp_name = (_, x); tp_constraints; _ } acc ->
+        SMap.add x tp_constraints acc)
+      paraml
+
   and extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
       ~f:begin fun { tp_name = (_, x); tp_constraints = cstr_list; _ } acc ->
+        let cstr_list = convert_type_constraints_to_aast cstr_list in
+        SMap.add x cstr_list acc
+      end in
+    { genv with type_params = params }
+
+  and aast_extend_params genv paraml =
+    let params = List.fold_right paraml ~init:genv.type_params
+      ~f:begin fun { Aast.tp_name = (_, x); tp_constraints = cstr_list; _ } acc ->
         SMap.add x cstr_list acc
       end in
     { genv with type_params = params }
 
   and fun_ nenv f =
-    let tparams = make_constraints f.f_tparams in
-    let genv = Env.make_fun_decl_genv nenv tparams f in
+    let f = Ast_to_nast.on_fun f in
+    aast_fun_ nenv f
+
+  and aast_fun_ nenv f =
+    let tparams = aast_make_constraints f.Aast.f_tparams in
+    let genv = Env.aast_make_fun_decl_genv nenv tparams f in
     let lenv = Env.empty_local None in
     let env = genv, lenv in
-    let where_constraints = type_where_constraints env f.f_constrs in
-    let h = Option.map f.f_ret (hint ~allow_retonly:true env) in
-    let variadicity, paraml = fun_paraml env f.f_params in
-    let x = Env.fun_id env f.f_name in
-    List.iter f.f_tparams check_constraint;
-    let f_tparams = type_paraml env f.f_tparams in
-    let f_kind = f.f_fun_kind in
+    let where_constraints = aast_type_where_constraints env f.Aast.f_where_constraints in
+    let h = Option.map f.Aast.f_ret (aast_hint ~allow_retonly:true env) in
+    let variadicity, paraml = aast_fun_paraml env f.Aast.f_params in
+    let x = Env.fun_id env f.Aast.f_name in
+    List.iter f.Aast.f_tparams aast_check_constraint;
+    let f_tparams = aast_type_paraml env f.Aast.f_tparams in
+    let f_kind = f.Aast.f_fun_kind in
     let body = match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
         N.NamedBody {
@@ -2099,16 +2179,25 @@ module Make (GetLocals : GetLocals) = struct
           fnb_unsafe = true;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        N.UnnamedBody {
-          N.fub_ast = f.f_body;
-          fub_tparams = f.f_tparams;
-          fub_namespace = f.f_namespace;
-        }
+        begin
+          match f.Aast.f_body with
+          | Aast.UnnamedBody _ -> failwith "ast_to_nast error unnamedbody in fun_"
+          | Aast.NamedBody {
+              Aast.fnb_nast;
+              _ ;
+            } ->
+              N.UnnamedBody {
+                N.fub_ast = fnb_nast;
+                (* Seems weird to use this instead of the converted f_tparams *)
+                fub_tparams = f.Aast.f_tparams;
+                fub_namespace = f.Aast.f_namespace;
+              }
+        end
     in
     let named_fun = {
       N.f_annotation = ();
-      f_span = f.f_span;
-      f_mode = f.f_mode;
+      f_span = f.Aast.f_span;
+      f_mode = f.Aast.f_mode;
       f_ret = h;
       f_name = x;
       f_tparams = f_tparams;
@@ -2117,12 +2206,13 @@ module Make (GetLocals : GetLocals) = struct
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
-      f_user_attributes = user_attributes env f.f_user_attributes;
-      f_file_attributes = file_attributes nenv f.f_mode f.f_file_attributes;
-      f_external = f.f_external;
-      f_namespace = f.f_namespace;
-      f_doc_comment = f.f_doc_comment;
-      f_static = f.f_static;
+      f_user_attributes = aast_user_attributes env f.Aast.f_user_attributes;
+      (* Fix file attributes if they are important *)
+      f_file_attributes = [];
+      f_external = f.Aast.f_external;
+      f_namespace = f.Aast.f_namespace;
+      f_doc_comment = f.Aast.f_doc_comment;
+      f_static = f.Aast.f_static;
     } in
     named_fun
 
@@ -2351,33 +2441,14 @@ module Make (GetLocals : GetLocals) = struct
     SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
     result
 
-  and stmt_list ?after_unsafe stl env =
-    let stmt_list = stmt_list ?after_unsafe in
-    match stl with
-    | [] -> []
-    | (_, Unsafe) :: rest ->
-      Env.set_unsafe env true;
-      let st = Errors.ignore_ (fun () -> N.Unsafe_block (stmt_list rest env)) in
-      st :: Option.to_list after_unsafe
-    | (_, Block b) :: rest ->
-      (* Add lexical scope for block scoped let variables *)
-      let b = Env.scope_lexical env (stmt_list b) in
-      let rest = stmt_list rest env in
-      b @ rest
-    | x :: rest ->
-      let x = stmt env x in
-      let rest = stmt_list rest env in
-      x :: rest
-
   and aast_stmt_list ?after_unsafe stl env =
     let aast_stmt_list = aast_stmt_list ?after_unsafe in
     match stl with
     | [] -> []
-    | [Aast.Unsafe_block b] ->
+    | Aast.Unsafe_block b :: _ ->
       Env.set_unsafe env true;
       let st = Errors.ignore_ (fun () -> N.Unsafe_block (aast_stmt_list b env)) in
       st :: Option.to_list after_unsafe
-    | Aast.Unsafe_block _ :: _ -> failwith "ast_to_nast unsafeblock error"
     | Aast.Block b :: rest ->
       (* Add lexical scope for block scoped let variables *)
       let b = Env.scope_lexical env (aast_stmt_list b) in
@@ -2387,11 +2458,6 @@ module Make (GetLocals : GetLocals) = struct
       let x = aast_stmt env x in
       let rest = aast_stmt_list rest env in
       x :: rest
-
-  and block ?(new_scope=true) env stl =
-    if new_scope
-    then Env.scope env (stmt_list stl)
-    else stmt_list stl env
 
   and aast_block ?(new_scope=true) env stl =
     if new_scope
@@ -3121,7 +3187,7 @@ module Make (GetLocals : GetLocals) = struct
       | N.UnnamedBody { N.fub_ast; N.fub_tparams; N.fub_namespace; _ } ->
         let genv = Env.make_fun_genv nenv
           SMap.empty f.N.f_mode (snd f.N.f_name) fub_namespace in
-        let genv = extend_params genv fub_tparams in
+        let genv = aast_extend_params genv fub_tparams in
         let lenv = Env.empty_local None in
         let env = genv, lenv in
         let env =
@@ -3130,11 +3196,11 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVellipsis _ | N.FVnonVariadic -> env
           | N.FVvariadicArg param -> Env.add_param env param
         in
-        let body = block env fub_ast in
+        let fub_ast = aast_block env fub_ast in
         let unsafe = func_body_had_unsafe env in
         Env.check_goto_references env;
         {
-          N.fnb_nast = body;
+          N.fnb_nast = fub_ast;
           fnb_unsafe = unsafe;
         }
 
@@ -3143,7 +3209,7 @@ module Make (GetLocals : GetLocals) = struct
       | N.NamedBody _ as b -> b
       | N.UnnamedBody {N.fub_ast; N.fub_tparams; N.fub_namespace; _} ->
         let genv = {genv with namespace = fub_namespace} in
-        let genv = extend_params genv fub_tparams in
+        let genv = aast_extend_params genv fub_tparams in
         let env = genv, Env.empty_local None in
         let env =
           List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
@@ -3151,11 +3217,11 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVellipsis _ | N.FVnonVariadic -> env
           | N.FVvariadicArg param -> Env.add_param env param
         in
-        let body = block env fub_ast in
+        let fub_ast = aast_block env fub_ast in
         let unsafe = func_body_had_unsafe env in
         Env.check_goto_references env;
         N.NamedBody {
-          N.fnb_nast = body;
+          N.fnb_nast = fub_ast;
           fnb_unsafe = unsafe;
         }
     ) in
@@ -3274,6 +3340,7 @@ module Make (GetLocals : GetLocals) = struct
       []
     | Ast.FileAttributes _ -> []
   end in program ast
+
 end
 
 include Make(struct

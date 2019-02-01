@@ -181,8 +181,8 @@ struct
     match b with
     | S.UnnamedBody fub ->
       T.UnnamedBody {
-        T.fub_ast = fub.S.fub_ast;
-        T.fub_tparams = fub.S.fub_tparams;
+        T.fub_ast = map_block menv fub.S.fub_ast;
+        T.fub_tparams = List.map fub.S.fub_tparams (map_tparam menv);
         T.fub_namespace = fub.S.fub_namespace;
       }
     | S.NamedBody fnb ->

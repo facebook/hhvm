@@ -852,13 +852,6 @@ class ReflectionProperty implements Reflector {
         $this->forceAccessible
       );
     }
-    // Can be removed once we support ParamCoerceMode in PHP
-    if (func_num_args() != 1) {
-      trigger_error('ReflectionProperty::getValue() expects exactly 1'
-        . ' parameter, ' . func_num_args() . ' given', E_WARNING);
-      return null;
-    }
-    // Can be removed once we support ParamCoerceMode in PHP
     if (!is_object($obj)) {
       trigger_error('ReflectionProperty::getValue() expects parameter 1'
          . ' to be object, ' . gettype($obj) . ' given', E_WARNING);
@@ -886,17 +879,29 @@ class ReflectionProperty implements Reflector {
    *
    * @return     mixed   No value is returned.
    */
-  public function setValue($obj = null, $value = null) {
-    if (func_num_args() == 1) {
-      $value = $obj;
-      $obj = null;
-    }
+  public function setValue(mixed ...$args) {
     if (!$this->isAccessible()) {
       throw new ReflectionException(
         "Cannot access non-public member " . $this->class .
         "::" . $this->getName()
       );
     }
+
+    switch (count($args)) {
+      case 0:
+        $value = null;
+        $obj = null;
+        break;
+      case 1:
+        $value = $args[0];
+        $obj = null;
+        break;
+      default:
+        $value = $args[1];
+        $obj = $args[0];
+        break;
+    }
+
     if ($this->isStatic()) {
       hphp_set_static_property(
         $this->class,
@@ -905,13 +910,11 @@ class ReflectionProperty implements Reflector {
         $this->forceAccessible
       );
     } else {
-      // Can be removed once we support ParamCoerceMode in PHP
-      if (func_num_args() != 2) {
-        trigger_error('ReflectionProperty::setValue() expects exactly 2'
-          . ' parameters, ' . func_num_args() . ' given', E_WARNING);
+      if (count($args) != 2) {
+        trigger_error('ReflectionProperty::setValue() expects exactly 2'.
+                      ' parameters, ' . count($args) . ' given', E_WARNING);
         return null;
       }
-      // Can be removed once we support ParamCoerceMode in PHP
       if (!is_object($obj)) {
         trigger_error('ReflectionProperty::setValue() expects parameter 1'
           . ' to be object, ' . gettype($obj) . ' given', E_WARNING);

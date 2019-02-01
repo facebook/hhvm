@@ -379,7 +379,7 @@ bool Package::parseImpl(const std::string* fileName) {
   // error and and skip it.
   auto uc = UnitCompiler::create(
     content.data(), content.size(), fileName->c_str(), md5,
-    Native::s_noNativeFuncs, false, RepoOptions::defaults());
+    Native::s_noNativeFuncs, false, RepoOptions::forFile(fileName->data()));
   assertx(uc);
   try {
     auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());

@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 #include <cstdint>
+#include <libgen.h>
 #include <limits>
 #include <stdexcept>
 #include <map>
@@ -24,6 +25,7 @@
 #include <set>
 #include <vector>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
 #include <folly/FileUtil.h>
 #include <folly/String.h>
@@ -83,6 +85,12 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/treadmill.h"
+
+#ifdef __APPLE__
+#define st_mtim st_mtimespec
+#define st_ctim st_ctimespec
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,6 +151,96 @@ folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
   }
   return obj;
 }
+
+struct CachedRepoOptions {
+  CachedRepoOptions() = default;
+  explicit CachedRepoOptions(RepoOptions&& opts)
+    : options(new RepoOptions(std::move(opts)))
+  {}
+  CachedRepoOptions(const CachedRepoOptions& opts)
+    : options(nullptr)
+  {
+    if (auto o = opts.options.load(std::memory_order_relaxed)) {
+      options.store(new RepoOptions(*o), std::memory_order_relaxed);
+    }
+  }
+  ~CachedRepoOptions() {
+    Treadmill::enqueue([opt = options.exchange(nullptr)] { delete opt; });
+  }
+
+  CachedRepoOptions& operator=(const CachedRepoOptions& opts) {
+    auto const o = opts.options.load(std::memory_order_relaxed);
+    auto const old = options.exchange(o ? new RepoOptions(*o) : nullptr);
+    if (old) Treadmill::enqueue([old] { delete old; });
+    return *this;
+  }
+
+  static bool isChanged(const RepoOptions* opts, struct stat s) {
+    auto const o = opts->stat();
+    return
+      s.st_mtim.tv_sec  != o.st_mtim.tv_sec ||
+      s.st_mtim.tv_nsec != o.st_mtim.tv_nsec ||
+      s.st_ctim.tv_sec  != o.st_ctim.tv_sec ||
+      s.st_ctim.tv_nsec != o.st_ctim.tv_nsec ||
+      s.st_dev != o.st_dev ||
+      s.st_ino != o.st_ino;
+  }
+
+  const RepoOptions* update(RepoOptions&& opts) const {
+    auto const val = new RepoOptions(std::move(opts));
+    auto const old = options.exchange(val);
+    if (old) Treadmill::enqueue([old] { delete old; });
+    return val;
+  }
+
+  const RepoOptions* fetch(struct stat st) const {
+    auto const opts = options.load(std::memory_order_relaxed);
+    return opts && !isChanged(opts, st) ? opts : nullptr;
+  }
+
+  mutable std::atomic<RepoOptions*> options{nullptr};
+};
+
+using RepoOptionCache = tbb::concurrent_hash_map<
+  std::string,
+  CachedRepoOptions,
+  stringHashCompare
+>;
+RepoOptionCache s_repoOptionCache;
+
+}
+
+const RepoOptions& RepoOptions::forFile(const char* path) {
+  const char* filename = ".hhvmconfig.hdf";
+  std::string fpath{path};
+  if (boost::starts_with(fpath, "/:")) return defaults();
+  do {
+    auto const off = fpath.rfind('/');
+    if (off == std::string::npos) return defaults();
+    fpath.resize(off);
+    fpath += '/';
+    fpath += filename;
+
+    if (!access(fpath.data(), R_OK)) {
+      struct stat st;
+      lstat(fpath.data(), &st);
+
+      RepoOptionCache::const_accessor rpathAcc;
+      s_repoOptionCache.insert(rpathAcc, fpath);
+
+      if (auto const opts = rpathAcc->second.fetch(st)) {
+        return *opts;
+      }
+
+      RepoOptions newOpts{fpath.data()};
+      newOpts.m_stat = st;
+      return *rpathAcc->second.update(std::move(newOpts));
+    }
+
+    fpath.resize(off);
+  } while (!fpath.empty() && fpath != "/");
+
+  return defaults();
 }
 
 std::string RepoOptions::cacheKeyRaw() const {

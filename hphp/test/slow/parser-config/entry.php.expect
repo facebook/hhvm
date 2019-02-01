@@ -1,0 +1,4 @@
+function(main)
+string(5) "inner"
+function(inner2)
+string(6) "inner3"

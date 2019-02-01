@@ -1212,6 +1212,12 @@ Class* ExecutionContext::getParentContextClass() {
 }
 
 const RepoOptions& ExecutionContext::getRepoOptionsForCurrentFrame() const {
+  VMRegAnchor _;
+
+  if (auto const ar = vmfp()) {
+    auto const path = ar->func()->unit()->filepath();
+    return RepoOptions::forFile(path->data());
+  }
   return RepoOptions::defaults();
 }
 

@@ -556,7 +556,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const struct stat* statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs) {
-  auto const& options = RepoOptions::defaults();
+  auto const& options = RepoOptions::forFile(requestedPath->data());
   // Steady state, its probably already in the cache. Try that first
   {
     rqtrace::EventGuard trace{"READ_UNIT"};

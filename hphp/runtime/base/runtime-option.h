@@ -27,6 +27,7 @@
 #include <set>
 #include <boost/container/flat_set.hpp>
 #include <memory>
+#include <sys/stat.h>
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -70,6 +71,8 @@ inline constexpr bool isJitSerializing(JitSerdesMode m) {
 }
 
 struct RepoOptions {
+  RepoOptions(const RepoOptions&) = default;
+  RepoOptions(RepoOptions&&) = default;
 
   using StringMap = std::map<std::string, std::string>;
 // (Type, HDFName, DV)
@@ -97,9 +100,12 @@ struct RepoOptions {
   std::string cacheKeyMd5() const;
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
+  struct stat stat() const { return m_stat; }
 
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
+
+  static const RepoOptions& forFile(const char* path);
 
 private:
   RepoOptions() = default;
@@ -117,6 +123,8 @@ PARSERFLAGS()
 #undef P
 #undef H
 #undef E
+
+  struct stat m_stat;
 
   static bool s_init;
   static RepoOptions s_defaults;

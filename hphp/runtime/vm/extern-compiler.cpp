@@ -259,7 +259,8 @@ struct ExternCompiler {
     folly::StringPiece code,
     const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval,
-    AsmCallbacks* callbacks
+    AsmCallbacks* callbacks,
+    const RepoOptions& options
   ) {
     if (!isRunning()) {
       start();
@@ -272,7 +273,7 @@ struct ExternCompiler {
       StructuredLogEntry log;
       log.setStr("filename", filename);
       int64_t t = logTime(log, 0, nullptr, true);
-      writeProgram(filename, md5, code, forDebuggerEval);
+      writeProgram(filename, md5, code, forDebuggerEval, options);
       t = logTime(log, t, "send_source");
       prog = readResult(&log);
       t = logTime(log, t, "receive_hhas");
@@ -345,7 +346,7 @@ private:
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfigs();
   void writeProgram(const char* filename, MD5 md5, folly::StringPiece code,
-                    bool forDebuggerEval);
+                    bool forDebuggerEval, const RepoOptions& options);
   void writeExtractFacts(const std::string& filename, folly::StringPiece code);
   void writeParseFile(const std::string& filename, folly::StringPiece code);
 
@@ -383,7 +384,8 @@ struct CompilerPool {
                          const Native::FuncTable& nativeFuncs,
                          bool forDebuggerEval,
                          AsmCallbacks* callbacks,
-                         bool& internal_error);
+                         bool& internal_error,
+                         const RepoOptions& options);
   FfpResult parse(std::string name, const char* code, int len);
   ParseFactsResult extract_facts(const CompilerGuard& compiler,
                                  const std::string& filename,
@@ -555,7 +557,8 @@ CompilerResult CompilerPool::compile(const char* code,
                                      const Native::FuncTable& nativeFuncs,
                                      bool forDebuggerEval,
                                      AsmCallbacks* callbacks,
-                                     bool& internal_error
+                                     bool& internal_error,
+                                     const RepoOptions& options
 ) {
   auto compile = [&](const CompilerGuard& c) {
     return c->compile(filename,
@@ -563,7 +566,8 @@ CompilerResult CompilerPool::compile(const char* code,
                       folly::StringPiece(code, len),
                       nativeFuncs,
                       forDebuggerEval,
-                      callbacks);
+                      callbacks,
+                      options);
   };
   return run_compiler(
     CompilerGuard(*this),
@@ -742,7 +746,8 @@ void ExternCompiler::writeProgram(
   const char* filename,
   MD5 md5,
   folly::StringPiece code,
-  bool forDebuggerEval
+  bool forDebuggerEval,
+  const RepoOptions& options
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "code")
@@ -750,7 +755,7 @@ void ExternCompiler::writeProgram(
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
-    ("config_overrides", RepoOptions::defaults().toDynamic());
+    ("config_overrides", options.toDynamic());
   writeMessage(header, code);
 }
 
@@ -986,10 +991,19 @@ CompilerResult hackc_compile(
   const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
   AsmCallbacks* callbacks,
-  bool& internal_error
+  bool& internal_error,
+  const RepoOptions& options
 ) {
   return s_manager.get_hackc_pool().compile(
-    code, len, filename, md5, nativeFuncs, forDebuggerEval, callbacks, internal_error
+    code,
+    len,
+    filename,
+    md5,
+    nativeFuncs,
+    forDebuggerEval,
+    callbacks,
+    internal_error,
+    options
   );
 }
 
@@ -1140,11 +1154,19 @@ UnitCompiler::create(const char* code,
                      const char* filename,
                      const MD5& md5,
                      const Native::FuncTable& nativeFuncs,
-                     bool forDebuggerEval
+                     bool forDebuggerEval,
+                     const RepoOptions& options
 ) {
   s_manager.ensure_started();
-  return std::make_unique<HackcUnitCompiler>(code, codeLen, filename, md5,
-                                             nativeFuncs, forDebuggerEval);
+  return std::make_unique<HackcUnitCompiler>(
+    code,
+    codeLen,
+    filename,
+    md5,
+    nativeFuncs,
+    forDebuggerEval,
+    options
+  );
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
@@ -1157,7 +1179,8 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_nativeFuncs,
                            m_forDebuggerEval,
                            callbacks,
-                           ice);
+                           ice,
+                           m_options);
   std::unique_ptr<UnitEmitter> unitEmitter;
   match<void>(
     res,

@@ -362,7 +362,8 @@ void CompletionsCommand::addMemberCompletions(
   context.matchContext = "<?hh return @(" + context.matchContext + ");";
   std::unique_ptr<Unit> unit(
                           compile_debugger_string(context.matchContext.c_str(),
-                            context.matchContext.size()));
+                            context.matchContext.size(),
+                            g_context->getRepoOptionsForCurrentFrame()));
 
   if (unit == nullptr) {
     // Expression failed to compile.

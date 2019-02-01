@@ -22,6 +22,7 @@ namespace HPHP {
 
 struct Unit;
 struct MD5;
+struct RepoOptions;
 
 namespace Native {
 struct FuncTable;
@@ -33,7 +34,7 @@ void hphp_compiler_init();
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
 Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
-                   const Native::FuncTable& nativeFuncs,
+                   const Native::FuncTable& nativeFuncs, const RepoOptions&,
                    Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
@@ -43,10 +44,10 @@ Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
 Unit* compile_string(const char* s, size_t sz, const char* fname,
-                     const Native::FuncTable& nativeFuncs,
+                     const Native::FuncTable& nativeFuncs, const RepoOptions&,
                      bool forDebuggerEval = false);
 
-Unit* compile_debugger_string(const char* s, size_t sz);
+Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
                                const Native::FuncTable& nativeFuncs);
@@ -60,7 +61,8 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
  */
 
 using CompileStringFn = Unit* (*)(const char*, int, const MD5&, const char*,
-                                  const Native::FuncTable&, Unit**, bool);
+                                  const Native::FuncTable&, Unit**, bool,
+                                  const RepoOptions&);
 
 extern CompileStringFn g_hphp_compiler_parse;
 

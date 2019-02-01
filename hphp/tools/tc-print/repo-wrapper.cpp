@@ -71,13 +71,15 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   if (!phpLib.empty()) {
     auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                   "systemlib.php",
-                                  Native::s_systemNativeFuncs);
+                                  Native::s_systemNativeFuncs,
+                                  RepoOptions::defaults());
     addUnit(phpUnit);
   }
   if (!hhasLib.empty()) {
     auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
                                    "systemlib.hhas",
-                                   Native::s_systemNativeFuncs);
+                                   Native::s_systemNativeFuncs,
+                                   RepoOptions::defaults());
     addUnit(hhasUnit);
   }
 

@@ -316,6 +316,8 @@ public:
   const Variant& getSoftLateInitDefault() const;
   void setSoftLateInitDefault(Variant);
 
+  const RepoOptions& getRepoOptionsForCurrentFrame() const;
+
 private:
   struct OutputBuffer {
     explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)

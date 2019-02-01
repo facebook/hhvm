@@ -32,22 +32,24 @@ CompileStringFn g_hphp_compiler_parse;
 
 void hphp_compiler_init() {
   g_hphp_compiler_parse(nullptr, 0, MD5(), nullptr, Native::s_noNativeFuncs,
-                        nullptr, false);
+                        nullptr, false, RepoOptions::defaults());
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname, const Native::FuncTable& nativeFuncs,
-                   Unit** releaseUnit) {
+                   const RepoOptions& options, Unit** releaseUnit) {
   return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, releaseUnit,
-                               false);
+                               false, options);
 }
 
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
                      const Native::FuncTable& nativeFuncs,
+                     const RepoOptions& options,
                      bool forDebuggerEval) {
-  auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
+  auto const md5 = MD5{
+    mangleUnitMd5(string_md5(folly::StringPiece{s, sz}), options)};
   if (auto u = Repo::get().loadUnit(
         fname ? fname : "",
         md5, nativeFuncs).release()) {
@@ -57,7 +59,7 @@ Unit* compile_string(const char* s,
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
   return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, nullptr,
-                               forDebuggerEval);
+                               forDebuggerEval, options);
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
@@ -66,11 +68,20 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
   if (auto u = lookupSyslibUnit(makeStaticString(fname), nativeFuncs)) {
     return u;
   }
-  return compile_string(s, sz, fname, nativeFuncs);
+  return compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
 }
 
-Unit* compile_debugger_string(const char* s, size_t sz) {
-  return compile_string(s, sz, nullptr, Native::s_noNativeFuncs, true);
+Unit* compile_debugger_string(
+  const char* s, size_t sz, const RepoOptions& options
+) {
+  return compile_string(
+    s,
+    sz,
+    nullptr,
+    Native::s_noNativeFuncs,
+    options,
+    true
+  );
 }
 
 }

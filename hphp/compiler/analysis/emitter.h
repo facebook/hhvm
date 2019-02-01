@@ -25,6 +25,7 @@ namespace HPHP {
 struct AnalysisResult;
 struct MD5;
 struct Unit;
+struct RepoOptions;
 
 namespace Native {
 struct FuncTable;
@@ -40,7 +41,8 @@ extern "C" {
                             const char* filename,
                             const Native::FuncTable& nativeFuncs,
                             Unit** releaseUnit,
-                            bool forDebuggerEval);
+                            bool forDebuggerEval,
+                            const RepoOptions&);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

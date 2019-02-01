@@ -778,7 +778,8 @@ bool BreakpointManager::isBreakConditionSatisified(
   if (unit == nullptr && !condition.empty()) {
     try {
       auto const cond = EvaluateCommand::prepareEvalExpression(condition);
-      unit = compile_debugger_string(cond.c_str(), cond.size());
+      unit = compile_debugger_string(
+        cond.c_str(), cond.size(), g_context->getRepoOptionsForCurrentFrame());
       bp->cacheConditionUnit(requestId, unit);
     } catch (...) {
       // Errors will be printed to stderr already, and we'll err on the side

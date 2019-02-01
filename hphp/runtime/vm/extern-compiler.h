@@ -80,13 +80,15 @@ struct UnitCompiler {
                const char* filename,
                const MD5& md5,
                const Native::FuncTable& nativeFuncs,
-               bool forDebuggerEval)
+               bool forDebuggerEval,
+               const RepoOptions& options)
       : m_code(code),
         m_codeLen(codeLen),
         m_filename(filename),
         m_md5(md5),
         m_nativeFuncs(nativeFuncs),
-        m_forDebuggerEval(forDebuggerEval)
+        m_forDebuggerEval(forDebuggerEval),
+        m_options(options)
     {}
   virtual ~UnitCompiler() {}
 
@@ -96,7 +98,8 @@ struct UnitCompiler {
     const char* filename,
     const MD5& md5,
     const Native::FuncTable& nativeFuncs,
-    bool forDebuggerEval);
+    bool forDebuggerEval,
+    const RepoOptions& options);
 
   virtual std::unique_ptr<UnitEmitter> compile(
     AsmCallbacks* callbacks = nullptr) const = 0;
@@ -110,6 +113,7 @@ struct UnitCompiler {
   const MD5& m_md5;
   const Native::FuncTable& m_nativeFuncs;
   bool m_forDebuggerEval;
+  const RepoOptions& m_options;
 };
 
 struct HackcUnitCompiler : public UnitCompiler {

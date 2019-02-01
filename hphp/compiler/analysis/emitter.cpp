@@ -308,7 +308,8 @@ extern "C" {
 Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                           const char* filename,
                           const Native::FuncTable& nativeFuncs,
-                          Unit** releaseUnit, bool forDebuggerEval) {
+                          Unit** releaseUnit, bool forDebuggerEval,
+                          const RepoOptions& options) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::RecordErrors = false;
@@ -356,7 +357,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // the extern compiler
     if (!ue) {
       auto uc = UnitCompiler::create(code, codeLen, filename, md5,
-                                     nativeFuncs, forDebuggerEval);
+                                     nativeFuncs, forDebuggerEval, options);
       assertx(uc);
       try {
         ue = uc->compile();

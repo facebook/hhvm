@@ -1816,7 +1816,9 @@ static int execute_program_impl(int argc, char** argv) {
     contents << fs.rdbuf();
 
     auto const str = contents.str();
-    auto const md5 = MD5{mangleUnitMd5(string_md5(str))};
+    auto const md5 = MD5{
+      mangleUnitMd5(string_md5(str), RepoOptions::defaults())
+    };
 
     compilers_start();
     hphp_thread_init();
@@ -1835,7 +1837,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
                                  Native::s_noNativeFuncs,
-                                 nullptr);
+                                 RepoOptions::defaults(), nullptr);
 
     if (po.mode == "verify") {
       return 0;

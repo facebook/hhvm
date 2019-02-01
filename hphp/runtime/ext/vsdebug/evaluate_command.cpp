@@ -67,7 +67,8 @@ EvaluatePHPExecutor::EvaluatePHPExecutor(
 void EvaluatePHPExecutor::callPHPCode()
 {
   std::unique_ptr<Unit> unit(compile_debugger_string(m_expr.c_str(),
-                              m_expr.size()));
+                              m_expr.size(),
+                              g_context->getRepoOptionsForCurrentFrame()));
   if (!unit) {
     // The compiler will already have printed more detailed error messages
     // to stderr, which is redirected to the debugger client's console.

@@ -190,10 +190,15 @@ struct CachedUnitWithFree {
   explicit CachedUnitWithFree(const CachedUnitWithFree&) = delete;
   CachedUnitWithFree& operator=(const CachedUnitWithFree&) = delete;
 
-  explicit CachedUnitWithFree(const CachedUnit& src,
-                              const struct stat* statInfo,
-                              bool needsTreadmill) :
-      cu(src), needsTreadmill{needsTreadmill} {
+  explicit CachedUnitWithFree(
+    const CachedUnit& src,
+    const struct stat* statInfo,
+    bool needsTreadmill,
+    const RepoOptions& options
+  ) : cu(src)
+    , needsTreadmill{needsTreadmill}
+    , repoOptionsHash(options.cacheKeyMd5())
+  {
     if (statInfo) {
 #ifdef _MSC_VER
       mtime      = statInfo->st_mtime;
@@ -225,6 +230,8 @@ struct CachedUnitWithFree {
   mutable ino_t ino;
   mutable dev_t devId;
   bool needsTreadmill;
+
+  MD5 repoOptionsHash;
 };
 
 struct CachedUnitNonRepo {
@@ -268,7 +275,11 @@ bool stressUnitCache() {
   return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
 }
 
-bool isChanged(copy_ptr<CachedUnitWithFree> cachedUnit, const struct stat* s) {
+bool isChanged(
+  copy_ptr<CachedUnitWithFree> cachedUnit,
+  const struct stat* s,
+  const RepoOptions& options
+) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
@@ -284,6 +295,7 @@ bool isChanged(copy_ptr<CachedUnitWithFree> cachedUnit, const struct stat* s) {
 #endif
          cachedUnit->ino != s->st_ino ||
          cachedUnit->devId != s->st_dev ||
+         cachedUnit->repoOptionsHash != MD5{options.cacheKeyMd5()} ||
          stressUnitCache();
 }
 
@@ -310,8 +322,9 @@ CachedUnit createUnitFromString(const char* path,
                                 const String& contents,
                                 Unit** releaseUnit,
                                 OptLog& ent,
-                                const Native::FuncTable& nativeFuncs) {
-  auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
+                                const Native::FuncTable& nativeFuncs,
+                                const RepoOptions& options) {
+  auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()), options)};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5, nativeFuncs)) {
     return CachedUnit { unit.release(), rds::allocBit() };
@@ -320,7 +333,7 @@ CachedUnit createUnitFromString(const char* path,
   rqtrace::EventGuard trace{"COMPILE_UNIT"};
   trace.annotate("file_size", folly::to<std::string>(contents.size()));
   auto const unit = compile_file(contents.data(), contents.size(), md5, path,
-                                 nativeFuncs, releaseUnit);
+                                 nativeFuncs, options, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
 
@@ -341,17 +354,18 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath,
   }
   OptLog ent;
   return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent,
-                              nativeFuncs);
+                              nativeFuncs, RepoOptions::defaults());
 }
 
 CachedUnit createUnitFromFile(const StringData* const path,
                               Unit** releaseUnit, Stream::Wrapper* w,
                               OptLog& ent,
-                              const Native::FuncTable& nativeFuncs) {
+                              const Native::FuncTable& nativeFuncs,
+                              const RepoOptions& options) {
   auto const contents = readFileAsString(w, path);
   return contents
     ? createUnitFromString(path->data(), *contents, releaseUnit, ent,
-                           nativeFuncs)
+                           nativeFuncs, options)
     : CachedUnit{};
 }
 
@@ -418,7 +432,8 @@ NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
                                const struct stat* statInfo,
                                OptLog& ent,
-                               const Native::FuncTable& nativeFuncs) {
+                               const Native::FuncTable& nativeFuncs,
+                               const RepoOptions& options) {
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
@@ -482,7 +497,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     cache.insert(rpathAcc, rpath);
     auto& cachedUnit = rpathAcc->second.cachedUnit;
     if (auto const tmp = cachedUnit.copy()) {
-      if (!isChanged(tmp, statInfo)) {
+      if (!isChanged(tmp, statInfo, options)) {
         if (ent) ent->setStr("type", "cache_hit_readlock");
         return tmp;
       }
@@ -491,7 +506,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     cachedUnit.lock_for_update();
     try {
       if (auto const tmp = cachedUnit.copy()) {
-        if (!isChanged(tmp, statInfo)) {
+        if (!isChanged(tmp, statInfo, options)) {
           cachedUnit.unlock();
           if (ent) ent->setStr("type", "cache_hit_writelock");
           return tmp;
@@ -503,9 +518,9 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
       trace.finish();
       auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
-                                         nativeFuncs);
+                                         nativeFuncs, options);
       auto const isICE = cu.unit && cu.unit->isICE();
-      auto p = copy_ptr<CachedUnitWithFree>(cu, statInfo, isICE);
+      auto p = copy_ptr<CachedUnitWithFree>(cu, statInfo, isICE, options);
       // Don't cache the unit if it was created in response to an internal error
       // in ExternCompiler. Such units represent transient events.
       if (UNLIKELY(isICE)) {
@@ -541,13 +556,14 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const struct stat* statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs) {
+  auto const& options = RepoOptions::defaults();
   // Steady state, its probably already in the cache. Try that first
   {
     rqtrace::EventGuard trace{"READ_UNIT"};
     NonRepoUnitCache::const_accessor acc;
     if (s_nonRepoUnitCache.find(acc, requestedPath)) {
       auto const cachedUnit = acc->second.cachedUnit.copy();
-      if (!isChanged(cachedUnit, statInfo)) {
+      if (!isChanged(cachedUnit, statInfo, options)) {
         auto const cu = cachedUnit->cu;
         if (!cu.unit || !RuntimeOption::CheckSymLink ||
             !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
@@ -558,7 +574,8 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
       }
     }
   }
-  return loadUnitNonRepoAuth(requestedPath, statInfo, ent, nativeFuncs);
+  return loadUnitNonRepoAuth(requestedPath, statInfo, ent, nativeFuncs,
+    options);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -744,7 +761,7 @@ const std::string mangleUnitPHP7Options() {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string mangleUnitMd5(const std::string& fileMd5) {
+std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
@@ -782,7 +799,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
-    + RepoOptions::defaults().cacheKeyRaw()
+    + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()
     + hackc_version();
   return string_md5(t);

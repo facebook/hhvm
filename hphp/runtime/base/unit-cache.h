@@ -27,6 +27,7 @@ namespace HPHP {
 struct Unit;
 struct String;
 struct StringData;
+struct RepoOptions;
 
 namespace Native {
 struct FuncTable;
@@ -71,7 +72,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
  * Mangle a file's md5sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */
-std::string mangleUnitMd5(const std::string& fileMd5);
+std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions&);
 
 /*
  * Return the number of php files that are currently loaded in this process.

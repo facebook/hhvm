@@ -1211,6 +1211,10 @@ Class* ExecutionContext::getParentContextClass() {
   return nullptr;
 }
 
+const RepoOptions& ExecutionContext::getRepoOptionsForCurrentFrame() const {
+  return RepoOptions::defaults();
+}
+
 StringData* ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
@@ -2259,7 +2263,8 @@ Unit* ExecutionContext::compileEvalString(
       code->data(),
       code->size(),
       evalFilename,
-      Native::s_noNativeFuncs
+      Native::s_noNativeFuncs,
+      getRepoOptionsForCurrentFrame()
     );
   }
   return acc->second;
@@ -2268,7 +2273,8 @@ Unit* ExecutionContext::compileEvalString(
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?php" prepended already
-  auto unit = compile_debugger_string(code->data(), code->size());
+  auto unit = compile_debugger_string(code->data(), code->size(),
+    getRepoOptionsForCurrentFrame());
   if (unit == nullptr) {
     raise_error("Syntax error");
     return {true, init_null_variant, "Syntax error"};
@@ -2417,7 +2423,9 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 }
 
 void ExecutionContext::enterDebuggerDummyEnv() {
-  static Unit* s_debuggerDummy = compile_debugger_string("<?php?>", 7);
+  static Unit* s_debuggerDummy = compile_debugger_string(
+    "<?php?>", 7, RepoOptions::defaults()
+  );
   // Ensure that the VM stack is completely empty (vmfp() should be null)
   // and that we're not in a nested VM (reentrancy)
   assertx(vmfp() == nullptr);

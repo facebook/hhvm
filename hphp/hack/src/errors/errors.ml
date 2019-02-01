@@ -17,19 +17,16 @@ type error_code = int
  * before sending it to the client *)
 type 'a message = 'a * string
 
-type error_phase = Init | Parsing | Naming | Decl | Typing
-type error_severity = Warning | Error
-
-(* For callers that don't care about tracking error origins *)
-let default_context = (Relative_path.default, Typing)
+type phase = Init | Parsing | Naming | Decl | Typing
+type severity = Warning | Error
 
 (* The file and phase of analysis being currently performed *)
-let current_context: (Relative_path.t * error_phase) ref = ref default_context
+let current_context : (Relative_path.t * phase) ref = ref (Relative_path.default, Typing)
 
 let allow_errors_in_default_path = ref true
 
 module PhaseMap = Reordered_argument_map(MyMap.Make(struct
-  type t = error_phase
+  type t = phase
 
   let rank = function
     | Init -> 0
@@ -85,16 +82,14 @@ let get_code_severity code =
   then Warning
   else Error
 
-module Common = struct
-
-  (* Get most recently-ish added error. *)
-  let get_last error_map =
-    (* If this map has more than one element, we pick an arbitrary file. Because
-     * of that, we might not end up with the most recent error and generate a
-     * less-specific error message. This should be rare. *)
-    match Relative_path.Map.max_binding error_map with
-    | None -> None
-    | Some (_, phase_map) -> begin
+(* Get most recently-ish added error. *)
+let get_last error_map =
+  (* If this map has more than one element, we pick an arbitrary file. Because
+   * of that, we might not end up with the most recent error and generate a
+   * less-specific error message. This should be rare. *)
+  match Relative_path.Map.max_binding error_map with
+  | None -> None
+  | Some (_, phase_map) -> begin
       let error_list = PhaseMap.max_binding phase_map
         |> Option.value_map ~f:snd ~default:[]
       in
@@ -103,264 +98,216 @@ module Common = struct
         | e::_ -> Some e
       end
 
-  let try_with_result f1 f2 error_map accumulate_errors =
-    let error_map_copy = !error_map in
-    let accumulate_errors_copy = !accumulate_errors in
-    error_map := Relative_path.Map.empty;
-    accumulate_errors := true;
-    let result, errors = Utils.try_finally
-      ~f:begin fun () ->
-        let result = f1 () in
-        result, !error_map
-      end
-      ~finally:begin fun () ->
-        error_map := error_map_copy;
-        accumulate_errors := accumulate_errors_copy;
-      end
-    in
-    match get_last errors with
-    | None -> result
-    | Some l -> f2 result l
+type 'a error_ = error_code * 'a message list
+type error = Pos.t error_
+type applied_fixme = Pos.t * int
 
-  let do_ f error_map accumulate_errors applied_fixmes  =
-    let error_map_copy = !error_map in
-    let accumulate_errors_copy = !accumulate_errors in
-    let applied_fixmes_copy = !applied_fixmes in
-    error_map := Relative_path.Map.empty;
-    applied_fixmes := Relative_path.Map.empty;
-    accumulate_errors := true;
-    let result, out_errors, out_applied_fixmes = Utils.try_finally
-      ~f:begin fun () ->
-        let result = f () in
-        result, !error_map, !applied_fixmes
-      end
-      ~finally:begin fun () ->
-        error_map := error_map_copy;
-        applied_fixmes := applied_fixmes_copy;
-        accumulate_errors := accumulate_errors_copy;
-      end
-    in
-    let out_errors = files_t_map ~f:(List.rev) out_errors in
-    (out_errors, out_applied_fixmes), result
+let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 
-  let run_in_context path phase f =
-    let context_copy = !current_context in
-    current_context := (path, phase);
-    Utils.try_finally ~f ~finally:begin fun () ->
-      current_context := context_copy;
+let (error_map : error files_t ref) = ref Relative_path.Map.empty
+
+let accumulate_errors = ref false
+(* Some filename when declaring *)
+let in_lazy_decl = ref None
+
+let try_with_result f1 f2 =
+  let error_map_copy = !error_map in
+  let accumulate_errors_copy = !accumulate_errors in
+  error_map := Relative_path.Map.empty;
+  accumulate_errors := true;
+  let result, errors = Utils.try_finally
+    ~f:begin fun () ->
+      let result = f1 () in
+      result, !error_map
     end
-
-  (* Log important data if lazy_decl triggers a crash *)
-  let lazy_decl_error_logging error error_map to_absolute to_string =
-    let error_list = files_t_to_list !error_map in
-    (* Print the current error list, which should be empty *)
-    Printf.eprintf "%s" "Error list(should be empty):\n";
-    List.iter error_list ~f:(fun err ->
-        let msg = err |> to_absolute |> to_string in Printf.eprintf "%s\n" msg);
-    Printf.eprintf "%s" "Offending error:\n";
-    Printf.eprintf "%s" error;
-
-    (* Print out a larger stack trace *)
-    Printf.eprintf "%s" "Callstack:\n";
-    Printf.eprintf "%s" (Caml.Printexc.raw_backtrace_to_string
-      (Caml.Printexc.get_callstack 500));
-    (* Exit with special error code so we can see the log after *)
-    Exit_status.exit Exit_status.Lazy_decl_bug
-
-  (*****************************************************************************)
-  (* Error code printing. *)
-  (*****************************************************************************)
-
-  let error_kind error_code =
-    match error_code / 1000 with
-    | 1 -> "Parsing"
-    | 2 -> "Naming"
-    | 3 -> "NastCheck"
-    | 4 -> "Typing"
-    | 5 -> "Lint"
-    | 8 -> "Init"
-    | _ -> "Other"
-
-  let error_code_to_string error_code =
-    let error_kind = error_kind error_code in
-    let error_number = Printf.sprintf "%04d" error_code in
-    error_kind^"["^error_number^"]"
-
-  let phase_to_string (phase: error_phase) : string =
-    match phase with
-    | Init -> "Init"
-    | Parsing -> "Parsing"
-    | Naming -> "Naming"
-    | Decl -> "Decl"
-    | Typing -> "Typing"
-
-  let sort get_pos err =
-    List.sort ~compare:begin fun x y ->
-      Pos.compare (get_pos x) (get_pos y)
-    end err
-    |> List.remove_consecutive_duplicates ~equal:(=)
-
-  let get_sorted_error_list get_pos (err,_) =
-    sort get_pos (files_t_to_list err)
-
-  (* Getters and setter for passed-in map, based on current context *)
-  let get_current_file_t file_t_map =
-     let current_file = fst !current_context in
-     Relative_path.Map.get file_t_map current_file |>
-     Option.value ~default:PhaseMap.empty
-
-  let get_current_list file_t_map =
-    let current_phase = snd !current_context in
-    get_current_file_t file_t_map |> fun x ->
-    PhaseMap.get x current_phase |>
-    Option.value ~default:[]
-
-  let set_current_list file_t_map new_list =
-    let current_file, current_phase = !current_context in
-    file_t_map := Relative_path.Map.add
-      !file_t_map
-      current_file
-      (PhaseMap.add
-        (get_current_file_t !file_t_map)
-        current_phase
-        new_list
-      )
-end
-
-module type Errors_modes = sig
-
-  type 'a error_
-  type error = Pos.t error_
-  type applied_fixme = Pos.t * int
-
-  val applied_fixmes: applied_fixme files_t ref
-  val error_map: error files_t ref
-
-  val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
-  val do_: (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a
-  val do_with_context: Relative_path.t -> error_phase ->
-    (unit -> 'a) -> (error files_t * applied_fixme files_t) * 'a
-  val run_in_context: Relative_path.t -> error_phase -> (unit -> 'a) -> 'a
-  val run_in_decl_mode: Relative_path.t -> (unit -> 'a) -> 'a
-  val add_error: error -> unit
-  val make_error: error_code -> (Pos.t message) list -> error
-
-  val get_code: 'a error_ -> error_code
-  val get_pos: error -> Pos.t
-  val get_severity: 'a error_ -> error_severity
-  val to_list: 'a error_ -> 'a message list
-  val to_absolute : error -> Pos.absolute error_
-
-  val to_string : ?indent:bool -> Pos.absolute error_ -> string
-
-  val get_sorted_error_list: error files_t * applied_fixme files_t -> error list
-  val sort: error list -> error list
-  val currently_has_errors : unit -> bool
-
-end
-
-module Errors: Errors_modes = struct
-  type 'a error_ = error_code * 'a message list
-  type error = Pos.t error_
-  type applied_fixme = Pos.t * int
-
-  let applied_fixmes: applied_fixme files_t ref = ref Relative_path.Map.empty
-  let (error_map: error files_t ref) = ref Relative_path.Map.empty
-  let accumulate_errors = ref false
-  (* Some filename when declaring *)
-  let in_lazy_decl = ref None
-
-  let try_with_result f1 f2 =
-    Common.try_with_result f1 f2 error_map accumulate_errors
-
-  let do_ f =
-    Common.do_ f error_map accumulate_errors applied_fixmes
-
-  let do_with_context path phase f =
-    Common.run_in_context path phase (fun () -> do_ f)
-
-  let run_in_context = Common.run_in_context
-
-  (* Turn on lazy decl mode for the duration of the closure.
-     This runs without returning the original state,
-     since we collect it later in do_with_lazy_decls_
-  *)
-  let run_in_decl_mode filename f =
-    let old_in_lazy_decl = !in_lazy_decl in
-    in_lazy_decl := Some filename;
-    Utils.try_finally ~f ~finally:begin fun () ->
-      in_lazy_decl := old_in_lazy_decl;
+    ~finally:begin fun () ->
+      error_map := error_map_copy;
+      accumulate_errors := accumulate_errors_copy;
     end
+  in
+  match get_last errors with
+  | None -> result
+  | Some l -> f2 result l
 
-  and make_error code (x: (Pos.t * string) list) = ((code, x): error)
+let do_ f =
+  let error_map_copy = !error_map in
+  let accumulate_errors_copy = !accumulate_errors in
+  let applied_fixmes_copy = !applied_fixmes in
+  error_map := Relative_path.Map.empty;
+  applied_fixmes := Relative_path.Map.empty;
+  accumulate_errors := true;
+  let result, out_errors, out_applied_fixmes = Utils.try_finally
+    ~f:begin fun () ->
+      let result = f () in
+      result, !error_map, !applied_fixmes
+    end
+    ~finally:begin fun () ->
+      error_map := error_map_copy;
+      applied_fixmes := applied_fixmes_copy;
+      accumulate_errors := accumulate_errors_copy;
+    end
+  in
+  let out_errors = files_t_map ~f:(List.rev) out_errors in
+  (out_errors, out_applied_fixmes), result
 
-  (*****************************************************************************)
-  (* Accessors. *)
-  (*****************************************************************************)
+let run_in_context path phase f =
+  let context_copy = !current_context in
+  current_context := (path, phase);
+  Utils.try_finally ~f ~finally:begin fun () ->
+    current_context := context_copy;
+  end
 
-  and get_code (error: 'a error_) = ((fst error): error_code)
-  let get_pos (error : error) = fst (List.hd_exn (snd error))
+(* Log important data if lazy_decl triggers a crash *)
+let lazy_decl_error_logging error error_map to_absolute to_string =
+  let error_list = files_t_to_list !error_map in
+  (* Print the current error list, which should be empty *)
+  Printf.eprintf "%s" "Error list(should be empty):\n";
+  List.iter error_list ~f:(fun err ->
+    let msg = err |> to_absolute |> to_string in Printf.eprintf "%s\n" msg);
+  Printf.eprintf "%s" "Offending error:\n";
+  Printf.eprintf "%s" error;
 
-  let get_severity (error: 'a error_) = get_code_severity (get_code error)
+  (* Print out a larger stack trace *)
+  Printf.eprintf "%s" "Callstack:\n";
+  Printf.eprintf "%s" (Caml.Printexc.raw_backtrace_to_string
+    (Caml.Printexc.get_callstack 500));
+  (* Exit with special error code so we can see the log after *)
+  Exit_status.exit Exit_status.Lazy_decl_bug
 
-  let to_list (error : 'a error_) = snd error
-  let to_absolute error =
-    let code, msg_l = (get_code error), (to_list error) in
-    let msg_l = List.map msg_l (fun (p, s) -> Pos.to_absolute p, s) in
-    code, msg_l
+(*****************************************************************************)
+(* Error code printing. *)
+(*****************************************************************************)
 
-  let to_string ?(indent=false) (error : Pos.absolute error_) : string =
-    let error_code, msgl = (get_code error), (to_list error) in
-    let buf = Buffer.create 50 in
-    (match msgl with
-    | [] -> assert false
-    | (pos1, msg1) :: rest_of_error ->
-        Buffer.add_string buf begin
-          let error_code = Common.error_code_to_string error_code in
-          Printf.sprintf "%s\n%s (%s)\n"
-            (Pos.string pos1) msg1 error_code
+let error_kind error_code =
+  match error_code / 1000 with
+  | 1 -> "Parsing"
+  | 2 -> "Naming"
+  | 3 -> "NastCheck"
+  | 4 -> "Typing"
+  | 5 -> "Lint"
+  | 8 -> "Init"
+  | _ -> "Other"
+
+let error_code_to_string error_code =
+  let error_kind = error_kind error_code in
+  let error_number = Printf.sprintf "%04d" error_code in
+  error_kind^"["^error_number^"]"
+
+let phase_to_string (phase : phase) : string =
+  match phase with
+  | Init -> "Init"
+  | Parsing -> "Parsing"
+  | Naming -> "Naming"
+  | Decl -> "Decl"
+  | Typing -> "Typing"
+
+let rec get_pos (error : error) = fst (List.hd_exn (snd error))
+
+and sort err =
+  List.sort ~compare:begin fun x y ->
+    Pos.compare (get_pos x) (get_pos y)
+  end err
+  |> List.remove_consecutive_duplicates ~equal:(=)
+
+and get_sorted_error_list (err,_) =
+  sort (files_t_to_list err)
+
+(* Getters and setter for passed-in map, based on current context *)
+let get_current_file_t file_t_map =
+  let current_file = fst !current_context in
+  Relative_path.Map.get file_t_map current_file |>
+  Option.value ~default:PhaseMap.empty
+
+let get_current_list file_t_map =
+  let current_phase = snd !current_context in
+  get_current_file_t file_t_map |> fun x ->
+  PhaseMap.get x current_phase |>
+  Option.value ~default:[]
+
+let set_current_list file_t_map new_list =
+  let current_file, current_phase = !current_context in
+  file_t_map := Relative_path.Map.add
+    !file_t_map
+    current_file
+    (PhaseMap.add
+      (get_current_file_t !file_t_map)
+      current_phase
+      new_list
+    )
+
+let do_with_context path phase f = run_in_context path phase (fun () -> do_ f)
+
+(* Turn on lazy decl mode for the duration of the closure.
+   This runs without returning the original state,
+   since we collect it later in do_with_lazy_decls_
+*)
+let run_in_decl_mode filename f =
+  let old_in_lazy_decl = !in_lazy_decl in
+  in_lazy_decl := Some filename;
+  Utils.try_finally ~f ~finally:begin fun () ->
+    in_lazy_decl := old_in_lazy_decl;
+  end
+
+and make_error code (x : (Pos.t * string) list) : error = (code, x)
+
+(*****************************************************************************)
+(* Accessors. *)
+(*****************************************************************************)
+
+and get_code (error: 'a error_) = ((fst error): error_code)
+
+let get_severity (error: 'a error_) = get_code_severity (get_code error)
+
+let to_list (error : 'a error_) = snd error
+let to_absolute error =
+  let code, msg_l = (get_code error), (to_list error) in
+  let msg_l = List.map msg_l (fun (p, s) -> Pos.to_absolute p, s) in
+  code, msg_l
+
+let to_string ?(indent=false) (error : Pos.absolute error_) : string =
+  let error_code, msgl = (get_code error), (to_list error) in
+  let buf = Buffer.create 50 in
+  (match msgl with
+  | [] -> assert false
+  | (pos1, msg1) :: rest_of_error ->
+      Buffer.add_string buf begin
+        let error_code = error_code_to_string error_code in
+        Printf.sprintf "%s\n%s (%s)\n"
+          (Pos.string pos1) msg1 error_code
       end;
-        let indentstr = if indent then "  " else "" in
-        List.iter rest_of_error begin fun (p, w) ->
-          let msg = Printf.sprintf "%s%s\n%s%s\n"
-              indentstr (Pos.string p) indentstr w in
-          Buffer.add_string buf msg
-        end
-    );
-    Buffer.contents buf
+      let indentstr = if indent then "  " else "" in
+      List.iter rest_of_error begin fun (p, w) ->
+        let msg = Printf.sprintf "%s%s\n%s%s\n"
+            indentstr (Pos.string p) indentstr w in
+        Buffer.add_string buf msg
+      end
+  );
+  Buffer.contents buf
 
-  let sort = Common.sort get_pos
-  let get_sorted_error_list = Common.get_sorted_error_list get_pos
+let add_error error =
+  if !accumulate_errors then
+    let () = match !current_context with
+      | (path, _) when path = Relative_path.default &&
+          (not !allow_errors_in_default_path) ->
+          Hh_logger.log "WARNING: adding an error in default path\n%s\n"
+            (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 100))
+      | _ -> ()
+    in
+    (* Cheap test to avoid duplicating most recent error *)
+    let error_list = get_current_list !error_map in
+    match error_list with
+    | old_error :: _ when error = old_error -> ()
+    | _ -> set_current_list error_map (error :: error_list)
+  else
+    (* We have an error, but haven't handled it in any way *)
+    let msg = error |> to_absolute |> to_string in
+    match !in_lazy_decl with
+    | Some _ ->
+      lazy_decl_error_logging msg error_map to_absolute to_string
+    | None -> assert_false_log_backtrace (Some msg)
 
-  let add_error error =
-    if !accumulate_errors then
-      let () = match !current_context with
-        | (path, _) when path = Relative_path.default &&
-            (not !allow_errors_in_default_path) ->
-            Hh_logger.log "WARNING: adding an error in default path\n%s\n"
-              (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 100))
-        | _ -> ()
-      in
-      (* Cheap test to avoid duplicating most recent error *)
-      let error_list = Common.get_current_list !error_map in
-      match error_list with
-      | old_error :: _ when error = old_error -> ()
-      | _ -> Common.set_current_list error_map (error :: error_list)
-    else
-      (* We have an error, but haven't handled it in any way *)
-      let msg = error |> to_absolute |> to_string in
-      match !in_lazy_decl with
-      | Some _ ->
-        Common.lazy_decl_error_logging msg error_map to_absolute to_string
-      | None -> assert_false_log_backtrace (Some msg)
-  let currently_has_errors () =
-    Common.get_current_list !error_map <> []
-
-end
-
-(** The Errors functor which produces the Errors module.
- * Omitting gratuitous indentation. *)
-module Errors_with_mode(M: Errors_modes) = struct
+(* Whether we've found at least one error *)
+let currently_has_errors () = get_current_list !error_map <> []
 
 module Temporary = Error_codes.Temporary
 module Parsing = Error_codes.Parsing
@@ -373,13 +320,7 @@ module Init = Error_codes.Init
 (* Types *)
 (*****************************************************************************)
 
-type 'a error_ = 'a M.error_
-type error = Pos.t error_
-type applied_fixme = M.applied_fixme
 type t = error files_t * applied_fixme files_t
-
-type phase = error_phase = Init | Parsing | Naming | Decl | Typing
-type severity = error_severity = Warning | Error
 
 module type Error_category = sig
   type t
@@ -393,8 +334,6 @@ end
 (* HH_FIXMEs hook *)
 (*****************************************************************************)
 
-let applied_fixmes = M.applied_fixmes
-let error_map = M.error_map
 
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
@@ -414,26 +353,24 @@ let (get_hh_fixme_pos: (Pos.t -> error_code -> Pos.t option) ref) =
 let add_ignored_fixme_code_error pos code =
   if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
-    M.add_error (M.make_error code
-      [pos, 
+    add_error (make_error code
+      [pos,
        Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)
 (*****************************************************************************)
 
-let add_applied_fixme code pos =
+let rec add_applied_fixme code pos =
   if ServerLoadFlag.get_no_load () then
-    let applied_fixmes_list = Common.get_current_list !applied_fixmes in
-    Common.set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
+    let applied_fixmes_list = get_current_list !applied_fixmes in
+    set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
   else ()
-
-let rec add_error = M.add_error
 
 and add code pos msg =
   if not (is_ignored_fixme code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
-  else add_error (M.make_error code [pos, msg]);
+  else add_error (make_error code [pos, msg]);
   add_ignored_fixme_code_error pos code
 
 and add_list code pos_msg_l =
@@ -539,15 +476,6 @@ and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
-and get_code = M.get_code
-and get_pos = M.get_pos
-and get_severity = M.get_severity
-and to_list = M.to_list
-
-and make_error = M.make_error
-
-let sort = M.sort
-let get_sorted_error_list = M.get_sorted_error_list
 let iter_error_list f err = List.iter ~f:f (get_sorted_error_list err)
 
 let fold_errors ?phase err ~init ~f =
@@ -583,10 +511,6 @@ let get_failed_files err phase =
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)
-
-let error_code_to_string = Common.error_code_to_string
-
-let phase_to_string = Common.phase_to_string
 
 let internal_error pos msg =
   add 0 pos ("Internal error: "^msg)
@@ -3498,12 +3422,6 @@ let typechecker_timeout (pos, fun_name) seconds =
     (Printf.sprintf "Type checker timed out after %d seconds whilst checking function %s" seconds fun_name)
 
 (*****************************************************************************)
-(* Convert relative paths to absolute. *)
-(*****************************************************************************)
-
-let to_absolute = M.to_absolute
-
-(*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 
@@ -3522,17 +3440,13 @@ let to_json (error : Pos.absolute error_) =
   end in
   Hh_json.JSON_Object [ "message", Hh_json.JSON_Array elts ]
 
-let to_string = M.to_string
-
 (*****************************************************************************)
 (* Try if errors. *)
 (*****************************************************************************)
 
-let try_ f1 f2 =
-  M.try_with_result f1 (fun _ l -> f2 l)
+let try_ f1 f2 = try_with_result f1 (fun _ l -> f2 l)
 
-let try_with_error f1 f2 =
-  try_ f1 (fun err -> add_error err; f2())
+let try_with_error f1 f2 = try_ f1 (fun err -> add_error err; f2 ())
 
 let try_add_err pos err f1 f2 =
   try_ f1 begin fun error ->
@@ -3548,12 +3462,6 @@ let has_no_errors f =
 (* Do. *)
 (*****************************************************************************)
 
-let do_ = M.do_
-let do_with_context = M.do_with_context
-
-let run_in_context = M.run_in_context
-let run_in_decl_mode = M.run_in_decl_mode
-
 let ignore_ f =
   let allow_errors_in_default_path_copy = !allow_errors_in_default_path in
   set_allow_errors_in_default_path true;
@@ -3562,15 +3470,12 @@ let ignore_ f =
   result
 
 let try_when f ~when_ ~do_ =
-  M.try_with_result f begin fun result (error: error) ->
+  try_with_result f begin fun result (error: error) ->
     if when_()
     then do_ error
     else add_error error;
     result
   end
-
-(* Whether we've found at least one error *)
-let currently_has_errors = M.currently_has_errors
 
 (* Runs the first function that is expected to produce an error. If it doesn't
  * then we run the second function we are given
@@ -3578,7 +3483,3 @@ let currently_has_errors = M.currently_has_errors
 let must_error f error_fun =
   let had_no_errors = try_with_error (fun () -> f(); true) (fun _ -> false) in
   if had_no_errors then error_fun();
-
-end
-
-include Errors_with_mode(Errors)

@@ -1802,10 +1802,6 @@ module Make (GetLocals : GetLocals) = struct
       (* Arbitrary expression. This will be assigned to a temporary *)
     | _ -> []
 
-  and stmt env st =
-    let st = Ast_to_nast.on_stmt st in
-    aast_stmt env st
-
   and aast_stmt env st =
     match st with
     | Aast.Let (x, h, e) -> aast_let_stmt env x h e
@@ -2893,28 +2889,32 @@ module Make (GetLocals : GetLocals) = struct
   (* The entry point to CHECK the program, and transform the program *)
   (**************************************************************************)
 
-  let program tcopt ast =
+  let aast_program tcopt aast =
     let top_level_env = ref (Env.make_top_level_env tcopt) in
-    let rec program ast =
-    List.concat @@ List.map ast begin function
-    | Ast.Fun f -> [N.Fun (fun_ tcopt f)]
-    | Ast.Class c -> [N.Class (class_ tcopt c)]
-    | Ast.Typedef t -> [N.Typedef (typedef tcopt t)]
-    | Ast.Constant cst -> [N.Constant (global_const tcopt cst)]
-    | Ast.Stmt (_, Ast.Noop)
-    | Ast.Stmt (_, Ast.Markup _) -> [] (* Noops and markup aren't needed in NAST *)
-    | Ast.Stmt s -> [N.Stmt (stmt !top_level_env s)]
-    | Ast.Namespace (_ns, ast) -> program ast
-    | Ast.NamespaceUse _ -> []
-    | Ast.SetNamespaceEnv nsenv ->
-      begin
+    let rec aux acc def =
+      match def with
+      | Aast.Fun f -> (N.Fun (aast_fun_ tcopt f)) :: acc
+      | Aast.Class c -> (N.Class (aast_class_ tcopt c)) :: acc
+      | Aast.Stmt Aast.Noop
+      | Aast.Stmt (Aast.Markup _) -> acc
+      | Aast.Stmt s -> (N.Stmt (aast_stmt !top_level_env s)) :: acc
+      | Aast.Typedef t -> (N.Typedef (aast_typedef tcopt t)) :: acc
+      | Aast.Constant cst -> (N.Constant (aast_global_const tcopt cst)) :: acc
+      | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
+      | Aast.NamespaceUse _ -> acc
+      | Aast.SetNamespaceEnv nsenv ->
         let (genv, lenv) = !top_level_env in
         let genv = { genv with namespace = nsenv } in
-        top_level_env := (genv, lenv)
-      end;
-      []
-    | Ast.FileAttributes _ -> []
-  end in program ast
+        top_level_env := (genv, lenv);
+        acc in
+    let on_program aast =
+      let nast = List.fold_left ~f:aux ~init:[] aast in
+      List.rev nast in
+    on_program aast
+
+  let program tcopt ast =
+    let aast = Ast_to_nast.on_program ast in
+    aast_program tcopt aast
 
 end
 

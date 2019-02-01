@@ -885,7 +885,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
 }
 
 bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
-  MemberKey key;
+  MemberCode mcode;
 
   switch(op){
     case Op::IncDecM:
@@ -894,7 +894,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_op(pc);
       decode_iva(pc);
       decode_byte(pc);
-      key = decode_member_key(pc, unit());
+      mcode = static_cast<MemberCode>(decode_byte(pc));
       break;
     case Op::BindM:
     case Op::UnsetM:
@@ -902,7 +902,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
     case Op::VGetM:   //TWO(IVA, KA)
       decode_op(pc);
       decode_iva(pc);
-      key = decode_member_key(pc, unit());
+      mcode = static_cast<MemberCode>(decode_byte(pc));
       break;
     case Op::SetRangeM:
       return true;
@@ -912,11 +912,25 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       return false;
   }
 
-  if ((key.mcode == MemberCode::MEC || key.mcode == MemberCode::MPC) &&
-        key.iva + 1 > cur->stklen) {
-      error("Member Key %s in op %s has stack offset greater than stack"
-            " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
-      return false;
+  uint32_t iva = 0;
+  switch (mcode) {
+    case MET: case MPT: case MQT: {
+      auto const id = decode_raw<Id>(pc);
+      if (!checkString(pc, id)) return false;
+      break;
+    }
+
+    case MEC: case MEL: case MPC: case MPL: iva = decode_iva(pc); break;
+    case MEI:                               decode_raw<int64_t>(pc); break;
+    case MW:                                break;
+  }
+
+  if ((mcode == MemberCode::MEC || mcode == MemberCode::MPC) &&
+      iva + 1 > cur->stklen) {
+    MemberKey key{mcode, iva};
+    error("Member Key %s in op %s has stack offset greater than stack"
+          " depth %d\n", show(key).c_str(), opcodeToName(op), cur->stklen);
+    return false;
   }
 
   return true;
@@ -964,7 +978,7 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
               opcodeToName(op));
         ok = false;
       } else {
-        auto const c = decode_member_key(new_pc, &m_func->ue()).mcode;
+        auto const c = static_cast<MemberCode>(decode_byte(new_pc));
         if (!mcodeIsElem(c)) {
           error("Member instruction with mode InOut and incompatible member "
                 "code %s, must be Elem\n", memberCodeString(c));
@@ -1228,7 +1242,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     case Op::InitProp:
     case Op::CheckProp: {
-        auto const prop = m_func->ue().lookupLitstr(getImm(pc, 0).u_SA);
         auto fname = m_func->name->toCppString();
         if (fname.compare("86pinit") != 0 &&
             fname.compare("86sinit") != 0 &&
@@ -1236,6 +1249,14 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
+        if (!LitstrTable::canRead()) {
+          // Unfortunately in order to check if the property name itself is
+          // valid we need to be able to read from the Litstr table, which we
+          // cannot do while verifying an optimized repo in hhbbc.
+          if (!checkString(pc, getImm(pc, 0).u_SA)) return false;
+          break;
+        }
+        auto const prop = m_func->ue().lookupLitstr(getImm(pc, 0).u_SA);
         if (!m_func->pce() || !m_func->pce()->hasProp(prop)){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);

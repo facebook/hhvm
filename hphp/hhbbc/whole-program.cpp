@@ -622,6 +622,14 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   LitstrTable::init();
   LitstrTable::get().setWriting();
   make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
+    if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
+      fprintf(
+        stderr,
+        "The optimized unit for %s did not pass verification, "
+        "bailing because Eval.AbortBuildOnVerifyError is set\n",
+        ue->m_filepath->data()
+      );
+    }
     ueq.push(std::move(ue));
   });
 

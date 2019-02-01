@@ -387,6 +387,9 @@ ExnNodePtr commonParent(ExnNodePtr eh1, ExnNodePtr eh2) {
   return eh1;
 };
 
+const StaticString
+  s_hhbbc_fail_verification("__hhvm_intrinsics\\hhbbc_fail_verification");
+
 EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          UnitEmitter& ue,
                          const php::Func& func) {
@@ -736,6 +739,16 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
 #define O(opcode, imms, inputs, outputs, flags)         \
     auto emit_##opcode = [&] (const bc::opcode& data) { \
+      if (RuntimeOption::EnableIntrinsicsExtension) {   \
+        if (Op::opcode == Op::FCallBuiltin &&           \
+            inst.FCallBuiltin.str3->isame(              \
+              s_hhbbc_fail_verification.get())) {       \
+          ue.emitOp(Op::CheckProp);                     \
+          ue.emitInt32(                                 \
+            ue.mergeLitstr(inst.FCallBuiltin.str3));    \
+          ue.emitOp(Op::PopC);                          \
+        }                                               \
+      }                                                 \
       if (Op::opcode == Op::DefCls)       defcls();     \
       if (Op::opcode == Op::DefClsNop)    defclsnop();  \
       if (Op::opcode == Op::CreateCl)     createcl();   \

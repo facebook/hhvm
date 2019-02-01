@@ -20,6 +20,9 @@ function get_expect_file_and_type($test, $options) {
                    'expectregex');
   }
   if (isset($options['repo'])) {
+    if (file_exists($test . '.hhbbc_assert')) {
+      return array($test . '.hhbbc_assert', 'expectf');
+    }
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
       if (file_exists($fname)) {
@@ -2037,8 +2040,10 @@ function run_config_post($outputs, $test, $options) {
   $stderr = $outputs[1];
   file_put_contents("$test.out", $output);
 
+  $error_ok = $options['repo'] && file_exists($test . '.hhbbc_assert');
+
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
-  if ($stderr) {
+  if ($stderr && !$error_ok) {
     file_put_contents(
       "$test.diff",
       "Test failed because the process wrote on stderr:\n$stderr"
@@ -2338,6 +2343,17 @@ function run_test($options, $test) {
     shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
+
+    if (file_exists($test . '.hhbbc_assert')) {
+      $hhvm = hphp_cmd($options, $test, $program);
+      if (!repo_single($options, $test)) {
+        $result = exec_with_stack($hhvm);
+        if ($result !== true) return false;
+        $hhvm = hhbbc_cmd($options, $test, $program);
+      }
+      return run_one_config($options, $test, $hhvm, $hhvm_env);
+    }
+
     if (!repo_mode_compile($options, $test, $program)) {
       return false;
     }

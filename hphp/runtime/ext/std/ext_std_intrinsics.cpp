@@ -152,6 +152,10 @@ void HHVM_FUNCTION(
   g.finish(from_micros(end_us));
 }
 
+void HHVM_FUNCTION(hhbbc_fail_verification) {
+  g_context->write("PASS\n", 5);
+}
+
 }
 
 void StandardExtension::initIntrinsics() {
@@ -174,6 +178,9 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scope, rqtrace_create_scope);
   HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scoped_events,
               rqtrace_create_scoped_events);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\hhbbc_fail_verification,
+              hhbbc_fail_verification);
 
   loadSystemlib("std_intrinsics");
 }

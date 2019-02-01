@@ -84,4 +84,8 @@ function rqtrace_create_scoped_events(
   dict<string, (int, int, dict<string, string>)> $events
 ): void;
 
+/* dummy builtin to cause hhbbc to emit unverifiable bytecode */
+<<__Native>>
+function hhbbc_fail_verification(): void;
+
 }

@@ -48,8 +48,9 @@ inline size_t LitstrTable::numLitstrs() const {
 }
 
 inline bool LitstrTable::contains(Id id) const {
-  assertx(m_safeToRead);
-  return m_namedInfo.contains(id);
+  return m_safeToRead
+    ? m_namedInfo.contains(id)
+    : 0 < id && id < m_nextId.load(std::memory_order_relaxed);
 }
 
 inline StringData* LitstrTable::lookupLitstrId(Id id) const {

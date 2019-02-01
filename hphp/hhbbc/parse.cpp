@@ -1480,12 +1480,12 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, uep->isASystemLib()};
   FTRACE(2, "parse_unit {}\n", uep->m_filepath->data());
 
-  if (RuntimeOption::EvalAbortBuildOnVerifyError) {
-    always_assert_flog(
-      uep->check(false),
-      "The unoptimized unit for {} did not pass verification, "
-      "bailing because Eval.AbortBuildOnVerifyError is set",
-      uep->m_filepath
+  if (RuntimeOption::EvalAbortBuildOnVerifyError && !uep->check(false)) {
+    fprintf(
+      stderr,
+      "The unoptimized unit for %s did not pass verification, "
+      "bailing because Eval.AbortBuildOnVerifyError is set\n",
+      uep->m_filepath->data()
     );
   }
 

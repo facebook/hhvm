@@ -90,6 +90,10 @@ struct LitstrTable {
   const NamedEntity* lookupNamedEntityId(Id id) const;
   NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
+  static bool canRead() {
+    return !s_litstrTable || s_litstrTable->m_safeToRead;
+  }
+
   /*
    * Set up the named info table.  Not thread-safe.
    */

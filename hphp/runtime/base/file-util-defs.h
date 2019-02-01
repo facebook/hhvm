@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/util/logger.h"
 
 #include <string>
@@ -123,7 +124,11 @@ bool runRelative(std::string suffix, String cmd,
   auto cwd = resolve_include(
     cmd,
     currentDir,
-    [] (const String& f, void*) { return access(f.data(), R_OK) == 0; },
+    [] (const String& f, void*) {
+      if (!is_cli_mode()) return access(f.data(), R_OK) == 0;
+      auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+      return w->access(f, R_OK) == 0;
+    },
     nullptr
   );
   if (cwd.isNull()) return false;

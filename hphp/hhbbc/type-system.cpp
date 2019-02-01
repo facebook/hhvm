@@ -178,6 +178,8 @@ bool mayHaveData(trep bits) {
   case BOptUncStrLike:
   case BOptFunc:
   case BOptCls:
+  case BClsMeth:
+  case BOptClsMeth:
   case BInitCell:
   case BCell:
   case BInitGen:
@@ -217,6 +219,7 @@ bool canBeOptional(trep bits) {
   case BRes:
   case BFunc:
   case BCls:
+  case BClsMeth:
     return true;
 
   case BSPArrE:
@@ -325,6 +328,7 @@ bool canBeOptional(trep bits) {
   case BOptStrLike:
   case BOptFunc:
   case BOptCls:
+  case BOptClsMeth:
     return false;
 
   case BInitPrim:
@@ -3514,6 +3518,8 @@ Type union_of(Type a, Type b) {
   Y(UncStrLike)
   Y(StrLike)
 
+  Y(ClsMeth)
+
   // non-optional types that contain other types above (and hence
   // must come after them).
   X(InitPrim)
@@ -4922,6 +4928,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
   }
   if (testTy.subtypeOf(BStrLike)) return valTy.couldBe(BFunc | BCls);
+  if (testTy.subtypeOf(BArrLike)) return valTy.couldBe(BClsMeth);
   return false;
 }
 

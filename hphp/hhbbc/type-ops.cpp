@@ -235,6 +235,14 @@ Type typeSame(const Type& a, const Type& b) {
   auto const nsb = loosen_dvarrayness(b);
   if (nsa.couldBe(BFunc | BCls) && nsb.couldBe(TStr)) return TBool;
   if (nsb.couldBe(BFunc | BCls) && nsa.couldBe(TStr)) return TBool;
+  if (nsa.couldBe(BClsMeth) &&
+      nsb.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return TBool;
+  }
+  if (nsb.couldBe(BClsMeth) &&
+      nsa.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return TBool;
+  }
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }

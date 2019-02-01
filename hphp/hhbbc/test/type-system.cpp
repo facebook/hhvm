@@ -280,7 +280,8 @@ auto const primitives = folly::lazy([] {
     TObj,
     TRes,
     TCls,
-    TRef
+    TRef,
+    TClsMeth
   };
 });
 
@@ -325,7 +326,8 @@ auto const optionals = folly::lazy([] {
     TOptSKeyset,
     TOptKeyset,
     TOptObj,
-    TOptRes
+    TOptRes,
+    TOptClsMeth
   };
 });
 
@@ -375,6 +377,7 @@ auto const non_opt_unions = folly::lazy([] {
     TUnc,
     TUncArrKey,
     TArrKey,
+    TClsMeth,
     TTop
   };
 });
@@ -709,6 +712,10 @@ TEST(Type, Option) {
   EXPECT_TRUE(TRes.subtypeOf(BOptRes));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptRes));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptRes));
+
+  EXPECT_TRUE(TClsMeth.subtypeOf(BOptClsMeth));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptClsMeth));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptClsMeth));
 
   EXPECT_TRUE(TArrKey.subtypeOf(BOptArrKey));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKey));

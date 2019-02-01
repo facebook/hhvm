@@ -219,23 +219,25 @@ enum trep : uint64_t {
   BSDArrN   = 1ULL << 19, // static non-empty darray
   BCDArrN   = 1ULL << 20, // counted non-empty darray
 
-  BObj      = 1ULL << 21,
-  BRes      = 1ULL << 22,
-  BCls      = 1ULL << 23,
-  BRef      = 1ULL << 24,
+  BClsMeth  = 1ULL << 21, // ClassMethod
 
-  BSVecE    = 1ULL << 25, // static empty vec
-  BCVecE    = 1ULL << 26, // counted empty vec
-  BSVecN    = 1ULL << 27, // static non-empty vec
-  BCVecN    = 1ULL << 28, // counted non-empty vec
-  BSDictE   = 1ULL << 29, // static empty dict
-  BCDictE   = 1ULL << 30, // counted empty dict
-  BSDictN   = 1ULL << 31, // static non-empty dict
-  BCDictN   = 1ULL << 32, // counted non-empty dict
-  BSKeysetE = 1ULL << 33, // static empty keyset
-  BCKeysetE = 1ULL << 34, // counted empty keyset
-  BSKeysetN = 1ULL << 35, // static non-empty keyset
-  BCKeysetN = 1ULL << 36, // counted non-empty keyset
+  BObj      = 1ULL << 22,
+  BRes      = 1ULL << 23,
+  BCls      = 1ULL << 24,
+  BRef      = 1ULL << 25,
+
+  BSVecE    = 1ULL << 26, // static empty vec
+  BCVecE    = 1ULL << 27, // counted empty vec
+  BSVecN    = 1ULL << 28, // static non-empty vec
+  BCVecN    = 1ULL << 29, // counted non-empty vec
+  BSDictE   = 1ULL << 30, // static empty dict
+  BCDictE   = 1ULL << 31, // counted empty dict
+  BSDictN   = 1ULL << 32, // static non-empty dict
+  BCDictN   = 1ULL << 33, // counted non-empty dict
+  BSKeysetE = 1ULL << 34, // static empty keyset
+  BCKeysetE = 1ULL << 35, // counted empty keyset
+  BSKeysetN = 1ULL << 36, // static non-empty keyset
+  BCKeysetN = 1ULL << 37, // counted non-empty keyset
 
   BSPArr    = BSPArrE | BSPArrN,
   BCPArr    = BCPArrE | BCPArrN,
@@ -308,6 +310,7 @@ enum trep : uint64_t {
   BOptRes      = BInitNull | BRes,
   BOptFunc     = BInitNull | BFunc,
   BOptCls      = BInitNull | BCls,
+  BOptClsMeth  = BInitNull | BClsMeth,
   BOptSVecE    = BInitNull | BSVecE,
   BOptCVecE    = BInitNull | BCVecE,
   BOptSVecN    = BInitNull | BSVecN,
@@ -382,7 +385,7 @@ enum trep : uint64_t {
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset | BFunc | BCls,
+              BVec | BDict | BKeyset | BFunc | BCls | BClsMeth,
   BCell     = BUninit | BInitCell,
   BInitGen  = BInitCell | BRef,
   BGen      = BUninit | BInitGen,
@@ -793,6 +796,7 @@ X(Res)                                          \
 X(Cls)                                          \
 X(Ref)                                          \
 X(Func)                                         \
+X(ClsMeth)                                      \
 X(SVecE)                                        \
 X(SVecN)                                        \
 X(SDictE)                                       \
@@ -863,6 +867,7 @@ X(OptObj)                                       \
 X(OptRes)                                       \
 X(OptFunc)                                      \
 X(OptCls)                                       \
+X(OptClsMeth)                                   \
 X(OptSVecE)                                     \
 X(OptSVecN)                                     \
 X(OptSVec)                                      \

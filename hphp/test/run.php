@@ -1309,6 +1309,10 @@ class Status {
     rmdir($dir);
   }
 
+  public static function removeTempDir() {
+    self::removeDirectory(self::$tempdir);
+  }
+
   public static function setMode($mode) {
     self::$mode = $mode;
   }
@@ -1358,7 +1362,6 @@ class Status {
   public static function finished() {
     self::$overall_end_time = microtime(true);
     self::send(self::MSG_FINISHED, null);
-    self::removeDirectory(self::$tempdir);
   }
 
   public static function killQueue() {
@@ -3246,6 +3249,8 @@ function main($argv) {
                    Status::BLUE,
                    sprintf("%.2fs\n",
                    Status::addTestTimesSerial()));
+
+  Status::removeTempDir();
 
   return $return_value;
 }

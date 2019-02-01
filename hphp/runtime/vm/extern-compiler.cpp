@@ -749,7 +749,8 @@ void ExternCompiler::writeProgram(
     ("md5", md5.toString())
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
-    ("for_debugger_eval", forDebuggerEval);
+    ("for_debugger_eval", forDebuggerEval)
+    ("config_overrides", RepoOptions::defaults().toDynamic());
   writeMessage(header, code);
 }
 

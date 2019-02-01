@@ -192,7 +192,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 }
 
 bool Parser::parseImpl() {
-  if (RuntimeOption::PHP7_UVS) {
+  if (false) {
     return parseImpl7();
   } else {
     return parseImpl5();
@@ -2723,15 +2723,9 @@ const Parser::AutoAliasMap& Parser::getAutoAliasedClasses() {
 
 namespace {
 Parser::AutoAliasMap getAutoAliasedNamespacesHelper() {
-  using AutoAlias  = Parser::AliasTable::AutoAlias;
-  using AliasFlags = Parser::AliasTable::AliasFlags;
-
-  Parser::AutoAliasMap map;
-  for (const auto kv: RuntimeOption::AliasedNamespaces) {
-    map[kv.first] = AutoAlias { kv.second, AliasFlags::RuntimeOption };
-  }
-  return map;
-}}
+  return {};
+}
+}
 
 const Parser::AutoAliasMap& Parser::getAutoAliasedNamespaces() {
   static auto autoAliases = getAutoAliasedNamespacesHelper();

@@ -563,13 +563,21 @@ let decl_and_run_mode compiler_options =
             (get_bool "for_debugger_eval")
             (fun af -> fail_daemon None ("for_debugger_eval flag missing: " ^ af))
             header in
-          process_single_source_unit
+          let old_config = !Hhbc_options.compiler_options in
+          let config_overrides = get_field
+            (get_obj "config_overrides")
+            (fun _af -> JSON_Object [])
+            header in
+          set_compiler_options (Some config_overrides);
+          let result = process_single_source_unit
             ~for_debugger_eval
             compiler_options
             handle_output
             handle_exception
             (Relative_path.create Relative_path.Dummy filename)
-            body)
+            body in
+          Hhbc_options.set_compiler_options old_config;
+          result)
         ; facts = (fun header body -> (
           (* if body is empty - read file from disk *)
           let filename = get_field

@@ -731,22 +731,10 @@ const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
   std::string s;
   s += (RuntimeOption::PHP7_IntSemantics ? '1' : '0') +
-      (RuntimeOption::PHP7_LTR_assign ? '1' : '0') +
       (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
       (RuntimeOption::PHP7_Builtins ? '1' : '0') +
       (RuntimeOption::PHP7_ScalarTypes ? '1' : '0') +
-      (RuntimeOption::PHP7_Substr ? '1' : '0') +
-      (RuntimeOption::PHP7_UVS ? '1' : '0');
-  return s;
-}
-
-const std::string mangleAliasedNamespaces() {
-  std::string s;
-  s += folly::to<std::string>(RuntimeOption::AliasedNamespaces.size());
-  s += '\0';
-  for (auto& par : RuntimeOption::AliasedNamespaces) {
-    s += par.first + '\0' + par.second + '\0';
-  }
+      (RuntimeOption::PHP7_Substr ? '1' : '0');
   return s;
 }
 
@@ -759,8 +747,6 @@ const std::string mangleAliasedNamespaces() {
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::AssertEmitted ? '1' : '0')
-    + (RuntimeOption::EnableCoroutines ? '1' : '0')
-    + (RuntimeOption::EnableIsExprPrimitiveMigration ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableReifiedGenerics ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
@@ -780,7 +766,6 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
     + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
     + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
-    + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')
     + std::to_string(RuntimeOption::EvalForbidDynamicCalls)
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
@@ -790,24 +775,15 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
-    + (RuntimeOption::Hacksperimental ? '1' : '0')
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
-    + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::EvalDumpHHJS ? '1' : '0')
-    + (RuntimeOption::EvalHHJSUniqueFilenames ? '1' : '0')
-    + (RuntimeOption::EnableConcurrent ? '1' : '0')
-    + (RuntimeOption::EnableAwaitAsAnExpression ? '1' : '0')
-    + (RuntimeOption::EnableStrongerAwaitBinding ? '1' : '0')
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
     + std::to_string(RuntimeOption::UndefinedConstFallback)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
-    + (RuntimeOption::EvalEmitFuncPointers ? '1' : '0')
-    + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
-    + (RuntimeOption::EvalEmitInstMethPointers ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
+    + RepoOptions::defaults().cacheKeyRaw()
     + mangleUnitPHP7Options()
-    + mangleAliasedNamespaces()
     + hackc_version();
   return string_md5(t);
 }

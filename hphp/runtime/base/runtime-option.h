@@ -69,6 +69,59 @@ inline constexpr bool isJitSerializing(JitSerdesMode m) {
   return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
 }
 
+struct RepoOptions {
+
+  using StringMap = std::map<std::string, std::string>;
+// (Type, HDFName, DV)
+// (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
+#define PARSERFLAGS() \
+  N(StringMap, AliasedNamespaces,              StringMap{})      \
+  P(bool,      UVS,                            s_PHP7_master)    \
+  P(bool,      LTRAssign,                      s_PHP7_master)    \
+  H(bool,      EnableIsExprPrimitiveMigration, true)             \
+  H(bool,      EnableCoroutines,               true)             \
+  H(bool,      Hacksperimental,                false)            \
+  H(bool,      EnableConcurrent,               false)            \
+  H(bool,      EnableAwaitAsAnExpression,      false)            \
+  H(bool,      EnableStrongerAwaitBinding,     false)            \
+  E(bool,      CreateInOutWrapperFunctions,    true)             \
+  E(bool,      EnableHHJS,                     false)            \
+  E(bool,      HHJSUniqueFilenames,            false)            \
+  E(bool,      HHJSModules,                    true)             \
+  E(bool,      EmitFuncPointers,               true)             \
+  E(bool,      EmitClsMethPointers,            EmitFuncPointers) \
+  E(bool,      EmitInstMethPointers,           EmitFuncPointers) \
+  /**/
+
+  std::string cacheKeyRaw() const;
+  std::string cacheKeyMd5() const;
+  std::string toJSON() const;
+  folly::dynamic toDynamic() const;
+
+  static const RepoOptions& defaults();
+  static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
+
+private:
+  RepoOptions() = default;
+  explicit RepoOptions(const char* file);
+
+  void filterNamespaces();
+  void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
+
+#define N(t, n, ...) t n;
+#define P(t, n, ...) t n;
+#define H(t, n, ...) t n;
+#define E(t, n, ...) t n;
+PARSERFLAGS()
+#undef N
+#undef P
+#undef H
+#undef E
+
+  static bool s_init;
+  static RepoOptions s_defaults;
+};
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -456,10 +509,7 @@ struct RuntimeOption {
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
-  static bool EnableIsExprPrimitiveMigration;
   static bool EnableReifiedGenerics;
-  static bool EnableCoroutines;
-  static bool Hacksperimental;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialNamedEntityTableSize;
   static JitSerdesMode EvalJitSerdesMode;
@@ -470,13 +520,11 @@ struct RuntimeOption {
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;
   static bool PHP7_IntSemantics;
-  static bool PHP7_LTR_assign;
   static bool PHP7_NoHexNumerics;
   static bool PHP7_Builtins;
   static bool PHP7_ScalarTypes;
   static bool PHP7_EngineExceptions;
   static bool PHP7_Substr;
-  static bool PHP7_UVS;
   static bool PHP7_DisallowUnsafeCurlUploads;
 
   static int64_t HeapSizeMB;
@@ -528,16 +576,6 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableConstant;
-  // Enable concurrent
-  // true => allows use of concurrent, false => error
-  static bool EnableConcurrent;
-  // Enable await-as-an-expression
-  // true => allows use await as an expression, false => error
-  static bool EnableAwaitAsAnExpression;
-  // Enable stronger await binding.
-  // true => await binds similarly to postfix++
-  // false => await binds weaker than everything.
-  static bool EnableStrongerAwaitBinding;
   // Disables PHP's define() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
@@ -564,9 +602,6 @@ struct RuntimeOption {
   static std::vector<std::string> Extensions;
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
-
-  // Namespace aliases for the compiler
-  static std::map<std::string, std::string> AliasedNamespaces;
 
   static std::vector<std::string> TzdataSearchPaths;
 
@@ -653,9 +688,7 @@ struct RuntimeOption {
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
-  F(bool, EnableHHJS,                  false)                           \
   F(bool, DumpHHJS,                    false)                           \
-  F(bool, HHJSUniqueFilenames,         false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   /* Generate warning of side effect of the pseudomain is called by     \
      top-level code.*/                                                  \
@@ -771,9 +804,6 @@ struct RuntimeOption {
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool,     JitAHotSizeRoundUp,      true)                            \
-  F(bool,     EmitFuncPointers,        true)                            \
-  F(bool,     EmitClsMethPointers,     EvalEmitFuncPointers)            \
-  F(bool,     EmitInstMethPointers,    EvalEmitFuncPointers)            \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
@@ -998,7 +1028,6 @@ struct RuntimeOption {
   F(bool, NoticeOnReadDynamicProp, false)                               \
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
-  F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \

@@ -54,6 +54,7 @@
 #endif
 
 #include "hphp/parser/scanner.h"
+#include "hphp/zend/zend-string.h"
 
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -86,6 +87,174 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+bool RepoOptions::s_init{false};
+RepoOptions RepoOptions::s_defaults;
+
+namespace {
+
+#ifdef FACEBOOK
+const static bool s_PHP7_default = false;
+#else
+const static bool s_PHP7_default = true;
+#endif
+// PHP7 is off by default (false). s_PHP7_master is not a static member of
+// RuntimeOption so that it's private to this file and not exposed -- it's a
+// master switch only, and not to be used for any actual gating, use the more
+// granular options instead. (It can't be a local since Config::Bind will take
+// and store a pointer to it.)
+static bool s_PHP7_master = s_PHP7_default;
+
+std::vector<std::string> s_RelativeConfigs;
+
+////////////////////////////////////////////////////////////////////////////////
+
+char mangleForKey(bool b) { return b ? '1' : '0'; }
+std::string mangleForKey(const RepoOptions::StringMap& map) {
+  std::string s;
+  s += folly::to<std::string>(map.size());
+  s += '\0';
+  for (auto& par : map) {
+    s += par.first + '\0' + par.second + '\0';
+  }
+  return s;
+}
+void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
+  val = hdf[name].configGetBool(dv);
+}
+void hdfExtract(
+  const Hdf& hdf,
+  const char* name,
+  RepoOptions::StringMap& map,
+  const RepoOptions::StringMap& dv
+) {
+  Hdf config = hdf[name];
+  if (config.exists() && !config.isEmpty()) config.configGet(map);
+  else map = dv;
+}
+
+folly::dynamic toIniValue(bool b) {
+  return b ? "1" : "0";
+}
+
+folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
+  folly::dynamic obj = folly::dynamic::object();
+  for (auto& kv : map) {
+    obj[kv.first] = kv.second;
+  }
+  return obj;
+}
+}
+
+std::string RepoOptions::cacheKeyRaw() const {
+  return std::string("")
+#define N(_, n, ...) + mangleForKey(n)
+#define P(_, n, ...) + mangleForKey(n)
+#define H(_, n, ...) + mangleForKey(n)
+#define E(_, n, ...) + mangleForKey(n)
+PARSERFLAGS();
+#undef N
+#undef P
+#undef H
+#undef E
+}
+
+std::string RepoOptions::cacheKeyMd5() const {
+  return string_md5(cacheKeyRaw());
+}
+
+std::string RepoOptions::toJSON() const {
+  return folly::toJson(toDynamic());
+}
+
+folly::dynamic RepoOptions::toDynamic() const {
+  folly::dynamic json = folly::dynamic::object();
+#define OUT(key, var)                                \
+  {                                                  \
+    auto const ini_name = Config::IniName(key);      \
+    auto const ini_value = toIniValue(var);          \
+    folly::dynamic entry = folly::dynamic::object(); \
+    entry["global_value"] = ini_value;               \
+    entry["local_value"] = ini_value;                \
+    entry["access"] = 4;                             \
+    json[ini_name] = entry;                          \
+  }
+
+#define N(_, n, ...) OUT(#n, n)
+#define P(_, n, ...) OUT("PHP7." #n, n)
+#define H(_, n, ...) OUT("Hack.Lang." #n, n)
+#define E(_, n, ...) OUT("Eval." #n, n)
+PARSERFLAGS();
+#undef N
+#undef P
+#undef H
+#undef E
+
+#undef OUT
+
+  return json;
+}
+
+const RepoOptions& RepoOptions::defaults() {
+  always_assert(s_init);
+  return s_defaults;
+}
+
+void RepoOptions::filterNamespaces() {
+  for (auto it = AliasedNamespaces.begin(); it != AliasedNamespaces.end(); ) {
+    if (!is_valid_class_name(it->second)) {
+      Logger::Warning("Skipping invalid AliasedNamespace %s\n",
+                      it->second.c_str());
+      it = AliasedNamespaces.erase(it);
+      continue;
+    }
+
+    while (it->second.size() && it->second[0] == '\\') {
+      it->second = it->second.substr(1);
+    }
+
+    ++it;
+  }
+}
+
+RepoOptions::RepoOptions(const char* file) {
+  always_assert(s_init);
+  Hdf config = (Hdf{file})["Parser"];
+
+#define N(_, n, ...) hdfExtract(config, #n, n, s_defaults.n);
+#define P(_, n, ...) hdfExtract(config, "PHP7." #n, n, s_defaults.n);
+#define H(_, n, ...) hdfExtract(config, "Hack.Lang." #n, n, s_defaults.n);
+#define E(_, n, ...) hdfExtract(config, "Eval." #n, n, s_defaults.n);
+PARSERFLAGS();
+#undef N
+#undef P
+#undef H
+#undef E
+
+  filterNamespaces();
+}
+
+void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
+#define N(_, n, dv) Config::Bind(n, ini, hdf, #n, dv);
+#define P(_, n, dv) Config::Bind(n, ini, hdf, "PHP7." #n, dv);
+#define H(_, n, dv) Config::Bind(n, ini, hdf, "Hack.Lang." #n, dv);
+#define E(_, n, dv) Config::Bind(n, ini, hdf, "Eval." #n, dv);
+PARSERFLAGS()
+#undef N
+#undef P
+#undef H
+#undef E
+
+  filterNamespaces();
+}
+
+void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {
+  always_assert(!s_init);
+  s_defaults.initDefaults(hdf, ini);
+  s_init = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::DeploymentId;
@@ -108,12 +277,9 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::EnableReifiedGenerics = false;
-bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
-bool RuntimeOption::EnableCoroutines = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -433,9 +599,6 @@ uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisableReservedVariables = false;
 bool RuntimeOption::DisallowExecutionOperator = false;
 uint64_t RuntimeOption::DisableConstant = 0;
-bool RuntimeOption::EnableConcurrent = false;
-bool RuntimeOption::EnableAwaitAsAnExpression = false;
-bool RuntimeOption::EnableStrongerAwaitBinding = false;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -458,30 +621,14 @@ HackStrictOption
 bool RuntimeOption::LookForTypechecker = false;
 bool RuntimeOption::AutoTypecheck = false;
 
-#ifdef FACEBOOK
-const static bool s_PHP7_default = false;
-#else
-const static bool s_PHP7_default = true;
-#endif
-// PHP7 is off by default (false). s_PHP7_master is not a static member of
-// RuntimeOption so that it's private to this file and not exposed -- it's a
-// master switch only, and not to be used for any actual gating, use the more
-// granular options instead. (It can't be a local since Config::Bind will take
-// and store a pointer to it.)
-static bool s_PHP7_master = s_PHP7_default;
 bool RuntimeOption::PHP7_DeprecationWarnings = false;
 bool RuntimeOption::PHP7_EngineExceptions = false;
 bool RuntimeOption::PHP7_IntSemantics = false;
-bool RuntimeOption::PHP7_LTR_assign = false;
 bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_Builtins = false;
 bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
-bool RuntimeOption::PHP7_UVS = false;
 bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
-
-std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
-std::vector<std::string> s_RelativeConfigs;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1564,27 +1711,9 @@ void RuntimeOption::Load(
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
 
-    Config::Bind(EnableIsExprPrimitiveMigration, ini, config,
-                 "Hack.Lang.EnableIsExprPrimitiveMigration",
-                 true);
     Config::Bind(EnableReifiedGenerics, ini, config,
                  "Hack.Lang.EnableReifiedGenerics",
                  false);
-    Config::Bind(Hacksperimental, ini, config,
-                "Hack.Lang.Hacksperimental",
-                false);
-    Config::Bind(EnableCoroutines, ini, config,
-                "Hack.Lang.EnableCoroutines",
-                true);
-    Config::Bind(EnableConcurrent, ini, config,
-                "Hack.Lang.EnableConcurrent",
-                false);
-    Config::Bind(EnableAwaitAsAnExpression, ini, config,
-                "Hack.Lang.EnableAwaitAsAnExpression",
-                false);
-    Config::Bind(EnableStrongerAwaitBinding, ini, config,
-                "Hack.Lang.EnableStrongerAwaitBinding",
-                false);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break
@@ -1607,8 +1736,6 @@ void RuntimeOption::Load(
                  s_PHP7_master);
     Config::Bind(PHP7_IntSemantics, ini, config, "PHP7.IntSemantics",
                  s_PHP7_master);
-    Config::Bind(PHP7_LTR_assign, ini, config, "PHP7.LTRAssign",
-                 s_PHP7_master);
     Config::Bind(PHP7_NoHexNumerics, ini, config, "PHP7.NoHexNumerics",
                  s_PHP7_master);
     Config::Bind(PHP7_Builtins, ini, config, "PHP7.Builtins", s_PHP7_master);
@@ -1616,7 +1743,6 @@ void RuntimeOption::Load(
                  s_PHP7_master);
     Config::Bind(PHP7_Substr, ini, config, "PHP7.Substr",
                  s_PHP7_master);
-    Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
     Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
                  "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
   }
@@ -2164,22 +2290,6 @@ void RuntimeOption::Load(
     if (b) RuntimeOption::AssertEmitted = v.toInt64() >= 0;
   }
 
-  Config::Bind(AliasedNamespaces, ini, config, "AliasedNamespaces");
-  for (auto it = AliasedNamespaces.begin(); it != AliasedNamespaces.end(); ) {
-    if (!is_valid_class_name(it->second)) {
-      Logger::Warning("Skipping invalid AliasedNamespace %s\n",
-                      it->second.c_str());
-      it = AliasedNamespaces.erase(it);
-      continue;
-    }
-
-    while (it->second.size() && it->second[0] == '\\') {
-      it->second = it->second.substr(1);
-    }
-
-    ++it;
-  }
-
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
@@ -2333,6 +2443,8 @@ void RuntimeOption::Load(
     RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
     RuntimeOption::EvalHackArrCompatNotices;
 
+  // Initialize defaults for repo-specific parser configuration options.
+  RepoOptions::setDefaults(config, ini);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

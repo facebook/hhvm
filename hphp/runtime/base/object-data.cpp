@@ -1423,6 +1423,13 @@ tv_rval ObjectData::getProp(const Class* ctx, const StringData* key) const {
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
+tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
+                                          const StringData* key) const {
+  auto const lookup = const_cast<ObjectData*>(this)
+    ->getPropImpl<false, true, true>(ctx, key);
+  return lookup.val && lookup.accessible ? lookup.val : nullptr;
+}
+
 tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
   auto const lookup = getPropImpl<true, true, true>(nullptr, key);
   auto prop = lookup.val;

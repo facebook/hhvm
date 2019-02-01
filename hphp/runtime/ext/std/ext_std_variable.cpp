@@ -630,10 +630,58 @@ void HHVM_FUNCTION(parse_str,
   arr.assignIfRef(result);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
 Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer,
                      const String& name) {
   auto const cls = Unit::loadClass(name.get());
   return cls ? Variant{cls} : init_null();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+bool HHVM_FUNCTION(HH_is_late_init_prop_init,
+                   const Object& obj,
+                   const String& name) {
+  auto const val = obj->getPropIgnoreLateInit(
+    arGetContextClass(GetCallerFrame()),
+    name.get()
+  );
+  if (!val) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat(
+       "Unknown or inaccessible property '{}' on object of class {}",
+       name.get(),
+       obj->getVMClass()->name()
+      )
+    );
+  }
+  return type(val) != KindOfUninit;
+}
+
+bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
+                   const String& clsName,
+                   const String& name) {
+  auto const cls = Unit::loadClass(clsName.get());
+  if (!cls) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unknown class {}", clsName)
+    );
+  }
+  auto const lookup = cls->getSPropIgnoreLateInit(
+    arGetContextClass(GetCallerFrame()),
+    name.get()
+  );
+  if (!lookup.val || !lookup.accessible) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat(
+       "Unknown or inaccessible static property '{}' on class {}",
+       name.get(),
+       clsName.get()
+      )
+    );
+  }
+  return type(lookup.val) != KindOfUninit;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -682,6 +730,8 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last, HH_last);
   HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first_key, HH_first_key);
   HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last_key, HH_last_key);
+  HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
+  HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
 
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,

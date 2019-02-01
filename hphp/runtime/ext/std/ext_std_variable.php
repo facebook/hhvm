@@ -252,6 +252,25 @@ namespace HH {
    */
   <<__Native>>
   function object_prop_array(object $obj): array;
+
+  /*
+   * Return true if the <<__LateInit>> property (with name $prop) on the given
+   * object is initialized to a value (and therefore will not throw when
+   * accessed). Throws InvalidArgumentException if the property does not exist
+   * or is inaccessible in the current context.
+   */
+  <<__Native>>
+  function is_late_init_prop_init(object $obj, string $prop): bool;
+
+  /*
+   * Return true if the <<__LateInit>> static property (with name $prop) on the
+   * class given by $cls is initialized to a value (and therefore will not throw
+   * when accessed). Throws InvalidArgumentException if $cls is not a valid
+   * classname, if the static property does not exist, or if the static property
+   * is inaccessible in the current context.
+   */
+  <<__Native>>
+  function is_late_init_sprop_init(string $cls, string $prop): bool;
 }
 
 namespace HH\Lib\_Private\Native {

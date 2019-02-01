@@ -486,6 +486,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // never box the lval returned from getPropLval; use propB instead
   tv_lval getPropLval(const Class*, const StringData*);
   tv_rval getProp(const Class*, const StringData*) const;
+  // Like getProp() but does not throw for <<__LateInit>>. Value can be
+  // KindOfUninit.
+  tv_rval getPropIgnoreLateInit(const Class* ctx,
+                                const StringData* key) const;
   // don't use vGetPropIgnoreAccessibility in new code
   tv_lval vGetPropIgnoreAccessibility(const StringData*);
 

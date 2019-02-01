@@ -53,15 +53,6 @@ type env = {
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
-let error_on_attr env attrs attr f =
-  if not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
-  then match Attributes.find attr attrs with
-  | Some { ua_name = (p, _); _ } -> f p;
-  | _ -> ()
-
-let error_if_has_atmost_rx_as_rxfunc_attribute env attrs =
-  error_on_attr env attrs
-    SN.UserAttributes.uaAtMostRxAsFunc Errors.atmost_rx_as_rxfunc_invalid_location;
 
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, st with
@@ -468,7 +459,6 @@ and func env f named_body =
     && not env.is_reactive then
     Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
 
-  error_if_has_atmost_rx_as_rxfunc_attribute env f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
   List.iter f.f_tparams (tparam env);
@@ -639,8 +629,6 @@ and class_ tenv c =
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
-
-  error_if_has_atmost_rx_as_rxfunc_attribute env c.c_user_attributes;
 
   (* Const handling:
    * prevent for abstract final classes, traits, and interfaces
@@ -991,7 +979,6 @@ and method_ (env, is_static) m =
     Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
 
   check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
-  error_if_has_atmost_rx_as_rxfunc_attribute env m.m_user_attributes;
   check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in

@@ -644,6 +644,18 @@ let check_redundant_rx_condition env pos r =
     then Errors.redundant_rx_condition pos
   | _ -> ()
 
+let error_on_attr env attrs attr f =
+    let find x xs =
+      List.find xs (fun { ua_name; _ } -> x = snd ua_name) in
+    if not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
+    then match find attr attrs with
+    | Some { ua_name = (p, _); _ } -> f p;
+    | _ -> ()
+
+let check_has_at_most_rx_as_rxfunc_attribute env attrs =
+  error_on_attr env attrs
+    SN.UserAttributes.uaAtMostRxAsFunc Errors.atmost_rx_as_rxfunc_invalid_location
+
 let handler = object
   inherit Tast_visitor.handler_base
   method! at_fun_def env f =
@@ -652,8 +664,16 @@ let handler = object
     check#handle_body env ctx f.f_body
 
   method! at_method_ env m =
+    check_has_at_most_rx_as_rxfunc_attribute env m.m_user_attributes;
     let env = Tast_env.restore_method_env env m in
     check_redundant_rx_condition env (fst m.m_name) (Env.env_reactivity env);
     let ctx = new_ctx (Env.env_reactivity env) in
     check#handle_body env ctx m.m_body
+
+  method! at_class_ env c =
+    check_has_at_most_rx_as_rxfunc_attribute env c.c_user_attributes
+
+  method! at_fun_ env f =
+    check_has_at_most_rx_as_rxfunc_attribute env f.f_user_attributes
+
 end

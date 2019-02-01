@@ -250,7 +250,7 @@ and fun_ = {
   f_body     : func_body;
   f_fun_kind : Ast.fun_kind;
   f_user_attributes : user_attribute list;
-  f_file_attributes : user_attribute list;
+  f_file_attributes : file_attribute list;
   f_external : bool;  (* true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
   f_namespace : nsenv;
@@ -285,6 +285,11 @@ and func_named_body = {
 and user_attribute = {
   ua_name: sid;
   ua_params: expr list (* user attributes are restricted to scalar values *)
+}
+
+and file_attribute = {
+  fa_user_attributes: user_attribute list;
+  fa_namespace: nsenv;
 }
 
 and tparam = {
@@ -337,7 +342,7 @@ and class_ = {
   c_xhp_attrs      : xhp_attr list    ;
   c_namespace      : nsenv            ;
   c_user_attributes: user_attribute list;
-  c_file_attributes: user_attribute list;
+  c_file_attributes: file_attribute list;
   c_enum           : enum_ option     ;
   c_doc_comment    : string option    ;
 }

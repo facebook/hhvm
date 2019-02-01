@@ -13,8 +13,13 @@
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = [];
       c_file_attributes =
-      [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] };
-        { ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
+      [{ fa_user_attributes =
+         [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];
+         fa_namespace = <opaque> };
+        { fa_user_attributes =
+          [{ ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
+          fa_namespace = <opaque> }
+        ];
       c_enum = None; c_doc_comment = None });
   (Class
      { c_span = [13:1-45]; c_annotation = (); c_mode = <opaque>;
@@ -31,7 +36,12 @@
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes =
-       [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] };
-         { ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
+       [{ fa_user_attributes =
+          [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];
+          fa_namespace = <opaque> };
+         { fa_user_attributes =
+           [{ ua_name = ([11:9-14], "\\B\\AttrB"); ua_params = [] }];
+           fa_namespace = <opaque> }
+         ];
        c_enum = None; c_doc_comment = None })
   ]

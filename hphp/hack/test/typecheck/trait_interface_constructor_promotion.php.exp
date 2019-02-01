@@ -1,2 +1,2 @@
-File "trait_interface_constructor_promotion.php", line 4, characters 19-29:
+File "trait_interface_constructor_promotion.php", line 4, characters 43-44:
 Constructor parameter promotion not allowed on traits or interfaces (Naming[2093])

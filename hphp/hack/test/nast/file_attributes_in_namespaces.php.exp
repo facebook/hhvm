@@ -13,8 +13,11 @@
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = [];
       c_file_attributes =
-      [{ ua_name = ([5:9-24], "\\MyNamespace\\MyFileAttribute");
-         ua_params = [] }
+      [{ fa_user_attributes =
+         [{ ua_name = ([5:9-24], "\\MyNamespace\\MyFileAttribute");
+            ua_params = [] }
+           ];
+         fa_namespace = <opaque> }
         ];
       c_enum = None; c_doc_comment = None });
   (Class
@@ -30,8 +33,11 @@
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes =
-       [{ ua_name = ([5:9-24], "\\MyNamespace\\MyFileAttribute");
-          ua_params = [] }
+       [{ fa_user_attributes =
+          [{ ua_name = ([5:9-24], "\\MyNamespace\\MyFileAttribute");
+             ua_params = [] }
+            ];
+          fa_namespace = <opaque> }
          ];
        c_enum = None; c_doc_comment = None })
   ]

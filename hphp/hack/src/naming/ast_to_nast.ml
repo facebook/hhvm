@@ -51,6 +51,11 @@ let make_empty_class_body = {
 
 let on_list f l = List.map f l
 
+let on_list_append_acc acc f l =
+  List.fold_left
+    (fun acc li -> f li :: acc)
+    acc
+    l
 let optional f = function
   | None -> None
   | Some x -> Some (f x)
@@ -108,74 +113,83 @@ and on_hint (p, h) : Aast.hint =
   | Hsoft h -> (p, Aast.Hsoft (on_hint h))
   | Hreified h -> (p, Aast.Hreified (on_hint h))
 
-and on_class_elt body elt : class_body =
+and on_class_elt trait_or_interface body elt : class_body =
   match elt with
   | Attributes attrs ->
-    let attrs = body.c_attributes @ (on_list on_class_attr attrs) in
+    let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
     { body with c_attributes = attrs; }
   | Const (hopt, el) ->
     let hopt = optional on_hint hopt in
-    let consts = List.map (fun (id, e) ->
+    let consts = on_list_append_acc body.c_consts (fun (id, e) ->
       (hopt, id, Some (on_expr e))
     ) el in
-    let consts = body.c_consts @ consts in
     { body with c_consts = consts; }
   | AbsConst (hopt, id) ->
-    let consts = body.c_consts @ [(optional on_hint hopt, id, None)] in
+    let consts = (optional on_hint hopt, id, None) :: body.c_consts in
     { body with c_consts = consts; }
   | ClassUse h  ->
-    let hints = body.c_uses @ [on_hint h] in
+    let hints = on_hint h :: body.c_uses in
     { body with c_uses = hints; }
   | ClassUseAlias (_, (p, _), _, _) ->
     Errors.unsupported_feature p "Trait use aliasing"; body
   | ClassUsePrecedence (_, (p, _), _) ->
     Errors.unsupported_feature p "The insteadof keyword"; body
   | MethodTraitResolution res ->
-    let redecls = body.c_method_redeclarations @ [on_method_trait_resolution res] in
+    let redecls = on_method_trait_resolution res :: body.c_method_redeclarations in
     { body with c_method_redeclarations = redecls; }
   | XhpAttrUse h ->
-    let hints = body.c_xhp_attr_uses @ [on_hint h] in
+    let hints = on_hint h :: body.c_xhp_attr_uses in
     { body with c_xhp_attr_uses = hints }
   | ClassTraitRequire (MustExtend, h) ->
-    let hints = body.c_req_extends @ [on_hint h] in
+    let hints = on_hint h :: body.c_req_extends in
     { body with c_req_extends = hints; }
   | ClassTraitRequire (MustImplement, h) ->
-    let hints = body.c_req_implements @ [on_hint h] in
+    let hints = on_hint h :: body.c_req_implements in
     { body with c_req_implements = hints; }
   | ClassVars cv when List.mem Static cv.cv_kinds ->
     let attrs = on_list on_user_attribute cv.cv_user_attributes in
-    let vars = body.c_static_vars @
-      (on_list (on_class_var false (optional on_hint cv.cv_hint) attrs cv.cv_kinds) cv.cv_names) in
+    let vars =
+      on_list_append_acc
+        body.c_static_vars
+        (on_class_var false (optional on_hint cv.cv_hint) attrs cv.cv_kinds)
+        cv.cv_names in
     { body with c_static_vars = vars; }
   | ClassVars { cv_names; cv_user_attributes; cv_hint; cv_kinds; _ } ->
     let attrs = on_list on_user_attribute cv_user_attributes in
     let vars =
-      body.c_vars @ (on_list (on_class_var false (optional on_hint cv_hint) attrs cv_kinds) cv_names) in
+      on_list_append_acc
+      body.c_vars
+      (on_class_var false (optional on_hint cv_hint) attrs cv_kinds)
+      cv_names in
     { body with c_vars = vars; }
   | XhpAttr (hopt, var, is_required, maybe_enum)  ->
     (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
     let hopt = optional on_hint hopt in
-    let attrs = body.c_xhp_attrs @
-      [(hopt,
+    let attrs =
+      (hopt,
         on_class_var true hopt [] [] var,
         is_required,
-        optional on_xhp_attr maybe_enum)] in
+        optional on_xhp_attr maybe_enum) :: body.c_xhp_attrs in
     { body with c_xhp_attrs = attrs; }
   | XhpCategory (_, cs) ->
+    if body.c_xhp_category <> [] && cs <> []
+    then Errors.multiple_xhp_category (fst (List.hd cs));
     { body with c_xhp_category = cs; }
   | XhpChild (p, c) ->
-    let children = body.c_xhp_children @ [(p, on_xhp_child c)] in
+    let children = (p, on_xhp_child c) :: body.c_xhp_children in
     { body with c_xhp_children = children; }
   | Method m when snd m.m_name = SN.Members.__construct ->
-    { body with c_constructor = Some (on_method m) }
+    if body.c_constructor <> None
+    then Errors.method_name_already_bound (fst m.m_name) (snd m.m_name);
+    { body with c_constructor = Some (on_method ~trait_or_interface m) }
   | Method m when List.mem Static m.m_kind ->
-    let statics = body.c_static_methods @ [on_method m] in
+    let statics = on_method m :: body.c_static_methods in
     { body with c_static_methods = statics; }
   | Method m ->
-    let methods = body.c_methods @ [on_method m] in
+    let methods = on_method m :: body.c_methods in
     { body with c_methods = methods; }
   | TypeConst tc ->
-    let typeconsts = body.c_typeconsts @ [on_class_typeconst tc] in
+    let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
     { body with c_typeconsts = typeconsts; }
 
 and on_as_expr aw e : Aast.as_expr =
@@ -362,8 +376,10 @@ and on_tparam t : Aast.tparam =
     tp_user_attributes = on_list on_user_attribute t.tp_user_attributes;
   }
 
-and on_fun_param param : Aast.fun_param =
+and on_fun_param ?(trait_or_interface=false) param : Aast.fun_param =
   let p, name = param.param_id in
+  if trait_or_interface && param.param_modifier <> None
+  then Errors.trait_interface_constructor_promo p;
   { Aast.param_annotation = p;
     param_hint = optional on_hint param.param_hint;
     param_is_reference = param.param_is_reference;
@@ -392,11 +408,11 @@ and on_user_attribute attribute : Aast.user_attribute =
   let ua_params = on_list on_expr attribute.ua_params in
   Aast.{ ua_name = attribute.ua_name; ua_params; }
 
-and on_file_attribute file_attribute : Aast.user_attribute list =
-  on_list on_user_attribute file_attribute.fa_user_attributes
-
-and on_file_attributes file_attributes : Aast.user_attribute list =
-  List.concat (on_list on_file_attribute file_attributes)
+and on_file_attribute (attribute:Ast.file_attributes) : Aast.file_attribute =
+  Aast.
+  { fa_user_attributes = on_list on_user_attribute attribute.fa_user_attributes
+  ; fa_namespace = attribute.fa_namespace
+  }
 
 and on_fun f : Aast.fun_ =
   let body = on_block f.f_body in
@@ -419,7 +435,7 @@ and on_fun f : Aast.fun_ =
     f_fun_kind = f.f_fun_kind;
     f_variadic = determine_variadicity f.f_params;
     f_user_attributes = on_list on_user_attribute f.f_user_attributes;
-    f_file_attributes = on_file_attributes f.f_file_attributes;
+    f_file_attributes = on_list on_file_attribute f.f_file_attributes;
     f_external = f.f_external;
     f_namespace = f.f_namespace;
     f_doc_comment = f.f_doc_comment;
@@ -449,10 +465,21 @@ and on_ca_type ty : Aast.ca_type =
   | CA_enum sl -> Aast.CA_enum (sl)
 
 and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
+  let tconst_type =
+    match tc.tconst_type, tc.tconst_abstract with
+    | None, false ->
+      Errors.not_abstract_without_typeconst tc.tconst_name;
+      tc.tconst_constraint
+    | Some _, true ->
+      Errors.abstract_with_typeconst tc.tconst_name;
+      None
+    | h, _ -> h in
+  if tc.tconst_tparams <> []
+  then Errors.no_tparams_on_type_consts (fst tc.tconst_name);
   Aast.{
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;
-    c_tconst_type = optional on_hint tc.tconst_type;
+    c_tconst_type = optional on_hint tconst_type;
   }
 
 and on_class_var is_xhp h attrs kinds (_, id, eopt) : Aast.class_var =
@@ -487,7 +514,9 @@ and on_method_trait_resolution res : Aast.method_redeclaration =
   let final, abs, static, vis = List.fold_left kind acc res.mt_kind in
   let vis =
     match vis with
-    | None -> Aast.Public
+    | None ->
+      Errors.method_needs_visibility (fst res.mt_name);
+      Aast.Public
     | Some v -> v in
   Aast.{
     mt_final           = final;
@@ -527,7 +556,7 @@ and kind (final, abs, static, vis) = function
   | Public -> final, abs, static, Some Aast.Public
   | Protected -> final, abs, static, Some Aast.Protected
 
-and on_method m : Aast.method_ =
+and on_method ?(trait_or_interface=false) m : Aast.method_ =
   let body = on_block m.m_body in
   let body = Aast.NamedBody {
         Aast.fnb_nast = body;
@@ -550,7 +579,7 @@ and on_method m : Aast.method_ =
     m_tparams         = on_list on_tparam m.m_tparams;
     m_where_constraints = on_list on_constr m.m_constrs;
     m_variadic        = determine_variadicity m.m_params;
-    m_params          = on_list on_fun_param m.m_params;
+    m_params          = on_list (on_fun_param ~trait_or_interface) m.m_params;
     m_body            = body;
     m_fun_kind        = m.m_fun_kind;
     m_user_attributes = on_list on_user_attribute m.m_user_attributes;
@@ -559,12 +588,33 @@ and on_method m : Aast.method_ =
     m_doc_comment     = m.m_doc_comment;
   }
 
+and on_class_body trait_or_interface cb =
+  let reversed_body = List.fold_left (on_class_elt trait_or_interface) make_empty_class_body cb in
+  { reversed_body with
+    c_uses = List.rev reversed_body.c_uses;
+    c_method_redeclarations = List.rev reversed_body.c_method_redeclarations;
+    c_xhp_attr_uses = List.rev reversed_body.c_xhp_attr_uses;
+    c_xhp_category = List.rev reversed_body.c_xhp_category;
+    c_req_extends = List.rev reversed_body.c_req_extends;
+    c_req_implements = List.rev reversed_body.c_req_implements;
+    c_consts = List.rev reversed_body.c_consts;
+    c_typeconsts = List.rev reversed_body.c_typeconsts;
+    c_static_vars = List.rev reversed_body.c_static_vars;
+    c_vars = List.rev reversed_body.c_vars;
+    c_static_methods = List.rev reversed_body.c_static_methods;
+    c_methods = List.rev reversed_body.c_methods;
+    c_attributes = List.rev reversed_body.c_attributes;
+    c_xhp_children = List.rev reversed_body.c_xhp_children;
+    c_xhp_attrs = List.rev reversed_body.c_xhp_attrs;
+  }
+
 and on_class c : Aast.class_ =
   let c_tparams = {
     Aast.c_tparam_list = on_list on_tparam c.c_tparams;
     Aast.c_tparam_constraints = SMap.empty;
   } in
-  let body = List.fold_left on_class_elt make_empty_class_body c.c_body in
+  let trait_or_interface = c.c_kind = Ctrait || c.c_kind = Cinterface in
+  let body = on_class_body trait_or_interface c.c_body in
   let named_class =
   Aast.{
       c_annotation            = ();
@@ -594,7 +644,7 @@ and on_class c : Aast.class_ =
       c_xhp_children          = body.c_xhp_children;
       c_xhp_attrs             = body.c_xhp_attrs;
       c_user_attributes       = on_list on_user_attribute c.c_user_attributes;
-      c_file_attributes       = [];
+      c_file_attributes       = on_list on_file_attribute c.c_file_attributes;
       c_namespace             = c.c_namespace;
       c_enum                  = optional on_enum c.c_enum;
       c_doc_comment           = c.c_doc_comment;

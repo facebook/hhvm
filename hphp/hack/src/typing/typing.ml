@@ -6376,9 +6376,15 @@ and supertype_redeclared_method tc env m =
 and file_attributes tcopt file mode droot file_attrs =
   let env = Env.empty tcopt file ~droot in
   let env = Env.set_mode env mode in
+  let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in
   let env =
-    Typing_attributes.check_def env new_object SN.AttributeKinds.file file_attrs in
-  List.map file_attrs (user_attribute env)
+    Typing_attributes.check_def env new_object SN.AttributeKinds.file uas in
+  List.map
+    ~f:(fun fa ->
+      { T.fa_user_attributes = List.map ~f:(user_attribute env) fa.fa_user_attributes;
+        T.fa_namespace = fa.fa_namespace;
+      })
+    file_attrs
 
 and user_attribute env ua =
   let typed_ua_params =

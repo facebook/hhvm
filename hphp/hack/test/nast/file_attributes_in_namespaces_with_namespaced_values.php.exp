@@ -38,13 +38,16 @@
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
       c_user_attributes = [];
       c_file_attributes =
-      [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-         ua_params =
-         [([12:33-56],
-           (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
-              ([12:42-56], "MY_CLASS_CONST"))))
-           ]
-         }
+      [{ fa_user_attributes =
+         [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
+            ua_params =
+            [([12:33-56],
+              (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
+                 ([12:42-56], "MY_CLASS_CONST"))))
+              ]
+            }
+           ];
+         fa_namespace = <opaque> }
         ];
       c_enum = None; c_doc_comment = None });
   (Class
@@ -63,13 +66,16 @@
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes =
-       [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-          ua_params =
-          [([12:33-56],
-            (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
-               ([12:42-56], "MY_CLASS_CONST"))))
-            ]
-          }
+       [{ fa_user_attributes =
+          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
+             ua_params =
+             [([12:33-56],
+               (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
+                  ([12:42-56], "MY_CLASS_CONST"))))
+               ]
+             }
+            ];
+          fa_namespace = <opaque> }
          ];
        c_enum = None; c_doc_comment = None });
   (Class
@@ -85,13 +91,16 @@
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes =
-       [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
-          ua_params =
-          [([12:33-56],
-            (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
-               ([12:42-56], "MY_CLASS_CONST"))))
-            ]
-          }
+       [{ fa_user_attributes =
+          [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");
+             ua_params =
+             [([12:33-56],
+               (Class_const (([12:33-40], (CI ([12:33-40], "\\A\\MyClass"))),
+                  ([12:42-56], "MY_CLASS_CONST"))))
+               ]
+             }
+            ];
+          fa_namespace = <opaque> }
          ];
        c_enum = None; c_doc_comment = None })
   ]

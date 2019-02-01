@@ -774,7 +774,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
 
     assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
-    if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
+    if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain() ||
+	inst->marker().func()->isClosureBody()) {
       clearLocals();
     } else {
       auto it = extra.changedLocals;

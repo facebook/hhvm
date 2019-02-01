@@ -265,8 +265,6 @@ and func_body =
 and func_unnamed_body = {
   (* Unnamed AST for the function body *)
   fub_ast       : block [@opaque];
-  (* Unnamed AST for the function type params *)
-  fub_tparams   : tparam list [@opaque];
   (* Namespace info *)
   fub_namespace : nsenv;
 }

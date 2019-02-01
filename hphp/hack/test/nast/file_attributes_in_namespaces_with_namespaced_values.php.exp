@@ -29,9 +29,7 @@
                  param_user_attributes = [] }
                 ];
               m_body =
-              (UnnamedBody
-                 { fub_ast = <opaque>; fub_tparams = <opaque>;
-                   fub_namespace = <opaque> });
+              (UnnamedBody { fub_ast = <opaque>; fub_namespace = <opaque> });
               m_fun_kind = FSync; m_user_attributes = []; m_ret = None;
               m_external = false; m_doc_comment = None });
       c_static_methods = []; c_methods = []; c_attributes = [];

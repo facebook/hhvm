@@ -1625,7 +1625,6 @@ module Make (GetLocals : GetLocals) = struct
             } ->
               N.UnnamedBody {
                 N.fub_ast = fnb_nast;
-                fub_tparams = tparam_l;
                 fub_namespace = genv.namespace;
               }
         end
@@ -1765,7 +1764,6 @@ module Make (GetLocals : GetLocals) = struct
               N.UnnamedBody {
                 N.fub_ast = fnb_nast;
                 (* Seems weird to use this instead of the converted f_tparams *)
-                fub_tparams = f.Aast.f_tparams;
                 fub_namespace = f.Aast.f_namespace;
               }
         end
@@ -2751,10 +2749,10 @@ module Make (GetLocals : GetLocals) = struct
   let func_body nenv f =
     match f.N.f_body with
       | N.NamedBody b -> b
-      | N.UnnamedBody { N.fub_ast; N.fub_tparams; N.fub_namespace; _ } ->
+      | N.UnnamedBody { N.fub_ast; N.fub_namespace; _ } ->
         let genv = Env.make_fun_genv nenv
           SMap.empty f.N.f_mode (snd f.N.f_name) fub_namespace in
-        let genv = aast_extend_params genv fub_tparams in
+        let genv = aast_extend_params genv f.N.f_tparams in
         let lenv = Env.empty_local None in
         let env = genv, lenv in
         let env =
@@ -2774,9 +2772,9 @@ module Make (GetLocals : GetLocals) = struct
   let meth_body genv m =
     let named_body = (match m.N.m_body with
       | N.NamedBody _ as b -> b
-      | N.UnnamedBody {N.fub_ast; N.fub_tparams; N.fub_namespace; _} ->
+      | N.UnnamedBody {N.fub_ast; N.fub_namespace; _} ->
         let genv = {genv with namespace = fub_namespace} in
-        let genv = aast_extend_params genv fub_tparams in
+        let genv = aast_extend_params genv m.N.m_tparams in
         let env = genv, Env.empty_local None in
         let env =
           List.fold_left ~f:Env.add_param m.N.m_params ~init:env in

@@ -10,10 +10,7 @@
          param_pos = [12:18-20]; param_name = "$v"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
-      f_body =
-      (UnnamedBody
-         { fub_ast = <opaque>; fub_tparams = <opaque>;
-           fub_namespace = <opaque> });
+      f_body = (UnnamedBody { fub_ast = <opaque>; fub_namespace = <opaque> });
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = true; f_namespace = <opaque>;
       f_doc_comment =

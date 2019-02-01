@@ -92,19 +92,6 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                            /* check ref */ true);
 }
 
-Variant HHVM_FUNCTION(check_user_func_async, const Variant& /*handles*/,
-                      int /*timeout*/ /* = -1 */) {
-  raise_error("%s is no longer supported", __func__);
-  return init_null();
-}
-
-Variant HHVM_FUNCTION(end_user_func_async, const Object& /*handle*/,
-                      int /*default_strategy*/ /*= k_GLOBAL_STATE_IGNORE*/,
-                      const Variant& /*additional_strategies*/ /* = null */) {
-  raise_error("%s is no longer supported", __func__);
-  return init_null();
-}
-
 Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
                       const Array& params) {
   auto const warning = "forward_static_call_array() is deprecated and subject"
@@ -284,8 +271,6 @@ void StandardExtension::initFunction() {
   HHVM_FE(is_callable);
   HHVM_FE(call_user_func);
   HHVM_FE(call_user_func_array);
-  HHVM_FE(check_user_func_async);
-  HHVM_FE(end_user_func_async);
   HHVM_FE(forward_static_call_array);
   HHVM_FE(forward_static_call);
   HHVM_FE(func_get_arg);

@@ -96,12 +96,12 @@ module Env : sig
   val empty_local : unbound_handler option -> lenv
   val make_class_genv :
     TypecheckerOptions.t ->
-    type_constraint SMap.t ->
+    aast_type_constraint SMap.t ->
     FileInfo.mode ->
     Ast.id * Ast.class_kind -> Namespace_env.env -> bool -> genv
   val make_class_env :
     TypecheckerOptions.t ->
-    type_constraint SMap.t -> Ast.class_ -> genv * lenv
+    aast_type_constraint SMap.t -> Ast.class_ -> genv * lenv
   val aast_make_typedef_env :
     TypecheckerOptions.t ->
     aast_type_constraint SMap.t -> Aast.typedef -> genv * lenv
@@ -256,7 +256,7 @@ end = struct
       in_try        = false;
       in_finally    = false;
       in_ppl        = is_ppl;
-      type_params   = SMap.map convert_type_constraints_to_aast tparams;
+      type_params   = tparams;
       current_cls   = Some (cid, ckind);
       class_consts  = Caml.Hashtbl.create 0;
       class_props   = Caml.Hashtbl.create 0;
@@ -1256,6 +1256,7 @@ module Make (GetLocals : GetLocals) = struct
   (* Naming of a class *)
   let rec class_ nenv c =
     let constraints = make_constraints c.c_tparams in
+    let constraints = aast_map_constaints constraints in
     let env      = Env.make_class_env nenv constraints c in
     (* Checking for a code smell *)
     List.iter c.c_tparams check_constraint;
@@ -2210,6 +2211,13 @@ module Make (GetLocals : GetLocals) = struct
       ~f:(fun { Aast.tp_name = (_, x); tp_constraints; _ } acc ->
         SMap.add x tp_constraints acc)
       paraml
+
+  and aast_map_constaints cmap =
+    SMap.map
+      (fun cl ->
+        List.map ~f:(fun (c, h) -> (c, Ast_to_nast.on_hint h))
+        cl)
+      cmap
 
   and extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params

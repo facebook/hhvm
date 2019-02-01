@@ -122,7 +122,6 @@
     typing_exts
     typing_gather_defined
     typing_infer_return
-    typing_instantiability
     typing_lambda_ambiguous
     typing_lenv
     typing_memoize

@@ -46,7 +46,7 @@ let typing_env_from_file tcopt file =
 
 let type_from_hint tcopt file hint =
   let tenv = typing_env_from_file tcopt file in
-  let decl_ty = Typing_instantiability.instantiable_hint tenv hint in
+  let decl_ty = Decl_hint.hint tenv.Typing_env.decl_env hint in
   Typing_phase.localize_with_self tenv decl_ty
 
 let just_return types =

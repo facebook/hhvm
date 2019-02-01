@@ -196,6 +196,13 @@ void VSDebugExtension::requestShutdown() {
   s_debugger->requestShutdown();
 }
 
+void VSDebugExtension::threadShutdown() {
+  // NB some threads may be in the list, but we never get a requestShutdown
+  // on them because they either never run PHP code or are done by the time
+  // we query the list. Catch those threads and clean them up.
+  requestShutdown();
+}
+
 std::string& VSDebugExtension::getUnixSocketPath() {
   static std::string s_unixSocketPath = "";
   return s_unixSocketPath;

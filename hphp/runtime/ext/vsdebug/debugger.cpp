@@ -907,7 +907,9 @@ void Debugger::requestShutdown() {
     m_requestIdMap.erase(idItr);
     m_requestInfoMap.erase(infoItr);
 
-    g_context->removeStdoutHook(getStdoutHook());
+    if (!g_context.isNull()) {
+      g_context->removeStdoutHook(getStdoutHook());
+    }
     Logger::SetThreadHook(nullptr);
 
     // Cleanup any server objects for this request before dropping the lock.

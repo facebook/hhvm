@@ -35,6 +35,7 @@ struct VSDebugExtension final : Extension {
   void moduleShutdown() override;
   void requestInit() override;
   void requestShutdown() override;
+  void threadShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
 
   static Debugger* getDebugger() { return s_debugger; }

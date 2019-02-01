@@ -7,6 +7,7 @@
  *
  *)
 
+module Aast = Ast_to_nast.Aast
 
 (** Module "naming" a program.
  * Transform all the local names into a unique identifier
@@ -33,6 +34,11 @@ module type GetLocals = sig
   val lvalue :
     TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
       Ast.expr -> Namespace_env.env * Pos.t SMap.t
+
+  val aast_lvalue : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+    Aast.expr -> Namespace_env.env * Pos.t SMap.t
+  val aast_stmt : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+    Aast.stmt -> Namespace_env.env * Pos.t SMap.t
 end
 
 module Make : functor (GetLocals : GetLocals) -> sig

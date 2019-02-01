@@ -178,10 +178,12 @@ and on_class_elt body elt : class_body =
     let typeconsts = body.c_typeconsts @ [on_class_typeconst tc] in
     { body with c_typeconsts = typeconsts; }
 
-and on_as_expr e : Aast.as_expr =
-  match e with
-  | As_v e -> Aast.As_v (on_expr e)
-  | As_kv (e1, e2) -> Aast.As_kv (on_expr e1, on_expr e2)
+and on_as_expr aw e : Aast.as_expr =
+  match aw, e with
+  | None, As_v ev -> Aast.As_v (on_expr ev)
+  | Some p, As_v ev -> Aast.Await_as_v (p, on_expr ev)
+  | None, As_kv (k, ev) -> Aast.As_kv (on_expr k, on_expr ev)
+  | Some p, As_kv (k, ev) -> Aast.Await_as_kv (p, on_expr k, on_expr ev)
 
 and on_afield f : Aast.afield =
   match f with
@@ -314,9 +316,9 @@ and on_stmt (p, st) :  Aast.stmt =
   | Fallthrough               -> Aast.Fallthrough
   | Noop                      -> Aast.Noop
   | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
-  | Break (Some _)            -> failwith "Breaks with labels are not allowed in Hack"
+  | Break (Some _)            -> Errors.break_continue_n_not_supported p; Aast.Break p
   | Break None                -> Aast.Break p
-  | Continue (Some _)         -> failwith "Continues with labels are not allowed in Hack"
+  | Continue (Some _)         -> Errors.break_continue_n_not_supported p; Aast.Continue p
   | Continue None             -> Aast.Continue p
   | Throw e                   -> Aast.Throw (false, on_expr e)
   | Return e                  -> Aast.Return (p, optional on_expr e)
@@ -338,7 +340,7 @@ and on_stmt (p, st) :  Aast.stmt =
    }
   | For (st1, e, st2, b)      -> Aast.For (on_expr st1, on_expr e, on_expr st2, on_block b)
   | Switch (e, cl)            -> Aast.Switch (on_expr e, on_list on_case cl)
-  | Foreach (e, _, ae, b)     -> Aast.Foreach (on_expr e, on_as_expr ae, on_block b)
+  | Foreach (e, aw, ae, b)    -> Aast.Foreach (on_expr e, on_as_expr aw ae, on_block b)
   | Try (b, cl, fb)           -> Aast.Try (on_block b, on_list on_catch cl, on_block fb)
   | Def_inline d              -> Aast.Def_inline (on_def d)
   | Expr e                    -> Aast.Expr (on_expr e)

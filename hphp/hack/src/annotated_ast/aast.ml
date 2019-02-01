@@ -172,7 +172,6 @@ and expr_ =
   | Collection of sid * afield list (* TODO: T38184446 Consolidate collections in AAST *)
   | BracedExpr of expr
   | ParenthesizedExpr of expr
-
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
   | Fun_id of sid

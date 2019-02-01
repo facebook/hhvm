@@ -15,7 +15,6 @@
  *)
 open Core_kernel
 open Common
-open Ast
 open Utils
 open String_utils
 
@@ -116,7 +115,7 @@ module Env : sig
     aast_type_constraint SMap.t -> Aast.fun_ -> genv
   val make_file_attributes_env :
     TypecheckerOptions.t ->
-    FileInfo.mode -> nsenv -> genv * lenv
+    FileInfo.mode -> Aast.nsenv -> genv * lenv
   val aast_make_const_env :
     TypecheckerOptions.t ->
     Aast.gconst -> genv * lenv
@@ -144,8 +143,8 @@ module Env : sig
   val fun_id : genv * lenv -> Ast.id -> Ast.id
   val bind_class_const : genv * lenv -> Ast.id -> unit
   val goto_label : genv * lenv -> string -> Pos.t option
-  val new_goto_label : genv * lenv -> pstring -> unit
-  val new_goto_target : genv * lenv -> pstring -> unit
+  val new_goto_label : genv * lenv -> Aast.pstring -> unit
+  val new_goto_target : genv * lenv -> Aast.pstring -> unit
   val check_goto_references : genv * lenv -> unit
   val copy_let_locals : genv * lenv -> genv * lenv -> unit
 
@@ -748,16 +747,16 @@ let aast_check_repetition s param =
   else s
 
 let convert_shape_name env = function
-  | SFlit_int (pos, s) -> (pos, SFlit_int (pos, s))
-  | SFlit_str (pos, s) -> (pos, SFlit_str (pos, s))
-  | SFclass_const (x, (pos, y)) ->
+  | Ast.SFlit_int (pos, s) -> (pos, Ast.SFlit_int (pos, s))
+  | Ast.SFlit_str (pos, s) -> (pos, Ast.SFlit_str (pos, s))
+  | Ast.SFclass_const (x, (pos, y)) ->
     let class_name =
       if (snd x) = SN.Classes.cSelf then
         match (fst env).current_cls with
         | Some (cid, _) -> cid
         | None -> Errors.self_outside_class pos; (pos, SN.Classes.cUnknown)
       else Env.type_name env x ~allow_typedef:false in
-    (pos, SFclass_const (class_name, (pos, y)))
+    (pos, Ast.SFclass_const (class_name, (pos, y)))
 
 let arg_unpack_unexpected = function
   | [] -> ()
@@ -1165,7 +1164,7 @@ module Make (GetLocals : GetLocals) = struct
   let add_abstractl methods = List.map methods add_abstract
 
   let aast_interface c constructor methods smethods =
-    if c.Aast.c_kind <> Cinterface
+    if c.Aast.c_kind <> Ast.Cinterface
     then constructor, methods, smethods
     else
       let constructor = Option.map constructor add_abstract in
@@ -1237,7 +1236,7 @@ module Make (GetLocals : GetLocals) = struct
       match c.Aast.c_kind with
       (* Make enums implicitly extend the BuiltinEnum class in order to provide
        * utility methods. *)
-      | Cenum ->
+      | Ast.Cenum ->
         let pos = fst name in
         let enum_type = pos, N.Happly (name, []) in
         let parent =
@@ -1524,12 +1523,13 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.String _ -> ()
     | Aast.Class_const ((_, Aast.CIexpr (_, cls)), _)
       when (match cls with Aast.Id (_, "static") -> false | _ -> true) -> ()
-    | Aast.Unop ((Uplus| Uminus | Utild | Unot), e) -> aast_check_constant_expr env e
+    | Aast.Unop ((Ast.Uplus| Ast.Uminus | Ast.Utild | Ast.Unot), e) ->
+      aast_check_constant_expr env e
     | Aast.Binop (op, e1, e2) ->
       (* Only assignment is invalid *)
       begin
         match op with
-        | Eq _ -> Errors.illegal_constant pos
+        | Ast.Eq _ -> Errors.illegal_constant pos
         | _ ->
           aast_check_constant_expr env e1;
           aast_check_constant_expr env e2
@@ -1797,7 +1797,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Expr_list using_clauses ->
       List.concat_map using_clauses aast_get_using_vars
       (* Simple assignment to local of form `$lvar = e` *)
-    | Aast.Binop (Eq None, (_, Aast.Lvar (p, lid)), _) ->
+    | Aast.Binop (Ast.Eq None, (_, Aast.Lvar (p, lid)), _) ->
       [ (p, Local_id.get_name lid) ]
       (* Arbitrary expression. This will be assigned to a temporary *)
     | _ -> []
@@ -1861,7 +1861,7 @@ module Make (GetLocals : GetLocals) = struct
             if cond <> Aast.False
             then
               let b1, b2 = [Aast.Expr violation], [Aast.Noop] in
-              let cond = (cond_p, Aast.Unop (Unot, (cond_p, cond))) in
+              let cond = (cond_p, Aast.Unop (Ast.Unot, (cond_p, cond))) in
               aast_if_stmt env st cond b1 b2
             else (* a false <condition> means unconditional invariant_violation *)
               N.Expr (aast_expr env violation)
@@ -2076,7 +2076,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_static_varl env l = List.map l (aast_static_var env)
   and aast_static_var env = function
     | p, Aast.Lvar _ as lv ->
-      aast_expr env (p, Aast.Binop (Eq None, lv, (p, Aast.Null)))
+      aast_expr env (p, Aast.Binop (Ast.Eq None, lv, (p, Aast.Null)))
     | e -> aast_expr env e
 
   and aast_global_varl env l = aast_static_varl env l
@@ -2438,7 +2438,7 @@ module Make (GetLocals : GetLocals) = struct
           end in
       N.Cast (ty, aast_expr env e2)
     | Aast.Unop (uop, e) -> N.Unop (uop, aast_expr env e)
-    | Aast.Binop (Eq None as op, lv, e2) ->
+    | Aast.Binop (Ast.Eq None as op, lv, e2) ->
       if Env.inside_pipe env then
         Errors.unimplemented_feature p "Assignment within pipe expressions";
       let e2 = aast_expr env e2 in
@@ -2447,7 +2447,7 @@ module Make (GetLocals : GetLocals) = struct
         GetLocals.aast_lvalue (fst env).tcopt (nsenv, SMap.empty) lv in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       N.Binop (op, aast_expr env lv, e2)
-    | Aast.Binop (Eq _ as bop, e1, e2) ->
+    | Aast.Binop (Ast.Eq _ as bop, e1, e2) ->
       if Env.inside_pipe env
       then Errors.unimplemented_feature p "Assignment within pipe expressions";
       N.Binop (bop, aast_expr env e1, aast_expr env e2)
@@ -2573,12 +2573,12 @@ module Make (GetLocals : GetLocals) = struct
       N.Xml (Env.type_name env x ~allow_typedef:false, aast_attrl env al,
         aast_exprl env el)
     | Aast.Shape fdl ->
-      let (shp, _) = begin List.fold_left fdl ~init:([], ShapeSet.empty)
+      let (shp, _) = begin List.fold_left fdl ~init:([], Ast.ShapeSet.empty)
         ~f:begin fun (fdm, set) (pname, value) ->
           let pos, name = convert_shape_name env pname in
-          if ShapeSet.mem name set
+          if Ast.ShapeSet.mem name set
           then Errors.fd_name_already_bound pos;
-          (name, (aast_expr env value)) :: fdm, ShapeSet.add name set
+          (name, (aast_expr env value)) :: fdm, Ast.ShapeSet.add name set
         end
       end in
       N.Shape (List.rev shp)

@@ -27,6 +27,7 @@ type env = {
   progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version : bool;
+  saved_state_ignore_hhconfig : bool;
   use_priority_pipe : bool;
   prechecked : bool option;
   config : (string * string) list;
@@ -240,6 +241,7 @@ let rec connect
                                      ai_mode = env.ai_mode;
                                      debug_port = None;
                                      ignore_hh_version = env.ignore_hh_version;
+                                     saved_state_ignore_hhconfig = env.saved_state_ignore_hhconfig;
                                      dynamic_view = false;
                                      prechecked = env.prechecked;
                                      config = env.config;

@@ -90,15 +90,17 @@ module Revision_map = struct
           (** Prefetcher *) (unit Future.t) option ref)) Caml.Hashtbl.t;
         use_xdb : bool;
         ignore_hh_version : bool;
+        ignore_hhconfig : bool;
         saved_state_cache_limit : int;
       }
 
-    let create ~saved_state_cache_limit use_xdb ignore_hh_version =
+    let create ~saved_state_cache_limit ~use_xdb ~ignore_hh_version ~ignore_hhconfig =
       {
         svn_queries = Caml.Hashtbl.create 200;
         xdb_queries = Caml.Hashtbl.create 200;
         use_xdb;
         ignore_hh_version;
+        ignore_hhconfig;
         saved_state_cache_limit;
       }
 
@@ -153,6 +155,9 @@ module Revision_map = struct
         | Caml.Not_found ->
           let hhconfig_hash, _config = Config_file.parse
             (Relative_path.to_absolute ServerConfig.filename) in
+          let hhconfig_hash = if t.ignore_hhconfig
+            then None
+            else Some hhconfig_hash in
           (** Query doesn't exist yet, so we create one and consume it when
            * it's ready. *)
           let future =
@@ -352,6 +357,7 @@ module Revision_tracker = struct
     saved_state_cache_limit : int;
     use_xdb : bool;
     ignore_hh_version : bool;
+    ignore_hhconfig : bool;
   }
 
   type env = {
@@ -403,7 +409,7 @@ module Revision_tracker = struct
 
   let init
   ~min_distance_restart
-  ~use_xdb ~ignore_hh_version
+  ~use_xdb ~ignore_hh_version ~ignore_hhconfig
   ~saved_state_cache_limit
   watchman root =
     let init_settings = {
@@ -413,6 +419,7 @@ module Revision_tracker = struct
       saved_state_cache_limit;
       use_xdb;
       ignore_hh_version;
+      ignore_hhconfig;
   } in
     ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -430,8 +437,9 @@ module Revision_tracker = struct
       current_base_revision = ref base_svn_rev;
       rev_map = Revision_map.create
         ~saved_state_cache_limit:init_settings.saved_state_cache_limit
-        init_settings.use_xdb
-        init_settings.ignore_hh_version;
+        ~use_xdb:init_settings.use_xdb
+        ~ignore_hh_version:init_settings.ignore_hh_version
+        ~ignore_hhconfig:init_settings.ignore_hhconfig;
       state_changes = Queue.create() ;
       is_in_hg_update_state = ref false;
       is_in_hg_transaction_state = ref false;
@@ -824,6 +832,7 @@ let init {
   use_xdb;
   watchman_debug_logging;
   ignore_hh_version;
+  ignore_hhconfig;
 } =
   if use_dummy then
     let () = Printf.eprintf "Informant using dummy - resigning\n" in
@@ -852,6 +861,7 @@ let init {
           ~min_distance_restart
           ~use_xdb
           ~ignore_hh_version
+          ~ignore_hhconfig
           ~saved_state_cache_limit
           (Watchman.Watchman_alive watchman_env)
           root;

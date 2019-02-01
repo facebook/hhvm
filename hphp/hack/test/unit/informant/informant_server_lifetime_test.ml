@@ -78,6 +78,7 @@ module Tools = struct
     use_xdb = true;
     saved_state_cache_limit = 20;
     ignore_hh_version = false;
+    ignore_hhconfig = false;
   }
 end;;
 

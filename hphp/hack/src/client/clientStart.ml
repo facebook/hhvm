@@ -30,6 +30,7 @@ type env = {
   ai_mode : string option;
   debug_port: Unix.file_descr option;
   ignore_hh_version : bool;
+  saved_state_ignore_hhconfig: bool;
   dynamic_view : bool;
   prechecked : bool option;
   config : (string * string) list;
@@ -70,6 +71,7 @@ let start_server env =
        * it doesn't, and shouldn't, use it. *)
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
       if env.ignore_hh_version then [| "--ignore-hh-version" |] else [||];
+      if env.saved_state_ignore_hhconfig then [| "--saved-state-ignore-hhconfig" |] else [||];
       if env.dynamic_view then [| "--dynamic-view"|] else [||];
       if env.prechecked = Some true then [| "--prechecked" |] else [||];
       if env.prechecked = Some false then [| "--no-prechecked" |] else [||];

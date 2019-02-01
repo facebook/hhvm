@@ -88,6 +88,7 @@ let connect ?(use_priority_pipe=false) args =
     progress_callback = ClientConnect.tty_progress_reporter ();
     do_post_handoff_handshake = true;
     ignore_hh_version = args.ignore_hh_version;
+    saved_state_ignore_hhconfig = args.saved_state_ignore_hhconfig;
     use_priority_pipe;
     prechecked = args.prechecked;
     config = args.config;

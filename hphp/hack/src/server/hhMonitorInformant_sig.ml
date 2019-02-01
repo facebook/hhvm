@@ -19,7 +19,10 @@ module Types = struct
     watchman_debug_logging : bool;
     (** Informant should ignore the hh_version column when looking up a saved
      * state from XDB. *)
-     ignore_hh_version : bool;
+    ignore_hh_version : bool;
+    (** Informant should ignore the hhconfig_hash column when looking up a saved
+     * state from XDB. *)
+    ignore_hhconfig : bool;
   }
   type init_env = options
 end

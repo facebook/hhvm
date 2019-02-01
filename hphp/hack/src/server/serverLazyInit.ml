@@ -72,6 +72,7 @@ let download_and_load_state_exn
         watchman_mergebase;
       } in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+  let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
 
   let state_future : (State_loader.native_load_result, State_loader.error) result =
@@ -79,7 +80,7 @@ let download_and_load_state_exn
       ~config:genv.local_config.SLC.state_loader_timeouts
       ~use_canary ?saved_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root
-      ~ignore_hh_version
+      ~ignore_hh_version ~ignore_hhconfig
       ~use_prechecked_files in
 
   match state_future with

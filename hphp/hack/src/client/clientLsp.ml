@@ -1662,6 +1662,7 @@ let rec connect_client
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
       do_post_handoff_handshake = false;
       ignore_hh_version = false;
+      saved_state_ignore_hhconfig = false;
       use_priority_pipe = true;
       prechecked = None;
       config = [];
@@ -1760,6 +1761,7 @@ let start_server (root: Path.t) : unit =
       exit_on_failure = false;
       debug_port = None;
       ignore_hh_version = false;
+      saved_state_ignore_hhconfig = false;
       dynamic_view = !cached_toggle_state;
       prechecked = None;
       config = [];

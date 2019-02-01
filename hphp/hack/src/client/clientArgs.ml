@@ -90,6 +90,7 @@ let parse_check_args cmd =
   let hot_classes_threshold = ref 0 in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
+  let saved_state_ignore_hhconfig = ref false in
   let logname = ref false in
   let log_inference_constraints = ref false in
   let mode = ref None in
@@ -279,6 +280,9 @@ let parse_check_args cmd =
     "--ignore-hh-version",
       Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
+    "--saved-state-ignore-hhconfig",
+      Arg.Set saved_state_ignore_hhconfig,
+      " ignore hhconfig hash when loading saved states (default: false)";
     "--in-memory-dep-table-size",
       Arg.Unit (set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
       " number of entries in the in-memory dependency table";
@@ -541,6 +545,7 @@ let parse_check_args cmd =
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
+    saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     lint_paths = lint_paths;
     log_inference_constraints = !log_inference_constraints;
     mode = mode;
@@ -572,6 +577,7 @@ let parse_start_env command =
   let profile_log = ref false in
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
+  let saved_state_ignore_hhconfig = ref false in
   let prechecked = ref None in
   let from = ref "" in
   let config = ref [] in
@@ -594,6 +600,8 @@ let parse_start_env command =
     "  run ai with options ";
     "--ignore-hh-version", Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
+    "--saved-state-ignore-hhconfig", Arg.Set saved_state_ignore_hhconfig,
+      " ignore hhconfig hash when loading saved states (default: false)";
     Common_argspecs.prechecked prechecked;
     Common_argspecs.no_prechecked prechecked;
     Common_argspecs.config config;
@@ -615,6 +623,7 @@ let parse_start_env command =
     exit_on_failure = true;
     from = !from;
     ignore_hh_version = !ignore_hh_version;
+    saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;

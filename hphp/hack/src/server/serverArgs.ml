@@ -23,6 +23,7 @@ type options = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
+  saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   load_state_canary: bool;
   log_inference_constraints: bool;
@@ -62,6 +63,7 @@ module Messages = struct
   let from_hhclient = " DEPRECATED"
   let gen_saved_ignore_type_errors = " generate a saved state even if there are type errors."
   let ignore_hh_version = " ignore hh_version check when loading saved states"
+  let saved_state_ignore_hhconfig = " ignore hhconfig hash when loading saved states"
   let json = " output errors in json format (arc lint mode)"
   let load_state_canary = " Look up a saved state using the hg commit" ^
                           " hash instead of the SVN rev."
@@ -186,6 +188,7 @@ let parse_options () =
   let from_vim = ref false in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh = ref false in
+  let saved_state_ignore_hhconfig = ref false in
   let json_mode = ref false in
   let load_state_canary = ref false in
   let log_inference_constraints = ref false in
@@ -226,6 +229,9 @@ let parse_options () =
         Arg.Set gen_saved_ignore_type_errors,
         Messages.gen_saved_ignore_type_errors;
       "--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version;
+      "--saved-state-ignore-hhconfig",
+        Arg.Set saved_state_ignore_hhconfig,
+        Messages.saved_state_ignore_hhconfig;
       "--json", Arg.Set json_mode, Messages.json;
       "--load-state-canary", Arg.Set load_state_canary, Messages.load_state_canary;
       "--log-inference-constraints",
@@ -289,6 +295,7 @@ let parse_options () =
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
+    saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     json_mode = !json_mode;
     load_state_canary = !load_state_canary;
     log_inference_constraints = !log_inference_constraints;
@@ -315,6 +322,7 @@ let default_options ~root = {
   from = "";
   gen_saved_ignore_type_errors = false;
   ignore_hh_version = false;
+  saved_state_ignore_hhconfig = false;
   json_mode = false;
   load_state_canary = false;
   log_inference_constraints = false;
@@ -343,6 +351,7 @@ let file_info_on_disk options = options.file_info_on_disk
 let from options = options.from
 let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
 let ignore_hh_version options = options.ignore_hh_version
+let saved_state_ignore_hhconfig options = options.saved_state_ignore_hhconfig
 let json_mode options = options.json_mode
 let load_state_canary options = options.load_state_canary
 let log_inference_constraints options = options.log_inference_constraints
@@ -387,6 +396,7 @@ let to_string
     from;
     gen_saved_ignore_type_errors;
     ignore_hh_version;
+    saved_state_ignore_hhconfig;
     json_mode;
     load_state_canary;
     log_inference_constraints;
@@ -433,6 +443,7 @@ let to_string
         "from: "; from; ", ";
         "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors; ", ";
         "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
+        "saved_state_ignore_hhconfig: "; string_of_bool saved_state_ignore_hhconfig; ", ";
         "json_mode: "; string_of_bool json_mode; ", ";
         "load_state_canary: "; string_of_bool load_state_canary; ", ";
         "log_inference_constraints: "; string_of_bool log_inference_constraints; ", ";

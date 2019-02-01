@@ -102,6 +102,7 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
         local_config.ServerLocalConfig.saved_state_cache_limit;
       use_xdb = local_config.ServerLocalConfig.informant_use_xdb;
       ignore_hh_version = ServerArgs.ignore_hh_version options;
+      ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig options;
     } in
     let max_purgatory_clients =
       local_config.ServerLocalConfig.max_purgatory_clients in

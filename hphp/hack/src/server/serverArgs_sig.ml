@@ -43,6 +43,7 @@ module type S = sig
   val from: options -> string
   val gen_saved_ignore_type_errors: options -> bool
   val ignore_hh_version: options -> bool
+  val saved_state_ignore_hhconfig: options -> bool
   val json_mode: options -> bool
   val load_state_canary: options -> bool
   val log_inference_constraints: options -> bool

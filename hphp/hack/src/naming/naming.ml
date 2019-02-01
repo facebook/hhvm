@@ -102,9 +102,9 @@ module Env : sig
   val make_class_env :
     TypecheckerOptions.t ->
     type_constraint SMap.t -> Ast.class_ -> genv * lenv
-  val make_typedef_env :
+  val aast_make_typedef_env :
     TypecheckerOptions.t ->
-    type_constraint SMap.t -> Ast.typedef -> genv * lenv
+    aast_type_constraint SMap.t -> Aast.typedef -> genv * lenv
   val make_top_level_env :
     TypecheckerOptions.t -> genv * lenv
   val make_fun_genv :
@@ -117,7 +117,9 @@ module Env : sig
   val make_file_attributes_env :
     TypecheckerOptions.t ->
     FileInfo.mode -> Ast.file_attributes -> genv * lenv
-  val make_const_env : TypecheckerOptions.t -> Ast.gconst -> genv * lenv
+  val aast_make_const_env :
+    TypecheckerOptions.t ->
+    Aast.gconst -> genv * lenv
 
   val has_unsafe : genv * lenv -> bool
   val set_unsafe : genv * lenv -> bool -> unit
@@ -290,25 +292,24 @@ end = struct
     let env  = genv, lenv in
     env
 
-  let make_typedef_genv tcopt cstrs tdef = {
+  let make_typedef_genv tcopt cstrs tdef_name tdef_namespace = {
     in_mode       = FileInfo.Mstrict;
     tcopt;
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
-    type_params   = SMap.map convert_type_constraints_to_aast cstrs;
+    type_params   = cstrs;
     current_cls   = None;
     class_consts = Caml.Hashtbl.create 0;
     class_props = Caml.Hashtbl.create 0;
-    droot         = Typing_deps.Dep.Class (snd tdef.t_id);
-    namespace     = tdef.t_namespace;
+    droot         = Typing_deps.Dep.Class tdef_name;
+    namespace     = tdef_namespace;
   }
 
-  let make_typedef_env genv cstrs tdef =
-    let genv = make_typedef_genv genv cstrs tdef in
+  let aast_make_typedef_env genv cstrs tdef =
+    let genv = make_typedef_genv genv cstrs (snd tdef.Aast.t_name) tdef.Aast.t_namespace in
     let lenv = empty_local None in
-    let env  = genv, lenv in
-    env
+    genv, lenv
 
   let make_fun_genv tcopt params f_mode f_name f_namespace = {
     in_mode       = f_mode;
@@ -341,8 +342,8 @@ end = struct
   let aast_make_fun_decl_genv nenv params f =
     aast_make_fun_genv nenv params f.Aast.f_mode (snd f.Aast.f_name) f.Aast.f_namespace
 
-  let make_const_genv tcopt cst = {
-    in_mode       = cst.cst_mode;
+  let aast_make_const_genv tcopt cst = {
+    in_mode       = cst.Aast.cst_mode;
     tcopt;
     in_try        = false;
     in_finally    = false;
@@ -351,8 +352,8 @@ end = struct
     current_cls   = None;
     class_consts = Caml.Hashtbl.create 0;
     class_props = Caml.Hashtbl.create 0;
-    droot         = Typing_deps.Dep.GConst (snd cst.cst_name);
-    namespace     = cst.cst_namespace;
+    droot         = Typing_deps.Dep.GConst (snd cst.Aast.cst_name);
+    namespace     = cst.Aast.cst_namespace;
   }
 
   let make_top_level_genv tcopt = {
@@ -396,8 +397,8 @@ end = struct
     let env  = genv, lenv in
     env
 
-  let make_const_env nenv cst =
-    let genv = make_const_genv nenv cst in
+  let aast_make_const_env nenv cst =
+    let genv = aast_make_const_genv nenv cst in
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
@@ -1861,11 +1862,70 @@ module Make (GetLocals : GetLocals) = struct
         | _ -> Errors.illegal_constant p)
     | _ -> Errors.illegal_constant pos
 
+  and aast_check_constant_expr env (pos, e) =
+    match e with
+    | Aast.Unsafe_expr _
+    | Aast.Id _
+    | Aast.Null
+    | Aast.True
+    | Aast.False
+    | Aast.Int _
+    | Aast.Float _
+    | Aast.String _ -> ()
+    | Aast.Class_const ((_, Aast.CIexpr (_, cls)), _)
+      when (match cls with Aast.Id (_, "static") -> false | _ -> true) -> ()
+    | Aast.Class_const _ ->
+      failwith "Ast_to_nast class const const expr translation error"
+    | Aast.Unop ((Uplus| Uminus | Utild | Unot), e) -> aast_check_constant_expr env e
+    | Aast.Binop (op, e1, e2) ->
+      (* Only assignment is invalid *)
+      begin
+        match op with
+        | Eq _ -> Errors.illegal_constant pos
+        | _ ->
+          aast_check_constant_expr env e1;
+          aast_check_constant_expr env e2
+      end
+    | Aast.Eif (e1, e2, e3) ->
+      aast_check_constant_expr env e1;
+      Option.iter e2 (aast_check_constant_expr env);
+      aast_check_constant_expr env e3
+    | Aast.Array l -> List.iter l ~f:(aast_check_afield_constant_expr env)
+    | Aast.Darray l ->
+      List.iter l ~f:(fun (e1, e2) ->
+        aast_check_constant_expr env e1;
+        aast_check_constant_expr env e2)
+    | Aast.Varray l -> List.iter l ~f:(aast_check_constant_expr env)
+    | Aast.Shape fdl ->
+        (* Only check the values because shape field names are always legal *)
+        List.iter fdl ~f:(fun (_, e) -> aast_check_constant_expr env e)
+    | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
+      when cn = SN.SpecialFunctions.tuple ->
+        (* Tuples are not really function calls, they are just parsed that way*)
+        arg_unpack_unexpected uel;
+        List.iter el ~f:(aast_check_constant_expr env)
+    | Aast.Collection (id, l) ->
+      let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
+      (* Only vec/keyset/dict are allowed because they are value types *)
+      if cn = SN.Collections.cVec
+      || cn = SN.Collections.cKeyset
+      || cn = SN.Collections.cDict
+      then List.iter l ~f:(aast_check_afield_constant_expr env)
+      else Errors.illegal_constant p
+    | _ -> Errors.illegal_constant pos
+
   and check_afield_constant_expr env = function
     | AFvalue e -> check_constant_expr env e
     | AFkvalue (e1, e2) ->
         check_constant_expr env e1;
         check_constant_expr env e2
+
+  and aast_check_afield_constant_expr env afield =
+    match afield with
+    | Aast.AFvalue e -> aast_check_constant_expr env e
+    | Aast.AFkvalue (e1, e2) ->
+      aast_check_constant_expr env e1;
+      aast_check_constant_expr env e2
 
   and constant_expr env e =
     let valid_constant_expression = Errors.try_with_error begin fun () ->
@@ -1873,6 +1933,15 @@ module Make (GetLocals : GetLocals) = struct
       true
     end (fun () -> false) in
     if valid_constant_expression then expr env e else fst e, N.Any
+
+  and aast_constant_expr env e =
+    let valid_constant_expression =
+      Errors.try_with_error
+        (fun () -> aast_check_constant_expr env e; true)
+        (fun () -> false) in
+    if valid_constant_expression
+    then aast_expr env e
+    else fst e, N.Any
 
   and const_defl h env l = List.map l (const_def h env)
   and const_def h env (x, e) =
@@ -3250,70 +3319,74 @@ module Make (GetLocals : GetLocals) = struct
   (* Typedefs *)
   (**************************************************************************)
 
-  let typedef genv tdef =
-    let ty = match tdef.t_kind with Alias t | NewType t -> t in
-    let cstrs = make_constraints tdef.t_tparams in
-    let env = Env.make_typedef_env genv cstrs tdef in
-    let tconstraint = Option.map tdef.t_constraint (hint env) in
-    List.iter tdef.t_tparams check_constraint;
-    let tparaml = type_paraml env tdef.t_tparams in
-    let t_vis = match tdef.t_kind with
-      | Ast.Alias _ -> N.Transparent
-      | Ast.NewType _ -> N.Opaque
-    in
-    let attrs = user_attributes env tdef.t_user_attributes in
+  let aast_typedef genv tdef =
+    let cstrs = aast_make_constraints tdef.Aast.t_tparams in
+    let env = Env.aast_make_typedef_env genv cstrs tdef in
+    let tconstraint = Option.map tdef.Aast.t_constraint (aast_hint env) in
+    List.iter tdef.Aast.t_tparams aast_check_constraint;
+    let tparaml = aast_type_paraml env tdef.Aast.t_tparams in
+    let attrs = aast_user_attributes env tdef.Aast.t_user_attributes in
     {
       N.t_annotation = ();
-      t_name = tdef.t_id;
+      t_name = tdef.Aast.t_name;
       t_tparams = tparaml;
       t_constraint = tconstraint;
-      t_kind = hint env ty;
+      t_kind = aast_hint env tdef.Aast.t_kind;
       t_user_attributes = attrs;
-      t_mode = tdef.t_mode;
-      t_namespace = tdef.t_namespace;
-      t_vis;
+      t_mode = tdef.Aast.t_mode;
+      t_namespace = tdef.Aast.t_namespace;
+      t_vis = tdef.Aast.t_vis;
     }
+
+  let typedef genv tdef =
+    let tdef = Ast_to_nast.on_typedef tdef in
+    aast_typedef genv tdef
 
   (**************************************************************************)
   (* Global constants *)
   (**************************************************************************)
 
   let check_constant_hint cst =
-    match cst.cst_type with
-    | None when cst.cst_mode = FileInfo.Mstrict ->
-        Errors.add_a_typehint (fst cst.cst_name)
+    match cst.Aast.cst_type with
+    | None when cst.Aast.cst_mode = FileInfo.Mstrict ->
+        Errors.add_a_typehint (fst cst.Aast.cst_name)
     | None
     | Some _ -> ()
 
   let check_constant_name genv cst =
     if genv.namespace.Namespace_env.ns_name <> None then
-      let pos, name = cst.cst_name in
+      let pos, name = cst.Aast.cst_name in
       let name = Utils.strip_all_ns name in
       if SN.PseudoConsts.is_pseudo_const (Utils.add_ns name) then
         Errors.name_is_reserved name pos
 
-  let global_const genv cst =
-    let env = Env.make_const_env genv cst in
-    let hint = Option.map cst.cst_type (hint env) in
-    let e = match cst.cst_kind with
-    | Ast.Cst_const ->
-      check_constant_name (fst env) cst;
-      check_constant_hint cst;
-      Some (constant_expr env cst.cst_value)
-    (* Define allows any expression, so don't call check_constant.
-     * Furthermore it often appears at toplevel, which we don't track at
-     * all, so don't type or even name that expression, it may refer to
-     * "undefined" variables that actually exist, just untracked since
-     * they're toplevel. *)
-    | Ast.Cst_define -> None in
+  let aast_global_const genv cst =
+    let env = Env.aast_make_const_env genv cst in
+    let hint = Option.map cst.Aast.cst_type (aast_hint env) in
+    let e =
+      (* Define allows any expression, so don't call check_constant.
+       * Furthermore it often appears at toplevel, which we don't track at
+       * all, so don't type or even name that expression, it may refer to
+       * "undefined" variables that actually exist, just untracked since
+       * they're toplevel. *)
+      if cst.Aast.cst_is_define
+      then None
+      else
+        let _ = check_constant_name (fst env) cst in
+        let _ = check_constant_hint cst in
+        Option.map cst.Aast.cst_value (aast_constant_expr env) in
     { N.cst_annotation = ();
-      cst_mode = cst.cst_mode;
-      cst_name = cst.cst_name;
+      cst_mode = cst.Aast.cst_mode;
+      cst_name = cst.Aast.cst_name;
       cst_type = hint;
       cst_value = e;
-      cst_is_define = (cst.cst_kind = Ast.Cst_define);
-      cst_namespace = cst.cst_namespace;
+      cst_is_define = cst.Aast.cst_is_define;
+      cst_namespace = cst.Aast.cst_namespace;
     }
+
+  let global_const genv cst =
+    let cst = Ast_to_nast.on_constant cst in
+    aast_global_const genv cst
 
   (**************************************************************************)
   (* The entry point to CHECK the program, and transform the program *)

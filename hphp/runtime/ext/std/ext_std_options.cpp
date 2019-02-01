@@ -66,7 +66,6 @@ const StaticString s_ZEND_VERSION("2.4.99");
 const int64_t k_ASSERT_ACTIVE      = 1;
 const int64_t k_ASSERT_BAIL        = 3;
 const int64_t k_ASSERT_WARNING     = 4;
-const int64_t k_ASSERT_QUIET_EVAL  = 5;
 const int64_t k_ASSERT_EXCEPTION   = 6;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +76,6 @@ struct OptionData final : RequestEventHandler {
     assertException = 0;
     assertWarning = 1;
     assertBail = 0;
-    assertQuietEval = false;
   }
 
   void requestShutdown() override {}
@@ -86,7 +84,6 @@ struct OptionData final : RequestEventHandler {
   int assertException;
   int assertWarning;
   int assertBail;
-  bool assertQuietEval;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(OptionData, s_option_data);
@@ -120,11 +117,6 @@ static Variant HHVM_FUNCTION(assert_options,
     int oldValue = s_option_data->assertBail;
     if (!value.isNull()) s_option_data->assertBail = value.toInt64();
     return oldValue;
-  }
-  if (what == k_ASSERT_QUIET_EVAL) {
-    bool oldValue = s_option_data->assertQuietEval;
-    if (!value.isNull()) s_option_data->assertQuietEval = value.toBoolean();
-    return Variant(oldValue);
   }
   if (what == k_ASSERT_EXCEPTION) {
     int oldValue = s_option_data->assertException;
@@ -1265,7 +1257,6 @@ void StandardExtension::initOptions() {
   HHVM_RC_INT(ASSERT_ACTIVE, k_ASSERT_ACTIVE);
   HHVM_RC_INT(ASSERT_BAIL, k_ASSERT_BAIL);
   HHVM_RC_INT(ASSERT_WARNING, k_ASSERT_WARNING);
-  HHVM_RC_INT(ASSERT_QUIET_EVAL, k_ASSERT_QUIET_EVAL);
   HHVM_RC_INT(ASSERT_EXCEPTION, k_ASSERT_EXCEPTION);
 
   loadSystemlib("std_options");

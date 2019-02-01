@@ -292,6 +292,19 @@ PARSERFLAGS();
   return json;
 }
 
+bool RepoOptions::operator==(const RepoOptions& o) const {
+#define N(_, n, ...) if (n != o.n) return false;
+#define P(_, n, ...) if (n != o.n) return false;
+#define H(_, n, ...) if (n != o.n) return false;
+#define E(_, n, ...) if (n != o.n) return false;
+PARSERFLAGS();
+#undef N
+#undef P
+#undef H
+#undef E
+  return true;
+}
+
 const RepoOptions& RepoOptions::defaults() {
   always_assert(s_init);
   return s_defaults;
@@ -314,7 +327,7 @@ void RepoOptions::filterNamespaces() {
   }
 }
 
-RepoOptions::RepoOptions(const char* file) {
+RepoOptions::RepoOptions(const char* file) : m_path(file) {
   always_assert(s_init);
   Hdf config = (Hdf{file})["Parser"];
 
@@ -343,6 +356,7 @@ PARSERFLAGS()
 #undef E
 
   filterNamespaces();
+  m_path = "{default options}";
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

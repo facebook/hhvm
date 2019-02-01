@@ -96,11 +96,14 @@ struct RepoOptions {
   E(bool,      EmitInstMethPointers,           EmitFuncPointers) \
   /**/
 
+  std::string path() const { return m_path; }
   std::string cacheKeyRaw() const;
   std::string cacheKeyMd5() const;
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   struct stat stat() const { return m_stat; }
+
+  bool operator==(const RepoOptions& o) const;
 
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
@@ -124,6 +127,7 @@ PARSERFLAGS()
 #undef H
 #undef E
 
+  std::string m_path;
   struct stat m_stat;
 
   static bool s_init;
@@ -660,6 +664,7 @@ struct RuntimeOption {
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
   F(bool, WarnOnCoerceBuiltinParams,   false)                           \
+  F(bool, FatalOnParserOptionMismatch, true)                            \
   F(bool, WarnOnSkipFrameLookup,       true)                            \
   /* Whether to use the embedded hackc binary */                        \
   F(bool, HackCompilerUseEmbedded,     facebook)                        \

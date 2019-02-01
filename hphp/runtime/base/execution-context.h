@@ -318,6 +318,11 @@ public:
 
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
 
+  // When a file is loaded inside of a request context we perform a consistency
+  // check to ensure that all files loaded within the request use the same
+  // options.
+  void onLoadWithOptions(const char* f, const RepoOptions& options);
+
 private:
   struct OutputBuffer {
     explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
@@ -616,6 +621,8 @@ public:
 private:
   ExcLoggerHook m_logger_hook;
   rqtrace::Trace* m_requestTrace{nullptr};
+
+  folly::Optional<RepoOptions> m_requestOptions;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

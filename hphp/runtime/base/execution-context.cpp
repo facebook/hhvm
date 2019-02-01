@@ -1221,6 +1221,23 @@ const RepoOptions& ExecutionContext::getRepoOptionsForCurrentFrame() const {
   return RepoOptions::defaults();
 }
 
+void ExecutionContext::onLoadWithOptions(
+  const char* f, const RepoOptions& opts
+) {
+  if (!RuntimeOption::EvalFatalOnParserOptionMismatch) return;
+  if (!m_requestOptions) {
+    m_requestOptions.emplace(opts);
+    return;
+  }
+  if (m_requestOptions != opts) {
+    raise_error(
+      "Attempting to load file %s with incompatible parser settings from %s, "
+      "this request is using parser settings from %s",
+      f, opts.path().data(), m_requestOptions->path().data()
+    );
+  }
+}
+
 StringData* ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = vmfp();

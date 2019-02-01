@@ -127,6 +127,7 @@ let handler = object
     check_tparams env f.f_tparams;
     List.iter f.f_params (check_param env);
     check_variadic_param env f.f_variadic;
+    Option.iter f.f_ret (check_hint env)
 
   method! at_method_ env m =
     check_tparams env m.m_tparams;

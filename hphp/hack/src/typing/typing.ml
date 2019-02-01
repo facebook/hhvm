@@ -32,7 +32,6 @@ module Unify        = Typing_unify
 module Union        = Typing_union
 module TGen         = Typing_generic
 module SN           = Naming_special_names
-module TI           = Typing_instantiability
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body
 module T            = Tast
@@ -495,7 +494,7 @@ and fun_def tcopt f : Tast.fun_def option =
         | None ->
           env, (Reason.Rwitness pos, Typing_utils.tany env)
         | Some ret ->
-          let ty = TI.instantiable_hint env ret in
+          let ty = Decl_hint.hint env.Env.decl_env ret in
           Phase.localize_with_self env ty in
       let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
         ~is_explicit:(Option.is_some f.f_ret) ty in
@@ -2751,7 +2750,7 @@ and anon_make tenv p f ft idl =
               Typing_return.force_awaitable env p ret_ty
             end
           | Some x ->
-            let ret = TI.instantiable_hint env x in
+            let ret = Decl_hint.hint env.Env.decl_env x in
             (* If a 'this' type appears it needs to be compatible with the
              * late static type
              *)
@@ -6463,7 +6462,7 @@ and method_def env m =
     | None ->
       env, Typing_return.make_default_return env m.m_name
     | Some ret ->
-      let ret = TI.instantiable_hint env ret in
+      let ret = Decl_hint.hint env.Env.decl_env ret in
       (* If a 'this' type appears it needs to be compatible with the
        * late static type
        *)

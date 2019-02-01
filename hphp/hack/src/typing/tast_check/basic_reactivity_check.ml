@@ -447,21 +447,14 @@ let check = object(self)
 
   method handle_body env ctx b =
     if ctx.reactivity = Nonreactive
-    then begin match b with
-    | NamedBody { fnb_nast; _ } -> List.iter fnb_nast (check_non_rx#on_stmt env)
-    | _ -> ()
-    end
-    else begin
-      match b with
-      | NamedBody {
-          fnb_nast = [If ((_, Id (_, c)), then_stmt, else_stmt ) ]; _
-        } when c = SN.Rx.is_enabled ->
-        List.iter then_stmt (self#on_stmt (env, ctx));
-        List.iter else_stmt ~f:(check_non_rx#on_stmt env)
-      | NamedBody b ->
-        List.iter b.fnb_nast (self#on_stmt (env, ctx))
-      | _ -> ();
-    end
+    then List.iter b.fb_ast (check_non_rx#on_stmt env)
+    else
+      match b.fb_ast with
+      | [If ((_, Id (_, c)), then_stmt, else_stmt ) ]
+        when c = SN.Rx.is_enabled ->
+          List.iter then_stmt (self#on_stmt (env, ctx));
+          List.iter else_stmt ~f:(check_non_rx#on_stmt env)
+      | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
 
   method! on_Expr (env, ctx) e =
     self#on_expr (env, set_expr_statement ctx) e

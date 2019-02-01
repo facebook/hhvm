@@ -17,6 +17,7 @@ end
 module type ASTAnnotationTypes = sig
   module ExprAnnotation : AnnotationType
   module EnvAnnotation : AnnotationType
+  module FuncBodyAnnotation : AnnotationType
 end
 
 module AnnotatedAST(Annotations: ASTAnnotationTypes) =
@@ -24,6 +25,7 @@ struct
 
 module ExprAnnotation = Annotations.ExprAnnotation
 module EnvAnnotation = Annotations.EnvAnnotation
+module FuncBodyAnnotation = Annotations.FuncBodyAnnotation
 
 type program = def list
 [@@deriving
@@ -55,6 +57,7 @@ type program = def list
 
 and expr_annotation = ExprAnnotation.t [@visitors.opaque]
 and env_annotation = EnvAnnotation.t [@visitors.opaque]
+and funcbody_annotation = Annotations.FuncBodyAnnotation.t [@visitors.opaque]
 
 and stmt =
   | Unsafe_block of block
@@ -258,26 +261,17 @@ and fun_ = {
   f_static : bool;
 }
 
-and func_body =
-  | UnnamedBody of func_unnamed_body
-  | NamedBody of func_named_body
-
-and func_unnamed_body = {
-  (* Unnamed AST for the function body *)
-  fub_ast       : block [@opaque];
-  (* Namespace info *)
-  fub_namespace : nsenv;
-}
-
-and func_named_body = {
-  (* Named AST for the function body *)
-  fnb_nast     : block;
-  (* True if there are any UNSAFE blocks; the presence of any unsafe
-   * block in the function makes comparing the function body to the
-   * declared return type impossible, since that block could return;
-   * functions declared in Mdecl are by definition UNSAFE
-   *)
-  fnb_unsafe   : bool;
+(**
+ * Naming has two phases and the annotation helps to indicate the phase.
+ * In the first pass, it will perform naming on everything except for function
+ * and method bodies and collect information needed. Then, another round of
+ * naming is performed where function bodies are named. Thus, naming will
+ * have named and unnamed variants of the annotation.
+ * See BodyNamingAnnotation in nast.ml and the comment in naming.ml
+ *)
+and func_body = {
+  fb_ast : block;
+  fb_annotation : funcbody_annotation
 }
 
 and user_attribute = {

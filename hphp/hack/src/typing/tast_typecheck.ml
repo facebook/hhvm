@@ -208,11 +208,10 @@ and check_block env (block:ETast.block) gamma =
   go block gamma (empty_delta_with_next_cont gamma)
 
 let check_func_body env (body:ETast.func_body) gamma =
-  match body with
-  | UnnamedBody _ -> raise Cant_check
-  | NamedBody body ->
-    if body.fnb_unsafe then raise Cant_check else
-    let _ = check_block env body.fnb_nast gamma in
+  if body.fb_annotation = Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+  then raise Cant_check
+  else
+    let _ = check_block env body.fb_ast gamma in
     ()
 
 (* TODO It's annoying to have to carry this giant 'env' everywhere. Can we

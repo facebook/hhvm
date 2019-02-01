@@ -21,24 +21,21 @@
          m_name = ([15:26-29], "get"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
-         (NamedBody
-            { fnb_nast =
-              [(If (
-                  (([16:9-17], ?int),
-                   (Class_get ((([16:9-13], TestClass), CIself),
-                      (CGstring ([16:15-17], "$x"))))),
-                  [(Return ([17:7-23],
-                      (Some (([17:14-22], int),
-                             (Class_get ((([17:14-18], TestClass), CIself),
-                                (CGstring ([17:20-22], "$x"))))))
-                      ))
-                    ],
-                  [(Return ([19:7-16], (Some (([19:14-15], int), (Int "0")))
-                      ))
-                    ]
-                  ))
-                ];
-              fnb_unsafe = false });
+         { fb_ast =
+           [(If (
+               (([16:9-17], ?int),
+                (Class_get ((([16:9-13], TestClass), CIself),
+                   (CGstring ([16:15-17], "$x"))))),
+               [(Return ([17:7-23],
+                   (Some (([17:14-22], int),
+                          (Class_get ((([17:14-18], TestClass), CIself),
+                             (CGstring ([17:20-22], "$x"))))))
+                   ))
+                 ],
+               [(Return ([19:7-16], (Some (([19:14-15], int), (Int "0")))))]
+               ))
+             ];
+           fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([15:33-36], (Hprim Tint))); m_external = false;
          m_doc_comment = None }

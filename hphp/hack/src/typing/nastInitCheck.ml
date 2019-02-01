@@ -156,7 +156,8 @@ let rec class_ tenv c =
   if c.c_mode = FileInfo.Mdecl then () else
   match c.c_constructor with
   | _ when c.c_kind = Ast.Cinterface -> ()
-  | Some { m_body = NamedBody { fnb_unsafe = true; _ }; _ } -> ()
+  | Some { m_body =
+      { fb_annotation = Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks; _ }; _ } -> ()
   | _ -> (
     let p = match c.c_constructor with
       | Some m -> fst m.m_name
@@ -238,7 +239,7 @@ and constructor env cstr =
         Option.iter p.param_expr check_param_initializer
       );
       let b = Nast.assert_named_body cstr.m_body in
-      toplevel env S.empty b.fnb_nast
+      toplevel env S.empty b.fb_ast
 
 and assign _env acc x =
   S.add x acc
@@ -411,7 +412,7 @@ and expr_ env acc p e =
           | Todo b ->
             method_ := Done;
             let fb = Nast.assert_named_body b in
-            toplevel env acc fb.fnb_nast
+            toplevel env acc fb.fb_ast
           )
       )
   | Call (_, e, _, el, uel) ->

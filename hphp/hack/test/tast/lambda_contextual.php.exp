@@ -14,7 +14,7 @@
          param_pos = [3:42-44]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
-      f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+      f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
@@ -24,47 +24,43 @@
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Expr
-                (([6:3-23], void),
-                 (Call (Cnormal,
-                    (([6:3-12], (function((function(int): num) $f): void)),
-                     (Id ([6:3-12], "\\takes_fun"))),
-                    [],
-                    [(([6:13-22], (function(int $x): num)),
-                      (Efun (
-                         { f_span = [6:13-22]; f_annotation = ();
-                           f_mode = <opaque>; f_ret = None;
-                           f_name = ([6:13-22], ";anonymous");
-                           f_tparams = []; f_where_constraints = [];
-                           f_variadic = FVnonVariadic;
-                           f_params =
-                           [{ param_annotation = ([6:13-15], int);
-                              param_hint = None; param_is_reference = false;
-                              param_is_variadic = false;
-                              param_pos = [6:13-15]; param_name = "$x";
-                              param_expr = None; param_callconv = None;
-                              param_user_attributes = [] }
-                             ];
-                           f_body =
-                           (NamedBody
-                              { fnb_nast =
-                                [(Return ([6:20-22],
-                                    (Some (([6:20-22], int),
-                                           (Lvar ([6:20-22], $x))))
-                                    ))
-                                  ];
-                                fnb_unsafe = false });
-                           f_fun_kind = FSync; f_user_attributes = [];
-                           f_file_attributes = []; f_external = false;
-                           f_namespace = <opaque>; f_doc_comment = None;
-                           f_static = false },
-                         [])))
-                      ],
-                    []))))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Expr
+             (([6:3-23], void),
+              (Call (Cnormal,
+                 (([6:3-12], (function((function(int): num) $f): void)),
+                  (Id ([6:3-12], "\\takes_fun"))),
+                 [],
+                 [(([6:13-22], (function(int $x): num)),
+                   (Efun (
+                      { f_span = [6:13-22]; f_annotation = ();
+                        f_mode = <opaque>; f_ret = None;
+                        f_name = ([6:13-22], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params =
+                        [{ param_annotation = ([6:13-15], int);
+                           param_hint = None; param_is_reference = false;
+                           param_is_variadic = false; param_pos = [6:13-15];
+                           param_name = "$x"; param_expr = None;
+                           param_callconv = None; param_user_attributes = []
+                           }
+                          ];
+                        f_body =
+                        { fb_ast =
+                          [(Return ([6:20-22],
+                              (Some (([6:20-22], int), (Lvar ([6:20-22], $x))))
+                              ))
+                            ];
+                          fb_annotation = No unsafe blocks };
+                        f_fun_kind = FSync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace = <opaque>; f_doc_comment = None;
+                        f_static = false },
+                      [])))
+                   ],
+                 []))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

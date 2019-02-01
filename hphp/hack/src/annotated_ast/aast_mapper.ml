@@ -12,12 +12,15 @@ struct
   module T = AnnotatedAST(Target)
   module SourceExpr = Source.ExprAnnotation
   module SourceEnv = Source.EnvAnnotation
+  module SourceFuncBody = Source.FuncBodyAnnotation
   module TargetExpr = Target.ExprAnnotation
   module TargetEnv = Target.EnvAnnotation
+  module TargetFuncBody = Target.FuncBodyAnnotation
 
   type mapping_env = {
     map_expr_annotation : SourceExpr.t -> TargetExpr.t;
     map_env_annotation : SourceEnv.t -> TargetEnv.t;
+    map_funcbody_annotation : SourceFuncBody.t -> TargetFuncBody.t
   }
 
   let rec map_afield menv af =
@@ -184,17 +187,9 @@ struct
   }
 
   and map_func_body menv b =
-    match b with
-    | S.UnnamedBody fub ->
-      T.UnnamedBody {
-        T.fub_ast = map_block menv fub.S.fub_ast;
-        T.fub_namespace = fub.S.fub_namespace;
-      }
-    | S.NamedBody fnb ->
-      T.NamedBody {
-        T.fnb_unsafe = fnb.S.fnb_unsafe;
-        T.fnb_nast = map_block menv fnb.S.fnb_nast;
-      }
+    { T.fb_ast = map_block menv b.S.fb_ast;
+      T.fb_annotation = menv.map_funcbody_annotation b.S.fb_annotation
+    }
 
   and map_using_stmt menv us =
   T.{
@@ -427,7 +422,7 @@ struct
     (kind, id1, id2)
 
   and map_def menv d =
-    let { map_expr_annotation; map_env_annotation } = menv in
+    let { map_expr_annotation; map_env_annotation; map_funcbody_annotation } = menv in
     match d with
     | S.Fun fd -> T.Fun (map_fun menv fd)
     | S.Class c -> T.Class (map_class menv c)
@@ -435,17 +430,20 @@ struct
     | S.Constant gc -> T.Constant (map_gconst menv gc)
     | S.Stmt s -> T.Stmt (map_stmt menv s)
     | S.Namespace (id, p) ->
-      T.Namespace (id, map_program ~map_expr_annotation ~map_env_annotation p)
+      T.Namespace (id,
+        map_program ~map_expr_annotation ~map_env_annotation ~map_funcbody_annotation p)
     | S.NamespaceUse usel -> T.NamespaceUse (List.map usel map_ns_use)
     | S.SetNamespaceEnv env -> T.SetNamespaceEnv env
 
   and map_program
     ~map_expr_annotation
     ~map_env_annotation
+    ~map_funcbody_annotation
     dl =
     let menv = {
       map_expr_annotation;
       map_env_annotation;
+      map_funcbody_annotation;
     } in
     List.map dl (map_def menv)
 end

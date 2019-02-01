@@ -16,10 +16,25 @@ include Aast
 (* The NAST definitions, which we just include into this file *)
 module PosAnnotation = struct type t = Pos.t [@@deriving show] end
 module UnitAnnotation = struct type t = unit [@@deriving show] end
+module BodyNamingAnnotation = struct
+  type t =
+    | Named
+    | NamedWithUnsafeBlocks
+    | Unnamed of Namespace_env.env [@opaque] (* Namespace info *)
+
+  let pp f t =
+    let s =
+      match t with
+      | Named -> "Named"
+      | NamedWithUnsafeBlocks -> "NamedWithUnsafeBlocks"
+      | Unnamed _ -> "Unnamed" in
+    Format.pp_print_string f s
+end
 
 module Annotations = struct
   module ExprAnnotation = PosAnnotation
   module EnvAnnotation = UnitAnnotation
+  module FuncBodyAnnotation = BodyNamingAnnotation
 end
 
 module PosAnnotatedAST = AnnotatedAST(Annotations)
@@ -28,9 +43,22 @@ include PosAnnotatedAST
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been
  * allowed at the AST. Ideally this would be enforced by the compiler,
  * a la the typechecking decl vs local phases *)
-let assert_named_body = function
-  | NamedBody b -> b
-  | UnnamedBody _ -> failwith "Expecting a named function body"
+let is_body_named fb =
+ match fb.fb_annotation with
+ | BodyNamingAnnotation.Named
+ | BodyNamingAnnotation.NamedWithUnsafeBlocks -> true
+ | BodyNamingAnnotation.Unnamed _ -> false
+
+let assert_named_body fb =
+  if is_body_named fb
+  then fb
+  else failwith "Expecting a named function body"
+
+let named_body_is_unsafe fb =
+  match fb.fb_annotation with
+  | BodyNamingAnnotation.Named -> false
+  | BodyNamingAnnotation.NamedWithUnsafeBlocks -> true
+  | BodyNamingAnnotation.Unnamed _ -> failwith "Expecting a named function body"
 
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
@@ -251,8 +279,8 @@ class type ['a] visitor_type = object
   method on_field: 'a -> field -> 'a
   method on_afield: 'a -> afield -> 'a
 
-  method on_func_named_body: 'a -> func_named_body -> 'a
-  method on_func_unnamed_body: 'a -> func_unnamed_body -> 'a
+  method on_func_named_body: 'a -> func_body -> 'a
+  method on_func_unnamed_body: 'a -> func_body -> 'a
   method on_func_body: 'a -> func_body -> 'a
   method on_method_: 'a -> method_ -> 'a
 
@@ -636,10 +664,10 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = List.fold_left uel ~f:this#on_expr ~init:acc in
     acc
 
-  method on_efun acc f _ = match f.f_body with
-    | UnnamedBody _ ->
-      failwith "lambdas expected to be named in the context of the surrounding function"
-    | NamedBody { fnb_nast = n; _ } -> this#on_block acc n
+  method on_efun acc f _ =
+    if is_body_named f.f_body
+    then this#on_block acc f.f_body.fb_ast
+    else failwith "lambdas expected to be named in the context of the surrounding function"
 
   method on_xml acc _ attrl el =
     let acc = List.fold_left attrl ~init:acc ~f:begin fun acc attr -> match attr with
@@ -687,13 +715,15 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_func_named_body acc fnb =
-    this#on_block acc fnb.fnb_nast
+    this#on_block acc fnb.fb_ast
 
   method on_func_unnamed_body acc _ = acc
 
-  method on_func_body acc = function
-    | UnnamedBody unb -> this#on_func_unnamed_body acc unb
-    | NamedBody nb -> this#on_func_named_body acc nb
+  method on_func_body acc fb =
+    if is_body_named fb
+    then this#on_func_named_body acc fb
+    (* No action on unnamed body *)
+    else acc
 
   method on_method_ acc m =
     let acc = this#on_id acc m.m_name in

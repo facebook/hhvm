@@ -10,30 +10,27 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
-               [(Expr
-                   (([15:7-12], _),
-                    (Call (Cnormal,
-                       (([15:7-10], _), (Id ([15:7-10], "\\bar"))), [], 
-                       [], []))));
-                 (Unsafe_block
-                    [(Expr
-                        (([17:7-12], _),
-                         (Call (Cnormal,
-                            (([17:7-10], _), (Id ([17:7-10], "\\baz"))), 
-                            [], [], []))))
-                      ]);
-                 (Expr
-                    (([19:5-10], _),
-                     (Call (Cnormal,
-                        (([19:5-8], _), (Id ([19:5-8], "\\qux"))), [], 
-                        [], []))))
-                 ],
-               [Noop]))
-             ];
-           fnb_unsafe = true });
+      { fb_ast =
+        [(If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
+            [(Expr
+                (([15:7-12], _),
+                 (Call (Cnormal, (([15:7-10], _), (Id ([15:7-10], "\\bar"))),
+                    [], [], []))));
+              (Unsafe_block
+                 [(Expr
+                     (([17:7-12], _),
+                      (Call (Cnormal,
+                         (([17:7-10], _), (Id ([17:7-10], "\\baz"))), 
+                         [], [], []))))
+                   ]);
+              (Expr
+                 (([19:5-10], _),
+                  (Call (Cnormal, (([19:5-8], _), (Id ([19:5-8], "\\qux"))),
+                     [], [], []))))
+              ],
+            [Noop]))
+          ];
+        fb_annotation = Has unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>;
       f_doc_comment =

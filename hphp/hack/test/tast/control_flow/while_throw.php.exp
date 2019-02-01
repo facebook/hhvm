@@ -11,23 +11,21 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(While ((([4:10-15], bool), (Lvar ([4:10-15], $cond))),
-               [(Throw (true,
-                   (([5:11-39], Exception),
-                    (New (
-                       (([5:15-24], Exception),
-                        (CI ([5:15-24], "\\Exception"))),
-                       [], [(([5:25-38], string), (String "DoWhileBody"))],
-                       [],
-                       ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
-                       )))
-                   ))
-                 ]
-               ))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(While ((([4:10-15], bool), (Lvar ([4:10-15], $cond))),
+            [(Throw (true,
+                (([5:11-39], Exception),
+                 (New (
+                    (([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))),
+                    [], [(([5:25-38], string), (String "DoWhileBody"))], 
+                    [],
+                    ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
+                    )))
+                ))
+              ]
+            ))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false })

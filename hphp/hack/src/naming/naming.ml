@@ -1611,23 +1611,16 @@ module Make (GetLocals : GetLocals) = struct
     let body =
       match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
-        N.NamedBody {
-          N.fnb_nast = [];
-          fnb_unsafe = true;
+        { N.fb_ast = [];
+          fb_annotation = N.BodyNamingAnnotation.NamedWithUnsafeBlocks;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        begin
-          match m.Aast.m_body with
-          | Aast.UnnamedBody _ -> failwith "ast_to_nast error unnamedbody in method_"
-          | Aast.NamedBody {
-              Aast.fnb_nast;
-              _ ;
-            } ->
-              N.UnnamedBody {
-                N.fub_ast = fnb_nast;
-                fub_namespace = genv.namespace;
-              }
-        end
+        if Aast.is_body_named m.Aast.m_body
+        then
+          { N.fb_ast = m.Aast.m_body.Aast.fb_ast;
+            fb_annotation = N.BodyNamingAnnotation.Unnamed genv.namespace;
+          }
+        else failwith "ast_to_nast error unnamedbody in method_"
     in
     let attrs = aast_user_attributes env m.Aast.m_user_attributes in
     { N.m_annotation = ();
@@ -1747,26 +1740,19 @@ module Make (GetLocals : GetLocals) = struct
     List.iter f.Aast.f_tparams aast_check_constraint;
     let f_tparams = aast_type_paraml env f.Aast.f_tparams in
     let f_kind = f.Aast.f_fun_kind in
-    let body = match genv.in_mode with
+    let body =
+      match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
-        N.NamedBody {
-          N.fnb_nast = [];
-          fnb_unsafe = true;
+        { N.fb_ast = [];
+          fb_annotation = N.BodyNamingAnnotation.NamedWithUnsafeBlocks;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        begin
-          match f.Aast.f_body with
-          | Aast.UnnamedBody _ -> failwith "ast_to_nast error unnamedbody in fun_"
-          | Aast.NamedBody {
-              Aast.fnb_nast;
-              _ ;
-            } ->
-              N.UnnamedBody {
-                N.fub_ast = fnb_nast;
-                (* Seems weird to use this instead of the converted f_tparams *)
-                fub_namespace = f.Aast.f_namespace;
-              }
-        end
+        if Aast.is_body_named f.Aast.f_body
+        then
+          { N.fb_ast = f.Aast.f_body.Aast.fb_ast;
+            fb_annotation = N.BodyNamingAnnotation.Unnamed genv.namespace;
+          }
+        else failwith "ast_to_nast error unnamedbody in fun_"
     in
     let named_fun = {
       N.f_annotation = ();
@@ -2621,15 +2607,18 @@ module Make (GetLocals : GetLocals) = struct
     (* The bodies of lambdas go through naming in the containing local
      * environment *)
     let body_nast = aast_f_body env f.Aast.f_body in
-    let unsafe = func_body_had_unsafe env in
+    let annotation =
+      if func_body_had_unsafe env
+      then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
+      else N.BodyNamingAnnotation.Named in
     (* restore unsafe state *)
     Env.set_unsafe env previous_unsafe;
     (* These could all be probably be replaced with a {... where ...} *)
-    let body = N.NamedBody {
-      N.fnb_unsafe = unsafe;
-      fnb_nast = body_nast;
-    } in {
-      N.f_annotation = ();
+    let body = {
+      N.fb_ast = body_nast;
+      fb_annotation = annotation;
+    } in
+    { N.f_annotation = ();
       f_span = f.Aast.f_span;
       f_mode = (fst env).in_mode;
       f_ret = h;
@@ -2649,10 +2638,9 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and aast_f_body env f_body =
-    match f_body with
-    | Aast.NamedBody { Aast.fnb_nast; _ } -> aast_block env fnb_nast
-    | Aast.UnnamedBody _ ->
-      failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
+    if Aast.is_body_named f_body
+    then aast_block env f_body.Aast.fb_ast
+    else failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
 
   and make_class_id env (p, x as cid) =
     p,
@@ -2747,33 +2735,39 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let func_body nenv f =
-    match f.N.f_body with
-      | N.NamedBody b -> b
-      | N.UnnamedBody { N.fub_ast; N.fub_namespace; _ } ->
-        let genv = Env.make_fun_genv nenv
-          SMap.empty f.N.f_mode (snd f.N.f_name) fub_namespace in
-        let genv = aast_extend_params genv f.N.f_tparams in
-        let lenv = Env.empty_local None in
-        let env = genv, lenv in
-        let env =
-          List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
-        let env = match f.N.f_variadic with
-          | N.FVellipsis _ | N.FVnonVariadic -> env
-          | N.FVvariadicArg param -> Env.add_param env param
-        in
-        let fub_ast = aast_block env fub_ast in
-        let unsafe = func_body_had_unsafe env in
-        Env.check_goto_references env;
-        {
-          N.fnb_nast = fub_ast;
-          fnb_unsafe = unsafe;
-        }
+    match f.N.f_body.N.fb_annotation with
+    | N.BodyNamingAnnotation.Named
+    | N.BodyNamingAnnotation.NamedWithUnsafeBlocks -> f.N.f_body
+    | N.BodyNamingAnnotation.Unnamed nsenv ->
+      let genv = Env.make_fun_genv nenv
+        SMap.empty f.N.f_mode (snd f.N.f_name) nsenv in
+      let genv = aast_extend_params genv f.N.f_tparams in
+      let lenv = Env.empty_local None in
+      let env = genv, lenv in
+      let env =
+        List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
+      let env = match f.N.f_variadic with
+        | N.FVellipsis _ | N.FVnonVariadic -> env
+        | N.FVvariadicArg param -> Env.add_param env param
+      in
+      let fub_ast = aast_block env f.N.f_body.N.fb_ast in
+      let annotation =
+        if func_body_had_unsafe env
+        then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
+        else N.BodyNamingAnnotation.Named in
+      Env.check_goto_references env;
+      {
+        N.fb_ast = fub_ast;
+        fb_annotation = annotation;
+      }
 
   let meth_body genv m =
-    let named_body = (match m.N.m_body with
-      | N.NamedBody _ as b -> b
-      | N.UnnamedBody {N.fub_ast; N.fub_namespace; _} ->
-        let genv = {genv with namespace = fub_namespace} in
+    let named_body =
+      match m.N.m_body.N.fb_annotation with
+      | N.BodyNamingAnnotation.Named
+      | N.BodyNamingAnnotation.NamedWithUnsafeBlocks -> m.N.m_body
+      | N.BodyNamingAnnotation.Unnamed nsenv ->
+        let genv = { genv with namespace = nsenv } in
         let genv = aast_extend_params genv m.N.m_tparams in
         let env = genv, Env.empty_local None in
         let env =
@@ -2782,14 +2776,15 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVellipsis _ | N.FVnonVariadic -> env
           | N.FVvariadicArg param -> Env.add_param env param
         in
-        let fub_ast = aast_block env fub_ast in
-        let unsafe = func_body_had_unsafe env in
+        let fub_ast = aast_block env m.N.m_body.N.fb_ast in
+        let annotation =
+          if func_body_had_unsafe env
+          then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
+          else N.BodyNamingAnnotation.Named in
         Env.check_goto_references env;
-        N.NamedBody {
-          N.fnb_nast = fub_ast;
-          fnb_unsafe = unsafe;
-        }
-    ) in
+        { N.fb_ast = fub_ast;
+          fb_annotation = annotation;
+        } in
     {m with N.m_body = named_body}
 
   let class_meth_bodies nenv nc =

@@ -14,12 +14,9 @@
          m_name = ([4:19-29], "__toString"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
-         (NamedBody
-            { fnb_nast =
-              [(Return ([5:5-16], (Some (([5:12-15], string), (String "3")))
-                  ))
-                ];
-              fnb_unsafe = false });
+         { fb_ast =
+           [(Return ([5:5-16], (Some (([5:12-15], string), (String "3")))))];
+           fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([4:33-39], (Hprim Tstring))); m_external = false;
          m_doc_comment = None }
@@ -33,37 +30,35 @@
        f_name = ([9:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Expr
-                (([10:3-9], int),
-                 (Binop ((Eq None), (([10:3-5], int), (Lvar ([10:3-5], $x))),
-                    (([10:8-9], int), (Int "0"))))));
-              (Expr
-                 (([11:21-50], _),
-                  (Unsafe_expr
-                     (([11:21-50], _),
-                      (Call (Cnormal,
-                         (([11:21-25], _), (Id ([11:21-25], "\\eval"))), 
-                         [],
-                         [(([11:26-49], _),
-                           (Binop (Dot,
-                              (([11:26-45], _),
-                               (Binop (Dot,
-                                  (([11:26-33], _), (String "$x = ")),
-                                  (([11:34-45], _),
-                                   (New (
-                                      (([11:38-43], _),
-                                       (CI ([11:38-43], "\\Three"))),
-                                      [], [], [], ([11:38-43], _))))
-                                  ))),
-                              (([11:46-49], _), (String ";")))))
-                           ],
-                         []))))));
-              (Return ([12:3-13],
-                 (Some (([12:10-12], int), (Lvar ([12:10-12], $x))))))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Expr
+             (([10:3-9], int),
+              (Binop ((Eq None), (([10:3-5], int), (Lvar ([10:3-5], $x))),
+                 (([10:8-9], int), (Int "0"))))));
+           (Expr
+              (([11:21-50], _),
+               (Unsafe_expr
+                  (([11:21-50], _),
+                   (Call (Cnormal,
+                      (([11:21-25], _), (Id ([11:21-25], "\\eval"))), 
+                      [],
+                      [(([11:26-49], _),
+                        (Binop (Dot,
+                           (([11:26-45], _),
+                            (Binop (Dot, (([11:26-33], _), (String "$x = ")),
+                               (([11:34-45], _),
+                                (New (
+                                   (([11:38-43], _),
+                                    (CI ([11:38-43], "\\Three"))),
+                                   [], [], [], ([11:38-43], _))))
+                               ))),
+                           (([11:46-49], _), (String ";")))))
+                        ],
+                      []))))));
+           (Return ([12:3-13],
+              (Some (([12:10-12], int), (Lvar ([12:10-12], $x))))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

@@ -233,7 +233,7 @@ let sequence_visitor ~require_used used_vars =
     | Efun (f, idl) ->
       let nb = Nast.assert_named_body f.f_body in
       (* Ignore the current environment and start fresh. *)
-      let _acc = this#on_block empty_env nb.fnb_nast in
+      let _acc = this#on_block empty_env nb.fb_ast in
       (* we use all the variables we are capturing *)
       List.fold_left ~f:use_local ~init:env idl
 

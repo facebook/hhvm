@@ -23,12 +23,9 @@
        f_name = ([7:10-29], "\\returnsTheStringFoo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Return ([7:42-55], (Some (([7:49-54], string), (String "foo")))
-                ))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Return ([7:42-55], (Some (([7:49-54], string), (String "foo")))))];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -45,29 +42,27 @@
           param_callconv = None; param_user_attributes = [] }
          ];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Expr
-                (([10:3-15], string),
-                 (Binop ((Eq None),
-                    (([10:3-7], string), (Lvar ([10:3-7], $foo))),
-                    (([10:10-15], string), (String "foo"))))));
-              (Expr
-                 (([11:3-10], ?int),
-                  (Obj_get ((([11:3-5], C), (Lvar ([11:3-5], $c))),
-                     (([11:7-10], ?int), (Id ([11:7-10], "foo"))),
-                     OG_nullthrows))));
-              (Expr
-                 (([12:3-11], _),
-                  (Obj_get ((([12:3-5], C), (Lvar ([12:3-5], $c))),
-                     (([12:7-11], _), (Lvar ([12:7-11], $foo))),
-                     OG_nullthrows))));
-              (Expr
-                 (([13:3-30], _),
-                  (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
-                     (([13:8-29], _), Any), OG_nullthrows))))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Expr
+             (([10:3-15], string),
+              (Binop ((Eq None),
+                 (([10:3-7], string), (Lvar ([10:3-7], $foo))),
+                 (([10:10-15], string), (String "foo"))))));
+           (Expr
+              (([11:3-10], ?int),
+               (Obj_get ((([11:3-5], C), (Lvar ([11:3-5], $c))),
+                  (([11:7-10], ?int), (Id ([11:7-10], "foo"))), OG_nullthrows
+                  ))));
+           (Expr
+              (([12:3-11], _),
+               (Obj_get ((([12:3-5], C), (Lvar ([12:3-5], $c))),
+                  (([12:7-11], _), (Lvar ([12:7-11], $foo))), OG_nullthrows))));
+           (Expr
+              (([13:3-30], _),
+               (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
+                  (([13:8-29], _), Any), OG_nullthrows))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

@@ -55,10 +55,20 @@ module Cls          = Typing_classes_heap
 module NastTanyMapper =
   Aast_mapper.MapAnnotatedAST(Nast.Annotations)(Tast.Annotations)
 
+let map_funcbody_annotation an =
+  match an with
+  | Nast.Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks ->
+    Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+  | Nast.Annotations.FuncBodyAnnotation.Named ->
+    Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks
+  | Nast.Annotations.FuncBodyAnnotation.Unnamed _ ->
+    failwith "Should not map over unnamed body"
+
 let ntm_env tcopt =
   NastTanyMapper.{
     map_env_annotation = (fun () -> Tast.empty_saved_env tcopt);
     map_expr_annotation = (fun p -> p, (Reason.Rnone, Tany));
+    map_funcbody_annotation = map_funcbody_annotation;
   }
 
 (*****************************************************************************)
@@ -539,10 +549,7 @@ and fun_def tcopt f : Tast.fun_def option =
         T.f_fun_kind = f.f_fun_kind;
         T.f_file_attributes = file_attrs;
         T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
-        T.f_body = T.NamedBody {
-          T.fnb_nast = tb;
-          T.fnb_unsafe = nb.fnb_unsafe;
-        };
+        T.f_body = { T.fb_ast = tb; fb_annotation = map_funcbody_annotation nb.fb_annotation };
         T.f_external = f.f_external;
         T.f_namespace = f.f_namespace;
         T.f_doc_comment = f.f_doc_comment;
@@ -562,13 +569,13 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
     debug_last_pos := pos;
     let env = Env.set_return env return in
     let env = Env.set_fn_kind env f_kind in
-    let env, tb = block env named_body.fnb_nast in
-    Typing_sequencing.sequence_check_block named_body.fnb_nast;
+    let env, tb = block env named_body.fb_ast in
+    Typing_sequencing.sequence_check_block named_body.fb_ast;
     let { Typing_env_return_info.return_type = ret; _} = Env.get_return env in
     let env =
       if not @@ LEnv.has_next env ||
         abstract ||
-        named_body.fnb_unsafe
+        Nast.named_body_is_unsafe named_body
       then env
       else fun_implicit_return env pos ret f_kind in
     debug_last_pos := Pos.none;
@@ -2757,15 +2764,19 @@ and anon_make tenv p f ft idl =
             ~is_explicit:(Option.is_some ret_ty)
             hret) in
         let local_tpenv = env.Env.lenv.Env.tpenv in
-        let env, tb, implicit_return = anon_block env nb.fnb_nast in
+        let env, tb, implicit_return = anon_block env nb.fb_ast in
         let env =
-          if not implicit_return || nb.fnb_unsafe
+          if not implicit_return || Nast.named_body_is_unsafe nb
           then env
           else fun_implicit_return env p hret f.f_fun_kind
         in
         (* We don't want the *uses* of the function to affect its return type *)
         let env, hret = Env.unbind env hret in
         is_typing_self := false;
+        let annotation =
+          if Nast.named_body_is_unsafe nb
+          then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+          else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
         let tfun_ = {
           T.f_annotation = Env.save local_tpenv env;
           T.f_span = f.f_span;
@@ -2777,10 +2788,7 @@ and anon_make tenv p f ft idl =
           T.f_fun_kind = f.f_fun_kind;
           T.f_file_attributes = [];
           T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
-          T.f_body = T.NamedBody {
-            T.fnb_nast = tb;
-            T.fnb_unsafe = nb.fnb_unsafe;
-          };
+          T.f_body = { T.fb_ast = tb; fb_annotation = annotation };
           T.f_params = t_params;
           T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
           T.f_external = f.f_external;
@@ -6507,6 +6515,10 @@ and method_def env m =
     | Some hint ->
       Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
   let m = { m with m_ret = m_ret; } in
+  let annotation =
+    if Nast.named_body_is_unsafe nb
+    then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+    else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
     T.m_span = m.m_span;
@@ -6522,10 +6534,7 @@ and method_def env m =
     T.m_fun_kind = m.m_fun_kind;
     T.m_user_attributes = List.map m.m_user_attributes (user_attribute env);
     T.m_ret = m.m_ret;
-    T.m_body = T.NamedBody {
-      T.fnb_nast = tb;
-      T.fnb_unsafe = nb.fnb_unsafe;
-    };
+    T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
     T.m_external = m.m_external;
     T.m_doc_comment = m.m_doc_comment;
   } in

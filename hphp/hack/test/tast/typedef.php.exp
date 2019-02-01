@@ -23,7 +23,7 @@
                    param_expr = None; param_callconv = None;
                    param_user_attributes = [] });
               m_params = [];
-              m_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+              m_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
               m_external = false; m_doc_comment = None });

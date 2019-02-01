@@ -21,12 +21,11 @@ Errors:
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(Return ([4:3-13],
-               (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(Return ([4:3-13], (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))
+            ))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
@@ -36,18 +35,17 @@ Errors:
        f_name = ([7:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Expr
-                (([8:3-27], string),
-                 (Call (Cnormal,
-                    (([8:3-4], (function<reify T, Tu>(string $f): string)),
-                     (Id ([8:3-4], "\\f"))),
-                    [(([8:11-14], (Hprim Tint)), true);
-                      (([8:16-22], (Hprim Tstring)), false)],
-                    [(([8:24-26], int), (Int "42"))], []))))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Expr
+             (([8:3-27], string),
+              (Call (Cnormal,
+                 (([8:3-4], (function<reify T, Tu>(string $f): string)),
+                  (Id ([8:3-4], "\\f"))),
+                 [(([8:11-14], (Hprim Tint)), true);
+                   (([8:16-22], (Hprim Tstring)), false)],
+                 [(([8:24-26], int), (Int "42"))], []))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

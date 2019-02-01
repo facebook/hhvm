@@ -14,12 +14,11 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(Return ([3:58-68],
-               (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(Return ([3:58-68],
+            (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
@@ -29,98 +28,89 @@
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Expr
-                (([6:3-8:4], (function(): Awaitable<void>)),
-                 (Binop ((Eq None),
-                    (([6:3-6], (function(): Awaitable<void>)),
-                     (Lvar ([6:3-6], $f0))),
-                    (([6:9-8:4], (function(): Awaitable<_>)),
-                     (Efun (
-                        { f_span = [6:9-8:4]; f_annotation = ();
-                          f_mode = <opaque>; f_ret = None;
-                          f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
-                          f_where_constraints = [];
-                          f_variadic = FVnonVariadic; f_params = [];
-                          f_body =
-                          (NamedBody
-                             { fnb_nast =
-                               [(Expr
-                                   (([7:5-34], string),
-                                    (Binop ((Eq None),
-                                       (([7:5-9], string),
-                                        (Lvar ([7:5-9], $str))),
-                                       (([7:12-34], string),
-                                        (Await
-                                           (([7:18-34], Awaitable<string>),
-                                            (Call (Cnormal,
-                                               (([7:18-27], (function(string $s): Awaitable<string>)),
-                                                (Id
-                                                   ([7:18-27], "\\genString"))),
-                                               [],
-                                               [(([7:28-33], string),
-                                                 (String "foo"))],
-                                               [])))))
-                                       ))))
-                                 ];
-                               fnb_unsafe = false });
-                          f_fun_kind = FAsync; f_user_attributes = [];
-                          f_file_attributes = []; f_external = false;
-                          f_namespace = <opaque>; f_doc_comment = None;
-                          f_static = false },
-                        [])))
-                    ))));
-              (Expr
-                 (([9:3-11:4], [fun]),
-                  (Binop ((Eq None),
-                     (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
-                     (([9:9-11:4], [fun]),
-                      (Efun (
-                         { f_span = [9:9-11:4]; f_annotation = ();
-                           f_mode = <opaque>; f_ret = None;
-                           f_name = ([9:9-11:4], ";anonymous");
-                           f_tparams = []; f_where_constraints = [];
-                           f_variadic = FVnonVariadic;
-                           f_params =
-                           [{ param_annotation = ([9:15-17], _);
-                              param_hint = None; param_is_reference = false;
-                              param_is_variadic = false;
-                              param_pos = [9:15-17]; param_name = "$x";
-                              param_expr = None; param_callconv = None;
-                              param_user_attributes = [] }
-                             ];
-                           f_body =
-                           (NamedBody
-                              { fnb_nast =
-                                [(Expr
-                                    (([10:5-31], string),
-                                     (Binop ((Eq None),
-                                        (([10:5-9], string),
-                                         (Lvar ([10:5-9], $str))),
-                                        (([10:12-31], string),
-                                         (Await
-                                            (([10:18-31], Awaitable<string>),
-                                             (Call (Cnormal,
-                                                (([10:18-27], (function(string $s): Awaitable<string>)),
-                                                 (Id
-                                                    ([10:18-27],
-                                                     "\\genString"))),
-                                                [],
-                                                [(([10:28-30], _),
-                                                  (Lvar ([10:28-30], $x)))],
-                                                [])))))
-                                        ))))
-                                  ];
-                                fnb_unsafe = false });
-                           f_fun_kind = FAsync; f_user_attributes = [];
-                           f_file_attributes = []; f_external = false;
-                           f_namespace = <opaque>; f_doc_comment = None;
-                           f_static = false },
-                         [])))
-                     ))))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Expr
+             (([6:3-8:4], (function(): Awaitable<void>)),
+              (Binop ((Eq None),
+                 (([6:3-6], (function(): Awaitable<void>)),
+                  (Lvar ([6:3-6], $f0))),
+                 (([6:9-8:4], (function(): Awaitable<_>)),
+                  (Efun (
+                     { f_span = [6:9-8:4]; f_annotation = ();
+                       f_mode = <opaque>; f_ret = None;
+                       f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
+                       f_where_constraints = []; f_variadic = FVnonVariadic;
+                       f_params = [];
+                       f_body =
+                       { fb_ast =
+                         [(Expr
+                             (([7:5-34], string),
+                              (Binop ((Eq None),
+                                 (([7:5-9], string), (Lvar ([7:5-9], $str))),
+                                 (([7:12-34], string),
+                                  (Await
+                                     (([7:18-34], Awaitable<string>),
+                                      (Call (Cnormal,
+                                         (([7:18-27], (function(string $s): Awaitable<string>)),
+                                          (Id ([7:18-27], "\\genString"))),
+                                         [],
+                                         [(([7:28-33], string),
+                                           (String "foo"))],
+                                         [])))))
+                                 ))))
+                           ];
+                         fb_annotation = No unsafe blocks };
+                       f_fun_kind = FAsync; f_user_attributes = [];
+                       f_file_attributes = []; f_external = false;
+                       f_namespace = <opaque>; f_doc_comment = None;
+                       f_static = false },
+                     [])))
+                 ))));
+           (Expr
+              (([9:3-11:4], [fun]),
+               (Binop ((Eq None), (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
+                  (([9:9-11:4], [fun]),
+                   (Efun (
+                      { f_span = [9:9-11:4]; f_annotation = ();
+                        f_mode = <opaque>; f_ret = None;
+                        f_name = ([9:9-11:4], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params =
+                        [{ param_annotation = ([9:15-17], _);
+                           param_hint = None; param_is_reference = false;
+                           param_is_variadic = false; param_pos = [9:15-17];
+                           param_name = "$x"; param_expr = None;
+                           param_callconv = None; param_user_attributes = []
+                           }
+                          ];
+                        f_body =
+                        { fb_ast =
+                          [(Expr
+                              (([10:5-31], string),
+                               (Binop ((Eq None),
+                                  (([10:5-9], string),
+                                   (Lvar ([10:5-9], $str))),
+                                  (([10:12-31], string),
+                                   (Await
+                                      (([10:18-31], Awaitable<string>),
+                                       (Call (Cnormal,
+                                          (([10:18-27], (function(string $s): Awaitable<string>)),
+                                           (Id ([10:18-27], "\\genString"))),
+                                          [],
+                                          [(([10:28-30], _),
+                                            (Lvar ([10:28-30], $x)))],
+                                          [])))))
+                                  ))))
+                            ];
+                          fb_annotation = No unsafe blocks };
+                        f_fun_kind = FAsync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace = <opaque>; f_doc_comment = None;
+                        f_static = false },
+                      [])))
+                  ))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

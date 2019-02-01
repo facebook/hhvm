@@ -29,21 +29,19 @@
                  param_user_attributes = [] }
                 ];
               m_body =
-              (NamedBody
-                 { fnb_nast =
-                   [(Expr
-                       (([5:47-58], string),
-                        (Binop ((Eq None),
-                           (([5:47-58], string),
-                            (Obj_get ((([5:47-58], this), This),
-                               (([5:47-58], string),
-                                (Id ([5:47-58], "attr_value"))),
-                               OG_nullthrows))),
-                           (([5:47-58], string),
-                            (Lvar ([5:47-58], $attr_value)))
-                           ))));
-                     Noop];
-                   fnb_unsafe = false });
+              { fb_ast =
+                [(Expr
+                    (([5:47-58], string),
+                     (Binop ((Eq None),
+                        (([5:47-58], string),
+                         (Obj_get ((([5:47-58], this), This),
+                            (([5:47-58], string),
+                             (Id ([5:47-58], "attr_value"))),
+                            OG_nullthrows))),
+                        (([5:47-58], string), (Lvar ([5:47-58], $attr_value)))
+                        ))));
+                  Noop];
+                fb_annotation = No unsafe blocks };
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([5:21-32], (Happly (([5:21-32], "void"), []))));
               m_external = false; m_doc_comment = None });

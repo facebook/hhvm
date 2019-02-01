@@ -10,16 +10,15 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(Return ([4:3-18],
-               (Some (([4:10-17], int),
-                      (Binop (QuestionQuestion,
-                         (([4:10-12], ?int), (Lvar ([4:10-12], $x))),
-                         (([4:16-17], int), (Int "0"))))))
-               ))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(Return ([4:3-18],
+            (Some (([4:10-17], int),
+                   (Binop (QuestionQuestion,
+                      (([4:10-12], ?int), (Lvar ([4:10-12], $x))),
+                      (([4:16-17], int), (Int "0"))))))
+            ))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false })

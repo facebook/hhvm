@@ -29,7 +29,17 @@
                  param_user_attributes = [] }
                 ];
               m_body =
-              (UnnamedBody { fub_ast = <opaque>; fub_namespace = <opaque> });
+              { fb_ast =
+                [(Expr
+                    ([5:47-58],
+                     (Binop ((Eq None),
+                        ([5:47-58],
+                         (Obj_get (([5:47-58], (Lvar ([5:47-58], $this))),
+                            ([5:47-58], (Id ([5:47-58], "attr_value"))),
+                            OG_nullthrows))),
+                        ([5:47-58], (Lvar ([5:47-58], $attr_value)))))));
+                  Noop];
+                fb_annotation = Unnamed };
               m_fun_kind = FSync; m_user_attributes = []; m_ret = None;
               m_external = false; m_doc_comment = None });
       c_static_methods = []; c_methods = []; c_attributes = [];

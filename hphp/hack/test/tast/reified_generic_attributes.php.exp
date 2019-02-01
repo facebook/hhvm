@@ -46,7 +46,7 @@ Errors:
           }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -64,7 +64,7 @@ Errors:
            }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -78,7 +78,7 @@ Errors:
           [{ ua_name = ([8:14-15], "\\B"); ua_params = [] }] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -95,7 +95,7 @@ Errors:
           }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

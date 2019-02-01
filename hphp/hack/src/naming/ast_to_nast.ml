@@ -416,11 +416,11 @@ and on_file_attribute (attribute:Ast.file_attributes) : Aast.file_attribute =
 
 and on_fun f : Aast.fun_ =
   let body = on_block f.f_body in
-  let body = Aast.NamedBody {
-        Aast.fnb_nast = body;
-        fnb_unsafe = true;
-  }
-  in
+  let body = {
+    Aast.fb_ast = body;
+    (* Still seems incorrect to have this as a Named body... *)
+    Aast.fb_annotation = Aast.BodyNamingAnnotation.NamedWithUnsafeBlocks;
+  } in
   let named_fun = {
     Aast.f_annotation = ();
     f_span = f.f_span;
@@ -558,9 +558,10 @@ and kind (final, abs, static, vis) = function
 
 and on_method ?(trait_or_interface=false) m : Aast.method_ =
   let body = on_block m.m_body in
-  let body = Aast.NamedBody {
-        Aast.fnb_nast = body;
-        fnb_unsafe = true;
+  let body = {
+    Aast.fb_ast = body;
+    (* Still seems incorrect to have this as a Named body... *)
+    Aast.fb_annotation = Aast.BodyNamingAnnotation.NamedWithUnsafeBlocks;
   } in
   let acc = false, false, false, None in
   let final, abs, static, vis = List.fold_left kind acc m.m_kind in

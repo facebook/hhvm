@@ -74,6 +74,14 @@ module Annotations = struct
   module EnvAnnotation = struct
     type t = saved_env [@@deriving show]
   end
+
+  module FuncBodyAnnotation = struct
+    (* All items should be named in the TAST *)
+    type t =
+      | HasUnsafeBlocks
+      | NoUnsafeBlocks
+      [@@deriving show] (* True if there are any UNSAFE blocks *)
+  end
 end
 
 module TypeAndPosAnnotatedAST = Aast.AnnotatedAST(Annotations)
@@ -102,16 +110,28 @@ let get_type (((_, ty), _) : expr) = ty
 
 module NastMapper = Aast_mapper.MapAnnotatedAST(Annotations)(Nast.Annotations)
 
+let annotation_to_string an =
+  match an with
+  | Annotations.FuncBodyAnnotation.HasUnsafeBlocks -> "Has unsafe blocks"
+  | Annotations.FuncBodyAnnotation.NoUnsafeBlocks -> "No unsafe blocks"
+
+let map_fb_annotation an =
+  if an = Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+  then Nast.Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks
+  else Nast.Annotations.FuncBodyAnnotation.Named
+
 let nast_mapping_env =
   NastMapper.{
     map_env_annotation = (fun _ -> ());
     map_expr_annotation = fst;
+    map_funcbody_annotation = map_fb_annotation
   }
 
 let to_nast program =
   NastMapper.map_program
     ~map_env_annotation:(fun _ -> ())
     ~map_expr_annotation:fst
+    ~map_funcbody_annotation:map_fb_annotation
     program
 
 let to_nast_expr =

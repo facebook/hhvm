@@ -490,11 +490,11 @@ and func env f named_body =
         Errors.variadic_byref_param vparam.param_pos
     | _ -> ()
   );
-  block env named_body.fnb_nast;
+  block env named_body.fb_ast;
   CheckFunctionBody.start
     f.f_fun_kind
     env
-    named_body.fnb_nast
+    named_body.fb_ast
 
 and tparam env t =
   List.iter t.tp_constraints (fun (_, h) -> hint env h)
@@ -819,9 +819,8 @@ and check_class_property_initialization prop =
 
 and interface c =
   let enforce_no_body = begin fun m ->
-    match m.m_body with
-    | UnnamedBody { fub_ast = [] ; _}
-    | NamedBody { fnb_nast = [] ; _} ->
+    match m.m_body.fb_ast with
+    | [] ->
       if m.m_visibility = Private
       then Errors.not_public_or_protected_interface (fst m.m_name)
       else ()
@@ -1014,15 +1013,15 @@ and method_ (env, is_static) m =
     | _ -> ()
   );
   List.iter m.m_tparams (tparam env);
-  block env named_body.fnb_nast;
+  block env named_body.fb_ast;
   maybe hint env m.m_ret;
   CheckFunctionBody.start
     m.m_fun_kind
     env
-    named_body.fnb_nast;
-  if m.m_abstract && named_body.fnb_nast <> []
+    named_body.fb_ast;
+  if m.m_abstract && named_body.fb_ast <> []
   then Errors.abstract_with_body m.m_name;
-  if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fnb_nast = []
+  if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fb_ast = []
   then Errors.not_abstract_without_body m.m_name;
   (match env.class_name with
   | Some cname ->

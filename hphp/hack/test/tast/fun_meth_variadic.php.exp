@@ -10,7 +10,7 @@
          param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }
         ];
-      f_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+      f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false });
@@ -27,23 +27,20 @@
             param_callconv = None; param_user_attributes = [] });
        f_params = [];
        f_body =
-       (NamedBody
-          { fnb_nast =
-            [(Foreach (
-                (([6:12-17], varray<string>), (Lvar ([6:12-17], $args))),
-                (As_v (([6:21-25], string), (Lvar ([6:21-25], $arg)))),
-                [(Expr
-                    (([7:5-23], void),
-                     (Call (Cnormal,
-                        (([7:5-17], (function(string $s): void)),
-                         (Id ([7:5-17], "\\takes_string"))),
-                        [],
-                        [(([7:18-22], string), (Lvar ([7:18-22], $arg)))], 
-                        []))))
-                  ]
-                ))
-              ];
-            fnb_unsafe = false });
+       { fb_ast =
+         [(Foreach ((([6:12-17], varray<string>), (Lvar ([6:12-17], $args))),
+             (As_v (([6:21-25], string), (Lvar ([6:21-25], $arg)))),
+             [(Expr
+                 (([7:5-23], void),
+                  (Call (Cnormal,
+                     (([7:5-17], (function(string $s): void)),
+                      (Id ([7:5-17], "\\takes_string"))),
+                     [], [(([7:18-22], string), (Lvar ([7:18-22], $arg)))],
+                     []))))
+               ]
+             ))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -70,7 +67,7 @@
                param_expr = None; param_callconv = None;
                param_user_attributes = [] });
           m_params = [];
-          m_body = (NamedBody { fnb_nast = [Noop]; fnb_unsafe = false });
+          m_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = (Some ([12:35-39], (Hprim Tvoid))); m_external = false;
           m_doc_comment = None }

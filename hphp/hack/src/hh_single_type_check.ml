@@ -22,6 +22,7 @@ end
 module StringNASTAnnotations = struct
   module ExprAnnotation = StringAnnotation
   module EnvAnnotation = Nast.UnitAnnotation
+  module FuncBodyAnnotation = StringAnnotation
 end
 
 module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
@@ -459,9 +460,9 @@ let compute_least_type tcopt popt fn =
   Option.iter (Parser_heap.find_fun_in_file popt fn "\\test")
     ~f:begin fun f ->
       let f = Naming.fun_ tcopt f in
-      let {Nast.fnb_nast; _} = Typing_naming_body.func_body tcopt f in
+      let { Nast.fb_ast; _} = Typing_naming_body.func_body tcopt f in
       let types =
-        Nast.(List.fold fnb_nast ~init:[]
+        Nast.(List.fold fb_ast ~init:[]
           ~f:begin fun acc stmt ->
             match stmt with
             | Expr (_, New ((_, CI (_, "\\least_upper_bound")), tal, _, _, _)) ->
@@ -584,7 +585,7 @@ let with_named_body opts n_fun =
    * we need to invoke naming here.
    * See also docs in Naming.Make. *)
   let n_f_body = TNBody.func_body opts n_fun in
-  { n_fun with Nast.f_body = Nast.NamedBody n_f_body }
+  { n_fun with Nast.f_body = n_f_body }
 
 let n_fun_fold opts fn acc (_, fun_name) =
   match Parser_heap.find_fun_in_file ~full:true opts fn fun_name with
@@ -763,7 +764,8 @@ let print_tasts tasts tcopt =
     in
     TASTStringMapper.map_program tast
       ~map_env_annotation:(fun () -> ())
-      ~map_expr_annotation:print_pos_and_ty in
+      ~map_expr_annotation:print_pos_and_ty
+      ~map_funcbody_annotation:(fun b -> Tast.annotation_to_string b) in
   Relative_path.Map.iter tasts (fun _k tast ->
     let string_ast = stringify_types tast in
     Printf.printf "%s\n" (StringNAST.show_program string_ast))

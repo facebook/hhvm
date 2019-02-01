@@ -43,7 +43,7 @@ end
 
 module Make : functor (GetLocals : GetLocals) -> sig
   (* Solves the local names in a function body *)
-  val func_body: TypecheckerOptions.t -> Nast.fun_ -> Nast.func_named_body
+  val func_body: TypecheckerOptions.t -> Nast.fun_ -> Nast.func_body
 
   (* Solves the local names in class method bodies *)
   val class_meth_bodies: TypecheckerOptions.t -> Nast.class_ -> Nast.class_

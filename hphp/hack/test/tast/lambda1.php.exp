@@ -4,75 +4,66 @@
       f_name = ([2:10-22], "\\test_lambda1"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(Expr
-               (([3:3-13], string),
-                (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))),
-                   (([3:8-13], string), (String "foo"))))));
-             (Expr
-                (([4:3-41], [fun]),
-                 (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
-                    (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
-                     (Efun (
-                        { f_span = [4:8-41]; f_annotation = ();
-                          f_mode = <opaque>; f_ret = None;
-                          f_name = ([4:8-41], ";anonymous"); f_tparams = [];
-                          f_where_constraints = [];
-                          f_variadic = FVnonVariadic;
-                          f_params =
-                          [{ param_annotation = ([4:8-10], _);
-                             param_hint = None; param_is_reference = false;
-                             param_is_variadic = false; param_pos = [4:8-10];
-                             param_name = "$n"; param_expr = None;
-                             param_callconv = None;
-                             param_user_attributes = [] }
-                            ];
-                          f_body =
-                          (NamedBody
-                             { fnb_nast =
-                               [(Return ([4:17-39],
-                                   (Some (([4:24-38], string),
-                                          (Binop (Dot,
-                                             (([4:24-31], string),
-                                              (Binop (Dot,
-                                                 (([4:24-26], _),
-                                                  (Lvar ([4:24-26], $n))),
-                                                 (([4:29-31], string),
-                                                  (Lvar ([4:29-31], $s)))
-                                                 ))),
-                                             (([4:34-38], string),
-                                              (String "\\n"))
-                                             ))))
-                                   ))
-                                 ];
-                               fnb_unsafe = false });
-                          f_fun_kind = FSync; f_user_attributes = [];
-                          f_file_attributes = []; f_external = false;
-                          f_namespace = <opaque>; f_doc_comment = None;
-                          f_static = false },
-                        [([4:29-31], $s)])))
-                    ))));
-             (Expr
-                (([5:3-13], string),
-                 (Binop ((Eq None),
-                    (([5:3-5], string), (Lvar ([5:3-5], $x))),
-                    (([5:8-13], string),
-                     (Call (Cnormal,
-                        (([5:8-10], [fun]), (Lvar ([5:8-10], $f))), [],
-                        [(([5:11-12], int), (Int "4"))], [])))
-                    ))));
-             (Expr
-                (([6:3-17], string),
-                 (Binop ((Eq None),
-                    (([6:3-5], string), (Lvar ([6:3-5], $y))),
-                    (([6:8-17], string),
-                     (Call (Cnormal,
-                        (([6:8-10], [fun]), (Lvar ([6:8-10], $f))), [],
-                        [(([6:11-16], string), (String "bar"))], [])))
-                    ))))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(Expr
+            (([3:3-13], string),
+             (Binop ((Eq None), (([3:3-5], string), (Lvar ([3:3-5], $s))),
+                (([3:8-13], string), (String "foo"))))));
+          (Expr
+             (([4:3-41], [fun]),
+              (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
+                 (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
+                  (Efun (
+                     { f_span = [4:8-41]; f_annotation = ();
+                       f_mode = <opaque>; f_ret = None;
+                       f_name = ([4:8-41], ";anonymous"); f_tparams = [];
+                       f_where_constraints = []; f_variadic = FVnonVariadic;
+                       f_params =
+                       [{ param_annotation = ([4:8-10], _);
+                          param_hint = None; param_is_reference = false;
+                          param_is_variadic = false; param_pos = [4:8-10];
+                          param_name = "$n"; param_expr = None;
+                          param_callconv = None; param_user_attributes = [] }
+                         ];
+                       f_body =
+                       { fb_ast =
+                         [(Return ([4:17-39],
+                             (Some (([4:24-38], string),
+                                    (Binop (Dot,
+                                       (([4:24-31], string),
+                                        (Binop (Dot,
+                                           (([4:24-26], _),
+                                            (Lvar ([4:24-26], $n))),
+                                           (([4:29-31], string),
+                                            (Lvar ([4:29-31], $s)))
+                                           ))),
+                                       (([4:34-38], string), (String "\\n"))
+                                       ))))
+                             ))
+                           ];
+                         fb_annotation = No unsafe blocks };
+                       f_fun_kind = FSync; f_user_attributes = [];
+                       f_file_attributes = []; f_external = false;
+                       f_namespace = <opaque>; f_doc_comment = None;
+                       f_static = false },
+                     [([4:29-31], $s)])))
+                 ))));
+          (Expr
+             (([5:3-13], string),
+              (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
+                 (([5:8-13], string),
+                  (Call (Cnormal, (([5:8-10], [fun]), (Lvar ([5:8-10], $f))),
+                     [], [(([5:11-12], int), (Int "4"))], [])))
+                 ))));
+          (Expr
+             (([6:3-17], string),
+              (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
+                 (([6:8-17], string),
+                  (Call (Cnormal, (([6:8-10], [fun]), (Lvar ([6:8-10], $f))),
+                     [], [(([6:11-16], string), (String "bar"))], [])))
+                 ))))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false })

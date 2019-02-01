@@ -20,18 +20,17 @@
           param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody
-         { fnb_nast =
-           [(If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [], [Noop]));
-             (Return ([5:3-16],
-                (Some (([5:10-15], int),
-                       (Call (Cnormal,
-                          (([5:10-12], (function(int): int)),
-                           (Lvar ([5:10-12], $f))),
-                          [], [(([5:13-14], int), (Int "1"))], []))))
-                ))
-             ];
-           fnb_unsafe = false });
+      { fb_ast =
+        [(If ((([4:7-9], bool), (Lvar ([4:7-9], $b))), [], [Noop]));
+          (Return ([5:3-16],
+             (Some (([5:10-15], int),
+                    (Call (Cnormal,
+                       (([5:10-12], (function(int): int)),
+                        (Lvar ([5:10-12], $f))),
+                       [], [(([5:13-14], int), (Int "1"))], []))))
+             ))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
       f_static = false })

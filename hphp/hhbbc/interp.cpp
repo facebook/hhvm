@@ -2515,11 +2515,11 @@ bool canReduceToDontResolve(SArray ts) {
 } // namespace
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
-  if (!topC(env).subtypeOf(requiredTSType)) {
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  if (!topC(env).couldBe(requiredTSType)) {
     popC(env);
     popC(env);
-    return push(env, TBottom);
+    return unreachable(env);
   }
   auto const a = tv(topC(env));
   if (!a || !isValidTSType(*a, false)) {
@@ -2535,11 +2535,11 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
 }
 
 void in(ISS& env, const bc::AsTypeStructC& op) {
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
-  if (!topC(env).subtypeOf(requiredTSType)) {
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  if (!topC(env).couldBe(requiredTSType)) {
     popC(env);
     popC(env);
-    return push(env, TBottom);
+    return unreachable(env);
   }
   auto const a = tv(topC(env));
   if (!a || !isValidTSType(*a, false)) {
@@ -2558,40 +2558,43 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   // TODO(T31677864): implement real optimizations
   assertx(op.arg1 > 0);
   auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
-    valid &= t.subtypeOf(requiredTSType);
+    valid &= t.couldBe(requiredTSType);
   }
-  push(env, valid ? requiredTSType : TBottom);
+  if (!valid) return unreachable(env);
+  push(env, Type{requiredTSType});
 }
 
 void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   // TODO(T31677864): implement real optimizations
   assertx(op.arg1 > 0);
   auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   auto const resultingArray = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
   for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
-    valid &= t.subtypeOf(requiredTSType);
+    valid &= t.couldBe(requiredTSType);
   }
-  if (valid) nothrow(env);
-  push(env, valid ? resultingArray : TBottom);
+  if (!valid) return unreachable(env);
+  nothrow(env);
+  push(env, resultingArray);
 }
 
 void in(ISS& env, const bc::ReifiedName& op) {
   // TODO(T31677864): implement real optimizations
   assertx(op.arg1 > 0);
   auto const name = popC(env);
-  auto valid = name.subtypeOf(TStr);
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  auto valid = name.couldBe(BStr);
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   for (int i = 1; i < op.arg1; ++i) {
     auto const t = popC(env);
-    valid &= t.subtypeOf(requiredTSType);
+    valid &= t.couldBe(requiredTSType);
   }
-  if (valid) nothrow(env);
-  push(env, valid ? TStr : TBottom);
+  if (!valid) return unreachable(env);
+  nothrow(env);
+  push(env, TSStr);
 }
 
 void in(ISS& env, const bc::ReifiedGeneric& op) {

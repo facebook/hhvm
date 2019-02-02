@@ -1431,11 +1431,26 @@ module Make (GetLocals : GetLocals) = struct
     List.rev ret
 
   and aast_type_param ~forbid_this env t =
+    let (genv, _) = env in
     if t.Aast.tp_reified && not (TypecheckerOptions.experimental_feature_enabled
-        (fst env).tcopt
+        genv.tcopt
       TypecheckerOptions.experimental_reified_generics)
     then
       Errors.experimental_feature (fst t.Aast.tp_name) "reified generics";
+
+    (* Treat type params as inline class declarations that don't go into the naming heap *)
+    let (pos, name) = NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name in
+    let _ = match Naming_heap.TypeIdHeap.get name with
+    | Some (def_pos, _) ->
+      let def_pos, _ = GEnv.get_full_pos genv.tcopt (def_pos, name) in
+      Errors.error_name_already_bound name name pos def_pos
+    | None ->
+      match GEnv.type_canon_name name with
+      | Some canonical ->
+        let def_pos = Option.value ~default:Pos.none (GEnv.type_pos genv.tcopt canonical) in
+        Errors.error_name_already_bound name canonical pos def_pos
+      | None -> () in
+
     {
       N.tp_variance = t.Aast.tp_variance;
       tp_name = t.Aast.tp_name;

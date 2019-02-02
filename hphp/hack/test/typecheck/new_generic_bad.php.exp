@@ -1,2 +1,4 @@
-File "new_generic_bad.php", line 5, characters 16-16:
-Generics can only be used in type hints since they are erased at runtime. (Typing[4124])
+File "new_generic_bad.php", line 3, characters 9-9:
+Name already bound: T (Naming[2012])
+File "new_generic_bad.php", line 3, characters 7-7:
+Previous definition is here

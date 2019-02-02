@@ -1,1 +1,4 @@
-No errors
+File "refl_subtype.php", line 4, characters 10-11:
+Name already bound: Tr (Naming[2012])
+  File "refl_subtype.php", line 4, characters 7-8:
+  Previous definition TR differs only in capitalization 

@@ -1,0 +1,32 @@
+File "tparams_shadow_classes.php", line 6, characters 13-14:
+Name already bound: TA (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition Ta differs only in capitalization 
+File "tparams_shadow_classes.php", line 7, characters 13-14:
+Name already bound: Ta (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition is here
+File "tparams_shadow_classes.php", line 9, characters 10-11:
+Name already bound: TA (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition Ta differs only in capitalization 
+File "tparams_shadow_classes.php", line 10, characters 10-11:
+Name already bound: Ta (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition is here
+File "tparams_shadow_classes.php", line 13, characters 22-23:
+Name already bound: TA (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition Ta differs only in capitalization 
+File "tparams_shadow_classes.php", line 14, characters 22-23:
+Name already bound: Ta (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition is here
+File "tparams_shadow_classes.php", line 17, characters 9-10:
+Name already bound: TA (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition Ta differs only in capitalization 
+File "tparams_shadow_classes.php", line 18, characters 9-10:
+Name already bound: Ta (Naming[2012])
+  File "tparams_shadow_classes.php", line 4, characters 7-8:
+  Previous definition is here

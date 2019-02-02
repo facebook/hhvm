@@ -1,0 +1,4 @@
+File "tparams_shadow_classes_namespaced.php", line 7, characters 11-11:
+Name already bound: A\T (Naming[2012])
+  File "tparams_shadow_classes_namespaced.php", line 5, characters 9-9:
+  Previous definition is here

@@ -149,10 +149,23 @@ void tweak_variant_dtors() {
   void Variant::set(argType v) noexcept {                 \
     if (isPrimitive()) {                                  \
       setOp;                                              \
-    } else if (isRefType(m_type)) {                     \
+    } else if (isRefType(m_type)) {                       \
       m_data.pref->var()->set(v);                         \
     } else {                                              \
       auto const old = *asTypedValue();                   \
+      setOp;                                              \
+      tvDecRefCountable(old);                             \
+    }                                                     \
+  }                                                       \
+  void variant_ref::set(argType v) noexcept {             \
+    Value& m_data = val(m_val);                           \
+    DataType& m_type = type(m_val);                       \
+    if (isPrimitive()) {                                  \
+      setOp;                                              \
+    } else if (isRefType(m_type)) {                       \
+      m_data.pref->var()->set(v);                         \
+    } else {                                              \
+      auto const old = m_val.tv();                        \
       setOp;                                              \
       tvDecRefCountable(old);                             \
     }                                                     \
@@ -172,15 +185,40 @@ IMPLEMENT_SET(const StaticString&,
 
 #define IMPLEMENT_PTR_SET(ptr, member, dtype)                           \
   void Variant::set(ptr *v) noexcept {                                  \
-    Variant *self = isRefType(m_type) ? m_data.pref->var() : this;    \
+    Variant *self = isRefType(m_type) ? m_data.pref->var() : this;      \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
     } else {                                                            \
       v->incRefCount();                                                 \
-      auto const old = *self->asTypedValue();                           \
+      const TypedValue old = *self->asTypedValue();                     \
       self->m_type = dtype;                                             \
       self->m_data.member = v;                                          \
-      tvDecRefGen(old);                                                    \
+      tvDecRefGen(old);                                                 \
+    }                                                                   \
+  }                                                                     \
+  void variant_ref::set(ptr *v) noexcept {                              \
+    if (isRefType(type(m_val))) {                                       \
+      Variant *self = val(m_val).pref->var();                           \
+      if (UNLIKELY(!v)) {                                               \
+        self->setNull();                                                \
+      } else {                                                          \
+        v->incRefCount();                                               \
+        const TypedValue old = *self->asTypedValue();                   \
+        self->m_type = dtype;                                           \
+        self->m_data.member = v;                                        \
+        tvDecRefGen(old);                                               \
+      }                                                                 \
+    }                                                                   \
+    else {                                                              \
+      if (UNLIKELY(!v)) {                                               \
+        this->setNull();                                                \
+      } else {                                                          \
+        v->incRefCount();                                               \
+        const TypedValue old = this->m_val.tv();                        \
+        type(this->m_val) = dtype;                                      \
+        val(this->m_val).member = v;                                    \
+        tvDecRefGen(old);                                               \
+      }                                                                 \
     }                                                                   \
   }
 
@@ -196,14 +234,37 @@ IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
 
 #define IMPLEMENT_STEAL(ptr, member, dtype)                             \
   void Variant::steal(ptr* v) noexcept {                                \
-    Variant* self = isRefType(m_type) ? m_data.pref->var() : this;  \
+    Variant *self = isRefType(m_type) ? m_data.pref->var() : this;      \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
     } else {                                                            \
-      auto const old = *self->asTypedValue();                           \
+      const TypedValue old = *self->asTypedValue();                     \
       self->m_type = dtype;                                             \
       self->m_data.member = v;                                          \
-      tvDecRefGen(old);                                                    \
+      tvDecRefGen(old);                                                 \
+    }                                                                   \
+  }                                                                     \
+  void variant_ref::steal(ptr* v) noexcept {                            \
+    if (isRefType(type(m_val))) {                                       \
+      Variant *self = val(m_val).pref->var();                           \
+      if (UNLIKELY(!v)) {                                               \
+        self->setNull();                                                \
+      } else {                                                          \
+        const TypedValue old = *self->asTypedValue();                   \
+        self->m_type = dtype;                                           \
+        self->m_data.member = v;                                        \
+        tvDecRefGen(old);                                               \
+      }                                                                 \
+    }                                                                   \
+    else {                                                              \
+      if (UNLIKELY(!v)) {                                               \
+        this->setNull();                                                \
+      } else {                                                          \
+        const TypedValue old = this->m_val.tv();                        \
+        type(this->m_val) = dtype;                                      \
+        val(this->m_val).member = v;                                    \
+        tvDecRefGen(old);                                               \
+      }                                                                 \
     }                                                                   \
   }
 

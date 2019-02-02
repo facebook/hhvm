@@ -18,6 +18,7 @@
 #define incl_HPHP_TV_VARIANT_H_
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 

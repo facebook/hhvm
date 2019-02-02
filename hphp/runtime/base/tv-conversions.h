@@ -42,13 +42,20 @@ struct StringData;
  */
 
 #define X(kind) \
-void tvCastTo##kind##InPlace(TypedValue* tv); \
-bool tvCoerceParamTo##kind##InPlace(TypedValue* tv, \
-                                    bool builtin);
+template<typename T> \
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
+template<typename T> \
+enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
+#define Y(kind) \
+template<typename T, IntishCast intishCast = IntishCast::AllowCastAndWarn> \
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
+template<typename T, IntishCast intishCast = IntishCast::AllowCastAndWarn> \
+enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
 X(Boolean)
 X(Int64)
 X(Double)
 X(String)
+Y(Array)
 X(Vec)
 X(Dict)
 X(Keyset)
@@ -56,18 +63,17 @@ X(Shape)
 X(Object)
 X(NullableObject)
 X(Resource)
+#undef Y
 #undef X
 
-template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
-void tvCastToArrayInPlace(TypedValue* tv);
-template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
-bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool builtin);
-
-void tvCastToVArrayInPlace(TypedValue* tv);
-void tvCastToDArrayInPlace(TypedValue* tv);
+template<typename T>
+enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
+template<typename T>
+enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
 void cellCastToStringInPlace(tv_lval tv);
 
-ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvCastInPlace(T tv, DataType DType) {
 #define X(kind) \
   if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
   X(Boolean)
@@ -84,8 +90,9 @@ ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
   not_reached();
 }
 
-ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
-                                        bool builtin) {
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, bool> tvCoerceParamInPlace(T tv, DataType DType,
+                                               bool builtin) {
 #define X(kind) \
   if (DType == KindOf##kind) \
     return tvCoerceParamTo##kind##InPlace(tv, \

@@ -192,6 +192,68 @@ bool refIsPlausible(Ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * TV-lval "concept"-like trait.
+ *
+ * This enables us to take functions that logically operate on a TypedValue&
+ * and parametrize them over any opaque mutable reference to a DataType tag and
+ * a Value data element.  This decouples the representation of a TypedValue
+ * from its actual memory layout.
+ *
+ * See tv-mutate.h for usage examples.
+ */
+template<typename T, typename Ret = void>
+using enable_if_lval_t = typename std::enable_if<
+  conjunction<
+    std::is_same<
+      ident_t<decltype((type(std::declval<T>())))>,
+      DataType&
+    >,
+    std::is_same<
+      ident_t<decltype((val(std::declval<T>())))>,
+      Value&
+    >,
+    std::is_same<
+      ident_t<decltype((as_tv(std::declval<T>())))>,
+      TypedValue
+    >
+  >::value,
+  Ret
+>::type;
+
+template<typename T, typename Ret = void>
+using enable_if_tv_val_t = typename std::enable_if<
+  conjunction<
+    std::is_convertible<
+      ident_t<decltype((type(std::declval<T>())))>,
+      DataType
+    >,
+    std::is_convertible<
+      ident_t<decltype((val(std::declval<T>())))>,
+      Value
+    >,
+    std::is_convertible<
+      ident_t<decltype((as_tv(std::declval<T>())))>,
+      TypedValue
+    >
+  >::value,
+  Ret
+>::type;
+
+/*
+ * TV-lval API for TypedValue.
+ */
+ALWAYS_INLINE DataType& type(TypedValue& tv) { return tv.m_type; }
+ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
+ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
+ALWAYS_INLINE DataType& type(TypedValue* tv) { return tv->m_type; }
+ALWAYS_INLINE Value& val(TypedValue* tv) { return tv->m_data; }
+ALWAYS_INLINE const DataType& type(const TypedValue* tv) { return tv->m_type; }
+ALWAYS_INLINE const Value& val(const TypedValue* tv) { return tv->m_data; }
+ALWAYS_INLINE TypedValue as_tv(const TypedValue* tv) { return *tv; }
+
+///////////////////////////////////////////////////////////////////////////////
+
 template<DataType> struct DataTypeCPPType;
 
 #define X(dt, cpp) \
@@ -276,103 +338,40 @@ typename std::enable_if<
  *
  * int64_t val = unpack_tv<KindOfInt64>(tv);
  */
-template <DataType DType>
+template <DataType DType, typename T>
 typename std::enable_if<
   std::is_same<typename DataTypeCPPType<DType>::type,double>::value,
-  double
->::type unpack_tv(TypedValue *tv) {
-  assertx(DType == tv->m_type);
-  assertx(tvIsPlausible(*tv));
-  return tv->m_data.dbl;
+  enable_if_lval_t<T, double>
+>::type unpack_tv(T tv) {
+  assertx(DType == type(tv));
+  return val(tv).dbl;
 }
 
-template <DataType DType>
+template <DataType DType, typename T>
 typename std::enable_if<
   std::is_integral<typename DataTypeCPPType<DType>::type>::value,
-  typename DataTypeCPPType<DType>::type
->::type unpack_tv(TypedValue *tv) {
-  assertx(DType == tv->m_type);
+  enable_if_lval_t<T, typename DataTypeCPPType<DType>::type>
+>::type unpack_tv(T tv) {
+  assertx(DType == type(tv));
   assertx(tvIsPlausible(*tv));
-  return tv->m_data.num;
+  return val(tv).num;
 }
 
-template <DataType DType>
+template <DataType DType, typename T>
 typename std::enable_if<
   std::is_pointer<typename DataTypeCPPType<DType>::type>::value,
-  typename DataTypeCPPType<DType>::type
->::type unpack_tv(TypedValue *tv) {
-  assertx((DType == tv->m_type) ||
-         (isStringType(DType) && isStringType(tv->m_type)) ||
-         (isArrayType(DType) && isArrayType(tv->m_type)) ||
-         (isVecType(DType) && isVecType(tv->m_type)) ||
-         (isDictType(DType) && isDictType(tv->m_type)) ||
-         (isKeysetType(DType) && isKeysetType(tv->m_type)));
+  enable_if_lval_t<T, typename DataTypeCPPType<DType>::type>
+>::type unpack_tv(T tv) {
+  assertx((DType == type(tv)) ||
+         (isStringType(DType) && isStringType(type(tv))) ||
+         (isArrayType(DType) && isArrayType(type(tv))) ||
+         (isVecType(DType) && isVecType(type(tv))) ||
+         (isDictType(DType) && isDictType(type(tv))) ||
+         (isKeysetType(DType) && isKeysetType(type(tv))));
   assertx(tvIsPlausible(*tv));
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
-           (tv->m_data.pstr);
+           (val(tv).pstr);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * TV-lval "concept"-like trait.
- *
- * This enables us to take functions that logically operate on a TypedValue&
- * and parametrize them over any opaque mutable reference to a DataType tag and
- * a Value data element.  This decouples the representation of a TypedValue
- * from its actual memory layout.
- *
- * See tv-mutate.h for usage examples.
- */
-template<typename T, typename Ret = void>
-using enable_if_lval_t = typename std::enable_if<
-  conjunction<
-    std::is_same<
-      ident_t<decltype((type(std::declval<T>())))>,
-      DataType&
-    >,
-    std::is_same<
-      ident_t<decltype((val(std::declval<T>())))>,
-      Value&
-    >,
-    std::is_same<
-      ident_t<decltype((as_tv(std::declval<T>())))>,
-      TypedValue
-    >
-  >::value,
-  Ret
->::type;
-
-template<typename T, typename Ret = void>
-using enable_if_tv_val_t = typename std::enable_if<
-  conjunction<
-    std::is_convertible<
-      ident_t<decltype((type(std::declval<T>())))>,
-      DataType
-    >,
-    std::is_convertible<
-      ident_t<decltype((val(std::declval<T>())))>,
-      Value
-    >,
-    std::is_convertible<
-      ident_t<decltype((as_tv(std::declval<T>())))>,
-      TypedValue
-    >
-  >::value,
-  Ret
->::type;
-
-/*
- * TV-lval API for TypedValue.
- */
-ALWAYS_INLINE DataType& type(TypedValue& tv) { return tv.m_type; }
-ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
-ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
-ALWAYS_INLINE DataType& type(TypedValue* tv) { return tv->m_type; }
-ALWAYS_INLINE Value& val(TypedValue* tv) { return tv->m_data; }
-ALWAYS_INLINE const DataType& type(const TypedValue* tv) { return tv->m_type; }
-ALWAYS_INLINE const Value& val(const TypedValue* tv) { return tv->m_data; }
-ALWAYS_INLINE TypedValue as_tv(const TypedValue* tv) { return *tv; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -107,25 +107,26 @@ void implCast(IRLS& env, const IRInstruction* inst, Vreg base, int offset) {
 
   auto const helper = [&]() -> void (*)(TypedValue*) {
     if (type <= TBool) {
-      return tvCastToBooleanInPlace;
+      return tvCastToBooleanInPlace<TypedValue*>;
     } else if (type <= TInt) {
-      return tvCastToInt64InPlace;
+      return tvCastToInt64InPlace<TypedValue*>;
     } else if (type <= TDbl) {
-      return tvCastToDoubleInPlace;
+      return tvCastToDoubleInPlace<TypedValue*>;
     } else if (type <= TArr) {
-      return tvCastToArrayInPlace;
+      return tvCastToArrayInPlace<TypedValue*>;
     } else if (type <= TVec) {
-      return tvCastToVecInPlace;
+      return tvCastToVecInPlace<TypedValue*>;
     } else if (type <= TDict) {
-      return tvCastToDictInPlace;
+      return tvCastToDictInPlace<TypedValue*>;
     } else if (type <= TKeyset) {
-      return tvCastToKeysetInPlace;
+      return tvCastToKeysetInPlace<TypedValue*>;
     } else if (type <= TStr) {
-      return tvCastToStringInPlace;
+      return tvCastToStringInPlace<TypedValue*>;
     } else if (type <= TObj) {
-      return nullable ? tvCastToNullableObjectInPlace : tvCastToObjectInPlace;
+      return nullable ? tvCastToNullableObjectInPlace<TypedValue*> :
+                        tvCastToObjectInPlace<TypedValue*>;
     } else if (type <= TRes) {
-      return tvCastToResourceInPlace;
+      return tvCastToResourceInPlace<TypedValue*>;
     } else {
       not_reached();
     }

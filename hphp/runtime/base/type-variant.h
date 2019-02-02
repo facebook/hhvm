@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
@@ -38,11 +37,6 @@ namespace HPHP {
 
 // Forward declare these to avoid including tv-conversions.h which has a
 // circular dependency with this file.
-void tvCastToVecInPlace(TypedValue*);
-void tvCastToDictInPlace(TypedValue*);
-void tvCastToKeysetInPlace(TypedValue*);
-void tvCastToVArrayInPlace(TypedValue*);
-void tvCastToDArrayInPlace(TypedValue*);
 
 struct OptionalVariant;
 
@@ -67,6 +61,9 @@ public:
     auto const t = type(m_val);
     return isRefType(t) ? val(m_val).pref->cell()->m_type : t;
   }
+  DataType getRawType() const {
+    return type(m_val);
+  }
   bool isNull()      const { return isNullType(getType()); }
   bool isBoolean()   const { return isBooleanType(getType()); }
   bool isInteger()   const { return isIntType(getType()); }
@@ -85,6 +82,7 @@ public:
   bool isFunc()      const { return isFuncType(getType()); }
   bool isClass()     const { return isClassType(getType()); }
 
+  bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
   bool isReferenced() const {
     return isRefType(type(m_val)) && val(m_val).pref->isReferenced();
   }
@@ -106,10 +104,15 @@ public:
 
   tv_rval toCell() const { return tvToCell(m_val); }
 
-  auto getArrayData() const {
+  ArrayData *getArrayData() const {
     assertx(isArray());
     return isRefType(type(m_val)) ? val(m_val).pref->cell()->m_data.parr
                                   : val(m_val).parr;
+  }
+
+  Variant *getRefData() const {
+    assertx(isRefType(type(m_val)));
+    return val(m_val).pref->var();
   }
 
   auto toFuncVal() const {
@@ -147,6 +150,81 @@ struct variant_ref : variant_ref_detail::base<false> {
   void unset() const {
     tvMove(make_tv<KindOfUninit>(), m_val);
   }
+
+  void setNull() noexcept {
+    tvSetNull(m_val);
+  }
+
+  variant_ref& operator=(const Variant& v) noexcept;
+
+  variant_ref& assign(const Variant& v) noexcept;
+
+  variant_ref& operator=(Variant &&rhs) noexcept;
+
+  // Generic assignment operator. Forward argument (preserving rvalue-ness and
+  // lvalue-ness) to the appropriate set function, as long as its not a Variant.
+  template <typename T>
+  typename std::enable_if<
+    !std::is_same<
+      Variant,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value
+    &&
+    !std::is_same<
+      VarNR,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value,
+    variant_ref&
+  >::type operator=(T&& v) {
+    set(std::forward<T>(v));
+    return *this;
+  }
+
+  void set(bool    v) noexcept;
+  void set(int     v) noexcept;
+  void set(int64_t   v) noexcept;
+  void set(double  v) noexcept;
+  void set(const char* v) = delete;
+  void set(const std::string & v) {
+    return set(String(v));
+  }
+  void set(StringData  *v) noexcept;
+  void set(ArrayData   *v) noexcept;
+  void set(ObjectData  *v) noexcept;
+  void set(ResourceHdr *v) noexcept;
+  void set(ResourceData *v) noexcept { set(v->hdr()); }
+  void set(const StringData *v) = delete;
+  void set(const ArrayData *v) = delete;
+  void set(const ObjectData *v) = delete;
+  void set(const ResourceData *v) = delete;
+  void set(const ResourceHdr *v) = delete;
+
+  void set(const String& v) noexcept { set(v.get()); }
+  void set(const StaticString & v) noexcept;
+  void set(const Array& v) noexcept { set(v.get()); }
+  void set(const Object& v) noexcept { set(v.get()); }
+  void set(const Resource& v) noexcept { set(v.hdr()); }
+
+  void set(String&& v) noexcept { steal(v.detach()); }
+  void set(Array&& v) noexcept { steal(v.detach()); }
+  void set(Object&& v) noexcept { steal(v.detach()); }
+  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+
+  template<typename T>
+  void set(const req::ptr<T> &v) noexcept {
+    return set(v.get());
+  }
+
+  template <typename T>
+  void set(req::ptr<T>&& v) noexcept {
+    return steal(v.detach());
+  }
+
+  void steal(StringData* v) noexcept;
+  void steal(ArrayData* v) noexcept;
+  void steal(ObjectData* v) noexcept;
+  void steal(ResourceHdr* v) noexcept;
+  void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 };
 
 struct const_variant_ref : variant_ref_detail::base<true> {
@@ -199,6 +277,8 @@ inline variant_ref::operator const_variant_ref() const {
  */
 
 struct Variant : private TypedValue {
+  friend variant_ref;
+
   // Used by VariantTraits to create a folly::Optional-like
   // optional Variant which fits in 16 bytes.
   using Optional = OptionalVariant;
@@ -1433,6 +1513,35 @@ inline variant_ref::variant_ref(Variant& v)
 inline const_variant_ref::const_variant_ref(const Variant& v)
   : variant_ref_detail::base<true>{v.asTypedValue()}
 {}
+
+inline variant_ref& variant_ref::operator=(const Variant& v) noexcept {
+  return assign(v);
+}
+
+inline variant_ref& variant_ref::assign(const Variant& v) noexcept {
+  tvSet(tvToInitCell(*v.asTypedValue()), m_val);
+  return *this;
+}
+
+inline variant_ref& variant_ref::operator=(Variant &&rhs) noexcept {
+  if (isRefType(rhs.m_type)) return *this = *rhs.m_data.pref->var();
+
+  variant_ref lhs = isRefType(type(m_val)) ? *val(m_val).pref->var() : *this;
+
+  Variant goner((Variant::NoInit()));
+  goner.m_data = val(lhs.m_val);
+  goner.m_type = type(lhs.m_val);
+
+  if (rhs.m_type == KindOfUninit) {
+    type(lhs.m_val) = KindOfNull;
+  } else {
+    type(lhs.m_val) = rhs.m_type;
+    val(lhs.m_val) = rhs.m_data;
+    rhs.m_type = KindOfNull;
+  }
+
+  return *this;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

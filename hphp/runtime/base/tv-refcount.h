@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/util/assertions.h"
 
@@ -66,7 +67,7 @@ ALWAYS_INLINE bool tvDecRefWillRelease(TypedValue tv) {
  * Get the reference count of `tv'.  Intended for debugging and instrumentation
  * purposes only.
  *
- * @requires: isRefcountedType(tv->m_type)
+ * @requires: isRefcountedType(type(tv))
  */
 ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
   assertx(isRefcountedType(tv.m_type));
@@ -90,7 +91,7 @@ ALWAYS_INLINE RawDestructor& destructorForType(DataType dt) {
 /*
  * Decref `tv'.
  *
- * @requires: isRefcountedType(tv->m_type)
+ * @requires: isRefcountedType(type(tv))
  */
 ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   assertx(isRefcountedType(tv.m_type));
@@ -102,8 +103,15 @@ ALWAYS_INLINE void tvDecRefCountable(TypedValue tv) {
   }
 }
 
-ALWAYS_INLINE void tvDecRefCountable(const TypedValue* tv) {
-  tvDecRefCountable(*tv);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefCountable(T tv) {
+  assertx(isRefcountedType(type(tv)));
+
+  if (noop_decref) return;
+
+  if (val(tv).pcnt->decReleaseCheck()) {
+    destructorForType(type(tv))(val(tv).pcnt);
+  }
 }
 
 /*
@@ -116,14 +124,16 @@ ALWAYS_INLINE void tvDecRefGen(TypedValue tv) {
     tvDecRefCountable(tv);
   }
 }
-ALWAYS_INLINE void tvDecRefGen(TypedValue* tv) {
+
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefGen(T tv) {
   if (noop_decref) return;
 
-  if (isRefcountedType(tv->m_type)) {
+  if (isRefcountedType(type(tv))) {
     tvDecRefCountable(tv);
     // If we're in debug mode, turn the entry into null so that the GC doesn't
     // assert if it tries to follow it.
-    if (debug) tv->m_type = KindOfNull;
+    if (debug) type(tv) = KindOfNull;
   }
 }
 
@@ -155,37 +165,42 @@ ALWAYS_INLINE void tvDecRefGenNZ(const TypedValue* tv) {
 /*
  * DecRefs for TypedValues of known type.
  */
-ALWAYS_INLINE void tvDecRefStr(const TypedValue* tv) {
-  assertx(tv->m_type == KindOfString);
-  decRefStr(tv->m_data.pstr);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefStr(T tv) {
+  assertx(type(tv) == KindOfString);
+  decRefStr(val(tv).pstr);
 }
 
-ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
-  assertx(tv->m_type == KindOfArray ||
-         tv->m_type == KindOfVec ||
-         tv->m_type == KindOfDict ||
-         tv->m_type == KindOfShape ||
-         tv->m_type == KindOfKeyset);
-  decRefArr(tv->m_data.parr);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefArr(T tv) {
+  assertx(type(tv) == KindOfArray ||
+         type(tv) == KindOfVec ||
+         type(tv) == KindOfDict ||
+         type(tv) == KindOfShape ||
+         type(tv) == KindOfKeyset);
+  decRefArr(val(tv).parr);
 }
 
 ALWAYS_INLINE void tvDecRefArr(TypedValue tv) {
   tvDecRefArr(&tv);
 }
 
-ALWAYS_INLINE void tvDecRefObj(const TypedValue* tv) {
-  assertx(tv->m_type == KindOfObject);
-  decRefObj(tv->m_data.pobj);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefObj(T tv) {
+  assertx(type(tv) == KindOfObject);
+  decRefObj(val(tv).pobj);
 }
 
-ALWAYS_INLINE void tvDecRefRes(const TypedValue* tv) {
-  assertx(tv->m_type == KindOfResource);
-  decRefRes(tv->m_data.pres);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefRes(T tv) {
+  assertx(type(tv) == KindOfResource);
+  decRefRes(val(tv).pres);
 }
 
-ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
-  assertx(isRefType(tv->m_type));
-  decRefRef(tv->m_data.pref);
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefRef(T tv) {
+  assertx(isRefType(type(tv)));
+  decRefRef(val(tv).pref);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,7 +208,7 @@ ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
 /*
  * Incref `tv'.
  *
- * @requires: isRefcountedType(tv->m_type)
+ * @requires: isRefcountedType(type(tv))
  */
 ALWAYS_INLINE void tvIncRefCountable(TypedValue tv) {
   assertx(tvIsPlausible(tv));

@@ -278,7 +278,7 @@ inline int64_t countHelper(TypedValue tv) {
     return make_tv<KindOfNull>();                                        \
   }                                                                      \
   Variant var_##input(input);                                            \
-  tvCastToArrayInPlace<IntishCast::CastSilently>(                        \
+  tvCastToArrayInPlace<TypedValue*, IntishCast::CastSilently>(           \
     var_##input.asTypedValue()                                           \
   );                                                                     \
   assertx(var_##input.isArray());                                        \

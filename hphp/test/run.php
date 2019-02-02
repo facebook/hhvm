@@ -2043,7 +2043,7 @@ function run_config_post($outputs, $test, $options) {
   $stderr = $outputs[1];
   file_put_contents("$test.out", $output);
 
-  $error_ok = $options['repo'] && file_exists($test . '.hhbbc_assert');
+  $error_ok = isset($options['repo']) && file_exists($test . '.hhbbc_assert');
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
   if ($stderr && !$error_ok) {

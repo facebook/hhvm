@@ -32,6 +32,27 @@ let text_source_to_filename = function
   | File filename -> Some filename
   | Stdin filename -> filename
 
+let file_exists path = Option.is_some (Sys_utils.realpath path)
+
+let rec guess_root config start recursion_limit =
+  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
+  else if Wwwroot.is_www_directory ~config start then Some start
+  else if recursion_limit <= 0 then None
+  else guess_root config (Path.parent start) (recursion_limit - 1)
+
+let get_root = function
+  | Some root -> Path.make root
+  | None ->
+    eprintf "No root specified, trying to guess one\n";
+    let config = ".hhconfig" in
+    let start_path = Path.make "." in
+    let root = match guess_root config start_path 50 with
+      | None -> start_path
+      | Some r -> r in
+    Wwwroot.assert_www_directory ~config root;
+    eprintf "Guessed root: %a\n%!" Path.output root;
+    root
+
 module Env = struct
   type t = {
     debug: bool;
@@ -139,8 +160,6 @@ let parse_options () =
   (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !root,
     !diff_dry, config),
   (!debug, !test)
-
-let file_exists path = Option.is_some (Sys_utils.realpath path)
 
 type format_options =
   | Print of {
@@ -321,25 +340,6 @@ let output ?text_source str =
     | None -> f stdout
   in
   with_out_channel (fun out_channel -> fprintf out_channel "%s%!" str)
-
-let rec guess_root config start recursion_limit =
-  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
-  else if Wwwroot.is_www_directory ~config start then Some start
-  else if recursion_limit <= 0 then None
-  else guess_root config (Path.parent start) (recursion_limit - 1)
-
-let get_root = function
-  | Some root -> Path.make root
-  | None ->
-    eprintf "No root specified, trying to guess one\n";
-    let config = ".hhconfig" in
-    let start_path = Path.make "." in
-    let root = match guess_root config start_path 50 with
-      | None -> start_path
-      | Some r -> r in
-    Wwwroot.assert_www_directory ~config root;
-    eprintf "Guessed root: %a\n%!" Path.output root;
-    root
 
 let format_diff_intervals ?config env intervals tree =
   try

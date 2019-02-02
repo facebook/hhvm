@@ -43,6 +43,7 @@
 #include "hphp/util/ssl-init.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/util/sync-signal.h"
 
 #include <folly/Conv.h>
 #include <folly/Format.h>
@@ -65,28 +66,47 @@ std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 std::atomic<double> HttpServer::LoadFactor{1.0};
 std::atomic_int HttpServer::QueueDiscount{0};
+std::atomic_int HttpServer::SignalReceived{0};
 std::atomic_int_fast64_t HttpServer::PrepareToStopTime{0};
 time_t HttpServer::OldServerStopTime;
 std::vector<ShutdownStat> HttpServer::ShutdownStats;
 folly::MicroSpinLock HttpServer::StatsLock;
 
-static void on_kill(int sig) {
-  signal(sig, SIG_DFL);
-  // There is a small race condition here with HttpServer::reset in
-  // program-functions.cpp, but it can only happen if we get a signal while
-  // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
-  // like overkill.
+// signals upon which the server shuts down gracefully
+static const int kTermSignals[] = { SIGHUP, SIGINT, SIGTERM, SIGUSR1 };
+
+static void on_kill_server(int sig) {   // runs in signal handler thread.
+  static std::atomic_flag flag = ATOMIC_FLAG_INIT;
+  if (flag.test_and_set()) return;      // it was already called once.
+
   if (HttpServer::Server) {
-    HttpServer::Server->stopOnSignal(sig);
+    // Stop handling signals, because the
+    // server is already shutting down, and we don't want to use the default
+    // handlers which may immediately terminate the process.
+    ignore_sync_signals();
+
+    int zero = 0;
+    HttpServer::SignalReceived.compare_exchange_strong(zero, sig);
+    // SignalReceived may possibly be set in HttpServer::stopOnSignal().
+    HttpServer::Server->stop();
   } else {
-    raise(sig);
+    reset_sync_signals();
+    raise(sig);                         // invoke default handler
   }
+  pthread_exit(nullptr);                // terminate signal handler thread
+}
+
+static void exit_on_timeout(int sig) {
+  // Must only call async-signal-safe functions.
+  kill(getpid(), SIGKILL);
+  // we really shouldn't get here, but who knows.
+  // abort so we catch it as a crash.
+  abort();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HttpServer::HttpServer()
-  : m_stopped(false), m_killed(false), m_stopReason(nullptr) {
+HttpServer::HttpServer() {
   LoadFactor = RuntimeOption::EvalInitialLoadFactor;
 
   // enabling mutex profiling, but it's not turned on
@@ -139,7 +159,6 @@ HttpServer::HttpServer()
     m_pageServer->enableSSLWithPlainText();
   }
 
-
   ServerOptions admin_options(RuntimeOption::AdminServerIP,
                               RuntimeOption::AdminServerPort,
                               RuntimeOption::AdminThreadCount);
@@ -176,10 +195,9 @@ HttpServer::HttpServer()
     }
   );
 
-  signal(SIGHUP, on_kill);
-  signal(SIGINT, on_kill);
-  signal(SIGTERM, on_kill);
-  signal(SIGUSR1, on_kill);
+  for (auto const sig : kTermSignals) {
+    sync_signal(sig, on_kill_server);
+  }
 }
 
 // Synchronously stop satellites
@@ -312,6 +330,8 @@ void HttpServer::runOrExitProcess() {
     Logger::Info(msg);
   }
 
+  block_sync_signals_and_start_handler_thread();
+
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
       startupFailure("Unable to start page server");
@@ -416,11 +436,8 @@ void HttpServer::runOrExitProcess() {
     }
     if (m_stopReason) {
       Logger::Warning("Server stopping with reason: %s", m_stopReason);
-    }
-    // if we were killed, bail out immediately
-    if (m_killed) {
-      Logger::Info("page server killed");
-      return;
+    } else if (auto signo = SignalReceived.load(std::memory_order_acquire)) {
+      Logger::Warning("Server stopping with reason: %s", strsignal(signo));
     }
   }
 
@@ -446,20 +463,16 @@ void HttpServer::waitForServers() {
   // all other servers invoke waitForEnd on stop
 }
 
-static void exit_on_timeout(int sig) {
-  signal(sig, SIG_DFL);
-#ifdef _WIN32
-  TerminateProcess(GetCurrentProcess(), (UINT)-1);
-#else
-  kill(getpid(), SIGKILL);
-#endif
-  // we really shouldn't get here, but who knows.
-  // abort so we catch it as a crash.
-  abort();
-}
-
 void HttpServer::stop(const char* stopReason) {
   if (m_stopping.exchange(true)) return;
+
+  // Let all worker threads know that the server is shutting down. If some
+  // request installed a PHP-level signal handler through `pcntl_signal(SIGTERM,
+  // handler_func)`, `handler_func()` will run in the corresponding request
+  // context, to perform cleanup tasks. If no handler is registered, it is
+  // ignored.
+  RequestInfo::BroadcastSignal(SIGTERM);
+
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
@@ -475,13 +488,10 @@ void HttpServer::stop(const char* stopReason) {
     if (totalWait > 0) {
       // Use a killer thread to _Exit() after totalWait seconds.  If
       // the main thread returns before that, the killer thread will
-      // exit.  So don't do join() on this thread.  Since we create a
-      // thread here, `HttpServer::stop()` cannot be called in signal
-      // handlers, use `stopOnSignal()` (which uses SIGALRM) in that
-      // case.
+      // exit.  So don't do join() on this thread.
       auto killer = std::thread([totalWait] {
 #ifdef __linux__
-          sched_param param;
+          sched_param param{};
           param.sched_priority = 5;
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
           // It is OK if we fail to increase thread priority.
@@ -501,36 +511,27 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
-  if (m_stopping.exchange(true)) return;
-  // we're shutting down flush http logs
-  Logger::FlushAll();
-  HttpRequestHandler::GetAccessLog().flushAllWriters();
-  Process::OOMScoreAdj(1000);
-  MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
-
-  // Signal to the main server thread to exit immediately if
-  // we want to die on SIGTERM
-  if (RuntimeOption::ServerKillOnSIGTERM && sig == SIGTERM) {
-    {
-      Lock lock(this);
-      m_stopped = true;
-      m_killed = true;
-      m_stopReason = "SIGTERM received";
-      notify();
+  int zero = 0;
+  if (SignalReceived.compare_exchange_strong(zero, sig) &&
+      RuntimeOption::ServerKillOnTimeout) {
+    auto const totalWait =
+      RuntimeOption::ServerPreShutdownWait +
+      RuntimeOption::ServerShutdownListenWait +
+      RuntimeOption::ServerGracefulShutdownWait;
+    // In case HttpServer::stop() isn't invoked in the synchronous signal
+    // handler.
+    if (totalWait > 0) {
+        signal(SIGALRM, exit_on_timeout);
+        sigset_t s;
+        sigemptyset(&s);
+        sigaddset(&s, SIGALRM);
+        pthread_sigmask(SIG_UNBLOCK, &s, nullptr);
+        alarm(totalWait);
     }
-    raise(sig);
-    return;
   }
-
-  if (RuntimeOption::ServerGracefulShutdownWait) {
-    signal(SIGALRM, exit_on_timeout);
-    alarm(RuntimeOption::ServerGracefulShutdownWait);
-  }
-
-  Lock lock(this);
-  m_stopped = true;
-  m_stopReason = "signal received";
-  notify();
+  // Invoke HttpServer::stop() from the synchronous signal handler thread. This
+  // way, stopOnSignal() is asynchronous-signal safe.
+  raise(SIGTERM);
 }
 
 void HttpServer::EvictFileCache() {

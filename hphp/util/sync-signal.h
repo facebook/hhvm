@@ -36,6 +36,10 @@ void block_sync_signals_and_start_handler_thread();
 // in the thread.
 void reset_sync_signals();
 
+// Unblock sync signals and ignore them (instead of handing them with the
+// default hander).
+void ignore_sync_signals();
+
 // Whether a signal is intended to be forwarded to PHP code.
 bool is_sync_signal(int signo);
 

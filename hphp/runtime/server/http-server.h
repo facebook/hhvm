@@ -32,18 +32,20 @@ namespace HPHP {
 
 struct HttpServer : Synchronizable, TakeoverListener,
                     Server::ServerEventListener {
+ public:
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
   static std::atomic<double> LoadFactor;
   static std::atomic_int QueueDiscount;
+  static std::atomic_int SignalReceived;
 
-private:
+ private:
   static std::atomic_int_fast64_t PrepareToStopTime;
   static time_t OldServerStopTime;
   static std::vector<ShutdownStat> ShutdownStats;
   static folly::MicroSpinLock StatsLock; // for ShutdownStats
 
-public:
+ public:
   explicit HttpServer();
   ~HttpServer() override;
 
@@ -134,9 +136,8 @@ private:
 
 private:
   std::atomic<bool> m_stopping{false};
-  bool m_stopped;
-  bool m_killed;
-  const char* m_stopReason;
+  bool m_stopped{false};
+  const char* m_stopReason{nullptr};
 
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;

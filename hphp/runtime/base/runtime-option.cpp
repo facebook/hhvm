@@ -493,7 +493,6 @@ int64_t RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
-bool RuntimeOption::ServerKillOnSIGTERM = false;
 bool RuntimeOption::ServerKillOnTimeout = true;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
@@ -1947,8 +1946,6 @@ void RuntimeOption::Load(
                  config, "Server.GracefulShutdownWait", 0);
     Config::Bind(ServerHarshShutdown, ini, config, "Server.HarshShutdown",
                  true);
-    Config::Bind(ServerKillOnSIGTERM, ini, config, "Server.KillOnSIGTERM",
-                 false);
     Config::Bind(ServerKillOnTimeout, ini, config, "Server.KillOnTimeout",
                  true);
     Config::Bind(ServerEvilShutdown, ini, config, "Server.EvilShutdown", true);

@@ -163,8 +163,15 @@ bool is_sync_signal(int signo) {
 }
 
 void reset_sync_signals() {
-  for (auto iter : g_sync_handlers) {
+  for (auto const iter : g_sync_handlers) {
     signal(iter.first, SIG_DFL);
+  }
+  pthread_sigmask(SIG_UNBLOCK, &g_sync_signals, nullptr);
+}
+
+void ignore_sync_signals() {
+  for (auto const iter : g_sync_handlers) {
+    signal(iter.first, SIG_IGN);
   }
   pthread_sigmask(SIG_UNBLOCK, &g_sync_signals, nullptr);
 }

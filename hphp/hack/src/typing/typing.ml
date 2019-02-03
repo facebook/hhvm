@@ -4895,7 +4895,7 @@ and call ~expected ?method_call_info pos env fty el uel =
 
 and call_ ~expected ~method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
-  let env, efty = Env.expand_type env fty in
+  let env, efty = SubType.expand_type_and_solve env fty in
   (match efty with
   | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
     let el = el @ uel in

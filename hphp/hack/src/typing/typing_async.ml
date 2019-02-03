@@ -25,7 +25,7 @@ There is the special case that
 *)
 let rec overload_extract_from_awaitable env p opt_ty_maybe =
   let r = Reason.Rwitness p in
-  let env, e_opt_ty = Env.expand_type env opt_ty_maybe in
+  let env, e_opt_ty = SubType.expand_type_and_solve env opt_ty_maybe in
   (match e_opt_ty with
   | _, Tunresolved tyl ->
     (* If we cannot fold the union into a single type, we need to look at

@@ -653,12 +653,15 @@ SSATmp* opt_foldable(IRGS& env,
   if (numNonDefaultArgs > func->numNonVariadicParams()) {
     assertx(params.size() == func->numParams());
     auto const variadic = params.info.back().value;
-    if (!variadic->type().hasConstVal()) return nullptr;
+    auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    if (!variadic->type().hasConstVal(ty)) return nullptr;
 
     variadicArgs = variadic->variantVal().asCArrRef().get();
     numVariadicArgs = variadicArgs->size();
-    assertx(variadicArgs->isStatic() &&
-            (!numVariadicArgs || variadicArgs->isVecOrVArray()));
+
+    if (numVariadicArgs && !variadicArgs->isVecOrVArray()) return nullptr;
+
+    assertx(variadicArgs->isStatic());
     numNonDefaultArgs = func->numNonVariadicParams();
   }
 

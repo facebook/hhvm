@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/util/bitset.h"
@@ -328,7 +329,8 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Res,             bits_t::bit<23>())                                 \
   c(Func,            bits_t::bit<24>())                                 \
   c(Cls,             bits_t::bit<25>())                                 \
-// Boxed*:           26-51
+  c(ClsMeth,         bits_t::bit<26>())                                 \
+// Boxed*:           27-53
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -347,28 +349,28 @@ constexpr bool operator>(Mem a, Mem b) {
   c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
   c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
   c(PersistentArrLike,   kPersistentArr|kPersistentShape|kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)                \
+  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)       \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
   c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls) \
   c(Uncounted,           kUninit|kUncountedInit)                        \
-  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes) \
+  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes|kClsMeth) \
   c(Cell,                kUninit|kInitCell)
 
 #define IRT_RUNTIME                                                     \
-  IRT(VarEnv,      bits_t::bit<52>())                                          \
-  IRT(NamedEntity, bits_t::bit<53>())                                          \
-  IRT(Cctx,        bits_t::bit<54>()) /* Class* with the lowest bit set,  */   \
+  IRT(VarEnv,      bits_t::bit<54>())                                          \
+  IRT(NamedEntity, bits_t::bit<55>())                                          \
+  IRT(Cctx,        bits_t::bit<56>()) /* Class* with the lowest bit set,  */   \
                                       /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     bits_t::bit<55>()) /* Return address */                     \
-  IRT(StkPtr,      bits_t::bit<56>()) /* Stack pointer */                      \
-  IRT(FramePtr,    bits_t::bit<57>()) /* Frame pointer */                      \
-  IRT(TCA,         bits_t::bit<58>())                                          \
-  IRT(ABC,         bits_t::bit<59>()) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   bits_t::bit<60>()) /* rds::Handle */                        \
-  IRT(Nullptr,     bits_t::bit<61>())                                          \
-  IRT(MIPropSPtr,  bits_t::bit<62>()) /* Ptr to MInstrPropState */             \
-  /* bits 63 and above are unused */
+  IRT(RetAddr,     bits_t::bit<57>()) /* Return address */                     \
+  IRT(StkPtr,      bits_t::bit<58>()) /* Stack pointer */                      \
+  IRT(FramePtr,    bits_t::bit<59>()) /* Frame pointer */                      \
+  IRT(TCA,         bits_t::bit<60>())                                          \
+  IRT(ABC,         bits_t::bit<61>()) /* AsioBlockableChain */                 \
+  IRT(RDSHandle,   bits_t::bit<62>()) /* rds::Handle */                        \
+  IRT(Nullptr,     bits_t::bit<63>())                                          \
+  IRT(MIPropSPtr,  bits_t::bit<64>()) /* Ptr to MInstrPropState */
+  /* bits 65 and above are unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -387,7 +389,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRTX(AnyDict,      Top,    kAnyDict)                        \
   IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
   IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
-  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
+  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kClsMeth) \
   IRTP(PtrToCounted,  Ptr,    kCounted)                       \
   IRTL(LvalToCounted, Ptr,    kCounted)                       \
   IRTM(MemToCounted,  Ptr,    kCounted)                       \
@@ -454,8 +456,8 @@ struct ConstCctx {
  */
 struct Type {
 private:
-  using bits_t = BitSet<63>;
-  static constexpr size_t kBoxShift = 26;
+  using bits_t = BitSet<65>;
+  static constexpr size_t kBoxShift = 27;
 
 public:
   static constexpr bits_t kBottom{};
@@ -725,6 +727,7 @@ public:
   const ArrayData* keysetVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
+  ClsMethDataRef clsmethVal() const;
   ConstCctx cctxVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
@@ -936,6 +939,7 @@ private:
     const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
+    ClsMethDataRef m_clsmethVal;
     ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
     rds::Handle m_rdsHandleVal;

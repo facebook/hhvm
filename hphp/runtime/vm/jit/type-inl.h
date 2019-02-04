@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/hash.h"
 
@@ -133,6 +134,7 @@ inline Type for_const(const ArrayData* ad) {
 inline Type for_const(double)        { return TDbl; }
 inline Type for_const(const Func*)   { return TFunc; }
 inline Type for_const(const Class*)  { return TCls; }
+inline Type for_const(ClsMethDataRef) { return TClsMeth; }
 inline Type for_const(ConstCctx)     { return TCctx; }
 inline Type for_const(TCA)           { return TTCA; }
 
@@ -391,6 +393,7 @@ IMPLEMENT_CNS_VAL(TPersistentShape, shape, const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
 IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
+IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)

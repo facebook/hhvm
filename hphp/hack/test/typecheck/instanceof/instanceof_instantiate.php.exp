@@ -3,8 +3,8 @@ File "instanceof_instantiate.php", line 15, characters 5-15:
   where TDi#1 as \C4, TDi#1 as \I<TDi#1>
 File "instanceof_instantiate.php", line 22, characters 7-17:
   D<T1, T2, T3, TDi#1>
-  where T1 super TDpos#1, T2 = TDinv#1, T3 as TDneg#1, TDi#1 as T4, TDi#1 as \I<T4>, TDi#1 as \I<TDi#1>
+  where T1 super TDpos#1, T3 as TDneg#1, TDi#1 as T4, TDi#1 as \I<T4>, TDi#1 as \I<TDi#1>
 File "instanceof_instantiate.php", line 27, characters 7-17:
   D<T1, T2, T3, TDi#1>
-  where T1 super TDpos#1, T2 = TDinv#1, T3 as TDneg#1, TDi#1 as T4, TDi#1 as \I<T4>, TDi#1 as \I<TDi#1>
+  where T1 super TDpos#1, T3 as TDneg#1, TDi#1 as T4, TDi#1 as \I<T4>, TDi#1 as \I<TDi#1>
 No errors

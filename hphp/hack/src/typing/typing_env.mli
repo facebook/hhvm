@@ -133,6 +133,12 @@ val add_upper_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
 val get_env_mutability : env -> Typing_mutability_env.mutability_env
+(** Given a list of type parameter names, attempt to simplify away those
+type parameters by looking for a type to which they are equal in the tpenv.
+If such a type exists, remove the type parameter from the tpenv.
+Returns a set of substitutions mapping each type parameter name to the type
+to which it is equal if found, otherwise to itself. *)
+val simplify_tpenv : env -> string list -> Reason.t -> env * locl ty SMap.t
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list

@@ -2256,7 +2256,7 @@ and decompose_constraint
  * constraint "T2 as C<T3>" i.e. we end up with
  *   C<T1> <: T2 <: C<T3>
  * Then by transitivity we know that T1 <: T3 so we add this to the
- * environment also.
+ * environment too.
  *
  * We repeat this process until no further bounds are added to the
  * environment, or some limit is reached. (It's possible to construct

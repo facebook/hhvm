@@ -5682,7 +5682,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
           let env, tparams_with_new_names, tyl_fresh =
             isexpr_generate_fresh_tparams env class_info reason tyl in
           safely_refine_class_type
-            env p _c class_info ivar_ty hint_ty tparams_with_new_names
+            env p _c class_info ivar_ty hint_ty reason tparams_with_new_names
             tyl_fresh
         | None ->
           env, (Reason.Rwitness ivar_pos, Tobject)
@@ -5706,7 +5706,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
 and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   (* Generate fresh names consisting of formal type parameter name
    * with unique suffix *)
-  let env, tparams_with_new_names =
+  let env, (tparams_with_new_names : (decl tparam * string) option list) =
     List.map_env env (Cls.tparams class_info)
       (fun env ({tp_name = (_, name); tp_reified; _ } as tp) ->
         let env, name = Env.add_fresh_generic_parameter env name tp_reified in
@@ -5724,9 +5724,13 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
       new_names in
   let env, obj_ty =
     safely_refine_class_type
-      env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh in
+      env p class_name class_info ivar_ty obj_ty reason tparams_with_new_names tyl_fresh in
   env, obj_ty
 
+(** If we are dealing with a refinement like
+      $x is MyClass<A, B>
+    then class_info is the class info of MyClass and hint_tyl corresponds
+    to A, B. *)
 and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let tparams_len = List.length (Cls.tparams class_info) in
   let hint_tyl = List.take hint_tyl tparams_len in
@@ -5750,7 +5754,9 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   env, tparams_with_new_names, tyl_fresh
 
 and safely_refine_class_type
-  env p class_name class_info ivar_ty obj_ty tparams_with_new_names tyl_fresh =
+  env p class_name class_info ivar_ty obj_ty reason
+  (tparams_with_new_names : (decl tparam * string) option list)
+  tyl_fresh =
   (* Type of variable in block will be class name
    * with fresh type parameters *)
   let obj_ty = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh)) in
@@ -5767,8 +5773,8 @@ and safely_refine_class_type
       List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
         (* Substitute fresh type parameters for
          * original formals in constraint *)
-      let env, ty = Phase.localize ~ety_env env ty in
-      SubType.add_constraint p env ck ty_fresh ty end in
+        let env, ty = Phase.localize ~ety_env env ty in
+        SubType.add_constraint p env ck ty_fresh ty end in
   let env =
     List.fold_left (List.zip_exn (Cls.tparams class_info) tyl_fresh)
       ~f:add_bounds ~init:env in
@@ -5786,13 +5792,20 @@ and safely_refine_class_type
 
   (* It's often the case that the fresh name isn't necessary. For
    * example, if C<T> extends B<T>, and we have $x:B<t> for some type t
-   * then $x instanceof B should refine to $x:C<t>.
+   * then $x instanceof C should refine to $x:C<t>.
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
    *    1) There is an eqality constraint T#1 = t then replace T#1 with t.
    *    2) T#1 is covariant, and T#1 <: t and occurs nowhere else in the constraints
    *    3) T#1 is contravariant, and t <: T#1 and occurs nowhere else in the constraints
    *)
+  let tparam_names = List.filter_map ~f:(Option.map ~f:snd) tparams_with_new_names in
+  let env, tparam_substs = Env.simplify_tpenv env tparam_names reason in
+  let tyl_fresh = List.map2_exn tyl_fresh tparams_with_new_names
+    ~f:(fun orig_ty tparam_opt ->
+      match tparam_opt with
+      | None -> orig_ty
+      | Some (_tp, name) -> SMap.find name tparam_substs) in
   let tparams_in_constraints = Env.get_tpenv_tparams env in
   let tyl_fresh_simplified =
     List.map2_exn tparams_with_new_names tyl_fresh

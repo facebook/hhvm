@@ -4941,7 +4941,8 @@ and call_ ~expected ~method_call_info pos env fty el uel =
 
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
-
+    let tyvars = Env.get_current_tyvars env in
+    let env = Env.set_tyvar_variance ~tyvars env ft.ft_ret in
     let is_lambda e = match snd e with Efun _ -> true | _ -> false in
 
     let get_next_param_info paraml =
@@ -4960,8 +4961,27 @@ and call_ ~expected ~method_call_info pos env fty el uel =
         (* Pick up next parameter type info *)
         let is_variadic, opt_param, paraml = get_next_param_info paraml in
         let env, one_result =
-          if is_lambda e && not check_lambdas || Option.is_some opt_result
+          if Option.is_some opt_result
           then env, opt_result
+          else
+          if is_lambda e && not check_lambdas
+          then
+            begin match opt_param with
+            | Some param ->
+              let rec set_params_variance env ty =
+                let env, ty = Env.expand_type env ty in
+                match ty with
+                | _, Tunresolved [ty] -> set_params_variance env ty
+                | _, Toption ty -> set_params_variance env ty
+                | _, Tfun { ft_params; _ } ->
+                  List.fold ~init:env ~f:(fun env param ->
+                    Env.set_tyvar_variance ~tyvars env param.fp_type) ft_params
+                | _ -> env in
+              let env = set_params_variance env param.fp_type in
+              env, opt_result
+            | None ->
+              env, opt_result
+            end
           else
             begin match opt_param with
             | Some param ->

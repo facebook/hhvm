@@ -245,7 +245,10 @@ and union_unresolved env tyl1 tyl2 r =
         normalize_union env tyl1 tyl2 res_is_opt
       end in
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
-  let ty = (r, Tunresolved tyl) in
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  let ty = match tyl with
+    | [ty] when new_inference -> ty
+    | tyl -> (r, Tunresolved tyl) in
   let ty = match res_is_opt with
     | Some r -> (r, Toption ty)
     | None -> ty in

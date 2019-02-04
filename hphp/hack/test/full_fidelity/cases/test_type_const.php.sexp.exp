@@ -12,13 +12,15 @@
         ((() { 1 ((end_of_line 1)))
          (list 48
           ((type_const_declaration 20
-            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1)))
              (() type 4 ((whitespace 1))) (() name 2 ((whitespace 1)))
              (missing 0 ()) (missing 0 ()) (() = 1 ((whitespace 1)))
              (simple_type_specifier 3 ((() int 3 ())))
              (() ";" 1 ((end_of_line 1)))))
            (type_const_declaration 25
-            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1)))
              (() type 4 ((whitespace 1))) (() name 2 ((whitespace 1)))
              (missing 0 ())
              (type_constraint 5

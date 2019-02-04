@@ -346,7 +346,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constant_declarator_initializer                    : t
     }
   | TypeConstDeclaration                    of
-    { type_const_abstract                                : t
+    { type_const_attribute_spec                          : t
+    ; type_const_abstract                                : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
@@ -1659,7 +1660,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constant_declarator_initializer: simple_initializer option value
     }
   and type_const_declaration =
-    { type_const_abstract: Token.t option value
+    { type_const_attribute_spec: attribute_specification option value
+    ; type_const_abstract: Token.t option value
     ; type_const_keyword: Token.t value
     ; type_const_type_keyword: Token.t value
     ; type_const_name: Token.t value

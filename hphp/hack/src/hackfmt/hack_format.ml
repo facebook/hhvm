@@ -657,6 +657,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Newline;
     ]
   | Syntax.TypeConstDeclaration {
+      type_const_attribute_spec = attr;
       type_const_abstract = abs;
       type_const_keyword = kw;
       type_const_type_keyword = type_kw ;
@@ -667,6 +668,8 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       type_const_type_specifier = type_spec;
       type_const_semicolon = semi } ->
     Concat [
+      t env attr;
+      when_present attr newline;
       t env abs;
       Space;
       t env kw;

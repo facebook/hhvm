@@ -233,7 +233,8 @@ module type Syntax_S = sig
     ; constant_declarator_initializer                    : t
     }
   | TypeConstDeclaration                    of
-    { type_const_abstract                                : t
+    { type_const_attribute_spec                          : t
+    ; type_const_abstract                                : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
@@ -1107,7 +1108,7 @@ module type Syntax_S = sig
   val make_require_clause : t -> t -> t -> t -> t
   val make_const_declaration : t -> t -> t -> t -> t -> t -> t
   val make_constant_declarator : t -> t -> t
-  val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_decorated_expression : t -> t -> t
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
   val make_variadic_parameter : t -> t -> t -> t

@@ -66,7 +66,7 @@ module type SmartConstructors_S = sig
   val make_require_clause : r -> r -> r -> r -> t -> t * r
   val make_const_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_constant_declarator : r -> r -> t -> t * r
-  val make_type_const_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_type_const_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_decorated_expression : r -> r -> t -> t * r
   val make_parameter_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_variadic_parameter : r -> r -> r -> t -> t * r
@@ -252,7 +252,7 @@ end) = struct
     let require_clause parser arg0 arg1 arg2 arg3 = call parser (SCI.make_require_clause arg0 arg1 arg2 arg3)
     let const_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_const_declaration arg0 arg1 arg2 arg3 arg4 arg5)
     let constant_declarator parser arg0 arg1 = call parser (SCI.make_constant_declarator arg0 arg1)
-    let type_const_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_type_const_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
+    let type_const_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_type_const_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
     let decorated_expression parser arg0 arg1 = call parser (SCI.make_decorated_expression arg0 arg1)
     let parameter_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_parameter_declaration arg0 arg1 arg2 arg3 arg4 arg5)
     let variadic_parameter parser arg0 arg1 arg2 = call parser (SCI.make_variadic_parameter arg0 arg1 arg2)

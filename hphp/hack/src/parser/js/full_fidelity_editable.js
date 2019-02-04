@@ -6706,6 +6706,7 @@ class ConstantDeclarator extends EditableSyntax
 class TypeConstDeclaration extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     abstract,
     keyword,
     type_keyword,
@@ -6717,6 +6718,7 @@ class TypeConstDeclaration extends EditableSyntax
     semicolon)
   {
     super('type_const_declaration', {
+      attribute_spec: attribute_spec,
       abstract: abstract,
       keyword: keyword,
       type_keyword: type_keyword,
@@ -6727,6 +6729,7 @@ class TypeConstDeclaration extends EditableSyntax
       type_specifier: type_specifier,
       semicolon: semicolon });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get abstract() { return this.children.abstract; }
   get keyword() { return this.children.keyword; }
   get type_keyword() { return this.children.type_keyword; }
@@ -6736,8 +6739,22 @@ class TypeConstDeclaration extends EditableSyntax
   get equal() { return this.children.equal; }
   get type_specifier() { return this.children.type_specifier; }
   get semicolon() { return this.children.semicolon; }
+  with_attribute_spec(attribute_spec){
+    return new TypeConstDeclaration(
+      attribute_spec,
+      this.abstract,
+      this.keyword,
+      this.type_keyword,
+      this.name,
+      this.type_parameters,
+      this.type_constraint,
+      this.equal,
+      this.type_specifier,
+      this.semicolon);
+  }
   with_abstract(abstract){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       abstract,
       this.keyword,
       this.type_keyword,
@@ -6750,6 +6767,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_keyword(keyword){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       keyword,
       this.type_keyword,
@@ -6762,6 +6780,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_type_keyword(type_keyword){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       type_keyword,
@@ -6774,6 +6793,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_name(name){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6786,6 +6806,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_type_parameters(type_parameters){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6798,6 +6819,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_type_constraint(type_constraint){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6810,6 +6832,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_equal(equal){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6822,6 +6845,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_type_specifier(type_specifier){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6834,6 +6858,7 @@ class TypeConstDeclaration extends EditableSyntax
   }
   with_semicolon(semicolon){
     return new TypeConstDeclaration(
+      this.attribute_spec,
       this.abstract,
       this.keyword,
       this.type_keyword,
@@ -6850,6 +6875,7 @@ class TypeConstDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var abstract = this.abstract.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var type_keyword = this.type_keyword.rewrite(rewriter, new_parents);
@@ -6860,6 +6886,7 @@ class TypeConstDeclaration extends EditableSyntax
     var type_specifier = this.type_specifier.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       abstract === this.abstract &&
       keyword === this.keyword &&
       type_keyword === this.type_keyword &&
@@ -6875,6 +6902,7 @@ class TypeConstDeclaration extends EditableSyntax
     else
     {
       return rewriter(new TypeConstDeclaration(
+        attribute_spec,
         abstract,
         keyword,
         type_keyword,
@@ -6888,6 +6916,9 @@ class TypeConstDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.type_const_attribute_spec, position, source);
+    position += attribute_spec.width;
     let abstract = EditableSyntax.from_json(
       json.type_const_abstract, position, source);
     position += abstract.width;
@@ -6916,6 +6947,7 @@ class TypeConstDeclaration extends EditableSyntax
       json.type_const_semicolon, position, source);
     position += semicolon.width;
     return new TypeConstDeclaration(
+        attribute_spec,
         abstract,
         keyword,
         type_keyword,
@@ -6930,6 +6962,7 @@ class TypeConstDeclaration extends EditableSyntax
   {
     if (TypeConstDeclaration._children_keys == null)
       TypeConstDeclaration._children_keys = [
+        'attribute_spec',
         'abstract',
         'keyword',
         'type_keyword',

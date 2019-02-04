@@ -479,7 +479,8 @@ let schema : schema_node list =
     ; prefix      = "type_const"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "abstract", ZeroOrOne Token
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "abstract", ZeroOrOne Token
       ; "keyword", Token
       ; "type_keyword", Token
       ; "name", Token

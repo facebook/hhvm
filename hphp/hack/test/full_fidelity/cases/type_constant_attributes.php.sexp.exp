@@ -1,0 +1,65 @@
+((script 180
+  ((list 180
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 174
+      ((missing 0 ())
+       (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
+       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
+       (classish_body 157
+        ((() { 1 ((end_of_line 1)))
+         (list 151
+          ((type_const_declaration 49
+            ((attribute_specification 17
+              ((((whitespace 2)) << 2 ())
+               (list 13
+                ((list_item 13
+                  ((constructor_call 13
+                    ((() name 13 ()) (missing 0 ()) (missing 0 ())
+                     (missing 0 ())))
+                   (missing 0 ())))))
+               (() >> 2 ((end_of_line 1)))))
+             (((whitespace 2)) abstract 8 ((whitespace 1)))
+             (() const 5 ((whitespace 1))) (() type 4 ((whitespace 1)))
+             (() name 1 ((whitespace 1))) (missing 0 ())
+             (type_constraint 6
+              ((() as 2 ((whitespace 1)))
+               (simple_type_specifier 3 ((() num 3 ())))))
+             (missing 0 ()) (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
+           (type_const_declaration 30
+            ((missing 0 ())
+             (((end_of_line 1) (whitespace 2)) abstract 8 ((whitespace 1)))
+             (() const 5 ((whitespace 1))) (() type 4 ((whitespace 1)))
+             (() name 2 ((whitespace 1))) (missing 0 ())
+             (type_constraint 6
+              ((() as 2 ((whitespace 1)))
+               (simple_type_specifier 3 ((() num 3 ())))))
+             (missing 0 ()) (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
+           (type_const_declaration 40
+            ((attribute_specification 17
+              ((((end_of_line 1) (whitespace 2)) << 2 ())
+               (list 13
+                ((list_item 13
+                  ((constructor_call 13
+                    ((() name 13 ()) (missing 0 ()) (missing 0 ())
+                     (missing 0 ())))
+                   (missing 0 ())))))
+               (() >> 2 ((end_of_line 1)))))
+             (missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+             (() type 4 ((whitespace 1))) (() name 2 ((whitespace 1)))
+             (missing 0 ()) (missing 0 ()) (() = 1 ((whitespace 1)))
+             (simple_type_specifier 3 ((() int 3 ())))
+             (() ";" 1 ((end_of_line 1)))))
+           (type_const_declaration 20
+            ((missing 0 ()) (missing 0 ())
+             (((end_of_line 1) (whitespace 2)) const 5 ((whitespace 1)))
+             (() type 4 ((whitespace 1))) (() name 2 ((whitespace 1)))
+             (missing 0 ()) (missing 0 ()) (() = 1 ((whitespace 1)))
+             (simple_type_specifier 3 ((() int 3 ())))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

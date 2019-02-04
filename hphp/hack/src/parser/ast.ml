@@ -274,6 +274,7 @@ and method_trait_resolution = {
 }
 
 and typeconst = {
+  tconst_user_attributes: user_attribute list;
   tconst_abstract: bool;
   tconst_name: id;
   tconst_tparams: tparam list;

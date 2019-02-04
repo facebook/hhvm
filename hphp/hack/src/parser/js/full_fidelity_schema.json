@@ -806,6 +806,7 @@
       "description" : "type_const_declaration",
       "prefix" : "type_const",
       "fields" : [
+        { "field_name" : "attribute_spec" },
         { "field_name" : "abstract" },
         { "field_name" : "keyword" },
         { "field_name" : "type_keyword" },

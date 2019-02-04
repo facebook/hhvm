@@ -85,7 +85,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 164
           ((type_const_declaration 33
-            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1)))
              (() type 4 ((whitespace 1))) (() name 3 ())
              (type_parameters 12
               ((() < 1 ())

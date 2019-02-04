@@ -665,8 +665,9 @@ module WithExpressionAndStatementAndTypeParser
           let (parser, const) = assert_token parser Const in
           parse_const_declaration parser missing missing' const
         | Type, _ when kind2 <> Equal ->
+          let (parser, missing') = Make.missing parser (pos parser) in
           let (parser, const) = assert_token parser Const in
-          parse_type_const_declaration parser missing const
+          parse_type_const_declaration parser missing missing' const
         | _, _ ->
           let (parser, missing') = Make.missing parser (pos parser) in
           let (parser, const) = assert_token parser Const in
@@ -690,9 +691,9 @@ module WithExpressionAndStatementAndTypeParser
     | Static
     | Final
     | LessThanLessThan ->
-      (* Parse methods, constructors, destructors or properties. *)
+      (* Parse methods, constructors, destructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
-      parse_methodish_or_property parser attr
+      parse_methodish_or_property_or_type_constant parser attr
     | Require ->
       (* We give an error if these are found where they should not be,
          in a later pass. *)
@@ -1038,6 +1039,27 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semi) = require_semicolon parser in
     Make.require_clause parser req req_kind name semi
 
+  (* This duplicates work from parse_methodish_or_property, but this function is only
+   * invoked after an attribute spec, while parse_methodish_or_property is called after
+   * a modifier. Having this function prevents "private abstract const type T".
+   * See also, parse_methodish_or_const_or_type_const *)
+  and parse_methodish_or_property_or_type_constant parser attribute_spec =
+    let (parser1, _, contains_abstract) = parse_modifiers parser in
+    let current_token_kind = peek_token_kind parser1 in
+    let next_token = peek_token ~lookahead:1 parser1 in
+    let next_token_kind = Token.kind next_token in
+    match current_token_kind, next_token_kind with
+    | Const, Type ->
+      let (parser, abstr) =
+        if contains_abstract
+        then assert_token parser Abstract
+        else Make.missing parser (pos parser) in
+      let (parser, const) = assert_token parser Const in
+      parse_type_const_declaration parser attribute_spec abstr const
+    | _ ->
+      parse_methodish_or_property parser attribute_spec
+
+
   and parse_methodish_or_property parser attribute_spec =
     let (parser, modifiers, contains_abstract) = parse_modifiers parser in
     (* ERROR RECOVERY: match against two tokens, because if one token is
@@ -1299,7 +1321,7 @@ module WithExpressionAndStatementAndTypeParser
     CONSIDER: We could detect this error in a post-parse pass; it is entirely
     syntactic.  Consider moving the error detection out of the type checker.
   *)
-  and parse_type_const_declaration parser abstr const =
+  and parse_type_const_declaration parser attributes abstr const =
     let (parser, type_token) = assert_token parser Type in
     let (parser, name) = require_name_allow_non_reserved parser in
     let (parser, generic_type_parameter_list) =
@@ -1318,6 +1340,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semicolon) = require_semicolon parser in
     Make.type_const_declaration
       parser
+      attributes
       abstr
       const
       type_token
@@ -1702,9 +1725,10 @@ module WithExpressionAndStatementAndTypeParser
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser missing abstr const
       | Type, _ when kind2 <> Equal ->
+        let (parser, attributes) = Make.missing parser (pos parser) in
         let (parser, abstr) = assert_token parser Abstract in
         let (parser, const) = assert_token parser Const in
-        parse_type_const_declaration parser abstr const
+        parse_type_const_declaration parser attributes abstr const
       | _, _ ->
         let (parser, missing) = Make.missing parser (pos parser) in
         let (parser, abstr) = assert_token parser Abstract in

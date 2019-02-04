@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
 
+#include "hphp/runtime/vm/class-meth-data.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -265,6 +266,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* String */
     0, /* Resource */
     sizeClass<RefData>(),
+    sizeClass<ClsMethData>(),
     0, /* Object */
     0, /* NativeObject */
     0, /* WaitHandle */
@@ -294,6 +296,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Empty, ArrayData)
   CHECKSIZE(Globals, GlobalsArray)
   CHECKSIZE(Ref, RefData)
+  CHECKSIZE(ClsMeth, ClsMethData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
   CHECKSIZE(Vector, c_Vector)
   CHECKSIZE(Map, c_Map)
@@ -444,6 +447,7 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
     case HeaderKind::Ref:
+    case HeaderKind::ClsMeth:
       not_reached();
   }
   return MemoryManager::sizeClass(size);

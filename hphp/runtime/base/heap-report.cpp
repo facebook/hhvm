@@ -61,6 +61,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     case HeaderKind::Resource:
     case HeaderKind::Ref:
+    case HeaderKind::ClsMeth:
       break;
     case HeaderKind::Object:
     case HeaderKind::NativeObject:

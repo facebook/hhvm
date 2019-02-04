@@ -1049,6 +1049,8 @@ struct RuntimeOption {
   F(bool, RaiseFuncConversionWarning, false)                            \
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
+  /* Raise warning when ClsMethDataRef is used as varray/vec. */        \
+  F(bool, RaiseClsMethConversionWarning, false)                         \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \

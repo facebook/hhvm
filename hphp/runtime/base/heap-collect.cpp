@@ -160,6 +160,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Globals:
     case HeaderKind::Ref:
     case HeaderKind::Resource:
+    case HeaderKind::ClsMeth:
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:

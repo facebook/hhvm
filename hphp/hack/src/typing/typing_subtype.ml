@@ -2128,16 +2128,16 @@ let subtype_method
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
-  let check_tparam_constraints env { tp_name = (p, name); tp_constraints = cstrl; _ } =
-    List.fold_left cstrl ~init:env ~f:begin fun env (ck, cstr_ty) ->
-      let tgeneric = (Reason.Rwitness p, Tabstract (AKgeneric name, None)) in
-      Typing_generic_constraint.check_constraint env ck cstr_ty tgeneric
-    end in
-  List.fold_left tparams ~init:env ~f:check_tparam_constraints in
+    let check_tparam_constraints env { tp_name = (p, name); tp_constraints = cstrl; _ } =
+      List.fold_left cstrl ~init:env ~f:begin fun env (ck, cstr_ty) ->
+        let tgeneric = (Reason.Rwitness p, Tabstract (AKgeneric name, None)) in
+        Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty
+      end in
+    List.fold_left tparams ~init:env ~f:check_tparam_constraints in
 
   let check_where_constraints env cstrl =
     List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
-      Typing_generic_constraint.check_constraint env ck ty2 ty1
+      Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2
     end in
 
   (* We only do this if the ft_tparam lengths match. Currently we don't even

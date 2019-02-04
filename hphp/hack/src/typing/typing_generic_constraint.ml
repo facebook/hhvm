@@ -14,7 +14,7 @@ module Reason = Typing_reason
 module Env = Typing_env
 open Typing_defs
 
-let check_constraint env ck cstr_ty ty =
+let check_constraint env ck ty ~cstr_ty =
   Typing_log.(log_with_level env "sub" 1 (fun () ->
     log_types (Reason.to_pos (fst ty)) env
     [Log_head ("Typing_generic_constraint.check_constraint",
@@ -48,7 +48,7 @@ let add_check_constraint_todo (env_now:Env.env) ~use_pos (pos,name) ck cstr_ty t
   Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
-        check_constraint env ck cstr_ty ty)
+        check_constraint env ck ty ~cstr_ty)
       (fun l ->
        Errors.explain_constraint ~use_pos ~definition_pos:pos ~param_name:name l;
        env
@@ -59,7 +59,7 @@ let add_check_where_constraint_todo (env_now:Env.env) ~use_pos ~definition_pos c
   Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
-        check_constraint env ck cstr_ty ty)
+        check_constraint env ck ty ~cstr_ty)
       (fun l ->
        Errors.explain_where_constraint ~use_pos ~definition_pos l;
        env
@@ -84,7 +84,7 @@ let add_check_where_constraint_todo (env_now:Env.env) ~use_pos ~definition_pos c
 *)
 let handle_eq_tconst_constraint env ck ty cstr_ty =
   (* First check that the bigger types work *)
-  let env = check_constraint env ck ty cstr_ty in
+  let env = check_constraint env ck ty ~cstr_ty in
   let env, ty = Env.expand_type env ty in
   let env, cstr_ty = Env.expand_type env cstr_ty in
   let rec flatten_unresolved_tys ty =
@@ -102,7 +102,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
   | ty::tys ->
   List.fold tys ~init: env
   ~f: begin fun env ty_ ->
-    check_constraint env ck ty ty_
+    check_constraint env ck ty_ ~cstr_ty:ty
   end
 
 let add_check_tconst_where_constraint_todo
@@ -116,7 +116,7 @@ let add_check_tconst_where_constraint_todo
         | Ast.Constraint_eq ->
           handle_eq_tconst_constraint env ck ty cstr_ty
         | _ ->
-          check_constraint env ck ty cstr_ty
+          check_constraint env ck ty ~cstr_ty
       )
       (fun l ->
         Errors.explain_tconst_where_constraint ~use_pos ~definition_pos l;

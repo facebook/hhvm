@@ -599,7 +599,7 @@ and check_happly unchecked_tparams env h =
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in
                       ignore @@ Errors.try_
                         (fun () ->
-                           TGenConstraint.check_constraint env ck cstr_ty ty
+                           TGenConstraint.check_constraint env ck ty ~cstr_ty
                         )
                         (fun l ->
                           Reason.explain_generic_constraint env.Env.pos r x l;

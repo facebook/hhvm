@@ -31,8 +31,18 @@ constexpr uint16_t kRATArrayDataBit = 0x8000;
 ALWAYS_INLINE
 size_t encodedRATSize(const unsigned char* pc) {
   using T = RepoAuthType::Tag;
-  auto const rawTag = (static_cast<uint16_t>(*(pc + 1)) << 8) |
-                       static_cast<uint16_t>(*pc);
+  uint16_t permutatedTag = static_cast<uint8_t>(*pc);
+  auto nextPcVal = *(pc + 1);
+  if (permutatedTag == 0xff) {
+    uint8_t tmp = static_cast<uint8_t>(nextPcVal);
+    assertx(tmp != 0xff);
+    permutatedTag = tmp + 0xff;
+    nextPcVal = *(pc + 2);
+  }
+  size_t tagSize = permutatedTag < 0xff ? 1 : 2;
+
+  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) bit back
+  uint16_t rawTag = (permutatedTag >> 2) | (permutatedTag << 14);
   bool const highBitSet = rawTag & kRATArrayDataBit;
   auto const tag = static_cast<T>(rawTag & ~kRATArrayDataBit);
   switch (tag) {
@@ -73,7 +83,7 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::InitGen:
   case T::Gen:
     assertx(!highBitSet);
-    return 2;
+    return tagSize;
   case T::SArr:
   case T::OptSArr:
   case T::Arr:
@@ -98,13 +108,16 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-    return highBitSet ? 6 : 2;
+    if (highBitSet) {
+      return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
+    }
+    return tagSize;
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
     assertx(!highBitSet);
-    return 6;
+    return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
   }
   not_reached();
 }

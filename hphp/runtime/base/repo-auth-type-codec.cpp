@@ -29,9 +29,15 @@ template <class LookupStr, class LookupArrayType>
 RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
                            LookupArrayType lookupArrayType) {
   using T = RepoAuthType::Tag;
-  auto const rawTagLower = static_cast<uint16_t>(*pc++);
-  auto const rawTagUpper = static_cast<uint16_t>(*pc++);
-  auto const rawTag = (rawTagUpper << 8) | rawTagLower;
+  uint16_t permutatedTag = static_cast<uint8_t>(*pc++);
+  if (permutatedTag == 0xff) {
+    uint8_t tmp = static_cast<uint8_t>(*pc++);
+    assertx(tmp != 0xff);
+    permutatedTag = tmp + 0xff;
+  }
+
+  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) bit back
+  auto rawTag = (permutatedTag >> 2) | (permutatedTag << 14);
   bool const highBitSet = rawTag & kRATArrayDataBit;
   auto const tag = static_cast<T>(rawTag & ~kRATArrayDataBit);
   switch (tag) {
@@ -99,9 +105,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::Keyset:
   case T::OptKeyset:
     if (highBitSet) {
-      uint32_t id;
-      std::memcpy(&id, pc, sizeof id);
-      pc += sizeof id;
+      uint32_t id = decode_iva(pc);
       auto const arr = lookupArrayType(id);
       return RepoAuthType{tag, arr};
     }
@@ -113,9 +117,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptSubObj:
     assertx(!highBitSet);
     {
-      uint32_t id;
-      std::memcpy(&id, pc, sizeof id);
-      pc += sizeof id;
+      uint32_t id = decode_iva(pc);
       const StringData* const clsName = lookupStr(id);
       return RepoAuthType{tag, clsName};
     }
@@ -142,6 +144,19 @@ RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
 }
 
 void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
+  auto rawTag = static_cast<uint16_t>(rat.tag());
+  if (rat.hasArrData()) rawTag |= kRATArrayDataBit;
+
+  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) last
+  uint16_t permutatedTag = (rawTag << 2) | (rawTag >> 14);
+  if (permutatedTag >= 0xff) {
+    // Write a 0xff signal byte
+    ue.emitByte(static_cast<uint8_t>(0xff));
+    permutatedTag -= 0xff;
+  }
+  assertx(permutatedTag < 0xff);
+  ue.emitByte(static_cast<uint8_t>(permutatedTag));
+
   using T = RepoAuthType::Tag;
   switch (rat.tag()) {
   case T::Uninit:
@@ -180,7 +195,6 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::Ref:
   case T::InitGen:
   case T::Gen:
-    ue.emitInt16(static_cast<uint16_t>(rat.tag()));
     break;
 
   case T::SArr:
@@ -207,22 +221,16 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-    {
-      auto tagByte = static_cast<uint16_t>(rat.tag());
-      if (rat.hasArrData()) tagByte |= kRATArrayDataBit;
-      ue.emitInt16(tagByte);
-      if (rat.hasArrData()) {
-        ue.emitInt32(rat.arrayId());
-      }
-      break;
+    if (rat.hasArrData()) {
+      ue.emitIVA(rat.arrayId());
     }
+    break;
 
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    ue.emitInt16(static_cast<uint16_t>(rat.tag()));
-    ue.emitInt32(ue.mergeLitstr(rat.clsName()));
+    ue.emitIVA(ue.mergeLitstr(rat.clsName()));
     break;
   }
 }

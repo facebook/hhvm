@@ -1,0 +1,19 @@
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line %d
+array(0) {
+}
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line %d
+array(2) {
+  ["a"]=>
+  int(10)
+  ["b"]=>
+  string(4) "test"
+}
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line %d
+array(2) {
+  ["a"]=>
+  int(10)
+  ["b"]=>
+  string(4) "test"
+}

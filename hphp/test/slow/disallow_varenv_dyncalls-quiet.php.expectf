@@ -1,4 +1,5 @@
 Running test_compact_dyncall() #1....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -7,6 +8,7 @@ array(2) {
 }
 test_compact_dyncall() done
 Running test_compact_dyncall() #2....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -15,6 +17,7 @@ array(2) {
 }
 test_compact_dyncall() done
 Running test_compact_cuf() #1....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -23,6 +26,7 @@ array(2) {
 }
 test_compact_cuf() done
 Running test_compact_cuf() #2....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -31,6 +35,7 @@ array(2) {
 }
 test_compact_cuf() done
 Running test_compact_cuf_array() #1....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -39,6 +44,7 @@ array(2) {
 }
 test_compact_cuf_array() done
 Running test_compact_cuf_array() #2....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(2) {
   ["var1"]=>
   int(100)
@@ -47,6 +53,7 @@ array(2) {
 }
 test_compact_cuf_array() done
 Running test_compact_map() #1....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(1) {
   [0]=>
   array(2) {
@@ -58,6 +65,7 @@ array(1) {
 }
 test_compact_map() done
 Running test_compact_map() #2....
+compact() is deprecated and subject to removal from the Hack language in disallow_varenv_dyncalls.inc at line %d
 array(1) {
   [0]=>
   array(2) {

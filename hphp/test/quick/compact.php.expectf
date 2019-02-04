@@ -1,3 +1,4 @@
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 9
 Array
 (
     [b] => Array

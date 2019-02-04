@@ -696,7 +696,7 @@ int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
-uint64_t RuntimeOption::DisableCompact = 0;
+uint64_t RuntimeOption::DisableCompact = 1;
 uint64_t RuntimeOption::DisableExtract = 0;
 uint64_t RuntimeOption::DisableForwardStaticCall = 0;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;

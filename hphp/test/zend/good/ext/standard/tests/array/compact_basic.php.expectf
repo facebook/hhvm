@@ -1,4 +1,6 @@
 *** Testing compact() : basic functionality ***
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 22
 array(6) {
   ["a"]=>
   int(1)
@@ -16,6 +18,8 @@ array(6) {
   ["f"]=>
   string(6) "string"
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 24
 array(6) {
   ["a"]=>
   int(1)
@@ -33,16 +37,24 @@ array(6) {
   ["f"]=>
   string(6) "string"
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 25
 array(2) {
   ["a"]=>
   int(1)
   ["b"]=>
   float(0.2)
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 28
 array(0) {
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 29
 array(0) {
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 30
 array(0) {
 }
 Done

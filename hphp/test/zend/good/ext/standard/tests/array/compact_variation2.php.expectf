@@ -1,10 +1,14 @@
 *** Testing compact() : usage variations  - variables outside of current scope ***
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 15
 array(2) {
   ["b"]=>
   string(3) "f.b"
   ["c"]=>
   string(3) "f.c"
 }
+
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 16
 array(2) {
   ["b"]=>
   string(3) "f.b"

@@ -1,5 +1,5 @@
 File "mixed.php", line 17, characters 3-13:
-  exact A
+  (_ | exact A)
 File "mixed.php", line 25, characters 3-13:
   nonnull
 File "mixed.php", line 34, characters 3-13:

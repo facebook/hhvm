@@ -5,7 +5,7 @@ File "lambda.php", line 24, characters 5-15:
 File "lambda.php", line 51, characters 11-21:
   _
 File "lambda.php", line 71, characters 9-19:
-  (exact D | exact G | exact J)
+  (_ | exact D | exact G | exact J)
 File "lambda.php", line 51, characters 11-21:[2]
   exact A
 File "lambda.php", line 71, characters 9-19:[2]
@@ -17,7 +17,7 @@ File "lambda.php", line 24, characters 5-15:[2]
 File "lambda.php", line 51, characters 11-21:[3]
   _
 File "lambda.php", line 71, characters 9-19:[3]
-  (exact D | exact G | exact J)
+  (_ | exact D | exact G | exact J)
 File "lambda.php", line 51, characters 11-21:[4]
   exact A
 File "lambda.php", line 71, characters 9-19:[4]
@@ -29,7 +29,7 @@ File "lambda.php", line 24, characters 5-15:[3]
 File "lambda.php", line 51, characters 11-21:[5]
   _
 File "lambda.php", line 71, characters 9-19:[5]
-  (exact D | exact G | exact J)
+  (_ | exact D | exact G | exact J)
 File "lambda.php", line 51, characters 11-21:[6]
   exact A
 File "lambda.php", line 71, characters 9-19:[6]

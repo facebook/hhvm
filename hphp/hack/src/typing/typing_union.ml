@@ -54,19 +54,11 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
   else match ty1, ty2 with
-    | (_, Tany), (_, Tunresolved _ as ty)
-    | (_, Tunresolved _ as ty), (_, Tany) ->
-      env, ty
-    | (_, Tany), (r, _ as ty)
-    | (r, _ as ty), (_, Tany) ->
-      (* The TC will issue an error for null checks on certain types. However,
-       * a nullcheck on a Tany is valid and should still be after unioning this
-       * Tany to something.
-       * So we wrap in an unresolved for now to mimic previous behavior,
-       * and allow null checks. *)
-      env, (r, Tunresolved [ty])
-    | (_, Terr), ty | ty, (_, Terr) ->
-      env, ty
+    (* We don't want to treat Tany and Terr as top or bottom types *)
+    | (_, (Tany | Terr)), _
+    | _, (_, (Tany | Terr)) ->
+      let r = union_reason r1 r2 in
+      union_ env ty1 ty2 r
     | _, _ ->
       if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
       else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
@@ -214,14 +206,10 @@ and union_ env ty1 ty2 r =
 
 and union_unresolved env tyl1 tyl2 r =
   let unify env ty1 ty2 =
-    match ty1, ty2 with
-    | (_, Tany), ty
-    | ty, (_, Tany) -> env, Some ty
-    | _ ->
-      begin match union env ty1 ty2 with
-      | _, (_, Tunresolved _) -> env, None
-      | env, ty -> env, Some ty
-      end in
+    begin match union env ty1 ty2 with
+    | _, (_, Tunresolved _) -> env, None
+    | env, ty -> env, Some ty
+    end in
 
   let attempt_union env tyl ty2 res_is_opt =
     let rec go env tyl ty2 missed res_is_opt =
@@ -259,8 +247,8 @@ and union_unresolved env tyl1 tyl2 r =
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
   let ty = (r, Tunresolved tyl) in
   let ty = match res_is_opt with
-  | Some r -> (r, Toption ty)
-  | None -> ty in
+    | Some r -> (r, Toption ty)
+    | None -> ty in
   env, ty
 
 and union_arraykind env ak1 ak2 =

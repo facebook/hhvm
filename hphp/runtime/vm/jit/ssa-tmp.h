@@ -60,6 +60,7 @@ struct SSATmp {
   const ArrayData*   keysetVal() const    { return type().keysetVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
+  const ClsMethDataRef clsmethVal() const { return type().clsmethVal(); }
   ConstCctx          cctxVal() const      { return type().cctxVal(); }
   rds::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
   TCA                tcaVal() const       { return type().tcaVal(); }

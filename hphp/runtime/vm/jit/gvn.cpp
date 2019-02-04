@@ -287,6 +287,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdCls:
   case LdClsCached:
   case LdClsInitData:
+  case LdClsFromClsMeth:
+  case LdFuncFromClsMeth:
   case LdFuncVecLen:
   case LdClsMethod:
   case LdIfaceMethod:

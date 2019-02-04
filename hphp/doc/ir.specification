@@ -1564,6 +1564,14 @@ To string conversions:
   class name or a function name. Raises an error if this name does not have
   any associated reified generics.
 
+| LdClsFromClsMeth, D(Cls), S(ClsMeth), NF
+
+  Load the Class* of the ClsMethDataRef in S0.
+
+| LdFuncFromClsMeth, D(Func), S(ClsMeth), NF
+
+  Load the Func* of the ClsMethDataRef in S0.
+
 8. Allocation
 
 | AllocObj, DAllocObj, S(Cls), PRc
@@ -1727,6 +1735,9 @@ To string conversions:
 
   Allocate an object by cloning S0.
 
+| NewClsMeth, D(ClsMeth), S(Cls) S(Func), NF
+
+  Allocate a new ClsMethDataRef.
 
 9. Call & Return
 

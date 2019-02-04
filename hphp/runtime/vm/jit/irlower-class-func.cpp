@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/preclass.h"
 
@@ -245,6 +247,33 @@ void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
   v << loadzlq{func[Func::attrsOff()], attrs};
   v << shrqi{14, attrs, shifted, v.makeReg()};
   v << andqi{3, shifted, dst, v.makeReg()};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
+  auto const clsMeth = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  emitLdLowPtr(
+    vmain(env), clsMeth[ClsMethData::clsOffset()], dst, sizeof(LowPtr<Class>));
+}
+
+void cgLdFuncFromClsMeth(IRLS& env, const IRInstruction* inst) {
+  auto const clsMeth = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  emitLdLowPtr(
+    vmain(env), clsMeth[ClsMethData::funcOffset()], dst, sizeof(LowPtr<Func>));
+}
+
+void cgNewClsMeth(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(ClsMethDataRef::create),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0).ssa(1)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

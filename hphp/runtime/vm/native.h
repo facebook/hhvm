@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/tv-variant.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/abi-cxx.h"
 
 #include <type_traits>
@@ -269,6 +270,7 @@ const StringData* getInvokeName(ActRec* ar);
   X(Resource,   const Resource&,      Resource)       \
   X(Func,       Func*,                Func*)          \
   X(Class,      const Class*,         const Class*)   \
+  X(ClsMeth,    ClsMethDataRef,       ClsMethDataRef) \
   X(Mixed,      const Variant&,       Variant)        \
   X(ObjectArg,  ObjectArg,            ObjectArg)      \
   X(StringArg,  StringArg,            StringArg)      \

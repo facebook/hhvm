@@ -781,6 +781,7 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::Class:      return "class";
   case T::Void:       return "void";
   case T::Func:       return "func";
+  case T::ClsMeth:    return "clsmeth";
   }
   not_reached();
 }

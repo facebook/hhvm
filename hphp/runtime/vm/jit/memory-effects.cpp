@@ -1180,6 +1180,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
     );
 
+  case LdClsFromClsMeth:
+  case LdFuncFromClsMeth:
+    return may_load_store(AHeapAny, AEmpty);
+
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
 
@@ -1530,6 +1534,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // track are isolated from anything else we care about.
 
   case NewArray:
+  case NewClsMeth:
   case NewCol:
   case NewColFromArray:
   case NewPair:

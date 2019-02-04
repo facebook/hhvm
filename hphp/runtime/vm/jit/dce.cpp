@@ -178,6 +178,8 @@ bool canDCE(IRInstruction* inst) {
   case LdClosure:
   case LdClsCtx:
   case LdClsCctx:
+  case LdClsFromClsMeth:
+  case LdFuncFromClsMeth:
   case FwdCtxStaticCall:
   case DefConst:
   case Conjure:
@@ -463,6 +465,7 @@ bool canDCE(IRInstruction* inst) {
   case LookupFuncCached:
   case AllocObj:
   case AllocObjReified:
+  case NewClsMeth:
   case RegisterLiveObj:
   case InitProps:
   case PropTypeRedefineCheck:

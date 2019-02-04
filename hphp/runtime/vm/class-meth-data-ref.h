@@ -29,6 +29,10 @@ struct ClsMethDataRef {
 
   ClsMethDataRef(Class* cls, Func* func) : data(ClsMethData::make(cls, func)) {}
 
+  static ClsMethDataRef create(Class* cls, Func* func) {
+    return ClsMethDataRef(cls, func);
+  }
+
   ClsMethData& operator*() {
     return *data;
   }

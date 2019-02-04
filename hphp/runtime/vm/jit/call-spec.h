@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include <array>
 #include <cstdint>
@@ -52,6 +53,7 @@ namespace detail {
   T(AsioBlockableChain, TABC)    \
   T(Class*, TCls)                \
   T(Func*, TFunc)                \
+  T(ClsMethDataRef, TClsMeth)    \
   T(NamedEntity*, TNamedEntity)  \
   T(RefData*, TBoxedInitCell)    \
   T(ResourceHdr*, TRes)          \

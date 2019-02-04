@@ -86,7 +86,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
         array_get ~lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2
       end in
-      env, Union.union_list_approx tyl (fst ety1)
+      env, Union.union_list_approx env tyl (fst ety1)
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = MakeType.int (Reason.Ridx (fst e2, fst ety1)) in
       let env = type_index env p ty2 ty1 Reason.index_array in
@@ -348,7 +348,9 @@ let rec assign_array_append pos ur env ty1 ty2 =
     let env, resl =
       List.map_env env ty1l (fun env ty1 -> assign_array_append pos ur env ty1 ty2) in
     let (ty1l', tyl') = List.unzip resl in
-    env, ((r, Tunresolved ty1l'), (r, Tunresolved tyl'))
+    let ty1' = Union.union_list_approx env ty1l' r in
+    let ty' = Union.union_list_approx env tyl' r in
+    env, (ty1', ty')
   | _, Tabstract _ ->
     let resl = TUtils.try_over_concrete_supertypes env ty1 begin fun env ty1 ->
       let _env, res = assign_array_append pos ur env ty1 ty2 in
@@ -394,7 +396,9 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
     let env, resl = List.map_env env ty1l (fun env ty1 ->
       assign_array_get pos ur env ty1 key tkey ty2) in
     let (ty1l', tyl') = List.unzip resl in
-    env, ((fst ety1, Tunresolved ty1l'), (fst ety1, Tunresolved tyl'))
+    let ty1' = Union.union_list_approx env ty1l' (fst ety1) in
+    let ty' = Union.union_list_approx env tyl' (fst ety1) in
+    env, (ty1', ty')
   | Tarraykind (AKvarray tv) ->
     let tk = MakeType.int (Reason.Ridx (fst key, fst ety1)) in
     let env = type_index env pos tkey tk Reason.index_array in

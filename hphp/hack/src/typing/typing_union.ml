@@ -75,6 +75,9 @@ let rec union env (r1, _ as ty1) (r2, _ as ty2) =
         union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r =
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  let (env, ty1) = if new_inference then Env.expand_type env ty1 else env, ty1 in
+  let (env, ty2) = if new_inference then Env.expand_type env ty2 else env, ty2 in
   try
   begin match ty1, ty2 with
   | (r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat)
@@ -96,7 +99,7 @@ and union_ env ty1 ty2 r =
     | _, Toption _ -> env, ty
     | _ -> env, (r, Toption ty)
     end
-  | (_, Tvar n1), (_, Tvar n2) when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
+  | (_, Tvar n1), (_, Tvar n2) when not new_inference ->
     let env, n1 = Env.get_var env n1 in
     let env, n2 = Env.get_var env n2 in
     if n1 = n2 then env, (r, Tvar n1) else
@@ -107,7 +110,7 @@ and union_ env ty1 ty2 r =
     let env = URec.add env n' ty in
     env, (r, Tvar n')
   | (r, Tvar n), ty2
-  | ty2, (r, Tvar n) when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
+  | ty2, (r, Tvar n) when not new_inference ->
     let env, ty1 = Env.get_type env r n in
     let n' = Env.fresh () in
     let env, ty = union env ty1 ty2 in
@@ -409,10 +412,25 @@ and union_reason r1 r2 =
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
 
-let union_list_approx tyl r =
-  let tyl = TySet.elements (TySet.of_list tyl) in
-  match tyl with
-  | [ty] -> ty
-  | _ -> (r, Tunresolved tyl)
+let union_list_approx env tyl r =
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  let rec normalized_union tyl reason_nullable =
+    match tyl with
+    | [] -> reason_nullable, TySet.empty
+    | ty :: tyl ->
+      let ty = if new_inference then Typing_expand.fully_expand env ty else ty in
+      let reason_nullable, tys' = match ty with
+        | (r, Toption ty) -> normalized_union [ty] (Some r)
+        | (_, Tunresolved tyl') -> normalized_union tyl' reason_nullable
+        | ty -> reason_nullable, TySet.singleton ty in
+      let reason_nullable, tys = normalized_union tyl reason_nullable in
+      reason_nullable, TySet.union tys' tys in
+  let reason_nullable, tys = normalized_union tyl None in
+  let ty = match TySet.elements tys with
+    | [ty] -> ty
+    | tyl -> (r, Tunresolved tyl) in
+  match reason_nullable with
+  | Some r -> (r, Toption ty)
+  | None -> ty
 
 let () = Typing_utils.union_ref := union

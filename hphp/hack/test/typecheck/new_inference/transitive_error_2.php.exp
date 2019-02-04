@@ -1,6 +1,6 @@
 File "transitive_error_2.php", line 12, characters 5-6:
 Invalid argument (Typing[4110])
-File "transitive_error_2.php", line 8, characters 17-22:
-This is a string
-File "transitive_error_2.php", line 4, characters 20-22:
-It is incompatible with an int
+  File "transitive_error_2.php", line 8, characters 17-22:
+  This is a string
+  File "transitive_error_2.php", line 4, characters 20-22:
+  It is incompatible with an int

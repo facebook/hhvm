@@ -10,7 +10,9 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List
+
+from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 
 max_workers = 48
 verbose = False
@@ -30,6 +32,65 @@ same name as test, but with .flags extension.
 """
 
 
+def compare_errors_by_line_no(errors_exp: List[Error], errors_out: List[Error]):
+    i_out = 0
+    i_exp = 0
+    len_out = len(errors_out)
+    len_exp = len(errors_exp)
+    errors_in_out_not_in_exp = []
+    errors_in_exp_not_in_out = []
+    while i_out < len_out and i_exp < len_exp:
+        err_out = errors_out[i_out]
+        err_exp = errors_exp[i_exp]
+        l_out = err_out.message.position.line
+        l_exp = err_exp.message.position.line
+        if l_out < l_exp:
+            errors_in_out_not_in_exp.append(err_out)
+            i_out += 1
+        elif l_exp < l_out:
+            errors_in_exp_not_in_out.append(err_exp)
+            i_exp += 1
+        else:
+            i_out += 1
+            i_exp += 1
+    if i_out >= len_out:
+        for i in range(i_exp, len_exp):
+            errors_in_exp_not_in_out.append(errors_exp[i])
+    elif i_exp >= len_exp:
+        for i in range(i_out, len_out):
+            errors_in_out_not_in_exp.append(errors_out[i])
+    return (errors_in_exp_not_in_out, errors_in_out_not_in_exp)
+
+
+def compare_output_files_error_lines_only(file_out: str, file_exp: str):
+    out = ''
+    failed = False
+    try:
+        errors_out = parse_errors(file_out)
+        errors_exp = parse_errors(file_exp)
+        (errors_in_exp_not_in_out, errors_in_out_not_in_exp) = \
+            compare_errors_by_line_no(errors_out=errors_out, errors_exp=errors_exp)
+
+        failed = errors_in_exp_not_in_out or errors_in_out_not_in_exp
+        if errors_in_exp_not_in_out:
+            out += f"""\033[93mExpected errors which were not produced:\033[0m
+{sprint_errors(errors_in_exp_not_in_out)}
+"""
+        if errors_in_out_not_in_exp:
+            out += f"""\033[93mProduced errors which were not expected:\033[0m
+{sprint_errors(errors_in_out_not_in_exp)}
+"""
+    except IOError as e:
+        out = f'Warning: {e}'
+    return (failed, out)
+
+
+def check_output_error_lines_only(test: str, out_ext=".out", exp_ext=".exp"):
+    file_out = test + out_ext
+    file_exp = test + exp_ext
+    return compare_output_files_error_lines_only(file_out=file_out, file_exp=file_exp)
+
+
 def get_test_flags(path: str) -> List[str]:
     prefix, _ext = os.path.splitext(path)
     path = prefix + '.flags'
@@ -40,12 +101,31 @@ def get_test_flags(path: str) -> List[str]:
         return shlex.split(file.read().strip())
 
 
+def check_output(
+    case,
+    out_extension: str,
+    default_expect_regex,
+    ignore_error_text: bool,
+    only_compare_error_lines: bool,
+):
+    if only_compare_error_lines:
+        (failed, out) = check_output_error_lines_only(case.file_path)
+        return Result(test_case=case, output=out, is_failure=failed)
+    else:
+        with open(case.file_path + out_extension, "r") as f:
+            output : str = f.read()
+            return check_result(case, default_expect_regex,
+              ignore_error_text, output)
+
+
 def run_batch_tests(test_cases: List[TestCase],
                     program: str,
                     default_expect_regex,
                     ignore_error_text,
                     get_flags: Callable[[str], List[str]],
-                    out_extension: str) -> List[Result]:
+                    out_extension: str,
+                    only_compare_error_lines: bool = False,
+                    ) -> List[Result]:
     """
     Run the program with batches of files and return a list of results.
     """
@@ -77,17 +157,19 @@ def run_batch_tests(test_cases: List[TestCase],
             subprocess.call(
                 cmd, stderr=subprocess.STDOUT, cwd=test_dir,
                 universal_newlines=True)
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             pass
         results = []
         for case in test_cases:
-            with open(case.file_path + out_extension, "r") as f:
-                output : str = f.read()
-                result = check_result(case, default_expect_regex,
-                  ignore_error_text, output)
-                results.append(result)
+            result = check_output(
+                case,
+                out_extension=out_extension,
+                default_expect_regex=default_expect_regex,
+                ignore_error_text=ignore_error_text,
+                only_compare_error_lines=only_compare_error_lines)
+            results.append(result)
         return results
     # Create a list of batched cases.
     all_batched_cases : List[List[TestCase]] = []
@@ -106,6 +188,7 @@ def run_batch_tests(test_cases: List[TestCase],
     results = [future.result() for future in futures]
     # Flatten the list
     return [item for sublist in results for item in sublist]
+
 
 def run_test_program(test_cases: List[TestCase],
                      program: str,
@@ -154,8 +237,8 @@ def filter_ocaml_stacktrace(text: str) -> str:
     out = []
     for x in it:
         drop_line = (
-            x.lstrip().startswith("Called") or
-            x.lstrip().startswith("Raised")
+            x.lstrip().startswith("Called")
+            or x.lstrip().startswith("Raised")
         )
         if drop_line:
             pass
@@ -185,12 +268,12 @@ def check_result(test_case: TestCase, default_expect_regex,
     check that the output in :out contains the provided regex.
     """
     is_ok = (
-        strip_lines(test_case.expected) == strip_lines(out) or
-        (ignore_error_messages and compare_expected(test_case.expected, out)) or
-        test_case.expected == filter_ocaml_stacktrace(out) or
-        (
-            default_expect_regex is not None and
-            re.search(default_expect_regex, out) is not None
+        strip_lines(test_case.expected) == strip_lines(out)
+        or (ignore_error_messages and compare_expected(test_case.expected, out))
+        or test_case.expected == filter_ocaml_stacktrace(out)
+        or (
+            default_expect_regex is not None
+            and re.search(default_expect_regex, out) is not None
         )
     )
 
@@ -208,17 +291,24 @@ def report_failures(total: int,
                     failures: List[Result],
                     out_extension: str,
                     expect_extension: str,
-                    no_copy: bool=False) -> None:
-    record_results(failures, out_extension)
-    fnames = [failure.test_case.file_path for failure in failures]
-    print("To review the failures, use the following command: ")
-    print("OUT_EXT=%s EXP_EXT=%s NO_COPY=%s ./hphp/hack/test/review.sh %s" %
-            (out_extension,
-            expect_extension,
-            "true" if no_copy else "false",
-            " ".join(fnames)))
-    if dump_on_failure:
-        dump_failures(failures)
+                    no_copy: bool = False,
+                    only_compare_error_lines: bool = False) -> None:
+    if only_compare_error_lines:
+        for failure in failures:
+            print(f'\033[95m{failure.test_case.file_path}\033[0m')
+            print(failure.output)
+            print()
+    else:
+        record_results(failures, out_extension)
+        fnames = [failure.test_case.file_path for failure in failures]
+        print("To review the failures, use the following command: ")
+        print("OUT_EXT=%s EXP_EXT=%s NO_COPY=%s ./hphp/hack/test/review.sh %s" %
+                (out_extension,
+                expect_extension,
+                "true" if no_copy else "false",
+                " ".join(fnames)))
+        if dump_on_failure:
+            dump_failures(failures)
 
 
 def dump_failures(failures: List[Result]) -> None:
@@ -288,7 +378,7 @@ def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
             args.test_path)
 
 
-def get_content(file_path: str, ext: str='') -> str:
+def get_content(file_path: str, ext: str = '') -> str:
     try:
         with open(file_path + ext, 'r') as fexp:
             return fexp.read()
@@ -306,6 +396,7 @@ def run_tests(files: List[str],
               ignore_error_text: str,
               get_flags: Callable[[str], List[str]],
               timeout=None,
+              only_compare_error_lines: bool = False,
               ) -> List[Result]:
 
     # for each file, create a test case
@@ -317,7 +408,7 @@ def run_tests(files: List[str],
         for file in files]
     if batch_mode:
         results = run_batch_tests(test_cases, program, default_expect_regex,
-            ignore_error_text, get_flags, out_extension)
+            ignore_error_text, get_flags, out_extension, only_compare_error_lines)
     else:
         results = run_test_program(test_cases, program, default_expect_regex,
             ignore_error_text, get_flags, timeout=timeout)
@@ -335,7 +426,8 @@ def run_tests(files: List[str],
             num_results,
             failures,
             args.out_extension,
-            args.expect_extension)
+            args.expect_extension,
+            only_compare_error_lines=only_compare_error_lines)
         sys.exit(1)  # this exit code fails the suite and lets Buck know
 
     return results
@@ -422,12 +514,16 @@ if __name__ == '__main__':
                         help='Run tests in batches to the test program')
     parser.add_argument("--ignore-error-text", action='store_true',
                         help='Do not compare error text when verifying output')
+    parser.add_argument("--only-compare-error-lines", action='store_true',
+                        help='Does not care about exact expected error message, '
+                        'but only compare the error line numbers.')
     parser.add_argument("--timeout", type=int,
                     help='Timeout in seconds for each test, in non-batch mode.')
     parser.epilog = "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
                     "contents will be passed as arguments to " \
-                    "<program> in addition to any arguments specified by --flags" % parser.prog
+                    "<program> in addition to any arguments " \
+                    "specified by --flags" % parser.prog
     args = parser.parse_args()
 
     max_workers = args.max_workers
@@ -461,7 +557,8 @@ if __name__ == '__main__':
         args.batch,
         args.ignore_error_text,
         get_flags,
-        timeout=args.timeout)
+        timeout=args.timeout,
+        only_compare_error_lines=args.only_compare_error_lines)
 
     # Doesn't make sense to check failures for idempotence
     successes = [result for result in results if not result.is_failure]

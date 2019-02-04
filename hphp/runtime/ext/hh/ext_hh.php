@@ -123,6 +123,8 @@ interface FileAttribute {}
 
 interface TypeParameterAttribute {}
 
+interface TypeConstantAttribute {}
+
 }
 
 

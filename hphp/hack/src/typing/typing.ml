@@ -6228,16 +6228,20 @@ and typeconst_def env {
   c_tconst_name = (pos, _) as id;
   c_tconst_constraint;
   c_tconst_type;
+  c_tconst_user_attributes;
 } =
   let env, cstr = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let env, ty = opt Phase.localize_hint_with_self env c_tconst_type in
   ignore (
     Option.map2 ty cstr ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
   );
+  let env = Typing_attributes.check_def env new_object
+    SN.AttributeKinds.typeconst c_tconst_user_attributes in
   {
     T.c_tconst_name = id;
     T.c_tconst_constraint = c_tconst_constraint;
     T.c_tconst_type = c_tconst_type;
+    T.c_tconst_user_attributes = List.map c_tconst_user_attributes (user_attribute env);
   }
 
 and class_const_def env (h, id, e) =

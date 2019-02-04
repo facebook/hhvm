@@ -480,6 +480,7 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;
     c_tconst_type = optional on_hint tconst_type;
+    c_tconst_user_attributes = on_list on_user_attribute tc.tconst_user_attributes;
   }
 
 and on_class_var is_xhp h attrs kinds (_, id, eopt) : Aast.class_var =

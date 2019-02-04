@@ -201,6 +201,7 @@ module AttributeKinds = struct
   let parameter = "\\HH\\ParameterAttribute"
   let typeparam = "\\HH\\TypeParameterAttribute"
   let file = "\\HH\\FileAttribute"
+  let typeconst = "\\HH\\TypeConstantAttribute"
 
   let plain_english_map =
     List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
@@ -214,6 +215,7 @@ module AttributeKinds = struct
       ; (parameter, "a parameter")
       ; (typeparam, "a type parameter")
       ; (file, "a file")
+      ; (typeconst, "a type constant")
       ]
 end
 

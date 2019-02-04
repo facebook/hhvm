@@ -289,7 +289,7 @@ struct
     T.c_req_implements = c.S.c_req_implements;
     T.c_implements = c.S.c_implements;
     T.c_consts = List.map c.S.c_consts (map_class_const menv);
-    T.c_typeconsts = List.map c.S.c_typeconsts map_class_typeconst;
+    T.c_typeconsts = List.map c.S.c_typeconsts (map_class_typeconst menv);
     T.c_static_vars = List.map c.S.c_static_vars (map_class_var menv);
     T.c_vars = List.map c.S.c_vars (map_class_var menv);
     T.c_constructor = Option.map c.S.c_constructor (map_method menv);
@@ -328,11 +328,12 @@ struct
   and map_class_const menv (h, id, e) =
     (h, id, Option.map e (map_expr menv))
 
-  and map_class_typeconst tc =
+  and map_class_typeconst menv tc =
   {
     T.c_tconst_name = tc.S.c_tconst_name;
     T.c_tconst_constraint = tc.S.c_tconst_constraint;
     T.c_tconst_type = tc.S.c_tconst_type;
+    T.c_tconst_user_attributes = List.map tc.S.c_tconst_user_attributes (map_user_attribute menv);
   }
 
   and map_class_var menv cv =

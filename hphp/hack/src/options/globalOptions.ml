@@ -141,6 +141,11 @@ let tco_experimental_reified_generics = "reified_generics"
 let tco_experimental_trait_method_redeclarations = "trait_method_redeclarations"
 
 (**
+ * Enable attributes on type constants
+ *)
+let tco_experimental_type_const_attributes = "type_const_attributes"
+
+(**
  * Enable declaration linearization
  *)
 let tco_experimental_decl_linearization = "decl_linearization"
@@ -174,6 +179,7 @@ let tco_experimental_all =
      tco_experimental_null_coalesce_assignment;
      tco_experimental_reified_generics;
      tco_experimental_trait_method_redeclarations;
+     tco_experimental_type_const_attributes;
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
      tco_experimental_null_type;

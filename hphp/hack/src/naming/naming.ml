@@ -1606,10 +1606,15 @@ module Make (GetLocals : GetLocals) = struct
     Env.bind_class_const env t.Aast.c_tconst_name;
     let constr = Option.map t.Aast.c_tconst_constraint (aast_hint env) in
     let type_ = Option.map t.Aast.c_tconst_type (aast_hint env) in
+    let attrs = aast_user_attributes env t.Aast.c_tconst_user_attributes in
+    if not (TypecheckerOptions.experimental_feature_enabled (fst env).tcopt
+        TypecheckerOptions.experimental_type_const_attributes || List.is_empty attrs)
+    then Errors.experimental_feature (fst t.Aast.c_tconst_name) "type constant attributes";
     N.
     { c_tconst_name = t.Aast.c_tconst_name
     ; c_tconst_constraint = constr
     ; c_tconst_type = type_
+    ; c_tconst_user_attributes = attrs
     }
 
   and func_body_had_unsafe env = Env.has_unsafe env

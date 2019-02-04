@@ -1051,7 +1051,7 @@ and param_is_mutable p =
 and param_is_maybe_mutable p =
   Attributes.mem SN.UserAttributes.uaMaybeMutable p.param_user_attributes
 
-and fun_param env (pos, name) f_type byref param =
+and fun_param env (_pos, name) f_type byref param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
   let is_mutable = param_is_mutable param in
@@ -1062,11 +1062,6 @@ and fun_param env (pos, name) f_type byref param =
     if is_maybe_mutable
     then Errors.maybe_mutable_methods_must_be_reactive param.param_pos name;
   end;
-
-  if env.is_reactive
-     && param.param_is_reference
-     && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
-  then Errors.reference_in_rx pos;
 
   match param.param_callconv with
   | None -> ()

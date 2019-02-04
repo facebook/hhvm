@@ -5795,37 +5795,21 @@ and safely_refine_class_type
    * then $x instanceof C should refine to $x:C<t>.
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
-   *    1) There is an eqality constraint T#1 = t then replace T#1 with t.
-   *    2) T#1 is covariant, and T#1 <: t and occurs nowhere else in the constraints
-   *    3) T#1 is contravariant, and t <: T#1 and occurs nowhere else in the constraints
+   *      - There is an eqality constraint T#1 = t,
+   *      - T#1 is covariant, and T#1 has only one upper bound t
+   *      - T#1 is contravariant, and t <: T#1 has only one lower bount t,
+   *    then replace T#1 with t.
+   * This is done in Env.simplify_tpenv
    *)
-  let tparam_names = List.filter_map ~f:(Option.map ~f:snd) tparams_with_new_names in
+  let tparam_names = List.filter_map tparams_with_new_names
+    ~f:(Option.map ~f:(fun (tp, name) -> (name, tp.tp_variance))) in
   let env, tparam_substs = Env.simplify_tpenv env tparam_names reason in
   let tyl_fresh = List.map2_exn tyl_fresh tparams_with_new_names
     ~f:(fun orig_ty tparam_opt ->
       match tparam_opt with
       | None -> orig_ty
       | Some (_tp, name) -> SMap.find name tparam_substs) in
-  let tparams_in_constraints = Env.get_tpenv_tparams env in
-  let tyl_fresh_simplified =
-    List.map2_exn tparams_with_new_names tyl_fresh
-      ~f:begin fun x y -> match x, y with
-        | Some (t, newname), ty_fresh ->
-          begin match t.tp_variance,
-            TySet.elements (Env.get_lower_bounds env newname),
-            TySet.elements (Env.get_equal_bounds env newname),
-            TySet.elements (Env.get_upper_bounds env newname) with
-            (* Special case for mixed=?nonnull as a lower bound *)
-            | _, [(_, Toption (_, Tnonnull)) as ty], _, _ -> ty
-            | _, _, [ty], _ -> ty
-            | Ast.Covariant, _, _, [ty]
-            | Ast.Contravariant, [ty], _, _
-              when not (SSet.mem newname tparams_in_constraints) -> ty
-            | _, _, _, _ -> ty_fresh
-          end
-        | None, ty_fresh -> ty_fresh
-      end in
-  let obj_ty_simplified = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh_simplified)) in
+  let obj_ty_simplified = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh)) in
   env, obj_ty_simplified
 
 and is_instance_var = function

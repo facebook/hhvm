@@ -138,7 +138,7 @@ type parameters by looking for a type to which they are equal in the tpenv.
 If such a type exists, remove the type parameter from the tpenv.
 Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
-val simplify_tpenv : env -> string list -> Reason.t -> env * locl ty SMap.t
+val simplify_tpenv : env -> (string * Ast.variance) list -> Reason.t -> env * locl ty SMap.t
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list

@@ -271,27 +271,36 @@ let remove_from_tpenv tpenv tparam =
   let tpenv = TySet.fold remove_tparam_from_lower_bounds_of upper_bounds tpenv in
   SMap.remove tparam tpenv
 
-let simplify_tpenv env (tparam_names : string list) r =
+let simplify_tpenv env (tparams : (string * Ast.variance) list) r =
   let tpenv = env.lenv.tpenv in
-  (* For each tparam, if there exists one other type parameter tparam' to which
-   * it is equal, remove tparam from tpenv and add substitution
-   * (tparam -> tparam') to substs. *)
-  let (tpenv, substs) = List.fold tparam_names ~init:(tpenv, SMap.empty)
-    ~f:(fun (tpenv, substs) tparam_name ->
+  (* For each tparam, "solve" it if it falls in any of those categories:
+   *   - there exists a type ty to which it is equal
+   *   - it is covariant and has only one upper bound ty
+   *   - it is contravariant and has only one lower bound ty.
+   * In which case remove tparam from tpenv and add substitution
+   * (tparam -> ty) to substs. *)
+  let (tpenv, substs) = List.fold tparams ~init:(tpenv, SMap.empty)
+    ~f:(fun (tpenv, substs) (tparam_name, variance) ->
       let equal_bounds = get_tpenv_equal_bounds tpenv tparam_name in
-      match TySet.choose_opt equal_bounds with
-      | Some equal_bound ->
+      let lower_bounds = TySet.elements (get_tpenv_lower_bounds tpenv tparam_name) in
+      let upper_bounds = TySet.elements (get_tpenv_upper_bounds tpenv tparam_name) in
+      match variance, lower_bounds, upper_bounds, TySet.choose_opt equal_bounds with
+      (* Special case for mixed=?nonnull as a lower bound *)
+      | _, [(_, Toption (_, Tnonnull)) as bound], _, _
+      | _, _, _, Some bound
+      | Ast.Covariant, _, [bound], _
+      | Ast.Contravariant, [bound], _, _->
         (* remove tparam_name from tpenv, and in any lower/upper bound set
          * where it occurs.
          * We don't need to do any merging of lower/upper bounds,
          * because all its lower/upper bounds
-         * are already lower/upper bounds of equal_bound (and other bounds)
+         * are already lower/upper bounds of `bound` (and other bounds)
          * thanks to the transitive closure we've done in
          * Typing_subtype.add_constraint. *)
         let tpenv = remove_from_tpenv tpenv tparam_name in
-        let substs = SMap.add tparam_name equal_bound substs in
+        let substs = SMap.add tparam_name bound substs in
         tpenv, substs
-      | None ->
+      | _ ->
         let tparam_ty = (r, Tabstract (AKgeneric tparam_name, None)) in
         let substs = SMap.add tparam_name tparam_ty substs in
         tpenv, substs) in
@@ -316,8 +325,8 @@ let simplify_tpenv env (tparam_names : string list) r =
       end
     | Some subst ->
       substs, Some subst in
-  let reduce substs tparam = fst (reduce substs tparam) in
-  let substs = List.fold tparam_names ~init:substs ~f:reduce in
+  let reduce substs (tparam, _) = fst (reduce substs tparam) in
+  let substs = List.fold tparams ~init:substs ~f:reduce in
   env_with_tpenv env tpenv, substs
 
 let add_upper_bound_global env name ty =

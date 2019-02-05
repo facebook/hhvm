@@ -4,7 +4,7 @@ int(1234)
 int(1234)
 logger 0 constructing
 
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 28
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 25
 array(2) {
   ["x"]=>
   object(logger)#1 (1) {
@@ -16,7 +16,7 @@ array(2) {
 }
 string(12) "almost there"
 
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 32
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 29
 array(2) {
   ["foo"]=>
   string(10) "inside foo"
@@ -24,7 +24,7 @@ array(2) {
   string(3) "foo"
 }
 
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 33
+Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 30
 array(4) {
   ["x"]=>
   object(logger)#1 (1) {

@@ -232,17 +232,6 @@ module CheckFunctionBody = struct
     | _, BracedExpr _
     | _, ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
     | _, Any -> ()
-    | _, Class_const ((_pos, CIparent), ((_, construct)))
-      when construct = SN.Members.__construct ->
-      let () = match Env.get_class env.tenv (Env.get_parent_id env.tenv) with
-        | Some parent_class ->
-          begin match fst (Cls.construct parent_class) with
-          | None when (Cls.kind parent_class) = Ast.Cabstract ->
-              Errors.parent_abstract_call construct p (Cls.pos parent_class);
-          | _ -> ()
-          end
-        | _ -> () in
-      ()
     | _, Class_const _
     | _, Fun_id _
     | _, Method_id _
@@ -1006,10 +995,6 @@ and method_ (env, is_static) m =
     m.m_fun_kind
     env
     named_body.fb_ast;
-  if m.m_abstract && named_body.fb_ast <> []
-  then Errors.abstract_with_body m.m_name;
-  if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fb_ast = []
-  then Errors.not_abstract_without_body m.m_name;
   (match env.class_name with
   | Some cname ->
       let p, mname = m.m_name in

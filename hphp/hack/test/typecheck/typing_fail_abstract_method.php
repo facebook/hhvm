@@ -12,7 +12,7 @@
 // An abstract method shouldn't contain code
 
 abstract class A {
-  public abstract function f() {
+  public abstract function f(): int {
     return 0;
   }
 }

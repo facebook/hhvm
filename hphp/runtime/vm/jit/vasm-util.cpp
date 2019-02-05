@@ -570,10 +570,11 @@ struct SSAConverter {
         if (it == incompletePhis.end()) continue;
         auto const& preds = predecessors[succ];
         assertx(preds.size() > 1);
-        for (auto const& incomplete : it->second) {
+        auto const incompletes = std::move(it->second);
+        incompletePhis.erase(it);
+        for (auto const& incomplete : incompletes) {
           fillPhi(succ, incomplete.phi, incomplete.variable, preds);
         }
-        incompletePhis.erase(it);
       }
     }
   }

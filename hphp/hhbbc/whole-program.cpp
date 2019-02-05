@@ -629,6 +629,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         "bailing because Eval.AbortBuildOnVerifyError is set\n",
         ue->m_filepath->data()
       );
+      std::exit(1);
     }
     ueq.push(std::move(ue));
   });

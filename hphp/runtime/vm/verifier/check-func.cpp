@@ -916,7 +916,11 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
   switch (mcode) {
     case MET: case MPT: case MQT: {
       auto const id = decode_raw<Id>(pc);
-      if (!checkString(pc, id)) return false;
+      if (!checkString(pc, id)) {
+        error("Member Key in op %s contains an invalid string id\n",
+              opcodeToName(op));
+        return false;
+      }
       break;
     }
 
@@ -1275,7 +1279,12 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       if (decode_oa<BareThisOp>(new_pc) != BareThisOp::NeverNull) break;
     }
     case Op::BaseH: {
-      if (!cur->guaranteedThis) {
+      // In HHBBC we can track the $this across loads into locals and pushes
+      // onto the stack. If the types of those equivalent locations are refined
+      // we may end up knowing that $this is never null. The verifier doesn't
+      // currently support this type of sophisticated tracking and it's doubtful
+      // there would be much value in adding it.
+      if (!RuntimeOption::RepoAuthoritative && !cur->guaranteedThis) {
         ferror("{} required that $this be guaranteed to be non-null\n",
         opcodeToName(op));
         return false;

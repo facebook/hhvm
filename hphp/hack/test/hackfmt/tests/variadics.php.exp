@@ -12,7 +12,7 @@ function f(
     $bbbbbbbbbbbbbbbbbbbb,
     $cccccccccc,
     $dddddddddd,
-    ...$eee,
+    ...$eee
   ) {
     return 1;
   };

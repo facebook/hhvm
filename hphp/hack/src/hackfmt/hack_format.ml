@@ -2767,12 +2767,8 @@ and transform_argish_with_return_type env left_p params right_p colon ret_type =
   Concat [
     t env left_p;
     when_present params split;
-    WithRule (Rule.Parental, Span [
-      Span [ transform_possible_comma_list env params right_p ];
-      t env colon;
-      when_present colon space;
-      t env ret_type;
-    ])
+    transform_fn_decl_args env
+      params right_p colon ret_type (Syntax.make_missing SourceText.empty 0);
   ]
 
 and transform_argish env

@@ -23,7 +23,6 @@
 
 open Core_kernel
 open Nast
-open String_utils
 open Typing_defs
 open Utils
 
@@ -507,17 +506,17 @@ and hint_ env p = function
       end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
     begin match Typing_lazy_heap.get_typedef (Env.get_tcopt env.tenv) x with
-      | Some {td_tparams; _} ->
+      | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);
-        check_tparams env p x td_tparams hl
+        List.iter hl (hint env)
       | None -> ()
     end
   | Happly ((_, x), hl) as h ->
       (match Env.get_class env.tenv x with
       | None -> ()
-      | Some class_ ->
+      | Some _ ->
           check_happly env.typedef_tparams env.tenv (p, h);
-          check_tparams env p x (Cls.tparams class_) hl
+          List.iter hl (hint env)
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
@@ -529,21 +528,6 @@ and hint_ env p = function
       hint env h; ()
   | Hreified h ->
       hint env h; ()
-
-and check_tparams env p x tparams hl =
-  let arity = List.length tparams in
-  check_arity env p x arity (List.length hl);
-  List.iter hl (hint env);
-
-and check_arity env p tname arity size =
-  if size = arity then () else
-  if size = 0 && not (Typing_env.is_strict env.tenv)
-  && not (TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env.tenv)
-    TypecheckerOptions.experimental_generics_arity)
-  then ()
-  else
-    let nargs = soi arity in
-    Errors.type_arity p tname nargs
 
 and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in

@@ -1,2 +1,2 @@
-File "incorrect_tparam_arity.php", line 4, characters 24-30:
+File "incorrect_tparam_arity.php", line 4, characters 21-27:
 The type C expects 1 type parameter(s) (Typing[4101])

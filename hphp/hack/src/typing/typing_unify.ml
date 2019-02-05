@@ -120,8 +120,8 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   | Tfun ft1, Tfun ft2 ->
       let env, ft = unify_funs env r1 ft1 r2 ft2 in
       env, Tfun ft
-  | Tclass (((p1, x1) as id), e1, argl1),
-      Tclass ((p2, x2), e2, argl2) when String.compare x1 x2 = 0 ->
+  | Tclass (((_, x1) as id), e1, argl1),
+      Tclass ((_, x2), e2, argl2) when String.compare x1 x2 = 0 ->
       let e = match e1, e2 with
       | Exact, Exact -> Exact
       | _, _ -> Nonexact in
@@ -136,28 +136,10 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           then List.map argl1 (fun _ -> (r1, Tany))
           else argl2
         in
-        if List.length argl1 <> List.length argl2
-        then begin
-          let n1 = soi (List.length argl1) in
-          let n2 = soi (List.length argl2) in
-          Errors.type_arity_mismatch p1 n1 p2 n2;
-          env, Terr
-        end
-        else
           let env, argl = List.map2_env env argl1 argl2 unify in
           env, Tclass (id, e, argl)
   | Tabstract (AKnewtype (x1, argl1), tcstr1),
     Tabstract (AKnewtype (x2, argl2), tcstr2) when String.compare x1 x2 = 0 ->
-        if List.length argl1 <> List.length argl2
-        then begin
-          let n1 = soi (List.length argl1) in
-          let n2 = soi (List.length argl2) in
-          let p1 = Reason.to_pos r1 in
-          let p2 = Reason.to_pos r2 in
-          Errors.type_arity_mismatch p1 n1 p2 n2;
-          env, Terr
-        end
-        else
           let env, tcstr = match tcstr1, tcstr2 with
             | Some x1, Some x2 ->
               let env, x = unify env x1 x2 in

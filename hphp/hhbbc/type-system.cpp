@@ -699,6 +699,14 @@ Type packed_values(const DArrLikePacked& a) {
 }
 
 //////////////////////////////////////////////////////////////////////
+template <typename T>
+struct DataTagTrait {};
+
+template<> struct DataTagTrait<DArrLikePacked>  { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikePackedN> { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikeMap>     { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikeMapN>    { using tag = SArray; };
+template<> struct DataTagTrait<SArray>          { using tag = SArray; };
 
 /*
  * Helper for dealing with dualDispatchDataFn's---most of them are commutative.
@@ -715,26 +723,15 @@ struct Commute : InnerFn {
 
   using InnerFn::operator();
 
-  template<class B>
-  typename std::enable_if<!std::is_same<SArray, B>::value, result_type>::type
-  operator()(SArray a, const B& b) const {
+  template<class T1, class T2>
+  typename std::enable_if<!std::is_same<T1, T2>::value &&
+                          std::is_same<typename DataTagTrait<T1>::tag,
+                                       typename DataTagTrait<T2>::tag>::value,
+                          result_type>::type
+  operator()(const T1& a, const T2& b) const {
     return InnerFn::operator()(b, a);
   }
 
-  template<class B>
-  result_type operator()(const DArrLikeMap& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
-
-  template<class B>
-  result_type operator()(const DArrLikePackedN& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
-
-  template<class B>
-  result_type operator()(const DArrLikeMapN& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
 };
 
 template<bool contextSensitive>
@@ -1523,17 +1520,26 @@ const Type& Type::operator &= (Type&& other) {
 
 template<class Ret, class T, class Function>
 struct Type::DDHelperFn {
-  template<class Y>
-  typename std::enable_if<!std::is_same<Y,T>::value ||
-                          !Function::disjoint, Ret>::type
+  template <class Y>
+  typename std::enable_if<(!std::is_same<Y,T>::value || !Function::disjoint) &&
+                          std::is_same<typename DataTagTrait<Y>::tag,
+                                       typename DataTagTrait<T>::tag>::value,
+                          Ret>::type
   operator()(const Y& y) const { return f(t, y); }
 
   template <class Y>
-  typename std::enable_if<std::is_same<Y, T>::value && Function::disjoint,
+  typename std::enable_if<(std::is_same<Y,T>::value && Function::disjoint) &&
+                          std::is_same<typename DataTagTrait<Y>::tag,
+                                       typename DataTagTrait<T>::tag>::value,
                           Ret>::type
-  operator()(const Y& /*y*/) const {
-    not_reached();
-  }
+  operator()(const Y& /*y*/) const { not_reached(); }
+
+  template <class Y>
+  typename std::enable_if<!std::is_same<typename DataTagTrait<Y>::tag,
+                                        typename DataTagTrait<T>::tag>::value,
+                          Ret>::type
+  operator()(const Y& /*y*/) const { return f(); }
+
   Ret operator()() const { return f(); }
   Function f;
   const T& t;

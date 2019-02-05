@@ -420,6 +420,26 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   return [$process, $pipes, $client];
 }
 
+// Polls up to 10 seconds waiting for the specified process to exit.
+// Returns true if it exited, false otherwise.
+function pollForExit($process) {
+  $tries = 0;
+  $status = null;
+
+  while ($tries < 10) {
+    $status = proc_get_status($process);
+    if ($status{'running'} !== false) {
+     sleep(1);
+    } else {
+     return true;
+    }
+    $tries++;
+  }
+
+  $status = proc_get_status($process);
+  return $status{'running'} === false;
+}
+
 function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
   $process = $testProcess[0];
   $pipes = $testProcess[1];
@@ -441,21 +461,14 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
     fclose($pipe);
   }
 
-  $tries = 0;
-  $status = null;
+  if (!pollForExit($process)) {
+    // Ask the process to exit.
+    proc_terminate($process);
 
-  while ($tries < 10) {
-    $status = proc_get_status($process);
-    if ($status{'running'} !== false) {
-      sleep(1);
-    } else {
-      break;
+    if (!pollForExit($process)) {
+      // Send process SIGKILL
+      proc_terminate($process, 9);
     }
-    $tries++;
-  }
-
-  if ($status{'running'} !== false) {
-    throw new UnexpectedValueException("Expected child process to have exited!");
   }
 
   proc_close($process);

@@ -98,7 +98,7 @@ val add_constraint :
 
 val solve_tyvars :
   ?solve_invariant:bool ->
-  tyvars:ISet.t ->
+  tyvars:Ident.t list ->
   Env.env ->
   Env.env
 

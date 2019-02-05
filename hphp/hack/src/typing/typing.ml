@@ -520,7 +520,7 @@ and fun_def tcopt f : Tast.fun_def option =
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
-      let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
+      let tyvars = IMap.keys env.Env.tvenv in
       let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
       Typing_subtype.log_prop env;
       (* restore original reactivity *)
@@ -6515,7 +6515,7 @@ and method_def env m =
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env = Env.check_todo env in
-  let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
+  let tyvars = IMap.keys env.Env.tvenv in
   let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
   Typing_subtype.log_prop env;
   (* restore original method reactivity  *)

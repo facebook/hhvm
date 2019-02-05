@@ -203,8 +203,8 @@ let log_tvenv env =
 let log_tyvars env =
   indentEnv "tyvars_stack" (fun () ->
     lprintf (Normal Green) "%s"
-      (String.concat ~sep:"/" (List.map ~f:(fun s -> "{" ^ String.concat ~sep:","
-        (List.map ~f:(fun i -> Printf.sprintf "#%d" i) (ISet.elements s)) ^ "}")
+      (String.concat ~sep:"/" (List.map ~f:(fun vars -> "{" ^ String.concat ~sep:","
+        (List.map ~f:(fun i -> Printf.sprintf "#%d" i) vars) ^ "}")
         env.Env.tyvars_stack)))
 
 let log_fake_members env =

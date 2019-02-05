@@ -19,8 +19,8 @@ val fresh : unit -> int
 val fresh_type : env -> Pos.t -> env *  locl ty
 val fresh_unresolved_type : env -> Pos.t -> env * locl ty
 val open_tyvars : env -> env
-val get_current_tyvars : env -> ISet.t
-val add_current_tyvar : env -> int -> env
+val get_current_tyvars : env -> Ident.t list
+val add_current_tyvar : env -> Ident.t -> env
 val close_tyvars : env -> env
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env
@@ -196,5 +196,5 @@ val save : tpenv -> env -> Tast.saved_env
 val set_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty -> env
 val get_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty option
 val add_subtype_prop: env -> Typing_logic.subtype_prop -> env
-val set_tyvar_variance : tyvars:ISet.t -> env -> Typing_defs.locl Typing_defs.ty -> env
+val set_tyvar_variance : tyvars:Ident.t list -> env -> Typing_defs.locl Typing_defs.ty -> env
 val update_variance_after_bind : env -> int -> Typing_defs.locl Typing_defs.ty -> env

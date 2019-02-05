@@ -71,7 +71,7 @@ let add_current_tyvar env v =
   then
     match env.tyvars_stack with
     | tyvars::rest ->
-      { env with tyvars_stack = ISet.add v tyvars :: rest }
+      { env with tyvars_stack = (v :: tyvars) :: rest }
     | _ -> env
   else env
 
@@ -84,7 +84,7 @@ let fresh_unresolved_type env p =
   env, (Reason.Rtype_variable p, Tvar v)
 
 let open_tyvars env =
-  { env with tyvars_stack = ISet.empty :: env.tyvars_stack }
+  { env with tyvars_stack = [] :: env.tyvars_stack }
 
 let close_tyvars env =
   match env.tyvars_stack with
@@ -93,7 +93,7 @@ let close_tyvars env =
 
 let get_current_tyvars env =
   match env.tyvars_stack with
-  | [] -> ISet.empty
+  | [] -> []
   | tyvars::_ -> tyvars
 
 let fresh_type env p =
@@ -1441,15 +1441,10 @@ and update_variance_after_bind env var ty =
 
 let set_tyvar_variance ~tyvars env ty =
   let env, positive, negative = get_tyvars env ty in
-  let env =
-    ISet.fold
-      (fun var env -> set_tyvar_appears_covariantly env var)
-      (ISet.inter tyvars positive) env in
-  let env =
-    ISet.fold
-      (fun var env -> set_tyvar_appears_contravariantly env var)
-      (ISet.inter tyvars negative) env in
-  env
+  List.fold_left tyvars ~init:env ~f:(fun env var ->
+    let env = if ISet.mem var positive then set_tyvar_appears_covariantly env var else env in
+    let env = if ISet.mem var negative then set_tyvar_appears_contravariantly env var else env in
+    env)
 
  (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
   * If the optional [intersect] operation is supplied, then use this to avoid

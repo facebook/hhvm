@@ -2561,9 +2561,8 @@ let solve_tyvar ~freshen ~solve_invariant env r var =
 
 let solve_tyvars ?(solve_invariant = false) ~tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
-  then ISet.fold
-    (fun tyvar env -> solve_tyvar ~freshen:false ~solve_invariant env Reason.Rnone tyvar)
-    tyvars env
+  then List.fold_left tyvars ~init:env
+    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~solve_invariant env Reason.Rnone tyvar)
   else env
 
 (* Expand an already-solved type variable, and solve an unsolved type variable

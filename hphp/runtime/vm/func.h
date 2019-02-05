@@ -776,20 +776,6 @@ struct Func final {
   bool readsCallerFrame() const;
 
   /*
-   * Can this function potentially write to the caller's frame?
-   *
-   * @implies: isBuiltin() && !isMethod()
-   */
-  bool writesCallerFrame() const;
-
-  /*
-   * Can this function potentially read or write to the caller's frame?
-   *
-   * @implies: readsCallerFrame() || writesCallerFrame()
-   */
-  bool accessesCallerFrame() const;
-
-  /*
    * This HNI method takes an additional "func_num_args()" value at the
    * beginning of its signature (after Class* / ObjectData* for methods)
    */
@@ -1528,7 +1514,6 @@ bool disallowDynamicVarEnvFuncs();
  *
  * This occurs, e.g., if `func' is extract().
  */
-bool funcWritesLocals(const Func*);
 bool funcReadsLocals(const Func*);
 
 /*

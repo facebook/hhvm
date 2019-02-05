@@ -9,7 +9,7 @@ HH\Set Object
     2
     3
 )
-object(HH\Set)#1 (3) refcount(2){
+object(HH\Set)#1 (3) refcount(%d){
   long(1) refcount(1)
   long(2) refcount(1)
   long(3) refcount(1)

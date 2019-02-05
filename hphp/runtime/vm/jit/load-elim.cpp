@@ -531,7 +531,6 @@ Flags handle_call_effects(Local& env,
   }();
 
   Flags flags = FNone{};
-  auto writesLocals = effects.writes_locals;
   if (!knownCallee) {
     if (auto const meta = env.global.ainfo.find(canonicalize(effects.callee))) {
       assertx(meta->index < kMaxTrackedALocs);
@@ -539,16 +538,10 @@ Flags handle_call_effects(Local& env,
         auto const& tracked = env.state.tracked[meta->index];
         if (tracked.knownType.hasConstVal(TFunc)) {
           auto const callee = tracked.knownType.funcVal();
-          if (writesLocals) writesLocals = funcWritesLocals(callee);
           flags = FResolvable { callee };
         }
       }
     }
-  }
-
-  if (writesLocals) {
-    clear_everything(env);
-    return flags;
   }
 
   /*
@@ -891,7 +884,6 @@ void resolve_call(Global& env,
     auto& extra = *inst.extra<Call>();
     assertx(extra.callee == nullptr);
     extra.callee = flags.callee;
-    extra.writeLocals = funcWritesLocals(flags.callee);
     extra.readLocals = funcReadsLocals(flags.callee);
     extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
     retypeDests(&inst, &env.unit);
@@ -903,7 +895,6 @@ void resolve_call(Global& env,
     auto& extra = *inst.extra<CallUnpack>();
     assertx(extra.callee == nullptr);
     extra.callee = flags.callee;
-    extra.writeLocals = funcWritesLocals(flags.callee);
     extra.readLocals = funcReadsLocals(flags.callee);
     retypeDests(&inst, &env.unit);
     ++env.callsResolved;

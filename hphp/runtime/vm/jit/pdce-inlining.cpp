@@ -458,11 +458,11 @@ bool canAdjustFrame(IRInstruction& inst) {
    */
   case CallBuiltin: {
     auto data = inst.extra<CallBuiltin>();
-    return !data->writeLocals && !data->needsCallerFrame;
+    return !data->needsCallerFrame;
   }
   case Call: {
     auto data = inst.extra<Call>();
-    return !data->writeLocals && !data->needsCallerFrame;
+    return !data->needsCallerFrame;
   }
   default: break;
   }

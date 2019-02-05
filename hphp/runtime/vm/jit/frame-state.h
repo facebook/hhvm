@@ -487,7 +487,7 @@ private:
   void updateMBase(const IRInstruction*);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void trackCall(bool writeLocals);
+  void trackCall();
 
   /*
    * Per-block state helpers.

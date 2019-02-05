@@ -1055,7 +1055,7 @@ bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
 bool is_dangerous_varenv_function(const StringData* name) {
   auto const f = Unit::lookupBuiltin(name);
   // Functions can which can access the caller's frame are always builtin.
-  return f && f->accessesCallerFrame();
+  return f && f->readsCallerFrame();
 }
 
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,

@@ -595,7 +595,7 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
   auto const func = curFunc(env);
 
   if (!(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
-      !func->accessesCallerFrame()) {
+      !func->readsCallerFrame()) {
     return;
   }
 
@@ -612,7 +612,7 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
     [&] {
       hint(env, Block::Hint::Unlikely);
 
-      if (func->accessesCallerFrame()) {
+      if (func->readsCallerFrame()) {
         gen(env, RaiseVarEnvDynCall, cns(env, func));
       }
 

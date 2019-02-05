@@ -636,14 +636,12 @@ struct CallUnpackData : IRExtraData {
                           uint32_t numOut,
                           Offset callOffset,
                           const Func* callee,
-                          bool writeLocals,
                           bool readLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
     , callOffset(callOffset)
     , callee(callee)
-    , writeLocals(writeLocals)
     , readLocals(readLocals)
   {
     assertx(numParams > 0);
@@ -655,7 +653,6 @@ struct CallUnpackData : IRExtraData {
       callee
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
-      writeLocals ? ",writeLocals" : "",
       readLocals ? ",readLocals" : "");
   }
 
@@ -664,7 +661,6 @@ struct CallUnpackData : IRExtraData {
   uint32_t numOut;
   Offset callOffset;  // offset from unit m_bc (unlike m_callOff in ActRec)
   const Func* callee; // nullptr if not statically known
-  bool writeLocals;
   bool readLocals;
 };
 
@@ -672,13 +668,11 @@ struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            const Func* callee,
                            int32_t numNonDefault,
-                           bool writeLocals,
                            bool readLocals,
                            bool needsFrame)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
-    , writeLocals{writeLocals}
     , readLocals{readLocals}
     , needsCallerFrame{needsFrame}
   {}
@@ -687,7 +681,6 @@ struct CallBuiltinData : IRExtraData {
     return folly::to<std::string>(
       spOffset.offset, ',',
       callee->fullName()->data(),
-      writeLocals ? ",writeLocals" : "",
       readLocals ? ",readLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : ""
     );
@@ -696,7 +689,6 @@ struct CallBuiltinData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
   const Func* callee;
   int32_t numNonDefault;
-  bool writeLocals;
   bool readLocals;
   bool needsCallerFrame;
 };
@@ -707,7 +699,6 @@ struct CallData : IRExtraData {
                     uint32_t numOut,
                     Offset callOffset,
                     const Func* callee,
-                    bool writeLocals,
                     bool readLocals,
                     bool needsFrame,
                     bool asyncEagerReturn)
@@ -716,7 +707,6 @@ struct CallData : IRExtraData {
     , numOut(numOut)
     , callOffset(callOffset)
     , callee(callee)
-    , writeLocals(writeLocals)
     , readLocals(readLocals)
     , needsCallerFrame(needsFrame)
     , asyncEagerReturn(asyncEagerReturn)
@@ -728,7 +718,6 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
-      writeLocals ? ",writeLocals" : "",
       readLocals ? ",readLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : ""
@@ -740,7 +729,6 @@ struct CallData : IRExtraData {
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // m_callOff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
-  bool writeLocals;
   bool readLocals;
   bool needsCallerFrame;
   bool asyncEagerReturn;

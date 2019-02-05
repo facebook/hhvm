@@ -321,14 +321,10 @@ struct Func {
   bool cantBeMagicCall() const;
 
   /*
-   * Returns whether this resolved function could possibly read or write to the
+   * Returns whether this resolved function could possibly read to the
    * caller's frame.
    */
   bool mightReadCallerFrame() const;
-  bool mightWriteCallerFrame() const;
-  bool mightAccessCallerFrame() const {
-    return mightReadCallerFrame() || mightWriteCallerFrame();
-  }
 
   /*
    * Returns whether this resolved function is definitely safe to constant fold.

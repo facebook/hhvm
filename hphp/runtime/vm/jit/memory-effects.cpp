@@ -861,7 +861,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<CallUnpack>();
       return CallEffects {
-        extra->writeLocals,
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // Stack. The act-rec, incoming parameters, and everything below.
@@ -871,7 +870,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        (extra->writeLocals || extra->readLocals)
+        extra->readLocals
           ? AFrameAny : backtrace_locals(inst),
         // Callee.
         actrec_func(inst.src(0), extra->spOffset + extra->numParams)
@@ -882,7 +881,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<ContEnter>();
       return CallEffects {
-        false,
         // Kills. Everything on the stack below the sent value.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // Stack. The value being sent, and everything below.
@@ -898,7 +896,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<Call>();
       return CallEffects {
-        extra->writeLocals,
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // Stack. The act-rec, incoming parameters, and everything below.
@@ -908,7 +905,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        (extra->writeLocals || extra->readLocals)
+        extra->readLocals
           ? AFrameAny : backtrace_locals(inst),
         // Callee.
         actrec_func(inst.src(0), extra->spOffset + extra->numParams)
@@ -930,12 +927,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      auto const writeLocs = extra->writeLocals ? AFrameAny : AEmpty;
-      auto const readLocs =
-        (extra->readLocals || extra->writeLocals) ? AFrameAny : AEmpty;
+      auto const readLocs = extra->readLocals ? AFrameAny : AEmpty;
       return may_load_store_kill(
         stk | AHeapAny | readLocs,
-        writeLocs,
+        AEmpty,
         AMIStateAny
       );
     }
@@ -2418,7 +2413,6 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (CallEffects x) -> R {
       return CallEffects {
-        x.writes_locals,
         canonicalize(x.kills),
         canonicalize(x.stack),
         canonicalize(x.locals),

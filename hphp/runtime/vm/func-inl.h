@@ -478,14 +478,6 @@ inline bool Func::readsCallerFrame() const {
   return m_attrs & AttrReadsCallerFrame;
 }
 
-inline bool Func::writesCallerFrame() const {
-  return m_attrs & AttrWritesCallerFrame;
-}
-
-inline bool Func::accessesCallerFrame() const {
-  return m_attrs & (AttrReadsCallerFrame | AttrWritesCallerFrame);
-}
-
 inline bool Func::takesNumArgs() const {
   return shared()->m_takesNumArgs;
 }
@@ -747,7 +739,7 @@ inline int8_t& Func::maybeIntercepted() const {
 
 inline void Func::setAttrs(Attr attrs) {
   m_attrs = attrs;
-  assertx(IMPLIES(accessesCallerFrame(), isBuiltin() && !isMethod()));
+  assertx(IMPLIES(readsCallerFrame(), isBuiltin() && !isMethod()));
 }
 
 inline void Func::setBaseCls(Class* baseCls) {

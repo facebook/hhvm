@@ -10,7 +10,7 @@ open Core_kernel
 
 let is_method_interceptable namespace ast_class original_id attrs =
   let open Hhbc_options in
-  let native_accesses_caller_frame = Hhas_attribute.is_accesses_caller_frame attrs in
+  let native_accesses_caller_frame = Hhas_attribute.is_reads_caller_frame attrs in
   let difs = dynamic_invoke_functions !compiler_options in
   ((not native_accesses_caller_frame) &&
     (jit_enable_rename_function !compiler_options ||
@@ -23,7 +23,7 @@ let is_method_interceptable namespace ast_class original_id attrs =
 
 let is_function_interceptable namespace ast_fun attrs =
   let open Hhbc_options in
-  let native_accesses_caller_frame = Hhas_attribute.is_accesses_caller_frame attrs in
+  let native_accesses_caller_frame = Hhas_attribute.is_reads_caller_frame attrs in
   let difs = dynamic_invoke_functions !compiler_options in
   ((not native_accesses_caller_frame) &&
     (not (repo_authoritative !compiler_options) &&

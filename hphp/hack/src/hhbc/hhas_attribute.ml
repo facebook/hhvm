@@ -54,8 +54,6 @@ let is_native_arg s attributes =
   List.exists attributes f
 let is_native_opcode_impl = is_native_arg "OpCodeImpl"
 let is_reads_caller_frame = is_native_arg "ReadsCallerFrame"
-let is_writes_caller_frame = is_native_arg "WritesCallerFrame"
-let is_accesses_caller_frame attr = is_reads_caller_frame attr || is_writes_caller_frame attr
 let is_no_injection = is_native_arg "NoInjection"
 
 let deprecation_info attributes =

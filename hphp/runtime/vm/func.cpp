@@ -107,7 +107,7 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   , m_shared(nullptr)
   , m_attrs(attrs)
 {
-  assertx(IMPLIES(accessesCallerFrame(), isBuiltin() && !isMethod()));
+  assertx(IMPLIES(readsCallerFrame(), isBuiltin() && !isMethod()));
 }
 
 Func::~Func() {
@@ -219,7 +219,7 @@ void Func::rescope(Class* ctx, Attr attrs) {
   m_cls = ctx;
   if (attrs != AttrNone) {
     m_attrs = attrs;
-    assertx(IMPLIES(accessesCallerFrame(), isBuiltin() && !isMethod()));
+    assertx(IMPLIES(readsCallerFrame(), isBuiltin() && !isMethod()));
   }
   setFullName(numParams());
 }
@@ -589,7 +589,6 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrRequiresThis) { out << " (requiresthis)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
   if (attrs & AttrReadsCallerFrame) { out << " (reads_caller_frame)"; }
-  if (attrs & AttrWritesCallerFrame) { out << " (writes_caller_frame)"; }
   if (attrs & AttrSkipFrame) { out << " (skip_frame)"; }
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
@@ -1052,24 +1051,8 @@ bool disallowDynamicVarEnvFuncs() {
   return RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
 }
 
-bool funcWritesLocals(const Func* callee) {
-  assertx(callee != nullptr);
-
-  // A skip-frame function can dynamically call a function which writes to the
-  // caller's frame. If we don't forbid such dynamic calls, we have to be
-  // pessimistic.
-  if (callee->isSkipFrame() && !disallowDynamicVarEnvFuncs()) {
-    return true;
-  }
-
-  return callee->writesCallerFrame();
-}
-
 bool funcReadsLocals(const Func* callee) {
   assertx(callee != nullptr);
-
-  // Any function which can write locals is assumed to read them as well.
-  if (funcWritesLocals(callee)) return true;
 
   // A skip-frame function can dynamically call a function which reads from the
   // caller's frame. If we don't forbid such dynamic calls, we have to be
@@ -1087,8 +1070,7 @@ bool funcNeedsCallerFrame(const Func* callee) {
   return
     (callee->isCPPBuiltin() &&
       s_ignores_frame.count(callee->name()->data()) == 0) ||
-    funcReadsLocals(callee) ||
-    funcWritesLocals(callee);
+    funcReadsLocals(callee);
 }
 
 void logFunc(const Func* func, StructuredLogEntry& ent) {

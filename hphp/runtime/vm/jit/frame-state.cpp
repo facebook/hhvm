@@ -440,7 +440,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
         setType(stk(base + i), TInitCell);
       }
-      trackCall(extra->writeLocals);
+      trackCall();
       // The return value is known to be at least a Gen.
       setType(
         stk(extra->spOffset + kNumActRecCells + extra->numParams - 1),
@@ -472,7 +472,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
         setType(stk(base + i), TInitCell);
       }
-      trackCall(extra->writeLocals);
+      trackCall();
       setType(
         stk(extra->spOffset + numCells - 1),
         extra->numOut ? TInitCell : TGen
@@ -491,14 +491,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case CallBuiltin:
-    if (inst->extra<CallBuiltin>()->writeLocals) clearLocals();
     break;
 
   case ContEnter:
     {
       auto const extra = inst->extra<ContEnter>();
       setValue(stk(extra->spOffset), nullptr);
-      trackCall(false);
+      trackCall();
       setType(stk(extra->spOffset), TGen);
       // ContEnter pops a cell.
       assertx(cur().bcSPOff == inst->marker().spOff());
@@ -1103,7 +1102,6 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               [&](PureStore m) { handle_stores(m.dst); },
               [&](PureSpillFrame m) { handle_stores(m.stk); },
               [&](CallEffects x) {
-                if (x.writes_locals) handle_stores(AFrameAny);
                 handle_stores(x.stack);
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
@@ -1433,8 +1431,7 @@ void FrameStateMgr::trackInlineReturn() {
  * Keeping a value live across a Call requires spilling, so we avoid it---but
  * we do continue keeping track of types.
  */
-void FrameStateMgr::trackCall(bool writesLocals) {
-  if (writesLocals) clearLocals();
+void FrameStateMgr::trackCall() {
   for (auto& state : m_stack) {
     for (auto& loc : state.locals) {
       if (loc.value && !loc.value->inst()->is(DefConst)) loc.value = nullptr;

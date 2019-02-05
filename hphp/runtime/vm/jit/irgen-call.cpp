@@ -607,13 +607,12 @@ const StaticString
   s_php_errormsg("php_errormsg");
 
 /*
- * Could `inst' access the locals in the environment of `caller' according to
- * the given predicate?
+ * Could `inst' read from the locals in the environment of `caller'?
+ *
+ * This occurs, e.g., if `inst' is a call to compact().
  */
-template <typename P>
-bool callAccessesLocals(const NormalizedInstruction& inst,
-                        const Func* caller,
-                        P predicate) {
+bool callReadsLocals(const NormalizedInstruction& inst,
+                     const Func* caller) {
   // We don't handle these two cases, because we don't compile functions
   // containing them:
   assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
@@ -625,7 +624,7 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     auto const str = unit->lookupLitstrId(id);
     // Only builtins can access a caller's locals or be skip-frame.
     auto const callee = Unit::lookupBuiltin(str);
-    return callee && predicate(callee);
+    return callee && funcReadsLocals(callee);
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
@@ -666,26 +665,6 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
     default:
       always_assert("Unhandled FPush type in callAccessesLocals" && 0);
   }
-}
-
-/*
- * Could `inst' write to the locals in the environment of `caller'?
- *
- * This occurs, e.g., if `inst' is a call to extract().
- */
-bool callWritesLocals(const NormalizedInstruction& inst,
-                      const Func* caller) {
-  return callAccessesLocals(inst, caller, funcWritesLocals);
-}
-
-/*
- * Could `inst' read from the locals in the environment of `caller'?
- *
- * This occurs, e.g., if `inst' is a call to compact().
- */
-bool callReadsLocals(const NormalizedInstruction& inst,
-                     const Func* caller) {
-  return callAccessesLocals(inst, caller, funcReadsLocals);
 }
 
 /*
@@ -1553,9 +1532,6 @@ void emitFCall(IRGS& env,
                const StringData*) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
-  auto const writeLocals = callee
-    ? funcWritesLocals(callee)
-    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const readLocals = callee
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
@@ -1571,7 +1547,6 @@ void emitFCall(IRGS& env,
       fca.numRets - 1,
       bcOff(env),
       callee,
-      writeLocals,
       readLocals
     };
     push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
@@ -1594,7 +1569,6 @@ void emitFCall(IRGS& env,
         fca.numRets - 1,
         bcOff(env) - curFunc(env)->base(),
         callee,
-        writeLocals,
         readLocals,
         needsCallerFrame,
         asyncEagerReturn,
@@ -1688,7 +1662,6 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
       0,
       callBcOffset,
       callee,
-      funcWritesLocals(callee),
       funcReadsLocals(callee),
       funcNeedsCallerFrame(callee),
       false

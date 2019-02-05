@@ -1606,7 +1606,6 @@ SSATmp* builtinCall(IRGS& env,
       spOffBCFromIRSP(env),
       callee,
       params.count ? -1 : numNonDefault,
-      funcWritesLocals(callee),
       funcReadsLocals(callee),
       funcNeedsCallerFrame(callee)
     },

@@ -74,7 +74,7 @@ inline void calleeDynamicCallChecks(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();
 
-  if (func->accessesCallerFrame()) {
+  if (func->readsCallerFrame()) {
     raise_disallowed_dynamic_call(func);
   }
 

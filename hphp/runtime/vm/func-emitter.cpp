@@ -486,7 +486,6 @@ void FuncEmitter::setEHTabIsSorted() {
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *  "ReadsCallerFrame": Function might read from the caller's frame
- *  "WritesCallerFrame": Function might write to the caller's frame
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -498,8 +497,7 @@ static const StaticString
   s_noinjection("NoInjection"),
   s_numargs("NumArgs"),
   s_opcodeimpl("OpCodeImpl"),
-  s_readsCallerFrame("ReadsCallerFrame"),
-  s_writesCallerFrame("WritesCallerFrame");
+  s_readsCallerFrame("ReadsCallerFrame");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -527,8 +525,6 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         ret |= Native::AttrOpCodeImpl;
       } else if (userAttrStrVal.get()->isame(s_readsCallerFrame.get())) {
         attrs_ |= AttrReadsCallerFrame;
-      } else if (userAttrStrVal.get()->isame(s_writesCallerFrame.get())) {
-        attrs_ |= AttrWritesCallerFrame;
       }
     }
   }
@@ -540,7 +536,7 @@ Attr FuncEmitter::fix_attrs(Attr a) const {
 
   a = Attr(a & ~AttrInterceptable);
 
-  if (a & (AttrReadsCallerFrame | AttrWritesCallerFrame)) {
+  if (a & AttrReadsCallerFrame) {
     return a;
   }
 

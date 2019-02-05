@@ -186,10 +186,6 @@ enum Attr {
   // allowed for builtins.
   AttrReadsCallerFrame     = (1u << 23), //       |          |    X    //
                                          //       |          |         //
-  // Indicates that the function might write to the caller's frame. Only allowed
-  // for builtins.
-  AttrWritesCallerFrame    = (1u << 24), //       |          |    X    //
-                                         //       |          |         //
   // Is this a (non-static) method that *must* have a non-null this?   //
   AttrRequiresThis         = (1u << 25), //       |          |    X    //
                                          //       |          |         //

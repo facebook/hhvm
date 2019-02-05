@@ -324,7 +324,6 @@ void analyze_block(LoopEnv& env, Block* blk) {
       [&] (UnknownEffects)   { kill(AUnknown); },
 
       [&] (CallEffects x)    { env.contains_call = true;
-                               if (x.writes_locals) kill(AFrameAny);
                                kill(AHeapAny); },
       [&] (PureStore x)      { kill(x.dst); },
       [&] (PureSpillFrame x) { kill(x.stk); },

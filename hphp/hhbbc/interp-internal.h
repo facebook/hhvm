@@ -942,8 +942,7 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
    * might dynamically call a function which can. So, skip-frame functions kill
    * our locals unless they can't call such functions.
    */
-  if (func.mightWriteCallerFrame() ||
-      (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
+  if ((RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
        func.mightBeSkipFrame())) {
     readUnknownLocals(env);
     killLocals(env);

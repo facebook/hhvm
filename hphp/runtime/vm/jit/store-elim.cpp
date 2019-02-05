@@ -598,10 +598,7 @@ void visit(Local& env, IRInstruction& inst) {
       env.containsCall = true;
 
       load(env, AHeapAny);
-
       load(env, l.locals);
-      if (l.writes_locals) mayStore(env, AFrameAny);
-
       load(env, l.stack);
       kill(env, l.kills);
     },

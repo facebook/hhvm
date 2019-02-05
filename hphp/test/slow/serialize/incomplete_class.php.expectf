@@ -8,7 +8,7 @@ __PHP_Incomplete_Class::__set_state(array(
 (
     [__PHP_Incomplete_Class_Name] => invalid
 )
-object(__PHP_Incomplete_Class)#1 (1) refcount(2){
+object(__PHP_Incomplete_Class)#1 (1) refcount(%d){
   ["__PHP_Incomplete_Class_Name"]=>
   string(7) "invalid" refcount(2)
 }

@@ -1,9 +1,6 @@
 <?php
 
 class C {
-  function __destruct() {
-    echo "woot-cakes\n";
-  }
 }
 
 function f() {
@@ -15,4 +12,3 @@ function f() {
 }
 
 f();
-

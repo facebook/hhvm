@@ -54,12 +54,4 @@
     Null
     RetC
   }
-  .method [public] <"" N  > __destruct() {
-    String ""
-    BaseH
-    SetM 0 PT:"attre"
-    PopC
-    Null
-    RetC
-  }
 }

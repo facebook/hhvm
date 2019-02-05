@@ -18,7 +18,6 @@
  */
 class FooBar implements Iterator {
     function __construct()   { echo "Constructing new FooBar\n"; }
-    function __destruct()    { echo "Destructing FooBar\n"; }
     function current ()      { throw new Exception; }
     function key ()          { return 0; }
     function next ()         {}

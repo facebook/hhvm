@@ -1,1 +1,0 @@
-Fatal error: Class Dtor has a __destruct() method and cannot be instantiated when %s in %s/test/slow/object/unserialize-destructor.php on line 10

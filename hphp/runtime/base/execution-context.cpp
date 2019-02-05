@@ -148,16 +148,6 @@ void ExecutionContext::sweep() {
 }
 
 ExecutionContext::~ExecutionContext() {
-  // When we destroy the execution context will call destructors on any objects
-  // in the userErrorHandlers and userExceptionHandlers vectors. If these
-  // destructors call restore_*_handler() they can trigger a pop_back() on the
-  // vector resulting in double destruction. There's no reason for code to do
-  // this but we should still avoid crashing.
-  // N.B.: This is already taken care of for us if EnableObjDestructCall is on
-  if (!RuntimeOption::EnableObjDestructCall) {
-    while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
-    while (!m_userExceptionHandlers.empty()) m_userExceptionHandlers.pop_back();
-  }
   cleanup();
 }
 
@@ -2252,16 +2242,6 @@ void ExecutionContext::manageAPCHandle() {
       FreedAPCHandle(std::move(handles), m_apcMemSize)
     );
     APCStats::getAPCStats().addPendingDelete(m_apcMemSize);
-  }
-}
-
-void ExecutionContext::destructObjects() {
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-    while (!m_liveBCObjs.empty()) {
-      ObjectData* obj = *m_liveBCObjs.begin();
-      obj->destructForExit(); // Let the instance remove the node.
-    }
-    m_liveBCObjs.clear();
   }
 }
 

@@ -117,7 +117,6 @@ function dump_param($param) {
      var_dump($func->isProtected());
      var_dump($func->isStatic());
      var_dump($func->isConstructor());
-     var_dump($func->isDestructor());
      var_dump($func->getModifiers() & 0xFFFF);
      verify_class($func->getDeclaringClass());
      if ($name == 'method1') $func->invoke($obj, 'invoked');

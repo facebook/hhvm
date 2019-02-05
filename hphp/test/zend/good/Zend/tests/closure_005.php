@@ -7,10 +7,6 @@ class A {
 		$this->x = $x;
 	}
 
-	function __destruct() {
-		echo "Destroyed\n";
-	}
-
 	function getIncer($val) {
 		return function() use ($val) {
 			$this->x += $val;
@@ -22,13 +18,13 @@ class A {
 			echo $this->x."\n";
 		};
 	}
-	
+
 	function getError() {
 		return static function() {
 			echo $this->x."\n";
 		};
 	}
-	
+
 	function printX() {
 		echo $this->x."\n";
 	}

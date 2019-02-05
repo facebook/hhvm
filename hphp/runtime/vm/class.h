@@ -552,7 +552,6 @@ public:
    */
   const Func* getCtor() const;
   const Func* getDeclaredCtor() const;
-  const Func* getDtor() const;
   const Func* getToString() const;
   const Func* get86pinit() const;
   const Func* get86sinit() const;
@@ -568,12 +567,6 @@ public:
    * Does this class have a __call method?
    */
   bool hasCall() const;
-
-  /*
-   * Has this class's constructor been replaced with one that always fatals, to
-   * prevent constructing instances of it?
-   */
-  bool hasDisabledCtor() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1518,7 +1511,6 @@ private:
   VMFixedVector<const Func*> m_sinitVec;
   VMFixedVector<const Func*> m_linitVec;
   LowPtr<Func> m_ctor;
-  LowPtr<Func> m_dtor;
   PropInitVec m_declPropInit;
   VMFixedVector<const Func*> m_pinitVec;
 

@@ -129,9 +129,3 @@ string(34) "a:2:{i:123;k:1:{i:731;}i:456;R:3;}"
 
 Notice: Unable to unserialize: [a:2:{i:123;k:1:{i:731;}i:456;R:3;}]. Id 3 out of range. in %s on line %d
 bool(false)
-====================================================
-string(62) "k:2:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}}"
-Dtor::__destruct(): 1
-
-Notice: Unable to unserialize: [k:2:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}}]. Keysets can only contain integers and strings. in %s on line %d
-bool(false)

@@ -7,9 +7,6 @@ class logger {
     $this->idx = self::$x++;
     printf("logger %d constructing\n", $this->idx);
   }
-  function __destruct() {
-    printf("logger %d destructing\n", $this->idx);
-  }
 }
 
 function create() {

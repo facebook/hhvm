@@ -22,26 +22,18 @@ class Point
 //  const CON = 10;             // excluded from serialization
 //  protected static $prots;    // excluded from serialization
 
-    public static function getPointCount()
-    {
-        return self::$pointCount;
-    }
-
     public function __construct($x = 0, $y = 0)
     {
         $this->x = $x;
         $this->y = $y;
-        ++self::$pointCount;
         $this->id = self::$nextId++;
-
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
     }
 
     public function move($x, $y)
     {
         $this->x = $x;
         $this->y = $y;
-    }   
+    }
 
     public function translate($x, $y)
     {
@@ -49,22 +41,13 @@ class Point
         $this->y += $y;
     }
 
-    public function __destruct()
-    {
-        --self::$pointCount;
-
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
-    }
-
     public function __toString()
     {
         return 'ID:' . $this->id . '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 ///*
     public function __sleep()
     {
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
-        
 //      return array('y', 'x', 'proti', 'pubi');
         return array('y', 'x'); // get serialized in array insertion order
 //      return array('y');
@@ -76,9 +59,6 @@ class Point
 ///*
     public function __wakeup()
     {
-        echo "\nInside " . __METHOD__ . ", $this, \$nextId, = " . self::$nextId . "\n\n";
-        
-        ++self::$pointCount;
         $this->id = self::$nextId++;
     }
 //*/
@@ -139,7 +119,7 @@ class ColoredPoint extends Point
     public function __toString()
     {
         return parent::__toString() . $this->color;
-    }   
+    }
 
 // while this method returns an array containing the names of the two inherited, private
 // properties and adds to that the one private property from the current class,
@@ -151,7 +131,7 @@ class ColoredPoint extends Point
     public function __sleep()
     {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
-        
+
         $a = parent::__sleep();
         var_dump($a);
         $a[] = 'color';

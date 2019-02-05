@@ -155,7 +155,6 @@ function determine_flags(OptionMap $opts): string {
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
-    'no-obj-destruct' => '-v Eval.EnableObjDestructCall=0 ',
     'hphpd'           => '-m debug ',
     'server'          => '-v Eval.JitPGOHotOnly=0 -m server ',
   };

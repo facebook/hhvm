@@ -4,10 +4,6 @@ class MyClass {
   public function __construct() {
     echo "constructing\n";
   }
-
-  public function __destruct() {
-    echo "destructing\n";
-  }
 }
 
 set_error_handler(

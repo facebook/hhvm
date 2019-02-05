@@ -7,7 +7,6 @@
 
 class Dtor {
   public function __construct() { echo "hi\n"; }
-  public function __destruct() { echo "ah\n"; }
 }
 
 class Something {

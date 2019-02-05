@@ -7,9 +7,6 @@ class A {
 }
 
 class B {
-  function __destruct() {
-    throw new Exception();
-  }
 }
 
 function foo($a, $b) {

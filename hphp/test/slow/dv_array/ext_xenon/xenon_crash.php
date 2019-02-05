@@ -7,17 +7,7 @@ async function genList(...$args) {
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
-class X {
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
-}
-
 class A {
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
-
   async function gen1($a) {
     await RescheduleWaitHandle::create(0, 0); // simulate blocking I/O
     return $a + 1;
@@ -30,7 +20,6 @@ class A {
   }
 
   async function genBar($a) {
-    $x = new X;
     await RescheduleWaitHandle::create(0, $a); // simulate blocking I/O
     return $a + 2;
   }

@@ -7,9 +7,6 @@ if (isset($g)) {
  else {
   class X {
     public $a = 1;
-    function __destruct() {
- var_dump(__METHOD__);
- }
   }
 }
 class X1 extends X {

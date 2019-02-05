@@ -7,9 +7,6 @@ class Foo {
     $this->foo = $f;
     $this->bar = $b;
   }
-  public function __destruct() {
-    echo "Destructing a Foo\n";
-  }
   public function __sleep() {
     echo "I'm going to sleep\n";
     return array('foo');

@@ -7,12 +7,6 @@ class A {
     return true;
   }
 
-  function __destruct() {
-    var_dump(__FUNCTION__);
-    var_dump(func_get_args());
-    return true;
-  }
-
   public function dir_closedir() {
     var_dump(__FUNCTION__);
     var_dump(func_get_args());

@@ -4,9 +4,6 @@ class A {
     public function autoload() {
         echo "var:".$this->var."\n";
     }
-    public function __destruct() {
-        echo "__destruct__\n";
-    }
 }
 
 $a = new A;

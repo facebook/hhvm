@@ -2,17 +2,13 @@
 class Node {
 	public $parent = NULL;
 	public $childs = array();
-	
+
 	function __construct(Node $parent=NULL) {
 		if ($parent) {
 			$parent->childs[] = $this;
 		}
 		$this->childs[] = $this;
 	}
-	
-	function __destruct() {
-		$this->childs = NULL;
-	}	
 }
 
 define("MAX", 16);

@@ -7,7 +7,7 @@ class A {
   }
 }
 
-class lol { public function __destruct() { echo "lol\n"; } }
+class lol {}
 class B {
   public static function bar() {
     var_dump(func_get_args());

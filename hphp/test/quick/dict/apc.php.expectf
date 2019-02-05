@@ -9,9 +9,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
-Dtor... 1
-Dtor... 2
 Sleep...
 dict(0) {
 }
@@ -83,11 +80,9 @@ dict(1) {
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#13 (1) {
+  object(Sleep)#8 (1) {
     ["val"]=>
     NULL
   }
@@ -163,17 +158,13 @@ dict(1) {
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#8 (1) {
+  object(Sleep)#5 (1) {
     ["val"]=>
     NULL
   }
 }
-Dtor... 1
-Dtor... 2
 Sleep...
 dict(0) {
 }
@@ -245,11 +236,9 @@ dict(1) {
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#19 (1) {
+  object(Sleep)#11 (1) {
     ["val"]=>
     NULL
   }

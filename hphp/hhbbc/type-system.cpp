@@ -4908,11 +4908,6 @@ bool could_contain_objects(const Type& t) {
   not_reached();
 }
 
-bool could_run_destructor(const Type& t) {
-  if (!RuntimeOption::EvalAllowObjectDestructors) return false;
-  return could_contain_objects(t);
-}
-
 bool could_copy_on_write(const Type& t) {
   return t.m_bits & (BCStr | BCArrN | BCVecN | BCDictN | BCKeysetN);
 }

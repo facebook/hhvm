@@ -246,8 +246,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
       s_globalData.AbortBuildOnVerifyError;
     RuntimeOption::DisallowDynamicVarEnvFuncs =
       s_globalData.DisallowDynamicVarEnvFuncs;
-    RuntimeOption::EvalAllowObjectDestructors =
-      s_globalData.AllowObjectDestructors;
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
     }

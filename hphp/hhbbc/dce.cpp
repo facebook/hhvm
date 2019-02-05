@@ -188,9 +188,7 @@ uint32_t numPush(const Bytecode& bc) {
 // side-effects (running destuctors, or modifying arbitrary things via
 // a Ref).
 bool setCouldHaveSideEffects(const Type& t) {
-  return
-    t.couldBe(BRef) ||
-    could_run_destructor(t);
+  return t.couldBe(BRef);
 }
 
 // Some reads could raise warnings and run arbitrary code.
@@ -209,17 +207,6 @@ enum class Use {
 
   // Indicates that the cell is (unconditionally) not used.
   Not = 1,
-
-  /*
-   * Indicates that the cell is only used if it was the last reference alive.
-   * For instance, a PopC will call the destructor of the top-of-stack object
-   * if it was the last reference alive, and this counts as an example of
-   * 'UsedIfLastRef'.
-   *
-   * If the producer of the cell knows that it is not the last reference, then
-   * it can treat Use::UsedIfLastRef as being equivalent to Use::Not.
-   */
-  UsedIfLastRef = 2,
 
   /*
    * Indicates that the stack slot contains an array-like being
@@ -438,9 +425,7 @@ std::string show(InstrId id) {
 }
 
 inline void validate(Use u) {
-  assert(!any(u & Use::Linked) ||
-         mask_use(u) == Use::Not ||
-         mask_use(u) == Use::UsedIfLastRef);
+  assert(!any(u & Use::Linked) || mask_use(u) == Use::Not);
 }
 
 const char* show(Use u) {
@@ -449,7 +434,6 @@ const char* show(Use u) {
     switch (mask_use(u)) {
       case Use::Used:          return "*U";
       case Use::Not:           return "*0";
-      case Use::UsedIfLastRef: return "*UL";
       case Use::AddElemC:      return "*AE";
       case Use::Linked: not_reached();
     }
@@ -545,8 +529,7 @@ bool allUnusedIfNotLastRef() { return true; }
 template<class... Args>
 bool allUnusedIfNotLastRef(const UseInfo& ui, const Args&... args) {
   auto u = mask_use(ui.usage);
-  return (u == Use::Not || u == Use::UsedIfLastRef) &&
-    allUnusedIfNotLastRef(args...);
+  return u == Use::Not && allUnusedIfNotLastRef(args...);
 }
 
 bool alwaysPop(const UseInfo& ui) {
@@ -593,15 +576,6 @@ Type topC(Env& env, uint32_t idx = 0) {
   auto const t = topT(env, idx);
   assert(t.subtypeOf(BInitCell));
   return t;
-}
-
-bool popCouldRunDestructor(Env& env, uint32_t i = 0) {
-  // If there's an equivLoc, we know that it's not the last
-  // reference, so popping the stack won't run any destructors.
-  auto const& s = env.stateBefore.stack;
-  auto const& e = s[s.size() - i - 1];
-  // Either StackDupId or StackThisId will guard the popped value
-  return e.equivLoc == NoLocalId && could_run_destructor(e.type);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -762,25 +736,6 @@ void discard(Env& env) {
   pop(env, Use::Not, env.id);
 }
 
-/*
- * It may be ok to remove pops on objects with destructors in some scenarios
- * (where it won't change the observable point at which a destructor runs).  We
- * could also look at the object type and see if it is known that it can't have
- * a user-defined destructor.
- *
- * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
- * to the producer of the cell that the it is considered used if it could be
- * the last reference alive (in which case the destructor would be run on
- * Pop). If the producer knows that the cell is not the last reference (e.g. if
- * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
- */
-void discardNonDtors(Env& env) {
-  if (popCouldRunDestructor(env)) {
-    return pop(env, Use::UsedIfLastRef, env.id);
-  }
-  discard(env);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -883,14 +838,14 @@ UseInfo& combineUis(UseInfo& accum, const UseInfo& ui, const Args&... args) {
 
 /*
  * The current instruction is going to be replaced with PopCs. Perform
- * appropriate pops (either Use::Not or Use::UsedIfLastRef).
+ * appropriate pops (Use::Not)
  */
 void ignoreInputs(Env& env, bool linked, DceActionMap&& actions) {
   auto const np = numPop(env.op);
   if (!np) return;
 
   auto usage = [&] (uint32_t i) {
-    auto ret = popCouldRunDestructor(env, i) ? Use::UsedIfLastRef : Use::Not;
+    auto ret = Use::Not;
     if (linked) ret = ret | Use::Linked;
     return ret;
   };
@@ -919,14 +874,13 @@ DceActionMap& commitUis(Env& env, bool linked,
  *
  *   $a ? f() : 42
  *
- * If f() is known to return a non-counted type, we have FCall -> PopC on
- * one path, and Int 42 -> PopC on another, and the PopC marks
- * its value Use::Not. When we get to the Int 42 it thinks both
- * instructions can be killed; but when we get to the FCall it
- * does nothing. So any time we decide to ignore a Use::Not or
- * Use::UsedIfLastRef, we have to record that fact so we can prevent
- * the other paths from trying to use that information. We communicate
- * this via the ui.location field, and the forcedLiveLocations set.
+ * If f() is known to return a non-counted type, we have FCall -> PopC on one
+ * path, and Int 42 -> PopC on another, and the PopC marks its value Use::Not.
+ * When we get to the Int 42 it thinks both instructions can be killed; but when
+ * we get to the FCall it does nothing. So any time we decide to ignore a
+ * Use::Not , we have to record that fact so we can prevent the other paths from
+ * trying to use that information. We communicate this via the ui.location
+ * field, and the forcedLiveLocations set.
  *
  * [ We deal with this case now by inserting a PopC after the
  *   FCall, which allows the 42/PopC to be removed - but there are
@@ -1101,8 +1055,8 @@ void pushRemovable(Env& env) {
  * eliminating the CGetL.
  */
 
-void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
-void dce(Env& env, const bc::PopV&)          { discardNonDtors(env); }
+void dce(Env& env, const bc::PopC&)          { discard(env); }
+void dce(Env& env, const bc::PopV&)          { discard(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
@@ -1154,7 +1108,7 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
     writeSlot(env, op.slot);
     return pop(
       env,
-      popCouldRunDestructor(env) ? Use::UsedIfLastRef : Use::Not,
+      Use::Not,
       std::move(ui.actions)
     );
   }
@@ -1211,8 +1165,7 @@ void dce(Env& env, const bc::Dup&) {
   //     and all dependent instructions.
   stack_ops(env, [&] (UseInfo& dup, UseInfo& orig) {
       // Dup pushes a cell that is guaranteed to be not the last reference.
-      // So, it can be eliminated if the cell it pushes is used as either
-      // Use::Not or Use::UsedIfLastRef.
+      // So, it can be eliminated if the cell it pushes is used as Use::Not.
       auto const dup_unused = allUnusedIfNotLastRef(dup);
       auto const orig_unused = allUnused(orig) &&
         (!isLinked(dup) || dup_unused);
@@ -1272,8 +1225,7 @@ void dce(Env& env, const bc::PushL& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       scheduleGenLoc(env, op.loc1);
       if (allUnused(ui)) {
-        if (isLocLive(env, op.loc1) ||
-            could_run_destructor(locRaw(env, op.loc1))) {
+        if (isLocLive(env, op.loc1)) {
           env.dceState.replaceMap.insert(
             { env.id, { bc::UnsetL { op.loc1 } } });
           ui.actions.emplace(env.id, DceAction::Replace);
@@ -1519,7 +1471,7 @@ void dce(Env& env, const bc::PopL& op) {
     assert(!locRaw(env, op.loc1).couldBe(BRef) ||
            env.stateBefore.localStaticBindings[op.loc1] ==
            LocalStaticBinding::Bound);
-    discardNonDtors(env);
+    discard(env);
     env.dceState.actionMap[env.id] = DceAction::PopInputs;
     return;
   }

@@ -266,24 +266,9 @@ void doRet(ISS& env, Type t, bool hasEffects) {
   assert(env.state.stack.empty());
   env.flags.retParam = NoLocalId;
   env.flags.returned = t;
-  if (hasEffects) return;
-  nothrow(env);
-
-  // If we're doing EffectFreeOnly analysis, we don't care about
-  // params that might have side effects when they're destroyed,
-  // because those params will just get popped if we drop the call,
-  // with exactly the same results.
-  auto i = any(env.collect.opts & CollectionOpts::EffectFreeOnly) ?
-    env.ctx.func->params.size() : 0;
-
-  while (i < env.state.locals.size()) {
-    auto const& l = env.state.locals[i++];
-    if (could_run_destructor(l)) {
-      return;
-    }
+  if (!hasEffects) {
+    effect_free(env);
   }
-
-  effect_free(env);
 }
 
 void mayUseVV(ISS& env) {

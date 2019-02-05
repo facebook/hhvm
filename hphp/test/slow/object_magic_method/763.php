@@ -6,22 +6,22 @@ if (isset($g)) {
  }
 else {
   class X {
-    function __destruct() {
+    function foo() {
       var_dump(__METHOD__);
     }
   }
 }
 class Y extends X {
-  function __destruct() {
+  function foo() {
     var_dump(__METHOD__);
-    parent::__destruct();
+    parent::foo();
   }
 }
 class Z extends X {
 }
 function test($t) {
   var_dump('test:'.$t);
-  new $t(1,2);
+  (new $t(1,2))->foo();
 }
 test('X');
 test('Y');

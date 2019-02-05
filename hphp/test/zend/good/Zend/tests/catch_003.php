@@ -12,11 +12,6 @@ class MyObject
 		self::fail();
 		echo __METHOD__ . "() Must not be reached\n";
 	}
-
-	function __destruct()
-	{
-		echo __METHOD__ . "() Must not be called\n";
-	}
 }
 
 try

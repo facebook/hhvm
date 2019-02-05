@@ -96,17 +96,3 @@ isUserDefined():
 bool(false)
 
 **********************************
-**********************************
-Reflecting on method TestClass::__destruct()
-
-
-getName():
-string(10) "__destruct"
-
-isInternal():
-bool(false)
-
-isUserDefined():
-bool(true)
-
-**********************************

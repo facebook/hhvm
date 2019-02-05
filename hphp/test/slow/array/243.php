@@ -1,9 +1,6 @@
 <?php
 
 class X {
- function __destruct() {
- var_dump('two');
- }
  }
 function test($a) {
   $x = array(new X);

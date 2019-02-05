@@ -13,11 +13,6 @@ class MyObject
 		echo __METHOD__ . "() Must not be reached\n";
 	}
 
-	function __destruct()
-	{
-		echo __METHOD__ . "() Must not be called\n";
-	}
-	
 	static function test()
 	{
 		try

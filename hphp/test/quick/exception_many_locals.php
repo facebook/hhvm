@@ -1,10 +1,6 @@
 <?php
 
 class c {
-  private static $x = 0;
-  public function __destruct() {
-    printf("c %d destructing\n", self::$x++);
-  }
 }
 
 function my_handler() {

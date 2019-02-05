@@ -7,9 +7,6 @@ class DestructLogger {
     echo "constructing in {$this->where}\n";
   }
 
-  private function __destruct() {
-    echo "destructing in {$this->where}\n";
-  }
 }
 
 function l($obj, $where) {

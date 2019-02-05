@@ -2,14 +2,6 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls implements Iterator {
-  public $idx;
-  function __construct($idx) {
-    $this->idx = $idx;
-  }
-  function __destruct() {
-    echo "Cls::__destruct " . $this->idx . "\n";
-  }
-
   public function rewind() {}
   public function current() {}
   public function key() {}
@@ -24,7 +16,8 @@ function from_obj($obj) {
 function test() {
   for ($i = 0; $i < 10; $i++) {
     echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
-    from_obj(new Cls($i));
+    from_obj(new Cls);
+    var_dump(hh\objprof_get_data());
     echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
   }
 }
@@ -32,6 +25,6 @@ function test() {
 
 <<__EntryPoint>>
 function main_from_obj_dtor() {
-error_reporting(E_ERROR);
-test();
+  error_reporting(E_ERROR);
+  test();
 }

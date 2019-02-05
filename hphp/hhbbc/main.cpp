@@ -279,7 +279,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckArrayPlus =
     RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
       gd.HackArrCompatNotices;
-  RuntimeOption::EvalAllowObjectDestructors  = gd.AllowObjectDestructors;
   RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
@@ -361,7 +360,6 @@ void write_global_data(
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
-  gd.AllowObjectDestructors      = RuntimeOption::EvalAllowObjectDestructors;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.UndefinedConstFallback      = RuntimeOption::UndefinedConstFallback;

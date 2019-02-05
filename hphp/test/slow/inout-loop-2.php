@@ -1,7 +1,6 @@
 <?hh
 
 class D {
-  function __destruct() { echo "destruct!\n"; }
 }
 
 function foo(inout int $x) {

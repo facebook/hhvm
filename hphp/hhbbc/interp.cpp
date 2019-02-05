@@ -198,9 +198,8 @@ void in(ISS& env, const bc::DiscardClsRef& op) {
   takeClsRefSlot(env, op.slot);
 }
 void in(ISS& env, const bc::PopC&) {
-  auto const guarded = topStkEquiv(env) != NoLocalId;
-  if (!could_run_destructor(popC(env)) || guarded) return effect_free(env);
-  nothrow(env);
+  effect_free(env);
+  popC(env);
 }
 void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
@@ -2644,8 +2643,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     } else if (equivLoc == NoLocalId) {
       equivLoc = op.loc1;
     }
-    if (any(env.collect.opts & CollectionOpts::Inlining) &&
-        !could_run_destructor(peekLocRaw(env, op.loc1))) {
+    if (any(env.collect.opts & CollectionOpts::Inlining)) {
       effect_free(env);
     }
   } else {

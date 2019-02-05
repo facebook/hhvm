@@ -67,18 +67,6 @@
     RetC
   }
 
-  .method [public] __destruct() {
-    String "dtor: "
-    This
-    BaseC 0 Warn
-    QueryM 1 CGet PT:"x"
-    Concat
-    String "\n"
-    Concat
-    Print
-    RetC
-  }
-
   .property [private] x;
 }
 

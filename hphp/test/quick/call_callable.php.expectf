@@ -1,8 +1,3 @@
- = test_destructor =
-Dtor::f
-Dtor::f
-Dtor::__destruct
-done: test_destructor
  = test_inheritance =
 Base::blah
 Base::blah

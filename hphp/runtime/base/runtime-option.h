@@ -158,12 +158,6 @@ struct RuntimeOption {
     return EvalJit && EvalJitSampleRate > 0;
   }
 
-  static bool AllowObjectDestructors() {
-    // When one_bit_refcount == true, skip the runtime check since destructors
-    // are never allowed.
-    return !one_bit_refcount && EvalAllowObjectDestructors;
-  }
-
   static void ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
@@ -504,7 +498,6 @@ struct RuntimeOption {
   static bool EnableXHP;
   static bool EnablePHP;
   static bool CheckParamTypeInvariance;
-  static bool EnableObjDestructCall;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
@@ -764,7 +757,6 @@ struct RuntimeOption {
   */                                                                    \
   F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
-  F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           false)                           \

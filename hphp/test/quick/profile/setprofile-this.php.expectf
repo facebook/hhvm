@@ -8,12 +8,6 @@ C constructing
 
     exit C::__construct: a:1:{s:6:"return";N;}
 
-    enter C::__destruct: a:1:{s:4:"args";a:0:{}}
-
-C destructing
-
-    exit C::__destruct: a:1:{s:6:"return";N;}
-
     enter Exception::getMessage: a:1:{s:4:"args";a:0:{}}
 
     exit Exception::getMessage: a:1:{s:6:"return";s:14:"C::__construct";}
@@ -36,12 +30,6 @@ A constructing
 
       exit A::__construct: a:1:{s:6:"return";N;}
 
-      enter C::__destruct: a:1:{s:4:"args";a:0:{}}
-
-C destructing
-
-      exit C::__destruct: a:1:{s:6:"return";N;}
-
     exit C::method: a:1:{s:6:"return";O:1:"A":0:{}}
 
     enter Exception::getMessage: a:1:{s:4:"args";a:0:{}}
@@ -49,12 +37,6 @@ C destructing
     exit Exception::getMessage: a:1:{s:6:"return";s:9:"C::method";}
 
 Caught C::method
-
-    enter A::__destruct: a:1:{s:4:"args";a:0:{}}
-
-A destructing
-
-    exit A::__destruct: a:1:{s:6:"return";N;}
 
   exit main: a:1:{s:6:"return";N;}
 

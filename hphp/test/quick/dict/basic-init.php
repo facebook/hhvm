@@ -6,27 +6,9 @@ class ToString {
   }
 }
 
-class Noisy {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo $this->id . " Noisy::__destruct()\n";
-  }
-}
-
 function create($a, $b, $c, $d) {
   try {
     var_dump(dict[$a => $b, $c => $d]);
-  } catch (Exception $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
-  }
-}
-
-function create_noisy($a, $b, $c, $d) {
-  try {
-    var_dump(dict[$a => new Noisy($c), $b => new Noisy($d)]);
   } catch (Exception $e) {
     echo "Exception: " . $e->getMessage() . "\n";
   }
@@ -56,7 +38,6 @@ function main() {
   create('abc', new stdclass, 'def', new stdclass);
   create(100, vec[1, 2, 3], 200, vec[4, 5, 6]);
   create('abc', null, 'def', 4.56);
-  create_noisy('abc', 'abc', 1, 2);
 
   // These should fail:
   create(null, 'a', null, 'b');
@@ -71,8 +52,6 @@ function main() {
   create(Vector{1, 2, 3}, 123, Vector{4, 5, 6}, 456);
   create(false, 'first', null, 'second');
   create(vec[], 'first', dict[], 'second');
-  create_noisy(1, [], 3, 4);
-  create_noisy(false, true, 5, 6);
 }
 
 main();

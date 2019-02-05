@@ -1,11 +1,5 @@
 <?hh
 
-class Dtor {
-  function __destruct() {
-    echo "Dtor::__destruct\n";
-  }
-}
-
 function main() {
   $e = dict[];
   $one = dict[1 => "bar"];
@@ -20,11 +14,6 @@ function main() {
   unset($two["1"]);
   unset($three['not-there']);
   var_dump($e, $one, $two, $three);
-
-  echo "====================================================\n";
-  $four = dict[1 => 'a', '2' => new Dtor, 3 => false];
-  unset($four['2']);
-  var_dump($four);
 }
 
 main();

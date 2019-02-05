@@ -18,9 +18,6 @@ class C {
     $this->c = log(0);
     echo "C has a safe constructor.\n";
   }
-  function __destruct() {
-    echo "C has a safe destructor.\n";
-  }
   function __wakeup() {
     echo "C wakes up safely.\n";
   }
@@ -34,9 +31,6 @@ class DangerousClass {
   public $danger = "DangerousString";
   function __construct() {
     echo "I have dangerous constructor.\n";
-  }
-  function __destruct() {
-    echo "I have dangerous destructor.\n";
   }
   function __wakeup() {
     echo "I wake up dangerously.\n";

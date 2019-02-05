@@ -6,9 +6,6 @@ class Cls implements Iterator {
   function __construct($idx) {
     $this->idx = $idx;
   }
-  function __destruct() {
-    echo "Cls::__destruct " . $this->idx . "\n";
-  }
 
   public function rewind() {}
   public function current() {}
@@ -25,6 +22,7 @@ function test() {
   for ($i = 0; $i < 10; $i++) {
     echo "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n";
     from_obj(new Cls($i));
+    var_dump(hh\objprof_get_data());
     echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
   }
 }

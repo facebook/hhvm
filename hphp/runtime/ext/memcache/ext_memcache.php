@@ -390,10 +390,6 @@ class Memcache {
                      bool $status = true,
                      mixed $failure_callback = null,
                      int $timeoutms = 0): bool;
-
-  <<__OptionalDestruct>>
-  function __destruct(): void {
-  }
 }
 
 /* Memcache::connect() establishes a connection to the memcached server. The

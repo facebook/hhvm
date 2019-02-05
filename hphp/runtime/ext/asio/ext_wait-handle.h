@@ -105,7 +105,7 @@ struct c_Awaitable : ObjectData {
 
   explicit c_Awaitable(Class* cls, HeaderKind kind,
                         type_scan::Index tyindex) noexcept
-    : ObjectData(cls, NoInit{}, ObjectData::NoDestructor, kind),
+    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind),
       m_tyindex(tyindex)
   {
     assertx(type_scan::isKnownType(tyindex));

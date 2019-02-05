@@ -5,7 +5,6 @@ class Fooz {
     register_shutdown_function('onShutdown2');
     echo "in Fooz::baz\n";
   }
-  function __destruct() { echo "in Fooz::__destruct()\n"; }
 }
 
 function onShutdownRegisterShutdown_foo() { echo "in foo\n"; }

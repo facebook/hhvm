@@ -5,9 +5,6 @@ trait logger {
   public function __construct() {
     echo "\n".__CLASS__." constructing\n";
   }
-  public function __destruct() {
-    echo "\n".__CLASS__." destructing\n";
-  }
 }
 
 class A {

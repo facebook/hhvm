@@ -5,7 +5,7 @@ function foo() {
  return 12;
 }
 
-class lol { public function __destruct() { echo "lol\n"; } }
+class lol {}
 function bar() {
   var_dump(func_get_args());
   $x = new lol();

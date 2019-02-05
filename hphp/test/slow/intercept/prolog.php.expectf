@@ -36,7 +36,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
-    int(20)
+    int(19)
     ["function"]=>
     string(4) "func"
     ["class"]=>
@@ -55,7 +55,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
-    int(28)
+    int(27)
     ["function"]=>
     string(4) "test"
     ["args"]=>

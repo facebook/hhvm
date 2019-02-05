@@ -61,7 +61,6 @@ const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
 const StaticString s_86reified_prop("86reified_prop");
 const StaticString s_86reifiedinit("86reifiedinit");
-const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
 const StaticString s___Reified("__Reified");
@@ -232,9 +231,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 268 : 312), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 268 : 304), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 260 : 296), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -244,24 +243,6 @@ template struct assert_sizeof_class<sizeof_Class>;
  */
 ReadWriteMutex s_scope_cache_mutex;
 
-[[noreturn]] ObjectData* destructorFatalInstanceCtor(Class* cls) {
-  auto err = folly::sformat(
-    "Class {} has a __destruct() method and cannot be instantiated when ",
-    cls->name()->data()
-  );
-
-  if (one_bit_refcount) {
-    err += "one-bit reference counting is enabled";
-  } else {
-    err += "Eval.DisallowObjectDestructors is set";
-  }
-  raise_error("%s", err.c_str());
-}
-
-}
-
-bool Class::hasDisabledCtor() const {
-  return m_extra->m_instanceCtor == destructorFatalInstanceCtor;
 }
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
@@ -1662,7 +1643,6 @@ static Func* findSpecialMethod(Class* cls, const StringData* name) {
 const StaticString
   s_toString("__toString"),
   s_construct("__construct"),
-  s_destruct("__destruct"),
   s_invoke("__invoke"),
   s_sleep("__sleep"),
   s_get("__get"),
@@ -1676,8 +1656,7 @@ static Func* markNonStatic(Func* meth) {
   // Do not use isStaticInPrologue here, since that uses the
   // AttrRequiresThis flag.
   if (meth && (!meth->isStatic() || meth->isClosureBody() ||
-      s_construct.equal(meth->name()) ||
-      s_destruct.equal(meth->name()))) {
+      s_construct.equal(meth->name()))) {
     meth->setAttrs(meth->attrs() | AttrRequiresThis);
   }
   return meth;
@@ -1689,7 +1668,6 @@ static Func* markNonStatic(const Class* thiz, const String& meth) {
 
 void Class::setSpecial() {
   m_toString = markNonStatic(this, s_toString);
-  m_dtor = markNonStatic(this, s_destruct);
 
   /*
    * The invoke method is only cached in the Class for a fast path JIT
@@ -3709,19 +3687,6 @@ void Class::setNativeDataInfo() {
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
       m_RTAttrs |= ndi->rt_attrs;
       break;
-    }
-  }
-
-  // If destructors aren't supported by the current configuration, this class
-  // has one, and the destructor doesn't have the __OptionalDestruct attribute,
-  // prevent instantiation of the class with an instanceCtor.
-  if (!RuntimeOption::AllowObjectDestructors() && getDtor()) {
-    if (getDtor()->userAttributes().count(s___OptionalDestruct.get()) == 0 &&
-        !RuntimeOption::EvalAllDestructorsOptional) {
-      allocExtraData();
-      m_extra.raw()->m_instanceCtor = destructorFatalInstanceCtor;
-    } else {
-      m_dtor = nullptr;
     }
   }
 }

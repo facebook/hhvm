@@ -1,1 +1,1 @@
--vRuntime.Eval.AllowObjectDestructors=0 -vEnableHipHopSyntax=1
+-vEnableHipHopSyntax=1

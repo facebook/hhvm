@@ -76,10 +76,10 @@ getFileName():
 string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
-int(42)
+int(40)
 
 getEndLine():
-int(42)
+int(40)
 
 **********************************
 **********************************
@@ -94,19 +94,5 @@ bool(false)
 
 getEndLine():
 bool(false)
-
-**********************************
-**********************************
-Reflecting on method TestClass::__destruct()
-
-
-getFileName():
-string(%d) "%sReflectionMethod_basic4.php"
-
-getStartLine():
-int(36)
-
-getEndLine():
-int(36)
 
 **********************************

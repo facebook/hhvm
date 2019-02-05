@@ -182,7 +182,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function isFinal();
   public function isStatic();
   public function isConstructor();
-  public function isDestructor();
   public function getClosure($object);
   public function getModifiers();
   public function invoke($object, ...);

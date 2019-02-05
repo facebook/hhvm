@@ -791,7 +791,6 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
     + (RuntimeOption::EvalEnableIntishCast ? '1' : '0')
     + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
-    + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'

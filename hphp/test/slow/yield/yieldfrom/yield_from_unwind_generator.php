@@ -2,7 +2,6 @@
 
 class GenClass {
   function __construct() { echo "Making GenClass\n"; }
-  function __destruct()  { echo "Destroying GenClass\n"; }
   function genInner()    { throw new Exception; yield 5; }
 }
 

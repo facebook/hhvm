@@ -23,7 +23,6 @@ function func_to_enter() {}
 
 class DtorObj {
   public function __construct($x) { $this->x = $x; echo "__ctor $x\n"; }
-  public function __destruct() { echo "__dtor " . $this->x . "\n"; }
 }
 
 // During function exit

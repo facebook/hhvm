@@ -100,7 +100,6 @@ struct BaseGenerator {
     auto const obj = new (objmem) ObjectData(cls, 0, HeaderKind::NativeObject);
     assertx((void*)obj == (void*)objmem);
     assertx(obj->hasExactlyOneRef());
-    assertx(obj->noDestruct());
     return obj;
   }
 

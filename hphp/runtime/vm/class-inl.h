@@ -183,10 +183,6 @@ inline const Func* Class::getCtor() const {
   return m_ctor;
 }
 
-inline const Func* Class::getDtor() const {
-  return m_dtor;
-}
-
 inline const Func* Class::getToString() const {
   return m_toString;
 }

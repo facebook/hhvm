@@ -1,3 +1,0 @@
-<?php
-# TODO remove this once T12771200 is fixed
-if (gc_enabled()) echo "skip\n";

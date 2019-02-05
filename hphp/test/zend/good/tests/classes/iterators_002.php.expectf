@@ -10,7 +10,6 @@ c_iter::rewind
 c_iter::valid = true
 c_iter::current
 double:0:0
-c_iter::__destruct
 c_iter::next
 c_iter::valid = true
 c_iter::current
@@ -21,7 +20,6 @@ c_iter::rewind
 c_iter::valid = true
 c_iter::current
 double:1:0
-c_iter::__destruct
 c_iter::next
 c_iter::valid = true
 c_iter::current
@@ -32,9 +30,6 @@ c_iter::rewind
 c_iter::valid = true
 c_iter::current
 double:2:0
-c_iter::__destruct
 c_iter::next
 c_iter::valid = false
-c_iter::__destruct
-c::__destruct
 Done

@@ -1,9 +1,6 @@
 <?hh // decl
 
 class Foo {
-  public function __destruct() {
-    echo "generator destructed\n";
-  }
 }
 
 async function foo() {

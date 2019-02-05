@@ -26,9 +26,9 @@ private
     $x = $a;
   }
 
-  public function __destruct() {
-    echo "C1 destructor!\n";
-  }
+
+
+
 };
 
 class C2 {
@@ -40,12 +40,12 @@ private
     $x = $a;
   }
 
-  public function __destruct() {
-    echo "C2 destructor\n";
-    $c = new C1(42);
-    $c = null;
-    echo "C2 destructor done\n";
-  }
+
+
+
+
+
+
 };
 
 function main() {
@@ -59,5 +59,3 @@ function main() {
 }
 
 main();
-
-

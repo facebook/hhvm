@@ -25,10 +25,6 @@ class finfo {
     $this->magic_file = $magic_file;
   }
 
-  <<__OptionalDestruct>>
-  public function __destruct() {
-  }
-
   public function __sleep() {
     return array('options', 'magic_file');
   }

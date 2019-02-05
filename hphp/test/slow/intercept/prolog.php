@@ -9,7 +9,6 @@ class Cls {
     return false;
   }
   function intercept3() { throw new Exception("intercept3"); }
-  function __destruct() {}
 }
 
 function getCls() { return new Cls; }

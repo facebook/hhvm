@@ -379,7 +379,6 @@ bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnablePHP = true;
 bool RuntimeOption::EnableXHP = false;
-bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1644,8 +1643,6 @@ void RuntimeOption::Load(
       EnableXHP = true;
     }
 
-    Config::Bind(EnableObjDestructCall, ini, config,
-                 "Eval.EnableObjDestructCall", true);
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
 
 #define F(type, name, defaultVal) \

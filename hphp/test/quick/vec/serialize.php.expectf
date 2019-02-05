@@ -301,21 +301,3 @@ Serialize exception: Sleep exception
 ====================================================
 string(29) "v:1:{O:11:"WakeupThrow":0:{}}"
 Unserialize exception: Wakeup exception
-====================================================
-string(141) "v:5:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}O:4:"Dtor":1:{s:2:"id";i:3;}O:11:"WakeupThrow":0:{}O:4:"Dtor":1:{s:2:"id";i:4;}}"
-Dtor::__destruct(): 1
-Dtor::__destruct(): 2
-Dtor::__destruct(): 3
-Dtor::__destruct(): 4
-Unserialize exception: Wakeup exception
-====================================================
-string(50) "v:3:{v:1:{i:123;}R:2;O:4:"Dtor":1:{s:2:"id";i:1;}}"
-
-Notice: Unable to unserialize: [v:3:{v:1:{i:123;}R:2;O:4:"Dtor":1:{s:2:"id";i:1;}}]. Vecs cannot contain references. in %s on line %d
-bool(false)
-====================================================
-string(50) "v:3:{O:4:"Dtor":1:{s:2:"id";i:1;}v:1:{i:123;}R:3;}"
-Dtor::__destruct(): 1
-
-Notice: Unable to unserialize: [v:3:{O:4:"Dtor":1:{s:2:"id";i:1;}v:1:{i:123;}R:3;}]. Vecs cannot contain references. in %s on line %d
-bool(false)

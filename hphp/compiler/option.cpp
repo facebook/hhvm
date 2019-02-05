@@ -268,9 +268,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
                ini, config, "NoticeOnBuiltinDynamicCalls",
                RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
-  Config::Bind(RuntimeOption::EvalAllowObjectDestructors,
-               ini, config, "AllowObjectDestructors",
-               RuntimeOption::EvalAllowObjectDestructors);
   Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
                ini, config, "AbortBuildOnVerifyError",
                RuntimeOption::EvalAbortBuildOnVerifyError);

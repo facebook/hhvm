@@ -27,12 +27,4 @@ continue
 out
 break clear all
 continue
-break flow2.php:26
-@test(3)
-out
-continue
-out
-out
-break clear all
-continue
 quit

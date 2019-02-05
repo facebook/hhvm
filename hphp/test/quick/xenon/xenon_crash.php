@@ -8,16 +8,9 @@ async function genList(...$args) {
 }
 
 class X {
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
 }
 
 class A {
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
-
   async function gen1($a) {
     await RescheduleWaitHandle::create(0, 0); // simulate blocking I/O
     return $a + 1;

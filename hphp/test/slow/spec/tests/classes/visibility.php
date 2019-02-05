@@ -45,7 +45,7 @@ class C
 //  private static var $vsprop4;
 
 // methods
-    
+
     function f1() {}
     public function f2() {}
     protected function f3() {}
@@ -57,7 +57,7 @@ class C
     private static function sf4() {}
 
 // constructors
-    
+
     function __construct() {}               // OK on its own; implicitly public
 //  public function __construct() {}        // OK on its own
 //  protected function __construct() {}     // OK on its own
@@ -67,18 +67,6 @@ class C
 //  public static function __construct() {}
 //  protected static function __construct() {}
 //  private static function __construct() {}
-
-// destructors
-    
-    function __destruct() {}                // OK on its own; implicitly public
-//  public function __destruct() {}         // OK on its own
-//  protected function __destruct() {}      // OK on its own
-//  private function __destruct() {}        // OK on its own
-
-//  static function __destruct() {}         // destructors can't be static
-//  public static function __destruct() {}
-//  protected static function __destruct() {}
-//  private static function __destruct() {}
 }
 
 echo "CON1: " . C::CON1 . "\n"; // use :: notation, as a const is implicitly static

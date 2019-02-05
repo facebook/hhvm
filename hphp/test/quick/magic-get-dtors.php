@@ -7,9 +7,6 @@ class c{
     $this->x = self::$idx++;
     printf("c %d constructing\n", $this->x);
   }
-  public function __destruct() {
-    printf("c %d destructing\n", $this->x);
-  }
   public function __get($name) {
     return new C();
   }

@@ -139,12 +139,6 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
 };
 
-void tweak_variant_dtors() {
-  if (RuntimeOption::EnableObjDestructCall) return;
-  destructorForType(KindOfObject) =
-    (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
-}
-
 #define IMPLEMENT_SET(argType, setOp)                     \
   void Variant::set(argType v) noexcept {                 \
     if (isPrimitive()) {                                  \

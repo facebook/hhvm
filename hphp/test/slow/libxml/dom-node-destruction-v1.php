@@ -12,10 +12,6 @@ class MyElement extends DOMElement {
     return $this;
   }
 
-  function __destruct() {
-    echo "Destructing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
-  }
-
   function info() {
     echo "Querying DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
   }

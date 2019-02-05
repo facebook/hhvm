@@ -27,7 +27,5 @@ baz 47
 47 2209 103823
 foo 48
 bar 48
-destructing in bar
 end bar
-destructing in baz
 end baz

@@ -466,7 +466,6 @@ bool canDCE(IRInstruction* inst) {
   case AllocObj:
   case AllocObjReified:
   case NewClsMeth:
-  case RegisterLiveObj:
   case InitProps:
   case PropTypeRedefineCheck:
   case InitSProps:

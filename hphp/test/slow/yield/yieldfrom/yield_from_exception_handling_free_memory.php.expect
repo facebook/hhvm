@@ -3,4 +3,3 @@ Constructing new FooBar
 Caught Exception
 Unsetting $x
 Finishing bar()
-Destructing FooBar

@@ -782,9 +782,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     if ($this->isConstructor()) {
       $preAttrs[] = 'ctor';
     }
-    if ($this->isDestructor()) {
-      $preAttrs[] = 'dtor';
-    }
 
     $funcAttrs = [];
     if ($this->isAbstract()) {
@@ -981,18 +978,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   <<__Native>>
   public function isConstructor(): bool;
-
-  /**
-   * ( excerpt from
-   * http://php.net/manual/en/reflectionmethod.isdestructor.php )
-   *
-   * Checks if the method is a destructor.
-   *
-   * @return     bool   TRUE if the method is a destructor, otherwise FALSE
-   */
-  public function isDestructor(): bool {
-    return $this->getName() == '__destruct';
-  }
 
   /**
    * ( excerpt from

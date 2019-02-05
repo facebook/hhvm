@@ -1,11 +1,6 @@
 <?php
 class A
 {
-	public function __destruct()
-	{
-		gc_collect_cycles();
-	}
-	
 	public function getB()
 	{
 		$this->data['foo'] = new B($this);
@@ -20,10 +15,6 @@ class B
 	public function B($A)
 	{
 		$this->A = $A;
-	}
-
-	public function __destruct()
-	{
 	}
 }
 

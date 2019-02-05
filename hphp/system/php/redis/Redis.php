@@ -1786,9 +1786,4 @@ class Redis {
 
     return $ret;
   }
-
-  <<__OptionalDestruct>>
-  public function __destruct() {
-
-  }
 }

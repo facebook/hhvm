@@ -6,10 +6,6 @@ class logger2 {
     echo "logger2 constructing\n";
   }
 
-  public function __destruct() {
-    echo "logger2 destructing\n";
-  }
-
   public function __set($name, $value) {
     echo "set was called, throwing an exception\n";
     throw new Exception('nope');
@@ -19,10 +15,6 @@ class logger2 {
 class logger {
   public function __construct() {
     echo "logger constructing\n";
-  }
-
-  public function __destruct() {
-    echo "logger destructing\n";
   }
 
   public function __set($name, $value) {
@@ -40,10 +32,6 @@ class c {
     echo "c constructing\n";
   }
 
-  public function __destruct() {
-    echo "c destructing\n";
-  }
-
   public function __get($name) {
     echo "returning new logger\n";
     return new logger;
@@ -53,10 +41,6 @@ class c {
 class d {
   public function __construct() {
     echo "d constructing\n";
-  }
-
-  public function __destruct() {
-    echo "d destructing\n";
   }
 
   public function __get($name) {

@@ -60,7 +60,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(ForbidDynamicCalls);
   SHOW(NoticeOnBuiltinDynamicCalls);
   SHOW(ReffinessInvariance);
-  SHOW(AllowObjectDestructors);
   SHOW(AbortBuildOnVerifyError);
   SHOW(UndefinedConstFallback);
   SHOW(Signature);

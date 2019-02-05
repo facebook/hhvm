@@ -572,10 +572,6 @@ inline bool Func::isGenerated() const {
   return shared()->m_isGenerated;
 }
 
-inline bool Func::isDestructor() const {
-  return !strcmp(m_name->data(), "__destruct");
-}
-
 inline bool Func::isMagic() const {
   return isMagicCallMethod() || isMagicCallStaticMethod();
 }

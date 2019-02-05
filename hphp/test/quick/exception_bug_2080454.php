@@ -1,11 +1,5 @@
 <?php
 
-class Dtor {
-  public function __destruct() {
-    echo "dtor\n";
-  }
-}
-
 $ar = array(1,3,2);
 
 //////////////////////////////////////////////////////////////////////
@@ -32,7 +26,7 @@ function case1() { foo(); }
 function foo2() {
   global $ar;
   foreach ($ar as $y) {
-    func(12, new Dtor(), mt_rand(), blar($y) ? 1024 : -1);
+    func(12, new stdclass(), mt_rand(), blar($y) ? 1024 : -1);
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
@@ -42,7 +36,7 @@ function case2() { foo2(); }
 function foo3() {
   global $ar;
   foreach ($ar as $y) {
-    func(12, new Dtor(), mt_rand(), func(blar($y)));
+    func(12, new stdclass(), mt_rand(), func(blar($y)));
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
@@ -53,7 +47,7 @@ function case3() { foo3(); }
 function foo4() {
   global $ar;
   foreach ($ar as $y) {
-    func(12, new Dtor(), mt_rand(), func(mt_rand(), blar($y)));
+    func(12, new stdclass(), mt_rand(), func(mt_rand(), blar($y)));
   }
   try {} catch (Exception $x) { echo "Bad\n"; }
 }

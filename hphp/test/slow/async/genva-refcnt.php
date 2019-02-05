@@ -1,9 +1,6 @@
 <?hh // decl
 
 class Marker {
-  public function __destruct() {
-    echo "destructing\n";
-  }
 }
 
 async function foo() {
@@ -11,6 +8,7 @@ async function foo() {
 }
 
 async function bar() {
+  var_dump(objprof_get_data());
   echo "genva 1\n";
   list($a, $b) = await genva(foo(), foo());
   echo "unset a\n";
@@ -22,6 +20,7 @@ async function bar() {
   echo "genva 3\n";
   await genva(foo(), foo());
   echo "done\n";
+  var_dump(objprof_get_data());
 }
 
 

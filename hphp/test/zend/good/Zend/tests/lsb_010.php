@@ -8,9 +8,6 @@ class Foo {
 	public function __construct() {
 		echo static::$className . "::__construct\n";
 	}
-	public function __destruct() {
-		echo static::$className . "::__destruct\n";
-	}
 }
 
 class FooChild extends Foo {

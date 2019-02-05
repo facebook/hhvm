@@ -20,25 +20,10 @@ signal throwing
 Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/hphp/test/quick/profile/setprofile_throw.php:19
 Stack trace:
 #0 (): signal_thrower()
-#1 %s/hphp/test/quick/profile/setprofile_throw.php(49): posix_kill()
-#2 %s/hphp/test/quick/profile/setprofile_throw.php(93): func_entry()
-#3 %s/hphp/test/quick/profile/setprofile_throw.php(97): main()
-#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 49
-__dtor 15
-__dtor 14
-__dtor 13
-__dtor 12
-__dtor 11
-__dtor 10
-__dtor 9
-__dtor 8
-__dtor 7
-__dtor 6
-__dtor 5
-__dtor 4
-__dtor 3
-__dtor 2
-__dtor 1
+#1 %s/hphp/test/quick/profile/setprofile_throw.php(48): posix_kill()
+#2 %s/hphp/test/quick/profile/setprofile_throw.php(92): func_entry()
+#3 %s/hphp/test/quick/profile/setprofile_throw.php(96): main()
+#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 48
 __ctor 1
 __ctor 2
 __ctor 3
@@ -59,22 +44,7 @@ signal throwing
 Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/hphp/test/quick/profile/setprofile_throw.php:19
 Stack trace:
 #0 (): signal_thrower()
-#1 %s/hphp/test/quick/profile/setprofile_throw.php(75): posix_kill()
-#2 %s/hphp/test/quick/profile/setprofile_throw.php(94): func_backward()
-#3 %s/hphp/test/quick/profile/setprofile_throw.php(97): main()
-#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 75
-__dtor 15
-__dtor 14
-__dtor 13
-__dtor 12
-__dtor 11
-__dtor 10
-__dtor 9
-__dtor 8
-__dtor 7
-__dtor 6
-__dtor 5
-__dtor 4
-__dtor 3
-__dtor 2
-__dtor 1
+#1 %s/hphp/test/quick/profile/setprofile_throw.php(74): posix_kill()
+#2 %s/hphp/test/quick/profile/setprofile_throw.php(93): func_backward()
+#3 %s/hphp/test/quick/profile/setprofile_throw.php(96): main()
+#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 74

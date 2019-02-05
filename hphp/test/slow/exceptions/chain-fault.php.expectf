@@ -11,7 +11,7 @@ object(Exception)#2 (8) {
   ["file":protected]=>
   string(%d) "%s/test/slow/exceptions/chain-fault.php"
   ["line":protected]=>
-  int(18)
+  int(15)
   ["trace":"Exception":private]=>
   array(2) {
     [0]=>
@@ -19,7 +19,7 @@ object(Exception)#2 (8) {
       ["file"]=>
       string(%d) "%s/test/slow/exceptions/chain-fault.php"
       ["line"]=>
-      int(25)
+      int(22)
       ["function"]=>
       string(7) "thrower"
       ["args"]=>
@@ -31,7 +31,7 @@ object(Exception)#2 (8) {
       ["file"]=>
       string(%d) "%s/test/slow/exceptions/chain-fault.php"
       ["line"]=>
-      int(34)
+      int(31)
       ["function"]=>
       string(4) "main"
       ["args"]=>
@@ -50,7 +50,7 @@ object(Exception)#2 (8) {
     ["file":protected]=>
     string(%d) "%s/test/slow/exceptions/chain-fault.php"
     ["line":protected]=>
-    int(16)
+    int(13)
     ["trace":"Exception":private]=>
     array(2) {
       [0]=>
@@ -58,7 +58,7 @@ object(Exception)#2 (8) {
         ["file"]=>
         string(%d) "%s/test/slow/exceptions/chain-fault.php"
         ["line"]=>
-        int(25)
+        int(22)
         ["function"]=>
         string(7) "thrower"
         ["args"]=>
@@ -70,7 +70,7 @@ object(Exception)#2 (8) {
         ["file"]=>
         string(%d) "%s/test/slow/exceptions/chain-fault.php"
         ["line"]=>
-        int(34)
+        int(31)
         ["function"]=>
         string(4) "main"
         ["args"]=>
@@ -86,5 +86,4 @@ object(Exception)#2 (8) {
   ["userMetadata":protected]=>
   NULL
 }
-Destructing
 Leaving main

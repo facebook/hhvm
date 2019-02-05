@@ -3,13 +3,11 @@ NULL
 string(8) "ticktick"
 string(4) "woof"
 
-Notice: Undefined index: 3 in %s on line 27
+Notice: Undefined index: 3 in %s on line 24
 NULL
-Destructing
 NULL
 string(8) "tocktock"
 string(4) "meow"
 
-Notice: Undefined index: 3 in %s on line 35
+Notice: Undefined index: 3 in %s on line 32
 NULL
-Destructing

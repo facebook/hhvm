@@ -210,12 +210,6 @@ void raiseMissingArgument(const Func* func, int got);
 
 Class* lookupClsRDS(const StringData* name);
 
-/*
- * Insert obj into the set of live objects to be destructed at the end of the
- * request.
- */
-void registerLiveObj(ObjectData* obj);
-
 /* Check if a method of the given name exists on the class. */
 bool methodExistsHelper(Class*, StringData*);
 

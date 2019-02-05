@@ -114,7 +114,4 @@ vec(4) {
   string(3) "abc"
   int(10)
 }
-3 Noisy::__destruct()
-2 Noisy::__destruct()
-1 Noisy::__destruct()
 Exception: Thrower::__construct()

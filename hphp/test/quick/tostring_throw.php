@@ -3,7 +3,7 @@
 class stringer {
   public function __toString() { throw new Exception("nope\n"); }
 }
-class dtor { public function __destruct() { echo "dtor ran\n"; } }
+class dtor {}
 
 function ignore() {}
 function foo() {

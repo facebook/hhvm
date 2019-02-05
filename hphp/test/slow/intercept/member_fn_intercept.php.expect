@@ -17,7 +17,6 @@ array(5) {
 }
 object(lol)#1 (0) {
 }
-lol
 array(5) {
   [0]=>
   string(6) "A::foo"
@@ -35,5 +34,4 @@ array(5) {
   [4]=>
   bool(true)
 }
-lol
 done

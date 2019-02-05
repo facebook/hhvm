@@ -10,8 +10,6 @@ error_reporting(-1);
 
 class Point
 {
-    private static $pointCount = 0;
-
     private $x;
     private $y;
 
@@ -24,16 +22,13 @@ class Point
     {
         $this->x = $x;
         $this->y = $y;
-        ++self::$pointCount;
-
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
     }
 
     public function move($x, $y)
     {
         $this->x = $x;
         $this->y = $y;
-    }   
+    }
 
     public function translate($x, $y)
     {
@@ -41,25 +36,10 @@ class Point
         $this->y += $y;
     }
 
-    public function __destruct()
-    {
-        --self::$pointCount;
-
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
-    }
-///*
-    public function __clone()
-    {
-        ++self::$pointCount;
-
-        echo "\nInside " . __METHOD__ . ", $this, point count = " . self::$pointCount . "\n\n";
-    }
-//*/
-
     public function __toString()
     {
         return '(' . $this->x . ',' . $this->y . ')';
-    }   
+    }
 }
 
 ///*

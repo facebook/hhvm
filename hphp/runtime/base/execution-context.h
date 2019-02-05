@@ -404,7 +404,6 @@ public:
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
-  void destructObjects();
   void debuggerExecutePsps();
 
   bool isNested() { return m_nesting != 0; }
@@ -579,7 +578,6 @@ private:
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  req::vector_set<ObjectData*> m_liveBCObjs; // objects with destructors
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill

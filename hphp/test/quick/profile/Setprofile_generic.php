@@ -1,7 +1,6 @@
 <?php
 
 class Foo {
-  public function __destruct() { echo "heh\n"; }
 }
 
 function pure_function_many_locals($a) {

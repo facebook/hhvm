@@ -3,9 +3,6 @@
 const N = 10;
 
 class Obj {
-  function __destruct() {
-    echo "object destroyed\n";
-  }
 }
 
 class X {
@@ -34,9 +31,14 @@ class X {
 }
 
 
+function f() {
+  $x = new X();
+  $x->f();
+}
+
 <<__EntryPoint>>
 function main_uninit_leak() {
-$x = new X();
-$x->f();
-echo "done\n";
+  f();
+  var_dump(hh\objprof_get_data());
+  echo "done\n";
 }

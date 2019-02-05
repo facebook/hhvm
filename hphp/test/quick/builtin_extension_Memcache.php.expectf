@@ -5,7 +5,7 @@ object(Memcache)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class Memcache in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(21) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -46,8 +46,6 @@ array(21) {
   string(15) "setserverparams"
   [19]=>
   string(9) "addserver"
-  [20]=>
-  string(10) "__destruct"
 }
 ================
 A_Memcache
@@ -59,7 +57,7 @@ object(A_Memcache)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcache in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(21) {
+array(20) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -100,6 +98,4 @@ array(21) {
   string(15) "setserverparams"
   [19]=>
   string(9) "addserver"
-  [20]=>
-  string(10) "__destruct"
 }

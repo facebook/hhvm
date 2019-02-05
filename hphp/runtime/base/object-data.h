@@ -149,7 +149,7 @@ struct InvokeResult {
 extern DECLARE_RDS_LOCAL_HOTVALUE(uint32_t, os_max_id);
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint8_t {
-    NoDestructor       = 0x01, // __destruct()
+    NoAttrs            = 0x00,
     IsWeakRefed        = 0x02, // Is pointed to by at least one WeakRef
     HasDynPropArr      = 0x04, // has a dynamic properties array
     IsBeingConstructed = 0x08, // Constructor for most derived class has not
@@ -226,34 +226,22 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * uninitialized object of that class. These are meant to be called from the
    * JIT, where the cls, size, and attributes are constants at JIT time.
    *
-   * newInstanceRaw<> should be called only when !cls->getDtor(); otherwise,
-   * use newInstanceRawAttrs. The big=true versions should be called when
-   * size > kMaxSmallSize.
+   * The big=true versions should be called when size > kMaxSmallSize.
    *
    * The memo versions should be used if the object has memo slots.
    *
    * The initial ref-count will be set to one.
    */
-  static const uint8_t DefaultAttrs = NoDestructor;
+  static const uint8_t DefaultAttrs = NoAttrs;
 
   static ObjectData* newInstanceRawSmall(Class*, size_t size, size_t index);
   static ObjectData* newInstanceRawBig(Class*, size_t size);
-  static ObjectData* newInstanceRawAttrsSmall(Class*, size_t size, size_t index,
-                                              uint8_t attrs);
-  static ObjectData* newInstanceRawAttrsBig(Class*, size_t size,
-                                            uint8_t attrs);
 
   static ObjectData* newInstanceRawMemoSmall(Class*, size_t size,
                                              size_t index, size_t objoff);
   static ObjectData* newInstanceRawMemoBig(Class*, size_t size, size_t objoff);
-  static ObjectData* newInstanceRawMemoAttrsSmall(Class*, size_t size,
-                                                  size_t index, size_t objoff,
-                                                  uint8_t attrs);
-  static ObjectData* newInstanceRawMemoAttrsBig(Class*, size_t size,
-                                                size_t objoff, uint8_t attrs);
 
   void release() noexcept;
-  void releaseNoObjDestructCheck() noexcept;
 
   Class* getVMClass() const;
   void setVMClass(Class* cls);
@@ -308,9 +296,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void setAttribute(Attribute);
   bool hasInstanceDtor() const;
   bool hasNativeData() const;
-  bool noDestruct() const;
-  void setNoDestruct();
-  void clearNoDestruct();
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
 
@@ -337,16 +322,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool moreEqual(const ObjectData&) const;
   int64_t compare(const ObjectData&) const;
 
-  /*
-   * Call this object's destructor, if it has one. No restrictions are placed
-   * on the object's refcount, since this is used on objects still alive at
-   * request shutdown.
-   */
-  void destructForExit();
-
  private:
   void instanceInit(Class*);
-  bool destructImpl();
 
  public:
 
@@ -591,21 +568,6 @@ private:
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
-
-struct CountableHelper {
-  explicit CountableHelper(ObjectData* object) : m_object(object) {
-    object->incRefCount();
-  }
-  ~CountableHelper() {
-    m_object->decRefCount();
-  }
-
-  CountableHelper(const CountableHelper&) = delete;
-  CountableHelper& operator=(const CountableHelper&) = delete;
-
-private:
-  ObjectData *m_object;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 

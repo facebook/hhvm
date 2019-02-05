@@ -7,7 +7,6 @@ final class c {}
 class x
 {
 	function __construct() {}
-	function __destruct() {}
 	private function a() {}
 	private static function b() {}
 	protected function c() {}

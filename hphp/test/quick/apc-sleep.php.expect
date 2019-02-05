@@ -6,7 +6,6 @@ object(Foo)#1 (2) {
   int(2)
 }
 I'm going to sleep
-Destructing a Foo
 I'm waking up
 object(Foo)#1 (2) {
   ["foo"]=>
@@ -14,4 +13,3 @@ object(Foo)#1 (2) {
   ["bar"]=>
   NULL
 }
-Destructing a Foo

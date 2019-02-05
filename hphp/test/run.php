@@ -2094,7 +2094,7 @@ function run_config_post($outputs, $test, $options) {
   if ((!$is_tc && ($type === 'expect' || $type === 'hhvm.expect')) ||
       ($is_tc && $type === 'typechecker.expect')) {
     $wanted = trim(file_get_contents($file));
-    if (isset($options['ignore-oids'])) {
+    if (isset($options['ignore-oids']) || isset($options['repo'])) {
       $output = replace_object_resource_ids($output, 'n');
       $wanted = replace_object_resource_ids($wanted, 'n');
     }
@@ -2110,7 +2110,7 @@ function run_config_post($outputs, $test, $options) {
   } else if ((!$is_tc && ($type === 'expectf' || $type === 'hhvm.expectf')) ||
              ($is_tc && $type === 'typechecker.expectf')) {
     $wanted = trim(file_get_contents($file));
-    if (isset($options['ignore-oids'])) {
+    if (isset($options['ignore-oids']) || isset($options['repo'])) {
       $wanted = replace_object_resource_ids($wanted, '%d');
     }
     $wanted_re = $wanted;

@@ -6,9 +6,6 @@ class E implements ArrayAccess {
   public function __construct() {
     $this->i = ++self::$count;
   }
-  public function __destruct() {
-    printf("In E::__destruct() %d\n", $this->i);;
-  }
   public function offsetGet($offset) {
     print "In E::offsetGet()\n";
     $a = array();
@@ -25,9 +22,6 @@ class E implements ArrayAccess {
 }
 
 class D implements ArrayAccess {
-  public function __destruct() {
-    print "In D::__destruct()\n";
-  }
   public function offsetGet($offset) {
     print "In D::offsetGet()\n";
     # Generate a new object that has no references besides the one being

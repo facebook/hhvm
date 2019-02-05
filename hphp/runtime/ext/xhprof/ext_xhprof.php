@@ -32,8 +32,7 @@ function xhprof_network_disable(): mixed;
 
 /* Starts an artificial frame. Together with xhprof_frame_end(), this times
  * one block of code execution as if it were a function call, allowing people
- * to define arbitrary function boundaries. Prefer to use XhprofFrame
- * classobjects instead of calling this function directly.
+ * to define arbitrary function boundaries.
  * @param string $name - The "virtual" function's name.
  */
 <<__HipHopSpecific, __Native("NoInjection")>>
@@ -43,8 +42,7 @@ function xhprof_frame_begin(string $name): void;
  * sure there are no exceptions in between these two calls, as otherwise, it
  * may report incorrect timings. Also, xhprof_frame_begin() and
  * xhprof_frame_end() have to be paired up really well, so not to interfere
- * with regular function's profiling, unless that's the intention. Prefer to
- * use XhprofFrame classobjects instead of calling this function directly.
+ * with regular function's profiling, unless that's the intention.
  */
 <<__HipHopSpecific, __Native("NoInjection")>>
 function xhprof_frame_end(): void;

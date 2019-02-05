@@ -14,10 +14,6 @@ class IPAddressIsh {
     $this->binary = "asdasd";
   }
 
-  public function __destruct() {
-    echo "dtor" . $this->id . "\n";
-  }
-
   public function toBinary() {
     return $this->binary;
   }

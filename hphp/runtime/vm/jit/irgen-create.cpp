@@ -298,10 +298,6 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
     initThrowable(env, cls, obj);
   }
 
-  if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
-    gen(env, RegisterLiveObj, obj);
-  }
-
   return obj;
 }
 

@@ -1,9 +1,6 @@
 <?php
 
 class C {
-  function __destruct() {
-    echo "__destruct!\n";
-  }
 }
 
 function foo() {

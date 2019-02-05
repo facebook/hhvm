@@ -24,16 +24,6 @@ class WakeupThrow {
   }
 }
 
-class Dtor {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo "Dtor::__destruct(): " . $this->id . "\n";
-  }
-}
-
 function roundtrip($v) {
   echo "====================================================\n";
   var_dump($v);
@@ -101,11 +91,6 @@ function main() {
 
   try_serialize(vec[new SleepThrow]);
   try_unserialize("v:1:{O:11:\"WakeupThrow\":0:{}}");
-
-  // Ensure dtors of already unserialized elements run
-  try_unserialize("v:5:{O:4:\"Dtor\":1:{s:2:\"id\";i:1;}O:4:\"Dtor\":1:{s:2:\"id\";i:2;}O:4:\"Dtor\":1:{s:2:\"id\";i:3;}O:11:\"WakeupThrow\":0:{}O:4:\"Dtor\":1:{s:2:\"id\";i:4;}}");
-  try_unserialize("v:3:{v:1:{i:123;}R:2;O:4:\"Dtor\":1:{s:2:\"id\";i:1;}}");
-  try_unserialize("v:3:{O:4:\"Dtor\":1:{s:2:\"id\";i:1;}v:1:{i:123;}R:3;}");
 }
 
 main();

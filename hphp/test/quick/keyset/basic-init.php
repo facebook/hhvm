@@ -7,13 +7,6 @@ class ToString {
 }
 
 class Noisy {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo $this->id . " Noisy::__destruct()\n";
-  }
 }
 
 function create($a, $b, $c) {
@@ -54,7 +47,7 @@ function main() {
   create('a', new ToString, 'c');
 
   try {
-    var_dump(keyset['a', 1, 'b', 2, new Noisy(1), new Noisy(2)]);
+    var_dump(keyset['a', 1, 'b', 2, new Noisy, new Noisy]);
   } catch (Exception $e) {
     echo "Exception: " . $e->getMessage() . "\n";
   }

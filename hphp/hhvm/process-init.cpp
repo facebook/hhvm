@@ -64,7 +64,6 @@ const StaticString s_ParseError("ParseError");
 const StaticString s_TypeError("TypeError");
 }
 
-void tweak_variant_dtors();
 void ProcessInit() {
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
@@ -168,8 +167,6 @@ void ProcessInit() {
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
-
-  tweak_variant_dtors();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

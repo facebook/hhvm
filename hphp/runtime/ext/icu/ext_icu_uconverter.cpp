@@ -270,8 +270,7 @@ static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
   }
 }
 
-// TODO(4017519)
-static void HHVM_METHOD(UConverter, __destruct) {
+static void HHVM_METHOD(UConverter, __dispose) {
   FETCH_CNV(data, this_,);
   if (data->src()) ucnv_close(data->src());
   if (data->dest()) ucnv_close(data->dest());
@@ -496,8 +495,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
 
 void IntlExtension::initUConverter() {
   HHVM_ME(UConverter, __construct);
-  // TODO(4017519)
-  HHVM_ME(UConverter, __destruct);
+  HHVM_ME(UConverter, __dispose);
   HHVM_ME(UConverter, convert);
   HHVM_ME(UConverter, getDestinationEncoding);
   HHVM_ME(UConverter, getSourceEncoding);

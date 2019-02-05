@@ -9,9 +9,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
-Dtor... 1
-Dtor... 2
 Sleep...
 vec(0) {
 }
@@ -63,8 +60,6 @@ vec(1) {
     int(12345)
   }
 }
-string(16) "Wakeup exception"
-Dtor... 1
 string(16) "Wakeup exception"
 vec(1) {
   object(Sleep)#%d (1) {
@@ -124,16 +119,12 @@ vec(1) {
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 vec(1) {
   object(Sleep)#%d (1) {
     ["val"]=>
     NULL
   }
 }
-Dtor... 1
-Dtor... 2
 Sleep...
 vec(0) {
 }
@@ -185,8 +176,6 @@ vec(1) {
     int(12345)
   }
 }
-string(16) "Wakeup exception"
-Dtor... 1
 string(16) "Wakeup exception"
 vec(1) {
   object(Sleep)#%d (1) {

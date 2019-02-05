@@ -1,6 +1,6 @@
 <?php
 
-class dtor { public function __destruct() { echo "heyo\n"; } }
+class dtor {}
 
 <<__EntryPoint>>
 function main_session_unset() {

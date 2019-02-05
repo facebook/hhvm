@@ -1,7 +1,6 @@
 <?php
 
 class X {
-  function __destruct() { var_dump(__METHOD__); }
   function __toString() { return __METHOD__; }
 }
 

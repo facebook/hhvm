@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyConverter extends UConverter {
   /**
    * Called during conversion from source encoding to internal UChar representation
@@ -18,7 +18,11 @@ class MyConverter extends UConverter {
 
 }
 
-$c = new MyConverter('ascii', 'utf-8');
-foreach(array("regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!") as $word) {
-  $c->convert($word);
+<<__EntryPoint>>
+function main() {
+  using ($c = new MyConverter('ascii', 'utf-8')) {
+    foreach(array("regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!") as $word) {
+      $c->convert($word);
+    }
+  }
 }

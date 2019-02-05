@@ -1,4 +1,3 @@
-~bar()
 array(4) {
   [0]=>
   string(3) "asd"
@@ -9,9 +8,7 @@ array(4) {
   [3]=>
   string(3) "asd"
 }
-~bar()
 sup
 holding this:
 asd
-~bar()
 Done

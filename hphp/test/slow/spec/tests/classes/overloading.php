@@ -132,10 +132,6 @@ echo "----------------------\n";
 
 class X
 {
-    public function __destruct()
-    {
-        echo __METHOD__ . "\n";
-    }
 }
 
 ///*

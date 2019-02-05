@@ -294,11 +294,7 @@ CallSpec getDtorCallSpec(DataType type) {
     case KindOfKeyset:
       return CallSpec::direct(SetArray::Release);
     case KindOfObject:
-      return CallSpec::method(
-        RuntimeOption::EnableObjDestructCall
-          ? &ObjectData::release
-          : &ObjectData::releaseNoObjDestructCheck
-      );
+      return CallSpec::method(&ObjectData::release);
     case KindOfResource:
       return CallSpec::method(&ResourceHdr::release);
     case KindOfRef:
@@ -324,9 +320,7 @@ CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
 
     // These conditions must match the ones which cause us to call
     // cls->instanceDtor() in ObjectData::release().
-    if ((cls->attrs() & AttrNoOverride) &&
-        !cls->getDtor() &&
-        cls->instanceDtor()) {
+    if ((cls->attrs() & AttrNoOverride) && cls->instanceDtor()) {
       args.immPtr(cls);
       return CallSpec::direct(cls->instanceDtor().get());
     }

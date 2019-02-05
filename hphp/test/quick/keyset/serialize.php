@@ -1,16 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class Dtor {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo "Dtor::__destruct(): " . $this->id . "\n";
-  }
-}
-
 function roundtrip($ks) {
   echo "====================================================\n";
   var_dump($ks);
@@ -65,9 +55,6 @@ function main() {
   try_unserialize("k:1:{R:1;}");
   try_unserialize("a:2:{i:123;s:3:\"abc\";i:456;k:1:{R:2;}}");
   try_unserialize("a:2:{i:123;k:1:{i:731;}i:456;R:3;}");
-
-  // Ensure dtors run
-  try_unserialize("k:2:{O:4:\"Dtor\":1:{s:2:\"id\";i:1;}O:4:\"Dtor\":1:{s:2:\"id\";i:2;}}");
 }
 
 main();

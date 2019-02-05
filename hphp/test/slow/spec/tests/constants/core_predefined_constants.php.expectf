@@ -34,7 +34,7 @@ __TRAIT__: string(0) ""
 __NAMESPACE__: string(0) ""
 Inside Date::setDay
 __FUNCTION__: string(6) "setDay"
-__LINE__: int(98)
+__LINE__: int(90)
 Inside Date::priv1
 __FUNCTION__: string(5) "priv1"
 Inside Date::spf1
@@ -51,7 +51,3 @@ __FUNCTION__: string(2) "xx"
 Inside includefile.php
 string(%d) "%s/constants/includefile.inc"
 string(%d) "%s/constants"
-Inside Date::__destruct
-__FUNCTION__: string(10) "__destruct"
-Inside Date::__destruct
-__FUNCTION__: string(10) "__destruct"

@@ -190,11 +190,6 @@ struct Repo::GlobalData {
   bool ReffinessInvariance = false;
 
   /*
-   * Are objects allowed to run destructors?
-   */
-  bool AllowObjectDestructors = false;
-
-  /*
    * Should HHBBC do build time verification?
    */
   bool AbortBuildOnVerifyError = false;
@@ -245,7 +240,6 @@ struct Repo::GlobalData {
       (ReffinessInvariance)
       (ForbidDynamicCalls)
       (NoticeOnBuiltinDynamicCalls)
-      (AllowObjectDestructors)
       (Signature)
       (AbortBuildOnVerifyError)
       (UndefinedConstFallback)

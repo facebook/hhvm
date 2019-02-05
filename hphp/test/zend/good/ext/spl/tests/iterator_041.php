@@ -51,11 +51,6 @@ class MyArrayIterator extends ArrayIterator
 		return parent::next();
 	}
 
-	function __destruct()
-	{
-//		self::fail(7, __FUNCTION__);
-	}
-
 	static function test($func, $skip = null)
 	{
 		echo "===$func===\n";

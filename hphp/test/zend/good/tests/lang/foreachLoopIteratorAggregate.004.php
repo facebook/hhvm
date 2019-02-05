@@ -34,10 +34,8 @@ class c_iter implements Iterator {
 			default: return "???";
 		}
 	}
-	function __destruct() {
-	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 3;
@@ -45,8 +43,6 @@ class c implements IteratorAggregate {
 	function getIterator() {
 		echo __METHOD__ . "\n";
 		return new c_iter($this);
-	}
-	function __destruct() {
 	}
 }
 

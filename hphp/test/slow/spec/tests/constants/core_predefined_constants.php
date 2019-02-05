@@ -83,14 +83,6 @@ class Date
         // ...
     }
 
-    function __destruct()
-    {
-        echo "Inside " . __METHOD__ . "\n";
-        trace("__FUNCTION__", __FUNCTION__);
-
-        // ...
-    }
-
     public function setDay($day)
     {
         echo "Inside " . __METHOD__ . "\n";

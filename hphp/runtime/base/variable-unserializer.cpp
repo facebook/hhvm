@@ -998,7 +998,7 @@ void VariableUnserializer::unserializeVariant(
         // it. Otherwise, we risk creating a CPP object without having it
         // initialized completely.
         if (cls->instanceCtor() && !cls->isCppSerializable() &&
-            !cls->isCollectionClass() && !cls->hasDisabledCtor()) {
+            !cls->isCollectionClass()) {
           assertx(obj.isNull());
           throw_null_pointer_exception();
         } else {
@@ -1202,7 +1202,6 @@ void VariableUnserializer::unserializeVariant(
                       obj->getClassName().data());
       } else {
         obj->o_invoke_few_args(s_unserialize, 1, serialized);
-        obj.get()->clearNoDestruct();
       }
 
       tvMove(make_tv<KindOfObject>(obj.detach()), self);

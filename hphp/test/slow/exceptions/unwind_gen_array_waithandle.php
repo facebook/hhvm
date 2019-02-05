@@ -9,7 +9,6 @@ class E1 extends Exception {
       self::$e = $this;
     }
   }
-  function __destruct() { var_dump(__METHOD__); }
 
   function rethrow() {
     $e = self::$e;

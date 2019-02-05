@@ -296,8 +296,4 @@ Properties:
   "p" => 112
   "q" => 223
   "r" => 340
-object(dumper)#9 (1) {
-  ["prop"]=>
-  int(10)
-}
 Test end

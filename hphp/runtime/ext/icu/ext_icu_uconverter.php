@@ -1,7 +1,7 @@
 <?hh
 
 <<__NativeData("UConverter")>>
-class UConverter {
+class UConverter implements IDisposable {
   /**
    * Create UConverter object
    *
@@ -17,7 +17,7 @@ class UConverter {
   // TODO(4017519) PHP5 doesn't have this destructor, we have it to prevent a
   // nasty issue with destructing IntlUConverter.
   <<__Native>>
-  public function __destruct(): void;
+  public function __dispose(): void;
 
   /**
    * Convert string from one charset to another

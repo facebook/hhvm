@@ -71,7 +71,6 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
   assertx(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
-  assertx(waitHandle->noDestruct());
   waitHandle->initialize(child);
   return waitHandle;
 }

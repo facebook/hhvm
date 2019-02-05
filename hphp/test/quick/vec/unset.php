@@ -1,9 +1,6 @@
 <?hh
 
 class Dtor {
-  function __destruct() {
-    echo "Dtor::__destruct\n";
-  }
 }
 
 function do_unset($v, $k) {

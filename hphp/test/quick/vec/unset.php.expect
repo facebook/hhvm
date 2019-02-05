@@ -37,7 +37,6 @@ vec(3) {
   object(Dtor)#1 (0) {
   }
 }
-Dtor::__destruct
 vec(2) {
   int(1)
   string(3) "abc"

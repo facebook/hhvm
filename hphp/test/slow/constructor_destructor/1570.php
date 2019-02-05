@@ -6,21 +6,12 @@ class C1 {
 }
  }
 class D1 {
- function __destruct() {
- var_dump(__METHOD__);
- }
  }
 class D2 extends C1 {
- function __destruct(){
- var_dump(__METHOD__);
- }
  }
 class D3 extends D2 {
 }
 class D4 extends B1 {
- function __destruct(){
- var_dump(__METHOD__);
- }
  }
 class D5 extends D4 {
 }

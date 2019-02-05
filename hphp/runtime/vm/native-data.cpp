@@ -155,9 +155,9 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
   node->obj_offset = nativeDataSize;
   assertx(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
-  auto const flags = cls->getDtor() ? 0 : ObjectData::NoDestructor;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
-    ObjectData(cls, ObjectData::InitRaw{}, flags, HeaderKind::NativeObject);
+    ObjectData(cls, ObjectData::InitRaw{}, ObjectData::NoAttrs,
+      HeaderKind::NativeObject);
   assertx(obj->hasExactlyOneRef());
 
   if (UNLIKELY(cls->hasMemoSlots())) {

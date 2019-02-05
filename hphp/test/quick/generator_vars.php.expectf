@@ -38,7 +38,6 @@ array(4) {
   ["z"]=>
   int(5)
 }
-logger 0 destructing
 int(3735928559)
 array(5) {
   [0]=>

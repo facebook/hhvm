@@ -65,21 +65,7 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const index = MemoryManager::size2Index(size);
   auto const size_class = MemoryManager::sizeIndex2Size(index);
 
-  auto const attrs = cls->getDtor() ? 0 : ObjectData::NoDestructor;
-
   auto const target = [&]{
-    if (attrs != ObjectData::DefaultAttrs) {
-      if (memoSize > 0) {
-        return size <= kMaxSmallSize
-          ? CallSpec::direct(&ObjectData::newInstanceRawMemoAttrsSmall)
-          : CallSpec::direct(&ObjectData::newInstanceRawMemoAttrsBig);
-      } else {
-        return size <= kMaxSmallSize
-          ? CallSpec::direct(&ObjectData::newInstanceRawAttrsSmall)
-          : CallSpec::direct(&ObjectData::newInstanceRawAttrsBig);
-      }
-    }
-
     if (memoSize > 0) {
       return size <= kMaxSmallSize
         ? CallSpec::direct(&ObjectData::newInstanceRawMemoSmall)
@@ -96,7 +82,6 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
     ? args.imm(size_class).imm(index)
     : args.imm(size);
   if (memoSize > 0) args.imm(memoSize);
-  if (attrs != ObjectData::DefaultAttrs) args.imm(attrs);
 
   cgCallHelper(
     vmain(env),
@@ -118,7 +103,6 @@ void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(Clone)
-IMPL_OPCODE_CALL(RegisterLiveObj)
 
 ///////////////////////////////////////////////////////////////////////////////
 

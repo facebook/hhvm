@@ -7,13 +7,6 @@ class ToString {
 }
 
 class Noisy {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo $this->id . " Noisy::__destruct()\n";
-  }
 }
 
 class Thrower {

@@ -5,10 +5,6 @@ class A {
   public function __construct($a) {
     $this->a = $a + 1;
   }
-  public function __destruct() {
-    $this->a += 2;
-    var_dump($this->a);
-  }
 }
 class B extends A {
   public function __construct($a) {

@@ -1,7 +1,6 @@
 <?php
 
 class X {
-  function __destruct() { echo "dead\n"; }
 }
 function thing() {
   static $s = 0;
@@ -15,9 +14,8 @@ function test() {
 
 <<__EntryPoint>>
 function main_generic_decref() {
-;
-
-for ($i = 0; $i < 101; $i++) {
-  test();
-}
+  for ($i = 0; $i < 101; $i++) {
+    test();
+  }
+  var_dump(hh\objprof_get_data());
 }

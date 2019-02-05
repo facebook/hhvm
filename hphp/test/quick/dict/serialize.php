@@ -24,16 +24,6 @@ class WakeupThrow {
   }
 }
 
-class Dtor {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo "Dtor::__destruct(): " . $this->id . "\n";
-  }
-}
-
 function roundtrip($d) {
   echo "====================================================\n";
   var_dump($d);
@@ -81,7 +71,6 @@ function main() {
 
   // Duplicate keys
   try_unserialize("D:2:{i:1;i:123;i:1;i:456;}");
-  try_unserialize("D:2:{i:1;O:4:\"Dtor\":1:{s:2:\"id\";i:1;}i:1;i:456;}");
 
   // Recursive data structures
   try_unserialize("D:1:{i:1;O:8:\"stdClass\":1:{s:3:\"val\";a:1:{i:1;r:2;}}}");
@@ -110,10 +99,6 @@ function main() {
 
   try_serialize(dict[1 => new SleepThrow]);
   try_unserialize("D:1:{i:123;O:11:\"WakeupThrow\":0:{}}");
-
-  // Ensure propert dtors run
-  try_unserialize("D:3:{i:1;O:4:\"Dtor\":1:{s:2:\"id\";i:1;}i:2;O:11:\"WakeupThrow\":0:{}i:3;O:4:\"Dtor\":1:{s:2:\"id\";i:2;}}");
-  try_unserialize("D:3:{i:1;O:4:\"Dtor\":1:{s:2:\"id\";i:1;}b:0;s:3:\"abc\";i:3;O:4:\"Dtor\":1:{s:2:\"id\";i:2;}}");
 }
 
 main();

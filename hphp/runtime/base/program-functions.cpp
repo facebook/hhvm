@@ -2795,7 +2795,6 @@ void hphp_context_shutdown() {
   g_thread_safe_locale_handler->reset();
 
   auto const context = g_context.getNoCheck();
-  context->destructObjects();
   context->onRequestShutdown();
 
   try {

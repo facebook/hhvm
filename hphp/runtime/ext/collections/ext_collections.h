@@ -39,7 +39,7 @@ extern const StaticString
     return req::make<c_##name>().detach();                  \
   }
 
-constexpr ObjectData::Attribute objectFlags = ObjectData::NoDestructor;
+constexpr ObjectData::Attribute objectFlags = ObjectData::NoAttrs;
 
 /**
  * The "materialization" methods have the form "to[CollectionName]()" and

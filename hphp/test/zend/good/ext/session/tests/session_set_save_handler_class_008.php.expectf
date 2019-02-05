@@ -4,4 +4,3 @@
 (#1) writing %s = foo|s:3:"bar";
 (#1) closing %s
 done
-(#1) destructor called

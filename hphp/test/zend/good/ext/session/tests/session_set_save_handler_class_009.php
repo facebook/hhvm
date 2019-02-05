@@ -2,10 +2,10 @@
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() : implicit shutdown ***\n";
@@ -15,9 +15,6 @@ class MySession extends SessionHandler {
 	public function __construct($num) {
 		$this->num = $num;
 		echo "(#$this->num) constructor called\n";
-	}
-	public function __destruct() {
-		echo "(#$this->num) destructor called\n";
 	}
 	public function finish() {
 		$id = session_id();

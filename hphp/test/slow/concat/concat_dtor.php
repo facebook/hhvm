@@ -7,7 +7,6 @@ function foo($x, $y) {
 class dtor {
   private $i;
   function __construct($i) { $this->i = $i; }
-  function __destruct() { echo "dtor: $this->i\n"; }
   function __toString() { echo "toString: $this->i\n"; return "a"; }
 }
 
@@ -21,5 +20,6 @@ function go() {
 
 <<__EntryPoint>>
 function main_concat_dtor() {
-go();
+  go();
+  var_dump(hh\objprof_get_data());
 }

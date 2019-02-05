@@ -6,9 +6,6 @@ class Dtor {
   function __construct($id) {
     $this->id = $id;
   }
-  function __destruct() {
-    echo "Dtor::__destruct(" . $this->id . ")\n";
-  }
 }
 
 function main() {
@@ -86,5 +83,6 @@ function main() {
 
 <<__EntryPoint>>
 function main_convert_dtor() {
-main();
+  main();
+  var_dump(hh\objprof_get_data());
 }

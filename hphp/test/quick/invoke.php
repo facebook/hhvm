@@ -1,8 +1,6 @@
 <?php
 
 class Normal {
-  public function __destruct() { echo "~Normal\n"; }
-
   public function __invoke() {
     echo "This is Normal\n";
     var_dump($this);
@@ -10,8 +8,6 @@ class Normal {
 };
 
 class Weird {
-  public function __destruct() { echo "~Weird\n"; }
-
   public static function __invoke() {
     echo "This is Weird\n";
     var_dump($this);
@@ -19,8 +15,6 @@ class Weird {
 };
 
 class Weird2 {
-  public function __destruct() { echo "~Weird2\n"; }
-
   private function __invoke() {
     echo "This is Weird2\n";
     var_dump($this);
@@ -28,8 +22,6 @@ class Weird2 {
 };
 
 class Weird3 {
-  public function __destruct() { echo "~Weird3\n"; }
-
   private function __invoke() {
     echo "This is Weird3\n";
     var_dump($this);

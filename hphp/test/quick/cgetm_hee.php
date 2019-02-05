@@ -4,9 +4,6 @@ class ary implements ArrayAccess {
   public function __construct() {
     echo "Constructing\n";
   }
-  public function __destruct() {
-    echo "Destructing\n";
-  }
   public function offsetExists($i) {
     return true;
   }

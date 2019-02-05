@@ -11,10 +11,6 @@ class Logger {
     $this->what = $what;
     echo "constructing {$this->what}\n";
   }
-
-  private function __destruct() {
-    echo "destructing {$this->what}\n";
-  }
 }
 
 class Base {

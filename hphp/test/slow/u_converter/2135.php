@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyConverter extends UConverter {
   public function toUCallback($reason, $source, $codeUnits, &$error) {
@@ -12,16 +12,16 @@ class MyConverter extends UConverter {
 }
 
 function main() {
-  $c = new MyConverter('ascii', 'utf-8');
-  $words = array(
-    "regular",
-    "irregul\xC1\xA1r",
-    "\xC2\xA1unsupported!",
-  );
-  foreach($words as $word) {
-    $c->convert($word);
+  using ($c = new MyConverter('ascii', 'utf-8')) {
+    $words = array(
+      "regular",
+      "irregul\xC1\xA1r",
+      "\xC2\xA1unsupported!",
+    );
+    foreach($words as $word) {
+      $c->convert($word);
+    }
   }
-  unset($c);
 }
 
 

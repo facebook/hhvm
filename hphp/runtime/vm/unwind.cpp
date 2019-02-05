@@ -81,14 +81,8 @@ void discardStackTemps(const ActRec* const fp,
 
   visitStackElems(
     fp, stack.top(), bcOffset,
-    [&] (ActRec* ar, Offset pushOff) {
+    [&] (ActRec* ar, Offset) {
       assertx(ar == reinterpret_cast<ActRec*>(stack.top()));
-      // ar is a pre-live ActRec in fp's scope, and pushOff
-      // is the offset of the corresponding FPush* opcode.
-      if (fp->func()->unit()->getOp(pushOff) == Op::FPushCtor) {
-        assertx(ar->hasThis());
-        ar->getThis()->setNoDestruct();
-      }
       ITRACE(2, "  unwind pop AR : {}\n",
              implicit_cast<void*>(stack.top()));
       stack.popAR();
@@ -178,7 +172,6 @@ UnwindAction checkHandlers(const EHEnt* eh,
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
                           ObjectData* phpException) {
   auto const func = fp->func();
-  auto const curOp = peek_op(pc);
   auto const prevFp = fp->sfp();
   auto const callOff = fp->m_callOff;
 
@@ -188,33 +181,6 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   ITRACE(1, "  fp {} prevFp {}\n",
          implicit_cast<void*>(fp),
          implicit_cast<void*>(prevFp));
-
-  // When throwing from a constructor, we normally want to avoid running the
-  // destructor on an object that hasn't been fully constructed yet. But if
-  // we're unwinding through the constructor's RetC, the constructor has
-  // logically finished and we're unwinding for some internal reason (timeout
-  // or user profiler, most likely). More importantly, fp->m_this may have
-  // already been destructed and/or overwritten due to sharing space with
-  // the return value via fp->retSlot().
-  if (curOp != OpRetC &&
-      !fp->localsDecRefd() &&
-      fp->m_func->cls() &&
-      fp->hasThis() &&
-      fp->getThis()->getVMClass()->getCtor() == func &&
-      fp->getThis()->getVMClass()->getDtor()) {
-    /*
-     * Looks like an FPushCtor call, but it could still have been called
-     * directly. Check the fpi region to be sure.
-     */
-    Offset prevPc;
-    auto outer = g_context->getPrevVMState(fp, &prevPc);
-    if (outer) {
-      auto fe = outer->func()->findFPI(prevPc);
-      if (fe && outer->func()->unit()->getOp(fe->m_fpushOff) == Op::FPushCtor) {
-        fp->getThis()->setNoDestruct();
-      }
-    }
-  }
 
   auto const decRefLocals = [&] {
     /*

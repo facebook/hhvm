@@ -1558,12 +1558,6 @@ IterTypes iter_types(const Type&);
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
 
 /*
- * True iff t could be an object or a type which contains objects and
- * Eval.AllowObjectDestructors is enbaled.
- */
-bool could_run_destructor(const Type& t);
-
-/*
  * Returns true iff an IsType testing for testTy on valTy might raise.
  */
 bool is_type_might_raise(const Type& testTy, const Type& valTy);

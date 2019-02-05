@@ -44,8 +44,6 @@ object(C)#4 (3) {
   ["c"]=>
   float(-INF)
 }
-C has a safe destructor.
-C has a safe destructor.
 ========================
 I have dangerous constructor.
 I sleep dangerously.
@@ -57,8 +55,6 @@ object(DangerousClass)#5 (1) {
   ["danger"]=>
   string(15) "DangerousString"
 }
-I have dangerous destructor.
-I have dangerous destructor.
 ========================
 I have dangerous constructor.
 I sleep dangerously.
@@ -73,8 +69,6 @@ object(E)#7 (1) {
     string(15) "DangerousString"
   }
 }
-I have dangerous destructor.
-I have dangerous destructor.
 ========================
 string(27) "C:1:"F":14:{SerializedData}"
 unserialize: SerializedData
@@ -89,8 +83,6 @@ object(G)#9 (1) {
   ["danger"]=>
   string(15) "DangerousString"
 }
-I have dangerous destructor.
-I have dangerous destructor.
 ========================
 string(63) "a:4:{i:0;s:15:"Hello World<>$%";i:1;d:NAN;i:2;d:-INF;i:3;i:50;}"
 array(4) {
@@ -178,8 +170,4 @@ array(2) {
     }
   }
 }
-C has a safe destructor.
-I have dangerous destructor.
-C has a safe destructor.
-I have dangerous destructor.
 ========================

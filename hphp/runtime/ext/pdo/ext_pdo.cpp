@@ -1846,7 +1846,6 @@ static bool do_fetch(sp_PDOStatement stmt,
           (flags & PDO_FETCH_PROPS_LATE)) {
         ret.asCObjRef()->o_invoke(stmt->fetch.constructor,
                                   stmt->fetch.ctor_args.toArray());
-        ret.asCObjRef()->clearNoDestruct();
       }
     }
     break;
@@ -1996,7 +1995,6 @@ static bool do_fetch(sp_PDOStatement stmt,
         !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
       ret.toObject()->o_invoke(stmt->fetch.constructor,
                                stmt->fetch.ctor_args.toArray());
-      ret.toObject()->clearNoDestruct();
     }
     if (flags & PDO_FETCH_CLASSTYPE) {
       stmt->fetch.clsname = old_clsname;

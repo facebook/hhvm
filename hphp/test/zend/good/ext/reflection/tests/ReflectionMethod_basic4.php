@@ -32,8 +32,6 @@ class TestClass
     }
 
     protected function prot() {}
-
-    public function __destruct() {}
 }
 
 class DerivedClass extends TestClass {}
@@ -49,6 +47,5 @@ reflectMethod("TestClass", "prot");
 reflectMethod("DerivedClass", "prot");
 reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
-reflectMethod("TestClass", "__destruct");
 
 ?>

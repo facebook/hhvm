@@ -6,9 +6,6 @@ class LogExn extends Exception {
     echo "Constructing\n";
   }
 
-  function __destruct() {
-    echo "Destructing\n";
-  }
 }
 
 function thrower() {

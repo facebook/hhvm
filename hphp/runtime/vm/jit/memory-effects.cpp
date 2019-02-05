@@ -1823,7 +1823,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckType:
   case CheckVArray:
   case CheckDArray:
-  case RegisterLiveObj:
   case StArResumeAddr:
   case StContArState:
   case ZeroErrorLevel:

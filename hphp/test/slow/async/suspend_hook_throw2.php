@@ -6,13 +6,7 @@ function thrower($why, $what) {
   }
 }
 
-class dtor {
-  function __construct(private $i) {}
-  function __destruct() { echo "dtor: $this->i\n"; }
-}
-
 async function foo($resched) {
-  $dtor = new dtor(1);
   echo "enter foo\n";
   await $resched;
   echo "foo fallthrhough\n";

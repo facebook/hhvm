@@ -154,9 +154,6 @@ class ThingerMaker {
 }
 
 class dumper {
-  public function __destruct() {
-    var_dump($this);
-  }
 }
 function foo() {
   return new dumper;

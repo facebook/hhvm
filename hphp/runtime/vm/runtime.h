@@ -199,12 +199,6 @@ inline ObjectData* newInstanceImpl(Class* cls) {
   assertx(cls);
   auto* inst = ObjectData::newInstance(cls);
   assertx(inst->checkCount());
-  Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
-                            : Stats::ObjectData_new_dtor_no);
-
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && cls->getDtor())) {
-    g_context->m_liveBCObjs.insert(inst);
-  }
   return inst;
 }
 

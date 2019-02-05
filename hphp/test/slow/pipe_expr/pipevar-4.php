@@ -2,7 +2,6 @@
 
 class Wrapper {
   public function __construct(public array $val) { var_dump("Make wrapper"); }
-  public function __destruct() { var_dump("Destroy wrapper"); }
 }
 
 function beep($x) {

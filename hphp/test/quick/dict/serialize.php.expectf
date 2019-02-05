@@ -162,13 +162,6 @@ dict(1) {
   int(456)
 }
 ====================================================
-string(48) "D:2:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}i:1;i:456;}"
-Dtor::__destruct(): 1
-dict(1) {
-  [1]=>
-  int(456)
-}
-====================================================
 string(53) "D:1:{i:1;O:8:"stdClass":1:{s:3:"val";a:1:{i:1;r:2;}}}"
 dict(1) {
   [1]=>
@@ -298,14 +291,3 @@ Serialize exception: Sleep exception
 ====================================================
 string(35) "D:1:{i:123;O:11:"WakeupThrow":0:{}}"
 Unserialize exception: Wakeup exception
-====================================================
-string(97) "D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}i:2;O:11:"WakeupThrow":0:{}i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}"
-Dtor::__destruct(): 1
-Dtor::__destruct(): 2
-Unserialize exception: Wakeup exception
-====================================================
-string(84) "D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}b:0;s:3:"abc";i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}"
-Dtor::__destruct(): 1
-
-Notice: Unable to unserialize: [D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}b:0;s:3:"abc";i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}]. Invalid key. in %s on line %d
-bool(false)

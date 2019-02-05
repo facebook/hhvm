@@ -1007,11 +1007,6 @@ Class* lookupClsRDS(const StringData* name) {
   return NamedEntity::get(name)->getCachedClass();
 }
 
-void registerLiveObj(ObjectData* obj) {
-  assertx(RuntimeOption::EnableObjDestructCall && obj->getVMClass()->getDtor());
-  g_context->m_liveBCObjs.insert(obj);
-}
-
 void throwSwitchMode() {
   // This is only called right after dispatchBB, so the VM regs really are
   // clean.

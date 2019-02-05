@@ -116,13 +116,23 @@ let handler = object
     List.iter f.f_tparams (check_tparam env);
     List.iter f.f_params (check_param env)
 
-  method! at_expr env e =
+  method! at_expr env (_, e) =
     match e with
-    | _, As (_, h, _) -> check_hint env h
-    | _, Is (_, h) -> check_hint env h
+    | As (_, h, _) -> check_hint env h
+    | Is (_, h) -> check_hint env h
+    | New ((_, CI (_, cid)), targs, _, _, (p, _)) ->
+      begin match Env.get_class env cid with
+      | None -> ()
+      | Some class_ ->
+        let tparams_length = List.length (Cls.tparams class_) in
+        let hargs_length = List.length targs in
+        if (hargs_length <> tparams_length) && (hargs_length <> 0)
+          then Errors.type_arity p cid (string_of_int tparams_length)
+      end
     | _ -> ()
 
   method! at_typedef env t =
     Option.iter t.t_constraint (check_hint env);
     check_hint env t.t_kind
+
 end

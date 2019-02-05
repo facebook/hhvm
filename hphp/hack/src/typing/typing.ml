@@ -4617,7 +4617,7 @@ and trait_most_concrete_req_class trait env =
 
 (* If there are no explicit type arguments then generate fresh type variables
  * for all of them. Otherwise, check the arity, and use the explicit types. *)
-and resolve_type_arguments env p class_id tparaml hintl =
+and resolve_type_arguments env p _class_id tparaml hintl =
   (* For explicit type arguments we support a wildcard syntax `_` for which
    * Hack will generate a fresh type variable *)
   let resolve_type_argument env hint =
@@ -4630,8 +4630,6 @@ and resolve_type_arguments env p class_id tparaml hintl =
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml
   then begin
-    if length_hintl <> 0
-    then Errors.type_arity p (snd class_id) (string_of_int length_tparaml);
     List.map_env env tparaml begin fun env _ ->
       Env.fresh_unresolved_type env p end
   end

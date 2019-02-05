@@ -229,6 +229,12 @@ const_fold(ISS& env, uint32_t nArgs, const res::Func& rfunc);
 
 folly::Optional<Type> thisType(const Index& index, Context ctx);
 
+/*
+ * Extracts name from the type either by using a reified name specialization or
+ * by looking at the typed value
+ */
+SString getNameFromType(const Type& t);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

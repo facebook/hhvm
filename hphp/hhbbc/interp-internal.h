@@ -449,6 +449,11 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
       return false;
     }
     if (maybeDynamic && ar.func->mightCareAboutDynCalls()) return false;
+    // Reified functions may have a mismatch of arity or reified generics
+    // so we cannot fold them
+    // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
+    // be foldable
+    if (ar.func->couldHaveReifiedGenerics()) return false;
     auto const func = ar.func->exactFunc();
     if (!func) return false;
     if (func->attrs & AttrTakesInOutParams) return false;

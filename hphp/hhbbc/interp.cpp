@@ -190,6 +190,13 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
   return bestRange;
 }
 
+SString getNameFromType(const Type& t) {
+  if (!t.subtypeOf(BStr)) return nullptr;
+  if (is_specialized_reifiedname(t)) return dreifiedname_of(t).name;
+  if (is_specialized_string(t)) return sval_of(t);
+  return nullptr;
+}
+
 namespace interp_step {
 
 void in(ISS& env, const bc::Nop&)  { effect_free(env); }
@@ -1729,15 +1736,13 @@ void in(ISS& env, const bc::VGetS& op) {
 
 void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
   auto cls = [&]{
+    if (auto const clsname = getNameFromType(t1)) {
+      auto const rcls = env.index.resolve_class(env.ctx, clsname);
+      if (rcls) return clsExact(*rcls);
+    }
     if (t1.subtypeOf(BObj)) {
       nothrow(env);
       return objcls(t1);
-    }
-    auto const v1 = tv(t1);
-    if (v1 && v1->m_type == KindOfPersistentString) {
-      if (auto const rcls = env.index.resolve_class(env.ctx, v1->m_data.pstr)) {
-        return clsExact(*rcls);
-      }
     }
     return TCls;
   }();
@@ -1754,6 +1759,7 @@ void in(ISS& env, const bc::ClsRefGetL& op) {
   }
   clsRefGetImpl(env, locAsCell(env, op.loc1), op.slot);
 }
+
 void in(ISS& env, const bc::ClsRefGetC& op) {
   clsRefGetImpl(env, popC(env), op.slot);
 }
@@ -2563,6 +2569,7 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     valid &= t.couldBe(requiredTSType);
   }
   if (!valid) return unreachable(env);
+  nothrow(env);
   push(env, Type{requiredTSType});
 }
 
@@ -2593,6 +2600,9 @@ void in(ISS& env, const bc::ReifiedName& op) {
   }
   if (!valid) return unreachable(env);
   nothrow(env);
+  if (auto const tvname = tv(name)) {
+    return push(env, rname(tvname->m_data.pstr));
+  }
   push(env, TSStr);
 }
 
@@ -2886,20 +2896,21 @@ void in(ISS& env, const bc::FPushFuncD& op) {
 
 void in(ISS& env, const bc::FPushFunc& op) {
   auto const t1 = topC(env);
-  auto const v1 = tv(t1);
   folly::Optional<res::Func> rfunc;
   // FPushFuncD and FPushFuncU require that the names of inout functions be
   // mangled, so skip those for now.
-  if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    auto const name = normalizeNS(v1->m_data.pstr);
+  auto const name = getNameFromType(t1);
+  if (name && op.argv.size() == 0) {
+    auto const nname = normalizeNS(name);
     // FPushFuncD doesn't support class-method pair strings yet.
-    if (isNSNormalized(name) && notClassMethodPair(name)) {
-      rfunc = env.index.resolve_func(env.ctx, name);
+    if (isNSNormalized(nname) && notClassMethodPair(nname)) {
+      rfunc = env.index.resolve_func(env.ctx, nname);
       // If the function might distinguish being called dynamically from not,
       // don't turn a dynamic call into a static one.
-      if (!rfunc->mightCareAboutDynCalls()) {
+      if (rfunc && !rfunc->mightCareAboutDynCalls() &&
+          !rfunc->couldHaveReifiedGenerics()) {
         return reduce(env, bc::PopC {},
-                      bc::FPushFuncD { op.arg1, name, op.has_unpack });
+                      bc::FPushFuncD { op.arg1, nname, op.has_unpack });
       }
     }
   }
@@ -3037,18 +3048,19 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env); // meth name
-  auto const v1 = tv(t1);
   auto const t2 = topC(env, 1); // object
   auto const clsTy = objcls(t2);
   folly::Optional<res::Func> rfunc;
-  if (v1 && v1->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, clsTy, v1->m_data.pstr);
-    if (!rfunc->mightCareAboutDynCalls()) {
+  auto const name = getNameFromType(t1);
+  if (name && op.argv.size() == 0) {
+    rfunc = env.index.resolve_method(env.ctx, clsTy, name);
+    if (rfunc && !rfunc->mightCareAboutDynCalls() &&
+        !rfunc->couldHaveReifiedGenerics()) {
       return reduce(
         env,
         bc::PopC {},
         bc::FPushObjMethodD {
-          op.arg1, v1->m_data.pstr, op.subop2, op.has_unpack
+          op.arg1, name, op.subop2, op.has_unpack
         }
       );
     }
@@ -3108,8 +3120,6 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
 void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = peekClsRefSlot(env, op.slot);
   auto const t2 = topC(env);
-  auto const v2 = tv(t2);
-
   folly::Optional<res::Class> rcls;
   auto exactCls = false;
   if (is_specialized_cls(t1)) {
@@ -3118,15 +3128,17 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
     exactCls = dcls.type == DCls::Exact;
   }
   folly::Optional<res::Func> rfunc;
-  if (v2 && v2->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
-    if (exactCls && rcls && !rfunc->mightCareAboutDynCalls()) {
+  auto const name = getNameFromType(t2);
+  if (name && op.argv.size() == 0) {
+    rfunc = env.index.resolve_method(env.ctx, t1, name);
+    if (exactCls && rcls && !rfunc->mightCareAboutDynCalls() &&
+        !rfunc->couldHaveReifiedGenerics()) {
       return reduce(
         env,
         bc::DiscardClsRef { op.slot },
         bc::PopC {},
         bc::FPushClsMethodD {
-          op.arg1, v2->m_data.pstr, rcls->name(), op.has_unpack
+          op.arg1, name, rcls->name(), op.has_unpack
         }
       );
     }
@@ -3142,18 +3154,19 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
 }
 
 void in(ISS& env, const bc::FPushClsMethodS& op) {
-  auto const name  = topC(env);
-  auto const namev = tv(name);
+  auto const t1  = topC(env);
   auto const cls = specialClsRefToCls(env, op.subop2);
   folly::Optional<res::Func> rfunc;
-  if (namev && namev->m_type == KindOfPersistentString && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, cls, namev->m_data.pstr);
-    if (!rfunc->mightCareAboutDynCalls()) {
+  auto const name = getNameFromType(t1);
+  if (name && op.argv.size() == 0) {
+    rfunc = env.index.resolve_method(env.ctx, cls, name);
+    if (!rfunc->mightCareAboutDynCalls() &&
+        !rfunc->couldHaveReifiedGenerics()) {
       return reduce(
         env,
         bc::PopC {},
         bc::FPushClsMethodSD {
-          op.arg1, op.subop2, namev->m_data.pstr, op.has_unpack
+          op.arg1, op.subop2, name, op.has_unpack
         }
       );
     }
@@ -3242,7 +3255,7 @@ void in(ISS& env, const bc::NewObjS& op) {
 
 void in(ISS& env, const bc::NewObj& op) {
   auto const cls = peekClsRefSlot(env, op.slot);
-  if (!is_specialized_cls(cls) || op.subop2 != HasGenericsOp::NoGenerics) {
+  if (!is_specialized_cls(cls) || op.subop2 == HasGenericsOp::MaybeGenerics) {
     takeClsRefSlot(env, op.slot);
     push(env, TObj);
     return;
@@ -3250,7 +3263,8 @@ void in(ISS& env, const bc::NewObj& op) {
 
   auto const dcls = dcls_of(cls);
   auto const exact = dcls.type == DCls::Exact;
-  if (exact && !dcls.cls.mightCareAboutDynConstructs()) {
+  if (exact && !dcls.cls.mightCareAboutDynConstructs() &&
+      !dcls.cls.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::DiscardClsRef { op.slot },

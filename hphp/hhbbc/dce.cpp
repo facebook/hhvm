@@ -1037,6 +1037,13 @@ void pushRemovable(Env& env) {
     });
 }
 
+void pushRemovableIfNoThrow(Env& env) {
+  stack_ops(env,[&] (const UseInfo& ui) {
+      return !env.flags.wasPEI && allUnused(ui)
+             ? PushFlags::MarkUnused : PushFlags::MarkLive;
+    });
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1090,10 +1097,10 @@ void dce(Env& env, const bc::ClsRefName& op) {
 bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
   if (!ty.subtypeOf(BObj)) {
     if (!ty.strictSubtypeOf(TStr)) return false;
-    auto v = tv(ty);
-    if (!v) return false;
-    auto res = env.dceState.index.resolve_class(
-      env.dceState.ainfo.ctx, v->m_data.pstr);
+    auto const name = getNameFromType(ty);
+    if (!name) return false;
+    auto const res = env.dceState.index.resolve_class(env.dceState.ainfo.ctx,
+                                                      name);
     if (!res || !res->resolved()) return false;
   }
   return !isSlotLive(env, slot);
@@ -1287,13 +1294,16 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
-void dce(Env& env, const bc::IsTypeStructC& op) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (!env.flags.wasPEI && allUnused(ui)) {
-        return PushFlags::MarkUnused;
-      }
-      return PushFlags::MarkLive;
-    });
+void dce(Env& env, const bc::IsTypeStructC&) {
+  pushRemovableIfNoThrow(env);
+}
+
+void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
+  pushRemovableIfNoThrow(env);
+}
+
+void dce(Env& env, const bc::ReifiedName&) {
+  pushRemovableIfNoThrow(env);
 }
 
 void dce(Env& env, const bc::Array& op) {

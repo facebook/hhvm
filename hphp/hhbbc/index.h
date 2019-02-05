@@ -338,6 +338,11 @@ struct Func {
   bool mightBeSkipFrame() const;
 
   /*
+   * Whether this function could have reified generics
+   */
+  bool couldHaveReifiedGenerics() const;
+
+  /*
    * Returns whether this resolved function might distinguish being called
    * dynamically versus being called normally (IE, might raise a notice).
    */

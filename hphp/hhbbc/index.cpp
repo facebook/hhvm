@@ -857,6 +857,23 @@ bool Func::mightBeSkipFrame() const {
     });
 }
 
+bool Func::couldHaveReifiedGenerics() const {
+  return match<bool>(
+    val,
+    [&](FuncName s) { return true; },
+    [&](MethodName) { return true; },
+    [&](FuncInfo* fi) { return fi->func->isReified; },
+    [&](const MethTabEntryPair* mte) {
+      return mte->second.func->isReified;
+    },
+    [&](FuncFamily* fa) {
+      for (auto const pf : fa->possibleFuncs) {
+        if (pf->second.func->isReified) return true;
+      }
+      return false;
+    });
+}
+
 bool Func::mightCareAboutDynCalls() const {
   if (mightReadCallerFrame()) return true;
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {

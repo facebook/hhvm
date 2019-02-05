@@ -498,6 +498,7 @@ std::string show(const Type& t) {
   case DataTag::Obj:
   case DataTag::Cls:
   case DataTag::RefInner:
+  case DataTag::ReifiedName:
   case DataTag::ArrLikePacked:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMap:
@@ -567,6 +568,9 @@ std::string show(const Type& t) {
           | unsplit<std::string>(",");
       }()
     );
+    break;
+  case DataTag::ReifiedName:
+    folly::format(&ret, "<{}>", t.m_data.rname.name);
     break;
   case DataTag::ArrLikePackedN:
     folly::format(&ret, "([{}])", show(t.m_data.packedn->type));

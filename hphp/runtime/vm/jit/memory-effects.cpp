@@ -2030,6 +2030,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:
+  case RaiseTooManyArg:
   case RaiseError:
   case RaiseNotice:
   case RaiseWarning:

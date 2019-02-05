@@ -53,8 +53,6 @@
 
 #include <folly/Format.h>
 
-#include <boost/format.hpp>
-
 #include <algorithm>
 
 namespace HPHP {
@@ -847,14 +845,12 @@ void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  std::string msg;
-  if (expected == 1) {
-    msg = (boost::format(Strings::MISSING_ARGUMENT) %
-           fn % expectDesc % got).str();
-  } else {
-    msg = (boost::format(Strings::MISSING_ARGUMENTS) %
-           fn % expectDesc % expected % got).str();
-  }
+  auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
+                                  fn,
+                                  expectDesc,
+                                  expected,
+                                  expected == 1 ? "" : "s",
+                                  got);
 
   if (level == 2) {
     raise_error(msg);

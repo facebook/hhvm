@@ -756,6 +756,11 @@ struct RuntimeOption {
         instead of the GlobalData.
   */                                                                    \
   F(bool, HardTypeHints,               RepoAuthoritative)               \
+  /* WarnOnTooManyArguments:
+   * 0 -> no warning, 1 -> warning, 2 -> exception
+   */                                                                   \
+  F(uint32_t, WarnOnTooManyArguments,  0)                               \
+  F(bool, ThrowOnMissingArgument,      false)                           \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \

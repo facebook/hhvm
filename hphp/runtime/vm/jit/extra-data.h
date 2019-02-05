@@ -1653,6 +1653,7 @@ X(LookupFuncCached,             FuncNameData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
+X(RaiseTooManyArg,              FuncArgData);
 X(RaiseParamRefMismatchForFunc, ParamData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);

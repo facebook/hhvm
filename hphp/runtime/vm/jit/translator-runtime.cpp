@@ -959,21 +959,14 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-[[noreturn]] void throwMissingArgument(const char* fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-
-  SystemLib::throwArgumentCountErrorObject(Variant(msg));
-}
-
-void raiseMissingArgument(const Func* func, int got) {
+void raiseArgumentImpl(const Func* func, int got, bool missing) {
+  if (!missing && !RuntimeOption::EvalWarnOnTooManyArguments) return;
   const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();
   const Func::ParamInfoVec& params = func->params();
+  if (variadic && !missing) return;
   int expected = 0;
+  bool atmost = false;
   // We subtract the number of parameters with default value at the end
   for (size_t i = total; i--; ) {
     if (!params[i].hasDefaultValue()) {
@@ -981,24 +974,36 @@ void raiseMissingArgument(const Func* func, int got) {
       break;
     }
   }
-  bool lessNeeded = (variadic || expected < total);
+  auto const amount = [&] {
+    if (!missing) {
+      atmost = expected < total;
+      return atmost ? "at most" : "exactly";
+    }
+    return variadic || expected < total ? "at least" : "exactly";
+  }();
 
-  if (RuntimeOption::PHP7_EngineExceptions) {
-    throwMissingArgument(
-      Strings::MISSING_ARGUMENT_EXCEPTION,
-      func->displayName()->data(),
-      got,
-      lessNeeded ? "at least" : "exactly",
-      expected
-    );
-  }
-  if (expected == 1) {
-    raise_warning(Strings::MISSING_ARGUMENT, func->displayName()->data(),
-                  lessNeeded ? "at least" : "exactly", got);
+  auto const value = atmost ? total : expected;
+  auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
+                                  func->displayName()->data(),
+                                  amount,
+                                  value,
+                                  value == 1 ? "" : "s",
+                                  got);
+
+  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
+      (missing && RuntimeOption::EvalThrowOnMissingArgument)) {
+    SystemLib::throwRuntimeExceptionObject(Variant(msg));
   } else {
-    raise_warning(Strings::MISSING_ARGUMENTS, func->displayName()->data(),
-                  lessNeeded ? "at least" : "exactly", expected, got);
+    raise_warning(msg);
   }
+}
+
+void raiseMissingArgument(const Func* func, int got) {
+  raiseArgumentImpl(func, got, true);
+}
+
+void raiseTooManyArguments(const Func* func, int got) {
+  raiseArgumentImpl(func, got, false);
 }
 
 //////////////////////////////////////////////////////////////////////

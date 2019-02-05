@@ -60,12 +60,6 @@ auto constexpr FUNCTION_NAME_MUST_BE_STRING =
   "Function name must be a string";
 auto constexpr METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
-auto constexpr MISSING_ARGUMENT_EXCEPTION =
-  "Too few arguments to function %s(), %d passed and %s %d expected";
-auto constexpr MISSING_ARGUMENT =
-  "%s() expects %s 1 parameter, %d given";
-auto constexpr MISSING_ARGUMENTS =
-  "%s() expects %s %d parameters, %d given";
 auto constexpr CANT_UNSET_STRING =
   "Cannot unset string offsets";
 auto constexpr OP_NOT_SUPPORTED_STRING =

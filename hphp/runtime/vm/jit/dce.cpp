@@ -534,6 +534,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:
+  case RaiseTooManyArg:
   case RaiseError:
   case RaiseWarning:
   case RaiseMissingThis:

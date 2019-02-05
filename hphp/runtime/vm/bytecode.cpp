@@ -1556,6 +1556,7 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
   const Func* func = ar->m_func;
   Offset firstDVInitializer = InvalidAbsoluteOffset;
   bool raiseMissingArgumentWarnings = false;
+  folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
   ArrayData* reified_generics = nullptr;
@@ -1592,6 +1593,7 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
       } else {
         shuffleExtraStackArgs(ar);
       }
+      raiseTooManyArgumentsWarnings = nargs;
     } else {
       if (nargs < nparams) {
         // Push uninitialized nulls for missing arguments. Some of them may
@@ -1665,6 +1667,11 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
   // for non-cppext functions/methods
   if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
     HPHP::jit::raiseMissingArgument(func, ar->numArgs());
+  }
+  if (raiseTooManyArgumentsWarnings && !func->isCPPBuiltin()) {
+    // since shuffleExtraStackArgs changes ar->numArgs() we need to communicate
+    // the value before it gets changed
+    HPHP::jit::raiseTooManyArguments(func, *raiseTooManyArgumentsWarnings);
   }
 }
 

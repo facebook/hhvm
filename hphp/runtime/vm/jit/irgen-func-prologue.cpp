@@ -311,9 +311,9 @@ void init_locals(IRGS& env, const Func* func) {
 }
 
 /*
- * Emit raise-warnings for any missing arguments.
+ * Emit raise-warnings for any missing or too many arguments.
  */
-void warn_missing_args(IRGS& env, uint32_t argc) {
+void warn_argument_arity(IRGS& env, uint32_t argc) {
   auto const func = env.context.func;
   auto const nparams = func->numNonVariadicParams();
 
@@ -327,6 +327,9 @@ void warn_missing_args(IRGS& env, uint32_t argc) {
         break;
       }
     }
+  }
+  if (!func->hasVariadicCaptureParam() && argc > nparams) {
+    gen(env, RaiseTooManyArg, FuncArgData { func, argc });
   }
 }
 
@@ -414,7 +417,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   for (uint32_t slot = 0; slot < func->numClsRefSlots(); ++slot) {
     killClsRef(env, slot);
   }
-  warn_missing_args(env, argc);
+  warn_argument_arity(env, argc);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.

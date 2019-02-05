@@ -2207,8 +2207,13 @@ To string conversions:
 
 | RaiseMissingArg<func,argc>, ND, NA, NF
 
-  Raise a missing argument warning because only S1 arguments were passed to
-  function S0.
+  Raise a missing argument warning because only argc arguments were passed to
+  function func.
+
+| RaiseTooManyArg<func,argc>, ND, NA, NF
+
+  Raise a too many argument warning because argc arguments were passed to
+  function func.
 
 | RaiseError, ND, S(Str), T
 

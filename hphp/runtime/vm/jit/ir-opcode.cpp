@@ -344,6 +344,8 @@ bool opcodeMayRaise(Opcode opc) {
   case CGetElem:
   case CGetProp:
   case CGetPropQ:
+  case CheckClsReifiedGenericMismatch:
+  case CheckFunReifiedGenericMismatch:
   case CheckStackOverflow:
   case CheckSurpriseAndStack:
   case CheckSurpriseFlagsEnter:
@@ -507,8 +509,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseMissingThis:
   case RaiseNotice:
   case RaiseParamRefMismatchForFunc:
-  case CheckClsReifiedGenericMismatch:
-  case CheckFunReifiedGenericMismatch:
+  case RaiseTooManyArg:
   case RaiseUndefProp:
   case RaiseUninitLoc:
   case RaiseVarEnvDynCall:

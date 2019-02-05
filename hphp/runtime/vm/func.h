@@ -1100,10 +1100,11 @@ struct Func final {
   rds::Handle funcHandle() const;
 
   /*
-   * Get and set the function body code pointer.
+   * Get, set and reset the function body code pointer.
    */
   unsigned char* getFuncBody() const;
   void setFuncBody(unsigned char* fb);
+  void resetFuncBody();
 
   /*
    * Get and set the `index'-th function prologue.

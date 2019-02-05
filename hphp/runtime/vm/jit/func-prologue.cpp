@@ -102,9 +102,8 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                        CodeCache::View code) {
-  auto context = prologue_context(kInvalidTransID, TransKind::Live,
-                                  func, func->base());
+                        TransKind kind, CodeCache::View code) {
+  auto context = prologue_context(kInvalidTransID, kind, func, func->base());
   IRUnit unit{context};
   irgen::IRGS env{unit, nullptr};
 

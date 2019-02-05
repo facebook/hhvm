@@ -284,8 +284,8 @@ void emitFuncPrologueOpt(ProfTransRec* rec) {
 }
 
 TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                 CodeCache::View view) {
-  return genFuncBodyDispatch(func, dvs, view);
+                                 TransKind kind, CodeCache::View view) {
+  return genFuncBodyDispatch(func, dvs, kind, view);
 }
 
 void publishFuncBodyDispatch(Func* func, TCA start, TCA end) {
@@ -316,7 +316,7 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
   auto metaLock = lockMetadata();
 
   const auto& view = code().view(kind);
-  const auto tca = emitFuncBodyDispatchInternal(func, dvs, view);
+  const auto tca = emitFuncBodyDispatchInternal(func, dvs, kind, view);
   publishFuncBodyDispatch(func, tca, view.main().frontier());
   return tca;
 }

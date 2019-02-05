@@ -310,6 +310,7 @@ void retranslateAll() {
     // discard ProfData in this mode.
     if (!RuntimeOption::EvalEnableReusableTC) {
       discardProfData();
+      tc::freeProfCode();
     }
   }
 }

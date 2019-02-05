@@ -213,6 +213,7 @@ struct SrcRec final {
    * The following functions will implicitly acquire the lock for this SrcRec
    */
   void removeIncomingBranch(TCA toSmash);
+  void removeIncomingBranchesInRange(TCA start, TCA frontier);
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void replaceOldTranslations();

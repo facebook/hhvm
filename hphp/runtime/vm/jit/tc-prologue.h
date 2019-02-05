@@ -59,7 +59,7 @@ void smashFuncCallers(TCA start, ProfTransRec* rec);
  * Precondition: calling thread owns both code and metadata locks
  */
 TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                 CodeCache::View view);
+                                 TransKind kind, CodeCache::View view);
 
 void publishFuncBodyDispatch(Func* func, TCA start, TCA end);
 

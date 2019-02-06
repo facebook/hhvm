@@ -69,6 +69,7 @@ and instantiate_ subst x =
       )
   | Tfun ft ->
       let tparams, instantiate_tparams = ft.ft_tparams in
+      let outer_subst = subst in
       let subst = List.fold_left ~f:begin fun subst t ->
         SMap.remove (snd t.tp_name) subst
       end ~init:subst tparams in
@@ -88,7 +89,7 @@ and instantiate_ subst x =
       } end in
       let where_constraints = List.map ft.ft_where_constraints
           begin (fun (ty1, ck, ty2) ->
-            (instantiate subst ty1, ck, instantiate subst ty2)) end in
+            (instantiate subst ty1, ck, instantiate outer_subst ty2)) end in
       Tfun { ft with ft_arity = arity; ft_params = params;
                      ft_ret = ret; ft_tparams = (tparams, instantiate_tparams);
                      ft_where_constraints = where_constraints }

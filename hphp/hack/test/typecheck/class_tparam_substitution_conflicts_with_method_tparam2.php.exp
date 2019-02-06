@@ -1,0 +1,16 @@
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 17-32:
+A 'where' type constraint is violated here (Typing[4110])
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 4, characters 19-34:
+This is the method with 'where' type constraints
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
+This is an object of type B
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
+  via this generic Tnext
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
+  via this generic Tout
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
+  via this generic Tv
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 17-32:
+It is incompatible with an object of type C
+File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
+It was implicitly typed as an object of type C during this operation

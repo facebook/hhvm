@@ -22,10 +22,13 @@ namespace HPHP {
 namespace VSDEBUG {
 
 VSDebugExtension::~VSDebugExtension() {
+  std::atomic_thread_fence(std::memory_order_acquire);
   if (s_debugger != nullptr) {
     delete s_debugger;
     s_debugger = nullptr;
   }
+
+  std::atomic_thread_fence(std::memory_order_release);
 }
 
 void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
@@ -146,12 +149,14 @@ void VSDebugExtension::moduleInit() {
 }
 
 void VSDebugExtension::moduleShutdown() {
+  std::atomic_thread_fence(std::memory_order_acquire);
   if (s_debugger != nullptr) {
     delete s_debugger;
     s_debugger = nullptr;
   }
 
   VSDebugLogger::FinalizeLogging();
+  std::atomic_thread_fence(std::memory_order_release);
 }
 
 void VSDebugExtension::requestInit() {
@@ -188,7 +193,9 @@ void VSDebugExtension::requestInit() {
 }
 
 void VSDebugExtension::requestShutdown() {
-  if (!m_enabled) {
+  // Barrier for m_enabled and s_debugger
+  std::atomic_thread_fence(std::memory_order_acquire);
+  if (!m_enabled || s_debugger == nullptr) {
     return;
   }
 

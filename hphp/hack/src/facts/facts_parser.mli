@@ -12,4 +12,5 @@
   hhvm_compat_mode: bool ->
   force_hh: bool ->
   enable_xhp: bool ->
+  filename: Relative_path.t ->
   string -> Hh_json.json option

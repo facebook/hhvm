@@ -263,10 +263,11 @@ let rec collect (ns, facts as acc) n =
     end
   | _ -> acc
 
-let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp s =
-  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode ~hhvm_compat_mode
+let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp filename s =
+  let suffix = Relative_path.suffix filename in
+  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode
     ~force_hh ~enable_xhp () in
-  let text = Full_fidelity_source_text.make Relative_path.default s in
+  let text = Full_fidelity_source_text.make filename s in
   let (parser, root) =
     let p = FactsParser.make env text in
     FactsParser.parse_script p in
@@ -278,8 +279,8 @@ let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp s =
     let _, facts = collect ("", empty) root in
     Some facts
   end
-let extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~force_hh ~enable_xhp text =
-  from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp text
+let extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~force_hh ~enable_xhp ~filename text =
+  from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp filename text
   |> Option.map ~f:(fun facts ->
     let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
     let sha1 = Sha1.digest text in

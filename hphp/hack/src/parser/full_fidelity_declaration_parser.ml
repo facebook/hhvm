@@ -16,6 +16,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module TriviaKind = Full_fidelity_trivia_kind
 module SyntaxError = Full_fidelity_syntax_error
+module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module SimpleParserSyntax =
   Full_fidelity_simple_parser.WithSyntax(Syntax)
@@ -1880,7 +1881,9 @@ module WithExpressionAndStatementAndTypeParser
       (* We purposefully ignore leading trivia before the <?hh, and handle
       the error on a later pass *)
       (* TODO: Handle the case where the langauge is not a Name. *)
-    let has_dot_hack_extension = Env.has_dot_hack_extension (env parser) in
+    let file = SourceText.file_path (fst (pos parser)) in
+    let suffix = Relative_path.suffix file in
+    let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
     if has_dot_hack_extension && has_suffix then
       let parser = with_error parser SyntaxError.error1060 in
       parser, markup_section

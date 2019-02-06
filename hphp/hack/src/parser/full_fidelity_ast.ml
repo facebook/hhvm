@@ -102,6 +102,7 @@ let make_env
   ?(is_hh_file               = false                   )
   ?stats
   ?(hacksperimental          = false                   )
+  ?(pocket_universes         = false                   )
   (file : Relative_path.t)
   : env
   =
@@ -112,6 +113,8 @@ let make_env
       (String_utils.string_ends_with (Relative_path.suffix file) ".hack") in
     let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
       (codegen && (enable_hh_syntax || is_hh_file)) in
+    let parser_options = ParserOptions.setup_pocket_universes parser_options
+        pocket_universes in
     { is_hh_file
     ; codegen = codegen || systemlib_compat_mode
     ; systemlib_compat_mode

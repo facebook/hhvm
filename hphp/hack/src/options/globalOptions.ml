@@ -161,6 +161,11 @@ let tco_experimental_track_subtype_prop = "track_subtype_prop"
  *)
 let tco_experimental_null_type = "null_type"
 
+(**
+ * Enable support for the Pocket Universes
+ *)
+let tco_experimental_pocket_universes = "pocket_universes"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -371,3 +376,11 @@ let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level
 let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
+
+let setup_pocket_universes env enabled =
+  let exp_features = env.tco_experimental_features in
+  let exp_features = if enabled then
+      SSet.add tco_experimental_pocket_universes exp_features
+    else
+      SSet.remove tco_experimental_pocket_universes exp_features
+  in { env with tco_experimental_features = exp_features }

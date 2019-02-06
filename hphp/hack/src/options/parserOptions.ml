@@ -24,6 +24,7 @@ let with_hh_syntax_for_hhvm po b =
 let with_enable_await_as_an_expression po b =
   { po with GlobalOptions.po_enable_await_as_an_expression = b }
 let enable_stronger_await_binding = GlobalOptions.po_enable_stronger_await_binding
+let setup_pocket_universes = GlobalOptions.setup_pocket_universes
 
 let make
   ~auto_namespace_map

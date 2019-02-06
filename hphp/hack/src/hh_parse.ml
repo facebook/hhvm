@@ -66,6 +66,7 @@ module FullFidelityParseArgs = struct
     files : string list;
     dump_nast : bool;
     enable_stronger_await_binding : bool;
+    pocket_universes : bool;
   }
 
   let make
@@ -94,7 +95,8 @@ module FullFidelityParseArgs = struct
     show_file_name
     files
     dump_nast
-    enable_stronger_await_binding = {
+    enable_stronger_await_binding
+    pocket_universes = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -120,7 +122,8 @@ module FullFidelityParseArgs = struct
     show_file_name;
     files;
     dump_nast;
-    enable_stronger_await_binding
+    enable_stronger_await_binding;
+    pocket_universes
   }
 
   let parse_args () =
@@ -163,6 +166,7 @@ module FullFidelityParseArgs = struct
     let dump_nast = ref false in
     let enable_stronger_await_binding = ref false in
     let set_show_file_name () = show_file_name := true in
+    let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
     let options =  [
@@ -271,6 +275,9 @@ No errors are filtered out.";
       "--stronger-await-binding",
         Arg.Set enable_stronger_await_binding,
         "Increases precedence of await during parsing.";
+      "--pocket-universes",
+        Arg.Set pocket_universes,
+        "Enables support for Pocket Universes";
       ] in
     Arg.parse options push_file usage;
     make
@@ -300,6 +307,7 @@ No errors are filtered out.";
       (List.rev !files)
       !dump_nast
       !enable_stronger_await_binding
+      !pocket_universes
 end
 
 open FullFidelityParseArgs
@@ -400,6 +408,7 @@ let handle_existing_file args filename =
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file
+        ~pocket_universes:args.pocket_universes
         file
     in
     let res = Lowerer.from_file env in

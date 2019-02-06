@@ -1,0 +1,7 @@
+B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 14
+B more,args 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 15
+C other,args

@@ -1,1 +1,2 @@
 -vHack.Lang.Phpism.DisableForwardStaticCallArray=1
+-vHack.Lang.Phpism.DisableForwardStaticCall=0

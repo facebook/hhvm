@@ -1,22 +1,38 @@
 A
 -
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 17
 B
 -
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 22
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 17
 B
 -
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 27
 B
 -
 C
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 38
 C
 -
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 22
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 17
 C
 -
 B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 27
 C
 ===DONE===

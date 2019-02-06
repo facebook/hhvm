@@ -170,37 +170,85 @@ Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 293
 
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 294
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 132
+
 Notice: 'func' called dynamically in %s/forbid-notice.php on line 132
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 133
 
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 133
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 134
+
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 134
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 135
 
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 135
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 136
+
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 136
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 137
 
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 137
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 138
+
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 138
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 140
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 140
 
 Notice: 'func' called dynamically in %s/forbid-notice.php on line 140
 
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 141
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 141
+
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 141
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 142
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 142
 
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 142
 
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 143
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 143
+
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 143
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 144
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 144
 
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 144
 
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 145
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 145
+
 Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 145
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 146
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 146
 
 Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 146
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 30
+
 Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 30
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 31
+
 Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 31
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 32
 
 Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 32
 
@@ -224,6 +272,60 @@ Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 307
 
 Notice: 'CCmp::__call' called dynamically in %s/forbid-notice.php on line 308
 =============== negative tests =====================
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 170
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 171
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 171
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 193
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 194
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 195
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 196
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 197
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 198
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 199
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 201
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 201
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 202
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 202
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 203
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 203
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 204
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 204
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 205
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 205
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 206
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 206
+
+Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 207
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 207
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 56
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 57
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 58
 =============== positive tests (exceptions) ========
 Exception: 'func' called dynamically
 Exception: 'async_func' called dynamically
@@ -310,23 +412,23 @@ Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'C::__call' called dynamically
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
+Exception: forward_static_call() is deprecated and subject to removal from the Hack language
 Exception: 'cmp' called dynamically
 Exception: 'A::cmp' called dynamically
 Exception: 'A::static_cmp' called dynamically

@@ -9,95 +9,207 @@ B D D
 C D D
 D D D
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 98
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 99
 C D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 100
 D D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 101
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 102
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 103
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 104
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 105
 C D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 106
 D D D
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 108
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 109
 C D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 110
 D D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 111
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 112
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 113
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 114
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 115
 C D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 116
 D D D
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 118
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 119
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 119
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 120
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 120
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 121
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 121
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 122
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 122
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 123
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 123
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 124
 A D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 125
 
 Warning: behavior of call_user_func(array('B', 'self::foo')) is undefined in %s on line 125
 B D D
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 126
 
 Warning: behavior of call_user_func(array('B', 'static::foo')) is undefined in %s on line 126
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 126
 ****************
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 128
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 128
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 129
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 129
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 130
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 130
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 131
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 132
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 133
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 133
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 134
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 135
 
 Warning: behavior of call_user_func(array('G', 'self::foo')) is undefined in %s on line 135
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 136
 
 Warning: behavior of call_user_func(array('G', 'static::foo')) is undefined in %s on line 136
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 136
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 139
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 140
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 141
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 141
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 142
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 142
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 143
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 143
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 144
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 144
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 145
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 145
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 146
 A B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 147
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 148
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 148
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 151
 G G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 152
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 152
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 153
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 153
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 154
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 154
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 155
 F G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 156
 G G G
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 157
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 157
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 158
 F G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 159
 G G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 160
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 160
 ****************
@@ -112,95 +224,207 @@ B D
 C D 
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 175
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 176
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 177
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 178
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 179
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 180
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 181
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 182
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 183
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 185
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 186
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 187
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 188
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 189
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 190
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 191
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 192
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 193
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 195
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 196
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 196
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 197
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 197
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 198
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 198
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 199
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 199
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 200
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 200
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 201
 A D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 202
 
 Warning: behavior of call_user_func(array('B', 'self::foo')) is undefined in %s on line 202
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 203
 
 Warning: behavior of call_user_func(array('B', 'static::foo')) is undefined in %s on line 203
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 203
 ****************
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 205
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 205
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 206
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 206
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 207
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 207
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 208
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 209
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 210
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 210
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 211
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 212
 
 Warning: behavior of call_user_func(array('G', 'self::foo')) is undefined in %s on line 212
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 213
 
 Warning: behavior of call_user_func(array('G', 'static::foo')) is undefined in %s on line 213
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 213
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 216
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 217
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 218
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 218
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 219
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 219
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 220
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 220
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 221
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 221
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 222
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 222
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 223
 A B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 224
 B B B
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 225
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 225
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 228
 G G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 229
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 229
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 230
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 230
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 231
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 231
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 232
 F G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 233
 G G G
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 234
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 234
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 235
 F G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 236
 G G G
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 237
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 237
 ****************
@@ -215,95 +439,207 @@ B D
 C D 
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 252
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 253
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 254
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 255
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 256
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 257
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 258
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 259
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 260
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 262
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 263
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 264
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 265
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 266
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 267
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 268
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 269
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 270
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 272
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 273
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 273
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 274
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 274
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 275
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 275
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 276
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 276
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 277
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 277
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 278
 A D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 279
 
 Warning: behavior of call_user_func(array('B', 'self::bar')) is undefined in %s on line 279
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 280
 
 Warning: behavior of call_user_func(array('B', 'static::bar')) is undefined in %s on line 280
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 280
 ****************
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 282
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 282
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 283
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 283
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 284
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 284
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 285
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 286
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 287
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 287
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 288
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 289
 
 Warning: behavior of call_user_func(array('G', 'self::bar')) is undefined in %s on line 289
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 290
 
 Warning: behavior of call_user_func(array('G', 'static::bar')) is undefined in %s on line 290
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 290
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 293
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 294
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 295
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 295
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 296
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 296
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 297
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 297
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 298
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 298
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 299
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 299
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 300
 A D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 301
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 302
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 302
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 305
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 306
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 306
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 307
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 307
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 308
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 308
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 309
 F G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 310
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 311
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 311
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 312
 F G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 313
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 314
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 314
 ****************
@@ -318,95 +654,207 @@ B D
 C D 
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 329
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 330
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 331
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 332
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 333
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 334
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 335
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 336
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 337
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 339
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 340
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 341
 D D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 342
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 343
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 344
 H H 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 345
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 346
 C D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 347
 D D 
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 349
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 350
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 350
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 351
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 351
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 352
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 352
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 353
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 353
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 354
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 354
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 355
 A D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 356
 
 Warning: behavior of call_user_func(array('B', 'self::bar')) is undefined in %s on line 356
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 357
 
 Warning: behavior of call_user_func(array('B', 'static::bar')) is undefined in %s on line 357
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 357
 ****************
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 359
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 359
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 360
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 360
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 361
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 361
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 362
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 363
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 364
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 364
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 365
 F F 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 366
 
 Warning: behavior of call_user_func(array('G', 'self::bar')) is undefined in %s on line 366
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 367
 
 Warning: behavior of call_user_func(array('G', 'static::bar')) is undefined in %s on line 367
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 367
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 370
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 371
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 372
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line 372
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 373
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 373
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 374
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'F' in %s on line 374
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 375
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line 375
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 376
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line 376
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 377
 A D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 378
 B D 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 379
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'D' in %s on line 379
 ****************
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 382
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 383
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'B' in %s on line 383
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 384
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line 384
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 385
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 385
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 386
 F G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 387
 G G 
 
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 388
+
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line 388
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 389
 F G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 390
 G G 
+
+Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 391
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line 391
 ****************

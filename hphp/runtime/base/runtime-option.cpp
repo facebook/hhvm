@@ -697,8 +697,8 @@ int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
 uint64_t RuntimeOption::DisableCompact = 1;
 uint64_t RuntimeOption::DisableExtract = 0;
-uint64_t RuntimeOption::DisableForwardStaticCall = 0;
-uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
+uint64_t RuntimeOption::DisableForwardStaticCall = 1;
+uint64_t RuntimeOption::DisableForwardStaticCallArray = 1;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;

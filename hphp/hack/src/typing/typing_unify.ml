@@ -136,10 +136,22 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           then List.map argl1 (fun _ -> (r1, Tany))
           else argl2
         in
+        if List.length argl1 <> List.length argl2
+        then begin
+          (* Error was already raised in naming. *)
+          env, Terr
+        end
+        else
           let env, argl = List.map2_env env argl1 argl2 unify in
           env, Tclass (id, e, argl)
   | Tabstract (AKnewtype (x1, argl1), tcstr1),
     Tabstract (AKnewtype (x2, argl2), tcstr2) when String.compare x1 x2 = 0 ->
+        if List.length argl1 <> List.length argl2
+        then begin
+          (* Error was already raised in naming. *)
+          env, Terr
+        end
+        else
           let env, tcstr = match tcstr1, tcstr2 with
             | Some x1, Some x2 ->
               let env, x = unify env x1 x2 in

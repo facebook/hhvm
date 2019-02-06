@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- *)
+*)
 
 open Config_file.Getters
 open Hh_core
@@ -64,7 +64,7 @@ type t = {
    * This flag disables that behavior--instead, when a class has changed, we
    * only redeclare files with an Extends dependency on the class, and we do not
    * redeclare any files when a function or global constant changes.
-   *)
+  *)
   disable_conservative_redecl : bool;
   ide_parser_cache : bool;
   ide_tast_cache : bool;
@@ -129,25 +129,26 @@ let default = {
 }
 
 let path =
-  let dir = try Sys.getenv "HH_LOCALCONF_PATH" with
-    _ ->
-      BuildOptions.system_config_path in
-      Filename.concat dir "hh.conf"
+  let dir =
+    try Sys.getenv "HH_LOCALCONF_PATH"
+    with _ -> BuildOptions.system_config_path
+  in
+  Filename.concat dir "hh.conf"
 
 let state_loader_timeouts_ ~default config =
   let open State_loader_config in
   let package_fetch_timeout = int_ "state_loader_timeout_package_fetch"
-    ~default:default.package_fetch_timeout config in
+      ~default:default.package_fetch_timeout config in
   let find_exact_state_timeout = int_ "state_loader_timeout_find_exact_state"
-    ~default:default.find_exact_state_timeout config in
+      ~default:default.find_exact_state_timeout config in
   let find_nearest_state_timeout = int_ "state_loader_timeout_find_nearest_state"
-    ~default:default.find_nearest_state_timeout config in
+      ~default:default.find_nearest_state_timeout config in
   let current_hg_rev_timeout =
     int_ "state_loader_timeout_current_hg_rev"
-    ~default:default.current_hg_rev_timeout config in
+      ~default:default.current_hg_rev_timeout config in
   let current_base_rev_timeout =
     int_ "state_loader_timeout_current_base_rev_timeout"
-    ~default:default.current_base_rev_timeout config in
+      ~default:default.current_base_rev_timeout config in
   {
     State_loader_config.package_fetch_timeout;
     find_exact_state_timeout;
@@ -163,95 +164,95 @@ let load_ fn ~silent =
   if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
   let config = Config_file.parse_contents contents in
   let use_watchman = bool_if_version "use_watchman"
-    ~default:default.use_watchman config in
+      ~default:default.use_watchman config in
   let use_saved_state = bool_if_version "use_mini_state"
-    ~default:default.use_saved_state config in
+      ~default:default.use_saved_state config in
   let enable_on_nfs = bool_if_version "enable_on_nfs"
-    ~default:default.enable_on_nfs config in
+      ~default:default.enable_on_nfs config in
   let enable_fuzzy_search = bool_if_version "enable_fuzzy_search"
-    ~default:default.enable_fuzzy_search config in
+      ~default:default.enable_fuzzy_search config in
   let lazy_parse = bool_if_version "lazy_parse"
-    ~default:default.lazy_parse config in
+      ~default:default.lazy_parse config in
   let lazy_init = bool_if_version "lazy_init2"
-    ~default:default.lazy_init config in
+      ~default:default.lazy_init config in
   let max_purgatory_clients = int_ "max_purgatory_clients"
-    ~default:default.max_purgatory_clients config in
+      ~default:default.max_purgatory_clients config in
   let search_chunk_size = int_ "search_chunk_size"
-    ~default:default.search_chunk_size config in
+      ~default:default.search_chunk_size config in
   let load_state_script_timeout = int_ "load_mini_script_timeout"
-    ~default:default.load_state_script_timeout config in
+      ~default:default.load_state_script_timeout config in
   let load_state_natively = bool_if_version "load_state_natively_v4"
-    ~default:default.load_state_natively config in
+      ~default:default.load_state_natively config in
   let state_loader_timeouts = state_loader_timeouts_
-    ~default:State_loader_config.default_timeouts config in
+      ~default:State_loader_config.default_timeouts config in
   let use_dummy_informant = bool_if_version "use_dummy_informant"
-    ~default:default.use_dummy_informant config in
+      ~default:default.use_dummy_informant config in
   let informant_min_distance_restart = int_ "informant_min_distance_restart"
-    ~default:default.informant_min_distance_restart config in
+      ~default:default.informant_min_distance_restart config in
   let informant_use_xdb = bool_if_version "informant_use_xdb_v5"
-    ~default:default.informant_use_xdb config in
+      ~default:default.informant_use_xdb config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
-    ~default:default.type_decl_bucket_size config in
+      ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
-    ~default:default.watchman_init_timeout config in
+      ~default:default.watchman_init_timeout config in
   let watchman_subscribe = bool_if_version "watchman_subscribe_v2"
-    ~default:default.watchman_subscribe config in
+      ~default:default.watchman_subscribe config in
   let watchman_synchronous_timeout = int_ "watchman_synchronous_timeout"
-    ~default:default.watchman_synchronous_timeout config in
+      ~default:default.watchman_synchronous_timeout config in
   let io_priority = int_ "io_priority"
-    ~default:default.io_priority config in
+      ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority"
-    ~default:default.cpu_priority config in
+      ~default:default.cpu_priority config in
   let saved_state_cache_limit = int_ "saved_state_cache_limit"
-    ~default:default.saved_state_cache_limit config in
+      ~default:default.saved_state_cache_limit config in
   let shm_dirs = string_list
-    ~delim:(Str.regexp ",")
-    "shm_dirs"
-    ~default:default.shm_dirs
-    config
-  |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
+      ~delim:(Str.regexp ",")
+      "shm_dirs"
+      ~default:default.shm_dirs
+      config
+                 |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
   let max_workers = int_opt "max_workers" config in
   let max_bucket_size = int_ "max_bucket_size"
-    ~default:default.max_bucket_size config in
+      ~default:default.max_bucket_size config in
   let interrupt_on_watchman = bool_if_version "interrupt_on_watchman"
-    ~default:default.interrupt_on_watchman config in
+      ~default:default.interrupt_on_watchman config in
   let interrupt_on_client = bool_if_version "interrupt_on_client"
-    ~default:default.interrupt_on_client config in
+      ~default:default.interrupt_on_client config in
   let use_full_fidelity_parser = bool_if_version "use_full_fidelity_parser"
-    ~default:default.use_full_fidelity_parser config in
+      ~default:default.use_full_fidelity_parser config in
   let trace_parsing = bool_if_version "trace_parsing"
-    ~default:default.trace_parsing config in
+      ~default:default.trace_parsing config in
   let prechecked_files = bool_if_version "prechecked_files"
-    ~default:default.prechecked_files config in
+      ~default:default.prechecked_files config in
   let predeclare_ide = bool_if_version "predeclare_ide"
-    ~default:default.predeclare_ide config in
+      ~default:default.predeclare_ide config in
   let predeclare_ide_deps = bool_if_version "predeclare_ide_deps"
-    ~default:default.predeclare_ide_deps config in
+      ~default:default.predeclare_ide_deps config in
   let max_typechecker_worker_memory_mb = int_opt "max_typechecker_worker_memory_mb" config in
   let watchman_debug_logging = bool_if_version "watchman_debug_logging"
-    ~default:default.watchman_debug_logging config in
+      ~default:default.watchman_debug_logging config in
   let hg_aware = bool_if_version "hg_aware"
-    ~default:default.hg_aware config in
+      ~default:default.hg_aware config in
   let disable_conservative_redecl = bool_if_version "disable_conservative_redecl"
-    ~default:default.disable_conservative_redecl config in
+      ~default:default.disable_conservative_redecl config in
   let store_decls_in_saved_state = bool_if_version "store_decls_in_saved_state"
-    ~default:default.store_decls_in_saved_state config in
+      ~default:default.store_decls_in_saved_state config in
   let load_decls_from_saved_state = bool_if_version "load_decls_from_saved_state"
-    ~default:default.load_decls_from_saved_state config in
+      ~default:default.load_decls_from_saved_state config in
   let hg_aware_parsing_restart_threshold = int_ "hg_aware_parsing_restart_threshold"
-    ~default:default.hg_aware_parsing_restart_threshold config in
+      ~default:default.hg_aware_parsing_restart_threshold config in
   let hg_aware_redecl_restart_threshold = int_ "hg_aware_redecl_restart_threshold"
-    ~default:default.hg_aware_redecl_restart_threshold config in
+      ~default:default.hg_aware_redecl_restart_threshold config in
   let hg_aware_recheck_restart_threshold = int_ "hg_aware_recheck_restart_threshold"
-    ~default:default.hg_aware_recheck_restart_threshold config in
+      ~default:default.hg_aware_recheck_restart_threshold config in
   let ide_parser_cache = bool_if_version "ide_parser_cache"
-    ~default:default.ide_parser_cache config in
+      ~default:default.ide_parser_cache config in
   let ide_tast_cache = bool_if_version "ide_tast_cache"
-    ~default:default.ide_tast_cache config in
+      ~default:default.ide_tast_cache config in
   let idle_gc_slice = int_ "idle_gc_slice"
-    ~default:default.idle_gc_slice config in
+      ~default:default.idle_gc_slice config in
   let basic_autocomplete_only = bool_if_version "basic_autocomplete_only"
-    ~default:default.basic_autocomplete_only config in
+      ~default:default.basic_autocomplete_only config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -300,9 +301,9 @@ let load_ fn ~silent =
   }
 
 let load ~silent =
-  try load_ path ~silent
-  with
-  | e ->
+  try
+    load_ path ~silent
+  with e ->
     Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
     Hh_logger.log "Could not load config at %s, using defaults" path;
     default

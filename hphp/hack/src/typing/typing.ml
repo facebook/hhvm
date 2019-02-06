@@ -1163,17 +1163,26 @@ and expr
     ?array_ref_ctx
     ?(valkind = `other)
     ?(check_defined = true)
-    env e =
-  begin match expected with
-  | None -> ()
-  | Some (_, r, ty) ->
-    Typing_log.(log_with_level env "typing" 1 (fun () ->
-      log_types (fst e) env
-      [Log_head ("Typing.expr " ^ Typing_reason.string_of_ureason r,
-       [Log_type ("expected_ty", ty)])])) end;
-  raw_expr ~accept_using_var ~is_using_clause
-    ~valkind ~check_defined
-    ?is_func_arg ?array_ref_ctx ?expected env e
+    env (p, _ as e) =
+  try
+    begin match expected with
+    | None -> ()
+    | Some (_, r, ty) ->
+      Typing_log.(log_with_level env "typing" 1 (fun () ->
+        log_types p env
+        [Log_head ("Typing.expr " ^ Typing_reason.string_of_ureason r,
+         [Log_type ("expected_ty", ty)])])) end;
+    raw_expr ~accept_using_var ~is_using_clause
+      ~valkind ~check_defined
+      ?is_func_arg ?array_ref_ctx ?expected env e
+  with e ->
+    let pos = Pos.string (Pos.to_absolute p) in
+    prerr_endline (Printf.sprintf "Exception while typechecking expression at position %s" pos);
+    let msg = Exn.to_string e in
+    let stack = Printexc.get_backtrace () in
+    prerr_endline (Printf.sprintf "Exception: %s" msg);
+    prerr_endline (Printf.sprintf "Stack trace: %s" stack);
+    raise e
 
 and raw_expr
   ?(accept_using_var = false)

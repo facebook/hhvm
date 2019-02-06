@@ -15,6 +15,7 @@ let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
 let allow_goto = GlobalOptions.po_allow_goto
 let enable_concurrent = GlobalOptions.po_enable_concurrent
 let enable_await_as_an_expression = GlobalOptions.po_enable_await_as_an_expression
+let default_mode = GlobalOptions.po_default_mode
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations

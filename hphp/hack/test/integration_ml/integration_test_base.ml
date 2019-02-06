@@ -37,6 +37,7 @@ let global_opts = GlobalOptions.make
   ~po_allow_goto:false
   ~po_enable_concurrent:false
   ~po_enable_await_as_an_expression:false
+  ~po_default_mode:"strict"
   ~tco_log_inference_constraints:false
   ~tco_disallow_ambiguous_lambda:false
   ~tco_disallow_array_typehint:false

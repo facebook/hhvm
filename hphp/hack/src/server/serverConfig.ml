@@ -265,6 +265,7 @@ let load config_filename options =
     ~po_disable_nontoplevel_declarations:false
     ~po_enable_concurrent:(bool_ "enable_concurrent" ~default:false config)
     ~po_enable_await_as_an_expression:(bool_ "enable_await_as_an_expression" ~default:false config)
+    ~po_default_mode:(string_ "default_mode" ~default:GlobalOptions.(po_default_mode default) config)
     ~po_allow_goto:(not (bool_ "disallow_goto" ~default:false config))
     ~tco_experimental_features:(config_experimental_tc_features config)
     ~tco_migration_flags:(config_tc_migration_flags config)

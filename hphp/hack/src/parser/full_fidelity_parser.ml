@@ -147,7 +147,7 @@ module Parser = WithSyntax(Syntax)
 open Syntax
 
 (* Parsing only the header of the file for language and mode information *)
-let parse_mode text =
+let parse_mode ?(default = ParserOptions.(default_mode default)) text =
   let suffix = Relative_path.suffix (SourceText.file_path text) in
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
@@ -191,7 +191,7 @@ let parse_mode text =
         in
         try
           let mode = List.hd (Str.split (Str.regexp " +") mode) in
-          FileInfo.parse_mode mode
+          FileInfo.parse_mode ~default mode
         with _ -> Some FileInfo.Mpartial
       end
   | _ when has_dot_hack_extension -> Some FileInfo.Mstrict

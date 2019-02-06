@@ -3476,7 +3476,8 @@ let parse_text
   (env : env)
   (source_text : SourceText.t)
 : (FileInfo.mode option * PositionedSyntaxTree.t) =
-  let mode = Full_fidelity_parser.parse_mode source_text in
+  let default_mode = ParserOptions.default_mode env.parser_options in
+  let mode = Full_fidelity_parser.parse_mode ~default:default_mode source_text in
   let quick_mode = not env.codegen && (
     match mode with
     | None
@@ -3686,7 +3687,8 @@ let defensive_program
     let mode =
     try
       let source = Full_fidelity_source_text.make fn content in
-      Full_fidelity_parser.parse_mode source
+      let default_mode = ParserOptions.default_mode parser_options in
+      Full_fidelity_parser.parse_mode ~default:default_mode source
     with _ -> None in
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in

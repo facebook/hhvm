@@ -413,6 +413,10 @@ RegInfo& reg_info_insert(State& state, Vreg r, RegInfo info) {
   return *newInfo;
 }
 
+bool is_spill(RegClass cls) {
+  return cls == RegClass::Spill || cls == RegClass::SpillWide;
+}
+
 //////////////////////////////////////////////////////////////////////
 // State utilities
 
@@ -451,6 +455,37 @@ void compute_dominator_info(State& state) {
     state.domOrder[b] = order++;
     for (auto const child : dominatorTree[b]) dfs.push(child);
   }
+}
+
+// Return true if the given Vreg is live in (that is, before the instruction
+// executes) at the instruction given by the block and index. This merely looks
+// for a usage of that Vreg in the future, so it may return true if you give it
+// a Vreg which isn't yet defined.
+bool live_in_at(const State& state, Vreg reg, Vlabel b, size_t i) {
+  assertx(b < state.unit.blocks.size());
+  assertx(i <= state.unit.blocks[b].code.size());
+
+  // If the position is the beginning of the block, we can just use the
+  // pre-calculated liveness information.
+  if (i == 0) return state.liveIn[b][reg];
+
+  // Otherwise walk through the block from the specified position and look for a
+  // use of that Vreg. If we find one, it must be live (assuming its defined at
+  // the specified position).
+  auto const& unit = state.unit;
+  auto const& block = unit.blocks[b];
+  for (; i < block.code.size(); ++i) {
+    auto const& inst = block.code[i];
+    auto found = false;
+    visitUses(
+      unit, inst,
+      [&](Vreg r) { if (r == reg) found = true; }
+    );
+    if (found) return true;
+  }
+  // If we reach the end of the block without finding a usage, it may still be
+  // used in a successor, so use the pre-calculated live-out information.
+  return state.liveOut[b][reg];
 }
 
 // Calculate liveness in the traditional dataflow way. There's more efficient
@@ -527,6 +562,12 @@ LoopInfo& loop_info(State& state, Vlabel loop) {
   assertx(it != state.loopInfo.end());
   return it->second;
 };
+
+// A block is a loop header if we have loop info for it (since loops are keyed
+// by their header).
+bool is_loop_header(const State& state, Vlabel b) {
+  return state.loopInfo.find(b) != state.loopInfo.end();
+}
 
 // Calculate various loop metadata
 void calculate_loop_info(State& state) {
@@ -2074,6 +2115,78 @@ void infer_register_classes(State& state) {
 // Spilling
 
 /*
+ * Spilling is by far the most complicated part of the register allocator. It is
+ * responsible for inserting Vinstr::spill and Vinstr::reload instructions to
+ * move Vregs to/from spill slots in memory. Non-copy instructions have to have
+ * their inputs in registers (not in memory) at the point they're executed, but
+ * we can never have more Vregs in registers than there are actually physical
+ * registers.
+ *
+ * Once spilling is accomplished then the unit is guaranteed to be trivially
+ * colorable. Its guaranteed that at all points in the unit there's never more
+ * Vregs in registers than there are physical registers, and therefore there'll
+ * always be a free physical register to select (ignoring constrained
+ * instructions, see below). This property is completely independent of the
+ * colors you choose and thus means the actual color selection is arbitrary.
+ *
+ * The key behind this algorithm is that in a strict SSA program, the number of
+ * needed physical registers at any point is equal to the number of live values
+ * (Vregs here). This is just a restatement of the property that the chromatic
+ * number of chordal interference graphs is equal to the largest clique. Each
+ * clique of size N in the interference graph represents a point where N values
+ * are simultaneously alive.
+ *
+ * Since we have a fixed number of physical registers, it follows that the unit
+ * can only be colored if we can reduce (at every point) the number of live
+ * Vregs to below that number. Of course we cannot make Vregs be not live, since
+ * that affects program semantics, but we can spill them, which means they don't
+ * occupy a register. This logic does *not* apply for non-SSA programs.
+ *
+ * The spilling is accomplished by walking the unit block by block. We keep
+ * per-block state of which Vregs are in registers (not-spilled), and which are
+ * in memory (spilled). At the entry of each block we first calculate the
+ * initial state. That is, we decide which live-in Vregs should be in registers
+ * and which in memory initially. For loop headers we apply extra logic to avoid
+ * spilling Vregs used within the loop. Every block is free to make its own
+ * independent decision in this regard. It can lead to blocks disagreeing about
+ * where a Vreg should be, which will be fixed up afterwards.
+ *
+ * Once the block state is initialized, the block is walked instruction by
+ * instruction. We force all the Vregs an instruction uses out of memory (if
+ * necessary), generating reload instructions. This might increase the number of
+ * Vregs in registers past the limit, so it may trigger spilling other Vregs
+ * into memory, restoring the balance (generating spill instructions). We then
+ * purge any uses which are now dead out of the state. We then record the defs
+ * of the instruction as being in registers (since the instruction has to write
+ * to registers). This may generate yet more spills. Finally we purge any defs
+ * which are now dead (because they're unused). The decision of which Vregs to
+ * actually spill is performed by a heuristic which uses a calculated "spill
+ * weight" for each Vreg.
+ *
+ * This process is repeated for every instruction, generating reload and spill
+ * instructions along the way. When we reach the end of the block, we record the
+ * out state. If the block ends in a phijmp, we also record the state of the
+ * Vregs used by the phi.
+ *
+ * Copies get special treatment. Copy instructions are special in that they can
+ * handle both spilled and non-spilled Vregs (no reload required). This is
+ * actually required because we need to be able to copy spilled Vregs around
+ * without adding new register pressure. We do, however, require that the source
+ * and dest of the copy agree with regards to whether the Vreg is spilled or
+ * not. We may have to introduce extra instructions to guarantee this.
+ *
+ * Once this is all done, each block is self-consistent, but the blocks may not
+ * agree amongst themselves about which Vregs are spilled or not. IE, one block
+ * may have decided that it would assume that a live-in Vreg is in a register,
+ * but its predecessor may have decided to spill this. We resolve this by
+ * inserting spills or reloads at the end of the predecessor as necessary. A
+ * similar situation may happen with phijmp/phidef pairs.
+ *
+ * The actual spill and reload instructions are kept until after coloring and
+ * will be removed as part of SSA lowering.
+ */
+
+/*
  * Materialization:
  *
  * When attempting to reload a spilled Vreg, we can instead rematerialize the
@@ -2615,11 +2728,1915 @@ void calculate_spill_weights(State& state) {
   }
 }
 
+/*
+ * Constrained instructions:
+ *
+ * Certain instructions require their sources or dests to be assigned particular
+ * physical registers (this is why we have pseudo instructions). Such
+ * instructions are called "constrained". A constrained instruction is any
+ * instruction whose source or dest Vreg(s) has a precolor (IE, it was
+ * originally a physical register). The exception is certain copy instructions
+ * because (1) there's never a semantic requirement to have a physical register
+ * there, and (2) we need to be able to insert those instructions to keep the
+ * program colorable even with constraints.
+ *
+ * Unfortunately constrained instructions add additional structure to the
+ * coloring problem which means the program may not be colorable even after the
+ * register pressure has been lowered at all points. Once spilling has been
+ * performed, the program should be able to be successfully colored with any
+ * arbitrary selection of colors (IE, no matter what color you choose, you can
+ * always color the remaining program). This is *not* true if we have
+ * constrained instructions because you might choose a color for an instruction
+ * which will be required by a constrained instruction later on.
+ *
+ * However (just for this specific problem) the program can be modified to
+ * restore the trivial colorability property. Before any constrained instruction
+ * we split the live ranges of all Vregs in registers at that point. This is
+ * done by inserting a copyargs instruction where all the live Vregs are the
+ * sources (with matching dests). We'll restore SSA afterwards which will
+ * rewrite the copyargs to have new dests (and fix all downstream uses). This
+ * copyargs breaks the live range of all Vregs, which means we always have the
+ * option at that point to shuffle the registers as needed during coloring. This
+ * ensures that we'll always be able to satisfy the constraint(s), no matter
+ * what coloring choices have already been made. If there's no need to shuffle,
+ * the copy will be optimized away.
+ *
+ * Constrained instructions introduce one other problem, this time during
+ * spilling and modelling register pressure. It's best illustrated by an
+ * example.
+ *
+ * Consider the instruction "Op R1 -> R2" where R1 and R2 are not precolored,
+ * and R1 is not used after Op. This instruction clearly only requires one
+ * physical register because R1 is dead after Op, and therefore R2 can always
+ * use the same register that R1 had. However, suppose that R1 was precolored to
+ * %eax, and R2 was precolored to %ecx. The instruction actually requires two
+ * physical registers because we no longer have the freedom to assign R1 and R2
+ * the same physical register. Sebastian Hack calls such instructions "register
+ * pressure unfaithful".
+ *
+ * This is problematic for the spiller because it does not attempt to assign
+ * colors to Vregs. It only makes sure the register pressure never exceeds the
+ * number of physical registers. However, it can be dealt with (conservatively)
+ * via a heuristic. If an instruction is constrained, we try to match up
+ * precolored sources with same precolored dests. If any precolored sources
+ * remain after this, we try to match them with non-precolored dests. If any
+ * precolored sources remain after this, and those sources are live-out of the
+ * instruction, we treat them as "across" instead of "use". This ensures they
+ * are treated as live at the same time as the defs and therefore we model the
+ * register pressure appropriately. This is a heuristic, but its safe and this
+ * situation almost never happens. Using the above example, we'd fail to match
+ * up R1 and R2 because they have different precolors, so R1 would be treated as
+ * "across" and the spiller would model the instruction as needing at least two
+ * free physical registers.
+ */
+
+bool is_constrained_inst(const State& state, const Vinstr& inst) {
+  // These are never constrained (we need to be able to use them to resolve
+  // constraints).
+  switch (inst.op) {
+    case Vinstr::copy:
+    case Vinstr::copyargs:
+    case Vinstr::phijmp:
+    case Vinstr::phidef:
+    case Vinstr::spill:
+    case Vinstr::reload:
+      return false;
+    default:
+      break;
+  }
+
+  // Otherwise an instruction is constrained if any of its uses or defs is
+  // precolored.
+  auto hasPrecolor = false;
+  auto const process = [&] (Vreg r) {
+    if (hasPrecolor || r.isPhys()) return;
+    auto const& info = reg_info(state, r);
+    if (info.precolor != InvalidReg) hasPrecolor = true;
+  };
+
+  visitUses(state.unit, inst, process);
+  if (!hasPrecolor) visitDefs(state.unit, inst, process);
+  return hasPrecolor;
+}
+
+// Adjust the use and across sets of the instruction at the given instruction to
+// account for "register pressure unfaithfulness" as described above. If we
+// cannot match up a pre-colored Vreg with a pre-colored Vreg in the defs set,
+// move it from the use set to the across set.
+void fix_constrained_inst_uses(const State& state,
+                               const VregSet& defs,
+                               VregSet& uses,
+                               VregSet& acrosses,
+                               Vlabel block,
+                               size_t instIdx) {
+  assertx(is_constrained_inst(state, state.unit.blocks[block].code[instIdx]));
+
+  if (defs.none()) return;
+
+  auto const compat_class = [] (RegClass c1, RegClass c2) {
+    assertx(c1 != RegClass::Any);
+    assertx(c2 != RegClass::Any);
+    if (c1 == c2) return true;
+    if (c1 == RegClass::AnyNarrow) return (c2 == RegClass::GP);
+    if (c2 == RegClass::AnyNarrow) return (c1 == RegClass::GP);
+    return false;
+  };
+
+  VregSet matchedUse;
+  VregSet matchedDef;
+
+  // If the precolored use can be paired up with a same precolored def (which
+  // hasn't already been paired), return the def.
+  auto const findMatchingPrecoloredDef = [&] (Vreg use) {
+    assertx(!matchedUse[use]);
+    auto const& useInfo = reg_info(state, use);
+    assertx(useInfo.precolor != InvalidReg);
+
+    Vreg match;
+    defs.forEach(
+      [&] (Vreg def) {
+        assertx(!match.isValid());
+        auto const& defInfo = reg_info(state, def);
+        if (useInfo.precolor == defInfo.precolor) {
+          assertx(!matchedDef[def]);
+          assertx(compat_class(useInfo.regClass, defInfo.regClass));
+          match = def;
+          return false;
+        }
+        return true;
+      }
+    );
+    return match;
+  };
+
+  // If the precolored use can be paired up with a precolored def (which isn't
+  // already paired and not the same precolor), then return the def.
+  auto const findNotMatchingPrecoloredDef = [&] (Vreg use) {
+    assertx(!matchedUse[use]);
+    auto const& useInfo = reg_info(state, use);
+    assertx(useInfo.precolor != InvalidReg);
+
+    Vreg match;
+    defs.forEach(
+      [&] (Vreg def) {
+        assertx(!match.isValid());
+        if (matchedDef[def]) return true;
+        auto const& defInfo = reg_info(state, def);
+        if (defInfo.precolor != InvalidReg &&
+            compat_class(useInfo.regClass, defInfo.regClass)) {
+          assertx(useInfo.precolor != defInfo.precolor);
+          match = def;
+          return false;
+        }
+        return true;
+      }
+    );
+    return match;
+  };
+
+  // If the precolored use can be paired up with a non-precolored def (which
+  // hasn't already been paired), return the def.
+  auto const findMatchingUnconstrainedDef = [&] (Vreg use) {
+    assertx(!matchedUse[use]);
+    auto const& useInfo = reg_info(state, use);
+    assertx(useInfo.precolor != InvalidReg);
+
+    Vreg match;
+    defs.forEach(
+      [&] (Vreg def) {
+        assertx(!match.isValid());
+        if (matchedDef[def]) return true;
+        auto const& defInfo = reg_info(state, def);
+        if (defInfo.precolor == InvalidReg &&
+            compat_class(useInfo.regClass, defInfo.regClass)) {
+          match = def;
+          return false;
+        }
+        return true;
+      }
+    );
+    return match;
+  };
+
+  // Try to pair up uses with defs, preferring use/def pairs which have the same
+  // precolor register first.
+  auto const matchDef = [&] (auto f) {
+    uses.forEach(
+      [&] (Vreg r) {
+        if (matchedUse[r] ||
+            reg_info(state, r).precolor == InvalidReg ||
+            live_in_at(state, r, block, instIdx+1)) {
+          return;
+        }
+        auto const match = f(r);
+        if (match.isValid()) {
+          matchedUse.add(r);
+          matchedDef.add(match);
+        }
+      }
+    );
+  };
+  matchDef(findMatchingPrecoloredDef);
+  matchDef(findMatchingUnconstrainedDef);
+
+  // If there's any unpaired uses left, force them to be "across".
+  VregSet forcedAcross;
+  uses.forEach(
+    [&] (Vreg r) {
+      if (matchedUse[r] ||
+          reg_info(state, r).precolor == InvalidReg ||
+          live_in_at(state, r, block, instIdx+1)) {
+        return;
+      }
+      auto const match = findNotMatchingPrecoloredDef(r);
+      if (match.isValid()) forcedAcross.add(r);
+    }
+  );
+
+  uses -= forcedAcross;
+  acrosses |= forcedAcross;
+}
+
+// The state of which live Vregs are currently spilled or not-spilled. This
+// encapsulates that state, as well as the logic to decide which registers
+// should be spilled or reloaded.
+
+struct SpillerState {
+  // Default state is no Vregs are live
+  explicit SpillerState(const State& state)
+    : gp{size_t(state.gpUnreserved.size())}
+    , simd{size_t(state.simdUnreserved.size())}
+    , state{&state}
+  {}
+
+  // We track the Vreg state separately for each register class.
+  struct PerClass {
+    size_t numRegs;
+    VregSet inReg;
+    VregSet inMem;
+  };
+  PerClass gp;
+  PerClass simd;
+  const State* state;
+
+  // Given a Vreg, return the per-class state appropriate for that Vreg (or
+  // nullptr if untracked). This lets code manipulate the state generically
+  // without having to switch on register class constantly.
+  const PerClass* forReg(Vreg r) const {
+    if (r.isPhys()) return nullptr;
+    switch (reg_info(*state, r).regClass) {
+      case RegClass::AnyNarrow:
+      case RegClass::GP:
+        return &gp;
+      case RegClass::SIMD:
+      case RegClass::SIMDWide:
+        return &simd;
+      case RegClass::SF:
+        return nullptr;
+      case RegClass::Any:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+        break;
+    }
+    always_assert(false);
+  }
+  PerClass* forReg(Vreg r) {
+    return const_cast<PerClass*>(
+      const_cast<const SpillerState*>(this)->forReg(r)
+    );
+  }
+
+  /*
+   * Using the spill weights at the given position, move any Vregs which need to
+   * be moved from "inReg" to "inMem" to bring the number of Vregs in "inReg"
+   * back below the size of the register class. If we cannot move enough Vregs,
+   * then we'll assert (which means a bug). The set if Vregs thus moved is
+   * returned. Spill instructions will need to be generated for these Vregs.
+   *
+   * The "forbidden" set is the set of Vregs which are not eligible
+   * for spilling (typically the set of Vregs which are operands to the
+   * instruction and thus cannot be spilled).
+   *
+   * The "retry" flag changes the semantics a bit. If the retry flag is set,
+   * then we first attempt to spill registers as normal. However if we cannot,
+   * we'll retry, ignoring the forbidden set. This is used to treat the
+   * forbidden set as a hint instead of a hard rule.
+   *
+   * This function is typically used after some Vregs are moved into the "inReg"
+   * set (perhaps because of reloading). You then call this to spill as
+   * necessary (using the Vregs just reloaded as the forbidden set).
+   */
+  VregSet spill(Vlabel b,
+                size_t instIdx,
+                const VregSet& forbidden = VregSet{},
+                bool retry = false) {
+    // We'll calculate spill for GP and SIMD separately and then combine the
+    // results (since they do not interact).
+    auto const impl = [&] (PerClass& per, bool recursed, auto const& self) {
+      // If we're already below the size, there's nothing to do (this is the
+      // common case).
+      if (per.inReg.size() <= per.numRegs) return VregSet{};
+
+      // Otherwise we really have to spill. Gather up the candidates with their
+      // spill weights at this point.
+      jit::vector<std::pair<Vreg, uint64_t>> candidates;
+      candidates.reserve(per.inReg.size());
+      per.inReg.forEach(
+        [&] (Vreg r) {
+          // Are we ignoring the forbidden set?
+          if (!recursed && forbidden[r]) return;
+          candidates.emplace_back(r, spill_weight_at(*state, r, b, instIdx));
+        }
+      );
+
+      // If we have less candidates than we need to spill, we're in trouble.
+      auto const toRemove = per.inReg.size() - per.numRegs;
+      if (toRemove > candidates.size()) {
+        // If the forbidden set is "soft" then retry without it.
+        if (retry && !recursed) return self(per, true, self);
+        always_assert(false);
+      }
+
+      // Sort them according to their spill weights. Higher weights (more
+      // profitable to spill) come first. Use the Vreg number to break ties.
+      std::sort(
+        candidates.begin(),
+        candidates.end(),
+        [](std::pair<Vreg, uint64_t> a, std::pair<Vreg, uint64_t> b) {
+          if (a.second > b.second) return true;
+          if (a.second < b.second) return false;
+          return a.first < b.first;
+        }
+      );
+
+      // Spill the first N, remove them from the inReg state and put them in
+      // inMem to reflect they're spilled.
+      VregSet spilled;
+      for (size_t i = 0; i < toRemove; ++i) spilled.add(candidates[i].first);
+      per.inReg -= spilled;
+      per.inMem |= spilled;
+
+      return spilled;
+    };
+    return impl(gp, false, impl) | impl(simd, false, impl);
+  }
+
+  // Remove any Vregs (in the candidates set) from being tracked which are not
+  // live after the current position.
+  void dropDead(const VregSet& candidates,
+                Vlabel b,
+                size_t instIdx) {
+    assertx(checkInvariants(Vlabel{}, 0));
+    candidates.forEach(
+      [&] (Vreg r) {
+        auto s = forReg(r);
+        if (!s) return;
+        assertx(s->inReg[r] || s->inMem[r]);
+        if (live_in_at(*state, r, b, instIdx+1)) return;
+        s->inReg.remove(r);
+        s->inMem.remove(r);
+      }
+    );
+  }
+
+  std::string toString() const {
+    return folly::sformat(
+      "GP: [Reg: {} Mem: {}] SIMD: [Reg: {} Mem: {}]",
+      show(gp.inReg), show(gp.inMem),
+      show(simd.inReg), show(simd.inMem)
+    );
+  }
+
+  // Sanity checking
+  bool checkInvariants(Vlabel b, size_t instIdx) const {
+    auto const impl = [&] (const PerClass& per) {
+      // If we can't spill, we should never have a Vreg in memory.
+      always_assert(IMPLIES(!state->abi.canSpill, per.inMem.none()));
+      // We should never have more un-spilled Vregs than there are physical
+      // registers for the class (except before a call to spill()).
+      always_assert(per.inReg.size() <= per.numRegs);
+      // A Vreg is either spilled or not.
+      always_assert((per.inReg & per.inMem).none());
+      (per.inReg | per.inMem).forEach(
+        [&] (Vreg r) {
+          // A Vreg should only be tracked if its actually live at this
+          // position, and a Vreg should be in the per-class state appropriate
+          // for it.
+          always_assert(!r.isPhys());
+          always_assert(forReg(r) == &per);
+          always_assert(!b.isValid() || live_in_at(*state, r, b, instIdx));
+        }
+      );
+    };
+    impl(gp);
+    impl(simd);
+    return true;
+  }
+};
+
+// SpillerState at block boundaries, along with created Vregs which need SSA
+// restoration.
+struct SpillerResults {
+  explicit SpillerResults(const State& state)
+    : perBlock(state.unit.blocks.size()) {}
+
+  struct PerBlock {
+    folly::Optional<SpillerState> in;
+    folly::Optional<SpillerState> out;
+    // Phi inputs/outputs. If a bit is set at index N, it means the phi
+    // input/output at position N of the phi instruction is non-spilled.
+    folly::Optional<boost::dynamic_bitset<>> inPhi;
+    folly::Optional<boost::dynamic_bitset<>> outPhi;
+  };
+  jit::vector<PerBlock> perBlock;
+  VregSet ssaize;
+
+  std::string toString(const State& state) const {
+    std::string ret;
+    for (auto const b : state.rpo) {
+      auto const& per = perBlock[b];
+      std::string inPhi;
+      std::string outPhi;
+      if (per.inPhi) {
+        boost::to_string(*per.inPhi, inPhi);
+      } else {
+        inPhi = "*";
+      }
+      if (per.outPhi) {
+        boost::to_string(*per.outPhi, outPhi);
+      } else {
+        outPhi = "*";
+      }
+      ret += folly::sformat(
+        "  {:5}:\n"
+        "    In      -> {}\n"
+        "    Out     -> {}\n"
+        "    In-Phi  -> {}\n"
+        "    Out-Phi -> {}\n",
+        b,
+        per.in ? per.in->toString() : "*",
+        per.out ? per.out->toString() : "*",
+        inPhi,
+        outPhi
+      );
+    }
+    return ret;
+  }
+};
+
+// Update the phi spiller state for block b to account for which Vregs have been
+// spilled or not.
+void record_phi_spill_state_helper(Vlabel b,
+                                   const VregList& defs,
+                                   SpillerState& spillerState,
+                                   SpillerResults& results) {
+  auto& in = results.perBlock[b].inPhi.emplace();
+  in.resize(defs.size());
+  for (size_t i = 0; i < defs.size(); ++i) {
+    auto const r = defs[i];
+    auto const s = spillerState.forReg(r);
+    if (!s) continue;
+    assertx(s->inReg[r] || s->inMem[r]);
+    in[i] = s->inReg[r];
+  }
+
+  // Some of the phi outputs might be immediately dead, so drop them now.
+  spillerState.dropDead(
+    spillerState.gp.inReg | spillerState.gp.inMem |
+    spillerState.simd.inReg | spillerState.simd.inMem,
+    b,
+    0
+  );
+}
+
+// Initialize the spiller state for entry into a block (populating the block's
+// in state) when the block is a loop header. We apply a few heuristics when
+// we're in a loop header to avoid spilling things inside the loop. This decides
+// which Vregs should be considered spilled or non-spilled upon entry to the
+// block. We can make this decision independently per-block because we'll fix up
+// any mismatches later. The starting instruction index is returned (to skip
+// over any phi).
+size_t setup_initial_spiller_state_loop(const State& state,
+                                        Vlabel b,
+                                        SpillerResults& results) {
+  assertx(is_loop_header(state, b));
+  auto const& unit = state.unit;
+
+  SpillerState initial{state};
+
+  // Start with all Vregs live-in to the block. Also include any Vregs defined
+  // by a phidef.
+  auto alive = state.liveIn[b];
+  const VregList* defs = nullptr;
+  if (unit.blocks[b].code.front().op == Vinstr::phidef) {
+    auto const& phidef = unit.blocks[b].code.front().phidef_;
+    defs = &unit.tuples[phidef.defs];
+
+    assertx(b != unit.entry);
+    assertx(!is_constrained_inst(state, phidef));
+    assertx(usesSet(unit, phidef).none());
+
+    for (size_t i = 0; i < defs->size(); ++i) {
+      auto const r = (*defs)[i];
+      if (!initial.forReg(r)) continue;
+      alive.add(r);
+    }
+  }
+
+  auto const& loopInfo = loop_info(state, b);
+
+  // Split the Vregs into those which are used inside the loop, and those which
+  // are just live-through (but unused).
+  auto const usedWithin = loopInfo.uses & alive;
+  auto const liveThrough = alive - usedWithin;
+
+  // Decide which Vregs should be assumed to be non-spilled on the block entry,
+  // and which ones should be assumed to be spilled on block entry. Use the max
+  // register pressure within the loop as a guide.
+  auto const process = [&] (SpillerState::PerClass& s, size_t pressure) {
+    // Assume that all Vregs used within the loop are non-spilled.
+    size_t usedCount = 0;
+    usedWithin.forEach(
+      [&] (Vreg r) {
+        if (initial.forReg(r) != &s) return;
+        s.inReg.add(r);
+        ++usedCount;
+      }
+    );
+
+    if (usedCount < s.numRegs) {
+      // There's still some space left after taking into account the Vregs used
+      // within the loop. We might be able to allow some live-through Vregs to
+      // be in registers.
+      size_t throughCount = 0;
+      liveThrough.forEach(
+        [&] (Vreg r) {
+          if (initial.forReg(r) != &s) return;
+          ++throughCount;
+        }
+      );
+
+      throughCount += s.numRegs;
+      if (throughCount > pressure) {
+        // There's still some space left. Pick the live-through Vregs which have
+        // the lowest spill weights (less profitable to spill) to also be
+        // non-spilled.
+        throughCount -= pressure;
+
+        jit::vector<std::pair<Vreg, uint64_t>> candidates;
+        candidates.reserve(liveThrough.size());
+        liveThrough.forEach(
+          [&] (Vreg r) {
+            if (initial.forReg(r) != &s) return;
+            candidates.emplace_back(r, spill_weight_at(state, r, b, 0));
+          }
+        );
+
+        std::sort(
+          candidates.begin(),
+          candidates.end(),
+          [](std::pair<Vreg, uint64_t> a, std::pair<Vreg, uint64_t> b) {
+            return std::tie(a.second, a.first) < std::tie(b.second, b.first);
+          }
+        );
+
+        // The first N are non-spilled and the rest are spilled.
+        auto const numReg = std::min(throughCount, candidates.size());
+        for (size_t i = 0; i < numReg; ++i) {
+          s.inReg.add(candidates[i].first);
+        }
+        for (size_t i = numReg; i < candidates.size(); ++i) {
+          s.inMem.add(candidates[i].first);
+        }
+
+        assertx(s.inReg.size() <= s.numRegs);
+        return;
+      }
+    }
+
+    // We used up all the space for Vregs used within the loop. The live-through
+    // Vregs have to be spilled.
+    liveThrough.forEach(
+      [&] (Vreg r) {
+        if (initial.forReg(r) != &s) return;
+        s.inMem.add(r);
+      }
+    );
+  };
+  process(initial.gp, loopInfo.gpPressure);
+  process(initial.simd, loopInfo.simdPressure);
+
+  // If we have more used-within Vregs than physical registers, we still might
+  // need to move some to the spilled category. Do so here.
+  initial.spill(b, 0);
+  assertx(!results.perBlock[b].inPhi);
+
+  // If this block has a phidef, we need to record which outputs of the phi were
+  // considered to be spilled or not.
+  if (defs) {
+    record_phi_spill_state_helper(
+      b,
+      *defs,
+      initial,
+      results
+    );
+  }
+
+  // Record block state
+  assertx(!results.perBlock[b].in);
+  assertx(initial.checkInvariants(b, !!defs));
+  results.perBlock[b].in = std::move(initial);
+
+  return !!defs;
+}
+
+// Initialize the spiller state for entry into a block (populating the block's
+// in state). This decides which Vregs should be considered spilled or
+// non-spilled upon entry to the block. We take into account which Vregs have
+// been spilled in predecessors, but we're not required to, since we'll fix up
+// any mismatches later. The starting instruction index is returned (to skip
+// over any phi).
+size_t setup_initial_spiller_state(const State& state,
+                                   Vlabel b,
+                                   SpillerResults& results) {
+  assertx(b != state.unit.entry || state.liveIn[b].none());
+
+  // Loop headers are dealt with specially.
+  if (is_loop_header(state, b)) {
+    return setup_initial_spiller_state_loop(state, b, results);
+  }
+
+  auto const& unit = state.unit;
+  SpillerState initial{state};
+
+  // First iterate over all (already processed) predecessors. If a Vreg is
+  // spilled in all the predecessors, we'll consider it spilled initially as
+  // well. Otherwise we'll optimistically consider it non-spilled. Also track
+  // any Vregs which are non-spilled in all predecessors (which will be given
+  // priority).
+  VregSet allInReg;
+  auto first = true;
+  for (auto const& pred : state.preds[b]) {
+    auto const& out = results.perBlock[pred].out;
+    if (!out) continue;
+    // There shouldn't be anything live which isn't tracked.
+    assertx(
+      (state.liveIn[b] -
+       (out->gp.inReg | out->simd.inReg | out->gp.inMem | out->simd.inMem)
+      ).none()
+    );
+
+    if (first) {
+      initial = *out;
+      allInReg = out->gp.inReg | out->simd.inReg;
+      first = false;
+    } else {
+      initial.gp.inReg |= out->gp.inReg;
+      initial.simd.inReg |= out->simd.inReg;
+      initial.gp.inMem &= out->gp.inMem;
+      initial.simd.inMem &= out->simd.inMem;
+      allInReg &= (out->gp.inReg | out->simd.inReg);
+    }
+  }
+  // The predecessors can have live-out Vregs which aren't live-in here, so
+  // remove those.
+  initial.gp.inReg &= state.liveIn[b];
+  initial.gp.inMem &= state.liveIn[b];
+  initial.simd.inReg &= state.liveIn[b];
+  initial.simd.inMem &= state.liveIn[b];
+  allInReg &= state.liveIn[b];
+
+  // Now that we've processed Vregs which were live-in to the block, we need to
+  // consider phidef outputs. We can use similar logic to the live-in Vregs,
+  // except examining the phi state of the predecessors.
+  const VregList* defs = nullptr;
+  if (unit.blocks[b].code.front().op == Vinstr::phidef) {
+    auto const& phidef = unit.blocks[b].code.front().phidef_;
+    defs = &unit.tuples[phidef.defs];
+
+    assertx(b != unit.entry);
+    assertx(!is_constrained_inst(state, phidef));
+    assertx(usesSet(unit, phidef).none());
+
+    boost::dynamic_bitset<> allInRegPhis;
+    boost::dynamic_bitset<> inRegPhis;
+    first = true;
+    for (auto const pred : state.preds[b]) {
+      auto const& out = results.perBlock[pred].outPhi;
+      if (!out) continue;
+
+      assertx(out->size() == defs->size());
+      if (first) {
+        inRegPhis = *out;
+        allInRegPhis = *out;
+        first = false;
+      } else {
+        allInRegPhis &= *out;
+        inRegPhis |= *out;
+      }
+    }
+
+    // Similar to the live-in Vregs, only consider a Vreg as spilled if its been
+    // spilled in all predecessors. Otherwise treat it as non-spilled.
+    for (size_t i = 0; i < defs->size(); ++i) {
+      auto const r = (*defs)[i];
+      auto const s = initial.forReg(r);
+      if (!s) {
+        assertx(!allInRegPhis[i] && !inRegPhis[i]);
+        continue;
+      }
+      if (inRegPhis[i]) {
+        s->inReg.add(r);
+        if (allInRegPhis[i]) allInReg.add(r);
+      } else {
+        assertx(!allInRegPhis[i]);
+        s->inMem.add(r);
+      }
+    }
+  }
+
+  // We might have more non-spilled Vregs than we can fit into registers. Spill
+  // as necessary. We hint that the Vregs which were non-spilled in all
+  // predecessors should not be spilled.
+  initial.spill(b, 0, allInReg, true);
+  assertx(!results.perBlock[b].inPhi);
+
+  // If this block has a phidef, we need to record which outputs of the phi were
+  // considered to be spilled or not.
+  if (defs) {
+    record_phi_spill_state_helper(
+      b,
+      *defs,
+      initial,
+      results
+    );
+  }
+
+  // Record block state
+  assertx(!results.perBlock[b].in);
+  assertx(initial.checkInvariants(b, !!defs));
+  results.perBlock[b].in = std::move(initial);
+
+  return !!defs;
+}
+
+// Emit instructions to reload Vreg src into Vreg dst, possibly using
+// rematerialization. If rematerialization is not possible, then a reload vasm
+// instruction is emitted. The number of instructions emitted is returned.
+size_t reload_with_remat(Vout& v,
+                         State& state,
+                         const VregSet& gpInReg,
+                         const VregSet& simdInReg,
+                         Vreg src,
+                         Vreg dst) {
+  auto const reload = [&] (Vout& v) { v << jit::reload{src, dst}; return 1; };
+
+  // No rematerialized instruction, just emit a reload instruction.
+  auto const& sInfo = reg_info(state, src);
+  if (!sInfo.remat) return reload(v);
+
+  // Check if all of the rematerialized instructions are available. This check
+  // is actually pointless because we do not allow rematerialization candidates
+  // which take inputs right now. This is because the check isn't quite correct
+  // because we might spill one of the inputs after this check. TODO
+  // (TT37650327): Handle instructions with sources
+  auto srcsAvailable = true;
+  visitUses(
+    state.unit, *sInfo.remat,
+    [&] (Vreg r) {
+      assertx(!r.isPhys());
+      if (!srcsAvailable) return;
+      srcsAvailable = gpInReg[r] || simdInReg[r];
+    }
+  );
+  // If the inputs aren't available, just reload
+  if (!srcsAvailable) return reload(v);
+
+  // Pick a Vreg to use as the rematerialized instruction output. If the dest
+  // Vreg is precolored, make a new one. Otherwise just use the dest. We need to
+  // do this because if the dest Vreg is precolored, we'll have to make this
+  // rematerialized instruction constrained, which means we need to insert
+  // live-range breaks *before it*, but its too late to do that. Instead we'll
+  // use a temporary and copy it to the dest Vreg (which doesn't introduce any
+  // constraints).
+  auto const& dInfo = reg_info(state, dst);
+  auto const temp = (dInfo.precolor != InvalidReg)
+    ? state.unit.makeReg()
+    : dst;
+
+  // Copy the rematerialized instruction, rewrite the output Vreg and insert it.
+  auto inst = *sInfo.remat;
+  visitRegsMutable(
+    state.unit,
+    inst,
+    [] (Vreg r) { return r; },
+    [&] (Vreg)  { return temp; }
+  );
+  v << inst;
+
+  // If we used a new Vreg as the instruction output, assign it the same info as
+  // the dest Vreg (except for the precolor), and insert a copy after the
+  // rematerialized instruction. Note that we don't have to insert the temporary
+  // into the spiller state because its dead after the copy.
+  if (temp != dst) {
+    auto tInfo = dInfo;
+    tInfo.precolor = InvalidReg;
+    reg_info_insert(state, temp, std::move(tInfo));
+    v << copy{temp, dst};
+    return 2;
+  }
+
+  return 1;
+}
+
+// Run spiller logic for a phijmp instruction. Phis can handle spilled Vregs, so
+// we don't need to reload the phi's inputs.
+void process_phijmp_spills(const State& state,
+                           Vlabel b,
+                           size_t instIdx,
+                           const phijmp& phijmp,
+                           SpillerState& spiller,
+                           SpillerResults& results) {
+  auto const& unit = state.unit;
+
+  // This should end a block
+  assertx(instIdx == unit.blocks[b].code.size() - 1);
+  assertx(!is_constrained_inst(state, phijmp));
+  assertx(defsSet(unit, phijmp).none());
+  assertx(acrossesSet(unit, phijmp).none());
+
+  // Examine which Vregs are currently non-spilled and record them in the phi
+  // state.
+  auto const& uses = unit.tuples[phijmp.uses];
+  assertx(!results.perBlock[b].outPhi);
+  auto& outPhi = results.perBlock[b].outPhi.emplace();
+  outPhi.resize(uses.size());
+  for (size_t i = 0; i < uses.size(); ++i) {
+    auto const r = uses[i];
+    auto const s = spiller.forReg(r);
+    if (!s) continue;
+    assertx(s->inReg[r] || s->inMem[r]);
+    outPhi[i] = s->inReg[r];
+  }
+
+  // Remove any Vregs which aren't used after the phi so they won't be part of
+  // the block's live-out.
+  spiller.dropDead(usesSet(unit, phijmp), b, instIdx);
+}
+
+// Run spiller logic for a copy-ish instruction. Copies need to be handle
+// specially because unlike normal instructions, they can handle both spilled
+// and non-spilled Vregs (therefore we don't need to reload the inputs before
+// the instruction). We only need to ensure that a copy doesn't attempt to move
+// between a spilled or non-spilled Vreg (or vice-versa). Indeed, we need to
+// ensure that a copy never causes a reload, as we need to be able to copy
+// spilled Vregs around without introducing additional register presure. Return
+// the number of instructions inserted.
+size_t process_copy_spills(State& state,
+                           VregList& uses,
+                           const VregList& defs,
+                           Vlabel b,
+                           size_t instIdx,
+                           SpillerState& spiller,
+                           SpillerResults& results) {
+  auto& unit = state.unit;
+
+  assertx(uses.size() == defs.size());
+
+  // Record which uses of the copy are currently spilled or not.
+  VregSet inReg;
+  VregSet inMem;
+  for (size_t i = 0; i < uses.size(); ++i) {
+    auto const u = uses[i];
+    auto const d = defs[i];
+    auto const s = spiller.forReg(u);
+    if (!s) {
+      assertx(!spiller.forReg(d));
+      continue;
+    }
+    assertx(s->inReg[u] || s->inMem[u]);
+    assertx(spiller.forReg(d));
+    if (s->inReg[u]) {
+      inReg.add(d);
+    } else {
+      inMem.add(d);
+    }
+  }
+
+  // Remove any Vregs which aren't used after the copy from being tracked.
+  spiller.dropDead(VregSet{uses}, b, instIdx);
+
+  // Now do the same for the copy outputs.
+  for (size_t i = 0; i < defs.size(); ++i) {
+    auto const d = defs[i];
+    auto const s = spiller.forReg(d);
+    if (!s) {
+      assertx(!inReg[d] && !inMem[d]);
+      assertx(!spiller.forReg(uses[i]));
+      continue;
+    }
+    // Since this is being defined here, we shouldn't already be tracking it.
+    assertx(!s->inReg[d] && !s->inMem[d]);
+    assertx(spiller.forReg(uses[i]));
+    if (inReg[d]) {
+      s->inReg.add(d);
+    } else {
+      s->inMem.add(d);
+    }
+  }
+
+  // Adding the defs may have exceeded the available registers, so spill as
+  // necessary.
+  auto const spills = spiller.spill(b, instIdx);
+  if (spills.none()) {
+    // If no spilling is required, then remove any immediately dead defs and
+    // then we're done.
+    spiller.dropDead(VregSet{defs}, b, instIdx);
+    return 0;
+  }
+
+  // We have to spill. Make sure we can.
+  always_assert(state.abi.canSpill);
+
+  if (debug) {
+    spills.forEach(
+      [&] (Vreg r) { always_assert(spiller.forReg(r)); }
+    );
+  }
+
+  // We know which Vregs we want to spill. Copys can handle copying between
+  // spilled Vregs on both sides and non-spilled Vregs on both sides (but not
+  // mixing). Moving between spilled and non-spilled Vregs is the job of the
+  // spill and reload instructions. So, if we need to spill one side of the copy
+  // and not the other (and vice-versa), we need to insert other instructions to
+  // keep this invariant.
+
+  jit::vector<std::pair<Vreg, Vreg>> aliasPairs; // Emit ssaalias p1 -> p2
+  jit::vector<std::pair<Vreg, Vreg>> spillPairs; // Emit spill p1 -> p2
+  auto selfSpills = spills; // Emit spill p -> p
+  for (size_t i = 0; i < uses.size(); ++i) {
+    auto const u = uses[i];
+    auto const d = defs[i];
+
+    if (spills[u]) {
+      if (!spills[d]) {
+        /*
+         * The src has been spilled, but dst has not. We need to make the input
+         * and output of the copy agree with regards to the spillness. We can't
+         * reload src because we've already decided we don't have the available
+         * registers to do that. Instead we'll spill src (because its in
+         * selfSpills). We'll emit a ssaalias instruction, aliasing src to dst,
+         * rewrite the copy to take dst instead, and mark dst as needing SSA
+         * restoration.
+         *
+         * For example:
+         *   copy src -> dst
+         *   conjureuse dst
+         *
+         * Becomes:
+         *   ssaalias src -> dst
+         *   spill src -> src
+         *   copy dst -> dst
+         *   conjureuse dst
+         *
+         * After SSA:
+         *  spill src -> src2
+         *  copy src -> dst
+         *  conjureuse dst
+         */
+        aliasPairs.emplace_back(u, d);
+        uses[i] = d;
+        results.ssaize.add(d);
+      } else {
+        /*
+         * Both the src and dst have been spilled. Copies can handle spilled
+         * Vregs just fine, so we'll spill src (because its in selfSpills), but
+         * don't need to do anything with the dst (so remove it from
+         * selfSpills).
+         *
+         * For example:
+         *   copy src -> dst
+         *   conjureuse dst
+         *
+         * Becomes:
+         *   spill src -> src
+         *   copy src -> dst
+         *   conjureuse dst
+         *
+         * After SSA:
+         *   spill src -> src2
+         *   copy src2 -> dst
+         *   conjureuse dst
+         */
+        selfSpills.remove(d);
+      }
+    } else if (spills[d]) {
+      /*
+       * The src isn't spilled, but dst has been. The copy can handle spilled
+       * Vregs just fine, so we'll emit a spill instruction before the copy,
+       * spilling the src into the dst. We'll rewrite the copy to take dst as
+       * the src. We'll mark dst as needing SSA conversion, so the copy will get
+       * a new Vreg as its output and all down stream users will be rewritten.
+       *
+       * For example:
+       *   copy src -> dst
+       *   conjureuse dst
+       *
+       * Becomes:
+       *   spill src -> dst
+       *   copy dst -> dst
+       *   conjureuse dst
+       *
+       * After SSA:
+       *   spill src -> dst
+       *   copy dst -> dst2
+       *   conjureuse dst2
+       */
+      spillPairs.emplace_back(u, d);
+      uses[i] = d;
+      selfSpills.remove(d);
+      results.ssaize.add(d);
+    }
+  }
+
+  // Anything self spilled needs to be SSA restored because we spill to itself.
+  results.ssaize |= selfSpills;
+
+  // Now that we've calculated everything, emit the actual instructions. We need
+  // to emit them in this particular order for correctness.
+  size_t added = 0;
+  vmodify(
+    unit, b, instIdx,
+    [&] (Vout& v) {
+      for (auto const& p : aliasPairs) {
+        v << ssaalias{p.first, p.second};
+        ++added;
+      }
+      for (auto const& p : spillPairs) {
+        v << spill{p.first, p.second};
+        ++added;
+      }
+      selfSpills.forEach(
+        [&] (Vreg r) {
+          v << spill{r, r};
+          ++added;
+        }
+      );
+      return 0;
+    }
+  );
+
+  // Remove any Vregs which the copy defined and are immediately dead.
+  spiller.dropDead(VregSet{defs}, b, instIdx + added);
+  return added;
+}
+
+// Run spiller logic for normal instructions (not phis or copies). Return the
+// number of instructions inserted.
+size_t process_inst_spills(State& state,
+                           Vlabel b,
+                           size_t instIdx,
+                           const Vinstr& inst,
+                           SpillerState& spiller,
+                           SpillerResults& results) {
+  // We allow Vinstr::copy if the src/dest is a physical register. In that case,
+  // we treat it like a normal instruction (not giving it the special copy
+  // logic).
+  assertx(inst.op != Vinstr::phijmp &&
+          inst.op != Vinstr::phidef &&
+          inst.op != Vinstr::copyargs);
+
+  auto& unit = state.unit;
+
+  // NB: acrosses is a subset of uses at this point
+  auto uses = usesSet(unit, inst) - state.reservedRegs;
+  auto acrosses = acrossesSet(unit, inst) - state.reservedRegs;
+  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+
+  auto const isConstrained = is_constrained_inst(state, inst);
+  VregSet reloads; // Vregs we'll have to reload
+  VregSet spills;  // Vregs we'll have to spill
+  VregSet copies;  // Vregs we'll have to emit a copyargs for
+
+  // First process the uses (including acrosses). If any use is currently
+  // spilled, make it non-spilled and record that it needs a reload.
+  uses.forEach(
+    [&] (Vreg r) {
+      auto s = spiller.forReg(r);
+      if (!s) return;
+      assertx(s->inReg[r] || s->inMem[r]);
+      if (s->inMem[r]) {
+        reloads.add(r);
+        s->inMem.remove(r);
+      }
+      s->inReg.add(r);
+    }
+  );
+  // Moving the uses into registers may require us to spill other Vregs (except
+  // the ones we just reloaded).
+  spills |= spiller.spill(b, instIdx, uses);
+  uses -= acrosses; // Make uses and acrosses disjoint
+
+  if (isConstrained) {
+    // If this instruction is constrained, we may need to move some of the uses
+    // into the acrosses set to propertly model register pressure. We also need
+    // to insert a copyargs for all non-spilled Vregs to split their live
+    // ranges.
+    fix_constrained_inst_uses(state, defs, uses, acrosses, b, instIdx);
+    copies = spiller.gp.inReg | spiller.simd.inReg;
+  }
+
+  // If any of the uses aren't used after this, drop them from being tracked to
+  // make room for the defs. Since we removed the acrosses from the uses, we'll
+  // keep those alive.
+  spiller.dropDead(uses, b, instIdx);
+
+  // Process the defs. The defs always start in registers because the
+  // instruction has to write them there.
+  defs.forEach(
+    [&] (Vreg r) {
+      auto s = spiller.forReg(r);
+      if (!s) return;
+      // We shouldn't already be tracking this
+      assertx(!s->inReg[r] && !s->inMem[r]);
+      s->inReg.add(r);
+    }
+  );
+  // Adding the defs may have caused us to need to spill even more (but not any
+  // uses or defs).
+  spills |= spiller.spill(b, instIdx, defs | acrosses | uses);
+  // Some of the defs or acrosses may not be live (if the defs are never used),
+  // so remove them.
+  spiller.dropDead(defs | acrosses, b, instIdx);
+
+  // If we ended up spilling a Vreg, we don't need a copyarg for it. If we
+  // reloaded one, we need to copy that as well.
+  if (isConstrained) {
+    copies -= spills;
+    copies |= reloads;
+  }
+
+  // Make sure we can spill.
+  always_assert_flog(
+    IMPLIES(!state.abi.canSpill, spills.none() && reloads.none()),
+    "Trying to spill/reload for {} in {} when not allowed "
+    "(Spills: {}, Reloads: {})",
+    show(state.unit, inst),
+    b,
+    show(spills),
+    show(reloads)
+  );
+
+  // Bail out if we don't need to emit anything (hopefully the common case).
+  if (spills.none() && reloads.none() && copies.none()) return 0;
+  // We should either spill or reload a Vreg, not both.
+  assertx((spills & reloads).none());
+
+  // We always spill/reload/copy a Vreg to itself, so they'll need to be
+  // re-SSAized.
+  results.ssaize |= spills;
+  results.ssaize |= reloads;
+  results.ssaize |= copies;
+
+  size_t added = 0;
+  vmodify(
+    unit, b, instIdx,
+    [&] (Vout& v) {
+      // First emit the spills (which decreases register pressure).
+      spills.forEach(
+        [&] (Vreg r) { v << spill{r, r}; ++added; }
+      );
+
+      // Now emit the reloads (which increases register pressure), possibily
+      // with rematerialization.
+      reloads.forEach(
+        [&] (Vreg r) {
+          added += reload_with_remat(
+            v,
+            state,
+            spiller.gp.inReg,
+            spiller.simd.inReg,
+            r,
+            r
+          );
+        }
+      );
+
+      // Always emit the copy/copyargs at the end. It needs to immediately
+      // precede the constrained instruction. We always emit one instruction for
+      // this.
+      if (copies.any()) {
+        VregList operands;
+        copies.forEach([&] (Vreg r) { operands.emplace_back(r); });
+        if (operands.size() == 1) {
+          v << copy{operands[0], operands[0]};
+        } else {
+          v << copyargs{v.makeTuple(operands), v.makeTuple(operands)};
+        }
+        ++added;
+      }
+
+      return 0;
+    }
+  );
+
+  return added;
+}
+
+// Run the spiller logic over the entire unit. Returning the spiller state at
+// block boundaries (and Vregs which need SSA conversion). Each block is allowed
+// to determine which of its in/out Vregs should be spilled or not,
+// independently of all others. We'll later pass over all the state and insert
+// spills/reloads as needed to make each block compatible.
+SpillerResults process_spills(State& state) {
+  auto& unit = state.unit;
+
+  SpillerResults results{state};
+  SCOPE_ASSERT_DETAIL("Spiller State") { return results.toString(state); };
+
+  for (auto const b : state.rpo) {
+    // Initialize the state for this block and get the initial (in) state.
+    auto instIdx = setup_initial_spiller_state(state, b, results);
+    auto spiller = *results.perBlock[b].in;
+
+    // Iterate over each instruction and run the logic for each one. We need to
+    // use indices because we'll modify the unit as part of processing it (which
+    // means we need to shift the indices).
+    for (; instIdx < unit.blocks[b].code.size(); ++instIdx) {
+      assertx(spiller.checkInvariants(b, instIdx));
+
+      auto const& inst = unit.blocks[b].code[instIdx];
+      switch (inst.op) {
+        case Vinstr::phijmp:
+          process_phijmp_spills(
+            state, b, instIdx, inst.phijmp_, spiller, results
+          );
+          break;
+        case Vinstr::copyargs:
+          assertx(!is_constrained_inst(state, inst));
+          assertx(acrossesSet(unit, inst).none());
+          instIdx += process_copy_spills(
+            state,
+            unit.tuples[inst.copyargs_.s],
+            unit.tuples[inst.copyargs_.d],
+            b,
+            instIdx,
+            spiller,
+            results
+          );
+          break;
+        case Vinstr::copy: {
+          assertx(!is_constrained_inst(state, inst));
+          assertx(acrossesSet(unit, inst).none());
+
+          // Copies which have physical sources or dests are treated like normal
+          // instructions.
+          if (inst.copy_.s.isPhys() || inst.copy_.d.isPhys()) {
+            instIdx += process_inst_spills(
+              state,
+              b,
+              instIdx,
+              inst,
+              spiller,
+              results
+            );
+            break;
+          }
+
+          // process_copy_spills takes its uses and defs as a VregList, so use a
+          // temporary one to satisfy the interface.
+          VregList uses{inst.copy_.s};
+          instIdx += process_copy_spills(
+            state,
+            uses,
+            VregList{inst.copy_.d},
+            b,
+            instIdx,
+            spiller,
+            results
+          );
+          unit.blocks[b].code[instIdx].copy_.s = uses[0];
+          break;
+        }
+        case Vinstr::phidef:
+          // Should be handled as part of setting up the initial block state.
+          always_assert(false);
+          break;
+        default:
+          instIdx += process_inst_spills(
+            state,
+            b,
+            instIdx,
+            inst,
+            spiller,
+            results
+          );
+          break;
+      }
+    }
+
+    assertx(spiller.checkInvariants(b, unit.blocks[b].code.size()));
+    results.perBlock[b].out = std::move(spiller);
+  }
+
+  return results;
+}
+
+// Mismatches between a block and its successors. This indicates what should be
+// inserted in the block to resolve the mismatch.
+struct SpillMismatchState {
+  VregSet spills;  // Vregs to spill
+  VregSet reloads; // Vregs to reload
+
+  // Map a spilled Vreg to the spill destination. If not present, the Vreg is
+  // spilled to itself.
+  jit::fast_map<Vreg, Vreg> spillDests;
+  // Map a reloaded Vreg to the reload destination. If not present, the Vreg is
+  // reloaded to itself.
+  jit::fast_map<Vreg, Vreg> reloadDests;
+  // ssaalias instructions to insert
+  jit::fast_map<Vreg, Vreg> aliases;
+};
+
+// Calculate the spill/reload mismatches between a block and its successors.
+SpillMismatchState find_spill_mismatches(State& state,
+                                         Vlabel b,
+                                         SpillerResults& results) {
+  auto& unit = state.unit;
+
+  auto& pred = results.perBlock[b].out;
+  auto& predPhi = results.perBlock[b].outPhi;
+  // We should have out state for everything at this point (but only predPhi if
+  // this has a phijmp).
+  assertx(pred);
+
+  assertx(IMPLIES(!results.perBlock[b].in, b == unit.entry));
+  assertx(pred->checkInvariants(b, unit.blocks[b].code.size()));
+
+  SpillMismatchState mismatch;
+  boost::dynamic_bitset<> phiSpills;
+  boost::dynamic_bitset<> phiReloads;
+
+  // Iterate over the successors and calculate where the states disagree.
+  for (auto const succLabel : succs(unit.blocks[b])) {
+    auto const& succ = results.perBlock[succLabel].in;
+    auto const& succPhi = results.perBlock[succLabel].inPhi;
+    assertx(succ);
+    assertx((bool)predPhi == (bool)succPhi);
+
+    // If the Vreg is in a register in the predecessor but spilled in the
+    // successor, we need to spill it. Likewise, if the Vreg is spilled in the
+    // predecessor but in a register in the successor, we need to reload it.
+    auto const add = [&] (const SpillerState::PerClass& s1,
+                          const SpillerState::PerClass& s2) {
+      mismatch.spills |= (s1.inReg & s2.inMem);
+      mismatch.reloads |= (s1.inMem & s2.inReg);
+    };
+    add(pred->gp, succ->gp);
+    add(pred->simd, succ->simd);
+
+    if (!predPhi) continue;
+
+    // Do the same thing, but for phi input/outputs.
+    assertx(predPhi->size() == succPhi->size());
+    if (phiSpills.empty()) {
+      assertx(phiReloads.empty());
+      phiSpills.resize(predPhi->size());
+      phiReloads.resize(predPhi->size());
+    } else {
+      assertx(phiSpills.size() == predPhi->size());
+      assertx(phiReloads.size() == predPhi->size());
+    }
+
+    auto const diff = *predPhi ^ *succPhi;
+    phiSpills |= (*predPhi & diff);
+    phiReloads |= (*succPhi & diff);
+  }
+
+  assertx((mismatch.spills & mismatch.reloads).none());
+  assertx(phiSpills.size() == phiReloads.size());
+  assertx((phiSpills & phiReloads).none());
+
+  // Since we split critical edges, the only way we can get mismatches is if the
+  // block only has one successor and that successor has multiple
+  // predecessors. This is good, because otherwise resolving the mismatches
+  // would be difficult. (IE, some successors might want it spilled and some
+  // might want it in physical registers).
+  assertx(
+    IMPLIES(mismatch.spills.any() || mismatch.reloads.any() ||
+            phiSpills.any() || phiReloads.any(),
+            succs(unit.blocks[b]).size() == 1 &&
+            state.preds[succs(unit.blocks[b])[0]].size() > 1)
+  );
+
+  // Update the block's out state to match the changes we need to make.
+  auto const update = [&] (SpillerState::PerClass& s) {
+    s.inReg |= (mismatch.reloads & s.inMem);
+    s.inMem |= (mismatch.spills & s.inReg);
+    s.inReg -= mismatch.spills;
+    s.inMem -= mismatch.reloads;
+  };
+  update(pred->gp);
+  update(pred->simd);
+
+  // If there's no phi, we're done.
+  if (!predPhi) {
+    assertx(phiReloads.empty());
+    assertx(phiSpills.empty());
+    return mismatch;
+  }
+
+  // Modify this block's phi state to match the successors.
+  assertx(phiSpills.size() == predPhi->size());
+  *predPhi |= phiReloads;
+  *predPhi -= phiSpills;
+
+  assertx(unit.blocks[b].code.back().op == Vinstr::phijmp);
+  auto const& phijmp = unit.blocks[b].code.back().phijmp_;
+  auto& uses = unit.tuples[phijmp.uses];
+
+  // If there's a phi, we might need to add additional instructions. The reason
+  // is because we might need to spill or reload Vregs to match the successor,
+  // but the phijmp might take one of those Vregs as an input. We cannot defer
+  // the spill or reloads after the phijmp because that's always the end of the
+  // block. So, we might need to insert additional fixup instructions to make
+  // sure the inputs of the phijmp matches the spilled/non-spilled state of the
+  // phidef in the successor. Just like copies, phijmp/phidefs can handle Vregs
+  // with the same spilled/non-spilled state on each side, but not a mix.
+  VregSet newSpills;
+  VregSet newReloads;
+  for (size_t i = 0; i < uses.size(); ++i) {
+    auto& r = uses[i];
+    if (!pred->forReg(r)) {
+      assertx(!phiSpills[i] && !phiReloads[i]);
+      continue;
+    }
+
+    if (phiSpills[i])  newSpills.add(r);
+    if (phiReloads[i]) newReloads.add(r);
+
+    if (mismatch.spills[r] && !phiSpills[i]) {
+      /*
+       * A Vreg that's an input to the phijmp needs to be spilled, but the
+       * successor expects it to be in a register when output by the
+       * phidef. We'll make a temporary Vreg and alias it to the original input
+       * (before the spill). The phijmp will then take the temporary as input
+       * instead.
+       *
+       * Before:
+       *   phijmp src
+       *
+       * After:
+       *   ssaalias src -> src2
+       *   spill src -> src
+       *   phijmp src2
+       *
+       * After SSA:
+       *   spill src -> src3
+       *   phijmp src
+       */
+
+      // Re-use an existing alias Vreg if one exists.
+      auto const it = mismatch.aliases.find(r);
+      if (it != mismatch.aliases.end()) {
+        r = it->second;
+      } else {
+        auto const r2 = unit.makeReg();
+        mismatch.aliases.emplace(r, r2);
+        r = r2;
+      }
+    } else if (!mismatch.spills[r] && phiSpills[i]) {
+      /*
+       * A Vreg that's an input to the phijmp doesn't need to be spilled, but
+       * the successor expects it to be spilled when output by the phidef. This
+       * case is easy to handle. Just spill to a temporary Vreg, and then have
+       * the phijmp use that temporary as an input instead.
+       *
+       * Before:
+       *  phijmp src
+       *
+       * After:
+       *  spill src -> src2
+       *  phijmp src2
+       *
+       * After SSA:
+       *  spill src -> src2
+       *  phijmp src2
+       */
+      auto const it = mismatch.spillDests.find(r);
+      if (it != mismatch.spillDests.end()) {
+        r = it->second;
+      } else {
+        auto const r2 = unit.makeReg();
+        mismatch.spillDests.emplace(r, r2);
+        r = r2;
+      }
+    }
+
+    if (mismatch.reloads[r] && !phiReloads[i]) {
+      /*
+       * A Vreg that's an input to the phijmp needs to be reloaded, but the
+       * successor expects it to be spilled when output by the phidef.  We'll
+       * make a temporary Vreg and alias it to the original input (before the
+       * reload). The phijmp will then take the temporary as input instead.
+       *
+       * Before
+       *   phijmp src
+       *
+       * After:
+       *  ssaalias src -> src2
+       *  reload src -> src
+       *  phijmp src2
+       *
+       * After SSA:
+       *   reload src -> src3
+       *   phijmp src
+       */
+
+      // Re-use an existing alias Vreg if one exists.
+      auto const it = mismatch.aliases.find(r);
+      if (it != mismatch.aliases.end()) {
+        r = it->second;
+      } else {
+        auto const r2 = unit.makeReg();
+        mismatch.aliases.emplace(r, r2);
+        r = r2;
+      }
+    } else if (!mismatch.reloads[r] && phiReloads[i]) {
+      /*
+       * A Vreg that's an input to the phijmp doesn't need to be reloaded, but
+       * the successor expects it to be in a register when output by the
+       * phidef. This case is easy to handle. Just reload to a temporary Vreg,
+       * and then have the phijmp use that temporary as an input instead.
+       *
+       * Before:
+       *  phijmp src
+       *
+       * After:
+       *  reload src -> src2
+       *  phijmp src2
+       *
+       * After SSA:
+       *  reload src -> src2
+       *  phijmp src2
+       */
+      auto const it = mismatch.reloadDests.find(r);
+      if (it != mismatch.reloadDests.end()) {
+        r = it->second;
+      } else {
+        auto const r2 = unit.makeReg();
+        mismatch.reloadDests.emplace(r, r2);
+        r = r2;
+      }
+    }
+  }
+
+  mismatch.spills |= newSpills;
+  mismatch.reloads |= newReloads;
+
+  return mismatch;
+}
+
+// Find all mismatches between blocks in the unit, and insert spill/reloads as
+// necessary to resolve them.
+void fixup_spill_mismatches(State& state, SpillerResults& results) {
+  auto& unit = state.unit;
+
+  // For each block, find the mismatches and then materialize them.
+  for (auto const b : state.rpo) {
+    auto const mismatch = find_spill_mismatches(state, b, results);
+
+    always_assert(
+      IMPLIES(
+        !state.abi.canSpill, mismatch.spills.none() && mismatch.reloads.none()
+      )
+    );
+
+    if (mismatch.spills.any() || mismatch.reloads.any()) {
+      results.ssaize |= mismatch.spills;
+      results.ssaize |= mismatch.reloads;
+
+      // Any new Vreg being used as a destination of a spill/reload/ssaalias
+      // should have the same RegInfo as its source.
+      auto const processMap = [&] (const jit::fast_map<Vreg, Vreg>& m) {
+        for (auto const& p : m) {
+          results.ssaize.add(p.first);
+          results.ssaize.add(p.second);
+          reg_info_insert(state, p.second, reg_info(state, p.first));
+        }
+      };
+      processMap(mismatch.spillDests);
+      processMap(mismatch.reloadDests);
+      processMap(mismatch.aliases);
+
+      // Materialize the actual instructions. The order of these is important.
+      vmodify(
+        unit, b, unit.blocks[b].code.size() - 1,
+        [&] (Vout& v) {
+          // First the ssaaliases, which must come before anything else.
+          for (auto const& p : mismatch.aliases) {
+            v << ssaalias{p.first, p.second};
+          }
+
+          // Then the spills, which reduce register pressure.
+          mismatch.spills.forEach(
+            [&] (Vreg r) {
+              auto const it = mismatch.spillDests.find(r);
+              auto const r2 =
+                (it == mismatch.spillDests.end()) ? r : it->second;
+              v << spill{r, r2};
+            }
+          );
+
+          // Then the reloads, which increases register pressure.
+          mismatch.reloads.forEach(
+            [&] (Vreg r) {
+              auto const it = mismatch.reloadDests.find(r);
+              auto const r2 =
+                (it == mismatch.reloadDests.end()) ? r : it->second;
+              auto const& pred = results.perBlock[b].out;
+              reload_with_remat(
+                v,
+                state,
+                pred->gp.inReg,
+                pred->simd.inReg,
+                r,
+                r2
+              );
+            }
+          );
+
+          return 0;
+        }
+      );
+    }
+
+    if (debug) {
+      always_assert(
+        results.perBlock[b].out->checkInvariants(
+          b, unit.blocks[b].code.size()
+        )
+      );
+      for (auto const s : succs(unit.blocks[b])) {
+        always_assert(results.perBlock[b].outPhi == results.perBlock[s].inPhi);
+      }
+    }
+  }
+}
+
+// Now that all spills and reloads have been inserted, we need to update the
+// RegClass of spilled Vregs to indicate they represent spills. A Vreg
+// represents a spill if its def is a spill instruction. The "spillness" is also
+// propagated across copies and phis (if the source is a spill slot, the dest
+// must be as well). Since this runs after SSA restoration, the mappings is used
+// to map Vregs back to their original Vregs when necessary.
+void set_spill_reg_classes(State& state,
+                           const SpillerResults& results,
+                           const jit::fast_map<Vreg, Vreg>& mappings) {
+  auto const& unit = state.unit;
+
+  // Mark that the given Vreg is a spill of the appropriate width.
+  auto const spillize = [&] (Vreg r) {
+    assertx(!r.isPhys());
+    auto& info = reg_info(state, r);
+    auto const cls = info.regClass;
+    if (is_spill(cls)) return;
+    assertx(cls != RegClass::SF);
+    if (cls == RegClass::SIMDWide) {
+      info.regClass = RegClass::SpillWide;
+    } else {
+      info.regClass = RegClass::Spill;
+    }
+  };
+
+  for (auto const b : state.rpo) {
+    auto const& in = results.perBlock[b].in;
+    auto const& phi = results.perBlock[b].inPhi;
+    assertx(in);
+
+    for (auto const& inst : unit.blocks[b].code) {
+      switch (inst.op) {
+        case Vinstr::phidef: {
+          // Propagate "spillness" across the phi. If the block's phi state
+          // indicates that the phi output is spilled, the corresponding dest
+          // Vreg must be spillized.
+
+          // This is a bit tricky because the SSA restoration pass that we run
+          // before this may have created new phis, or expanded existing
+          // ones. Therefore we cannot trust the phi state blindly. If the index
+          // exists in the phi state, we can use it. Otherwise we need to map
+          // the Vreg back to its pre-SSAize value and use the block state.
+          auto const& defs = unit.tuples[inst.phidef_.defs];
+          for (size_t i = 0; i < defs.size(); ++i) {
+            auto const r = defs[i];
+
+            auto const s = in->forReg(r);
+            if (!s) continue;
+            if (phi && i < phi->size()) {
+              // This phi and index existed before the SSA pass, so we can just
+              // use the phi state.
+              if (!(*phi)[i]) spillize(r);
+              continue;
+            }
+
+            // Otherwise this wasn't part of a phi originally but was turned
+            // into one. Consult the mapping table to learn what the Vreg was
+            // originally and use the block state to see if it was spilled.
+            auto const it = mappings.find(r);
+            auto const oldR = (it != mappings.end()) ? it->second : r;
+            if (s->inMem[oldR]) {
+              spillize(r);
+            } else {
+              assertx(s->inReg[oldR]);
+            }
+          }
+          break;
+        }
+        case Vinstr::spill:
+          // The dest of a spill instruction is a spill.
+          spillize(inst.spill_.d);
+          break;
+        case Vinstr::copy: {
+          // Propagate "spillness" across copy
+          auto const s = inst.copy_.s;
+          auto const d = inst.copy_.d;
+          if (s.isPhys()) break;
+          auto const cls = reg_info(state, s).regClass;
+          if (is_spill(cls)) spillize(d);
+          break;
+        }
+        case Vinstr::copyargs: {
+          // Propagate "spillness" across copy
+          auto const& uses = unit.tuples[inst.copyargs_.s];
+          auto const& defs = unit.tuples[inst.copyargs_.d];
+          assertx(uses.size() == defs.size());
+          for (size_t i = 0; i < uses.size(); ++i) {
+            assertx(uses[i].isPhys() == defs[i].isPhys());
+            if (uses[i].isPhys()) continue;
+            auto const cls = reg_info(state, uses[i]).regClass;
+            if (is_spill(cls)) spillize(defs[i]);
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
+  // Everything after this is sanity checking.
+  if (!debug) return;
+
+  // Do a pass over the unit making sure that the RegClasses of everything is
+  // sane.
+  auto const appropriate = [] (RegClass spill, RegClass reg) {
+    switch (reg) {
+      case RegClass::GP:
+      case RegClass::SIMD:
+      case RegClass::AnyNarrow:
+        return spill == RegClass::Spill;
+      case RegClass::SIMDWide:
+        return spill == RegClass::SpillWide;
+      case RegClass::Any:
+      case RegClass::SF:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+        break;
+    }
+    always_assert(false);
+  };
+
+  for (auto const b : state.rpo) {
+    for (auto const& inst : unit.blocks[b].code) {
+      switch (inst.op) {
+        case Vinstr::spill: {
+          // The dest of a spill should be a spill slot, and the source should
+          // not be.
+          auto const dCls = reg_info(state, inst.spill_.d).regClass;
+          auto const sCls = reg_info(state, inst.spill_.s).regClass;
+          always_assert(is_spill(dCls));
+          always_assert(!is_spill(sCls));
+          always_assert(appropriate(dCls, sCls));
+          break;
+        }
+        case Vinstr::reload: {
+          // The source of a reload should be a spill slot, and the dest should
+          // not be.
+          auto const dCls = reg_info(state, inst.reload_.d).regClass;
+          auto const sCls = reg_info(state, inst.reload_.s).regClass;
+          always_assert(!is_spill(dCls));
+          always_assert(is_spill(sCls));
+          always_assert(appropriate(sCls, dCls));
+          break;
+        }
+        case Vinstr::phidef: {
+          // The source/dest pairs of a phijmp/phidef should always be the same
+          // RegClass. There shouldn't be any copying between physical registers
+          // and Vregs.
+          auto const& defs = unit.tuples[inst.phidef_.defs];
+          for (auto const& pred : state.preds[b]) {
+            always_assert(unit.blocks[pred].code.back().op == Vinstr::phijmp);
+            auto const& uses = unit.tuples[
+              unit.blocks[pred].code.back().phijmp_.uses
+            ];
+            always_assert(defs.size() == uses.size());
+            for (size_t i = 0; i < defs.size(); ++i) {
+              always_assert(defs[i].isPhys() == uses[i].isPhys());
+              if (defs[i].isPhys()) continue;
+              auto const dCls = reg_info(state, defs[i]).regClass;
+              auto const uCls = reg_info(state, uses[i]).regClass;
+              always_assert(dCls == uCls);
+            }
+          }
+          break;
+        }
+        case Vinstr::phijmp:
+          // Handled as part of phidef
+          break;
+        case Vinstr::copy: {
+          // The source and dest of a copy should both be spill slots or both
+          // should not be, never a mix. The widths of the spill slots should be
+          // the same.
+          auto const s = inst.copy_.s;
+          auto const d = inst.copy_.d;
+          if (s.isPhys()) {
+            always_assert(
+              d.isPhys() || !is_spill(reg_info(state, d).regClass)
+            );
+            break;
+          }
+          if (d.isPhys()) {
+            always_assert(!is_spill(reg_info(state, s).regClass));
+            break;
+          }
+          auto const dCls = reg_info(state, d).regClass;
+          auto const uCls = reg_info(state, s).regClass;
+          always_assert(is_spill(dCls) == is_spill(uCls));
+          always_assert(IMPLIES(is_spill(dCls), dCls == uCls));
+          break;
+        }
+        case Vinstr::copyargs: {
+          // Same as Vinstr::copy, but with a tuple
+          auto const& uses = unit.tuples[inst.copyargs_.s];
+          auto const& defs = unit.tuples[inst.copyargs_.d];
+          always_assert(uses.size() == defs.size());
+          for (size_t i = 0; i < uses.size(); ++i) {
+            always_assert(uses[i].isPhys() == defs[i].isPhys());
+            if (uses[i].isPhys()) continue;
+            auto const dCls = reg_info(state, defs[i]).regClass;
+            auto const uCls = reg_info(state, uses[i]).regClass;
+            always_assert(is_spill(dCls) == is_spill(uCls));
+            always_assert(IMPLIES(is_spill(dCls), dCls == uCls));
+          }
+          break;
+        }
+        default:
+          // For most instructions, both the sources and dests should not be
+          // spill slots.
+          visitUses(
+            unit, inst,
+            [&] (Vreg r) {
+              if (r.isPhys()) return;
+              always_assert(!is_spill(reg_info(state, r).regClass));
+            }
+          );
+          visitDefs(
+            unit, inst,
+            [&] (Vreg r) {
+              if (r.isPhys()) return;
+              always_assert(!is_spill(reg_info(state, r).regClass));
+            }
+          );
+          break;
+      }
+    }
+  }
+}
+
 void insert_spills(State& state) {
   find_materialization_candidates(state);
   calculate_liveness(state);
   calculate_loop_info(state);
   calculate_spill_weights(state);
+
+  auto results = process_spills(state);
+  fixup_spill_mismatches(state, results);
+
+  auto const mappings = restoreSSA(state.unit, results.ssaize, state.rpo);
+  for (auto const& map : mappings) {
+    reg_info_insert(
+      state,
+      map.first,
+      reg_info(state, map.second)
+    );
+  }
+
+  set_spill_reg_classes(state, results, mappings);
+
+  // Rematerialization may have created dead code, so remove it now.
+  removeDeadCode(state.unit);
+
+  assertx(check(state.unit));
 }
 
 //////////////////////////////////////////////////////////////////////

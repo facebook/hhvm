@@ -97,6 +97,8 @@ struct Vunit;
   O(pseudodiv, Inone, U(uses) U(uses64) UA(across), D(defs) D(sf))\
   O(pseudocallphp, Inone, U(uses) U(uses64) UA(across), D(defs))\
   O(pseudoshift, Inone, UH(s,d) U(uses) UA(across), DH(d,s) D(defs) D(sf))\
+  O(spill, Inone, U(s), D(d))\
+  O(reload, Inone, U(s), D(d))\
   O(ssaalias, Inone, U(s), D(d))\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -561,6 +563,17 @@ struct pseudojcc { Vtuple defs; Vtuple uses; Vtuple across; VregSF sf; };
 struct pseudodiv { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; VregSF sf; };
 struct pseudocallphp { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; Vlabel targets[2]; };
 struct pseudoshift { Vreg64 d; Vreg64 s; Vtuple defs; Vtuple uses; Vtuple across; VregSF sf; };
+
+/*
+ * Pseudo-instructions used to represent where Vregs are moved to/from
+ * spill slots during register allocation. One of the Vregs represents
+ * a Vreg in memory, and the other represents a Vreg in a
+ * register. This lets spilled Vregs be manipulated like any
+ * other. These will not exist outside of register allocation as they
+ * are lowered into actual load/stores to/from memory.
+ */
+struct spill { Vreg s, d; };
+struct reload { Vreg s, d; };
 
 /*
  * Pseudo-instruction used to indicate to restoreSSA() that d is an

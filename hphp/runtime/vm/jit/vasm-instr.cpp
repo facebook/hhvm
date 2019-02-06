@@ -133,6 +133,8 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::pseudodiv:
     case Vinstr::pseudocallphp:
     case Vinstr::pseudoshift:
+    case Vinstr::spill:
+    case Vinstr::reload:
     case Vinstr::ssaalias:
     // native function abi
     case Vinstr::vcall:

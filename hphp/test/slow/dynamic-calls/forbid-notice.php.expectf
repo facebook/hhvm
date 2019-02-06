@@ -1,331 +1,195 @@
 =============== positive tests =====================
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 216
+Notice: 'func' called dynamically in %s on line 171
 
-Notice: 'async_func' called dynamically in %s/forbid-notice.php on line 217
+Notice: 'async_func' called dynamically in %s on line 172
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 218
+Notice: 'A::func' called dynamically in %s on line 173
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 219
+Notice: 'A::static_func' called dynamically in %s on line 174
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 220
+Notice: 'A::async_func' called dynamically in %s on line 175
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 221
+Notice: 'A::static_async_func' called dynamically in %s on line 176
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 222
+Notice: 'C::__callStatic' called dynamically in %s on line 177
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 223
+Notice: 'A::func' called dynamically in %s on line 178
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 224
+Notice: 'A::static_func' called dynamically in %s on line 179
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 225
+Notice: 'A::async_func' called dynamically in %s on line 180
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 226
+Notice: 'A::static_async_func' called dynamically in %s on line 181
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 227
+Notice: 'C::__callStatic' called dynamically in %s on line 182
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 228
+Notice: 'A::func' called dynamically in %s on line 183
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 229
+Notice: 'A::static_func' called dynamically in %s on line 184
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 230
+Notice: 'A::async_func' called dynamically in %s on line 185
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 231
+Notice: 'A::static_async_func' called dynamically in %s on line 186
 
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 232
+Notice: 'C::__call' called dynamically in %s on line 187
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 233
+Notice: 'A::func' called dynamically in %s on line 188
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 234
+Notice: 'A::static_func' called dynamically in %s on line 189
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 235
+Notice: 'A::async_func' called dynamically in %s on line 190
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 236
+Notice: 'A::static_async_func' called dynamically in %s on line 191
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 237
+Notice: 'C::__callStatic' called dynamically in %s on line 192
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 238
+Notice: 'A::func' called dynamically in %s on line 193
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 239
+Notice: 'A::static_func' called dynamically in %s on line 194
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 240
+Notice: 'A::async_func' called dynamically in %s on line 195
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 241
+Notice: 'A::static_async_func' called dynamically in %s on line 196
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 242
+Notice: 'C::__callStatic' called dynamically in %s on line 197
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 111
+Notice: 'A::func' called dynamically in %s on line 102
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 112
+Notice: 'A::func' called dynamically in %s on line 103
 
-Notice: 'B::func' called dynamically in %s/forbid-notice.php on line 113
+Notice: 'B::func' called dynamically in %s on line 104
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 116
+Notice: 'A::static_func' called dynamically in %s on line 107
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 117
+Notice: 'A::static_func' called dynamically in %s on line 108
 
-Notice: 'B::static_func' called dynamically in %s/forbid-notice.php on line 118
+Notice: 'B::static_func' called dynamically in %s on line 109
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 121
+Notice: 'A::async_func' called dynamically in %s on line 112
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 122
+Notice: 'A::async_func' called dynamically in %s on line 113
 
-Notice: 'B::async_func' called dynamically in %s/forbid-notice.php on line 123
+Notice: 'B::async_func' called dynamically in %s on line 114
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 126
+Notice: 'A::static_async_func' called dynamically in %s on line 117
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 127
+Notice: 'A::static_async_func' called dynamically in %s on line 118
 
-Notice: 'B::static_async_func' called dynamically in %s/forbid-notice.php on line 128
+Notice: 'B::static_async_func' called dynamically in %s on line 119
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 24
+Notice: 'C::__callStatic' called dynamically in %s on line 24
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 25
+Notice: 'C::__callStatic' called dynamically in %s on line 25
 
-Notice: 'D::__callStatic' called dynamically in %s/forbid-notice.php on line 26
+Notice: 'D::__callStatic' called dynamically in %s on line 26
 
-Notice: 'A' constructed dynamically in %s/forbid-notice.php on line 247
+Notice: 'A' constructed dynamically in %s on line 202
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 248
+Notice: 'A::func' called dynamically in %s on line 203
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 249
+Notice: 'A::static_func' called dynamically in %s on line 204
 
-Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 250
+Notice: 'A::async_func' called dynamically in %s on line 205
 
-Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 251
+Notice: 'A::static_async_func' called dynamically in %s on line 206
 
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 252
+Notice: 'C::__call' called dynamically in %s on line 207
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 254
+Notice: 'func' called dynamically in %s on line 209
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 255
+Notice: 'A::func' called dynamically in %s on line 210
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 256
+Notice: 'A::static_func' called dynamically in %s on line 211
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 257
+Notice: 'C::__callStatic' called dynamically in %s on line 212
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 258
+Notice: 'A::func' called dynamically in %s on line 213
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 259
+Notice: 'A::static_func' called dynamically in %s on line 214
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 260
+Notice: 'C::__callStatic' called dynamically in %s on line 215
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 261
+Notice: 'A::func' called dynamically in %s on line 216
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 262
+Notice: 'A::static_func' called dynamically in %s on line 217
 
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 263
+Notice: 'C::__call' called dynamically in %s on line 218
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 266
+Notice: 'func' called dynamically in %s on line 221
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 267
+Notice: 'A::func' called dynamically in %s on line 222
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 268
+Notice: 'A::static_func' called dynamically in %s on line 223
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 269
+Notice: 'C::__callStatic' called dynamically in %s on line 224
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 270
+Notice: 'A::func' called dynamically in %s on line 225
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 271
+Notice: 'A::static_func' called dynamically in %s on line 226
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 272
+Notice: 'C::__callStatic' called dynamically in %s on line 227
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 273
+Notice: 'A::func' called dynamically in %s on line 228
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 274
+Notice: 'A::static_func' called dynamically in %s on line 229
 
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 275
+Notice: 'C::__call' called dynamically in %s on line 230
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 277
+Notice: 'func' called dynamically in %s on line 232
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 278
+Notice: 'A::func' called dynamically in %s on line 233
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 279
+Notice: 'A::static_func' called dynamically in %s on line 234
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 280
+Notice: 'C::__callStatic' called dynamically in %s on line 235
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 281
+Notice: 'A::func' called dynamically in %s on line 236
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 282
+Notice: 'A::static_func' called dynamically in %s on line 237
 
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 283
+Notice: 'C::__callStatic' called dynamically in %s on line 238
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 284
+Notice: 'A::func' called dynamically in %s on line 239
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 285
+Notice: 'A::static_func' called dynamically in %s on line 240
 
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 286
+Notice: 'C::__call' called dynamically in %s on line 241
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 288
+Notice: 'func' called dynamically in %s on line 243
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 289
+Notice: 'A::func' called dynamically in %s on line 244
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 290
+Notice: 'A::static_func' called dynamically in %s on line 245
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 291
+Notice: 'A::func' called dynamically in %s on line 246
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 292
+Notice: 'A::static_func' called dynamically in %s on line 247
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 293
+Notice: 'A::func' called dynamically in %s on line 248
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 294
+Notice: 'A::static_func' called dynamically in %s on line 249
 
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 132
+Notice: 'cmp' called dynamically in %s on line 251
 
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 132
+Notice: 'A::cmp' called dynamically in %s on line 252
 
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 133
+Notice: 'A::static_cmp' called dynamically in %s on line 253
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 133
+Notice: 'CCmp::__callStatic' called dynamically in %s on line 254
 
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 134
+Notice: 'A::cmp' called dynamically in %s on line 255
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 134
+Notice: 'A::static_cmp' called dynamically in %s on line 256
 
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 135
+Notice: 'CCmp::__callStatic' called dynamically in %s on line 257
 
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 135
+Notice: 'A::cmp' called dynamically in %s on line 258
 
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 136
+Notice: 'A::static_cmp' called dynamically in %s on line 259
 
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 136
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 137
-
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 137
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 138
-
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 138
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 140
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 140
-
-Notice: 'func' called dynamically in %s/forbid-notice.php on line 140
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 141
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 141
-
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 141
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 142
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 142
-
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 142
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 143
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 143
-
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 143
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 144
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 144
-
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 144
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 145
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 145
-
-Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 145
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 146
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 146
-
-Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 146
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 30
-
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 30
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 31
-
-Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 31
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 32
-
-Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 32
-
-Notice: 'cmp' called dynamically in %s/forbid-notice.php on line 299
-
-Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 300
-
-Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 301
-
-Notice: 'CCmp::__callStatic' called dynamically in %s/forbid-notice.php on line 302
-
-Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 303
-
-Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 304
-
-Notice: 'CCmp::__callStatic' called dynamically in %s/forbid-notice.php on line 305
-
-Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 306
-
-Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 307
-
-Notice: 'CCmp::__call' called dynamically in %s/forbid-notice.php on line 308
+Notice: 'CCmp::__call' called dynamically in %s on line 260
 =============== negative tests =====================
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 170
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 171
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 171
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 193
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 194
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 195
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 196
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 197
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 198
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 199
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 201
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 201
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 202
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 202
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 203
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 203
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 204
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 204
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 205
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 205
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 206
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 206
-
-Warning: forward_static_call_array() is deprecated and subject to removal from the Hack language in %s on line 207
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 207
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 56
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 57
-
-Warning: forward_static_call() is deprecated and subject to removal from the Hack language in %s on line 58
 =============== positive tests (exceptions) ========
 Exception: 'func' called dynamically
 Exception: 'async_func' called dynamically
@@ -412,23 +276,6 @@ Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call_array() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
-Exception: forward_static_call() is deprecated and subject to removal from the Hack language
 Exception: 'cmp' called dynamically
 Exception: 'A::cmp' called dynamically
 Exception: 'A::static_cmp' called dynamically

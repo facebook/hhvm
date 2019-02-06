@@ -26,12 +26,6 @@ class C extends D {
     try { parent::$x(); } catch (Exception $e) { wrap($e); }
   }
 
-  public static function positive_test2() {
-    try { forward_static_call('C::foobar'); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call(['C', 'foobar']); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
-  }
-
   public static function negative_test1() {
     self::foobar();
     static::foobar();
@@ -53,9 +47,6 @@ class E extends G {
     self::$x();
     static::$x();
     parent::$x();
-    forward_static_call('E::foobar');
-    forward_static_call(['E', 'foobar']);
-    forward_static_call([new E, 'foobar']);
   }
 }
 
@@ -128,24 +119,6 @@ class A extends B {
     try { await parent::$x(); } catch (Exception $e) { wrap($e); }
   }
 
-  public static function positive_test2() {
-    try { forward_static_call('func'); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call('A::func'); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call('A::static_func'); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call(['A', 'func']); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call([new A, 'func']); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call([new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-
-    try { forward_static_call_array('func', []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array('A::func', []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array('A::static_func', []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array(['A', 'func'], []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array(['A', 'static_func'], []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array([new A, 'func'], []); } catch (Exception $e) { wrap($e); }
-    try { forward_static_call_array([new A, 'static_func'], []); } catch (Exception $e) { wrap($e); }
-  }
-
   public static async function negative_test1() {
     self::func();
     static::func();
@@ -167,9 +140,6 @@ class A extends B {
     new static;
     new parent;
 
-    forward_static_call('count', []);
-    forward_static_call_array('count', [[]]);
-
     $x = 'func2';
     self::$x();
     static::$x();
@@ -190,21 +160,6 @@ class A extends B {
     await static::$x();
     await parent::$x();
 
-    forward_static_call('func2');
-    forward_static_call('A::func2');
-    forward_static_call('A::static_func2');
-    forward_static_call(['A', 'func2']);
-    forward_static_call(['A', 'static_func2']);
-    forward_static_call([new A, 'func2']);
-    forward_static_call([new A, 'static_func2']);
-
-    forward_static_call_array('func2', []);
-    forward_static_call_array('A::func2', []);
-    forward_static_call_array('A::static_func2', []);
-    forward_static_call_array(['A', 'func2'], []);
-    forward_static_call_array(['A', 'static_func2'], []);
-    forward_static_call_array([new A, 'func2'], []);
-    forward_static_call_array([new A, 'static_func2'], []);
   }
 }
 
@@ -292,9 +247,6 @@ async function positive_tests() {
   try { call_user_func_array(['A', 'static_func'], []); } catch (Exception $e) { wrap($e); }
   try { call_user_func_array([new A, 'func'], []); } catch (Exception $e) { wrap($e); }
   try { call_user_func_array([new A, 'static_func'], []); } catch (Exception $e) { wrap($e); }
-
-  A::positive_test2();
-  C::positive_test2();
 
   try { $x = 'cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
   try { $x = 'A::cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }

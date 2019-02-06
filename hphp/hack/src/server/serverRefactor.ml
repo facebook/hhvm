@@ -100,6 +100,136 @@ let get_pos_before_docblock_from_cst_node filename node =
   let start_offset = leading_start_offset node in
   SourceText.relative_pos filename source_text start_offset start_offset
 
+(* This function will capture a variadic parameter and give it a name if it is
+ * anonymous.  Example:
+ *
+ * public static function newName(int $x, ...): string {
+ *
+ * would become:
+ *
+ * public static function newName(int $x, mixed ...$args): string {
+ *
+ *)
+let fixup_anonymous_variadic (func_decl: Full_fidelity_positioned_syntax.t)
+  (has_anonymous_variadic: bool): string =
+
+  let open Full_fidelity_positioned_syntax in
+  if has_anonymous_variadic then
+    let r = Str.regexp "\\.\\.\\." in
+    Str.global_replace r "mixed ...$args" (text func_decl)
+  else
+    text func_decl
+
+(* Contains just enough information to properly wrap a function *)
+type wrapper_call_signature_info = {
+    params_text_list: string list;
+    returns_void: bool;
+    is_async: bool;
+    is_static: bool;
+    has_anonymous_variadic: bool;
+}
+
+(* Identify key information about a function so we can produce a deprecated wrapper *)
+let get_call_signature_for_wrap (func_decl: Full_fidelity_positioned_syntax.t)
+  : wrapper_call_signature_info =
+  let open Full_fidelity_positioned_syntax in
+  match syntax func_decl with
+  | FunctionDeclarationHeader {
+      function_parameter_list = params;
+      function_type = ret_type;
+      function_modifiers = modifiers; _
+    } ->
+      let params_text_list = match syntax params with
+        | SyntaxList params ->
+          let params_text_list = List.map params ~f:begin fun param ->
+            let param = match syntax param with
+              | ListItem { list_item; _ } -> list_item
+              | _ -> failwith "Expected ListItem"
+            in
+            match syntax param with
+            (* NOTE:
+               `ParameterDeclaration` includes regular params like "$x" and
+                _named_ variadic parameters like "...$nums". For the latter case,
+                calling `text parameter_name` will return the entire "...$nums"
+                string, including the ellipsis.
+
+              `VariadicParameter` addresses the unnamed variadic parameter
+                "...". In this case, we provide as a parameter a function call
+                that outputs only the variadic params (and dropping the
+                non-variadic ones).
+            *)
+              | ParameterDeclaration { parameter_name = name; _ } -> text name
+              | VariadicParameter _ -> "...$args"
+              | _ -> failwith "Expected some parameter type"
+          end in
+          params_text_list
+        | Missing -> []
+        | _ -> []
+      in
+      let has_anonymous_variadic = match syntax params with
+        | SyntaxList params ->
+          List.exists params ~f:begin fun param ->
+            let param = match syntax param with
+              | ListItem { list_item; _ } -> list_item
+              | _ -> failwith "Expected ListItem"
+            in
+            match syntax param with
+              | VariadicParameter _ -> true
+              | _ -> false
+          end
+        | Missing -> false
+        | _ -> false
+      in
+      let returns_void = match syntax ret_type with
+        | GenericTypeSpecifier {
+            generic_class_type = generic_type;
+            generic_argument_list = { syntax =
+              TypeArguments {
+                type_arguments_types = { syntax =
+                  SyntaxList [{ syntax =
+                    ListItem {
+                      list_item = { syntax =
+                        SimpleTypeSpecifier {
+                          simple_type_specifier = type_spec
+                        }; _
+                      }; _
+                    }; _
+                  }]; _
+                }; _
+              }; _
+            }; _
+          } -> (text generic_type) = "Awaitable" && (text type_spec) = "void"
+        | SimpleTypeSpecifier { simple_type_specifier = type_spec } ->
+          (text type_spec) = "void"
+        | _ -> false
+      in
+      let is_async, is_static = match syntax modifiers with
+        | SyntaxList modifiers ->
+          let is_async =
+            List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
+          in
+          let is_static =
+            List.exists modifiers ~f:(fun modifier -> (text modifier) = "static")
+          in
+          is_async, is_static
+        | _ -> false, false
+      in
+      {
+        params_text_list = params_text_list;
+        returns_void = returns_void;
+        is_async = is_async;
+        is_static = is_static;
+        has_anonymous_variadic = has_anonymous_variadic;
+      }
+  | _ -> {
+    params_text_list = [];
+    returns_void = false;
+    is_async = false;
+    is_static = false;
+    has_anonymous_variadic = false;
+  }
+
+(* Produce a "deprecated" version of the old function so that calls to it can be rerouted *)
 let get_deprecated_wrapper_patch ~filename ~definition new_name =
   let open SymbolDefinition in
   let open Full_fidelity_positioned_syntax in
@@ -122,99 +252,37 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
   let cst_node =
     ServerSymbolDefinition.get_definition_cst_node filename_server_type definition in
   cst_node >>= fun cst_node ->
-  let get_params_modifier_info func_decl = match syntax func_decl with
-    | FunctionDeclarationHeader {
-        function_parameter_list = params;
-        function_type = ret_type;
-        function_modifiers = modifiers; _
-      } ->
-        let params_text_list = match syntax params with
-          | SyntaxList params ->
-            let params_text_list = List.map params ~f:begin fun param ->
-              let param = match syntax param with
-                | ListItem { list_item; _ } -> list_item
-                | _ -> failwith "Expected ListItem"
-              in
-              match syntax param with
-              (* NOTE:
-                 `ParameterDeclaration` includes regular params like "$x" and
-                  _named_ variadic parameters like "...$nums". For the latter case,
-                  calling `text parameter_name` will return the entire "...$nums"
-                  string, including the ellipsis.
-
-                `VariadicParameter` addresses the unnamed variadic parameter
-                  "...". In this case, we provide as a parameter a function call
-                  that outputs only the variadic params (and dropping the
-                  non-variadic ones).
-              *)
-                | ParameterDeclaration { parameter_name = name; _ } -> text name
-                | VariadicParameter _ ->
-                  let num_of_nonvariadic_params = string_of_int ((List.length params) - 1) in
-                  "...Vec\\drop(func_get_args(), " ^ num_of_nonvariadic_params ^ ")"
-                | _ -> failwith "Expected some parameter type"
-            end in
-            Some params_text_list
-          | Missing -> Some []
-          | _ -> None
-        in
-        let returns_void = match syntax ret_type with
-          | GenericTypeSpecifier {
-              generic_class_type = generic_type;
-              generic_argument_list = { syntax =
-                TypeArguments {
-                  type_arguments_types = { syntax =
-                    SyntaxList [{ syntax =
-                      ListItem {
-                        list_item = { syntax =
-                          SimpleTypeSpecifier {
-                            simple_type_specifier = type_spec
-                          }; _
-                        }; _
-                      }; _
-                    }]; _
-                  }; _
-                }; _
-              }; _
-            } -> (text generic_type) = "Awaitable" && (text type_spec) = "void"
-          | SimpleTypeSpecifier { simple_type_specifier = type_spec } ->
-            (text type_spec) = "void"
-          | _ -> false
-        in
-        let is_async, is_static = match syntax modifiers with
-          | SyntaxList modifiers ->
-            let is_async =
-              List.exists modifiers ~f:(fun modifier -> (text modifier) = "async")
-            in
-            let is_static =
-              List.exists modifiers ~f:(fun modifier -> (text modifier) = "static")
-            in
-            is_async, is_static
-          | _ -> false, false
-        in
-        params_text_list, returns_void, is_async, is_static
-    | _ -> None, false, false, false
-  in
   begin match syntax cst_node with
   | MethodishDeclaration { methodish_function_decl_header = func_decl; _ } ->
-      let func_decl_text = text func_decl in
-      let params_text_list, returns_void, is_async, is_static =
-        get_params_modifier_info func_decl
+      let call_signature = get_call_signature_for_wrap func_decl in
+      let func_decl_text =
+        fixup_anonymous_variadic func_decl call_signature.has_anonymous_variadic
       in
       let func_ref =
-        if is_static
+        if call_signature.is_static
         then DeprecatedStaticMethodRef
         else DeprecatedNonStaticMethodRef
       in
-      params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, returns_void, is_async, func_ref)
+      Some (
+        func_decl_text,
+        call_signature.params_text_list,
+        call_signature.returns_void,
+        call_signature.is_async,
+        func_ref
+      )
   | FunctionDeclaration { function_declaration_header = func_decl; _ } ->
-      let func_decl_text = text func_decl in
-      let params_text_list, returns_void, is_async, _ =
-        get_params_modifier_info func_decl
+      let call_signature = get_call_signature_for_wrap func_decl in
+      let func_decl_text =
+        fixup_anonymous_variadic func_decl call_signature.has_anonymous_variadic
       in
       let func_ref = DeprecatedFunctionRef in
-      params_text_list >>= fun params_text_list ->
-      Some (func_decl_text, params_text_list, returns_void, is_async, func_ref)
+      Some (
+        func_decl_text,
+        call_signature.params_text_list,
+        call_signature.returns_void,
+        call_signature.is_async,
+        func_ref
+      )
   | _ -> None
   end >>| fun (func_decl_text, params_text_list, returns_void, is_async, func_ref) ->
   let deprecated_wrapper_stub =

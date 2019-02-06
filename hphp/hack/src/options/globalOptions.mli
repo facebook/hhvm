@@ -94,6 +94,9 @@ type t = {
  (* Flag to enable await-as-an-expression *)
  po_enable_await_as_an_expression : bool;
 
+ (* The default parse mode when no mode is specified. *)
+ po_default_mode : string;
+
  (** Print types of size bigger than 1000 after performing a type union. *)
  tco_log_inference_constraints : bool;
 
@@ -219,6 +222,7 @@ val make :
   po_allow_goto: bool ->
   po_enable_concurrent: bool ->
   po_enable_await_as_an_expression: bool ->
+  po_default_mode: string ->
   tco_log_inference_constraints : bool ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
@@ -264,6 +268,7 @@ val po_disable_nontoplevel_declarations : t -> bool
 val po_allow_goto : t -> bool
 val po_enable_concurrent : t -> bool
 val po_enable_await_as_an_expression : t -> bool
+val po_default_mode : t -> string
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool

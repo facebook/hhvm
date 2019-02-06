@@ -1378,30 +1378,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     transform_argish_with_return_type env lp params rp colon ret_type
   | Syntax.CastExpression _ ->
     Span (List.map (Syntax.children node) (t env))
-  | Syntax.MemberSelectionExpression {
-      member_object;
-      member_operator;
-      member_name; } ->
-    handle_possible_chaining env
-      (
-          member_object,
-          member_operator,
-          member_name,
-          None
-        )
-      None
-  | Syntax.SafeMemberSelectionExpression {
-      safe_member_object;
-      safe_member_operator;
-      safe_member_name; } ->
-    handle_possible_chaining env
-      (
-            safe_member_object,
-            safe_member_operator,
-            safe_member_name,
-            None
-          )
-      None
+  | Syntax.MemberSelectionExpression _
+  | Syntax.SafeMemberSelectionExpression _ ->
+    handle_possible_chaining env node
   | Syntax.YieldExpression {
       yield_keyword = kw;
       yield_operand = operand; } ->
@@ -1552,28 +1531,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           then Nest [t env false_expr]
           else t env false_expr;
       ])
-  | Syntax.FunctionCallExpression {
-      function_call_receiver;
-      function_call_left_paren;
-      function_call_argument_list;
-      function_call_right_paren; } ->
-    handle_function_call_expression env
-      function_call_receiver
-      function_call_left_paren
-      function_call_argument_list
-      function_call_right_paren
-  | Syntax.FunctionCallWithTypeArgumentsExpression {
-      function_call_with_type_arguments_receiver;
-      function_call_with_type_arguments_type_args;
-      function_call_with_type_arguments_left_paren;
-      function_call_with_type_arguments_argument_list;
-      function_call_with_type_arguments_right_paren; } ->
-    handle_function_call_with_type_arguments_expression env
-      function_call_with_type_arguments_receiver
-      function_call_with_type_arguments_type_args
-      function_call_with_type_arguments_left_paren
-      function_call_with_type_arguments_argument_list
-      function_call_with_type_arguments_right_paren
+  | Syntax.FunctionCallExpression _
+  | Syntax.FunctionCallWithTypeArgumentsExpression _ ->
+    handle_possible_chaining env node
   | Syntax.EvalExpression {
       eval_keyword = kw;
       eval_left_paren = left_p;
@@ -2552,116 +2512,60 @@ and handle_xhp_open_right_angle_token env attrs node =
     ]
   | _ -> failwith "expected xhp_open right_angle token"
 
-and handle_function_call_expression env
-    receiver
-    lp
-    args
-    rp
-  =
-  match Syntax.syntax receiver with
-  | Syntax.MemberSelectionExpression {
-      member_object;
-      member_operator;
-      member_name; } ->
-    handle_possible_chaining env
-      (member_object, member_operator, member_name, None)
-      (Some (lp, args, rp))
-  | Syntax.SafeMemberSelectionExpression {
-      safe_member_object;
-      safe_member_operator;
-      safe_member_name; } ->
-    handle_possible_chaining env
-      (safe_member_object, safe_member_operator, safe_member_name, None)
-      (Some (lp, args, rp))
-  | _ ->
-    Concat [
-      t env receiver;
-      transform_argish env lp args rp
-    ]
+and handle_possible_chaining env node =
+  let rec handle_member_selection acc (receiver, arrow, member, targs) args =
+    let first_receiver, acc = handle_chaining acc receiver in
+    first_receiver, (arrow, member, targs, args) :: acc
 
-and handle_function_call_with_type_arguments_expression env
-    receiever
-    tyargs
-    lp
-    args
-    rp
-  =
-  match Syntax.syntax receiever with
-  | Syntax.MemberSelectionExpression {
-      member_object;
-      member_operator;
-      member_name; } ->
-    handle_possible_chaining env
-      (member_object, member_operator, member_name, Some tyargs)
-      (Some (lp, args, rp))
-  | Syntax.SafeMemberSelectionExpression {
-      safe_member_object;
-      safe_member_operator;
-      safe_member_name; } ->
-    handle_possible_chaining env
-      (safe_member_object, safe_member_operator, safe_member_name, Some tyargs)
-      (Some (lp, args, rp))
-  | _ ->
-    Concat [
-      t env receiever;
-      t env tyargs;
-      transform_argish env lp args rp
-    ]
+  and handle_fun_call acc node receiver ?targs lp args rp =
+    match Syntax.syntax receiver with
+    | Syntax.MemberSelectionExpression {
+        member_object = obj;
+        member_operator = arrow;
+        member_name = member; }
+    | Syntax.SafeMemberSelectionExpression {
+        safe_member_object = obj;
+        safe_member_operator = arrow;
+        safe_member_name = member; } ->
+      handle_member_selection acc
+        (obj, arrow, member, targs)
+        (Some (lp, args, rp))
+    | _ -> node, []
 
-and handle_possible_chaining env (obj, arrow1, member1, targs1) argish =
-  let rec handle_chaining obj =
-    let handle_mse_or_smse (obj, arrow, member, targs) fun_paren_args =
-      let (obj, l) = handle_chaining obj in
-      obj, l @ [(arrow, member, targs, fun_paren_args)]
-    in
-    let handle_fun_call receiver ?targs lp args rp =
-      match Syntax.syntax receiver with
-      | Syntax.MemberSelectionExpression {
-          member_object = obj;
-          member_operator = arrow;
-          member_name = member; }
-      | Syntax.SafeMemberSelectionExpression {
-          safe_member_object = obj;
-          safe_member_operator = arrow;
-          safe_member_name = member; } ->
-        handle_mse_or_smse
-          (obj, arrow, member, targs)
-          (Some (lp, args, rp))
-      | _ -> obj, []
-    in
-    match Syntax.syntax obj with
+  and handle_chaining acc node =
+    match Syntax.syntax node with
     | Syntax.FunctionCallExpression {
         function_call_receiver = receiver;
         function_call_left_paren = lp;
         function_call_argument_list = args;
         function_call_right_paren = rp; } ->
-      handle_fun_call receiver lp args rp
+      handle_fun_call acc node receiver lp args rp
     | Syntax.FunctionCallWithTypeArgumentsExpression {
         function_call_with_type_arguments_receiver = receiver;
         function_call_with_type_arguments_type_args = targs;
         function_call_with_type_arguments_left_paren = lp;
         function_call_with_type_arguments_argument_list = args;
         function_call_with_type_arguments_right_paren = rp; } ->
-      handle_fun_call receiver ~targs lp args rp
+      handle_fun_call acc node receiver ~targs lp args rp
     | Syntax.MemberSelectionExpression {
-        member_object;
-        member_operator;
-        member_name; } ->
-      handle_mse_or_smse
-        (member_object, member_operator, member_name, None)
-        None
+        member_object = obj;
+        member_operator = arrow;
+        member_name = member; }
     | Syntax.SafeMemberSelectionExpression {
-        safe_member_object;
-        safe_member_operator;
-        safe_member_name; } ->
-      handle_mse_or_smse
-        (safe_member_object, safe_member_operator, safe_member_name, None)
+        safe_member_object = obj;
+        safe_member_operator = arrow;
+        safe_member_name = member; } ->
+      handle_member_selection acc
+        (obj, arrow, member, None)
         None
-    | _ -> obj, []
+    | _ -> node, []
   in
 
-  let (obj, chain_list) = handle_chaining obj in
-  let chain_list = chain_list @ [(arrow1, member1, targs1, argish)] in
+  (* Flatten nested member selection expressions into the first receiver and a
+     list of member selections.
+     E.g., transform $x->a->b->c into ($x, [->a; ->b; ->c]) *)
+  let first_receiver, chain_list = handle_chaining [] node in
+  let chain_list = List.rev chain_list in
 
   let transform_chain (arrow, member, targs, argish) =
     Concat [
@@ -2672,12 +2576,47 @@ and handle_possible_chaining env (obj, arrow1, member1, targs1) argish =
         ~f:(fun (lp, args, rp) -> transform_argish env lp args rp);
     ]
   in
-  let obj_has_trailing_newline = node_has_trailing_newline obj in
+
+  (* The actual transform for function call expressions (the default transform
+     just calls into [handle_possible_chaining]). *)
+  let transform_first_receiver node =
+    match Syntax.syntax node with
+    | Syntax.FunctionCallExpression {
+        function_call_receiver = receiver;
+        function_call_left_paren = lp;
+        function_call_argument_list = args;
+        function_call_right_paren = rp; } ->
+      Concat [
+        t env receiver;
+        transform_argish env lp args rp;
+      ]
+    | Syntax.FunctionCallWithTypeArgumentsExpression {
+        function_call_with_type_arguments_receiver = receiver;
+        function_call_with_type_arguments_type_args = targs;
+        function_call_with_type_arguments_left_paren = lp;
+        function_call_with_type_arguments_argument_list = args;
+        function_call_with_type_arguments_right_paren = rp; } ->
+      Concat [
+        t env receiver;
+        t env targs;
+        transform_argish env lp args rp;
+      ]
+    | Syntax.MemberSelectionExpression _
+    | Syntax.SafeMemberSelectionExpression _ ->
+      failwith ("Should not be possible for a member selection expression to \
+                 be considered first_receiver")
+    | _ -> t env node
+  in
+
+  let first_receiver_has_trailing_newline =
+    node_has_trailing_newline first_receiver
+  in
   match chain_list with
+  | [] -> transform_first_receiver first_receiver
   | hd :: [] ->
     Concat [
-      Span [t env obj];
-      if obj_has_trailing_newline
+      Span [transform_first_receiver first_receiver];
+      if first_receiver_has_trailing_newline
       then Newline
       else SplitWith Cost.High;
       Nest [transform_chain hd];
@@ -2691,7 +2630,7 @@ and handle_possible_chaining env (obj, arrow1, member1, targs1) argish =
       | (_, _, _, Some (_, _, trailing)) ->
         if node_has_trailing_newline trailing
         then Rule.Always
-        else if obj_has_trailing_newline
+        else if first_receiver_has_trailing_newline
         then Rule.Parental
         else
           (* If we have a chain where only the final item contains internal
@@ -2713,8 +2652,8 @@ and handle_possible_chaining env (obj, arrow1, member1, targs1) argish =
     Span [
       WithLazyRule (rule_type,
         Concat [
-          t env obj;
-          if obj_has_trailing_newline
+          transform_first_receiver first_receiver;
+          if first_receiver_has_trailing_newline
           then Newline
           else SplitWith Cost.Base;
         ],
@@ -2724,7 +2663,6 @@ and handle_possible_chaining env (obj, arrow1, member1, targs1) argish =
           Nest (List.map tl ~f:(fun x -> Concat [Split; x]))
         ])
     ]
-  | _ -> failwith "Expected a chain of at least length 1"
 
 and transform_fn_decl_name env modifiers kw name type_params leftp =
   let mods = handle_possible_list env ~after_each:(fun _ -> Space) modifiers in

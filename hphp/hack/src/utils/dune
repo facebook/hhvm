@@ -104,7 +104,9 @@
     hh_json
     http_lite
     marshal_tools
-    sys_utils))
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))
 
 (library
   (name http_lite)

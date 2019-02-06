@@ -433,28 +433,38 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event Lwt.t =
     else Lwt.return (Server_message (Queue.dequeue_exn server.pending_messages))
   in
 
-  let from_client (client: Jsonrpc.queue) : event =
-    match Jsonrpc.get_message client with
-    | `Message message -> Client_message message
-    | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
-    | `Recoverable_exception edata -> raise (Client_recoverable_connection_exception edata)
+  let from_client (client: Jsonrpc.queue) : event Lwt.t =
+    let%lwt message = Jsonrpc.get_message client in
+    match message with
+    | `Message message ->
+      Lwt.return (Client_message message)
+    | `Fatal_exception edata ->
+      raise (Client_fatal_connection_exception edata)
+    | `Recoverable_exception edata ->
+      raise (Client_recoverable_connection_exception edata)
   in
 
   match state with
   | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> begin
       let%lwt message_source = get_message_source conn client in
       match message_source with
-      | `From_client -> Lwt.return (from_client client)
+      | `From_client ->
+        let%lwt message = from_client client in
+        Lwt.return message
       | `From_server ->
         let%lwt message = from_server conn in
         Lwt.return message
-      | `No_source -> Lwt.return Tick
+      | `No_source ->
+        Lwt.return Tick
     end
   | _ -> begin
       let%lwt message_source = get_client_message_source client in
       match message_source with
-      | `From_client -> Lwt.return (from_client client)
-      | `No_source -> Lwt.return Tick
+      | `From_client ->
+        let%lwt message = from_client client in
+        Lwt.return message
+      | `No_source ->
+        Lwt.return Tick
     end
 
 
@@ -2072,11 +2082,19 @@ let hack_log_error
 let short_timeout = 2.5
 let long_timeout = 15.0
 
-let cancel_if_stale (client: Jsonrpc.queue) (message: Jsonrpc.message) (timeout: float) : unit =
+let cancel_if_stale
+    (client: Jsonrpc.queue)
+    (message: Jsonrpc.message)
+    (timeout: float)
+    : unit Lwt.t =
   let message_received_time = message.Jsonrpc.timestamp in
   let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
-  if time_elapsed >= timeout && Jsonrpc.has_message client
-  then raise (Error.RequestCancelled "request timed out")
+  if time_elapsed >= timeout then begin
+    if Jsonrpc.has_message client
+    then raise (Error.RequestCancelled "request timed out")
+    else Lwt.return_unit
+  end else
+    Lwt.return_unit
 
 let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
   let open Main_env in
@@ -2292,7 +2310,7 @@ let handle_event
 
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_hover c.params
       |> do_hover menv.conn ref_unblocked_time
     in
@@ -2301,7 +2319,7 @@ let handle_event
 
   (* textDocument/definition request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_definition c.params
       |> do_definition menv.conn ref_unblocked_time
     in
@@ -2312,7 +2330,7 @@ let handle_event
   | Main_loop menv, Client_message c when c.method_ = "textDocument/completion" ->
     let do_completion =
       if env.use_ffp_autocomplete then do_completion_ffp else do_completion_legacy in
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_completion c.params
       |> do_completion menv.conn ref_unblocked_time
     in
@@ -2321,7 +2339,7 @@ let handle_event
 
   (* completionItem/resolve request *)
   | Main_loop menv, Client_message c when c.method_ = "completionItem/resolve" ->
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result =
       parse_completionItem c.params
       |> do_completionItemResolve menv.conn ref_unblocked_time
@@ -2349,7 +2367,7 @@ let handle_event
 
   (* textDocument/references request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/references" ->
-    cancel_if_stale client c long_timeout;
+    let%lwt () = cancel_if_stale client c long_timeout in
     let%lwt result = parse_findReferences c.params
       |> do_findReferences menv.conn ref_unblocked_time
     in
@@ -2368,7 +2386,7 @@ let handle_event
 
   (* textDocument/documentHighlight *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/documentHighlight" ->
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_documentHighlight c.params
       |> do_documentHighlight menv.conn ref_unblocked_time
     in
@@ -2400,7 +2418,7 @@ let handle_event
 
   (* textDocument/onTypeFormatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/onTypeFormatting" ->
-    cancel_if_stale client c short_timeout;
+    let%lwt () = cancel_if_stale client c short_timeout in
     parse_documentOnTypeFormatting c.params
     |> do_documentOnTypeFormatting menv.editor_open_files
     |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c;

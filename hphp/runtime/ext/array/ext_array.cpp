@@ -1290,50 +1290,6 @@ TypedValue HHVM_FUNCTION(array_values,
   return tvReturn(array_values(input));
 }
 
-static void compact(PointerSet& seen, VarEnv* v, Array& ret,
-                    const Variant& var) {
-  if (var.isArray()) {
-    auto adata = var.getArrayData();
-    auto check = couldRecur(var, adata);
-    if (check) {
-      if (seen.find(adata) != seen.end()) {
-        raise_warning("compact(): recursion detected");
-        return;
-      }
-      seen.insert(adata);
-    }
-    for (ArrayIter iter(adata); iter; ++iter) {
-      compact(seen, v, ret, VarNR(iter.secondVal()));
-    }
-    if (check) seen.erase(adata);
-  } else {
-    String varname = var.toString();
-    if (!varname.empty() && v->lookup(varname.get()) != NULL) {
-      ret.set(varname, tvAsVariant(v->lookup(varname.get())));
-    }
-  }
-}
-
-Array HHVM_FUNCTION(compact,
-                    const Variant& varname,
-                    const Array& args /* = null array */) {
-  auto const warning =
-    "compact() is deprecated and subject to removal from the Hack language";
-  switch (RuntimeOption::DisableCompact) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-  Array ret = Array::CreateDArray();
-  VarEnv* v = g_context->getOrCreateVarEnv();
-  if (v) {
-    PointerSet seen;
-    compact(seen, v, ret, varname);
-    if (!args.empty()) compact(seen, v, ret, args);
-  }
-  return ret;
-}
-
 static int php_count_recursive(const Array& array) {
   long cnt = array.size();
   for (ArrayIter iter(array); iter; ++iter) {
@@ -3083,7 +3039,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_unique);
     HHVM_FE(array_unshift);
     HHVM_FE(array_values);
-    HHVM_FE(compact);
     HHVM_FE(shuffle);
     HHVM_FE(count);
     HHVM_FE(sizeof);

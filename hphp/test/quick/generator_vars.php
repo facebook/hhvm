@@ -22,12 +22,12 @@ function create() {
 
 function unusedarg($x, $y) {
   $z = 5;
-  yield compact('x', 'z');
+  yield array('x' => $x, 'z' => $z);
   $s = 'foo';
   yield 'almost there';
   $foo = 'inside foo';
-  yield compact('foo', 's');
-  yield compact('x', 'y', 'foo', 'z');
+  yield array('foo' => $foo, 's' => $s);
+  yield array('x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z);
 }
 
 function dumpgen($g) {

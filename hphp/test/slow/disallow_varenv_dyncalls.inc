@@ -7,41 +7,6 @@ function custom_handler($error, $errmsg, $errfile, $errline, $errcontext) {
 }
 set_error_handler('custom_handler');
 
-function test_compact_dyncall() {
-  $var1 = 100;
-  $var2 = 200;
-  $f = 'compact';
-  var_dump($f(['var1', 'var2']));
-}
-
-function test_compact_cuf() {
-  $var1 = 100;
-  $var2 = 200;
-  $f = 'compact';
-  var_dump(call_user_func($f, ['var1', 'var2']));
-}
-
-function test_compact_cuf_array() {
-  $var1 = 100;
-  $var2 = 200;
-  $f = 'compact';
-  var_dump(call_user_func_array($f, ['var1', 'var2']));
-}
-
-function test_compact_map() {
-  $var1 = 100;
-  $var2 = 200;
-  $f = 'compact';
-  var_dump(array_map($f, [['var1', 'var2']]));
-}
-
-function test_compact_errors() {
-  $f = 'compact';
-  $f();
-  call_user_func($f);
-  call_user_func_array($f, []);
-}
-
 function test_getargs_dyncall_impl($a, $b, $c) {
   $f = 'func_get_args';
   var_dump($f());
@@ -97,12 +62,6 @@ function get_current_test($all) {
 
 function run_tests() {
   $all = [
-    'test_compact_dyncall',
-    'test_compact_cuf',
-    'test_compact_cuf_array',
-    'test_compact_map',
-    'test_compact_errors',
-
     'test_getargs_dyncall',
     'test_getargs_cuf',
     'test_getargs_cuf_array',

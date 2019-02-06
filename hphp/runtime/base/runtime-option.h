@@ -537,9 +537,6 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
-  // Disables PHP's compact() function.
-  // 0 => enabled (default), 1 => warning, 2 => error.
-  static uint64_t DisableCompact;
   // Disables PHP's extract() function.
   // 0 => enabled (default), 1 => warning, 2 => error.
   static uint64_t DisableExtract;

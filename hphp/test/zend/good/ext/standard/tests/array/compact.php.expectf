@@ -1,7 +1,0 @@
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 9
-array(2) {
-  ["event"]=>
-  string(8) "SIGGRAPH"
-  ["state"]=>
-  string(2) "CA"
-}

@@ -98,9 +98,6 @@ TypedValue HHVM_FUNCTION(array_unshift,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_values,
                          const Variant& input);
-Array HHVM_FUNCTION(compact,
-                    const Variant& varname,
-                    const Array& args = null_array);
 bool HHVM_FUNCTION(shuffle,
                    VRefParam array);
 int64_t HHVM_FUNCTION(count,

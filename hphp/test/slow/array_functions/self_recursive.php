@@ -15,7 +15,6 @@ function main() {
 
   test($a);
   test($GLOBALS);
-  var_dump(compact($a));
 }
 
 

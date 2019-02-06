@@ -695,7 +695,6 @@ int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
-uint64_t RuntimeOption::DisableCompact = 1;
 uint64_t RuntimeOption::DisableExtract = 0;
 uint64_t RuntimeOption::DisableForwardStaticCall = 1;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 1;
@@ -1472,8 +1471,6 @@ void RuntimeOption::Load(
   }
   {
     // PHPisms
-    Config::Bind(DisableCompact, ini, config,
-                 "Hack.Lang.Phpism.DisableCompact", DisableCompact);
     Config::Bind(DisableExtract, ini, config,
                  "Hack.Lang.Phpism.DisableExtract", DisableExtract);
     Config::Bind(DisableForwardStaticCall, ini, config,

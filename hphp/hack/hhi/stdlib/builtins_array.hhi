@@ -155,8 +155,6 @@ function array_walk_recursive(&$input, $funcname, $userdata = null);
 <<__PHPStdLib, __Deprecated('This function is scheduled for removal')>>
 function array_walk(&$input, $funcname, $userdata = null);
 <<__PHPStdLib>>
-function compact($varname, ...);
-<<__PHPStdLib>>
 function shuffle(&$array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>

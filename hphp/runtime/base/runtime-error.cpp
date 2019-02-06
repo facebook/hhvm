@@ -644,6 +644,13 @@ void raise_message(ErrorMode mode,
   raise_notice_helper(mode, skipTop, msg);
 }
 
+void raise_str_to_class_notice(const StringData* name) {
+  if (RuntimeOption::EvalRaiseStrToClsConversionWarning && !name->isStatic()) {
+    raise_notice("Implicit string to Class conversion for classname %s",
+                 name->data());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HC(Opt, ...) \

@@ -3416,6 +3416,9 @@ OPTBLD_INLINE void iopThrow(PC&) {
 
 OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
   auto const cell = vmStack().topC();
+  if (isStringType(cell->m_type)) {
+    raise_str_to_class_notice(cell->m_data.pstr);
+  }
   auto const cls  = lookupClsRef(cell);
   ArrayData* reified_types = getReifiedGenericsOpt(*cell);
   slot.put(reified_types, cls);
@@ -3423,7 +3426,11 @@ OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
 }
 
 OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
-  slot.put(nullptr, lookupClsRef(tvToCell(fr.ptr)));
+  auto const cell = tvToCell(fr.ptr);
+  if (isStringType(cell->m_type)) {
+    raise_str_to_class_notice(cell->m_data.pstr);
+  }
+  slot.put(nullptr, lookupClsRef(cell));
 }
 
 OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {

@@ -2278,6 +2278,10 @@ To string conversions:
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
+| RaiseStrToClassNotice, ND, S(Str), NF
+
+  Raise a notice if a string is implicitly converted to a class.
+
 | CheckClsReifiedGenericMismatch<cls>, ND, SVArr, NF
 
   Raises a runtime error unless whether each generic in S0 is reified or erased

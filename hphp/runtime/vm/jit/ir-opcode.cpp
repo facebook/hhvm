@@ -509,6 +509,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseMissingThis:
   case RaiseNotice:
   case RaiseParamRefMismatchForFunc:
+  case RaiseStrToClassNotice:
   case RaiseTooManyArg:
   case RaiseUndefProp:
   case RaiseUninitLoc:

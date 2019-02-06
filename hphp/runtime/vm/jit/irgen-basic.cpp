@@ -86,6 +86,9 @@ void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot, bool cflavor) {
 void emitClsRefGetC(IRGS& env, uint32_t slot) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(TObj, TStr)) {
+    if (name->isA(TStr) && !name->hasConstVal()) {
+      gen(env, RaiseStrToClassNotice, name);
+    }
     popC(env);
     implClsRefGet(env, name, slot, true);
     decRef(env, name);
@@ -99,6 +102,9 @@ void emitClsRefGetL(IRGS& env, int32_t id, uint32_t slot) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   if (src->type().subtypeOfAny(TObj, TStr)) {
+    if (src->isA(TStr) && !src->hasConstVal()) {
+      gen(env, RaiseStrToClassNotice, src);
+    }
     implClsRefGet(env, src, slot, false);
   } else {
     PUNT(ClsRefGetL);

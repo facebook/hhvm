@@ -486,6 +486,17 @@ void cgRaiseHackArrPropNotice(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(raise_str_to_class_notice),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0)
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

@@ -547,6 +547,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseParamRefMismatchForFunc:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseStrToClassNotice:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case InitStaticLoc:

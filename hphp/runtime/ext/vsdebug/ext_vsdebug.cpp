@@ -200,7 +200,11 @@ void VSDebugExtension::threadShutdown() {
   // NB some threads may be in the list, but we never get a requestShutdown
   // on them because they either never run PHP code or are done by the time
   // we query the list. Catch those threads and clean them up.
-  requestShutdown();
+  // TODO(T40097246): hphp_thread_exit can currently run after moduleShutdown
+  // as a workaround until this is fixed, check to see if we've already shut
+  // down instead of asserting that we haven't
+  if (!m_enabled || s_debugger == nullptr) return;
+  s_debugger->requestShutdown();
 }
 
 std::string& VSDebugExtension::getUnixSocketPath() {

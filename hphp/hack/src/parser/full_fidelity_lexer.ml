@@ -80,6 +80,10 @@ end = struct
     ?(enable_xhp = false)
     ?(codegen = false)
     text =
+    (* this is the default; this can be overridden in scan_markup, but we *)
+    (* need to explicitly reset it, as `scan_markup` is never called for *)
+    (* `.hack` files *)
+    Env.set_is_hh_file true;
     Env.set ~force_hh ~enable_xhp ~codegen;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 

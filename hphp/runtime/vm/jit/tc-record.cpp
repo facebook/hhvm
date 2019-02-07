@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"

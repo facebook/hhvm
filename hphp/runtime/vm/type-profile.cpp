@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/write-lease.h"

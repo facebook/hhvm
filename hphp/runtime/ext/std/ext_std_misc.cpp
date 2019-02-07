@@ -34,7 +34,7 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
-#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-record.h"

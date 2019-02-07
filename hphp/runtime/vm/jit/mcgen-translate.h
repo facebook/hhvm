@@ -53,6 +53,24 @@ folly::Optional<tc::TransMetaInfo> translate(
  * execution mode.
  */
 bool retranslateAllEnabled();
+/*
+ * Is still a pending call to retranslateAll()
+ */
+bool retranslateAllPending();
+/*
+ * Whether retranslateAll has been scheduled (and possibly already completed).
+ */
+bool retranslateAllScheduled();
+
+/*
+ * Whether retranslateAll has been scheduled but has not complete.
+ */
+bool pendingRetranslateAllScheduled();
+
+/*
+ * Is retranslateAll() finished.
+ */
+bool retranslateAllComplete();
 
 /*
  * Get the ordering of optimized translations using hfsort on the call graph.

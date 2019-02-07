@@ -24,7 +24,9 @@
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 
+#include "hphp/util/copy-ptr.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/match.h"
 
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -131,6 +133,14 @@ enum RegClass {
   SpillWide // 128-bit spill slot
 };
 
+// Color is a discriminated union representing an unassigned color, a spill
+// slot, or a physical register.  Which subset is valid depends on the Vreg's
+// RegClass.
+struct None {};
+struct SpillSlot { size_t slot; };
+struct SpillSlotWide { size_t slot; };
+using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
+
 // State about each Vreg. Instead of separate data-structures, all Vreg
 // information is concentrated in this one data-structure.
 struct RegInfo {
@@ -139,6 +149,8 @@ struct RegInfo {
   // ensure that this Vreg will be assigned the same physical register at all
   // uses and defs (except copies).
   PhysReg precolor = InvalidReg;
+  // Color assigned to this Vreg
+  Color color;
   // Can this Vreg be potentially rematerialized (instead of reloaded) by this
   // instruction?
   folly::Optional<Vinstr> remat;
@@ -224,6 +236,16 @@ std::string show(RegClass r) {
   always_assert(false);
 }
 
+std::string show(Color c) {
+  return match<std::string>(
+    c,
+    [] (None)            { return "-"; },
+    [] (PhysReg r)       { return show(r); },
+    [] (SpillSlot s)     { return folly::sformat("S{}", s.slot); },
+    [] (SpillSlotWide s) { return folly::sformat("SW{}", s.slot); }
+  );
+}
+
 std::string show(const BlockVector& v) {
   using namespace folly::gen;
   return folly::sformat(
@@ -263,10 +285,16 @@ std::string show(const PhiWeightVector& v) {
 }
 
 std::string show(const Vunit& unit, const RegInfo& info) {
+  auto const color = [&]{
+    if (info.precolor != InvalidReg) {
+      return folly::sformat("{} ({})", show(info.color), show(info.precolor));
+    }
+    return show(info.color);
+  }();
   return folly::sformat(
-    "Class: {:10}, Pre-Color: {}, Mat: ({})",
+    "Class: {:10}, Color: {:15}, Mat: ({})",
     show(info.regClass),
-    info.precolor != InvalidReg ? show(info.precolor) : "-",
+    color,
     info.remat ? show(unit, *info.remat) : "-"
   );
 }
@@ -415,6 +443,45 @@ RegInfo& reg_info_insert(State& state, Vreg r, RegInfo info) {
 
 bool is_spill(RegClass cls) {
   return cls == RegClass::Spill || cls == RegClass::SpillWide;
+}
+
+bool is_colorable(RegClass cls) {
+  switch (cls) {
+    case RegClass::AnyNarrow:
+    case RegClass::GP:
+    case RegClass::SIMD:
+    case RegClass::SIMDWide:
+      return true;
+    case RegClass::SF:
+    case RegClass::Spill:
+    case RegClass::SpillWide:
+      return false;
+    case RegClass::Any:
+      break;
+  }
+  always_assert(false);
+}
+
+// Wrappers around boost::get<>. Will assert if you try to retrieve a value from
+// the color that isn't present (so check before calling).
+bool is_color_none(Color c) { return boost::get<None>(&c); }
+
+PhysReg color_reg(Color c) {
+  auto const r = boost::get<PhysReg>(&c);
+  assertx(r);
+  return *r;
+}
+
+SpillSlot color_spill_slot(Color c) {
+  auto const s = boost::get<SpillSlot>(&c);
+  assertx(s);
+  return *s;
+}
+
+SpillSlotWide color_spill_slot_wide(Color c) {
+  auto const s = boost::get<SpillSlotWide>(&c);
+  assertx(s);
+  return *s;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4640,6 +4707,580 @@ void insert_spills(State& state) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Coloring
+
+/*
+ * Compared to spilling, coloring is rather straightforward. As already
+ * mentioned, now that the spiller has lowered the register pressure everywhere
+ * to below the number of physical registers, the unit should be trivially
+ * colorable. To color the unit, all we have to do is visit the blocks in any
+ * dominance preserving order (we use RPO) and choose a free color for each Vreg
+ * that the instruction defines. Its guaranteed that they'll always be a free
+ * color, regardless of previous choices. Thus coloring can be accomplished in a
+ * single linear pass. Once a Vreg becomes dead, its color is released.
+ *
+ * We only color physical registers here. We defer assigning spill slots to the
+ * optimization phase because its fairly trivial to use that to assign the slots
+ * optimally.
+ *
+ * Constrained instructions are the only real complexity, since we do not have
+ * the freedom to choose arbitrary colors for them. Instead, we rely on the fact
+ * that we split all the live ranges of Vregs before each constrained
+ * instruction. Therefore we can assume that all colors are free and choose the
+ * colors for the uses and defs of the constrained instruction as dictated by
+ * their precolors. Once we have selected the colors for the constrained
+ * instruction, we then color the preceding copy instruction which broke the
+ * live range. The copy isn't constrained, so we can select colors for
+ * unassigned Vregs from the set that wasn't used by the constrained
+ * instruction.
+ *
+ * This logic only works if each RegClass can only select from non-overlapping
+ * sets of physical registers. If there's overlapping pools of physical
+ * registers, it introduces additional constraints which the colorer cannot
+ * satisfy. Namely, assume that RegClass::AnyNarrow choose from both GP and SIMD
+ * registers. We want to color a particular register with RegClass::Any, so we
+ * select a GP register (as opposed to a SIMD). It happens to be the last GP
+ * register. Later on, we attempt to color a RegClass::GP register, but we can't
+ * because there's none free. If instead we had selected a SIMD earlier, it
+ * would have been colorable. In other words, having overlapping physical
+ * register pools means you no longer have a free choice for colors. So, we have
+ * to restrict RegClass::AnyNarrow to a single register pool, namely GP.
+ *
+ * We select the free colors arbitrarily. Note that while the algorithm
+ * guarantees the unit is colorable regardless of choice, it does not guarantee
+ * the choices will result in a good coloring. Indeed, most colorings are pretty
+ * bad. We rely on a separate optimization of the colorings afterwards to remove
+ * most of the copies.
+ */
+
+// FreeRegs is responsible for tracking which physical registers are free and
+// assigning them. It only deals with physical registers and not spill slots.
+
+struct FreeRegs {
+  explicit FreeRegs(const State& state)
+    : state{&state}
+    , gp{state.gpUnreserved}
+    , simd{state.simdUnreserved} {}
+
+  // Choose (with no particular heuristics) a free physical register appropriate
+  // for the given register class and return it as a color (or None if there's
+  // none available). This merely chooses the register, and does not mark it as
+  // taken.
+  Color choose(RegClass cls) const {
+    switch (cls) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow: {
+        auto const r = gp.choose();
+        return r == InvalidReg ? None{} : Color{r};
+      }
+      case RegClass::SIMD:
+      case RegClass::SIMDWide: {
+        auto const r = simd.choose();
+        return r == InvalidReg ? None{} : Color{r};
+      }
+      case RegClass::Any:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+      case RegClass::SF:
+        break;
+    }
+    always_assert(false);
+  }
+
+  // Mark the given physical register as taken. The register should not already
+  // be reserved. The RegClass should be appropriate for that register.
+  void reserve(PhysReg r, RegClass cls) {
+    switch (cls) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow: {
+        assertx(gp.contains(r));
+        gp -= r;
+        return;
+      }
+      case RegClass::SIMD:
+      case RegClass::SIMDWide: {
+        assertx(simd.contains(r));
+        simd -= r;
+        return;
+      }
+      case RegClass::Any:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+      case RegClass::SF:
+        break;
+    }
+    always_assert(false);
+  }
+
+  // Mark the given physical register as available. The register should be
+  // already marked as taken. The RegClass should be appropriate for that
+  // register.
+  void release(PhysReg r, RegClass cls) {
+    switch (cls) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow: {
+        assertx(!gp.contains(r));
+        gp |= r;
+        return;
+      }
+      case RegClass::SIMD:
+      case RegClass::SIMDWide: {
+        assertx(!simd.contains(r));
+        simd |= r;
+        return;
+      }
+      case RegClass::Any:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+      case RegClass::SF:
+        break;
+    }
+    always_assert(false);
+  }
+
+  // Mark all physical registers as available.
+  void releaseAll() {
+    gp = state->gpUnreserved;
+    simd = state->simdUnreserved;
+  }
+
+  // Return false if any physical registers are taken.
+  bool allAvailable() const {
+    return
+      gp == state->gpUnreserved &&
+      simd == state->simdUnreserved;
+  }
+
+  // Check if the given physical register (with appropriate RegClass) is taken.
+  bool available(PhysReg r, RegClass cls) const {
+    switch (cls) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow:
+        return gp.contains(r);
+      case RegClass::SIMD:
+      case RegClass::SIMDWide:
+        return simd.contains(r);
+      case RegClass::Any:
+      case RegClass::Spill:
+      case RegClass::SpillWide:
+      case RegClass::SF:
+        break;
+    }
+    always_assert(false);
+  }
+
+  // Set operations:
+
+  FreeRegs operator-(const FreeRegs& other) const {
+    assertx(state == other.state);
+    auto temp = *this;
+    temp.gp -= other.gp;
+    temp.simd -= other.simd;
+    return temp;
+  }
+
+  FreeRegs operator&(const FreeRegs& other) const {
+    assertx(state == other.state);
+    auto temp = *this;
+    temp.gp &= other.gp;
+    temp.simd &= other.simd;
+    return temp;
+  }
+
+private:
+  const State* state;
+  RegSet gp;
+  RegSet simd;
+};
+
+// Helper function to assert that a Color is not None (which means we couldn't
+// find a free one, which is a bug).
+void assert_found_color(Vreg r, Color c) {
+  always_assert_flog(
+    !is_color_none(c),
+    "Unable to find free color for {}",
+    show(r)
+  );
+}
+
+// Helper function to assert that the precolor for a particular Vreg is
+// available (if not, its a bug).
+void assert_precolor_avail(const FreeRegs& regs, const RegInfo& info, Vreg r) {
+  always_assert_flog(
+    regs.available(info.precolor, info.regClass),
+    "{} is pre-colored to {}, but it is not available",
+    show(r), show(info.precolor)
+  );
+}
+
+// Release the allocated colors from any Vregs (from the given candidate set)
+// which are dead at the given position.
+void release_dead_regs(const State& state, FreeRegs& free,
+                       const VregSet& candidates,
+                       Vlabel block, size_t instIdx) {
+  candidates.forEach(
+    [&] (Vreg r) {
+      if (r.isPhys()) return;
+      auto const& info = reg_info(state, r);
+      if (!is_colorable(info.regClass)) return;
+      // Since we walk the unit in a dominance preserving order, every Vreg
+      // defined at this point should have a color assigned.
+      assertx(!is_color_none(info.color));
+      auto const reg = color_reg(info.color);
+      assertx(!free.available(reg, info.regClass));
+      if (live_in_at(state, r, block, instIdx + 1)) return;
+      free.release(reg, info.regClass);
+    }
+  );
+}
+
+// Color the defs of the given instruction (which is unconstrained) at the given
+// position.
+void color_unconstrained(State& state, FreeRegs& free,
+                         const Vinstr& inst, Vlabel block,
+                         size_t instIdx) {
+  assertx(!is_constrained_inst(state, inst));
+
+  auto const& unit = state.unit;
+
+  auto const acrosses = acrossesSet(unit, inst) - state.reservedRegs;
+  auto const uses = usesSet(unit, inst) - state.reservedRegs - acrosses;
+  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+
+  // Make sure the uses of the instruction are all colored already (which should
+  // be the case because we walk the unit in dominance preserving order).
+  if (debug) {
+    auto const checkColored = [&] (Vreg r) {
+      auto const& info = reg_info(state, r);
+      if (!is_colorable(info.regClass)) return;
+      always_assert(!is_color_none(info.color));
+    };
+    uses.forEach(checkColored);
+    acrosses.forEach(checkColored);
+  }
+
+  // First release any colors held by now dead uses. This doesn't include
+  // acrosses, which we removed from the uses set above.
+  release_dead_regs(state, free, uses, block, instIdx);
+
+  defs.forEach(
+    [&] (Vreg r) {
+      auto& info = reg_info(state, r);
+      // This Vreg is being defined here, so it better not have a color already.
+      if (!is_colorable(info.regClass)) return;
+      assertx(is_color_none(info.color));
+      // Pick a color, assert we found something (which we always should) and
+      // then reserve it.
+      info.color = free.choose(info.regClass);
+      assert_found_color(r, info.color);
+      free.reserve(color_reg(info.color), info.regClass);
+    }
+  );
+
+  // Release any now dead defs or acrosses.
+  release_dead_regs(state, free, acrosses, block, instIdx);
+  release_dead_regs(state, free, defs, block, instIdx);
+}
+
+// Color constrained instructions is a bit more complicated because we need to
+// ensure that Vregs with precolors are colored to the appropriate physical
+// register. We might have inserted a copy/copyargs instruction immediately
+// before the constrained instruction to break Vreg live ranges. If so, we need
+// to color both the copy and the constrained instruction simultaneously.
+void color_constrained(State& state, FreeRegs& finalFree,
+                       const Vinstr& inst, const Vinstr* copy,
+                       Vlabel block, size_t firstIdx) {
+  assertx(is_constrained_inst(state, inst));
+  assertx(!copy ||
+          copy->op == Vinstr::copy ||
+          copy->op == Vinstr::copyargs);
+  assertx(!copy || !is_constrained_inst(state, *copy));
+
+  auto const& unit = state.unit;
+
+  // Index of the constrained instruction
+  auto const instIdx = firstIdx + (copy ? 1 : 0);
+
+  // finalFree is the state of free registers coming into the copy/constrained
+  // instruction pair. If there's no copy, its already empty. If there's a copy,
+  // it won't be, but we'll adjust it after coloring the copy instruction.
+  auto usesFree = finalFree;
+  auto defsFree = finalFree;
+  // Start out by assuming all physical registers are available. This is safe to
+  // assume because the copy/copyargs (if necessary) broke the live ranges of
+  // all Vregs, giving us complete freedom to reassign things.
+  usesFree.releaseAll();
+  defsFree.releaseAll();
+
+  auto uses = usesSet(unit, inst) - state.reservedRegs;
+  auto acrosses = acrossesSet(unit, inst) - state.reservedRegs;
+  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+
+  // Just like with spilling, we might need to treat some uses as acrosses to
+  // model register pressure properly.
+  fix_constrained_inst_uses(state, defs, uses, acrosses, block, instIdx);
+
+  // We color the constrained instruction first, not the copy. Once we color the
+  // constrained instruction, we then color the copy with what is left. This
+  // ensures the colorability.
+
+  // Does the Vreg live thru the instruction? IE, is it an across, or live-out?
+  auto const isLiveThru = [&] (Vreg r) {
+    return acrosses[r] || live_in_at(state, r, block, instIdx + 1);
+  };
+
+  // Assign colors to the precolored subset of the given Vregs, using "free" to
+  // choose available colors. If "other" is provided, and the Vreg is live-thru
+  // the instruction, then also mark it as reserved in "other".
+  auto const constrained = [&] (const VregSet& regs,
+                                FreeRegs& free,
+                                FreeRegs* other) {
+    regs.forEach(
+      [&] (Vreg r) {
+        auto& info = reg_info(state, r);
+        assertx(!is_spill(info.regClass));
+        if (info.precolor == InvalidReg) return;
+        if (!is_colorable(info.regClass)) return;
+
+        assertx(is_color_none(info.color));
+        assert_precolor_avail(free, info, r);
+        info.color = info.precolor;
+        free.reserve(info.precolor, info.regClass);
+
+        if (!other) return;
+        if (!isLiveThru(r)) return;
+
+        assert_precolor_avail(*other, info, r);
+        other->reserve(info.precolor, info.regClass);
+      }
+    );
+  };
+  // Color the precolored uses, also reserving them in defsFree if live-thru.
+  constrained(uses, usesFree, &defsFree);
+  // Color the precolored defs, not using any colors used by live-thru Vregs in
+  // the uses.
+  constrained(defs, defsFree, nullptr);
+
+  // Assign colors to the non-precolored subset of the given Vregs. Use "free"
+  // to select Vregs, preferring Vregs not taken in "avoid"
+  auto const unconstrained = [&] (const VregSet& regs,
+                                  FreeRegs& free,
+                                  FreeRegs& avoid,
+                                  bool skipLiveThru) {
+    regs.forEach(
+      [&] (Vreg r) {
+        auto& info = reg_info(state, r);
+        assertx(!is_spill(info.regClass));
+        if (info.precolor != InvalidReg) return;
+        if (info.regClass == RegClass::SF) return;
+        assertx(is_color_none(info.color));
+
+        if (skipLiveThru && isLiveThru(r)) return;
+
+        // Choose a color. First pick among the Vregs available in free, but
+        // taken in avoid. If we can't find a color there, just choose from free
+        // (which should always succeed).
+        auto const color = [&]{
+          auto const preferred = (free - avoid).choose(info.regClass);
+          if (!is_color_none(preferred)) return preferred;
+          return free.choose(info.regClass);
+        }();
+        assert_found_color(r, color);
+
+        info.color = color;
+        free.reserve(color_reg(color), info.regClass);
+      }
+    );
+  };
+  // Color the non-precolored uses which aren't live-thru. Try to avoid free
+  // registers available for defs.
+  unconstrained(uses, usesFree, defsFree, true);
+  // Color the non-precolored defs. Try to avoid free registers available for
+  // uses.
+  unconstrained(defs, defsFree, usesFree, false);
+
+  // Finally color the non-precolored uses which are live-thru. Use the
+  // registers which are free in both usesFree and defsFree (which should always
+  // exist).
+  uses.forEach(
+    [&] (Vreg r) {
+      auto& info = reg_info(state, r);
+      assertx(!is_spill(info.regClass));
+      if (info.precolor != InvalidReg) return;
+      if (info.regClass == RegClass::SF) return;
+      if (!isLiveThru(r)) return;
+
+      assertx(is_color_none(info.color));
+
+      auto const color = (usesFree & defsFree).choose(info.regClass);
+      assert_found_color(r, color);
+
+      info.color = color;
+      usesFree.reserve(color_reg(color), info.regClass);
+      defsFree.reserve(color_reg(color), info.regClass);
+    }
+  );
+
+  // Now that we've colored the constrained instruction, color the copy (if it
+  // exists). Since the copy is unconstrained, we can color its defs any way we
+  // want.
+  if (copy) {
+    assertx(acrossesSet(unit, *copy).none());
+
+    auto const copyUses = usesSet(unit, *copy) - state.reservedRegs;
+    if (debug) {
+      copyUses.forEach(
+        [&] (Vreg r) {
+          auto const& info = reg_info(state, r);
+          if (!is_colorable(info.regClass)) return;
+          always_assert(!is_color_none(info.color));
+        }
+      );
+    }
+
+    FreeRegs copyDefsFree{state};
+
+    visitDefs(
+      unit, *copy,
+      [&] (Vreg r) {
+        if (r.isPhys()) return;
+
+        auto& info = reg_info(state, r);
+        if (!is_colorable(info.regClass)) return;
+
+        // If this def was used by the constrained instruction, its already been
+        // colored. Reserve the color its been assigned.
+        if (!is_color_none(info.color)) {
+          auto const reg = color_reg(info.color);
+          always_assert(copyDefsFree.available(reg, info.regClass));
+          copyDefsFree.reserve(reg, info.regClass);
+          return;
+        }
+
+        // This def isn't assigned a color yet, which means it wasn't used by
+        // the constrained instruction. If its live-in to the constrained
+        // instruction, we have to assign it a color which isn't used by the
+        // constrained instruction at all (and not used by the copy either).
+        if (live_in_at(state, r, block, instIdx)) {
+          info.color =
+            (copyDefsFree & defsFree & usesFree).choose(info.regClass);
+          assert_found_color(r, info.color);
+          auto const reg = color_reg(info.color);
+          copyDefsFree.reserve(reg, info.regClass);
+          defsFree.reserve(reg, info.regClass);
+          usesFree.reserve(reg, info.regClass);
+          return;
+        }
+
+        // This def is dead after the copy. It won't interfere with the
+        // constrained instruction, so we can give it any color that isn't
+        // already used by the copy. However, we'd like to give it a color which
+        // isn't used by the constrained instruction to give other Vregs maximum
+        // freedom in their choices.
+        auto const color = [&]{
+          // First try a color which isn't used anywhere
+          auto const preferred1 =
+            (copyDefsFree - usesFree - defsFree).choose(info.regClass);
+          if (!is_color_none(preferred1)) return preferred1;
+          // Then try one which isn't used by the copy or the constrained
+          // instruction's uses.
+          auto const preferred2 =
+            (copyDefsFree - usesFree).choose(info.regClass);
+          if (!is_color_none(preferred2)) return preferred2;
+          // If that fails, just choose one not used by the copy (which is the
+          // bare minimum required).
+          return copyDefsFree.choose(info.regClass);
+        }();
+        assert_found_color(r, color);
+        info.color = color;
+        copyDefsFree.reserve(color_reg(color), info.regClass);
+      }
+    );
+
+    // Release any uses of the copy which are now dead from the original
+    // FreeRegs (reflecting the state before the copy and constrained
+    // instruction). Since the point of the copy was to break all the Vreg live
+    // ranges, this should release all physical registers.
+    release_dead_regs(state, finalFree, copyUses, block, firstIdx);
+  }
+
+  // At this point finalFree reflects the register allocation state after the
+  // copy (if any) and before the constrained instruction. Since its a
+  // pre-requisite for proper coloring that all physical registers are available
+  // for selection before a constrained instruction, we can assert the state has
+  // everything available. Either there was no copy, and there were no live
+  // Vregs, or there was a copy and we just released everything above.
+  always_assert(finalFree.allAvailable());
+
+  // The new state is whats free after the defs.
+  finalFree = defsFree;
+  // Release any now dead acrosses or defs after the constrained instruction.
+  release_dead_regs(state, finalFree, acrosses, block, instIdx);
+  release_dead_regs(state, finalFree, defs, block, instIdx);
+}
+
+void assign_colors(State& state) {
+  auto const& unit = state.unit;
+
+  // Walk the unit in RPO order. This is dominance preserving, so we'll always
+  // encounter a Vreg's def before any of its usages. This means we can color in
+  // a single pass over the unit.
+  for (auto const b : state.rpo) {
+    // Start with all physical registers being available.
+    FreeRegs free{state};
+
+    // Then reserve all the registers already assigned to live-in Vregs.
+    state.liveIn[b].forEach(
+      [&] (Vreg r) {
+        auto const& info = reg_info(state, r);
+        if (!is_colorable(info.regClass)) return;
+        assertx(!is_color_none(info.color));
+        auto const reg = color_reg(info.color);
+        always_assert(free.available(reg, info.regClass));
+        free.reserve(reg, info.regClass);
+      }
+    );
+
+    auto const& block = unit.blocks[b];
+    for (size_t i = 0; i < block.code.size(); ++i) {
+      auto const& inst = block.code[i];
+
+      if (inst.op == Vinstr::copy || inst.op == Vinstr::copyargs) {
+        // Constrained instructions need special coloring logic to ensure that
+        // the precolors are satisfied. A constrained instruction may have a
+        // copy/copyargs in front of it (to break Vreg live ranges) and we want
+        // to color both simultaneously as a pair. So, if we have a
+        // copy/copyargs, peak ahead and see if the next is a constrained
+        // instruction.
+        assertx(!is_constrained_inst(state, inst));
+        assertx(i + 1 < block.code.size());
+
+        auto const& next = block.code[i+1];
+        if (is_constrained_inst(state, next)) {
+          // The next is a constrained instruction, color both as a pair.
+          color_constrained(state, free, next, &inst, b, i);
+          i++; // Skip over the next.
+        } else {
+          // Its not. Color this copy normally and we'll deal with the next the
+          // next trip around.
+          color_unconstrained(state, free, inst, b, i);
+        }
+      } else if (is_constrained_inst(state, inst)) {
+        // A constrained instruction is not guaranteed to have a copy/copyargs
+        // in front of it (if nothing was live), so handle that case here.
+        assertx(inst.op != Vinstr::copy && inst.op != Vinstr::copyargs);
+        color_constrained(state, free, inst, nullptr, b, i);
+      } else {
+        // Normal unconstrained instruction.
+        color_unconstrained(state, free, inst, b, i);
+      }
+    }
+  }
+
+  assertx(check(state.unit));
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -4656,6 +5297,11 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   prepare_unit(state);
   infer_register_classes(state);
   insert_spills(state);
+
+  // The spiller's SSA restoration may have invalidated liveness information, so
+  // recalculate it.
+  calculate_liveness(state);
+  assign_colors(state);
 
   printUnit(kVasmRegAllocLevel, "after vasm-graph-color", unit);
 

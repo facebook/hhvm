@@ -3,9 +3,9 @@ File "instanceof_static_with_reqs.php", line 10, characters 5-19:
 File "instanceof_static_with_reqs.php", line 17, characters 5-19:
   this as BaseField<T>
 File "instanceof_static_with_reqs.php", line 26, characters 7-21:
-  INeedsFoo<[unresolved]>
+  INeedsFoo<T#1>
 File "instanceof_static_with_reqs.php", line 30, characters 5-19:
-  (this as BaseField<T> | INeedsFoo<_>)
+  (this as BaseField<T> | INeedsFoo<T#1>)
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:

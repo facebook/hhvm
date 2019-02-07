@@ -5660,10 +5660,7 @@ and condition ?lhs_of_null_coalesce env tparamet
                  * t3216948).  *)
                 env, x_ty
               else
-                (* We only implement the safe instanceof in strict mode *)
-                (* Also: for generic types we implememt it only with
-                 * experimental feature enabled *)
-              if Env.is_strict env && (tyl = [] || safe_instanceof_enabled)
+              if tyl = [] || safe_instanceof_enabled
               then safe_instanceof env p _c class_info ivar_pos x_ty obj_ty
               else env, obj_ty
           end

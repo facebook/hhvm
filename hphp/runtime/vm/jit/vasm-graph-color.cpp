@@ -141,6 +141,19 @@ struct SpillSlot { size_t slot; };
 struct SpillSlotWide { size_t slot; };
 using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 
+// Represents a position in the unit for def/use chains.
+struct Position {
+  Vlabel block;
+  size_t index; // The index of the instruction in the block, multiplied by
+                // two. Uses get even numbers, and acrosses and defs get
+                // odd. This lets us say a use dominates a def within the same
+                // instruction.
+  bool operator==(const Position& o) const {
+    return std::tie(block, index) == std::tie(o.block, o.index);
+  }
+};
+using PositionVector = jit::vector<Position>;
+
 // State about each Vreg. Instead of separate data-structures, all Vreg
 // information is concentrated in this one data-structure.
 struct RegInfo {
@@ -154,6 +167,12 @@ struct RegInfo {
   // Can this Vreg be potentially rematerialized (instead of reloaded) by this
   // instruction?
   folly::Optional<Vinstr> remat;
+  // Where this Vreg is defined (only valid during color optimization).
+  Position def;
+  // List of uses of this Vreg (only valid during color optimization).
+  PositionVector uses;
+  // Optional set of interference neighbors. Calculated lazily.
+  folly::Optional<VregSet> neighbors;
 };
 
 using BlockVector = jit::vector<Vlabel>;
@@ -217,6 +236,11 @@ struct State {
 
   // Vreg state
   jit::vector<folly::Optional<RegInfo>> regInfo;
+
+  // The number of non-wide and wide spill slots allocated. This determines how
+  // much space to reserve in the stack.
+  size_t numSpillSlots = 0;
+  size_t numWideSpillSlots = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -243,6 +267,22 @@ std::string show(Color c) {
     [] (PhysReg r)       { return show(r); },
     [] (SpillSlot s)     { return folly::sformat("S{}", s.slot); },
     [] (SpillSlotWide s) { return folly::sformat("SW{}", s.slot); }
+  );
+}
+
+std::string show(const Position& p) {
+  return p.block.isValid()
+    ? folly::sformat("({},{})", p.block, p.index)
+    : "-";
+}
+
+std::string show(const PositionVector& v) {
+  using namespace folly::gen;
+  return folly::sformat(
+    "[{}]",
+    from(v)
+      | map([] (const Position& p) { return show(p); })
+      | unsplit<std::string>(", ")
   );
 }
 
@@ -292,10 +332,12 @@ std::string show(const Vunit& unit, const RegInfo& info) {
     return show(info.color);
   }();
   return folly::sformat(
-    "Class: {:10}, Color: {:15}, Mat: ({})",
+    "Class: {:10}, Color: {:15}, Def: {:10}, Mat: ({}), Uses: {}",
     show(info.regClass),
     color,
-    info.remat ? show(unit, *info.remat) : "-"
+    show(info.def),
+    info.remat ? show(unit, *info.remat) : "-",
+    show(info.uses)
   );
 }
 
@@ -328,6 +370,8 @@ std::string show(const State& state) {
     "SIMD Unreserved:      {}\n"
     "Reserved Regs:        {}\n"
     "Scratch Reg:          {}\n"
+    "Num Spill Slots:      {}\n"
+    "Num Wide Spill Slots: {}\n"
     "RPO:                  {}\n"
     "Idoms:                {}\n"
     "Reg Info:\n{}"
@@ -342,6 +386,8 @@ std::string show(const State& state) {
     show(state.simdUnreserved),
     show(state.reservedRegs),
     show(state.scratch),
+    state.numSpillSlots,
+    state.numWideSpillSlots,
     show(state.rpo),
     [&]{
       std::string str = "[";
@@ -456,6 +502,25 @@ bool is_colorable(RegClass cls) {
     case RegClass::Spill:
     case RegClass::SpillWide:
       return false;
+    case RegClass::Any:
+      break;
+  }
+  always_assert(false);
+}
+
+// Compatible in the sense they map to the same set of physical registers.
+bool compatible_reg_classes(RegClass cls1, RegClass cls2) {
+  switch (cls1) {
+    case RegClass::AnyNarrow:
+    case RegClass::GP:
+      return cls2 == RegClass::AnyNarrow || cls2 == RegClass::GP;
+    case RegClass::SIMD:
+    case RegClass::SIMDWide:
+      return cls2 == RegClass::SIMD || cls2 == RegClass::SIMDWide;
+    case RegClass::SF:
+    case RegClass::Spill:
+    case RegClass::SpillWide:
+      return cls1 == cls2;
     case RegClass::Any:
       break;
   }
@@ -913,6 +978,45 @@ size_t block_loop_depth(const State& state, Vlabel b) {
   // The depth includes itself, so must always be at least 1.
   assertx(info.depth > 0);
   return info.depth;
+}
+
+// Populate the def and uses fields of the Vreg info.
+void record_defs_and_uses(State& state) {
+  auto const& unit = state.unit;
+
+  for (auto const b : state.rpo) {
+    auto const& code = unit.blocks[b].code;
+    for (size_t i = 0; i < code.size(); ++i) {
+      auto const& inst = code[i];
+
+      auto const acrosses = acrossesSet(unit, inst);
+      visitUses(
+        unit, inst,
+        [&] (Vreg r) {
+          if (r.isPhys()) return;
+          // Uses get an even index
+          Position position{b, i*2};
+          // Except for acrosses
+          if (acrosses[r]) ++position.index;
+          auto& uses = reg_info(state, r).uses;
+          // Don't record duplicate positions for uses
+          if (!uses.empty() && uses.back() == position) return;
+          uses.emplace_back(position);
+        }
+      );
+
+      visitDefs(
+        unit, inst,
+        [&] (Vreg r) {
+          if (r.isPhys()) return;
+          auto& def = reg_info(state, r).def;
+          assertx(!def.block.isValid());
+          // Defs get an odd index
+          def = Position{b, i*2 + 1};
+        }
+      );
+    }
+  }
 }
 
 State make_state(Vunit& unit, const Abi& abi) {
@@ -5281,6 +5385,1152 @@ void assign_colors(State& state) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Color optimization
+
+/*
+ * We've colored the unit (except for spills), but the coloring may not be very
+ * good. In fact, its usually pretty bad because the color selection is
+ * arbitrary. We now attempt to optimize the colors so that we can minimize the
+ * number of copies between different registers (and maximize the number of
+ * instructions whose hints are satisfied).
+ *
+ * Note that once the coloring phase is done, we *always* have a valid coloring
+ * for the unit. This pass will attempt to optimize the coloring, but at all
+ * times the coloring is valid. This means that, in principal, you can stop at
+ * any point and have a valid unit.
+ *
+ * Color optimization is NP-hard, even for SSA programs, so we use a greedy
+ * algorithm which works well in practice:
+ *
+ * - First we construct affinities. An affinity is a pair of Vregs which are
+ *   joined by a hint on an instruction (this includes copy instructions), or a
+ *   phi. Each affinity has a score. The higher the score is, the more
+ *   profitable it is to satisfy the affinity by assigning the Vregs the same
+ *   register. Right now the score is just calculated statically from the
+ *   block's coldness.
+ *
+ * - We then group affinities together into affinity chunks. An affinity chunk
+ *   is a group of Vregs which all don't interfere with each other and whose has
+ *   at least one affinity with another Vreg in the same chunk. The score of the
+ *   chunk is the sum of all the contained affinities. An affinity is contained
+ *   within the chunk if both Vregs of the affinity are in the chunk. Since the
+ *   Vregs in the chunk don't interfere with each other, they can all be
+ *   assigned the same color. Since they have affinities with each other, if
+ *   they are assigned the same color, you'll profit by eliminating the chunk's
+ *   score (all the affinities in the chunk will be automatically satisfied).
+ *
+ * - Affinity chunks are constructed via a greedy algorithm. First every Vreg is
+ *   placed into its own singleton chunk (which therefore has no affinities). We
+ *   sort the affinities by their score (higher affinities first). For each
+ *   affinity, if its Vregs are in different chunks, and those chunks do not
+ *   interfere, we merge them together. This will try to generate chunks with
+ *   maximal scores (since affinities with greater scores are considered
+ *   first). As the chunks grow, its more and more likely they'll interfere with
+ *   another chunk.
+ *
+ * - The chunks are placed in a priority queue, chunks with higher scores
+ *   first. For each chunk, we attempt to find the best register to re-color
+ *   that chunk to. That is, if you attempt to re-color every Vreg in the chunk
+ *   to that register, what is the sum of the scores of the affinities who are
+ *   now satisfied? Calculate that for every register and use the one with the
+ *   highest score. That register is the one we re-color the chunk to. It may
+ *   not be possible to re-color all Vregs in the chunk to that color (because
+ *   of interference with neighbors). The portion that cannot be re-colored is
+ *   split into a new chunk and re-inserted into the priority queue. This
+ *   process repeats until the queue is empty.
+ *
+ * - The re-coloring is done recursively. First we change the color of the Vreg
+ *   to the desired register. We then iterate over the Vreg's interference
+ *   neighbors and attempt to re-color them to a different register (if
+ *   necessary). This might require those Vregs' neighbors to be re-colored to a
+ *   different color, etc. This is why its called recursive re-coloring. To
+ *   avoid infinite recursion, once we set a color for a Vreg, we mark it as
+ *   "fixed". This is, it cannot be changed again until the entire recursion
+ *   finishes.
+ *
+ * - Spill slots are handled a bit differently. We didn't bother coloring them
+ *   in the coloring phase. Instead we turn them into chunks like above. That
+ *   is, every spill Vreg in the same chunk can be assigned the same slot
+ *   because they don't interfer. We then merge chunks that don't interfer, even
+ *   if there's no affinity between them. This minimize the total number of
+ *   chunks. We then assign a unique slot to each chunk and assign all Vregs in
+ *   the same chunk that slot.
+ */
+
+// Return true if position p1 dominates position p2.
+bool dominates(const State& state, const Position& p1, const Position& p2) {
+  // If they're in the same block, an earlier index always dominates a later.
+  if (p1.block == p2.block) return p1.index <= p2.index;
+  // Otherwise use the standard dominance check.
+  return dominates(p1.block, p2.block, state.idoms);
+}
+
+// Return true if two Vregs interfer. That is, they're both alive at some
+// position. In strict SSA form this can be calculated using dominance relations
+// and liveness information rather than having to build a full interference
+// graph.
+bool vregs_interfer(const State& state, Vreg r1, Vreg r2) {
+  assertx(!r1.isPhys());
+  assertx(!r2.isPhys());
+
+  auto i1 = &reg_info(state, r1);
+  auto i2 = &reg_info(state, r2);
+  // If they're defined at the same point, they obviously interfer.
+  if (i1->def == i2->def) return true;
+
+  if (dominates(state, i2->def, i1->def)) {
+    // Ensure the def of r1 dominates the def of r2
+    std::swap(r2, r1);
+    std::swap(i2, i1);
+  } else if (!dominates(state, i1->def, i2->def)) {
+    // If neither dominates the other, they cannot be simultaneously alive.
+    return false;
+  }
+
+  // We know that the def of r1 dominates the def of r2. This implies that r1 is
+  // defined in the same block as r2, or in a block leading to the def of r2. If
+  // r1 is also live-out of r2's def block, then it means that r1's lifetime
+  // crosses r2's, so they interfer.
+  if (state.liveOut[i2->def.block][r1]) return true;
+
+  // Otherwise check every use of r1 and see if r2 dominates any of them. The
+  // def of r1 dominates the def of r2. If there's a usage of r1 which is
+  // dominated by r2, that means any path to that usage must pass through r2's
+  // def. That implies that r1 must be alive at the same time as r2.
+  for (auto const& use : i1->uses) {
+    if (dominates(state, i2->def, use)) return true;
+  }
+
+  return false;
+}
+
+// Return all the Vregs that a particular Vreg interfers with. This uses caching
+// to avoid doing a (potentially expensive) recalculation.
+const VregSet& find_interferences(State& state, Vreg r) {
+  auto& info = reg_info(state, r);
+  assertx(!is_spill(info.regClass));
+  assertx(info.regClass != RegClass::SF);
+
+  // We already have the information, so we're done.
+  if (info.neighbors) return *info.neighbors;
+
+  boost::dynamic_bitset<> visited(state.unit.blocks.size());
+  VregSet interferences;
+
+  // Walk the block backwards, modeling liveness information. Whenever r is
+  // alive, record all other live Vregs.
+  auto const find = [&] (Vlabel b, auto const& self) {
+    assertx(!visited[b]);
+    visited[b] = true;
+
+    // Start with the already stored liveness information
+    auto live = state.liveOut[b];
+
+    auto const add = [&] (Vreg a) {
+      if (a.isPhys()) return;
+      if (reg_info(state, a).regClass == RegClass::SF) return;
+      live.add(a);
+    };
+    auto const remove = [&] (Vreg a) { live.remove(a); };
+    auto const update = [&] {
+      if (live[r]) interferences |= live;
+    };
+
+    // And then walk backwards modifying it on the fly.
+    auto const& block = state.unit.blocks[b];
+    for (auto const& inst : boost::adaptors::reverse(block.code)) {
+      visitDefs(state.unit, inst, add);
+      visitAcrosses(state.unit, inst, add);
+      update();
+      visitDefs(state.unit, inst, remove);
+      visitUses(state.unit, inst, add);
+      update();
+    }
+
+    // Our liveness calculation should match what the liveness analysis
+    // calculated.
+    assertx(live == state.liveIn[b]);
+    if (!live[r]) {
+      // We only processed this block if r had a usage in it. If r is no longer
+      // live, this should be where its defined.
+      assertx(info.def.block == b);
+      return;
+    }
+
+    // Recurse to all predecessors of this block which are dominated by the
+    // definition (if they're not, r cannot be alive in them).
+    for (auto const pred : state.preds[b]) {
+      if (dominates(info.def.block, pred, state.idoms) && !visited[pred]) {
+        self(pred, self);
+      }
+    }
+  };
+
+  // Visit all blocks where there's a use and record the live Vregs.
+  for (auto const& p : info.uses) {
+    if (!visited[p.block]) find(p.block, find);
+  }
+  // The def as well.
+  if (!visited[info.def.block]) find(info.def.block, find);
+
+  // Record the calculated information for re-use.
+  interferences.remove(r);
+  info.neighbors = std::move(interferences);
+  return *info.neighbors;
+}
+
+// Like an instruction, a Vreg is constrained if it has a precolor and its used
+// or defined in a non-copy instruction.
+bool is_constrained_vreg(const State& state, Vreg r) {
+  auto const& info = reg_info(state, r);
+  if (info.precolor == InvalidReg) return false;
+
+  auto const check = [&] (const Position& pos) {
+    auto const& block = state.unit.blocks[pos.block];
+    auto const& inst = block.code[pos.index / 2];
+    switch (inst.op) {
+      case Vinstr::copy:
+      case Vinstr::copyargs:
+      case Vinstr::phidef:
+      case Vinstr::phijmp:
+      case Vinstr::spill:
+      case Vinstr::reload:
+        return false;
+      default:
+        return true;
+    }
+  };
+
+  if (check(info.def)) return true;
+  return std::any_of(info.uses.begin(), info.uses.end(), check);
+}
+
+// Return "weight" of a block, an approximation of how many times it will be
+// executed. The higher the weight of a block, the more profitable it is to
+// remove copies in it.
+size_t block_weight(const State& state, Vlabel b) {
+  // Right now use hard-coded weights based on the area.  TODO (T37650402):
+  // Incorporate profiling information
+  auto const base = [&]{
+    switch (state.unit.blocks[b].area_idx) {
+      case AreaIndex::Main:   return 1000;
+      case AreaIndex::Cold:   return 10;
+      case AreaIndex::Frozen: return 1;
+    }
+    always_assert(false);
+  }();
+
+  // Cap the max loop depth to avoid numerical issues.
+  static constexpr size_t maxLoopDepth = 5;
+
+  // Adjust the base score by the loop nesting depth (we want to eliminate
+  // copies in inner loops more than ones outside of them). Real profiling
+  // information may make this unnecessary.
+  auto const depth = std::min(block_loop_depth(state, b), maxLoopDepth);
+  return std::pow(100, depth) * base;
+}
+
+// An affinity is a pair of Vregs joined by a copy instruction or a hint. The
+// score indicates how profitable it is to eliminate this copy by assigning the
+// two Vregs the same color (higher is more profitable). An affinity can have an
+// invalid second register, which means it exists just to record the existance
+// of that Vreg. This is only needed for spilled Vregs to ensure every such Vreg
+// is assigned a slot.
+struct Affinity {
+  Vreg r1;
+  Vreg r2;
+  size_t score;
+};
+
+// Build a list of all affinities in the unit sorted from biggest score to
+// smallest.
+jit::vector<Affinity> build_affinities(const State& state) {
+  auto const& unit = state.unit;
+
+  jit::vector<Affinity> affinities;
+
+  // A "singleton" is an affinity with a single Vreg in it. We only need these
+  // for spilled Vregs to ensure we assign spill slots for all of them (a
+  // non-spilled Vreg with no affinity can be ignored since its already assigned
+  // color is fine).
+  auto const singleton = [&] (Vreg r) {
+    if (!r.isValid() || r.isPhys()) return;
+    if (!is_spill(reg_info(state, r).regClass)) return;
+    affinities.push_back(Affinity{r, Vreg{}, 0});
+  };
+
+  auto const add = [&] (Vreg r1, Vreg r2, size_t score) {
+    // If the two Vregs aren't compatible (in the sense that its not possible to
+    // choose colors to remove the copy) don't record them as a pair.
+    if (!r1.isValid() || r1.isPhys()) return singleton(r2);
+    if (!r2.isValid() || r2.isPhys()) return singleton(r1);
+
+    auto const& i1 = reg_info(state, r1);
+    auto const& i2 = reg_info(state, r2);
+
+    // If the Vregs interfere they can never be assigned the same color, or if
+    // they're constrained and have different precolors.
+    if (!compatible_reg_classes(i1.regClass, i2.regClass) ||
+        i1.regClass == RegClass::SF ||
+        i2.regClass == RegClass::SF ||
+        vregs_interfer(state, r1, r2) ||
+        (is_constrained_vreg(state, r1) &&
+         is_constrained_vreg(state, r2) &&
+         i1.precolor != i2.precolor)) {
+      singleton(r1);
+      singleton(r2);
+      return;
+    }
+
+    affinities.push_back(Affinity{r1, r2, score});
+  };
+
+  for (auto const b : state.rpo) {
+    auto const blockWeight = block_weight(state, b);
+
+    for (auto const& inst : unit.blocks[b].code) {
+      // Phis need to be considered specially since their sources and dests
+      // aren't in the same instruction.
+      if (inst.op == Vinstr::phidef) {
+        auto const& d = unit.tuples[inst.phidef_.defs];
+        for (auto const pred : state.preds[b]) {
+          assertx(unit.blocks[pred].code.back().op == Vinstr::phijmp);
+          auto const& phijmp = unit.blocks[pred].code.back().phijmp_;
+          auto const& s = unit.tuples[phijmp.uses];
+          assertx(s.size() == d.size());
+          // For phis we want to use the weight of the predecessor (so we prefer
+          // the hot parts of the phi).
+          auto const predWeight = block_weight(state, pred);
+          for (size_t i = 0; i < s.size(); ++i) add(s[i], d[i], predWeight);
+        }
+        continue;
+      }
+
+      // The sources and dests of copies are considered hints, so this covers
+      // this as well. The score of the affinity is just the weight of the block
+      // the instruction is in.
+      visitDefsWithHints(
+        unit, inst,
+        [&] (Vreg r, Vreg hint) { add(hint, r, blockWeight); }
+      );
+    }
+  }
+
+  std::sort(
+    affinities.begin(), affinities.end(),
+    [](const Affinity& a1, const Affinity& a2) {
+      if (a1.score > a2.score) return true;
+      if (a1.score < a2.score) return false;
+      return std::tie(a1.r1, a1.r2) < std::tie(a2.r1, a2.r2);
+    }
+  );
+
+  return affinities;
+}
+
+// An AffinityChunk is a group of Vregs and affinities between them such that no
+// Vreg within interfers with any other. Therefore all the Vregs in a chunk can
+// be colored the same color.
+struct AffinityChunk {
+  AffinityChunk() = default;
+  AffinityChunk(size_t index, Vreg r, RegClass cls, PhysReg constraint)
+    : cls{cls}
+    , constraint{constraint}
+    , index{index}
+    { regs.emplace_back(r); }
+
+  // We only allow Vregs with compatible RegClass in the same chunk (because
+  // they have to be able to be colored the same).
+  RegClass cls = RegClass::Any;
+  // We don't allow Vregs with different precolors in the same chunk (because
+  // they can never be colored the same). We do allow Vregs with the same
+  // precolor and non-precolored Vregs however.
+  PhysReg constraint;
+  size_t index = 0; // Convenient index when building the chunks
+  size_t score = 0; // Sum of all the scores of contained affinities
+  VregList regs; // All Vregs in chunk, sorted by dominance tree order
+  jit::vector<Affinity> affinities;
+
+  // Check if this chunk interfers with another chunk. Two chunks interfere if
+  // any Vreg in one interfers with any in another.
+  bool interfers(const State& state, const AffinityChunk& o) const {
+    // Naive version of the interference check. Useful for debugging, but way
+    // too slow even for debug builds by default.
+    auto const DEBUG_ONLY naive = [&] (bool expect) {
+      if (false) {
+        for (auto const r1 : regs) {
+          for (auto const r2 : o.regs) {
+            if (vregs_interfer(state, r1, r2)) return expect;
+          }
+        }
+        return !expect;
+      } else {
+        return true;
+      }
+    };
+
+    /*
+     * The naive way do this is to check every Vreg in *this against every Vreg
+     * in o, which is O(N^2) comparisons. This is a clever algorithm which takes
+     * into account dominance relationships to make it a linear check. See
+     * "Revisiting Out-of-SSA Translation for Correctness, Code Quality, and
+     * Efficiency" by Benoit Boissinot, Alain Darte, Fabrice Rastello, Benoit
+     * Dupont de Dinechin, Christophe Guillon for an explanation of how it
+     * works.
+     */
+
+    jit::stack<Vreg> domStack;
+    size_t i = 0;
+    size_t j = 0;
+    while (i < regs.size() || j < o.regs.size()) {
+      auto const current = [&]{
+        if (i == regs.size() ||
+            (j < o.regs.size() && compare(state, o.regs[j], regs[i]))) {
+          return o.regs[j++];
+        } else {
+          return regs[i++];
+        }
+      }();
+
+      auto const parent = [&]{
+        while (!domStack.empty()) {
+          auto const t = domStack.top();
+          if (dominates(state,
+                        reg_info(state, t).def,
+                        reg_info(state, current).def)) {
+            return t;
+          }
+          domStack.pop();
+        }
+        return Vreg{};
+      }();
+
+      if (parent.isValid() && vregs_interfer(state, current, parent)) {
+        assertx(naive(true));
+        return true;
+      }
+      domStack.push(current);
+    }
+
+    assertx(naive(false));
+    return false;
+  }
+
+  // Merge two chunks together, together with an optional affinity. The two
+  // chunks should not interfere (nor should the affinity). The optional
+  // affinity should "join" each chunk (one Vreg in each).
+  void mergeInto(const State& state,
+                 const AffinityChunk& o,
+                 const Affinity* a) {
+    // Since the two chunks cannot have Vregs in common, the result of the merge
+    // will be exactly this size.
+    regs.resize(regs.size() + o.regs.size());
+
+    auto it1 = regs.rbegin() + o.regs.size();
+    auto it2 = o.regs.rbegin();
+    auto const end1 = regs.rend();
+    auto const end2 = o.regs.rend();
+    auto insertIt = regs.rbegin();
+
+    // Standard backwards in-place merge.
+    while (true) {
+      if (it1 == end1) {
+        std::copy(it2, end2, insertIt);
+        break;
+      }
+      if (it2 == end2) {
+        std::copy(it1, end1, insertIt);
+        break;
+      }
+
+      // Maintain dominance tree order when merging.
+      if (compare(state, *it1, *it2)) {
+        *insertIt = *it2;
+        ++it2;
+      } else {
+        *insertIt = *it1;
+        ++it1;
+      }
+      ++insertIt;
+    }
+
+    if (cls == RegClass::Any) cls = o.cls;
+    assertx(compatible_reg_classes(cls, o.cls));
+
+    if (constraint != o.constraint) {
+      if (constraint == InvalidReg) {
+        constraint = o.constraint;
+      } else {
+        assertx(o.constraint == InvalidReg);
+      }
+    }
+
+    // Add together the scores and combine the affinities.
+    score += o.score;
+    affinities.insert(
+      affinities.end(), o.affinities.begin(), o.affinities.end()
+    );
+    if (a) {
+      // And add the optional affinity. The affinity's Vregs should already have
+      // been in the chunks.
+      score += a->score;
+      affinities.emplace_back(*a);
+    }
+    assertx(checkInvariants(state));
+  }
+
+  // Split this chunk into a smaller chunk according to the given predicate
+  // (called on each Vreg). The original chunk is not changed.
+  template <typename F> AffinityChunk split(const State& state, F&& f) const {
+    AffinityChunk other;
+
+    auto first = true;
+    for (auto const r : regs) {
+      if (!f(r)) continue; // Don't add to new chunk
+      other.regs.emplace_back(r); // This maintains the dominance tree order
+
+      auto const& info = reg_info(state, r);
+      auto const constraint =
+        is_constrained_vreg(state, r) ? info.precolor : InvalidReg;
+      assertx(info.regClass != RegClass::SF);
+
+      // Set the RegClass and constraint for the chunk as appropriate.
+      if (first) {
+        other.cls = info.regClass;
+        other.constraint = constraint;
+      } else {
+        if (other.cls == RegClass::Any) other.cls = info.regClass;
+        assertx(compatible_reg_classes(other.cls, info.regClass));
+
+        if (other.constraint != constraint) {
+          if (other.constraint == InvalidReg) {
+            other.constraint = constraint;
+          } else {
+            assertx(constraint == InvalidReg);
+          }
+        }
+      }
+
+      first = false;
+    }
+
+    // Recalculate the score. We only carry over an affinity into the new chunk
+    // if both Vregs are in the new chunk.
+    other.score = 0;
+    for (auto const& affinity : affinities) {
+      if (f(affinity.r1) && f(affinity.r2)) {
+        other.affinities.emplace_back(affinity);
+        other.score += affinity.score;
+      }
+    }
+
+    assertx(other.checkInvariants(state));
+    return other;
+  }
+
+  void reset() {
+    regs.clear();
+    affinities.clear();
+    score = 0;
+    cls = RegClass::Any;
+    constraint = InvalidReg;
+  }
+
+  // Sanity checking
+  bool checkInvariants(const State& state) const {
+    VregSet seen;
+    for (size_t i = 0; i < regs.size(); ++i) {
+      auto const r = regs[i];
+      assertx(r.isValid());
+      assertx(!r.isPhys());
+      assertx(compatible_reg_classes(reg_info(state, r).regClass, cls));
+
+      // The Vreg list should only have unique Vregs
+      assertx(!seen[r]);
+      seen.add(r);
+
+      if (false) {
+        // Useful for debugging but very expensive, even for debug builds.
+        for (size_t j = i+1; j < regs.size(); j++) {
+          assertx(!vregs_interfer(state, r, regs[j]));
+        }
+      }
+
+      if (i+1 >= regs.size()) continue;
+      // Verify dominance tree ordering.
+      assertx(compare(state, r, regs[i+1]));
+    }
+
+    // The chunk's score should be the sum of all of its affinities' scores.
+    size_t affinityScore = 0;
+    for (auto const& affinity : affinities) {
+      assertx(seen[affinity.r1]);
+      assertx(seen[affinity.r2]);
+      affinityScore += affinity.score;
+    }
+    assertx(score == affinityScore);
+
+    return true;
+  }
+
+private:
+  // Helper function to compare according to dominance tree order.
+  static bool compare(const State& state, Vreg r1, Vreg r2) {
+    auto const d1 = reg_info(state, r1).def;
+    auto const d2 = reg_info(state, r2).def;
+    // If they're defined in different blocks, use the pre-calculated dominance
+    // tree ordering.
+    if (d1.block != d2.block) {
+      return state.domOrder[d1.block] < state.domOrder[d2.block];
+    }
+    // Otherwise whatever one is defined first.
+    if (d1.index != d2.index) return d1.index < d2.index;
+    // Arbitrary
+    return r1 < r2;
+  }
+};
+
+// Build a set of affinity chunks for the unit. We aim to construct affinity
+// chunks with as large a score as possible using a greedy algorithm.
+jit::vector<AffinityChunk> build_affinity_chunks(const State& state) {
+  // Build the individual affinities
+  auto const affinities = build_affinities(state);
+
+  // Map of a Vreg to the chunk it currently occupies, 0 if none.
+  jit::vector<size_t> regToChunk(state.regInfo.size());
+  jit::vector<AffinityChunk> chunks;
+  chunks.emplace_back(); // Since 0 means "no chunk", we reserve a dummy empty
+                         // chunk at the first position.
+
+  // First we iterate over all affinities and build a singleton chunk for each
+  // unique Vreg we see.
+  for (auto const& affinity : affinities) {
+    assertx(!affinity.r1.isPhys());
+
+    auto const& i1 = reg_info(state, affinity.r1);
+    assertx(i1.regClass != RegClass::SF);
+
+    if (!regToChunk[affinity.r1]) {
+      regToChunk[affinity.r1] = chunks.size();
+      chunks.emplace_back(
+        chunks.size(),
+        affinity.r1,
+        i1.regClass,
+        is_constrained_vreg(state, affinity.r1) ? i1.precolor : InvalidReg
+      );
+    }
+
+    // If this is a singleton affinity we're done with this one.
+    if (!affinity.r2.isValid()) continue;
+
+    assertx(!affinity.r2.isPhys());
+
+    auto const& i2 = reg_info(state, affinity.r2);
+    assertx(i2.regClass != RegClass::SF);
+    assertx(compatible_reg_classes(i1.regClass, i2.regClass));
+
+    if (!regToChunk[affinity.r2]) {
+      regToChunk[affinity.r2] = chunks.size();
+      chunks.emplace_back(
+        chunks.size(),
+        affinity.r2,
+        i2.regClass,
+        is_constrained_vreg(state, affinity.r2) ? i2.precolor : InvalidReg
+      );
+    }
+  }
+
+  // Retrieve the chunk that a particular Vreg currently resides in. At this
+  // point every Vreg should be in a chunk.
+  auto const chunk = [&] (Vreg r) -> AffinityChunk& {
+    assertx(!r.isPhys());
+    auto const idx = regToChunk[r];
+    assertx(idx);
+    auto& chunk = chunks[idx];
+    assertx(chunk.index == idx);
+    return chunk;
+  };
+
+  jit::vector<jit::fast_set<size_t>> forbid(chunks.size());
+
+  // Check if two chunks are compatible, in the sense that there's nothing
+  // stopping us from potentially merging them together. Once two chunks are
+  // incompatible, they always will be, so cache that result and avoid duplicate
+  // calculation.
+  auto const compat = [&] (const AffinityChunk& c1, const AffinityChunk& c2) {
+    // Easy checks first
+    if (!compatible_reg_classes(c1.cls, c2.cls)) return false;
+    if (c1.constraint != c2.constraint) {
+      if (c1.constraint != InvalidReg && c2.constraint != InvalidReg) {
+        return false;
+      }
+    }
+
+    // See if we've cached an incompatibility.
+    auto const it = forbid[c1.index].find(c2.index);
+    if (it != forbid[c1.index].end()) return false;
+
+    // Otherwise do an expensive interference check.
+    if (c1.interfers(state, c2)) {
+      forbid[c1.index].emplace(c2.index);
+      forbid[c2.index].emplace(c1.index);
+      return false;
+    }
+    return true;
+  };
+
+  /*
+   * Now try to coalesce chunks together maximally. We only coalesce together a
+   * chunk if they're compatible and there's an affinity bridging the two. This
+   * means the affinity contains a Vreg in one and a Vreg in the other. If
+   * there's no affinity between them, its not profitable to merge them because
+   * there's no benefit to assigning them the same color.
+   *
+   * Since the affinities are sorted from greatest score to least, we'll
+   * greedily construct chunks with the biggest score.
+   */
+  for (auto const& affinity : affinities) {
+    if (!affinity.r2.isValid()) continue;
+
+    // If they're already in the same chunk or incompatible there's nothing to
+    // be done.
+    auto& chunk1 = chunk(affinity.r1);
+    auto& chunk2 = chunk(affinity.r2);
+    if (&chunk1 == &chunk2 || !compat(chunk1, chunk2)) continue;
+
+    // We're going to merge them, update all the bookkeeping to reflect the
+    // Vregs now live in the other chunk.
+    for (auto const r : chunk2.regs) {
+      assertx(regToChunk[r] == chunk2.index);
+      regToChunk[r] = chunk1.index;
+    }
+
+    // Also keep the forbidden list up to date.
+    for (auto const i : forbid[chunk2.index]) {
+      forbid[i].emplace(chunk1.index);
+      forbid[chunk1.index].emplace(i);
+    }
+
+    // Do the actual merge and leave the old chunk empty. Since no Vregs now
+    // live in it, we should never look at it again.
+    chunk1.mergeInto(state, chunk2, &affinity);
+    chunk2.reset();
+  }
+
+  // Remove empty chunks, or non-spill singleton chunks. We want to keep spill
+  // chunks around because we assign spill slots entirely from the chunks, even
+  // if no merging as happened. This invalidates the index information in the
+  // chunks, so it cannot be used beyond this point.
+  chunks.erase(
+    std::remove_if(
+      chunks.begin(), chunks.end(),
+      [](const AffinityChunk& c) {
+        if (is_spill(c.cls)) return c.regs.empty();
+        return c.regs.size() <= 1;
+      }
+    ),
+    chunks.end()
+  );
+
+  return chunks;
+}
+
+// Temporary state used by the re-colorer.
+struct RecolorState {
+  RegSet available; // Physical registers we have available to chose from
+
+  // Set of Vregs which are "fixed", which means we cannot re-color them. This
+  // prevents us from constantly trying to re-color a Vreg we just changed. (We
+  // don't use a VregSet because this is more efficient for this particular use
+  // case).
+  boost::dynamic_bitset<> fixed;
+
+  // The old register for a Vreg before it was last modified.
+  jit::vector<PhysReg> old;
+  VregSet changed; // Set of Vregs changed during a particular re-color attempt
+
+  // Indicates that a particular Vreg has been set to a register which wasn't
+  // its original value. Indicates that the value at the same index in the orig
+  // vector is meaningful.
+  boost::dynamic_bitset<> notOrig;
+  // If notOrig[r] is true, then orig[r] contains the register for r before it
+  // was changed. This is similar to old, but orig always contains the original
+  // value while old contains the last modified.
+  jit::vector<PhysReg> orig;
+};
+
+// Re-color the given Vreg to the given register.
+void recolor_set(State& state,
+                 RecolorState& recolor,
+                 Vreg r,
+                 PhysReg p) {
+  assertx(!recolor.fixed[r]);
+  // Whenever we set a register, we fix it so it won't be changed in this
+  // attempt again. This prevents infinite recursion.
+  recolor.fixed[r] = true;
+  auto& color = reg_info(state, r).color;
+  // Save the old colors.
+  recolor.old[r] = color_reg(color);
+  if (!recolor.notOrig[r]) {
+    recolor.orig[r] = recolor.old[r];
+    recolor.notOrig[r] = true;
+  }
+  // Update and record that it changed in this attempt.
+  color = p;
+  recolor.changed.add(r);
+}
+
+// Attempt to recolor the given Vreg to some available register other than the
+// given register. (It should "avoid" p). This might involve recursively
+// recoloring other Vregs. Return true if successful, false otherwise.
+bool recolor_avoid(State& state,
+                   RecolorState& recolor,
+                   Vreg r,
+                   PhysReg p) {
+  auto const& info = reg_info(state, r);
+  assertx(!is_constrained_vreg(state, r) ||
+          color_reg(info.color) == info.precolor);
+  // If we're already not that register, everything is good.
+  if (is_spill(info.regClass) || color_reg(info.color) != p) return true;
+  // Can't change a Vreg we've fixed or a contrained Vreg.
+  if (recolor.fixed[r] || is_constrained_vreg(state, r)) return false;
+
+  auto const& neighbors = find_interferences(state, r);
+
+  // Find the best new register to use for this Vreg. Find the available
+  // register which is used least among this Vreg's interference neighbors. This
+  // will require the least amount of work to re-color.
+  auto const newReg = [&]{
+    PhysReg::Map<size_t> uses;
+    neighbors.forEach(
+      [&] (Vreg neighbor) {
+        auto const& info = reg_info(state, neighbor);
+        if (is_spill(info.regClass)) return;
+        auto const reg = color_reg(info.color);
+        if (!recolor.available.contains(reg)) return;
+        ++uses[reg];
+      }
+    );
+
+    PhysReg best;
+    size_t bestCount = 0;
+    recolor.available.forEach(
+      [&] (PhysReg reg) {
+        if (reg == p) return;
+        if (best != InvalidReg && uses[reg] >= bestCount) return;
+        bestCount = uses[reg];
+        best = reg;
+      }
+    );
+    assertx(best != InvalidReg);
+    return best;
+  }();
+
+  // Set this Vreg to the best new register.
+  recolor_set(state, recolor, r, newReg);
+
+  // Then attempt to recursively re-color all of the interference neighbors to
+  // something else.
+  auto success = true;
+  neighbors.forEach(
+    [&] (Vreg neighbor) {
+      assertx(success);
+      if (!recolor_avoid(state, recolor, neighbor, newReg)) success = false;
+      return success;
+    }
+  );
+
+  return success;
+}
+
+// Attempt to recolor the given Vreg to the given register, recursively
+// re-coloring other Vregs as necessary to avoid conflicts.
+void recolor_single(State& state,
+                    RecolorState& recolor,
+                    Vreg r,
+                    PhysReg p) {
+  // If this Vreg is fixed, we can't change it, nor can we recolor a precolored
+  // Vreg to something other than its precolor.
+  if (recolor.fixed[r]) return;
+  if (is_constrained_vreg(state, r) && reg_info(state, r).precolor != p) return;
+
+  recolor.changed.reset();
+  // Update this Vreg's color
+  recolor_set(state, recolor, r, p);
+  auto const& neighbors = find_interferences(state, r);
+  // Attempt to recolor all of its interference neighbors to a different
+  // register.
+  neighbors.forEach(
+    [&] (Vreg neighbor) {
+      if (recolor_avoid(state, recolor, neighbor, p)) return true;
+      // We failed to recolor this neighbor to a different register. We have to
+      // stop with this attempt, so rollback the colors to their old value.
+      recolor.changed.forEach(
+        [&] (Vreg changed) {
+          reg_info(state, changed).color = recolor.old[changed];
+        }
+      );
+      return false;
+    }
+  );
+
+  // We fixed Vregs as we changed them. Unfix them all now.
+  recolor.changed.forEach(
+    [&] (Vreg changed) { recolor.fixed[changed] = false; }
+  );
+}
+
+struct AffinityChunkPriority {
+  bool operator()(const AffinityChunk& c1, const AffinityChunk& c2) const {
+    if (c1.score < c2.score) return true;
+    if (c1.score > c2.score) return false;
+    return c1.regs > c2.regs;
+  }
+};
+using AffinityChunkQueue =
+  jit::priority_queue<AffinityChunk, AffinityChunkPriority>;
+
+// Attempt to assign all of the Vregs in the chunk at the top of the queue to
+// the same color which maximizes the scores of the satisfied affinities. This
+// might involve splitting the chunk into smaller pieces, which will be
+// re-inserted into the queue.
+void recolor_chunk(State& state,
+                   RecolorState& recolor,
+                   AffinityChunkQueue& chunks) {
+  assertx(!chunks.empty());
+
+  auto const& chunk = chunks.top();
+  assertx(chunk.regs.size() > 1);
+
+  // The best physical register we've found so far along with the score it
+  // generates and the set of Vregs that can be colored to that register.
+  PhysReg bestReg;
+  VregSet bestSet;
+  size_t bestScore = 0;
+
+  // Attempt to re-color the Vregs in the current chunk with the given
+  // register. Updating the best score as necessary.
+  auto const test = [&] (PhysReg reg) {
+    // Unfix all the colors in the chunk since we're going to be changing them.
+    for (auto const r : chunk.regs) recolor.fixed[r] = false;
+
+    recolor.notOrig.reset();
+    VregSet changed;
+    // Attempt to re-color each Vreg in the chunk, fixing each one when we
+    // finish (to avoid thrash). Record the Vregs which actually changed during
+    // the attempt.
+    for (auto const r : chunk.regs) {
+      recolor_single(state, recolor, r, reg);
+      changed |= recolor.changed;
+      recolor.fixed[r] = true;
+    }
+
+    // Check which subset of the chunk was actually re-colored to the desired
+    // register.
+    VregSet matched;
+    for (auto const r : chunk.regs) {
+      if (color_reg(reg_info(state, r).color) == reg) matched.add(r);
+    }
+
+    // Roll-back the colors to what they were originally.
+    changed.forEach(
+      [&] (Vreg r) {
+        if (!recolor.notOrig[r]) return;
+        reg_info(state, r).color = recolor.orig[r];
+      }
+    );
+
+    if (matched.none()) return;
+
+    // Calculate the sum of the affinities in the chunk which are now satisfied
+    // by having both Vregs have the same color.
+    size_t score = 0;
+    for (auto const& affinity : chunk.affinities) {
+      if (matched[affinity.r1] && matched[affinity.r2]) {
+        score += affinity.score;
+      }
+    }
+
+    // Update the best score if we've improved it.
+    if (bestReg != InvalidReg && score < bestScore) return;
+    bestReg = reg;
+    bestScore = score;
+    bestSet = std::move(matched);
+  };
+
+  // If the chunk has a constraint (some of the Vregs inside it have a
+  // precolor), try that first. Its very likely that will end up as the best
+  // choice anyways.
+  if (chunk.constraint != InvalidReg) test(chunk.constraint);
+  // If we found a register whose score matches the total of the chunk, we can't
+  // do any better. Otherwise try all the other available registers, bailing out
+  // if we hit the max score.
+  if (bestReg == InvalidReg || bestScore != chunk.score) {
+    recolor.available.forEach(
+      [&] (PhysReg reg) {
+        if (reg == chunk.constraint) return; // Checked outside of the loop
+        if (bestReg != InvalidReg && bestScore == chunk.score) return;
+        test(reg);
+      }
+    );
+  }
+
+  // We should have found a register and been able to re-color at least one Vreg
+  // with it.
+  assertx(bestReg != InvalidReg);
+  assertx(bestSet.any());
+
+  // After each re-coloring attempt, we rollbacked the colors to what they were
+  // originally. Now that we have the best register, we're going to set them for
+  // good. Unfix all the colors so we can change them.
+  for (auto const r : chunk.regs) recolor.fixed[r] = false;
+
+  // And then recolor the Vregs with the best register.
+  for (auto const r : chunk.regs) {
+    recolor_single(state, recolor, r, bestReg);
+    recolor.fixed[r] = true; // This is its new color, so fix it for good.
+    if (!bestSet[r]) continue;
+    // If we successfully re-colored this Vreg to this register the first time,
+    // we should be able to do it now.
+    assertx(color_reg(reg_info(state, r).color) == bestReg);
+    assertx(
+      !is_constrained_vreg(state, r) ||
+      color_reg(reg_info(state, r).color) == reg_info(state, r).precolor
+    );
+  }
+
+  // The Vregs which were successfully recolored will be left as fixed so they
+  // don't get recolored by later chunks. Those that weren't are eligible to be
+  // changed, however.
+  for (auto const r : chunk.regs) {
+    if (!bestSet[r]) recolor.fixed[r] = false;
+  }
+
+  // We re-colored everything, so remove the chunk and we're done.
+  if (chunk.regs.size() == bestSet.size()) {
+    chunks.pop();
+    return;
+  }
+
+  // We successfully re-colored some subset of the chunk with a color. Split the
+  // portion of the chunk which was not re-colored into a new chunk.
+  auto rest = chunk.split(state, [&] (Vreg r) { return !bestSet[r]; });
+  chunks.pop();
+  // Insert the new chunk back into the queue for re-coloring, unless if the
+  // chunk only has a single Vreg. A singleton chunk can be left as whatever
+  // color it has because by definition it has no copies to optimize away.
+  if (rest.regs.size() > 1) chunks.emplace(std::move(rest));
+}
+
+void optimize_colors(State& state) {
+  // Build def/use information because we'll need that for interference checks.
+  record_defs_and_uses(state);
+  // Then build the chunks.
+  auto chunks = build_affinity_chunks(state);
+
+  // Partition the chunks by the ones which represent spills and the ones which
+  // don't.
+  auto const spillsBegin = std::stable_partition(
+    chunks.begin(), chunks.end(),
+    [] (const AffinityChunk& c) { return !is_spill(c.cls); }
+  );
+
+  // Process the spills first. Optimization is a bit of misnormer here since we
+  // haven't assign colors to spills at all until now. Instead we use the same
+  // chunk machinery to assign spill slots. Since there's no upper bound on the
+  // number of spill slots we need to allocate this works.
+
+  // The chunks may not be sorted by their score. Sort the spill portion now.
+  std::sort(
+    spillsBegin, chunks.end(),
+    [] (const AffinityChunk& c1, const AffinityChunk& c2) {
+      if (c1.score > c2.score) return true;
+      if (c1.score < c2.score) return false;
+      return c1.regs < c2.regs;
+    }
+  );
+
+  // We only merged the spill chunks together if there was an affinity between
+  // them. Now merge together the spill chunks solely if they don't interfer. We
+  // don't want to do this for non-spill chunks because it combines Vregs into a
+  // single chunk for no good reason (we'll try to give them the same color even
+  // though there's no profit to be had from doing that). However we want to do
+  // it for spill chunks because it minimizes the total number of spill
+  // slots. This is, of course, a non-issue for non-spill chunks because the
+  // number of colors is fixed.
+  for (auto it1 = spillsBegin; it1 != chunks.end(); ++it1) {
+    auto& chunk1 = *it1;
+    if (chunk1.regs.empty()) continue;
+    assertx(is_spill(chunk1.cls));
+    assertx(chunk1.constraint == InvalidReg);
+
+    for (auto it2 = it1+1; it2 != chunks.end(); ++it2) {
+      auto& chunk2 = *it2;
+      if (chunk2.regs.empty()) continue;
+      assertx(is_spill(chunk2.cls));
+      assertx(chunk2.constraint == InvalidReg);
+      if (chunk1.cls != chunk2.cls || chunk1.interfers(state, chunk2)) continue;
+      chunk1.mergeInto(state, chunk2, nullptr);
+      chunk2.reset();
+    }
+  }
+
+  assertx(state.numSpillSlots == 0);
+  assertx(state.numWideSpillSlots == 0);
+
+  // The spill slot assignment is easy now. Just assign them using counters,
+  // with every Vreg in each chunk getting the same slot.
+  for (auto it = spillsBegin; it != chunks.end(); ++it) {
+    auto const& chunk = *it;
+    if (chunk.regs.empty()) continue;
+    assertx(is_spill(chunk.cls));
+    auto const color = chunk.cls == RegClass::Spill
+      ? Color{SpillSlot{state.numSpillSlots++}}
+      : Color{SpillSlotWide{state.numWideSpillSlots++}};
+    for (auto const r : chunk.regs) {
+      assertx(is_color_none(reg_info(state, r).color));
+      reg_info(state, r).color = color;
+    }
+  }
+  // We're done now with the spill chunks, erase them.
+  chunks.erase(spillsBegin, chunks.end());
+
+  // Make sure the spill slot count is round (for alignment).
+  if ((state.numSpillSlots % 2) == 1) ++state.numSpillSlots;
+
+  RecolorState recolor;
+  recolor.fixed.resize(state.regInfo.size());
+  recolor.old.resize(state.regInfo.size());
+  recolor.notOrig.resize(state.regInfo.size());
+  recolor.orig.resize(state.regInfo.size());
+
+  // Put the remaining chunks in the priority queue and process each one
+  // according to its weight.
+  AffinityChunkQueue chunksQueue(AffinityChunkPriority{}, std::move(chunks));
+  while (!chunksQueue.empty()) {
+    recolor.available = [&]{
+      switch (chunksQueue.top().cls) {
+        case RegClass::AnyNarrow:
+        case RegClass::GP:
+          return state.gpUnreserved;
+        case RegClass::SIMD:
+        case RegClass::SIMDWide:
+          return state.simdUnreserved;
+        case RegClass::Any:
+        case RegClass::SF:
+        case RegClass::Spill:
+        case RegClass::SpillWide:
+          break;
+      }
+      always_assert(false);
+    }();
+    // Attempt to recolor this chunk. If necessary, it will split the chunk and
+    // re-insert it into the queue.
+    recolor_chunk(state, recolor, chunksQueue);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -5302,6 +6552,7 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   // recalculate it.
   calculate_liveness(state);
   assign_colors(state);
+  optimize_colors(state);
 
   printUnit(kVasmRegAllocLevel, "after vasm-graph-color", unit);
 

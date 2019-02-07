@@ -8,8 +8,6 @@ module Typing_subtype = Typing_subtype
 let global_options =
   GlobalOptions.make
     ~tco_assume_php:true
-    ~tco_safe_array:true
-    ~tco_safe_vector_array:true
     ~po_allow_goto:false
     ~po_default_mode:"strict"
     ~tco_unsafe_rx:false

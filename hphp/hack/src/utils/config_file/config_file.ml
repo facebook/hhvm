@@ -54,15 +54,19 @@ module Getters = struct
     Option.value_map (SMap.get key config) ~default ~f:int_of_string
 
   let int_opt key config =
-    match SMap.get key config with
-    | Some s -> int_of_string_opt s
-    | None -> None
+    Option.map (SMap.get key config) ~f:int_of_string
 
   let float_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:float_of_string
 
+  let float_opt key config =
+    Option.map (SMap.get key config) ~f:float_of_string
+
   let bool_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:bool_of_string
+
+  let bool_opt key config =
+    Option.map (SMap.get key config) ~f:bool_of_string
 
   let string_list ~delim key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:(Str.split delim)

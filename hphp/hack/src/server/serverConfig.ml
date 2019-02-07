@@ -149,7 +149,7 @@ let process_ignored_paths config =
 
 let process_forward_compatibility_level config =
   SMap.get config "forward_compatibility_level"
-  |> Option.value_map ~f:ForwardCompatibilityLevel.from_string ~default:ForwardCompatibilityLevel.HEAD
+  |> Option.value_map ~f:ForwardCompatibilityLevel.from_string ~default:ForwardCompatibilityLevel.default
 
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
@@ -256,49 +256,44 @@ let load config_filename options =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let forward_compat_level = process_forward_compatibility_level config in
   let global_opts = GlobalOptions.make
-    ~tco_assume_php:(bool_ "assume_php" ~default:true config)
-    ~tco_safe_array:(bool_ "safe_array" ~default:true config)
-    ~tco_safe_vector_array:(bool_ "safe_vector_array" ~default:true config)
-    ~po_deregister_php_stdlib:(bool_ "deregister_php_stdlib" ~default:false config)
-    ~po_disallow_execution_operator:false
-    ~po_disable_define:false
-    ~po_disable_nontoplevel_declarations:false
-    ~po_enable_concurrent:(bool_ "enable_concurrent" ~default:false config)
-    ~po_enable_await_as_an_expression:(bool_ "enable_await_as_an_expression" ~default:false config)
-    ~po_default_mode:(string_ "default_mode" ~default:GlobalOptions.(po_default_mode default) config)
-    ~po_allow_goto:(not (bool_ "disallow_goto" ~default:false config))
-    ~tco_experimental_features:(config_experimental_tc_features config)
-    ~tco_migration_flags:(config_tc_migration_flags config)
-    ~tco_dynamic_view:false (* option to set Tany as Tdynamic *)
-    ~tco_disallow_array_as_tuple:(bool_ "disallow_array_as_tuple" ~default:false config)
-    ~po_auto_namespace_map:(prepare_auto_namespace_map config)
-    ~tco_disallow_ambiguous_lambda:(bool_ "disallow_ambiguous_lambda" ~default:false config)
-    ~tco_disallow_array_typehint:(bool_ "disallow_array_typehint" ~default:false config)
-    ~tco_disallow_array_literal:(bool_ "disallow_array_literal" ~default:false config)
-    ~tco_untyped_nonstrict_lambda_parameters:(bool_
-      "untyped_nonstrict_lambda_parameters" ~default:false config)
-    ~tco_disallow_assign_by_ref:(bool_ "disallow_assign_by_ref" ~default:false config)
-    ~tco_disallow_array_cell_pass_by_ref:(bool_
-      "disallow_array_cell_pass_by_ref" ~default:false config)
-    ~tco_language_feature_logging:(bool_ "language_feature_logging" ~default:false config)
-    ~tco_log_inference_constraints:(ServerArgs.log_inference_constraints options)
-    ~tco_unsafe_rx:(bool_ "unsafe_rx" ~default:true config)
-    ~tco_disallow_implicit_returns_in_non_void_functions:(bool_
-      "disallow_implicit_returns_in_non_void_functions" ~default:false config)
-    ~tco_disallow_unset_on_varray:(bool_ "disallow_unset_on_varray" ~default:false config)
-    ~tco_disallow_scrutinee_case_value_type_mismatch:(bool_
-      "disallow_scrutinee_case_value_type_mismatch" ~default:true config)
-    ~tco_disallow_stringish_magic:(bool_ "disallow_stringish_magic" ~default:false config)
-    ~tco_disallow_anon_use_capture_by_ref:(bool_
-      "disallow_anon_use_capture_by_ref" ~default:false config)
-    ~tco_new_inference:(float_ "new_inference" ~default:0.0 config)
-    ~tco_new_inference_no_eager_solve:(bool_ "new_inference_no_eager_solve" ~default:false config)
-    ~tco_timeout:(int_ "timeout" ~default:0 config)
-    ~tco_disallow_invalid_arraykey:(bool_ "disallow_invalid_arraykey" ~default:false config)
-    ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
+    ?tco_assume_php:(bool_opt "assume_php" config)
+    ?tco_safe_array:(bool_opt "safe_array" config)
+    ?tco_safe_vector_array:(bool_opt "safe_vector_array" config)
+    ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
+    ?po_enable_concurrent:(bool_opt "enable_concurrent" config)
+    ?po_enable_await_as_an_expression:(bool_opt "enable_await_as_an_expression" config)
+    ?po_default_mode:(string_opt "default_mode" config)
+    ?po_allow_goto:(Option.map ~f:not (bool_opt "disallow_goto" config))
+    ?tco_disallow_array_as_tuple:(bool_opt "disallow_array_as_tuple" config)
+    ?tco_disallow_ambiguous_lambda:(bool_opt "disallow_ambiguous_lambda" config)
+    ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)
+    ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
+    ?tco_untyped_nonstrict_lambda_parameters:
+      (bool_opt "untyped_nonstrict_lambda_parameters" config)
+    ?tco_disallow_assign_by_ref:(bool_opt "disallow_assign_by_ref" config)
+    ?tco_disallow_array_cell_pass_by_ref:
+      (bool_opt "disallow_array_cell_pass_by_ref" config)
+    ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
+    ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)
+    ?tco_disallow_implicit_returns_in_non_void_functions:
+      (bool_opt "disallow_implicit_returns_in_non_void_functions" config)
+    ?tco_disallow_unset_on_varray:(bool_opt "disallow_unset_on_varray" config)
+    ?tco_disallow_scrutinee_case_value_type_mismatch:
+      (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
+    ?tco_disallow_stringish_magic:(bool_opt "disallow_stringish_magic" config)
+    ?tco_disallow_anon_use_capture_by_ref:
+      (bool_opt "disallow_anon_use_capture_by_ref" config)
+    ?tco_new_inference:(float_opt "new_inference" config)
+    ?tco_new_inference_no_eager_solve:(bool_opt "new_inference_no_eager_solve" config)
+    ?tco_timeout:(int_opt "timeout" config)
+    ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
+    ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ~forward_compatibility_level:forward_compat_level
-    ~log_levels:SMap.empty
-    ~po_enable_stronger_await_binding:(bool_ "stronger_await_binding" ~default:false config)
+    ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
+    ~po_auto_namespace_map:(prepare_auto_namespace_map config)
+    ~tco_experimental_features:(config_experimental_tc_features config)
+    ~tco_log_inference_constraints:(ServerArgs.log_inference_constraints options)
+    ~tco_migration_flags:(config_tc_migration_flags config)
     ()
   in
   Errors.ignored_fixme_codes :=

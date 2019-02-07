@@ -199,8 +199,8 @@ let tco_migration_flags_all =
 
 let default = {
  tco_assume_php = false;
- tco_safe_array = false;
- tco_safe_vector_array = false;
+ tco_safe_array = true;
+ tco_safe_vector_array = true;
  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
  tco_experimental_features = tco_experimental_all;

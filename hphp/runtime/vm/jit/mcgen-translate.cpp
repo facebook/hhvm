@@ -138,13 +138,8 @@ void optimize(tc::FuncMetaInfo& info) {
   }
 }
 
-struct OptimizeData {
-  FuncId id;
-  tc::FuncMetaInfo info;
-};
-
-struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
-  void doJob(OptimizeData* d) override {
+struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
+  void doJob(tc::FuncMetaInfo* info) override {
     ProfileNonVMThread nonVM;
 
     hphp_session_init(Treadmill::SessionKind::TranslateWorker);
@@ -154,13 +149,13 @@ struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
     };
 
     // Check if the func was treadmilled before the job started
-    if (!Func::isFuncIdValid(d->id)) return;
+    if (!Func::isFuncIdValid(info->fid)) return;
 
-    if (profData()->optimized(d->id)) return;
-    profData()->setOptimized(d->id);
+    if (profData()->optimized(info->fid)) return;
+    profData()->setOptimized(info->fid);
 
     VMProtect _;
-    optimize(d->info);
+    optimize(*info);
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -188,8 +183,8 @@ WorkerDispatcher& dispatcher() {
   return *dispatcher;
 }
 
-void enqueueRetranslateOptRequest(OptimizeData* d) {
-  dispatcher().enqueue(d);
+void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
+  dispatcher().enqueue(info);
 }
 
 /*
@@ -256,7 +251,7 @@ void retranslateAll() {
   // 3) Generate machine code for all the profiled functions.
 
   auto const initialSize = 512;
-  std::vector<OptimizeData> jobs;
+  std::vector<tc::FuncMetaInfo> jobs;
   jobs.reserve(nFuncs);
   std::unique_ptr<uint8_t[]> codeBuffer(new uint8_t[nFuncs * initialSize]);
 
@@ -270,10 +265,9 @@ void retranslateAll() {
       for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
         auto const fid = sortedFuncs[i];
         auto const func = const_cast<Func*>(Func::fromFuncId(fid));
-        jobs.emplace_back(OptimizeData{
-          fid,
+        jobs.emplace_back(
           tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
-        });
+        );
         enqueueRetranslateOptRequest(&jobs.back());
       }
     }
@@ -287,13 +281,7 @@ void retranslateAll() {
 
   // 4) Relocate the machine code into code.hot in the desired order
 
-  std::vector<tc::FuncMetaInfo> infos;
-  infos.reserve(nFuncs);
-  for (auto& job: jobs) {
-    infos.emplace_back(std::move(job.info));
-  }
-
-  tc::relocatePublishSortedOptFuncs(std::move(infos));
+  tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
   if (serverMode) {
     Logger::Info("retranslateAll: finished retranslating all optimized "

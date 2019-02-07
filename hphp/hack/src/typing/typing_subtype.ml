@@ -236,6 +236,7 @@ let rec process_simplify_subtype_result ~this_ty ~fail env prop =
 and simplify_subtype
   ~(seen_generic_params : SSet.t option)
   ?(deep : bool = true)
+  ~(no_top_bottom : bool)
   ?(this_ty : locl ty option = None)
   (ty_sub : locl ty)
   (ty_super : locl ty)
@@ -257,6 +258,9 @@ and simplify_subtype
     if new_inference
     then env, TL.IsSubtype (ety_sub, ety_super)
     else env, TL.IsSubtype (ty_sub, ty_super) in
+  let simplify_subtype = simplify_subtype ~no_top_bottom in
+  let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom in
+  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -350,7 +354,7 @@ and simplify_subtype
   | Tabstract ((AKnewtype _ | AKdependent _), None), _
   | _, Tabstract ((AKnewtype _ | AKdependent _), None) -> assert false
 
-  | Terr, _ | _, Terr -> valid ()
+  | Terr, _ | _, Terr -> if no_top_bottom then default () else valid ()
 
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
@@ -964,7 +968,7 @@ and simplify_subtype
     else default ()
 
   | _, Tany | Tany, _ ->
-    if new_inference then valid () else default ()
+    if new_inference && not no_top_bottom then valid () else default ()
 
   (* If subtype and supertype are the same generic parameter, we're done *)
   | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)
@@ -1037,12 +1041,17 @@ and simplify_subtype
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
   ~(deep : bool)
+  ~(no_top_bottom : bool)
   (cid : string)
   (variancel : Ast.variance list)
   (children_tyl : locl ty list)
   (super_tyl : locl ty list)
   : Env.env -> Env.env * TL.subtype_prop
   = fun env ->
+  let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params
+    ~deep ~this_ty:None in
+  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom
+    ~seen_generic_params ~deep in
   match variancel, children_tyl, super_tyl with
   | [], _, _
   | _, [], _
@@ -1050,27 +1059,28 @@ and simplify_subtype_variance
   | variance :: variancel, child :: childrenl, super :: superl ->
       begin match variance with
       | Ast.Covariant ->
-        simplify_subtype ~seen_generic_params ~deep ~this_ty:None child super env
+        simplify_subtype child super env
       | Ast.Contravariant ->
         let super = (Reason.Rcontravariant_generic (fst super,
           Utils.strip_ns cid), snd super) in
-        simplify_subtype ~seen_generic_params ~deep ~this_ty:None super child env
+        simplify_subtype super child env
       | Ast.Invariant ->
         let super' = (Reason.Rinvariant_generic (fst super,
           Utils.strip_ns cid), snd super) in
         if deep
         then
           env |>
-          simplify_subtype ~seen_generic_params ~deep ~this_ty:None child super' &&&
-          simplify_subtype ~seen_generic_params ~deep ~this_ty:None super child
+          simplify_subtype child super' &&&
+          simplify_subtype super child
         else
           env, TL.IsEqual (child, super')
       end &&&
-      simplify_subtype_variance ~seen_generic_params ~deep cid variancel childrenl superl
+      simplify_subtype_variance cid variancel childrenl superl
 
 and simplify_subtype_params
-  ~seen_generic_params
-  ~deep
+  ~(seen_generic_params : SSet.t option)
+  ~(deep : bool)
+  ~(no_top_bottom : bool)
   ?(is_method : bool = false)
   ?(check_params_reactivity = false)
   ?(check_params_mutability = false)
@@ -1080,6 +1090,13 @@ and simplify_subtype_params
   (variadic_super_ty : locl ty option)
   env =
 
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
+    ~no_top_bottom ~deep in
+  let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
+    ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_supertype_params_with_variadic = simplify_supertype_params_with_variadic
+    ~seen_generic_params ~no_top_bottom ~deep in
   match subl, superl with
   (* When either list runs out, we still have to typecheck that
   the remaining portion sub/super types with the other's variadic.
@@ -1108,10 +1125,10 @@ and simplify_subtype_params
   *)
   | [], _ -> (match variadic_super_ty with
     | None -> valid env
-    | Some ty -> simplify_supertype_params_with_variadic ~seen_generic_params ~deep superl ty env)
+    | Some ty -> simplify_supertype_params_with_variadic superl ty env)
   | _, [] -> (match variadic_sub_ty with
     | None -> valid env
-    | Some ty -> simplify_subtype_params_with_variadic ~seen_generic_params ~deep subl ty env)
+    | Some ty -> simplify_subtype_params_with_variadic subl ty env)
   | sub :: subl, super :: superl ->
     env |>
     begin
@@ -1141,42 +1158,50 @@ and simplify_subtype_params
       | FPinout, FPinout ->
         (* Inout parameters are invariant wrt subtyping for function types. *)
         env |>
-        simplify_subtype ~seen_generic_params ~deep ty_super ty_sub &&&
-        simplify_subtype ~seen_generic_params ~deep ty_sub ty_super
+        simplify_subtype ty_super ty_sub &&&
+        simplify_subtype ty_sub ty_super
       | _ ->
         env |>
-        simplify_subtype ~seen_generic_params ~deep ty_sub ty_super
+        simplify_subtype ty_sub ty_super
       end &&&
-    simplify_subtype_params ~seen_generic_params ~deep ~is_method subl superl
+    simplify_subtype_params ~is_method subl superl
       variadic_sub_ty variadic_super_ty
 
 and simplify_subtype_params_with_variadic
-  ~seen_generic_params
-  ~deep
+  ~(seen_generic_params : SSet.t option)
+  ~(deep : bool)
+  ~(no_top_bottom : bool)
   (subl : locl fun_param list)
   (variadic_ty : locl ty)
   env =
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
+    ~seen_generic_params ~no_top_bottom ~deep in
   match subl with
   | [] -> valid env
   | { fp_type = sub; _ } :: subl ->
     let env = { env with Env.pos = Reason.to_pos (fst sub) } in
     env |>
-    simplify_subtype ~seen_generic_params ~deep sub variadic_ty &&&
-    simplify_subtype_params_with_variadic ~seen_generic_params ~deep subl variadic_ty
+    simplify_subtype sub variadic_ty &&&
+    simplify_subtype_params_with_variadic subl variadic_ty
 
 and simplify_supertype_params_with_variadic
-  ~seen_generic_params
-  ~deep
+  ~(seen_generic_params : SSet.t option)
+  ~(deep : bool)
+  ~(no_top_bottom : bool)
   (superl : locl fun_param list)
   (variadic_ty : locl ty)
   env =
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_supertype_params_with_variadic = simplify_supertype_params_with_variadic
+    ~seen_generic_params ~no_top_bottom ~deep in
   match superl with
   | [] -> valid env
   | { fp_type = super; _ } :: superl ->
     let env = { env with Env.pos = Reason.to_pos (fst super) } in
     env |>
-    simplify_subtype ~seen_generic_params ~deep variadic_ty super &&&
-    simplify_supertype_params_with_variadic ~seen_generic_params ~deep superl variadic_ty
+    simplify_subtype variadic_ty super &&&
+    simplify_supertype_params_with_variadic superl variadic_ty
 
 and subtype_reactivity
   ?(extra_info: reactivity_extra_info option)
@@ -1557,8 +1582,9 @@ and check_subtype_funs_attributes
  *   (3) special casing for variadics, and various reactivity and mutability attributes
  *)
  and simplify_subtype_funs
-  ~seen_generic_params
-  ~deep
+   ~(seen_generic_params : SSet.t option)
+   ~(deep : bool)
+   ~(no_top_bottom : bool)
   ~(check_return : bool)
   ?(extra_info: reactivity_extra_info option)
   (r_sub : Reason.t)
@@ -1574,6 +1600,10 @@ and check_subtype_funs_attributes
     | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
     | _ -> None in
 
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
+    ~no_top_bottom ~deep in
+
   (* First apply checks on attributes, coroutine-ness and variadic arity *)
   env |>
   check_subtype_funs_attributes ?extra_info r_sub ft_sub r_super ft_super &&&
@@ -1581,7 +1611,7 @@ and check_subtype_funs_attributes
   (* Now do contravariant subtyping on parameters *)
   begin
     match variadic_subtype, variadic_supertype with
-    | Some var_sub, Some var_super -> simplify_subtype ~seen_generic_params ~deep var_super var_sub
+    | Some var_sub, Some var_super -> simplify_subtype var_super var_sub
     | _ -> valid
   end &&&
 
@@ -1592,8 +1622,6 @@ and check_subtype_funs_attributes
     let is_method =
       (Option.map extra_info (fun i -> Option.is_some i.method_info)) = Some true in
     simplify_subtype_params
-      ~seen_generic_params
-      ~deep
       ~is_method
       ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
       ~check_params_mutability
@@ -1602,7 +1630,7 @@ and check_subtype_funs_attributes
 
   (* Finally do covariant subtryping on return type *)
   if check_return
-  then simplify_subtype ~seen_generic_params ~deep ft_sub.ft_ret ft_super.ft_ret
+  then simplify_subtype ft_sub.ft_ret ft_super.ft_ret
   else valid
 
 (* One of the main entry points to this module *)
@@ -1737,7 +1765,10 @@ and sub_type_inner
   log_subtype ~this_ty "sub_type_inner" env ty_sub ty_super;
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, prop = simplify_subtype
-    ~seen_generic_params:empty_seen ~deep:new_inference ~this_ty ty_sub ty_super env in
+    ~seen_generic_params:empty_seen
+    ~deep:new_inference
+    ~no_top_bottom:false
+    ~this_ty ty_sub ty_super env in
   let env, prop = if new_inference then prop_to_env env prop else env, prop in
   let env =
     if new_inference || TypecheckerOptions.experimental_feature_enabled
@@ -1878,9 +1909,9 @@ and is_sub_type
     result
   end
 
-and is_sub_type_alt env ty1 ty2 =
+and is_sub_type_alt env ~no_top_bottom ty1 ty2 =
   let _env, prop =
-    simplify_subtype ~seen_generic_params:None ~deep:true
+    simplify_subtype ~seen_generic_params:None ~deep:true ~no_top_bottom
     ~this_ty:(Some ty1) ty1 ty2 env in
   if TL.is_valid prop then Some true
   else
@@ -1898,6 +1929,7 @@ and is_sub_type_alt env ty1 ty2 =
  * It can be assumed that the original list contains no redundancy.
  *)
 and try_intersect env ty tyl =
+  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
@@ -1930,6 +1962,7 @@ and try_intersect env ty tyl =
  * TODO: there are many more unions to implement yet.
  *)
 and try_union env ty tyl =
+  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
@@ -2117,6 +2150,7 @@ let subtype_method
   simplify_subtype_funs
     ~seen_generic_params:empty_seen
     ~deep:true
+    ~no_top_bottom:false
     ~check_return
     ~extra_info
     r_sub ft_sub_no_tvars
@@ -2207,7 +2241,7 @@ let rec decompose_subtype
   log_subtype ~this_ty:None "decompose_subtype" env ty_sub ty_super;
   let env, prop =
     simplify_subtype ~seen_generic_params:None
-      ~deep:true ~this_ty:None ty_sub ty_super env in
+      ~deep:true ~no_top_bottom:false ~this_ty:None ty_sub ty_super env in
   decompose_subtype_add_prop p env prop
 
 and decompose_subtype_add_prop p env prop =

@@ -70,7 +70,8 @@ type is_sub_type_type = Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
 let is_sub_type x = !is_sub_type_ref x
 
-type is_sub_type_alt_type = Env.env -> locl ty -> locl ty -> bool option
+type is_sub_type_alt_type =
+  Env.env -> no_top_bottom:bool -> locl ty -> locl ty -> bool option
 let (is_sub_type_alt_ref: is_sub_type_alt_type ref) = ref not_implemented
 let is_sub_type_alt x = !is_sub_type_alt_ref x
 
@@ -512,6 +513,7 @@ let flatten_unresolved env ty acc =
   env, res
 
 let rec member_inter env ty tyl acc =
+  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
   match tyl with
   | [] -> env, ty :: acc
   | x :: rl ->

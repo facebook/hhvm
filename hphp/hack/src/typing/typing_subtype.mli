@@ -41,6 +41,7 @@ Result is
 *)
 val is_sub_type_alt :
   Env.env ->
+  no_top_bottom:bool ->
   locl ty ->
   locl ty ->
   bool option

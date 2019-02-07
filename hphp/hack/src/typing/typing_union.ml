@@ -53,18 +53,13 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
 
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
-  else match ty1, ty2 with
-    (* We don't want to treat Tany and Terr as top or bottom types *)
-    | (_, (Tany | Terr)), _
-    | _, (_, (Tany | Terr)) ->
+  else
+    let is_sub_type = Typing_subtype.is_sub_type_alt ~no_top_bottom:true in
+    if is_sub_type env ty1 ty2 = Some true then env, ty2
+    else if is_sub_type env ty2 ty1 = Some true then env, ty1
+    else
       let r = union_reason r1 r2 in
       union_ env ty1 ty2 r
-    | _, _ ->
-      if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
-      else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
-      else
-        let r = union_reason r1 r2 in
-        union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r =
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in

@@ -160,43 +160,44 @@ let parse_options () =
   let line = ref 0 in
   let log_key = ref "" in
   let log_levels = ref SMap.empty in
+  let all_errors = ref false in
+  let batch_mode = ref false in
   let set_mode x () =
     if !mode <> Errors
     then raise (Arg.Bad "only a single mode should be specified")
     else mode := x in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
-  let safe_array = ref false in
-  let safe_vector_array = ref false in
+  let safe_array = ref (Some false) in
+  let safe_vector_array = ref (Some false) in
   let forbid_nullable_cast = ref false in
-  let deregister_attributes = ref false in
+  let deregister_attributes = ref None in
   let disable_optional_and_unknown_shape_fields = ref false in
-  let disallow_ambiguous_lambda = ref false in
-  let disallow_array_typehint = ref false in
-  let disallow_array_literal = ref false in
+  let disallow_ambiguous_lambda = ref None in
+  let disallow_array_typehint = ref None in
+  let disallow_array_literal = ref None in
   let disallow_reified_generics = ref false in
-  let untyped_nonstrict_lambda_parameters = ref false in
-  let no_fallback_in_namespaces = ref false in
-  let dynamic_view = ref false in
-  let allow_array_as_tuple = ref false in
-  let disallow_assign_by_ref = ref false in
-  let allow_array_cell_pass_by_ref = ref false in
-  let allow_anon_use_capture_by_ref = ref false in
-  let allow_user_attributes = ref false in
-  let disallow_unset_on_varray = ref false in
-  let auto_namespace_map = ref [] in
-  let dont_assume_php = ref false in
-  let unsafe_rx = ref false in
-  let enable_concurrent = ref false in
-  let enable_await_as_an_expression = ref false in
-  let disallow_stringish_magic = ref false in
-  let log_inference_constraints = ref false in
-  let new_inference = ref false in
-  let new_inference_no_eager_solve = ref false in
-  let timeout = ref 0 in
-  let all_errors = ref false in
-  let batch_mode = ref false in
-  let disallow_invalid_arraykey = ref false in
-  let enable_stronger_await_binding = ref false in
+  let untyped_nonstrict_lambda_parameters = ref None in
+  let no_fallback_in_namespaces = ref None in
+  let dynamic_view = ref None in
+  let allow_array_as_tuple = ref (Some false) in
+  let disallow_assign_by_ref = ref None in
+  let allow_array_cell_pass_by_ref = ref (Some false) in
+  let allow_anon_use_capture_by_ref = ref (Some false) in
+  let allow_user_attributes = ref None in
+  let disallow_unset_on_varray = ref None in
+  let auto_namespace_map = ref None in
+  let dont_assume_php = ref (Some false) in
+  let unsafe_rx = ref (Some false) in
+  let enable_concurrent = ref None in
+  let enable_await_as_an_expression = ref None in
+  let disallow_stringish_magic = ref None in
+  let log_inference_constraints = ref None in
+  let new_inference = ref None in
+  let new_inference_no_eager_solve = ref None in
+  let timeout = ref None in
+  let disallow_invalid_arraykey = ref None in
+  let enable_stronger_await_binding = ref None in
+  let set_bool x () = x := Some true in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -205,10 +206,10 @@ let parse_options () =
       Arg.Set all_errors,
       " List all errors not just the first one";
     "--allow-user-attributes",
-      Arg.Set allow_user_attributes,
+      Arg.Unit (set_bool allow_user_attributes),
       " Allow all user attributes";
     "--deregister-attributes",
-      Arg.Set deregister_attributes,
+      Arg.Unit (set_bool deregister_attributes),
       " Ignore all functions with attribute '__PHPStdLib'";
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
@@ -218,7 +219,7 @@ let parse_options () =
       " Produce autocomplete suggestions as if manually triggered by user";
     "--auto-namespace-map",
       Arg.String (fun m ->
-        auto_namespace_map := ServerConfig.convert_auto_namespace_to_map m),
+        auto_namespace_map := Some (ServerConfig.convert_auto_namespace_to_map m)),
       " Alias namespaces";
     "--ffp-auto-complete",
       Arg.Unit (set_mode Ffp_autocomplete),
@@ -250,7 +251,7 @@ let parse_options () =
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
     "--dont-assume-php",
-      Arg.Set dont_assume_php,
+      Arg.Unit (set_bool dont_assume_php),
       " Don't assume that undefined names are in PHP files";
     "--dump-deps",
       Arg.Unit (set_mode Dump_deps),
@@ -306,33 +307,33 @@ let parse_options () =
       " Test comparison functions used in incremental mode on declarations" ^
       " in provided file";
     "--safe_array",
-      Arg.Set safe_array,
+      Arg.Unit (set_bool safe_array),
       " Enforce array subtyping relationships so that array<T> and array<Tk, \
       Tv> are each subtypes of array but not vice-versa.";
     "--safe_vector_array",
-      Arg.Set safe_vector_array,
+      Arg.Unit (set_bool safe_vector_array),
       " Enforce array subtyping relationships so that array<T> is not a \
       of array<int, T>.";
     "--forbid_nullable_cast",
       Arg.Set forbid_nullable_cast,
       " Forbid casting from nullable values.";
     "--disallow-ambiguous-lambda",
-      Arg.Set disallow_ambiguous_lambda,
+      Arg.Unit (set_bool disallow_ambiguous_lambda),
       " Disallow definition of lambdas that require use-site checking.";
     "--untyped-nonstrict-lambda-parameters",
-      Arg.Set untyped_nonstrict_lambda_parameters,
+      Arg.Unit (set_bool untyped_nonstrict_lambda_parameters),
       " In non-strict files treat lambda parameters without a type hint as untyped.";
     "--disallow-array-typehint",
-      Arg.Set disallow_array_typehint,
+      Arg.Unit (set_bool disallow_array_typehint),
       " Disallow usage of array typehints.";
     "--disallow-array-literal",
-      Arg.Set disallow_array_literal,
+      Arg.Unit (set_bool disallow_array_literal),
       " Disallow usage of array literals.";
     "--disallow-reified-generics",
       Arg.Set disallow_reified_generics,
       " Disallow usage of reified generics.";
     "--no-fallback-in-namespaces",
-      Arg.Set no_fallback_in_namespaces,
+      Arg.Unit (set_bool no_fallback_in_namespaces),
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
     "--infer-return-types",
       Arg.Unit (set_mode Infer_return_types),
@@ -341,49 +342,49 @@ let parse_options () =
         Arg.Unit (set_mode Least_upper_bound),
         " Gets the least upper bound of a list of types.";
     "--dynamic-view",
-        Arg.Set (dynamic_view),
+        Arg.Unit (set_bool dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic";
     "--allow-array-as-tuple",
-        Arg.Set allow_array_as_tuple,
+        Arg.Unit (set_bool allow_array_as_tuple),
         " Allow tuples to be passed as untyped arrays and vice versa";
     "--disallow-assign-by-ref",
-        Arg.Set disallow_assign_by_ref,
+        Arg.Unit (set_bool disallow_assign_by_ref),
         " Disallow assignment by reference";
     "--allow-array-cell-pass-by-ref",
-        Arg.Set allow_array_cell_pass_by_ref,
+        Arg.Unit (set_bool allow_array_cell_pass_by_ref),
         " Allow binding of array cells by reference as arguments to function calls";
     "--allow-anon-use-capture-by-ref",
-        Arg.Set allow_anon_use_capture_by_ref,
+        Arg.Unit (set_bool allow_anon_use_capture_by_ref),
         " Allow binding of local variables by reference in anonymous function use clauses";
     "--disallow-unset-on-varray",
-        Arg.Set disallow_unset_on_varray,
+        Arg.Unit (set_bool disallow_unset_on_varray),
         " Disallow unsetting indices from varrays";
     "--enable-concurrent",
-      Arg.Set enable_concurrent,
+      Arg.Unit (set_bool enable_concurrent),
       " Enable the concurrent feature";
     "--enable-await-as-an-expression",
-      Arg.Set enable_await_as_an_expression,
+      Arg.Unit (set_bool enable_await_as_an_expression),
       " Enable the await-as-an-expression feature";
     "--unsafe-rx",
-        Arg.Set unsafe_rx,
+        Arg.Unit (set_bool unsafe_rx),
         " Disables reactivity related errors";
     "--mro",
         Arg.Unit (set_mode Linearization),
         " Grabs the linearization of all classes in a file.";
     "--disallow-stringish-magic",
-        Arg.Set disallow_stringish_magic,
+        Arg.Unit (set_bool disallow_stringish_magic),
         " Disallow using objects in contexts where strings are required.";
     "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
+        Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba.";
     "--new-inference",
-        Arg.Set new_inference,
+        Arg.Unit (fun () -> new_inference := Some 1.0),
         " Type inference by constraint generation.";
     "--new-inference-no-eager-solve",
-        Arg.Set new_inference_no_eager_solve,
+        Arg.Unit (set_bool new_inference_no_eager_solve),
         " Do not eagerly solve invariant type variable constraints.";
     "--timeout",
-        Arg.Int (fun secs -> timeout := secs),
+        Arg.Int (fun secs -> timeout := Some secs),
         " Timeout in seconds for checking a function or a class.";
     "--hh-log-level",
         Arg.Tuple ([
@@ -395,10 +396,10 @@ let parse_options () =
         Arg.Set batch_mode,
         " Typecheck each file passed in independently";
     "--disallow-invalid-arraykey",
-      Arg.Set disallow_invalid_arraykey,
+      Arg.Unit (set_bool disallow_invalid_arraykey),
         " Disallow using values that get casted to arraykey at runtime as array keys";
     "--stronger-await-binding",
-      Arg.Set enable_stronger_await_binding,
+      Arg.Unit (set_bool enable_stronger_await_binding),
       "Increases precedence of await during parsing.";
   ] in
   let options = Arg.align ~limit:25 options in
@@ -406,35 +407,35 @@ let parse_options () =
   let fns = match !fn_ref with
     | [] -> die usage
     | x -> x in
-  let tcopt = {
-    GlobalOptions.default with
-      GlobalOptions.tco_assume_php = not !dont_assume_php;
-      GlobalOptions.tco_unsafe_rx = !unsafe_rx;
-      GlobalOptions.tco_safe_array = !safe_array;
-      GlobalOptions.tco_safe_vector_array = !safe_vector_array;
-      GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
-      GlobalOptions.tco_disallow_ambiguous_lambda = !disallow_ambiguous_lambda;
-      GlobalOptions.tco_untyped_nonstrict_lambda_parameters =
-        !untyped_nonstrict_lambda_parameters;
-      GlobalOptions.tco_disallow_array_typehint = !disallow_array_typehint;
-      GlobalOptions.tco_disallow_array_literal = !disallow_array_literal;
-      GlobalOptions.tco_dynamic_view = !dynamic_view;
-      GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
-      GlobalOptions.tco_disallow_assign_by_ref = !disallow_assign_by_ref;
-      GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
-      GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
-      GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
-      GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
-      GlobalOptions.tco_log_inference_constraints = !log_inference_constraints;
-      GlobalOptions.tco_new_inference = if !new_inference then 1.0 else 0.0;
-      GlobalOptions.tco_new_inference_no_eager_solve = !new_inference_no_eager_solve;
-      GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
-      GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
-      GlobalOptions.po_enable_concurrent = !enable_concurrent;
-      GlobalOptions.po_enable_await_as_an_expression = !enable_await_as_an_expression;
-      GlobalOptions.log_levels = !log_levels;
-      GlobalOptions.po_enable_stronger_await_binding = !enable_stronger_await_binding;
-  } in
+  let not_ = Option.map ~f:not in
+  let tcopt = GlobalOptions.make
+    ?tco_assume_php:(not_ !dont_assume_php)
+    ?tco_unsafe_rx:(!unsafe_rx)
+    ?tco_safe_array:(!safe_array)
+    ?tco_safe_vector_array:(!safe_vector_array)
+    ?po_deregister_php_stdlib:(!deregister_attributes)
+    ?tco_disallow_ambiguous_lambda:(!disallow_ambiguous_lambda)
+    ?tco_untyped_nonstrict_lambda_parameters:(!untyped_nonstrict_lambda_parameters)
+    ?tco_disallow_array_typehint:(!disallow_array_typehint)
+    ?tco_disallow_array_literal:(!disallow_array_literal)
+    ?tco_dynamic_view:(!dynamic_view)
+    ?tco_disallow_array_as_tuple:(not_ !allow_array_as_tuple)
+    ?tco_disallow_assign_by_ref:(!disallow_assign_by_ref)
+    ?tco_disallow_array_cell_pass_by_ref:(not_ !allow_array_cell_pass_by_ref)
+    ?tco_disallow_anon_use_capture_by_ref:(not_ !allow_anon_use_capture_by_ref)
+    ?tco_disallow_unset_on_varray:(!disallow_unset_on_varray)
+    ?tco_disallow_stringish_magic:(!disallow_stringish_magic)
+    ?tco_log_inference_constraints:(!log_inference_constraints)
+    ?tco_new_inference:(!new_inference)
+    ?tco_new_inference_no_eager_solve:(!new_inference_no_eager_solve)
+    ?tco_disallow_invalid_arraykey:(!disallow_invalid_arraykey)
+    ?po_auto_namespace_map:(!auto_namespace_map)
+    ?po_enable_concurrent:(!enable_concurrent)
+    ?po_enable_await_as_an_expression:(!enable_await_as_an_expression)
+    ?po_enable_stronger_await_binding:(!enable_stronger_await_binding)
+    ~log_levels:(!log_levels)
+    ()
+  in
   let tcopt = {
     tcopt with
       GlobalOptions.tco_experimental_features = SSet.filter begin fun x ->

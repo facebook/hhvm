@@ -253,84 +253,87 @@ let make_permissive tcopt =
     tco_assume_php = true;
   }
 
-let make ~tco_assume_php
-         ~tco_safe_array
-         ~tco_safe_vector_array
-         ~po_deregister_php_stdlib
-         ~po_disallow_execution_operator
-         ~po_disable_define
-         ~po_disable_nontoplevel_declarations
-         ~po_allow_goto
-         ~po_enable_concurrent
-         ~po_enable_await_as_an_expression
-         ~po_default_mode
-         ~tco_log_inference_constraints
-         ~tco_experimental_features
-         ~tco_migration_flags
-         ~tco_dynamic_view
-         ~tco_disallow_array_as_tuple
-         ~po_auto_namespace_map
-         ~tco_disallow_ambiguous_lambda
-         ~tco_disallow_array_typehint
-         ~tco_disallow_array_literal
-         ~tco_untyped_nonstrict_lambda_parameters
-         ~tco_disallow_assign_by_ref
-         ~tco_disallow_array_cell_pass_by_ref
-         ~tco_language_feature_logging
-         ~tco_unsafe_rx
-         ~tco_disallow_implicit_returns_in_non_void_functions
-         ~tco_disallow_unset_on_varray
-         ~tco_disallow_scrutinee_case_value_type_mismatch
-         ~tco_disallow_stringish_magic
-         ~tco_disallow_anon_use_capture_by_ref
-         ~tco_new_inference
-         ~tco_new_inference_no_eager_solve
-         ~tco_timeout
-         ~tco_disallow_invalid_arraykey
-         ~ignored_fixme_codes
-         ~forward_compatibility_level
-         ~log_levels
-         ~po_enable_stronger_await_binding = {
-                   tco_assume_php;
-                   tco_safe_array;
-                   tco_safe_vector_array;
-                   tco_experimental_features;
-                   tco_migration_flags;
-                   tco_dynamic_view;
-                   tco_disallow_array_as_tuple;
-                   po_auto_namespace_map;
-                   po_enable_hh_syntax_for_hhvm = false;
-                   ignored_fixme_codes;
-                   po_deregister_php_stdlib;
-                   po_disallow_execution_operator;
-                   po_disable_define;
-                   po_disable_nontoplevel_declarations;
-                   po_allow_goto;
-                   po_enable_concurrent;
-                   po_enable_await_as_an_expression;
-                   po_default_mode;
-                   tco_log_inference_constraints;
-                   tco_disallow_ambiguous_lambda;
-                   tco_disallow_array_typehint;
-                   tco_disallow_array_literal;
-                   tco_untyped_nonstrict_lambda_parameters;
-                   tco_disallow_assign_by_ref;
-                   tco_disallow_array_cell_pass_by_ref;
-                   tco_language_feature_logging;
-                   tco_unsafe_rx;
-                   tco_disallow_implicit_returns_in_non_void_functions;
-                   tco_disallow_unset_on_varray;
-                   tco_disallow_scrutinee_case_value_type_mismatch;
-                   tco_disallow_stringish_magic;
-                   tco_disallow_anon_use_capture_by_ref;
-                   tco_new_inference;
-                   tco_new_inference_no_eager_solve;
-                   tco_timeout;
-                   tco_disallow_invalid_arraykey;
-                   forward_compatibility_level;
-                   log_levels;
-                   po_enable_stronger_await_binding
-        }
+let make
+  ?(tco_assume_php = default.tco_assume_php)
+  ?(tco_safe_array = default.tco_safe_array)
+  ?(tco_safe_vector_array = default.tco_safe_vector_array)
+  ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
+  ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
+  ?(po_disable_define = default.po_disable_define)
+  ?(po_disable_nontoplevel_declarations = default.po_disable_nontoplevel_declarations)
+  ?(po_allow_goto = default.po_allow_goto)
+  ?(po_enable_concurrent = default.po_enable_concurrent)
+  ?(po_enable_await_as_an_expression = default.po_enable_await_as_an_expression)
+  ?(po_default_mode = default.po_default_mode)
+  ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
+  ?(tco_experimental_features = default.tco_experimental_features)
+  ?(tco_migration_flags = default.tco_migration_flags)
+  ?(tco_dynamic_view = default.tco_dynamic_view)
+  ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
+  ?(po_auto_namespace_map = default.po_auto_namespace_map)
+  ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
+  ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
+  ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
+  ?(tco_untyped_nonstrict_lambda_parameters = default.tco_untyped_nonstrict_lambda_parameters)
+  ?(tco_disallow_assign_by_ref = default.tco_disallow_assign_by_ref)
+  ?(tco_disallow_array_cell_pass_by_ref = default.tco_disallow_array_cell_pass_by_ref)
+  ?(tco_language_feature_logging = default.tco_language_feature_logging)
+  ?(tco_unsafe_rx = default.tco_unsafe_rx)
+  ?(tco_disallow_implicit_returns_in_non_void_functions = default.tco_disallow_implicit_returns_in_non_void_functions)
+  ?(tco_disallow_unset_on_varray = default.tco_disallow_unset_on_varray)
+  ?(tco_disallow_scrutinee_case_value_type_mismatch = default.tco_disallow_scrutinee_case_value_type_mismatch)
+  ?(tco_disallow_stringish_magic = default.tco_disallow_stringish_magic)
+  ?(tco_disallow_anon_use_capture_by_ref = default.tco_disallow_anon_use_capture_by_ref)
+  ?(tco_new_inference = default.tco_new_inference)
+  ?(tco_new_inference_no_eager_solve = default.tco_new_inference_no_eager_solve)
+  ?(tco_timeout = default.tco_timeout)
+  ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
+  ?(ignored_fixme_codes = default.ignored_fixme_codes)
+  ?(forward_compatibility_level = default.forward_compatibility_level)
+  ?(log_levels = default.log_levels)
+  ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
+  ()
+= {
+  tco_assume_php;
+  tco_safe_array;
+  tco_safe_vector_array;
+  tco_experimental_features;
+  tco_migration_flags;
+  tco_dynamic_view;
+  tco_disallow_array_as_tuple;
+  po_auto_namespace_map;
+  po_enable_hh_syntax_for_hhvm = false;
+  ignored_fixme_codes;
+  po_deregister_php_stdlib;
+  po_disallow_execution_operator;
+  po_disable_define;
+  po_disable_nontoplevel_declarations;
+  po_allow_goto;
+  po_enable_concurrent;
+  po_enable_await_as_an_expression;
+  po_default_mode;
+  tco_log_inference_constraints;
+  tco_disallow_ambiguous_lambda;
+  tco_disallow_array_typehint;
+  tco_disallow_array_literal;
+  tco_untyped_nonstrict_lambda_parameters;
+  tco_disallow_assign_by_ref;
+  tco_disallow_array_cell_pass_by_ref;
+  tco_language_feature_logging;
+  tco_unsafe_rx;
+  tco_disallow_implicit_returns_in_non_void_functions;
+  tco_disallow_unset_on_varray;
+  tco_disallow_scrutinee_case_value_type_mismatch;
+  tco_disallow_stringish_magic;
+  tco_disallow_anon_use_capture_by_ref;
+  tco_new_inference;
+  tco_new_inference_no_eager_solve;
+  tco_timeout;
+  tco_disallow_invalid_arraykey;
+  forward_compatibility_level;
+  log_levels;
+  po_enable_stronger_await_binding
+}
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array

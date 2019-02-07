@@ -208,46 +208,49 @@ type t = {
  po_enable_stronger_await_binding : bool;
 
 } [@@deriving show]
+
 val make :
-  tco_assume_php: bool ->
-  tco_safe_array: bool ->
-  tco_safe_vector_array: bool ->
-  po_deregister_php_stdlib: bool ->
-  po_disallow_execution_operator: bool ->
-  po_disable_define: bool ->
-  po_disable_nontoplevel_declarations: bool ->
-  po_allow_goto: bool ->
-  po_enable_concurrent: bool ->
-  po_enable_await_as_an_expression: bool ->
-  po_default_mode: string ->
-  tco_log_inference_constraints : bool ->
-  tco_experimental_features: SSet.t ->
-  tco_migration_flags: SSet.t ->
-  tco_dynamic_view: bool ->
-  tco_disallow_array_as_tuple: bool ->
-  po_auto_namespace_map: (string * string) list ->
-  tco_disallow_ambiguous_lambda: bool ->
-  tco_disallow_array_typehint: bool ->
-  tco_disallow_array_literal: bool ->
-  tco_untyped_nonstrict_lambda_parameters: bool ->
-  tco_disallow_assign_by_ref: bool ->
-  tco_disallow_array_cell_pass_by_ref: bool ->
-  tco_language_feature_logging: bool ->
-  tco_unsafe_rx: bool ->
-  tco_disallow_implicit_returns_in_non_void_functions: bool ->
-  tco_disallow_unset_on_varray: bool ->
-  tco_disallow_scrutinee_case_value_type_mismatch: bool ->
-  tco_disallow_stringish_magic: bool ->
-  tco_disallow_anon_use_capture_by_ref: bool ->
-  tco_new_inference: float ->
-  tco_new_inference_no_eager_solve: bool ->
-  tco_timeout: int ->
-  tco_disallow_invalid_arraykey: bool ->
-  ignored_fixme_codes: ISet.t ->
-  forward_compatibility_level: ForwardCompatibilityLevel.t ->
-  log_levels: int SMap.t ->
-  po_enable_stronger_await_binding: bool ->
+  ?tco_assume_php: bool ->
+  ?tco_safe_array: bool ->
+  ?tco_safe_vector_array: bool ->
+  ?po_deregister_php_stdlib: bool ->
+  ?po_disallow_execution_operator: bool ->
+  ?po_disable_define: bool ->
+  ?po_disable_nontoplevel_declarations: bool ->
+  ?po_allow_goto: bool ->
+  ?po_enable_concurrent: bool ->
+  ?po_enable_await_as_an_expression: bool ->
+  ?po_default_mode: string ->
+  ?tco_log_inference_constraints : bool ->
+  ?tco_experimental_features: SSet.t ->
+  ?tco_migration_flags: SSet.t ->
+  ?tco_dynamic_view: bool ->
+  ?tco_disallow_array_as_tuple: bool ->
+  ?po_auto_namespace_map: (string * string) list ->
+  ?tco_disallow_ambiguous_lambda: bool ->
+  ?tco_disallow_array_typehint: bool ->
+  ?tco_disallow_array_literal: bool ->
+  ?tco_untyped_nonstrict_lambda_parameters: bool ->
+  ?tco_disallow_assign_by_ref: bool ->
+  ?tco_disallow_array_cell_pass_by_ref: bool ->
+  ?tco_language_feature_logging: bool ->
+  ?tco_unsafe_rx: bool ->
+  ?tco_disallow_implicit_returns_in_non_void_functions: bool ->
+  ?tco_disallow_unset_on_varray: bool ->
+  ?tco_disallow_scrutinee_case_value_type_mismatch: bool ->
+  ?tco_disallow_stringish_magic: bool ->
+  ?tco_disallow_anon_use_capture_by_ref: bool ->
+  ?tco_new_inference: float ->
+  ?tco_new_inference_no_eager_solve: bool ->
+  ?tco_timeout: int ->
+  ?tco_disallow_invalid_arraykey: bool ->
+  ?ignored_fixme_codes: ISet.t ->
+  ?forward_compatibility_level: ForwardCompatibilityLevel.t ->
+  ?log_levels: int SMap.t ->
+  ?po_enable_stronger_await_binding: bool ->
+  unit ->
   t
+
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool

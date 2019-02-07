@@ -93,45 +93,12 @@ function testTypecheck(): void {
 let () =
 
   let global_opts = GlobalOptions.make
-    ~tco_assume_php: false
-    ~tco_safe_array: false
-    ~tco_safe_vector_array: false
-    ~tco_experimental_features: GlobalOptions.tco_experimental_all
-    ~tco_migration_flags: SSet.empty
-    ~tco_dynamic_view: false
-    ~tco_disallow_array_as_tuple: false
-    ~po_auto_namespace_map:
-      [("ShortName", "HH\\LongName\\ShortName")]
-    ~po_deregister_php_stdlib: true
-    ~po_disallow_execution_operator:false
-    ~po_disable_define:false
-    ~po_disable_nontoplevel_declarations:false
+    ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
+    ~po_deregister_php_stdlib:true
     ~po_allow_goto:false
-    ~po_enable_concurrent:false
-    ~po_enable_await_as_an_expression:false
     ~po_default_mode:"strict"
-    ~tco_log_inference_constraints:false
-    ~tco_disallow_ambiguous_lambda:false
-    ~tco_disallow_array_typehint:false
-    ~tco_disallow_array_literal:false
-    ~tco_disallow_assign_by_ref:false
-    ~tco_disallow_array_cell_pass_by_ref:false
-    ~tco_untyped_nonstrict_lambda_parameters:false
-    ~tco_language_feature_logging:false
     ~tco_unsafe_rx:false
-    ~tco_disallow_implicit_returns_in_non_void_functions:true
-    ~tco_disallow_unset_on_varray:false
-    ~tco_disallow_scrutinee_case_value_type_mismatch:false
-    ~tco_disallow_stringish_magic:false
-    ~tco_disallow_anon_use_capture_by_ref:false
-    ~tco_disallow_invalid_arraykey:false
-    ~tco_new_inference:0.0
-    ~tco_new_inference_no_eager_solve:false
-    ~tco_timeout:0
-    ~ignored_fixme_codes: ISet.empty
-    ~forward_compatibility_level: ForwardCompatibilityLevel.default
-    ~log_levels: SMap.empty
-    ~po_enable_stronger_await_binding:false
+    ()
   in
 
   let custom_config = ServerConfig.default_config in

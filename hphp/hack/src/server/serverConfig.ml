@@ -299,6 +299,7 @@ let load config_filename options =
     ~forward_compatibility_level:forward_compat_level
     ~log_levels:SMap.empty
     ~po_enable_stronger_await_binding:(bool_ "stronger_await_binding" ~default:false config)
+    ()
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);

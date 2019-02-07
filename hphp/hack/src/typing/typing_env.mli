@@ -20,7 +20,7 @@ val fresh_type : env -> Pos.t -> env *  locl ty
 val fresh_unresolved_type : env -> Pos.t -> env * locl ty
 val open_tyvars : env -> env
 val get_current_tyvars : env -> Ident.t list
-val add_current_tyvar : env -> Ident.t -> env
+val add_current_tyvar : env -> Pos.t -> Ident.t -> env
 val close_tyvars : env -> env
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env
@@ -145,31 +145,33 @@ val get_generic_parameters : env -> string list
 val is_generic_parameter: env -> string -> bool
 
 (* Get or add to bounds on type variables *)
-val get_tyvar_lower_bounds : env -> int -> tparam_bounds
-val get_tyvar_upper_bounds : env -> int -> tparam_bounds
+val get_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds
+val get_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds
 (* Optionally supply intersection or union operations to simplify the bounds *)
 val add_tyvar_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->
-  env -> int -> locl ty -> env
+  env -> Ident.t -> locl ty -> env
 val add_tyvar_lower_bound :
   ?union:(locl ty -> locl ty list -> locl ty list) ->
-  env -> int -> locl ty -> env
+  env -> Ident.t -> locl ty -> env
 val remove_tyvar_upper_bound :
-  env -> int -> int -> env
+  env -> Ident.t -> Ident.t -> env
 val remove_tyvar_lower_bound :
-  env -> int -> int -> env
+  env -> Ident.t -> Ident.t -> env
 val set_tyvar_appears_covariantly :
-  env -> int -> env
+  env -> Ident.t -> env
 val set_tyvar_appears_contravariantly :
-  env -> int -> env
+  env -> Ident.t -> env
 val get_tyvar_appears_covariantly :
-  env -> int -> bool
+  env -> Ident.t -> bool
 val get_tyvar_appears_contravariantly :
-  env -> int -> bool
+  env -> Ident.t -> bool
+val get_tyvar_info :
+  env -> Ident.t -> tyvar_info
 val remove_tyvar :
-  env -> int -> env
+  env -> Ident.t -> env
 val remove_equivalent_tyvars :
-  env -> int -> env
+  env -> Ident.t -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool

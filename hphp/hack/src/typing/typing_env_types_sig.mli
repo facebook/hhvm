@@ -46,13 +46,14 @@
    tpenv              : tpenv;
  }
 
- type tvar_info = {
+ type tyvar_info = {
+   tyvar_pos: Pos.t;
    appears_covariantly: bool;
    appears_contravariantly: bool;
    lower_bounds : TySet.t;
    upper_bounds : TySet.t;
  }
- type tvenv = tvar_info IMap.t
+ type tvenv = tyvar_info IMap.t
 
  type env = {
    (* position of the function/method being checked *)

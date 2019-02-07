@@ -93,7 +93,8 @@ let pp_anon _ _ = Printf.printf "%s\n" "<anon>"
 let show_tfun _ = "<tfun>"
 let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
-type tvar_info = {
+type tyvar_info = {
+  tyvar_pos: Pos.t;
   (* Does this type variable appear covariantly in the type of the expression?
    *)
   appears_covariantly: bool;
@@ -105,7 +106,7 @@ type tvar_info = {
   lower_bounds : TySet.t;
   upper_bounds : TySet.t;
 }
-type tvenv = tvar_info IMap.t
+type tvenv = tyvar_info IMap.t
 
 type env = {
   (* position of the function/method being checked *)

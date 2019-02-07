@@ -2477,9 +2477,8 @@ let expand_types env tys =
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
-let bind_to_lower_bound ~freshen env r var =
-  let env, lower_bounds =
-    expand_types env (Env.get_tyvar_lower_bounds env var) in
+let bind_to_lower_bound ~freshen env r var lower_bounds =
+  let env, lower_bounds = expand_types env lower_bounds in
   (* Construct the union of the lower bounds, normalizing null|t to ?t because
    * some code is still sensitive to this representation.
    * Note that if there are no lower bounds then we will construct the empty
@@ -2522,9 +2521,8 @@ let bind_to_lower_bound ~freshen env r var =
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 
-let bind_to_upper_bound env r var =
-  let env, upper_bounds =
-    expand_types env (Env.get_tyvar_upper_bounds env var) in
+let bind_to_upper_bound env r var upper_bounds =
+  let env, upper_bounds = expand_types env upper_bounds in
   match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->
@@ -2568,30 +2566,33 @@ let solve_tyvar ~freshen ~solve_invariant env r var =
   if Env.tyvar_is_solved env var
   then env
   else
-  let appears_contravariantly = Env.get_tyvar_appears_contravariantly env var in
-  let appears_covariantly = Env.get_tyvar_appears_covariantly env var in
-  match appears_covariantly, appears_contravariantly with
+  let tyvar_info = Env.get_tyvar_info env var in
+  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
+  match tyvar_info.Env.appears_covariantly, tyvar_info.Env.appears_contravariantly with
   | true, false
   | false, false ->
     (* As in Local Type Inference by Pierce & Turner, if type variable does
      * not appear at all, or only appears covariantly, force to lower bound
      *)
-    bind_to_lower_bound ~freshen:false env r var
+    bind_to_lower_bound ~freshen:false env r var tyvar_info.Env.lower_bounds
   | false, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears only contravariantly, force to upper bound
      *)
-    bind_to_upper_bound env r var
+    bind_to_upper_bound env r var tyvar_info.Env.upper_bounds
   | true, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears both covariantly and contravariantly and there is a type that
      * is both a lower and upper bound, force to that type
      *)
-    let lower_bounds = Env.get_tyvar_lower_bounds env var in
-    let upper_bounds = Env.get_tyvar_upper_bounds env var in
+    let lower_bounds = tyvar_info.Env.lower_bounds in
+    let upper_bounds = tyvar_info.Env.upper_bounds in
     match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
     | Some ty -> bind env r var ty
-    | None -> if solve_invariant then bind_to_lower_bound ~freshen env r var else env
+    | None ->
+      if solve_invariant
+      then bind_to_lower_bound ~freshen env r var lower_bounds
+      else env
 
 let solve_tyvars ?(solve_invariant = false) ~tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)

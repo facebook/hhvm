@@ -1,1 +1,4 @@
-No errors
+File "tconst7.php", line 11, characters 15-24:
+Invalid "is" expression hint (Typing[4195])
+  File "tconst7.php", line 11, characters 15-24:
+  The "is" operator cannot be used with a late static bound type constant, because it can hide a generic

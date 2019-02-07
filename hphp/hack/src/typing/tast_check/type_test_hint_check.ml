@@ -79,6 +79,11 @@ let visitor = object(this)
     else acc
   method! on_tarraykind acc r _array_kind =
     update acc @@ Invalid (r, "an array type")
+  method! on_taccess acc r taccess_type =
+    match taccess_type with
+    | (_, Tthis), _ -> update acc @@
+      Invalid (r, "a late static bound type constant, because it can hide a generic")
+    | _ -> acc
   method is_wildcard = function
     | _, Tabstract (AKgeneric name, _) ->
       Env.is_fresh_generic_parameter name

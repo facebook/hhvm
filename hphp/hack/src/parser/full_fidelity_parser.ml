@@ -26,6 +26,7 @@ end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
 
 module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
+module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Context =
   Full_fidelity_parser_context.WithToken(Syntax.Token)
@@ -91,9 +92,14 @@ type t = {
 }
 
 let make (env:Env.t) text =
+  let force_hh = (Env.force_hh env) || text
+    |> SourceText.file_path
+    |> Relative_path.suffix
+    |> fun suffix -> String_utils.string_ends_with suffix ".hack"
+  in
   let lexer = Lexer.make
     ~is_experimental_mode:(Env.is_experimental_mode env)
-    ~force_hh:(Env.force_hh env)
+    ~force_hh
     ~enable_xhp:(Env.enable_xhp env)
     ~codegen:(Env.codegen env)
     text in

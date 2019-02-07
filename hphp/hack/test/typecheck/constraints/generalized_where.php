@@ -4,7 +4,7 @@
 class Cov<+T> { }
 
 class C<+T> {
-  public function foo<Tu>(Tu $x):T where Cov<T> super Cov<Tu> {
+  public function foo<Tu>(Tu $x):Tu where Cov<Tu> super Cov<T> {
     return $x;
   }
 }

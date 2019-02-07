@@ -49,6 +49,9 @@ type position_descr =
   | Rconstraint_as
   | Rconstraint_eq
   | Rconstraint_super
+  | Rwhere_as
+  | Rwhere_super
+  | Rwhere_eq
 
 type position_variance =
   | Pcovariant
@@ -143,6 +146,12 @@ let reason_to_string ~sign (_, descr, variance) =
       "`as` constraints on method type parameters are contravariant"
   | Rconstraint_eq ->
       "`=` constraints on method type parameters are invariant"
+  | Rwhere_as ->
+    "`where _ as _` constraints are covariant on the left, contravariant on the right"
+  | Rwhere_eq ->
+    "`where _ = _` constraints are invariant on the left and right"
+  | Rwhere_super ->
+    "`where _ super _` constraints are contravariant on the left, covariant on the right"
 
 let detailed_message variance pos stack =
   match stack with
@@ -360,13 +369,17 @@ and class_method tcopt root static env (_method_name, method_) =
     then ()
     else
       match method_.ce_type with
-      | lazy (_, Tfun { ft_tparams = (tparams, _); ft_params; ft_ret; _ }) ->
+      | lazy (_, Tfun { ft_tparams = (tparams, _);
+                          ft_params;
+                          ft_ret;
+                          ft_where_constraints; _ }) ->
           let env = List.fold_left tparams
             ~f:begin fun env t ->
               SMap.remove (snd t.tp_name) env
             end ~init:env in
           List.iter ft_params ~f:(fun_param tcopt root static env);
           List.iter tparams ~f:(fun_tparam tcopt root env);
+          List.iter ft_where_constraints ~f:(fun_where_constraint tcopt root env);
           fun_ret tcopt root static env ft_ret
       | _ -> assert false
 
@@ -378,6 +391,27 @@ and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
 
 and fun_tparam tcopt root env t =
   List.iter t.tp_constraints ~f:(constraint_ tcopt root env)
+
+and fun_where_constraint tcopt root env (ty1, ck, ty2) =
+  let pos1 = Reason.to_pos (fst ty1) in
+  let pos2 = Reason.to_pos (fst ty2) in
+  match ck with
+  | Ast.Constraint_super ->
+    let var1 = Vcontravariant [pos1, Rwhere_super, Pcontravariant] in
+    let var2 = Vcovariant [pos2, Rwhere_super, Pcovariant] in
+    type_ tcopt root var1 env ty1;
+    type_ tcopt root var2 env ty2
+  | Ast.Constraint_eq ->
+    let reason1 = [pos1, Rwhere_eq, Pinvariant] in
+    let reason2 = [pos2, Rwhere_eq, Pinvariant] in
+    let var = Vinvariant (reason1, reason2) in
+    type_ tcopt root var env ty1;
+    type_ tcopt root var env ty2
+  | Ast.Constraint_as ->
+    let var1 = Vcovariant [pos1, Rwhere_as, Pcovariant] in
+    let var2 = Vcontravariant [pos2, Rwhere_as, Pcontravariant] in
+    type_ tcopt root var1 env ty1;
+    type_ tcopt root var2 env ty2
 
 and fun_ret tcopt root static env (reason, _ as ty) =
   let pos = Reason.to_pos reason in

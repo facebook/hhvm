@@ -1,0 +1,24 @@
+File "contravariant_in_where_bad.php", line 9, characters 39-39:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "contravariant_in_where_bad.php", line 4, characters 15-15:
+  This is where the parameter was declared as contravariant (-)
+  File "contravariant_in_where_bad.php", line 9, characters 39-39:
+  `where _ as _` constraints are covariant on the left, contravariant on the right
+File "contravariant_in_where_bad.php", line 13, characters 48-48:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "contravariant_in_where_bad.php", line 4, characters 15-15:
+  This is where the parameter was declared as contravariant (-)
+  File "contravariant_in_where_bad.php", line 13, characters 48-48:
+  `where _ super _` constraints are contravariant on the left, covariant on the right
+File "contravariant_in_where_bad.php", line 17, characters 39-39:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "contravariant_in_where_bad.php", line 4, characters 15-15:
+  This is where the parameter was declared as contravariant (-)
+  File "contravariant_in_where_bad.php", line 17, characters 39-39:
+  `where _ = _` constraints are invariant on the left and right
+File "contravariant_in_where_bad.php", line 21, characters 36-36:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "contravariant_in_where_bad.php", line 4, characters 15-15:
+  This is where the parameter was declared as contravariant (-)
+  File "contravariant_in_where_bad.php", line 21, characters 36-36:
+  `where _ as _` constraints are covariant on the left, contravariant on the right

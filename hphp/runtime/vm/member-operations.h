@@ -1681,7 +1681,10 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, Cell* value) {
 
   ArrayData* a = val(base).parr;
   auto* newData = SetElemArrayPre<setResult, intishCast>(a, key, value);
-  assertx(newData->isPHPArray());
+  // NB: If 'a' was sitting inside a reference, it may have been released during
+  // the set (and 'newData' will equal 'a'). We can only safely dereference
+  // 'newData' if its not equal to 'a'.
+  assertx(a == newData || newData->isPHPArray());
 
   arrayRefShuffle<true, KindOfArray>(a, newData, base);
 }

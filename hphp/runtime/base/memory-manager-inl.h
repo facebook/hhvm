@@ -257,6 +257,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
+  assertx(memset(ptr, kSmallFreeFill, bytes));
   m_freelists[index].push(ptr);
   m_stats.mm_freed += bytes;
 }

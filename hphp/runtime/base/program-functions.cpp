@@ -2602,11 +2602,6 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(session_kind);
 
-#ifdef ENABLE_SIMPLE_COUNTER
-  SimpleCounter::Enabled = true;
-  StackTrace::Enabled = true;
-#endif
-
   // Ordering is sensitive; StatCache::requestInit produces work that
   // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();

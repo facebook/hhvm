@@ -77,7 +77,6 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -2284,14 +2283,6 @@ void RuntimeOption::Load(
     Config::Bind(TraceFunctions, ini, config,
                  "Debug.TraceFunctions", TraceFunctions);
     Config::Bind(TraceFuncId, ini, config, "Debug.TraceFuncId", TraceFuncId);
-
-    {
-      // Debug SimpleCounter
-      Config::Bind(SimpleCounter::SampleStackCount, ini,
-                   config, "Debug.SimpleCounter.SampleStackCount", 0);
-      Config::Bind(SimpleCounter::SampleStackDepth, ini,
-                   config, "Debug.SimpleCounter.SampleStackDepth", 5);
-    }
   }
   {
     // Stats

@@ -202,25 +202,22 @@ type stored_value_kind =
 type instruction_sequence_with_locals =
   (Instruction_sequence.t * (Local.t * stored_value_kind) option) list
 
-(* converts instruction_sequence_with_locals to instruction_sequence.t *)
-let rebuild_sequence s rest =
+(* converts instruction_sequence_with_locals of loads into instruction_sequence.t *)
+let rebuild_load_store load store =
   let rec aux = function
-  | [] -> rest ()
-  | (i, None) :: xs -> gather [ i; aux xs ]
+  | [] -> [], []
+  | (i, None) :: xs ->
+    let ld, st = aux xs in
+    i :: ld, st
   | (i, Some (l, kind)) :: xs ->
-    let fault_label = Label.next_fault () in
+    let ld, st = aux xs in
+    let set =
+      if kind = Value_kind_expression then instr_setl l else instr_popl l in
     let unset = instr_unsetl l in
-    let set = if kind = Value_kind_expression then instr_setl l else instr_popl l in
-    let try_block = gather [
-      set;
-      aux xs;
-    ] in
-    let fault_block = gather [ unset; instr_unwind; ] in
-    gather [
-      i;
-      instr_try_fault fault_label try_block fault_block;
-      unset;  ] in
-  aux s
+    i :: set :: ld, unset :: st
+  in
+  let ld, st = aux load in
+  gather ld, gather (store :: st)
 
 (* result of emit_array_get *)
 type array_get_instr =
@@ -776,6 +773,8 @@ and emit_reified_targs env pos targs =
     | (h, true) -> fst @@ emit_reified_arg env pos h)
 
 and emit_new env pos expr targs args uargs =
+  if has_inout_args args then
+    Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
   let has_reified_args = List.exists ~f:(fun (_, b) -> b) targs in
   let nargs = List.length args + List.length uargs in
   let scope = Emit_env.get_scope env in
@@ -839,21 +838,39 @@ and emit_new env pos expr targs args uargs =
   | _ ->
     gather [ emit_load_class_ref env pos cexpr; instr_newobj 0 has_generics ]
   in
+  Local_helpers.scope_with_handler @@ fun () ->
+  let instr_args, _ = emit_args_and_inout_setters env args in
+  let instr_uargs = match uargs with
+    | [] -> empty
+    | uargs :: _ -> emit_expr ~need_ref:false env uargs
+  in
   gather [
     newobj_instrs;
     instr_dup;
     instr_fpushctor nargs;
-    emit_args_and_call env pos args uargs None;
+    instr_args;
+    instr_uargs;
+    emit_fcall pos args uargs None;
     instr_popc
   ]
 
 and emit_new_anon env pos cls_idx args uargs =
+  if has_inout_args args then
+    Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
   let nargs = List.length args + List.length uargs in
+  Local_helpers.scope_with_handler @@ fun () ->
+  let instr_args, _ = emit_args_and_inout_setters env args in
+  let instr_uargs = match uargs with
+    | [] -> empty
+    | uargs :: _ -> emit_expr ~need_ref:false env uargs
+  in
   gather [
     instr_newobji cls_idx;
     instr_dup;
     instr_fpushctor nargs;
-    emit_args_and_call env pos args uargs None;
+    instr_args;
+    instr_uargs;
+    emit_fcall pos args uargs None;
     instr_popc
   ]
 
@@ -3014,109 +3031,103 @@ and emit_reified_arg env pos hint =
       instr_combine_and_resolve_type_struct (count + 1);
     ], (count = 0)
 
-(* Emit code to construct the argument frame and then make the call *)
-and emit_args_and_call env call_pos args uargs async_eager_label =
-  let args_count = List.length args in
-  let all_args = args @ uargs in
+(* Emit arguments of a function call and inout setter for inout args *)
+and emit_args_and_inout_setters env args =
   let aliases =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
 
-  let rec aux i rem_args inout_setters =
-    match rem_args with
-    | [] ->
-      let num_rets = (List.length inout_setters) + 1 in
-      let nargs = List.length args in
-      let instr_enforce_hint =
-        if args <> []
-        then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
-        else empty
-      in
-      let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
-      let fcall_args = make_fcall_args
-        ~flags ~num_rets ?async_eager_label nargs in
-      gather [
-        (* emit call*)
-        emit_pos call_pos;
-        instr_enforce_hint;
-        instr_fcall fcall_args;
-        (* propagate inout values back *)
-        if List.is_empty inout_setters
-        then empty
-        else begin
-          let local = Local.get_unnamed_local () in
-          gather [
-            instr_popl local;
-            gather @@ List.rev inout_setters;
-            instr_pushl local
-          ]
-        end; ]
+  let emit_arg_and_inout_setter i arg =
+    match snd arg with
+    (* inout $var *)
+    | A.Callconv (A.Pinout, (_, A.Lvar lvar)) ->
+      let local = get_local env lvar in
+      let not_in_try = not (Emit_env.is_in_try env) in
+      let move_instrs =
+        if not_in_try && (InoutLocals.should_move_local_value local aliases)
+        then gather [ instr_null; instr_popl local ]
+        else empty in
+      gather [ instr_cgetl local; move_instrs ],
+      instr_popl local
+    (* inout $arr[...][...] *)
+    | A.Callconv (A.Pinout, (pos, A.Array_get (base_expr, opt_elem_expr))) ->
+      let array_get_result =
+        fst (emit_array_get_worker ~need_ref:false
+          ~inout_param_info:(Some (i, aliases)) env pos
+          QueryOp.InOut base_expr opt_elem_expr) in
+      begin match array_get_result with
+      | Array_get_regular instrs ->
+        let setter_base =
+          fst (emit_array_get ~no_final:true ~need_ref:false
+            ~mode:MemberOpMode.Define
+            env pos QueryOp.InOut base_expr opt_elem_expr) in
+        let setter = gather [
+          setter_base;
+          instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
+          instr_popc
+        ] in
+        instrs, setter
+      | Array_get_inout { load; store } ->
+        rebuild_load_store load store
+      end
+    (* unsupported inout *)
+    | A.Callconv (A.Pinout, _) ->
+      failwith "emit_arg_and_inout_setter: Unexpected inout expression type"
 
-    | (_, A.Callconv (A.Pinout, expr)) :: rest -> begin
-      let pos, expr_ = strip_ref expr in
-      match expr_ with
-      | A.Lvar ((name_pos, _) as lvar) ->
-        let local = get_local env lvar in
-        let inout_setters =
-          (instr_popl local) :: inout_setters in
-        let not_in_try = not (Emit_env.is_in_try env) in
-        let move_instrs =
-          if not_in_try && (InoutLocals.should_move_local_value local aliases)
-          then gather [ instr_null; instr_popl local ]
-          else empty in
-        gather [
-          emit_pos name_pos;
-          instr_cgetl local;
-          move_instrs;
-          aux (i + 1) rest inout_setters
-        ]
-      | A.Array_get (base_expr, opt_elem_expr) -> begin
-        let array_get_result =
-          fst (emit_array_get_worker ~need_ref:false
-            ~inout_param_info:(Some (i, aliases)) env pos
-            QueryOp.InOut base_expr opt_elem_expr) in
-        match array_get_result with
-        | Array_get_regular instrs ->
-          let setter =
-            let base =
-              fst (emit_array_get ~no_final:true ~need_ref:false
-                ~mode:MemberOpMode.Define
-                env pos QueryOp.InOut base_expr opt_elem_expr) in
-            gather [
-              base;
-              instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
-              instr_popc
-            ] in
-          gather [
-            instrs;
-            aux (i + 1) rest (setter :: inout_setters) ]
-        | Array_get_inout { load; store } ->
-          rebuild_sequence load @@ begin fun () ->
-            aux (i + 1) rest (store :: inout_setters)
-          end
-        end
-      | _ -> failwith "emit_args_and_call: Unexpected inout expression type"
+    (* by-ref annotated argument *)
+    | A.Unop (A.Uref, expr) ->
+      begin match snd expr with
+      (* passed by reference *)
+      | A.Array_get _
+      | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _))
+      | A.Class_get _
+      | A.Lvar _
+      | A.Obj_get _ ->
+        emit_expr_as_ref env expr, empty
+      (* passed by value *)
+      | _ -> emit_expr ~need_ref:false env expr, empty
       end
 
-    | expr :: rest ->
-      let next c = gather [ c; aux (i + 1) rest inout_setters ] in next @@
-      let by_ref = expr_starts_with_ref expr in
-      let expr = strip_ref expr in
-      if i >= args_count || not by_ref then
-        emit_expr ~need_ref:false env expr
-      else
-        match snd expr with
-        | A.Lvar _
-        | A.Array_get _
-        | A.Obj_get _
-        | A.Class_get _
-        | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _)) ->
-          emit_expr_as_ref env expr
-        | _ ->
-          emit_expr ~need_ref:false env expr
+    (* regular argument *)
+    | _ -> emit_expr ~need_ref:false env arg, empty
   in
-  Local.scope @@ fun () -> aux 0 all_args []
+
+  let rec aux i args = match args with
+  | [] -> empty, empty
+  | arg :: rem_args ->
+    let this_arg, this_setter = emit_arg_and_inout_setter i arg in
+    let rem_args, rem_setters = aux (i + 1) rem_args in
+    gather [ this_arg; rem_args ],
+    gather [ this_setter; rem_setters ]
+  in
+
+  let instr_args, instr_setters = aux 0 args in
+  if has_inout_args args then
+    let retval = Local.get_unnamed_local () in
+    instr_args, gather [ instr_popl retval; instr_setters; instr_pushl retval ]
+  else
+    instr_args, empty
+
+(* Emit code to make the function call *)
+and emit_fcall call_pos args uargs async_eager_label =
+  let num_args = List.length args in
+  let num_rets = List.fold_left args ~init:1
+    ~f:(fun acc arg -> if is_inout_arg arg then acc + 1 else acc) in
+  let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
+  let fcall_args = make_fcall_args
+    ~flags ~num_rets ?async_eager_label num_args in
+  let instr_enforce_hint =
+    if args <> []
+    then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
+    else empty
+  in
+  gather [
+    (* emit call*)
+    emit_pos call_pos;
+    instr_enforce_hint;
+    instr_fcall fcall_args;
+  ]
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env ?last_pos (_, expr_ as expr) =
@@ -3141,8 +3152,12 @@ and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
     end
   ]
 
+and is_inout_arg = function
+  | _, A.Callconv (A.Pinout, _) -> true
+  | _ -> false
+
 and has_inout_args es =
-  List.exists es ~f:(function _, A.Callconv (A.Pinout, _) -> true | _ -> false)
+  List.exists es ~f:is_inout_arg
 
 and emit_call_lhs
   env outer_pos (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
@@ -3529,12 +3544,21 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   let nargs = List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
-  let default () =
+  let default () = Local_helpers.scope_with_handler @@ fun () ->
+    let instr_args, instr_inout_setters =
+      emit_args_and_inout_setters env args in
+    let instr_uargs = match uargs with
+      | [] -> empty
+      | uargs :: _ -> emit_expr ~need_ref:false env uargs
+    in
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
         env pos expr targs nargs (not (List.is_empty uargs)) inout_arg_positions;
-      emit_args_and_call env pos args uargs async_eager_label;
+      instr_args;
+      instr_uargs;
+      emit_fcall pos args uargs async_eager_label;
+      instr_inout_setters
     ] in
 
   match expr_, args with

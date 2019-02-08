@@ -3,12 +3,12 @@
 
 <<__EntryPoint>>
 function main_incomplete_class() {
-$incomplete = new __php_incomplete_class();
+  // unserialize will produce __PHP_Incomplete_Class
+  $incomplete = unserialize('O:8:"IGNOREME":0:{}');
 
-$o = new SplObjectStorage();
-$o->attach($incomplete);
-var_dump($o->count());
+  $o = new SplObjectStorage();
+  $o->attach($incomplete);
+  var_dump($o->count());
 
-
-$arr = new ArrayObject($incomplete); // No Exception
+  $arr = new ArrayObject($incomplete); // No Exception
 }

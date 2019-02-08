@@ -1,0 +1,1 @@
+Fatal error: Class A may not inherit from final class (__PHP_Incomplete_Class) in %s/test/slow/object/incomplete_class_extend.php on line 3

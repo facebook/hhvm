@@ -1812,7 +1812,6 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
     objects.
-    Instances of descendants of __PHP_Incomplete_Class are considered objects.
   Otherwise, the result is true if $1 is of type t and false otherwise.
   The result is pushed on the stack.
 

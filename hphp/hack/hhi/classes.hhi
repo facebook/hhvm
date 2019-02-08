@@ -196,5 +196,3 @@ final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
 }
 
 final class stdClass {}
-
-class __PHP_Incomplete_Class {}

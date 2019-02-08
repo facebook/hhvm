@@ -94,7 +94,6 @@ function test($thing) {
 
 class C {}
 class D { public $x = 1; }
-class Extends___PHP_Incomplete_Class extends __PHP_Incomplete_Class {}
 
 <<__EntryPoint>>
 function main() {
@@ -103,5 +102,4 @@ function main() {
   test(gmp_init(0));
   test(new stdClass());
   test(unserialize('O:4:"Nope":0:{}')); // __PHP_Incomplete_Class
-  test(new Extends___PHP_Incomplete_Class());
 }

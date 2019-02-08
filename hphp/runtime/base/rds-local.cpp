@@ -44,12 +44,12 @@ void initializeRequestEventHandler(RequestEventHandler* h) {
   // it before calling requestInit() so that obj is reachable to the GC no
   // matter what the callback does.
   auto index = g_context->registerRequestEventHandler(h);
-  h->requestInit();
-
   SCOPE_FAIL {
     h->setInited(false);
     g_context->unregisterRequestEventHandler(h, index);
   };
+
+  h->requestInit();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

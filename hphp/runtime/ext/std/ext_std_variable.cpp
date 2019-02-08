@@ -617,11 +617,6 @@ Variant HHVM_FUNCTION(hhvm_intrinsics_unserialize_keep_dvarrays,
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
 
-Array HHVM_FUNCTION(get_defined_vars) {
-  VarEnv* v = g_context->getOrCreateVarEnv();
-  return v ? v->getDefinedVariables() : empty_array();
-}
-
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    VRefParam arr) {
@@ -722,7 +717,6 @@ void StandardExtension::initVariable() {
   HHVM_FE(var_dump);
   HHVM_FE(serialize);
   HHVM_FE(unserialize);
-  HHVM_FE(get_defined_vars);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);

@@ -145,8 +145,6 @@ VS(serialize($v),
   VS($v1, $v2);
 }
 
-get_defined_vars();
-
 $typesTest = array(
     'boolean' => array(0, 1, 2, true, false),
     'integer' => array(1.0, 1, -1),

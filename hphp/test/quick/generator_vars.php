@@ -60,11 +60,11 @@ function manylocals() {
   $j = 10;
   $k = 11;
   $l = 12;
-  $a = yield get_defined_vars();
+  $a = yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
   $b = 0xdeadbeef;
-  $c = yield get_defined_vars();
+  $c = yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
   $d = $e = 0xba53b411;
-  yield get_defined_vars();
+  yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
 }
 
 function main() {

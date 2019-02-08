@@ -53,8 +53,6 @@ function debug_zval_dump(<<__AcceptDisposable>> $variable);
 function serialize($value);
 <<__PHPStdLib>>
 function unserialize(string $str, $class_whitelist = array());
-<<__Rx>>
-function get_defined_vars();
 <<__PHPStdLib>>
 function import_request_variables(string $types, string $prefix = "");
 }

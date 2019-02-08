@@ -161,13 +161,6 @@ function serialize(mixed $value): string;
 function unserialize(string $str,
                      array $options = []): mixed;
 
-/* This function returns a multidimensional array containing a list of all
- * defined variables, be they environment, server or user-defined
- * variables, within the scope in which get_defined_vars() is called.
- */
-<<__Native("ReadsCallerFrame")>>
-function get_defined_vars(): array;
-
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
  * you disabled register_globals, but would like to see some variables in the
  * global scope.

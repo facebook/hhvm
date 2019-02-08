@@ -97,12 +97,6 @@ void registerExtension(Extension* ext) {
   (*s_exts)[name] = ext;
 }
 
-void unregisterExtension(const char* name) {
-  assertx(s_exts);
-  assertx(s_exts->find(name) != s_exts->end());
-  s_exts->erase(name);
-}
-
 bool isLoaded(const char* name, bool enabled_only /*= true */) {
   assertx(s_exts);
   auto it = s_exts->find(name);

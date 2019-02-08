@@ -11,11 +11,6 @@ namespace HPHP { namespace ExtensionRegistry {
 
 void registerExtension(Extension* ext);
 
-void unregisterExtension(const char* name);
-inline void unregisterExtension(const String& name) {
-  unregisterExtension(name.data());
-}
-
 bool isLoaded(const char* name, bool enabled_only = true);
 inline bool isLoaded(const String& name, bool enabled_only = true) {
   return isLoaded(name.data(), enabled_only);

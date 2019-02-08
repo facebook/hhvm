@@ -2165,6 +2165,74 @@
         { "field_name" : "item" },
         { "field_name" : "separator" }
       ] },
+    { "kind_name" : "PocketAtomExpression",
+      "type_name" : "pocket_atom_expression",
+      "description" : "pocket_atom",
+      "prefix" : "pocket_atom",
+      "fields" : [
+        { "field_name" : "expression" }
+      ] },
+    { "kind_name" : "PocketAtomMappingDeclaration",
+      "type_name" : "pocket_atom_mapping_declaration",
+      "description" : "pocket_atom_mapping",
+      "prefix" : "pocket_atom_mapping",
+      "fields" : [
+        { "field_name" : "expression" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "mappings" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "PocketEnumDeclaration",
+      "type_name" : "pocket_enum_declaration",
+      "description" : "pocket_enum_declaration",
+      "prefix" : "pocket_enum",
+      "fields" : [
+        { "field_name" : "modifiers" },
+        { "field_name" : "enum" },
+        { "field_name" : "name" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "fields" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "PocketFieldTypeExprDeclaration",
+      "type_name" : "pocket_field_type_expr_declaration",
+      "description" : "pocket_field_type_expr_declaration",
+      "prefix" : "pocket_field_type_expr",
+      "fields" : [
+        { "field_name" : "case" },
+        { "field_name" : "type" },
+        { "field_name" : "name" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "PocketFieldTypeDeclaration",
+      "type_name" : "pocket_field_type_declaration",
+      "description" : "pocket_field_type_declaration",
+      "prefix" : "pocket_field_type",
+      "fields" : [
+        { "field_name" : "case" },
+        { "field_name" : "type" },
+        { "field_name" : "name" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "PocketMappingIdDeclaration",
+      "type_name" : "pocket_mapping_id_declaration",
+      "description" : "pocket_mapping_id_declaration",
+      "prefix" : "pocket_mapping_id",
+      "fields" : [
+        { "field_name" : "name" },
+        { "field_name" : "initializer" }
+      ] },
+    { "kind_name" : "PocketMappingTypeDeclaration",
+      "type_name" : "pocket_mapping_type_declaration",
+      "description" : "pocket_mapping_type_declaration",
+      "prefix" : "pocket_mapping_type",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "equal" },
+        { "field_name" : "type" }
+      ] },
 
     { "kind_name" : "Token",
       "type_name" : "token",

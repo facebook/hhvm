@@ -169,7 +169,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.GenericTypeSpecifier _
   | Syntax.NullableTypeSpecifier _
   | Syntax.SoftTypeSpecifier _
-  | Syntax.ListItem _ ->
+  | Syntax.ListItem _
+  | Syntax.PocketAtomExpression _
+  | Syntax.PocketAtomMappingDeclaration _
+  | Syntax.PocketEnumDeclaration _
+  | Syntax.PocketMappingIdDeclaration _
+  | Syntax.PocketMappingTypeDeclaration _
+  | Syntax.PocketFieldTypeExprDeclaration _
+  | Syntax.PocketFieldTypeDeclaration _ ->
     transform_simple env node
   | Syntax.ReifiedTypeArgument
     { reified_type_argument_reified; reified_type_argument_type } ->

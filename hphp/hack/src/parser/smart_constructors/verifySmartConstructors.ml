@@ -1439,4 +1439,60 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
+  let make_pocket_atom_expression p0 stack =
+    match stack with
+    | a0 :: rem ->
+      let () = verify ~stack [p0] [a0] "pocket_atom_expression" in
+      let node = Syntax.make_pocket_atom_expression p0 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_atom_mapping_declaration p0 p1 p2 p3 p4 stack =
+    match stack with
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "pocket_atom_mapping_declaration" in
+      let node = Syntax.make_pocket_atom_mapping_declaration p0 p1 p2 p3 p4 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_enum_declaration p0 p1 p2 p3 p4 p5 stack =
+    match stack with
+    | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4; p5] [a0; a1; a2; a3; a4; a5] "pocket_enum_declaration" in
+      let node = Syntax.make_pocket_enum_declaration p0 p1 p2 p3 p4 p5 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_field_type_expr_declaration p0 p1 p2 p3 stack =
+    match stack with
+    | a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "pocket_field_type_expr_declaration" in
+      let node = Syntax.make_pocket_field_type_expr_declaration p0 p1 p2 p3 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_field_type_declaration p0 p1 p2 p3 stack =
+    match stack with
+    | a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "pocket_field_type_declaration" in
+      let node = Syntax.make_pocket_field_type_declaration p0 p1 p2 p3 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_mapping_id_declaration p0 p1 stack =
+    match stack with
+    | a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1] [a0; a1] "pocket_mapping_id_declaration" in
+      let node = Syntax.make_pocket_mapping_id_declaration p0 p1 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
+  let make_pocket_mapping_type_declaration p0 p1 p2 p3 stack =
+    match stack with
+    | a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "pocket_mapping_type_declaration" in
+      let node = Syntax.make_pocket_mapping_type_declaration p0 p1 p2 p3 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
 end (* WithSyntax *)

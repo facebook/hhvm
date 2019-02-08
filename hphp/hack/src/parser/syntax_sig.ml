@@ -1050,6 +1050,46 @@ module type Syntax_S = sig
     { list_item                                          : t
     ; list_separator                                     : t
     }
+  | PocketAtomExpression                    of
+    { pocket_atom_expression                             : t
+    }
+  | PocketAtomMappingDeclaration            of
+    { pocket_atom_mapping_expression                     : t
+    ; pocket_atom_mapping_left_paren                     : t
+    ; pocket_atom_mapping_mappings                       : t
+    ; pocket_atom_mapping_right_paren                    : t
+    ; pocket_atom_mapping_semicolon                      : t
+    }
+  | PocketEnumDeclaration                   of
+    { pocket_enum_modifiers                              : t
+    ; pocket_enum_enum                                   : t
+    ; pocket_enum_name                                   : t
+    ; pocket_enum_left_brace                             : t
+    ; pocket_enum_fields                                 : t
+    ; pocket_enum_right_brace                            : t
+    }
+  | PocketFieldTypeExprDeclaration          of
+    { pocket_field_type_expr_case                        : t
+    ; pocket_field_type_expr_type                        : t
+    ; pocket_field_type_expr_name                        : t
+    ; pocket_field_type_expr_semicolon                   : t
+    }
+  | PocketFieldTypeDeclaration              of
+    { pocket_field_type_case                             : t
+    ; pocket_field_type_type                             : t
+    ; pocket_field_type_name                             : t
+    ; pocket_field_type_semicolon                        : t
+    }
+  | PocketMappingIdDeclaration              of
+    { pocket_mapping_id_name                             : t
+    ; pocket_mapping_id_initializer                      : t
+    }
+  | PocketMappingTypeDeclaration            of
+    { pocket_mapping_type_keyword                        : t
+    ; pocket_mapping_type_name                           : t
+    ; pocket_mapping_type_equal                          : t
+    ; pocket_mapping_type_type                           : t
+    }
 
 
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
@@ -1244,6 +1284,13 @@ module type Syntax_S = sig
   val make_tuple_type_specifier : t -> t -> t -> t
   val make_error : t -> t
   val make_list_item : t -> t -> t
+  val make_pocket_atom_expression : t -> t
+  val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t
+  val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
+  val make_pocket_field_type_declaration : t -> t -> t -> t -> t
+  val make_pocket_mapping_id_declaration : t -> t -> t
+  val make_pocket_mapping_type_declaration : t -> t -> t -> t -> t
 
 
   val position : Relative_path.t -> t -> Pos.t option
@@ -1421,6 +1468,13 @@ module type Syntax_S = sig
   val is_tuple_type_specifier : t -> bool
   val is_error : t -> bool
   val is_list_item : t -> bool
+  val is_pocket_atom_expression : t -> bool
+  val is_pocket_atom_mapping_declaration : t -> bool
+  val is_pocket_enum_declaration : t -> bool
+  val is_pocket_field_type_expr_declaration : t -> bool
+  val is_pocket_field_type_declaration : t -> bool
+  val is_pocket_mapping_id_declaration : t -> bool
+  val is_pocket_mapping_type_declaration : t -> bool
 
 
   val is_specific_token : TokenKind.t -> t -> bool

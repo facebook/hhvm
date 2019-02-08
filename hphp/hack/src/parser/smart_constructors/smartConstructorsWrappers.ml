@@ -204,6 +204,13 @@ module type SyntaxKind_S = sig
   val is_tuple_type_specifier : r -> bool
   val is_error : r -> bool
   val is_list_item : r -> bool
+  val is_pocket_atom_expression : r -> bool
+  val is_pocket_atom_mapping_declaration : r -> bool
+  val is_pocket_enum_declaration : r -> bool
+  val is_pocket_field_type_expr_declaration : r -> bool
+  val is_pocket_field_type_declaration : r -> bool
+  val is_pocket_mapping_id_declaration : r -> bool
+  val is_pocket_mapping_type_declaration : r -> bool
 
 end
 
@@ -400,6 +407,13 @@ module SyntaxKind(SC : SC_S)
   let make_tuple_type_specifier arg0 arg1 arg2 state = compose SK.TupleTypeSpecifier (SC.make_tuple_type_specifier (snd arg0) (snd arg1) (snd arg2) state)
   let make_error arg0 state = compose SK.ErrorSyntax (SC.make_error (snd arg0) state)
   let make_list_item arg0 arg1 state = compose SK.ListItem (SC.make_list_item (snd arg0) (snd arg1) state)
+  let make_pocket_atom_expression arg0 state = compose SK.PocketAtomExpression (SC.make_pocket_atom_expression (snd arg0) state)
+  let make_pocket_atom_mapping_declaration arg0 arg1 arg2 arg3 arg4 state = compose SK.PocketAtomMappingDeclaration (SC.make_pocket_atom_mapping_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
+  let make_pocket_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.PocketEnumDeclaration (SC.make_pocket_enum_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
+  let make_pocket_field_type_expr_declaration arg0 arg1 arg2 arg3 state = compose SK.PocketFieldTypeExprDeclaration (SC.make_pocket_field_type_expr_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
+  let make_pocket_field_type_declaration arg0 arg1 arg2 arg3 state = compose SK.PocketFieldTypeDeclaration (SC.make_pocket_field_type_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
+  let make_pocket_mapping_id_declaration arg0 arg1 state = compose SK.PocketMappingIdDeclaration (SC.make_pocket_mapping_id_declaration (snd arg0) (snd arg1) state)
+  let make_pocket_mapping_type_declaration arg0 arg1 arg2 arg3 state = compose SK.PocketMappingTypeDeclaration (SC.make_pocket_mapping_type_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
 
 
   let has_kind kind node = kind_of node = kind
@@ -578,6 +592,13 @@ module SyntaxKind(SC : SC_S)
   let is_tuple_type_specifier                         = has_kind SK.TupleTypeSpecifier
   let is_error                                        = has_kind SK.ErrorSyntax
   let is_list_item                                    = has_kind SK.ListItem
+  let is_pocket_atom_expression                       = has_kind SK.PocketAtomExpression
+  let is_pocket_atom_mapping_declaration              = has_kind SK.PocketAtomMappingDeclaration
+  let is_pocket_enum_declaration                      = has_kind SK.PocketEnumDeclaration
+  let is_pocket_field_type_expr_declaration           = has_kind SK.PocketFieldTypeExprDeclaration
+  let is_pocket_field_type_declaration                = has_kind SK.PocketFieldTypeDeclaration
+  let is_pocket_mapping_id_declaration                = has_kind SK.PocketMappingIdDeclaration
+  let is_pocket_mapping_type_declaration              = has_kind SK.PocketMappingTypeDeclaration
 
 
 end (* SyntaxKind *)

@@ -426,6 +426,20 @@ class EditableSyntax
       return ErrorSyntax.from_json(json, position, source);
     case 'list_item':
       return ListItem.from_json(json, position, source);
+    case 'pocket_atom':
+      return PocketAtomExpression.from_json(json, position, source);
+    case 'pocket_atom_mapping':
+      return PocketAtomMappingDeclaration.from_json(json, position, source);
+    case 'pocket_enum_declaration':
+      return PocketEnumDeclaration.from_json(json, position, source);
+    case 'pocket_field_type_expr_declaration':
+      return PocketFieldTypeExprDeclaration.from_json(json, position, source);
+    case 'pocket_field_type_declaration':
+      return PocketFieldTypeDeclaration.from_json(json, position, source);
+    case 'pocket_mapping_id_declaration':
+      return PocketMappingIdDeclaration.from_json(json, position, source);
+    case 'pocket_mapping_type_declaration':
+      return PocketMappingTypeDeclaration.from_json(json, position, source);
 
     default:
       throw 'unexpected json kind: ' + json.kind; // TODO: Better exception
@@ -21475,6 +21489,708 @@ class ListItem extends EditableSyntax
     return ListItem._children_keys;
   }
 }
+class PocketAtomExpression extends EditableSyntax
+{
+  constructor(
+    expression)
+  {
+    super('pocket_atom', {
+      expression: expression });
+  }
+  get expression() { return this.children.expression; }
+  with_expression(expression){
+    return new PocketAtomExpression(
+      expression);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    if (
+      expression === this.expression)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketAtomExpression(
+        expression), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let expression = EditableSyntax.from_json(
+      json.pocket_atom_expression, position, source);
+    position += expression.width;
+    return new PocketAtomExpression(
+        expression);
+  }
+  get children_keys()
+  {
+    if (PocketAtomExpression._children_keys == null)
+      PocketAtomExpression._children_keys = [
+        'expression'];
+    return PocketAtomExpression._children_keys;
+  }
+}
+class PocketAtomMappingDeclaration extends EditableSyntax
+{
+  constructor(
+    expression,
+    left_paren,
+    mappings,
+    right_paren,
+    semicolon)
+  {
+    super('pocket_atom_mapping', {
+      expression: expression,
+      left_paren: left_paren,
+      mappings: mappings,
+      right_paren: right_paren,
+      semicolon: semicolon });
+  }
+  get expression() { return this.children.expression; }
+  get left_paren() { return this.children.left_paren; }
+  get mappings() { return this.children.mappings; }
+  get right_paren() { return this.children.right_paren; }
+  get semicolon() { return this.children.semicolon; }
+  with_expression(expression){
+    return new PocketAtomMappingDeclaration(
+      expression,
+      this.left_paren,
+      this.mappings,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_left_paren(left_paren){
+    return new PocketAtomMappingDeclaration(
+      this.expression,
+      left_paren,
+      this.mappings,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_mappings(mappings){
+    return new PocketAtomMappingDeclaration(
+      this.expression,
+      this.left_paren,
+      mappings,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_right_paren(right_paren){
+    return new PocketAtomMappingDeclaration(
+      this.expression,
+      this.left_paren,
+      this.mappings,
+      right_paren,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new PocketAtomMappingDeclaration(
+      this.expression,
+      this.left_paren,
+      this.mappings,
+      this.right_paren,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var mappings = this.mappings.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      expression === this.expression &&
+      left_paren === this.left_paren &&
+      mappings === this.mappings &&
+      right_paren === this.right_paren &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketAtomMappingDeclaration(
+        expression,
+        left_paren,
+        mappings,
+        right_paren,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let expression = EditableSyntax.from_json(
+      json.pocket_atom_mapping_expression, position, source);
+    position += expression.width;
+    let left_paren = EditableSyntax.from_json(
+      json.pocket_atom_mapping_left_paren, position, source);
+    position += left_paren.width;
+    let mappings = EditableSyntax.from_json(
+      json.pocket_atom_mapping_mappings, position, source);
+    position += mappings.width;
+    let right_paren = EditableSyntax.from_json(
+      json.pocket_atom_mapping_right_paren, position, source);
+    position += right_paren.width;
+    let semicolon = EditableSyntax.from_json(
+      json.pocket_atom_mapping_semicolon, position, source);
+    position += semicolon.width;
+    return new PocketAtomMappingDeclaration(
+        expression,
+        left_paren,
+        mappings,
+        right_paren,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (PocketAtomMappingDeclaration._children_keys == null)
+      PocketAtomMappingDeclaration._children_keys = [
+        'expression',
+        'left_paren',
+        'mappings',
+        'right_paren',
+        'semicolon'];
+    return PocketAtomMappingDeclaration._children_keys;
+  }
+}
+class PocketEnumDeclaration extends EditableSyntax
+{
+  constructor(
+    modifiers,
+    enum,
+    name,
+    left_brace,
+    fields,
+    right_brace)
+  {
+    super('pocket_enum_declaration', {
+      modifiers: modifiers,
+      enum: enum,
+      name: name,
+      left_brace: left_brace,
+      fields: fields,
+      right_brace: right_brace });
+  }
+  get modifiers() { return this.children.modifiers; }
+  get enum() { return this.children.enum; }
+  get name() { return this.children.name; }
+  get left_brace() { return this.children.left_brace; }
+  get fields() { return this.children.fields; }
+  get right_brace() { return this.children.right_brace; }
+  with_modifiers(modifiers){
+    return new PocketEnumDeclaration(
+      modifiers,
+      this.enum,
+      this.name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_enum(enum){
+    return new PocketEnumDeclaration(
+      this.modifiers,
+      enum,
+      this.name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_name(name){
+    return new PocketEnumDeclaration(
+      this.modifiers,
+      this.enum,
+      name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_left_brace(left_brace){
+    return new PocketEnumDeclaration(
+      this.modifiers,
+      this.enum,
+      this.name,
+      left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_fields(fields){
+    return new PocketEnumDeclaration(
+      this.modifiers,
+      this.enum,
+      this.name,
+      this.left_brace,
+      fields,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new PocketEnumDeclaration(
+      this.modifiers,
+      this.enum,
+      this.name,
+      this.left_brace,
+      this.fields,
+      right_brace);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
+    var enum = this.enum.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var fields = this.fields.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    if (
+      modifiers === this.modifiers &&
+      enum === this.enum &&
+      name === this.name &&
+      left_brace === this.left_brace &&
+      fields === this.fields &&
+      right_brace === this.right_brace)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketEnumDeclaration(
+        modifiers,
+        enum,
+        name,
+        left_brace,
+        fields,
+        right_brace), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let modifiers = EditableSyntax.from_json(
+      json.pocket_enum_modifiers, position, source);
+    position += modifiers.width;
+    let enum = EditableSyntax.from_json(
+      json.pocket_enum_enum, position, source);
+    position += enum.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_enum_name, position, source);
+    position += name.width;
+    let left_brace = EditableSyntax.from_json(
+      json.pocket_enum_left_brace, position, source);
+    position += left_brace.width;
+    let fields = EditableSyntax.from_json(
+      json.pocket_enum_fields, position, source);
+    position += fields.width;
+    let right_brace = EditableSyntax.from_json(
+      json.pocket_enum_right_brace, position, source);
+    position += right_brace.width;
+    return new PocketEnumDeclaration(
+        modifiers,
+        enum,
+        name,
+        left_brace,
+        fields,
+        right_brace);
+  }
+  get children_keys()
+  {
+    if (PocketEnumDeclaration._children_keys == null)
+      PocketEnumDeclaration._children_keys = [
+        'modifiers',
+        'enum',
+        'name',
+        'left_brace',
+        'fields',
+        'right_brace'];
+    return PocketEnumDeclaration._children_keys;
+  }
+}
+class PocketFieldTypeExprDeclaration extends EditableSyntax
+{
+  constructor(
+    case,
+    type,
+    name,
+    semicolon)
+  {
+    super('pocket_field_type_expr_declaration', {
+      case: case,
+      type: type,
+      name: name,
+      semicolon: semicolon });
+  }
+  get case() { return this.children.case; }
+  get type() { return this.children.type; }
+  get name() { return this.children.name; }
+  get semicolon() { return this.children.semicolon; }
+  with_case(case){
+    return new PocketFieldTypeExprDeclaration(
+      case,
+      this.type,
+      this.name,
+      this.semicolon);
+  }
+  with_type(type){
+    return new PocketFieldTypeExprDeclaration(
+      this.case,
+      type,
+      this.name,
+      this.semicolon);
+  }
+  with_name(name){
+    return new PocketFieldTypeExprDeclaration(
+      this.case,
+      this.type,
+      name,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new PocketFieldTypeExprDeclaration(
+      this.case,
+      this.type,
+      this.name,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var case = this.case.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      case === this.case &&
+      type === this.type &&
+      name === this.name &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketFieldTypeExprDeclaration(
+        case,
+        type,
+        name,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let case = EditableSyntax.from_json(
+      json.pocket_field_type_expr_case, position, source);
+    position += case.width;
+    let type = EditableSyntax.from_json(
+      json.pocket_field_type_expr_type, position, source);
+    position += type.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_field_type_expr_name, position, source);
+    position += name.width;
+    let semicolon = EditableSyntax.from_json(
+      json.pocket_field_type_expr_semicolon, position, source);
+    position += semicolon.width;
+    return new PocketFieldTypeExprDeclaration(
+        case,
+        type,
+        name,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (PocketFieldTypeExprDeclaration._children_keys == null)
+      PocketFieldTypeExprDeclaration._children_keys = [
+        'case',
+        'type',
+        'name',
+        'semicolon'];
+    return PocketFieldTypeExprDeclaration._children_keys;
+  }
+}
+class PocketFieldTypeDeclaration extends EditableSyntax
+{
+  constructor(
+    case,
+    type,
+    name,
+    semicolon)
+  {
+    super('pocket_field_type_declaration', {
+      case: case,
+      type: type,
+      name: name,
+      semicolon: semicolon });
+  }
+  get case() { return this.children.case; }
+  get type() { return this.children.type; }
+  get name() { return this.children.name; }
+  get semicolon() { return this.children.semicolon; }
+  with_case(case){
+    return new PocketFieldTypeDeclaration(
+      case,
+      this.type,
+      this.name,
+      this.semicolon);
+  }
+  with_type(type){
+    return new PocketFieldTypeDeclaration(
+      this.case,
+      type,
+      this.name,
+      this.semicolon);
+  }
+  with_name(name){
+    return new PocketFieldTypeDeclaration(
+      this.case,
+      this.type,
+      name,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new PocketFieldTypeDeclaration(
+      this.case,
+      this.type,
+      this.name,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var case = this.case.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      case === this.case &&
+      type === this.type &&
+      name === this.name &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketFieldTypeDeclaration(
+        case,
+        type,
+        name,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let case = EditableSyntax.from_json(
+      json.pocket_field_type_case, position, source);
+    position += case.width;
+    let type = EditableSyntax.from_json(
+      json.pocket_field_type_type, position, source);
+    position += type.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_field_type_name, position, source);
+    position += name.width;
+    let semicolon = EditableSyntax.from_json(
+      json.pocket_field_type_semicolon, position, source);
+    position += semicolon.width;
+    return new PocketFieldTypeDeclaration(
+        case,
+        type,
+        name,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (PocketFieldTypeDeclaration._children_keys == null)
+      PocketFieldTypeDeclaration._children_keys = [
+        'case',
+        'type',
+        'name',
+        'semicolon'];
+    return PocketFieldTypeDeclaration._children_keys;
+  }
+}
+class PocketMappingIdDeclaration extends EditableSyntax
+{
+  constructor(
+    name,
+    initializer)
+  {
+    super('pocket_mapping_id_declaration', {
+      name: name,
+      initializer: initializer });
+  }
+  get name() { return this.children.name; }
+  get initializer() { return this.children.initializer; }
+  with_name(name){
+    return new PocketMappingIdDeclaration(
+      name,
+      this.initializer);
+  }
+  with_initializer(initializer){
+    return new PocketMappingIdDeclaration(
+      this.name,
+      initializer);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
+    if (
+      name === this.name &&
+      initializer === this.initializer)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketMappingIdDeclaration(
+        name,
+        initializer), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let name = EditableSyntax.from_json(
+      json.pocket_mapping_id_name, position, source);
+    position += name.width;
+    let initializer = EditableSyntax.from_json(
+      json.pocket_mapping_id_initializer, position, source);
+    position += initializer.width;
+    return new PocketMappingIdDeclaration(
+        name,
+        initializer);
+  }
+  get children_keys()
+  {
+    if (PocketMappingIdDeclaration._children_keys == null)
+      PocketMappingIdDeclaration._children_keys = [
+        'name',
+        'initializer'];
+    return PocketMappingIdDeclaration._children_keys;
+  }
+}
+class PocketMappingTypeDeclaration extends EditableSyntax
+{
+  constructor(
+    keyword,
+    name,
+    equal,
+    type)
+  {
+    super('pocket_mapping_type_declaration', {
+      keyword: keyword,
+      name: name,
+      equal: equal,
+      type: type });
+  }
+  get keyword() { return this.children.keyword; }
+  get name() { return this.children.name; }
+  get equal() { return this.children.equal; }
+  get type() { return this.children.type; }
+  with_keyword(keyword){
+    return new PocketMappingTypeDeclaration(
+      keyword,
+      this.name,
+      this.equal,
+      this.type);
+  }
+  with_name(name){
+    return new PocketMappingTypeDeclaration(
+      this.keyword,
+      name,
+      this.equal,
+      this.type);
+  }
+  with_equal(equal){
+    return new PocketMappingTypeDeclaration(
+      this.keyword,
+      this.name,
+      equal,
+      this.type);
+  }
+  with_type(type){
+    return new PocketMappingTypeDeclaration(
+      this.keyword,
+      this.name,
+      this.equal,
+      type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      name === this.name &&
+      equal === this.equal &&
+      type === this.type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketMappingTypeDeclaration(
+        keyword,
+        name,
+        equal,
+        type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.pocket_mapping_type_keyword, position, source);
+    position += keyword.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_mapping_type_name, position, source);
+    position += name.width;
+    let equal = EditableSyntax.from_json(
+      json.pocket_mapping_type_equal, position, source);
+    position += equal.width;
+    let type = EditableSyntax.from_json(
+      json.pocket_mapping_type_type, position, source);
+    position += type.width;
+    return new PocketMappingTypeDeclaration(
+        keyword,
+        name,
+        equal,
+        type);
+  }
+  get children_keys()
+  {
+    if (PocketMappingTypeDeclaration._children_keys == null)
+      PocketMappingTypeDeclaration._children_keys = [
+        'keyword',
+        'name',
+        'equal',
+        'type'];
+    return PocketMappingTypeDeclaration._children_keys;
+  }
+}
 
 
 function from_json(json)
@@ -21890,3 +22606,10 @@ exports.TypeParameters = TypeParameters;
 exports.TupleTypeSpecifier = TupleTypeSpecifier;
 exports.ErrorSyntax = ErrorSyntax;
 exports.ListItem = ListItem;
+exports.PocketAtomExpression = PocketAtomExpression;
+exports.PocketAtomMappingDeclaration = PocketAtomMappingDeclaration;
+exports.PocketEnumDeclaration = PocketEnumDeclaration;
+exports.PocketFieldTypeExprDeclaration = PocketFieldTypeExprDeclaration;
+exports.PocketFieldTypeDeclaration = PocketFieldTypeDeclaration;
+exports.PocketMappingIdDeclaration = PocketMappingIdDeclaration;
+exports.PocketMappingTypeDeclaration = PocketMappingTypeDeclaration;

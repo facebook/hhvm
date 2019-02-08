@@ -192,6 +192,13 @@ type t =
   | TupleTypeSpecifier
   | ErrorSyntax
   | ListItem
+  | PocketAtomExpression
+  | PocketAtomMappingDeclaration
+  | PocketEnumDeclaration
+  | PocketFieldTypeExprDeclaration
+  | PocketFieldTypeDeclaration
+  | PocketMappingIdDeclaration
+  | PocketMappingTypeDeclaration
 
   [@@deriving show]
 
@@ -371,3 +378,10 @@ let to_string kind =
   | TupleTypeSpecifier                      -> "tuple_type_specifier"
   | ErrorSyntax                             -> "error"
   | ListItem                                -> "list_item"
+  | PocketAtomExpression                    -> "pocket_atom"
+  | PocketAtomMappingDeclaration            -> "pocket_atom_mapping"
+  | PocketEnumDeclaration                   -> "pocket_enum_declaration"
+  | PocketFieldTypeExprDeclaration          -> "pocket_field_type_expr_declaration"
+  | PocketFieldTypeDeclaration              -> "pocket_field_type_declaration"
+  | PocketMappingIdDeclaration              -> "pocket_mapping_id_declaration"
+  | PocketMappingTypeDeclaration            -> "pocket_mapping_type_declaration"

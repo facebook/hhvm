@@ -32,49 +32,24 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitClsRefWithReifiedGenerics(
-  IRGS& env, SSATmp* cls, const StringData* name, uint32_t slot
-) {
-  auto ts =
-    getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
-  putClsRef(env, slot, cls, cns(env, ts));
-}
-
 void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot, bool cflavor) {
   auto const cls = (classSrc->type() <= TStr)
     ? ldCls(env, classSrc)
     : gen(env, LdObjClass, classSrc);
-  if (cflavor) {
-    if (cls->hasConstVal()) {
-      auto const clsval = cls->clsVal();
-      auto name = clsval->name();
-      if (clsval->hasReifiedGenerics() && isReifiedName(name)) {
-        emitClsRefWithReifiedGenerics(env, cls, name, slot);
-        return;
-      }
-    } else if (classSrc->hasConstVal(TStr)) {
-      auto const name = classSrc->strVal();
-      if (isReifiedName(name)) {
-        emitClsRefWithReifiedGenerics(env, cls, name, slot);
-        return;
-      }
-    } else {
-      if (classSrc->isA(TStr)) {
-        ifThenElse(
-          env,
-          [&] (Block* taken) {
-            auto const isreified = gen(env, IsReifiedName, classSrc);
-            gen(env, JmpZero, taken, isreified);
-          },
-          [&] {
-            auto ts = gen(env, LdReifiedGeneric, classSrc);
-            putClsRef(env, slot, cls, ts);
-          },
-          [&] { putClsRef(env, slot, cls); }
-        );
-        return;
-      }
-    }
+  if (cflavor && classSrc->isA(TStr)) {
+    ifThenElse(
+      env,
+      [&] (Block* taken) {
+        auto const isreified = gen(env, IsReifiedName, classSrc);
+        gen(env, JmpZero, taken, isreified);
+      },
+      [&] {
+        auto ts = gen(env, LdReifiedGeneric, classSrc);
+        putClsRef(env, slot, cls, ts);
+      },
+      [&] { putClsRef(env, slot, cls); }
+    );
+    return;
   }
   putClsRef(env, slot, cls);
 }

@@ -33,6 +33,7 @@ function chr(int $ascii): string;
 function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
 <<__PHPStdLib, __Rx>>
 function dechex(int $number): string;
+<<__Deprecated('Will be removed in future version of Hack')>>
 function func_get_args(): varray;
 <<__PHPStdLib, __Rx>>
 function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>

@@ -113,6 +113,7 @@ module ExprDepTy = struct
         let env, ty = apply_single env dep_tys ty in
         env, ty::acc) ~init:(env, []) in
       env, (r, Tunresolved tyl)
+    | _, Tvar _ -> env, ty
     | _ -> apply_single env dep_tys ety
 
 

@@ -1,0 +1,10 @@
+File "tconst_on_generics2.php", line 50, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_on_generics2.php", line 48, characters 12-20:
+  This is a string
+  File "tconst_on_generics2.php", line 19, characters 18-23:
+    resulting from expanding the type constant StringBox::T
+  File "tconst_on_generics2.php", line 49, characters 12-17:
+  It is incompatible with an int
+  File "tconst_on_generics2.php", line 10, characters 18-20:
+    resulting from expanding the type constant IntBox::T

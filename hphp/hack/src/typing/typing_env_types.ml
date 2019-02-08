@@ -105,6 +105,13 @@ type tyvar_info = {
   appears_contravariantly: bool;
   lower_bounds : TySet.t;
   upper_bounds : TySet.t;
+  (* Map associating a type to each type constant id of this variable.
+  Whenever we localize "T1::T" in a constraint, we add a fresh type variable
+  indexed by "T" in the type_constants of the type variable representing T1.
+  This allows to properly check constraints on "T1::T". *)
+  type_constants :
+    (Nast.sid (* id of the type constant "T", containing its position. *)
+    * locl_ty) SMap.t;
 }
 type tvenv = tyvar_info IMap.t
 

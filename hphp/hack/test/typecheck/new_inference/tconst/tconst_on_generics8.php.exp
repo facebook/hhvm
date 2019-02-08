@@ -1,0 +1,10 @@
+File "tconst_on_generics8.php", line 60, characters 21-30:
+Invalid argument (Typing[4110])
+  File "tconst_on_generics8.php", line 50, characters 47-51:
+  This is the expression dependent type \Box::T
+  File "tconst_on_generics8.php", line 4, characters 23-23:
+    resulting from expanding the type constant Box::T
+  File "tconst_on_generics8.php", line 65, characters 35-37:
+  It is incompatible with an int
+  File "tconst_on_generics8.php", line 65, characters 35-37:
+  Considering that this type argument is contravariant with respect to Contra

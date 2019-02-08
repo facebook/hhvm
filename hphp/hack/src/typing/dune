@@ -56,6 +56,7 @@
     typing_reactivity
     typing_set
     typing_subtype
+    typing_subtype_tconst
     typing_taccess
     typing_tdef
     typing_unify

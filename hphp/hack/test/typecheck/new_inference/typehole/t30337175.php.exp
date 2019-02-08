@@ -1,6 +1,12 @@
-File "t30337175.php", line 18, characters 7-7:
-Invalid argument (Typing[4110])
+File "t30337175.php", line 18, characters 3-5:
+Some type constraint(s) here are violated (Typing[4110])
+  File "t30337175.php", line 14, characters 14-14:
+  'T' is a constrained type parameter
+  File "t30337175.php", line 14, characters 19-19:
+  This is an int
+  File "t30337175.php", line 11, characters 19-21:
+    resulting from expanding the type constant E::Tc
   File "t30337175.php", line 14, characters 24-24:
-  This is an object of type D
-  File "t30337175.php", line 18, characters 7-7:
-  It is incompatible with an int
+  It is incompatible with a string
+  File "t30337175.php", line 8, characters 19-24:
+    resulting from expanding the type constant D::Tc

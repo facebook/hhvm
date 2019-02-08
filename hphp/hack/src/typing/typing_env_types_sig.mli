@@ -52,6 +52,7 @@
    appears_contravariantly: bool;
    lower_bounds : TySet.t;
    upper_bounds : TySet.t;
+   type_constants : (Nast.sid * locl ty) SMap.t;
  }
  type tvenv = tyvar_info IMap.t
 

@@ -57,13 +57,18 @@ let empty_env env ety_env ids = {
   typeconsts_seen = [];
 }
 
-let rec expand_with_env ety_env env reason root ids =
-  let tenv, env, ty = expand_with_env_ ety_env env reason root ids in
+(** Expand a type constant access like A::T
+If as_tyvar_with_cnstr is set, then return a fresh type variable which has
+the same constraints as type constant T in A. Otherwise, return an
+AKGeneric("A::T"). *)
+let rec expand_with_env ety_env env ?(as_tyvar_with_cnstr = false) reason root ids =
+  let tenv, env, ty =
+    expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids in
   tenv, (env.ety_env, ty)
 
-and expand_with_env_ ety_env env reason root ids =
+and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
   let env = empty_env env ety_env ids in
-  let env, (root_r, root_ty) = expand env root in
+  let env, (root_r, root_ty) = expand env ~as_tyvar_with_cnstr root in
   let trail = List.rev_map env.trail (compose strip_ns ExprDepTy.to_string) in
   let reason_func r =
     let r = match r with
@@ -96,7 +101,7 @@ and expand_with_env_ ety_env env reason root ids =
 
 and referenced_typeconsts tenv ety_env r (root, ids) =
   let tenv, (ety_env, root) = Phase.localize_with_env ~ety_env tenv root in
-  let _, env, _ = expand_with_env_ ety_env tenv r root ids in
+  let _, env, _ = expand_with_env_ ety_env ~as_tyvar_with_cnstr:false tenv r root ids in
   List.rev env.typeconsts_seen
 
 (* The root of a type access is a type. When expanding a type access this type
@@ -106,7 +111,10 @@ and referenced_typeconsts tenv ety_env r (root, ids) =
  * We also need to track what expansions have already taken place to make sure
  * we do not recurse infinitely.
  *)
-and expand env (root_reason, root_ty as root) =
+and expand env ~as_tyvar_with_cnstr root =
+  let expand = expand ~as_tyvar_with_cnstr in
+  let tenv, (root_reason, root_ty as root) = Env.expand_type env.tenv root in
+  let env = { env with tenv = tenv } in
   match env.ids with
   | [] ->
       env, root
@@ -120,7 +128,8 @@ and expand env (root_reason, root_ty as root) =
           let env, ty =
             create_root_from_type_constant
               env class_pos class_name
-               (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl)) head in
+              (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl))
+              head ~as_tyvar_with_cnstr in
           expand { env with ids = tail } ty
       | Tabstract (AKgeneric s, _) ->
         let dep_ty = generic_to_dep_ty s in
@@ -171,13 +180,9 @@ and expand env (root_reason, root_ty as root) =
             { prev_env with tenv }, ty
           end in
           { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
-      | Tvar _ ->
-          if TypecheckerOptions.new_inference env.tenv.Env.genv.Env.tcopt
-          then env, root (* TODO: T36856670 *)
-          else
-            let tenv, ty = Env.expand_type env.tenv root in
-            let env = { env with tenv = tenv } in
-            expand env ty
+      | Tvar n ->
+          let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n head in
+          expand { env with ids = tail; tenv } ty
       | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
           let pos, tconst = head in
@@ -199,8 +204,9 @@ and expand env (root_reason, root_ty as root) =
  * otherwise we choose the constraint type. If there is no constraint type then
  * we choose the assigned type.
  *)
-and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst) =
-  match get_typeconst env class_pos class_name pos tconst with
+and create_root_from_type_constant env class_pos class_name root_ty
+  (pos, tconst) ~as_tyvar_with_cnstr =
+  match get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr with
   | None -> env, (fst root_ty, Typing_utils.tany env.tenv)
   | Some (env, typeconst) ->
       let env =
@@ -231,20 +237,29 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
              *)
             let dep_tys =
               List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
-            { env with dep_tys = dep_ty::dep_tys; tenv = tenv }, cstr
+            let tenv, ty =
+              if as_tyvar_with_cnstr then
+                let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
+                let tenv = Typing_utils.sub_type tenv tvar cstr in
+                tenv, tvar
+              else tenv, cstr in
+            { env with dep_tys = dep_ty::dep_tys; tenv }, ty
         | _ ->
-            let ty =
-              Reason.Rwitness (fst typeconst.ttc_name),
-              Tabstract (AKgeneric (class_name^"::"^tconst), None) in
-              let dep_tys =
+            let tenv, ty =
+              if as_tyvar_with_cnstr then Env.fresh_invariant_type_var tenv pos
+              else
+                let reason = Reason.Rwitness (fst typeconst.ttc_name) in
+                let ty = (reason, Tabstract (AKgeneric (class_name^"::"^tconst), None)) in
+                tenv, ty in
+            let dep_tys =
               List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
-            { env with dep_tys = dep_tys }, ty
+            { env with dep_tys; tenv }, ty
       end
 
 (* Looks up the type constant within the given class. This also checks for
  * potential cycles by examining the expansions we have already performed.
  *)
-and get_typeconst env class_pos class_name pos tconst =
+and get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr =
   try
     let class_ = match Env.get_class env.tenv class_name with
       | None ->
@@ -253,8 +268,9 @@ and get_typeconst env class_pos class_name pos tconst =
       | Some c -> c in
     let typeconst = match Env.get_typeconst env.tenv class_ tconst with
       | None ->
-          Errors.smember_not_found
-            `class_typeconst pos ((Cls.pos class_), class_name) tconst `no_hint;
+          if not as_tyvar_with_cnstr then
+            Errors.smember_not_found
+              `class_typeconst pos ((Cls.pos class_), class_name) tconst `no_hint;
           raise Exit
       | Some tc -> tc in
     let tc_tuple = ((Cls.name class_), snd typeconst.ttc_name, pos) in

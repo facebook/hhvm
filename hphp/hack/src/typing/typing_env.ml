@@ -78,6 +78,7 @@ let empty_tvar_info =
     upper_bounds = empty_bounds;
     appears_covariantly = false;
     appears_contravariantly = false;
+    type_constants = SMap.empty;
     }
 
 let add_current_tyvar env p v =
@@ -439,15 +440,14 @@ let get_tpenv_size env =
  *****************************************************************************)
 
 let get_tyvar_lower_bounds env var =
-match IMap.get var env.tvenv with
-| None -> empty_bounds
-| Some {lower_bounds; _} -> lower_bounds
+  match IMap.get var env.tvenv with
+  | None -> empty_bounds
+  | Some {lower_bounds; _} -> lower_bounds
 
 let get_tyvar_upper_bounds env var =
-match IMap.get var env.tvenv with
-| None -> empty_bounds
-| Some {upper_bounds; _} -> upper_bounds
-
+  match IMap.get var env.tvenv with
+  | None -> empty_bounds
+  | Some {upper_bounds; _} -> upper_bounds
 
 let rec is_tvar ~elide_nullable ty var =
   match ty with
@@ -461,10 +461,18 @@ let merge_tvar_info tvinfo1 tvinfo2 =
     upper_bounds = TySet.union tvinfo1.upper_bounds tvinfo2.upper_bounds;
     appears_covariantly = tvinfo1.appears_covariantly || tvinfo2.appears_covariantly;
     appears_contravariantly = tvinfo1.appears_contravariantly || tvinfo2.appears_contravariantly;
+    type_constants =
+      (* At this point, type constants of equivalent type variables must
+      have been made equivalent too. *)
+      SMap.union tvinfo1.type_constants tvinfo2.type_constants
+        ~combine:(fun _tconstid ty1 _ty2 -> Some ty1);
   }
 
 let get_tyvar_info env var =
   Option.value (IMap.get var env.tvenv) ~default:empty_tvar_info
+
+let set_tyvar_info env var tvinfo =
+  env_with_tvenv env (IMap.add var tvinfo env.tvenv)
 
 let remove_tyvar env var =
   env_with_tvenv env (IMap.remove var env.tvenv)
@@ -514,7 +522,7 @@ let remove_equivalent_tyvars env var =
       upper_bounds = TySet.diff tvinfo.upper_bounds redundant_bounds;
       lower_bounds = TySet.diff tvinfo.lower_bounds redundant_bounds;
     } in
-  env_with_tvenv env (IMap.add var tvinfo env.tvenv)
+  set_tyvar_info env var tvinfo
 
 let get_tyvar_appears_covariantly env var =
   let tvinfo = get_tyvar_info env var in
@@ -523,6 +531,18 @@ let get_tyvar_appears_covariantly env var =
 let get_tyvar_appears_contravariantly env var =
   let tvinfo = get_tyvar_info env var in
   tvinfo.appears_contravariantly
+
+let get_tyvar_type_consts env var =
+  let tvinfo = get_tyvar_info env var in
+  tvinfo.type_constants
+
+let get_tyvar_type_const env var (_, tyconstid) =
+  SMap.get tyconstid (get_tyvar_type_consts env var)
+
+let set_tyvar_type_const env var (_, tyconstid_ as tyconstid) ty =
+  let tvinfo = get_tyvar_info env var in
+  let type_constants = SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants in
+  set_tyvar_info env var { tvinfo with type_constants }
 
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
@@ -1449,6 +1469,13 @@ let set_tyvar_variance ~tyvars env ty =
     let env = if ISet.mem var positive then set_tyvar_appears_covariantly env var else env in
     let env = if ISet.mem var negative then set_tyvar_appears_contravariantly env var else env in
     env)
+
+let fresh_invariant_type_var env p =
+  let v = Ident.tmp () in
+  let env = add_current_tyvar env p v in
+  let env = set_tyvar_appears_covariantly env v in
+  let env = set_tyvar_appears_contravariantly env v in
+  env, (Reason.Rtype_variable p, Tvar v)
 
  (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
   * If the optional [intersect] operation is supplied, then use this to avoid

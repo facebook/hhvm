@@ -84,8 +84,8 @@ let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implem
 let expand_type_and_solve x = !expand_type_and_solve_ref x
 
 type expand_typeconst =
-  expand_env -> Env.env -> Reason.t -> locl ty -> Nast.sid list ->
-  Env.env * ety
+  expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> Reason.t -> locl ty ->
+  Nast.sid list -> Env.env * ety
 let (expand_typeconst_ref: expand_typeconst ref) = ref not_implemented
 let expand_typeconst x = !expand_typeconst_ref x
 

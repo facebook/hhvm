@@ -1656,6 +1656,8 @@ and add_tyvar_upper_bound env r var ty =
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
   let env =
     Typing_set.fold (fun upper_bound env ->
+      let env = Typing_subtype_tconst.make_all_type_consts_equal env var
+        upper_bound ~as_tyvar_with_cnstr:true in
       Typing_set.fold (fun lower_bound env ->
         sub_type env lower_bound upper_bound)
         lower_bounds env)
@@ -1679,6 +1681,8 @@ and add_tyvar_lower_bound env r var ty =
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
   let env =
     Typing_set.fold (fun lower_bound env ->
+      let env = Typing_subtype_tconst.make_all_type_consts_equal env var
+        lower_bound ~as_tyvar_with_cnstr:false in
       Typing_set.fold (fun upper_bound env ->
         sub_type env lower_bound upper_bound)
         upper_bounds env)

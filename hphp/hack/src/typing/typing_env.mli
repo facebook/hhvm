@@ -18,6 +18,7 @@ val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : env -> Pos.t -> env *  locl ty
 val fresh_unresolved_type : env -> Pos.t -> env * locl ty
+val fresh_invariant_type_var : env -> Pos.t -> env * locl ty
 val open_tyvars : env -> env
 val get_current_tyvars : env -> Ident.t list
 val add_current_tyvar : env -> Pos.t -> Ident.t -> env
@@ -168,6 +169,12 @@ val get_tyvar_appears_contravariantly :
   env -> Ident.t -> bool
 val get_tyvar_info :
   env -> Ident.t -> tyvar_info
+val get_tyvar_type_const :
+  env -> int -> Nast.sid -> (Nast.sid * locl ty) option
+val set_tyvar_type_const :
+  env -> int -> Nast.sid -> locl ty -> env
+val get_tyvar_type_consts :
+  env -> int -> (Nast.sid * locl ty) SMap.t
 val remove_tyvar :
   env -> Ident.t -> env
 val remove_equivalent_tyvars :

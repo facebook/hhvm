@@ -1,15 +1,19 @@
 <?php
-function _filter_var_array_is_valid_filter($filter) {
-  static $ids = null;
-  if ($ids === null) {
-    // A bit painful in php, exposing the IDs might be better if this is hot
-    $ids = array_fill_keys(array_map('filter_id', filter_list()), null);
+
+abstract final class _FilterVarArrayFilterValidator {
+  private static $ids = null;
+
+  public static function isValid($filter) {
+    if (self::$ids === null) {
+      // A bit painful in php, exposing the IDs might be better if this is hot
+      self::$ids = array_fill_keys(array_map('filter_id', filter_list()), null);
+    }
+    return array_key_exists($filter, self::$ids);
   }
-  return array_key_exists($filter, $ids);
 }
 
 function _filter_var_array_single($value, $filter, $options = array()) {
-  if (!_filter_var_array_is_valid_filter($filter)) {
+  if (!_FilterVarArrayFilterValidator::isValid($filter)) {
     $filter = FILTER_DEFAULT;
   }
   $ret = filter_var($value, (int) $filter, $options);
@@ -69,7 +73,7 @@ function filter_var_array($data, $definition = null, $add_empty = true) {
     if ($definition === null) {
       $default_filter = FILTER_DEFAULT;
     } else if (is_int($definition)) {
-      if (!_filter_var_array_is_valid_filter($definition)) {
+      if (!_FilterVarArrayFilterValidator::isValid($definition)) {
         return false;
       }
       $default_filter = $definition;

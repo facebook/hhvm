@@ -3214,9 +3214,8 @@ let pProgram : program parser = fun node env  ->
     | (Stmt (p, _) as e)::el
         when (env.keep_errors) && (not env.codegen) && env.fi_mode = FileInfo.Mstrict ->
       (* We've already lowered at this point, so raise_parsing_error doesn't
-        really fit. This is only a typechecker error anyway, so just add it
-        directly *)
-      Errors.parsing_error (p, SyntaxError.toplevel_statements);
+        really fit. This is only a typechecker error anyway, so do it anyway *)
+      raise_parsing_error env (`Pos p) SyntaxError.toplevel_statements;
       post_process el (e :: acc)
     | (e::el) -> post_process el (e :: acc)
   in

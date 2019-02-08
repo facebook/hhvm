@@ -2431,6 +2431,7 @@ and freshen_ty ~variance env ty =
   | Ast.Invariant -> env, ty
   | Ast.Covariant | Ast.Contravariant ->
     let v = Env.fresh () in
+    let env = Env.add_current_tyvar env (Reason.to_pos (fst ty)) v in
     let env = Env.set_tyvar_appears_covariantly env v in
     let env = Env.set_tyvar_appears_contravariantly env v in
     let freshty = (fst ty, Tvar v) in
@@ -2615,6 +2616,11 @@ let expand_type_and_solve env ty =
     Env.expand_type env ty
   | _ ->
     env, ety
+
+let close_tyvars_and_solve env =
+  let tyvars = Env.get_current_tyvars env in
+  let env = Env.close_tyvars env in
+  solve_tyvars ~tyvars env
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in

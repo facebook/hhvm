@@ -694,7 +694,7 @@ and gather_defined_in_expr env e =
 
 and stmt env st =
   let env = Env.open_tyvars env in
-  (fun (env, tb) -> Env.close_tyvars env, tb) @@
+  (fun (env, tb) -> SubType.close_tyvars_and_solve env, tb) @@
   match st with
   | Unsafe_block b ->
     (* Do not run inference on the block, since unsafe is sometimes used to work
@@ -1101,8 +1101,7 @@ and as_expr env ty1 pe e =
       else Type.sub_type pe Reason.URforeach env ty1 ty in
     let tyvars = Env.get_current_tyvars env in
     let env = Env.set_tyvar_variance ~tyvars env ty in
-    let env = SubType.solve_tyvars ~tyvars env in
-  Env.close_tyvars env, tk, tv) @@
+  SubType.close_tyvars_and_solve env, tk, tv) @@
   let env, tv = Env.fresh_unresolved_type env pe in
   match e with
   | As_v _ ->
@@ -1314,8 +1313,6 @@ and make_result env p te ty =
    * to how they appear in the expression type *)
   let tyvars = Env.get_current_tyvars env in
   let env = Env.set_tyvar_variance ~tyvars env ty in
-  (* Immediately attempt to "solve" for those type variables *)
-  let env = SubType.solve_tyvars ~tyvars env in
   env, T.make_typed_expr p ty te, ty
 
 and expr_
@@ -1329,7 +1326,7 @@ and expr_
   ~check_defined
   env (p, e) =
   let env = Env.open_tyvars env in
-  (fun (env, te, ty) -> Env.close_tyvars env, te, ty) @@
+  (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
   let expr = expr ~check_defined in
   let exprs = exprs ~check_defined in
   let raw_expr = raw_expr ~check_defined in
@@ -2192,7 +2189,7 @@ and expr_
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
           let env = Env.open_tyvars env in
-          (fun (env, te, ty) -> Env.close_tyvars env, te, ty) @@
+          (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
           check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
@@ -2808,8 +2805,7 @@ and anon_make tenv p f ft idl =
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
         let tyvars = Env.get_current_tyvars env in
         let env = Env.set_tyvar_variance ~tyvars env ty in
-        let env = SubType.solve_tyvars ~tyvars env in
-        let env = Env.close_tyvars env in
+        let env = SubType.close_tyvars_and_solve env in
         env, te, hret
       end
     end
@@ -3144,8 +3140,7 @@ and assign_ p ur env e1 ty2 =
           let env = Type.sub_type p ur env folded_ty2 tuple_ty in
           let tyvars = Env.get_current_tyvars env in
           let env = Env.set_tyvar_variance ~tyvars env tuple_ty in
-          let env = SubType.solve_tyvars ~tyvars env in
-          let env = Env.close_tyvars env in
+          let env = SubType.close_tyvars_and_solve env in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
             let env, te, _ = assign p env lvalue ty2 in

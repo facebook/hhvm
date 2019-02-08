@@ -80,8 +80,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
           (fun _ -> env, false) in
       let tyvars = Env.get_current_tyvars env in
       let env = Env.set_tyvar_variance ~tyvars env container_type in
-      let env = SubType.solve_tyvars ~tyvars env in
-      let env = Env.close_tyvars env in
+      let env = SubType.close_tyvars_and_solve env in
       if is_container then
         check_memoizable env type_param
       else

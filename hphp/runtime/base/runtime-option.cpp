@@ -695,7 +695,6 @@ int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 
-uint64_t RuntimeOption::DisableExtract = 0;
 uint64_t RuntimeOption::DisableForwardStaticCall = 2;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 2;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
@@ -1471,8 +1470,6 @@ void RuntimeOption::Load(
   }
   {
     // PHPisms
-    Config::Bind(DisableExtract, ini, config,
-                 "Hack.Lang.Phpism.DisableExtract", DisableExtract);
     Config::Bind(DisableForwardStaticCall, ini, config,
                  "Hack.Lang.Phpism.DisableForwardStaticCall",
                  DisableForwardStaticCall);

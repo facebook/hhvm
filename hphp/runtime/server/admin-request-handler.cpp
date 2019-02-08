@@ -643,13 +643,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
     if (strncmp(cmd.c_str(), "jit-des-info", 13) == 0) {
-      if (jit::ProfDataDeserializer::getBuildTime() == 0) {
+      if (!jit::ProfData::wasDeserialized()) {
         transport->sendString("", 200);
         break;
       }
       auto msg = folly::sformat("{}:{}",
-                                jit::ProfDataDeserializer::getBuildHost(),
-                                jit::ProfDataDeserializer::getBuildTime());
+                                jit::ProfData::buildHost()->slice(),
+                                jit::ProfData::buildTime());
       transport->sendString(msg, 200);
     }
 
@@ -1105,6 +1105,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("static-strings", makeStaticStringCount());
     appendStat("request-count", requestCount());
     appendStat("single-jit-requests", singleJitRequestCount());
+    appendStat("jit-des", jit::ProfData::triedDeserialization());
+    appendStat("jit-des-succ", jit::ProfData::wasDeserialized());
 
     /*
      * We're only using globalProfData() here because admin requests don't call

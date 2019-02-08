@@ -335,8 +335,27 @@ struct ProfData {
     Treadmill::Session m_ts;
   };
 
-  bool wasDeserialized() const { return m_wasDeserialized; }
-  void setDeserialized() { m_wasDeserialized = true; }
+  static bool triedDeserialization() {
+    return s_triedDeserialization.load(std::memory_order_relaxed);
+  }
+  static void setTriedDeserialization() {
+    s_triedDeserialization.store(true, std::memory_order_relaxed);
+  }
+
+  static bool wasDeserialized() {
+    return s_wasDeserialized.load(std::memory_order_relaxed);
+  }
+  static int64_t buildTime() {
+    return s_buildTime.load(std::memory_order_relaxed);
+  }
+  static const StringData* buildHost() {
+    return s_buildHost.load(std::memory_order_relaxed);
+  }
+  static void setDeserialized(const std::string& buildHost, int64_t buildTime) {
+    s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
+    s_buildTime.store(buildTime, std::memory_order_relaxed);
+    s_wasDeserialized.store(true, std::memory_order_relaxed);
+  }
 
   /*
    * Allocate a new id for a translation. Depending on the kind of the
@@ -633,7 +652,7 @@ struct ProfData {
     m_sortedFuncIds = order;
   }
 
-private:
+ private:
   struct PrologueID {
     FuncId func;
     int nArgs;
@@ -711,8 +730,6 @@ private:
   mutable folly::SharedMutex m_targetProfilesLock;
   jit::fast_map<TransID, jit::vector<TargetProfileInfo>> m_targetProfiles;
 
-  bool m_wasDeserialized{false};
-
   /*
    * Base profile count for inlining.
    */
@@ -723,6 +740,15 @@ private:
    * callg graph.
    */
   std::vector<FuncId> m_sortedFuncIds;
+
+  /*
+   * The following static variables need to be alive for the lifetime of the
+   * process, even after profile data are freed.
+   */
+  static std::atomic_bool s_triedDeserialization;
+  static std::atomic_bool s_wasDeserialized;
+  static std::atomic<StringData*> s_buildHost;
+  static std::atomic<int64_t> s_buildTime;
 };
 
 //////////////////////////////////////////////////////////////////////

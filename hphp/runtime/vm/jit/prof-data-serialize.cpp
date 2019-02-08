@@ -904,9 +904,6 @@ ProfDataSerializer::~ProfDataSerializer() {
   }
 }
 
-std::string ProfDataDeserializer::s_buildHost;
-int64_t ProfDataDeserializer::s_buildTime{0};
-
 ProfDataDeserializer::ProfDataDeserializer(const std::string& name) {
   fd = open(name.c_str(), O_CLOEXEC | O_RDONLY);
   if (fd == -1) throw std::runtime_error("Failed to open: " + name);
@@ -1331,6 +1328,8 @@ std::string serializeProfData(const std::string& filename) {
 
 std::string deserializeProfData(const std::string& filename, int numWorkers) {
   try {
+    ProfData::setTriedDeserialization();
+
     ProfDataDeserializer ser{filename};
 
     auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
@@ -1346,8 +1345,9 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     }
 
     size = read_raw<size_t>(ser);
-    ProfDataDeserializer::s_buildHost.resize(size);
-    read_raw(ser, &ProfDataDeserializer::s_buildHost[0], size);
+    std::string buildHost;
+    buildHost.resize(size);
+    read_raw(ser, &buildHost[0], size);
 
     int64_t buildTime;
     read_raw(ser, buildTime);
@@ -1358,7 +1358,6 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     } else if (buildTime > currTime) {
       throw std::runtime_error("profile data dumped in the future?");
     }
-    ProfDataDeserializer::s_buildTime = buildTime;
 
     InstanceBits::deserialize(ser);
     read_global_array_map(ser);
@@ -1366,7 +1365,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     ProfData::Session pds;
     auto const pd = profData();
     read_prof_data(ser, pd);
-    pd->setDeserialized();
+    pd->setDeserialized(buildHost, buildTime);
 
     read_target_profiles(ser);
 
@@ -1384,8 +1383,6 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     // the unit to be loaded the implementation might never get pulled
     // in (resulting in fatals when the wrapper tries to call it).
     merge_loaded_units(numWorkers);
-
-    // Read function orders for optimized translation
 
     return "";
   } catch (std::runtime_error& err) {

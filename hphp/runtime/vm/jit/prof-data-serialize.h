@@ -117,15 +117,6 @@ struct ProfDataDeserializer {
 
   bool done();
 
-  // Currently we deserialize at most once in the process, so use static
-  // variables here to make the result outlive the deserializer.
-  static const std::string& getBuildHost() {
-    return s_buildHost;
-  }
-  static int64_t getBuildTime() {
-    return s_buildTime;
-  }
-
  private:
   int fd;
   static constexpr uint32_t buffer_size = 8192;
@@ -140,8 +131,6 @@ struct ProfDataDeserializer {
   EntMap<const RepoAuthType::Array*> ratMap;
   jit::fast_map<uint32_t, uint32_t> fidMap;
 
-  static std::string s_buildHost;
-  static int64_t s_buildTime;
   friend std::string deserializeProfData(const std::string&, int);
 };
 

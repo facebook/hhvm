@@ -2476,9 +2476,8 @@ void hphp_process_init() {
         }
         BootStats::mark("jit::deserializeProfData");
         BootStats::set("prof_data_source_host",
-                       jit::ProfDataDeserializer::getBuildHost());
-        BootStats::set("prof_data_timestamp",
-                       jit::ProfDataDeserializer::getBuildTime());
+                       jit::ProfData::buildHost()->toCppString());
+        BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
         RuntimeOption::EvalNumSingleJitRequests = 0;
         RuntimeOption::EvalJitProfileInterpRequests = 0;
         RuntimeOption::EvalJitProfileRequests = 0;

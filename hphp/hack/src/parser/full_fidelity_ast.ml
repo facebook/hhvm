@@ -3475,6 +3475,12 @@ module FromPositionedSyntax = WithPositionedSyntax(PositionedSyntax)
 module FromEditablePositionedSyntax =
   WithPositionedSyntax(Full_fidelity_editable_positioned_syntax)
 
+(* Creates a relative position out of the error and the given path and source text. *)
+let pos_of_error path source_text error =
+  SourceText.relative_pos path source_text
+    (SyntaxError.start_offset error)
+    (SyntaxError.end_offset error)
+
 let parse_text
   (env : env)
   (source_text : SourceText.t)
@@ -3490,10 +3496,7 @@ let parse_text
   ) in
   if mode = Some FileInfo.Mexperimental && env.codegen && (not env.hacksperimental) then begin
     let e = SyntaxError.make 0 0 SyntaxError.experimental_in_codegen_without_hacksperimental in
-    let p =
-      SourceText.relative_pos env.file source_text
-        (Full_fidelity_syntax_error.start_offset e)
-        (Full_fidelity_syntax_error.end_offset e) in
+    let p = pos_of_error env.file source_text e in
     raise @@ SyntaxError.ParserFatal (e, p)
   end;
   let tree =
@@ -3549,7 +3552,12 @@ let lower_tree
     } in
   let script = PositionedSyntaxTree.root tree in
   let comments = scour_comments_and_add_fixmes env source_text script in
-  let () =
+  let relative_pos = pos_of_error env.file source_text in
+  let check_for_syntax_errors _ast =
+    let find_errors error_env =
+      ParserErrors.parse_errors error_env
+      (* TODO: concatenate with errors found by visiting AST *)
+    in
     if env.codegen && not env.lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode
         then ParserErrors.SystemLibCompat
@@ -3560,7 +3568,7 @@ let lower_tree
         ~codegen:env.codegen
         ~parser_options:env.parser_options
       in
-      let errors = ParserErrors.parse_errors error_env in
+      let errors = find_errors error_env in
       (* Prioritize runtime errors *)
       let runtime_errors =
         List.filter errors ~f:SyntaxError.(fun e -> error_type e = RuntimeError)
@@ -3570,17 +3578,10 @@ let lower_tree
       | _, e :: _
       | e :: _, _
         ->
-        let p =
-          SourceText.relative_pos env.file source_text
-            (Full_fidelity_syntax_error.start_offset e)
-            (Full_fidelity_syntax_error.end_offset e) in
-        raise @@ SyntaxError.ParserFatal (e, p)
+        raise @@ SyntaxError.ParserFatal (e, relative_pos e)
     else if env.keep_errors then
-      let pos_and_message_of error =
-        let so = SyntaxError.start_offset error in
-        let eo = SyntaxError.end_offset error in
-        let p = SourceText.relative_pos env.file source_text so eo in
-        p, SyntaxError.message error
+      let report_error e =
+        Errors.parsing_error (relative_pos e, SyntaxError.message e)
       in
       let is_hhi =
         String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
@@ -3595,12 +3596,11 @@ let lower_tree
           ~hhi_mode:is_hhi
           ~parser_options:env.parser_options
         in
-        let errors = ParserErrors.parse_errors error_env in
-        let f e = Errors.parsing_error (pos_and_message_of e) in
-        List.iter ~f errors
-      | e::_ ->
-        Errors.parsing_error (pos_and_message_of e);
-  in
+        let errors = find_errors error_env in
+        List.iter ~f:report_error errors
+      | error :: _ -> report_error error
+  in (* check_for_syntax_errors *)
+  let () = check_for_syntax_errors () in
   let mode = Option.value mode ~default:(FileInfo.Mpartial) in
   let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
@@ -3611,23 +3611,20 @@ let lower_tree
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm popt || env.is_hh_file)) in
   let env = { env with parser_options = popt } in
-  if env.lower_coroutines
-  then
-    let script =
-      Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
-      |> Ppl_class_rewriter.rewrite_ppl_classes
-      |> Coroutine_lowerer.lower_coroutines in
-    FromEditablePositionedSyntax.lower
-      env
-      ~source_text
-      ~script
-      comments
-  else
-    FromPositionedSyntax.lower
-      env
-      ~source_text
-      ~script
-      comments
+  let lower =
+    if env.lower_coroutines
+    then
+      let script =
+        Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
+        |> Ppl_class_rewriter.rewrite_ppl_classes
+        |> Coroutine_lowerer.lower_coroutines in
+      FromEditablePositionedSyntax.lower ~script
+    else
+      FromPositionedSyntax.lower ~script
+  in lower
+    env
+    ~source_text
+    comments
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let (mode, tree) = parse_text env source_text in

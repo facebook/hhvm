@@ -265,8 +265,11 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
     if instantiate_tparams
     then
       let default () =
-        List.map_env env tparams (fun env _ ->
-          TUtils.unresolved_tparam ~reason:(Reason.Rtype_variable use_pos) env) in
+        List.map_env env tparams (fun env tparam ->
+          let reason = Reason.Rtype_variable use_pos in
+          let env, tvar = TUtils.unresolved_tparam ~reason env in
+          Typing_log.log_tparam_instantiation env use_pos tparam tvar;
+          env, tvar) in
       let env, tvarl =
         if List.length explicit_tparams = 0
         then default ()

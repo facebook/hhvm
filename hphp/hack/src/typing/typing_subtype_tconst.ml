@@ -42,10 +42,11 @@ let make_all_type_consts_equal env var ty ~as_tyvar_with_cnstr =
 
 
 (** `p` is the position where var::tconstid was encountered. *)
-let get_tyvar_type_const env var (pos, _ as tconstid) =
+let get_tyvar_type_const env var (pos, tconstid_ as tconstid) =
   match Env.get_tyvar_type_const env var tconstid with
   | Some (_pos, ty) -> env, ty
   | None ->
     let env, tvar = Env.fresh_invariant_type_var env pos in
+    Typing_log.log_new_tvar_for_tconst env pos var tconstid_ tvar;
     let env = add_tyvar_type_const env var tconstid tvar in
     env, tvar

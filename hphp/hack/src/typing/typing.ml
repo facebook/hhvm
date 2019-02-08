@@ -2905,7 +2905,10 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         | CI _, (_::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl
         | _ ->
           let env, params = List.map_env env (Cls.tparams class_info)
-            (fun env _ -> Env.fresh_unresolved_type env p) in
+            (fun env tparam ->
+              let env, tvar = Env.fresh_unresolved_type env p in
+              Typing_log.log_new_tvar_for_new_object env p tvar cname tparam;
+              env, tvar) in
           begin match snd c_ty with
           | Tclass(_, Exact, _) ->
             env, (Tclass (cname, Exact, params)), params
@@ -4634,8 +4637,10 @@ and resolve_type_arguments env p _class_id tparaml hintl =
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml
   then begin
-    List.map_env env tparaml begin fun env _ ->
-      Env.fresh_unresolved_type env p end
+    List.map_env env tparaml begin fun env tparam ->
+      let env, tvar = Env.fresh_unresolved_type env p in
+      Typing_log.log_tparam_instantiation env p tparam tvar;
+      env, tvar end
   end
   else List.map_env env hintl resolve_type_argument
 

@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+open Typing_defs
 module Env = Typing_env
 
 open Tty
@@ -298,6 +299,29 @@ let log_types p env items =
 let log_prop ?(do_normalize = false) level p message env prop =
   log_with_level env "prop" level (fun () ->
     log_position p (fun () -> log_subtype_prop ~do_normalize env message prop))
+
+let log_new_tvar env p tvar message =
+  log_with_level env "prop" 2 (fun () ->
+    log_types p env [Log_head (message, [Log_type ("type variable", tvar)])])
+
+let log_tparam_instantiation env p tparam tvar =
+  let message = Printf.sprintf "Instantiating type parameter %s with" (snd tparam.tp_name) in
+  log_new_tvar env p tvar message
+
+let log_new_tvar_for_new_object env p tvar cname tparam =
+  let message = Printf.sprintf
+    "Creating new type var for type parameter %s while instantiating object %s"
+    (snd tparam.tp_name) (snd cname) in
+  log_new_tvar env p tvar message
+
+let log_new_tvar_for_tconst env p tvar tconstid tvar_for_tconst =
+  let message = Printf.sprintf "Creating new type var for #%d::%s" tvar tconstid in
+  log_new_tvar env p tvar_for_tconst message
+
+let log_new_tvar_for_tconst_access env p tvar class_name tconst =
+  let message = Printf.sprintf "Creating type var with the same constraints as %s::%s"
+    class_name tconst in
+  log_new_tvar env p tvar message
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env)

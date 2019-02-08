@@ -15,6 +15,7 @@ open Utils
 
 module Reason = Typing_reason
 module Env = Typing_env
+module Log = Typing_log
 module Phase = Typing_phase
 module TySet = Typing_set
 module TR = Typing_reactivity
@@ -240,13 +241,17 @@ and create_root_from_type_constant env class_pos class_name root_ty
             let tenv, ty =
               if as_tyvar_with_cnstr then
                 let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
+                Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
                 let tenv = Typing_utils.sub_type tenv tvar cstr in
                 tenv, tvar
               else tenv, cstr in
             { env with dep_tys = dep_ty::dep_tys; tenv }, ty
         | _ ->
             let tenv, ty =
-              if as_tyvar_with_cnstr then Env.fresh_invariant_type_var tenv pos
+              if as_tyvar_with_cnstr then
+                let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
+                Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
+                tenv, tvar
               else
                 let reason = Reason.Rwitness (fst typeconst.ttc_name) in
                 let ty = (reason, Tabstract (AKgeneric (class_name^"::"^tconst), None)) in

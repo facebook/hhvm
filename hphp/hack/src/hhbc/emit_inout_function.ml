@@ -29,13 +29,13 @@ let emit_body_instrs_inout params call_instrs =
       ]
       else instr_pushl (Local.Named (Hhas_param.name p))
     ) in
-  let inout_params = List.filter_map params ~f:(fun p ->
+  let inout_setters = List.filter_map params ~f:(fun p ->
       if not @@ Hhas_param.is_inout p then None else
-        Some (instr_setl @@ Local.Named (Hhas_param.name p))) in
+        Some (instr_popl @@ Local.Named (Hhas_param.name p))) in
   let local = Local.get_unnamed_local () in
   let has_variadic = is_last_param_variadic param_count params in
   let param_count = if has_variadic then param_count - 1 else param_count in
-  let num_inout = List.length inout_params in
+  let num_inout = List.length inout_setters in
   let flags = { default_fcall_flags with has_unpack = has_variadic } in
   let fcall_args = make_fcall_args
     ~flags ~num_rets:(num_inout + 1) param_count in
@@ -44,7 +44,9 @@ let emit_body_instrs_inout params call_instrs =
     call_instrs;
     param_instrs;
     instr_fcall fcall_args;
-    Emit_inout_helpers.emit_list_set_for_inout_call local inout_params;
+    instr_popl local;
+    gather @@ inout_setters;
+    instr_pushl local;
     instr_retc
   ]
 

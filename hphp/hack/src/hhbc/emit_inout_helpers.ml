@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open Instruction_sequence
 open Core_kernel
 
 module H = Hhbc_ast
@@ -56,32 +55,3 @@ let inout_suffix param_location =
   "$"
   ^ (String.concat ~sep:";" param_location)
   ^ "$inout"
-
-let emit_set_instrs ?(is_last=false) opt_base (index, set_instrs) =
-  let index = if is_last then 0 else index in
-  gather [
-    set_instrs;
-    instr_popc;
-    match opt_base with
-    | Some base ->
-      gather [
-        instr_basel base H.MemberOpMode.Warn;
-        instr_querym 0 H.QueryOp.CGet (H.MemberKey.EI (Int64.of_int index))
-      ]
-    | None -> empty
-  ]
-
-let emit_list_set_for_inout_call local inout_params = Local.scope @@ fun () ->
-  if List.length inout_params = 0 then empty else
-  let inout_params = List.mapi ~f:(fun i p -> (i + 2, p)) inout_params in
-  (* We know that this is safe since there must be at least 1 inout param *)
-  let all_but_last, last =
-    List.split_n inout_params (List.length inout_params - 1) in
-  let last = List.hd_exn last in
-  gather [
-    instr_setl local;
-    instr_popc;
-    gather @@ List.map all_but_last ~f:(emit_set_instrs None);
-    emit_set_instrs ~is_last:true None last;
-    instr_pushl local
-  ]

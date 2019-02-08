@@ -2498,9 +2498,11 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
           make_final (base.stack_size + elem_stack_size);
         ], None
       ] in
-    let store =
+    let store = gather [
       emit_store_for_simple_base ~is_base:false env outer_pos elem_stack_size
-      base_expr local in
+        base_expr local;
+      instr_popc
+    ] in
     Array_get_inout { load; store }
 
   | Array_get_base_inout base, None ->
@@ -2515,9 +2517,10 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
         make_final (base.load.stack_size + elem_stack_size);
       ], None
     ] in
-    let store =  gather [
+    let store = gather [
       base.store;
       instr_setm 0 mk;
+      instr_popc
     ] in
     Array_get_inout { load; store }
 
@@ -2540,6 +2543,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     let store = gather [
       base.store;
       instr_setm 0 (MemberKey.EL local);
+      instr_popc
     ] in
     Array_get_inout { load; store }
   in
@@ -3043,8 +3047,9 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
         else begin
           let local = Local.get_unnamed_local () in
           gather [
-            Emit_inout_helpers.emit_list_set_for_inout_call local
-              (List.rev inout_setters)
+            instr_popl local;
+            gather @@ List.rev inout_setters;
+            instr_pushl local
           ]
         end; ]
 
@@ -3054,7 +3059,7 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
       | A.Lvar ((name_pos, _) as lvar) ->
         let local = get_local env lvar in
         let inout_setters =
-          (instr_setl local) :: inout_setters in
+          (instr_popl local) :: inout_setters in
         let not_in_try = not (Emit_env.is_in_try env) in
         let move_instrs =
           if not_in_try && (InoutLocals.should_move_local_value local aliases)
@@ -3081,6 +3086,7 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
             gather [
               base;
               instr_setm 0 (get_elem_member_key env 0 opt_elem_expr);
+              instr_popc
             ] in
           gather [
             instrs;

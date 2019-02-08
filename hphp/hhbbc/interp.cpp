@@ -468,12 +468,8 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
 void in(ISS& env, const bc::AddElemV& /*op*/) {
   popV(env); popC(env);
-  auto const ty = popC(env);
-  auto const outTy =
-    ty.subtypeOf(BArr) ? TArr
-    : ty.subtypeOf(BDict) ? TDict
-    : union_of(TArr, TDict);
-  push(env, outTy);
+  popC(env);
+  push(env, TArr);
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {

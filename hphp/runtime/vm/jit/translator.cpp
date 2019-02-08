@@ -127,7 +127,7 @@ static const struct {
   { OpNewVArray,   {StackN,           Stack1,       OutArray        }},
   { OpNewDArray,   {None,             Stack1,       OutArray        }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutModifiedInput3 }},
-  { OpAddElemV,    {StackTop3,        Stack1,       OutModifiedInput3 }},
+  { OpAddElemV,    {StackTop3,        Stack1,       OutArray        }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},

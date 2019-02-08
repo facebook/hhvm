@@ -2204,8 +2204,8 @@ OPTBLD_INLINE void iopAddElemV() {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
-    raise_error("AddElemV: $3 must be an array or dict");
+  if (!isArrayType(c3->m_type)) {
+    raise_error("AddElemV: $3 must be an array");
   }
   if (c2->m_type == KindOfInt64) {
     cellAsVariant(*c3).asArrRef().setRef(c2->m_data.num, tvAsVariant(r1));

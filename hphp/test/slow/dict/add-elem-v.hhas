@@ -1,5 +1,5 @@
 #
-# Can only use AddElemV on PHP arrays or dicts
+# Can only use AddElemV on PHP arrays
 #
 
 .main {

@@ -1,4 +1,1 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Dicts cannot contain references' in %s:-%d
-Stack trace:
-#0 %s(-%d): main()
-#1 {main}
+Fatal error: AddElemV: $3 must be an array in %s/hphp/test/slow/dict/add-elem-v.hhas on line -%d

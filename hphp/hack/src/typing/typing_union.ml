@@ -217,6 +217,8 @@ and union_unresolved env tyl1 tyl2 r =
           go env (tyl1@tyl) ty2 missed res_is_opt
         | r, Toption ty ->
           go env (ty::tyl) ty2 missed (Some r)
+        | r, Tprim Nast.Tnull ->
+          go env tyl ty2 missed (Some r)
         | _ ->
           begin match unify env ety1 ty2 with
           | _, None -> go env tyl ty2 (ety1::missed) res_is_opt
@@ -235,6 +237,8 @@ and union_unresolved env tyl1 tyl2 r =
         normalize_union env tyl1 (tyl@tyl2) res_is_opt
       | r, Toption ty ->
         normalize_union env tyl1 (ty::tyl2) (Some r)
+      | r, Tprim Nast.Tnull ->
+        normalize_union env tyl1 tyl2 (Some r)
       | _ ->
         let env, tyl1, res_is_opt = attempt_union env tyl1 ety2 res_is_opt in
         normalize_union env tyl1 tyl2 res_is_opt
@@ -400,18 +404,19 @@ and union_reason r1 r2 =
 
 let union_list_approx env tyl r =
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let rec normalized_union tyl reason_nullable =
+  let rec normalize_union tyl reason_nullable =
     match tyl with
     | [] -> reason_nullable, TySet.empty
     | ty :: tyl ->
       let ty = if new_inference then Typing_expand.fully_expand env ty else ty in
       let reason_nullable, tys' = match ty with
-        | (r, Toption ty) -> normalized_union [ty] (Some r)
-        | (_, Tunresolved tyl') -> normalized_union tyl' reason_nullable
+        | (r, Tprim Nast.Tnull) -> normalize_union [] (Some r)
+        | (r, Toption ty) -> normalize_union [ty] (Some r)
+        | (_, Tunresolved tyl') -> normalize_union tyl' reason_nullable
         | ty -> reason_nullable, TySet.singleton ty in
-      let reason_nullable, tys = normalized_union tyl reason_nullable in
+      let reason_nullable, tys = normalize_union tyl reason_nullable in
       reason_nullable, TySet.union tys' tys in
-  let reason_nullable, tys = normalized_union tyl None in
+  let reason_nullable, tys = normalize_union tyl None in
   let ty = match TySet.elements tys with
     | [ty] -> ty
     | tyl -> (r, Tunresolved tyl) in

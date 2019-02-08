@@ -1342,7 +1342,9 @@ static void php_session_reset_id() {
     static const auto s_SID = makeStaticString("SID");
     auto const handle = lookupCnsHandle(s_SID);
     if (!handle) {
-      f_define(String{s_SID}, v);
+      auto name = String{s_SID};
+      auto value = v.toCell();
+      Unit::defCns(name.get(), value);
     } else {
       auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
       v.setEvalScalar();

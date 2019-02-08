@@ -1146,6 +1146,8 @@ class EditableToken extends EditableSyntax
        return new XHPCommentToken(leading, trailing, token_text);
     case 'markup':
        return new MarkupToken(leading, trailing, token_text);
+    case 'atom':
+       return new PUAtomToken(leading, trailing, token_text);
 
       default: throw 'unexpected token kind; ' + token_kind;
       // TODO: Better error
@@ -2853,6 +2855,18 @@ class MarkupToken extends EditableToken
   with_text(text)
   {
     return new MarkupToken(this.leading, this.trailing, text);
+  }
+
+}
+class PUAtomToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('atom', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new PUAtomToken(this.leading, this.trailing, text);
   }
 
 }
@@ -21690,6 +21704,7 @@ exports.XHPStringLiteralToken = XHPStringLiteralToken;
 exports.XHPBodyToken = XHPBodyToken;
 exports.XHPCommentToken = XHPCommentToken;
 exports.MarkupToken = MarkupToken;
+exports.PUAtomToken = PUAtomToken;
 
 exports.EditableTrivia = EditableTrivia;
 exports.WhiteSpace = WhiteSpace;

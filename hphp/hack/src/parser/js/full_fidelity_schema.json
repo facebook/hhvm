@@ -456,6 +456,8 @@
       "token_text" : null },
     { "token_kind" : "Markup",
       "token_text" : null },
+    { "token_kind" : "PUAtom",
+      "token_text" : null },
 
     { "token_kind" : "EndOfFile",
       "token_text" : null } ],

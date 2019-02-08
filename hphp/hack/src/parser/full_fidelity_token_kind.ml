@@ -237,6 +237,7 @@ type t =
   | XHPBody
   | XHPComment
   | Markup
+  | PUAtom
 
   [@@deriving show]
 
@@ -654,6 +655,7 @@ let to_string kind =
   | XHPBody                       -> "XHP_body"
   | XHPComment                    -> "XHP_comment"
   | Markup                        -> "markup"
+  | PUAtom                        -> "atom"
 
 
 let is_variable_text kind =
@@ -686,4 +688,5 @@ let is_variable_text kind =
   | XHPBody -> true
   | XHPComment -> true
   | Markup -> true
+  | PUAtom -> true
   | _ -> false

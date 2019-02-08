@@ -51,6 +51,15 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
     | _ -> raise Not_equiv in
   env, ty
 
+let make_union env r tyl reason_nullable_opt =
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  match new_inference, reason_nullable_opt, tyl with
+  | _, Some null_r, [] ->  (null_r, Tprim Nast.Tnull)
+  | true, None, [ty] -> ty
+  | _, None, tyl -> (r, Tunresolved tyl)
+  | true, Some null_r, [ty] -> (null_r, Toption ty)
+  | _, Some null_r, tyl -> (null_r, Toption (r, Tunresolved tyl))
+
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
   else
@@ -244,14 +253,7 @@ and union_unresolved env tyl1 tyl2 r =
         normalize_union env tyl1 tyl2 res_is_opt
       end in
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let ty = match tyl with
-    | [ty] when new_inference -> ty
-    | tyl -> (r, Tunresolved tyl) in
-  let ty = match res_is_opt with
-    | Some r -> (r, Toption ty)
-    | None -> ty in
-  env, ty
+  env, make_union env r tyl res_is_opt
 
 and union_arraykind env ak1 ak2 =
   match ak1, ak2 with
@@ -402,6 +404,8 @@ and union_reason r1 r2 =
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
 
+let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
+
 let union_list_approx env tyl r =
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let rec normalize_union tyl reason_nullable =
@@ -417,11 +421,6 @@ let union_list_approx env tyl r =
       let reason_nullable, tys = normalize_union tyl reason_nullable in
       reason_nullable, TySet.union tys' tys in
   let reason_nullable, tys = normalize_union tyl None in
-  let ty = match TySet.elements tys with
-    | [ty] -> ty
-    | tyl -> (r, Tunresolved tyl) in
-  match reason_nullable with
-  | Some r -> (r, Toption ty)
-  | None -> ty
+  make_union env r tys reason_nullable
 
 let () = Typing_utils.union_ref := union

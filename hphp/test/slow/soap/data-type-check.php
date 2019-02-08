@@ -23,7 +23,7 @@ class MySoapClient extends SoapClient {
   }
 }
 
-class BodyType extends stdClass {}
+class BodyType {}
 
 
 <<__EntryPoint>>

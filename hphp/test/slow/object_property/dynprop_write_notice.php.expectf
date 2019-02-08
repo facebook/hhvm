@@ -146,49 +146,6 @@ object(__PHP_Incomplete_Class)#2 (4) {
   ["dynprop3"]=>
   int(1)
 }
-==== Extends_stdClass ====
-
-Notice: Created dynamic property with static name Extends_stdClass::dynprop in %s/dynprop_write_notice.php on line 5
-
-Notice: Created dynamic property with dynamic name Extends_stdClass::dynprop2 in %s/dynprop_write_notice.php on line 7
-
-Notice: Created dynamic property with static name Extends_stdClass::dynprop3 in %s/dynprop_write_notice.php on line 8
-object(Extends_stdClass)#1 (3) {
-  ["dynprop"]=>
-  int(3)
-  ["dynprop2"]=>
-  int(2)
-  ["dynprop3"]=>
-  int(1)
-}
-
-Notice: Created dynamic property with dynamic name Extends_stdClass::dynprop in %s/dynprop_write_notice.php on line 10
-
-Notice: Created dynamic property with dynamic name Extends_stdClass::dynprop2 in %s/dynprop_write_notice.php on line 10
-
-Notice: Created dynamic property with dynamic name Extends_stdClass::dynprop3 in %s/dynprop_write_notice.php on line 10
-object(Extends_stdClass)#2 (3) {
-  ["dynprop"]=>
-  int(3)
-  ["dynprop2"]=>
-  int(2)
-  ["dynprop3"]=>
-  int(1)
-}
-
-Notice: Created dynamic property with static name Extends_stdClass::dynprop in %s/dynprop_write_notice.php on line 12
-
-Notice: Created dynamic property with dynamic name Extends_stdClass::dynprop2 in %s/dynprop_write_notice.php on line 12
-
-Notice: Created dynamic property with static name Extends_stdClass::dynprop3 in %s/dynprop_write_notice.php on line 12
-object(Extends_stdClass)#2 (3) {
-  ["dynprop"]=>
-  int(3)
-  ["dynprop2"]=>
-  int(2)
-  ["dynprop3"]=>
-  int(1)
-}
 ==== Extends___PHP_Incomplete_Class ====
 
 Notice: Created dynamic property with static name Extends___PHP_Incomplete_Class::dynprop in %s/dynprop_write_notice.php on line 5

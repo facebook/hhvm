@@ -1,7 +1,7 @@
 <?php
 
-// default base
-class stdClass {
+// empty class that's always available
+final class stdClass {
 }
 
 // used in unserialize() for unknown classes

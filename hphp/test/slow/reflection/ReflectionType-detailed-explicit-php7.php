@@ -6,13 +6,14 @@ function nfoo(?stdClass $a, ?array $b, ?callable $c, ?stdClass $d = null,
             $e = null, ?string $f, ?bool $g, ?int $h, ?float $i,
             ?NotExisting $j) { }
 function bar(): stdClass { return new stdClass; }
-class c extends stdClass {
+class b {}
+class c extends b {
   function bar(self $x): int { return 1; }
   function nbar(?self $x): ?int { return 1; }
   function pbar(parent $x): int { return 1; }
   function factory(): self { return new c; }
   function nfactory(): ?self { return new c; }
-  function pfactory(): parent { return new stdClass; }
+  function pfactory(): parent { return new b(); }
 }
 
 <<__EntryPoint>>

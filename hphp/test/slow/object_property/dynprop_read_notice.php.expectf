@@ -297,80 +297,6 @@ object(__PHP_Incomplete_Class)#18 (2) refcount(%d){
 == bind ==
 == clone ==
 == unset ==
-==== Extends_stdClass may notice ====
-== read ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 8
-== read (dynamic name) ==
-
-Notice: Read dynamic property with dynamic name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 12
-== setOp ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 15
-== incDec ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 18
-== dim for read ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 22
-== dim for read (quiet) ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 25
-== cast to array ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 29
-== get_object_vars ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 32
-== foreach ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 35
-== ReflectionProperty ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 38
-== ReflectionClass::getProperties ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 45
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 45
-== property_exists ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 49
-== print_r ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 52
-== var_export ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 55
-== var_dump ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
-object(Extends_stdClass)#18 (1) {
-  ["dynprop"]=>
-  %r&?%rint(3)
-}
-== debug_zval_dump ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
-object(Extends_stdClass)#18 (1) refcount(%d){
-  ["dynprop"]=>
-  %r&?%rlong(3) refcount(%d)
-}
-== json_encode ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 64
-== serialize ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 67
-== apc_store ==
-
-Notice: Read dynamic property with static name Extends_stdClass::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 70
-==== Extends_stdClass never notice ====
-== dim for write ==
-== vget ==
-== bind ==
-== clone ==
-== unset ==
 ==== Extends___PHP_Incomplete_Class may notice ====
 == read ==
 
@@ -414,7 +340,7 @@ Notice: Read dynamic property with static name Extends___PHP_Incomplete_Class::d
 == var_dump ==
 
 Notice: Read dynamic property with static name Extends___PHP_Incomplete_Class::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
-object(Extends___PHP_Incomplete_Class)#22 (2) {
+object(Extends___PHP_Incomplete_Class)#18 (2) {
   ["__PHP_Incomplete_Class_Name"]=>
   %r&?%rNULL
   ["dynprop"]=>
@@ -423,7 +349,7 @@ object(Extends___PHP_Incomplete_Class)#22 (2) {
 == debug_zval_dump ==
 
 Notice: Read dynamic property with static name Extends___PHP_Incomplete_Class::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
-object(Extends___PHP_Incomplete_Class)#22 (2) refcount(%d){
+object(Extends___PHP_Incomplete_Class)#18 (2) refcount(%d){
   ["__PHP_Incomplete_Class_Name"]=>
   %r&?%rNULL refcount(%d)
   ["dynprop"]=>

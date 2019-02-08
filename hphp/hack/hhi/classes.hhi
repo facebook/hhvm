@@ -195,12 +195,6 @@ final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, Exception): void) $callback) {}
 }
 
-/*
- * stdClass is not really final. However, because stdClass has no
- * properties of its own and is the result of casting an array to an
- * object, it is exempt from 'property must exist' checks and so should not
- * be getting extended.
- */
 final class stdClass {}
 
 class __PHP_Incomplete_Class {}

@@ -766,6 +766,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IncStat:
   case InitCtx:
   case InitObjProps:
+  case InitObjMemoSlots:
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
   case InitStaticLoc:

@@ -3181,6 +3181,10 @@ fields of that struct for holding intermediate values.
   overwriting any previous value, with appropriate ref-count
   manipulations. This op can only be used inside a memoize wrapper.
 
+| InitObjMemoSlots<class>, ND, S(Obj), NF
+
+  Initialize the memoization instance slots for object S0 of the given class.
+
 | BindElem, ND, S(LvalToGen) S(Cell) S(BoxedCell) S(MIPropSPtr,Nullptr), MElem
 
   Bind element with key S1 in base S0 to the reference S2.

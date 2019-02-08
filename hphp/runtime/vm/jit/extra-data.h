@@ -1580,6 +1580,7 @@ X(InitProps,                    ClassData);
 X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
+X(InitObjMemoSlots,             ClassData);
 X(InstanceOfIfaceVtable,        ClassData);
 X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);

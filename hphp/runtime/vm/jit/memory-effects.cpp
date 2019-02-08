@@ -1192,6 +1192,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
 
+  case InitObjMemoSlots:
+    // Writes to memo slots, but these are not modeled.
+    return IrrelevantEffects {};
+
   // Loads $obj->trace, stores $obj->file and $obj->line.
   case InitThrowableFileAndLine:
     return may_load_store(AHeapAny, APropAny);

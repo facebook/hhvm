@@ -470,6 +470,7 @@ bool canDCE(IRInstruction* inst) {
   case PropTypeRedefineCheck:
   case InitSProps:
   case InitObjProps:
+  case InitObjMemoSlots:
   case DebugBacktrace:
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:

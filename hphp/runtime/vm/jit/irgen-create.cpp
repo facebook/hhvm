@@ -232,6 +232,31 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
   );
 }
 
+void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
+  auto const nprops = cls->numDeclProperties();
+
+  if (nprops <= RuntimeOption::EvalHHIRInliningMaxInitObjProps &&
+      cls->pinitVec().size() == 0) {
+    if (cls->hasMemoSlots()) {
+      gen(env, InitObjMemoSlots, ClassData(cls), obj);
+    }
+    for (int i = 0; i < nprops; ++i) {
+      const TypedValue& tv = cls->declPropInit()[i];
+      auto const val = cns(env, tv);
+      auto const addr = gen(
+        env,
+        LdPropAddr,
+        ByteOffsetData { (ptrdiff_t)(cls->declPropOffset(i)) },
+        TLvalToPropGen,
+        obj
+      );
+      gen(env, StMem, addr, val);
+    }
+  } else {
+    gen(env, InitObjProps, ClassData(cls), obj);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -290,7 +315,7 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
     obj = gen(env, NewInstanceRaw, ClassData(cls));
 
     // Initialize the properties.
-    gen(env, InitObjProps, ClassData(cls), obj);
+    initObjProps(env, cls, obj);
   }
 
   // Initialize Throwable.

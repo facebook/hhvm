@@ -110,22 +110,7 @@ namespace {
 
 void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
                           Vreg dst, const Class* cls, size_t nprops) {
-  // If the object has a small number of properties, just emit stores inline.
-  if (nprops < 8) {
-    for (int i = 0; i < nprops; ++i) {
-      auto const propOffset = sizeof(ObjectData) + sizeof(TypedValue) * i;
-      auto const& initTV = cls->declPropInit()[i];
-
-      if (!isNullType(initTV.m_type)) {
-        emitImmStoreq(v, initTV.m_data.num, dst[propOffset + TVOFF(m_data)]);
-      }
-      v << storebi{static_cast<data_type_t>(initTV.m_type),
-                   dst[propOffset + TVOFF(m_type)]};
-    }
-    return;
-  }
-
-  // Use memcpy for large numbers of properties.
+  // memcpy the values from the class property init vec.
   auto args = argGroup(env, inst)
     .addr(dst, safe_cast<int32_t>(sizeof(ObjectData)))
     .imm(reinterpret_cast<uintptr_t>(&cls->declPropInit()[0]))
@@ -159,6 +144,14 @@ void implInitObjMemoSlots(Vout& v, IRLS& env, const IRInstruction* inst,
                kVoidDest, SyncOptions::None, args);
 }
 
+}
+
+void cgInitObjMemoSlots(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->extra<InitObjMemoSlots>()->cls;
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  implInitObjMemoSlots(v, env, inst, cls, obj);
 }
 
 void cgInitObjProps(IRLS& env, const IRInstruction* inst) {

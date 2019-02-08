@@ -2582,6 +2582,14 @@ SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyInitObjMemoSlots(State& env, const IRInstruction* inst) {
+  auto const cls = inst->extra<InitObjMemoSlots>()->cls;
+  if (!cls->hasMemoSlots()) {
+    return gen(env, Nop);
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
   auto const srcType = inst->src(0)->type();
@@ -3883,6 +3891,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(FwdCtxStaticCall)
   X(IncRef)
   X(InitObjProps)
+  X(InitObjMemoSlots)
   X(InstanceOf)
   X(InstanceOfIface)
   X(InstanceOfIfaceVtable)

@@ -455,6 +455,8 @@ let make_popt () =
       Hhbc_options.(phpism_disable_define !compiler_options)
     ~disable_nontoplevel_declarations:
       Hhbc_options.(phpism_disable_nontoplevel_declarations !compiler_options)
+    ~disable_static_local_variables:
+      Hhbc_options.(phpism_disable_static_local_variables !compiler_options)
     ~enable_hh_syntax_for_hhvm:
       Hhbc_options.(enable_hiphop_syntax !compiler_options)
     ~enable_stronger_await_binding:

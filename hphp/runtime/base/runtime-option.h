@@ -585,6 +585,9 @@ struct RuntimeOption {
   // Disables non-top-level declarations
   // true => error, false => default behaviour
   static bool DisableNontoplevelDeclarations;
+  // Disables static local variables
+  // true => error, false => default behaviour
+  static bool DisableStaticLocalVariables;
 
   // Disables the setting of reserved variable php_errorsmg
   // true => error, false => php_errormsg can be set

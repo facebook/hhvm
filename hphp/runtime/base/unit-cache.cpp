@@ -800,6 +800,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + std::to_string(RuntimeOption::UndefinedConstFallback)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
+    + (RuntimeOption::DisableStaticLocalVariables ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()

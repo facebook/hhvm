@@ -54,6 +54,7 @@ type t = {
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_define            : bool;
   option_phpism_disable_nontoplevel_declarations : bool;
+  option_phpism_disable_static_local_variables : bool;
   option_emit_func_pointers               : bool;
   option_emit_cls_meth_pointers           : bool;
   option_emit_inst_meth_pointers          : bool;
@@ -106,6 +107,7 @@ let default = {
   option_phpism_disallow_execution_operator = false;
   option_phpism_disable_define = true;
   option_phpism_disable_nontoplevel_declarations = false;
+  option_phpism_disable_static_local_variables = false;
   option_emit_func_pointers = true;
   option_emit_cls_meth_pointers = true;
   option_emit_inst_meth_pointers = true;
@@ -154,6 +156,7 @@ let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let phpism_disable_define o = o.option_phpism_disable_define
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
+let phpism_disable_static_local_variables o = o.option_phpism_disable_static_local_variables
 let emit_func_pointers o = o.option_emit_func_pointers
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
@@ -209,6 +212,8 @@ let to_string o =
     ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
+    ; Printf.sprintf "phpism_disable_static_local_variables %B"
+      @@ phpism_disable_static_local_variables o
     ; Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o
     ; Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o
     ; Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o
@@ -300,6 +305,8 @@ let set_option options name value =
     { options with option_phpism_disable_define = int_of_string value > 0 }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
     { options with option_phpism_disable_nontoplevel_declarations = as_bool value }
+  | "hack.lang.phpism.disablestaticlocalvariables" ->
+    { options with option_phpism_disable_static_local_variables = as_bool value }
 
   | "hack.lang.enableconcurrent" ->
     { options with option_enable_concurrent = as_bool value }
@@ -455,6 +462,8 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_nontoplevel_declarations = (v = 1) });
+  (set_value "hhvm.hack.lang.phpism.disable_static_local_variables" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_disable_static_local_variables = (v = 1) });
   (set_value "hhvm.emit_func_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_func_pointers = (v > 0) });
   (set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int @@

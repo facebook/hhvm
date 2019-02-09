@@ -2194,6 +2194,10 @@ and pStmt : stmt parser = fun node env ->
       | _ -> []
     )
   | FunctionStaticStatement { static_declarations; _ } ->
+    if (ParserOptions.disable_static_local_variables env.parser_options) then
+      raise_parsing_error env (`Node node)
+        SyntaxError.static_locals_variables_are_disabled;
+
     let pStaticDeclarator node env =
       match syntax node with
       | StaticDeclarator { static_name; static_initializer } ->

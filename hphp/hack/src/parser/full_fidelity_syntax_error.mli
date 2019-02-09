@@ -346,6 +346,7 @@ val complex_lval_in_concurrent_block : string
 val duplicate_lval_in_concurrent_block : string
 val val_and_lval_in_concurrent_block : string
 val concurrent_is_disabled : string
+val static_locals_variables_are_disabled : string
 val invalid_await_position : string
 val misplaced_reactivity_annotation : string
 val mutability_annotation_on_static_method : string

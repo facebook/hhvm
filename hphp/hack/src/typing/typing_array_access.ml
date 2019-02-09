@@ -144,7 +144,6 @@ let rec array_get ?(lhs_of_null_coalesce=false)
   | Tclass ((_, cn) as id, _, argl)
       when cn = SN.Collections.cConstMap
         || cn = SN.Collections.cImmMap
-        || cn = SN.Collections.cIndexish
         || cn = SN.Collections.cKeyedContainer ->
     if is_lvalue then
       error_const_mutation env p ety1
@@ -451,7 +450,6 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
   | Tclass ((_, cn), _, _)
        when cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
-         || cn = SN.Collections.cIndexish
          || cn = SN.Collections.cKeyedContainer
          || cn = SN.Collections.cConstVector
          || cn = SN.Collections.cImmVector

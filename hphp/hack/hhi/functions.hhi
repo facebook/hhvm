@@ -75,7 +75,7 @@ namespace HH {
   // autoload-map
   function could_include($file): bool;
   function autoload_set_paths(
-    \Indexish<string, \Indexish<string, string>> $map,
+    KeyedContainer<string, KeyedContainer<string, string>> $map,
     string $root,
   ): bool;
 

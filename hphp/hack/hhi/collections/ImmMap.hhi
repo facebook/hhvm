@@ -40,7 +40,7 @@
  * @guide /hack/collections/classes
  */
 
-final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
+final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv> {
   /**
    * Creates an `ImmMap` from the given `KeyedTraversable`, or an empty
    * `ImmMap` if `null` is passed.

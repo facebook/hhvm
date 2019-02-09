@@ -62,7 +62,6 @@ module Collections = struct
   let cKeyedContainer   = "\\KeyedContainer"
   let cTraversable      = "\\Traversable"
   let cKeyedTraversable = "\\KeyedTraversable"
-  let cIndexish         = "\\Indexish"
   let cCollection       = "\\Collection"
 
   let cConstVector      = "\\ConstVector"

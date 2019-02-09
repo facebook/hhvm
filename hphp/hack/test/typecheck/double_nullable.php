@@ -4,7 +4,7 @@ function bar(): array<int, ?int> {
   return array(123 => null, 456 => 789);
 }
 
-function idx2<Tk, Tv>(?Indexish<Tk, Tv> $collection, ?Tk $index): ?Tv {
+function idx2<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, ?Tk $index): ?Tv {
   return idx($collection, $index);
 }
 

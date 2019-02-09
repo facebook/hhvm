@@ -298,7 +298,7 @@ interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
 interface ConstVector<+Tv> extends ConstCollection<Tv>,
                                    ConstIndexAccess<int, Tv>,
                                    HH\Rx\KeyedIterable<int, Tv>,
-                                   Indexish<int, Tv> {
+                                   KeyedContainer<int, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current
    * `ConstVector`. Essentially a copy of the current `ConstVector`.
@@ -853,7 +853,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
 interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
                                     ConstMapAccess<Tk, Tv>,
                                     HH\Rx\KeyedIterable<Tk, Tv>,
-                                    Indexish<Tk, Tv> {
+                                    KeyedContainer<Tk, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstMap`.
    *
@@ -1403,7 +1403,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
                                 HH\Rx\KeyedIterable<arraykey, Tv>,
-                                Indexish<Tv, Tv> {
+                                KeyedContainer<Tv, Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstSet`.
    *

@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo<Tk,Tv>(Indexish<Tk,Tv> $x, Tk $k) : Tv {
+function foo<Tk,Tv>(KeyedContainer<Tk,Tv> $x, Tk $k) : Tv {
   return $x[$k];
 }
 

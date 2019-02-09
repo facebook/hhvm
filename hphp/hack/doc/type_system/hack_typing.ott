@@ -713,10 +713,10 @@ transitivity of subtyping.
 
 {{ com
 
-Because legacy arrays are $\kwd{Indexish}$ it follows by transitivity
+Because legacy arrays are $\kwd{KeyedContainer}$ it follows by transitivity
 of subtyping and \ottdrulename{sub\_class\_as\_nonnull} that arrays
 are subtypes of $[[nonnull]]$.  Do we need separate rules for Hack
-arrays, shapes, and tuples, or should we make them $\kwd{Indexish}$
+arrays, shapes, and tuples, or should we make them $\kwd{KeyedContainer}$
 too?
 
 }}
@@ -775,16 +775,16 @@ G |- t <: u
 ---------------------- :: keyset_co
 G |- keyset<t> <: keyset<u>
 
-{{ com Vecs, dicts, and keysets are Indexish }}
+{{ com Vecs, dicts, and keysets are KeyedContainer }}
 
---------------------------------- :: vec_as_indexish
-G |- vec<t> <: `Indexish`<int, t>
+--------------------------------- :: vec_as_KeyedContainer
+G |- vec<t> <: `KeyedContainer`<int, t>
 
---------------------------------------- :: dict_as_indexish
-G |- dict<t1, t2> <: `Indexish`<t1, t2>
+--------------------------------------- :: dict_as_KeyedContainer
+G |- dict<t1, t2> <: `KeyedContainer`<t1, t2>
 
----------------------------------- :: keyset_as_indexish
-G |- keyset<t> <: `Indexish`<t, t>
+---------------------------------- :: keyset_as_KeyedContainer
+G |- keyset<t> <: `KeyedContainer`<t, t>
 
 {{ com \subsection{Legacy arrays} }}
 
@@ -805,8 +805,8 @@ G |- array<t1,t2> <: array<u1,u2>
 G |- array<t> <: array<int,t>
 
 {{ com Map-like arrays can be indexed. }}
-------------------------------- :: maparray_as_indexish
-G |- array<t1,t2> <: `Indexish`<t1,t2>
+------------------------------- :: maparray_as_KeyedContainer
+G |- array<t1,t2> <: `KeyedContainer`<t1,t2>
 
 {{ com The empty array type is a bottom type in the array hierarchy. }}
 ------------------------------- :: emptyarray_as_vecarray
@@ -1581,8 +1581,8 @@ defn
 by
 
 G ; K |- e : t1 | dynamic
------------------------------------------- :: indexish
-G ; K |- `Indexish` < t1 , t2 > [ e ] : t2
+------------------------------------------ :: KeyedContainer
+G ; K |- `KeyedContainer` < t1 , t2 > [ e ] : t2
 
 ------------------------------------------------- :: shape
 G ; K |- shape ( sfn => t , vardots \ sfn1 , .. , sfnm ) [ sfn ] : t

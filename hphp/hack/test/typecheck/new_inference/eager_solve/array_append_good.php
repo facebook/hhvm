@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo<Tk,Tv>(Indexish<Tk,Tv> $x, Tk $k) : Tv {
+function foo<Tk,Tv>(KeyedContainer<Tk,Tv> $x, Tk $k) : Tv {
   return $x[$k];
 }
 
@@ -12,8 +12,8 @@ function expectString(string $s):void { }
 function expectKeysetOfArraykey(keyset<arraykey> $ks):void { }
 function expectSetOfNum(Set<num> $s):void { }
 
-// Let's just check that ground subtyping against Indexish works as expected
-function test_indexish_subtype(
+// Let's just check that ground subtyping against KeyedContainer works as expected
+function test_KeyedContainer_subtype(
   // Vector-like stuff
   array<int> $a,
   vec<int> $v,

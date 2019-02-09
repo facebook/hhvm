@@ -159,15 +159,13 @@ let get_value_collection_inst ty =
 
 (* Is this type KeyedTraversable<kty,vty>
  *           or KeyedContainer<kty,vty>
- *           or Indexish<kty,vty>
  * for some kty, vty?
  *)
 let get_key_value_collection_inst ty =
   match ty with
   | (_, Tclass ((_, c), _, [kty; vty])) when
       c = SN.Collections.cKeyedTraversable ||
-      c = SN.Collections.cKeyedContainer ||
-      c = SN.Collections.cIndexish ->
+      c = SN.Collections.cKeyedContainer ->
     Some (kty, vty)
     (* If we're expecting a mixed or a nonnull then we can just assume
      * that the value and key types are mixed *)

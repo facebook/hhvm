@@ -815,8 +815,7 @@ and simplify_subtype
   | Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super])
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Rx.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer
-         || coll = SN.Collections.cIndexish) ->
+         || coll = SN.Collections.cKeyedContainer) ->
     let r = fst ety_sub in
       (match akind with
       | AKany -> valid ()

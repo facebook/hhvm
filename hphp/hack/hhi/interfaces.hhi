@@ -95,6 +95,16 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * a key, except it does not include objects that implement `KeyedIterator` nor
  * `Set` and `ImmSet`.
  *
+ * Additionally, represents an entity that can be indexed using square-bracket syntax
+ *
+ * Square bracket syntax is:
+ *
+ * ```
+ * $keyed_container[$key]
+ * ```
+ *
+ * At this point, this includes entities with keys of `int` and `string`.
+ *
  * The iteration variables will have a type of `Tk` for the key and `Tv` for the
  * value.
  *
@@ -102,29 +112,10 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
- */
-<<__Sealed(Indexish::class)>>
-interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
-
-/**
- * Represents an entity that can be indexed using square-bracket syntax.
- *
- * Square bracket syntax is:
- *
- * ```
- * $indexish[$key]
- * ```
- *
- * At this point, this includes entities with keys of `int` and `string`.
- *
- * In addition to Hack collections, PHP `array`s are `Indexish`.
- *
- * @guide /hack/collections/introduction
- * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
-<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
-interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
+<<__Sealed(ConstVector::class, ConstMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
+interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides

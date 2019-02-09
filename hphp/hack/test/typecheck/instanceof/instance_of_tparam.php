@@ -9,8 +9,8 @@
  *
  */
 
-function f(mixed $x): Indexish<string, string> {
-  if ($x instanceof Indexish) {
+function f(mixed $x): KeyedContainer<string, string> {
+  if ($x instanceof KeyedContainer) {
     return $x;
   }
 

@@ -85,7 +85,7 @@ class C {
   public ?Ty10 $ivar52;
   public string $ivar53;
 
-  public function __construct(?Indexish<string, mixed> $vals = null) {
+  public function __construct(?KeyedContainer<string, mixed> $vals = null) {
     $this->ivar1 = (string)untyped_idx($vals, 'ivar1', '');
     $this->ivar2 = (string)untyped_idx($vals, 'ivar2', '');
     $this->ivar3 = (string)untyped_idx($vals, 'ivar3', '');

@@ -223,9 +223,9 @@ class ReflectionParameter implements Reflector {
   public function isVariadic();
   public function hasType(): bool;
   public function getType(): ?ReflectionType;
-  final public function getAttribute(string $name);
+  final public function getAttribute(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c): ?T;
-  final public function getAttributes();
+  final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name);
   <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive();
 }
@@ -317,8 +317,8 @@ class ReflectionTypeAlias implements Reflector {
   public function getName(): string;
   public function getFileName(): string;
   public function getFile(): ReflectionFile;
-  final public function getAttributes(): darray;
-  final public function getAttribute(string $name);
+  final public function getAttributes(): darray<string, varray<mixed>>;
+  final public function getAttribute(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
 }
 
@@ -331,13 +331,12 @@ class ReflectionType {
   public function __toString(): string;
 }
 
-
 class ReflectionFile implements Reflector {
   final private function __clone();
   final public function __construct(string $name);
   public function __toString(): string;
   public function getName(): string;
-  final public function getAttributes(): darray;
-  final public function getAttribute(string $name);
+  final public function getAttributes(): darray<string, varray<mixed>>;
+  final public function getAttribute(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c): ?T;
 }

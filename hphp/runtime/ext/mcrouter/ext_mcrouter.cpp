@@ -14,7 +14,6 @@
 #include "mcrouter/config.h" // @nolint
 #include "mcrouter/McrouterClient.h" // @nolint
 #include "mcrouter/McrouterInstance.h" // @nolint
-#include "mcrouter/lib/McOperation.h" // @nolint
 #include "mcrouter/lib/McResUtil.h" // @nolint
 #include "mcrouter/lib/network/CarbonMessageList.h" // @nolint
 #include "mcrouter/lib/network/gen/Memcache.h" // @nolint
@@ -97,7 +96,7 @@ template <class Reply>
 uint64_t getDelta(const Reply& /*reply*/) {
   mcr_throwException(
       "getDelta expected arithmetic reply type",
-      mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
+      mc::OpFromType<Reply, mc::ReplyOpMapping>::value);
 }
 uint64_t getDelta(const mc::McIncrReply& reply) {
   return reply.delta();
@@ -111,7 +110,7 @@ template <class Reply>
 uint64_t getCasToken(const Reply& /*reply*/) {
   mcr_throwException(
       "getCasToken expected reply type McGetsReply",
-      mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
+      mc::OpFromType<Reply, mc::ReplyOpMapping>::value);
 }
 uint64_t getCasToken(const mc::McGetsReply& reply) {
   return reply.casToken();
@@ -234,8 +233,8 @@ struct MCRouterResult : AsioExternalThreadEvent {
     if (mc::isErrorResult(reply.result())) {
       setResultException(request, reply);
     } else {
-      const auto mc_op = mc::McOperation<
-          mc::OpFromType<Request, mc::RequestOpMapping>::value>::mc_op;
+      const auto mc_op = 
+          mc::OpFromType<Request, mc::RequestOpMapping>::value;
       switch (mc_op) {
         case mc_op_add:
         case mc_op_cas:
@@ -305,8 +304,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
   template <class Request>
   void setResultException(const Request& request,
                           const mc::ReplyT<Request>& reply) {
-    m_op = mc::McOperation<
-        mc::OpFromType<Request, mc::RequestOpMapping>::value>::mc_op;
+    m_op = mc::OpFromType<Request, mc::RequestOpMapping>::value;
     m_replyCode = reply.result();
     m_exception  = mc_op_to_string(m_op);
     m_exception += " failed with result ";

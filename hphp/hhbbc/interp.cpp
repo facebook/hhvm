@@ -2874,11 +2874,9 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   if (!any(env.collect.opts & CollectionOpts::Speculating)) {
     if (auto const func = rfunc.exactFunc()) {
       if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
-        fpiPush(
+        fpiPushNoFold(
           env,
-          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc },
-          op.arg1,
-          false
+          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
         );
         return reduce(env, bc::Nop {});
       }
@@ -2912,20 +2910,14 @@ void in(ISS& env, const bc::FPushFunc& op) {
   }
   popC(env);
   if (t1.subtypeOf(BObj)) {
-    return fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
+    fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
+  } else if (t1.subtypeOf(BArr)) {
+    fpiPushNoFold(env, ActRec { FPIKind::CallableArr, TTop });
+  } else if (t1.subtypeOf(BStr)) {
+    fpiPushNoFold(env, ActRec { FPIKind::Func, TTop, folly::none, rfunc });
+  } else {
+    fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
   }
-  if (t1.subtypeOf(BArr)) {
-    return fpiPushNoFold(env, ActRec { FPIKind::CallableArr, TTop });
-  }
-  if (t1.subtypeOf(BStr)) {
-    fpiPush(
-      env,
-      ActRec { FPIKind::Func, TTop, folly::none, rfunc },
-      op.arg1,
-      true);
-    return;
-  }
-  fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
@@ -3062,7 +3054,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     }
   }
   popC(env);
-  fpiPush(
+  fpiPushNoFold(
     env,
     ActRec {
       FPIKind::ObjMeth,
@@ -3071,9 +3063,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
         ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
         : folly::none,
       rfunc
-    },
-    op.arg1,
-    true
+    }
   );
 }
 
@@ -3275,18 +3265,16 @@ void in(ISS& env, const bc::NewObj& op) {
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const obj = popC(env);
   if (!is_specialized_obj(obj)) {
-    fpiPush(env, ActRec { FPIKind::Ctor, TObj }, op.arg1, false);
-    return;
+    return fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
   }
 
   auto const dobj = dobj_of(obj);
   auto const exact = dobj.type == DObj::Exact;
   auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls, exact);
   if (!rfunc || !rfunc->exactFunc()) {
-    fpiPush(env, ActRec { FPIKind::Ctor, obj }, op.arg1, false);
-    return;
+    return fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj });
   }
-  fpiPush(env, ActRec { FPIKind::Ctor, obj, dobj.cls, rfunc }, op.arg1, false);
+  fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dobj.cls, rfunc });
 }
 
 void in(ISS& env, const bc::FThrowOnRefMismatch& op) {

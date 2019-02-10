@@ -3136,22 +3136,6 @@ and emit_object_expr env ?last_pos (_, expr_ as expr) =
     instr_this
   | _ -> emit_expr ?last_pos ~need_ref:false env expr
 
-and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
-  let id = Pos.none, SN.SpecialIdents.this in
-  let temp = Local.get_unnamed_local () in
-  gather [
-    emit_local ~notice:Notice ~need_ref:false env id;
-    instr_setl temp;
-    with_temp_local temp
-    begin fun temp _ -> gather [
-      instr_popc;
-      instrs;
-      instr (IGet (ClsRefGetL (temp, 0)));
-      instr_unsetl temp;
-    ]
-    end
-  ]
-
 and is_inout_arg = function
   | _, A.Callconv (A.Pinout, _) -> true
   | _ -> false
@@ -3260,12 +3244,14 @@ and emit_call_lhs
       if no_reified_args then
         instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Parent
-    | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+    | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
        let name_instrs =
         if no_reified_args then instr_string method_id_string
         else reified_call_body method_id_string in
        gather [
-         emit_call_lhs_with_this env name_instrs;
+         name_instrs;
+         emit_local ~notice:Notice ~need_ref:false env this;
+         instr_clsrefgetc;
          instr_fpushclsmethod nargs []
        ]
     | _ ->
@@ -3294,9 +3280,11 @@ and emit_call_lhs
     | Class_parent ->
        gather [expr_instrs;
          emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Parent]
-    | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
+    | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
        gather [
-        emit_call_lhs_with_this env expr_instrs;
+        expr_instrs;
+        emit_local ~notice:Notice ~need_ref:false env this;
+        instr_clsrefgetc;
         emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
        ]

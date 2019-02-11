@@ -2477,25 +2477,49 @@ let expand_types env tys =
     tys
     (env, Typing_set.empty)
 
+(* Given a set of types, expand solved type variables, and eliminate
+ * top-level unions by folding types back into the set. Remove any use of
+ * `null` or `?t`, instead returning a boolean if
+ * a null type exists in the set. Finally, remove any type variable match `var`
+ *)
+let expand_and_flatten_type_set env var tys =
+
+  let rec expand_and_flatten_type_list env tys has_null res =
+    match tys with
+    | [] -> env, has_null, Typing_set.elements res
+    | ty::tys ->
+      let env, ety = Env.expand_type env ty in
+      match ety with
+      | _, Tunresolved tys' -> expand_and_flatten_type_list env (tys' @ tys) has_null res
+      | _, Toption ty -> expand_and_flatten_type_list env (ty::tys) true res
+      | _, Tprim Nast.Tnull -> expand_and_flatten_type_list env tys true res
+      | _, Tvar var' when var=var' -> expand_and_flatten_type_list env tys has_null res
+      | _ -> expand_and_flatten_type_list env tys has_null (Typing_set.add ety res)
+  in
+    expand_and_flatten_type_list env (TySet.elements tys) false TySet.empty
+
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
-  let env, lower_bounds = expand_types env lower_bounds in
   (* Construct the union of the lower bounds, normalizing null|t to ?t because
    * some code is still sensitive to this representation.
    * Note that if there are no lower bounds then we will construct the empty
-   * type, i.e. Tunresolved []. *)
-  let (nulls, nonnulls) =
-    List.partition_tf (Typing_set.elements lower_bounds)
-      (fun ty -> match ty with (_, Tprim Nast.Tnull) -> true | _ -> false) in
+   * type, i.e. Tunresolved [].
+   * Also note that `var` is eliminated from the bounds, as
+   *       var | t1 | ... | tn <: var
+   *   iff       t1 | ... | tn <: var
+   * This prevents it getting picked up later during the "occurs check" and
+   * reported as a circular type error.
+   *)
+  let env, has_null, nonnulls = expand_and_flatten_type_set env var lower_bounds in
   let ty =
     match nonnulls with
     | [ty] -> ty
     | tys -> (r, Tunresolved tys) in
   let ty =
-    if List.is_empty nulls
+    if not has_null
     then ty
     else (fst ty, Toption ty) in
   (* Freshen components of the types in the union wrt their variance.

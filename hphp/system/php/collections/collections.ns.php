@@ -82,15 +82,11 @@ interface MapAccess extends ConstMapAccess,
                             IndexAccess {
 }
 
-<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
-interface Indexish extends \HH\KeyedContainer {
-}
-
 <<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               \HH\Rx\KeyedIterable,
-                              Indexish {
+                              \HH\KeyedContainer {
 }
 
 <<__Sealed(Vector::class)>>
@@ -103,7 +99,7 @@ interface MutableVector extends ConstVector,
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
                            \HH\Rx\KeyedIterable,
-                           Indexish {
+                           \HH\KeyedContainer {
 }
 
 <<__Sealed(Map::class)>>
@@ -116,7 +112,7 @@ interface MutableMap extends ConstMap,
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
                            \HH\Rx\KeyedIterable,
-                           Indexish {
+                           \HH\KeyedContainer {
 }
 
 <<__Sealed(Set::class)>>

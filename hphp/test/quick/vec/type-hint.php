@@ -45,9 +45,6 @@ function takes_array1(array $a): array {
 function takes_array2(?array $a): ?array {
   return $a;
 }
-function takes_indexish(Indexish $x): Indexish {
-  return $x;
-}
 function takes_xhp_child(XHPChild $x): XHPChild {
   return $x;
 }
@@ -99,7 +96,6 @@ function test_all_hints($x) {
     |> takes_string($$)
     |> takes_array1($$)
     |> takes_array2($$)
-    |> takes_indexish($$)
     |> takes_xhp_child($$)
     |> takes_foo($$)
     |> takes_array_access($$)

@@ -38,7 +38,7 @@ function takes_vector(Vector $v) {}
 function takes_map(Map $v) {}
 function takes_mixed(mixed $v) {}
 function takes_traversable(Traversable $v) {}
-function takes_indexish(Indexish $v) {}
+function takes_KeyedContainer(KeyedContainer $v) {}
 
 function returns_bool($v): bool { return $v; }
 function returns_int($v): int { return $v; }
@@ -53,7 +53,7 @@ function returns_vector($v): Vector { return $v; }
 function returns_map($v): Map { return $v; }
 function returns_mixed($v): mixed { return $v; }
 function returns_traversable($v): Traversable { return $v; }
-function returns_indexish($v): Indexish { return $v; }
+function returns_KeyedContainer($v): KeyedContainer { return $v; }
 
 function test1() {
   $values =
@@ -147,7 +147,7 @@ function test2() {
       'takes_map',
       'takes_mixed',
       'takes_traversable',
-      'takes_indexish',
+      'takes_KeyedContainer',
 
       'returns_bool',
       'returns_int',
@@ -162,7 +162,7 @@ function test2() {
       'returns_map',
       'returns_mixed',
       'returns_traversable',
-      'returns_indexish'
+      'returns_KeyedContainer'
     ]
   );
 

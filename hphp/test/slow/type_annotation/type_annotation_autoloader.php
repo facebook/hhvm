@@ -30,7 +30,7 @@ class C {
 var_dump(type_structure(C::class, 'T'));
 
 // Test that we do not attempt to autoload a bultin class
-type BuiltinClass = Indexish;
+type BuiltinClass = HH\KeyedContainer;
 type_structure(BuiltinClass::class);
 
 // Test that we do not attempt to autoload an already loaded class

@@ -52,7 +52,6 @@ function test($prefix) {
     "HH\\KeyedTraversable",
     "HH\\Container",
     "HH\\KeyedContainer",
-    "Indexish",
     "XHPChild",
     "Stringish"
   );

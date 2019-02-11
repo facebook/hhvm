@@ -2,7 +2,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-bool(true)
 bool(false)
 Traversable
 array(0) {
@@ -16,8 +15,5 @@ array(0) {
 KeyedContainer
 array(0) {
 }
-Indexish
-array(0) {
-}
 
-Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, array given in %s/test/slow/array_iterator/array-traversable-2.php on line 42
+Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, array given in %s/test/slow/array_iterator/array-traversable-2.php on line 36

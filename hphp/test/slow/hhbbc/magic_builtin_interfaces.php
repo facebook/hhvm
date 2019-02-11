@@ -9,7 +9,6 @@ function instance_of_test(array $x) {
   var_dump($x instanceof Container);   // false without
                                        // EnableHipHopSyntax or <?hh
   var_dump($x instanceof XHPChild);
-  var_dump($x instanceof Indexish);
   var_dump($x instanceof Stringish);
   var_dump($x instanceof \HH\KeyedTraversable);
   var_dump($x instanceof KeyedTraversable); // false without

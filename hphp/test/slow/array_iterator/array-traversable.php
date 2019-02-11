@@ -18,10 +18,6 @@ function kcont(KeyedContainer $x) {
   echo "KeyedContainer ", $x, "\n";
   var_dump($x);
 }
-function ind(Indexish $x) {
-  echo "Indexish ", $x, "\n";
-  var_dump($x);
-}
 function ifoo(IFoo $x) {
   echo "IFoo ", $x, "\n";
   var_dump($x);
@@ -32,13 +28,11 @@ function main() {
   var_dump($arr instanceof KeyedTraversable);
   var_dump($arr instanceof Container);
   var_dump($arr instanceof KeyedContainer);
-  var_dump($arr instanceof Indexish);
   var_dump($arr instanceof IFoo);
   trav($arr);
   ktrav($arr);
   cont($arr);
   kcont($arr);
-  ind($arr);
   ifoo($arr);
 }
 

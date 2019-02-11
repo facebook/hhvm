@@ -904,7 +904,7 @@ string(75) "Argument 1 passed to takes_map() must be an instance of HH\Map, arra
 PASSES
 ================ takes_traversable ============================
 PASSES
-================ takes_indexish ============================
+================ takes_KeyedContainer ============================
 PASSES
 ================ returns_bool ============================
 string(77) "Value returned from function returns_bool() must be of type bool, array given"
@@ -932,7 +932,7 @@ string(78) "Value returned from function returns_map() must be of type HH\Map, a
 PASSES
 ================ returns_traversable ============================
 PASSES
-================ returns_indexish ============================
+================ returns_KeyedContainer ============================
 PASSES
 ================ takes_bool ============================
 string(74) "Argument 1 passed to takes_bool() must be an instance of bool, array given"
@@ -960,7 +960,7 @@ string(75) "Argument 1 passed to takes_map() must be an instance of HH\Map, arra
 PASSES
 ================ takes_traversable ============================
 PASSES
-================ takes_indexish ============================
+================ takes_KeyedContainer ============================
 PASSES
 ================ returns_bool ============================
 string(77) "Value returned from function returns_bool() must be of type bool, array given"
@@ -988,5 +988,5 @@ string(78) "Value returned from function returns_map() must be of type HH\Map, a
 PASSES
 ================ returns_traversable ============================
 PASSES
-================ returns_indexish ============================
+================ returns_KeyedContainer ============================
 PASSES

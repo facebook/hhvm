@@ -51,9 +51,6 @@ function takes_bool(bool $b): bool {
 function takes_string(string $s): string {
   return $s;
 }
-function takes_indexish(Indexish $x): Indexish {
-  return $x;
-}
 function takes_xhp_child(XHPChild $x): XHPChild {
   return $x;
 }
@@ -107,7 +104,6 @@ function test_all_hints($x) {
     |> takes_array2($$)
     |> takes_bool($$)
     |> takes_string($$)
-    |> takes_indexish($$)
     |> takes_xhp_child($$)
     |> takes_foo($$)
     |> takes_array_access($$)

@@ -40,7 +40,6 @@ const StaticString
   s_HH_RX_KeyedTraversable("HH\\Rx\\KeyedTraversable"),
   s_HH_Container("HH\\Container"),
   s_HH_KeyedContainer("HH\\KeyedContainer"),
-  s_Indexish("Indexish"),
   s_XHPChild("XHPChild"),
   s_Stringish("Stringish");
 
@@ -131,7 +130,6 @@ bool interface_supports_non_objects(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()) ||
           s->isame(s_Stringish.get()));
 }
@@ -143,7 +141,6 @@ bool interface_supports_array(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
 
@@ -155,7 +152,6 @@ bool interface_supports_array(const std::string& n) {
           (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 
@@ -166,7 +162,6 @@ bool interface_supports_vec(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
 
@@ -178,7 +173,6 @@ bool interface_supports_vec(const std::string& n) {
           (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 
@@ -189,7 +183,6 @@ bool interface_supports_dict(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
 
@@ -201,7 +194,6 @@ bool interface_supports_dict(const std::string& n) {
           (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 
@@ -212,7 +204,6 @@ bool interface_supports_shape(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
 
@@ -224,7 +215,6 @@ bool interface_supports_shape(const std::string& n) {
           (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 
@@ -235,7 +225,6 @@ bool interface_supports_keyset(const StringData* s) {
           s->isame(s_HH_RX_KeyedTraversable.get()) ||
           s->isame(s_HH_Container.get()) ||
           s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
 }
 
@@ -247,7 +236,6 @@ bool interface_supports_keyset(const std::string& n) {
           (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
           (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
           (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));
 }
 

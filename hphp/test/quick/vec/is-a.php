@@ -62,9 +62,6 @@ function test_is_a($a, $interfaces) {
   echo "instanceof KeyedContainer: ";
   var_dump($a instanceof KeyedContainer);
 
-  echo "instanceof Indexish: ";
-  var_dump($a instanceof Indexish);
-
   echo "instanceof XHPChild: ";
   var_dump($a instanceof XHPChild);
 
@@ -103,7 +100,6 @@ function main() {
     "HH\\KeyedTraversable",
     "HH\\Container",
     "HH\\KeyedContainer",
-    "Indexish",
     "XHPChild",
     "ArrayAccess",
     "Vector",

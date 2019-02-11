@@ -89,6 +89,9 @@ void visit(const Vunit& /*unit*/, RegSet regs, F f) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// NB: Unless otherwise stated, all these visitors will visit operands in the
+// order they're defined in the VASM_OPCODES macro.
+
 template<class Use>
 void visitUses(const Vunit& unit, const Vinstr& inst, Use use) {
   switch (inst.op) {

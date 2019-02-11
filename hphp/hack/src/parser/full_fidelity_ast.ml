@@ -82,6 +82,13 @@ type env =
   ; cls_reified_generics : SSet.t ref
   ; in_static_method : bool ref
   ; parent_is_reified : bool ref
+  (* This provides a generic mechanism to delay raising parsing errors;
+   * since we're moving FFP errors away from CST to a stage after lowering
+   * _and_ want to prioritize errors before lowering, the lowering errors
+   * must be merely stored when the lowerer runs (until check for FFP runs (on AST)
+   * and raised _after_ FFP error checking (unless we run the lowerer twice,
+   * which would be expensive). *)
+  ; lowpri_errors : (Pos.t * string) list ref
   }[@@deriving show]
 
 let make_env
@@ -152,6 +159,7 @@ let make_env
     ; in_static_method = ref false
     ; parent_is_reified = ref false
     ; lifted_awaits = None
+    ; lowpri_errors = ref []
     }
 
 type result =
@@ -272,15 +280,13 @@ let raise_parsing_error env node_or_pos msg =
       | `Pos pos -> pos
       | `Node node -> pPos node env
     in
-    Errors.parsing_error (p, msg)
+    env.lowpri_errors := (p, msg) :: !(env.lowpri_errors)
   else if env.codegen && not env.lower_coroutines then
     let p = match node_or_pos with
       | `Pos pos -> pos
       | `Node node -> (Option.value (position env.file node) ~default:Pos.none)
     in
-    let (s, e) = Pos.info_raw p in
-    let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
-    raise @@ SyntaxError.ParserFatal (e, p)
+    env.lowpri_errors := (p, msg) :: !(env.lowpri_errors)
   else ()
 
 (* HHVM starts range of function declaration from the 'function' keyword *)
@@ -341,7 +347,7 @@ complaining that the code does not parse. Don't raise a parsing error
 if there already is one, since that one will likely be better than this one. *)
 let lowering_error env pos text syntax_kind =
   if not (is_typechecker env) then () else
-  if not (Errors.currently_has_errors ()) then
+  if not (Errors.currently_has_errors () || !(env.lowpri_errors) <> []) then
     raise_parsing_error env (`Pos pos)
       (SyntaxError.lowering_parsing_error text syntax_kind)
 
@@ -3541,6 +3547,19 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
       Fixmes.HH_FIXMES.add env.file fixmes in
   comments
 
+let flush_parsing_errors env =
+  let lowpri_errors = List.rev !(env.lowpri_errors) in
+  env.lowpri_errors := [];
+  if not env.quick_mode && env.keep_errors then
+    List.iter ~f:Errors.parsing_error lowpri_errors
+  else if env.codegen && not env.lower_coroutines then
+    match lowpri_errors with
+    | (p, msg) :: _ ->
+      let (s, e) = Pos.info_raw p in
+      let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
+      raise @@ SyntaxError.ParserFatal (e, p)
+    | _ -> ()
+
 let lower_tree
   (env : env)
   (source_text : SourceText.t)
@@ -3603,7 +3622,7 @@ let lower_tree
         List.iter ~f:report_error errors
       | error :: _ -> report_error error
   in (* check_for_syntax_errors *)
-  let () = check_for_syntax_errors () in
+  check_for_syntax_errors ();
   let mode = Option.value mode ~default:(FileInfo.Mpartial) in
   let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
@@ -3624,10 +3643,12 @@ let lower_tree
       FromEditablePositionedSyntax.lower ~script
     else
       FromPositionedSyntax.lower ~script
-  in lower
-    env
-    ~source_text
-    comments
+  in
+  Utils.try_finally ~f:(fun () ->
+    lower env ~source_text comments
+  ) ~finally:(fun () ->
+    flush_parsing_errors env
+  )
 
 let from_text (env : env) (source_text : SourceText.t) : result =
   let (mode, tree) = parse_text env source_text in

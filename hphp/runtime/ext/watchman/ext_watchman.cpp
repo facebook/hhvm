@@ -434,9 +434,11 @@ struct ActiveSubscription {
     auto res_future = promise.getFuture();
     if (timeout != std::chrono::milliseconds::zero()) {
       res_future = std::move(res_future).within(timeout)
-        .onError([](folly::FutureTimeout) {
-          return false;
-        });
+        .thenError(
+            folly::tag_t<folly::FutureTimeout>{},
+            [](folly::FutureTimeout) {
+              return false;
+            });
     }
     m_syncPromises.emplace_back(std::move(promise));
     return res_future;
@@ -640,11 +642,13 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
         }
         return folly::unit;
       })
-      .onError([name] (std::exception const& e) -> folly::Unit {
-        // (ASNYC) delete active subscription
-        s_activeSubscriptions.erase(name);
-        throw std::runtime_error(e.what());
-      });
+      .thenError(
+          folly::tag_t<std::exception>{},
+          [name] (std::exception const& e) -> folly::Unit {
+            // (ASNYC) delete active subscription
+            s_activeSubscriptions.erase(name);
+            throw std::runtime_error(e.what());
+          });
     return Object{
       (new FutureEvent<folly::Unit>(std::move(res_future)))->getWaitHandle()
     };

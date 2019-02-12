@@ -285,8 +285,8 @@ let rec class_decl_if_missing class_env c =
 
 and class_naming_and_decl (class_env:class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
-  let c = Errors.ignore_ (fun () -> Naming.class_ class_env.tcopt c) in
-  let shallow_class = Shallow_decl.class_ class_env.tcopt c in
+  let shallow_class =
+    Shallow_classes_heap.class_naming_and_decl class_env.tcopt c in
   let errors, tc = Errors.do_ begin fun() ->
     class_parents_decl class_env shallow_class;
     class_decl class_env.tcopt shallow_class

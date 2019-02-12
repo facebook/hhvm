@@ -62,6 +62,28 @@ let rec has_disj p =
 
 let valid = Conj []
 
+(* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Unsat _]
+* if not simplified
+*)
+let rec is_valid p =
+match p with
+| Conj ps -> List.for_all ps is_valid
+| Disj ps -> List.exists ps is_valid
+| Unsat _ -> false
+| IsSubtype (_, _) -> false
+| IsEqual (_, _) -> false
+
+(* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Unsat _]
+* if not simplified
+*)
+and is_unsat p =
+match p with
+| Conj ps -> List.exists ps is_unsat
+| Disj ps -> List.for_all ps is_unsat
+| Unsat _ -> true
+| IsSubtype (_, _) -> false
+| IsEqual (_, _) -> false
+
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =
   match p1, p2 with
@@ -81,8 +103,8 @@ let conj_list ps =
 (* Smart constructor for binary disjunction *)
 let disj p1 p2 =
   match p1, p2 with
-  | p, (Unsat _ | Disj [])
-  | (Unsat _ | Disj []), p -> p
+  | p, p' when is_unsat p' -> p
+  | p', p when is_unsat p' -> p
   | Conj [], _
   | _, Conj [] -> Conj []
   | Disj ps1, Disj ps2 -> Disj (ps1 @ ps2)
@@ -92,25 +114,3 @@ let disj p1 p2 =
 
 let disj_list ps =
   List.fold ~init:(Disj []) ps ~f:disj
-
-(* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Unsat _]
- * if not simplified
- *)
-let rec is_valid p =
-  match p with
-  | Conj ps -> List.for_all ps is_valid
-  | Disj ps -> List.exists ps is_valid
-  | Unsat _ -> false
-  | IsSubtype (_, _) -> false
-  | IsEqual (_, _) -> false
-
-(* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Unsat _]
- * if not simplified
- *)
-and is_unsat p =
-  match p with
-  | Conj ps -> List.exists ps is_unsat
-  | Disj ps -> List.for_all ps is_unsat
-  | Unsat _ -> true
-  | IsSubtype (_, _) -> false
-  | IsEqual (_, _) -> false

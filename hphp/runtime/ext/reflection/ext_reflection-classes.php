@@ -1335,6 +1335,6 @@ namespace HH {
    * @return        darray   The resolved type structure for either a type
    *                         constant or a type alias.
    */
-  <<__Native>>
+  <<__Native, __Rx>>
   function type_structure(mixed $cls_or_obj, ?string $cns_name = null): darray;
 }

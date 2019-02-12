@@ -436,7 +436,6 @@ public:
   const Func* getPrevFunc(const ActRec*);
 
   ActRec* getFrameAtDepth(int frame = 0);
-  VarEnv* getOrCreateVarEnv(int frame = 0);
   VarEnv* hasVarEnv(int frame = 0);
   void setVar(StringData* name, tv_rval v);
   void bindVar(StringData* name, tv_lval v);

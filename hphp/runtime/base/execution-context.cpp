@@ -1324,17 +1324,6 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   return fp;
 }
 
-VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
-  auto const fp = getFrameAtDepth(frame);
-  if (!fp || !(fp->func()->attrs() & AttrMayUseVV)) {
-    raise_error("Could not create variable environment");
-  }
-  if (!fp->hasVarEnv()) {
-    fp->setVarEnv(VarEnv::createLocal(fp));
-  }
-  return fp->getVarEnv();
-}
-
 void ExecutionContext::setVar(StringData* name, tv_rval v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();

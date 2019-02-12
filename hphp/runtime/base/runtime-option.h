@@ -1067,6 +1067,13 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    */                                                                   \
   F(int32_t, ForbidThriftIntegerValuesOutOfRange, 0)                    \
+  /*                                                                    \
+   * Don't allow unserializing to __PHP_Incomplete_Class                \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Throw exception                                                \
+   */                                                                   \
+  F(int32_t, ForbidUnserializeIncompleteClass, 0)                       \
   F(int32_t, RxEnforceCalls, 0)                                         \
   /*                                                                    \
    * 0 - Nothing                                                        \

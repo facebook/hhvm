@@ -199,6 +199,20 @@ void throwKeysetValue() {
 void throwInvalidClassName() {
   throw Exception("Provided class name is invalid");
 }
+
+void warnOrThrowUnknownClass(const String& clsName) {
+  if (RuntimeOption::EvalForbidUnserializeIncompleteClass) {
+    auto const msg = folly::sformat(
+      "Attempted to unserialize class named '{}' but it doesn't exist",
+      clsName.toCppString()
+    );
+    if (RuntimeOption::EvalForbidUnserializeIncompleteClass > 1) {
+      throw_object("Exception", make_vec_array(msg));
+    } else {
+      raise_warning(msg);
+    }
+  }
+}
 }
 
 const StaticString
@@ -1015,6 +1029,7 @@ void VariableUnserializer::unserializeVariant(
           }
         }
       } else {
+        warnOrThrowUnknownClass(clsName);
         obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
         obj->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
                      clsName.toCell());
@@ -1190,6 +1205,7 @@ void VariableUnserializer::unserializeVariant(
         if (!allowUnknownSerializableClass()) {
           raise_error("unknown class %s", clsName.data());
         }
+        warnOrThrowUnknownClass(clsName);
         Object ret = create_object_only(s_PHP_Incomplete_Class);
         ret->setProp(nullptr, s_PHP_Incomplete_Class_Name.get(),
                      clsName.toCell());

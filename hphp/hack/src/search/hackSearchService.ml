@@ -165,7 +165,7 @@ module MasterApi = struct
     | "typedef" -> Some Typedef
     | _ -> None
 
-  let query popt workers input type_ ~fuzzy =
+  let query workers input type_ ~fuzzy =
     let results = SS.MasterApi.query workers input (get_type type_) ~fuzzy in
     List.filter_map results
       (fun search_term ->
@@ -178,7 +178,7 @@ module MasterApi = struct
           match pos, result_type with
           (* Need both class kind and position *)
           | FileInfo.File (FileInfo.Class, fn), Class _ ->
-            (match Parser_heap.find_class_in_file popt fn name with
+            (match Parser_heap.find_class_in_file fn name with
             | Some c ->
                 let pos, result_type =
                   (fst c.Ast.c_name, Class (Some c.Ast.c_kind)) in
@@ -189,7 +189,7 @@ module MasterApi = struct
                 }
             | None -> None)
           | FileInfo.File (FileInfo.Fun, fn), Function ->
-            (match Parser_heap.find_fun_in_file popt fn name with
+            (match Parser_heap.find_fun_in_file fn name with
             | Some c ->
                 let pos = fst c.Ast.f_name in
                 Some {
@@ -199,7 +199,7 @@ module MasterApi = struct
                 }
             | None -> None)
           | FileInfo.File (FileInfo.Typedef, fn), Typedef ->
-            (match Parser_heap.find_typedef_in_file popt fn name with
+            (match Parser_heap.find_typedef_in_file fn name with
             | Some c ->
                 let pos = fst c.Ast.t_id in
                 Some {
@@ -209,7 +209,7 @@ module MasterApi = struct
                 }
             | None -> None)
           | FileInfo.File (FileInfo.Const, fn), Constant ->
-            (match Parser_heap.find_const_in_file popt fn name with
+            (match Parser_heap.find_const_in_file fn name with
             | Some c ->
                 let pos = fst c.Ast.cst_name in
                 Some {
@@ -220,7 +220,7 @@ module MasterApi = struct
             | None -> None)
           | FileInfo.Full p, Class None ->
             let fn = Pos.filename p in
-            (match Parser_heap.find_class_in_file popt fn name with
+            (match Parser_heap.find_class_in_file fn name with
             | Some c ->
                 let result_type = Class (Some c.Ast.c_kind) in
                 Some {
@@ -262,7 +262,7 @@ module ClassMethods = struct
       Some file
     | _ -> None
 
-  let query tcopt class_name method_query =
+  let query class_name method_query =
     let open Option.Monad_infix in
     let method_query = String.lowercase method_query in
     let matches_query method_name =
@@ -270,7 +270,7 @@ module ClassMethods = struct
         String_utils.is_substring method_query method_name
     in
     get_class_definition_file class_name
-    >>= (fun file -> Parser_heap.find_class_in_file tcopt file class_name)
+    >>= (fun file -> Parser_heap.find_class_in_file file class_name)
     >>| (fun class_ -> class_.Ast.c_body)
     >>| List.filter_map ~f:begin fun class_elt ->
       match class_elt with

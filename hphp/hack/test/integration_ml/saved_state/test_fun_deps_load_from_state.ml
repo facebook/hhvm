@@ -33,12 +33,12 @@ let () =
         ~local_changes:[]
         ~use_precheked_files:false
       in
-    let ServerEnv.{tcopt; naming_table; popt; _} = env in
+    let ServerEnv.{tcopt; naming_table; _} = env in
     let _ =
       let filter = ServerCommandTypes.Method_jumps.No_filter in
       let find_children = true in
       let class_ = "Test" in
-      MethodJumps.get_inheritance tcopt class_ ~filter ~find_children
+      MethodJumps.get_inheritance class_ ~filter ~find_children
         env.ServerEnv.naming_table ServerEnvBuild.default_genv.ServerEnv.workers in
     let expected = {|
       {"position":{"file":"/test.php","line":3,"character":19},
@@ -53,7 +53,7 @@ let () =
       ServerRxApiShared.prepare_pos_infos h [("/" ^ (fst file), 3, 19)] naming_table in
     if errors <> []
     then Test.fail ("Unexpected errors:" ^ (String.concat "," errors));
-    let result = ServerRxApiShared.helper h tcopt popt [] pos_infos in
+    let result = ServerRxApiShared.helper h tcopt [] pos_infos in
 
     if result <> [expected]
     then begin

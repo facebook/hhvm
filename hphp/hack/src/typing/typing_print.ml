@@ -869,7 +869,6 @@ let wrong_phase ~message ~keytrace =
     (message ^ (Hh_json.Access.keytrace_to_string keytrace)))
 
 let to_locl_ty
-  (tcopt: TypecheckerOptions.t)
   ?(keytrace = [])
   (json: Hh_json.json)
   : locl deserialized_result =
@@ -919,7 +918,7 @@ let to_locl_ty
 
     | "newtype" ->
       get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
-      begin match Typing_lazy_heap.get_typedef tcopt name with
+      begin match Typing_lazy_heap.get_typedef name with
       | Some _typedef ->
         (* We end up only needing the name of the typedef. *)
         Ok name
@@ -1093,7 +1092,7 @@ let to_locl_ty
     | "class" ->
       get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
       let class_pos =
-        match Typing_lazy_heap.get_class tcopt name with
+        match Typing_lazy_heap.get_class name with
         | Some class_ty ->
           (Cls.pos class_ty)
         | None ->
@@ -1430,7 +1429,7 @@ module PrintClass = struct
      * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
      * sigil could be omitted *)
     Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
-      let sigil, kind = match Typing_lazy_heap.get_class tcopt field with
+      let sigil, kind = match Typing_lazy_heap.get_class field with
         | None -> "!", ""
         | Some cls ->
           (if Cls.members_fully_known cls then " " else "~"),

@@ -32,22 +32,22 @@ let handle_return tcopt file def name ret =
 let to_tuple r1 r2 =
   combine ~ok:(fun r1 r2 -> (r1, r2)) ~err:(fun _ e2 -> e2) r1 r2
 
-let get_fun_return_ty tcopt popt fun_name =
+let get_fun_return_ty tcopt fun_name =
   let fun_name = add_ns fun_name in
   let pos =
     of_option (Naming_heap.FunPosHeap.get fun_name) "Could not find function"
   in
   let file = map pos FileInfo.get_pos_filename in
   let funopt =
-    map file (fun file -> Parser_heap.find_fun_in_file popt file fun_name)
+    map file (fun file -> Parser_heap.find_fun_in_file file fun_name)
   in
   let f = join @@ map funopt (of_option ~error:"Could not find function") in
-  let f = map f (Naming.fun_ tcopt) in
+  let f = map f Naming.fun_ in
   let args = to_tuple file f in
   bind args
     (fun (file, f) -> handle_return tcopt file (Fun f) f.f_name f.f_ret)
 
-let get_meth_return_ty tcopt popt class_name meth_name =
+let get_meth_return_ty tcopt class_name meth_name =
   let class_name = add_ns class_name in
   let pos =
     match Naming_heap.TypeIdHeap.get class_name with
@@ -56,10 +56,10 @@ let get_meth_return_ty tcopt popt class_name meth_name =
   in
   let file = map pos FileInfo.get_pos_filename in
   let classopt =
-     map file (fun file -> Parser_heap.find_class_in_file popt file class_name)
+     map file (fun file -> Parser_heap.find_class_in_file file class_name)
   in
   let c = join @@ map classopt (of_option ~error:"Could not find class") in
-  let c = map c (Naming.class_ tcopt) in
+  let c = map c Naming.class_ in
   let meth_list = map c (fun c -> c.c_static_methods @ c.c_methods) in
   let mopt = map meth_list (List.find ~f:(fun m -> snd m.m_name = meth_name)) in
   let m = join @@ map mopt (of_option ~error:"Could not find method") in

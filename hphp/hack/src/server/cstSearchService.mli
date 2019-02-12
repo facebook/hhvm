@@ -12,7 +12,6 @@ type pattern
 type result
 
 val compile_pattern:
-  TypecheckerOptions.t ->
   Hh_json.json ->
   (pattern, string) Result.t
 (** Compile JSON input into a pattern that can be searched for. *)

@@ -194,18 +194,18 @@ let get_class_parents_and_traits env shallow_class =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec ifun_decl tcopt (f: Ast.fun_) =
-  let f = Errors.ignore_ (fun () -> Naming.fun_ tcopt f) in
-  fun_decl f tcopt;
+let rec ifun_decl (f: Ast.fun_) =
+  let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
+  fun_decl f;
   ()
 
-and fun_decl f decl_tcopt =
+and fun_decl f =
   let errors, ft = Errors.do_ begin fun () ->
     let dep = Dep.Fun (snd f.f_name) in
     let env = {
       Decl_env.mode = f.f_mode;
       droot = Some dep;
-      decl_tcopt;
+      decl_tcopt = GlobalNamingOptions.get ();
     } in
     fun_decl_in_env env f
   end in
@@ -260,7 +260,6 @@ and fun_decl_in_env env f =
 (*****************************************************************************)
 
 type class_env = {
-  tcopt: TypecheckerOptions.t;
   stack: SSet.t;
 }
 
@@ -284,12 +283,12 @@ let rec class_decl_if_missing class_env c =
   end
 
 and class_naming_and_decl (class_env:class_env) cid c =
-  let class_env = { class_env with stack = SSet.add cid class_env.stack } in
+  let class_env = { stack = SSet.add cid class_env.stack } in
   let shallow_class =
-    Shallow_classes_heap.class_naming_and_decl class_env.tcopt c in
+    Shallow_classes_heap.class_naming_and_decl c in
   let errors, tc = Errors.do_ begin fun() ->
     class_parents_decl class_env shallow_class;
-    class_decl class_env.tcopt shallow_class
+    class_decl shallow_class
   end in
   let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
@@ -323,7 +322,7 @@ and class_type_decl class_env hint =
       | Some (pos, `Class) when not (Decl_heap.Classes.mem cid) ->
         let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
-        let class_opt = Parser_heap.find_class_in_file class_env.tcopt fn cid in
+        let class_opt = Parser_heap.find_class_in_file fn cid in
         Errors.run_in_context fn Errors.Decl begin fun () ->
           Option.iter class_opt (class_decl_if_missing class_env)
         end
@@ -338,7 +337,7 @@ and class_is_abstract c =
     | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
-and class_decl tcopt c =
+and class_decl c =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   let is_ppl = Attrs.mem SN.UserAttributes.uaProbabilisticModel c.sc_user_attributes in
@@ -347,7 +346,7 @@ and class_decl tcopt c =
   let env = {
     Decl_env.mode = c.sc_mode;
     droot = Some class_dep;
-    decl_tcopt = tcopt;
+    decl_tcopt = GlobalNamingOptions.get ();
   } in
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
@@ -385,9 +384,9 @@ and class_decl tcopt c =
     | Some { elt_origin = cls; _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
-      let pos = method_pos tcopt ~is_static:false cls SN.Members.__toString  in
+      let pos = method_pos ~is_static:false cls SN.Members.__toString  in
       (* Declare Stringish and parents if not already declared *)
-      let class_env = { tcopt; stack = SSet.empty } in
+      let class_env = { stack = SSet.empty } in
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
       class_type_decl class_env ty;
       ty :: impl
@@ -462,10 +461,10 @@ and class_decl tcopt c =
   if Ast.Cnormal = c.sc_kind then
     begin
       SMap.iter (
-        method_check_trait_overrides tcopt ~is_static:false c
+        method_check_trait_overrides ~is_static:false c
       ) m;
       SMap.iter (
-        method_check_trait_overrides tcopt ~is_static:true c
+        method_check_trait_overrides ~is_static:true c
       ) sm;
     end
   else ();
@@ -767,9 +766,9 @@ and method_decl_acc ~is_static c (acc, condition_types) m  =
   let acc = SMap.add id elt acc in
   acc, condition_types
 
-and method_check_trait_overrides opt ~is_static c id meth =
+and method_check_trait_overrides ~is_static c id meth =
   if meth.elt_override then begin
-    let pos = method_pos opt ~is_static meth.elt_origin id in
+    let pos = method_pos ~is_static meth.elt_origin id in
     Errors.override_per_trait c.sc_name id pos
   end
 
@@ -778,7 +777,7 @@ and method_check_trait_overrides opt ~is_static c id meth =
  * are cases when the method has not been added to the Decl_heap yet, in which
  * case we fallback to retrieving the position from the parsing AST.
  *)
-and method_pos opt ~is_static class_id meth  =
+and method_pos ~is_static class_id meth  =
   let get_meth = if is_static then
       Decl_heap.StaticMethods.get
     else
@@ -790,7 +789,7 @@ and method_pos opt ~is_static class_id meth  =
       match Naming_heap.TypeIdHeap.get class_id with
       | Some (pos, `Class) ->
         let fn = FileInfo.get_pos_filename pos in
-        begin match Parser_heap.find_class_in_file opt fn class_id with
+        begin match Parser_heap.find_class_in_file fn class_id with
           | None -> raise Caml.Not_found
           | Some { Ast.c_body; _ } ->
             let elt = List.find ~f:begin fun x ->
@@ -815,14 +814,14 @@ and method_pos opt ~is_static class_id meth  =
 (* Dealing with typedefs *)
 (*****************************************************************************)
 
-let rec type_typedef_decl_if_missing tcopt typedef =
+let rec type_typedef_decl_if_missing typedef =
   let _, tid = typedef.Ast.t_id in
   if Decl_heap.Typedefs.mem tid
   then ()
   else
-    type_typedef_naming_and_decl tcopt typedef
+    type_typedef_naming_and_decl typedef
 
-and typedef_decl tdef decl_tcopt =
+and typedef_decl tdef =
   let {
     t_annotation = ();
     t_name = td_pos, tid;
@@ -835,7 +834,11 @@ and typedef_decl tdef decl_tcopt =
     t_vis = td_vis;
   } = tdef in
   let dep = Typing_deps.Dep.Class tid in
-  let env = {Decl_env.mode = mode; droot = Some dep; decl_tcopt} in
+  let env = {Decl_env.
+    mode;
+    droot = Some dep;
+    decl_tcopt = GlobalNamingOptions.get ();
+  } in
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
@@ -844,9 +847,9 @@ and typedef_decl tdef decl_tcopt =
     td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors;
   }
 
-and type_typedef_naming_and_decl tcopt tdef =
-  let tdef = Errors.ignore_ (fun () -> Naming.typedef tcopt tdef) in
-  let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef tcopt) in
+and type_typedef_naming_and_decl tdef =
+  let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
+  let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef) in
   record_typedef (snd tdef.t_name);
   Decl_heap.Typedefs.add (snd tdef.t_name)
     { tdecl with td_decl_errors = Some errors};
@@ -856,11 +859,15 @@ and type_typedef_naming_and_decl tcopt tdef =
 (* Global constants *)
 (*****************************************************************************)
 
-let const_decl cst decl_tcopt =
+let const_decl cst =
   let open Option.Monad_infix in
   let cst_pos, _cst_name = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
-  let env = {Decl_env.mode = cst.cst_mode; droot = Some dep; decl_tcopt} in
+  let env = {Decl_env.
+    mode = cst.cst_mode;
+    droot = Some dep;
+    decl_tcopt = GlobalNamingOptions.get ();
+  } in
   match cst.cst_type with
   | Some h -> Decl_hint.hint env h
   | None ->
@@ -872,66 +879,63 @@ let const_decl cst decl_tcopt =
     | None ->
       Reason.Rwitness cst_pos, Tany
 
-let iconst_decl tcopt cst =
-  let cst = Errors.ignore_ (fun () -> Naming.global_const tcopt cst) in
-  let errors, hint_ty = Errors.do_ (fun() -> const_decl cst tcopt) in
+let iconst_decl cst =
+  let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in
+  let errors, hint_ty = Errors.do_ (fun() -> const_decl cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
   ()
 
 (*****************************************************************************)
 
-let rec name_and_declare_types_program tcopt prog =
+let rec name_and_declare_types_program prog =
   List.iter prog begin fun def ->
     match def with
-    | Ast.Namespace (_, prog) -> name_and_declare_types_program tcopt prog
+    | Ast.Namespace (_, prog) -> name_and_declare_types_program prog
     | Ast.NamespaceUse _ -> ()
     | Ast.SetNamespaceEnv _ -> ()
     | Ast.FileAttributes _ -> ()
-    | Ast.Fun f -> ifun_decl tcopt f
+    | Ast.Fun f -> ifun_decl f
     | Ast.Class c ->
-      let class_env = {
-        tcopt;
-        stack = SSet.empty;
-      } in
+      let class_env = { stack = SSet.empty; } in
       class_decl_if_missing class_env c
     | Ast.Typedef typedef ->
-      type_typedef_decl_if_missing tcopt typedef
+      type_typedef_decl_if_missing typedef
     | Ast.Stmt _ -> ()
-    | Ast.Constant cst -> iconst_decl tcopt cst
+    | Ast.Constant cst -> iconst_decl cst
   end
 
-let make_env tcopt fn =
-  let ast = Parser_heap.get_from_parser_heap tcopt fn in
-  name_and_declare_types_program tcopt ast
+let make_env fn =
+  let ast = Parser_heap.get_from_parser_heap fn in
+  name_and_declare_types_program ast
 
 let err_not_found file name =
   let err_str =
     Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file) in
 raise (Decl_not_found err_str)
 
-let declare_class_in_file tcopt file name =
-  match Parser_heap.find_class_in_file tcopt file name with
+let declare_class_in_file file name =
+  match Parser_heap.find_class_in_file file name with
   | Some cls ->
-    let class_env = { tcopt; stack = SSet.empty; } in
+    let class_env = { stack = SSet.empty; } in
     class_decl_if_missing class_env cls
   | None ->
     err_not_found file name
 
-let declare_fun_in_file tcopt file name =
-  match Parser_heap.find_fun_in_file tcopt file name with
-  | Some f -> ifun_decl tcopt f
+let declare_fun_in_file file name =
+  match Parser_heap.find_fun_in_file file name with
+  | Some f -> ifun_decl f
   | None ->
     err_not_found file name
 
-let declare_typedef_in_file tcopt file name =
-  match Parser_heap.find_typedef_in_file tcopt file name with
-  | Some t -> type_typedef_naming_and_decl tcopt t
+let declare_typedef_in_file file name =
+  match Parser_heap.find_typedef_in_file file name with
+  | Some t -> type_typedef_naming_and_decl t
   | None ->
     err_not_found file name
 
-let declare_const_in_file tcopt file name =
-  match Parser_heap.find_const_in_file tcopt file name with
-  | Some cst -> iconst_decl tcopt cst
+let declare_const_in_file file name =
+  match Parser_heap.find_const_in_file file name with
+  | Some cst -> iconst_decl cst
   | None ->
     err_not_found file name

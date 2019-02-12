@@ -110,7 +110,7 @@ module Env = struct
       | Some parent_id -> Typing_env.set_parent_id tenv parent_id in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty c.c_methods in
     let decl_env = tenv.Typing_env.decl_env in
-    let sc = Shallow_decl.class_ decl_env.Decl_env.decl_tcopt c in
+    let sc = Shallow_decl.class_ c in
     let class_init_props = DICheck.initialized_props sc SSet.empty in
     let props = SSet.empty
       |> DICheck.own_props sc

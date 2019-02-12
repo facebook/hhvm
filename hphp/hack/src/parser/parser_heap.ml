@@ -35,11 +35,12 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
 
 let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
 
-let get_from_local_cache ~full popt file_name =
+let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> ast
   | None ->
+    let popt = GlobalParserOptions.get () in
     let f contents =
       let contents = if (FindUtils.file_filter fn) then contents else "" in
       match Ide_parser_cache.get_ast_if_active popt file_name contents with
@@ -56,16 +57,16 @@ let get_from_local_cache ~full popt file_name =
             file_name
             contents
           ).Parser_return.ast
-      in
-      let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
-      let ast =
-        if (Relative_path.prefix file_name = Relative_path.Hhi)
-        && ParserOptions.deregister_php_stdlib popt
-        then Ast_utils.deregister_ignored_attributes ast
-        else ast
-      in
-      let () = if full then LocalParserCache.add file_name ast in
-      ast
+    in
+    let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
+    let ast =
+      if (Relative_path.prefix file_name = Relative_path.Hhi)
+      && ParserOptions.deregister_php_stdlib popt
+      then Ast_utils.deregister_ignored_attributes ast
+      else ast
+    in
+    let () = if full then LocalParserCache.add file_name ast in
+    ast
 
 let get_class defs class_name =
   let rec get acc defs =
@@ -119,27 +120,27 @@ let rec get_statements defs =
 (* Get an AST directly from the parser heap. Will return empty AProgram
    if the file does not exist
 *)
-let get_from_parser_heap ?(full = false) popt file_name =
+let get_from_parser_heap ?(full = false) file_name =
   match ParserHeap.get file_name with
     | None ->
-      let ast = get_from_local_cache ~full popt file_name in
+      let ast = get_from_local_cache ~full file_name in
       (* Only store decl asts *)
       if not full then
       ParserHeap.add file_name (ast, Decl);
       ast
     | Some (_, Decl) when full ->
-      let ast = get_from_local_cache ~full popt file_name in
+      let ast = get_from_local_cache ~full file_name in
       ast
     | Some (defs, _) -> defs
 
-let find_class_in_file ?(full = false) popt file_name class_name =
-  get_class (get_from_parser_heap ~full popt file_name) class_name
+let find_class_in_file ?(full = false) file_name class_name =
+  get_class (get_from_parser_heap ~full file_name) class_name
 
-let find_fun_in_file ?(full = false) popt file_name fun_name =
-  get_fun (get_from_parser_heap ~full popt file_name) fun_name
+let find_fun_in_file ?(full = false) file_name fun_name =
+  get_fun (get_from_parser_heap ~full file_name) fun_name
 
-let find_typedef_in_file ?(full = false) popt file_name name =
-  get_typedef (get_from_parser_heap ~full popt file_name) name
+let find_typedef_in_file ?(full = false) file_name name =
+  get_typedef (get_from_parser_heap ~full file_name) name
 
-let find_const_in_file ?(full = false) popt file_name name =
-  get_const (get_from_parser_heap ~full popt file_name) name
+let find_const_in_file ?(full = false) file_name name =
+  get_const (get_from_parser_heap ~full file_name) name

@@ -61,11 +61,11 @@ let search_function function_name include_defs genv env =
 
 let search_member class_name member include_defs genv env =
   let class_name = add_ns class_name in
-  let class_name = FindRefsService.get_origin_class_name env.tcopt class_name member in
+  let class_name = FindRefsService.get_origin_class_name class_name member in
   handle_prechecked_files genv env Typing_deps.Dep.(make (Class class_name)) @@ fun () ->
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files class_name in
-  let all_classes = FindRefsService.find_child_classes env.tcopt
+  let all_classes = FindRefsService.find_child_classes
       class_name env.naming_table files in
   let all_classes = SSet.add all_classes class_name in
   (* Get all the files that reference those classes *)

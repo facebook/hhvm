@@ -44,7 +44,7 @@ let type_decl
   ServerProgress.send_progress_to_monitor "evaluating type declarations";
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let errorl =
-    Decl_service.go ~bucket_size genv.workers env.tcopt fast in
+    Decl_service.go ~bucket_size genv.workers fast in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   Stats.(stats.init_heap_size <- hs);

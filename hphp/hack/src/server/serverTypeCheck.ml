@@ -334,7 +334,7 @@ let declare_names env fast_parsed =
   remove_decls env fast_parsed;
   let errorl, failed_naming =
     Naming_table.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
-      let errorl', failed'= NamingGlobal.ndecl_file env.tcopt k v in
+      let errorl', failed'= NamingGlobal.ndecl_file k v in
       let errorl = Errors.merge errorl' errorl in
       let failed = Relative_path.Set.union failed' failed in
       errorl, failed
@@ -705,7 +705,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
-        ~bucket_size genv.workers env.tcopt oldified_defs fast in
+        ~bucket_size genv.workers oldified_defs fast in
 
     (* Things that were redeclared are no longer in old heap, so we substract
      * defs_ro_redecl from oldified_defs *)
@@ -749,7 +749,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       Decl_redecl_service.redo_type_decl
         ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
         ~bucket_size genv.workers
-        env.tcopt oldified_defs fast_redecl_phase2_now in
+        oldified_defs fast_redecl_phase2_now in
 
     let errors = Errors.(incremental_update_map errors
       errorl' fast_redecl_phase2_now Decl) in

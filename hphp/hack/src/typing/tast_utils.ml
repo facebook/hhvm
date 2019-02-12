@@ -90,7 +90,7 @@ let rec truthiness env ty =
     (* Classes which implement Traversable but not Container will always be
        truthy when empty. If this Tclass is instead an interface type like
        KeyedTraversable, the value may or may not be truthy when empty. *)
-    begin match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
+    begin match Typing_lazy_heap.get_class cid with
     | None -> Unknown
     | Some cls ->
       match Cls.kind cls with
@@ -156,7 +156,7 @@ let rec find_sketchy_types env acc ty =
     if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
     then acc
     else begin
-      match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
+      match Typing_lazy_heap.get_class cid with
       | None -> acc
       | Some cls ->
         match Cls.kind cls with

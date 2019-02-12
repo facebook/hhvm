@@ -86,7 +86,6 @@ val to_json: Typing_env.env -> 'a Typing_defs.ty -> Hh_json.json
 manipulate. Note that this function accesses the global state in
 `Typing_lazy_heap` to verify that certain type names exist. *)
 val json_to_locl_ty:
-  TypecheckerOptions.t
-  -> ?keytrace: Hh_json.Access.keytrace
+  ?keytrace: Hh_json.Access.keytrace
   -> Hh_json.json
   -> (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result

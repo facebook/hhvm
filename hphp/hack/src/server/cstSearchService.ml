@@ -388,7 +388,6 @@ and search_or
       )
 
 let compile_pattern
-    (tcopt: TypecheckerOptions.t)
     (json: Hh_json.json)
     : (pattern, string) Result.t =
   let open Result in
@@ -573,7 +572,6 @@ let compile_pattern
     get_obj "subtype_of" (json, keytrace)
       >>= fun (subtype_of_json, subtype_of_keytrace) ->
     let locl_ty = Typing_print.json_to_locl_ty
-      tcopt
       ~keytrace:subtype_of_keytrace
       subtype_of_json
     in
@@ -678,7 +676,7 @@ let go
     : (Hh_json.json, string) Result.t
   =
   let open Result.Monad_infix in
-  compile_pattern env.ServerEnv.tcopt input >>| fun pattern ->
+  compile_pattern input >>| fun pattern ->
 
   let num_files_searched = ref 0 in
   let last_printed_num_files_searched = ref 0 in

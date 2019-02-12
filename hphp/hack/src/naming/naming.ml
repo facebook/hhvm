@@ -94,30 +94,23 @@ module Env : sig
 
   val empty_local : unbound_handler option -> lenv
   val make_class_genv :
-    TypecheckerOptions.t ->
     aast_type_constraint SMap.t ->
     FileInfo.mode ->
     Ast.id * Ast.class_kind -> Namespace_env.env -> bool -> genv
   val aast_make_class_env :
-    TypecheckerOptions.t ->
     aast_type_constraint SMap.t -> Aast.class_ -> genv * lenv
   val aast_make_typedef_env :
-    TypecheckerOptions.t ->
     aast_type_constraint SMap.t -> Aast.typedef -> genv * lenv
   val make_top_level_env :
-    TypecheckerOptions.t -> genv * lenv
+    unit -> genv * lenv
   val make_fun_genv :
-    TypecheckerOptions.t ->
     type_constraint SMap.t ->
     FileInfo.mode -> string -> Namespace_env.env -> genv
   val aast_make_fun_decl_genv :
-    TypecheckerOptions.t ->
     aast_type_constraint SMap.t -> Aast.fun_ -> genv
   val make_file_attributes_env :
-    TypecheckerOptions.t ->
     FileInfo.mode -> Aast.nsenv -> genv * lenv
   val aast_make_const_env :
-    TypecheckerOptions.t ->
     Aast.gconst -> genv * lenv
 
   val has_unsafe : genv * lenv -> bool
@@ -248,9 +241,9 @@ end = struct
     goto_targets = ref SMap.empty;
   }
 
-  let make_class_genv tcopt tparams mode (cid, ckind) namespace is_ppl =
+  let make_class_genv tparams mode (cid, ckind) namespace is_ppl =
     { in_mode       = mode;
-      tcopt;
+      tcopt         = GlobalNamingOptions.get ();
       in_try        = false;
       in_finally    = false;
       in_ppl        = is_ppl;
@@ -280,18 +273,18 @@ end = struct
     end |> Typing_deps.add_idep genv.droot;
     Errors.unbound_name pos name kind
 
-  let aast_make_class_env tcopt tparams c =
+  let aast_make_class_env tparams c =
     let is_ppl = List.exists
       c.Aast.c_user_attributes
       (fun { Aast.ua_name; _ } -> snd ua_name = SN.UserAttributes.uaProbabilisticModel) in
-    let genv = make_class_genv tcopt tparams c.Aast.c_mode
+    let genv = make_class_genv tparams c.Aast.c_mode
       (c.Aast.c_name, c.Aast.c_kind) c.Aast.c_namespace is_ppl in
     let lenv = empty_local None in
     genv, lenv
 
-  let make_typedef_genv tcopt cstrs tdef_name tdef_namespace = {
+  let make_typedef_genv cstrs tdef_name tdef_namespace = {
     in_mode       = FileInfo.Mstrict;
-    tcopt;
+    tcopt         = GlobalNamingOptions.get ();
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
@@ -303,14 +296,14 @@ end = struct
     namespace     = tdef_namespace;
   }
 
-  let aast_make_typedef_env genv cstrs tdef =
-    let genv = make_typedef_genv genv cstrs (snd tdef.Aast.t_name) tdef.Aast.t_namespace in
+  let aast_make_typedef_env cstrs tdef =
+    let genv = make_typedef_genv cstrs (snd tdef.Aast.t_name) tdef.Aast.t_namespace in
     let lenv = empty_local None in
     genv, lenv
 
-  let make_fun_genv tcopt params f_mode f_name f_namespace = {
+  let make_fun_genv params f_mode f_name f_namespace = {
     in_mode       = f_mode;
-    tcopt;
+    tcopt         = GlobalNamingOptions.get ();
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
@@ -322,9 +315,9 @@ end = struct
     namespace     = f_namespace;
   }
 
-  let aast_make_fun_genv tcopt params f_mode f_name f_namespace =
+  let aast_make_fun_genv params f_mode f_name f_namespace =
     { in_mode = f_mode
-    ; tcopt
+    ; tcopt = GlobalNamingOptions.get ()
     ; in_try = false
     ; in_finally = false
     ; in_ppl = false
@@ -336,12 +329,12 @@ end = struct
     ; namespace = f_namespace
     }
 
-  let aast_make_fun_decl_genv nenv params f =
-    aast_make_fun_genv nenv params f.Aast.f_mode (snd f.Aast.f_name) f.Aast.f_namespace
+  let aast_make_fun_decl_genv params f =
+    aast_make_fun_genv params f.Aast.f_mode (snd f.Aast.f_name) f.Aast.f_namespace
 
-  let aast_make_const_genv tcopt cst = {
+  let aast_make_const_genv cst = {
     in_mode       = cst.Aast.cst_mode;
-    tcopt;
+    tcopt         = GlobalNamingOptions.get ();
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
@@ -353,9 +346,9 @@ end = struct
     namespace     = cst.Aast.cst_namespace;
   }
 
-  let make_top_level_genv tcopt = {
+  let make_top_level_genv () = {
     in_mode       = FileInfo.Mpartial;
-    tcopt;
+    tcopt         = GlobalNamingOptions.get ();
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
@@ -367,16 +360,16 @@ end = struct
     namespace     = Namespace_env.empty_with_default_popt;
   }
 
-  let make_top_level_env nenv =
-    let genv = make_top_level_genv nenv in
+  let make_top_level_env () =
+    let genv = make_top_level_genv () in
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
 
-  let make_file_attributes_genv tcopt mode namespace =
+  let make_file_attributes_genv mode namespace =
   {
     in_mode       = mode;
-    tcopt;
+    tcopt         = GlobalNamingOptions.get ();
     in_try        = false;
     in_finally    = false;
     in_ppl        = false;
@@ -388,14 +381,14 @@ end = struct
     namespace     = namespace;
   }
 
-  let make_file_attributes_env nenv mode namespace =
-    let genv = make_file_attributes_genv nenv mode namespace in
+  let make_file_attributes_env mode namespace =
+    let genv = make_file_attributes_genv mode namespace in
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
 
-  let aast_make_const_env nenv cst =
-    let genv = aast_make_const_genv nenv cst in
+  let aast_make_const_env cst =
+    let genv = aast_make_const_genv cst in
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
@@ -602,20 +595,20 @@ end = struct
       then Errors.using_internal_class pos (strip_ns name);
       pos, name
     | Some (def_pos, `Typedef) when not allow_typedef ->
-      let full_pos, _ = GEnv.get_full_pos genv.tcopt (def_pos, name) in
+      let full_pos, _ = GEnv.get_full_pos (def_pos, name) in
       Errors.unexpected_typedef pos full_pos;
       pos, name
     | Some (_def_pos, `Typedef) -> pos, name
     | None ->
       handle_unbound_name genv
-        (GEnv.type_pos genv.tcopt)
+        GEnv.type_pos
         GEnv.type_canon_name x `cls
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
       genv
       (Naming_heap.FunPosHeap.get)
-      (GEnv.fun_pos genv.tcopt)
+      GEnv.fun_pos
       GEnv.fun_canon_name
       x
 
@@ -763,14 +756,14 @@ let arg_unpack_unexpected = function
   | (pos, _) :: _ -> Errors.naming_too_few_arguments pos; ()
 
 module type GetLocals = sig
-  val stmt : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+  val stmt : Namespace_env.env * Pos.t SMap.t ->
     Ast.stmt -> Namespace_env.env * Pos.t SMap.t
-  val lvalue : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+  val lvalue : Namespace_env.env * Pos.t SMap.t ->
     Ast.expr -> Namespace_env.env * Pos.t SMap.t
 
-  val aast_lvalue : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+  val aast_lvalue : Namespace_env.env * Pos.t SMap.t ->
     Aast.expr -> Namespace_env.env * Pos.t SMap.t
-  val aast_stmt : TypecheckerOptions.t -> Namespace_env.env * Pos.t SMap.t ->
+  val aast_stmt : Namespace_env.env * Pos.t SMap.t ->
     Aast.stmt -> Namespace_env.env * Pos.t SMap.t
 end
 
@@ -1210,14 +1203,14 @@ module Make (GetLocals : GetLocals) = struct
       then err p
 
   (* Naming of a class *)
-  let rec class_ nenv c =
+  let rec class_ c =
     let c = Ast_to_nast.on_class c in
-    aast_class_ nenv c
+    aast_class_ c
 
   (* Naming of a class *)
-  and aast_class_ nenv c =
+  and aast_class_ c =
     let constraints = aast_make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
-    let env = Env.aast_make_class_env nenv constraints c in
+    let env = Env.aast_make_class_env constraints c in
     (* Checking for a code smell *)
     List.iter c.Aast.c_tparams.Aast.c_tparam_list aast_check_constraint;
     let name = Env.type_name env c.Aast.c_name ~allow_typedef:false in
@@ -1277,7 +1270,7 @@ module Make (GetLocals : GetLocals) = struct
       List.map ~f:(fun tp -> tp.Aast.tp_name) c.Aast.c_tparams.Aast.c_tparam_list in
     let enum = Option.map c.Aast.c_enum (aast_enum_ env) in
     let file_attributes =
-      aast_file_attributes nenv c.Aast.c_mode c.Aast.c_file_attributes in
+      aast_file_attributes c.Aast.c_mode c.Aast.c_file_attributes in
     let c_tparams =
       { N.c_tparam_list = tparam_l
       ; N.c_tparam_constraints = constraints
@@ -1347,10 +1340,10 @@ module Make (GetLocals : GetLocals) = struct
         attr :: acc in
     List.fold_left ~init:[] ~f:on_attr attrl
 
-  and aast_file_attributes tcopt mode fal =
-    List.map ~f:(aast_file_attribute tcopt mode) fal
-  and aast_file_attribute tcopt mode fa =
-    let env = Env.make_file_attributes_env tcopt mode fa.Aast.fa_namespace in
+  and aast_file_attributes mode fal =
+    List.map ~f:(aast_file_attribute mode) fal
+  and aast_file_attribute mode fa =
+    let env = Env.make_file_attributes_env mode fa.Aast.fa_namespace in
     let ua = aast_user_attributes env fa.Aast.fa_user_attributes in
     N.
     { fa_user_attributes = ua
@@ -1447,12 +1440,12 @@ module Make (GetLocals : GetLocals) = struct
         let (pos, name) = NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name in
         match Naming_heap.TypeIdHeap.get name with
         | Some (def_pos, _) ->
-          let def_pos, _ = GEnv.get_full_pos genv.tcopt (def_pos, name) in
+          let def_pos, _ = GEnv.get_full_pos (def_pos, name) in
           Errors.error_name_already_bound name name pos def_pos
         | None ->
           match GEnv.type_canon_name name with
           | Some canonical ->
-            let def_pos = Option.value ~default:Pos.none (GEnv.type_pos genv.tcopt canonical) in
+            let def_pos = Option.value ~default:Pos.none (GEnv.type_pos canonical) in
             Errors.error_name_already_bound name canonical pos def_pos
           | None -> ()
     end;
@@ -1750,13 +1743,13 @@ module Make (GetLocals : GetLocals) = struct
       end in
     { genv with type_params = params }
 
-  and fun_ nenv f =
+  and fun_ f =
     let f = Ast_to_nast.on_fun f in
-    aast_fun_ nenv f
+    aast_fun_ f
 
-  and aast_fun_ nenv f =
+  and aast_fun_ f =
     let tparams = aast_make_constraints f.Aast.f_tparams in
-    let genv = Env.aast_make_fun_decl_genv nenv tparams f in
+    let genv = Env.aast_make_fun_decl_genv tparams f in
     let lenv = Env.empty_local None in
     let env = genv, lenv in
     let where_constraints = aast_type_where_constraints env f.Aast.f_where_constraints in
@@ -1888,7 +1881,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_if_stmt env st e b1 b2 =
     let e = aast_expr env e in
     let nsenv = (fst env).namespace in
-    let _, vars = GetLocals.aast_stmt (fst env).tcopt (nsenv, SMap.empty) st in
+    let _, vars = GetLocals.aast_stmt (nsenv, SMap.empty) st in
     SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
     let result = Env.scope env
       (fun env ->
@@ -1940,7 +1933,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_switch_stmt env st e cl =
     let e = aast_expr env e in
     let nsenv = (fst env).namespace in
-    let _, vars = GetLocals.aast_stmt (fst env).tcopt (nsenv, SMap.empty) st in
+    let _, vars = GetLocals.aast_stmt (nsenv, SMap.empty) st in
     SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
     let result = Env.scope env begin fun env ->
       let all_locals_l, cl = aast_casel env cl in
@@ -1972,7 +1965,7 @@ module Make (GetLocals : GetLocals) = struct
       | ev ->
         let nsenv = (fst env).namespace in
         let _, vars =
-          GetLocals.aast_lvalue (fst env).tcopt (nsenv, SMap.empty) ev in
+          GetLocals.aast_lvalue (nsenv, SMap.empty) ev in
         SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
         aast_expr env ev in
     let handle_k ek =
@@ -2004,7 +1997,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_try_stmt env st b cl fb =
     let nsenv = (fst env).namespace in
     let _, vars =
-      GetLocals.aast_stmt (fst env).tcopt (nsenv, SMap.empty) st in
+      GetLocals.aast_stmt (nsenv, SMap.empty) st in
     SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
     let result = Env.scope
       env
@@ -2102,7 +2095,7 @@ module Make (GetLocals : GetLocals) = struct
               let e = Pos.none, Aast.Lvar e in
               let nsenv = (fst env).namespace in
               let _, vars =
-                GetLocals.aast_lvalue (fst env).tcopt (nsenv, SMap.empty) e in
+                GetLocals.aast_lvalue (nsenv, SMap.empty) e in
               SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
               Some (aast_expr env e)
             | Some _ -> failwith "ast_to_nast error in awaitall lvar"
@@ -2454,7 +2447,7 @@ module Make (GetLocals : GetLocals) = struct
       let e2 = aast_expr env e2 in
       let nsenv = (fst env).namespace in
       let _, vars =
-        GetLocals.aast_lvalue (fst env).tcopt (nsenv, SMap.empty) lv in
+        GetLocals.aast_lvalue (nsenv, SMap.empty) lv in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       N.Binop (op, aast_expr env lv, e2)
     | Aast.Binop (Ast.Eq _ as bop, e1, e2) ->
@@ -2472,7 +2465,7 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = aast_expr env e1 in
       let nsenv = (fst env).namespace in
       let get_lvalues = function e ->
-        snd @@ GetLocals.aast_stmt (fst env).tcopt (nsenv, SMap.empty) (Aast.Expr e) in
+        snd @@ GetLocals.aast_stmt (nsenv, SMap.empty) (Aast.Expr e) in
       let e2_lvalues =
         Option.value (Option.map e2opt get_lvalues) ~default:SMap.empty
       in
@@ -2760,12 +2753,12 @@ module Make (GetLocals : GetLocals) = struct
    * transformed into a a named body *)
   (**************************************************************************)
 
-  let func_body nenv f =
+  let func_body f =
     match f.N.f_body.N.fb_annotation with
     | N.BodyNamingAnnotation.Named
     | N.BodyNamingAnnotation.NamedWithUnsafeBlocks -> f.N.f_body
     | N.BodyNamingAnnotation.Unnamed nsenv ->
-      let genv = Env.make_fun_genv nenv
+      let genv = Env.make_fun_genv
         SMap.empty f.N.f_mode (snd f.N.f_name) nsenv in
       let genv = aast_extend_params genv f.N.f_tparams in
       let lenv = Env.empty_local None in
@@ -2813,9 +2806,9 @@ module Make (GetLocals : GetLocals) = struct
         } in
     {m with N.m_body = named_body}
 
-  let class_meth_bodies nenv nc =
+  let class_meth_bodies nc =
     let { N.c_tparam_constraints = cstrs; _ } = nc.N.c_tparams in
-    let genv  = Env.make_class_genv nenv cstrs
+    let genv  = Env.make_class_genv cstrs
       nc.N.c_mode (nc.N.c_name, nc.N.c_kind)
       Namespace_env.empty_with_default_popt
       (Attributes.mem SN.UserAttributes.uaProbabilisticModel nc.N.c_user_attributes)
@@ -2835,9 +2828,9 @@ module Make (GetLocals : GetLocals) = struct
   (* Typedefs *)
   (**************************************************************************)
 
-  let aast_typedef genv tdef =
+  let aast_typedef tdef =
     let cstrs = aast_make_constraints tdef.Aast.t_tparams in
-    let env = Env.aast_make_typedef_env genv cstrs tdef in
+    let env = Env.aast_make_typedef_env cstrs tdef in
     let tconstraint = Option.map tdef.Aast.t_constraint (aast_hint env) in
     List.iter tdef.Aast.t_tparams aast_check_constraint;
     let tparaml = aast_type_paraml env tdef.Aast.t_tparams in
@@ -2854,9 +2847,9 @@ module Make (GetLocals : GetLocals) = struct
       t_vis = tdef.Aast.t_vis;
     }
 
-  let typedef genv tdef =
+  let typedef tdef =
     let tdef = Ast_to_nast.on_typedef tdef in
-    aast_typedef genv tdef
+    aast_typedef tdef
 
   (**************************************************************************)
   (* Global constants *)
@@ -2876,8 +2869,8 @@ module Make (GetLocals : GetLocals) = struct
       if SN.PseudoConsts.is_pseudo_const (Utils.add_ns name) then
         Errors.name_is_reserved name pos
 
-  let aast_global_const genv cst =
-    let env = Env.aast_make_const_env genv cst in
+  let aast_global_const cst =
+    let env = Env.aast_make_const_env cst in
     let hint = Option.map cst.Aast.cst_type (aast_hint env) in
     let e =
       (* Define allows any expression, so don't call check_constant.
@@ -2900,25 +2893,25 @@ module Make (GetLocals : GetLocals) = struct
       cst_namespace = cst.Aast.cst_namespace;
     }
 
-  let global_const genv cst =
+  let global_const cst =
     let cst = Ast_to_nast.on_constant cst in
-    aast_global_const genv cst
+    aast_global_const cst
 
   (**************************************************************************)
   (* The entry point to CHECK the program, and transform the program *)
   (**************************************************************************)
 
-  let aast_program tcopt aast =
-    let top_level_env = ref (Env.make_top_level_env tcopt) in
+  let aast_program aast =
+    let top_level_env = ref (Env.make_top_level_env ()) in
     let rec aux acc def =
       match def with
-      | Aast.Fun f -> (N.Fun (aast_fun_ tcopt f)) :: acc
-      | Aast.Class c -> (N.Class (aast_class_ tcopt c)) :: acc
+      | Aast.Fun f -> (N.Fun (aast_fun_ f)) :: acc
+      | Aast.Class c -> (N.Class (aast_class_ c)) :: acc
       | Aast.Stmt Aast.Noop
       | Aast.Stmt (Aast.Markup _) -> acc
       | Aast.Stmt s -> (N.Stmt (aast_stmt !top_level_env s)) :: acc
-      | Aast.Typedef t -> (N.Typedef (aast_typedef tcopt t)) :: acc
-      | Aast.Constant cst -> (N.Constant (aast_global_const tcopt cst)) :: acc
+      | Aast.Typedef t -> (N.Typedef (aast_typedef t)) :: acc
+      | Aast.Constant cst -> (N.Constant (aast_global_const cst)) :: acc
       | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
       | Aast.NamespaceUse _ -> acc
       | Aast.SetNamespaceEnv nsenv ->
@@ -2931,16 +2924,16 @@ module Make (GetLocals : GetLocals) = struct
       List.rev nast in
     on_program aast
 
-  let program tcopt ast =
+  let program ast =
     let aast = Ast_to_nast.on_program ast in
-    aast_program tcopt aast
+    aast_program aast
 
 end
 
 include Make(struct
-  let stmt _ acc _ = acc
-  let lvalue _ acc _ = acc
+  let stmt acc _ = acc
+  let lvalue acc _ = acc
 
-  let aast_stmt _ acc _ = acc
-  let aast_lvalue _ acc _ = acc
+  let aast_stmt acc _ = acc
+  let aast_lvalue acc _ = acc
 end)

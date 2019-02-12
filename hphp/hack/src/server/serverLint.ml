@@ -110,7 +110,7 @@ let go_stdin env ~(filename : string) ~(contents : string) =
 
 let lint_single_xcontroller tcopt name =
   let module Cls = Typing_classes_heap in
-  match Typing_lazy_heap.get_class tcopt name with
+  match Typing_lazy_heap.get_class name with
   | Some class_ ->
     if Cls.extends class_ "\\XControllerBase" && not (Cls.abstract class_)
     then Linting_service.lint_xcontroller tcopt (Cls.(pos class_, name class_))

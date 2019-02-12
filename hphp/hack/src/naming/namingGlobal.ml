@@ -25,24 +25,24 @@ module SN = Naming_special_names
 let canon_key = String.lowercase
 
 module GEnv = struct
-  let get_full_pos popt (pos, name) =
+  let get_full_pos (pos, name) =
     try
     match pos with
       | FileInfo.Full p -> p, name
       | FileInfo.File (FileInfo.Class, fn) ->
-        let res = unsafe_opt (Parser_heap.find_class_in_file popt fn name) in
+        let res = unsafe_opt (Parser_heap.find_class_in_file fn name) in
         let (p', _) = res.Ast.c_name in
         p', name
       | FileInfo.File (FileInfo.Typedef, fn) ->
-        let res = unsafe_opt (Parser_heap.find_typedef_in_file popt fn name) in
+        let res = unsafe_opt (Parser_heap.find_typedef_in_file fn name) in
         let (p', _) = res.Ast.t_id in
         p', name
       | FileInfo.File (FileInfo.Const, fn) ->
-        let res = unsafe_opt (Parser_heap.find_const_in_file popt fn name) in
+        let res = unsafe_opt (Parser_heap.find_const_in_file fn name) in
         let (p', _) = res.Ast.cst_name in
         p', name
       | FileInfo.File (FileInfo.Fun, fn) ->
-        let res = unsafe_opt (Parser_heap.find_fun_in_file popt fn name) in
+        let res = unsafe_opt (Parser_heap.find_fun_in_file fn name) in
         let (p', _) = res.Ast.f_name in
         p', name
     with Invalid_argument _ ->
@@ -64,54 +64,54 @@ module GEnv = struct
       raise File_heap.File_heap_stale
 
   let type_canon_name name = TypeCanonHeap.get (canon_key name)
-  let type_pos popt name =
+  let type_pos name =
     let name = Option.value (type_canon_name name) ~default:name in
     match TypeIdHeap.get name with
       | Some (pos, `Class) ->
-          let p, _ = get_full_pos popt (pos, name) in
+          let p, _ = get_full_pos (pos, name) in
           Some p
       | Some (pos, `Typedef) ->
-          let p, _ = get_full_pos popt (pos, name) in
+          let p, _ = get_full_pos (pos, name) in
           Some p
       | None -> None
 
-  let type_canon_pos popt name =
+  let type_canon_pos name =
     let name = Option.value (type_canon_name name) ~default:name in
-    type_pos popt name
+    type_pos name
 
-  let type_info popt name = match TypeIdHeap.get name with
+  let type_info name = match TypeIdHeap.get name with
     | Some (pos, `Class) ->
-        let p, _ = get_full_pos popt (pos, name) in
+        let p, _ = get_full_pos (pos, name) in
         Some (p, `Class)
     | Some (pos, `Typedef) ->
-        let p, _ = get_full_pos popt (pos, name) in
+        let p, _ = get_full_pos (pos, name) in
         Some (p, `Typedef)
     | None -> None
 
   let fun_canon_name name = FunCanonHeap.get (canon_key name)
 
-  let fun_pos popt name =
+  let fun_pos name =
     match FunPosHeap.get name with
     | Some pos ->
-        let p, _ = get_full_pos popt (pos, name) in
+        let p, _ = get_full_pos (pos, name) in
         Some p
     | None -> None
 
-  let fun_canon_pos popt name =
+  let fun_canon_pos name =
     let name = Option.value (fun_canon_name name) ~default:name in
-    fun_pos popt name
+    fun_pos name
 
-  let typedef_pos popt name = match TypeIdHeap.get name with
+  let typedef_pos name = match TypeIdHeap.get name with
     | Some (pos, `Typedef) ->
-        let p, _ = get_full_pos popt (pos, name) in
+        let p, _ = get_full_pos (pos, name) in
         Some p
     | Some (_, `Class)
     | None -> None
 
-  let gconst_pos popt name =
+  let gconst_pos name =
     match ConstPosHeap.get name with
     | Some pos ->
-      let p, _ = get_full_pos popt (pos, name) in
+      let p, _ = get_full_pos (pos, name) in
       Some p
     | None -> None
 
@@ -136,12 +136,12 @@ end
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_not_typehint popt (p, name) =
+  let check_not_typehint (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
     if SN.Typehints.is_reserved_hh_name x ||
        SN.Typehints.is_reserved_global_name x
     then
-      let p, name = GEnv.get_full_pos popt (p, name) in
+      let p, name = GEnv.get_full_pos (p, name) in
       Errors.name_is_reserved name p; false
     else true
 
@@ -173,15 +173,15 @@ module Env = struct
   let new_global_const_fast fn name =
     ConstPosHeap.add name (FileInfo.File (FileInfo.Const, fn))
 
-  let new_fun popt (p, name) =
+  let new_fun (p, name) =
     let name_key = canon_key name in
     match FunCanonHeap.get name_key with
     | Some canonical ->
       let p' = FunPosHeap.find_unsafe canonical in
       if not @@ GEnv.compare_pos p' p
       then
-        let p, name = GEnv.get_full_pos popt (p, name) in
-        let p', canonical = GEnv.get_full_pos popt (p', canonical) in
+        let p, name = GEnv.get_full_pos (p, name) in
+        let p', canonical = GEnv.get_full_pos (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
     | None ->
       FunPosHeap.add name p;
@@ -192,16 +192,16 @@ module Env = struct
     let a = "\\__attribute__" in (* lowercase because canon_key call *)
     a, String.length a
 
-  let new_cid popt cid_kind (p, name) =
+  let new_cid cid_kind (p, name) =
     let validate canonical error =
       let (p', _) = unsafe_opt @@ TypeIdHeap.get canonical in
       if not @@ GEnv.compare_pos p' p
       then
-      let p, name = GEnv.get_full_pos popt (p, name) in
-      let p', canonical = GEnv.get_full_pos popt (p', canonical) in
+      let p, name = GEnv.get_full_pos (p, name) in
+      let p', canonical = GEnv.get_full_pos (p', canonical) in
       error name canonical p p'
     in
-    if not (check_not_typehint popt (p, name)) then () else
+    if not (check_not_typehint (p, name)) then () else
     let name_key = canon_key name in
     match TypeCanonHeap.get name_key with
     | Some canonical ->
@@ -225,17 +225,17 @@ module Env = struct
       TypeIdHeap.write_around name (p, cid_kind);
       TypeCanonHeap.add name_key name
 
-  let new_class popt = new_cid popt `Class
+  let new_class = new_cid `Class
 
-  let new_typedef popt = new_cid popt `Typedef
+  let new_typedef = new_cid `Typedef
 
-  let new_global_const popt (p, x) =
+  let new_global_const (p, x) =
     match ConstPosHeap.get x with
     | Some p' ->
       if not @@ GEnv.compare_pos p' p
       then
-      let p, x = GEnv.get_full_pos popt (p, x) in
-      let p', x = GEnv.get_full_pos popt (p', x) in
+      let p, x = GEnv.get_full_pos (p, x) in
+      let p', x = GEnv.get_full_pos (p', x) in
       Errors.error_name_already_bound x x p p'
     | None ->
       ConstPosHeap.add x p
@@ -261,11 +261,11 @@ let remove_decls ~funs ~classes ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env popt ~funs ~classes ~typedefs ~consts =
-  List.iter funs (Env.new_fun popt);
-  List.iter classes (Env.new_class popt);
-  List.iter typedefs (Env.new_typedef popt);
-  List.iter consts (Env.new_global_const popt)
+let make_env ~funs ~classes ~typedefs ~consts =
+  List.iter funs Env.new_fun;
+  List.iter classes Env.new_class;
+  List.iter typedefs Env.new_typedef;
+  List.iter consts Env.new_global_const
 
 
 let make_env_from_fast fn ~funs ~classes ~typedefs ~consts =
@@ -291,12 +291,12 @@ let add_files_to_rename failed defl defs_in_env =
 let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
   make_env_from_fast fn ~funs ~classes ~typedefs ~consts
 
-let ndecl_file popt fn
+let ndecl_file fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
                 comments = _; hash = _} =
   let errors, _ = Errors.do_with_context fn Errors.Naming begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
-    make_env popt ~funs ~classes ~typedefs ~consts
+    make_env ~funs ~classes ~typedefs ~consts
   end in
   if Errors.is_empty errors
   then errors, Relative_path.Set.empty
@@ -333,8 +333,8 @@ let ndecl_file popt fn
    * were actually duplicates?
    *)
   let failed = Relative_path.Set.singleton fn in
-  let failed = add_files_to_rename failed funs (GEnv.fun_canon_pos popt) in
-  let failed = add_files_to_rename failed classes (GEnv.type_canon_pos popt) in
-  let failed = add_files_to_rename failed typedefs (GEnv.type_canon_pos popt) in
-  let failed = add_files_to_rename failed consts (GEnv.gconst_pos popt) in
+  let failed = add_files_to_rename failed funs GEnv.fun_canon_pos in
+  let failed = add_files_to_rename failed classes GEnv.type_canon_pos in
+  let failed = add_files_to_rename failed typedefs GEnv.type_canon_pos in
+  let failed = add_files_to_rename failed consts GEnv.gconst_pos in
   errors, failed

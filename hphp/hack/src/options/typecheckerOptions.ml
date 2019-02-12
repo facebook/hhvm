@@ -23,7 +23,6 @@ let migration_flag_enabled =
   GlobalOptions.tco_migration_flag_enabled
 let log_inference_constraints = GlobalOptions.tco_log_inference_constraints
 let default = GlobalOptions.default
-let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
 let experimental_goto = GlobalOptions.tco_experimental_goto

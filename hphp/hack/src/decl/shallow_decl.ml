@@ -304,13 +304,13 @@ let class_ env c =
     sc_decl_errors = Errors.empty;
   }
 
-let class_ tcopt c =
+let class_ c =
   let _, cls_name = c.c_name in
   let class_dep = Dep.Class cls_name in
   let env = {
     Decl_env.mode = c.c_mode;
     droot = Some class_dep;
-    decl_tcopt = tcopt;
+    decl_tcopt = GlobalNamingOptions.get ();
   } in
   let errors, sc = Errors.do_ (fun () -> class_ env c) in
   { sc with sc_decl_errors = errors }

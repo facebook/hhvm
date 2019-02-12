@@ -35,9 +35,9 @@ let neutral = Errors.empty
 (*****************************************************************************)
 
 let type_fun opts fn x =
-  match Parser_heap.find_fun_in_file ~full:true opts fn x with
+  match Parser_heap.find_fun_in_file ~full:true fn x with
   | Some f ->
-    let fun_ = Naming.fun_ opts f in
+    let fun_ = Naming.fun_ f in
     let def_opt = Typing.fun_def opts fun_
       |> Option.map ~f:(fun f -> Tast.Fun f) in
     Option.iter def_opt Tast_check.def;
@@ -45,9 +45,9 @@ let type_fun opts fn x =
   | None -> None
 
 let type_class opts fn x =
-  match Parser_heap.find_class_in_file ~full:true opts fn x with
+  match Parser_heap.find_class_in_file ~full:true fn x with
   | Some cls ->
-    let class_ = Naming.class_ opts cls in
+    let class_ = Naming.class_ cls in
     let def_opt =
       Typing.class_def opts class_
       |> Option.map ~f:(fun c -> Tast.Class c)
@@ -57,9 +57,9 @@ let type_class opts fn x =
   | None -> None
 
 let check_typedef opts fn x =
-  match Parser_heap.find_typedef_in_file ~full:true opts fn x with
+  match Parser_heap.find_typedef_in_file ~full:true fn x with
   | Some t ->
-    let typedef = Naming.typedef opts t in
+    let typedef = Naming.typedef t in
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;
     let def = Tast.Typedef ret in
@@ -68,10 +68,10 @@ let check_typedef opts fn x =
   | None -> None
 
 let check_const opts fn x =
-  match Parser_heap.find_const_in_file ~full:true opts fn x with
+  match Parser_heap.find_const_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
-    let cst = Naming.global_const opts cst in
+    let cst = Naming.global_const cst in
     let def = Tast.Constant (Typing.gconst_def opts cst) in
     Tast_check.def def;
     Some def

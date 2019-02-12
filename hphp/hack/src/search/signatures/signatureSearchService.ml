@@ -110,7 +110,7 @@ let expand_to_optional_types type_list =
   let opt_ty_list = List.map type_list ~f:(fun type_ -> IToption type_) in
   type_list @ opt_ty_list
 
-let expand_to_supertypes (tcopt:TypecheckerOptions.t) type_ =
+let expand_to_supertypes type_ =
   let open Nast in
   let type_list =
     match type_ with
@@ -118,7 +118,7 @@ let expand_to_supertypes (tcopt:TypecheckerOptions.t) type_ =
     | ITprim Tfloat -> [ITprim Tnum; ITprim Tfloat]
     | ITprim Tstring -> [ITprim Tstring; ITprim Tarraykey]
     | ITapply type_ ->
-      begin match Typing_lazy_heap.get_class tcopt type_ with
+      begin match Typing_lazy_heap.get_class type_ with
       | Some cls ->
         let super_types = Sequence.to_list (Typing_classes_heap.all_ancestors cls) in
         let super_types = List.map super_types ~f:(fun (key, _) -> ITapply key) in
@@ -145,8 +145,8 @@ let create_search_terms param_types return_types =
   let arity = Arity (List.length param_types) in
   arity :: param_types @ return_types
 
-let fun_to_search_terms tcopt fun_name =
-  match Typing_lazy_heap.get_fun tcopt fun_name with
+let fun_to_search_terms fun_name =
+  match Typing_lazy_heap.get_fun fun_name with
   | None -> None
   | Some funs_t ->
     let params = funs_t.Typing_defs.ft_params in
@@ -161,7 +161,7 @@ let fun_to_search_terms tcopt fun_name =
 
     (* Transform return_types into a list, append super_types if applicable
          Append subtypes of primitives num and arraykey *)
-    let return_types = Option.map return_type (expand_to_supertypes tcopt) in
+    let return_types = Option.map return_type expand_to_supertypes in
     (* If the return type and all param_types are valid (that is, they are all
        types that we can index), we have a valid signature *)
     match param_types, return_types with
@@ -169,9 +169,9 @@ let fun_to_search_terms tcopt fun_name =
       Some (create_search_terms param_types return_type)
     | _ -> None
 
-let add_function tcopt fun_name =
+let add_function fun_name =
   Errors.ignore_ (fun () ->
-    fun_to_search_terms tcopt fun_name
+    fun_to_search_terms fun_name
     |> Option.iter ~f:begin fun search_terms ->
       search_terms
       |> List.map ~f:search_term_to_string
@@ -179,7 +179,7 @@ let add_function tcopt fun_name =
     end
   )
 
-let build tcopt naming_table =
+let build naming_table =
   Hh_logger.log "Building Search Index";
   Naming_table.iter naming_table (fun _ value ->
     let {FileInfo.funs; _ } = value in
@@ -195,14 +195,14 @@ let build tcopt naming_table =
          SignatureSearchService *)
       if prefix = Relative_path.Hhi
       || String_utils.string_starts_with fun_name "\\HH\\Lib\\"
-      then add_function tcopt fun_name
+      then add_function fun_name
       else ()
     )
   );
   Hh_logger.log "Search index is ready"
 
 
-let query_to_search_terms (tcopt:TypecheckerOptions.t) query =
+let query_to_search_terms query =
   let open Parser in
   let open Index in
   let {function_params = params; function_output = ret} = query in
@@ -210,7 +210,7 @@ let query_to_search_terms (tcopt:TypecheckerOptions.t) query =
     match parameter with
     | QTtype ty_spec ->
       let type_ = type_specifier_to_indexable_type ty_spec in
-      let types = expand_to_supertypes tcopt type_ in
+      let types = expand_to_supertypes type_ in
       Some (Or (List.map types ~f:(fun type_ ->
         let term = Parameter {position = i + 1; type_} in
         Term (search_term_to_string term)
@@ -229,16 +229,16 @@ let query_to_search_terms (tcopt:TypecheckerOptions.t) query =
   let query_list = Term (search_term_to_string arity) :: query_list in
   And query_list
 
-let go tcopt query =
+let go query =
   Errors.ignore_ (fun () ->
-    let keys = query_to_search_terms tcopt query in
+    let keys = query_to_search_terms query in
     let results = Index.get index keys in
     List.filter_map results ~f:(fun fun_name ->
       let open Option.Monad_infix in
       Naming_heap.FunPosHeap.get fun_name
       >>= function
       | FileInfo.File (_, fn) ->
-        Parser_heap.find_fun_in_file tcopt fn fun_name
+        Parser_heap.find_fun_in_file fn fun_name
         >>| fun fun_ ->
         let pos = fst fun_.Ast.f_name in
         {

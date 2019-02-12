@@ -505,7 +505,7 @@ and hint_ env p = function
       | _ -> ()
       end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
-    begin match Typing_lazy_heap.get_typedef (Env.get_tcopt env.tenv) x with
+    begin match Typing_lazy_heap.get_typedef x with
       | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);
         List.iter hl (hint env)

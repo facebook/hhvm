@@ -106,7 +106,7 @@ let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
   ServerProgress.send_progress_to_monitor "resolving symbol references";
   let env =
     Naming_table.fold env.naming_table ~f:begin fun k v env ->
-      let errorl, failed_naming = NamingGlobal.ndecl_file env.tcopt k v in
+      let errorl, failed_naming = NamingGlobal.ndecl_file k v in
       { env with
         errorl = Errors.merge errorl env.errorl;
         failed_naming =

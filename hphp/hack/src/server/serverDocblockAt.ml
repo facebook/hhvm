@@ -11,14 +11,14 @@ open Core_kernel
 
 module Cls = Typing_classes_heap
 
-let get_all_ancestors tcopt class_name =
+let get_all_ancestors class_name =
   let rec helper classes_to_check cinfos seen_classes =
     match classes_to_check with
     | [] -> cinfos
     | class_name :: classes when SSet.mem class_name seen_classes ->
       helper classes cinfos seen_classes
     | class_name :: classes ->
-      begin match Typing_lazy_heap.get_class tcopt class_name with
+      begin match Typing_lazy_heap.get_class class_name with
       | None ->
         helper classes cinfos seen_classes
       | Some class_info ->
@@ -76,7 +76,7 @@ let render_ancestor_docblocks docblocks =
     |> String.concat ~sep:"\n\n---\n\n"
     |> fun results -> Some results
 
-let fallback tcopt class_name member_name =
+let fallback class_name member_name =
   let rec all_interfaces_or_first_class_docblock seen_interfaces ancestors_to_check =
     match ancestors_to_check with
     | [] -> seen_interfaces
@@ -95,11 +95,11 @@ let fallback tcopt class_name member_name =
             ancestors
       end
   in
-  get_all_ancestors tcopt class_name
+  get_all_ancestors class_name
   |> all_interfaces_or_first_class_docblock []
   |> render_ancestor_docblocks
 
-let go_def tcopt def ~base_class_name ~file ~basic_only =
+let go_def def ~base_class_name ~file ~basic_only =
   let open Option.Monad_infix in
   (** Read as "or-else." *)
   let (>>~) opt f = if Option.is_some opt then opt else f () in
@@ -110,7 +110,7 @@ let go_def tcopt def ~base_class_name ~file ~basic_only =
   >>~ fun () ->
   match def.SymbolDefinition.kind, base_class_name with
   | SymbolDefinition.Method, Some base_class_name when not basic_only ->
-    fallback tcopt base_class_name def.SymbolDefinition.name
+    fallback base_class_name def.SymbolDefinition.name
   | _ -> None
 
 let go_location env (filename, line, char) ~base_class_name ~basic_only =
@@ -125,4 +125,4 @@ let go_location env (filename, line, char) ~base_class_name ~basic_only =
     in
     List.hd definitions
   end
-  >>= go_def tcopt ~base_class_name ~file:(ServerCommandTypes.FileName filename) ~basic_only
+  >>= go_def ~base_class_name ~file:(ServerCommandTypes.FileName filename) ~basic_only

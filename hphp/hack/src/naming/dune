@@ -58,6 +58,7 @@
   (name naming)
   (wrapped false)
   (modules
+    globalNamingOptions
     naming
     namingGlobal)
   (libraries

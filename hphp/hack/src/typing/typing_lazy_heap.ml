@@ -31,7 +31,7 @@ let get_type_id_filename x expected_kind =
     Some res
   | _ -> None
 
-let get_class tcopt x =
+let get_class x =
   match Classes.get x with
   | Some c ->
     Some c
@@ -39,11 +39,11 @@ let get_class tcopt x =
     match get_type_id_filename x `Class with
     | Some filename ->
       Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_class_in_file tcopt filename x);
+        (fun () -> Decl.declare_class_in_file filename x);
       Classes.get x
     | _ -> None
 
-let get_fun tcopt x =
+let get_fun x =
   match Funs.get x with
   | Some c -> Some c
   | None ->
@@ -51,11 +51,11 @@ let get_fun tcopt x =
     | Some pos ->
       let filename = FileInfo.get_pos_filename pos in
       Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_fun_in_file tcopt filename x);
+        (fun () -> Decl.declare_fun_in_file filename x);
       Funs.get x
     | None -> None
 
-let get_gconst tcopt cst_name =
+let get_gconst cst_name =
   match GConsts.get cst_name with
   | Some c -> Some c
   | None ->
@@ -63,17 +63,17 @@ let get_gconst tcopt cst_name =
     | Some pos ->
         let filename = FileInfo.get_pos_filename pos in
         Errors.run_in_decl_mode filename
-          (fun () -> Decl.declare_const_in_file tcopt filename cst_name);
+          (fun () -> Decl.declare_const_in_file filename cst_name);
       GConsts.get cst_name
     | None -> None
 
-let get_typedef tcopt x =
+let get_typedef x =
   match Typedefs.get x with
   | Some c -> Some c
   | None ->
     match get_type_id_filename x `Typedef with
     | Some filename ->
         Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_typedef_in_file tcopt filename x);
+        (fun () -> Decl.declare_typedef_in_file filename x);
       Typedefs.get x
     | _ -> None

@@ -7,16 +7,15 @@
  *
  *)
 
-val add_function : TypecheckerOptions.t -> string -> unit
+val add_function : string -> unit
 (** Given a function name, look up that function's signature on the typing heap
     and mutate the signature search index to include this function. *)
 
-val build : TypecheckerOptions.t -> Naming_table.t -> unit
+val build : Naming_table.t -> unit
 (** Given a Map of file info, retrieve each file's function name and update the
     index *)
 
 val go :
-  ParserOptions.t ->
   SignatureSearchParser.signature_query ->
   (Ast.pos, HackSearchService.search_result_type) SearchUtils.term list
 (** Performs a query on a global index for matching functions.

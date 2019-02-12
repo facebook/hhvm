@@ -292,7 +292,6 @@ val tco_new_inference_no_eager_solve : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
 val default : t
-val make_permissive : t -> t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
 val tco_experimental_goto : string

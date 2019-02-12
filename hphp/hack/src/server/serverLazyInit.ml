@@ -229,7 +229,6 @@ let names_to_deps (names: FileInfo.names) : DepSet.t =
     To be used only when load_decls_from_saved_state is enabled. *)
 let get_files_to_recheck
     (genv: ServerEnv.genv)
-    (env: ServerEnv.env)
     (old_fast: FileInfo.names Relative_path.Map.t)
     (new_fast: FileInfo.names Relative_path.Map.t)
     (dirty_fast: FileInfo.names Relative_path.Map.t)
@@ -262,7 +261,7 @@ let get_files_to_recheck
     genv.workers get_classes FileInfo.empty_names dirty_names;
   let _, _, to_redecl, to_recheck =
     Decl_redecl_service.redo_type_decl ~conservative_redecl:false
-      ~bucket_size genv.workers env.tcopt dirty_names fast in
+      ~bucket_size genv.workers dirty_names fast in
   Decl_redecl_service.remove_old_defs ~bucket_size genv.workers dirty_names;
   let deps = Typing_deps.add_all_deps to_redecl in
   let deps = Typing_deps.DepSet.union deps to_recheck in
@@ -310,7 +309,7 @@ let type_check_dirty
      declarations to oldify. This is necessary because the positions of
      declarations may have changed, which affects error messages and FIXMEs. *)
   let get_files_to_recheck =
-    get_files_to_recheck genv env old_fast new_fast @@
+    get_files_to_recheck genv old_fast new_fast @@
     extend_fast dirty_fast env.naming_table similar_files in
 
   let env, to_recheck = if use_prechecked_files genv then begin

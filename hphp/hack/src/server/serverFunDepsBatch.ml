@@ -158,12 +158,12 @@ let handlers = {
     S.on_method = collect_in_decl#on_method_;
     S.on_fun = collect_in_decl#on_fun_
   };
-  S.get_state = begin fun fn popt ->
-    Parser_heap.get_from_parser_heap ~full:true popt fn
+  S.get_state = begin fun fn ->
+    Parser_heap.get_from_parser_heap ~full:true fn
   end;
-  S.map_result = begin fun tcopt ast refs ->
+  S.map_result = begin fun ast refs ->
     Results.elements refs
-    |> List.map ~f:(ServerSymbolDefinition.go tcopt ast)
+    |> List.map ~f:(ServerSymbolDefinition.go ast)
     |> List.sort ~compare
     |> remove_duplicates_except_none
   end

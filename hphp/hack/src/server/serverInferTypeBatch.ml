@@ -25,7 +25,6 @@ let recheck_typing tcopt (pos_infos : pos_info list) =
     |> List.map ~f:(fun ((filename,_,_,_), file_info) -> filename, file_info)
     |> List.remove_consecutive_duplicates ~equal:(fun (a,_) (b,_) -> a = b)
   in
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
   ServerIdeUtils.recheck tcopt files_to_check
 
 let result_to_string result (fn, line, char, range_end) =

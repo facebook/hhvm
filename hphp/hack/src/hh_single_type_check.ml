@@ -456,12 +456,12 @@ let parse_options () =
     batch_mode = !batch_mode;
   }
 
-let compute_least_type tcopt popt fn =
+let compute_least_type tcopt fn =
   let tenv = Typing_infer_return.typing_env_from_file tcopt fn in
-  Option.iter (Parser_heap.find_fun_in_file popt fn "\\test")
+  Option.iter (Parser_heap.find_fun_in_file fn "\\test")
     ~f:begin fun f ->
-      let f = Naming.fun_ tcopt f in
-      let { Nast.fb_ast; _} = Typing_naming_body.func_body tcopt f in
+      let f = Naming.fun_ f in
+      let { Nast.fb_ast; _} = Typing_naming_body.func_body f in
       let types =
         Nast.(List.fold fb_ast ~init:[]
           ~f:begin fun acc stmt ->
@@ -575,31 +575,13 @@ let check_file opts errors files_info =
         (Typing_check_utils.check_defs opts fn fileinfo)
   end ~init:errors
 
-let create_nasts opts files_info =
+let create_nasts files_info =
   let build_nast fn _ =
-    let ast = Parser_heap.get_from_parser_heap ~full:true opts fn in
-    Naming.program opts ast
+    let ast = Parser_heap.get_from_parser_heap ~full:true fn in
+    Naming.program ast
   in Relative_path.Map.mapi ~f:(build_nast) files_info
 
-let with_named_body opts n_fun =
-  (** In the naming heap, the function bodies aren't actually named yet, so
-   * we need to invoke naming here.
-   * See also docs in Naming.Make. *)
-  let n_f_body = TNBody.func_body opts n_fun in
-  { n_fun with Nast.f_body = n_f_body }
-
-let n_fun_fold opts fn acc (_, fun_name) =
-  match Parser_heap.find_fun_in_file ~full:true opts fn fun_name with
-  | None -> acc
-  | Some f ->
-    let n_fun = Naming.fun_ opts f in
-    (with_named_body opts n_fun) :: acc
-
-let n_class_fold _tcopt _fn acc _class_name = acc
-let n_type_fold _tcopt _fn acc _type_name = acc
-let n_const_fold _tcopt _fn acc _const_name = acc
-
-let parse_name_and_decl popt files_contents tcopt =
+let parse_name_and_decl popt files_contents =
   Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi files_contents ~f:begin fun fn contents ->
@@ -627,13 +609,13 @@ let parse_name_and_decl popt files_contents tcopt =
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       Errors.run_in_context fn Errors.Naming begin fun () ->
         let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
-        NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
+        NamingGlobal.make_env ~funs ~classes ~typedefs ~consts
       end
     end;
 
     Relative_path.Map.iter files_info begin fun fn _ ->
       Errors.run_in_context fn Errors.Decl begin fun () ->
-        Decl.make_env tcopt fn
+        Decl.make_env fn
       end
     end;
 
@@ -684,7 +666,7 @@ let compare_classes c1 c2 =
   let _, is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
   if is_unchanged = `Changed then fail_comparison "ClassEltDiff"
 
-let test_decl_compare filenames popt files_contents tcopt files_info =
+let test_decl_compare filenames popt files_contents files_info =
   (* skip some edge cases that we don't handle now... ugly! *)
   if (Relative_path.suffix filenames) = "capitalization3.php" then () else
   if (Relative_path.suffix filenames) = "capitalization4.php" then () else
@@ -720,7 +702,7 @@ let test_decl_compare filenames popt files_contents tcopt files_info =
       ~collect_garbage:false;
 
   let files_contents = Relative_path.Map.map files_contents ~f:add_newline in
-  let _, _= parse_name_and_decl popt files_contents tcopt in
+  let _, _= parse_name_and_decl popt files_contents in
 
   let typedefs2, funs2, classes2 = get_decls defs in
 
@@ -736,7 +718,7 @@ let compute_tasts opts files_info interesting_files
   | Some nast, Some _ -> Some nast
   | _ -> None in
   Errors.do_ begin fun () ->
-    let nasts = create_nasts opts files_info in
+    let nasts = create_nasts files_info in
     (* Interesting files are usually the non hhi ones. *)
     let filter_non_interesting nasts = Relative_path.Map.merge nasts
       interesting_files
@@ -852,10 +834,9 @@ let handle_mode
         end
       end
   | Coverage ->
-      let p_tcopt = TypecheckerOptions.make_permissive tcopt in
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
-          let tast, _ = Typing_check_utils.type_file p_tcopt fn fileinfo in
+          let tast, _ = Typing_check_utils.type_file tcopt fn fileinfo in
           let type_acc = ServerCoverageMetric.accumulate_types tast fn in
           print_coverage type_acc;
         end
@@ -873,7 +854,7 @@ let handle_mode
     let open Result.Monad_infix in
     let result = Sys_utils.read_stdin_to_string ()
       |> Hh_json.json_of_string
-      |> CstSearchService.compile_pattern tcopt
+      |> CstSearchService.compile_pattern
       >>| CstSearchService.search tcopt filename fileinfo
       >>| CstSearchService.result_to_json ~sort_results:true
       >>| Hh_json.json_to_string ~pretty:true
@@ -933,7 +914,7 @@ let handle_mode
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
-          let ancestors = MethodJumps.get_inheritance tcopt class_
+          let ancestors = MethodJumps.get_inheritance class_
             ~filter:No_filter ~find_children:false naming_table
             None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
@@ -943,7 +924,7 @@ let handle_mode
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
-          let children = MethodJumps.get_inheritance tcopt class_
+          let children = MethodJumps.get_inheritance class_
             ~filter:No_filter ~find_children:true naming_table None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
@@ -971,7 +952,7 @@ let handle_mode
     )
   | Dump_nast ->
     iter_over_files (fun filename ->
-    let nasts = create_nasts tcopt files_info in
+    let nasts = create_nasts files_info in
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (Nast.show_program nast)
     )
@@ -1083,7 +1064,7 @@ let handle_mode
         Typing_log.out_channel := oc;
         ServerIdeUtils.make_local_changes ();
         let files_contents = file_to_files filename in
-        let parse_errors, individual_file_info = parse_name_and_decl popt files_contents tcopt in
+        let parse_errors, individual_file_info = parse_name_and_decl popt files_contents in
         let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
         (if all_errors then write_error_list errors oc
         else write_first_error errors oc);
@@ -1098,9 +1079,9 @@ let handle_mode
       ServerIdeUtils.make_local_changes ();
       let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
           k = filename) in
-      let _, individual_file_info = parse_name_and_decl popt files_contents tcopt in
+      let _, individual_file_info = parse_name_and_decl popt files_contents in
       (try
-        test_decl_compare filename popt files_contents tcopt individual_file_info;
+        test_decl_compare filename popt files_contents individual_file_info;
         Out_channel.output_string oc ""
       with e ->
         let msg = Exn.to_string e in
@@ -1129,10 +1110,10 @@ let handle_mode
       if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    test_decl_compare filename popt files_contents tcopt files_info
+    test_decl_compare filename popt files_contents files_info
   | Least_upper_bound ->
     iter_over_files (fun filename ->
-      compute_least_type tcopt popt filename
+      compute_least_type tcopt filename
     )
   | Linearization ->
     if parse_errors <> [] then (print_error (List.hd_exn parse_errors); exit 2);
@@ -1144,7 +1125,7 @@ let handle_mode
       let { FileInfo.classes; _} = info in
       List.iter classes ~f:(fun (_, classname) ->
         Printf.printf "Linearization for class %s:\n" classname;
-        let linearization = Decl_linearize.get_linearization tcopt classname in
+        let linearization = Decl_linearize.get_linearization classname in
         let linearization = Sequence.map linearization (fun mro ->
           let name = mro.Decl_defs.mro_name in
           let params = List.map mro.Decl_defs.mro_params (fun ty ->
@@ -1188,7 +1169,7 @@ let decl_and_run_mode {files; mode; no_builtins; tcopt; all_errors; batch_mode }
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl = if batch_mode then builtins else files_contents_with_builtins in
   let errors, files_info =
-    parse_name_and_decl popt to_decl tcopt in
+    parse_name_and_decl popt to_decl in
 
   handle_mode mode files tcopt popt files_contents files_info
     (Errors.get_error_list errors) all_errors batch_mode
@@ -1202,6 +1183,8 @@ let main_hack ({files; mode; tcopt; _} as opts) =
   ignore (handle: SharedMem.handle);
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
+  GlobalParserOptions.set tcopt;
+  GlobalNamingOptions.set tcopt;
   match mode with
   | Ai ai_options ->
     begin match files with

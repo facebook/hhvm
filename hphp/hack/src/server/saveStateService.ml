@@ -159,7 +159,7 @@ let get_hot_classes (filename: string) : SSet.t =
     |> SSet.of_list
   end
 
-let dump_class_decls tcopt filename =
+let dump_class_decls filename =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin saving class declarations";
   try
@@ -167,7 +167,7 @@ let dump_class_decls tcopt filename =
     Hh_logger.log "Reading hot class names from %s" hot_classes_filename;
     let classes = get_hot_classes hot_classes_filename in
     Hh_logger.log "Exporting %d class declarations..." @@ SSet.cardinal classes;
-    let decls = Decl_export.export_class_decls tcopt classes in
+    let decls = Decl_export.export_class_decls classes in
     Hh_logger.log "Marshalling class declarations...";
     dump_contents_exn filename decls;
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
@@ -178,7 +178,6 @@ let dump_class_decls tcopt filename =
 
 (* Dumps the file info and the errors, if any. *)
 let dump_saved_state
-    ~(tcopt: TypecheckerOptions.t)
     ~(save_decls: bool)
     (output_filename: string)
     (naming_table: Naming_table.t)
@@ -198,10 +197,9 @@ let dump_saved_state
   end;
 
   if save_decls then
-    dump_class_decls tcopt (get_decls_filename output_filename)
+    dump_class_decls (get_decls_filename output_filename)
 
 let update_save_state
-    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
@@ -212,7 +210,7 @@ let update_save_state
   let db_name = output_filename ^ ".sql" in
   if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
-  dump_saved_state ~tcopt ~save_decls output_filename naming_table errors;
+  dump_saved_state ~save_decls output_filename naming_table errors;
   let () = if file_info_on_disk then begin
     failwith "incrementally updating file info on disk not yet implemented"
   end else begin
@@ -228,7 +226,6 @@ let update_save_state
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
-    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
@@ -246,7 +243,7 @@ let save_state
   match SharedMem.loaded_dep_table_filename () with
   | None ->
     let t = Unix.gettimeofday () in
-    dump_saved_state ~tcopt ~save_decls output_filename naming_table errors;
+    dump_saved_state ~save_decls output_filename naming_table errors;
     let () = if file_info_on_disk then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
       (save_all_file_info_sqlite db_name naming_table : unit)
@@ -270,7 +267,6 @@ let save_state
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state
       ~file_info_on_disk
-      ~tcopt
       ~save_decls
       naming_table
       errors
@@ -285,7 +281,6 @@ let get_in_memory_dep_table_entry_count () : (int, string) result =
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
-    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
@@ -296,7 +291,6 @@ let go
   begin
     fun () -> save_state
       ~file_info_on_disk
-      ~tcopt
       ~save_decls
       naming_table errors
       output_filename

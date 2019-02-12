@@ -17,16 +17,16 @@ module Classes = SharedMem.LocalCache (StringKey) (struct
   let use_sqlite_fallback () = false
 end)
 
-let class_naming_and_decl tcopt c =
-  let c = Errors.ignore_ (fun () -> Naming.class_ tcopt c) in
-  Shallow_decl.class_ tcopt c
+let class_naming_and_decl c =
+  let c = Errors.ignore_ (fun () -> Naming.class_ c) in
+  Shallow_decl.class_ c
 
-let class_decl_if_missing tcopt c =
+let class_decl_if_missing c =
   let _, cid = c.Ast.c_name in
   match Classes.get cid with
   | Some c -> c
   | None ->
-    let c = class_naming_and_decl tcopt c in
+    let c = class_naming_and_decl c in
     Classes.add cid c;
     c
 
@@ -35,9 +35,9 @@ let err_not_found file name =
     Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file) in
   raise (Decl_defs.Decl_not_found err_str)
 
-let declare_class_in_file tcopt file name =
-  match Parser_heap.find_class_in_file tcopt file name with
-  | Some cls -> class_decl_if_missing tcopt cls
+let declare_class_in_file file name =
+  match Parser_heap.find_class_in_file file name with
+  | Some cls -> class_decl_if_missing cls
   | None -> err_not_found file name
 
 let get_class_filename x =
@@ -45,10 +45,10 @@ let get_class_filename x =
   | Some (pos, `Class) -> Some (FileInfo.get_pos_filename pos)
   | _ -> None
 
-let get tcopt cid =
+let get cid =
   match Classes.get cid with
   | Some _ as c -> c
   | None ->
     match get_class_filename cid with
     | None -> None
-    | Some filename -> Some (declare_class_in_file tcopt filename cid)
+    | Some filename -> Some (declare_class_in_file filename cid)

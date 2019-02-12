@@ -51,7 +51,6 @@ let get_class_filename cid =
 
 let rec collect_class
     ?(fail_if_missing=false)
-    (tcopt : TypecheckerOptions.t)
     (requested_classes : SSet.t)
     (cid : string)
     (decls : saved_decls)
@@ -69,8 +68,8 @@ let rec collect_class
         | None -> raise Exit
         | Some filename ->
           Hh_logger.log "Declaring %s class %s" kind cid;
-          Decl.declare_class_in_file tcopt filename cid;
-          collect_class tcopt requested_classes cid decls ~fail_if_missing:true
+          Decl.declare_class_in_file filename cid;
+          collect_class requested_classes cid decls ~fail_if_missing:true
       with Exit | Decl_not_found _ ->
         if not @@ SSet.mem requested_classes cid
         then failwith @@ "Missing ancestor class "^cid
@@ -141,10 +140,10 @@ let rec collect_class
     let ancestors =
       SSet.union (keys_to_sset data.dc_ancestors) data.dc_xhp_attr_deps
     in
-    collect_classes tcopt requested_classes decls ancestors
+    collect_classes requested_classes decls ancestors
 
-and collect_classes tcopt requested_classes decls =
-  SSet.fold ~init:decls ~f:(collect_class tcopt requested_classes)
+and collect_classes requested_classes decls =
+  SSet.fold ~init:decls ~f:(collect_class requested_classes)
 
 let restore_decls decls =
   let {classes; props; sprops; meths; smeths; cstrs; fixmes; decl_fixmes} = decls in
@@ -157,8 +156,8 @@ let restore_decls decls =
   Relative_path.Map.iter fixmes Fixmes.HH_FIXMES.add;
   Relative_path.Map.iter decl_fixmes Fixmes.DECL_HH_FIXMES.add
 
-let export_class_decls tcopt classes =
-  collect_classes tcopt classes empty_decls classes
+let export_class_decls classes =
+  collect_classes classes empty_decls classes
 
 let import_class_decls decls =
   restore_decls decls;

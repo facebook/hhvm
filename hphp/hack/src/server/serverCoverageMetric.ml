@@ -107,12 +107,11 @@ let relativize root path =
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
-  let p_tcopt = TypecheckerOptions.make_permissive tcopt in
   let naming_table = NamingTableStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
     relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
     Naming_table.get_file_info naming_table fn >>= fun defs ->
-    let tast, _ = Typing_check_utils.type_file p_tcopt fn defs in
+    let tast, _ = Typing_check_utils.type_file tcopt fn defs in
     let type_acc = accumulate_types tast fn in
     Some (relativized_fn, type_acc)
   end in

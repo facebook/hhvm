@@ -12,19 +12,18 @@ open ServerCommandTypes.Symbol_info_service
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)
 
-let recheck_naming filename_l tcopt =
+let recheck_naming filename_l =
   List.iter filename_l begin fun file ->
     match Parser_heap.ParserHeap.get file with
     | Some (ast, _) -> begin
-      let tcopt = TypecheckerOptions.make_permissive tcopt in
         Errors.ignore_ begin fun () ->
           (* We only need to name to find references to locals *)
           List.iter ast begin function
             | Ast.Fun f ->
-                let _ = Naming.fun_ tcopt f in
+                let _ = Naming.fun_ f in
                 ()
             | Ast.Class c ->
-                let _ = Naming.class_ tcopt c in
+                let _ = Naming.class_ c in
                 ()
             | _ -> ()
           end
@@ -33,14 +32,10 @@ let recheck_naming filename_l tcopt =
     | None -> () (* Do nothing if the file is not in parser heap *)
   end
 
-let recheck_typing filetuple_l tcopt =
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
-  ServerIdeUtils.recheck tcopt filetuple_l
-
 let helper tcopt acc filetuple_l  =
   let filename_l = List.rev_map filetuple_l fst in
-  recheck_naming filename_l tcopt;
-  let tasts = recheck_typing filetuple_l tcopt |> List.map ~f:snd in
+  recheck_naming filename_l;
+  let tasts = ServerIdeUtils.recheck tcopt filetuple_l |> List.map ~f:snd in
   let fun_calls = SymbolFunCallService.find_fun_calls tasts in
   let symbol_types = SymbolTypeService.generate_types tasts in
   (fun_calls, symbol_types) :: acc

@@ -9,6 +9,6 @@
 
 open Shallow_decl_defs
 
-val get : TypecheckerOptions.t -> string -> shallow_class option
+val get : string -> shallow_class option
 
-val class_naming_and_decl : TypecheckerOptions.t -> Ast.class_ -> shallow_class
+val class_naming_and_decl : Ast.class_ -> shallow_class

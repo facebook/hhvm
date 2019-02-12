@@ -55,9 +55,6 @@ let from_parent (c : shallow_class) : decl ty list =
   | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | _ -> c.sc_extends
 
-let get_class (env : env) (class_name : string) : shallow_class option =
-  Shallow_classes_heap.get env.decl_env.Decl_env.decl_tcopt class_name
-
 let rec ancestor_linearization
     (env : env)
     (class_name : string)
@@ -84,7 +81,7 @@ let rec ancestor_linearization
     let c = { c with mro_params = type_params } in
     (* Instantiate its linearization with those type parameters *)
     let tparams =
-      get_class env class_name
+      Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
     let subst = Decl_subst.make tparams type_params in
@@ -146,17 +143,17 @@ and get_linearization (env : env) (class_name : string) : linearization =
   match Cache.get class_name with
   | Some lin -> lin
   | None ->
-    match get_class env class_name with
+    match Shallow_classes_heap.get class_name with
     | None -> Sequence.empty
     | Some c ->
       let lin = linearize env c in
       Cache.add class_name lin;
       lin
 
-let get_linearization tcopt class_name =
+let get_linearization class_name =
   let decl_env = { Decl_env.
     mode = FileInfo.Mstrict;
     droot = Some (Typing_deps.Dep.Class class_name);
-    decl_tcopt = tcopt;
+    decl_tcopt = GlobalNamingOptions.get ();
   } in
   get_linearization { class_stack = SSet.empty; decl_env } class_name

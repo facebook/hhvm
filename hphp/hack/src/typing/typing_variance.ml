@@ -268,7 +268,7 @@ let check_final_this_pos_variance env_variance rpos class_ty =
  *)
 (*****************************************************************************)
 
-let get_class_variance tcopt root (pos, class_name) =
+let get_class_variance root (pos, class_name) =
   match class_name with
   | name when (name = SN.Classes.cAwaitable) ->
       [Vcovariant [pos, Rtype_argument (Utils.strip_ns name), Pcovariant]]
@@ -278,11 +278,11 @@ let get_class_variance tcopt root (pos, class_name) =
       let tparams =
         if Env.is_typedef class_name
         then
-          match TLazyHeap.get_typedef tcopt class_name with
+          match TLazyHeap.get_typedef class_name with
           | Some {td_tparams; _} -> td_tparams
           | None -> []
         else
-          match TLazyHeap.get_class tcopt class_name with
+          match TLazyHeap.get_class class_name with
           | None -> []
           | Some cls -> Cls.tparams cls
       in
@@ -318,7 +318,7 @@ let rec class_ tcopt class_name class_type impl =
 (*****************************************************************************)
 
 and typedef tcopt type_name =
-  match TLazyHeap.get_typedef tcopt type_name with
+  match TLazyHeap.get_typedef type_name with
   | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _;
       td_decl_errors = _;}  ->
      let root = (Typing_deps.Dep.Class type_name, None) in
@@ -512,7 +512,7 @@ and type_ tcopt root variance env (reason, ty) =
       type_ tcopt root variance env ft.ft_ret
   | Tapply (_, []) -> ()
   | Tapply ((_, name as pos_name), tyl) ->
-      let variancel = get_class_variance tcopt root pos_name in
+      let variancel = get_class_variance root pos_name in
       iter2_shortest begin fun tparam_variance (r, _ as ty) ->
         let pos = Reason.to_pos r in
         let reason = Rtype_argument (Utils.strip_ns name) in

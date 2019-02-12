@@ -66,10 +66,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | METHOD_JUMP (class_, filter, find_children) ->
-      env, MethodJumps.get_inheritance env.tcopt class_ ~filter ~find_children
+      env, MethodJumps.get_inheritance class_ ~filter ~find_children
         env.naming_table genv.workers
     | METHOD_JUMP_BATCH (classes, filter) ->
-      env, ServerMethodJumpsBatch.go genv.workers classes filter env
+      env, ServerMethodJumpsBatch.go genv.workers classes filter
     | FIND_REFS find_refs_action ->
         let open Done_or_retry in
         let include_defs = false in
@@ -111,12 +111,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         file_info_on_disk,
         replace_state_after_saving) ->
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
-        let tcopt = env.ServerEnv.tcopt in
         let save_decls =
           genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
         env,
         SaveStateService.go
-          ~tcopt
           ~file_info_on_disk
           ~save_decls
           env.ServerEnv.naming_table
@@ -126,7 +124,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       else
         env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->
-       env, ServerSearch.go env.tcopt genv.workers query type_
+       env, ServerSearch.go genv.workers query type_
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env
     | LINT fnl -> env, ServerLint.go genv env fnl
     | LINT_STDIN { filename; contents } ->
@@ -213,10 +211,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       begin match id_info with
       | Function fun_name ->
         env, InferReturnTypeService.get_fun_return_ty
-          env.tcopt env.popt fun_name
+          env.tcopt fun_name
       | Method (class_name, meth_name) ->
         env, InferReturnTypeService.get_meth_return_ty
-          env.tcopt env.popt class_name meth_name
+          env.tcopt class_name meth_name
       end
     | CST_SEARCH { sort_results; input; files_to_search }->
       begin try

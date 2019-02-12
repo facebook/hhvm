@@ -57,12 +57,10 @@ let save_state
 
   if not do_save_state then None
   else begin
-    let tcopt = env.ServerEnv.tcopt in
     let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
     let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
     let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
     let edges_added: int = SaveStateService.save_state
-        ~tcopt
         ~file_info_on_disk
         ~save_decls
         env.ServerEnv.naming_table
@@ -89,6 +87,10 @@ let init
   : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
   let env = ServerEnvBuild.make_env genv.config in
+  (* Save the global settings for parsing, naming, and declaration.
+     These settings cannot be changed during the lifetime of the server. *)
+  GlobalParserOptions.set env.popt;
+  GlobalNamingOptions.set env.tcopt;
   let init_errors, () = Errors.do_with_context ServerConfig.filename Errors.Init begin fun() ->
       let fcl = ServerConfig.forward_compatibility_level genv.config in
       let older_than = ForwardCompatibilityLevel.greater_than fcl in

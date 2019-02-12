@@ -26,8 +26,8 @@ let string_filter_to_method_jump_filter = function
 let add_ns name =
   if name.[0] = '\\' then name else "\\" ^ name
 
-let get_overridden_methods tcopt origin_class get_or_method dest_class acc =
-  match TLazyHeap.get_class tcopt dest_class with
+let get_overridden_methods origin_class get_or_method dest_class acc =
+  match TLazyHeap.get_class dest_class with
   | None -> acc
   | Some dest_class ->
     (* Check if each destination method exists in the origin *)
@@ -51,14 +51,14 @@ let get_overridden_methods tcopt origin_class get_or_method dest_class acc =
       | None -> acc
     end
 
-let check_if_extends_class_and_find_methods tcopt target_class_name get_method
+let check_if_extends_class_and_find_methods target_class_name get_method
       target_class_pos class_name acc =
-  let class_ = TLazyHeap.get_class tcopt class_name in
+  let class_ = TLazyHeap.get_class class_name in
   match class_ with
   | None -> acc
   | Some c
       when Cls.has_ancestor c target_class_name ->
-        let acc = get_overridden_methods tcopt
+        let acc = get_overridden_methods
                       target_class_name get_method
                       class_name
                       acc in {
@@ -71,21 +71,21 @@ let check_if_extends_class_and_find_methods tcopt target_class_name get_method
         } :: acc
   | _ -> acc
 
-let filter_extended_classes tcopt target_class_name get_method target_class_pos
+let filter_extended_classes target_class_name get_method target_class_pos
       acc classes =
   List.fold_left classes ~init:acc ~f:begin fun acc cid ->
     check_if_extends_class_and_find_methods
-      tcopt target_class_name get_method target_class_pos (snd cid) acc
+     target_class_name get_method target_class_pos (snd cid) acc
   end
 
-let find_extended_classes_in_files tcopt target_class_name get_method
+let find_extended_classes_in_files target_class_name get_method
       target_class_pos acc classes =
   List.fold_left classes ~init:acc ~f:begin fun acc classes ->
-    filter_extended_classes tcopt target_class_name get_method target_class_pos
+    filter_extended_classes target_class_name get_method target_class_pos
       acc classes
   end
 
-let find_extended_classes_in_files_parallel tcopt workers target_class_name
+let find_extended_classes_in_files_parallel workers target_class_name
       get_method target_class_pos naming_table files =
   let classes = Relative_path.Set.fold files ~init:[] ~f:begin fun fn acc ->
     let { FileInfo.classes; _ } = Naming_table.get_file_info_unsafe naming_table fn in
@@ -96,20 +96,20 @@ let find_extended_classes_in_files_parallel tcopt workers target_class_name
     MultiWorker.call
       workers
       ~job:(find_extended_classes_in_files
-        tcopt target_class_name get_method target_class_pos)
+       target_class_name get_method target_class_pos)
       ~merge:(List.rev_append)
       ~neutral:([])
       ~next:(MultiWorker.next workers classes)
   else
-    find_extended_classes_in_files tcopt
+    find_extended_classes_in_files
         target_class_name get_method target_class_pos [] classes
 
 (* Find child classes *)
-let get_child_classes_and_methods tcopt cls ~filter naming_table workers =
+let get_child_classes_and_methods cls ~filter naming_table workers =
   if filter <> No_filter
   then failwith "Method jump filters not implemented for finding children";
   let files = FindRefsService.get_child_classes_files (Cls.name cls) in
-  find_extended_classes_in_files_parallel tcopt
+  find_extended_classes_in_files_parallel
     workers (Cls.name cls) (Cls.get_method cls) (Cls.pos cls) naming_table files
 
 let class_passes_filter ~filter cls =
@@ -123,17 +123,17 @@ let class_passes_filter ~filter cls =
     false
 
 (* Find ancestor classes *)
-let get_ancestor_classes_and_methods tcopt cls ~filter acc =
-  let class_ = TLazyHeap.get_class tcopt (Cls.name cls) in
+let get_ancestor_classes_and_methods cls ~filter acc =
+  let class_ = TLazyHeap.get_class (Cls.name cls) in
   match class_ with
   | None -> []
   | Some cls ->
       Sequence.fold (Cls.all_ancestor_names cls) ~init:acc ~f:begin fun acc k ->
-        let class_ = TLazyHeap.get_class tcopt k in
+        let class_ = TLazyHeap.get_class k in
         match class_ with
         | Some c
           when class_passes_filter ~filter c ->
-            let acc = get_overridden_methods tcopt
+            let acc = get_overridden_methods
                           (Cls.name cls)
                           (Cls.get_method cls)
                           (Cls.name c)
@@ -151,12 +151,12 @@ let get_ancestor_classes_and_methods tcopt cls ~filter acc =
 (*  Returns a list of the ancestor or child
  *  classes and methods for a given class
  *)
-let get_inheritance tcopt class_ ~filter ~find_children naming_table workers =
+let get_inheritance class_ ~filter ~find_children naming_table workers =
   let class_ = add_ns class_ in
-  let class_ = TLazyHeap.get_class tcopt class_ in
+  let class_ = TLazyHeap.get_class class_ in
   match class_ with
   | None -> []
   | Some c ->
     if find_children then
-      get_child_classes_and_methods tcopt c ~filter naming_table workers
-    else get_ancestor_classes_and_methods tcopt c ~filter []
+      get_child_classes_and_methods c ~filter naming_table workers
+    else get_ancestor_classes_and_methods c ~filter []

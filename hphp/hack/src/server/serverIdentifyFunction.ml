@@ -56,7 +56,7 @@ let go content line char (tcopt : TypecheckerOptions.t) =
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   let (ast, _) = Parser_heap.ParserHeap.find_unsafe path in
     List.map symbols ~f:(fun x ->
-      let symbol_definition = ServerSymbolDefinition.go tcopt ast x in
+      let symbol_definition = ServerSymbolDefinition.go ast x in
       x, symbol_definition)
       )
 

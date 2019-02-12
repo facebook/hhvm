@@ -36,7 +36,6 @@ let recheck_typing tcopt (pos_infos : pos_info list) =
     |> List.map ~f:(fun ((filename,_, _), file_info) -> filename, file_info)
     |> List.remove_consecutive_duplicates ~equal:(fun (a,_) (b,_) -> a = b)
   in
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
   ServerIdeUtils.recheck tcopt files_to_check
 
 let pos_contains_line_char pos line char =
@@ -69,8 +68,8 @@ end
 type ('a, 'r, 's) handlers = {
   result_to_string: ('r option, string) result -> (Relative_path.t * int * int) -> string;
   walker: 'a walker;
-  get_state: Relative_path.t -> ParserOptions.t -> 's;
-  map_result: TypecheckerOptions.t -> 's -> 'a -> 'r
+  get_state: Relative_path.t -> 's;
+  map_result: 's -> 'a -> 'r
 }
 
 let prepare_pos_infos h pos_list naming_table =
@@ -97,7 +96,7 @@ let prepare_pos_infos h pos_list naming_table =
     |> List.map ~f:(h.result_to_string (Error "No such file or directory")) in
   pos_infos, failure_msgs
 
-let helper h tcopt popt acc pos_infos =
+let helper h tcopt acc pos_infos =
   let tasts =
     List.fold (recheck_typing tcopt pos_infos)
       ~init:Relative_path.Map.empty
@@ -105,22 +104,22 @@ let helper h tcopt popt acc pos_infos =
   in
   List.fold pos_infos ~init:acc ~f:begin fun acc (pos, _) ->
     let fn, line, char = pos in
-    let s = h.get_state fn popt in
+    let s = h.get_state fn in
     let result =
       Relative_path.Map.get tasts fn
       |> Result.of_option ~error:"No such file or directory"
       |> Result.map ~f:begin fun tast ->
         (find_in_tree h.walker line char)#go tast
-        |> Option.map ~f:(h.map_result tcopt s)
+        |> Option.map ~f:(h.map_result s)
       end
     in
     h.result_to_string result pos :: acc
   end
 
-let parallel_helper h workers tcopt popt pos_infos =
+let parallel_helper h workers tcopt pos_infos =
   MultiWorker.call
     workers
-    ~job:(helper h tcopt popt)
+    ~job:(helper h tcopt)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers pos_infos)
@@ -133,11 +132,11 @@ let go:
   (_ handlers) ->
   _ =
 fun workers pos_list env h ->
-  let {ServerEnv.tcopt; naming_table; popt; _} = env in
+  let {ServerEnv.tcopt; naming_table; _} = env in
   let pos_infos, failure_msgs = prepare_pos_infos h pos_list naming_table in
   let results =
     if (List.length pos_infos) < 10
-    then helper h tcopt popt [] pos_infos
-    else parallel_helper h workers tcopt popt pos_infos
+    then helper h tcopt [] pos_infos
+    else parallel_helper h workers tcopt pos_infos
   in
   failure_msgs @ results

@@ -14,7 +14,6 @@ val redo_type_decl :
   MultiWorker.worker list option ->
   bucket_size:int ->
   conservative_redecl:bool ->
-  TypecheckerOptions.t ->
   FileInfo.names ->
   Naming_table.fast ->
   Errors.t * DepSet.t * DepSet.t * DepSet.t

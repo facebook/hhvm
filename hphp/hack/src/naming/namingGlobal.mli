@@ -13,18 +13,18 @@
  *)
 
 module GEnv: sig
-  val get_full_pos: ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
-  val type_pos: ParserOptions.t -> string -> Pos.t option
+  val get_full_pos: FileInfo.pos * string -> Pos.t * string
+  val type_pos: string -> Pos.t option
   val type_canon_name: string -> string option
   val type_info:
-    ParserOptions.t -> string -> (Pos.t * [`Class | `Typedef]) option
+    string -> (Pos.t * [`Class | `Typedef]) option
 
-  val fun_pos: ParserOptions.t ->  string -> Pos.t option
+  val fun_pos:  string -> Pos.t option
   val fun_canon_name: string -> string option
 
-  val typedef_pos: ParserOptions.t -> string -> Pos.t option
+  val typedef_pos: string -> Pos.t option
 
-  val gconst_pos: ParserOptions.t -> string -> Pos.t option
+  val gconst_pos: string -> Pos.t option
 end
 
 (* Function building the original naming environment.
@@ -34,7 +34,6 @@ end
  * It all the entities passed as parameters and adds them to the shared heap.
 *)
 val make_env:
-      ParserOptions.t ->
       funs:FileInfo.id list ->
       classes:FileInfo.id list ->
       typedefs:FileInfo.id list ->
@@ -55,6 +54,5 @@ val ndecl_file_fast:
   consts: SSet.t -> unit
 
 val ndecl_file:
-  ParserOptions.t ->
   Relative_path.t -> FileInfo.t ->
   Errors.t * Relative_path.Set.t

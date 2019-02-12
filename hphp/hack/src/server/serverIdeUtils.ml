@@ -80,7 +80,6 @@ let make_then_revert_local_changes f () =
 let path = Relative_path.default
 
 let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     Fixmes.DECL_HH_FIXMES.(remove_batch @@ KeySet.singleton path);
@@ -110,15 +109,15 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
       ~classes:n_classes
       ~typedefs:n_types
       ~consts:n_consts;
-    NamingGlobal.make_env tcopt ~funs ~classes ~typedefs ~consts;
+    NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
 
     (* Decl is not necessary to run typing, since typing would get
      * whatever it needs using lazy decl, but we run it anyway in order to
      * ensure that hooks attached to decl phase are executed. *)
-    Decl.name_and_declare_types_program tcopt ast;
+    Decl.name_and_declare_types_program ast;
 
     let make_tast () =
-      let nast = Naming.program tcopt ast in
+      let nast = Naming.program ast in
       Typing.nast_to_tast tcopt nast
     in
 

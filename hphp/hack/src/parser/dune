@@ -124,6 +124,7 @@
     full_fidelity_ast
     full_fidelity_ast_types
     full_fidelity_parser_errors
+    globalParserOptions
     hh_autoimport
     html_entities
     ide_parser_cache

@@ -8,24 +8,22 @@
  *)
 
 let get_class id =
-  let opt = (TypecheckerOptions.make_permissive TypecheckerOptions.default) in
   match Naming_heap.TypeIdHeap.get id with
   | None
   | Some (_, `Typedef) -> None
   | Some (pos, `Class) ->
     let fn = FileInfo.get_pos_filename pos in
-    match Parser_heap.find_class_in_file opt fn id with
+    match Parser_heap.find_class_in_file fn id with
     | None -> None
     | Some class_ ->
-      Some (Naming.class_ opt class_)
+      Some (Naming.class_ class_)
 
 let get_fun id =
-  let opt = (TypecheckerOptions.make_permissive TypecheckerOptions.default) in
   match Naming_heap.FunPosHeap.get id with
   | None -> None
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in
-    match Parser_heap.find_fun_in_file opt fn id with
+    match Parser_heap.find_fun_in_file fn id with
     | None -> None
     | Some fun_ ->
-      Some (Naming.fun_ opt fun_)
+      Some (Naming.fun_ fun_)

@@ -74,8 +74,8 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) : ((int * int) * in
       if matches_end then Some (pos, idx) else None
     end
 
-let get_occurrence_info tcopt ast tast (line, char) occurrence =
-  let def_opt = ServerSymbolDefinition.go tcopt ast occurrence in
+let get_occurrence_info ast tast (line, char) occurrence =
+  let def_opt = ServerSymbolDefinition.go ast occurrence in
   ServerInferType.type_at_pos tast line char
   >>= fun (env, ty) ->
   let open Typing_defs in
@@ -103,7 +103,7 @@ let go env (file, line, char) ~basic_only =
   >>= fun ((symbol_line, symbol_char), argument_idx) ->
   let results = IdentifySymbolService.go tast symbol_line symbol_char in
   List.hd results
-  >>= get_occurrence_info tcopt ast tast (symbol_line, symbol_char)
+  >>= get_occurrence_info ast tast (symbol_line, symbol_char)
   >>| fun (occurrence, typing_env, ft, def_opt) ->
   let open Typing_defs in
   let open Lsp.SignatureHelp in
@@ -126,7 +126,7 @@ let go env (file, line, char) ~basic_only =
     >>= fun def ->
     let file =
       ServerCommandTypes.FileName (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename) in
-    ServerDocblockAt.go_def tcopt def ~base_class_name ~file ~basic_only
+    ServerDocblockAt.go_def def ~base_class_name ~file ~basic_only
   in
   let signature_information = {
     siginfo_label;

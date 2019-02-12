@@ -9,7 +9,6 @@
 
 (** Returns the docblock for the given symbol or expression. *)
 val go_def :
-  TypecheckerOptions.t ->
   Relative_path.t SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->

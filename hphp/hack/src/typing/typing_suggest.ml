@@ -14,8 +14,8 @@ open Core_kernel
 open Typing_defs
 open Utils
 
-let compare_types x y tcopt =
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
+let compare_types x y =
+  let tcopt = GlobalNamingOptions.get () in
   let tenv = Typing_env.empty tcopt Relative_path.default ~droot:None in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
@@ -48,10 +48,7 @@ let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
 let add_type env pos k type_ =
   let tcopt = Env.get_tcopt env in
-  let new_env =
-    Env.empty
-      (TypecheckerOptions.make_permissive tcopt)
-      Relative_path.default ~droot:None in
+  let new_env = Env.empty tcopt Relative_path.default ~droot:None in
   let new_type = (
     (* Some stuff in env isn't serializable, which we need so that we can infer
      * types part of the codebase at a time in worker threads. Fortunately we
@@ -123,8 +120,8 @@ end
  * we are only interested in the non-parametric ones, infering
  * the parameter would be too hard anyway.
  *)
-let get_implements tcopt (_, x) =
-  match Typing_lazy_heap.get_class tcopt x with
+let get_implements (_, x) =
+  match Typing_lazy_heap.get_class x with
   | None -> SSet.empty
   | Some cls ->
       let tyl = Typing_classes_heap.all_ancestors cls in
@@ -158,13 +155,13 @@ let get_implements tcopt (_, x) =
 (** normalizes a "guessed" type. We basically want to bailout whenever
  * the inferred type doesn't resolve to a type hint.
  *)
-let rec normalize tcopt (r, ty) = r, normalize_ tcopt ty
-and normalize_ tcopt = function
-  | Tunresolved [x] -> snd (normalize tcopt x)
+let rec normalize (r, ty) = r, normalize_ ty
+and normalize_ = function
+  | Tunresolved [x] -> snd (normalize x)
   | Tunresolved tyl
     when List.exists tyl (function _, Toption _ -> true | _ -> false) ->
       let tyl = List.map tyl (function _, Toption ty -> ty | x -> x) in
-      normalize_ tcopt (Toption (Reason.Rnone, Tunresolved tyl))
+      normalize_ (Toption (Reason.Rnone, Tunresolved tyl))
   | Tunresolved tyl
     when List.exists tyl
     (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
@@ -176,7 +173,7 @@ and normalize_ tcopt = function
           | Tdynamic
              ) -> true
       end in
-      normalize_ tcopt (Tunresolved tyl)
+      normalize_ (Tunresolved tyl)
   | Tunresolved ((_, Tclass (x, e, [])) :: rl) ->
       (* If we have A & B & C where all the elements are classes
        * we try to find a unique common ancestor.
@@ -188,16 +185,16 @@ and normalize_ tcopt = function
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
       end in
-      let x_imp = get_implements tcopt x in
+      let x_imp = get_implements x in
       let set = List.fold_left rl ~f:begin fun x_imp x ->
-        SSet.inter x_imp (get_implements tcopt x)
+        SSet.inter x_imp (get_implements x)
       end ~init:x_imp in
       (* is it unique? *)
       if SSet.cardinal set = 1
       then Tclass ((Pos.none, SSet.choose set), e, [])
       else raise Exit
-  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y tcopt = 0 ->
-      normalize_ tcopt (Tunresolved rl)
+  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y = 0 ->
+      normalize_ (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tnonnull -> Tnonnull
   | Terr -> Terr
@@ -206,19 +203,19 @@ and normalize_ tcopt = function
       Tarraykind (match akind with
         | AKany -> AKany
         | AKempty -> AKempty
-        | AKvarray tk -> AKvarray (normalize tcopt tk)
-        | AKvec tk -> AKvec (normalize tcopt tk)
-        | AKdarray (tk, tv) -> AKdarray (normalize tcopt tk, normalize tcopt tv)
-        | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
-        | AKvarray_or_darray tv -> AKvarray_or_darray (normalize tcopt tv)
+        | AKvarray tk -> AKvarray (normalize tk)
+        | AKvec tk -> AKvec (normalize tk)
+        | AKdarray (tk, tv) -> AKdarray (normalize tk, normalize tv)
+        | AKmap (tk, tv) -> AKmap (normalize tk, normalize tv)
+        | AKvarray_or_darray tv -> AKvarray_or_darray (normalize tv)
       )
     with Exit -> Tarraykind AKany
   end
   | Tabstract (AKgeneric _, _) as x -> x
-  | Tabstract (AKdependent _, Some ty) -> normalize_ tcopt (snd ty)
-  | Toption (_, (Toption (_, _) as ty)) -> normalize_ tcopt ty
+  | Tabstract (AKdependent _, Some ty) -> normalize_ (snd ty)
+  | Toption (_, (Toption (_, _) as ty)) -> normalize_ ty
   | Toption (_, Tprim Nast.Tvoid) -> raise Exit
-  | Toption ty -> Toption (normalize tcopt ty)
+  | Toption ty -> Toption (normalize ty)
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
@@ -228,7 +225,7 @@ and normalize_ tcopt = function
        * local one. Figure something else out that doesn't involve spamming '\'
        * across FB code, maybe? See if anyone complains on GitHub? I have no
        * idea how bad this is in practice, I'm kinda hoping it's okay. *)
-      normalize_ tcopt (Tclass ((pos, strip_ns name), e, tyl))
+      normalize_ (Tclass ((pos, strip_ns name), e, tyl))
   | Tclass ((pos1, "Awaitable"), e, [(_, Toption (pos2, Tprim Nast.Tvoid))]) ->
       (* Special case: Awaitable<?void> is nonsensical, but often
        * Awaitable<void> works. *)
@@ -240,15 +237,15 @@ and normalize_ tcopt = function
         then ":"^name
         else name
       in
-      Tclass ((pos, name), e, List.map tyl (normalize tcopt))
-  | Ttuple tyl -> Ttuple (List.map tyl (normalize tcopt))
+      Tclass ((pos, name), e, List.map tyl (normalize))
+  | Ttuple tyl -> Ttuple (List.map tyl (normalize))
   | Tdynamic -> Tdynamic
   | Tanon _ -> raise Exit
   | Tobject -> raise Exit
   | Tabstract _ -> raise Exit
   | Tshape _ -> raise Exit
 
-let normalize tcopt ty =
+let normalize ty =
   try
-    Some (normalize tcopt ty)
+    Some (normalize ty)
   with Exit -> None

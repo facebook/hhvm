@@ -36,16 +36,16 @@ let compute_deps_neutral = DepSet.empty, DepSet.empty, DepSet.empty
 (*****************************************************************************)
 
 module OnTheFlyStore = GlobalStorage.Make(struct
-  type t = TypecheckerOptions.t * Naming_table.fast
+  type t = Naming_table.fast
 end)
 
 (*****************************************************************************)
 (* Re-declaring the types in a file *)
 (*****************************************************************************)
 
-let on_the_fly_decl_file tcopt errors fn =
+let on_the_fly_decl_file errors fn =
   let decl_errors, () = Errors.do_with_context fn Errors.Decl begin fun () ->
-    Decl.make_env tcopt fn
+    Decl.make_env fn
   end in
   Errors.merge decl_errors errors
 
@@ -115,15 +115,15 @@ let compute_gconsts_deps ~conservative_redecl old_gconsts (changed, to_redecl, t
  *)
 (*****************************************************************************)
 
-let redeclare_files tcopt filel =
+let redeclare_files filel =
   List.fold_left filel
-    ~f:(on_the_fly_decl_file tcopt)
+    ~f:on_the_fly_decl_file
     ~init:Errors.empty
 
-let otf_decl_files tcopt filel =
+let otf_decl_files filel =
   SharedMem.invalidate_caches();
   (* Redeclaring the files *)
-  redeclare_files tcopt filel
+  redeclare_files filel
 
 let compute_deps ~conservative_redecl fast filel =
   let infol =
@@ -155,8 +155,7 @@ let compute_deps ~conservative_redecl fast filel =
 
 let load_and_otf_decl_files _ filel =
   try
-    let tcopt, _ = OnTheFlyStore.load() in
-    otf_decl_files tcopt filel
+    otf_decl_files filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -164,7 +163,7 @@ let load_and_otf_decl_files _ filel =
 
 let load_and_compute_deps ~conservative_redecl _acc filel =
   try
-    let _, fast = OnTheFlyStore.load() in
+    let fast = OnTheFlyStore.load() in
     compute_deps ~conservative_redecl fast filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
@@ -186,9 +185,9 @@ let merge_compute_deps
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_otf_decl ~conservative_redecl workers bucket_size tcopt fast fnl =
+let parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl =
   try
-    OnTheFlyStore.store (tcopt, fast);
+    OnTheFlyStore.store fast;
     let errors =
       MultiWorker.call
         workers
@@ -338,7 +337,7 @@ let get_elems workers ~bucket_size ~old defs =
 (* The main entry point *)
 (*****************************************************************************)
 
-let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_defs fast =
+let redo_type_decl workers ~bucket_size ~conservative_redecl all_oldified_defs fast =
   let defs =
     Relative_path.Map.fold fast
       ~init:FileInfo.empty_names ~f:(fun _ -> FileInfo.merge_names) in
@@ -361,10 +360,10 @@ let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_
   let result =
     if List.length fnl < 10
     then
-      let errors = otf_decl_files tcopt fnl in
+      let errors = otf_decl_files fnl in
       let changed, to_redecl, to_recheck = compute_deps ~conservative_redecl fast fnl in
       errors, changed, to_redecl, to_recheck
-    else parallel_otf_decl ~conservative_redecl workers bucket_size tcopt fast fnl
+    else parallel_otf_decl ~conservative_redecl workers bucket_size fast fnl
   in
   remove_old_defs defs all_elems;
   result

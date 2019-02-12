@@ -463,7 +463,7 @@ and fun_def tcopt f : Tast.fun_def option =
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst f.f_name in
-  let nb = TNBody.func_body tcopt f in
+  let nb = TNBody.func_body f in
   let env = EnvFromDef.fun_env tcopt f in
   add_decl_errors (Option.map
     (Env.get_fun env (snd f.f_name))
@@ -6021,7 +6021,7 @@ and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
   let tc = Env.get_class env (snd c.c_name) in
   add_decl_errors (Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc))));
-  let c = TNBody.class_meth_bodies tcopt c in
+  let c = TNBody.class_meth_bodies c in
   NastCheck.class_ env c;
   NastInitCheck.class_ env c;
   match tc with

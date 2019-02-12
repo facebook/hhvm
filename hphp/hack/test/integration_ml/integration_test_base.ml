@@ -80,6 +80,8 @@ let setup_server ?custom_config ?(hhi_files = []) ()  =
   let hhi_file_list = List.map hhi_files ~f:(fun (fn, _) ->
     Relative_path.create (Relative_path.Hhi) (Filename.concat hhi fn)) in
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
+  GlobalParserOptions.set result.ServerEnv.popt;
+  GlobalNamingOptions.set result.ServerEnv.tcopt;
   { result with ServerEnv.disk_needs_parsing = hhi_set }
 
 

@@ -249,18 +249,6 @@ let default = {
  po_enable_stronger_await_binding = false;
 }
 
-(* Use this instead of default when you don't have access to a project
-* .hhconfig and it's acceptable to omit some errors. IDE integration is one
-* example, assuming the IDE also talks to hh_client to get the full list with
-* higher latency.
-*
-* Use 'default' if it's fine to be potentially stricter than the rest of the
-* project requires, eg hh_single_typecheck *)
-let make_permissive tcopt =
-  { tcopt with
-    tco_assume_php = true;
-  }
-
 let make
   ?(tco_assume_php = default.tco_assume_php)
   ?(tco_safe_array = default.tco_safe_array)

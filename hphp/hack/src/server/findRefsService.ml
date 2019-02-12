@@ -38,21 +38,21 @@ let process_fun_id target_fun id =
   then Pos.Map.singleton (fst id) (snd id)
   else Pos.Map.empty
 
-let check_if_extends_class tcopt target_class_name class_name =
-  let class_ = Typing_lazy_heap.get_class tcopt class_name in
+let check_if_extends_class target_class_name class_name =
+  let class_ = Typing_lazy_heap.get_class class_name in
   match class_ with
   | Some cls
     when Cls.has_ancestor cls target_class_name
       || Cls.requires_ancestor cls target_class_name -> true
   | _ -> false
 
-let is_target_class tcopt target_classes class_name =
+let is_target_class target_classes class_name =
   match target_classes with
   | Class_set s -> SSet.mem s class_name
   | Subclasses_of s ->
-    s = class_name || check_if_extends_class tcopt s class_name
+    s = class_name || check_if_extends_class s class_name
 
-let process_member_id tcopt target_classes target_member class_name mid
+let process_member_id target_classes target_member class_name mid
     ~is_method ~is_const =
   let member_name = snd mid in
   let is_target = match target_member with
@@ -63,7 +63,7 @@ let process_member_id tcopt target_classes target_member class_name mid
     | Class_const target_name -> is_const && (member_name = target_name)
     | Typeconst _ -> false
   in
-  if is_target && is_target_class tcopt target_classes class_name
+  if is_target && is_target_class target_classes class_name
   then Pos.Map.singleton (fst mid) (class_name ^ "::" ^ (snd mid))
   else Pos.Map.empty
 
@@ -77,9 +77,9 @@ let process_class_id target_class cid mid_option =
    end
    else Pos.Map.empty
 
-let process_taccess tcopt target_classes target_typeconst
+let process_taccess target_classes target_typeconst
     (class_name, tconst_name, p) =
-  if (is_target_class tcopt target_classes class_name) &&
+  if (is_target_class target_classes class_name) &&
     (target_typeconst = tconst_name)
   then Pos.Map.singleton p (class_name ^ "::" ^ tconst_name)
   else Pos.Map.empty
@@ -89,27 +89,27 @@ let process_gconst_id target_gconst id =
   then Pos.Map.singleton (fst id) (snd id)
   else Pos.Map.empty
 
-let add_if_extends_class tcopt target_class_name class_name acc =
-  if check_if_extends_class tcopt target_class_name class_name
+let add_if_extends_class target_class_name class_name acc =
+  if check_if_extends_class target_class_name class_name
   then SSet.add acc class_name else acc
 
-let find_child_classes tcopt target_class_name naming_table files =
+let find_child_classes target_class_name naming_table files =
   SharedMem.invalidate_caches();
   Relative_path.Set.fold files ~init:SSet.empty ~f:begin fun fn acc ->
     (try
       let { FileInfo.classes; _ } =
         Naming_table.get_file_info_unsafe naming_table fn in
       List.fold_left classes ~init:acc ~f:begin fun acc cid ->
-        add_if_extends_class tcopt target_class_name (snd cid) acc
+        add_if_extends_class target_class_name (snd cid) acc
       end
     with Caml.Not_found ->
       acc)
   end
 
-let get_origin_class_name tcopt class_name member =
+let get_origin_class_name class_name member =
   let origin = match member with
     | Method method_name ->
-      begin match Typing_lazy_heap.get_class tcopt class_name with
+      begin match Typing_lazy_heap.get_class class_name with
       | Some class_ ->
         let get_origin_class meth = match meth with
           | Some meth -> Some meth.ce_origin
@@ -178,7 +178,6 @@ let get_deps_set_gconst cst_name =
     Relative_path.Set.empty
 
 let find_refs tcopt target acc fileinfo_l =
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
   let tasts = ServerIdeUtils.recheck tcopt fileinfo_l in
   let results =
     let module SO = SymbolOccurrence in
@@ -190,14 +189,14 @@ let find_refs tcopt target acc fileinfo_l =
         Pos.Map.union acc @@
         match target, type_ with
         | IMember (classes, Typeconst tc), SO.Typeconst (c_name, tc_name) ->
-          process_taccess tcopt classes tc (c_name, tc_name, pos)
+          process_taccess classes tc (c_name, tc_name, pos)
         | IMember (classes, member), SO.Method (c_name, m_name)
         | IMember (classes, member), SO.ClassConst (c_name, m_name)
         | IMember (classes, member), SO.Property (c_name, m_name) ->
           let mid = (pos, m_name) in
           let is_method = match type_ with SO.Method _ -> true | _ -> false in
           let is_const = match type_ with SO.ClassConst _ -> true | _ -> false in
-          process_member_id tcopt classes member c_name mid
+          process_member_id classes member c_name mid
             ~is_method ~is_const
         | IFunction fun_name, SO.Function ->
           process_fun_id fun_name (pos, name)
@@ -220,10 +219,10 @@ let parallel_find_refs workers fileinfo_l target tcopt =
     ~merge:(List.rev_append)
     ~next:(MultiWorker.next workers fileinfo_l)
 
-let get_definitions tcopt = function
+let get_definitions = function
   | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
-      match Typing_lazy_heap.get_class tcopt class_name with
+      match Typing_lazy_heap.get_class class_name with
       | Some class_ ->
         let add_meth get acc = match get method_name with
           | Some meth when meth.ce_origin = (Cls.name class_) ->
@@ -238,7 +237,7 @@ let get_definitions tcopt = function
     end
   | IMember (Class_set classes, Class_const class_const_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
-      match Typing_lazy_heap.get_class tcopt class_name with
+      match Typing_lazy_heap.get_class class_name with
       | Some class_ ->
         let add_class_const get acc = match get class_const_name with
           | Some class_const when class_const.cc_origin = (Cls.name class_) ->
@@ -252,13 +251,13 @@ let get_definitions tcopt = function
     end
   | IClass class_name ->
     Option.value ~default:[] begin Naming_heap.TypeIdHeap.get class_name >>=
-    function (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
+    function (_, `Class) -> Typing_lazy_heap.get_class class_name >>=
       fun class_ -> Some([(class_name, (Cls.pos class_))])
-    | (_, `Typedef) -> Typing_lazy_heap.get_typedef tcopt class_name >>=
+    | (_, `Typedef) -> Typing_lazy_heap.get_typedef class_name >>=
       fun type_ -> Some([class_name, type_.td_pos])
     end
   | IFunction fun_name ->
-    begin match Typing_lazy_heap.get_fun tcopt fun_name with
+    begin match Typing_lazy_heap.get_fun fun_name with
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
@@ -283,7 +282,7 @@ let find_references tcopt workers target include_defs
       parallel_find_refs workers fileinfo_l target tcopt
     in
   if include_defs then
-    let defs = get_definitions tcopt target in
+    let defs = get_definitions target in
     List.rev_append defs results
   else
     results

@@ -8,7 +8,6 @@
  *)
 
 val go :
-  TypecheckerOptions.t ->
   Ast.program ->
   Relative_path.t SymbolOccurrence.t ->
   Relative_path.t SymbolDefinition.t option

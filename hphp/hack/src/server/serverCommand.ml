@@ -184,11 +184,11 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
           let p = unsafe_opt
-            @@ NamingGlobal.GEnv.type_pos env.ServerEnv.tcopt canon in
+            @@ NamingGlobal.GEnv.type_pos canon in
           let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
-      let class_ = TLazyHeap.get_class env.ServerEnv.tcopt class_name in
+      let class_ = TLazyHeap.get_class class_name in
       (match class_ with
       | None -> Out_channel.output_string oc "Missing from typing env\n"
       | Some c ->
@@ -202,11 +202,11 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
           let p = unsafe_opt
-            @@ NamingGlobal.GEnv.fun_pos env.ServerEnv.tcopt canon in
+            @@ NamingGlobal.GEnv.fun_pos canon in
           let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
-      let fun_ = TLazyHeap.get_fun env.ServerEnv.tcopt fun_name in
+      let fun_ = TLazyHeap.get_fun fun_name in
       (match fun_ with
       | None ->
           Out_channel.output_string oc "Missing from typing env\n"
@@ -215,10 +215,10 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           Out_channel.output_string oc (fun_str^"\n")
       );
       Out_channel.output_string oc "\nglobal const:\n";
-      (match NamingGlobal.GEnv.gconst_pos env.ServerEnv.tcopt qual_name with
+      (match NamingGlobal.GEnv.gconst_pos qual_name with
       | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> Out_channel.output_string oc "Missing from naming env\n");
-      let gconst_ty = TLazyHeap.get_gconst env.ServerEnv.tcopt qual_name in
+      let gconst_ty = TLazyHeap.get_gconst qual_name in
       (match gconst_ty with
       | None -> Out_channel.output_string oc "Missing from typing env\n"
       | Some gc ->
@@ -226,10 +226,10 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           Out_channel.output_string oc ("ty: "^gconst_str^"\n")
       );
       Out_channel.output_string oc "typedef:\n";
-      (match NamingGlobal.GEnv.typedef_pos env.ServerEnv.tcopt qual_name with
+      (match NamingGlobal.GEnv.typedef_pos qual_name with
       | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> Out_channel.output_string oc "Missing from naming env\n");
-      let tdef = TLazyHeap.get_typedef env.ServerEnv.tcopt qual_name in
+      let tdef = TLazyHeap.get_typedef qual_name in
       (match tdef with
       | None ->
           Out_channel.output_string oc "Missing from typing env\n"
@@ -260,7 +260,7 @@ let with_dependency_table_reads full_recheck_needed f =
 (* Given a set of declaration names, put them in shared memory. We do it here, because
  * declarations computed while handling IDE commands will likely be useful for subsequent IDE
  * commands too, but are not persisted outside of make_then_revert_local_changes closure. *)
-let predeclare_ide_deps genv env {FileInfo.n_funs; n_classes; n_types; n_consts} =
+let predeclare_ide_deps genv {FileInfo.n_funs; n_classes; n_types; n_consts} =
   if genv.ServerEnv.local_config.ServerLocalConfig.predeclare_ide_deps then begin
     Utils.try_finally ~f:begin fun () ->
       (* We only want to populate declaration heap, without wasting space in lower
@@ -269,11 +269,11 @@ let predeclare_ide_deps genv env {FileInfo.n_funs; n_classes; n_types; n_consts}
       Parser_heap.ParserHeap.LocalChanges.push_stack ();
       let iter: type a.
           (string -> bool) ->
-          (TypecheckerOptions.t -> string -> a) ->
+          (string -> a) ->
           SSet.t -> unit =
         fun mem declare s -> SSet.iter begin fun x ->
         (* Depending on Typing_lazy_heap putting the thing we ask for in shared memory *)
-        if not @@ mem x then ignore @@ ((declare env.ServerEnv.tcopt x) : a)
+        if not @@ mem x then ignore @@ ((declare x) : a)
       end s in
       iter Decl_heap.Funs.mem Typing_lazy_heap.get_fun n_funs;
       iter Decl_heap.Classes.mem Typing_lazy_heap.get_class n_classes;
@@ -325,7 +325,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
       let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-      predeclare_ide_deps genv env declared_names;
+      predeclare_ide_deps genv declared_names;
       let major_gc_time, minor_gc_time = Sys_utils.get_gc_time () in
       HackEventLogger.handled_command cmd_string
         ~start_t:t ~major_gc_time ~minor_gc_time ~parsed_files;

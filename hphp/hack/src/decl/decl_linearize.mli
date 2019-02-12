@@ -9,4 +9,4 @@
 
 open Decl_defs
 
-val get_linearization : TypecheckerOptions.t -> string -> linearization
+val get_linearization : string -> linearization

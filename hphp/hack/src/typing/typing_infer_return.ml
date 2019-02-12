@@ -41,7 +41,6 @@ let clear_type_list ~suggest_mode =
   Typing_suggest.initialized_members := SMap.empty
 
 let typing_env_from_file tcopt file =
-  let tcopt = TypecheckerOptions.make_permissive tcopt in
   Typing_env.empty tcopt ~droot:None file
 
 let type_from_hint tcopt file hint =
@@ -94,7 +93,7 @@ let get_inferred_types tcopt fnl ~process =
       match Parser_heap.ParserHeap.get fn with
       | None -> ()
       | Some (ast, _) ->
-        List.iter (Naming.program tcopt ast)
+        List.iter (Naming.program ast)
           (process_types_and_funs ~process tcopt)
     end
 

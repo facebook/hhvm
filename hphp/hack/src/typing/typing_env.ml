@@ -734,7 +734,7 @@ let add_wclass env x =
 
 let get_typedef env x =
   add_wclass env x;
-  TLazyHeap.get_typedef env.genv.tcopt x
+  TLazyHeap.get_typedef x
 
 let is_typedef x =
   match Naming_heap.TypeIdHeap.get x with
@@ -743,7 +743,7 @@ let is_typedef x =
 
 let get_class env x =
   add_wclass env x;
-  TLazyHeap.get_class env.genv.tcopt x
+  TLazyHeap.get_class x
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -777,7 +777,8 @@ let fresh_tenv env f =
     }
 
 let get_enum env x =
-  match TLazyHeap.get_class env.genv.tcopt x with
+  add_wclass env x;
+  match TLazyHeap.get_class x with
   | Some tc when (Cls.enum_type tc) <> None -> Some tc
   | _ -> None
 
@@ -802,7 +803,7 @@ let get_const env class_ mid =
 let get_gconst env cst_name =
   let dep = Dep.GConst cst_name in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  TLazyHeap.get_gconst env.genv.tcopt cst_name
+  TLazyHeap.get_gconst cst_name
 
 let get_static_member is_method env class_ mid =
   add_wclass env (Cls.name class_);
@@ -920,7 +921,7 @@ let get_file env = env.genv.file
 let get_fun env x =
   let dep = Dep.Fun x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  TLazyHeap.get_fun env.genv.tcopt x
+  TLazyHeap.get_fun x
 
 let set_fn_kind env fn_type =
   let genv = env.genv in

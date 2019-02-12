@@ -92,10 +92,11 @@ class DateTimeImmutable implements DateTimeInterface {
     DateTimeZone $timezone = null
   ): mixed {
     $out = new DateTimeImmutable();
-    $out->data = DateTime::createFromFormat($format, $time, $timezone);
-    if ($out->data === false) {
+    $data = DateTime::createFromFormat($format, $time, $timezone);
+    if ($data === false) {
       return false;
     }
+    $out->data = $data;
     return $out;
   }
 

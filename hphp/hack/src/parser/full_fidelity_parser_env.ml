@@ -18,6 +18,7 @@ type t = {
   disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
+  disable_unsafe_expr: bool;
 } [@@deriving show]
 
 let default = {
@@ -29,6 +30,7 @@ let default = {
   enable_xhp = false;
   enable_stronger_await_binding = false;
   disable_nontoplevel_declarations = false;
+  disable_unsafe_expr = false;
 
   mode = None;
   stats = None;
@@ -45,6 +47,7 @@ let make
   ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
   ?mode
   ?stats
+  ?(disable_unsafe_expr = default.disable_unsafe_expr)
   () = {
     hhvm_compat_mode;
     php5_compat_mode;
@@ -56,6 +59,7 @@ let make
     disable_nontoplevel_declarations;
     mode;
     stats;
+    disable_unsafe_expr;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -72,3 +76,4 @@ let is_hack e = e.mode <> Some FileInfo.Mphp || force_hh e
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
 let is_typechecker e = is_hack e && not (codegen e)
+let disable_unsafe_expr e = e.disable_unsafe_expr

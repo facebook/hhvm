@@ -210,6 +210,9 @@ type t = {
  (* Flag to change the precedence and associativity of await. *)
  po_enable_stronger_await_binding : bool;
 
+ (* Flag to make UNSAFE_EXPR comments be just comments. *)
+ po_disable_unsafe_expr : bool;
+
 } [@@deriving show]
 
 val make :
@@ -252,6 +255,7 @@ val make :
   ?forward_compatibility_level: ForwardCompatibilityLevel.t ->
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
+  ?po_disable_unsafe_expr: bool ->
   unit ->
   t
 
@@ -320,4 +324,5 @@ val ignored_fixme_codes : t -> ISet.t
 val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
 val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
+val po_disable_unsafe_expr : t -> bool
 val setup_pocket_universes : t -> bool -> t

@@ -3521,6 +3521,8 @@ let parse_text
           (GlobalOptions.po_enable_stronger_await_binding env.parser_options)
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
+        ~disable_unsafe_expr:
+          (GlobalOptions.po_disable_unsafe_expr env.parser_options)
         ?mode
         ()
     in

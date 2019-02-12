@@ -102,6 +102,7 @@ let make (env:Env.t) text =
     ~force_hh
     ~enable_xhp:(Env.enable_xhp env)
     ~codegen:(Env.codegen env)
+    ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     text in
   { lexer
   ; errors = []

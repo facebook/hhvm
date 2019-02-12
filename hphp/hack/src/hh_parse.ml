@@ -67,6 +67,7 @@ module FullFidelityParseArgs = struct
     dump_nast : bool;
     enable_stronger_await_binding : bool;
     pocket_universes : bool;
+    disable_unsafe_expr : bool;
   }
 
   let make
@@ -96,7 +97,8 @@ module FullFidelityParseArgs = struct
     files
     dump_nast
     enable_stronger_await_binding
-    pocket_universes = {
+    pocket_universes
+    disable_unsafe_expr = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -123,7 +125,8 @@ module FullFidelityParseArgs = struct
     files;
     dump_nast;
     enable_stronger_await_binding;
-    pocket_universes
+    pocket_universes;
+    disable_unsafe_expr
   }
 
   let parse_args () =
@@ -169,6 +172,7 @@ module FullFidelityParseArgs = struct
     let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
+    let disable_unsafe_expr = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -278,6 +282,9 @@ No errors are filtered out.";
       "--pocket-universes",
         Arg.Set pocket_universes,
         "Enables support for Pocket Universes";
+      "--disable-unsafe-expr",
+        Arg.Set disable_unsafe_expr,
+        "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
       ] in
     Arg.parse options push_file usage;
     make
@@ -308,6 +315,7 @@ No errors are filtered out.";
       !dump_nast
       !enable_stronger_await_binding
       !pocket_universes
+      !disable_unsafe_expr
 end
 
 open FullFidelityParseArgs
@@ -346,6 +354,7 @@ let handle_existing_file args filename =
     ~enable_xhp:args.enable_hh_syntax
     ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ~has_dot_hack_extension:(String_utils.string_ends_with suffix ".hack")
+    ~disable_unsafe_expr:args.disable_unsafe_expr
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

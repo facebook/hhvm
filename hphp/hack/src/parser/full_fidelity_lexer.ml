@@ -18,12 +18,14 @@ module Env = struct
   let enable_xhp_opt = ref false
   let is_hh_file = ref true
   let backend_is_codegen = ref true
+  let enable_unsafe_expr = ref true
 
   let set_is_hh_file b = is_hh_file := b
-  let set ~force_hh ~enable_xhp ~codegen =
+  let set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr =
     force_hh_opt := force_hh;
     enable_xhp_opt := enable_xhp;
-    backend_is_codegen := codegen
+    backend_is_codegen := codegen;
+    enable_unsafe_expr := not disable_unsafe_expr
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
   let force_kw_in_lowercase () = is_hh () && not !backend_is_codegen
@@ -46,6 +48,7 @@ module Lexer : sig
     ?force_hh:bool ->
     ?enable_xhp:bool ->
     ?codegen:bool ->
+    ?disable_unsafe_expr:bool ->
     Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> SourceText.t -> int -> t
   val start : t -> int
@@ -79,11 +82,12 @@ end = struct
     ?(force_hh = false)
     ?(enable_xhp = false)
     ?(codegen = false)
+    ?(disable_unsafe_expr = false)
     text =
     (* this can be overridden in scan_markup, but we need to explicitly reset *)
     (* it, as `scan_markup` is never called for `.hack` files *)
     if (force_hh) then Env.set_is_hh_file true;
-    Env.set ~force_hh ~enable_xhp ~codegen;
+    Env.set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -1315,7 +1319,7 @@ let scan_delimited_comment lexer =
   let lexer = skip_to_end_of_delimited_comment lexer_ws in
   let w = width lexer in
   let c =
-    if match_string lexer_ws "UNSAFE_EXPR" then
+    if !Env.enable_unsafe_expr && match_string lexer_ws "UNSAFE_EXPR" then
       Trivia.make_unsafe_expression (source lexer) (start lexer) w
     else if match_string lexer_ws "HH_FIXME" then
       Trivia.make_fix_me (source lexer) (start lexer) w

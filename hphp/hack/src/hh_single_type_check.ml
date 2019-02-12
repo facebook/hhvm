@@ -198,6 +198,7 @@ let parse_options () =
   let disallow_invalid_arraykey = ref None in
   let enable_stronger_await_binding = ref None in
   let set_bool x () = x := Some true in
+  let disable_unsafe_expr = ref None in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -401,6 +402,9 @@ let parse_options () =
     "--stronger-await-binding",
       Arg.Unit (set_bool enable_stronger_await_binding),
       "Increases precedence of await during parsing.";
+    "--disable-unsafe-expr",
+      Arg.Unit (set_bool disable_unsafe_expr),
+      "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them"
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -433,6 +437,7 @@ let parse_options () =
     ?po_enable_concurrent:(!enable_concurrent)
     ?po_enable_await_as_an_expression:(!enable_await_as_an_expression)
     ?po_enable_stronger_await_binding:(!enable_stronger_await_binding)
+    ?po_disable_unsafe_expr:(!disable_unsafe_expr)
     ~log_levels:(!log_levels)
     ()
   in

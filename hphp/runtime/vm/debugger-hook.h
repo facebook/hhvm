@@ -166,11 +166,10 @@ struct DebuggerHook {
   // over an active line breakpoint
   virtual void onOpcode(const unsigned char* /*pc*/) {}
 
-  // Called right before top-level pseudo-main enters and right after it
-  // exits. This is useful for debuggers to initialize and shutdown separate
-  // from an extension as they can assume other extensions are initialized.
+  // Called right before top-level pseudo-main enters. This may be useful for
+  // debuggers to initialize separate from an extension as they can assume
+  // other extensions are initialized.
   virtual void onRequestInit() {}
-  virtual void onRequestShutdown() {}
 
   // Called whenever we are breaking due to completion of a step in or step out
   virtual void onStepInBreak(const Unit* /*unit*/, int /*line*/) {}
@@ -213,7 +212,6 @@ inline bool isDebuggerAttachedProcess() {
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
 void phpDebuggerRequestInitHook();
-void phpDebuggerRequestShutdownHook();
 void phpDebuggerFuncEntryHook(const ActRec* ar);
 void phpDebuggerFuncExitHook(const ActRec* ar);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);

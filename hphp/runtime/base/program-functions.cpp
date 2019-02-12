@@ -2791,14 +2791,6 @@ void hphp_context_shutdown() {
   auto const context = g_context.getNoCheck();
   context->onRequestShutdown();
 
-  try {
-    // Shutdown the debugger.  This can throw, but we don't care about what the
-    // error is.
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestShutdownHook());
-  } catch (...) {
-    // Gotta catch 'em all!
-  }
-
   // Log any loaded units
   flushLoadedUnitLogs();
 

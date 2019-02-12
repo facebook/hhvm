@@ -48,9 +48,6 @@ void VSDebugHook::onRequestInit() {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onRequestShutdown() {
-}
-
 void VSDebugHook::onOpcode(PC /*pc*/) {
   RID().setDebuggerIntr(false);
   BreakContext breakContext(true);

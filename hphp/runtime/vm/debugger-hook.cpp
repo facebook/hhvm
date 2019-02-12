@@ -254,12 +254,6 @@ void phpDebuggerRequestInitHook() {
   getDebuggerHook()->onRequestInit();
 }
 
-// Hook called on request shutdown after main() exits
-void phpDebuggerRequestShutdownHook() {
-  VMRegAnchor anchor;
-  getDebuggerHook()->onRequestShutdown();
-}
-
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
 void phpDebuggerFuncEntryHook(const ActRec* /*ar*/) {

@@ -27,7 +27,6 @@ struct DebuggerRequestInfo;
 
 struct VSDebugHook final : DebuggerHook {
   void onRequestInit() override;
-  void onRequestShutdown() override;
 
   void onOpcode(PC pc) override;
 

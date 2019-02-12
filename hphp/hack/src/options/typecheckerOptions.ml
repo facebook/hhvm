@@ -50,6 +50,8 @@ let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
+let experimental_type_param_shadowing =
+  GlobalOptions.tco_experimental_type_param_shadowing
 let experimental_trait_method_redeclarations =
   GlobalOptions.tco_experimental_trait_method_redeclarations
 let experimental_type_const_attributes =

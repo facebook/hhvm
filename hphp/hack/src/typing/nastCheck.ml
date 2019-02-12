@@ -51,7 +51,11 @@ type env = {
   is_array_append_allowed: bool;
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
+  file_mode: FileInfo.mode;
 }
+
+let is_strict mode =
+  mode = FileInfo.Mstrict || mode = FileInfo.Mexperimental
 
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, st with
@@ -418,7 +422,8 @@ let rec fun_ tenv f named_body =
               typedef_tparams = [];
               tenv = tenv;
               function_name = None;
-              is_reactive = fun_is_reactive f.f_user_attributes
+              is_reactive = fun_is_reactive f.f_user_attributes;
+              file_mode = f.f_mode;
               } in
   func env f named_body
 
@@ -500,7 +505,7 @@ and hint_ env p = function
       hint env h;
       begin match variadic_hint with
       | Hvariadic (Some h) -> hint env h;
-      | Hvariadic (None) when Env.is_strict env.tenv ->
+      | Hvariadic (None) when is_strict env.file_mode ->
         Errors.ellipsis_strict_mode ~require:`Type p;
       | _ -> ()
       end
@@ -595,7 +600,9 @@ and class_ tenv c =
               typedef_tparams = [];
               is_reactive = false;
               function_name = None;
-              tenv = tenv } in
+              tenv = tenv;
+              file_mode = c.c_mode;
+            } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
                tenv c.c_tparams.c_tparam_list
@@ -1280,7 +1287,8 @@ let typedef tenv t =
                *)
               typedef_tparams = t.t_tparams;
               tenv = tenv;
-              is_reactive = false
+              is_reactive = false;
+              file_mode = t.t_mode;
               } in
   maybe hint env t.t_constraint;
   hint env t.t_kind

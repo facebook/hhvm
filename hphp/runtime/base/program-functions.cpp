@@ -2784,7 +2784,7 @@ void log_loaded_unit(const Unit* u) {
   tl_loaded_units->emplace_back(u);
 }
 
-void hphp_context_shutdown() {
+void hphp_context_exit() {
   // Run shutdown handlers. This may cause user code to run.
   g_thread_safe_locale_handler->reset();
 
@@ -2805,16 +2805,9 @@ void hphp_context_shutdown() {
   // This causes request event handler registration to fail until the next
   // request starts.
   context->acceptRequestEventHandlers(false);
-}
-
-void hphp_context_exit(bool shutdown /* = true */) {
-  if (shutdown) {
-    hphp_context_shutdown();
-  }
 
   // Clean up a bunch of request state. No user code after this point.
   MemoryManager::setExiting();
-  auto const context = g_context.getNoCheck();
   context->requestExit();
   context->obProtect(false);
   context->obEndAll();

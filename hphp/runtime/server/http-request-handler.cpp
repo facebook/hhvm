@@ -534,26 +534,16 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     transport->resetStructuredLogEntry();
   }
 
-  // If we have registered post-send shutdown functions, end the request before
-  // executing them. If we don't, be compatible with Zend by allowing usercode
-  // in hphp_context_shutdown to run before we end the request.
-  bool hasPostSend =
-    context->hasShutdownFunctions(ExecutionContext::ShutdownType::PostSend);
-  if (hasPostSend) {
-    transport->onSendEnd();
-  }
+  transport->onSendEnd();
   context->onShutdownPostSend();
   Eval::Debugger::InterruptPSPEnded(transport->getUrl());
-  hphp_context_shutdown();
-  if (!hasPostSend) {
-    transport->onSendEnd();
-  }
+
   if (RuntimeOption::EvalProfileHWStructLog) {
     // This step must be done before globals are torn down in hphp_context_exit.
     entry = transport->createStructuredLogEntry();
     StructuredLog::recordRequestGlobals(*entry);
   }
-  hphp_context_exit(false);
+  hphp_context_exit();
   ServerStats::LogPage(file, code);
   return ret;
 }

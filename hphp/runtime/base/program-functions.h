@@ -114,8 +114,7 @@ bool hphp_invoke(ExecutionContext *context,
                  bool warmupOnly,
                  bool richErrorMsg,
                  const std::string& prelude);
-void hphp_context_shutdown();
-void hphp_context_exit(bool shutdown = true);
+void hphp_context_exit();
 
 void hphp_thread_init();
 void hphp_thread_exit();

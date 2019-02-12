@@ -706,8 +706,8 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
                           const char *sqlstate, const char *supp);
-void throw_pdo_exception(const Variant& code, const Variant& info,
-  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+void throw_pdo_exception(const Variant& info,
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

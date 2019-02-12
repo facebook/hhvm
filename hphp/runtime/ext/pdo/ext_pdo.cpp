@@ -388,10 +388,9 @@ const StaticString
   s_errorInfo("errorInfo"),
   s_PDOException("PDOException");
 
-void throw_pdo_exception(const Variant& code, const Variant& info,
-                         const char *fmt, ...) {
+void throw_pdo_exception(const Variant& info, const char *fmt, ...) {
   auto obj = SystemLib::AllocPDOExceptionObject();
-  obj->o_set(s_code, code, s_PDOException);
+  obj->o_set(s_code, 0, s_PDOException);
 
   va_list ap;
   va_start(ap, fmt);
@@ -428,7 +427,7 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
     VArrayInit info(2);
     info.append(String(*pdo_err, CopyString));
     info.append(0LL);
-    throw_pdo_exception(String(sqlstate, CopyString), info.toArray(), "%s",
+    throw_pdo_exception(info.toArray(), "%s",
                         err.c_str());
   }
 }
@@ -478,7 +477,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
   if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
     raise_warning("%s", err.c_str());
   } else {
-    throw_pdo_exception(String(*pdo_err, CopyString), info, "%s", err.c_str());
+    throw_pdo_exception(info, "%s", err.c_str());
   }
 }
 
@@ -864,13 +863,12 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     String name = "pdo.dsn."; name += data_source;
     String ini_dsn;
     if (!IniSetting::Get(name, ini_dsn)) {
-      throw_pdo_exception(uninit_null(), uninit_null(),
-                          "invalid data source name");
+      throw_pdo_exception(uninit_null(), "invalid data source name");
     }
     data_source = ini_dsn;
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(uninit_null(), uninit_null(),
+      throw_pdo_exception(uninit_null(),
                           "invalid data source name (via INI: %s)",
                           ini_dsn.data());
     }
@@ -880,14 +878,12 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     /* the specified URI holds connection details */
     auto file = File::Open(data_source.substr(4), "rb");
     if (!file || file->isInvalid()) {
-      throw_pdo_exception(uninit_null(), uninit_null(),
-                          "invalid data source URI");
+      throw_pdo_exception(uninit_null(), "invalid data source URI");
     }
     data_source = file->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(uninit_null(), uninit_null(),
-                          "invalid data source name (via URI)");
+      throw_pdo_exception(uninit_null(), "invalid data source name (via URI)");
     }
   }
 
@@ -897,7 +893,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
   if (iter == drivers.end()) {
     /* NB: don't want to include the data_source in the error message as
      * it might contain a password */
-    throw_pdo_exception(uninit_null(), uninit_null(), "could not find driver");
+    throw_pdo_exception(uninit_null(), "could not find driver");
   }
   PDODriver *driver = iter->second;
 
@@ -947,8 +943,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
         data->m_dbh = driver->createResource(colon + 1, username,
                                              password, options);
         if (!data->m_dbh) {
-          throw_pdo_exception(uninit_null(), uninit_null(),
-                              "unable to create a connection");
+          throw_pdo_exception(uninit_null(), "unable to create a connection");
         }
         data->m_dbh->conn()->persistent_id = shashkey;
       }
@@ -958,8 +953,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     data->m_dbh = driver->createResource(colon + 1, username,
                                          password, options);
     if (!data->m_dbh) {
-      throw_pdo_exception(uninit_null(), uninit_null(),
-                          "unable to create a connection");
+      throw_pdo_exception(uninit_null(), "unable to create a connection");
     }
   }
 
@@ -1041,7 +1035,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
   auto data = Native::data<PDOData>(this_);
 
   if (data->m_dbh->conn()->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(),
+    throw_pdo_exception(uninit_null(),
                         "There is already an active transaction");
   }
   if (data->m_dbh->conn()->begin()) {
@@ -1059,8 +1053,7 @@ static bool HHVM_METHOD(PDO, commit) {
 
   assertx(data->m_dbh->conn()->driver);
   if (!data->m_dbh->conn()->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(),
-                        "There is no active transaction");
+    throw_pdo_exception(uninit_null(), "There is no active transaction");
   }
   if (data->m_dbh->conn()->commit()) {
     data->m_dbh->conn()->in_txn = 0;
@@ -1082,8 +1075,7 @@ static bool HHVM_METHOD(PDO, rollback) {
 
   assertx(data->m_dbh->conn()->driver);
   if (!data->m_dbh->conn()->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(),
-                        "There is no active transaction");
+    throw_pdo_exception(uninit_null(), "There is no active transaction");
   }
   if (data->m_dbh->conn()->rollback()) {
     data->m_dbh->conn()->in_txn = 0;
@@ -1200,7 +1192,7 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
   }
 
   if (attribute == PDO_ATTR_AUTOCOMMIT) {
-    throw_pdo_exception(uninit_null(), uninit_null(),
+    throw_pdo_exception(uninit_null(),
                         "The auto-commit mode cannot be changed for this "
                         "driver");
   } else if (!data->m_dbh->conn()->support(PDOConnection::MethodSetAttribute)) {
@@ -1478,13 +1470,13 @@ static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& /*name*/,
 }
 
 static Variant HHVM_METHOD(PDO, __wakeup) {
-  throw_pdo_exception(uninit_null(), uninit_null(),
+  throw_pdo_exception(uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
   return init_null();
 }
 
 static Variant HHVM_METHOD(PDO, __sleep) {
-  throw_pdo_exception(uninit_null(), uninit_null(),
+  throw_pdo_exception(uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
   return init_null();
 }
@@ -3322,14 +3314,14 @@ static Variant HHVM_METHOD(PDOStatement, valid) {
 }
 
 static Variant HHVM_METHOD(PDOStatement, __wakeup) {
-  throw_pdo_exception(uninit_null(), uninit_null(),
+  throw_pdo_exception(uninit_null(),
                       "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return init_null();
 }
 
 static Variant HHVM_METHOD(PDOStatement, __sleep) {
-  throw_pdo_exception(uninit_null(), uninit_null(),
+  throw_pdo_exception(uninit_null(),
                       "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return init_null();

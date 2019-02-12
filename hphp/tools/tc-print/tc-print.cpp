@@ -24,6 +24,7 @@
 #include <vector>
 #include <sstream>
 
+#include <folly/Format.h>
 #include <folly/Singleton.h>
 
 #include "hphp/runtime/vm/repo.h"
@@ -611,13 +612,24 @@ void printCFG() {
 
 void printTopFuncs() {
   if (!nTopFuncs) return;
+  std::map<FuncId,std::string> funcStrs;
+  for (uint32_t t = 0; t < NTRANS; t++) {
+    auto tRec = TREC(t);
+    if (!tRec->isValid()) continue;
+    auto funcId = tRec->src.funcID();
+    if (funcStrs.count(funcId)) continue;
+    auto funcName = tRec->funcName;
+    funcStrs[funcId] = folly::sformat("{:<6}: {}", funcId, funcName);
+  }
   TransToFuncMapper funcMapper(g_transData);
   PerfEventsMap<FuncId> funcPerfEvents = transPerfEvents.mapTo(funcMapper);
   funcPerfEvents.printEventsSummary(sortBy,
-                                    "FuncId",
+                                    "Function",
+                                    72,
                                     nTopFuncs,
                                     verboseStats,
-                                    helpersMinPercentage);
+                                    helpersMinPercentage,
+                                    funcStrs);
 }
 
 void printTopFuncsBySize() {
@@ -680,6 +692,7 @@ void printTopTrans() {
       !sortByDensity) {
     transPerfEvents.printEventsSummary(sortBy,
                                        "TransId",
+                                       12,
                                        nTopTrans,
                                        verboseStats,
                                        helpersMinPercentage);
@@ -728,6 +741,7 @@ void printBytecodeStats(const OfflineTransData* tdata,
 
   bcPerfEvents.printEventsSummary(etype,
                                   "Opcode",
+                                  16,
                                   PerfEventsMap<ExtOpcode>::kAllEntries,
                                   verboseStats,
                                   helpersMinPercentage,

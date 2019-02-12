@@ -102,12 +102,17 @@ private:
 
   template<typename C>
   void outputAligned(C val) const {
-    std::cout << folly::format("{:>20}", val);
+    std::cout << folly::format("{:>16}", val);
   }
 
-  void printColumnHeaders(std::string keyColName,
+  template<typename C>
+  void outputAlignedKey(C val, uint16_t width) const {
+    std::cout << folly::format("{:<*}", width, val);
+  }
+
+  void printColumnHeaders(std::string keyColName, uint16_t keyColWidth,
                           const std::vector<PerfEventType>& etypes) const {
-    outputAligned(keyColName);
+    outputAlignedKey(keyColName, keyColWidth);
     std::cout << " ";
     for (size_t i = 0; i < etypes.size(); i++) {
       outputAligned(eventTypeToCommandLineArgument(etypes[i]));
@@ -243,6 +248,7 @@ public:
 
   void printEventsSummary(PerfEventType sortBy,
                           std::string keyColName,
+                          uint16_t keyColWidth,
                           size_t topN=kAllEntries,
                           bool verbose=false,
                           double minPercentage=0,
@@ -282,22 +288,22 @@ public:
 
     if (!verbose) {
       // Otherwise, we print them multilple times below.
-      printColumnHeaders(keyColName, printedEvents);
+      printColumnHeaders(keyColName, keyColWidth, printedEvents);
     }
 
     // Print the rows: one per key.
     topN = std::min(topN, ranking.size());
     for (size_t i = 0; i < topN; i++) {
 
-      if (verbose) printColumnHeaders(keyColName, printedEvents);
+      if (verbose) printColumnHeaders(keyColName, keyColWidth, printedEvents);
 
       // Try to map the key, if possible.
       if (keyToStr.empty()) {
-        outputAligned(ranking[i].second);
+        outputAlignedKey(ranking[i].second, keyColWidth);
       } else {
         auto it = keyToStr.find(ranking[i].second);
         always_assert(it != keyToStr.end());
-        outputAligned(it->second);
+        outputAlignedKey(it->second, keyColWidth);
       }
       std::cout << " ";
 
@@ -309,7 +315,7 @@ public:
         auto total = std::max<uint64_t>(eventTotals[printedEvents[j]], 1);
         snprintf(errBuff,
                  kErrBuffSize,
-                 "%10" PRIu64 " (%5.2lf%%)",
+                 "%6" PRIu64 " (%5.2lf%%)",
                  eventCount,
                  eventCount * 100.0 / total);
         outputAligned(errBuff);

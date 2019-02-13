@@ -1,0 +1,2 @@
+-vRuntime.Eval.EmitFuncPointers=0
+-vRuntime.Eval.EmitMethCallerFuncPointers=0

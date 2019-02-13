@@ -94,6 +94,7 @@ struct RepoOptions {
   E(bool,      EmitFuncPointers,               true)             \
   E(bool,      EmitClsMethPointers,            EmitFuncPointers) \
   E(bool,      EmitInstMethPointers,           EmitFuncPointers) \
+  E(bool,      EmitMethCallerFuncPointers,     false)            \
   /**/
 
   std::string path() const { return m_path; }

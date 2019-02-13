@@ -1,0 +1,48 @@
+object(__SystemLib\MethCallerHelper)#1 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#2 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#2 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#3 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#2 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#3 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#3 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+object(__SystemLib\MethCallerHelper)#4 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}

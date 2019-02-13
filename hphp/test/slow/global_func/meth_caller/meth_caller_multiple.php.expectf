@@ -1,0 +1,8 @@
+function(Ans\MethCaller$Ans\A::afunc)
+int(2)
+function(Ans\MethCaller$Ans\A::afunc)
+int(4)
+function(Ans\Bns\MethCaller$Ans\A::afunc)
+int(2)
+function(Ans\Bns\MethCaller$Ans\Bns\A::afunc)
+int(3)

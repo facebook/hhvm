@@ -88,6 +88,8 @@ type state = {
   hoisted_classes : class_ list;
   (* Hoisted inline functions *)
   hoisted_functions : fun_ list;
+  (* Hoisted meth_caller functions *)
+  named_hoisted_functions : fun_ SMap.t;
   (* Functions with inout_wrappers *)
   inout_wrappers : fun_ list;
   (* The current namespace environment *)
@@ -152,6 +154,7 @@ let initial_state popt =
   captured_generics = ULS.empty;
   hoisted_classes = [];
   hoisted_functions = [];
+  named_hoisted_functions = SMap.empty;
   inout_wrappers = [];
   namespace = Namespace_env.empty popt;
   static_vars = ULS.empty;
@@ -605,6 +608,69 @@ let check_if_in_async_context { scope; pos; _ } =
   | ScopeItem.Method md :: _ ->
     check_valid_fun_kind md.m_name md.m_fun_kind
 
+(* meth_caller helpers *)
+let rec get_scope_fmode scope =
+  match scope with
+  | [] -> FileInfo.Mstrict
+  | ScopeItem.Class cd :: _ -> cd.c_mode
+  | ScopeItem.Function fd :: _ -> fd.f_mode
+  | _ :: scope -> get_scope_fmode scope
+
+let make_fn_param pid is_variadic =
+  {
+    param_hint = None;
+    param_is_reference = false;
+    param_is_variadic = is_variadic;
+    param_id = pid;
+    param_expr = None;
+    param_modifier = None;
+    param_callconv = None;
+    param_user_attributes = [];
+  }
+
+let convert_meth_caller_to_func_ptr env st p pc cls pf func =
+  let mangle_name = SU.mangle_meth_caller cls func in
+  let fun_handle =
+    p, Call ((p, Id (p, "\\hh\\fun")), [], [(p, String mangle_name)], []) in
+  if SMap.has_key mangle_name st.named_hoisted_functions then
+    st, fun_handle
+  else
+    (* Build a new meth_caller function *)
+    (* invariant(is_a($o, <cls>), 'object must be an instance of <cls>'); *)
+    let obj_var = p, "$o" in
+    let obj_lvar = p, Lvar obj_var in
+    let assert_invariant = p, Call ((p, Id (p, "invariant")), [],
+      [(p, Call((p, Id (p, "is_a")), [], [obj_lvar; (pc, String cls)], []));
+       (p, String ("object must be an instance of (" ^ cls ^ ")"))], []) in
+
+    (* return $o-><func>(...$args); *)
+    let args_var = p, "$args" in
+    let meth_caller_handle = p, Call
+      ((p, Obj_get (obj_lvar, (p, Id (pf, func)), OG_nullthrows)), [], [],
+      [(p, Lvar args_var)]) in
+    let fd =  {
+      f_mode = (get_scope_fmode env.scope);
+      f_namespace = st.namespace;
+      f_name = (p, mangle_name);
+      f_params =
+        [(make_fn_param obj_var false); (make_fn_param args_var true)];
+      f_body =
+        [(p, Expr(assert_invariant)); (p, Return (Some meth_caller_handle))];
+      f_tparams = [];
+      f_constrs = [];
+      f_ret = None;
+      f_user_attributes = [];
+      f_file_attributes = [];
+      f_fun_kind = FSync;
+      f_span = p;
+      f_doc_comment = None;
+      f_static = false;
+      f_external = false;
+    } in
+    let named_hoisted_functions =
+      SMap.add mangle_name fd st.named_hoisted_functions in
+    { st with named_hoisted_functions }, fun_handle
+
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Null | True | False | Omitted | Yield_break
@@ -645,6 +711,30 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e1 = convert_expr env st e1 in
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
+  | Call ((_, Id (_, meth_caller)), _, [(pc, cls); (pf, func)], [])
+    when (String.lowercase @@ SU.strip_global_ns meth_caller = "hh\\meth_caller") &&
+         (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
+    let cls = match cls with
+      | Class_const (cid, (_, cs)) when SU.is_class cs ->
+        let _, (_, ex) = convert_expr env st cid in
+        let get_mangle_cls_name = match ex with
+          | Id (pc, id) when not (SU.is_self id) &&
+                             not (SU.is_parent id) &&
+                             not (SU.is_static id) ->
+              let fq_id, _id_opt =
+                Hhbc_id.Class.elaborate_id st.namespace (pc, id) in
+              Hhbc_id.Class.to_raw_string fq_id
+          | _ -> Emit_fatal.raise_fatal_parse pc "Invalid class"
+        in
+        get_mangle_cls_name
+      | String name -> name
+      | _ -> Emit_fatal.raise_fatal_parse pc "Class must be a Class or string type"
+      in
+    let func = match func with
+      | String name -> name
+      | _ -> Emit_fatal.raise_fatal_parse pf "Func must be a string type"
+      in
+    convert_meth_caller_to_func_ptr env st p pc cls pf func
   | Call ((_, Id (pe, "get_class")), _, [], [])
     when st.namespace.Namespace_env.ns_name = None ->
     st, inline_class_name_if_possible
@@ -1418,8 +1508,10 @@ let convert_toplevel_prog ~popt defs =
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
   let fun_defs = List.rev_map st.hoisted_functions (fun fd -> Hoisted, Fun fd) in
+  let named_hoisted_functions = SMap.values st.named_hoisted_functions in
+  let named_fun_defs = List.rev_map named_hoisted_functions (fun fd -> TopLevel, Fun fd) in
   let class_defs = List.rev_map st.hoisted_classes (fun cd -> Hoisted, Class cd) in
-  let ast_defs = fun_defs @ original_defs @ class_defs in
+  let ast_defs = fun_defs @ named_fun_defs @ original_defs @ class_defs in
   let global_state =
     Emit_env.(
       { global_explicit_use_set = st.explicit_use_set

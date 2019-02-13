@@ -1,0 +1,28 @@
+object(__SystemLib\MethCallerHelper)#1 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
+int(2)
+object(__SystemLib\MethCallerHelper)#2 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
+int(4)
+object(__SystemLib\MethCallerHelper)#3 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
+int(2)
+object(__SystemLib\MethCallerHelper)#4 (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(9) "Ans\Bns\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "afunc"
+}
+int(3)

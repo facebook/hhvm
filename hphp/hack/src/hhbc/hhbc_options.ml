@@ -58,6 +58,7 @@ type t = {
   option_emit_func_pointers               : bool;
   option_emit_cls_meth_pointers           : bool;
   option_emit_inst_meth_pointers          : bool;
+  option_emit_meth_caller_func_pointers   : bool;
   option_rx_is_enabled                    : bool;
   option_enable_stronger_await_binding      : bool;
 }
@@ -111,6 +112,7 @@ let default = {
   option_emit_func_pointers = true;
   option_emit_cls_meth_pointers = true;
   option_emit_inst_meth_pointers = true;
+  option_emit_meth_caller_func_pointers = true;
   option_rx_is_enabled = false;
   option_enable_stronger_await_binding = false;
 }
@@ -160,6 +162,7 @@ let phpism_disable_static_local_variables o = o.option_phpism_disable_static_loc
 let emit_func_pointers o = o.option_emit_func_pointers
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
+let emit_meth_caller_func_pointers o = o.option_emit_meth_caller_func_pointers
 let rx_is_enabled o = o.option_rx_is_enabled
 let enable_stronger_await_binding o = o.option_enable_stronger_await_binding
 let to_string o =
@@ -316,6 +319,8 @@ let set_option options name value =
     { options with option_emit_cls_meth_pointers = int_of_string value > 0 }
   | "hhvm.emit_inst_meth_pointers" ->
     { options with option_emit_inst_meth_pointers = int_of_string value > 0 }
+  | "hhvm.emit_meth_caller_func_pointers" ->
+    { options with option_emit_meth_caller_func_pointers = int_of_string value > 0 }
   | "hhvm.rx_is_enabled" ->
     { options with option_rx_is_enabled = int_of_string value > 0 }
   | "hack.lang.enableawaitasanexpression" ->
@@ -468,6 +473,8 @@ let value_setters = [
      fun opts v -> { opts with option_emit_func_pointers = (v > 0) });
   (set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_cls_meth_pointers = (v > 0) });
+  (set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int @@
+     fun opts v -> { opts with option_emit_meth_caller_func_pointers = (v > 0) });
   (set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_inst_meth_pointers = (v > 0) });
   (set_value "hhvm.rx_is_enabled" get_value_from_config_int @@

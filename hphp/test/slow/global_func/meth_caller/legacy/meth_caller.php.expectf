@@ -1,0 +1,12 @@
+int(1)
+int(4)
+int(6)
+int(8)
+int(9)
+int(10)
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (D), instead it is (B)' in %s/meth_caller.php:31
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s/meth_caller.php(31): __SystemLib\MethCallerHelper->__invoke()
+#2 {main}

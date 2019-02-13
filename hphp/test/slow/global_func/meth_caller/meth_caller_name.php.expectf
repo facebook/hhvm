@@ -1,0 +1,8 @@
+function(MethCaller$A::f)
+function(MethCaller$B::f)
+function(MethCaller$C::f)
+function(MethCaller$D::f)
+function(Ans\MethCaller$Ans\A::f)
+function(Ans\MethCaller$Ans\B::f)
+function(Ans\MethCaller$Ans\C::f)
+function(Ans\MethCaller$Ans\D::f)

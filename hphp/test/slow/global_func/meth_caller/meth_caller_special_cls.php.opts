@@ -1,0 +1,2 @@
+-vEval.EmitFuncPointers=1
+-vEval.EmitMethCallerFuncPointers=1

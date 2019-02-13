@@ -1838,13 +1838,14 @@ let is_in_unyieldable_magic_method context =
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 
-let function_call_argument_errors node errors =
+let function_call_argument_errors ~in_constructor_call node errors =
   match syntax node with
   | DecoratedExpression
     { decorated_expression_decorator = { syntax = Token token ; _ }
     ; decorated_expression_expression = expression
     } when Token.kind token = TokenKind.Inout ->
       let result =
+        if in_constructor_call then Some (true, SyntaxError.inout_param_in_construct) else
         match syntax expression with
         | BinaryExpression _ ->
           Some (true, SyntaxError.fun_arg_inout_set)
@@ -2400,7 +2401,12 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       else []
     in
     let designator_errors = class_type_designator_errors ctr_call.constructor_call_type in
-    typechecker_errors @ designator_errors @ errors
+    let func_errors =
+      let arg_list = syntax_to_list_no_separators ctr_call.constructor_call_argument_list in
+      List.fold_right arg_list ~init:[]
+        ~f:(fun p acc -> function_call_argument_errors ~in_constructor_call:true p acc)
+    in
+    typechecker_errors @ designator_errors @ func_errors @ errors
   | InstanceofExpression { instanceof_right_operand = operand; _ } ->
     (class_type_designator_errors operand) @ errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
@@ -2442,7 +2448,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     in
     let arg_list = syntax_to_list_no_separators arg_list in
     let errors = List.fold_right arg_list ~init:errors
-      ~f:(fun p acc -> function_call_argument_errors p acc)
+      ~f:(fun p acc -> function_call_argument_errors ~in_constructor_call:false p acc)
     in
     let errors =
       function_call_on_xhp_name_errors env function_call_receiver errors in

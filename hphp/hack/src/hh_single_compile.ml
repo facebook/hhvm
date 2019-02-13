@@ -424,7 +424,8 @@ let extract_facts ?pretty ~filename text =
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
         ~force_hh:enable_hh_syntax
-        ~enable_xhp text
+        ~enable_xhp
+        ~filename text
   in
   (* return empty string if file has syntax errors *)
   Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty) json_facts

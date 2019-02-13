@@ -10,7 +10,6 @@
 type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
-  has_dot_hack_extension: bool;
   codegen: bool;
   force_hh: bool;
   enable_xhp: bool;
@@ -24,7 +23,6 @@ type t = {
 let default = {
   hhvm_compat_mode = false;
   php5_compat_mode = false;
-  has_dot_hack_extension = false;
   codegen = false;
   force_hh = false;
   enable_xhp = false;
@@ -39,7 +37,6 @@ let default = {
 let make
   ?(hhvm_compat_mode = default.hhvm_compat_mode)
   ?(php5_compat_mode = default.php5_compat_mode)
-  ?(has_dot_hack_extension = default.has_dot_hack_extension)
   ?(codegen = default.codegen)
   ?(force_hh = default.force_hh)
   ?(enable_xhp = default.enable_xhp)
@@ -51,7 +48,6 @@ let make
   () = {
     hhvm_compat_mode;
     php5_compat_mode;
-    has_dot_hack_extension;
     codegen;
     force_hh;
     enable_xhp;
@@ -64,7 +60,6 @@ let make
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
 let php5_compat_mode e = e.php5_compat_mode
-let has_dot_hack_extension e = e.has_dot_hack_extension
 let codegen e = e.codegen
 let force_hh e = e.force_hh
 let enable_xhp e = e.enable_xhp

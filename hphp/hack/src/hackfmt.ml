@@ -32,13 +32,68 @@ let text_source_to_filename = function
   | File filename -> Some filename
   | Stdin filename -> filename
 
+let file_exists path = Option.is_some (Sys_utils.realpath path)
+
+let rec guess_root config start recursion_limit =
+  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
+  else if Wwwroot.is_www_directory ~config start then Some start
+  else if recursion_limit <= 0 then None
+  else guess_root config (Path.parent start) (recursion_limit - 1)
+
+let get_root_for_diff () =
+  eprintf "No root specified, trying to guess one\n";
+  let config = ".hhconfig" in
+  let start_path = Path.make "." in
+  let root = match guess_root config start_path 50 with
+    | None -> start_path
+    | Some r -> r in
+  Wwwroot.assert_www_directory ~config root;
+  eprintf "Guessed root: %a\n%!" Path.output root;
+  root
+
+let get_root_for_format files =
+  let cur = Path.make "." in
+  let start_path = match files with
+    | [] -> cur
+    (* just use the first file here. specifying more than one will result in an
+     * error during validation *)
+    | hd :: _ -> Path.make hd |> Path.dirname
+  in
+  match guess_root ".hhconfig" start_path 50 with
+  | Some p -> p
+  | None -> cur
+
+let read_hhconfig path =
+  let config = Sys_utils.cat path |> Config_file.parse_contents in
+  FEnv.{
+    add_trailing_commas = Config_file.Getters.bool_
+      "hackfmt.add_trailing_commas"
+      ~default:default.add_trailing_commas
+      config;
+    indent_width = Config_file.Getters.int_
+      "hackfmt.indent_width"
+      ~default:default.indent_width
+      config;
+    indent_with_tabs =
+      Config_file.Getters.bool_
+      "hackfmt.tabs" (* keep consistent with CLI arg name *)
+      ~default:default.indent_with_tabs
+      config;
+    line_width = Config_file.Getters.int_
+      "hackfmt.line_width"
+      ~default:default.line_width
+      config
+  }
+
+let opt_default opt def = match opt with | Some v -> v | None -> def
+
 module Env = struct
   type t = {
     debug: bool;
     test: bool;
     mutable mode: string option;
     mutable text_source: text_source;
-    mutable root: string;
+    root: string;
   }
 end
 
@@ -54,14 +109,17 @@ let parse_options () =
   let end_line = ref None in
   let at_char = ref None in
   let inplace = ref false in
-  let indent_width = ref FEnv.(default.indent_width) in
-  let indent_with_tabs = ref FEnv.(default.indent_with_tabs) in
-  let line_width = ref FEnv.(default.line_width) in
   let diff = ref false in
-  let root = ref None in
   let diff_dry = ref false in
   let debug = ref false in
   let test = ref false in
+
+  (* The following are either inferred from context (cwd and .hhconfig),
+   * or via CLI flags, with priority given to the latter. *)
+  let cli_indent_width = ref None in
+  let cli_indent_with_tabs = ref false in
+  let cli_line_width = ref None in
+  let cli_root = ref None in
 
   let rec options = ref [
     "--range",
@@ -86,25 +144,26 @@ let parse_options () =
     "-i", Arg.Set inplace, " Format file in-place";
     "--in-place", Arg.Set inplace, " Format file in-place";
 
-    "--indent-width", Arg.Set_int indent_width,
+    "--indent-width", Arg.Int (fun x -> cli_indent_width := Some x),
       sprintf
         " Specify the number of spaces per indentation level. Defaults to %d"
         FEnv.(default.indent_width);
 
-    "--line-width", Arg.Set_int line_width,
+    "--line-width", Arg.Int (fun x -> cli_line_width := Some x),
       sprintf
         " Specify the maximum length for each line. Defaults to %d"
         FEnv.(default.line_width);
 
-    "--tabs", Arg.Set indent_with_tabs, " Indent with tabs rather than spaces";
+    "--tabs", Arg.Set cli_indent_with_tabs, " Indent with tabs rather than spaces";
 
     "--diff",
       Arg.Set diff,
       " Format the changed lines in a diff" ^
       " (example: hg diff | hackfmt --diff)";
 
-    "--root", Arg.String (fun x -> root := Some x),
-      "[dir]  Specify a root directory for --diff mode";
+    "--root", Arg.String (fun x -> cli_root := Some x),
+      "[dir]  Specify a root directory for --diff mode, or a directory " ^
+      "containing .hhconfig for standard mode";
 
     "--diff-dry-run", Arg.Set diff_dry,
       " Preview the files that would be overwritten by --diff mode";
@@ -131,16 +190,26 @@ let parse_options () =
       raise (InvalidCliArg "Cannot use --range with --line-range")
     | _ -> None
   in
-  let config = FEnv.{default with
-    indent_width = !indent_width;
-    indent_with_tabs = !indent_with_tabs;
-    line_width = !line_width;
-  } in
-  (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !root,
-    !diff_dry, config),
+  let root = match !cli_root with
+    | Some p -> Path.make p
+    | None -> if !diff then get_root_for_diff () else get_root_for_format !files
+  in
+  let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
+  let config =
+    if file_exists hhconfig_path then read_hhconfig hhconfig_path else FEnv.default
+  in
+  let config =
+    FEnv.{
+      add_trailing_commas = config.add_trailing_commas;
+      indent_width = opt_default !cli_indent_width config.indent_width;
+      indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
+      line_width = opt_default !cli_line_width config.line_width;
+    }
+  in
+  (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !diff_dry,
+   config),
+  root,
   (!debug, !test)
-
-let file_exists path = Option.is_some (Sys_utils.realpath path)
 
 type format_options =
   | Print of {
@@ -158,7 +227,6 @@ type format_options =
       config: FEnv.t;
     }
   | Diff of {
-      root: string option;
       dry: bool;
       config: FEnv.t;
     }
@@ -184,7 +252,7 @@ type validate_options_input = {
 
 let validate_options env
   (files, filename_for_logging, range, at_char,
-    inplace, diff, root, diff_dry, config) =
+    inplace, diff, diff_dry, config) =
   let fail msg = raise (InvalidCliArg msg) in
   let filename =
     match files with
@@ -206,7 +274,7 @@ let validate_options env
         fail ("No such file or directory: " ^ path)
   in
   assert_file_exists filename;
-  assert_file_exists root;
+  assert_file_exists (Some env.Env.root);
 
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
@@ -233,7 +301,7 @@ let validate_options env
   | {diff = false; inplace = false; range = None; at_char = Some pos; _} ->
     AtChar {text_source; pos; config}
   | {diff = true; text_source = Stdin None; range = None; _} ->
-    Diff {root; dry = diff_dry; config}
+    Diff {dry = diff_dry; config}
 
 let read_stdin () =
   let buf = Buffer.create 256 in
@@ -322,25 +390,6 @@ let output ?text_source str =
   in
   with_out_channel (fun out_channel -> fprintf out_channel "%s%!" str)
 
-let rec guess_root config start recursion_limit =
-  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
-  else if Wwwroot.is_www_directory ~config start then Some start
-  else if recursion_limit <= 0 then None
-  else guess_root config (Path.parent start) (recursion_limit - 1)
-
-let get_root = function
-  | Some root -> Path.make root
-  | None ->
-    eprintf "No root specified, trying to guess one\n";
-    let config = ".hhconfig" in
-    let start_path = Path.make "." in
-    let root = match guess_root config start_path 50 with
-      | None -> start_path
-      | Some r -> r in
-    Wwwroot.assert_www_directory ~config root;
-    eprintf "Guessed root: %a\n%!" Path.output root;
-    root
-
 let format_diff_intervals ?config env intervals tree =
   try
     logging_time_taken env Logger.format_intervals_end
@@ -389,9 +438,8 @@ let main (env: Env.t) (options: format_options) =
     if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted;
-  | Diff {root; dry; config} ->
-    let root = get_root root in
-    env.Env.root <- Path.to_string root;
+  | Diff {dry; config} ->
+    let root = Path.make env.Env.root in
     read_stdin ()
       |> Parse_diff.go
       |> List.filter_map ~f:begin fun (rel_path, intervals) ->
@@ -438,13 +486,13 @@ let () =
      HackfmtEventLogger) to behave correctly *)
   Daemon.check_entry_point ();
 
-  let options, (debug, test) = parse_options () in
+  let options, root, (debug, test) = parse_options () in
   let env = { Env.
     debug;
     test;
     mode = None;
     text_source = Stdin None;
-    root = Sys.getcwd ();
+    root = Path.to_string root;
   } in
 
   let start_time = Unix.gettimeofday () in

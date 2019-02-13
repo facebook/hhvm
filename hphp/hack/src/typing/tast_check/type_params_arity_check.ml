@@ -97,6 +97,8 @@ let handler = object
       Option.iter t.c_tconst_constraint (check_hint env);
     );
     let check_var v =
+      if TypecheckerOptions.typecheck_xhp_cvars
+      (Env.get_tcopt env) then
       Option.iter v.cv_type (check_hint env) in
     List.iter c.c_vars check_var;
     List.iter c.c_static_vars check_var

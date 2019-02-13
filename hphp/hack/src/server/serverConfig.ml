@@ -290,6 +290,7 @@ let load config_filename options =
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
     ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)
+    ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)
     ~forward_compatibility_level:forward_compat_level
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ~po_auto_namespace_map:(prepare_auto_namespace_map config)

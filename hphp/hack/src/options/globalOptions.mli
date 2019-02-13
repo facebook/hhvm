@@ -212,6 +212,8 @@ type t = {
 
  (* Flag to make UNSAFE_EXPR comments be just comments. *)
  po_disable_unsafe_expr : bool;
+ (* Flag to typecheck xhp code *)
+ tco_typecheck_xhp_cvars : bool;
 
 } [@@deriving show]
 
@@ -256,6 +258,7 @@ val make :
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
   ?po_disable_unsafe_expr: bool ->
+  ?tco_typecheck_xhp_cvars: bool ->
   unit ->
   t
 
@@ -326,3 +329,4 @@ val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
 val po_disable_unsafe_expr : t -> bool
 val setup_pocket_universes : t -> bool -> t
+val tco_typecheck_xhp_cvars : t -> bool

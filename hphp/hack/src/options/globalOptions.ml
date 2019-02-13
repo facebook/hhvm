@@ -49,6 +49,7 @@ type t = {
   log_levels : int SMap.t;
   po_enable_stronger_await_binding : bool;
   po_disable_unsafe_expr : bool;
+  tco_typecheck_xhp_cvars : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -249,6 +250,7 @@ let default = {
  log_levels = SMap.empty;
  po_enable_stronger_await_binding = false;
  po_disable_unsafe_expr = false;
+ tco_typecheck_xhp_cvars = false;
 }
 
 let make
@@ -292,6 +294,7 @@ let make
   ?(log_levels = default.log_levels)
   ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
+  ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ()
 = {
   tco_assume_php;
@@ -335,6 +338,7 @@ let make
   log_levels;
   po_enable_stronger_await_binding;
   po_disable_unsafe_expr;
+  tco_typecheck_xhp_cvars;
 }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -383,6 +387,8 @@ let forward_compatibility_level t = t.forward_compatibility_level
 let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
+let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
+
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in
   let exp_features = if enabled then

@@ -755,7 +755,7 @@ struct TraceProfiler final : Profiler {
     }
   }
 
-  ~TraceProfiler() {
+  ~TraceProfiler() override {
     if (m_successful) {
       free(m_traceBuffer);
       IniSetting::Unbind("profiler.max_trace_buffer");
@@ -1101,7 +1101,7 @@ private:
 struct MemoProfiler final : Profiler {
   explicit MemoProfiler(int /*flags*/) : Profiler(true) {}
 
-  ~MemoProfiler() {
+  ~MemoProfiler() override {
   }
 
  private:

@@ -77,7 +77,7 @@ struct ZipStream : File {
   }
 
 
-  virtual ~ZipStream() { close(); }
+  ~ZipStream() override { close(); }
 
   bool open(const String&, const String&) override { return false; }
 
@@ -160,7 +160,7 @@ struct ZipEntry : SweepableResourceData {
     }
   }
 
-  ~ZipEntry() {
+  ~ZipEntry() override {
     close();
   }
 
@@ -245,7 +245,7 @@ struct ZipDirectory : SweepableResourceData {
                                   m_numFiles(zip_get_num_files(z)),
                                   m_curIndex(0) {}
 
-  ~ZipDirectory() { close(); }
+  ~ZipDirectory() override { close(); }
 
   bool close() {
     bool noError = true;

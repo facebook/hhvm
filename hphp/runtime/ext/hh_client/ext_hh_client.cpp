@@ -27,7 +27,7 @@ static class HHClientExtension final : Extension {
     loadSystemlib();
   }
 
-  virtual const DependencySet getDeps() const override {
+  const DependencySet getDeps() const override {
     return DependencySet({"enum"});
   }
 

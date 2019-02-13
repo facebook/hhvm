@@ -82,10 +82,10 @@ class RegisterToken : public ValueToken<const Register> {
   explicit RegisterToken(const Register reg)
       : ValueToken<const Register>(reg) {}
 
-  virtual bool IsRegister() const { return true; }
-  virtual bool CanAddressMemory() const { return value().Is64Bits(); }
-  virtual uint8_t* ToAddress(Debugger* debugger) const;
-  virtual void Print(FILE* out = stdout) const ;
+  bool IsRegister() const override { return true; }
+  bool CanAddressMemory() const override { return value().Is64Bits(); }
+  uint8_t* ToAddress(Debugger* debugger) const override;
+  void Print(FILE* out = stdout) const override ;
   const char* Name() const;
 
   static Token* Tokenize(const char* arg);
@@ -107,8 +107,8 @@ class FPRegisterToken : public ValueToken<const FPRegister> {
   explicit FPRegisterToken(const FPRegister fpreg)
       : ValueToken<const FPRegister>(fpreg) {}
 
-  virtual bool IsFPRegister() const { return true; }
-  virtual void Print(FILE* out = stdout) const ;
+  bool IsFPRegister() const override { return true; }
+  void Print(FILE* out = stdout) const override ;
 
   static Token* Tokenize(const char* arg);
   static FPRegisterToken* Cast(Token* tok) {
@@ -127,12 +127,12 @@ class IdentifierToken : public ValueToken<char*> {
     value_ = new char[size];
     strncpy(value_, name, size);
   }
-  virtual ~IdentifierToken() { delete[] value_; }
+  ~IdentifierToken() override { delete[] value_; }
 
-  virtual bool IsIdentifier() const { return true; }
-  virtual bool CanAddressMemory() const { return strcmp(value(), "pc") == 0; }
-  virtual uint8_t* ToAddress(Debugger* debugger) const;
-  virtual void Print(FILE* out = stdout) const;
+  bool IsIdentifier() const override { return true; }
+  bool CanAddressMemory() const override { return strcmp(value(), "pc") == 0; }
+  uint8_t* ToAddress(Debugger* debugger) const override;
+  void Print(FILE* out = stdout) const override;
 
   static Token* Tokenize(const char* arg);
   static IdentifierToken* Cast(Token* tok) {
@@ -147,10 +147,10 @@ class AddressToken : public ValueToken<uint8_t*> {
  public:
   explicit AddressToken(uint8_t* address) : ValueToken<uint8_t*>(address) {}
 
-  virtual bool IsAddress() const { return true; }
-  virtual bool CanAddressMemory() const { return true; }
-  virtual uint8_t* ToAddress(Debugger* debugger) const;
-  virtual void Print(FILE* out = stdout) const ;
+  bool IsAddress() const override { return true; }
+  bool CanAddressMemory() const override { return true; }
+  uint8_t* ToAddress(Debugger* debugger) const override;
+  void Print(FILE* out = stdout) const override ;
 
   static Token* Tokenize(const char* arg);
   static AddressToken* Cast(Token* tok) {
@@ -166,8 +166,8 @@ class IntegerToken : public ValueToken<int64_t> {
  public:
   explicit IntegerToken(int value) : ValueToken<int64_t>(value) {}
 
-  virtual bool IsInteger() const { return true; }
-  virtual void Print(FILE* out = stdout) const;
+  bool IsInteger() const override { return true; }
+  void Print(FILE* out = stdout) const override;
 
   static Token* Tokenize(const char* arg);
   static IntegerToken* Cast(Token* tok) {
@@ -195,10 +195,10 @@ class FormatToken : public Token {
  public:
   FormatToken() {}
 
-  virtual bool IsFormat() const { return true; }
+  bool IsFormat() const override { return true; }
   virtual int SizeOf() const = 0;
   virtual void PrintData(void* data, FILE* out = stdout) const = 0;
-  virtual void Print(FILE* out = stdout) const = 0;
+  void Print(FILE* out = stdout) const override = 0;
 
   static Token* Tokenize(const char* arg);
   static FormatToken* Cast(Token* tok) {
@@ -212,13 +212,13 @@ template<typename T> class Format : public FormatToken {
  public:
   explicit Format(const char* fmt) : fmt_(fmt) {}
 
-  virtual int SizeOf() const { return sizeof(T); }
-  virtual void PrintData(void* data, FILE* out = stdout) const {
+  int SizeOf() const override { return sizeof(T); }
+  void PrintData(void* data, FILE* out = stdout) const override {
     T value;
     memcpy(&value, data, sizeof(value));
     fprintf(out, fmt_, value);
   }
-  virtual void Print(FILE* out = stdout) const;
+  void Print(FILE* out = stdout) const override;
 
  private:
   const char* fmt_;
@@ -232,10 +232,10 @@ class UnknownToken : public Token {
     unknown_ = new char[size];
     strncpy(unknown_, arg, size);
   }
-  virtual ~UnknownToken() { delete[] unknown_; }
+  ~UnknownToken() override { delete[] unknown_; }
 
-  virtual bool IsUnknown() const { return true; }
-  virtual void Print(FILE* out = stdout) const;
+  bool IsUnknown() const override { return true; }
+  void Print(FILE* out = stdout) const override;
 
  private:
   char* unknown_;
@@ -272,7 +272,7 @@ class HelpCommand : public DebugCommand {
  public:
   explicit HelpCommand(Token* name) : DebugCommand(name) {}
 
-  virtual bool Run(Debugger* debugger);
+  bool Run(Debugger* debugger) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -286,7 +286,7 @@ class ContinueCommand : public DebugCommand {
  public:
   explicit ContinueCommand(Token* name) : DebugCommand(name) {}
 
-  virtual bool Run(Debugger* debugger);
+  bool Run(Debugger* debugger) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -300,11 +300,11 @@ class StepCommand : public DebugCommand {
  public:
   StepCommand(Token* name, IntegerToken* count)
       : DebugCommand(name), count_(count) {}
-  virtual ~StepCommand() { delete count_; }
+  ~StepCommand() override { delete count_; }
 
   int64_t count() { return count_->value(); }
-  virtual bool Run(Debugger* debugger);
-  virtual void Print(FILE* out = stdout);
+  bool Run(Debugger* debugger) override;
+  void Print(FILE* out = stdout) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -320,15 +320,15 @@ class DisasmCommand : public DebugCommand {
  public:
   DisasmCommand(Token* name, Token* target, IntegerToken* count)
       : DebugCommand(name), target_(target), count_(count) {}
-  virtual ~DisasmCommand() {
+  ~DisasmCommand() override {
     delete target_;
     delete count_;
   }
 
   Token* target() { return target_; }
   int64_t count() { return count_->value(); }
-  virtual bool Run(Debugger* debugger);
-  virtual void Print(FILE* out = stdout);
+  bool Run(Debugger* debugger) override;
+  void Print(FILE* out = stdout) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -346,11 +346,11 @@ class PrintCommand : public DebugCommand {
  public:
   PrintCommand(Token* name, Token* target)
       : DebugCommand(name), target_(target) {}
-  virtual ~PrintCommand() { delete target_; }
+  ~PrintCommand() override { delete target_; }
 
   Token* target() { return target_; }
-  virtual bool Run(Debugger* debugger);
-  virtual void Print(FILE* out = stdout);
+  bool Run(Debugger* debugger) override;
+  void Print(FILE* out = stdout) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -369,7 +369,7 @@ class MemCommand : public DebugCommand {
              IntegerToken* count,
              FormatToken* format)
       : DebugCommand(name), target_(target), count_(count), format_(format) {}
-  virtual ~MemCommand() {
+  ~MemCommand() override {
     delete target_;
     delete count_;
     delete format_;
@@ -378,8 +378,8 @@ class MemCommand : public DebugCommand {
   Token* target() { return target_; }
   int64_t count() { return count_->value(); }
   FormatToken* format() { return format_; }
-  virtual bool Run(Debugger* debugger);
-  virtual void Print(FILE* out = stdout);
+  bool Run(Debugger* debugger) override;
+  void Print(FILE* out = stdout) override;
 
   static DebugCommand* Build(std::vector<Token*> args);
 
@@ -397,9 +397,9 @@ class MemCommand : public DebugCommand {
 class UnknownCommand : public DebugCommand {
  public:
   explicit UnknownCommand(std::vector<Token*> args) : args_(args) {}
-  virtual ~UnknownCommand();
+  ~UnknownCommand() override;
 
-  virtual bool Run(Debugger* debugger);
+  bool Run(Debugger* debugger) override;
 
  private:
   std::vector<Token*> args_;
@@ -410,9 +410,9 @@ class InvalidCommand : public DebugCommand {
  public:
   InvalidCommand(std::vector<Token*> args, int index, const char* cause)
       : args_(args), index_(index), cause_(cause) {}
-  virtual ~InvalidCommand();
+  ~InvalidCommand() override;
 
-  virtual bool Run(Debugger* debugger);
+  bool Run(Debugger* debugger) override;
 
  private:
   std::vector<Token*> args_;

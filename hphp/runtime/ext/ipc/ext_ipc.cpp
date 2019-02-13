@@ -392,7 +392,7 @@ struct Semaphore : SweepableResourceData {
     return true;
   }
 
-  ~Semaphore() {
+  ~Semaphore() override {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this

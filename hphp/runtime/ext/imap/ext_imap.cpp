@@ -47,7 +47,7 @@ struct ImapStream : SweepableResourceData {
   ImapStream(MAILSTREAM *stream, int64_t flag)
       : m_stream(stream), m_flag(flag) {
   }
-  ~ImapStream() {
+  ~ImapStream() override {
     close();
   }
 

@@ -843,22 +843,22 @@ RDS_LOCAL(FileSessionData, s_file_session_data);
 struct FileSessionModule : SessionModule {
   FileSessionModule() : SessionModule("files") {
   }
-  virtual bool open(const char *save_path, const char *session_name) {
+  bool open(const char *save_path, const char *session_name) override {
     return s_file_session_data->open(save_path, session_name);
   }
-  virtual bool close() {
+  bool close() override {
     return s_file_session_data->close();
   }
-  virtual bool read(const char *key, String &value) {
+  bool read(const char *key, String &value) override {
     return s_file_session_data->read(key, value);
   }
-  virtual bool write(const char *key, const String& value) {
+  bool write(const char *key, const String& value) override {
     return s_file_session_data->write(key, value);
   }
-  virtual bool destroy(const char *key) {
+  bool destroy(const char *key) override {
     return s_file_session_data->destroy(key);
   }
-  virtual bool gc(int maxlifetime, int *nrdels) {
+  bool gc(int maxlifetime, int *nrdels) override {
     return s_file_session_data->gc(maxlifetime, nrdels);
   }
 };
@@ -975,7 +975,7 @@ std::vector<SessionSerializer*> SessionSerializer::RegisteredSerializers;
 struct BinarySessionSerializer : SessionSerializer {
   BinarySessionSerializer() : SessionSerializer("php_binary") {}
 
-  virtual String encode() {
+  String encode() override {
     StringBuffer buf;
     VariableSerializer vs(VariableSerializer::Type::Serialize);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
@@ -995,7 +995,7 @@ struct BinarySessionSerializer : SessionSerializer {
     return buf.detach();
   }
 
-  virtual bool decode(const String& value) {
+  bool decode(const String& value) override {
     const char *endptr = value.data() + value.size();
     VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
@@ -1030,7 +1030,7 @@ static BinarySessionSerializer s_binary_session_serializer;
 struct PhpSessionSerializer : SessionSerializer {
   PhpSessionSerializer() : SessionSerializer("php") {}
 
-  virtual String encode() {
+  String encode() override {
     StringBuffer buf;
     VariableSerializer vs(VariableSerializer::Type::Serialize);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
@@ -1051,7 +1051,7 @@ struct PhpSessionSerializer : SessionSerializer {
     return buf.detach();
   }
 
-  virtual bool decode(const String& value) {
+  bool decode(const String& value) override {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
     VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);

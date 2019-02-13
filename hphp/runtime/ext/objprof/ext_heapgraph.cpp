@@ -120,7 +120,7 @@ struct CapturedPtr {
 struct HeapGraphContext : SweepableResourceData {
   explicit HeapGraphContext(const HeapGraph& hg) : hg(hg) {}
   explicit HeapGraphContext(HeapGraph&& hg) : hg(std::move(hg)) {}
-  ~HeapGraphContext() {}
+  ~HeapGraphContext() override {}
 
   bool isInvalid() const override {
     return false;

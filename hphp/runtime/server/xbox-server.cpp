@@ -123,7 +123,7 @@ static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 struct XboxWorker
   : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
-  virtual void doJob(XboxTransport *job) {
+  void doJob(XboxTransport *job) override {
     try {
       // If this job or the previous job that ran on this thread have
       // a custom initial document, make sure we do a reset
@@ -156,7 +156,7 @@ private:
     }
   }
 
-  virtual void onThreadExit() {
+  void onThreadExit() override {
     if (!s_xbox_request_handler.isNull()) {
       s_xbox_request_handler.destroy();
     }
@@ -359,7 +359,7 @@ struct XboxTask : SweepableResourceData {
     m_job->incRefCount();
   }
 
-  ~XboxTask() {
+  ~XboxTask() override {
     m_job->decRefCount();
   }
 

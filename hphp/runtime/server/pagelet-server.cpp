@@ -297,7 +297,7 @@ static int64_t to_ms(const timespec& ts) {
 struct PageletWorker
   : JobQueueWorker<PageletTransport*,Server*,true,false,JobQueueDropVMStack>
 {
-  virtual void doJob(PageletTransport *job) {
+  void doJob(PageletTransport *job) override {
     try {
       job->onRequestStart(job->getStartTimer());
       int timeout = job->getTimeoutSeconds();
@@ -336,7 +336,7 @@ struct PageletTask : SweepableResourceData {
     m_job->incRefCount();
   }
 
-  ~PageletTask() {
+  ~PageletTask() override {
     m_job->decRefCount();
   }
 

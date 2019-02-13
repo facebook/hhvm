@@ -162,11 +162,11 @@ private:
 };
 
 struct ShmopRequestLocal final : RequestEventHandler {
-  virtual void requestInit() override {
+  void requestInit() override {
     // no-op
   }
 
-  virtual void requestShutdown() override {
+  void requestShutdown() override {
     m_records.clear();
   }
 

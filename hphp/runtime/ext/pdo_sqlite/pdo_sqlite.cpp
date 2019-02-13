@@ -33,7 +33,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 struct PDOSqliteStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
-  virtual ~PDOSqliteStatement();
+  ~PDOSqliteStatement() override;
 
   bool support(SupportedMethod method) override;
   bool executer() override;

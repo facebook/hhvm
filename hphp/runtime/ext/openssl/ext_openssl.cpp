@@ -94,7 +94,7 @@ static OpenSSLInitializer s_openssl_initializer;
 struct Key : SweepableResourceData {
   EVP_PKEY *m_key;
   explicit Key(EVP_PKEY *key) : m_key(key) { assertx(m_key);}
-  ~Key() {
+  ~Key() override {
     if (m_key) EVP_PKEY_free(m_key);
   }
 
@@ -283,7 +283,7 @@ public:
 
   X509_REQ *csr() { return m_csr; }
 
-  ~CSRequest() {
+  ~CSRequest() override {
     // X509_REQ_free(nullptr) is a no-op
     X509_REQ_free(m_csr);
   }

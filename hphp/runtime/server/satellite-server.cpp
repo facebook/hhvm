@@ -109,20 +109,20 @@ struct InternalPageServer : SatelliteServer {
                                       std::placeholders::_1));
   }
 
-  virtual void start() {
+  void start() override {
     m_server->start();
   }
-  virtual void stop() {
+  void stop() override {
     m_server->stop();
     m_server->waitForEnd();
   }
-  virtual size_t getMaxThreadCount() {
+  size_t getMaxThreadCount() override {
     return m_server->getActiveWorker();
   }
-  virtual int getActiveWorker() {
+  int getActiveWorker() override {
     return m_server->getActiveWorker();
   }
-  virtual int getQueuedJobs() {
+  int getQueuedJobs() override {
     return m_server->getQueuedJobs();
   }
 
@@ -159,20 +159,20 @@ struct RPCServer : SatelliteServer {
     });
   }
 
-  virtual void start() {
+  void start() override {
     m_server->start();
   }
-  virtual void stop() {
+  void stop() override {
     m_server->stop();
     m_server->waitForEnd();
   }
-  virtual size_t getMaxThreadCount() {
+  size_t getMaxThreadCount() override {
     return m_server->getActiveWorker();
   }
-  virtual int getActiveWorker() {
+  int getActiveWorker() override {
     return m_server->getActiveWorker();
   }
-  virtual int getQueuedJobs() {
+  int getQueuedJobs() override {
     return m_server->getQueuedJobs();
   }
 private:

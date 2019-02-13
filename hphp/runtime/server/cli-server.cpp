@@ -436,7 +436,7 @@ private:
 
 struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
   explicit CLIServer(const char* path);
-  ~CLIServer() = default;
+  ~CLIServer() override = default;
 
   void start();
   void stop();

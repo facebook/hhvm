@@ -58,7 +58,7 @@ struct PDOMySqlError {
 
 struct PDOMySqlConnection : PDOConnection {
   PDOMySqlConnection();
-  virtual ~PDOMySqlConnection();
+  ~PDOMySqlConnection() override;
 
   bool create(const Array& options) override;
 
@@ -109,7 +109,7 @@ struct PDOMySqlStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
 
   PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
-  virtual ~PDOMySqlStatement();
+  ~PDOMySqlStatement() override;
 
   bool create(const String& sql, const Array& options);
 

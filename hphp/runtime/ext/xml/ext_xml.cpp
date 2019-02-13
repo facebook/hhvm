@@ -110,7 +110,7 @@ static struct XMLExtension final : Extension {
 struct XmlParser : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}
-  virtual ~XmlParser();
+  ~XmlParser() override;
   void cleanupImpl();
   CLASSNAME_IS("xml");
   const String& o_getClassNameHook() const override;

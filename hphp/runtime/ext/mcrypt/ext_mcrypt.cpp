@@ -34,7 +34,7 @@ namespace HPHP {
 struct MCrypt : SweepableResourceData {
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
-  ~MCrypt() {
+  ~MCrypt() override {
     MCrypt::close();
   }
 

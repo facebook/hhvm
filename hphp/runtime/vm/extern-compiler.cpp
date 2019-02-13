@@ -410,7 +410,7 @@ struct CompilerGuard final: public FactsParser {
     std::tie(m_index, m_ptr) = m_pool.getCompiler();
   }
 
-  ~CompilerGuard() {
+  ~CompilerGuard() override {
     m_pool.releaseCompiler(m_index, m_ptr);
   }
 

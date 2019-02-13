@@ -158,7 +158,7 @@ struct LdapLink : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() {}
-  ~LdapLink() { closeImpl(); }
+  ~LdapLink() override { closeImpl(); }
 
   void close() {
     closeImpl();
@@ -246,7 +246,7 @@ struct LdapResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapResult)
 
   LdapResult(LDAPMessage *res) : data(res) {}
-  ~LdapResult() { close();}
+  ~LdapResult() override { close();}
 
   void close() {
     if (data) {
@@ -272,7 +272,7 @@ struct LdapResultEntry : SweepableResourceData {
 
   LdapResultEntry(LDAPMessage *entry, req::ptr<LdapResult> res)
     : data(entry), ber(nullptr), result(std::move(res)) {}
-  ~LdapResultEntry() { close();}
+  ~LdapResultEntry() override { close();}
 
   void close() {
     if (ber != NULL) {

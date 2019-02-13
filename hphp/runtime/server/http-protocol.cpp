@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/server/http-protocol.h"
 
-#include <map>
 #include <string>
 
 #include <folly/Conv.h>
@@ -46,9 +45,6 @@
 #include "hphp/runtime/vm/globals-array.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
-
-using std::map;
-using std::string;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -481,7 +477,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
 bool HttpProtocol::PrepareCookieVariable(Array& cookie,
                                          Transport *transport) {
 
-  string cookie_data = transport->getHeader("Cookie");
+  std::string cookie_data = transport->getHeader("Cookie");
   if (!cookie_data.empty()) {
     StringBuffer sb;
     sb.append(cookie_data);
@@ -562,7 +558,7 @@ static void CopyServerInfo(Array& server,
                            Transport *transport,
                            const VirtualHost *vhost) {
 
-  string hostHeader = transport->getHeader("Host");
+  std::string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
   String serverNameHeader(transport->getServerName());
   if (hostHeader.empty()) {
@@ -615,7 +611,7 @@ static void CopyRemoteInfo(Array& server, Transport *transport) {
 
 static void CopyAuthInfo(Array& server, Transport *transport) {
   // APE processes Authorization: Basic into PHP_AUTH_USER and PHP_AUTH_PW
-  string authorization = transport->getHeader("Authorization");
+  std::string authorization = transport->getHeader("Authorization");
   if (!authorization.empty()) {
     if (strncmp(authorization.c_str(), "Basic ", 6) == 0) {
       // it's safe to pass this as a string literal since authorization
@@ -659,7 +655,7 @@ static void CopyPathInfo(Array& server,
     port_suffix = folly::format(":{}", serverPort).str();
   }
 
-  string hostHeader;
+  std::string hostHeader;
   if (server.exists(s_HTTP_HOST)) {
     hostHeader = server[s_HTTP_HOST].toCStrRef().data();
   }
@@ -764,8 +760,8 @@ void HttpProtocol::PrepareServerVariable(Array& server,
                                          const VirtualHost *vhost) {
   // $_SERVER
 
-  string contentType = transport->getHeader("Content-Type");
-  string contentLength = transport->getHeader("Content-Length");
+  std::string contentType = transport->getHeader("Content-Type");
+  std::string contentLength = transport->getHeader("Content-Length");
 
   // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
   // Content-Type, Authorization), since the CGI "spec" merely says the server
@@ -898,7 +894,7 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
   }
 }
 
-bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
+bool HttpProtocol::IsRfc1867(const std::string contentType, std::string &boundary) {
   if (contentType.empty()) return false;
   const char *ctstr = contentType.c_str();
   char *s;
@@ -937,7 +933,7 @@ void HttpProtocol::DecodeRfc1867(Transport *transport,
                                  size_t contentLength,
                                  const void *&data,
                                  size_t &size,
-                                 string boundary) {
+                                 std::string boundary) {
   rfc1867PostHandler(transport,
                      post,
                      files,

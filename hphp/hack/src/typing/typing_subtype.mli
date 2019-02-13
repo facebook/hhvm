@@ -97,9 +97,8 @@ val add_constraint :
   locl ty ->
   Env.env
 
-val solve_tyvars :
-  ?solve_invariant:bool ->
-  tyvars:Ident.t list ->
+(* Force solve all remaining unsolved type variables *)
+val solve_all_unsolved_tyvars :
   Env.env ->
   Env.env
 

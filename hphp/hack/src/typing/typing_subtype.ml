@@ -2622,10 +2622,11 @@ let solve_tyvar ~freshen ~solve_invariant env r var =
       then bind_to_lower_bound ~freshen env r var lower_bounds
       else env
 
-let solve_tyvars ?(solve_invariant = false) ~tyvars env =
+let solve_all_unsolved_tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
-  then List.fold_left tyvars ~init:env
-    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~solve_invariant env Reason.Rnone tyvar)
+  then IMap.fold
+    (fun tyvar _ env -> solve_tyvar ~freshen:false ~solve_invariant:true env Reason.Rnone tyvar)
+    env.Env.tvenv env
   else env
 
 (* Expand an already-solved type variable, and solve an unsolved type variable
@@ -2647,7 +2648,8 @@ let expand_type_and_solve env ty =
 let close_tyvars_and_solve env =
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
-  solve_tyvars ~tyvars env
+  List.fold_left tyvars ~init:env
+    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~solve_invariant:false env Reason.Rnone tyvar)
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in

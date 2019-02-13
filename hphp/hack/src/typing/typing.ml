@@ -518,8 +518,7 @@ and fun_def tcopt f : Tast.fun_def option =
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
-      let tyvars = IMap.keys env.Env.tvenv in
-      let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
+      let env = SubType.solve_all_unsolved_tyvars env in
       Typing_subtype.log_prop env;
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
@@ -1097,8 +1096,7 @@ and as_expr env ty1 pe e =
       if TUtils.is_dynamic env ty1
       then env
       else Type.sub_type pe Reason.URforeach env ty1 ty in
-    let tyvars = Env.get_current_tyvars env in
-    let env = Env.set_tyvar_variance ~tyvars env ty in
+    let env = Env.set_tyvar_variance env ty in
   SubType.close_tyvars_and_solve env, tk, tv) @@
   let env, tv = Env.fresh_unresolved_type env pe in
   match e with
@@ -1309,8 +1307,7 @@ and exprs_expected (pos, ur, expected_tyl) env el =
 and make_result env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
-  let tyvars = Env.get_current_tyvars env in
-  let env = Env.set_tyvar_variance ~tyvars env ty in
+  let env = Env.set_tyvar_variance env ty in
   env, T.make_typed_expr p ty te, ty
 
 and expr_
@@ -2797,8 +2794,7 @@ and anon_make tenv p f ft idl =
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
-        let tyvars = Env.get_current_tyvars env in
-        let env = Env.set_tyvar_variance ~tyvars env ty in
+        let env = Env.set_tyvar_variance env ty in
         let env = SubType.close_tyvars_and_solve env in
         env, te, hret
       end
@@ -2922,6 +2918,10 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         if check_parent
         then env, c_ty
         else ExprDepTy.make env cid c_ty in
+      (* Set variance according to type of `new` expression now. Lambda arguments
+       * to the constructor might depend on it, and `call_construct` only uses
+       * `ctor_fty` to set the variance which has void return type *)
+      let env = Env.set_tyvar_variance env new_ty in
       let env, _tcid, tel, tuel, ctor_fty =
         let env = check_expected_ty "New" env new_ty expected in
         call_construct p env class_info params el uel cid in
@@ -3135,8 +3135,7 @@ and assign_ p ur env e1 ty2 =
              ~f:(fun env _ -> Env.fresh_unresolved_type env (Reason.to_pos r)) in
           let tuple_ty = (Reason.Rwitness (fst e1), Ttuple tyl) in
           let env = Type.sub_type p ur env folded_ty2 tuple_ty in
-          let tyvars = Env.get_current_tyvars env in
-          let env = Env.set_tyvar_variance ~tyvars env tuple_ty in
+          let env = Env.set_tyvar_variance env tuple_ty in
           let env = SubType.close_tyvars_and_solve env in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
@@ -4942,8 +4941,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
 
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
-    let tyvars = Env.get_current_tyvars env in
-    let env = Env.set_tyvar_variance ~tyvars env ft.ft_ret in
+    let env = Env.set_tyvar_variance env ft.ft_ret in
     let is_lambda e = match snd e with Efun _ -> true | _ -> false in
 
     let get_next_param_info paraml =
@@ -4976,7 +4974,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
                 | _, Toption ty -> set_params_variance env ty
                 | _, Tfun { ft_params; _ } ->
                   List.fold ~init:env ~f:(fun env param ->
-                    Env.set_tyvar_variance ~tyvars env param.fp_type) ft_params
+                    Env.set_tyvar_variance env param.fp_type) ft_params
                 | _ -> env in
               let env = set_params_variance env param.fp_type in
               env, opt_result
@@ -6513,8 +6511,7 @@ and method_def env m =
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env = Env.check_todo env in
-  let tyvars = IMap.keys env.Env.tvenv in
-  let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
+  let env = SubType.solve_all_unsolved_tyvars env in
   Typing_subtype.log_prop env;
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in

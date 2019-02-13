@@ -1916,7 +1916,7 @@ and expr_
       let env, te1, ty1 = raw_expr ~lhs_of_null_coalesce:true env e1 in
       let env, te2, ty2 = expr ?expected env e2 in
       let env, ty1' = Env.fresh_unresolved_type env (fst e1) in
-      let env = SubType.sub_type env ty1 (Reason.Rnone, Toption ty1') in
+      let env = SubType.sub_type env ty1 (MakeType.nullable Reason.Rnone ty1') in
       let env, ty_result = Union.union env ty1' ty2 in
       make_result env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
   (* For example, e1 += e2. This is typed and translated as if
@@ -2126,7 +2126,7 @@ and expr_
             env, MakeType.int (Reason.Rwitness p)
           | Ast.FAsyncGenerator ->
             let env, ty = Env.fresh_type env p in
-            env, (Reason.Ryield_asyncnull p, Toption ty)
+            env, MakeType.nullable (Reason.Ryield_asyncnull p) ty
           end
         | _, Some x ->
             env, x
@@ -2147,7 +2147,7 @@ and expr_
         Type.coerce_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
-      make_result env p (T.Yield taf) (Reason.Ryield_send p, Toption send)
+      make_result env p (T.Yield taf) (MakeType.nullable (Reason.Ryield_send p) send)
   | Yield_from e ->
     let env, key = Env.fresh_type env p in
     let env, value = Env.fresh_type env p in
@@ -2244,11 +2244,7 @@ and expr_
     let env, hint_ty =
       if is_nullable then
         let env, hint_ty = refine_type env (fst e) expr_ty hint_ty in
-        let hint_ty =
-          match snd hint_ty with
-          | Toption _ -> hint_ty (* Dont create ??hint *)
-          | _ -> Reason.Rwitness p, Toption (hint_ty) in
-        env, hint_ty
+        env, MakeType.nullable (Reason.Rwitness p) hint_ty
       else if is_instance_var e then
         let env, _, ivar_ty = raw_expr env e in
         let env, ((ivar_pos, _) as ivar) = get_instance_var env e in
@@ -3772,10 +3768,10 @@ and is_abstract_ft fty = match fty with
                 (r11, Toption (r12, Tapply (coll, [tk; (r13, Toption tv)])))
               | _ -> assert false in
             let param1 = { param1 with fp_type = ty1 } in
-            let ty2 = (r2, Toption (r2, Tgeneric "Tk")) in
+            let ty2 = MakeType.nullable r2 (r2, Tgeneric "Tk") in
             let param2 = { param2 with fp_type = ty2 } in
             let rret = fst fty.ft_ret in
-            let ret = (rret, Toption (rret, Tgeneric "Tv")) in
+            let ret = MakeType.nullable rret (rret, Tgeneric "Tv") in
             [param1; param2], ret
           | 3 ->
             let param2 = { param2 with fp_type = (r2, Tgeneric "Tk") } in
@@ -4490,7 +4486,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
         let env, method_, x = obj_get_ ~is_method ~nullsafe ~valkind
           ~pos_params ~explicit_tparams env ty cid id k k_lhs in
         let env, method_ = TUtils.non_null env method_ in
-        env, (Reason.Rnullsafe_op p1, Toption method_), x
+        env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, x
     | None ->
         Errors.null_member id_str id_pos
           (Reason.to_string

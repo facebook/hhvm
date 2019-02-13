@@ -114,9 +114,9 @@ let is_xhp_child env pos ty =
   let reason = Reason.Rwitness pos in
   (* ?XHPChild *)
   let ty_child = MakeType.class_type reason SN.Classes.cXHPChild [] in
-  let ty_child = reason, Toption ty_child in
+  let ty_child = MakeType.nullable reason ty_child in
   (* Any ?Traversable *)
   let ty_traversable = MakeType.traversable reason (Reason.none, TUtils.tany env) in
-  let ty_traversable = reason, Toption ty_traversable in
+  let ty_traversable = MakeType.nullable reason ty_traversable in
   let tys = [ty_child; ty_traversable] in
   List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

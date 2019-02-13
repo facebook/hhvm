@@ -78,3 +78,9 @@ let mixed r =
   (r, Toption (r, Tnonnull))
 let resource r =
   prim_type r Nast.Tresource
+
+let nullable r ty =
+  (* Cheap avoidance of double nullable *)
+  match ty with
+  | _, (Toption _ as ty_) -> (r, ty_)
+  | _ -> (r, Toption ty)

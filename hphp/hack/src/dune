@@ -101,4 +101,5 @@
   (libraries
     hackfmt
     hackfmt_debug
+    utils_config_file
     utils_ocaml_overrides))

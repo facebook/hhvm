@@ -23,29 +23,9 @@ type bare_this_usage =
 type decl_vars_state = {
   (* set of locals used inside the functions *)
   dvs_locals: ULS.t;
-  (* does function use anything that might access local dynamically:
-  - special function
-  - '$' operator *)
-  dvs_use_dynamic_var_access: bool;
   (* does function uses bare form of $this *)
   dvs_bare_this: bare_this_usage option
 }
-
-(* List of functions from SimpleFunctionCall::InitFunctionTypeMap()
-   with kinds: Extract, Assert, Compact, GetDefinedVars.
-   When function contains calls to functions from the list its is considered
-   to be having dynamic vars *)
-let dynamic_functions = SSet.of_list @@ [
-  "extract";
-  "parse_str";
-  "compact";
-  "assert";
-  "get_defined_vars"
-]
-
-let with_dynamic_var_access s =
-  if s.dvs_use_dynamic_var_access then s
-  else { s with dvs_use_dynamic_var_access = true }
 
 let with_local name s =
   { s with dvs_locals = ULS.add s.dvs_locals name }
@@ -58,13 +38,11 @@ let with_this barethis s =
     | u, _ -> u in
   if s.dvs_bare_this = new_bare_this then s
   else
-  { s with
-      dvs_bare_this = new_bare_this;
-      dvs_locals = ULS.add s.dvs_locals SN.SpecialIdents.this }
+  { dvs_bare_this = new_bare_this;
+    dvs_locals = ULS.add s.dvs_locals SN.SpecialIdents.this }
 
 let dvs_empty = {
   dvs_locals = ULS.empty;
-  dvs_use_dynamic_var_access = false;
   dvs_bare_this = None; }
 
 (* Add a local to the accumulated list. Don't add if it's $GLOBALS or
@@ -181,12 +159,6 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
       | (_, Ast.Id(p, "\\HH\\set_frame_metadata")) ->
         add_local ~barethis:Bare_this acc (p,"$86metadata")
       | _ -> acc in
-    let acc =
-      match e with
-      | (_, Ast.Id (_, s))
-        when SSet.mem (String.lowercase s) dynamic_functions ->
-        with_dynamic_var_access acc
-      | _ -> acc in
     let barethis =
       match e with
       | (_, Ast.Id(_, ("isset" | "echo" | "empty"))) -> Bare_this
@@ -237,7 +209,6 @@ let uls_from_ast ~is_closure_body ~has_this
     visitor#on_program acc b in
   let needs_local_this =
     state.dvs_bare_this = Some Bare_this_as_ref ||
-    (state.dvs_bare_this = Some Bare_this && state.dvs_use_dynamic_var_access) ||
     is_in_static_method
   in
   let param_names =

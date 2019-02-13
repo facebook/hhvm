@@ -60,9 +60,6 @@ public:
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   void setupScopes(AnalysisResultConstRawPtr ar);
-  bool readsLocals() const;
-  bool writesLocals() const;
-  void updateVtFlags();
   void setLocalThis(const std::string& name) { m_localThis = name; }
   bool isCallToFunction(folly::StringPiece name) const;
   std::string getFullName() const;
@@ -73,9 +70,6 @@ protected:
     Define,
     Create,
     VariableArgument,
-    Extract,
-    Assert,
-    Compact,
     ShellExec,
     Constant,
     Defined,
@@ -83,7 +77,6 @@ protected:
     ClassExists,
     InterfaceExists,
     Unserialize,
-    GetDefinedVars,
     ThrowFatal,
     ThrowParseFatal,
     ClassAlias,

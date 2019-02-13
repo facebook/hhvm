@@ -58,12 +58,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["func_get_args"]        = FunType::VariableArgument;
     FunctionTypeMap["func_num_args"]        = FunType::VariableArgument;
 
-    FunctionTypeMap["extract"]              = FunType::Extract;
-    FunctionTypeMap["parse_str"]            = FunType::Extract;
-    FunctionTypeMap["compact"]              = FunType::Compact;
-
-    FunctionTypeMap["assert"]               = FunType::Assert;
-
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
     FunctionTypeMap["passthru"]             = FunType::ShellExec;
@@ -77,8 +71,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
 
     FunctionTypeMap["unserialize"]          = FunType::Unserialize;
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
-
-    FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
   }
 }
 
@@ -196,22 +188,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
       fs->setAttribute(FileScope::VariableArgument);
       break;
 
-    case FunType::Extract:
-      fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      break;
-
-    case FunType::Assert:
-      fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      break;
-
-    case FunType::Compact:
-      fs->setAttribute(FileScope::ContainsDynamicVariable);
-      break;
-
-    case FunType::GetDefinedVars:
-      fs->setAttribute(FileScope::ContainsDynamicVariable);
-      break;
-
     case FunType::Unknown:
       break;
 
@@ -250,32 +226,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
     // for this function call
     setupScopes(ar);
     if (m_params) m_params->markParams();
-  }
-}
-
-bool SimpleFunctionCall::readsLocals() const {
-  return m_type == FunType::GetDefinedVars ||
-    m_type == FunType::Compact || m_type == FunType::Assert;
-}
-
-bool SimpleFunctionCall::writesLocals() const {
-  return m_type == FunType::Extract;
-}
-
-void SimpleFunctionCall::updateVtFlags() {
-  if (m_type != FunType::Unknown) {
-    auto const func = getScope()->getContainingFunction();
-    if (!func) return;
-    switch (m_type) {
-      case FunType::Extract:
-      case FunType::Assert:
-      case FunType::Compact:
-      case FunType::GetDefinedVars:
-        func->setContainsDynamicVar();
-        break;
-      default:
-        break;
-    }
   }
 }
 

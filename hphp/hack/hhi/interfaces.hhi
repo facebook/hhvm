@@ -567,7 +567,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *
    * @return - an `ImmMap` that has the keys and associated values of the
    *           current `KeyedIterable`.
-   */
+   */ /* HH_FIXME[4110] T40426954 */
   public function toImmMap(): ImmMap<Tk, Tv>;
   /**
    * Returns a lazy, access elements only when needed view of the current

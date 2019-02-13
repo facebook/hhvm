@@ -84,6 +84,7 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
    * See #6853603. */
   public function toMap(): Map<Tk, Tv>;
 
+  /* HH_FIXME[4110] T40426954 */
   public function toImmMap(): ImmMap<Tk, Tv>;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
@@ -207,6 +208,7 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
    * See #6853603. */
   public function toMap(): Map<Tk, Tv>;
 
+  /* HH_FIXME[4110] T40426954 */
   public function toImmMap(): ImmMap<Tk, Tv>;
 
   /* HH_FIXME[4120]: While this violates our variance annotations, we are

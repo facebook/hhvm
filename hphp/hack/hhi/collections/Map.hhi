@@ -122,7 +122,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - an `ImmMap` that is a copy of this `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmMap(): ImmMap<Tk, Tv>;
 
   /**
@@ -149,7 +149,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - an `ImmMap` that is a deep copy of this `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function immutable(): ImmMap<Tk, Tv>;
 
   /**

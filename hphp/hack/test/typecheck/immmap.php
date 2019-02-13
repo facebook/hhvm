@@ -9,10 +9,10 @@
  *
  */
 
-function basic(): ImmMap<mixed, int> {
+function basic(): ImmMap<arraykey, int> {
   return ImmMap { 1 => 1, 2 => 2};
 }
 
-function covariance(): ImmMap<mixed, mixed> {
+function covariance(): ImmMap<arraykey, mixed> {
   return basic();
 }

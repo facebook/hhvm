@@ -1,6 +1,0 @@
-
-
-#define EVENT(n,ty) external CONCAT(on,CAPITALIZE(n)) : ty = STRINGIFY(n) [@@bs.val] 
-
-
-EVENT(exit, unit -> unit)

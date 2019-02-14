@@ -26,6 +26,7 @@
 #include "hphp/util/text-util.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -67,12 +68,15 @@ static bool read_all_post_data(Transport *transport,
   return false;
 }
 
-static void CopyParams(Array& dest, Array& src) {
-  for (ArrayIter iter(src); iter; ++iter) {
-    const auto arraykey =
-      dest.convertKey<IntishCast::CastSilently>(iter.first());
-    dest.set(arraykey, iter.secondVal(), true);
-  }
+static void CopyParams(Array& dest, const Array& src) {
+  IterateKVNoInc(
+    src.get(),
+    [&](Cell k, TypedValue v) {
+      const auto arraykey =
+        dest.convertKey<IntishCast::CastSilently>(k);
+      dest.set(arraykey, v, true);
+    }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -335,9 +339,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 }
 
 void HttpProtocol::PrepareRequestVariables(Array& request,
-                                           Array& get,
-                                           Array& post,
-                                           Array& cookie,
+                                           const Array& get,
+                                           const Array& post,
+                                           const Array& cookie,
                                            const std::string& requestOrder) {
   for (const char& c : requestOrder) {
     switch(c) {

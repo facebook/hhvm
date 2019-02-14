@@ -35,9 +35,9 @@ struct HttpProtocol {
                                      const RequestURI &r,
                                      const SourceRootInfo &sri);
   static void PrepareRequestVariables(Array& request,
-                                      Array& get,
-                                      Array& post,
-                                      Array& cookie,
+                                      const Array& get,
+                                      const Array& post,
+                                      const Array& cookie,
                                       const std::string& requestOrder);
   static void PrepareGetVariable(Array& get,
                                  const RequestURI &r);

@@ -92,12 +92,12 @@ let get_unused_fixmes_for codes applied_fixme_map fn acc =
         then fixme_pos :: acc
         else acc) code_map acc) fixme_map acc
 
-let get_unused_fixmes codes applied_fixmes naming_table  =
+let get_unused_fixmes codes applied_fixmes files_info  =
   let applied_fixme_map =
     List.fold_left applied_fixmes ~init:Relative_path.Map.empty
       ~f:begin fun acc (pos,code) ->
       let fn = Pos.filename pos in
       let line, _, _ = Pos.info_pos pos in
       add_applied_fixme acc code fn line end in
-  Naming_table.fold naming_table ~f:(fun fn _ acc ->
+  Relative_path.Map.fold files_info ~f:(fun fn _ acc ->
     get_unused_fixmes_for codes applied_fixme_map fn acc) ~init:[]

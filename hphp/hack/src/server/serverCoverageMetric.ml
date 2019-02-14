@@ -13,8 +13,8 @@ open Option.Monad_infix
 open Reordered_argument_collections
 open String_utils
 
-module NamingTableStore = GlobalStorage.Make(struct
-  type t = Naming_table.t
+module FileInfoStore = GlobalStorage.Make(struct
+  type t = FileInfo.t Relative_path.Map.t
 end)
 
 let combine v1 v2 =
@@ -107,10 +107,10 @@ let relativize root path =
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
-  let naming_table = NamingTableStore.load () in
+  let files_info = FileInfoStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
     relativize root (Relative_path.to_absolute fn) >>= fun relativized_fn ->
-    Naming_table.get_file_info naming_table fn >>= fun defs ->
+    Relative_path.Map.get files_info fn >>= fun defs ->
     let tast, _ = Typing_check_utils.type_file tcopt fn defs in
     let type_acc = accumulate_types tast fn in
     Some (relativized_fn, type_acc)
@@ -121,8 +121,8 @@ let go_ fn genv env =
   let root = Path.make fn in
   let module RP = Relative_path in
   let next_files = MultiWorker.next
-    genv.ServerEnv.workers (Naming_table.get_files env.ServerEnv.naming_table) in
-  NamingTableStore.store env.ServerEnv.naming_table;
+    genv.ServerEnv.workers (Relative_path.Map.keys env.ServerEnv.files_info) in
+  FileInfoStore.store env.ServerEnv.files_info;
   let tcopt = env.ServerEnv.tcopt in
   let result =
     MultiWorker.call
@@ -132,7 +132,7 @@ let go_ fn genv env =
       ~merge:merge_trie_opt
       ~next:next_files
   in
-  NamingTableStore.clear ();
+  FileInfoStore.clear ();
   result
 
 let go fn genv env =

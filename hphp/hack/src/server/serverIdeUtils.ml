@@ -171,13 +171,13 @@ let recheck tcopt filetuple_l =
     fn, fst @@ Typing_check_utils.type_file tcopt fn defs
   end
 
-let check_file_input tcopt naming_table fi =
+let check_file_input tcopt files_info fi =
   match fi with
   | ServerCommandTypes.FileContent content ->
       declare_and_check content ~f:(fun path _ tast -> path, tast) tcopt
   | ServerCommandTypes.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
-      match Naming_table.get_file_info naming_table path with
+      match Relative_path.Map.get files_info path with
       | Some fileinfo ->
         let wrapper = if Ide_parser_cache.is_enabled () then
           (* Protect shared memory with local changes when using Ide_parser_cache *)

@@ -46,7 +46,7 @@ val add_idep : Dep.variant -> Dep.variant -> unit
 val get_ideps_from_hash : Dep.t -> DepSet.t
 val get_ideps : Dep.variant -> DepSet.t
 val get_files : DepSet.t -> Relative_path.Set.t
-val update_files : Naming_table.t -> unit
+val update_files : FileInfo.t Relative_path.Map.t -> unit
 
 (* Add to accumulator all extend dependencies of source_class. Visited is used
  * to avoid processing nodes reachable in multiple ways more than once. In other

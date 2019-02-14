@@ -11,7 +11,7 @@ val add_function : string -> unit
 (** Given a function name, look up that function's signature on the typing heap
     and mutate the signature search index to include this function. *)
 
-val build : Naming_table.t -> unit
+val build : FileInfo.t Relative_path.Map.t -> unit
 (** Given a Map of file info, retrieve each file's function name and update the
     index *)
 

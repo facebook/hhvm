@@ -179,9 +179,9 @@ let add_function fun_name =
     end
   )
 
-let build naming_table =
+let build fileinfos =
   Hh_logger.log "Building Search Index";
-  Naming_table.iter naming_table (fun _ value ->
+  Relative_path.Map.iter fileinfos (fun _ value ->
     let {FileInfo.funs; _ } = value in
     List.iter funs ~f:(fun (pos, fun_name) ->
       let path =

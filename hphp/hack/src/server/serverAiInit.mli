@@ -9,5 +9,5 @@
 
 val ai_check :
   ServerEnv.genv ->
-  Naming_table.t ->
+  FileInfo.t Relative_path.Map.t ->
   ServerEnv.env -> float -> ServerEnv.env * float

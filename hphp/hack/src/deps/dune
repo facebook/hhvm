@@ -2,8 +2,7 @@
   (name file_info)
   (wrapped false)
   (modules
-    fileInfo
-    naming_table)
+    fileInfo)
   (libraries
     opaque_digest
     pos

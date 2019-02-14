@@ -131,7 +131,7 @@ let go_xcontroller genv env (fnl : string list) =
   let open Option.Monad_infix in
   let classes = List.filter_map fnl ~f:begin fun path ->
     Relative_path.create_detect_prefix path |>
-    Naming_table.get_file_info env.naming_table >>= fun info ->
+    Relative_path.Map.get env.files_info >>= fun info ->
     Some (List.map info.FileInfo.classes ~f:snd)
   end |> List.concat in
   MultiWorker.call

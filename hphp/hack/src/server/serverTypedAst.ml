@@ -32,10 +32,10 @@ let go:
   string ->
   string =
 fun env filename ->
-  let ServerEnv.{tcopt; naming_table; _} = env in
+  let ServerEnv.{tcopt; files_info; _} = env in
 
   (* get the typed ast *)
-  let _, tast = ServerIdeUtils.check_file_input tcopt naming_table
+  let _, tast = ServerIdeUtils.check_file_input tcopt files_info
     (ServerCommandTypes.FileName filename) in
 
   (* get the parse tree *)

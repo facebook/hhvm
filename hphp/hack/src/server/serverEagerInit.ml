@@ -38,7 +38,7 @@ module SLC = ServerLocalConfig
 let type_decl
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
-    (fast: Naming_table.fast)
+    (fast: FileInfo.fast)
     (t: float)
   : ServerEnv.env * float =
   ServerProgress.send_progress_to_monitor "evaluating type declarations";
@@ -68,11 +68,11 @@ let init
   let trace = false in
   let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.naming_table;
+    SearchServiceRunner.update_fileinfo_map env.files_info;
 
-  let t = update_files genv env.naming_table t in
+  let t = update_files genv env.files_info t in
   let env, t = naming env t in
-  let fast = Naming_table.to_fast env.naming_table in
+  let fast = FileInfo.simplify_fast env.files_info in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast = Relative_path.Set.fold failed_parsing
     ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in

@@ -21,7 +21,7 @@ type check_kind =
    * - produces push diagnostics for those files
    * - updates their parsing / naming / decl definitions on heap
    * - updates their parsing level indexes, like HackSearchService or
-   *     ServerEnv.naming_table
+   *     ServerEnv.files_info
    * - invalidates their declaration dependencies, by removing them from the
    *     heap and depending on lazy declaration to redeclare them on
    *     as-needed basis later
@@ -140,9 +140,9 @@ let set_of_idl l =
  *)
 (*****************************************************************************)
 
-let add_old_decls old_naming_table fast =
+let add_old_decls old_files_info fast =
   Relative_path.Map.fold fast ~f:begin fun filename info_names acc ->
-    match Naming_table.get_file_info old_naming_table filename with
+    match Relative_path.Map.get old_files_info filename with
     | None -> acc
     | Some old_info ->
       let old_info_names = FileInfo.simplify old_info in
@@ -155,8 +155,8 @@ let add_old_decls old_naming_table fast =
 (*****************************************************************************)
 
 let remove_decls env fast_parsed =
-  Naming_table.iter fast_parsed begin fun fn _ ->
-    match Naming_table.get_file_info env.naming_table fn with
+  Relative_path.Map.iter fast_parsed begin fun fn _ ->
+    match Relative_path.Map.get env.files_info fn with
     | None -> ()
     | Some {FileInfo.
              funs = funl;
@@ -219,14 +219,11 @@ let get_files_with_stale_errors
 (* Even when we remove an IDE file that failed after parsing stage, it might
  * appear again in later stages - we need to filter it every time we extend
  * the set of files to process *)
-let remove_failed_parsing filter fast ~stop_at_errors env failed_parsing =
-  if stop_at_errors then filter fast
+let remove_failed_parsing fast ~stop_at_errors env failed_parsing =
+  if stop_at_errors then Relative_path.Map.filter fast
     ~f:(fun k _ -> not @@ Relative_path.(Set.mem failed_parsing k &&
                                          Set.mem env.editor_open_files k))
   else fast
-
-let remove_failed_parsing_naming_table = remove_failed_parsing Naming_table.filter
-let remove_failed_parsing_fast = remove_failed_parsing Relative_path.Map.filter
 
 let parsing genv env to_check ~stop_at_errors =
 
@@ -269,7 +266,7 @@ let parsing genv env to_check ~stop_at_errors =
     let ide_failed_parsing =
       Relative_path.Set.inter failed_parsing ide_files in
     let fast =
-      remove_failed_parsing_naming_table fast stop_at_errors env ide_failed_parsing in
+      remove_failed_parsing fast stop_at_errors env ide_failed_parsing in
     let ide_success_parsing =
       Relative_path.Set.diff ide_files ide_failed_parsing in
 
@@ -302,10 +299,10 @@ let parsing genv env to_check ~stop_at_errors =
  *)
 (*****************************************************************************)
 
-let update_naming_table env fast_parsed =
+let update_file_info env fast_parsed =
   Typing_deps.update_files fast_parsed;
-  let naming_table = Naming_table.combine env.naming_table fast_parsed in
-  naming_table
+  let files_info = Relative_path.Map.union fast_parsed env.files_info in
+  files_info
 
 (*****************************************************************************)
 (* Defining the global naming environment.
@@ -320,26 +317,26 @@ let declare_names env fast_parsed =
   let fast_parsed = Relative_path.Set.fold env.failed_naming
     ~init:fast_parsed
     ~f:begin fun k acc ->
-      match Naming_table.get_file_info acc k with
+      match Relative_path.Map.get acc k with
       | Some _ -> acc (* the file was re-parsed already *)
       | None ->
         (* The file was not re-parsed, so it's correct to look up its contents
          * in (old) env. *)
-        match Naming_table.get_file_info env.naming_table k with
+        match Relative_path.Map.get env.files_info k with
         | None -> acc (* this should not happen - failed_naming should be
-                         a subset of keys in naming_table *)
-        | Some v -> Naming_table.update acc k v
+                         a subset of keys in files_info *)
+        | Some v -> Relative_path.Map.add acc k v
     end
   in
   remove_decls env fast_parsed;
   let errorl, failed_naming =
-    Naming_table.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
+    Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
       let errorl', failed'= NamingGlobal.ndecl_file k v in
       let errorl = Errors.merge errorl' errorl in
       let failed = Relative_path.Set.union failed' failed in
       errorl, failed
     end ~init:(Errors.empty, Relative_path.Set.empty) in
-  let fast = Naming_table.to_fast fast_parsed in
+  let fast = FileInfo.simplify_fast fast_parsed in
   errorl, failed_naming, fast
 
 let diff_set_and_map_keys set map =
@@ -381,11 +378,11 @@ module type CheckKindType = sig
 
   (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
-    decl_defs:Naming_table.fast ->
-    naming_table:Naming_table.t ->
+    decl_defs:FileInfo.fast ->
+    files_info:FileInfo.t Relative_path.Map.t ->
     to_redecl_phase2:Relative_path.Set.t ->
     env:ServerEnv.env ->
-    Naming_table.fast * Naming_table.fast
+    FileInfo.fast * FileInfo.fast
 
   val get_to_recheck2_approximation :
     to_redecl_phase2_deps:Typing_deps.DepSet.t ->
@@ -395,17 +392,17 @@ module type CheckKindType = sig
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
     reparsed:Relative_path.Set.t ->
-    phase_2_decl_defs:Naming_table.fast ->
-    naming_table:Naming_table.t ->
+    phase_2_decl_defs:FileInfo.fast ->
+    files_info:FileInfo.t Relative_path.Map.t ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
-    Naming_table.fast * Relative_path.Set.t
+    FileInfo.fast * Relative_path.Set.t
 
 
   (* Update the global state based on resuts of parsing, naming and decl *)
   val get_env_after_decl :
     old_env:ServerEnv.env ->
-    naming_table:Naming_table.t ->
+    files_info:FileInfo.t Relative_path.Map.t ->
     failed_naming:Relative_path.Set.t ->
     ServerEnv.env
 
@@ -439,10 +436,10 @@ module FullCheckKind : CheckKindType = struct
       ~phases:[Errors.Decl]
       ~errors:env.errorl
 
-  let get_defs_to_redecl_phase2 ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
-    let fast = extend_fast decl_defs naming_table to_redecl_phase2 in
+  let get_defs_to_redecl_phase2 ~decl_defs ~files_info ~to_redecl_phase2 ~env =
+    let fast = extend_fast decl_defs files_info to_redecl_phase2 in
     (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
-    let fast = extend_fast fast naming_table env.needs_phase2_redecl in
+    let fast = extend_fast fast files_info env.needs_phase2_redecl in
     fast, Relative_path.Map.empty
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ =
@@ -450,7 +447,7 @@ module FullCheckKind : CheckKindType = struct
      * to approximate anything *)
     Relative_path.Set.empty
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
     (* Besides the files that actually changed, we want to also recheck
      * those that have typing errors referring to files that were
      * reparsed, since positions in those errors can be now stale. TODO: do we
@@ -464,14 +461,14 @@ module FullCheckKind : CheckKindType = struct
     in
     let to_recheck = Relative_path.Set.union stale_errors to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
-    extend_fast phase_2_decl_defs naming_table to_recheck, Relative_path.Set.empty
+    extend_fast phase_2_decl_defs files_info to_recheck, Relative_path.Set.empty
 
     let get_env_after_decl
         ~old_env
-        ~naming_table
+        ~files_info
         ~failed_naming =
       { old_env with
-          naming_table;
+          files_info;
           failed_naming;
           ide_needs_parsing = Relative_path.Set.empty;
           disk_needs_parsing = Relative_path.Set.empty;
@@ -521,13 +518,13 @@ module LazyCheckKind : CheckKindType = struct
        ~errors:env.errorl
 
   let get_defs_to_redecl_phase2
-      ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
+      ~decl_defs ~files_info ~to_redecl_phase2 ~env =
      (* Do phase2 only for IDE files, delay the fanout until next full check *)
     let to_redecl_phase2_now, to_redecl_phase2_later =
       Relative_path.Set.partition (is_ide_file env) to_redecl_phase2
     in
-    extend_fast decl_defs naming_table to_redecl_phase2_now,
-    extend_fast decl_defs naming_table to_redecl_phase2_later
+    extend_fast decl_defs files_info to_redecl_phase2_now,
+    extend_fast decl_defs files_info to_redecl_phase2_later
 
 
   let get_related_files dep =
@@ -550,7 +547,7 @@ module LazyCheckKind : CheckKindType = struct
       ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
     |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~files_info ~to_recheck ~env =
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
     let stale_errors = get_files_with_stale_errors
@@ -562,14 +559,14 @@ module LazyCheckKind : CheckKindType = struct
     let to_recheck = Relative_path.Set.union to_recheck stale_errors in
     let to_recheck_now, to_recheck_later =
       Relative_path.Set.partition (is_ide_file env) to_recheck in
-    extend_fast phase_2_decl_defs naming_table to_recheck_now, to_recheck_later
+    extend_fast phase_2_decl_defs files_info to_recheck_now, to_recheck_later
 
   let get_env_after_decl
       ~old_env
-      ~naming_table
+      ~files_info
       ~failed_naming =
     { old_env with
-        naming_table;
+        files_info;
         failed_naming;
         ide_needs_parsing = Relative_path.Set.empty;
     }
@@ -611,7 +608,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
   let get_oldified_defs env =
     Relative_path.Set.fold env.needs_phase2_redecl ~f:begin fun path acc ->
-      match Naming_table.get_file_info env.naming_table path with
+      match Relative_path.Map.get env.files_info path with
       | None -> acc
       | Some names -> FileInfo.(merge_names (simplify names) acc)
     end ~init:FileInfo.empty_names
@@ -675,7 +672,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let logstring = "Updating deps" in
     Hh_logger.log "Begin %s" logstring;
     let old_env = env in
-    let naming_table = update_naming_table env fast_parsed in
+    let files_info = update_file_info env fast_parsed in
     HackEventLogger.updating_deps_end t;
     let t = Hh_logger.log_duration logstring t in
 
@@ -685,15 +682,15 @@ end = functor(CheckKind:CheckKindType) -> struct
     let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
      * NamingGlobal.ndecl_file *)
-    let fast = extend_fast fast naming_table failed_naming in
+    let fast = extend_fast fast files_info failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
     let deptable_unlocked =
       Typing_deps.allow_dependency_table_reads true in
     let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
-    let fast = extend_fast fast naming_table failed_decl in
-    let fast = add_old_decls env.naming_table fast in
-    let fast = remove_failed_parsing_fast fast stop_at_errors env failed_parsing in
+    let fast = extend_fast fast files_info failed_decl in
+    let fast = add_old_decls env.files_info fast in
+    let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
 
     HackEventLogger.naming_end t;
     let t = Hh_logger.log_duration "Naming" t in
@@ -722,10 +719,10 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* DECLARING TYPES: Phase2 *)
     let fast_redecl_phase2_now, lazy_decl_later =
-      CheckKind.get_defs_to_redecl_phase2 fast naming_table to_redecl_phase2 env
+      CheckKind.get_defs_to_redecl_phase2 fast files_info to_redecl_phase2 env
     in
 
-    let fast_redecl_phase2_now = remove_failed_parsing_fast
+    let fast_redecl_phase2_now = remove_failed_parsing
       fast_redecl_phase2_now stop_at_errors env failed_parsing in
     let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
     ServerProgress.send_progress_to_monitor "evaluating type declarations of %d files" count;
@@ -736,7 +733,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
     let get_classes path =
-      match Naming_table.get_file_info naming_table path with
+      match Relative_path.Map.get files_info path with
       | None -> SSet.empty
       | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
     in
@@ -779,7 +776,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       (Relative_path.Set.cardinal to_recheck);
     let t = Hh_logger.log_duration "Type-decl" t in
     let env = CheckKind.get_env_after_decl
-      ~old_env:env ~naming_table ~failed_naming in
+      ~old_env:env ~files_info ~failed_naming in
     Hh_logger.log "Begin evaluating prechecked changes";
     let env = ServerPrecheckedFiles.update_after_local_changes genv env changes in
     let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
@@ -794,8 +791,8 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
-      files_to_parse fast naming_table to_recheck env in
-    let fast = remove_failed_parsing_fast fast stop_at_errors env failed_parsing in
+      files_to_parse fast files_info to_recheck env in
+    let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
     let to_recheck_count = Relative_path.Map.cardinal fast in
     ServerProgress.send_progress_to_monitor "typechecking %d files" to_recheck_count;
     ServerCheckpoint.process_updates fast;

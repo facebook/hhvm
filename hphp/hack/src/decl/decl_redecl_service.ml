@@ -36,7 +36,7 @@ let compute_deps_neutral = DepSet.empty, DepSet.empty, DepSet.empty
 (*****************************************************************************)
 
 module OnTheFlyStore = GlobalStorage.Make(struct
-  type t = Naming_table.fast
+  type t = FileInfo.fast
 end)
 
 (*****************************************************************************)

@@ -12,7 +12,7 @@ open ServerEnv
 
 let ai_check
     (genv: ServerEnv.genv)
-    (files_info: Naming_table.t)
+    (files_info: FileInfo.t Relative_path.Map.t)
     (env: ServerEnv.env)
     (t: float)
   : ServerEnv.env * float =

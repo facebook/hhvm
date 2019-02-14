@@ -158,4 +158,4 @@ let go ?(quick = false) workers files_set ~get_next popt ~trace =
         parse_sequential ~quick fn content acc popt
       ) in
   if trace then log_parsing_results fast;
-  Naming_table.create fast, errorl, failed_parsing
+  fast, errorl, failed_parsing

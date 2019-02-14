@@ -28,7 +28,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, { Server_status.liveness; has_unsaved_changes; error_list; }
     | STATUS_SINGLE fn -> env, ServerStatusSingle.go fn env.tcopt
     | COVERAGE_LEVELS fn ->
-        env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.naming_table fn
+        env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.files_info fn
     | INFER_TYPE (fn, line, char, dynamic_view) ->
         env, ServerInferType.go env (fn, line, char, dynamic_view)
     | INFER_TYPE_BATCH (positions, dynamic_view) ->
@@ -67,7 +67,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | METHOD_JUMP (class_, filter, find_children) ->
       env, MethodJumps.get_inheritance class_ ~filter ~find_children
-        env.naming_table genv.workers
+        env.files_info genv.workers
     | METHOD_JUMP_BATCH (classes, filter) ->
       env, ServerMethodJumpsBatch.go genv.workers classes filter
     | FIND_REFS find_refs_action ->
@@ -117,7 +117,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         SaveStateService.go
           ~file_info_on_disk
           ~save_decls
-          env.ServerEnv.naming_table
+          env.ServerEnv.files_info
           env.errorl
           filename
           ~replace_state_after_saving

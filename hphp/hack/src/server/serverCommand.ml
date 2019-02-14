@@ -159,7 +159,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       ServerEnv.list_files env oc;
       ServerUtils.shutdown_client (ic, oc)
   | LIST_MODES ->
-      Naming_table.iter env.ServerEnv.naming_table begin fun fn fileinfo ->
+      Relative_path.Map.iter env.ServerEnv.files_info begin fun fn fileinfo ->
         match Relative_path.prefix fn with
         | Relative_path.Root ->
           let mode = match fileinfo.FileInfo.file_mode with

@@ -86,9 +86,9 @@ let find_extended_classes_in_files target_class_name get_method
   end
 
 let find_extended_classes_in_files_parallel workers target_class_name
-      get_method target_class_pos naming_table files =
+      get_method target_class_pos files_info files =
   let classes = Relative_path.Set.fold files ~init:[] ~f:begin fun fn acc ->
-    let { FileInfo.classes; _ } = Naming_table.get_file_info_unsafe naming_table fn in
+    let { FileInfo.classes; _ } = Relative_path.Map.find_unsafe files_info fn in
     classes :: acc
   end in
 
@@ -105,12 +105,12 @@ let find_extended_classes_in_files_parallel workers target_class_name
         target_class_name get_method target_class_pos [] classes
 
 (* Find child classes *)
-let get_child_classes_and_methods cls ~filter naming_table workers =
+let get_child_classes_and_methods cls ~filter files_info workers =
   if filter <> No_filter
   then failwith "Method jump filters not implemented for finding children";
   let files = FindRefsService.get_child_classes_files (Cls.name cls) in
   find_extended_classes_in_files_parallel
-    workers (Cls.name cls) (Cls.get_method cls) (Cls.pos cls) naming_table files
+    workers (Cls.name cls) (Cls.get_method cls) (Cls.pos cls) files_info files
 
 let class_passes_filter ~filter cls =
   match filter, cls with
@@ -151,12 +151,12 @@ let get_ancestor_classes_and_methods cls ~filter acc =
 (*  Returns a list of the ancestor or child
  *  classes and methods for a given class
  *)
-let get_inheritance class_ ~filter ~find_children naming_table workers =
+let get_inheritance class_ ~filter ~find_children files_info workers =
   let class_ = add_ns class_ in
   let class_ = TLazyHeap.get_class class_ in
   match class_ with
   | None -> []
   | Some c ->
     if find_children then
-      get_child_classes_and_methods c ~filter naming_table workers
+      get_child_classes_and_methods c ~filter files_info workers
     else get_ancestor_classes_and_methods c ~filter []

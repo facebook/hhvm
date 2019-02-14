@@ -10,4 +10,8 @@ function f<reify Ta, Tb>() {
 function g<reify Ta, Tb>() { f<reify Ta, Tb>(); }
 function h<reify Ta, Tb>() { g<reify Ta, Tb>(); }
 
-g<reify int, string>();
+function a<T>() {
+  g<reify int, T>();
+}
+
+a();

@@ -666,7 +666,7 @@ and emit_as env pos e h is_nullable =
     (* (e is h) ? e : (e as h) *)
     emit_as_if_then_else_block @@
       Local.scope @@ fun () -> begin
-        let ts_instrs, is_static = emit_reified_arg env pos h in
+        let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
         begin if is_static then
           gather [
             get_type_structure_for_hint env ~targ_map:SMap.empty h;
@@ -681,7 +681,7 @@ and emit_as env pos e h is_nullable =
       end
 
 and emit_is env pos h =
-  let ts_instrs, is_static = emit_reified_arg env pos h in
+  let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
   if is_static then
     gather [
       get_type_structure_for_hint env ~targ_map:SMap.empty h;
@@ -765,17 +765,26 @@ and emit_conditional_expression env pos etest etrue efalse =
       instr_label end_label;
     ]
 
+and get_erased_tparams env =
+  Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
+  |> List.filter_map ~f:(function { A.tp_name = (_, name); A.tp_reified; _ }
+       -> Option.some_if (not tp_reified) name)
+
+and has_non_tparam_generics env targs =
+  let erased_tparams = get_erased_tparams env in
+  List.exists targs ~f:(function
+    | ((_, A.Happly ((_, id), _)), _)
+      when List.mem ~equal:String.equal erased_tparams id -> false
+    | _ -> true)
+
 and emit_reified_targs env pos targs =
-  List.map targs ~f:(function
-    | (_, false) ->
-      get_type_structure_for_hint env ~targ_map:SMap.empty
-        (pos, A.Happly ((pos, "_"), []))
-    | (h, true) -> fst @@ emit_reified_arg env pos h)
+  List.map targs
+    ~f:(fun (h, _) -> fst @@ emit_reified_arg env ~isas:false pos h)
 
 and emit_new env pos expr targs args uargs =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
-  let has_reified_args = List.exists ~f:(fun (_, b) -> b) targs in
+  let has_non_tparam_generics = has_non_tparam_generics env targs in
   let nargs = List.length args + List.length uargs in
   let scope = Emit_env.get_scope env in
   (* If `new self` or `new parent `when self or parent respectively has
@@ -801,10 +810,10 @@ and emit_new env pos expr targs args uargs =
         Option.value ~default:cexpr (get_reified_var_cexpr env pos name) in
       begin match emit_reified_type_opt env pos name with
       | Some instrs ->
-        if has_reified_args then Emit_fatal.raise_fatal_parse pos
+        if not @@ List.is_empty targs then Emit_fatal.raise_fatal_parse pos
           "Cannot have higher kinded reified generics";
         Class_reified instrs, H.MaybeGenerics
-      | None when not has_reified_args ->
+      | None when not has_non_tparam_generics ->
         cexpr, H.NoGenerics
       | None ->
         let cexpr_instrs name =
@@ -816,7 +825,10 @@ and emit_new env pos expr targs args uargs =
           ]
         in
         let instrs = match cexpr with
-          | Class_id (_, name) -> cexpr_instrs @@ instr_string name
+          | Class_id id ->
+            let fq_id, _ =
+              Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+            cexpr_instrs @@ instr_string (Hhbc_id.Class.to_raw_string fq_id)
           | Class_expr e -> cexpr_instrs @@ emit_expr ~need_ref:false env e
           | Class_reified instrs -> instrs
           | _ -> failwith "Internal error: This node can only be id or expr" in
@@ -2981,7 +2993,40 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
       emit_pos_then pop_pos @@ instr_pop flavor;
     ]
 
-and emit_reified_arg env pos hint =
+(*
+ * Replaces erased generics with underscores or
+ * raises a parse error if used with is/as expressions
+ *)
+and fixup_type_arg env ~isas hint =
+  let erased_tparams = get_erased_tparams env in
+  let rec aux (p, hint) =
+    match hint with
+    | A.Hoption h -> p, A.Hoption (aux h)
+    | A.Hfun (b, hl, l, vh, h) ->
+      p, A.Hfun (b, List.map ~f:aux hl, l, vh, aux h)
+    | A.Htuple hl -> p, A.Htuple (List.map ~f:aux hl)
+    | A.Happly ((_, id), _)
+      when List.mem ~equal:String.equal erased_tparams id ->
+      if isas then
+        Emit_fatal.raise_fatal_parse p
+          "Erased generics are not allowed in is/as expressions"
+      else
+        (p, A.Happly ((p, "_"), []))
+    | A.Happly (id, hl) -> p, A.Happly (id, List.map ~f:aux hl)
+    | A.Hshape {A.si_allows_unknown_fields = uf; A.si_shape_field_list = fl} ->
+      p, A.Hshape { A.si_allows_unknown_fields = uf
+                  ; A.si_shape_field_list = List.map ~f:aux_sf fl
+                  }
+    | A.Haccess _ -> p, hint
+    | A.Hsoft h -> p, A.Hsoft (aux h)
+    | A.Hreified h -> p, A.Hreified (aux h)
+  and aux_sf = function
+   { A.sf_optional = o; A.sf_name = n; A.sf_hint = h } ->
+   { A.sf_optional = o; A.sf_name = n; A.sf_hint = aux h }
+  in aux hint
+
+and emit_reified_arg env ~isas pos hint =
+  let hint = fixup_type_arg env ~isas hint in
   let scope = Emit_env.get_scope env in
   let f is_fun tparam acc =
     match tparam with
@@ -3146,7 +3191,8 @@ and has_inout_args es =
 and emit_call_lhs
   env outer_pos (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
   let has_inout_args = List.length inout_arg_positions <> 0 in
-  let no_reified_args = not (List.exists ~f:snd targs) in
+  let does_not_have_non_tparam_generics =
+    not (has_non_tparam_generics env targs) in
   let reified_call_body name =
     let reified_targs = emit_reified_targs env pos targs in
     gather [
@@ -3195,7 +3241,7 @@ and emit_call_lhs
     gather [
       emit_object_expr env ~last_pos:outer_pos obj;
       emit_pos outer_pos;
-      (if no_reified_args then
+      (if does_not_have_non_tparam_generics then
         instr_fpushobjmethodd nargs name null_flavor
       else
         reified_objmethod_call id null_flavor)
@@ -3228,25 +3274,25 @@ and emit_call_lhs
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
       Emit_symbol_refs.add_class fq_cid_string;
-      (if no_reified_args then
+      (if does_not_have_non_tparam_generics then
         instr_fpushclsmethodd nargs method_id fq_cid
       else
         reified_clsmethod_call method_id_string fq_cid_string)
     | Class_static ->
-      if no_reified_args then
+      if does_not_have_non_tparam_generics then
         instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Static
     | Class_self ->
-      if no_reified_args then
+      if does_not_have_non_tparam_generics then
         instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Self
     | Class_parent ->
-      if no_reified_args then
+      if does_not_have_non_tparam_generics then
         instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Parent
     | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
        let name_instrs =
-        if no_reified_args then instr_string method_id_string
+        if does_not_have_non_tparam_generics then instr_string method_id_string
         else reified_call_body method_id_string in
        gather [
          name_instrs;
@@ -3313,14 +3359,14 @@ and emit_call_lhs
       else fq_id in
     emit_pos_then outer_pos @@
     begin match id_opt with
-    | _ when not no_reified_args ->
+    | _ when not does_not_have_non_tparam_generics ->
       reified_fun_name_call (Hhbc_id.Function.to_raw_string fq_id)
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
   | A.String s ->
     emit_pos_then outer_pos @@
-    (if no_reified_args then
+    (if does_not_have_non_tparam_generics then
       instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
      else reified_fun_name_call s)
   | _ ->

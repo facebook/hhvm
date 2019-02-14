@@ -175,7 +175,7 @@ let emit_return
           ]
         | RGH.DefinitelyReified ->
           gather [
-            fst @@ Emit_expression.emit_reified_arg env Pos.none h;
+            fst @@ Emit_expression.emit_reified_arg env ~isas:false  Pos.none h;
             instr_verifyRetTypeTS
           ]
     in

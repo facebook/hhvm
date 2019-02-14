@@ -4,4 +4,8 @@ class C<reify Ta, Tb, reify Tc> {}
 
 function f(C<int, string, int> $x) {}
 
-f(new C<reify int, int, reify string>);
+function g<T>() {
+  f(new C<reify int, T, reify string>);
+}
+
+g();

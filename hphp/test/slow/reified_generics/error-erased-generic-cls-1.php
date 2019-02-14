@@ -2,4 +2,8 @@
 
 class C<reify T1, T2, reify T3> {}
 
-new C<reify int, reify string, bool>();
+function g<T>() {
+  new C<reify int, reify string, T>();
+}
+
+g();

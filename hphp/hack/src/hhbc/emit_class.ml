@@ -553,7 +553,8 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
         ~is_abstract:class_is_interface
         ~span:class_span
         instrs] in
-  let should_emit_reified_init = not (Emit_env.is_systemlib () ||
+  let should_emit_reified_init = not (
+    Emit_env.is_systemlib () || class_is_abstract ||
     is_closure_class || class_is_interface || class_is_trait) in
   let reified_init_method = if not should_emit_reified_init then [] else
     emit_reified_init_method env ast_class in

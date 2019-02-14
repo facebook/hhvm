@@ -2,7 +2,7 @@
 
 class C<reify Ta, Tb, reify Tc> {}
 
-$c = new C<reify int, string, reify bool>();
+$c = new C<reify int, bool, reify bool>();
 
 echo "-- Only wildcards\n";
 var_dump($c is C<_, _, _>);

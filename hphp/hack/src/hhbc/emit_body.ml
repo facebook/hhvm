@@ -44,7 +44,7 @@ let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
         ])
       | RGH.DefinitelyReified ->
         Some (gather [
-          fst @@ Emit_expression.emit_reified_arg env pos
+          fst @@ Emit_expression.emit_reified_arg env pos ~isas:false
             @@ Option.value_exn ast_p.A.param_hint;
           instr (IMisc (VerifyParamTypeTS param_name))
         ])

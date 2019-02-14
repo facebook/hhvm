@@ -1905,25 +1905,12 @@ module WithExpressionAndStatementAndTypeParser
       (* We purposefully ignore leading trivia before the <?hh, and handle
       the error on a later pass *)
       (* TODO: Handle the case where the langauge is not a Name. *)
-    let has_dot_hack_extension = pos parser
-      |> fst
-      |> SourceText.file_path
-      |> Relative_path.suffix
-      |> String.is_suffix ~suffix:".hack"
-    in
-    if has_dot_hack_extension && has_suffix then
-      let parser = with_error parser SyntaxError.error1060 in
-      parser, markup_section
     (* Do not attempt to recover in HHVM compatibility mode *)
-    else if (has_suffix || Env.hhvm_compat_mode (env parser)) &&
-      not has_dot_hack_extension then
+    if (has_suffix || Env.hhvm_compat_mode (env parser)) then
       parser1, markup_section
     else
-      (* no markup sections for .hack files, error recovery for other files *)
-      let parser =
-        if has_dot_hack_extension then parser
-        else with_error parser SyntaxError.error1001
-      in
+      (* error recovery *)
+      let parser = with_error parser SyntaxError.error1001 in
       let (parser, missing1) = Make.missing parser (pos parser) in
       let (parser, missing2) = Make.missing parser (pos parser) in
       let (parser, missing3) = Make.missing parser (pos parser) in
@@ -1944,11 +1931,20 @@ module WithExpressionAndStatementAndTypeParser
         aux parser (declaration :: acc)
     in
     (* parse leading markup section *)
-    let (parser, header) = parse_leading_markup_section parser in
+    let file = SourceText.file_path (fst (pos parser)) in
+    let suffix = Relative_path.suffix file in
+    let no_markup = String_utils.string_ends_with suffix ".hack" in
+    let (parser, header) =
+      if no_markup
+      then Make.missing parser (pos parser)
+      else parse_leading_markup_section parser
+    in
     let (parser, declarations) = aux parser [] in
     (* include leading markup section as a head of declaration list *)
     let (parser, declarations) =
-      make_list parser (header :: List.rev declarations)
+      if no_markup
+      then make_list parser (List.rev declarations)
+      else make_list parser (header :: List.rev declarations)
     in
     let (parser, result) = Make.script parser declarations in
     (* If we are not at the end of the file, something is wrong. *)

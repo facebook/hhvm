@@ -27,3 +27,9 @@ approximation which simply normalize the union - removes duplicate Tunresolved
 and Toption and removes duplicates from the list.
 If the result is a singleton union, discard the union constructor. *)
 val union_list_approx: Env.env -> locl ty list -> Typing_reason.t -> locl ty
+(** Same as union_list_approx, but return the union as a set of types and an
+optional reason for it to be nullable. *)
+val normalize_union: Env.env -> locl ty list -> (Reason.t option * Typing_set.t)
+(** Make a union type from a set of type.
+If a reason is provided, make the union nullable with that reason *)
+val make_union: Env.env -> Reason.t -> Typing_set.t -> Reason.t option -> locl ty

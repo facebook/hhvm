@@ -2469,59 +2469,16 @@ let bind env r var ty =
   (* Remove the variable from the environment *)
   Env.remove_tyvar env var
 
-let expand_types env tys =
-  Typing_set.fold
-    (fun ty (env, etys) ->
-      let env, ety = Env.expand_type env ty in
-      env, Typing_set.add ety etys)
-    tys
-    (env, Typing_set.empty)
-
-(* Given a set of types, expand solved type variables, and eliminate
- * top-level unions by folding types back into the set. Remove any use of
- * `null` or `?t`, instead returning a boolean if
- * a null type exists in the set. Finally, remove any type variable match `var`
- *)
-let expand_and_flatten_type_set env var tys =
-
-  let rec expand_and_flatten_type_list env tys has_null res =
-    match tys with
-    | [] -> env, has_null, Typing_set.elements res
-    | ty::tys ->
-      let env, ety = Env.expand_type env ty in
-      match ety with
-      | _, Tunresolved tys' -> expand_and_flatten_type_list env (tys' @ tys) has_null res
-      | _, Toption ty -> expand_and_flatten_type_list env (ty::tys) true res
-      | _, Tprim Nast.Tnull -> expand_and_flatten_type_list env tys true res
-      | _, Tvar var' when var=var' -> expand_and_flatten_type_list env tys has_null res
-      | _ -> expand_and_flatten_type_list env tys has_null (Typing_set.add ety res)
-  in
-    expand_and_flatten_type_list env (TySet.elements tys) false TySet.empty
+let var_as_ty var = (Reason.Rnone, Tvar var)
 
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
-  (* Construct the union of the lower bounds, normalizing null|t to ?t because
-   * some code is still sensitive to this representation.
-   * Note that if there are no lower bounds then we will construct the empty
-   * type, i.e. Tunresolved [].
-   * Also note that `var` is eliminated from the bounds, as
-   *       var | t1 | ... | tn <: var
-   *   iff       t1 | ... | tn <: var
-   * This prevents it getting picked up later during the "occurs check" and
-   * reported as a circular type error.
-   *)
-  let env, has_null, nonnulls = expand_and_flatten_type_set env var lower_bounds in
-  let ty =
-    match nonnulls with
-    | [ty] -> ty
-    | tys -> (r, Tunresolved tys) in
-  let ty =
-    if not has_null
-    then ty
-    else (fst ty, Toption ty) in
+  let nullable, lower_bounds = TUtils.normalize_union env (TySet.elements lower_bounds) in
+  let lower_bounds = TySet.remove (var_as_ty var) lower_bounds in
+  let ty = TUtils.make_union env r lower_bounds nullable in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
    *   Cov<C>, Contra<D> <: v
@@ -2532,41 +2489,17 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
     if freshen
     then freshen_inside_ty_wrt_variance env ty
     else env, ty in
-  (* If any of the components of the union are type variables, then remove
-   * var from their upper bounds. Why? Because if we construct
-   *   v1 , ... , vn , t <: var
-   * for type variables v1, ..., vn and non-type variable t
-   * then necessarily we must have var as an upper bound on each of vi
-   * so after binding var we end up with redundant bounds
-   *   vi <: v1 | ... | vn | t
-   *)
-  let env =
-    List.fold_left ~f:(fun env ty ->
-      match Env.expand_type env ty with
-      | env, (_, Tvar v) ->
-        Env.remove_tyvar_upper_bound env v var
-      | env, _ -> env) ~init:env nonnulls in
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 
 let bind_to_upper_bound env r var upper_bounds =
-  let env, upper_bounds = expand_types env upper_bounds in
+  (* Remove bounds which are the union of var and something else *)
+  let upper_bounds = TySet.filter (fun bound ->
+    let _reason_nullable_opt, tys = TUtils.normalize_union env [bound] in
+    not (TySet.mem (var_as_ty var) tys)) upper_bounds in
   match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->
-    (* If ty is a variable (in future, if any of the types in the list are variables),
-     * then remove var from their lower bounds. Why? Because if we construct
-     *   var <: v1 , ... , vn , t
-     * for type variables v1 , ... , vn and non-type variable t
-     * then necessarily we must have var as a lower bound on each of vi
-     * so after binding var we end up with redundant bounds
-     *   v1 & ... & vn & t <: vi
-     *)
-    let env =
-      (match Env.expand_type env ty with
-      | env, (_, Tvar v) ->
-        Env.remove_tyvar_lower_bound env v var
-      | env, _ -> env) in
     bind env r var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env

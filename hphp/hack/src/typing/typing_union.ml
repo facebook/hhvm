@@ -63,7 +63,7 @@ let make_union env r tyl reason_nullable_opt =
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
   else
-    let is_sub_type = Typing_subtype.is_sub_type_alt ~no_top_bottom:true in
+    let is_sub_type = Typing_utils.is_sub_type_alt ~no_top_bottom:true in
     if is_sub_type env ty1 ty2 = Some true then env, ty2
     else if is_sub_type env ty2 ty1 = Some true then env, ty1
     else
@@ -404,9 +404,7 @@ and union_reason r1 r2 =
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
 
-let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
-
-let union_list_approx env tyl r =
+let normalize_union env tyl =
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let rec normalize_union tyl reason_nullable =
     match tyl with
@@ -420,7 +418,14 @@ let union_list_approx env tyl r =
         | ty -> reason_nullable, TySet.singleton ty in
       let reason_nullable, tys = normalize_union tyl reason_nullable in
       reason_nullable, TySet.union tys' tys in
-  let reason_nullable, tys = normalize_union tyl None in
+  normalize_union tyl None
+
+let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
+
+let union_list_approx env tyl r =
+  let reason_nullable, tys = normalize_union env tyl in
   make_union env r tys reason_nullable
 
 let () = Typing_utils.union_ref := union
+let () = Typing_utils.normalize_union_ref := normalize_union
+let () = Typing_utils.make_union_ref := make_union

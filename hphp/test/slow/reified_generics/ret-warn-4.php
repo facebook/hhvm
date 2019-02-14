@@ -1,0 +1,12 @@
+<?hh
+
+class C<reify T> {}
+class D {}
+
+async function f(mixed $x): Awaitable<C<@int>> {
+  return $x;
+}
+
+\HH\Asio\join(f(new C<int>()));    // correct
+\HH\Asio\join(f(new C<string>())); // warn
+\HH\Asio\join(f(new D()));         // error

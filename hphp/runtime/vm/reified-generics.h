@@ -45,12 +45,12 @@ ArrayData* getReifiedTypeList(const StringData* name);
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
-// Returns a ReifiedGenericsInfo that contians number of generics,
-// their indices, indices of the soft reifications
+// Returns a ReifiedGenericsInfo that contains number of reified generics
+// and a list of TypeParamInfo which specifies whether each generic is
+// reified, soft and warn only
 // Format of the input is a list of integers where the first one is the count
 // of reified generics and the following numbers are their indices and whether
-// they are soft or not interleaved
-// This is used to distinguish reified and erased generics
+// they are soft or not and whether to error or warn interleaved
 ReifiedGenericsInfo extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
 
 // Raises a runtime error if the location of reified generics of f/c does not

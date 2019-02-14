@@ -557,7 +557,7 @@ void Func::resetPrologue(int numParams) {
 // Reified Generics
 
 namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {

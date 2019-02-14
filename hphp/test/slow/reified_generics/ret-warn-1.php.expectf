@@ -1,0 +1,5 @@
+Warning: Value returned from function f() must be of type C<int>, C<string> given in %s on line 6
+
+Warning: Value returned from function g() must be of type B<C<int>>, B<C<string>> given in %s on line 11
+
+Catchable fatal error: Value returned from function g() must be of type B<C<int>>, B<string> given in %s on line 16

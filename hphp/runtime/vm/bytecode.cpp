@@ -6172,15 +6172,16 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
   auto const cell = vmStack().topC();
   assertx(tvIsDictOrDArray(cell));
-  if (!verifyReifiedLocalType(cell->m_data.parr, param.ptr)) {
-    raise_typehint_error(
+  bool warn = false;
+  if (!verifyReifiedLocalType(cell->m_data.parr, param.ptr, warn)) {
+    raise_reified_typehint_error(
       folly::sformat(
         "Argument {} passed to {}() must be an instance of {}, given {}",
         param.index + 1,
         vmfp()->m_func->fullName()->data(),
         TypeStructure::toStringForDisplay(ArrNR(cell->m_data.parr)).c_str(),
         describe_actual_type(param.ptr, true)
-      )
+      ), warn
     );
   }
   vmStack().popC();
@@ -6221,14 +6222,15 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
   auto const ts = vmStack().topC();
   assertx(tvIsDictOrDArray(ts));
   auto const cell = vmStack().indC(1);
-  if (!verifyReifiedLocalType(ts->m_data.parr, cell)) {
-    raise_typehint_error(
+  bool warn = false;
+  if (!verifyReifiedLocalType(ts->m_data.parr, cell, warn)) {
+    raise_reified_typehint_error(
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",
         vmfp()->m_func->fullName()->data(),
         TypeStructure::toStringForDisplay(ArrNR(ts->m_data.parr)).c_str(),
         describe_actual_type(cell, true)
-      )
+      ), warn
     );
   }
   vmStack().popC();

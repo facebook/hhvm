@@ -1,4 +1,4 @@
-string(23) "?array<HH\int, HH\bool>"
+string(24) "?array<HH\int, @HH\bool>"
 array(3) {
   ["nullable"]=>
   bool(true)
@@ -12,7 +12,9 @@ array(3) {
       int(1)
     }
     [1]=>
-    array(1) {
+    array(2) {
+      ["soft"]=>
+      bool(true)
       ["kind"]=>
       int(2)
     }

@@ -155,6 +155,7 @@ bool typeStructureIsTypeList(
   const ArrayData*,
   const ArrayData*,
   const StringData*,
+  bool&,
   bool
 );
 
@@ -179,6 +180,7 @@ bool typeStructureIsTypeList(
 bool typeStructureIsType(
   const ArrayData* input,
   const ArrayData* type,
+  bool& warn,
   bool strict
 ) {
   assertx(input && type);
@@ -208,11 +210,23 @@ bool typeStructureIsType(
         auto const inputT = get_ts_kind(input);
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
       }
-      return type->equal(input, true);
+      if (!type->equal(input, true)) {
+        if (is_ts_soft(type)) {
+          auto ts = type->copy();
+          // Let's try once again without the soft annotation
+          auto const newType = ts->remove(s_soft.get());
+          return newType->equal(input, true);
+        }
+        return false;
+      }
+      return true;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
-      auto const name = get_ts_classname(input);
+      auto const classname_field = input->rval(s_classname.get());
+      if (!classname_field.is_set()) return false;
+      assertx(isStringType(classname_field.type()));
+      auto const name = classname_field.val().pstr;
       if (!name->isame(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
@@ -222,6 +236,7 @@ bool typeStructureIsType(
       return typeGenerics && typeStructureIsTypeList(*inputGenerics,
                                                      *typeGenerics,
                                                      name,
+                                                     warn,
                                                      strict);
     }
     case TypeStructure::Kind::T_tuple:
@@ -229,6 +244,7 @@ bool typeStructureIsType(
         get_ts_elem_types(input),
         get_ts_elem_types(type),
         nullptr,
+        warn,
         strict
       );
     case TypeStructure::Kind::T_shape: {
@@ -241,6 +257,9 @@ bool typeStructureIsType(
         return false;
       }
       auto result = true;
+      // If any of the generics will warn, we need to keep track of it and
+      // only warn if none of the other ones raise an error
+      bool willWarn = false;
       IterateKV(
         typeFields,
         [&](Cell k, TypedValue v) {
@@ -257,13 +276,22 @@ bool typeStructureIsType(
             return true; // short circuit
           }
           auto inputField = getShapeFieldElement(inputFields->at(k));
-          if (!typeStructureIsType(inputField, typeField, strict)) {
+          if (!typeStructureIsType(inputField, typeField, strict, warn)) {
+            if (warn || is_ts_soft(typeField)) {
+              willWarn = true;
+              warn = false;
+              return false;
+            }
             result = false;
             return true; // short circuit
           }
           return false;
         }
       );
+      if (willWarn && result) {
+        warn = true;
+        result = false;
+      }
       return result;
     }
     case TypeStructure::Kind::T_typevar:
@@ -288,39 +316,45 @@ bool typeStructureIsTypeList(
   const ArrayData* inputL,
   const ArrayData* typeL,
   const StringData* clsname,
+  bool& warn,
   bool strict
 ) {
   assertx(inputL && typeL);
   auto const size = typeL->size();
   if (inputL->size() != size) return false;
-  std::vector<size_t> positions;
+  std::vector<TypeParamInfo> tpinfo;
   bool found = false;
   if (!strict && clsname) {
     auto const ne = NamedEntity::get(clsname);
     if (auto const cls = Unit::lookupClass(ne)) {
       found = true;
-      positions = cls->getReifiedGenericsInfo().m_reifiedGenericPositions;
-      if (positions.size() == 0) return true;
+      tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
+      if (tpinfo.size() == 0) return true;
+      if (tpinfo.size() != size) return false;
     }
   }
-  auto it = positions.begin();
+  // If any of the generics will warn, we need to keep track of it and only warn
+  // if none of the other ones raise an error
+  bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
-    if (found) {
-      if (it == positions.end()) return true;
-      if (*it > i) {
-        continue;
-      }
-      if (*it == i) it++;
-    }
+    if (found && !tpinfo[i].m_isReified) continue;
     auto const inputElem = inputL->rval(i);
     auto const typeElem = typeL->rval(i);
     assertx(tvIsDictOrDArray(inputElem) && tvIsDictOrDArray(typeElem));
     if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
-                             strict)) {
+                             warn, strict)) {
+      if (warn || (found && (tpinfo[i].m_isWarn ||
+                             is_ts_soft(typeElem.val().parr)))) {
+        willWarn = true;
+        warn = false;
+        continue;
+      }
       return false;
     }
   }
-  return true;
+  if (!willWarn) return true;
+  warn = true;
+  return false;
 }
 
 ALWAYS_INLINE
@@ -328,6 +362,7 @@ bool checkReifiedGenericsMatch(
   const Array& ts,
   Cell c1,
   const NamedEntity* ne,
+  bool& warn,
   bool strict // whether to return false on erased generics
 ) {
   if (!ts.exists(s_generic_types)) return true;
@@ -350,6 +385,9 @@ bool checkReifiedGenericsMatch(
   auto const size = obj_generics->size();
   if (size != generics->size()) return false;
 
+  // If any of the generics will warn, we need to keep track of it and only warn
+  // if none of the other ones raise an error
+  bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
     auto const objrg = obj_generics->rval(i);
     auto const rg = generics->rval(i);
@@ -360,9 +398,20 @@ bool checkReifiedGenericsMatch(
         get_ts_name(tsvalue)->equal(s_wildcard.get())) {
       continue;
     }
-    if (!typeStructureIsType(objrg.val().parr, tsvalue, strict)) return false;
+    if (!typeStructureIsType(objrg.val().parr, tsvalue, warn, strict)) {
+      auto const tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
+      assertx(tpinfo.size() == size);
+      if (warn || tpinfo[i].m_isWarn || is_ts_soft(tsvalue)) {
+        willWarn = true;
+        warn = false;
+        continue;
+      }
+      return false;
+    }
   }
-  return true;
+  if (!willWarn) return true;
+  warn = true;
+  return false;
 }
 
 } // namespace
@@ -384,7 +433,11 @@ bool isTSAllWildcards(const ArrayData* ts) {
   return allWildcard;
 }
 
-bool verifyReifiedLocalType(const ArrayData* type_, const TypedValue* param) {
+bool verifyReifiedLocalType(
+  const ArrayData* type_,
+  const TypedValue* param,
+  bool& warn
+) {
   if (tvIsNull(param) && is_ts_nullable(type_)) return true;
   // If it is not an object, it can't be reified, type annotation check should
   // have failed already if we are checking for something reified
@@ -417,7 +470,7 @@ bool verifyReifiedLocalType(const ArrayData* type_, const TypedValue* param) {
       auto const cls = Unit::lookupClass(ne);
       if (!cls || !obj->instanceof(cls)) return false;
       return
-        checkReifiedGenericsMatch(type, *tvToCell(param), ne, false);
+        checkReifiedGenericsMatch(type, *tvToCell(param), ne, warn, false);
     }
     default: return true;
   }
@@ -538,7 +591,8 @@ bool checkTypeStructureMatchesCellImpl(
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
       result = cellInstanceOf(&c1, ne);
-      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne, true);
+      bool warn = false;
+      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne, warn, true);
       break;
     }
     case TypeStructure::Kind::T_null:

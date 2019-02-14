@@ -63,14 +63,21 @@ let ast_any_is_deprecated ast_attrs =
 let add_reified_attribute attrs params =
   let is_soft =
     List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
+  let is_warn =
+    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Warn") in
   let reified_data =
     List.filter_mapi params ~f:(fun i t ->
-      if t.A.tp_reified then Some (i, is_soft t.A.tp_user_attributes) else None)
+      if not t.A.tp_reified then None else
+      Some (i, is_soft t.A.tp_user_attributes, is_warn t.A.tp_user_attributes))
   in
   if List.is_empty reified_data then attrs else
+  let int_of_bool b = if b then 1 else 0 in
   let data = List.concat_map reified_data
-    ~f:(fun (i, is_soft) -> [TV.Int (Int64.of_int i);
-                             TV.Int (Int64.of_int (if is_soft then 1 else 0))])
+    ~f:(fun (i, is_soft, is_warn) ->
+          [ TV.Int (Int64.of_int i)
+          ; TV.Int (Int64.of_int @@ int_of_bool is_soft)
+          ; TV.Int (Int64.of_int @@ int_of_bool is_warn)
+          ])
   in
   let data = TV.Int (Int64.of_int (List.length params)) :: data in
   Hhas_attribute.make "__Reified" data :: attrs

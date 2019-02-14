@@ -21,18 +21,24 @@
 
 namespace HPHP {
 
+struct TypeParamInfo {
+  // Is the type parameter reified
+  bool m_isReified : 1;
+  // Does the type parameter contain a soft annotation
+  bool m_isSoft    : 1;
+  // Does the type parameter contain a warn annotation
+  bool m_isWarn    : 1;
+};
+
 /*
  * Struct that contains information regarding reified generics of a function
  * or class
  */
 struct ReifiedGenericsInfo {
-  // Number of generics, both erased and reified
-  size_t m_numGenerics;
-  // Type parameter indices of reified generics on the function or class
-  // Includes the soft reified ones
-  std::vector<size_t> m_reifiedGenericPositions;
-  // Type parameter indices of soft reified generics on the function or class
-  std::vector<size_t> m_softReifiedGenericPositions;
+  // Number of reified generics
+  size_t m_numReifiedGenerics;
+  // Information regarding each type parameter
+  std::vector<TypeParamInfo> m_typeParamInfo;
 };
 
 }

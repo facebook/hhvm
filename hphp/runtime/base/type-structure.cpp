@@ -80,7 +80,8 @@ const StaticString
   s_alias("alias"),
   s_typevars("typevars"),
   s_typevar_types("typevar_types"),
-  s_id("id")
+  s_id("id"),
+  s_soft("soft")
 ;
 
 const std::string
@@ -239,6 +240,11 @@ std::string fullName(const Array& arr, bool forDisplay) {
   if (arr.exists(s_nullable)) {
     assertx(arr[s_nullable].toBoolean());
     name += '?';
+  }
+
+  if (arr.exists(s_soft)) {
+    assertx(arr[s_soft].toBoolean());
+    name += '@';
   }
 
   assertx(arr.exists(s_kind));
@@ -602,6 +608,7 @@ Array resolveTS(TSEnv& env,
 
   auto newarr = Array::CreateDArray();
   if (arr.exists(s_nullable)) newarr.set(s_nullable, true_varNR.tv());
+  if (arr.exists(s_soft)) newarr.set(s_soft, true_varNR.tv());
   newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   if (arr.exists(s_allows_unknown_fields)) {
@@ -697,6 +704,9 @@ Array resolveTS(TSEnv& env,
         if (arr.exists(s_nullable)) {
           ts.set(s_nullable, true_varNR.tv());
         }
+        if (arr.exists(s_soft)) {
+          ts.set(s_soft, true_varNR.tv());
+        }
 
         return ts;
       }
@@ -776,6 +786,10 @@ Array resolveTS(TSEnv& env,
 
       if (arr.exists(s_nullable)) {
         typeCnsVal.set(s_nullable, true_varNR.tv());
+      }
+
+      if (arr.exists(s_soft)) {
+        typeCnsVal.set(s_soft, true_varNR.tv());
       }
 
       return typeCnsVal;

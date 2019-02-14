@@ -44,9 +44,16 @@ bool isTSAllWildcards(const ArrayData* ts);
 /*
  * Returns whether the typed value matches the type structure. This function
  * checks whether the reified generics match as well.
+ * Sets the warn flag if the type parameter is denoted as soft either through
+ * an annotation at the declaration site or by soft type hint at the generic
+ * level
  * Currently only checks for classes and interfaces.
  */
-bool verifyReifiedLocalType(const ArrayData* type, const TypedValue* param);
+bool verifyReifiedLocalType(
+  const ArrayData* type,
+  const TypedValue* param,
+  bool& warn
+);
 
 /*
  * Resolves the given Array as a type structure.

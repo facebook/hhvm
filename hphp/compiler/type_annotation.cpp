@@ -340,7 +340,8 @@ const StaticString
   s_optional_shape_field("optional_shape_field"),
   s_value("value"),
   s_typevars("typevars"),
-  s_id("id")
+  s_id("id"),
+  s_soft("soft")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
@@ -380,15 +381,9 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
 Array TypeAnnotation::getScalarArrayRep() const {
   auto rep = Array::CreateDArray();
 
-  bool nullable = (bool) m_nullable;
-  if (nullable) {
-    rep.set(s_nullable, true_varNR.tv());
-  }
-
-  bool allowsUnknownFields = (bool) m_allowsUnknownFields;
-  if (allowsUnknownFields) {
-    rep.set(s_allows_unknown_fields, true_varNR.tv());
-  }
+  if (m_nullable) rep.set(s_nullable, true_varNR.tv());
+  if (m_soft) rep.set(s_soft, true_varNR.tv());
+  if (m_allowsUnknownFields) rep.set(s_allows_unknown_fields, true_varNR.tv());
 
   TypeStructure::Kind kind = getKind();
   rep.set(s_kind, Variant(static_cast<uint8_t>(kind)));

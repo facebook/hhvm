@@ -1571,7 +1571,7 @@ bool Class::hasReifiedParent() const {
 }
 
 namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Class::getReifiedGenericsInfo() const {

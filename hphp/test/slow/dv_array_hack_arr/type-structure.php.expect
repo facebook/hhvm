@@ -3,7 +3,7 @@ string(150) "D:3:{s:4:"kind";i:14;s:6:"fields";D:3:{s:1:"a";D:1:{s:4:"kind";i:2;
 string(43) "D:2:{s:4:"kind";i:25;s:5:"alias";s:2:"T3";}"
 string(43) "D:2:{s:4:"kind";i:24;s:5:"alias";s:2:"T4";}"
 string(43) "D:2:{s:4:"kind";i:26;s:5:"alias";s:2:"T5";}"
-string(110) "D:3:{s:8:"nullable";b:1;s:4:"kind";i:12;s:13:"generic_types";v:2:{D:1:{s:4:"kind";i:1;}D:1:{s:4:"kind";i:2;}}}"
+string(125) "D:3:{s:8:"nullable";b:1;s:4:"kind";i:12;s:13:"generic_types";v:2:{D:1:{s:4:"kind";i:1;}D:2:{s:4:"soft";b:1;s:4:"kind";i:2;}}}"
 string(250) "D:3:{s:4:"kind";i:15;s:9:"classname";s:6:"HH\Map";s:13:"generic_types";v:2:{D:1:{s:4:"kind";i:7;}D:3:{s:4:"kind";i:15;s:9:"classname";s:9:"HH\Vector";s:13:"generic_types";v:1:{D:2:{s:4:"kind";i:12;s:13:"generic_types";v:1:{D:1:{s:4:"kind";i:1;}}}}}}}"
 string(128) "D:2:{s:4:"kind";i:10;s:10:"elem_types";v:3:{D:1:{s:4:"kind";i:1;}D:2:{s:8:"nullable";b:1;s:4:"kind";i:3;}D:1:{s:4:"kind";i:2;}}}"
 string(87) "D:3:{s:4:"kind";i:11;s:11:"return_type";D:1:{s:4:"kind";i:0;}s:11:"param_types";v:0:{}}"

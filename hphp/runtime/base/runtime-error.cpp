@@ -97,6 +97,11 @@ void raise_typehint_error(const std::string& msg) {
   }
 }
 
+void raise_reified_typehint_error(const std::string& msg, bool warn) {
+  if (!warn) return raise_typehint_error(msg);
+  raise_warning_unsampled(msg);
+}
+
 void raise_return_typehint_error(const std::string& msg) {
   if (RuntimeOption::PHP7_EngineExceptions) {
     VMRegAnchor _;

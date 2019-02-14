@@ -26,6 +26,7 @@ const StaticString s_fields("fields");
 const StaticString s_kind("kind");
 const StaticString s_value("value");
 const StaticString s_nullable("nullable");
+const StaticString s_soft("soft");
 const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
 const StaticString s_wildcard("_");
@@ -37,9 +38,16 @@ const StaticString s_is_cls_cns("is_cls_cns");
 
 ALWAYS_INLINE bool is_ts_nullable(const ArrayData* ts) {
   auto const nullable_field = ts->rval(s_nullable.get());
-  assertx(nullable_field == nullptr ||
-    (isBoolType(nullable_field.type()) && nullable_field.val().num));
-  return nullable_field != nullptr;
+  assertx(!nullable_field.is_set() ||
+          (isBoolType(nullable_field.type()) && nullable_field.val().num));
+  return nullable_field.is_set();
+}
+
+ALWAYS_INLINE bool is_ts_soft(const ArrayData* ts) {
+  auto const soft_field = ts->rval(s_soft.get());
+  assertx(!soft_field.is_set() ||
+          (isBoolType(soft_field.type()) && soft_field.val().num));
+  return soft_field.is_set();
 }
 
 ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {

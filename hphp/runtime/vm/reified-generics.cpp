@@ -80,9 +80,9 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
 
 ReifiedGenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
-  size_t len = 0;
-  std::vector<size_t> pos;
-  std::vector<size_t> soft;
+  size_t len = 0, cur = 0, numReified = 0;
+  bool isReified = false, isSoft = false;
+  std::vector<TypeParamInfo> tpList;
   IterateKV(
     arr,
     [&](Cell k, TypedValue v) {
@@ -90,19 +90,27 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
         len = (size_t) v.m_data.num;
-      } else if (k.m_data.num % 2 == 0) {
-        // whether soft or not
-        // If soft, add the last reified index
-        if (v.m_data.num) soft.emplace_back(pos.back());
       } else {
-        // reified index
-        pos.emplace_back(v.m_data.num);
+        if (k.m_data.num % 3 == 1) {
+          // This is the reified generic index
+          // Insert the non reified ones
+          tpList.insert(tpList.end(), v.m_data.num - cur, {});
+          cur = v.m_data.num;
+          isReified = true;
+        } else if (k.m_data.num % 3 == 2) {
+          isSoft = (bool) v.m_data.num;
+        } else {
+          // k.m_data.num % 3 == 0
+          numReified++;
+          cur++;
+          tpList.push_back({isReified, isSoft, (bool) v.m_data.num});
+        }
       }
     }
   );
-  assertx(pos.size() <= len);
-  assertx(soft.size() <= pos.size());
-  return {len, pos, soft};
+  // Insert the non reified ones at the end
+  tpList.insert(tpList.end(), len - cur, {});
+  return {numReified, tpList};
 }
 
 // Raises a runtime error if the location of reified generics of f does not
@@ -113,9 +121,8 @@ void checkReifiedGenericMismatchHelper(
   const StringData* name,
   const ArrayData* reified_generics
 ) {
-  auto const len = info.m_numGenerics;
-  auto const locations = info.m_reifiedGenericPositions;
-  auto const soft = info.m_softReifiedGenericPositions;
+  auto const generics = info.m_typeParamInfo;
+  auto const len = generics.size();
   if (len != reified_generics->size()) {
     raise_error("%s %s requires %zu generics but %zu given",
                 fun ? "Function" : "Class",
@@ -123,8 +130,7 @@ void checkReifiedGenericMismatchHelper(
                 len,
                 reified_generics->size());
   }
-  auto it = locations.begin();
-  auto softit = soft.begin();
+  auto it = generics.begin();
   IterateKV(
     reified_generics,
     [&](Cell k, TypedValue v) {
@@ -136,9 +142,8 @@ void checkReifiedGenericMismatchHelper(
           v.m_data.parr->exists(s_name.get())) {
         wildcard = (get_ts_name(v.m_data.parr)->equal(s_wildcard.get()));
       }
-      if (wildcard) {
-        if (it == locations.end() || *it > i) return false;
-        if (softit == soft.end() || *softit != i) {
+      if (wildcard && it->m_isReified) {
+        if (!it->m_isSoft) {
           raise_error("%s %s expects a reified generic at index %zu",
                       fun ? "Function" : "Class",
                       name->data(),
@@ -150,11 +155,7 @@ void checkReifiedGenericMismatchHelper(
                       fun ? "Function" : "Class",
                       name->data());
       }
-      // It is not a wildcard
-      if (it == locations.end() || *it != i) return false;
-      if (softit != soft.end() && *softit == *it) softit++;
       ++it;
-      return false;
     }
   );
 }

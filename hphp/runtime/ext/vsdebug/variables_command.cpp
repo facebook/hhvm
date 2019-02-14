@@ -19,11 +19,11 @@
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -525,21 +525,26 @@ int VariablesCommand::addSuperglobalVariables(
   }
 
   int count = 0;
-  const Array globals = php_globals_as_array();
-  for (ArrayIter iter(globals); iter; ++iter) {
-    const std::string name = iter.first().toString().toCppString();
-    if (!isSuperGlobal(name)) {
-      continue;
-    }
 
-    if (vars != nullptr) {
-      vars->push_back(
-        serializeVariable(session, debugger, requestId, name, iter.second())
-      );
-    }
+  // TODO(bill): directly access by-key
+  IterateKVNoInc(
+    get_global_variables()->asArrayData(),
+    [&](Cell k, TypedValue v) {
+      assertx(isStringType(k.m_type));
+      auto const& name = tvCastToStringData(k)->toCppString();
+      if (!isSuperGlobal(name)) {
+        return;
+      }
 
-    count++;
-  }
+      if (vars != nullptr) {
+        vars->push_back(
+          serializeVariable(session, debugger, requestId, name, VarNR{v})
+        );
+      }
+
+      count++;
+    }
+  );
 
   if (vars != nullptr) {
     // Cache the result since the same JSON array is to be requested by the

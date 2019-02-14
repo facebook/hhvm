@@ -59,25 +59,6 @@ Variant php_global_exchange(const StaticString& key, Variant newV);
  */
 Variant php_global(const StaticString&);
 
-/*
- * Return access to $GLOBALS as an Array.
- *
- * Note that the $GLOBALS Array behaves a bit differently than normal
- * PHP arrays: it doesn't do COW, and you need to be much more careful
- * with things like lvalAt or rvalPos, since anything that can
- * invoke arbitrary php-code (e.g. a set invoking an object
- * destructor) could turn around and clobber your pointer, where
- * normally you were protected from that by the COW/value semantics of
- * php arrays.  (If this doesn't make sense, please don't try to use
- * any of those APIs with this array.)
- *
- * Sometimes, however, it's still necessary to deal with globals using
- * a generic Array in extension code.  This function gives you that,
- * but keep in mind that if you are just doing lookups, the above
- * functions will be more efficient.
- */
-Array php_globals_as_array();
-
 //////////////////////////////////////////////////////////////////////
 
 }

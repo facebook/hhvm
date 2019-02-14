@@ -61,7 +61,13 @@ def parse_errors(output_file_name: str):
         try:
             return parse_error(output_file, multiple_error_file)
         except ParseException as e:
-            raise ParseException(f'at file {output_file_name}: {e}')
+            if multiple_error_file:
+                try:
+                    return parse_error(output_file, False)
+                except ParseException as ex:
+                    raise ParseException(f'at file {output_file_name}: {ex}')
+            else:
+                raise ParseException(f'at file {output_file_name}: {e}')
 
 
 def same_error(line: str, multiple_error_file: bool):

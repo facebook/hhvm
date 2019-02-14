@@ -588,12 +588,6 @@ Array HHVM_FUNCTION(type_structure,
   return Array::attach(typeCns.m_data.parr);
 }
 
-String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
-  Class* cls = Unit::loadClass(name.get());
-  if (!cls) return empty_string();
-  return cls->nameStr();
-}
-
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
@@ -2111,7 +2105,6 @@ struct ReflectionExtension final : Extension {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);
-    HHVM_FE(hphp_get_original_class_name);
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);
     HHVM_FE(hphp_invoke);

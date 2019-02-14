@@ -46,7 +46,7 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 template <class Body>
-void prologueDispatch(IRGS& env, const Func* func, Body body) {
+void prologDispatch(IRGS& env, const Func* func, Body body) {
   assertx(env.irb->curMarker().prologue());
 
   if (!func->mayHaveThis()) {
@@ -403,7 +403,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = env.context.func;
 
   // Increment profiling counter.
-  if (isProfiling(env.context.kind)) {
+  if (env.context.kind == TransKind::ProfPrologue) {
     gen(env, IncProfCounter, TransIDData{transID});
     profData()->setProfiling(func->getFuncId());
   }
@@ -433,7 +433,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   emitCalleeDynamicCallCheck(env);
   emitCallMCheck(env);
 
-  prologueDispatch(
+  prologDispatch(
     env, func,
     [&] (bool hasThis) {
       // Emit the bindjmp for the function body.
@@ -544,11 +544,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   auto const func = env.context.func;
   auto const num_args = gen(env, LdARNumParams, fp(env));
 
-  if (isProfiling(env.context.kind)) {
-    profData()->setProfiling(func->getFuncId());
-  }
-
-  prologueDispatch(
+  prologDispatch(
     env, func,
     [&] (bool hasThis) {
       for (auto const& dv : dvs) {

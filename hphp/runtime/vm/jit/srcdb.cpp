@@ -263,21 +263,6 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
   m_incomingBranches.setEnd(end);
 }
 
-void SrcRec::removeIncomingBranchesInRange(TCA start, TCA frontier) {
-  auto srLock = writelock();
-
-  auto end = std::remove_if(
-    m_incomingBranches.begin(),
-    m_incomingBranches.end(),
-    [&] (const IncomingBranch& ib) {
-      auto addr = ib.toSmash();
-      return start <= addr && addr < frontier;
-    }
-  );
-
-  m_incomingBranches.setEnd(end);
-}
-
 void SrcRec::replaceOldTranslations() {
   auto srLock = writelock();
 
@@ -286,6 +271,25 @@ void SrcRec::replaceOldTranslations() {
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
+
+  /*
+   * It may seem a little weird that we're about to point every
+   * incoming branch at the anchor, since that's going to just
+   * unconditionally retranslate this SrcKey and never patch the
+   * incoming branch to do something else.
+   *
+   * The reason this is ok is this mechanism is only used in
+   * non-RepoAuthoritative mode, and the granularity of code
+   * invalidation there is such that we'll only have incoming branches
+   * like this basically within the same file since we don't have
+   * whole program analysis.
+   *
+   * This means all these incoming branches are about to go away
+   * anyway ...
+   *
+   * If we ever change that we'll have to change this to patch to
+   * some sort of rebind requests.
+   */
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
 

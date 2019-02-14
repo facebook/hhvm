@@ -254,12 +254,6 @@ bool profileFunc(const Func* func);
  */
 void checkFreeProfData();
 
-/*
- * Discard the memory used for the main portion of the profile translations via
- * the treadmill.
- */
-void freeProfCode();
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

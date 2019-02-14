@@ -348,7 +348,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
       (func->getDVFunclets().size() > 0 || func->hasThisVaries())) {
     const auto& view = code().view(TransKind::OptPrologue);
     const auto tca = emitFuncBodyDispatchInternal(func, func->getDVFunclets(),
-                                                  TransKind::OptPrologue, view);
+                                                  view);
     if (tca != nullptr) {
       info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
         tca, view.main().frontier()
@@ -724,24 +724,12 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
   }
 }
 
-void invalidateFuncsProfSrcKeys() {
+void invalidateFuncsProfSrcKeys(const std::vector<FuncMetaInfo>& infos) {
   BootStats::Block timer("RTA_invalidate_prof_srckeys",
                          RuntimeOption::ServerExecutionMode());
-  auto const pd = profData();
-  assertx(pd);
-  auto const maxFuncId = pd->maxProfilingFuncId();
-
-  for (FuncId funcId = 0; funcId <= maxFuncId; funcId++) {
-    if (!Func::isFuncIdValid(funcId) || !pd->profiling(funcId)) continue;
-
-    auto func = const_cast<Func*>(Func::fromFuncId(funcId));
-    invalidateFuncProfSrcKeys(func);
-
-    // clear the func body and prologues
-    func->resetFuncBody();
-    auto const numPrologues = func->numPrologues();
-    for (int p = 0; p < numPrologues; p++) {
-      func->resetPrologue(p);
+  for (auto& finfo : infos) {
+    if (Func::isFuncIdValid(finfo.fid)) {
+      invalidateFuncProfSrcKeys(Func::fromFuncId(finfo.fid));
     }
   }
 }
@@ -927,13 +915,6 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
       return folly::none;
     }
   } else {
-    // If we were trying to create profile translation, we still need mark the
-    // function as being profiled as the Interp request will be placed in the
-    // profile code block.  This guarantees that this function will be
-    // reoptimized and this translation made unreachable before the profile code
-    // block is freed.
-    if (isProfiling(viewKind)) profData()->setProfiling(sk.funcID());
-
     args.kind = TransKind::Interp;
     FTRACE(1, "emitting dispatchBB interp request for failed "
            "translation (spOff = {})\n", env.initSpOffset.offset);
@@ -1038,7 +1019,7 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
     Logger::Info("retranslateAll: starting to publish functions");
   }
 
-  invalidateFuncsProfSrcKeys();
+  invalidateFuncsProfSrcKeys(infos);
 
   // Publish the metadata for all the translations/prologues before actually
   // publishing any of their code.  This is necessary because we've smashed

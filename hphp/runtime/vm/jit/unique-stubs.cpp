@@ -1229,10 +1229,6 @@ void enterTCImpl(TCA start, ActRec* stashedAR) {
   // register (aside from rvmfp()), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
   auto& regs = vmRegsUnsafe();
-
-  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
-              start, stashedAR->func(), stashedAR->func()->fullName());
-
   tc::ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,
                               vmFirstAR(), rds::tl_base, stashedAR);
   CALLEE_SAVED_BARRIER();

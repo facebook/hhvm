@@ -813,10 +813,13 @@ int main(int argc, char *argv[]) {
 
   pcre_init();
 
-  parseOptions(argc, argv);
-
+  // Initially use stdout logger while parsing arguments. Optionally switch
+  // to DBLogger below if the printToDb argument was passed.
   StdLogger stdoutlogger{};
   g_logger = &stdoutlogger;
+
+  parseOptions(argc, argv);
+
   #ifdef FACEBOOK
   folly::Optional<DBLogger> dblogger = folly::none;
   if (printToDB) {
@@ -825,6 +828,7 @@ int main(int argc, char *argv[]) {
     g_logger->printGeneric("Printing to database");
   }
   #endif
+
   g_transData = new OfflineTransData(dumpDir);
   transCode = new OfflineCode(dumpDir,
                                  g_transData->getHotBase(),

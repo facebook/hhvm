@@ -1830,7 +1830,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs($args = varray[]) {
+  public function newInstanceArgs(Traversable<mixed> $args = varray[]) {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(
@@ -1838,8 +1838,7 @@ class ReflectionClass implements Reflector {
         .' any constructor arguments'
       );
     }
-    // XXX: is this array_values necessary?
-    return hphp_create_object($this->getName(), array_values((array)$args));
+    return hphp_create_object($this->getName(), varray($args));
   }
 
   /**

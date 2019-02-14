@@ -69,7 +69,7 @@ function get_class_constants(string $class_name): array;
 // the return value is an instance with class $class
 // do **not** use this in your code, call newv() instead
 <<__PHPStdLib>>
-function hphp_create_object<T>(string $class_name, array $argv): T;
+function hphp_create_object<T>(string $class_name, varray<mixed> $argv): T;
 }
 namespace HH {
   // autoload-map

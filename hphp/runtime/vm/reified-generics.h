@@ -34,9 +34,9 @@ struct StringData;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addToReifiedGenericsTable(const std::string& mangledName,
-                               ArrayData* tsList);
-ArrayData* getReifiedTypeList(const std::string& name);
+void addToReifiedGenericsTable(const StringData* mangledName,
+                               ArrayData*& tsList);
+ArrayData* getReifiedTypeList(const StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ void checkClassReifiedGenericMismatch(
 // Throws if no such reified generics exist
 inline ArrayData* getReifiedGenerics(StringData* name) {
   assertx(isReifiedName(name));
-  auto const tstr = stripClsOrFnNameFromReifiedName(name->toCppString());
+  auto const tstr = stripClsOrFnNameFromReifiedName(name);
   return getReifiedTypeList(tstr);
 }
 

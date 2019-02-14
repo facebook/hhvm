@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
 
 #include "hphp/util/debug.h"
@@ -27,35 +28,38 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-using ReifiedGenericsTable = hphp_string_map<ArrayData*>;
-ReifiedGenericsTable g_reified_generics_table;
-} // namespace
-
 void addToReifiedGenericsTable(
-  const std::string& name,
-  ArrayData* tsList
+  const StringData* name,
+  ArrayData*& tsList
 ) {
-  auto e = g_reified_generics_table.find(name);
-
-  if (UNLIKELY(e == g_reified_generics_table.end())) {
-    g_reified_generics_table[name] = tsList;
+  auto const ne = NamedEntity::get(name, true);
+  auto const generics = ne->getCachedReifiedGenerics();
+  if (!generics) {
+    // We have created a new entry on the named entity table
+    // TODO(T31677864): If the type structures only contain persistent data,
+    // mark it as persistent
+    ne->m_cachedReifiedGenerics.bind(rds::Mode::Normal);
+    ArrayData::GetScalarArray(&tsList);
+    ne->setCachedReifiedGenerics(tsList);
     return;
   }
-  if (debug) {
-    if (!tsList->equal(e->second, true)) {
-      raise_error("Mismatched reified types");
-    }
+  // it already exists on the named entity table
+  if (debug && !tsList->equal(generics, true)) {
+    raise_error("Mismatched reified types");
   }
   return;
 }
 
-ArrayData* getReifiedTypeList(const std::string& name) {
-  auto e = g_reified_generics_table.find(name);
-  if (LIKELY(e != g_reified_generics_table.end())) {
-    return e->second;
-  }
-  raise_error("No such entry in the reified classes table");
+ArrayData* getReifiedTypeList(const StringData* name) {
+  auto const bail = [&] {
+    raise_error("%s does not exist on the reified generics table",
+                name->data());
+  };
+  auto const ne = NamedEntity::get(name, false);
+  if (!ne) bail();
+  auto const generics = ne->getCachedReifiedGenerics();
+  if (!generics) bail();
+  return generics;
 }
 
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {

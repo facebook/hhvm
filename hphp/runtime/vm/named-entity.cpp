@@ -79,6 +79,14 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
     : nullptr;
 }
 
+void NamedEntity::setCachedReifiedGenerics(ArrayData* a) {
+  if (!m_cachedReifiedGenerics.isInit()) {
+    m_cachedReifiedGenerics.initWith(a);
+  } else {
+    *m_cachedReifiedGenerics = a;
+  }
+}
+
 void NamedEntity::pushClass(Class* cls) {
   assertx(!cls->m_nextClass);
   cls->m_nextClass = m_clsList;

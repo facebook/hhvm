@@ -392,10 +392,14 @@ vm_decode_function(const_variant_ref function,
       }
       assertx(f && f->preClass() == nullptr);
       if (f->hasReifiedGenerics()) {
-        assertx(isReifiedName(name.get()));
+        if (!isReifiedName(name.get())) {
+          throw_invalid_argument("You may not call the reified function '%s' "
+                                 "without reified arguments",
+                                 f->fullName()->data());
+          return nullptr;
+        }
         reifiedGenerics =
-          getReifiedTypeList(stripClsOrFnNameFromReifiedName(
-            name.toCppString()));
+          getReifiedTypeList(stripClsOrFnNameFromReifiedName(name.get()));
       }
       return f;
     }

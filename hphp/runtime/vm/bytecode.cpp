@@ -2734,10 +2734,10 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
 
 namespace {
 
-// Creates a static list of reified generics from the stack and adds them
-// to the reified generics table
-ALWAYS_INLINE std::pair<std::string, ArrayData*>
-recordReifiedGenericsAndGetName(uint32_t first, uint32_t n) {
+// Creates a list of reified generics from the stack and adds them to the
+// reified generics table
+ALWAYS_INLINE std::pair<StringData*, ArrayData*>
+recordReifiedGenericsAndGetInfo(uint32_t first, uint32_t n) {
   assertx(first < n);
   auto tsList = ArrayData::CreateVArray();
   for (int i = 0; i < n - first; ++i) {
@@ -2745,8 +2745,7 @@ recordReifiedGenericsAndGetName(uint32_t first, uint32_t n) {
     isValidTSType(*a, true);
     tsList = tsList->appendInPlace(*a);
   }
-  ArrayData::GetScalarArray(&tsList);
-  auto const mangledName = mangleReifiedGenericsName(tsList);
+  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
   addToReifiedGenericsTable(mangledName, tsList);
   return std::make_pair(mangledName, tsList);
 }
@@ -2755,12 +2754,14 @@ recordReifiedGenericsAndGetName(uint32_t first, uint32_t n) {
 
 OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   assertx(n != 0);
-  auto const result = recordReifiedGenericsAndGetName(0, n);
+  auto const result = recordReifiedGenericsAndGetInfo(0, n);
+  auto tsList = result.second;
+  ArrayData::GetScalarArray(&tsList);
   vmStack().ndiscard(n);
   if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushStaticVec(result.second);
+    vmStack().pushStaticVec(tsList);
   } else {
-    vmStack().pushStaticArray(result.second);
+    vmStack().pushStaticArray(tsList);
   }
 }
 
@@ -2768,11 +2769,11 @@ OPTBLD_INLINE void iopReifiedName(uint32_t n, ReifiedGenericOp op) {
   assertx(n != 0);
   auto const name = vmStack().topC();
   if (!tvIsString(name)) raise_error("Reified name must be a string");
-  auto const result = recordReifiedGenericsAndGetName(1, n);
+  auto const result = recordReifiedGenericsAndGetInfo(1, n);
   auto const mangledName = mangleReifiedName(name->m_data.pstr, result.first);
   vmStack().popC();
   vmStack().ndiscard(n-1);
-  vmStack().pushStaticString(makeStaticString(mangledName));
+  vmStack().pushStaticString(mangledName);
 }
 
 OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
@@ -3448,10 +3449,10 @@ OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
   ArrayData* reified_types = nullptr;
   if (generics_field.is_set()) {
     reified_types = generics_field.val().parr;
-    ArrayData::GetScalarArray(&reified_types);
-    auto const mangledTypeName = mangleReifiedGenericsName(reified_types);
+    auto const mangledTypeName =
+      makeStaticString(mangleReifiedGenericsName(reified_types));
     addToReifiedGenericsTable(mangledTypeName, reified_types);
-    mangledName = makeStaticString(mangleReifiedName(name, mangledTypeName));
+    mangledName = mangleReifiedName(name, mangledTypeName);
   }
   auto tv = make_tv<KindOfString>(mangledName);
   auto const cls = lookupClsRef(&tv);
@@ -5187,7 +5188,7 @@ void fPushObjMethodImpl(StringData* name,
   if (f->hasReifiedGenerics()) {
     assertx(isReifiedName(name));
     auto const reifiedGenerics =
-      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
+      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
     ar->setReifiedGenerics(reifiedGenerics);
   }
 }
@@ -5406,7 +5407,7 @@ void pushClsMethodImpl(Class* cls,
   if (f->hasReifiedGenerics()) {
     assertx(isReifiedName(name));
     auto const reifiedGenerics =
-      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
+      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
     ar->setReifiedGenerics(reifiedGenerics);
   }
 }

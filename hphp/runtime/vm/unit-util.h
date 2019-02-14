@@ -132,11 +132,11 @@ inline std::string mangleReifiedGenericsName(const ArrayData* tsList) {
   return folly::sformat("<{}>", folly::join(",", l));
 }
 
-inline std::string mangleReifiedName(
+inline StringData* mangleReifiedName(
   const StringData* name,
-  const std::string& tsName
+  const StringData* tsName
 ) {
-  return folly::sformat("$${}$${}", name, tsName);
+  return makeStaticString(folly::sformat("$${}$${}", name, tsName));
 }
 
 inline bool isReifiedName(const StringData* name) {
@@ -148,21 +148,29 @@ inline bool isReifiedName(const StringData* name) {
           != std::string::npos;
 }
 
-inline std::string stripClsOrFnNameFromReifiedName(const std::string& name) {
+inline folly::StringPiece stripClsOrFnNameFromReifiedName(
+  const folly::StringPiece name
+) {
   auto i = name.find("$$<");
   if (i == std::string::npos) raise_error("Not a reified name");
-  return name.substr(i + 2, name.size() - i - 2);
+  return name.subpiece(i + 2, name.size() - i - 2);
 }
 
-inline std::string stripTypeFromReifiedName(const std::string& name) {
+inline StringData* stripClsOrFnNameFromReifiedName(const StringData* name) {
+  return makeStaticString(stripClsOrFnNameFromReifiedName(name->slice()));
+}
+
+inline folly::StringPiece stripTypeFromReifiedName(
+  const folly::StringPiece name
+) {
   auto i = name.find("$$<");
   if (i == std::string::npos || i < 2) raise_error("Not a reified name");
   // Remove the initial $$
-  return name.substr(2, i - 2);
+  return name.subpiece(2, i - 2);
 }
 
 inline StringData* stripTypeFromReifiedName(const StringData* name) {
-  return makeStaticString(stripTypeFromReifiedName(name->toCppString()));
+  return makeStaticString(stripTypeFromReifiedName(name->slice()));
 }
 
 //////////////////////////////////////////////////////////////////////

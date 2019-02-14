@@ -763,8 +763,7 @@ void storeReifiedGenerics(IRGS& env, SSATmp* funName) {
   if (funName->hasConstVal(TStr)) {
     auto const name = funName->strVal();
     if (!isReifiedName(name)) return;
-    auto const ts = getReifiedTypeList(stripClsOrFnNameFromReifiedName(
-      name->toCppString()));
+    auto const ts = getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
     gen(env,
         StARReifiedGenerics,
         IRSPRelOffsetData { spOffBCFromIRSP(env) },

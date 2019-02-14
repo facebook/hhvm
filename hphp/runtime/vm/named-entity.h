@@ -136,6 +136,15 @@ struct NamedEntity {
   void setCachedTypeAlias(const TypeAliasReq&);
   const TypeAliasReq* getCachedTypeAlias() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Reified generic cache.
+
+  /*
+   * Set and get the cached ReifiedGenerics.
+   */
+  void setCachedReifiedGenerics(ArrayData*);
+  ArrayData* getCachedReifiedGenerics() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Class list.
@@ -212,7 +221,10 @@ private:
 public:
   mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
-  mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias;
+  union {
+    mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias{};
+    mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
+  };
 
 private:
   AtomicLowPtr<Class, std::memory_order_acquire,

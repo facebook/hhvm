@@ -6,5 +6,5 @@ function f<reify T>(C<T> $a) {
   return $a;
 }
 
-f<reify int>(new C<reify int>);
-f<reify int>(new C<reify string>);
+f<int>(new C<int>);
+f<int>(new C<string>);

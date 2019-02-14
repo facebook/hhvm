@@ -7,11 +7,11 @@ function f<reify Ta, Tb>() {
     echo $e->getTraceAsString() . "\n";
   }
 }
-function g<reify Ta, Tb>() { f<reify Ta, Tb>(); }
-function h<reify Ta, Tb>() { g<reify Ta, Tb>(); }
+function g<reify Ta, Tb>() { f<Ta, Tb>(); }
+function h<reify Ta, Tb>() { g<Ta, Tb>(); }
 
 function a<T>() {
-  g<reify int, T>();
+  g<int, T>();
 }
 
 a();

@@ -17,5 +17,5 @@ class D<reify T> extends C<reify bool> {
 }
 
 
-$d = new D<reify int>();
+$d = new D<int>();
 $d->h();

@@ -16,15 +16,15 @@ function f<reify T>() {
 
 echo "function\n";
 
-var_dump(f<reify C>() is C);
-var_dump(f<reify D>() is C);
+var_dump(f<C>() is C);
+var_dump(f<D>() is C);
 
 echo "\nclass\n";
 
-$t = new Test<reify E>();
-var_dump($t->f<reify C>(true) is C);
-var_dump($t->f<reify D>(true) is C);
-var_dump($t->f<reify C>(false) is C);
-var_dump($t->f<reify D>(false) is C);
-var_dump($t->f<reify D>(true) is E);
-var_dump($t->f<reify D>(false) is E);
+$t = new Test<E>();
+var_dump($t->f<C>(true) is C);
+var_dump($t->f<D>(true) is C);
+var_dump($t->f<C>(false) is C);
+var_dump($t->f<D>(false) is C);
+var_dump($t->f<D>(true) is E);
+var_dump($t->f<D>(false) is E);

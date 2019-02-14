@@ -2,6 +2,6 @@
 
 function f() {}
 
-f<reify int>();
+f<int>();
 
 echo "done\n";

@@ -18,5 +18,5 @@ set_error_handler(
   }
 );
 
-f(new Foo<reify int>);
-f(new Foo<reify string>);
+f(new Foo<int>);
+f(new Foo<string>);

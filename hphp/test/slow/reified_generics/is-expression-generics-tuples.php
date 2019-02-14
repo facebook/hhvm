@@ -2,7 +2,7 @@
 
 class C<reify Ta> {}
 
-$c = new C<reify (int, string)>();
+$c = new C<(int, string)>();
 
 // just wildcard
 var_dump($c is C<_>);

@@ -11,6 +11,6 @@ class C<reify T1> {
   }
 }
 
-$c = new C<reify string>();
-$c->f<reify int>(tuple("hello", 1));
-$c->f<reify int>(tuple(1, "hello"));
+$c = new C<string>();
+$c->f<int>(tuple("hello", 1));
+$c->f<int>(tuple(1, "hello"));

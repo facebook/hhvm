@@ -2,7 +2,7 @@
 
 class C<reify Ta, reify Tb> {}
 
-$x = new C<reify string, reify bool>();
+$x = new C<string, bool>();
 
 echo "-- Valid input of reified\n";
 var_dump($x is C<string, bool>);

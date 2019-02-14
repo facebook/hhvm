@@ -2,4 +2,4 @@
 
 function f<reify T>() {}
 
-f<reify int, reify string>();
+f<int, string>();

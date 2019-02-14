@@ -22,6 +22,6 @@ class C<reify T1, reify T2> extends D<reify (int, (T1, string)), reify T1> {
   }
 }
 
-$c = new C<reify (int, string), reify string>();
+$c = new C<(int, string), string>();
 
 $c->f();

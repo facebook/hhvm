@@ -7,7 +7,7 @@ class C<reify C1, reify C2> {
     var_dump(__hhvm_intrinsics\get_reified_type(T1));
   }
   public function f<reify T1>(){
-    $this->g<reify (C1, (C2, int), T1)>();
+    $this->g<(C1, (C2, int), T1)>();
   }
 }
 
@@ -17,12 +17,12 @@ class D<reify C1, reify C2> {
     var_dump(__hhvm_intrinsics\get_reified_type(T1));
   }
   public function f<reify T1>(){
-    $this->g<reify (C1, (C2, int), T1)>();
+    $this->g<(C1, (C2, int), T1)>();
   }
 }
 
-$c = new C<reify int, reify string>();
-$c->f<reify int>();
+$c = new C<int, string>();
+$c->f<int>();
 
-$d = new D<reify int, reify string>();
-$d->f<reify int>();
+$d = new D<int, string>();
+$d->f<int>();

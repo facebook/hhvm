@@ -5,7 +5,7 @@ class C<reify Ta, Tb, reify Tc> {}
 function f(C<int, string, int> $x) {}
 
 function g<T>() {
-  f(new C<reify int, T, reify string>);
+  f(new C<int, T, string>);
 }
 
 g();

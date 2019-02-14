@@ -3,7 +3,7 @@
 class C<reify T> {}
 class D<reify Ta, reify Tb> {}
 
-$c = new C<reify D<int,string>>();
+$c = new C<D<int,string>>();
 
 echo "true\n";
 var_dump($c is C<_>);

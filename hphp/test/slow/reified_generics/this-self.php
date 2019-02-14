@@ -12,7 +12,7 @@ class D {
   const type T1 = string;
   public function f() {
     $e = new E();
-    $e->f<reify C::T2>();
+    $e->f<C::T2>();
   }
 }
 

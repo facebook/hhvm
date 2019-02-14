@@ -9,5 +9,5 @@ function f<reify T>(mixed $x) {
   }
 }
 
-f<reify int>("hello");
-f<reify int>(1);
+f<int>("hello");
+f<int>(1);

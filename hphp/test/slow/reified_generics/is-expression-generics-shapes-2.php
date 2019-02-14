@@ -2,7 +2,7 @@
 
 class C<reify Ta> {}
 
-$c = new C<reify shape(?'a' => int, 'b' => string)>();
+$c = new C<shape(?'a' => int, 'b' => string)>();
 
 // just wildcard
 var_dump($c is C<_>);

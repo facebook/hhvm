@@ -8,7 +8,7 @@ function f<reify T>() {
   return (new T());
 }
 
-$c = f<reify C<B<A>>>();
+$c = f<C<B<A>>>();
 var_dump($c is C<_>);
 var_dump($c is C<B<_>>);
 var_dump($c is C<B<A>>);

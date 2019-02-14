@@ -15,5 +15,5 @@ class D<reify T1> {
   }
 }
 
-$d = new D<reify C1>();
-$d->f<reify C2>();
+$d = new D<C1>();
+$d->f<C2>();

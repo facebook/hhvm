@@ -2,4 +2,4 @@
 
 function g<reify Ta, Tb>() {}
 
-g<reify int>();
+g<int>();

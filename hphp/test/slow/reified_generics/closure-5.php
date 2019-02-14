@@ -19,7 +19,7 @@ class D<reify T> {
     $x = () ==> {
     $y = () ==> {
       $c = new T1();
-      $c->f<reify T>();
+      $c->f<T>();
     };
     $y();
     };
@@ -27,5 +27,5 @@ class D<reify T> {
   }
 }
 
-$d = new D<reify B>();
-$d->f<reify C>();
+$d = new D<B>();
+$d->f<C>();

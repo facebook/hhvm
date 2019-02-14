@@ -4,7 +4,7 @@ class B<reify Ta, reify Tb> {}
 
 class C<reify Ta, reify Tb> extends B<reify Ta, reify int> {}
 
-$x = new C<reify string, reify bool>();
+$x = new C<string, bool>();
 
 echo "-- Valid input of reified\n";
 try {

@@ -18,11 +18,11 @@ class D<reify T> {
   function f<reify T1>() {
     $x = () ==> {
       $c = new T1();
-      $c->f<reify T>();
+      $c->f<T>();
     };
     $x();
   }
 }
 
-$d = new D<reify B>();
-$d->f<reify C>();
+$d = new D<B>();
+$d->f<C>();

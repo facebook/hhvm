@@ -3,9 +3,9 @@
 class C<reify Ta, Tb, <<__Soft>> reify Tc, reify Td> {}
 
 function g<T>() {
-  new C<reify int, int, reify string, reify int>(); // no warning
-  new C<reify int, int, T, reify int>(); // warning
-  new C<reify int, int, T, T>(); // warning and then error
+  new C<int, int, string, int>(); // no warning
+  new C<int, int, T, int>(); // warning
+  new C<int, int, T, T>(); // warning and then error
 }
 
 g();

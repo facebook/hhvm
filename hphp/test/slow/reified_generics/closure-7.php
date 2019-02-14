@@ -15,4 +15,4 @@ function f<reify T1>() {
   $x();
 }
 
-f<reify C>();
+f<C>();

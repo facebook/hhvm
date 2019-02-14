@@ -16,5 +16,5 @@ set_error_handler(
   }
 );
 
-$c = new C<reify string>();
+$c = new C<string>();
 f($c);

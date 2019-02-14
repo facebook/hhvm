@@ -2,4 +2,4 @@
 
 class C<reify Ta, reify Tb> {}
 
-new C<reify int, reify string, reify int>();
+new C<int, string, int>();

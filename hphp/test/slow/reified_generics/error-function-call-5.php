@@ -5,4 +5,4 @@ class C {
 }
 
 $c = new C();
-$c->f<reify string>();
+$c->f<string>();

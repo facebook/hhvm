@@ -6,5 +6,5 @@ class C<reify Ta, <<__Soft>> reify Tb> {
   }
 }
 
-$c = new C<reify int, string>();
-$c->f<reify int, string>();
+$c = new C<int, string>();
+$c->f<int, string>();

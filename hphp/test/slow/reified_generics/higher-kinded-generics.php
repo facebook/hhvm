@@ -3,7 +3,7 @@
 class C<reify T> {}
 
 function f<reify T>() {
-  new T<reify T>();
+  new T<T>();
 }
 
-f<reify C>();
+f<C>();

@@ -2,6 +2,6 @@
 
 class C<reify T> {}
 
-new C<reify int>();
+new C<int>();
 
 echo "done\n";

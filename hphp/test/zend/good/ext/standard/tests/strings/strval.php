@@ -1,7 +1,7 @@
 <?php
 $foo = 'bar';
 var_dump(strval($foo));
-define('FOO', 'BAR');
+const FOO = 'BAR';
 var_dump(strval(FOO));
 var_dump(strval('foobar'));
 var_dump(strval(1));

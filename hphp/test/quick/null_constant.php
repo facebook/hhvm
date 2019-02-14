@@ -1,2 +1,2 @@
 <?hh
-define('FOO', null);
+const FOO = null;

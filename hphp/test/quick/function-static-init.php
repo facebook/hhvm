@@ -17,9 +17,9 @@ function blerg() {
   $a []= count($a) + 1;
 }
 
-define("ICHI", 1);
-define("NI", 2);
-define("SAN", 3);
+const ICHI = 1;
+const NI = 2;
+const SAN = 3;
 blerg();
 blerg();
 blerg();

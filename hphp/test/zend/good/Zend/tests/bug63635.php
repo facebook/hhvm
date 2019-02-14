@@ -11,7 +11,7 @@ class Node {
 	}
 }
 
-define("MAX", 16);
+const MAX = 16;
 
 for ($n = 0; $n < 20; $n++) {
 	$top = new Node();

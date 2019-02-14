@@ -1,0 +1,5 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 13
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 14
+int(123)
+int(456)

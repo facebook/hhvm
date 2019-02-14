@@ -1,5 +1,7 @@
 --- At top-level
 bool(true)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
 bool(true)
 Top1: CON1 = 1
 Top1: CON2 = 2
@@ -8,10 +10,14 @@ Top1: $sVar1 = 11
 Top1: $tmp = 11
 Top1: $gVar1 = 21
 --- Inside f, block-level 1
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
 f:1 CON1 = 1
 f:1 CON2 = 2
 f:1 CON3 = 3
 --- Inside f, block-level 2
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
 f:2 CON1 = 1
 f:2 CON2 = 2
 f:2 CON3 = 3
@@ -27,11 +33,15 @@ f:1 $gVar1 = 25
 --- Back at top-level
 --- Inside f, block-level 1
 
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
+
 Notice: Constant CON3 already defined in %s/variables/unsetting_variables.php on line 47
 f:1 CON1 = 1
 f:1 CON2 = 2
 f:1 CON3 = 3
 --- Inside f, block-level 2
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
 
 Notice: Constant CON4 already defined in %s/variables/unsetting_variables.php on line 56
 f:2 CON1 = 1

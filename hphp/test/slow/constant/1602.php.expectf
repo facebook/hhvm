@@ -1,3 +1,4 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 6
 bool(true)
 array(2) {
   [0]=>
@@ -5,11 +6,17 @@ array(2) {
   [1]=>
   string(2) "bc"
 }
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 8
 bool(true)
 
-Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 9
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 9
+
+Notice: Constant FLUB already defined in %s on line 9
 bool(false)
 int(1230)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 11
 bool(true)
 array(2) {
   [0]=>
@@ -17,3 +24,5 @@ array(2) {
   [1]=>
   int(2)
 }
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 13

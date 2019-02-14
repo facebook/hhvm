@@ -1,3 +1,6 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 6
 
-Notice: Constant A_B already defined in %s/test/slow/constant/1600.php on line 7
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 7
+
+Notice: Constant A_B already defined in %s on line 7
 done

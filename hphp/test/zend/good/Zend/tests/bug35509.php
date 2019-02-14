@@ -13,7 +13,7 @@ class mytest
 
 $classtest = new mytest();
 
-define( "normalConstant", '01' );
+const normalConstant = '01';
 $normalArray = array( normalConstant => 'value' );
 print_r($normalArray);
 ?>

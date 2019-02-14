@@ -1,6 +1,6 @@
 <?php
 $ok = 0;
-define( 'COUNT', 120 );
+const COUNT = 120;
 $d0 = new DateTime('2009-11-20');
 for ( $i = 0; $i < COUNT * 12; $i++ )
 {

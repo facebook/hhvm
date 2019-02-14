@@ -1,12 +1,12 @@
 <?hh
 // check default values and type hints, implementating abstract methods: pass
-define('D0',0);
-define('D1',1);
-define('D2',2);
-define('DD2',2.0);
-define('DNULL',null);
-define('DABC','abc');
-define('DTRUE',true);
+const D0 = 0;
+const D1 = 1;
+const D2 = 2;
+const DD2 = 2.0;
+const DNULL = null;
+const DABC = 'abc';
+const DTRUE = true;
 
 abstract class A {
   const i0 = 0;
@@ -44,4 +44,3 @@ $b->s();
 $b->f();
 
 echo "Pass\n";
-

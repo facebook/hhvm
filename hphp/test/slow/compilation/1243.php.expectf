@@ -1,3 +1,4 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 7
 
-Notice: Undefined variable: b in %s/test/slow/compilation/1243.php on line 8
+Notice: Undefined variable: b in %s on line 8
 0

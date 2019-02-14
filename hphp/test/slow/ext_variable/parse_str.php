@@ -14,10 +14,10 @@ function testme() {
     echo 'no b='.$output['b'],EOL;
   }
 }
+const EOL = "\n";
 
 <<__EntryPoint>>
 function main_parse_str() {
-define('EOL',"\n");
 
 $data='a=1&b=2&c=3';
 echo 'global scope',EOL;

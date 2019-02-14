@@ -1,5 +1,5 @@
 <?php
-define('PREG_CACHE_SIZE', 4096+1);
+const PREG_CACHE_SIZE = 4096+1;
 
 $re = '';
 $str = str_repeat('x', PREG_CACHE_SIZE);

@@ -10,8 +10,10 @@ bool(false)
 string(8) "constant"
 string(3) "foo"
 
-Warning: constant(): Couldn't find constant foo in %s/test/slow/volatile/1233.php on line 19
+Warning: constant(): Couldn't find constant foo in %s on line 19
 NULL
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 12
 string(8) "constant"
 string(3) "bar"
 string(3) "baz"

@@ -2,7 +2,7 @@
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 require_once(dirname(__FILE__) . '/stream_test.inc');
-define('TIMENOW', time());
+$timenow = time();
 
 echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE test (id STRING, data BLOB)'));

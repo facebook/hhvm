@@ -5,7 +5,7 @@ $filename = __FILE__ . ".tmp";
 $fd = fopen($filename, "w+");
 
 // populate the file with lines of data
-define("LINE_OF_DATA", "12345678\n");
+const LINE_OF_DATA = "12345678\n";
 for ($i = 0; $i < 1000; $i++) {
 	fwrite($fd, LINE_OF_DATA);
 }

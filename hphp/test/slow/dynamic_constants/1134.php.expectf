@@ -1,5 +1,8 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 9
 
-Notice: Constant A already defined in %s/test/slow/dynamic_constants/1134.php on line 10
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 10
+
+Notice: Constant A already defined in %s on line 10
 array(1) {
   [0]=>
   int(10)

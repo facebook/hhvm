@@ -1,6 +1,6 @@
 <?php
 
-define('MAX_LOOPS',5);
+const MAX_LOOPS = 5;
 
 function withRefValue($elements, $transform) {
 	echo "\n---( Array with $elements element(s): )---\n";

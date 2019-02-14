@@ -1,6 +1,14 @@
 float(3.1415926535898)
 float(3.1415926535898)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 9
 float(3.1415926535898)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 11
 string(%d) "%s"
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 13
 int(1)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 19
 int(2)

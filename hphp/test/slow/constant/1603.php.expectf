@@ -1,4 +1,7 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s/test/slow/constant/1603.php on line 6
 bool(true)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/test/slow/constant/1603.php on line 7
 
 Notice: Constant foo already defined in %s/test/slow/constant/1603.php on line 7
 bool(false)

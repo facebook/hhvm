@@ -17,9 +17,9 @@ class EntShare {
 }
 
 
+const MUST_PREPARE = 0;
 <<__EntryPoint>>
 function main_2060() {
-define('MUST_PREPARE', 0);
 $obj1 = new EntShare;
 $obj1->canViewerComment();
 }

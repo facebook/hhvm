@@ -1,6 +1,8 @@
 bool(false)
 
-Notice: Use of undefined constant TEST - assumed 'TEST' in %s/test/slow/dynamic_constants/1132.php on line 7
+Notice: Use of undefined constant TEST - assumed 'TEST' in %s on line 7
 string(4) "TEST"
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 8
 bool(true)
 int(13)

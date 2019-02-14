@@ -24,9 +24,9 @@ function test() {
 
 
 
+const FIZ = 32;
 <<__EntryPoint>>
 function main_exitspill() {
-define('FIZ', 32);
 
 test();
 }

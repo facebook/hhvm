@@ -1,7 +1,7 @@
 <?php
 
 require_once(dirname(__FILE__) . '/new_db.inc');
-define('TIMENOW', time());
+$timenow = time();
 
 echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));

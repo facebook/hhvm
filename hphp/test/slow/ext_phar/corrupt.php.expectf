@@ -1,5 +1,7 @@
 #!/usr/bin/env php
 
+Warning: define() is deprecated and subject to removal from the Hack language in %s/phpunit-corrupt%s on line %d
+
 Fatal error: Uncaught exception 'PharException' with message 'phar has a broken signature' in %s/phpunit-corrupt%s:%d
 Stack trace:
 #0 (): __SystemLib\PharArchiveHandler->parsePhar()

@@ -1,6 +1,6 @@
 <?php
 
-define("PERMISSIONS_MASK", 0777);
+const PERMISSIONS_MASK = 0777;
 
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = $test_dir . "/" . basename(__FILE__, ".php") . "testdir";

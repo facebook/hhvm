@@ -63,6 +63,16 @@ string(2) "CD"
 Notice: Use of undefined constant CS - assumed 'CS' in %s on line 9
 string(2) "CS"
 Leave f()
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 29
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 30
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 31
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 32
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 33
 NULL
 bool(true)
 int(42)

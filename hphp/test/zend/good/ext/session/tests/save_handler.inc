@@ -1,6 +1,6 @@
 <?php
 
-DEFINE("SESSION_FILE_PREFIX" ,"session_test_");
+const SESSION_FILE_PREFIX = "session_test_";
 function open($save_path, $session_name) {
     global $session_save_path, $name;
     $session_save_path = $save_path;
@@ -48,7 +48,7 @@ function gc($maxlifetime) {
     $directory = opendir($session_save_path."/");
     $length = strlen(SESSION_FILE_PREFIX);
     while (($file = readdir($directory)) !== FALSE) {
-        $qualified = ($session_save_path."/".$file); 
+        $qualified = ($session_save_path."/".$file);
         if (is_file($qualified) === TRUE) {
             if (substr($file, 0, $length) === SESSION_FILE_PREFIX) {
                 unlink($qualified);
@@ -60,4 +60,3 @@ function gc($maxlifetime) {
 }
 
 ?>
-

@@ -1,3 +1,4 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 5
 int(1)
 int(1)
 int(1)

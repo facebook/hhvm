@@ -2,7 +2,7 @@
 
 print "Test begin\n";
 
-define('SOME_CONSTANT', "some string");
+const SOME_CONSTANT = "some string";
 
 #===============================================================================
 # ReflectionFunction.
@@ -324,7 +324,7 @@ print "SOME_CONSTANT: " . $a["SOME_CONSTANT"] . "\n";
 if (isset($a["ANOTHER_CONSTANT"])) {
   print "ANOTHER_CONSTANT: ".$a["ANOTHER_CONSTANT"]."\n";
 }
-define('ANOTHER_CONSTANT', "some other string");
+const ANOTHER_CONSTANT ="some other string";
 $a = get_defined_constants();
 print "SOME_CONSTANT: " . $a["SOME_CONSTANT"] . "\n";
 print "ANOTHER_CONSTANT: ".$a["ANOTHER_CONSTANT"]."\n";

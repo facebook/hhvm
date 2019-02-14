@@ -1,0 +1,34 @@
+int(0)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+array(0) {
+}
+int(0)
+int(1)
+bool(false)
+bool(false)
+string(8) "50000000"
+string(2) "30"
+string(2) "40"
+string(11) "5.6.99-hhvm"
+string(3) "1.0"
+string(7) "2.2.0b1"
+bool(false)
+string(4) "$Id$"
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 48
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 49
+bool(true)
+bool(true)

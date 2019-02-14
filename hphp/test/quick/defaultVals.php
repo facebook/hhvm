@@ -1,11 +1,11 @@
 <?hh
 // check a variety of acceptable default values and type hints: pass
-define('D0',0);
-define('D1',1);
-define('D2',2);
-define('DD2',2.0);
-define('DABC',  "abc");
-define('DTRUE', true);
+const D0 = 0;
+const D1 = 1;
+const D2 = 2;
+const DD2 = 2.0;
+const DABC =  "abc";
+const DTRUE = true;
 
 class A {
   const foo = 'ABC';
@@ -46,4 +46,3 @@ $b->a();
 $b->b();
 
 print "Pass\n";
-

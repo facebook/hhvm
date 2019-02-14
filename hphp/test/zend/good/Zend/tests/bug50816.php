@@ -1,6 +1,6 @@
 <?php
-define("ONE", 1);
-define("TWO", 1);
+const ONE = 1;
+const TWO = 1;
 
 class Foo {
   const ONE = 1;

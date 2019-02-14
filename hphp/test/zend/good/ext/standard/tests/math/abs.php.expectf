@@ -1,2 +1,5 @@
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 3
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s on line 4
 1,1,0,0
 OK

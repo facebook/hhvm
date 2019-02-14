@@ -1,4 +1,20 @@
 ====================== test_array ============================
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 array(0) {
 }
 array(4) {
@@ -97,6 +113,22 @@ array(3) {
   int(2)
 }
 ====================== test_vec ==============================
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 vec(0) {
 }
 vec(4) {
@@ -171,6 +203,30 @@ vec(3) {
   int(2)
 }
 ====================== test_dict =============================
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 dict(0) {
 }
 dict(4) {
@@ -308,6 +364,20 @@ dict(3) {
   int(2)
 }
 ====================== test_keyset ===========================
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 keyset(0) {
 }
 keyset(4) {
@@ -345,48 +415,92 @@ keyset(3) {
 }
 ====================== test_bad_array ========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 65
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 66
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 68
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 69
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 71
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 73
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 75
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 76
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 ====================== test_bad_vec ==========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 108
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 110
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 112
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 113
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 115
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 117
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 118
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 ====================== test_bad_dict =========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 163
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 165
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 167
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 168
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 170
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 172
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 173
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d
+
+Warning: define() is deprecated and subject to removal from the Hack language in %s/define-array.php on line %d
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line %d

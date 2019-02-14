@@ -2,7 +2,7 @@
 /* Prototype  : array get_defined_constants  ([ bool $categorize  ] )
  * Description:  Returns an associative array with the names of all the constants and their values
  * Source code: Zend/zend_builtin_functions.c
- */		
+ */
 
 echo "*** Testing get_defined_constants() : basic functionality ***\n";
 
@@ -14,7 +14,7 @@ $arr2 = get_defined_constants();
 var_dump(array_diff($arr1, $arr2));
 
 $n1 = count(get_defined_constants());
-define("USER_CONSTANT", "test");
+const USER_CONSTANT = "test";
 $arr2 = get_defined_constants();
 $n2 = count($arr2);
 

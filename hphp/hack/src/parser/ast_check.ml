@@ -7,6 +7,8 @@
  *
  *)
 
+module SyntaxError = Full_fidelity_syntax_error
+
 open Ast
 
 let rec check_lvalue errorf = function
@@ -31,3 +33,28 @@ let rec check_lvalue errorf = function
     | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _ | As _
     | ParenthesizedExpr _) ->
       errorf pos "Invalid lvalue"
+
+
+(** Syntax errors detected via a pass over AST (see: check_program)
+ * TODO: move here most of CST checks (module Full_fidelity_syntax_errors)
+ *)
+
+type context = {
+  _unused : unit;  (* TODO: dummy for easier rebasing until we have 2+ fields *)
+}
+
+let _mk_error ?(error_type=SyntaxError.ParseError) pos error =
+  let (start_offset, end_offset) = Pos.info_raw pos in
+  SyntaxError.make ~error_type start_offset end_offset error
+
+let check_program program =
+  let visitor = object(_)
+    inherit [context * (SyntaxError.t list)] Ast_visitor.ast_visitor as _super
+
+    (* TODO: override on_* and modify context and errors accordingly for each check *)
+  end
+  in snd @@ visitor#on_program (
+    {
+      _unused = ();
+    }, []
+    ) program

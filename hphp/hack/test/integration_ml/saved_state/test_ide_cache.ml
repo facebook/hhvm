@@ -35,11 +35,17 @@ let check_no_errors = function
 let expected_errors_by_contents = {|
 File "", line 3, characters 14-14:
 A left parenthesis ('(') is expected here. (Parsing[1002])
+
+File "", line 3, characters 14-14:
+Encountered unexpected text '{', was expecting a type hint. (Parsing[1002])
 |}
 
 let expected_errors_by_filename = {|
 File "/bar.php", line 3, characters 14-14:
 A left parenthesis ('(') is expected here. (Parsing[1002])
+
+File "/bar.php", line 3, characters 14-14:
+Encountered unexpected text '{', was expecting a type hint. (Parsing[1002])
 |}
 
 let check_errors expected_errors = function

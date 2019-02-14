@@ -10,7 +10,8 @@
     ast_deps
     file_info
     naming_special_names
-    parser_namespace_env)
+    parser_namespace_env
+    parser_syntax)
   (preprocess
     (pps visitors.ppx ppx_deriving.std)))
 

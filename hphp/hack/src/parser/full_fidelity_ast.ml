@@ -3574,10 +3574,14 @@ let lower_tree
   let script = PositionedSyntaxTree.root tree in
   let comments = scour_comments_and_add_fixmes env source_text script in
   let relative_pos = pos_of_error env.file source_text in
-  let check_for_syntax_errors _ast =
+  let check_for_syntax_errors ast_opt =
     let find_errors error_env =
       ParserErrors.parse_errors error_env
-      (* TODO: concatenate with errors found by visiting AST *)
+      @
+      (match ast_opt with
+      | Some ast -> Ast_check.check_program ast
+      | _ -> []
+      )
     in
     if env.codegen && not env.lower_coroutines then
       let hhvm_compat_mode = if env.systemlib_compat_mode
@@ -3621,7 +3625,6 @@ let lower_tree
         List.iter ~f:report_error errors
       | error :: _ -> report_error error
   in (* check_for_syntax_errors *)
-  check_for_syntax_errors ();
   let mode = Option.value mode ~default:(FileInfo.Mpartial) in
   let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
@@ -3643,9 +3646,13 @@ let lower_tree
     else
       FromPositionedSyntax.lower ~script
   in
+  let ast_opt = ref None in
   Utils.try_finally ~f:(fun () ->
-    lower env ~source_text comments
+    let ret = lower env ~source_text comments in
+    ast_opt := Some ret.ast;
+    ret
   ) ~finally:(fun () ->
+    check_for_syntax_errors !ast_opt;
     flush_parsing_errors env
   )
 

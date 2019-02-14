@@ -779,7 +779,7 @@ and has_non_tparam_generics env targs =
 
 and emit_reified_targs env pos targs =
   List.map targs
-    ~f:(fun (h, _) -> fst @@ emit_reified_arg env ~isas:false pos h)
+    ~f:(fun h -> fst @@ emit_reified_arg env ~isas:false pos h)
 
 and emit_new env pos expr targs args uargs =
   if has_inout_args args then
@@ -817,6 +817,7 @@ and emit_new env pos expr targs args uargs =
         cexpr, H.NoGenerics
       | None ->
         let cexpr_instrs name =
+          let targs = List.map ~f:fst targs in
           let reified_targs = emit_reified_targs env pos targs in
           gather [
             gather reified_targs;
@@ -3194,6 +3195,7 @@ and emit_call_lhs
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
   let reified_call_body name =
+    let targs = List.map ~f:fst targs in
     let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;

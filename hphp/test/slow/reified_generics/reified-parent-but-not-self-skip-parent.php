@@ -7,7 +7,7 @@ class E<reify T1, reify T2> {
   }
 }
 
-class D extends E<reify (int, int), reify int> {
+class D extends E<(int, int), int> {
   public function f() {
     parent::f();
   }

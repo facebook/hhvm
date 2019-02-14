@@ -1,10 +1,10 @@
 <?hh
 
 class D<Ta, reify Tb> {}
-class C<reify Ta, Tb, reify Tc> extends D<reify int, Tb>{}
+class C<reify Ta, Tb, reify Tc> extends D<int, Tb>{}
 
 function g<T>() {
-  $c = new C<reify int, T, reify bool>();
+  $c = new C<int, T, bool>();
 }
 
 g();

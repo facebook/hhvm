@@ -236,12 +236,9 @@ let validate_class_name ns (p, class_name) =
 
 let emit_reified_extends_params env ast_class =
   let type_params = match ast_class.Ast.c_extends with
-    | (_, Ast.Happly (_, l)):: _ ->
-      List.map l
-        ~f:(function (_, Ast.Hreified h) -> (h, true) | h -> (h, false))
+    | (_, Ast.Happly (_, l)) :: _ -> l
     | _ -> [] in
-  let has_reified = List.exists type_params ~f:snd in
-  if not has_reified then
+  if List.is_empty type_params then
     let tv = if hack_arr_dv_arrs () then TV.Vec [] else TV.VArray [] in
     instr (H.ILitConst (H.TypedValue tv))
   else
@@ -290,11 +287,10 @@ let emit_reified_init_body env num_reified ast_class =
 let emit_reified_init_method env ast_class =
   let num_reified =
     List.count ast_class.Ast.c_tparams ~f:(fun t -> t.Ast.tp_reified) in
-  let has_reified_parents = match ast_class.Ast.c_extends with
-    | (_, Ast.Happly (_, l)):: _ ->
-      List.exists l ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
+  let maybe_has_reified_parents = match ast_class.Ast.c_extends with
+    | (_, Ast.Happly (_, l)) :: _ -> not @@ List.is_empty l
     | _ -> false in
-  if num_reified = 0 && not has_reified_parents then [] else
+  if num_reified = 0 && not maybe_has_reified_parents then [] else
   let tc = Hhas_type_constraint.make (Some "HH\\varray") [] in
   let params =
     [ Hhas_param.make

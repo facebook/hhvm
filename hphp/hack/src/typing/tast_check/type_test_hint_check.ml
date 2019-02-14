@@ -50,6 +50,31 @@ let visitor = object(this)
     | AKdependent (`this, _) -> acc
     | AKgeneric name when Env.is_fresh_generic_parameter name -> acc
     | AKgeneric name when AbstractKind.is_generic_dep_ty name ->
+      (* The when constraint guarnatees that there is a :: in the name *)
+      let acc = match Str.split (Str.regexp_string "::") name with
+      | [class_id; tconst_id] ->
+        (* If a Taccess resolves to an abstract type constant, it will be given
+         * to this visitor as a Tabstract, and the recursive bounds check below
+         * will eventually resolve to the abstract type constant's constraint.
+         * However, a subtype of this constraint could have a type parameter, so
+         * we check whether the abstract type constant is enforceable. In the case
+         * where Taccess is concrete, the locl ty will have resolved to a
+         * Tclass/Tprim/etc, so it won't be checked by this method *)
+        let cls_opt = Env.get_class acc.env class_id in
+        let tconst_opt = Option.map cls_opt ~f:(fun cls -> Cls.get_typeconst cls tconst_id) in
+        Option.value_map ~default:acc tconst_opt ~f:(fun tconst ->
+          let _ = tconst in
+          let enforceable = false in
+          if not enforceable
+          then update acc @@
+            Invalid (r, "the abstract type constant " ^
+              tconst_id ^ " because it is not enforceable")
+          else acc
+        )
+      | _ ->
+        acc in
+
+
       let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
       List.fold_left bounds ~f:this#on_type ~init:acc
     | AKgeneric _ -> update acc @@
@@ -79,11 +104,6 @@ let visitor = object(this)
     else acc
   method! on_tarraykind acc r _array_kind =
     update acc @@ Invalid (r, "an array type")
-  method! on_taccess acc r taccess_type =
-    match taccess_type with
-    | (_, Tthis), _ -> update acc @@
-      Invalid (r, "a late static bound type constant, because it can hide a generic")
-    | _ -> acc
   method is_wildcard = function
     | _, Tabstract (AKgeneric name, _) ->
       Env.is_fresh_generic_parameter name

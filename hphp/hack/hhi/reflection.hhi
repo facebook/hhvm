@@ -256,6 +256,8 @@ class ReflectionProperty implements Reflector {
   public function getDocComment();
   public function setAccessible($accessible);
   public function getTypeText();
+  public function getAttributes(): darray<string, varray<mixed>>;
+  public function getAttribute(string $name): ?varray<mixed>;
 }
 
 class ReflectionExtension implements Reflector {

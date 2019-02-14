@@ -34,7 +34,10 @@ function main() {
   $a_cls = new ReflectionClass('A');
   var_dump($a_cls->getConstants());
   var_dump($a_cls->getAbstractConstantNames());
-  var_dump($a_cls->getOrderedTypeConstants());
+  $ordered_type_constants_meth =
+    new ReflectionMethod('ReflectionClass::getOrderedTypeConstants');
+  $ordered_type_constants_meth->setAccessible(true);
+  var_dump($ordered_type_constants_meth->invoke(null, $a_cls->getName()));
   var_dump($a_cls->getTypeConstants());
   var_dump($a_cls->getDefaultProperties());
   var_dump($a_cls->getInterfaceNames());

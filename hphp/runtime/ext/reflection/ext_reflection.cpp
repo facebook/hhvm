@@ -1316,9 +1316,27 @@ static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
   return (get_method_func(cls, name) != nullptr);
 }
 
+namespace {
+  const Class* get_class_from_name(const String& name) {
+    auto const cls = Unit::loadClass(name.get());
+    if (!cls) {
+      auto message = folly::sformat(
+        "class {} could not be loaded",
+        name.toCppString()
+      );
+      Reflection::ThrowReflectionExceptionObject(message);
+    }
+    return cls;
+  }
+}
+
 // helper for getMethods: returns a Set
-static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+static Object HHVM_STATIC_METHOD(
+  ReflectionClass,
+  getMethodOrder,
+  const String& clsname,
+  int64_t filter) {
+  auto const cls = get_class_from_name(clsname);
   Attr mask = attrs_from_modifiers(filter, false);
 
   // At each step, we fetch from the PreClass is important because the
@@ -1442,8 +1460,11 @@ void addClassConstantNames(const Class* cls,
 }
 
 // helper for getConstants
-static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+static Array HHVM_STATIC_METHOD(
+  ReflectionClass,
+  getOrderedConstants,
+  const String& clsname) {
+  auto const cls = get_class_from_name(clsname);
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
@@ -1467,8 +1488,11 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
 }
 
 // helper for getAbstractConstantNames
-static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+static Array HHVM_STATIC_METHOD(
+  ReflectionClass,
+  getOrderedAbstractConstants,
+  const String& clsname) {
+  auto const cls = get_class_from_name(clsname);
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
@@ -1493,8 +1517,11 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
 
 // helper for getTypeConstants/hasTypeConstant
-static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+static Array HHVM_STATIC_METHOD(
+  ReflectionClass,
+  getOrderedTypeConstants,
+  const String& clsname) {
+  auto const cls = get_class_from_name(clsname);
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
@@ -1553,12 +1580,15 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
   return ret;
 }
 
-static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
+static Array HHVM_STATIC_METHOD(
+  ReflectionClass,
+  getClassPropertyInfo,
+  const String& clsname) {
   /*
    * FIXME: This implementation is pretty horrible and should be rewritten
    * when ReflectionProperty is ported.
    */
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  auto const cls = get_class_from_name(clsname);
   auto const properties = cls->declProperties();
   cls->initialize();
   auto const& propInitVec = cls->getPropData()
@@ -2175,18 +2205,18 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getTraitAliases);
 
     HHVM_ME(ReflectionClass, hasMethod);
-    HHVM_ME(ReflectionClass, getMethodOrder);
+    HHVM_STATIC_ME(ReflectionClass, getMethodOrder);
 
     HHVM_ME(ReflectionClass, hasConstant);
     HHVM_ME(ReflectionClass, getConstant);
-    HHVM_ME(ReflectionClass, getOrderedConstants);
-    HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
-    HHVM_ME(ReflectionClass, getOrderedTypeConstants);
+    HHVM_STATIC_ME(ReflectionClass, getOrderedConstants);
+    HHVM_STATIC_ME(ReflectionClass, getOrderedAbstractConstants);
+    HHVM_STATIC_ME(ReflectionClass, getOrderedTypeConstants);
 
     HHVM_ME(ReflectionClass, getAttributesNamespaced);
     HHVM_ME(ReflectionClass, getAttributesRecursiveNamespaced);
 
-    HHVM_ME(ReflectionClass, getClassPropertyInfo);
+    HHVM_STATIC_ME(ReflectionClass, getClassPropertyInfo);
     HHVM_ME(ReflectionClass, getDynamicPropertyInfos);
     HHVM_ME(ReflectionClass, getConstructorName);
 

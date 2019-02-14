@@ -1458,19 +1458,20 @@ class ReflectionClass implements Reflector {
   /* Helper for getMethods: correctly ordered Set of the methods
    * declared on this class and its parents */
   <<__Native>>
-  private function getMethodOrder(int $filter): object;
+  private static function getMethodOrder(string $clsname, int $filter): object;
 
-  private static $methOrderCache = array();
   private function getMethodOrderWithCaching(?int $filter): Set<string> {
     if (null === $filter) {
-      $cached = hphp_array_idx(self::$methOrderCache, $this->getName(), null);
-      if (null !== $cached) {
-        return $cached;
-      }
-      return
-        self::$methOrderCache[$this->getName()] = $this->getMethodOrder(0xFFFF);
+      return self::getMethodOrderCache($this->getName());
     }
-    return $this->getMethodOrder($filter);
+    return $this->getMethodOrder($this->getName(), $filter);
+  }
+
+  <<__Memoize>>
+  private static function getMethodOrderCache(
+    string $clsname,
+  ): Set<string> {
+    return self::getMethodOrder($clsname, 0xFFFF);
   }
 
   /**
@@ -1527,8 +1528,6 @@ class ReflectionClass implements Reflector {
   <<__Native>>
   public function getConstant(string $name): mixed;
 
-  private static $constCache = array();
-
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getconstants.php
    * )
@@ -1540,15 +1539,15 @@ class ReflectionClass implements Reflector {
    *                     constant value in value.
    */
   public function getConstants(): darray<string, mixed> {
-    $clsname = $this->getName();
-    $cached = hphp_array_idx(self::$constCache, $clsname, null);
-    if (null !== $cached) {
-      return $cached;
-    }
-    return self::$constCache[$clsname] = $this->getOrderedConstants();
+    return $this->getConstantsCache($this->getName());
   }
 
-  private static $absConstCache = array();
+  <<__Memoize>>
+  private static function getConstantsCache(
+    string $clsname
+  ): darray<string, mixed> {
+    return self::getOrderedConstants($clsname);
+  }
 
   /**
    * ( excerpt from
@@ -1561,23 +1560,25 @@ class ReflectionClass implements Reflector {
    * @return  array<string, string>
    */
   public function getAbstractConstantNames(): darray<string, string> {
-    $clsname = $this->getName();
-    $cached = hphp_array_idx(self::$absConstCache, $clsname, null);
-    if (null !== $cached) {
-      return $cached;
-    }
-    return self::$absConstCache[$clsname] = $this->getOrderedAbstractConstants();
+    return $this->getAbstractConstantNamesCache($this->getName());
   }
 
-  private static $typeConstCache = array();
+  <<__Memoize>>
+  private static function getAbstractConstantNamesCache(
+    string $clsname
+  ): darray<string, string> {
+    return self::getOrderedAbstractConstants($clsname);
+  }
 
   private function getTypeConstantNamesWithCaching(): darray<string, string> {
-    $clsname = $this->getName();
-    $cached = hphp_array_idx(self::$typeConstCache, $clsname, null);
-    if (null !== $cached) {
-      return $cached;
-    }
-    return self::$typeConstCache[$clsname] = $this->getOrderedTypeConstants();
+    return $this->getTypeConstantNamesCache($this->getName());
+  }
+
+  <<__Memoize>>
+  private static function getTypeConstantNamesCache(
+    string $clsname
+  ): darray<string, string> {
+    return self::getOrderedTypeConstants($clsname);
   }
 
   public function getTypeConstant(string $name): ReflectionTypeConstant {
@@ -1598,13 +1599,19 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  private function getOrderedConstants(): darray<string, mixed>;
+  private static function getOrderedConstants(
+    string $clsname
+  ): darray<string, mixed>;
 
   <<__Native>>
-  private function getOrderedAbstractConstants(): darray<string, string>;
+  private static function getOrderedAbstractConstants(
+    string $clsname
+  ): darray<string, string>;
 
   <<__Native>>
-  public function getOrderedTypeConstants(): darray<string, string>;
+  private static function getOrderedTypeConstants(
+    string $clsname
+  ): darray<string, string>;
 
   /**
    * ( excerpt from
@@ -1854,20 +1861,13 @@ class ReflectionClass implements Reflector {
   //   'private_properties'       => array<string, prop_info_array>
   //   'properties_index'         => array<string, int>
   //   'private_properties_index' => array<string, int>
-  private function getClassPropertyInfo(): array;
+  private static function getClassPropertyInfo(string $clsname): array;
 
   <<__Native>>
   private function getDynamicPropertyInfos(object $obj): array<string, mixed>;
 
-  // Note: this cache could easily be shared between threads
-  private static $propInfoCache = array();
   private function getOrderedPropertyInfos(): ConstMap<string, mixed> {
-    $props_map = hphp_array_idx(self::$propInfoCache, $this->getName(), null);
-    if (null === $props_map) {
-      self::$propInfoCache[$this->getName()]
-        = $props_map = new ImmMap($this->getClassPropertyInfo());
-    }
-
+    $props_map = self::getPropsMapCache($this->getName());
     if (!$this->obj) { return $props_map; }
 
     // caching cannot be well applied to an object's dynamic properties,
@@ -1877,6 +1877,13 @@ class ReflectionClass implements Reflector {
     return (!$dynamic_props)
       ? $props_map
       : $props_map->toMap()->setAll($dynamic_props);
+  }
+
+  <<__Memoize>>
+  private static function getPropsMapCache(
+    string $clsname
+  ): ImmMap<string, mixed> {
+    return new ImmMap(self::getClassPropertyInfo($clsname));
   }
 
   /**

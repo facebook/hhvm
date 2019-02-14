@@ -19,11 +19,11 @@
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -489,20 +489,29 @@ int VariablesCommand::addConstants(
   return count;
 }
 
+namespace {
+const auto globalKeys = {
+  StaticString{"_SERVER"},
+  StaticString{"_GET"},
+  StaticString{"_POST"},
+  StaticString{"_COOKIE"},
+  StaticString{"_FILES"},
+  StaticString{"_ENV"},
+  StaticString{"_REQUEST"},
+  StaticString{"_SESSION"},
+  StaticString{"GLOBALS"},
+};
+}
+
 bool VariablesCommand::isSuperGlobal(const std::string& name) {
   static const hphp_string_set superGlobals = []() {
     hphp_string_set superGlobals;
-    superGlobals.insert("_SERVER");
-    superGlobals.insert("_GET");
-    superGlobals.insert("_POST");
-    superGlobals.insert("_COOKIE");
-    superGlobals.insert("_FILES");
-    superGlobals.insert("_ENV");
-    superGlobals.insert("_REQUEST");
-    superGlobals.insert("_SESSION");
+    for (auto const& k : globalKeys) {
+      superGlobals.insert(k.toCppString());
+    }
     return superGlobals;
   }();
-  return name == "GLOBALS" || superGlobals.count(name);
+  return superGlobals.count(name);
 }
 
 int VariablesCommand::addSuperglobalVariables(
@@ -526,25 +535,22 @@ int VariablesCommand::addSuperglobalVariables(
 
   int count = 0;
 
-  // TODO(bill): directly access by-key
-  IterateKVNoInc(
-    get_global_variables()->asArrayData(),
-    [&](Cell k, TypedValue v) {
-      assertx(isStringType(k.m_type));
-      auto const& name = tvCastToStringData(k)->toCppString();
-      if (!isSuperGlobal(name)) {
-        return;
-      }
-
-      if (vars != nullptr) {
-        vars->push_back(
-          serializeVariable(session, debugger, requestId, name, VarNR{v})
-        );
-      }
-
-      count++;
+  for (auto const& k : globalKeys) {
+    auto const& name = k.toCppString();
+    assertx(isSuperGlobal(name));
+    auto const v = php_global(k);
+    if (!v.isInitialized()) {
+      continue;
     }
-  );
+
+    if (vars != nullptr) {
+      vars->push_back(
+        serializeVariable(session, debugger, requestId, name, v)
+      );
+    }
+
+    count++;
+  }
 
   if (vars != nullptr) {
     // Cache the result since the same JSON array is to be requested by the

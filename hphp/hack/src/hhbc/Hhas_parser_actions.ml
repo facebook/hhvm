@@ -1138,8 +1138,6 @@ match s with
  | "AliasCls" ->
    IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))
 
- | "ReifiedGeneric" ->
-   IMisc (ReifiedGeneric (reifiedgenericopofiarg arg1, intofiarg arg2))
  | "ReifiedName" ->
    IMisc (ReifiedName (intofiarg arg1, reifiedgenericopofiarg arg2))
 

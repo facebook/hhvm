@@ -1176,8 +1176,7 @@ and emit_lambda env fundef ids =
           if is_in_lambda then
             instr_cgetl (Local.Named (
               SU.Reified.reified_generic_captured_name is_fun i))
-          else instr_reified_generic
-                 (if is_fun then FunGeneric else ClsGeneric) i
+          else emit_reified_generic_instrs Pos.none ~is_fun i
         | None ->
           instr (IGet (
             let lid = get_local env id in
@@ -1759,6 +1758,24 @@ and get_reified_var_cexpr env pos name =
       instr_querym 1 QueryOp.CGet (MemberKey.ET "classname");
     ]))
 
+and emit_reified_generic_instrs pos ~is_fun index =
+  let base = if is_fun then
+      instr_basel
+        (Local.Named SU.Reified.reified_generics_local_name)
+        MemberOpMode.Warn
+    else
+      gather [
+        instr_checkthis;
+        instr_baseh;
+        instr_dim_warn_pt @@
+          Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name;
+      ]
+  in
+  emit_pos_then pos @@ gather [
+    base;
+    instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int index))
+  ]
+
 and emit_reified_type_opt env pos name =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   let cget_instr is_fun i =
@@ -1770,18 +1787,15 @@ and emit_reified_type_opt env pos name =
        ^ " is annotated to be a soft reified generic,"
        ^ " it cannot be used until the __Soft annotation is removed")
   in
-  match is_reified_tparam ~is_fun:true env name with
-  | Some (i, is_soft) ->
-    check is_soft;
-    Some (if is_in_lambda then cget_instr true i
-          else instr_reified_generic FunGeneric i)
-  | None ->
-    match is_reified_tparam ~is_fun:false env name with
+  let rec aux ~is_fun =
+    match is_reified_tparam ~is_fun env name with
     | Some (i, is_soft) ->
       check is_soft;
-      Some (if is_in_lambda then cget_instr false i
-            else instr_reified_generic ClsGeneric i)
-    | None -> None
+      Some (if is_in_lambda then cget_instr is_fun i
+            else emit_reified_generic_instrs pos ~is_fun i)
+    | None -> if is_fun then aux ~is_fun:false else None
+  in
+  aux ~is_fun:true
 
 and emit_reified_type env pos name =
   match emit_reified_type_opt env pos name with

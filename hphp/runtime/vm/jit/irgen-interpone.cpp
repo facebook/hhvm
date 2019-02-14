@@ -465,8 +465,6 @@ void emitRecordReifiedGeneric(IRGS& env, uint32_t)
                                               { INTERP }
 void emitReifiedName(IRGS& env, uint32_t, ReifiedGenericOp)
                                               { INTERP }
-void emitReifiedGeneric(IRGS& env, ReifiedGenericOp, uint32_t)
-                                              { INTERP }
 void emitClsRefGetTS(IRGS& env, uint32_t)     { INTERP }
 
 //////////////////////////////////////////////////////////////////////

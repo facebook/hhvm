@@ -452,7 +452,7 @@ let emit_body
   let decl_vars =
     if List.exists ~f:(fun t -> t.A.tp_reified) immediate_tparams &&
        not is_closure_body
-    then "$0ReifiedGenerics" :: decl_vars else decl_vars in
+    then SU.Reified.reified_generics_local_name :: decl_vars else decl_vars in
 
   let function_state_key =
     let open Ast_scope in

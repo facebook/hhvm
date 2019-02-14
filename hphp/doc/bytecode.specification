@@ -3811,13 +3811,6 @@ ReifiedName <num args> <op> [C:Str C..C] -> [C:Str]
   Op is used to denote whether this name is for a class or a function. This
   information is used for optimizations only.
 
-ReifiedGeneric <op> <id>     []   ->   [C:Arr|Dict]
-
-  Returns the reified generic at the index id for the current class or function,
-  determined by the op. This instruction throws a fatal error if the op is
-  ClsGeneric and the current method is defined outside of a class or if the
-  class or method, depending on op, does not have a reified generic at index id.
-
 CheckReifiedGenericMismatch [C:Arr|Vec] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased

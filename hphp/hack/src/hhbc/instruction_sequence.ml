@@ -104,7 +104,6 @@ let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
 let instr_reified_name i op = instr (IMisc (ReifiedName (i, op)))
-let instr_reified_generic op i = instr (IMisc (ReifiedGeneric (op, i)))
 let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
 let instr_check_reified_generic_mismatch =
   instr (IMisc CheckReifiedGenericMismatch)
@@ -776,7 +775,7 @@ let get_input_output_count i =
   | IMisc i ->
     begin match i with
     | This | BareThis _ | StaticLocCheck _ | Catch | ChainFaults | ClsRefName _
-    | GetMemoKeyL _ | ReifiedGeneric _ -> (0, 1)
+    | GetMemoKeyL _ -> (0, 1)
     | CheckThis | InitThisLoc _ | VerifyParamType _ | VerifyParamTypeTS _
     | Self _ | Parent _
     | LateBoundCls _ | NativeImpl | AssertRATL _ | AssertRATStk _

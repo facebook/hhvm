@@ -254,6 +254,8 @@ module Reified = struct
 
   let reified_init_method_param_name = "$__typestructures"
 
+  let reified_generics_local_name = "$0ReifiedGenerics"
+
   let reified_generic_captured_name is_fun i =
     let type_ = if is_fun then "function" else "class" in
     Printf.sprintf "$__captured$reifiedgeneric$%s$%d" type_ i

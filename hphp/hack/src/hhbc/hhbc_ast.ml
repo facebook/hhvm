@@ -504,7 +504,6 @@ type instruct_misc =
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
   | ReifiedName of int * reified_generic_op
-  | ReifiedGeneric of reified_generic_op * int
   | RecordReifiedGeneric of int
   | CheckReifiedGenericMismatch
   | NativeImpl

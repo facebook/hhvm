@@ -2776,37 +2776,6 @@ OPTBLD_INLINE void iopReifiedName(uint32_t n, ReifiedGenericOp op) {
   vmStack().pushStaticString(mangledName);
 }
 
-OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
-  ArrayData* reifiedTypes;
-  if (op == ReifiedGenericOp::FunGeneric) {
-    // First local is always $0ReifiedGenerics which comes right after params
-    auto const tv = frame_local(vmfp(), vmfp()->m_func->numParams());
-    assertx(tv && tvIsVecOrVArray(tv));
-    reifiedTypes = tv->m_data.parr;
-  } else {
-    Class* cls = arGetContextClass(vmfp());
-    if (!cls) {
-      raise_error(
-        "Cannot access reified class generic when no class scope is active");
-    }
-    if (!cls->hasReifiedGenerics()) {
-      raise_error("%s has no reified generics", cls->name()->data());
-    }
-    reifiedTypes = getClsReifiedGenericsProp(cls, vmfp());
-  }
-  if (n >= reifiedTypes->size()) {
-    raise_error("There is no reified generic at index %u", n);
-  }
-  auto const rg = reifiedTypes->rval(n);
-  assertx(RuntimeOption::EvalHackArrDVArrs ? isDictType(rg.type())
-                                           : isArrayType(rg.type()));
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushStaticDict(rg.val().parr);
-  } else {
-    vmStack().pushStaticArray(rg.val().parr);
-  }
-}
-
 OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");

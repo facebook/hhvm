@@ -379,8 +379,6 @@ static const struct {
   { OpRecordReifiedGeneric,
                    {StackN,           Stack1,       OutVArray       }},
   { OpReifiedName, {StackN,           Stack1,       OutString       }},
-  { OpReifiedGeneric,
-                   {None,             Stack1,       OutDArray       }},
   { OpCheckReifiedGenericMismatch,
                    {Stack1,           None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
@@ -936,7 +934,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
   case Op::ReifiedName:
-  case Op::ReifiedGeneric:
   case Op::CheckReifiedGenericMismatch:
   case Op::ConcatN:
   case Op::Concat:

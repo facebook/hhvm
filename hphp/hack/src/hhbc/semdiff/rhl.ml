@@ -574,7 +574,7 @@ let check_instruct_misc asn i i' =
   | OODeclExists _, _ | VerifyParamTypeTS _, _
   | VerifyParamType _, _ | VerifyRetTypeC, _ | VerifyRetTypeTS, _ | Self _, _
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
-  | VerifyOutType _, _ | ReifiedName _, _ | ReifiedGeneric _, _
+  | VerifyOutType _, _ | ReifiedName _, _
   | RecordReifiedGeneric _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
   | CheckReifiedGenericMismatch, _
   | AssertRATStk _, _ | BreakTraceHint, _

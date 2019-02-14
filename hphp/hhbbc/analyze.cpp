@@ -37,6 +37,8 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
 
+#include "hphp/runtime/vm/reified-generics.h"
+
 namespace HPHP { namespace HHBBC {
 
 namespace {
@@ -55,6 +57,8 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
 const StaticString s_Closure("Closure");
+const StaticString s_86reified_prop("86reified_prop");
+const StaticString s_Reified("__Reified");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,6 +68,20 @@ const StaticString s_Closure("Closure");
  */
 uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
   return ai.bdata[blk].rpoId;
+}
+
+Type get_type_of_reified_list(const UserAttributeMap& ua) {
+  auto const it = ua.find(s_Reified.get());
+  assertx(it != ua.end());
+  auto const tv = it->second;
+  assertx(tvIsVecOrVArray(&tv));
+  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  auto const numGenerics = info.m_typeParamInfo.size();
+  assertx(numGenerics > 0);
+  std::vector<Type> types(numGenerics,
+                          RuntimeOption::EvalHackArrDVArrs ? TDictN : TDArrN);
+  return RuntimeOption::EvalHackArrDVArrs ? vec(types)
+                                          : arr_packed_varray(types);
 }
 
 State pseudomain_entry_state(const php::Func* func) {
@@ -169,7 +187,7 @@ State entry_state(const Index& index, Context const ctx,
     // Currently closures cannot be reified
     assert(!ctx.func->isClosureBody);
     assert(locId < ret.locals.size());
-    ret.locals[locId++] = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    ret.locals[locId++] = get_type_of_reified_list(ctx.func->userAttributes);
   }
 
   auto afterParamsLocId = uint32_t{0};
@@ -742,6 +760,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
         t = adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, t);
+      } else if (prop.name->isame(s_86reified_prop.get())) {
+        t = get_type_of_reified_list(ctx.cls->userAttributes);
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);

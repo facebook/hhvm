@@ -112,6 +112,10 @@ let expand_range_to_whole_rows content (range: File_content.range)
 (* Two integers separated by a space. *)
 let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 
+let path_to_lsp_uri (path: string) ~(default_path: string): string =
+  if path = "" then File_url.create default_path
+  else File_url.create path
+
 let go_ide
   (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
   (action: ServerFormatTypes.ide_action)
@@ -125,7 +129,7 @@ let go_ide
     | Range range -> range.Ide_api_types.range_filename
     | Position position -> position.Ide_api_types.filename
   in
-  let uri = Lsp_helpers.path_to_lsp_uri ~default_path:"" filename in
+  let uri = path_to_lsp_uri ~default_path:"" filename in
   let lsp_doc = SMap.get uri editor_open_files in
   let content = Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc in
 

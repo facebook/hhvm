@@ -784,7 +784,6 @@ and emit_reified_targs env pos targs =
 and emit_new env pos expr targs args uargs =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
-  let has_non_tparam_generics = has_non_tparam_generics env targs in
   let nargs = List.length args + List.length uargs in
   let scope = Emit_env.get_scope env in
   (* If `new self` or `new parent `when self or parent respectively has
@@ -792,15 +791,13 @@ and emit_new env pos expr targs args uargs =
   let resolve_self = match expr with
     | _, A.Id (_, n) when SU.is_self n ->
       Ast_scope.Scope.get_class_tparams scope
-      |> List.exists ~f:(fun t -> t.A.tp_reified)
-      |> not
+      |> List.for_all ~f:(fun t -> not t.A.tp_reified)
     | _, A.Id (_, n) when SU.is_parent n ->
       let cls = Ast_scope.Scope.get_class scope in
       Option.value_map cls ~default:true ~f:(fun cls ->
       match cls.A.c_extends with
       | (_, A.Happly (_, l)) :: _ ->
-        not @@ List.exists l ~f:(function (_, A.Hreified _) -> true
-                                         | _ -> false)
+        not @@ has_non_tparam_generics env @@ List.map ~f:(fun h -> h, false) l
       | _ -> true)
     | _ -> true in
   let cexpr = expr_to_class_expr ~resolve_self scope expr in
@@ -813,7 +810,7 @@ and emit_new env pos expr targs args uargs =
         if not @@ List.is_empty targs then Emit_fatal.raise_fatal_parse pos
           "Cannot have higher kinded reified generics";
         Class_reified instrs, H.MaybeGenerics
-      | None when not has_non_tparam_generics ->
+      | None when not (has_non_tparam_generics env targs) ->
         cexpr, H.NoGenerics
       | None ->
         let cexpr_instrs name =
@@ -3034,7 +3031,6 @@ and fixup_type_arg env ~isas hint =
                   }
     | A.Haccess _ -> p, hint
     | A.Hsoft h -> p, A.Hsoft (aux h)
-    | A.Hreified h -> p, A.Hreified (aux h)
   and aux_sf = function
    { A.sf_optional = o; A.sf_name = n; A.sf_hint = h } ->
    { A.sf_optional = o; A.sf_name = n; A.sf_hint = aux h }

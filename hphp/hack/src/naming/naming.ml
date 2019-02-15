@@ -934,13 +934,6 @@ module Make (GetLocals : GetLocals) = struct
           nsi_field_map
           ShapeMap.empty in
       N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
-    | Aast.Hreified h ->
-      if not (TypecheckerOptions.experimental_feature_enabled
-          (fst env).tcopt
-          TypecheckerOptions.experimental_reified_generics)
-      then
-        Errors.experimental_feature Pos.none "reified generics";
-        snd @@ aast_hint ~allow_retonly env h
     | Aast.Hany
     | Aast.Hmixed
     | Aast.Hnonnull

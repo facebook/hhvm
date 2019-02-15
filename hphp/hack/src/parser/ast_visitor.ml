@@ -172,7 +172,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_hint acc h =
     match (snd h) with
-    | Hreified h
     | Hsoft h
     | Hoption h ->
       let acc = this#on_hint acc h in

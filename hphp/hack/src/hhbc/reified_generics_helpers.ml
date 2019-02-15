@@ -44,7 +44,6 @@ let rec has_reified_type_constraint env h =
   | A.Htuple _
   | A.Hshape _
   | A.Hfun _
-  | A.Hreified _
   | A.Haccess _
   | A.Hsoft _ -> NotReified
 
@@ -57,7 +56,6 @@ let rec remove_awaitable (pos, _h as h) = match _h with
   | A.Htuple _
   | A.Hshape _
   | A.Hfun _
-  | A.Hreified _
   | A.Haccess _
   | A.Happly _ -> h
 

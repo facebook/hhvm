@@ -82,8 +82,9 @@ let add_reified_attribute attrs params =
   let data = TV.Int (Int64.of_int (List.length params)) :: data in
   Hhas_attribute.make "__Reified" data :: attrs
 
-let add_reified_parent_attribute attrs = function
+let add_reified_parent_attribute env attrs = function
   | ((_, Ast.Happly (_, hl))) :: _ ->
-    if List.exists hl ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
+    if Emit_expression.has_non_tparam_generics env @@
+         List.map ~f:(fun h -> h, false) hl
     then (Hhas_attribute.make "__HasReifiedParent" []) :: attrs else attrs
   | _ -> attrs

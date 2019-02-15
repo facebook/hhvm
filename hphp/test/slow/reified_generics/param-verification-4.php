@@ -10,7 +10,7 @@ f(new B<A>());
 function g(A<B<int>> $_) { echo "yep\n"; }
 g(new A());
 
-function h(C<A<int>, string, reify int> $_) { echo "yep\n"; }
+function h(C<A<int>, string, int> $_) { echo "yep\n"; }
 h(new C<A<int>, string, int>());
 
 function i(B<C<int, string, int>> $_) { echo "yep\n"; }

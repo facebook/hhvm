@@ -317,6 +317,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
   fun (ast_class, hoisted) ->
   let namespace = ast_class.Ast.c_namespace in
   validate_class_name namespace ast_class.Ast.c_name;
+  let env = Emit_env.make_class_env ast_class in
   (* TODO: communicate this without looking at the name *)
   let is_closure_class =
     String.is_prefix ~prefix:"Closure$" (snd ast_class.A.c_name) in
@@ -327,7 +328,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     Emit_attribute.add_reified_attribute
       class_attributes ast_class.Ast.c_tparams in
   let class_attributes = if is_closure_class then class_attributes else
-    Emit_attribute.add_reified_parent_attribute
+    Emit_attribute.add_reified_parent_attribute env
       class_attributes ast_class.Ast.c_extends in
   let class_is_immutable = Hhas_attribute.has_const class_attributes in
   (* In the future, we intend to set class_no_dynamic_props independently from
@@ -469,7 +470,6 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     (from_class_elt_classvars ast_class class_is_immutable tparams namespace) in
   let class_has_immutable = class_is_immutable ||
     List.exists class_properties (fun p -> Hhas_property.is_immutable p) in
-  let env = Emit_env.make_class_env ast_class in
   let class_constants =
     List.concat_map class_body (from_class_elt_constants env) in
   let class_requirements =

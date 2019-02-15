@@ -80,7 +80,7 @@ type env =
   ; recursion_depth : int ref
   ; cls_reified_generics : SSet.t ref
   ; in_static_method : bool ref
-  ; parent_is_reified : bool ref
+  ; parent_maybe_reified : bool ref
   (* This provides a generic mechanism to delay raising parsing errors;
    * since we're moving FFP errors away from CST to a stage after lowering
    * _and_ want to prioritize errors before lowering, the lowering errors
@@ -153,7 +153,7 @@ let make_env
     ; recursion_depth = ref 0
     ; cls_reified_generics = ref SSet.empty
     ; in_static_method = ref false
-    ; parent_is_reified = ref false
+    ; parent_maybe_reified = ref false
     ; lifted_awaits = None
     ; lowpri_errors = ref []
     }
@@ -810,7 +810,7 @@ let unwrap_extra_block (stmt : block) : block =
 let fail_if_invalid_class_creation env node (_, id) =
   if not !(env.in_static_method) then () else begin
     if (id = SN.Classes.cSelf && not @@ SSet.is_empty !(env.cls_reified_generics)) ||
-      (id = SN.Classes.cParent && !(env.parent_is_reified)) then
+      (id = SN.Classes.cParent && !(env.parent_maybe_reified)) then
         raise_parsing_error env (`Node node) SyntaxError.static_method_reified_obj_creation;
   end
 
@@ -957,8 +957,6 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
-    | ReifiedTypeArgument {reified_type_argument_type = t; _} ->
-      Hreified (pHint t env)
     | _ -> missing_syntax "type hint" node env
   in
   let hint = pPos node env, pHint_ node env in
@@ -3010,9 +3008,8 @@ and pDef : def list parser = fun node env ->
       env.cls_reified_generics := SSet.empty;
       let c_tparams = pTParaml ~is_class:true tparaml env in
       let c_extends = couldMap ~f:pHint exts env in
-      env.parent_is_reified := (match c_extends with
-        | (_, Happly (_, hl)) :: _ ->
-          List.exists hl ~f:(function _, Hreified _ -> true | _ -> false)
+      env.parent_maybe_reified := (match c_extends with
+        | (_, Happly (_, hl)) :: _ -> not @@ List.is_empty hl
         | _ -> false);
       let c_implements = couldMap ~f:pHint impls env in
       let c_body =

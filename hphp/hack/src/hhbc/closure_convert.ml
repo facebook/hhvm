@@ -942,9 +942,6 @@ and convert_hint env st (p, h as hint) =
     let st = add_generic env st id in
     let st, hl = convert_hints env st hl in
     st, (p, Happly (ast_id, hl))
-  | Hreified h ->
-    let st, h = convert_hint env st h in
-    st, (p, Hreified h)
   | Hoption h ->
     let st, h = convert_hint env st h in
     st, (p, Hoption h)

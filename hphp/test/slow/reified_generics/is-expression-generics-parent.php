@@ -2,7 +2,7 @@
 
 class B<reify Ta, reify Tb> {}
 
-class C<reify Ta, reify Tb> extends B<reify Ta, reify int> {}
+class C<reify Ta, reify Tb> extends B<Ta, int> {}
 
 $x = new C<string, bool>();
 

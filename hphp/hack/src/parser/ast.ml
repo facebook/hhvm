@@ -346,7 +346,6 @@ and hint_ =
   *)
   | Haccess of id * id * id list
   | Hsoft of hint
-  | Hreified of hint
 
 and shape_info = {
   si_allows_unknown_fields : bool;

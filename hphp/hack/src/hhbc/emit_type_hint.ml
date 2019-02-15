@@ -78,7 +78,6 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
       List.map ~f:format_shape_field si_shape_field_list in
     prefix_namespace "HH" "shape(" ^
       String.concat ~sep:", " shape_fields ^ ")"
-  | A.Hreified h -> fmt_hint ~tparams ~namespace h
 
 and fmt_hints ~tparams ~namespace hints =
   String.concat ~sep:", " (List.map hints (fmt_hint ~tparams ~namespace))
@@ -184,9 +183,6 @@ let rec hint_to_type_constraint
   | A.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
-
-  | A.Hreified h ->
-    hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace h
 
 and make_tc_with_flags_if_non_empty_flags
   ~kind ~tparams ~skipawaitable ~namespace t flags =

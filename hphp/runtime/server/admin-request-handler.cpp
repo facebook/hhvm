@@ -1075,22 +1075,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     std::stringstream out;
     bool first = true;
     out << "{" << endl;
-    auto appendStat = [&](folly::StringPiece name, int64_t value) {
+    auto const appendStat = [&](folly::StringPiece name, int64_t value) {
        out << folly::format("{} \"{}\":{}\n", first ? "" : ",", name, value);
        first = false;
     };
-    HPHP::Server* server = HttpServer::Server->getPageServer();
-    appendStat("load", server->getActiveWorker());
-    appendStat("queued", server->getQueuedJobs());
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("hhbc-size", g_hhbc_size->getSum());
-    auto const memInfos = jit::tc::getTCMemoryUsage();
-    for (auto const info : memInfos) {
-        auto isMain = info.name == "main";
-        appendStat(folly::format("tc-{}size",
-                                 isMain ? "" : info.name).str(),
-                   info.used);
-    }
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());
@@ -1121,6 +1111,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     }
 
     if (RuntimeOption::EvalEnableReusableTC) {
+      auto const memInfos = jit::tc::getTCMemoryUsage();
       for (auto const info : memInfos) {
         appendStat(folly::format("tc-{}-allocs", info.name).str(), info.allocs);
         appendStat(folly::format("tc-{}-frees", info.name).str(), info.frees);

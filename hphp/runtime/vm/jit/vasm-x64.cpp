@@ -1135,6 +1135,8 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
         rqtrace::EventGuard trace{"VOPT_XLS"};
         allocateRegistersWithXLS(unit, abi);
       }
+      rqtrace::EventGuard trace{"VOPT_SF_PEEPHOLES"};
+      sfPeepholes(unit, abi);
     }
   }
   if (unit.blocks.size() > 1) {

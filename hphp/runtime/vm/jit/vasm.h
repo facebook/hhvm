@@ -118,6 +118,7 @@ void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
+void sfPeepholes(Vunit&, const Abi&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

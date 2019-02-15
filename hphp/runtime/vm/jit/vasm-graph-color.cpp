@@ -7953,8 +7953,6 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   lower_ssa(state);
 
   printUnit(kVasmRegAllocLevel, "after vasm-graph-color", unit);
-
-  always_assert(false);
 }
 
 //////////////////////////////////////////////////////////////////////

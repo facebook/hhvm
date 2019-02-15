@@ -2332,91 +2332,6 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Flags liveness optimization.
-
-template <typename Inst, typename F>
-void optimize(Vunit& /*unit*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/,
-              F /*sf_live*/) {}
-
-template<typename xor_op, typename ldimm_op, typename F>
-void optimize_ldimm(Vunit& unit, ldimm_op& ldimm,
-                    Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && ldimm.s.q() == 0 && ldimm.d.isGP()) {
-    decltype(xor_op::d) d = ldimm.d;
-    unit.blocks[b].code[i] = xor_op{d, d, d, RegSF{0}};
-  }
-}
-
-template<typename F>
-void optimize(Vunit& unit, ldimmb& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorb>(unit, inst, b, i, sf_live);
-}
-template<typename F>
-void optimize(Vunit& unit, ldimml& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorl>(unit, inst, b, i, sf_live);
-}
-template<typename F>
-void optimize(Vunit& unit, ldimmq& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorq>(unit, inst, b, i, sf_live);
-}
-
-template<typename F>
-void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && inst.d == rsp()) {
-    assertx(inst.s.base == inst.d && !inst.s.index.isValid());
-    unit.blocks[b].code[i] = addqi{inst.s.disp, inst.d, inst.d, RegSF{0}};
-  }
-}
-
-/*
- * Perform optimizations on instructions in `unit' at which no flags registers
- * are live.
- */
-void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
-                        const jit::vector<Variable*>& variables) {
-  // Currently, all our optimizations are only relevant on x64.
-  if (arch() != Arch::X64) return;
-
-  // sf_var is the physical SF register, computed from the union of VregSF
-  // registers by computeLiveness() and buildIntervals().
-  auto const sf_var = variables[VregSF(RegSF{0})];
-  auto const sf_ivl = sf_var ? sf_var->ivl() : nullptr;
-
-  for (auto const b : ctx.blocks) {
-    auto& code = unit.blocks[b].code;
-
-    for (size_t i = 0; i < code.size(); ++i) {
-      auto& inst = code[i];
-
-      /*
-       * An instruction that defines sf, where sf is not subsequently
-       * read, will have a live range going from inst.pos to inst.pos
-       * + 1. Its ok to replace such an instruction with one that
-       * doesn't modify the flags (or that modifies them in different
-       * ways), so check for a range that covers pos-1 or pos+1 to
-       * determine true liveness.
-       */
-      auto const sf_live = [&] {
-        return sf_ivl &&
-          !sf_ivl->ranges.empty() &&
-          ((inst.pos && sf_ivl->covers(inst.pos - 1)) ||
-           sf_ivl->covers(inst.pos + 1));
-      };
-
-      switch (inst.op) {
-#define O(name, ...)        \
-        case Vinstr::name:  \
-          optimize(unit, inst.name##_, b, i, sf_live); \
-          break;
-
-        VASM_OPCODES
-#undef O
-      }
-    }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Copy insertion.
 
 /*
@@ -3212,8 +3127,6 @@ void allocateRegistersWithXLS(Vunit& unit, const Abi& abi) {
     printVariables("after inserting copies", unit, ctx, variables);
   );
 
-  // Perform optimizations based on flags liveness, then do some cleanup.
-  optimizeSFLiveness(unit, ctx, variables);
   peephole(unit, ctx);
 
   // Insert instructions for creating spill space.

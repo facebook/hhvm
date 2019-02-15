@@ -57,6 +57,7 @@
   TIMER_NAME(vasm_copy)                         \
   TIMER_NAME(vasm_optimize)                     \
   TIMER_NAME(vasm_dce)                          \
+  TIMER_NAME(vasm_sf_peepholes)                 \
 
 namespace HPHP {
 struct StructuredLogEntry;

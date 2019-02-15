@@ -94,47 +94,47 @@ function xmlwriter_flush(resource $xmlwriter, $empty = true);
 function xmlwriter_output_memory(resource $xmlwriter, $flush = true);
 
 class XMLWriter {
-  public function __construct() { }
-  public function openMemory() { }
-  public function openURI($uri) { }
-  public function setIndentString($indentstring) { }
-  public function setIndent($indent) { }
-  public function startDocument($version = "1.0", $encoding = null, $standalone = null) { }
-  public function startElement($name) { }
-  public function startElementNS($prefix, $name, $uri) { }
-  public function writeElementNS($prefix, $name, $uri, $content = null) { }
-  public function writeElement($name, $content = null) { }
-  public function endElement() { }
-  public function fullEndElement() { }
-  public function startAttributeNS($prefix, $name, $uri) { }
-  public function startAttribute($name) { }
-  public function writeAttributeNS($prefix, $name, $uri, $content) { }
-  public function writeAttribute($name, $value) { }
-  public function endAttribute() { }
-  public function startCData() { }
-  public function writeCData($content) { }
-  public function endCData() { }
-  public function startComment() { }
-  public function writeComment($content) { }
-  public function endComment() { }
-  public function endDocument() { }
-  public function startPI($target) { }
-  public function writePI($target, $content) { }
-  public function endPI() { }
-  public function text($content) { }
-  public function writeRaw($content) { }
-  public function startDTD($qualifiedname, $publicid = null, $systemid = null) { }
-  public function writeDTD($name, $publicid = null, $systemid = null, $subset = null) { }
-  public function startDTDElement($qualifiedname) { }
-  public function writeDTDElement($name, $content) { }
-  public function endDTDElement() { }
-  public function startDTDAttlist($name) { }
-  public function writeDTDAttlist($name, $content) { }
-  public function endDTDAttlist() { }
-  public function startDTDEntity($name, $isparam) { }
-  public function writeDTDEntity($name, $content, $pe = false, $publicid = null, $systemid = null, $ndataid = null) { }
-  public function endDTDEntity() { }
-  public function endDTD() { }
-  public function flush($empty = true) { }
-  public function outputMemory($flush = true) { }
+  public function __construct();
+  public function openMemory();
+  public function openURI(string $uri);
+  public function setIndentString(string $indentstring);
+  public function setIndent(bool $indent);
+  public function startDocument($version = "1.0", $encoding = null, $standalone = null);
+  public function startElement(string $name);
+  public function startElementNS($prefix, string $name, $uri);
+  public function writeElementNS($prefix, string $name, $uri, $content = null);
+  public function writeElement(string $name, $content = null);
+  public function endElement();
+  public function fullEndElement();
+  public function startAttributeNS(string $prefix, string $name, string $uri);
+  public function startAttribute(string $name);
+  public function writeAttributeNS(string $prefix, string $name, string $uri, string $content);
+  public function writeAttribute(string $name, string $value);
+  public function endAttribute();
+  public function startCData();
+  public function writeCData(string $content);
+  public function endCData();
+  public function startComment();
+  public function writeComment(string $content);
+  public function endComment();
+  public function endDocument();
+  public function startPI(string $target);
+  public function writePI(string $target, string $content);
+  public function endPI();
+  public function text(string $content);
+  public function writeRaw(string $content);
+  public function startDTD(string $qualifiedname, $publicid = null, $systemid = null);
+  public function writeDTD(string $name, $publicid = null, $systemid = null, $subset = null);
+  public function startDTDElement(string $qualifiedname);
+  public function writeDTDElement(string $name, string $content);
+  public function endDTDElement();
+  public function startDTDAttlist(string $name);
+  public function writeDTDAttlist(string $name, string $content);
+  public function endDTDAttlist();
+  public function startDTDEntity(string $name, bool $isparam);
+  public function writeDTDEntity(string $name, string $content, bool $pe = false, string $publicid = "", string $systemid = "", string $ndataid = "");
+  public function endDTDEntity();
+  public function endDTD();
+  public function flush($empty = true);
+  public function outputMemory($flush = true);
 }

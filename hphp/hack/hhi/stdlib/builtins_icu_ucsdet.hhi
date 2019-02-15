@@ -9,17 +9,17 @@
  */
 
 class EncodingDetector {
-  public function __construct() { }
-  public function setText($text) { }
-  public function setDeclaredEncoding($text) { }
-  public function detect() { }
-  public function detectAll() { }
+  public function __construct();
+  public function setText(string $text);
+  public function setDeclaredEncoding(string $text);
+  public function detect();
+  public function detectAll();
 }
 class EncodingMatch {
-  public function __construct() { }
-  public function isValid() { }
-  public function getEncoding() { }
-  public function getConfidence() { }
-  public function getLanguage() { }
-  public function getUTF8() { }
+  public function __construct();
+  public function isValid();
+  public function getEncoding();
+  public function getConfidence();
+  public function getLanguage();
+  public function getUTF8();
 }

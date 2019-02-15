@@ -16,9 +16,10 @@ class SpoofChecker {
   const SINGLE_SCRIPT = 0;
   const INVISIBLE = 0;
   const CHAR_LIMIT = 0;
-  public function __construct() { }
-  public function isSuspicious($text, &$issuesFound = null) { }
-  public function areConfusable($s1, $s2, &$issuesFound = null) { }
-  public function setAllowedLocales($localesList) { }
-  public function setChecks($checks) { }
+
+  public function __construct();
+  public function isSuspicious(string $text, &$issuesFound = null);
+  public function areConfusable(string $s1, string $s2, &$issuesFound = null);
+  public function setAllowedLocales(string $localesList);
+  public function setChecks(int $checks);
 }

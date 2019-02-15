@@ -566,20 +566,21 @@ class Collator {
   const NON_IGNORABLE = 0;
   const LOWER_FIRST = 0;
   const UPPER_FIRST = 0;
-  public function __construct($locale) {}
-  public function asort(&$arr, $sort_flag = null) {}
-  public function compare($str1, $str2) {}
-  static public function create($locale) {}
-  public function getAttribute($attr) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public function getLocale($type = 0) {}
-  public function getSortKey($str) {}
-  public function getStrength() {}
-  public function setAttribute($attr, $val) {}
-  public function setStrength($strength) {}
-  public function sortWithSortKeys(&$arr) {}
-  public function sort(&$arr, $sort_flag = null) {}
+
+  public function __construct(string $locale);
+  public function asort(&$arr, int $sort_flag = Collator::SORT_REGULAR);
+  public function compare($str1, $str2);
+  static public function create(string $locale);
+  public function getAttribute(int $attr);
+  public function getErrorCode();
+  public function getErrorMessage();
+  public function getLocale(int $type = 0);
+  public function getSortKey(string $str);
+  public function getStrength();
+  public function setAttribute(int $attr, int $val);
+  public function setStrength(int $strength);
+  public function sortWithSortKeys(&$arr);
+  public function sort(&$arr, int $sort_flag = Collator::SORT_REGULAR);
 }
 
 class Locale {
@@ -593,24 +594,25 @@ class Locale {
   const string VARIANT_TAG = 'variant';
   const string GRANDFATHERED_LANG_TAG = 'grandfathered';
   const string PRIVATE_TAG = 'private';
-  public static function acceptFromHttp($arg1) {}
-  public static function canonicalize($arg1) {}
-  public static function composeLocale($arg1) {}
-  public static function filterMatches($arg1, $arg2, $arg3) {}
-  public static function getAllVariants($arg1) {}
-  public static function getDefault() {}
-  public static function getDisplayLanguage($arg1, $arg2) {}
-  public static function getDisplayName($arg1, $arg2) {}
-  public static function getDisplayRegion($arg1, $arg2) {}
-  public static function getDisplayScript($arg1, $arg2) {}
-  public static function getDisplayVariant($arg1, $arg2) {}
-  public static function getKeywords($arg1) {}
-  public static function getPrimaryLanguage($arg1) {}
-  public static function getRegion($arg1) {}
-  public static function getScript($arg1) {}
-  public static function lookup($arg1, $arg2, $arg3, $arg4) {}
-  public static function parseLocale($arg1) {}
-  public static function setDefault($arg1) {}
+
+  public static function acceptFromHttp(string $arg1);
+  public static function canonicalize(string $arg1);
+  public static function composeLocale($arg1);
+  public static function filterMatches($arg1, $arg2, $arg3);
+  public static function getAllVariants(string $arg1);
+  public static function getDefault();
+  public static function getDisplayLanguage(string $arg1, string $arg2);
+  public static function getDisplayName(string $arg1, string $arg2);
+  public static function getDisplayRegion(string $arg1, string $arg2);
+  public static function getDisplayScript(string $arg1, string $arg2);
+  public static function getDisplayVariant(string $arg1, string $arg2);
+  public static function getKeywords(string $arg1);
+  public static function getPrimaryLanguage(string $arg1);
+  public static function getRegion(string $arg1);
+  public static function getScript(string $arg1);
+  public static function lookup($arg1, string $arg2, bool $arg3, string $arg4);
+  public static function parseLocale(string $arg1);
+  public static function setDefault(string $arg1);
 }
 
 class Normalizer {
@@ -623,23 +625,23 @@ class Normalizer {
   const NFC = 0;
   const FORM_KC = 0;
   const NFKC = 0;
-  public function __construct() {}
-  static public function isNormalized($input, $form = null) {}
-  static public function normalize($input, $form = null) {}
+
+  static public function isNormalized(string $input, int $form = Normalizer::FORM_C);
+  static public function normalize(string $input, int $form = Normalizer::FORM_C);
 }
 
 class MessageFormatter {
-  public function __construct($locale, $pattern) {}
-  public static function create($locale, $pattern) {}
-  public function format($args) {}
-  public static function formatMessage($locale, $pattern, $args) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public function getLocale() {}
-  public function getPattern() {}
-  public function parse($source) {}
-  public static function parseMessage($locale, $pattern, $args) {}
-  public function setPattern($pattern) {}
+  public function __construct(string $locale, string $pattern);
+  public static function create(string $locale, string $pattern);
+  public function format($args);
+  public static function formatMessage(string $locale, string $pattern, $args);
+  public function getErrorCode();
+  public function getErrorMessage();
+  public function getLocale();
+  public function getPattern();
+  public function parse(string $source);
+  public static function parseMessage(string $locale, string $pattern, string $args);
+  public function setPattern(string $pattern);
 }
 
 class IntlDateFormatter {
@@ -650,38 +652,39 @@ class IntlDateFormatter {
   const int NONE = -1;
   const int GREGORIAN = 1;
   const int TRADITIONAL = 0;
-  public function __construct($locale, $datetype, $timetype, $timezone = null, $calendar = null, $pattern = null) {}
-  public static function create($locale, $datetype, $timetype, $timezone = null, $calendar = null, $pattern = null) {}
-  public function format($args = null, $array = null) {}
-  public static function formatObject($object, $format = null, $locale = null) {}
-  public function getCalendar() {}
-  public function getCalendarObject() {}
-  public function getDateType() {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public function getLocale() {}
-  public function getPattern() {}
-  public function getTimeType() {}
-  public function getTimeZone() {}
-  public function getTimeZoneId() {}
-  public function isLenient() {}
-  public function localtime($string, &$position = null) {}
-  public function parse($string, &$position = null) {}
-  public function setCalendar($which) {}
-  public function setLenient($lenient) {}
-  public function setPattern($pattern) {}
-  public function setTimeZone($zone) {}
-  public function setTimeZoneId($zone) {}
+
+  public function __construct(string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "");
+  public static function create($locale, $datetype, $timetype, $timezone = null, $calendar = null, $pattern = null);
+  public function format($args = null);
+  public static function formatObject($object, $format = null, $locale = null);
+  public function getCalendar();
+  public function getCalendarObject();
+  public function getDateType();
+  public function getErrorCode();
+  public function getErrorMessage();
+  public function getLocale();
+  public function getPattern();
+  public function getTimeType();
+  public function getTimeZone();
+  public function getTimeZoneId();
+  public function isLenient();
+  public function localtime(string $string, &$position = null);
+  public function parse(string $string, &$position = null);
+  public function setCalendar($which);
+  public function setLenient(bool $lenient);
+  public function setPattern(string $pattern);
+  public function setTimeZone($zone);
+  public function setTimeZoneId(string $zone);
 }
 
 class ResourceBundle<T> implements Traversable<T> {
-  public function __construct($locale, $bundlename, $fallback = null) {}
-  public function count() {}
-  public static function create($locale, $bundlename, $fallback = null) {}
-  public function get($index, $fallback = null) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public static function getLocales($bundlename) {}
+  public function __construct($locale, $bundlename, bool $fallback = true);
+  public function count();
+  public static function create($locale, $bundlename, bool $fallback = false);
+  public function get($index, bool $fallback = true);
+  public function getErrorCode();
+  public function getErrorMessage();
+  public static function getLocales(string $bundlename);
 }
 
 class IntlTimeZone {
@@ -696,29 +699,30 @@ class IntlTimeZone {
   const int TYPE_ANY = 0;
   const int TYPE_CANONICAL = 1;
   const int TYPE_CANONICAL_LOCATION = 2;
-  private function __construct() {}
-  public static function countEquivalentIDs($zoneId) {}
-  public static function createDefault() {}
-  public static function createEnumeration($countryOrRawOffset = null) {}
-  public static function createTimeZone($zoneId) {}
-  public static function createTimeZoneIDEnumeration($zoneType, $region = null, $rawOffset = null) {}
-  public static function fromDateTimeZone($zoneId) {}
-  public static function getCanonicalID($zoneId, &$isSystemID = null) {}
-  public function getDSTSavings() {}
-  public function getDisplayName($isDaylight = null, $style = null, $locale = null) {}
-  public static function getEquivalentID($zoneId, $index) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public static function getGMT() {}
-  public function getID() {}
-  public function getOffset($date, $local, &$rawOffset, &$dstOffset) {}
-  public function getRawOffset() {}
-  public static function getRegion($zoneId) {}
-  public static function getTZDataVersion() {}
-  public static function getUnknown() {}
-  public function hasSameRules(IntlTimeZone $otherTimeZone) {}
-  public function toDateTimeZone() {}
-  public function useDaylightTime() {}
+
+  private function __construct();
+  public static function countEquivalentIDs(string $zoneId);
+  public static function createDefault();
+  public static function createEnumeration($countryOrRawOffset = null);
+  public static function createTimeZone(string $zoneId);
+  public static function createTimeZoneIDEnumeration(int $zoneType, string $region = "", $rawOffset = null);
+  public static function fromDateTimeZone($zoneId);
+  public static function getCanonicalID(string $zoneId, &$isSystemID = null);
+  public function getDSTSavings();
+  public function getDisplayName(bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, string $locale = "");
+  public static function getEquivalentID(string $zoneId, int $index);
+  public function getErrorCode();
+  public function getErrorMessage();
+  public static function getGMT();
+  public function getID();
+  public function getOffset(float $date, bool $local, int &$rawOffset, int &$dstOffset);
+  public function getRawOffset();
+  public static function getRegion(string $zoneId);
+  public static function getTZDataVersion();
+  public static function getUnknown();
+  public function hasSameRules(IntlTimeZone $otherTimeZone);
+  public function toDateTimeZone();
+  public function useDaylightTime();
 }
 
 class IntlCalendar {
@@ -761,58 +765,59 @@ class IntlCalendar {
   const int WALLTIME_FIRST = 1;
   const int WALLTIME_LAST = 0;
   const int WALLTIME_NEXT_VALID = 2;
-  private function __construct() {}
-  public function add($field, $amount) {}
-  public function after(IntlCalendar $calendar) {}
-  public function before(IntlCalendar $calendar) {}
-  public function clear($field = null) {}
-  public static function createInstance($timeZone = null, $locale = null) {}
-  public function equals(IntlCalendar $calendar) {}
-  public function fieldDifference($when, $field) {}
-  public static function fromDateTime($dateTime) {}
-  public function get($field) {}
-  public function getActualMaximum($field) {}
-  public function getActualMinimum($field) {}
-  public static function getAvailableLocales() {}
-  public function getDayOfWeekType($dayOfWeek) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public function getFirstDayOfWeek() {}
-  public function getGreatestMinimum($field) {}
-  public static function getKeywordValuesForLocale($key, $locale, $commonlyUsed) {}
-  public function getLeastMaximum($field) {}
-  public function getLocale($localeType) {}
-  public function getMaximum($field) {}
-  public function getMinimalDaysInFirstWeek() {}
-  public function getMinimum($field) {}
-  public static function getNow() {}
-  public function getRepeatedWallTimeOption() {}
-  public function getSkippedWallTimeOption() {}
-  public function getTime() {}
-  public function getTimeZone() {}
-  public function getType() {}
-  public function getWeekendTransition($dayOfWeek) {}
-  public function inDaylightTime() {}
-  public function isEquivalentTo(IntlCalendar $calendar) {}
-  public function isLenient() {}
-  public function isSet($field) {}
-  public function isWeekend($date = null) {}
-  public function roll($field, $amountOrUpOrDown) {}
-  public function set($fieldOrYear, $valueOrMonth, $dayOfMonth = null, $hour = null, $minute = null, $second = null) {}
-  public function setFirstDayOfWeek($dayOfWeek) {}
-  public function setLenient($isLenient) {}
-  public function setMinimalDaysInFirstWeek($numberOfDays) {}
-  public function setRepeatedWallTimeOption($wallTimeOption) {}
-  public function setSkippedWallTimeOption($wallTimeOption) {}
-  public function setTime($date) {}
-  public function setTimeZone($timeZone) {}
-  public function toDateTime() {}
+
+  private function __construct();
+  public function add(int $field, int $amount);
+  public function after(IntlCalendar $calendar);
+  public function before(IntlCalendar $calendar);
+  public function clear($field = null);
+  public static function createInstance($timeZone = null, string $locale = "");
+  public function equals(IntlCalendar $calendar);
+  public function fieldDifference($when, int $field);
+  public static function fromDateTime($dateTime);
+  public function get(int $field);
+  public function getActualMaximum(int $field);
+  public function getActualMinimum(int $field);
+  public static function getAvailableLocales();
+  public function getDayOfWeekType(int $dayOfWeek);
+  public function getErrorCode();
+  public function getErrorMessage();
+  public function getFirstDayOfWeek();
+  public function getGreatestMinimum(int $field);
+  public static function getKeywordValuesForLocale(string $key, string $locale, bool $commonlyUsed);
+  public function getLeastMaximum(int $field);
+  public function getLocale(int $localeType);
+  public function getMaximum(int $field);
+  public function getMinimalDaysInFirstWeek();
+  public function getMinimum(int $field);
+  public static function getNow();
+  public function getRepeatedWallTimeOption();
+  public function getSkippedWallTimeOption();
+  public function getTime();
+  public function getTimeZone();
+  public function getType();
+  public function getWeekendTransition(int $dayOfWeek);
+  public function inDaylightTime();
+  public function isEquivalentTo(IntlCalendar $calendar);
+  public function isLenient();
+  public function isSet($field);
+  public function isWeekend($date = null);
+  public function roll(int $field, $amountOrUpOrDown);
+  public function set(int $fieldOrYear, int $valueOrMonth, $dayOfMonth = null, $hour = null, $minute = null, $second = null);
+  public function setFirstDayOfWeek(int $dayOfWeek);
+  public function setLenient(bool $isLenient);
+  public function setMinimalDaysInFirstWeek(int $numberOfDays);
+  public function setRepeatedWallTimeOption(int $wallTimeOption);
+  public function setSkippedWallTimeOption(int $wallTimeOption);
+  public function setTime($date);
+  public function setTimeZone($timeZone);
+  public function toDateTime();
 }
 
 class IntlGregorianCalendar extends IntlCalendar {
-  public function getGregorianChange() {}
-  public function isLeapYear($year) {}
-  public function setGregorianChange($date) {}
+  public function getGregorianChange();
+  public function isLeapYear(int $year);
+  public function setGregorianChange(float $date);
 }
 
 class IntlIterator<Tv> implements KeyedIterator<int, Tv> {

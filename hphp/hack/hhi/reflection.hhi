@@ -259,7 +259,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public $name = '';
   public $class = '';
 
-  public static function export($class, $name, $return = false);
+  public static function export(string $class, string $name, bool $return = false);
   <<__Rx>>
   public function __construct($class, $name = null);
   <<__Rx, __MaybeMutable>>
@@ -287,7 +287,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function getDeclaringClass();
   <<__Rx, __MaybeMutable>>
   public function getPrototype();
-  public function setAccessible($accessible);
+  public function setAccessible(bool $accessible);
   <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive(): darray<string, varray<mixed>>;
   <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
@@ -369,7 +369,7 @@ class ReflectionProperty implements Reflector {
   final private function __clone();
   public static function export($class, $name, $return = null);
   <<__Rx>>
-  public function __construct($class, $name);
+  public function __construct($class, string $name);
   <<__Rx, __MaybeMutable>>
   public function __toString();
   <<__Rx, __MaybeMutable>>

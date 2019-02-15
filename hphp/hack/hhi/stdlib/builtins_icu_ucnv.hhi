@@ -50,25 +50,26 @@ class UConverter {
   const UTF32 = 0;
   const CESU8 = 0;
   const IMAP_MAILBOX = 0;
-  public function __construct($toEncoding = "utf-8", $fromEncoding = "utf-8") { }
-  public function getSourceEncoding() { }
-  public function setSourceEncoding($encoding) { }
-  public function getDestinationEncoding() { }
-  public function setDestinationEncoding($encoding) { }
-  public function getSourceType() { }
-  public function getDestinationType() { }
-  public function getSubstChars() { }
-  public function setSubstChars($chars) { }
-  public function fromUCallback($reason, $source, $codepoint, &$error) { }
-  public function toUCallback($reason, $source, $codeunits, &$error) { }
-  public function convert($str, $reverse = false) { }
-  static public function transcode($str, $toEncoding, $fromEncoding, $options = null) { }
-  public function getErrorCode() { }
-  public function getErrorMessage() { }
-  static public function reasonText($reason) { }
-  static public function getAvailable() { }
-  static public function getAliases($encoding) { }
-  static public function getStandards() { }
-  static public function getStandardName($name, $standard) { }
-  static public function getMIMEName($name) { }
+
+  public function __construct(string $toEncoding = "utf-8", string $fromEncoding = "utf-8");
+  public function getSourceEncoding();
+  public function setSourceEncoding(string $encoding);
+  public function getDestinationEncoding();
+  public function setDestinationEncoding(string $encoding);
+  public function getSourceType();
+  public function getDestinationType();
+  public function getSubstChars();
+  public function setSubstChars(string $chars);
+  public function fromUCallback(int $reason, $source, int $codepoint, int &$error);
+  public function toUCallback(int $reason, $source, $codeunits, int &$error);
+  public function convert(string $str, bool $reverse = false);
+  static public function transcode(string $str, string $toEncoding, string $fromEncoding, $options = null);
+  public function getErrorCode();
+  public function getErrorMessage();
+  static public function reasonText(int $reason);
+  static public function getAvailable();
+  static public function getAliases(string $encoding);
+  static public function getStandards();
+  static public function getStandardName(string $name, string $standard);
+  static public function getMIMEName(string $name);
 }

@@ -51,7 +51,7 @@ function passthru(string $command, &$return_var = null);
 <<__PHPStdLib>>
 function system(string $command, &$return_var = null);
 <<__PHPStdLib>>
-function proc_open(string $cmd, $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null);
+function proc_open(string $cmd, darray<int, mixed> $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null);
 <<__PHPStdLib>>
 function proc_terminate(resource $process, int $signal = 0);
 <<__PHPStdLib>>

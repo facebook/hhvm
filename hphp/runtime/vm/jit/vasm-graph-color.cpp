@@ -680,6 +680,8 @@ void calculate_liveness(State& state) {
       state.liveIn[b] = std::move(transfer);
     }
   }
+
+  assertx(state.liveIn[state.unit.entry].none());
 }
 
 // Helper function to retrieve loop info (and asserting if it doesn't
@@ -7097,6 +7099,763 @@ void restore_pseudo(State& state, Vinstr& inst) {
   }
 }
 
+/*
+ * Spill materialization:
+ *
+ * The materialization of spill and reload instructions can be complicated. The
+ * actual transformation of the instructions is easy, but we need to account for
+ * the stack space the spill slots use.
+ *
+ * Spill slots occupy space on the stack, so the stack pointer needs to be
+ * adjusted appropriately. We cannot simply access beyond the stack pointer
+ * because it might be clobbered by a call.
+ *
+ * There are two complications: (1) We want to defer the stack pointer
+ * adjustment until its actually needed (the first spill). (2) Other
+ * instructions may manipulate the stack pointer. We want to insert the stack
+ * pointer adjustments right before a spill slot is used (requiring the space),
+ * or when the stack pointer is changed by another instruction.
+ *
+ * First we split any side exiting blocks. These are blocks which contain
+ * instructions which implicitly exit the unit (without being reflected in
+ * control flow). The problem is, we might want to insert stack pointer
+ * adjustment code along such exits, and we need a place to do so. We replace
+ * these instructions with conditional jumps to blocks which use the
+ * unconditional version of the side-exit.
+ *
+ * Next we calculate the live regions for the spill slots. This is just the
+ * blocks where there's a live spilled value. Inside these regions, we need to
+ * have allocated the spill space on the stack (so the stack pointer should be
+ * adjusted).
+ *
+ * We then calculate the live regions for the stack pointer. This is the blocks
+ * where the stack pointer has been adjusted (by other instructions) away from
+ * its position when we entered the unit.
+ *
+ * Normally we insert the stack pointer adjustments when we enter or exit the
+ * spill slots live region. However, if we're already in a stack pointer live
+ * region when we enter or exit, we need to instead move the adjustment outward
+ * to the entry/exit of that stack pointer region. This is because we need to
+ * perform our adjustment before/after any stack pointer adjustment done by
+ * other instructions.
+ *
+ * So, if any spill slots live region is adjacent to a stack pointer live
+ * region, we expand the spill slots region to include that stack pointer live
+ * region. We repeat this process until the spill slots live region won't expand
+ * any further.
+ *
+ * Once this is done, we insert the actual stack pointer adjustments at the
+ * frontier of the spill slots live regions. Now that the stack is set up
+ * correctly, we lower the spill/reload instructions into stores or loads, using
+ * the stack pointer offset at that point.
+ *
+ * If we split any side-exiting blocks above, we then run some vasm optimization
+ * passes to attempt to recollapse them to side-exit instructions. We may not
+ * have had to insert any adjustment code there, so they can go back to their
+ * original form.
+ */
+
+// Return the amount an instruction will move the stack pointer. Negative is
+// moving away from the frame pointer, and positive is moving towards it. This
+// only supports the type of instructions we expect to see, and not abitrary
+// ones.
+int sp_change(const State& state, const Vinstr& inst) {
+  switch (inst.op) {
+    case Vinstr::push:
+    case Vinstr::pushf:
+    case Vinstr::pushm:
+      return -8;
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
+      return -16;
+    case Vinstr::pop:
+    case Vinstr::popf:
+    case Vinstr::popm:
+      return 8;
+    case Vinstr::popp:
+    case Vinstr::poppm:
+      return 16;
+    case Vinstr::lea: {
+      auto const& lea = inst.lea_;
+      if (lea.d == rsp()) {
+        assertx(lea.s.base == lea.d && !lea.s.index.isValid());
+        return lea.s.disp;
+      }
+      return 0;
+    }
+    default:
+      // No other instruction should be writing to the stack pointer.
+      if (debug) {
+        visitDefs(
+          state.unit, inst,
+          [&] (Vreg r) { always_assert(r != rsp()); }
+        );
+      }
+      return 0;
+  }
+}
+
+// Per-block information about the offset of the stack pointer (relative to its
+// position at the start of the unit).
+struct SPOffset {
+  folly::Optional<int> in;
+  folly::Optional<int> out;
+};
+using SPOffsets = jit::vector<SPOffset>;
+
+// Calculate stack pointer offset information
+SPOffsets calculate_sp_offsets(const State& state) {
+  auto const& unit = state.unit;
+
+  SPOffsets spOffsets(unit.blocks.size());
+
+  // The offset is relative to the start of unit position.
+  spOffsets[unit.entry].in = 0;
+
+  // We don't need dataflow for this because we require that the stack pointer
+  // offset is always statically known. This implies that it cannot have
+  // different offsets at join points (we'll assert otherwise), so one pass is
+  // sufficient.
+  for (auto const b : state.rpo) {
+    assertx(spOffsets[b].in);
+    auto spOffset = *spOffsets[b].in;
+
+    // Calculate the block's instruction effects on the offset.
+    auto const& block = unit.blocks[b];
+    for (auto const& inst : block.code) {
+      spOffset += sp_change(state, inst);
+      // Don't support moving the stack pointer before where it started
+      // originally.
+      assertx(spOffset <= 0);
+    }
+
+    // Propagate state to successors.
+    auto const successorList = succs(block);
+    // If there's no successors, we're exiting the unit, so make sure the stack
+    // pointer has been returned to its entry position.
+    assertx(IMPLIES(successorList.empty(), spOffset == 0));
+    for (auto const succ : successorList) {
+      // Join point shouldn't have differing offsets.
+      assertx(!spOffsets[succ].in || *spOffsets[succ].in == spOffset);
+      spOffsets[succ].in = spOffset;
+    }
+
+    spOffsets[b].out = spOffset;
+  }
+
+  return spOffsets;
+}
+
+// If the given instruction is a spill or reload, turn it into the appropriate
+// load/store instruction to/from memory. Use the given stack pointer offset to
+// calculate the location of the spill slot. Return true if the transformation
+// happened, false otherwise.
+
+/*
+ * (Stack grows downward)
+ *
+ *                 | Prev Frame    |
+ * prev %rsp --->  -----------------   <-----------------------
+ *                 | Spill Slot #0 |     |                    |
+ *                 -----------------     |                    |
+ *                 | Spill Slot #1 |     |--- spillSpace (24) |
+ *                 -----------------     |                    |
+ *                 | Spill Slot #2 |     |                    |-- spOffset (-40)
+ *                 -----------------   <--                    |
+ *                 |               |     |                    |
+ *                 -----------------     |--- skip (16)       |
+ *                 |               |     |                    |
+ *      %rsp --->  -----------------   <-----------------------
+ *
+ */
+bool materialize_spill(const State& state, Vinstr& inst, int skip) {
+  auto const to_offset = [&] (SpillSlot slot) {
+    return slot.slot*8 + skip;
+  };
+  auto const to_offset_wide = [&] (SpillSlotWide slot) {
+    return state.numSpillSlots*8 + slot.slot*16 + skip;
+  };
+
+  if (inst.op == Vinstr::spill) {
+    assertx(skip >= 0);
+    assertx(inst.spill_.s.isPhys());
+    auto const& info = reg_info(state, inst.spill_.d);
+    assertx(is_spill(info.regClass));
+
+    if (info.regClass == RegClass::Spill) {
+      auto const color = color_spill_slot(info.color);
+      inst.store_ = store{
+        inst.spill_.s,
+        rsp()[to_offset(color)]
+      };
+      inst.op = Vinstr::store;
+    } else {
+      assertx(info.regClass == RegClass::SpillWide);
+      assertx(inst.spill_.s.isSIMD());
+      auto const color = color_spill_slot_wide(info.color);
+      inst.storeups_ = storeups{
+        inst.spill_.s,
+        rsp()[to_offset_wide(color)]
+      };
+      inst.op = Vinstr::storeups;
+    }
+
+    return true;
+  } else if (inst.op == Vinstr::reload) {
+    assertx(skip >= 0);
+    assertx(inst.reload_.d.isPhys());
+    auto const& info = reg_info(state, inst.reload_.s);
+    assertx(is_spill(info.regClass));
+
+    if (info.regClass == RegClass::Spill) {
+      auto const color = color_spill_slot(info.color);
+      inst.load_ = load{
+        rsp()[to_offset(color)],
+        inst.reload_.d
+      };
+      inst.op = Vinstr::load;
+    } else {
+      assertx(info.regClass == RegClass::SpillWide);
+      assertx(inst.reload_.d.isSIMD());
+      auto const color = color_spill_slot_wide(info.color);
+      inst.loadups_ = loadups{
+        rsp()[to_offset_wide(color)],
+        inst.reload_.d
+      };
+      inst.op = Vinstr::loadups;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+// Turn all spill/reload instructions in the unit into appropriate load/store
+// instructions to/from memory. spillSpace is the total amount of space
+// allocated for spills.
+void materialize_spills(const State& state, size_t spillSpace) {
+  // The exact offset to use for a stack slot differs depending on the current
+  // stack pointer offset (because spill slots are addressed off the stack
+  // pointer). Therefore we need the offsets for every block.
+  auto const spOffsets = calculate_sp_offsets(state);
+  assertx(spOffsets.size() == state.unit.blocks.size());
+
+  for (auto const b : state.rpo) {
+    assertx(spOffsets[b].in);
+    auto spOffset = *spOffsets[b].in;
+    assertx(IMPLIES(b == state.unit.entry, spOffset == 0));
+    assertx(spOffset <= 0);
+
+    auto& block = state.unit.blocks[b];
+    for (auto& inst : block.code) {
+      if (materialize_spill(state, inst, -spOffset - spillSpace)) {
+        assertx(sp_change(state, inst) == 0);
+      } else {
+        spOffset += sp_change(state, inst);
+        assertx(spOffset <= 0);
+      }
+    }
+
+    // Do a sanity check that our offset calculation for the block matches what
+    // was calculated by calculate_sp_offsets().
+    if (debug) {
+      auto const successorList = succs(block);
+      always_assert(IMPLIES(successorList.empty(), spOffset == 0));
+      for (auto const succ : successorList) {
+        always_assert(spOffsets[succ].in == spOffset);
+      }
+    }
+  }
+}
+
+// Per-block liveness information for either spill slots or the stack pointer
+// offset. We call the stack pointer offset alive if its different than its
+// entry block position (non-zero).
+struct SPAdjustLiveness {
+  bool in = false; // If true, the spill slots/stack pointer is live-in
+  bool out = false; // If true, the spill slots/stack pointer is live-out
+  // If set, the index of the first instruction in the block which goes from
+  // dead to alive.
+  folly::Optional<size_t> begin;
+  // If set, the index of the last instruction in the block which goes from
+  // alive to dead.
+  folly::Optional<size_t> end;
+};
+
+// Calculate liveness information for the spill slots.
+jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
+  auto const& unit = state.unit;
+
+  // First calculate the spill slot liveness in the conventional manner using
+  // dataflow.
+  struct SlotLiveness {
+    boost::dynamic_bitset<> in;
+    boost::dynamic_bitset<> out;
+    boost::dynamic_bitset<> gen;
+    boost::dynamic_bitset<> kill;
+  };
+  jit::vector<SlotLiveness> slotLiveness(unit.blocks.size());
+
+  auto const offset = [&] (Vreg r) {
+    auto const& info = reg_info(state, r);
+    if (info.regClass == RegClass::Spill) {
+      return color_spill_slot(info.color).slot;
+    } else {
+      assertx(info.regClass == RegClass::SpillWide);
+      return color_spill_slot_wide(info.color).slot + state.numSpillSlots;
+    }
+  };
+
+  auto const numSlots = state.numSpillSlots + state.numWideSpillSlots;
+
+  dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
+  for (size_t i = 0; i < state.rpo.size(); ++i) worklist.push(i);
+
+  for (auto const b : state.rpo) {
+    auto& live = slotLiveness[b];
+    live.in.resize(numSlots);
+    live.out.resize(numSlots);
+    live.gen.resize(numSlots);
+    live.kill.resize(numSlots);
+
+    auto const& block = unit.blocks[b];
+    for (auto const& inst : boost::adaptors::reverse(block.code)) {
+      if (inst.op == Vinstr::spill) {
+        auto const o = offset(inst.spill_.d);
+        live.kill[o] = true;
+        live.gen[o] = false;
+      } else if (inst.op == Vinstr::reload) {
+        auto const o = offset(inst.reload_.s);
+        live.kill[o] = false;
+        live.gen[o] = true;
+      }
+    }
+
+    live.in = live.gen;
+  }
+
+  while (!worklist.empty()) {
+    auto const b = state.rpo[worklist.pop()];
+    auto& live = slotLiveness[b];
+
+    live.out.reset();
+    auto const& block = unit.blocks[b];
+    for (auto const succ : succs(block)) {
+      live.out |= slotLiveness[succ].in;
+    }
+
+    auto in = (live.out - live.kill) | live.gen;
+    if (in != live.in) {
+      for (auto const pred : state.preds[b]) {
+        worklist.push(state.rpoOrder[pred]);
+      }
+      live.in = std::move(in);
+    }
+  }
+
+  jit::vector<SPAdjustLiveness> liveness(unit.blocks.size());
+
+  for (auto const b : state.rpo) {
+    auto& live = liveness[b];
+
+    // The spill slots are alive if any of the individual ones were calculated
+    // to be alive (and vice-versa).
+    live.in = slotLiveness[b].in.any();
+    live.out = slotLiveness[b].out.any();
+
+    // If there are no spill slots alive going into the block, look for any
+    // instruction which make them alive.
+    if (!live.in) {
+      auto& block = unit.blocks[b];
+      for (size_t i = 0; i < block.code.size(); ++i) {
+        auto const& inst = block.code[i];
+        assertx(inst.op != Vinstr::reload);
+        if (inst.op != Vinstr::spill) continue;
+        live.begin = i;
+        break;
+      }
+    }
+
+    // If there are no spill slots alive going out of the block and there's any
+    // spill slot alive within it, look backwards for any instruction which
+    // kills them.
+    if (!live.out && (live.in || live.begin)) {
+      auto& block = unit.blocks[b];
+      for (size_t i = block.code.size(); i > 0; --i) {
+        auto const& inst = block.code[i-1];
+        // A spill slot could be completely dead, in which case its live-range
+        // is just the single spill instruction defining it (without a reload).
+        if (inst.op != Vinstr::reload &&
+            inst.op != Vinstr::spill) continue;
+        live.end = i - 1;
+        break;
+      }
+    }
+  }
+
+  return liveness;
+}
+
+// Calculate liveness information for the stack pointer offset
+jit::vector<SPAdjustLiveness> find_sp_liveness(const State& state,
+                                               bool& found) {
+  // The stack pointer is alive only if its offset is non-zero, so we'll use the
+  // offset information.
+  auto const spOffsets = calculate_sp_offsets(state);
+  assertx(spOffsets.size() == state.unit.blocks.size());
+
+  auto const& unit = state.unit;
+  jit::vector<SPAdjustLiveness> liveness(unit.blocks.size());
+
+  for (auto const b : state.rpo) {
+    assertx(spOffsets[b].in);
+    assertx(spOffsets[b].out);
+    auto const in = *spOffsets[b].in;
+    auto const out = *spOffsets[b].out;
+
+    auto& live = liveness[b];
+
+    if (in == 0) {
+      // The in-offset of the block is 0, so the stack pointer offset is dead
+      // coming into the block. Look for any instruction which changes it to
+      // make the stack pointer offset alive.
+      auto& block = unit.blocks[b];
+      for (size_t i = 0; i < block.code.size(); ++i) {
+        auto const& inst = block.code[i];
+        if (sp_change(state, inst) == 0) continue;
+        live.begin = i;
+        found = true;
+        break;
+      }
+    } else {
+      // Otherwise its live-in to the block.
+      live.in = true;
+      found = true;
+    }
+
+    if (out == 0) {
+      // The out-offset of the block is 0, so the stack pointer offset is dead
+      // going out of the block. Look backwards for any instruction which
+      // changes it to make the stack pointer offset alive.
+      auto& block = unit.blocks[b];
+      for (size_t i = block.code.size(); i > 0; --i) {
+        auto const& inst = block.code[i-1];
+        if (sp_change(state, inst) == 0) continue;
+        live.end = i - 1;
+        found = true;
+        break;
+      }
+    } else {
+      // Otherwise its live-out to the block.
+      live.out = true;
+      found = true;
+    }
+  }
+
+  return liveness;
+}
+
+// Expand the spill slot liveness information to also include the stack pointer
+// offset liveness if they are adjacent anywhere. This will give us the region
+// where we have to make stack pointer adjustments.
+void expand_spill_liveness(const State& state,
+                           jit::vector<SPAdjustLiveness>& spillLiveness,
+                           const jit::vector<SPAdjustLiveness>& spLiveness) {
+  // First find the blocks where the spill slots and stack pointer offset are
+  // both alive and expand the begin or end data appropriately.
+  for (auto const b : state.rpo) {
+    auto& spill = spillLiveness[b];
+    auto const& sp = spLiveness[b];
+
+    if (!spill.in && !spill.out && !spill.begin && !spill.end) continue;
+
+    if (!spill.in && sp.in) {
+      spill.in = true;
+      spill.begin.reset();
+    }
+
+    if (!spill.out && sp.out) {
+      spill.out = true;
+      spill.end.reset();
+    }
+
+    if (spill.begin && sp.begin) {
+      spill.begin = std::min(*spill.begin, *sp.begin);
+    }
+
+    if (spill.end && sp.end) {
+      spill.end = std::max(*spill.end, *sp.end);
+    }
+  }
+
+  // Then expand the spill slot live region to include any stack pointer offset
+  // live regions that are adjacent to it. We repeat this process until we can't
+  // expand it any further.
+  auto changed = true;
+  while (changed) {
+    changed = false;
+
+    for (auto const b : state.rpo) {
+      auto& spill = spillLiveness[b];
+      auto const& sp = spLiveness[b];
+
+      // If the spill slot liveness range already covers this block, no need to
+      // extend it.
+      if (spill.in || spill.out || spill.begin || spill.end) continue;
+
+      if (sp.out) {
+        for (auto const succ : succs(state.unit.blocks[b])) {
+          if (!spillLiveness[succ].in) continue;
+          spill = sp;
+          changed = true;
+          break;
+        }
+      }
+
+      if (spill.out) continue;
+
+      if (sp.in) {
+        for (auto const pred : state.preds[b]) {
+          if (!spillLiveness[pred].out) continue;
+          spill = sp;
+          changed = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // The spill slot live region(s) now incorporates any stack pointer offset
+  // live region(s).
+}
+
+// Insert stack pointer adjustments at the appropriate places
+void insert_sp_adjustments(State& state, size_t spillSpace) {
+  // Calculate where spill slots are alive, then where the stack pointer is
+  // alive (non zero offset), and expand the spill slot liveness to match the
+  // stack pointer liveness.
+  auto spillLiveness = find_spill_liveness(state);
+
+  auto found = false;
+  auto const spLiveness = find_sp_liveness(state, found);
+  if (found) expand_spill_liveness(state, spillLiveness, spLiveness);
+
+  auto& unit = state.unit;
+  // Insert a lea to adjust the stack pointer (either forwards or backwards)
+  // before the instruction at the given index.
+  auto const modify = [&] (Vlabel b, size_t check, size_t i, int adjustment) {
+    // If there's already a lea there, we can just modify that.
+    if (unit.blocks[b].code[check].op == Vinstr::lea) {
+      auto& lea = unit.blocks[b].code[check].lea_;
+      if (lea.d == rsp() && lea.s.base == rsp() && !lea.s.index.isValid()) {
+        lea.s.disp += adjustment;
+        return 0;
+      }
+    }
+    vmodify(
+      unit, b, i,
+      [&] (Vout& v) {
+        v << lea{rsp()[adjustment], rsp()};
+        return 0;
+      }
+    );
+    return 1;
+  };
+
+  for (auto const b : state.rpo) {
+    auto const& spill = spillLiveness[b];
+
+    size_t added = 0;
+    if (spill.begin) {
+      // The spill slot liveness begins here at an instruction, so insert a
+      // stack pointer adjustment before that instruction.
+      added += modify(b, *spill.begin, *spill.begin, -spillSpace);
+    }
+    if (spill.end) {
+      // The spill slot liveness ends here at an instruction, so insert a stack
+      // pointer adjustment back before that instruction.
+      added += modify(
+        b, *spill.end + added, *spill.end + added + 1, spillSpace
+      );
+    }
+
+    if (!spill.out) continue;
+    for (auto const succ : succs(unit.blocks[b])) {
+      if (spillLiveness[succ].in) continue;
+      // The spill slot liveness is live out of the block, but not live into
+      // this successor. This can only happen if the block has multiple
+      // successors (which implies the successor has only one predecessor, since
+      // we've split critical edges). We need to insert a stack pointer
+      // adjustment at the beginning of the successor.
+      assertx(succs(unit.blocks[b]).size() > 1);
+      assertx(state.preds[succ].size() == 1);
+
+      auto& succSpill = spillLiveness[succ];
+      if (succSpill.begin) {
+        // If we're going to need a stack pointer adjustment later in the
+        // successor, we can just elide it by forgoing the adjustment at the
+        // entry of the successor.
+        succSpill.in = true;
+        succSpill.begin.reset();
+      } else {
+        // Otherwise insert the adjustment at the beginning of the successor,
+        // skipping over a landingpad instruction if present. Since this can add
+        // instructions, we need to fix up the instruction offsets in the
+        // successor's state (we already know that succSpill.begin isn't set).
+        auto const idx
+          = size_t{unit.blocks[succ].code[0].op == Vinstr::landingpad};
+        auto const succAdded = modify(succ, idx, idx, spillSpace);
+        if (succSpill.end) *succSpill.end += succAdded;
+      }
+    }
+  }
+}
+
+// Look in the given block for any jccs which aren't at the end and have an
+// invalid next label. If so, split the block into two at the jcc.
+void split_block(State& state, Vlabel block) {
+  auto& unit = state.unit;
+
+  jit::vector<Vinstr> orig;
+  orig.swap(unit.blocks[block].code);
+
+  for (auto const& inst : orig) {
+    unit.blocks[block].code.emplace_back(inst);
+
+    // If the jcc has an invalid next label, that means it marks a place where
+    // the block should be split.
+    if (inst.op == Vinstr::jcc && !inst.jcc_.targets[0].isValid()) {
+      auto const newBlock = unit.makeBlock(
+        unit.blocks[block].area_idx,
+        unit.blocks[block].weight
+      );
+      unit.blocks[block].code.back().jcc_.targets[0] = newBlock;
+      block = newBlock;
+    }
+  }
+}
+
+// Split side exit instructions into a more explicit form. A side exit
+// instruction is something like fallbackcc or bindjcc, which conditionally
+// exits the unit (without any explicit control flow). We might have to insert
+// stack pointer adjustment code when we exit the unit, so we need a place to
+// insert the adjustments. Change these instructions into a conditional jump to
+// a block which uses their unconditional version. After inserting adjustment
+// code, we may have not inserted anything, and we can re-collapse them. Return
+// true if we made any changes.
+bool split_side_exits(State& state) {
+  auto& unit = state.unit;
+
+  jit::vector<Vlabel> blocksToSplit;
+  for (auto const b : state.rpo) {
+    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
+      auto const makeExitBlock = [&] (const Vinstr& exit) {
+        assertx(isBlockEnd(exit));
+
+        // Make a new exit block and populate it with the exit instruction
+        auto const target = unit.makeBlock(AreaIndex::Cold, 0);
+        auto& inst = unit.blocks[b].code[i];
+        auto& code = unit.blocks[target].code;
+        code.emplace_back(exit);
+        code.back().set_irctx(inst.irctx());
+
+        // Change the side-exit instruction to be a conditional jump to the
+        // block (or fall through). Note that this breaks vasm invariants, as we
+        // might have a jcc in the middle of a block now. This will be fixed up
+        // afterwards. We set the next label as invalid as the marker to
+        // split_block() that the block should be split here.
+        inst.jcc_ = jcc{
+          getConditionCode(inst),
+          getSFUseReg(inst),
+          {Vlabel{}, target}
+        };
+        inst.op = Vinstr::jcc;
+        // Mark this block as needing splitting at jccs.
+        blocksToSplit.emplace_back(b);
+      };
+
+      auto const& inst = unit.blocks[b].code[i];
+      if (inst.op == Vinstr::fallbackcc) {
+        makeExitBlock(
+          fallback{
+            inst.fallbackcc_.target,
+            inst.fallbackcc_.spOff,
+            inst.fallbackcc_.trflags,
+            inst.fallbackcc_.args
+          }
+        );
+      } else if (inst.op == Vinstr::bindjcc) {
+        makeExitBlock(
+          bindjmp{
+            inst.bindjcc_.target,
+            inst.bindjcc_.spOff,
+            inst.bindjcc_.trflags,
+            inst.bindjcc_.args
+          }
+        );
+      } else if (inst.op == Vinstr::jcci) {
+        auto const target = inst.jcci_.target;
+        auto const ctx = inst.irctx();
+        makeExitBlock(jmpi{inst.jcci_.taken});
+        unit.blocks[b].code.emplace_back(jmp{target});
+        unit.blocks[b].code.back().set_irctx(ctx);
+      }
+    }
+  }
+
+  // Split any block which now has embedded jccs. This is a rare case where
+  // we've changed the CFG, so we need to recalculate RPO and predecessor
+  // information.
+  if (!blocksToSplit.empty()) {
+    for (auto const b : blocksToSplit) split_block(state, b);
+    compute_rpo(state);
+    state.preds = computePreds(unit);
+    return true;
+  }
+
+  return false;
+}
+
+// Turn spills into load/store instructions, adjusting the stack pointer where
+// appropriate.
+void lower_spills(State& state) {
+  assertx((state.numSpillSlots % 2) == 0);
+
+  // Calculate total space on the stack used by spills.
+  auto const spillSpace =
+    state.numSpillSlots * 8 + state.numWideSpillSlots * 16;
+
+  assertx(IMPLIES(!state.abi.canSpill, spillSpace == 0));
+  assertx((spillSpace % 16) == 0);
+
+  // Common case, no spills.
+  if (spillSpace == 0) return;
+
+  // We need to split side exit instructions (which implicitly leave the unit
+  // intra-block) into explicit jumps to exit blocks. We might have to insert
+  // stack pointer adjustment code in those side-exits.
+  auto const split = split_side_exits(state);
+  // Insert any stack pointer adjustments
+  insert_sp_adjustments(state, spillSpace);
+  // Actually transform the spills
+  materialize_spills(state, spillSpace);
+
+  // If we split any side exits, try to unsplit any that we can again. If we
+  // didn't insert any adjustment code, they can be transformed back. This can
+  // change the CFG again, but nothing after this needs anything but RPO
+  // information right now.
+  if (split) {
+    optimizeExits(state.unit);
+    optimizeJmps(state.unit);
+    compute_rpo(state);
+  }
+
+  // Do a second stack pointer offset calculation which will check if the
+  // adjustment code kept the stack pointer in a consistent state.
+  if (debug) calculate_sp_offsets(state);
+}
+
 void lower_ssa(State& state) {
   auto& unit = state.unit;
 
@@ -7162,6 +7921,8 @@ void lower_ssa(State& state) {
     if (inst.op != Vinstr::phidef) continue;
     vmodify(unit, b, 0, [] (Vout&) { return 1; });
   }
+
+  lower_spills(state);
 
   assertx(check(unit));
 }

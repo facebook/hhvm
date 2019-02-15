@@ -1,8 +1,4 @@
-File "function_soft_reification.php", line 17, characters 3-11:
+File "function_soft_reification.php", line 11, characters 3-11:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "function_soft_reification.php", line 6, characters 10-16:
+  File "function_soft_reification.php", line 5, characters 10-16:
   Definition is here
-File "function_soft_reification.php", line 18, characters 11-13:
-The type argument at index 0 is not reified (Typing[4302])
-  File "function_soft_reification.php", line 6, characters 24-24:
-  Its definition T is reified

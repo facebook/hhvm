@@ -1,8 +1,1 @@
-File "box_keyword.php", line 16, characters 15-20:
-The type argument at index 0 is not reified (Typing[4302])
-  File "box_keyword.php", line 5, characters 21-22:
-  Its definition Tr is reified
-File "box_keyword.php", line 19, characters 15-26:
-The type argument at index 0 is not reified (Typing[4302])
-  File "box_keyword.php", line 5, characters 21-22:
-  Its definition Tr is reified
+No errors

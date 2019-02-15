@@ -7,8 +7,8 @@ class E<reify T> {}
 class F<T> {}
 
 function f(): void {
-  new C<reify int, reify string>();
-  new D<reify int>();
+  new C<int, string>();
+  new D<int>();
   new E();
   new F();
 }

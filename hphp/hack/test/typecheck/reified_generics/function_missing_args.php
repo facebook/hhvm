@@ -6,5 +6,5 @@ function g(int $j): void {}
 
 function h(): void {
   f(3);
-  g<reify int>(4);
+  g<int>(4);
 }

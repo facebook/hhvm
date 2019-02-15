@@ -15,10 +15,10 @@ function Erased_parametrizedCheck(): void {
 }
 
 function Reified_parametrizedCheck(): void {
-  new Reified<reify Erased>();
+  new Reified<Erased>();
 
-  new Reified<reify Reified>(); // bad
-  new Reified<reify Reified<int>>();
+  new Reified<Reified>(); // bad
+  new Reified<Reified<int>>();
 }
 
 // just some sanity checks
@@ -27,7 +27,7 @@ function deepChecks(): void {
   new Erased<Erased<Erased<Reified>>>(); // bad
   new Erased<Erased<Erased<Reified<int>>>>();
 
-  new Reified<reify Erased<Reified<int>>>();
-  new Reified<reify Erased<Erased<Reified>>>(); // bad
-  new Reified<reify Erased<Erased<Reified<int>>>>();
+  new Reified<Erased<Reified<int>>>();
+  new Reified<Erased<Erased<Reified>>>(); // bad
+  new Reified<Erased<Erased<Reified<int>>>>();
 }

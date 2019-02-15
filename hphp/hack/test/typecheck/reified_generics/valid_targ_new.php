@@ -4,5 +4,5 @@
 class C<reify Tc> {}
 
 function g<T>(): void {
-  new C<reify T>();
+  new C<T>();
 }

@@ -4,5 +4,5 @@
 function f<reify Tpain>(): void {}
 
 function g<T>(): void {
-  f<reify T>();
+  f<T>();
 }

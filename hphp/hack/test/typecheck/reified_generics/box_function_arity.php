@@ -5,10 +5,10 @@ class C<reify Ta, reify Tb> {}
 function f<reify T>(): void {}
 
 function f_nestedArity(): void {
-  f<reify C<int, C<int>>>(); // bad
-  f<reify C<int, C<int, string>>>();
+  f<C<int, C<int>>>(); // bad
+  f<C<int, C<int, string>>>();
 }
 
 function f_missingKeyword(): void {
-  f<C<int, C<int, string>>>(); // bad
+  f<C<int, C<int, string>>>();
 }

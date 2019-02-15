@@ -13,19 +13,8 @@ open Typing_defs
 
 module Env = Tast_env
 
-let is_soft_reified tparam =
-  List.exists tparam.tp_user_attributes ~f:(fun { Nast.ua_name = (_, n); _ } ->
-    Naming_special_names.UserAttributes.uaSoft = n
-  )
-
 let tparams_has_reified tparams =
-  List.exists ~f:(fun t -> t.tp_reified && not (is_soft_reified t)) tparams
-
-let match_reified i tparam targ =
-  let { tp_reified; tp_name; _ } = tparam in
-  let (targ_pos, _), targ_reified = targ in
-  if (tp_reified && not (is_soft_reified tparam) && not targ_reified) then
-    Errors.mismatched_reify tp_name targ_pos i
+  List.exists ~f:(fun t -> t.tp_reified) tparams
 
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
@@ -49,10 +38,9 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
      List.is_empty targs then
     Errors.require_args_reify decl_pos expr_pos;
   (* Unequal_lengths case handled elsewhere *)
-  let pairs = List.zip tparams targs in
-  Option.iter pairs ~f:(List.iteri ~f:(fun i (tparam, targ) ->
-    match_reified i tparam targ;
-    verify_targ_valid_for_reified_tparam env tparam (fst targ)))
+  List.iter2 tparams targs ~f:begin fun tparam targ ->
+    verify_targ_valid_for_reified_tparam env tparam (fst targ)
+  end |> ignore
 
 let handler = object
   inherit Tast_visitor.handler_base

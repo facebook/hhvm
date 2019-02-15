@@ -15,11 +15,11 @@ function Erased_arityCheck(): void {
 }
 
 function Reified_arityCheck(): void {
-  new Reified<reify Erased>();
-  new Reified<reify Erased<int>>();
-  new Reified<reify Erased<int, string>>(); // bad
+  new Reified<Erased>();
+  new Reified<Erased<int>>();
+  new Reified<Erased<int, string>>(); // bad
 
-  new Reified<reify Reified>(); // bad, Reified requires parameters
-  new Reified<reify Reified<int>>();
-  new Reified<reify Reified<int, string>>(); // bad
+  new Reified<Reified>(); // bad, Reified requires parameters
+  new Reified<Reified<int>>();
+  new Reified<Reified<int, string>>(); // bad
 }

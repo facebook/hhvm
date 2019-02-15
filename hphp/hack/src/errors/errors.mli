@@ -574,7 +574,6 @@ val multiple_concrete_defs : Pos.t -> Pos.t -> string -> string -> string -> str
 val move_in_nonreactive_context : Pos.t -> unit
 val invalid_move_target : Pos.t -> Pos.t -> string -> unit
 val invalid_move_use : Pos.t -> unit
-val mismatched_reify : Pos.t * string -> Pos.t -> int -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
 val erased_generic_passed_to_reified : Pos.t * string -> Pos.t * string -> unit
 val ignored_result_of_freeze : Pos.t -> unit

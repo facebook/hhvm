@@ -13,9 +13,9 @@ function f<
 >(): void where Teq = B {}
 
 function bad<Tbad1 as B super B, Tbad2>(): void where Tbad2 = B {
-  f<reify Tbad1, reify Tbad2>();
+  f<Tbad1, Tbad2>();
 }
 
 function good<reify Tgood1 as B super B, reify Tgood2>(): void where Tgood2 = B {
-  f<reify Tgood1, reify Tgood2>();
+  f<Tgood1, Tgood2>();
 }

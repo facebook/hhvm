@@ -539,7 +539,7 @@ module Typing                               = struct
   | ReferenceExprPartial
   | RedundantRxCondition
   | RedeclaringMissingMethod
-  | MismatchedReify
+  | MismatchedReifyDEPRECATED
   | RequireArgsReify
   | TypecheckerTimeout
   | ErasedGenericPassedToReified

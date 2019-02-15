@@ -119,7 +119,7 @@ function system(string $command, mixed &$return_var = null): string;
  */
 <<__Native>>
 function proc_open(string $cmd,
-                   array $descriptorspec,
+                   darray<int, mixed> $descriptorspec,
                    mixed &$pipes,
                    ?string $cwd = null,
                    mixed $env = null,

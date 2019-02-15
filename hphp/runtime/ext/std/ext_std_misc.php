@@ -98,7 +98,7 @@ function define(string $name,
  * @return bool - Returns TRUE if the named constant given by name has been
  * defined, FALSE otherwise.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function defined(string $name,
                  bool $autoload = true): bool;
 

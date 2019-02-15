@@ -191,7 +191,7 @@ function set_exception_handler(mixed $exception_handler): ?callable;
  * @return bool - This function returns FALSE if wrong error_type is
  *   specified, TRUE otherwise.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function trigger_error(string $error_msg,
                        int $error_type = E_USER_NOTICE): bool;
 

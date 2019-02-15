@@ -182,7 +182,7 @@ function get_parent_class(<<__MaybeMutable>> mixed $object = null): mixed;
  * @return bool - Returns TRUE if the interface given by interface_name
  *   has been defined, FALSE otherwise.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function interface_exists(string $interface_name,
                           bool $autoload = true): bool;
 

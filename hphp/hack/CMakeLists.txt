@@ -104,7 +104,7 @@ add_custom_target(
   ALL
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
-    "${OCAML_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${OCAML_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 add_dependencies(opam.stamp ocaml)
 
@@ -112,7 +112,7 @@ add_custom_target(
   hack
   ALL
   COMMAND
-        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam &&
+        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
@@ -126,14 +126,14 @@ add_custom_target(
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"
         OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 add_dependencies(hack ocaml opam.stamp)
 
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")
 else ()
-  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam")
+  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam")
 endif()
 
 add_custom_target(
@@ -148,7 +148,7 @@ add_custom_target(
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"
         OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 add_dependencies(hack_dune ocaml)
 if (NOT SKIP_OPAM)
@@ -158,7 +158,7 @@ endif()
 add_custom_target(
   hack_test
   COMMAND
-        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/src/_build/.opam &&
+        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
@@ -171,7 +171,7 @@ add_custom_target(
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"
         OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 add_dependencies(hack_test ocaml opam.stamp)
 

@@ -100,50 +100,50 @@ MODULES=\
   $(INOTIFY)
 
 HEADER_DIRS=\
-  $(ROOT)/heap\
-  $(ROOT)/utils/hashlib
+  $(ROOT)/src/heap\
+  $(ROOT)/src/utils/hashlib
 
 NATIVE_C_FILES=\
-  heap/hh_assert.c\
-  heap/hh_shared.c\
-  heap/hh_shared_sqlite.c\
-  libancillary/libancillary-stubs.c\
-  third-party/libancillary/fd_recv.c\
-  third-party/libancillary/fd_send.c\
-  utils/hashlib/sha1c.c\
-  utils/hashlib/sha1_ocaml.c\
-  utils/sys/files.c\
-  utils/sys/gc_profiling.c\
-  utils/sys/getrusage.c\
-  utils/sys/handle_stubs.c\
-  utils/sys/nproc.c\
-  utils/sys/priorities.c\
-  utils/sys/processor_info.c\
-  utils/sys/realpath.c\
-  utils/sys/sysinfo.c\
-  utils/parent/libparent.c\
-  utils/parent/stubparentimpl.c\
-  $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
+  src/heap/hh_assert.c\
+  src/heap/hh_shared.c\
+  src/heap/hh_shared_sqlite.c\
+  src/libancillary/libancillary-stubs.c\
+  src/third-party/libancillary/fd_recv.c\
+  src/third-party/libancillary/fd_send.c\
+  src/utils/hashlib/sha1c.c\
+  src/utils/hashlib/sha1_ocaml.c\
+  src/utils/sys/files.c\
+  src/utils/sys/gc_profiling.c\
+  src/utils/sys/getrusage.c\
+  src/utils/sys/handle_stubs.c\
+  src/utils/sys/nproc.c\
+  src/utils/sys/priorities.c\
+  src/utils/sys/processor_info.c\
+  src/utils/sys/realpath.c\
+  src/utils/sys/sysinfo.c\
+  src/utils/parent/libparent.c\
+  src/utils/parent/stubparentimpl.c\
+  src/$(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
 
 NATIVE_LIBRARIES=\
   pthread\
   $(RT)
 
 COPIED_HHIS=\
-	$(foreach file,$(call rwildcard,../hhi/,*.hhi),_build/$(patsubst ../hhi/%,hhi/%,$(file)))
+	$(foreach file,$(call rwildcard,hhi/,*.hhi),_build/$(file))
 
 TARGETS_BASE=\
-	_build/hh_server \
-	_build/hh_client \
-	_build/hh_single_type_check \
-	_build/hackfmt \
-	_build/hh_parse \
-	_build/hh_single_compile
+	_build/src/hh_server \
+	_build/src/hh_client \
+	_build/src/hh_single_type_check \
+	_build/src/hackfmt \
+	_build/src/hh_parse \
+	_build/src/hh_single_compile
 
 TARGETS=$(foreach target,$(TARGETS_BASE),$(target).$(TARGET_EXT))
 
 # Find all source files (all files not in _build dir)
-ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
+ALL_SRC_FILES=$(call rwildcard,src,*.*)
 ALL_INCLUDE_PATHS=$(EXTRA_INCLUDE_PATHS) $(HEADER_DIRS)
 
 ################################################################################
@@ -151,15 +151,15 @@ ALL_INCLUDE_PATHS=$(EXTRA_INCLUDE_PATHS) $(HEADER_DIRS)
 ################################################################################
 
 OBJECT_FILES_TO_BUILD=$(patsubst %.c,%.o,$(NATIVE_C_FILES))
-NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) utils/get_build_id.gen.o utils/get_build_id.o utils/compiler_id_impl.o
-INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
+NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) src/utils/get_build_id.gen.o src/utils/get_build_id.o src/utils/compiler_id_impl.o
+INCLUDE_OPTS=$(foreach dir,$(MODULES),-I src/$(dir))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_NATIVE_LIB_OPTS=$(foreach lib, $(EXTRA_NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_INCLUDE_OPTS=$(foreach dir, $(ALL_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
 EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
-BUILD_ID_OBJECTS=_build/utils/compiler_id_impl.o _build/utils/get_build_id.o _build/utils/get_build_id.gen.o
+BUILD_ID_OBJECTS=_build/src/utils/compiler_id_impl.o _build/src/utils/get_build_id.o _build/src/utils/get_build_id.gen.o
 CC_DEFINES=-cflag -ccopt -cflag -DUSE_UNISTD=1
 
 .PHONY: $(BUILD_ID_OBJECTS)
@@ -179,8 +179,8 @@ all: build-hack copy-hack-files
 
 clean:
 	$(OCAMLBUILD) -clean
-	find ../bin -mindepth 1 -not -path ../bin/README -delete
-	rm -f utils/get_build_id.gen.c
+	find ./bin -mindepth 1 -not -path ../bin/README -delete
+	rm -f src/utils/get_build_id.gen.c
 
 build-hack: $(TARGETS)
 
@@ -217,51 +217,51 @@ _build/hack.stamp: $(ALL_SRC_FILES) copy-hhis _build/ppx/ppx_gen_hhi
 
 _build/hackc/build-id: $(ALL_SRC_FILES)
 	mkdir -p _build/hackc
-	(cd $(ROOT)/../../.. && \
-	INSTALL_DIR=./hphp/hack/src/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
+	(cd $(ROOT)/../.. && \
+	INSTALL_DIR=./hphp/hack/_build/hackc FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src)
 
-_build/utils/compiler_id_impl.o: _build/hackc/build-id
+_build/src/utils/compiler_id_impl.o: _build/hackc/build-id
 	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHACKC_COMPILER_ID=$(shell cat _build/hackc/build-id)" \
-	utils/compiler_id_impl.o
+	src/utils/compiler_id_impl.o
 
 _build/hack/build-id: $(ALL_SRC_FILES)
 	mkdir -p _build/hack
-	(cd $(ROOT)/../../.. && \
-	INSTALL_DIR=./hphp/hack/src/_build/hack FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src)
+	(cd $(ROOT)/../.. && \
+	INSTALL_DIR=./hphp/hack/_build/hack FBCODE_DIR=./ hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src)
 
-_build/utils/get_build_id.o: _build/hack/build-id
+_build/src/utils/get_build_id.o: _build/hack/build-id
 	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -ccopt -DHH_BUILD_ID=$(shell cat _build/hack/build-id) -ccopt -DHH_BUILD_TIMESTAMP=$(shell date +%s)ul" \
-		utils/get_build_id.o
+		src/utils/get_build_id.o
 
 build-hack-native-deps: $(NATIVE_C_FILES) $(BUILD_ID_OBJECTS)
 	$(OCAMLBUILD) $(CC_DEFINES) -tag-line '<**/*.ml*>: package(ppx_deriving.std)' -use-ocamlfind \
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" \
 		$(OBJECT_FILES_TO_BUILD)
 
-_build/utils/get_build_id.gen.c: $(ALL_SRC_FILES)
+_build/src/utils/get_build_id.gen.c: $(ALL_SRC_FILES)
 	mkdir -p $(dir $@)
-	cd $(ROOT)/.. && \
-        $(OCAML) -I scripts -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
+	cd $(ROOT) && \
+        $(OCAML) -I scripts -w -3 unix.cma scripts/gen_build_id.ml _build/src/utils/get_build_id.gen.c
 
-_build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
+_build/src/utils/get_build_id.gen.o: _build/src/utils/get_build_id.gen.c
 	cd $(dir $@) && $(OCAMLC) $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
 _build/ppx/ppx_gen_hhi:
 	mkdir -p $(dir $@)
-	ocamlfind ocamlc -package ocaml-migrate-parsetree,compiler-libs.common,unix -linkpkg -o $@ -I ppx/ ppx/ppx_gen_hhi.ml ppx/ppx_gen_hhi_direct.ml
+	ocamlfind ocamlc -package ocaml-migrate-parsetree,compiler-libs.common,unix -linkpkg -o $@ -I src/ppx/ src/ppx/ppx_gen_hhi.ml src/ppx/ppx_gen_hhi_direct.ml
 
 copy-hack-files: build-hack
-	mkdir -p ../bin
-	cp _build/hh_server.$(TARGET_EXT) ../bin/hh_server
-	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
-	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
-	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
-	cp _build/hh_parse.$(TARGET_EXT) ../bin/hh_parse
-	cp _build/hh_single_compile.$(TARGET_EXT) ../bin/hh_single_compile
+	mkdir -p ./bin
+	cp _build/src/hh_server.$(TARGET_EXT) ./bin/hh_server
+	cp _build/src/hh_client.$(TARGET_EXT) ./bin/hh_client
+	cp _build/src/hh_single_type_check.$(TARGET_EXT) ./bin/hh_single_type_check
+	cp _build/src/hackfmt.$(TARGET_EXT) ./bin/hackfmt
+	cp _build/src/hh_parse.$(TARGET_EXT) ./bin/hh_parse
+	cp _build/src/hh_single_compile.$(TARGET_EXT) ./bin/hh_single_compile
 
-$(COPIED_HHIS): _build/%.hhi: ../%.hhi
+$(COPIED_HHIS): _build/%.hhi: %.hhi
 	mkdir -p $(dir $@)
 	cp $< $@
 
@@ -272,11 +272,11 @@ test: build-hack copy-hack-files
 	${MAKE} do-test
 
 do-test:
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/autocomplete
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/color
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/colour
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/coverage
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/dumpsymbolinfo
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/dump_inheritance
-	python3 ../test/verify.py --program ../bin/hh_single_type_check ../test/typecheck
-	python3 ../test/integration/runner.py ../bin/hh_server ../bin/hh_client
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/autocomplete
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/color
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/colour
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/coverage
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/dumpsymbolinfo
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/dump_inheritance
+	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/typecheck
+	python3 ./test/integration/runner.py ./bin/hh_server ./bin/hh_client

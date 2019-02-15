@@ -358,11 +358,11 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
         }
       }
       assertx(caller == vmfp());
-      sk = liveSK();
-      start = getTranslation(TransArgs{sk});
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
             caller->m_func->fullName()->data());
+      sk = liveSK();
+      start = getTranslation(TransArgs{sk});
       break;
     }
 

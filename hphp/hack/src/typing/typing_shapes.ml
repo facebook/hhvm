@@ -18,8 +18,9 @@ module TUtils       = Typing_utils
 module Type         = Typing_ops
 module MakeType     = Typing_make_type
 
-let rec refine_shape field_name env shape =
-  let env, shape = Typing_subtype.expand_type_and_solve env shape in
+let rec refine_shape field_name pos env shape =
+  let env, shape =
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
   match shape with
   | shape_r, Tshape (fields_known, fields) ->
     let refine_shape_field_type refined_sft_ty =
@@ -49,7 +50,7 @@ let rec refine_shape field_name env shape =
         refine_shape_field_type refined_sft_ty
     end
   | r, Tunresolved tyl ->
-    let env, tyl = List.map_env env tyl (refine_shape field_name) in
+    let env, tyl = List.map_env env tyl (refine_shape field_name pos) in
     env, (r, Tunresolved tyl)
   | _ -> env, shape
 
@@ -60,7 +61,8 @@ let rec refine_shape field_name env shape =
 (*****************************************************************************)
 
 let rec shrink_shape ~seen_tyvars pos field_name env shape =
-  let env, shape = Typing_subtype.expand_type_and_solve env shape in
+  let env, shape =
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
   match shape with
   | _, Tshape (fields_known, fields) ->
       (* remember that we have unset this field *)
@@ -98,7 +100,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
       let env, field_type =
         begin match ShapeMap.find_opt field ftm with
         | Some { sft_ty; _ } ->
-          let env, sft_ty = TUtils.non_null env sft_ty in
+          let env, sft_ty = TUtils.non_null env p sft_ty in
           env, { sft_optional = false; sft_ty }
         | None ->
           env,
@@ -249,12 +251,14 @@ let to_collection env shape_ty res return_type =
   end in
   mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
-let to_array env shape_ty res =
-  let env, shape_ty = Typing_subtype.expand_type_and_solve env shape_ty in
+let to_array env pos shape_ty res =
+  let env, shape_ty =
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape_ty in
   to_collection env shape_ty res (fun r key value ->
     (r, Tarraykind (AKmap (key, value))))
 
-let to_dict env shape_ty res =
-  let env, shape_ty = Typing_subtype.expand_type_and_solve env shape_ty in
+let to_dict env pos shape_ty res =
+  let env, shape_ty =
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape_ty in
   to_collection env shape_ty res (fun r key value ->
     MakeType.dict r key value)

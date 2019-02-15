@@ -1968,9 +1968,9 @@ let const_mutation pos1 pos2 ty =
 let expected_class ?(suffix="") pos =
   add (Typing.err_code Typing.ExpectedClass) pos ("Was expecting a class"^suffix)
 
-let unknown_class pos r =
-  let msg = ("Was expecting a class but class is unknown") in
-  add_list (Typing.err_code Typing.UnknownClass)
+let unknown_type description pos r =
+  let msg = ("Was expecting " ^ description ^ " but type is unknown") in
+  add_list (Typing.err_code Typing.UnknownType)
     ([pos, msg] @ r)
 
 let snot_found_hint = function

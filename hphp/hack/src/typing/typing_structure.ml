@@ -36,8 +36,9 @@ let make_ts env ty =
       (* Should not hit this because TypeStructure should always be defined *)
       env, (fst ty, Tany)
 
-let rec transform_shapemap ?(nullable = false) env ty shape =
-  let env, ty = SubType.expand_type_and_solve env ty in
+let rec transform_shapemap ?(nullable = false) env pos ty shape =
+  let env, ty =
+    SubType.expand_type_and_solve ~description_of_expected:"a shape" env pos ty in
   let env, ty = TUtils.fold_unresolved env ty in
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely
@@ -45,7 +46,7 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
   if TUtils.HasTany.check ty then env, shape else
   match ty with
   | _, Toption ty ->
-      transform_shapemap ~nullable:true env ty shape
+      transform_shapemap ~nullable:true env pos ty shape
   | _ ->
       (* If the abstract type is unbounded we do not specialize at all *)
       let is_unbound = match ty |> TUtils.get_base_type env |> snd with

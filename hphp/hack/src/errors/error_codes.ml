@@ -534,7 +534,7 @@ module Typing                               = struct
   | InvalidMutabilityFlavorInAssignment
   | OptionNull
   | UnknownObjectMember
-  | UnknownClass
+  | UnknownType
   | InvalidArrayKey
   | ReferenceExprPartial
   | RedundantRxCondition

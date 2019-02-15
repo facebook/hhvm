@@ -37,7 +37,8 @@ let xhp_attributes_for_class info: (string * class_elt) Sequence.t =
  * type that is not XHP.
  *)
 let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
-  let env, cty = SubType.expand_type_and_solve env cty in
+  let env, cty = SubType.expand_type_and_solve
+    ~description_of_expected:"an XHP instance" env pos cty in
   match (snd cty) with
   | Tany
   | Terr

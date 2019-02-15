@@ -2518,10 +2518,10 @@ let bind_to_upper_bound env r var upper_bounds =
  *   there exist i, j such that uj <: ti, which implies ti == uj and allows
  *   us to set v := ti.
  *)
-let solve_tyvar ~freshen ~solve_invariant env r var =
+let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar #%d" var, [])]));
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d" force_solve force_solve_to_nothing var, [])]));
 
   (* Don't try and solve twice *)
   if Env.tyvar_is_solved env var
@@ -2551,15 +2551,18 @@ let solve_tyvar ~freshen ~solve_invariant env r var =
     match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
     | Some ty -> bind env r var ty
     | None ->
-      if solve_invariant
+      if force_solve_to_nothing || (force_solve && not (TySet.is_empty lower_bounds))
       then bind_to_lower_bound ~freshen env r var lower_bounds
       else env
 
+(* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
-  then IMap.fold
-    (fun tyvar _ env -> solve_tyvar ~freshen:false ~solve_invariant:true env Reason.Rnone tyvar)
-    env.Env.tvenv env
+  then
+    IMap.fold
+    (fun tyvar _ env ->
+      solve_tyvar ~freshen:false ~force_solve:true ~force_solve_to_nothing:true
+        env Reason.Rnone tyvar) env.Env.tvenv env
   else env
 
 (* Expand an already-solved type variable, and solve an unsolved type variable
@@ -2569,20 +2572,31 @@ let solve_all_unsolved_tyvars env =
  * will be solved by
  *    #1 := vec<#2>  where C <: #2
  *)
-let expand_type_and_solve env ty =
+let expand_type_and_solve env ~description_of_expected p ty =
   let env, ety = Env.expand_type env ty in
   match ety with
   | (r, Tvar v) when not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) ->
-    let env = solve_tyvar ~freshen:true ~solve_invariant:true env r v in
-    Env.expand_type env ty
+    let env = solve_tyvar ~force_solve:true ~freshen:true ~force_solve_to_nothing:false env r v in
+    let env, ety = Env.expand_type env ty in
+    (* If after solving we still have a type variable, then report an error *)
+    begin match ety with
+    | _, Tvar _ ->
+      Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
+      env, (Reason.Rwitness p, TUtils.terr env)
+    | _ -> env, ety
+    end
   | _ ->
     env, ety
 
+(* Solve type variables on top of stack, without losing completeness, and pop
+ * variables off the stack
+ *)
 let close_tyvars_and_solve env =
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env
-    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~solve_invariant:false env Reason.Rnone tyvar)
+    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~force_solve:false ~force_solve_to_nothing:false
+      env Reason.Rnone tyvar)
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in

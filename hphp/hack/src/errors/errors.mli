@@ -187,7 +187,7 @@ val keyset_set : Pos.t -> Pos.t -> unit
 val array_append : Pos.t -> Pos.t -> string -> unit
 val const_mutation : Pos.t -> Pos.t -> string -> unit
 val expected_class : ?suffix:string -> Pos.t -> unit
-val unknown_class : Pos.t -> (Pos.t * string) list -> unit
+val unknown_type : string -> Pos.t -> (Pos.t * string) list -> unit
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method | `class_typeconst] ->
   Pos.t ->

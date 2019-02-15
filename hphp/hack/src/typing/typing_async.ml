@@ -25,7 +25,7 @@ There is the special case that
 *)
 let rec overload_extract_from_awaitable env p opt_ty_maybe =
   let r = Reason.Rwitness p in
-  let env, e_opt_ty = SubType.expand_type_and_solve env opt_ty_maybe in
+  let env, e_opt_ty = SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe in
   (match e_opt_ty with
   | _, Tunresolved tyl ->
     (* If we cannot fold the union into a single type, we need to look at
@@ -43,7 +43,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     (* We want to try to avoid easy double nullables here, so we handle Toption
      * with some special logic. *)
     let env, ty = overload_extract_from_awaitable env p ty in
-    let env, ty = TUtils.non_null env ty in
+    let env, ty = TUtils.non_null env p ty in
     env, (r, Toption ty)
   | r, Tprim Nast.Tnull ->
     env, (r, Tprim Nast.Tnull)
@@ -180,7 +180,7 @@ and gen_array_va_rec env p tyl =
     (match snd (TUtils.fold_unresolved env ty) with
     | r, Toption opt_ty ->
       let env, opt_ty = gen_array_va_rec' env opt_ty in
-      let env, opt_ty = TUtils.non_null env opt_ty in
+      let env, opt_ty = TUtils.non_null env p opt_ty in
       env, (r, Toption opt_ty)
     | _, Tarraykind _ -> gen_array_rec env p ty
     | _, Ttuple tyl -> genva env p tyl

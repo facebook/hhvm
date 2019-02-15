@@ -79,9 +79,9 @@ type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
 let add_constraint x = !add_constraint_ref x
 
-type expand_type_and_solve_type = Env.env -> locl ty -> Env.env * locl ty
+type expand_type_and_solve_type = Env.env -> description_of_expected:string -> Pos.t -> locl ty -> Env.env * locl ty
 let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implemented
-let expand_type_and_solve x = !expand_type_and_solve_ref x
+let expand_type_and_solve env ~description_of_expected = !expand_type_and_solve_ref env ~description_of_expected
 
 type expand_typeconst =
   expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> Reason.t -> locl ty ->
@@ -556,19 +556,20 @@ let normalize_inter env tyl1 tyl2 =
     env, (List.rev_append tyl1 tyl2)
   else normalize_inter env tyl1 tyl2
 
-let rec push_option_out env ty =
+let rec push_option_out pos env ty =
   let is_option = function
     | _, Toption _ -> true
     | _ -> false in
-  let env, ty = expand_type_and_solve env ty in
+  let env, ty = expand_type_and_solve env
+    ~description_of_expected:"a value of known type" pos ty in
   match ty with
   | r, Toption ty ->
-    let env, ty = push_option_out env ty in
+    let env, ty = push_option_out pos env ty in
     env, if is_option ty then ty else (r, Toption ty)
   | r, Tprim N.Tnull ->
     env, (r, Toption (r, Tany))
   | r, Tunresolved tyl ->
-    let env, tyl = List.map_env env tyl push_option_out in
+    let env, tyl = List.map_env env tyl (push_option_out pos) in
     if List.exists tyl is_option then
       let (env, tyl), r' =
         List.fold_right tyl ~f:begin fun ty ((env, tyl), r) ->
@@ -586,7 +587,7 @@ let rec push_option_out env ty =
   | r, Tabstract (ak, _) ->
     begin match get_concrete_supertypes env ty with
     | env, [ty'] ->
-      let env, ty' = push_option_out env ty' in
+      let env, ty' = push_option_out pos env ty' in
       (match ty' with
       | r', Toption ty' -> env, (r', Toption (r, Tabstract (ak, Some ty')))
       | _ -> env, ty)
@@ -601,8 +602,8 @@ let rec push_option_out env ty =
  * variables along the way, turning ?T -> T. This exists to avoid ??T when
  * we wrap a type in Toption while typechecking.
  *)
-let non_null env ty =
-  let env, ty = push_option_out env ty in
+let non_null env pos ty =
+  let env, ty = push_option_out pos env ty in
   match ty with
   | _, Toption ty' -> env, ty'
   | _ -> env, ty

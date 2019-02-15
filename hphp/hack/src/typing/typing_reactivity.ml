@@ -286,7 +286,7 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   then begin
     if param.Nast.param_hint = None
     then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Nast.param_pos
-    else match TU.non_null env param_ty with
+    else match TU.non_null env param.Nast.param_pos param_ty with
     (* if parameter has <<__AtMostRxAsFunc>> annotation then:
        - parameter should be typed as function *)
     | _, (_, Tfun _) -> ()

@@ -104,6 +104,8 @@ val solve_all_unsolved_tyvars :
 
 val expand_type_and_solve :
   Env.env ->
+  description_of_expected:string ->
+  Pos.t ->
   locl ty ->
   Env.env * locl ty
 

@@ -1078,18 +1078,22 @@ and pUserAttribute : user_attribute list parser = fun node env ->
     couldMap attrs env ~f:begin function
       | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
         fun env ->
-          { ua_name   = pos_name constructor_call_type env
-          ; ua_params = couldMap ~f:(fun p ->
-            begin match syntax p with
-            | ScopeResolutionExpression {
-                scope_resolution_name = { syntax = Token t; _ }; _
-              } when Token.kind t = TK.Name ->
-              raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
-            | Token t when Token.kind t = TK.Name ->
-              raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
-            | _ -> () end;
-            pExpr p) constructor_call_argument_list env
-          }
+          let ua_name = pos_name constructor_call_type env in
+          let name = String.lowercase (snd ua_name) in
+          if name = "__reified" || name = "__hasreifiedparent" then
+            raise_parsing_error env (`Node node) SyntaxError.reified_attribute;
+          let ua_params = couldMap constructor_call_argument_list env
+            ~f:(fun p ->
+              begin match syntax p with
+              | ScopeResolutionExpression {
+                  scope_resolution_name = { syntax = Token t; _ }; _
+                } when Token.kind t = TK.Name ->
+                raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+              | Token t when Token.kind t = TK.Name ->
+                raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+              | _ -> () end;
+              pExpr p) in
+          { ua_name; ua_params }
       | node -> missing_syntax "attribute" node
     end
   | _ -> missing_syntax "attribute specification" node env
@@ -2713,6 +2717,7 @@ and pClassElt : class_elt list parser = fun node env ->
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
       env.in_static_method := false;
       let is_external = is_semicolon methodish_function_body in
+      let user_attributes = pUserAttributes env methodish_attribute in
       member_def @ [Method
       { m_kind            = kind
       ; m_tparams         = hdr.fh_type_parameters
@@ -2720,7 +2725,7 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_name            = hdr.fh_name
       ; m_params          = hdr.fh_parameters
       ; m_body            = body
-      ; m_user_attributes = pUserAttributes env methodish_attribute
+      ; m_user_attributes = user_attributes
       ; m_ret             = hdr.fh_return_type
       ; m_span            = pFunction node env
       ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
@@ -2960,6 +2965,7 @@ and pDef : def list parser = fun node env ->
         if is_external then [], false else
           mpYielding pFunctionBody function_body env
       in
+      let user_attributes = pUserAttributes env function_attribute_spec in
       [ Fun
       { (fun_template yield node hdr.fh_suspension_kind env) with
         f_tparams         = hdr.fh_type_parameters
@@ -2978,7 +2984,7 @@ and pDef : def list parser = fun node env ->
           | [p, Noop] when containsUNSAFE function_body -> [p, Unsafe]
           | b -> b
         end
-      ; f_user_attributes = pUserAttributes env function_attribute_spec
+      ; f_user_attributes = user_attributes
       ; f_doc_comment = doc_comment_opt
       ; f_external = is_external
       }]

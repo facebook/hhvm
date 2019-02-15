@@ -1232,8 +1232,8 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (jit::mcgen::retranslateAllScheduled()) {
     // We ran retranslateAll from deserialized profile.
+    BootStats::Block timer("waitForRetranslateAll", true);
     jit::mcgen::joinWorkerThreads();
-    BootStats::mark("waitForRetranslateAll"); // delta from previous mark.
   }
 
   HttpServer::Server->runOrExitProcess();

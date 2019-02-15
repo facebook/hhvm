@@ -3548,7 +3548,7 @@ template<bool box> void getS(clsref_slot slot) {
     if (RuntimeOption::EvalCheckPropTypeHints > 0) {
       auto const& sprop = ss.cls->staticProperties()[ss.slot];
       auto const& tc = sprop.typeConstraint;
-      if (tc.isCheckable()) {
+      if (!tc.isMixedResolved()) {
         raise_property_typehint_binding_error(
           sprop.cls,
           sprop.name,
@@ -4874,7 +4874,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
   if (RuntimeOption::EvalCheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
     auto const& tc = sprop.typeConstraint;
-    if (tc.isCheckable()) {
+    if (!tc.isMixedResolved()) {
       raise_property_typehint_binding_error(
         sprop.cls,
         sprop.name,

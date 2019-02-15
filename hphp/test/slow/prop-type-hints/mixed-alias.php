@@ -7,10 +7,13 @@ class C {
   private FakeType<string> $p1;
   private FakeType<string> $p2;
 
+  private static FakeType<string> $s1;
+
   public function __construct() {
     $this->p1 = 'abc';
     $this->p2 = &$this->p1;
     $this->p1 = 'def';
+    C::$s1 = &$this->p1;
   }
 
   public function blah() {

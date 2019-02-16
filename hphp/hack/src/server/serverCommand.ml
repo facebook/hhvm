@@ -86,7 +86,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
-  | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
   | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | Stream LIST_MODES -> false
   | Stream SHOW _ -> false
@@ -153,7 +152,7 @@ let full_recheck_if_needed genv env msg =
 
 (** Stream response for this command. Returns true if the command needs
  * to force flush the notifier to complete.  *)
-let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
+let stream_response env (ic, oc) ~cmd =
   match cmd with
   | LIST_FILES ->
       ServerEnv.list_files env oc;
@@ -238,9 +237,6 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           Out_channel.output_string oc (td_str^"\n")
       );
       Out_channel.flush oc;
-      ServerUtils.shutdown_client (ic, oc)
-  | BUILD build_opts ->
-      BuildMain.go build_opts genv env oc;
       ServerUtils.shutdown_client (ic, oc)
 
 (* Only grant access to dependency table to commands that declared that they
@@ -336,7 +332,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       new_env
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in
-      stream_response genv env (ic, oc) ~cmd;
+      stream_response env (ic, oc) ~cmd;
       env
   | Debug ->
       let ic, oc = ClientProvider.get_channels client in

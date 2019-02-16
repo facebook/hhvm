@@ -58,7 +58,6 @@ let () =
     | ClientCommand.CStart _ -> "Start"
     | ClientCommand.CStop _ -> "Stop"
     | ClientCommand.CRestart _ -> "Restart"
-    | ClientCommand.CBuild _ -> "Build"
     | ClientCommand.CLsp _ -> "Lsp"
     | ClientCommand.CDebug _ -> "Debug"
   in
@@ -73,8 +72,6 @@ let () =
           Lwt_main.run (ClientStop.main env)
         | ClientCommand.CRestart env ->
           Lwt_main.run (ClientRestart.main env)
-        | ClientCommand.CBuild env ->
-          Lwt_main.run (ClientBuild.main env)
         | ClientCommand.CLsp env ->
           Lwt_main.run (ClientLsp.main env)
         | ClientCommand.CDebug env ->

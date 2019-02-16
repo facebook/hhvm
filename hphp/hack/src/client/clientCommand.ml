@@ -12,7 +12,6 @@ type command =
   | CStart of ClientStart.env
   | CStop of ClientStop.env
   | CRestart of ClientStart.env
-  | CBuild of ClientBuild.env
   | CLsp of ClientLsp.env
   | CDebug of ClientDebug.env
 
@@ -21,7 +20,6 @@ type command_keyword =
   | CKStart
   | CKStop
   | CKRestart
-  | CKBuild
   | CKNone
   | CKLsp
   | CKDebug

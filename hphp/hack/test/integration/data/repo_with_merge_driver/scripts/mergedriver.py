@@ -28,11 +28,9 @@ def conclude(ui, repo, hooktype, mergestate, wctx, labels):
     hh_client = os.environ.get('HH_HOME') + '/hh_client'
     build_cmd = [
         hh_client,
-        'build',
+        'check',
         '--force-dormant-start',
         'true',
-        '--steps',
-        'entschema-list',
         '.',
     ]
     subprocess.check_call(build_cmd, env=test_env)

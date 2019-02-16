@@ -62,7 +62,6 @@
     docblockService
     hoverService
     inferAtPosService
-    serverBuild
     serverCommandTypes
     serverCommandTypesUtils
     serverCoverageMetricTypes

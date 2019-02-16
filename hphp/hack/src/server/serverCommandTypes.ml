@@ -281,7 +281,6 @@ and streamed =
   | SHOW of string
   | LIST_FILES
   | LIST_MODES
-  | BUILD of ServerBuild.build_opts
 
 type push =
   | DIAGNOSTIC of int * (Pos.absolute Errors.error_ list) SMap.t

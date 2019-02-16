@@ -59,7 +59,6 @@ let parse_command () =
   | "start" -> CKStart
   | "stop" -> CKStop
   | "restart" -> CKRestart
-  | "build" -> CKBuild
   | "lsp" -> CKLsp
   | "debug" -> CKDebug
   | _ -> CKNone
@@ -661,101 +660,6 @@ let parse_stop_args () =
         exit 1
   in CStop {ClientStop.root = root; from = !from;}
 
-let parse_build_args () =
-  let usage =
-    Printf.sprintf
-      "Usage: %s build [OPTION]... [WWW-ROOT]\n\
-      Generates build files\n"
-      Sys.argv.(0) in
-  let force_dormant_start = ref false in
-  (* 800s was chosen because it was above most of the historical p95 of
-   * hack server startup times as observed here:
-   * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
-  let retries = ref 800 in
-  let steps = ref None in
-  let ignore_killswitch = ref false in
-  let no_steps = ref None in
-  let use_factsdb_static = ref false in
-  let verbose = ref false in
-  let serial = ref false in
-  let test_dir = ref None in
-  let grade = ref true in
-  let check = ref false in
-  let is_push = ref false in
-  let clean = ref false in
-  let from = ref "" in
-  (* todo: for now better to default to true here, but this is temporary! *)
-  let clean_before_build = ref true in
-  let run_scripts = ref true in
-  let wait = ref false in
-  let options = [
-    "--steps", Arg.String (fun x ->
-      steps := Some (Str.split (Str.regexp ",") x)),
-    " comma-separated list of build steps to run";
-    "--ignore-killswitch", Arg.Set ignore_killswitch,
-    " run all steps (including kill-switched ones) except steps in --no-steps";
-    "--no-steps", Arg.String (fun x ->
-      no_steps := Some (Str.split (Str.regexp ",") x)),
-    " comma-separated list of build steps not to run";
-    "--use-factsdb-static", Arg.Set use_factsdb_static,
-    " build autoload-map and arc-facts using FactsDB";
-    "--no-run-scripts", Arg.Clear run_scripts,
-    " don't run unported arc build scripts";
-    Common_argspecs.retries retries;
-    "--serial", Arg.Set serial,
-    " run without parallel worker processes";
-    Common_argspecs.force_dormant_start force_dormant_start;
-    Common_argspecs.from from;
-    "--test-dir", Arg.String (fun x -> test_dir := Some x),
-    " <dir> generates into <dir> and compares with root";
-    "--no-grade", Arg.Clear grade,
-    " skip full comparison with root";
-    "--check", Arg.Set check,
-    " run some sanity checks on the server state";
-    "--push", Arg.Set is_push,
-    " run steps appropriate for push build";
-    "--clean", Arg.Set clean,
-    " erase all previously generated files";
-    "--clean-before-build", Arg.Set clean_before_build,
-    " erase previously generated files before building (default)";
-    "--no-clean-before-build", Arg.Clear clean_before_build,
-    " do not erase previously generated files before building";
-    "--wait", Arg.Set wait,
-    " wait forever for hh_server intialization (default: false)";
-    "--verbose", Arg.Set verbose,
-    " guess what";
-  ] in
-  let args = parse_without_command options usage "build" in
-  let root =
-    match args with
-    | [x] -> ClientArgsUtils.get_root (Some x)
-    | _ -> Printf.printf "%s\n" usage; exit 2
-  in
-  CBuild { ClientBuild.
-    retries = !retries;
-    root = root;
-    from = !from;
-    wait = !wait;
-    force_dormant_start = !force_dormant_start;
-    build_opts = { ServerBuild.
-      steps = !steps;
-      ignore_killswitch = !ignore_killswitch;
-      no_steps = !no_steps;
-      use_factsdb_static = !use_factsdb_static;
-      run_scripts = !run_scripts;
-      serial = !serial;
-      test_dir = !test_dir;
-      grade = !grade;
-      is_push = !is_push;
-      clean = !clean;
-      clean_before_build = !clean_before_build;
-      check = !check;
-      user = Sys_utils.logname ();
-      verbose = !verbose;
-      id = Random_id.short_string ();
-    }
-  }
-
 let parse_lsp_args () =
   let usage = Printf.sprintf
     "Usage: %s lsp [OPTION]...\n\
@@ -806,12 +710,10 @@ let parse_args () =
     | CKStart -> parse_start_args ()
     | CKStop -> parse_stop_args ()
     | CKRestart -> parse_restart_args ()
-    | CKBuild -> parse_build_args ()
     | CKDebug -> parse_debug_args ()
     | CKLsp -> parse_lsp_args ()
 
 let root = function
-  | CBuild { ClientBuild.root; _ }
   | CCheck { ClientEnv.root; _ }
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }

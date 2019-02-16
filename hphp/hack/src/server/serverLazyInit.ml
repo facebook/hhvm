@@ -351,15 +351,6 @@ let type_check_dirty
     (Relative_path.Set.cardinal to_recheck);
   result
 
-(* get the (untracked, tracked) build targets *)
-let get_build_targets (env: ServerEnv.env) : Relative_path.Set.t * Relative_path.Set.t =
-  let untracked, tracked = BuildMain.get_live_targets env in
-  let untracked =
-    List.map untracked Relative_path.from_root in
-  let tracked =
-    List.map tracked Relative_path.from_root in
-  Relative_path.set_of_list untracked, Relative_path.set_of_list tracked
-
 let get_updates_exn
     ~(genv: ServerEnv.genv)
     ~(root: Path.t)
@@ -452,28 +443,12 @@ let post_saved_state_initialization
   let dirty_files =
     Relative_path.Set.union naming_and_parsing_error_files (
       Relative_path.Set.union dirty_master_files dirty_local_files) in
-  let build_targets, tracked_targets = get_build_targets env in
   let t = Unix.gettimeofday () in
-  (* Build targets are untracked by version control, so we must always
-   * recheck them. While we could query hg / git for the untracked files,
-   * it's much slower. *)
-  let dirty_files =
-    Relative_path.Set.union dirty_files build_targets in
   let dirty_files =
     Relative_path.Set.union dirty_files changed_while_parsing in
-  let dirty_files =
+  let parsing_files =
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in
-  (*
-    Tracked targets are build files that are tracked by version control.
-    We don't need to typecheck them, but we do need to parse them to load
-    them into memory, since arc rebuild deletes them before running.
-    This avoids build step dependencies and file_heap_stale errors crashing
-    the server when build fails and the deleted files aren't properly
-    regenerated.
-  *)
-  let parsing_files =
-    Relative_path.Set.union dirty_files tracked_targets in
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   let old_fast = FileInfo.saved_to_fast old_saved in
 

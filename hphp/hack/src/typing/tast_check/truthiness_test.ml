@@ -44,8 +44,6 @@ let rec truthiness_test env ((p, ty), e) =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! minimum_forward_compat_level = 2018_09_18
-
   method! at_expr env x =
     if Env.is_strict env then
     match snd x with

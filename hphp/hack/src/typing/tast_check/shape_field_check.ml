@@ -61,8 +61,6 @@ let shapes_idx_invalid_key_check pos1 env ((_, shape), _) field_name =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! minimum_forward_compat_level = 2018_05_31
-
   method! at_expr env =
     function
     | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name], [])

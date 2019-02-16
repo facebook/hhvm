@@ -201,9 +201,6 @@ type t = {
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
- (* What version of Hack the current codebase was designed for *)
- forward_compatibility_level : ForwardCompatibilityLevel.t;
-
  (* Initial hh_log_level settings *)
  log_levels : int SMap.t;
 
@@ -254,7 +251,6 @@ val make :
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
   ?ignored_fixme_codes: ISet.t ->
-  ?forward_compatibility_level: ForwardCompatibilityLevel.t ->
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
   ?po_disable_unsafe_expr: bool ->
@@ -324,7 +320,6 @@ val tco_experimental_pocket_universes : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
-val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
 val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
 val po_disable_unsafe_expr : t -> bool

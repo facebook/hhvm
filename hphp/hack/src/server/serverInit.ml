@@ -91,18 +91,6 @@ let init
      These settings cannot be changed during the lifetime of the server. *)
   GlobalParserOptions.set env.popt;
   GlobalNamingOptions.set env.tcopt;
-  let init_errors, () = Errors.do_with_context ServerConfig.filename Errors.Init begin fun() ->
-      let fcl = ServerConfig.forward_compatibility_level genv.config in
-      let older_than = ForwardCompatibilityLevel.greater_than fcl in
-      if older_than ForwardCompatibilityLevel.current then
-        let pos = Pos.make_from ServerConfig.filename in
-        if older_than ForwardCompatibilityLevel.minimum
-        then Errors.forward_compatibility_below_minimum pos fcl
-        else Errors.forward_compatibility_not_current pos fcl
-    end in
-  let env = { env with
-              errorl = init_errors
-            } in
   let root = ServerArgs.root genv.options in
   let (env, t), init_result = match lazy_lev, load_state_approach with
     | Init, None ->

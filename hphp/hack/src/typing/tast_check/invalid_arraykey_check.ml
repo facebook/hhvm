@@ -43,8 +43,6 @@ let is_valid_arraykey env tcontainer tkey =
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! minimum_forward_compat_level = 2018_10_31
-
   method! at_expr env ((p, _), expr) =
     match expr with
     | Array_get (((_, tcontainer), _), Some ((_, tkey), _))

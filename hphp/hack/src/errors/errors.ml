@@ -314,7 +314,6 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
-module Init = Error_codes.Init
 
 (*****************************************************************************)
 (* Types *)
@@ -3358,33 +3357,6 @@ let sketchy_truthiness_test pos ty truthiness =
         If you would like to only allow containers which are falsy \
         when empty, use the Container or KeyedContainer interfaces."
         ty
-
-let forward_compatibility_not_current pos value =
-  let current = ForwardCompatibilityLevel.current in
-  add (Init.err_code Init.ForwardCompatibilityNotCurrent)
-    pos
-    (Printf.sprintf
-      "forward_compatibility_level is set to '%s' (%d), which is stale; current is '%s' (%d). Errors may be missing."
-      (ForwardCompatibilityLevel.as_string value)
-      (ForwardCompatibilityLevel.as_int value)
-      (ForwardCompatibilityLevel.as_string current)
-      (ForwardCompatibilityLevel.as_int current)
-    )
-
-let forward_compatibility_below_minimum pos value =
-  let minimum = ForwardCompatibilityLevel.minimum in
-  let current = ForwardCompatibilityLevel.current in
-  add (Init.err_code Init.ForwardCompatibilityBelowMinimum)
-    pos
-    (Printf.sprintf
-      "forward_compatibility_level is set to '%s' (%d), which is below the minimum of '%s' (%d); current is '%s' (%d)"
-      (ForwardCompatibilityLevel.as_string value)
-      (ForwardCompatibilityLevel.as_int value)
-      (ForwardCompatibilityLevel.as_string minimum)
-      (ForwardCompatibilityLevel.as_int minimum)
-      (ForwardCompatibilityLevel.as_string current)
-      (ForwardCompatibilityLevel.as_int current)
-    )
 
 let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
   add (Typing.err_code Typing.InvalidSwitchCaseValueType) case_value_p @@

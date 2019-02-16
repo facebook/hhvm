@@ -80,6 +80,5 @@ let new_inference = GlobalOptions.tco_new_inference
 let new_inference_no_eager_solve = GlobalOptions.tco_new_inference_no_eager_solve
 let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
-let forward_compatibility_level = GlobalOptions.forward_compatibility_level
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars

@@ -181,8 +181,6 @@ val remove_equivalent_tyvars :
   env -> Ident.t -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
-val forward_compat_ge : env -> int -> bool
-val error_if_forward_compat_ge : env -> int -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> bool -> env * string
 val is_fresh_generic_parameter : string -> bool
 val get_tpenv_size : env -> int

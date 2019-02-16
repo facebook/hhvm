@@ -718,15 +718,6 @@ let error_if_shallow_reactive_context env f =
   | Reactive _ | Shallow _ when not (TypecheckerOptions.unsafe_rx env.genv.tcopt) -> f ()
   | _ -> ()
 
-let forward_compat_ge env min =
-  let fcl = TypecheckerOptions.forward_compatibility_level (get_tcopt env) in
-  ForwardCompatibilityLevel.as_int fcl >= min
-
-let error_if_forward_compat_ge env min f =
-  if forward_compat_ge env min
-  then f ()
-  else ()
-
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);

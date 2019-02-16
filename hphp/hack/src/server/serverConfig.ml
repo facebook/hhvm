@@ -34,9 +34,6 @@ type t = {
   extra_paths      : Path.t list;
   (* A list of regexps for paths to ignore for typechecking coroutines *)
   coroutine_whitelist_paths : string list;
-
-  (* what version of the typechecker is targetted *)
-  forward_compatibility_level : ForwardCompatibilityLevel.t;
 }
 
 let filename = Relative_path.from_root Config_file.file_path_relative_to_repo_root
@@ -147,10 +144,6 @@ let process_ignored_paths config =
   SMap.get config "ignored_paths"
   |> Option.value_map ~f:convert_paths ~default:[]
 
-let process_forward_compatibility_level config =
-  SMap.get config "forward_compatibility_level"
-  |> Option.value_map ~f:ForwardCompatibilityLevel.from_string ~default:ForwardCompatibilityLevel.default
-
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -254,7 +247,6 @@ let load config_filename options =
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
-  let forward_compat_level = process_forward_compatibility_level config in
   let global_opts = GlobalOptions.make
     ?tco_assume_php:(bool_opt "assume_php" config)
     ?tco_safe_array:(bool_opt "safe_array" config)
@@ -291,7 +283,6 @@ let load config_filename options =
     ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)
     ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)
-    ~forward_compatibility_level:forward_compat_level
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ~po_auto_namespace_map:(prepare_auto_namespace_map config)
     ~tco_experimental_features:(config_experimental_tc_features config)
@@ -313,7 +304,6 @@ let load config_filename options =
     ignored_paths = ignored_paths;
     extra_paths = extra_paths;
     coroutine_whitelist_paths = coroutine_whitelist_paths;
-    forward_compatibility_level = forward_compat_level;
   }, local_config
 
 (* useful in testing code *)
@@ -329,7 +319,6 @@ let default_config = {
   ignored_paths = [];
   extra_paths = [];
   coroutine_whitelist_paths = [];
-  forward_compatibility_level = ForwardCompatibilityLevel.HEAD;
 }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -344,4 +333,3 @@ let ignored_paths config = config.ignored_paths
 let extra_paths config = config.extra_paths
 let coroutine_whitelist_paths config = config.coroutine_whitelist_paths
 let version config = config.version
-let forward_compatibility_level config = config.forward_compatibility_level

@@ -5,6 +5,5 @@
   (libraries
     core_kernel
     coroutine_errors
-    fwd_compatibility
     pos
     server_load_flag))

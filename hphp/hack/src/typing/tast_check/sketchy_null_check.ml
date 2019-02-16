@@ -21,14 +21,11 @@ let rec find_sketchy_type env ty =
   (* Find sketchy nulls hidden under Tunresolved *)
   let env, ty = Env.fold_unresolved env ty in
   match snd ty with
-  | Tnonnull -> Some false
-
+  | Tnonnull
   | Tabstract (AKenum _, _)
-  | Tarraykind _
-    when Env.forward_compat_ge env 2018_06_14 -> Some false
+  | Tarraykind _ -> Some false
 
-  | Tclass ((_, cid), _, _)
-    when Env.forward_compat_ge env 2018_06_14 && (
+  | Tclass ((_, cid), _, _) when (
       (* Hack arrays *)
       cid = SN.Collections.cVec ||
       cid = SN.Collections.cDict ||
@@ -47,13 +44,12 @@ let rec find_sketchy_type env ty =
     )
     -> Some false
 
-  | Tprim Tbool when Env.forward_compat_ge env 2018_06_14 -> Some true
-  | Tprim (Tbool | Tresource) -> None
+  | Tprim Tbool -> Some true
+  | Tprim Tresource -> None
   | Tprim _ -> Some true
 
   | Tunresolved tyl -> List.find_map tyl (find_sketchy_type env)
-  | Tabstract _
-    when Env.forward_compat_ge env 2018_06_14 ->
+  | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in
     List.find_map tyl (find_sketchy_type env)
   | _ -> None
@@ -81,8 +77,6 @@ let sketchy_null_check env ((p, ty), e) kind =
 
 let handler = object
   inherit Tast_visitor.handler_base
-
-  method! minimum_forward_compat_level = 2018_05_17
 
   method! at_expr env x =
     match snd x with

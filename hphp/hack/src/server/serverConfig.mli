@@ -28,6 +28,5 @@ val parser_options      : t -> ParserOptions.t
 val formatter_override  : t -> Path.t option
 val config_hash         : t -> string option
 val version             : t -> string option
-val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
 
 val convert_auto_namespace_to_map : string -> (string * string) list

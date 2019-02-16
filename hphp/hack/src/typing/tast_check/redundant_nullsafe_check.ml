@@ -20,8 +20,6 @@ module Utils = Tast_utils
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! minimum_forward_compat_level = 2018_07_23
-
   method! at_expr env = function
     | (p, _), Obj_get (((_, ty), _), _, OG_nullsafe)
         when Utils.type_non_nullable env ty ->

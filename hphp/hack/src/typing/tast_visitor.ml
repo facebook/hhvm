@@ -172,8 +172,6 @@ end
     Intended to be used with {!iter_with} to aggregate many checks into a
     single pass over a TAST. *)
 class type handler = object
-  method minimum_forward_compat_level : int
-
   method at_class_ : Env.t -> Tast.class_ -> unit
   method at_typedef : Env.t -> Tast.typedef -> unit
   method at_gconst : Env.t -> Tast.gconst -> unit
@@ -198,8 +196,6 @@ end
 (** A {!handler} which does not need to make use of every visitation method can
     inherit from this no-op base class. *)
 class virtual handler_base : handler = object
-  method minimum_forward_compat_level = 0
-
   method at_class_ _ _ = ()
   method at_typedef _ _ = ()
   method at_gconst _ _ = ()
@@ -214,11 +210,6 @@ class virtual handler_base : handler = object
   method at_hint _ _ = ()
 end
 
-let if_enabled env f handler =
-  Env.error_if_forward_compat_ge env
-    handler#minimum_forward_compat_level
-    (fun () -> f handler)
-
 (** Return an {!iter} visitor which invokes all of the given handlers upon
     visiting each node. *)
 let iter_with (handlers : handler list) : iter = object
@@ -226,47 +217,47 @@ let iter_with (handlers : handler list) : iter = object
   inherit iter as super
 
   method! on_class_ env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_class_ env x));
+    List.iter handlers (fun v -> v#at_class_ env x);
     super#on_class_ env x;
 
   method! on_typedef env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_typedef env x));
+    List.iter handlers (fun v -> v#at_typedef env x);
     super#on_typedef env x;
 
   method! on_gconst env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_gconst env x));
+    List.iter handlers (fun v -> v#at_gconst env x);
     super#on_gconst env x;
 
   method! on_fun_def env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_fun_def env x));
+    List.iter handlers (fun v -> v#at_fun_def env x);
     super#on_fun_def env x;
 
   method! on_method_ env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_method_ env x));
+    List.iter handlers (fun v -> v#at_method_ env x);
     super#on_method_ env x;
 
   method! on_static_method env m =
-    List.iter handlers (if_enabled env (fun v -> v#at_static_method env m));
+    List.iter handlers (fun v -> v#at_static_method env m);
     super#on_static_method env m;
 
   method! on_expr env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_expr env x));
+    List.iter handlers (fun v -> v#at_expr env x);
     super#on_expr env x;
 
   method! on_stmt env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_stmt env x));
+    List.iter handlers (fun v -> v#at_stmt env x);
     super#on_stmt env x;
 
   method! on_fun_ env x =
-    List.iter handlers (if_enabled env (fun v -> v#at_fun_ env x));
+    List.iter handlers (fun v -> v#at_fun_ env x);
     super#on_fun_ env x;
 
   method! on_Call env ct e tal el uel =
-    List.iter handlers (if_enabled env (fun v -> v#at_Call env ct e tal el uel));
+    List.iter handlers (fun v -> v#at_Call env ct e tal el uel);
     super#on_Call env ct e tal el uel;
 
   method! on_hint env h =
-    List.iter handlers (if_enabled env (fun v -> v#at_hint env h));
+    List.iter handlers (fun v -> v#at_hint env h);
     super#on_hint env h;
 
 end

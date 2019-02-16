@@ -24,8 +24,6 @@ let trivial_equality_check p bop env ((_, ty1), _ as te1 : expr) ((_, ty2), _ as
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! minimum_forward_compat_level = 2018_05_23
-
   method! at_expr env = function
     | (p, _), Binop ((Eqeqeq | Diff2) as bop, te1, te2) ->
       trivial_equality_check p bop env te1 te2

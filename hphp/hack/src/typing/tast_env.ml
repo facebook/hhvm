@@ -63,9 +63,6 @@ let get_inside_constructor env = env.Typing_env.inside_constructor
 let get_decl_env env = env.Typing_env.decl_env
 let get_inside_ppl_class env = env.Typing_env.inside_ppl_class
 
-let forward_compat_ge = Typing_env.forward_compat_ge
-let error_if_forward_compat_ge = Typing_env.error_if_forward_compat_ge
-
 let get_file = Typing_env.get_file
 
 let fully_expand = Typing_expand.fully_expand

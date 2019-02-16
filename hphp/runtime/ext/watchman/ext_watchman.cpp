@@ -554,7 +554,7 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
     // order. So, after the unsubscribe should be safe to clean up.
     .thenValue([] (std::string&& result) {
       // (ASYNC)
-      return result;
+      return std::move(result);
     })
     .ensure([name] {
       // (ASYNC)

@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RUNTIME_VM_WORKER_H
 #define incl_HPHP_RUNTIME_VM_WORKER_H
 
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/async-func.h"
 #include <functional>
 
@@ -25,7 +27,6 @@ namespace HPHP {
 struct WorkerSpec {
   int numaNode{-1};
   unsigned hugeStackKb{0};
-  unsigned tlExtraKb{0};
 };
 
 // Run arbitrary code in a thread/fiber with VM context.
@@ -34,13 +35,15 @@ struct VMWorker : private std::function<void(void)>
   template<class F>
   explicit VMWorker(F&& f)
     : std::function<void(void)>(f)
-    , AsyncFuncImpl(this, run_, -1, 0, 0)
+    , AsyncFuncImpl(this, run_, -1, 0,
+                    rds::perThreadCapacity(RuntimeOption::EvalRDSSize) / 1024)
   {}
 
   template<class F>
   VMWorker(WorkerSpec s, F&& f)
     : std::function<void(void)>(f)
-    , AsyncFuncImpl(this, run_, s.numaNode, s.hugeStackKb, s.tlExtraKb)
+    , AsyncFuncImpl(this, run_, s.numaNode, s.hugeStackKb,
+                    rds::perThreadCapacity(RuntimeOption::EvalRDSSize) / 1024)
   {}
 
   VMWorker(const VMWorker&) = delete;

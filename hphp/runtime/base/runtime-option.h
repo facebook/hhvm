@@ -226,8 +226,8 @@ struct RuntimeOption {
   static int ServerThreadCount;
   static int ServerQueueCount;
   // Number of worker threads with stack partially on huge pages.
-  static int ServerHugeThreadCount;
-  static int ServerHugeStackKb;
+  static uint32_t ServerHugeThreadCount;
+  static uint32_t ServerHugeStackKb;
   static uint32_t ServerLoopSampleRate;
   static int ServerWarmupThrottleRequestCount;
   static int ServerWarmupThrottleThreadCount;
@@ -777,7 +777,7 @@ struct RuntimeOption {
   F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
   F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
-  F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
+  F(uint32_t, RDSSize,                 64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
@@ -912,7 +912,6 @@ struct RuntimeOption {
   F(uint32_t, DumpRegion,              0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
-  F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \

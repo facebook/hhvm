@@ -701,9 +701,11 @@ struct JobQueueDispatcher : IHostHealthObserver {
     return m_healthStatus;
   }
 
-  void setHugePageConfig(int count, unsigned stackKb, unsigned rangeKb = 0) {
-    m_hugeThreadCount = count;
+  void setWorkerStackConfig(unsigned hugeThreadCount, unsigned stackKb,
+                            unsigned extraKb) {
+    m_hugeThreadCount = hugeThreadCount;
     m_hugeStackKb = stackKb;
+    m_tlExtraKb = extraKb;
   }
 
   /*
@@ -757,9 +759,9 @@ private:
   const int m_maxQueueCount;    // not including the possible reaper
   int m_currThreadCountLimit;   // initial limit can be lower than max
   std::atomic_int m_prevNode{-1};       // the NUMA node for last worker
-  int m_hugeThreadCount{0};
-  unsigned m_hugeStackKb;
-  unsigned m_tlExtraKb;
+  unsigned m_hugeThreadCount{0};
+  unsigned m_hugeStackKb{0};
+  unsigned m_tlExtraKb{0};
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;

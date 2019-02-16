@@ -30,7 +30,6 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/logger.h"
-#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/smalllocks.h"
 #include "hphp/util/type-scan.h"
@@ -622,18 +621,17 @@ static size_t s_bits_to_go;
 
 void processInit() {
   assertx(!s_local_base);
-  if (RuntimeOption::EvalJitTargetCacheSize > 1u << 30) {
-    // The encoding of RDS handles require that the normal and local regions
-    // together be smaller than 1G.
-    RuntimeOption::EvalJitTargetCacheSize = 1u << 30;
-  }
-  s_local_base = RuntimeOption::EvalJitTargetCacheSize * 3 / 4;
+  // The encoding of RDS handle requires that the normal and local regions
+  // together be smaller than kMinPersistentHandle (1GB)
+  RuntimeOption::EvalRDSSize =
+    std::min(RuntimeOption::EvalRDSSize, (uint32_t)kMinPersistentHandle);
+  s_local_base = perThreadCapacity(RuntimeOption::EvalRDSSize);
   s_local_frontier = s_local_base;
 
 #if RDS_FIXED_PERSISTENT_BASE
   auto constexpr allocSize = kPersistentChunkSize;
 #else
-  auto const allocSize = RuntimeOption::EvalJitTargetCacheSize / 4;
+  auto const allocSize = persistentCapacity(RuntimeOption::EvalRDSSize);
 #endif
   addNewPersistentChunk(allocSize),
 
@@ -680,11 +678,19 @@ void requestExit() {
 
 void flush() {
   if (madvise(tl_base, s_normal_frontier, MADV_DONTNEED) == -1) {
-    Logger::Warning("RDS madvise failure: %s\n",
-                    folly::errnoStr(errno).c_str());
+    // Maybe a part of it is on a 2M hugetlb page, try again.
+    //auto const keepSize = reinterpret_cast<uintptr_t>(tl_base)
+    auto const base = reinterpret_cast<uintptr_t>(tl_base);
+    constexpr size_t mask = (2u << 20) - 1;
+    auto const next2mPage = (base + mask) & ~mask;
+    auto const length = s_normal_frontier - (next2mPage - base);
+    if (madvise(reinterpret_cast<void*>(next2mPage),
+                length, MADV_DONTNEED) == -1) {
+      Logger::Warning("RDS madvise failure: %s\n",
+                      folly::errnoStr(errno).c_str());
+    }
   }
-  if (jit::mcgen::retranslateAllEnabled() &&
-      !jit::mcgen::retranslateAllPending()) {
+  if (jit::mcgen::retranslateAllComplete()) {
     size_t offset = s_local_frontier & ~0xfff;
     size_t protectedSpace = local::detail::s_usedbytes +
                             (-local::detail::s_usedbytes & 0xfff);
@@ -802,20 +808,17 @@ void threadInit(bool shouldRegister) {
     processInit();
   }
   assertx(tl_base == nullptr);
-  tl_base = mmap(nullptr, s_local_base, PROT_READ | PROT_WRITE,
-                 MAP_ANON | MAP_PRIVATE, -1, 0);
-  always_assert_flog(
-    tl_base != MAP_FAILED,
-    "Failed to mmap RDS region. errno = {}",
-    folly::errnoStr(errno).c_str()
-  );
-  numa_bind_to(tl_base, s_local_base, s_numaNode);
-#ifdef NDEBUG
-  // A huge-page RDS is incompatible with VMProtect in vm-regs.cpp
-  if (RuntimeOption::EvalMapTgtCacheHuge) {
-    hintHuge(tl_base, s_local_base);
+
+  if (s_tlSpace.size < s_local_base || !shouldRegister) {
+    tl_base = mmap(nullptr, s_local_base, PROT_READ | PROT_WRITE,
+                   MAP_ANON | MAP_PRIVATE, -1, 0);
+    always_assert_flog(tl_base != MAP_FAILED,
+                       "Failed to mmap RDS region. errno = {}",
+                       folly::errnoStr(errno).c_str());
+    numa_bind_to(tl_base, s_local_base, s_numaNode);
+  } else {
+    tl_base = s_tlSpace.ptr;
   }
-#endif
 
   if (shouldRegister) {
     Guard g(s_tlBaseListLock);

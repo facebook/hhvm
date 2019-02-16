@@ -156,6 +156,13 @@ void processInit();
 void flush();
 
 /*
+ * Calculate the sizes of the per-thread (normal + local) part and the
+ * persistent part of RDS, given the total size.
+ */
+constexpr uint32_t perThreadCapacity(uint32_t total);
+constexpr uint32_t persistentCapacity(uint32_t total);
+
+/*
  * Return the number of bytes that have been allocated from either
  * persistent, local, or non-persistent RDS.
  */

@@ -12,11 +12,11 @@ function test() {
 
   try {
     // hphp_set_property is part of the reflection internals, and uses o_set
-    hphp_set_property($c, null, 'ci', 2);
+    hphp_set_property($c, '', 'ci', 2);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
-  hphp_set_property($c, null, 'i', 3);
+  hphp_set_property($c, '', 'i', 3);
 
   var_dump($c);
 }

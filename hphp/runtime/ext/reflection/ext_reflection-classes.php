@@ -953,7 +953,7 @@ class ReflectionProperty implements Reflector {
       }
       hphp_set_property(
         $obj,
-        $this->forceAccessible ? $this->class : null,
+        $this->forceAccessible ? $this->class : '',
         $this->name,
         $value
       );

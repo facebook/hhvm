@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/runtime/base/program-functions.h"
@@ -287,6 +288,10 @@ size_t CodeCache::totalUsed() const {
 }
 
 bool CodeCache::isValidCodeAddress(ConstCodeAddress addr) const {
+  if (m_profFreed && m_prof.contains(addr)) {
+    return false;
+  }
+
   return addr >= m_base && addr < m_base + m_codeSize &&
     (addr < m_threadLocalStart ||
      addr >= m_threadLocalStart + m_threadLocalSize);
@@ -298,6 +303,27 @@ void CodeCache::protect() {
 
 void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
+}
+
+void CodeCache::freeProf() {
+  if (RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("Freeing code.prof");
+  }
+
+  // If the transdb is enabled, we don't actually free the memory in order to
+  // allow the profile code to be included in TC dumps.  However, we still set
+  // m_profFreed below in order to trigger asserts.
+  if (!transdb::enabled()) {
+    if (madvise(m_prof.base(), m_prof.size(), MADV_DONTNEED) == -1) {
+      if (RuntimeOption::ServerExecutionMode()) {
+        Logger::Warning("code.prof madvise failure: %s\n",
+                        folly::errnoStr(errno).c_str());
+      }
+    }
+    mprotect(m_prof.base(), m_prof.size(), PROT_NONE);
+  }
+
+  m_profFreed = true;
 }
 
 CodeCache::View CodeCache::view(TransKind kind) {

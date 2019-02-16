@@ -318,6 +318,22 @@ void checkFreeProfData() {
   }
 }
 
+static void dropSrcDBProfIncomingBranches() {
+  auto const base     = code().prof().base();
+  auto const frontier = code().prof().frontier();
+  for (auto& it : srcDB()) {
+    auto sr = it.second;
+    sr->removeIncomingBranchesInRange(base, frontier);
+  }
+}
+
+void freeProfCode() {
+  Treadmill::enqueue([]{
+    dropSrcDBProfIncomingBranches();
+    code().freeProf();
+  });
+}
+
 bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 

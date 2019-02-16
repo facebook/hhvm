@@ -171,6 +171,8 @@ struct CodeCache {
 
   Address threadLocalStart() { return m_threadLocalStart; }
 
+  void freeProf();
+
 private:
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
@@ -178,6 +180,7 @@ private:
   size_t m_totalSize;
   size_t m_threadLocalSize;
   bool m_useHot;
+  bool m_profFreed{false};
 
   CodeBlock m_main;
   CodeBlock m_cold;

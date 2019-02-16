@@ -1740,6 +1740,9 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
 
   if (useJit) {
     jit::TCA start = enterFnAr->m_func->getFuncBody();
+    assert_flog(jit::tc::isValidCodeAddress(start),
+                "start = {} ; func = {} ({})\n",
+                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
     jit::enterTCAfterPrologue(start);
   } else {
     dispatch();

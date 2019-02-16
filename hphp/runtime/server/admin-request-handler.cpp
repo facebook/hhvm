@@ -1032,11 +1032,10 @@ static bool toggle_switch(Transport *transport, bool &setting) {
 }
 
 static bool send_report(Transport *transport) {
-  std::string keys   = transport->getParam      ("keys");
-  std::string prefix = transport->getParam      ("prefix");
+  std::string keys = transport->getParam("keys");
+  std::string prefix = transport->getParam("prefix");
 
-  std::string out;
-  ServerStats::Report(out, keys, prefix);
+  std::string out = ServerStats::Report(keys, prefix);
 
   transport->replaceHeader("Content-Type", "text/plain");
   transport->sendString(out);
@@ -1045,11 +1044,8 @@ static bool send_report(Transport *transport) {
 
 static bool send_status(Transport *transport, Writer::Format format,
                         const char *mime) {
-  string out;
-  ServerStats::ReportStatus(out, format);
-
   transport->replaceHeader("Content-Type", mime);
-  transport->sendString(out);
+  transport->sendString(ServerStats::ReportStatus(format));
   return true;
 }
 
@@ -1245,9 +1241,7 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   }
 
   if (cmd == "stats.keys") {
-    string out;
-    ServerStats::GetKeys(out);
-    transport->sendString(out);
+    transport->sendString(ServerStats::GetKeys());
     return true;
   }
   if (cmd == "stats.kvp") {

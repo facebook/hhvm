@@ -155,19 +155,14 @@ int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
   return ServerStats::Get(name.data());
 }
 Array HHVM_FUNCTION(hphp_get_status) {
-  std::string out;
-  ServerStats::ReportStatus(out, Writer::Format::JSON);
+  auto const out = ServerStats::ReportStatus(Writer::Format::JSON);
   return Variant::attach(HHVM_FN(json_decode)(String(out))).toArray();
 }
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();
 }
 void HHVM_FUNCTION(hphp_set_iostatus_address, const String& name) {
-  return ServerStats::SetThreadIOStatusAddress(name.c_str());
 }
-
-
-
 
 static double ts_float(const timespec &ts) {
   return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000;

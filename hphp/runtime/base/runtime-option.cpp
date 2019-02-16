@@ -663,8 +663,8 @@ bool RuntimeOption::EnableSQLTableStats = false;
 bool RuntimeOption::EnableNetworkIOStatus = false;
 std::string RuntimeOption::StatsXSL;
 std::string RuntimeOption::StatsXSLProxy;
-int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
-int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
+uint32_t RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
+uint32_t RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
@@ -2303,6 +2303,8 @@ void RuntimeOption::Load(
     Config::Bind(StatsSlotDuration, ini, config, "Stats.SlotDuration", 10 * 60);
     Config::Bind(StatsMaxSlot, ini, config, "Stats.MaxSlot",
                  12 * 6); // 12 hours
+    StatsSlotDuration = std::max(1u, StatsSlotDuration);
+    StatsMaxSlot = std::max(2u, StatsMaxSlot);
     Config::Bind(EnableHotProfiler, ini, config, "Stats.EnableHotProfiler",
                  true);
     Config::Bind(ProfilerTraceBuffer, ini, config, "Stats.ProfilerTraceBuffer",

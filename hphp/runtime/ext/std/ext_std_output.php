@@ -244,13 +244,7 @@ function hphp_get_status(): array;
 <<__HipHopSpecific, __Native>>
 function hphp_get_iostatus(): array;
 
-/* Use this name, instead of IP address or URL for I/O status reporting. The
- * name will only be effective for the upcoming I/O and it will be reset
- * immediately after. Use logical network address for grouping network I/O by
- * intention, instead of physical addresses.
- * @param string $name - Specifies the logical name to replace with.
- */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __Deprecated("this will be removed")>>
 function hphp_set_iostatus_address(string $name): void;
 
 /* Returns timestamps of different request events.

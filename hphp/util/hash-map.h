@@ -46,6 +46,9 @@ template<typename T>
 using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
 
 template<typename T>
+using hphp_fast_string_map = hphp_fast_map<std::string, T, string_hash>;
+
+template<typename T>
 using hphp_string_imap =
   hphp_hash_map<std::string, T, string_hashi, string_eqstri>;
 

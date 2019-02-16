@@ -464,8 +464,8 @@ struct RuntimeOption {
   static bool EnableNetworkIOStatus;
   static std::string StatsXSL;
   static std::string StatsXSLProxy;
-  static int StatsSlotDuration;
-  static int StatsMaxSlot;
+  static uint32_t StatsSlotDuration;
+  static uint32_t StatsMaxSlot;
 
   static bool EnableHotProfiler;
   static int32_t ProfilerTraceBuffer;

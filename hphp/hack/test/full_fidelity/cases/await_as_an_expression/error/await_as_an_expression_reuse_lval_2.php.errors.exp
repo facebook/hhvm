@@ -1,1 +1,1 @@
-(4,37)-(4,38) Concurrent blocks can either assign to a variable or read from it, not both.
+(4,26)-(4,27) Lval can no longer be used as an expression. Pull it out into it's own statement.

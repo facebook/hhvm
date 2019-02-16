@@ -1,1 +1,2 @@
-(5,16)-(5,17) Concurrent blocks can only use a lval once
+(5,16)-(5,17) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(6,16)-(6,17) Lval can no longer be used as an expression. Pull it out into it's own statement.

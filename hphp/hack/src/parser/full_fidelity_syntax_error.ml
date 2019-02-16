@@ -669,15 +669,6 @@ let invalid_syntax_concurrent_block =
 let statement_without_await_in_concurrent_block =
   "Statement without an await in a concurrent block"
 
-let complex_lval_in_concurrent_block =
-  "Concurrent blocks can only contain simple lval ($var = ...)."
-
-let duplicate_lval_in_concurrent_block =
-  "Concurrent blocks can only use a lval once"
-
-let val_and_lval_in_concurrent_block =
-  "Concurrent blocks can either assign to a variable or read from it, not both."
-
 let concurrent_is_disabled =
   "Concurrent is disabled"
 

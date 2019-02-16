@@ -1,1 +1,1 @@
-(5,16)-(5,20) Concurrent blocks can only contain simple lval ($var = ...).
+(5,16)-(5,20) Lval can no longer be used as an expression. Pull it out into it's own statement.

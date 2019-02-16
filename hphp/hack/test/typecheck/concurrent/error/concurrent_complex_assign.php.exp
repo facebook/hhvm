@@ -1,2 +1,2 @@
-File "concurrent_complex_assign.php", line 8, characters 21-22:
-Concurrent blocks can either assign to a variable or read from it, not both. (Parsing[1002])
+File "concurrent_complex_assign.php", line 7, characters 21-22:
+Lval can no longer be used as an expression. Pull it out into it's own statement. (Parsing[1002])

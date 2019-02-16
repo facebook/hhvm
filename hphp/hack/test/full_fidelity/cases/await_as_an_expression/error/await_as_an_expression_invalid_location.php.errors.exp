@@ -32,12 +32,8 @@
 (35,17)-(35,28) Await cannot be used as an expression in this location because it's conditionally executed.
 (36,12)-(36,23) Await cannot be used as an expression in this location because it's conditionally executed.
 (37,17)-(37,28) Await cannot be used as an expression in this location because it's conditionally executed.
-(38,5)-(38,22) Concurrent blocks can only contain simple lval ($var = ...).
 (38,9)-(38,20) Await cannot be used as an expression in this location because it's conditionally executed.
-(39,5)-(39,22) Concurrent blocks can only contain simple lval ($var = ...).
 (39,9)-(39,20) Await cannot be used as an expression in this location because it's conditionally executed.
-(40,13)-(40,26) Concurrent blocks can only contain simple lval ($var = ...).
 (40,14)-(40,25) Await cannot be used as an expression in this location because it's conditionally executed.
 (40,14)-(40,25) Unary expression is not allowed in write context
-(41,9)-(41,26) Concurrent blocks can only contain simple lval ($var = ...).
 (41,13)-(41,24) Await cannot be used as an expression in this location because it's conditionally executed.

@@ -2213,129 +2213,77 @@ let does_binop_create_write_on_left = function
   | _ -> false
 
 let find_invalid_lval_usage errors nodes =
-  let get_lvals_and_vals = rec_walk ~f:(fun ((lvals, vals) as acc) node parents ->
-    match parents, syntax node with
-    | DecoratedExpression {
-      decorated_expression_decorator = token;
-      decorated_expression_expression = ({ syntax = lval; _ } as lval_syntax)
-    } :: _, n
-      when phys_equal lval n &&
-           does_decorator_create_write (token_kind token) ->
-      (lval_syntax :: lvals, vals), false
-
-    | PrefixUnaryExpression {
-      prefix_unary_operator = token;
-      prefix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
-    } :: _, n
-    | PostfixUnaryExpression {
-      postfix_unary_operator = token;
-      postfix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
-    } :: _, n
-      when phys_equal lval n &&
-           does_unop_create_write (token_kind token) ->
-      (lval_syntax :: lvals, vals), false
-
-    | BinaryExpression {
-      binary_operator = token;
-      binary_left_operand = ({ syntax = lval; _ } as lval_syntax);
-    _ } :: parents, n
-      when phys_equal lval n &&
-           does_binop_create_write_on_left (token_kind token) ->
-      let acc = match parents with
-      | ExpressionStatement _ :: (([SyntaxList _]) | []) -> acc
-      | _ -> lval_syntax :: lvals, vals in
-      acc, false
-
-    | _, Token t when Token.kind t = TokenKind.Variable ->
-      (lvals, node :: vals), false
-
-    | _ -> acc, true
+  let get_errors = rec_walk ~f:(fun errors syntax_node parents ->
+    let node = syntax syntax_node in
+    let errors = match node_lval_type node parents with
+    | LvalTypeFinal
+    | LvalTypeNone -> errors
+    | LvalTypeNonFinal ->
+      make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
+    errors, true
   ) in
-
-  let lvals, vals = List.fold_left
-    ~init:([], [])
-    ~f:(fun acc node -> get_lvals_and_vals ~init:acc node)
-    nodes in
-
-  let (lval_set, errors) = List.fold_left
-    ~init:(SSet.empty, errors)
-    ~f:(fun (s, e) node -> match syntax node with
-      | VariableExpression { variable_expression = { syntax = Token t; _ }; _ }
-      | Token t when Token.kind t = TokenKind.Variable ->
-        let name = Token.text t in
-        if SSet.mem name s then
-          (s, make_error_from_node node SyntaxError.duplicate_lval_in_concurrent_block :: e)
-        else (SSet.add name s, e)
-      | _ -> (s, make_error_from_node node SyntaxError.complex_lval_in_concurrent_block :: e)
-    ) lvals in
 
   List.fold_left
     ~init:errors
-    ~f:(fun e token -> match syntax token with
-      | Token t when Token.kind t = TokenKind.Variable ->
-        let name = Token.text t in
-        if SSet.mem name lval_set then
-          make_error_from_node token SyntaxError.val_and_lval_in_concurrent_block :: e
-        else e
-      | _ -> failwith "unexpected non-Token node"
-    ) vals
+    ~f:(fun acc node -> get_errors ~init:acc node)
+    nodes
 
-  type binop_allows_await_in_positions =
-    | BinopAllowAwaitBoth
-    | BinopAllowAwaitLeft
-    | BinopAllowAwaitRight
-    | BinopAllowAwaitNone
+type binop_allows_await_in_positions =
+  | BinopAllowAwaitBoth
+  | BinopAllowAwaitLeft
+  | BinopAllowAwaitRight
+  | BinopAllowAwaitNone
 
-  let get_positions_binop_allows_await t =
-    (match token_kind t with
-    | None -> BinopAllowAwaitNone
-    | Some t -> (match t with
-    | TokenKind.And
-    | TokenKind.Or
-    | TokenKind.BarBar
-    | TokenKind.AmpersandAmpersand
-    | TokenKind.QuestionColon
-    | TokenKind.QuestionQuestion -> BinopAllowAwaitLeft
-    | TokenKind.Equal
-    | TokenKind.BarEqual
-    | TokenKind.PlusEqual
-    | TokenKind.StarEqual
-    | TokenKind.StarStarEqual
-    | TokenKind.SlashEqual
-    | TokenKind.DotEqual
-    | TokenKind.MinusEqual
-    | TokenKind.PercentEqual
-    | TokenKind.CaratEqual
-    | TokenKind.AmpersandEqual
-    | TokenKind.LessThanLessThanEqual
-    | TokenKind.GreaterThanGreaterThanEqual -> BinopAllowAwaitRight
-    | TokenKind.Xor
-    | TokenKind.Plus
-    | TokenKind.Minus
-    | TokenKind.Star
-    | TokenKind.Slash
-    | TokenKind.StarStar
-    | TokenKind.EqualEqualEqual
-    | TokenKind.LessThan
-    | TokenKind.GreaterThan
-    | TokenKind.Percent
-    | TokenKind.Dot
-    | TokenKind.EqualEqual
-    | TokenKind.ExclamationEqual
-    | TokenKind.LessThanGreaterThan
-    | TokenKind.ExclamationEqualEqual
-    | TokenKind.LessThanEqual
-    | TokenKind.LessThanEqualGreaterThan
-    | TokenKind.GreaterThanEqual
-    | TokenKind.BarGreaterThan (* Custom handling *)
-    | TokenKind.Ampersand
-    | TokenKind.Bar
-    | TokenKind.LessThanLessThan
-    | TokenKind.GreaterThanGreaterThan
-    | TokenKind.Carat -> BinopAllowAwaitBoth
-    | TokenKind.QuestionQuestionEqual
-    | _ -> BinopAllowAwaitNone
-    ))
+let get_positions_binop_allows_await t =
+  (match token_kind t with
+  | None -> BinopAllowAwaitNone
+  | Some t -> (match t with
+  | TokenKind.And
+  | TokenKind.Or
+  | TokenKind.BarBar
+  | TokenKind.AmpersandAmpersand
+  | TokenKind.QuestionColon
+  | TokenKind.QuestionQuestion -> BinopAllowAwaitLeft
+  | TokenKind.Equal
+  | TokenKind.BarEqual
+  | TokenKind.PlusEqual
+  | TokenKind.StarEqual
+  | TokenKind.StarStarEqual
+  | TokenKind.SlashEqual
+  | TokenKind.DotEqual
+  | TokenKind.MinusEqual
+  | TokenKind.PercentEqual
+  | TokenKind.CaratEqual
+  | TokenKind.AmpersandEqual
+  | TokenKind.LessThanLessThanEqual
+  | TokenKind.GreaterThanGreaterThanEqual -> BinopAllowAwaitRight
+  | TokenKind.Xor
+  | TokenKind.Plus
+  | TokenKind.Minus
+  | TokenKind.Star
+  | TokenKind.Slash
+  | TokenKind.StarStar
+  | TokenKind.EqualEqualEqual
+  | TokenKind.LessThan
+  | TokenKind.GreaterThan
+  | TokenKind.Percent
+  | TokenKind.Dot
+  | TokenKind.EqualEqual
+  | TokenKind.ExclamationEqual
+  | TokenKind.LessThanGreaterThan
+  | TokenKind.ExclamationEqualEqual
+  | TokenKind.LessThanEqual
+  | TokenKind.LessThanEqualGreaterThan
+  | TokenKind.GreaterThanEqual
+  | TokenKind.BarGreaterThan (* Custom handling *)
+  | TokenKind.Ampersand
+  | TokenKind.Bar
+  | TokenKind.LessThanLessThan
+  | TokenKind.GreaterThanGreaterThan
+  | TokenKind.Carat -> BinopAllowAwaitBoth
+  | TokenKind.QuestionQuestionEqual
+  | _ -> BinopAllowAwaitNone
+  ))
 
 let unop_allows_await t =
   (match token_kind t with

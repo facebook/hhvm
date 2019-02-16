@@ -32,7 +32,7 @@ let update state new_validity =
   else state
 
 let visitor = object(this)
-  inherit [validation_state] Type_visitor.type_visitor as super
+  inherit [validation_state] Type_visitor.type_visitor as _super
   (* Only comes about because naming has reported an error and left Hany *)
   method! on_tany acc _ = acc
   (* Already reported an error *)
@@ -86,18 +86,30 @@ let visitor = object(this)
   method! on_tunresolved acc r _tyl =
     update acc @@ Invalid (r, "a union")
   method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
-  method! on_tclass acc r cls exact tyl =
+  method! on_tclass acc r cls _ tyl =
     match Env.get_class acc.env (snd cls) with
     | Some tc when Cls.kind tc = Ctrait ->
       update acc @@ Invalid (r, "a trait")
-    | _ ->
+    | Some tc ->
+      let tparams = Cls.tparams tc in
       begin match tyl with
-      | [] -> acc
-      | tyl when List.for_all tyl this#is_wildcard -> acc
-      | _ ->
-        let acc = super#on_tclass acc r cls exact tyl in
-        update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")
+      | [] -> acc (* this case should really be handled by the fold2,
+        but we still allow class hints without args in certain places *)
+      | tyl ->
+        let open List.Or_unequal_lengths in
+        begin match List.fold2 ~init:acc tyl tparams ~f:(fun acc targ tparam ->
+          if this#is_wildcard targ
+          then acc
+          else
+            if tparam.tp_reified
+            then this#on_type acc targ
+            else update acc @@ Invalid (r, "a type with an erased generic type argument")
+        ) with
+        | Ok new_acc -> new_acc
+        | Unequal_lengths -> acc (* arity error elsewhere *)
+        end
       end
+    | None -> acc
   method! on_tapply acc r (_, name) tyl =
     if tyl <> [] && Typing_env.is_typedef name
     then update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")

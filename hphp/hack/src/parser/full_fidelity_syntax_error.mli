@@ -357,3 +357,4 @@ val vararg_and_mutable: string
 val expected_user_attribute : string
 val tparams_in_tconst : string
 val reified_attribute : string
+val lval_as_expression : string

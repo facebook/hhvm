@@ -66,6 +66,7 @@ module FullFidelityParseArgs = struct
     files : string list;
     dump_nast : bool;
     enable_stronger_await_binding : bool;
+    disable_lval_as_an_expression : bool;
     pocket_universes : bool;
     disable_unsafe_expr : bool;
   }
@@ -97,6 +98,7 @@ module FullFidelityParseArgs = struct
     files
     dump_nast
     enable_stronger_await_binding
+    disable_lval_as_an_expression
     pocket_universes
     disable_unsafe_expr = {
     full_fidelity_json;
@@ -125,6 +127,7 @@ module FullFidelityParseArgs = struct
     files;
     dump_nast;
     enable_stronger_await_binding;
+    disable_lval_as_an_expression;
     pocket_universes;
     disable_unsafe_expr
   }
@@ -168,6 +171,7 @@ module FullFidelityParseArgs = struct
     let show_file_name = ref false in
     let dump_nast = ref false in
     let enable_stronger_await_binding = ref false in
+    let disable_lval_as_an_expression = ref false in
     let set_show_file_name () = show_file_name := true in
     let pocket_universes = ref false in
     let files = ref [] in
@@ -279,6 +283,9 @@ No errors are filtered out.";
       "--stronger-await-binding",
         Arg.Set enable_stronger_await_binding,
         "Increases precedence of await during parsing.";
+      "--disable-lval-as-an-expression",
+        Arg.Set disable_lval_as_an_expression,
+        "Disable lval as an expression.";
       "--pocket-universes",
         Arg.Set pocket_universes,
         "Enables support for Pocket Universes";
@@ -314,6 +321,7 @@ No errors are filtered out.";
       (List.rev !files)
       !dump_nast
       !enable_stronger_await_binding
+      !disable_lval_as_an_expression
       !pocket_universes
       !disable_unsafe_expr
 end
@@ -343,6 +351,8 @@ let handle_existing_file args filename =
     (args.codegen && args.enable_hh_syntax) in
   let popt = ParserOptions.with_enable_await_as_an_expression popt
     (args.enable_await_as_an_expression) in
+  let popt = ParserOptions.with_disable_lval_as_an_expression popt
+    (args.disable_lval_as_an_expression) in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -352,6 +362,7 @@ let handle_existing_file args filename =
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax
     ~enable_stronger_await_binding:args.enable_stronger_await_binding
+    ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in

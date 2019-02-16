@@ -462,6 +462,8 @@ let make_popt () =
       Hhbc_options.(enable_hiphop_syntax !compiler_options)
     ~enable_stronger_await_binding:
       Hhbc_options.(enable_stronger_await_binding !compiler_options)
+    ~disable_lval_as_an_expression:
+      Hhbc_options.(disable_lval_as_an_expression !compiler_options)
 
 let process_single_source_unit ?(for_debugger_eval = false) compiler_options
   handle_output handle_exception filename source_text =

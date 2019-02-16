@@ -711,3 +711,6 @@ let expected_user_attribute = "A user attribute is expected here."
 let tparams_in_tconst = "Type parameters are not allowed on class type constants"
 
 let reified_attribute = "__Reified and __HasReifiedParent attributes may not be provided by the user"
+
+let lval_as_expression =
+  "Lval can no longer be used as an expression. Pull it out into it's own statement."

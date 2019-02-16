@@ -47,6 +47,7 @@ type t = {
   ignored_fixme_codes : ISet.t;
   log_levels : int SMap.t;
   po_enable_stronger_await_binding : bool;
+  po_disable_lval_as_an_expression : bool;
   po_disable_unsafe_expr : bool;
   tco_typecheck_xhp_cvars : bool;
 } [@@deriving show]
@@ -247,6 +248,7 @@ let default = {
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  log_levels = SMap.empty;
  po_enable_stronger_await_binding = false;
+ po_disable_lval_as_an_expression = false;
  po_disable_unsafe_expr = false;
  tco_typecheck_xhp_cvars = false;
 }
@@ -290,6 +292,7 @@ let make
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
   ?(log_levels = default.log_levels)
   ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
+  ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ()
@@ -333,6 +336,7 @@ let make
   tco_disallow_invalid_arraykey;
   log_levels;
   po_enable_stronger_await_binding;
+  po_disable_lval_as_an_expression;
   po_disable_unsafe_expr;
   tco_typecheck_xhp_cvars;
 }
@@ -381,6 +385,7 @@ let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
+let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 

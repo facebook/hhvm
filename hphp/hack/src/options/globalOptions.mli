@@ -207,8 +207,12 @@ type t = {
  (* Flag to change the precedence and associativity of await. *)
  po_enable_stronger_await_binding : bool;
 
+ (* Flag to disable using lvals as expressions. *)
+ po_disable_lval_as_an_expression : bool;
+
  (* Flag to make UNSAFE_EXPR comments be just comments. *)
  po_disable_unsafe_expr : bool;
+
  (* Flag to typecheck xhp code *)
  tco_typecheck_xhp_cvars : bool;
 
@@ -253,6 +257,7 @@ val make :
   ?ignored_fixme_codes: ISet.t ->
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
+  ?po_disable_lval_as_an_expression: bool ->
   ?po_disable_unsafe_expr: bool ->
   ?tco_typecheck_xhp_cvars: bool ->
   unit ->
@@ -322,6 +327,7 @@ val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
+val po_disable_lval_as_an_expression : t -> bool
 val po_disable_unsafe_expr : t -> bool
 val setup_pocket_universes : t -> bool -> t
 val tco_typecheck_xhp_cvars : t -> bool

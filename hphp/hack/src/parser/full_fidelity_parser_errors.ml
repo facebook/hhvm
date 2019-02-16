@@ -1597,6 +1597,146 @@ let parameter_rx_errors context errors node =
     errors
   | _ -> errors
 
+  let does_binop_create_write_on_left = function
+    | Some (TokenKind.Equal
+          | TokenKind.BarEqual
+          | TokenKind.PlusEqual
+          | TokenKind.StarEqual
+          | TokenKind.StarStarEqual
+          | TokenKind.SlashEqual
+          | TokenKind.DotEqual
+          | TokenKind.MinusEqual
+          | TokenKind.PercentEqual
+          | TokenKind.CaratEqual
+          | TokenKind.AmpersandEqual
+          | TokenKind.LessThanLessThanEqual
+          | TokenKind.GreaterThanGreaterThanEqual
+          | TokenKind.QuestionQuestionEqual) -> true
+    | _ -> false
+
+  let does_unop_create_write = function
+    | Some (TokenKind.PlusPlus | TokenKind.MinusMinus | TokenKind.Ampersand) -> true
+    | _ -> false
+
+  let does_decorator_create_write = function
+    | Some (TokenKind.Inout) -> true
+    | _ -> false
+
+  type lval_type = LvalTypeNone | LvalTypeNonFinal | LvalTypeFinal
+
+  let node_lval_type node parents =
+    let rec is_in_final_lval_position node parents =
+      match parents with
+      | ExpressionStatement _ :: _ -> true
+      | ForStatement {
+        for_initializer = { syntax = for_initializer; _ };
+        for_end_of_loop = { syntax = for_end_of_loop; _ }; _
+      } :: _
+        when phys_equal for_initializer node || phys_equal for_end_of_loop node ->
+        true
+      | (UsingStatementFunctionScoped { using_function_expression = { syntax = e; _ }; _ }
+        | UsingStatementBlockScoped { using_block_expressions = { syntax = e; _ }; _ }) :: _
+        when phys_equal e node -> true
+      | (SyntaxList _ | ListItem _) as node :: parents ->
+        is_in_final_lval_position node parents
+      | _ -> false
+    in
+    let rec get_arg_call_node_with_parents node parents =
+      match parents with
+      | (SyntaxList _ | ListItem _) as next_node :: next_parents ->
+        get_arg_call_node_with_parents next_node next_parents
+      | (FunctionCallExpression {
+          function_call_argument_list = { syntax = arg_list; _ }; _ }
+        | FunctionCallWithTypeArgumentsExpression {
+          function_call_with_type_arguments_argument_list = { syntax = arg_list; _ }; _ }
+      ) as call_expression :: parents when phys_equal arg_list node ->
+        (match parents with
+        | PrefixUnaryExpression { prefix_unary_operator = op; _ } as call_expression :: parents
+          when token_kind op = Some TokenKind.Await ->
+          Some (call_expression, parents)
+        | _ ->
+          Some (call_expression, parents))
+      | _ -> None
+    in
+    let lval_ness_of_function_arg next_node next_parents =
+      (match get_arg_call_node_with_parents next_node next_parents with
+      | None -> LvalTypeNone
+      | Some (call_node, call_parents) ->
+        if is_in_final_lval_position call_node call_parents
+          then LvalTypeFinal
+          else (match call_parents with
+            | BinaryExpression {
+              binary_operator = token;
+              binary_right_operand = { syntax = rval; _ };
+            _ } as next_node :: next_parents
+              when phys_equal rval call_node &&
+                   does_binop_create_write_on_left (token_kind token) ->
+               if is_in_final_lval_position next_node next_parents
+                then LvalTypeFinal
+                else LvalTypeNonFinal
+            | _ -> LvalTypeNonFinal)
+      ) in
+    match parents with
+    | DecoratedExpression {
+      decorated_expression_decorator = token;
+      decorated_expression_expression = { syntax = lval; _ }
+    } as next_node :: next_parents
+      when phys_equal lval node &&
+           does_decorator_create_write (token_kind token) ->
+      lval_ness_of_function_arg next_node next_parents
+
+    | PrefixUnaryExpression {
+      prefix_unary_operator = token;
+      prefix_unary_operand = { syntax = lval; _ }
+    } as next_node :: next_parents
+      when phys_equal lval node &&
+           Some TokenKind.Ampersand = token_kind token ->
+      lval_ness_of_function_arg next_node next_parents
+
+    | (PrefixUnaryExpression {
+      prefix_unary_operator = token;
+      prefix_unary_operand = { syntax = lval; _ }
+    }
+    | PostfixUnaryExpression {
+      postfix_unary_operator = token;
+      postfix_unary_operand = { syntax = lval; _ }
+    }) as next_node :: next_parents
+      when phys_equal lval node &&
+           does_unop_create_write (token_kind token) ->
+      if is_in_final_lval_position next_node next_parents
+        then LvalTypeFinal
+        else LvalTypeNonFinal
+
+    | BinaryExpression {
+      binary_operator = token;
+      binary_left_operand = { syntax = lval; _ };
+    _ } as next_node :: next_parents
+      when phys_equal lval node &&
+           does_binop_create_write_on_left (token_kind token) ->
+      if is_in_final_lval_position next_node next_parents
+        then LvalTypeFinal
+        else LvalTypeNonFinal
+
+    | ForeachStatement {
+      foreach_key = { syntax = key; _ };
+      foreach_value = { syntax = value; _ };
+    _ } :: _
+      when phys_equal key node || phys_equal value node ->
+      LvalTypeFinal
+
+    | _ -> LvalTypeNone
+
+  let lval_errors env syntax_node parents errors =
+    if not (ParserOptions.disable_lval_as_an_expression env.parser_options) then errors else
+    let node = syntax syntax_node in
+    let parents = List.map ~f:syntax parents in
+    match node_lval_type node parents with
+    | LvalTypeFinal
+    | LvalTypeNone -> errors
+    | LvalTypeNonFinal ->
+      make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors
+
+
 let parameter_errors env node namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
@@ -2072,13 +2212,6 @@ let does_binop_create_write_on_left = function
         | TokenKind.QuestionQuestionEqual) -> true
   | _ -> false
 
-let does_unop_create_write = function
-  | Some (TokenKind.PlusPlus
-        | TokenKind.MinusMinus
-        | TokenKind.Ampersand
-        | TokenKind.Inout) -> true
-  | _ -> false
-
 let find_invalid_lval_usage errors nodes =
   let get_lvals_and_vals = rec_walk ~f:(fun ((lvals, vals) as acc) node parents ->
     match parents, syntax node with
@@ -2087,7 +2220,7 @@ let find_invalid_lval_usage errors nodes =
       decorated_expression_expression = ({ syntax = lval; _ } as lval_syntax)
     } :: _, n
       when phys_equal lval n &&
-           does_unop_create_write (token_kind token) ->
+           does_decorator_create_write (token_kind token) ->
       (lval_syntax :: lvals, vals), false
 
     | PrefixUnaryExpression {
@@ -3583,30 +3716,6 @@ let enum_decl_errors node errors =
       else errors
   | _ -> errors
 
-let does_binop_create_write_on_left = function
-  | Some (TokenKind.Equal
-        | TokenKind.BarEqual
-        | TokenKind.PlusEqual
-        | TokenKind.StarEqual
-        | TokenKind.StarStarEqual
-        | TokenKind.SlashEqual
-        | TokenKind.DotEqual
-        | TokenKind.MinusEqual
-        | TokenKind.PercentEqual
-        | TokenKind.CaratEqual
-        | TokenKind.AmpersandEqual
-        | TokenKind.LessThanLessThanEqual
-        | TokenKind.GreaterThanGreaterThanEqual
-        | TokenKind.QuestionQuestionEqual) -> true
-  | _ -> false
-
-let does_unop_create_write = function
-  | Some (TokenKind.PlusPlus
-        | TokenKind.MinusMinus
-        | TokenKind.Ampersand
-        | TokenKind.Inout) -> true
-  | _ -> false
-
 let assignment_errors _env node errors =
   let append_errors node errors error =
     make_error_from_node node error :: errors
@@ -3704,10 +3813,12 @@ let assignment_errors _env node errors =
     { postfix_unary_operator = op
     ; postfix_unary_operand = loperand
     }
+  ) when does_unop_create_write (token_kind op) ->
+    check_lvalue ~allow_reassign_this:true loperand errors
   | DecoratedExpression
     { decorated_expression_decorator = op
     ; decorated_expression_expression = loperand
-    }) when does_unop_create_write (token_kind op) ->
+    } when does_decorator_create_write (token_kind op) ->
     check_lvalue ~allow_reassign_this:true loperand errors
   | BinaryExpression
     { binary_left_operand = loperand
@@ -4004,6 +4115,8 @@ let find_syntax_errors env =
         let errors = check_constant_expression errors init in
         trait_require_clauses, names, errors
       | _ -> trait_require_clauses, names, errors in
+
+    let errors = lval_errors env node parents errors in
 
     match syntax node with
     | LambdaExpression _

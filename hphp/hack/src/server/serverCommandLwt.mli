@@ -12,6 +12,5 @@ val rpc_persistent :
   -> 'a ServerCommandTypes.t
   -> ('s * 'a * float, 's * Utils.callstack * exn) result Lwt.t
 
-val stream_request : out_channel -> ServerCommandTypes.streamed -> unit
 val connect_debug : out_channel -> unit
 val send_connection_type : out_channel -> 'a -> unit

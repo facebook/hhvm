@@ -275,7 +275,6 @@ let is_critical_rpc : type a. a t -> bool = function
 
 type 'a command =
   | Rpc of 'a t
-  | Stream of streamed
   | Debug
 
 and streamed =

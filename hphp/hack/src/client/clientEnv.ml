@@ -35,7 +35,6 @@ type client_mode =
 | MODE_LINT_STDIN of string
 | MODE_LINT_XCONTROLLER of string
 | MODE_LIST_FILES
-| MODE_LIST_MODES
 | MODE_METHOD_JUMP_ANCESTORS of string * string
 | MODE_METHOD_JUMP_ANCESTORS_BATCH of string list * string
 | MODE_METHOD_JUMP_CHILDREN of string
@@ -47,7 +46,6 @@ type client_mode =
 | MODE_SAVE_STATE of string
 (* TODO figure out why we can't reference FuzzySearchService from here *)
 | MODE_SEARCH of string * string
-| MODE_SHOW of string
 | MODE_STATS
 | MODE_STATUS
 | MODE_STATUS_SINGLE of string (* filename *)
@@ -111,7 +109,6 @@ let mode_to_string = function
   | MODE_LINT_STDIN _ -> "MODE_LINT_STDIN"
   | MODE_LINT_XCONTROLLER _ -> "MODE_LINT_XCONTROLLER"
   | MODE_LIST_FILES -> "MODE_LIST_FILES"
-  | MODE_LIST_MODES -> "MODE_LIST_MODES"
   | MODE_METHOD_JUMP_ANCESTORS _ -> "MODE_METHOD_JUMP_ANCESTORS"
   | MODE_METHOD_JUMP_ANCESTORS_BATCH _ -> "MODE_METHOD_JUMP_ANCESTORS_BATCH"
   | MODE_METHOD_JUMP_CHILDREN _ -> "MODE_METHOD_JUMP_CHILDREN"
@@ -122,7 +119,6 @@ let mode_to_string = function
   | MODE_RETRIEVE_CHECKPOINT _ -> "MODE_RETRIEVE_CHECKPOINT"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_SEARCH _ -> "MODE_SEARCH"
-  | MODE_SHOW _ -> "MODE_SHOW"
   | MODE_STATS -> "MODE_STATS"
   | MODE_STATUS -> "MODE_STATUS"
   | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"

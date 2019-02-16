@@ -356,9 +356,6 @@ let parse_check_args cmd =
     "--list-files",
       Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
-    "--list-modes",
-      Arg.Unit (set_mode MODE_LIST_MODES),
-      " (mode) list all files with their associated hack modes";
     "--log-inference-constraints",
       Arg.Set log_inference_constraints,
       "  (for hh debugging purpose only) log type" ^
@@ -438,10 +435,6 @@ let parse_check_args cmd =
     "--search-typedef",
       Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef")) ()),
       " (mode) fuzzy search typedef definitions";
-    "--show",
-      Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
-      " (mode) show human-readable type info for the given name; \
-      output is not meant for machine parsing";
     "--single",
       Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x) ()),
       "Return errors in file with provided name (give '-' for stdin)";

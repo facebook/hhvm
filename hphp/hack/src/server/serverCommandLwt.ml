@@ -60,10 +60,6 @@ let rpc_persistent :
     let stack = Printexc.get_backtrace () in
     Lwt.return (Error (state, Utils.Callstack stack, e))
 
-let stream_request oc cmd =
-  Marshal.to_channel oc (Stream cmd) [];
-  Out_channel.flush oc
-
 let connect_debug oc =
   Marshal.to_channel oc Debug [];
   Out_channel.flush oc

@@ -87,8 +87,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
-  | Stream LIST_MODES -> false
-  | Stream SHOW _ -> false
   | Debug -> false
 
 let is_edit : type a. a command -> bool = function
@@ -149,92 +147,6 @@ let full_recheck_if_needed genv env msg =
 (****************************************************************************)
 (* Called by the server *)
 (****************************************************************************)
-
-(** Stream response for this command. Returns true if the command needs
- * to force flush the notifier to complete.  *)
-let stream_response env (ic, oc) ~cmd =
-  match cmd with
-  | LIST_MODES ->
-      Relative_path.Map.iter env.ServerEnv.files_info begin fun fn fileinfo ->
-        match Relative_path.prefix fn with
-        | Relative_path.Root ->
-          let mode = match fileinfo.FileInfo.file_mode with
-            | None | Some FileInfo.Mphp -> "php"
-            | Some FileInfo.Mdecl -> "decl"
-            | Some FileInfo.Mpartial -> "partial"
-            | Some FileInfo.Mexperimental -> "experimental"
-            | Some FileInfo.Mstrict -> "strict" in
-          Printf.fprintf oc "%s\t%s\n" mode (Relative_path.to_absolute fn)
-        | _ -> ()
-      end;
-      Out_channel.flush oc;
-      ServerUtils.shutdown_client (ic, oc)
-  | SHOW name ->
-      Out_channel.output_string oc "starting\n";
-      SharedMem.invalidate_caches();
-      let qual_name = if name.[0] = '\\' then name else ("\\"^name) in
-      Out_channel.output_string oc "class:\n";
-      let class_name =
-        match NamingGlobal.GEnv.type_canon_name qual_name with
-        | None ->
-          let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
-        | Some canon ->
-          let p = unsafe_opt
-            @@ NamingGlobal.GEnv.type_pos canon in
-          let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
-          canon
-      in
-      let class_ = TLazyHeap.get_class class_name in
-      (match class_ with
-      | None -> Out_channel.output_string oc "Missing from typing env\n"
-      | Some c ->
-          let class_str = Typing_print.class_ env.ServerEnv.tcopt c in
-          Out_channel.output_string oc (class_str^"\n")
-      );
-      Out_channel.output_string oc "\nfunction:\n";
-      let fun_name =
-        match NamingGlobal.GEnv.fun_canon_name qual_name with
-        | None ->
-          let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
-        | Some canon ->
-          let p = unsafe_opt
-            @@ NamingGlobal.GEnv.fun_pos canon in
-          let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
-          canon
-      in
-      let fun_ = TLazyHeap.get_fun fun_name in
-      (match fun_ with
-      | None ->
-          Out_channel.output_string oc "Missing from typing env\n"
-      | Some f ->
-          let fun_str = Typing_print.fun_ env.ServerEnv.tcopt f in
-          Out_channel.output_string oc (fun_str^"\n")
-      );
-      Out_channel.output_string oc "\nglobal const:\n";
-      (match NamingGlobal.GEnv.gconst_pos qual_name with
-      | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
-      | None -> Out_channel.output_string oc "Missing from naming env\n");
-      let gconst_ty = TLazyHeap.get_gconst qual_name in
-      (match gconst_ty with
-      | None -> Out_channel.output_string oc "Missing from typing env\n"
-      | Some gc ->
-          let gconst_str = Typing_print.gconst env.ServerEnv.tcopt gc in
-          Out_channel.output_string oc ("ty: "^gconst_str^"\n")
-      );
-      Out_channel.output_string oc "typedef:\n";
-      (match NamingGlobal.GEnv.typedef_pos qual_name with
-      | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
-      | None -> Out_channel.output_string oc "Missing from naming env\n");
-      let tdef = TLazyHeap.get_typedef qual_name in
-      (match tdef with
-      | None ->
-          Out_channel.output_string oc "Missing from typing env\n"
-      | Some td ->
-          let td_str = Typing_print.typedef env.ServerEnv.tcopt td in
-          Out_channel.output_string oc (td_str^"\n")
-      );
-      Out_channel.flush oc;
-      ServerUtils.shutdown_client (ic, oc)
 
 (* Only grant access to dependency table to commands that declared that they
  * need full check - without full check, there are no guarantees about
@@ -327,10 +239,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
       new_env
-  | Stream cmd ->
-      let ic, oc = ClientProvider.get_channels client in
-      stream_response env (ic, oc) ~cmd;
-      env
   | Debug ->
       let ic, oc = ClientProvider.get_channels client in
       genv.ServerEnv.debug_channels <- Some (ic, oc);

@@ -58,7 +58,6 @@ let debug_describe_t : type a. a t -> string = function
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
-  | Stream _ -> "Stream"
   | Debug -> "Debug"
 
 let source_tree_of_file_input file_input =

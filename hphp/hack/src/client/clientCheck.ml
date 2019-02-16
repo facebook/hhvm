@@ -140,13 +140,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt infol = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS  in
       List.iter infol (Printf.printf "%s\n");
       Lwt.return Exit_status.No_error
-    | MODE_LIST_MODES ->
-      let%lwt ClientConnect.{channels = ic, oc; _} = connect args in
-      Cmd.stream_request oc ServerCommandTypes.LIST_MODES;
-      begin try
-        while true do print_endline (Timeout.input_line ic) done;
-      with End_of_file -> () end;
-      Lwt.return Exit_status.No_error
     | MODE_COLORING file ->
       let file_input = match file with
         | "-" ->
@@ -410,11 +403,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let exit_status =
         ClientCheckStatus.go status args.output_json args.from in
       Lwt.return exit_status
-    | MODE_SHOW classname ->
-      let%lwt ClientConnect.{channels = ic, oc; _} = connect args in
-      Cmd.stream_request oc (ServerCommandTypes.SHOW classname);
-      print_all ic;
-      Lwt.return Exit_status.No_error
     | MODE_SEARCH (query, type_) ->
       let%lwt results = rpc args @@ Rpc.SEARCH (query, type_) in
       ClientSearch.go results args.output_json;

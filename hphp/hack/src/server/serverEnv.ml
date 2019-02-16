@@ -193,14 +193,12 @@ and init_env = {
   init_type : string;
 }
 
-let list_files env oc =
+let list_files env =
   let acc = List.fold_right
-    ~f:begin fun error acc ->
+    ~f:begin fun error (acc : SSet.t) ->
       let pos = Errors.get_pos error in
-      Relative_path.Set.add acc (Pos.filename pos)
+      SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
     end
-    ~init:Relative_path.Set.empty
+    ~init:SSet.empty
     (Errors.get_error_list env.errorl) in
-  Relative_path.Set.iter acc (fun s ->
-    Printf.fprintf oc "%s\n" (Relative_path.to_absolute s));
-  flush oc
+  SSet.elements acc

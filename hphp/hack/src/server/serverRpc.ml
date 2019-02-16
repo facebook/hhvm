@@ -244,3 +244,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | FUN_IS_LOCALLABLE_BATCH positions ->
         let env = { env with tcopt = env.ServerEnv.tcopt } in
         env, ServerFunIsLocallableBatch.go genv.workers positions env
+    | LIST_FILES_WITH_ERRORS ->
+      env, ServerEnv.list_files env

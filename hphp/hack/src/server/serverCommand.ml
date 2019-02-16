@@ -22,6 +22,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
     fun msg -> match msg with
   (* global error list is not updated during small checks *)
   | STATUS _ -> true
+  | LIST_FILES_WITH_ERRORS -> true  (* Same as STATUS *)
   | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
@@ -86,7 +87,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
-  | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | Stream LIST_MODES -> false
   | Stream SHOW _ -> false
   | Debug -> false
@@ -154,9 +154,6 @@ let full_recheck_if_needed genv env msg =
  * to force flush the notifier to complete.  *)
 let stream_response env (ic, oc) ~cmd =
   match cmd with
-  | LIST_FILES ->
-      ServerEnv.list_files env oc;
-      ServerUtils.shutdown_client (ic, oc)
   | LIST_MODES ->
       Relative_path.Map.iter env.ServerEnv.files_info begin fun fn fileinfo ->
         match Relative_path.prefix fn with

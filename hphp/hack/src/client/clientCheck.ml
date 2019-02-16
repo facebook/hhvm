@@ -28,18 +28,6 @@ let parse_function_or_method_id ~func_action ~meth_action name =
   with _ ->
     Printf.eprintf "Invalid input\n";
     raise Exit_status.(Exit_with Input_error)
-
-let get_list_files conn: string list =
-  let ic, oc = conn in
-  Cmd.stream_request oc ServerCommandTypes.LIST_FILES;
-  let res = ref [] in
-  try
-    while true do
-      res := (Timeout.input_line ic) :: !res
-    done;
-    assert false
-  with End_of_file -> !res
-
 let print_all ic =
   try
     while true do
@@ -149,8 +137,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
   let%lwt exit_status =
     match args.mode with
     | MODE_LIST_FILES ->
-      let%lwt ClientConnect.{channels; _} = connect args in
-      let infol = get_list_files channels in
+      let%lwt infol = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS  in
       List.iter infol (Printf.printf "%s\n");
       Lwt.return Exit_status.No_error
     | MODE_LIST_MODES ->

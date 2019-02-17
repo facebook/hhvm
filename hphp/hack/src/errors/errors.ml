@@ -2831,6 +2831,13 @@ let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
     ty_pos, ("The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
   ]
 
+let invalid_enforceable_type_argument (tp_pos, tp_name) targ_pos ty_pos ty_str =
+  add_list (Typing.err_code Typing.InvalidEnforceableTypeArgument) [
+    targ_pos, "Invalid type argument";
+    tp_pos, "Type parameter " ^ tp_name ^ " was declared __Enforceable here";
+    ty_pos, "This type argument is not enforceable because it has " ^ ty_str
+  ]
+
 let override_final ~parent ~child =
   add_list (Typing.err_code Typing.OverrideFinal) [child, "You cannot override this method";
             parent, "It was declared as final"]

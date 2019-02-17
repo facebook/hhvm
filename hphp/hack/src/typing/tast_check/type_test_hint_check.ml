@@ -122,7 +122,7 @@ let visitor = object(this)
     | _ -> false
 end
 
-let validate_hint env hint op =
+let validate_hint env hint emit_error =
   let hint_ty = Env.hint_to_ty env hint in
   let should_suppress = ref false in
   let validate_type env ty =
@@ -130,8 +130,7 @@ let validate_hint env hint op =
     match state.validity with
       | Invalid (r, msg) ->
         if not !should_suppress
-        then Errors.invalid_is_as_expression_hint
-          op (fst hint) (Reason.to_pos r) msg;
+        then emit_error (fst hint) (Reason.to_pos r) msg;
         should_suppress := true
       | Valid -> ()
   in
@@ -142,7 +141,7 @@ let validate_hint env hint op =
 let handler = object
   inherit Tast_visitor.handler_base
   method! at_expr env = function
-    | _, Is (_, hint) -> validate_hint env hint "is"
-    | _, As (_, hint, _) -> validate_hint env hint "as"
+    | _, Is (_, hint) -> validate_hint env hint (Errors.invalid_is_as_expression_hint "is")
+    | _, As (_, hint, _) -> validate_hint env hint (Errors.invalid_is_as_expression_hint "as")
     | _ -> ()
 end

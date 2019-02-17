@@ -12,6 +12,7 @@ open Tast
 open Typing_defs
 
 module Env = Tast_env
+module UA = Naming_special_names.UserAttributes
 
 let tparams_has_reified tparams =
   List.exists ~f:(fun t -> t.tp_reified) tparams
@@ -25,13 +26,17 @@ let tparams_has_reified tparams =
  * where Tf does not exist at runtime.
  *)
 let verify_targ_valid_for_reified_tparam env tparam targ =
-  if tparam.tp_reified then
+  begin if tparam.tp_reified then
     let ty = Env.hint_to_ty env targ in
-    begin match Typing_generic.IsGeneric.ty (Tast_env.get_tcopt env) ty with
+    match Typing_generic.IsGeneric.ty (Tast_env.get_tcopt env) ty with
     | Some resolved_targ when not (Tast_env.get_reified env (snd resolved_targ)) ->
       Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ
-    | _ -> ()
-    end
+    | _ -> () end;
+
+  if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
+    Type_test_hint_check.validate_hint env targ
+      (Errors.invalid_enforceable_type_argument tparam.tp_name)
+
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
   if tparams_has_reified tparams &&

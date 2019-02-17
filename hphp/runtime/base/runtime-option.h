@@ -89,7 +89,6 @@ struct RepoOptions {
   H(bool,      EnableStrongerAwaitBinding,     false)            \
   H(bool,      DisableLvalAsAnExpression,      false)            \
   E(bool,      CreateInOutWrapperFunctions,    true)             \
-  E(bool,      EnableHHJS,                     false)            \
   E(bool,      HHJSUniqueFilenames,            false)            \
   E(bool,      HHJSModules,                    true)             \
   E(bool,      EmitFuncPointers,               true)             \
@@ -692,6 +691,7 @@ struct RuntimeOption {
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
+  F(bool, EnableHHJS,                  false)                           \
   F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   /* Generate warning of side effect of the pseudomain is called by     \

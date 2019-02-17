@@ -34,8 +34,8 @@ namespace HPHP { namespace FileUtil {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename F>
-void find(const std::string &root, const std::string& path, bool php,
-          const F& callback) {
+void find(const std::string &root, const std::string& path,
+          bool php, bool js, bool other, const F& callback) {
   auto spath = path.empty() || !isDirSeparator(path[0]) ?
     path : path.substr(1);
 
@@ -73,7 +73,7 @@ void find(const std::string &root, const std::string& path, bool php,
     }
 
     if ((se.st_mode & S_IFMT) == S_IFDIR) {
-      find(root, spath + ename, php, callback);
+      find(root, spath + ename, php, js, other, callback);
       continue;
     }
 
@@ -89,9 +89,11 @@ void find(const std::string &root, const std::string& path, bool php,
     }
 
     bool isPHP = false;
+    bool isJS = false;
     const char *p = strrchr(ename, '.');
     if (p) {
-      isPHP = (strncmp(p + 1, "php", 3) == 0);
+      isPHP = strncmp(p + 1, "php", 3) == 0;
+      isJS = strcmp(p + 1, "js") == 0;
     } else {
       try {
         std::string line;
@@ -107,7 +109,7 @@ void find(const std::string &root, const std::string& path, bool php,
       }
     }
 
-    if (isPHP == php) {
+    if ((isPHP && php) || (isJS && js) || (!isPHP && !isJS && other)) {
       callback(spath + ename, false);
     }
   }

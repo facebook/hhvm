@@ -110,7 +110,8 @@ void Package::addDirectory(const std::string &path, bool force) {
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto const& dir : m_directories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir.first, false,
+    FileUtil::find(files, m_root, dir.first,
+                   /* php */ false, /* js */ true, /* other */ true,
                    &Option::PackageExcludeStaticDirs,
                    &Option::PackageExcludeStaticFiles);
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
@@ -124,7 +125,8 @@ std::shared_ptr<FileCache> Package::getFileCache() {
   }
   for (auto const& dir : m_staticDirectories) {
     std::vector<std::string> files;
-    FileUtil::find(files, m_root, dir, false);
+    FileUtil::find(files, m_root, dir,
+                   /* php */ false, /* js */ true, /* other */ true);
     for (auto& file : files) {
       auto const rpath = file.substr(m_root.size());
       if (!m_fileCache->fileExists(rpath.c_str())) {
@@ -238,8 +240,8 @@ void Package::addSourceFile(const std::string& fileName,
 }
 
 void Package::addPHPDirectory(const std::string& path, bool force) {
-  FileUtil::find(
-    m_root, path, true,
+  FileUtil::find(m_root, path,
+    /* php */ true, /* js */ RuntimeOption::EvalEnableHHJS, /* other */ false,
     [&] (const std::string& name, bool dir) {
       if (!dir) {
         if (!force) {

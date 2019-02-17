@@ -795,6 +795,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
+    + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::EvalDumpHHJS ? '1' : '0')
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
     + std::to_string(RuntimeOption::UndefinedConstFallback)

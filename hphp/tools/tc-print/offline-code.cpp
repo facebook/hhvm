@@ -236,9 +236,8 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
   return currBC;
 }
 
-void OfflineCode::printEventStats(TCA address,
-				  uint32_t instrLen,
-				  const PerfEventsMap<TCA>& perfEvents) {
+void OfflineCode::printEventStats(TCA address, uint32_t instrLen,
+                                  const PerfEventsMap<TCA>& perfEvents) {
   for (size_t i = getFirstEventType(); i < getNumEventTypes(); i++) {
     PerfEventType event = static_cast<PerfEventType>(i);
     uint64_t eventCount = perfEvents.getEventCount(address,
@@ -247,8 +246,8 @@ void OfflineCode::printEventStats(TCA address,
     std::string eventStr;
     if (eventCount) {
       eventStr = folly::format("{:>3}:{:>4}",
-			       eventTypeToSmallCaption(event),
-			       eventCount).str();
+                               eventTypeToSmallCaption(event),
+                               eventCount).str();
     }
     std::cout << folly::format("{:<10} ", eventStr);
   }

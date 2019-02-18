@@ -181,7 +181,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  char* sortByArg = NULL;
+  char* sortByArg = nullptr;
   while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:x"))
          != -1) {
     switch (c) {
@@ -267,7 +267,7 @@ void parseOptions(int argc, char *argv[]) {
           char* p = strtok(optarg, ",");
           while (p) {
             addEventType(std::string(p));
-            p = strtok(NULL, ",");
+            p = strtok(nullptr, ",");
           }
         }
         break;
@@ -360,18 +360,15 @@ void loadPerfEvents() {
   char   eventCaption[MAX_SYM_LEN];
   char   line[2*MAX_SYM_LEN];
   TCA    addr;
-  uint32_t tcSamples[getNumEventTypes()];
-  uint32_t hhvmSamples[getNumEventTypes()];
+  vector<uint32_t> tcSamples(getNumEventTypes(), 0);
+  vector<uint32_t> hhvmSamples(getNumEventTypes(), 0);
   size_t numEntries = 0;
   PerfEventType eventType = EVENT_NULL;
-  // samplesPerKind[event][kind]
-  uint32_t samplesPerKind[getNumEventTypes()][NumTransKinds];
-  uint32_t samplesPerTCRegion[getNumEventTypes()][TCRCount];
-
-  memset(tcSamples  , 0, sizeof(tcSamples));
-  memset(hhvmSamples, 0, sizeof(hhvmSamples));
-  memset(samplesPerKind, 0, sizeof(samplesPerKind));
-  memset(samplesPerTCRegion, 0, sizeof(samplesPerTCRegion));
+  // samplesPerKind[event][kind], samplesPerTCRegion[event][TCRegion]
+  vector< vector<uint32_t> > samplesPerKind(getNumEventTypes(),
+                                            vector<uint32_t>(NumTransKinds, 0));
+  vector< vector<uint32_t> > samplesPerTCRegion(getNumEventTypes(),
+                                                vector<uint32_t>(TCRCount, 0));
 
   while (fgets(line, 2*MAX_SYM_LEN, profFile) != nullptr) {
     always_assert(sscanf(line, "%s %s %lu", program, eventCaption, &numEntries)

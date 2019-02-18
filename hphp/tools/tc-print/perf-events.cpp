@@ -63,7 +63,7 @@ void addEventType(std::string  eventId) {
 
   char caption[] = "xx";
   sprintf(caption, "u%c",
-	  static_cast<char>(numEventTypes - getFirstEventType()) + 'A');
+          static_cast<char>(numEventTypes - getFirstEventType()) + 'A');
   smallCaptions.push_back(std::string(caption));
 
   numEventTypes++;
@@ -73,9 +73,8 @@ PerfEventType perfScriptOutputToEventType(std::string eventId) {
   auto it = idToType.find(eventId);
   if (it == idToType.end()) {
     return EVENT_NULL;
-  } else {
-    return it->second;
   }
+  return it->second;
 }
 
 PerfEventType commandLineArgumentToEventType(const char* argument) {

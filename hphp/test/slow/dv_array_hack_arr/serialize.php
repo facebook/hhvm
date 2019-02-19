@@ -26,7 +26,7 @@ function unserialize_test($s) {
   echo "----------------------------------------------------\n";
   $a = unserialize(
     __hhvm_intrinsics\launder_value($s),
-    ['force_darrays' => true]
+    darray['force_darrays' => true]
   );
   var_dump($a);
   var_dump(is_varray($a));

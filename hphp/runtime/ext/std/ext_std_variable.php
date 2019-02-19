@@ -159,7 +159,7 @@ function serialize(mixed $value): string;
 
 <<__Native, __ParamCoerceModeFalse>>
 function unserialize(string $str,
-                     array $options = []): mixed;
+                     darray $options = darray[]): mixed;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
  * you disabled register_globals, but would like to see some variables in the

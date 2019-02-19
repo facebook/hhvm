@@ -131,8 +131,6 @@ HttpServer::HttpServer() {
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
   options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
   options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
-  auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
-  options.m_extraKb = RDSSize / 1024;
   options.m_loop_sample_rate = RuntimeOption::ServerLoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
   m_pageServer->addTakeoverListener(this);

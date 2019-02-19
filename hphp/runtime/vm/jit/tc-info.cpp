@@ -158,19 +158,19 @@ std::vector<UsageInfo> getUsageInfo() {
   tcUsageInfo.emplace_back(UsageInfo{
     "RDS",
     rds::usedBytes(),
-    rds::perThreadCapacity(RuntimeOption::EvalRDSSize),
+    RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "RDSLocal",
     rds::usedLocalBytes(),
-    rds::perThreadCapacity(RuntimeOption::EvalRDSSize),
+    RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "persistentRDS",
     rds::usedPersistentBytes(),
-    rds::persistentCapacity(RuntimeOption::EvalRDSSize),
+    RuntimeOption::EvalJitTargetCacheSize / 4,
     false
   });
   return tcUsageInfo;

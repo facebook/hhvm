@@ -65,14 +65,6 @@ extern AllocDescriptorList s_local_alloc_descs;
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr uint32_t perThreadCapacity(uint32_t total) {
-  return total / 4 * 3;
-}
-
-constexpr uint32_t persistentCapacity(uint32_t total) {
-  return total / 4;
-}
-
 template<class T, Mode M>
 T* handleToPtr(void* base, Handle h) {
   using namespace detail;

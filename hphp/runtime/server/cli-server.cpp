@@ -555,8 +555,6 @@ void CLIServer::start() {
     RuntimeOption::ServerThreadDropStack,
     nullptr
   );
-  auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
-  m_dispatcher->setWorkerStackConfig(0, 0, RDSSize / 1024);
 
   m_dispatcher->start();
 

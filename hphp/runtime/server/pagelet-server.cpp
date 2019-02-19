@@ -354,7 +354,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 ///////////////////////////////////////////////////////////////////////////////
 // implementing PageletServer
 
-static JobQueueDispatcher<PageletWorker>* s_dispatcher;
+static JobQueueDispatcher<PageletWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
 static ServiceData::CounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
@@ -378,12 +378,9 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
-      auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
-      s_dispatcher->setWorkerStackConfig(
+      s_dispatcher->setHugePageConfig(
         RuntimeOption::PageletServerHugeThreadCount,
-        RuntimeOption::ServerHugeStackKb,
-        RDSSize / 1024
-      );
+        RuntimeOption::ServerHugeStackKb);
       auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
     }

@@ -165,7 +165,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JobQueueDispatcher<XboxWorker>* s_dispatcher;
+static JobQueueDispatcher<XboxWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
 
 void XboxServer::Restart() {
@@ -180,8 +180,6 @@ void XboxServer::Restart() {
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::ServerThreadDropStack,
          nullptr);
-      auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
-      s_dispatcher->setWorkerStackConfig(0, 0, RDSSize / 1024);
     }
     if (RuntimeOption::XboxServerLogInfo) {
       Logger::Info("xbox server started");

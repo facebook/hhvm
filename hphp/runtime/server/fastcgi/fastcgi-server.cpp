@@ -76,10 +76,6 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
-  auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
-  m_dispatcher.setWorkerStackConfig(RuntimeOption::ServerHugeThreadCount,
-                                    RuntimeOption::ServerHugeStackKb,
-                                    RDSSize / 1024);
   folly::SocketAddress sock_addr;
   if (useFileSocket) {
     sock_addr.setFromPath(address);

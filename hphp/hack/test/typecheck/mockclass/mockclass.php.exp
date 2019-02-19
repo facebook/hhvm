@@ -1,0 +1,4 @@
+File "mockclass.php", line 8, characters 13-19:
+You cannot extend final class MyParent (Typing[4035])
+File "mockclass.php", line 3, characters 13-20:
+Declaration is here

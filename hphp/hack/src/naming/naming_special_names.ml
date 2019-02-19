@@ -146,6 +146,7 @@ module UserAttributes = struct
   let uaNewable             = "__Newable"
   let uaEnforceable         = "__Enforceable"
   let uaSoft                = "__Soft"
+  let uaMockClass           = "__MockClass"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -182,6 +183,7 @@ module UserAttributes = struct
       uaNewable;
       uaEnforceable;
       uaSoft;
+      uaMockClass;
     ]
 end
 

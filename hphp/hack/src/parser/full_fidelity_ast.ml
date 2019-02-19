@@ -3532,7 +3532,7 @@ let parse_text
       let errors = DeclModeParser.errors parser in
       PositionedSyntaxTree.create source_text root errors mode false
     else
-      PositionedSyntaxTree.make ~env:env' source_text
+      PositionedSyntaxTree.make ~env:env' ~default_mode source_text
   in
   (mode, tree)
 

@@ -12,9 +12,14 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
   with type r = Syntax.t
   with module Token = Syntax.Token
 ) -> sig
-
   type t [@@deriving show]
-  val make : ?env:Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
+
+  val make :
+    ?env:Full_fidelity_parser_env.t ->
+    ?default_mode:string ->
+    Full_fidelity_source_text.t ->
+    t
+
   val create :
     Full_fidelity_source_text.t ->
     Syntax.t ->

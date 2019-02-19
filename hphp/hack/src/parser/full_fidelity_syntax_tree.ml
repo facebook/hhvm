@@ -80,19 +80,19 @@ let create text root errors mode state =
   let errors = process_errors errors in
   build text root errors mode state
 
-let make_impl ?(env = Env.default) text =
-  let mode = Full_fidelity_parser.parse_mode text in
+let make_impl ?(env = Env.default) ?default_mode text =
+  let mode = Full_fidelity_parser.parse_mode ?default:default_mode text in
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   let errors = Parser.errors parser in
   let state = Parser.sc_state parser in
   create text root errors mode state
 
-let make ?(env = Env.default) text =
+let make ?(env = Env.default) ?default_mode text =
   Stats_container.wrap_nullary_fn_timing
     ?stats:(Env.stats env)
     ~key:"Syntax_tree.make"
-    ~f:(fun () -> make_impl ~env text)
+    ~f:(fun () -> make_impl ~env ?default_mode text)
 
 let root tree =
   tree.root

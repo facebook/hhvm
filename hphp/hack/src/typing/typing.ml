@@ -4901,264 +4901,271 @@ and call ~expected ?method_call_info pos env fty el uel =
 
 and call_ ~expected ~method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
-  let env, efty = SubType.expand_type_and_solve
-    ~description_of_expected:"a function value" env pos fty in
-  (match efty with
-  | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
-    let el = el @ uel in
-    let env, tel = List.map_env env el begin fun env elt ->
-      let env, te, _ =
-        expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
-        ~is_func_arg:true env elt
+  let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
+    let env, efty = SubType.expand_type_and_solve
+      ~description_of_expected:"a function value" env pos fty in
+    match efty with
+    | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
+      let el = el @ uel in
+      let env, tel = List.map_env env el begin fun env elt ->
+        let env, te, _ =
+          expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
+          ~is_func_arg:true env elt
+        in
+        let env =
+          match elt with
+          | _, Callconv (Ast.Pinout, e1) ->
+            let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 efty in
+            env
+          | _, Unop (Ast.Uref, e1) ->
+            let env, _te, _ty = assign_ (fst e1) Reason.URparam env e1 efty in
+            env
+          | _ -> env in
+        env, te
+      end in
+      let env = call_untyped_unpack env uel in
+      let ty =
+        if snd efty = Tdynamic
+        then MakeType.dynamic (Reason.Rdynamic_call pos)
+        else (Reason.Rnone, Typing_utils.tany env)
       in
-      let env =
-        match elt with
-        | _, Callconv (Ast.Pinout, e1) ->
-          let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 efty in
-          env
-        | _, Unop (Ast.Uref, e1) ->
-          let env, _te, _ty = assign_ (fst e1) Reason.URparam env e1 efty in
-          env
-        | _ -> env in
-      env, te
-    end in
-    let env = call_untyped_unpack env uel in
-    let ty =
-      if snd efty = Tdynamic
-      then MakeType.dynamic (Reason.Rdynamic_call pos)
-      else (Reason.Rnone, Typing_utils.tany env)
-    in
-    env, tel, [], ty
-  | _, Tunresolved [ty] ->
-    call ~expected pos env ty el uel
-  | r, Tunresolved tyl ->
-    let env, retl = List.map_env env tyl begin fun env ty ->
-      let env, _, _, ty = call ~expected pos env ty el uel in env, ty
-    end in
-    let env, ty = TUtils.in_var env (r, Tunresolved retl) in
-    env, [], [], ty
-  | r2, Tfun ft ->
-    (* Typing of format string functions. It is dependent on the arguments (el)
-     * so it cannot be done earlier.
-     *)
-    let pos_def = Reason.to_pos r2 in
-    let env, ft = Typing_exts.retype_magic_func env ft el in
-    check_deprecated pos ft;
-    let env, var_param = variadic_param env ft in
+      env, tel, [], ty
+    | _, Tunresolved [ty] ->
+      call ~expected pos env ty el uel
+    | r, Tunresolved tyl ->
+      let env, retl = List.map_env env tyl begin fun env ty ->
+        let env, _, _, ty = call ~expected pos env ty el uel in env, ty
+      end in
+      let env, ty = TUtils.in_var env (r, Tunresolved retl) in
+      env, [], [], ty
+    | r2, Tfun ft ->
+      (* Typing of format string functions. It is dependent on the arguments (el)
+       * so it cannot be done earlier.
+       *)
+      let pos_def = Reason.to_pos r2 in
+      let env, ft = Typing_exts.retype_magic_func env ft el in
+      check_deprecated pos ft;
+      let env, var_param = variadic_param env ft in
 
-    (* Force subtype with expected result *)
-    let env = check_expected_ty "Call result" env ft.ft_ret expected in
-    let env = Env.set_tyvar_variance env ft.ft_ret in
-    let is_lambda e = match snd e with Efun _ -> true | _ -> false in
+      (* Force subtype with expected result *)
+      let env = check_expected_ty "Call result" env ft.ft_ret expected in
+      let env = Env.set_tyvar_variance env ft.ft_ret in
+      let is_lambda e = match snd e with Efun _ -> true | _ -> false in
 
-    let get_next_param_info paraml =
-      match paraml with
-      | param::paraml ->
-        false, Some param, paraml
-      | [] ->
-        true, var_param, paraml in
+      let get_next_param_info paraml =
+        match paraml with
+        | param::paraml ->
+          false, Some param, paraml
+        | [] ->
+          true, var_param, paraml in
 
-    (* Given an expected function type ft, check types for the non-unpacked
-     * arguments. Don't check lambda expressions if check_lambdas=false *)
-    let rec check_args check_lambdas env el paraml =
-      match el with
-      (* We've got an argument *)
-      | ((pos, _ as e), opt_result) :: el ->
-        (* Pick up next parameter type info *)
-        let is_variadic, opt_param, paraml = get_next_param_info paraml in
-        let env, one_result =
-          if Option.is_some opt_result
-          then env, opt_result
-          else
-          if is_lambda e && not check_lambdas
-          then
-            begin match opt_param with
-            | Some param ->
-              let rec set_params_variance env ty =
-                let env, ty = Env.expand_type env ty in
-                match ty with
-                | _, Tunresolved [ty] -> set_params_variance env ty
-                | _, Toption ty -> set_params_variance env ty
-                | _, Tfun { ft_params; _ } ->
-                  List.fold ~init:env ~f:(fun env param ->
-                    Env.set_tyvar_variance env param.fp_type) ft_params
-                | _ -> env in
-              let env = set_params_variance env param.fp_type in
-              env, opt_result
-            | None ->
-              env, opt_result
-            end
-          else
-            begin match opt_param with
-            | Some param ->
-              let env, te, ty =
-                expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
-                  ~expected:(pos, Reason.URparam, param.fp_type) env e in
-              let env = call_param env param (e, ty) ~is_variadic in
-              env, Some (te, ty)
-            | None ->
-              let env, te, ty = expr ~expected:(pos, Reason.URparam,
-                (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env e in
-              env, Some (te, ty)
-            end in
-        let env, rl, paraml = check_args check_lambdas env el paraml in
-        env, (e, one_result)::rl, paraml
-
-      | [] ->
-        env, [], paraml in
-
-    (* First check the non-lambda arguments. For generic functions, this
-     * is likely to resolve type variables to concrete types *)
-    let rl = List.map el (fun e -> (e, None)) in
-    let env, rl, _ = check_args false env rl ft.ft_params in
-    (* Now check the lambda arguments, hopefully with type variables resolved *)
-    let env, rl, paraml = check_args true env rl ft.ft_params in
-    (* We expect to see results for all arguments after this second pass *)
-    let get_param opt =
-      match opt with
-      | Some x -> x
-      | None -> failwith "missing parameter in check_args" in
-    let tel, tys =
-      let l = List.map rl (fun (_, opt) -> get_param opt) in
-      List.unzip l in
-    TR.check_call env method_call_info pos r2 ft tys;
-    let env, tuel, arity, did_unpack =
-      match uel with
-      | [] -> env, [], List.length el, false
-      | e :: _ ->
-        (* Enforces that e is unpackable. If e is a tuple, check types against
-         * parameter types *)
-        let env, te, ty = expr env e in
-        let env, ety = SubType.expand_type_and_solve
-          ~description_of_expected:"an unpackable value" env (fst e) ty in
-        match ety with
-        | _, Ttuple tyl ->
-          let rec check_elements env tyl paraml =
-            match tyl with
-            | [] -> env
-            | ty::tyl ->
-              let is_variadic, opt_param, paraml = get_next_param_info paraml in
-              match opt_param with
-              | None -> env
+      (* Given an expected function type ft, check types for the non-unpacked
+       * arguments. Don't check lambda expressions if check_lambdas=false *)
+      let rec check_args check_lambdas env el paraml =
+        match el with
+        (* We've got an argument *)
+        | ((pos, _ as e), opt_result) :: el ->
+          (* Pick up next parameter type info *)
+          let is_variadic, opt_param, paraml = get_next_param_info paraml in
+          let env, one_result =
+            if Option.is_some opt_result
+            then env, opt_result
+            else
+            if is_lambda e && not check_lambdas
+            then
+              begin match opt_param with
               | Some param ->
+                let rec set_params_variance env ty =
+                  let env, ty = Env.expand_type env ty in
+                  match ty with
+                  | _, Tunresolved [ty] -> set_params_variance env ty
+                  | _, Toption ty -> set_params_variance env ty
+                  | _, Tfun { ft_params; _ } ->
+                    List.fold ~init:env ~f:(fun env param ->
+                      Env.set_tyvar_variance env param.fp_type) ft_params
+                  | _ -> env in
+                let env = set_params_variance env param.fp_type in
+                env, opt_result
+              | None ->
+                env, opt_result
+              end
+            else
+              begin match opt_param with
+              | Some param ->
+                let env, te, ty =
+                  expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
+                    ~expected:(pos, Reason.URparam, param.fp_type) env e in
                 let env = call_param env param (e, ty) ~is_variadic in
-                check_elements env tyl paraml in
-          let env = check_elements env tyl paraml in
-          env, [te], List.length el + List.length tyl, false
-        | _ ->
-          let param_tyl = List.map paraml (fun param -> param.fp_type) in
-          let add_variadic_param_ty param_tyl =
-            match var_param with
-            | Some param -> param.fp_type :: param_tyl
-            | None -> param_tyl in
-          let param_tyl = add_variadic_param_ty param_tyl in
-          let pos = fst e in
-          let env = List.fold_right param_tyl ~init:env
-            ~f:(fun param_ty env ->
-            let traversable_ty = make_unpacked_traversable_ty pos param_ty in
-            Type.sub_type pos Reason.URparam env ety traversable_ty)
-          in
-          env, [te], List.length el, true
-    in
-    (* If we unpacked an array, we don't check arity exactly. Since each
-     * unpacked array consumes 1 or many parameters, it is nonsensical to say
-     * that not enough args were passed in (so we don't do the min check).
-     *)
-    let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
-    (* Variadic params cannot be inout so we can stop early *)
-    let env = wfold_left2 inout_write_back env ft.ft_params el in
-    let env, ret_ty =
-      TR.get_adjusted_return_type env method_call_info ft.ft_ret in
-    env, tel, tuel, ret_ty
-  | r2, Tanon (arity, id) ->
-    let env, tel, tyl = exprs ~is_func_arg:true env el in
-    let expr_for_unpacked_expr_list env = function
-      | [] -> env, [], None, Pos.none
-      | (pos, _) as e :: _ ->
-        let env, te, ety = expr env e in
-        env, [te], Some ety, pos
-    in
-    let append_tuple_types tyl = function
-      | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
-      | _ -> tyl
-    in
-    let determine_arity env min_arity pos = function
-      | None
-      | Some (_, Ttuple _) ->
-        env, Fstandard (min_arity, min_arity)
-      | Some (ety) ->
-        (* We need to figure out the underlying type of the unpacked expr type.
-         *
-         * For example, assume the call is:
-         *    $lambda(...$y);
-         * where $y is a variadic or collection of strings.
-         *
-         * $y may have the type Tarraykind or Traversable, however we need to
-         * pass Fvariadic a param of type string.
-         *
-         * Assuming $y has type Tarraykind, in order to get the underlying type
-         * we create a fresh_type(), wrap it in a Traversable and make that
-         * Traversable a super type of the expr type (Tarraykind). This way
-         * we can infer the underlying type and create the correct param for
-         * Fvariadic.
-         *)
-        let env, ty = Env.fresh_type env pos in
-        let traversable_ty = make_unpacked_traversable_ty pos ty in
-        let env = Type.sub_type pos Reason.URparam env ety traversable_ty in
-        let param =
-           { fp_pos = pos;
-             fp_name = None;
-             fp_type = ty;
-             fp_kind = FPnormal;
-             fp_accept_disposable = false;
-             fp_mutability = None;
-             fp_rx_annotation = None;
-           }
-         in
-         env, Fvariadic (min_arity, param)
-    in
-    let env, tuel, uety_opt, uepos = expr_for_unpacked_expr_list env uel in
-    let tyl = append_tuple_types tyl uety_opt in
-    let env, call_arity = determine_arity env (List.length tyl) uepos uety_opt in
-    let anon = Env.get_anonymous env id in
-    let fpos = Reason.to_pos r2 in
-    (match anon with
-      | None ->
-        Errors.anonymous_recursive_call pos;
-        env, tel, tuel, err_witness env pos
-      | Some (reactivity, is_coroutine, ftys, _, anon) ->
-        let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
-        let tyl = List.map tyl TUtils.default_fun_param in
-        let env, _, ty = anon ~el env tyl call_arity in
-        let fty =
-          (Reason.Rlambda_use pos, Tfun {
-            ft_pos = fpos;
-            ft_deprecated = None;
-            ft_abstract = false;
-            ft_is_coroutine = is_coroutine;
-            ft_arity = arity;
-            ft_tparams = ([], FTKtparams);
-            ft_where_constraints = [];
-            ft_params = tyl;
-            ft_ret = ty;
-            ft_reactive = reactivity;
-            ft_return_disposable = false;
-            ft_mutability = None;
-            ft_returns_mutable = false;
-            ft_decl_errors = None;
-            ft_returns_void_to_rx = false;
-          }) in
-        ftys := TUtils.add_function_type env fty !ftys;
-        env, tel, tuel, ty)
-  | _, Tarraykind _ when not (Env.is_strict env) ->
-    (* Relaxing call_user_func to work with an array in partial mode *)
-    let env = call_untyped_unpack env uel in
-    env, [], [], (Reason.Rnone, Typing_utils.tany env)
-  | ty ->
-    bad_call env pos ty;
+                env, Some (te, ty)
+              | None ->
+                let env, te, ty = expr ~expected:(pos, Reason.URparam,
+                  (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env e in
+                env, Some (te, ty)
+              end in
+          let env, rl, paraml = check_args check_lambdas env el paraml in
+          env, (e, one_result)::rl, paraml
+
+        | [] ->
+          env, [], paraml in
+
+      (* First check the non-lambda arguments. For generic functions, this
+       * is likely to resolve type variables to concrete types *)
+      let rl = List.map el (fun e -> (e, None)) in
+      let env, rl, _ = check_args false env rl ft.ft_params in
+      (* Now check the lambda arguments, hopefully with type variables resolved *)
+      let env, rl, paraml = check_args true env rl ft.ft_params in
+      (* We expect to see results for all arguments after this second pass *)
+      let get_param opt =
+        match opt with
+        | Some x -> x
+        | None -> failwith "missing parameter in check_args" in
+      let tel, tys =
+        let l = List.map rl (fun (_, opt) -> get_param opt) in
+        List.unzip l in
+      TR.check_call env method_call_info pos r2 ft tys;
+      let env, tuel, arity, did_unpack =
+        match uel with
+        | [] -> env, [], List.length el, false
+        | e :: _ ->
+          (* Enforces that e is unpackable. If e is a tuple, check types against
+           * parameter types *)
+          let env, te, ty = expr env e in
+          let env, ety = SubType.expand_type_and_solve
+            ~description_of_expected:"an unpackable value" env (fst e) ty in
+          match ety with
+          | _, Ttuple tyl ->
+            let rec check_elements env tyl paraml =
+              match tyl with
+              | [] -> env
+              | ty::tyl ->
+                let is_variadic, opt_param, paraml = get_next_param_info paraml in
+                match opt_param with
+                | None -> env
+                | Some param ->
+                  let env = call_param env param (e, ty) ~is_variadic in
+                  check_elements env tyl paraml in
+            let env = check_elements env tyl paraml in
+            env, [te], List.length el + List.length tyl, false
+          | _ ->
+            let param_tyl = List.map paraml (fun param -> param.fp_type) in
+            let add_variadic_param_ty param_tyl =
+              match var_param with
+              | Some param -> param.fp_type :: param_tyl
+              | None -> param_tyl in
+            let param_tyl = add_variadic_param_ty param_tyl in
+            let pos = fst e in
+            let env = List.fold_right param_tyl ~init:env
+              ~f:(fun param_ty env ->
+              let traversable_ty = make_unpacked_traversable_ty pos param_ty in
+              Type.sub_type pos Reason.URparam env ety traversable_ty)
+            in
+            env, [te], List.length el, true
+      in
+      (* If we unpacked an array, we don't check arity exactly. Since each
+       * unpacked array consumes 1 or many parameters, it is nonsensical to say
+       * that not enough args were passed in (so we don't do the min check).
+       *)
+      let () = check_arity ~did_unpack pos pos_def arity ft.ft_arity in
+      (* Variadic params cannot be inout so we can stop early *)
+      let env = wfold_left2 inout_write_back env ft.ft_params el in
+      let env, ret_ty =
+        TR.get_adjusted_return_type env method_call_info ft.ft_ret in
+      env, tel, tuel, ret_ty
+    | r2, Tanon (arity, id) ->
+      let env, tel, tyl = exprs ~is_func_arg:true env el in
+      let expr_for_unpacked_expr_list env = function
+        | [] -> env, [], None, Pos.none
+        | (pos, _) as e :: _ ->
+          let env, te, ety = expr env e in
+          env, [te], Some ety, pos
+      in
+      let append_tuple_types tyl = function
+        | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
+        | _ -> tyl
+      in
+      let determine_arity env min_arity pos = function
+        | None
+        | Some (_, Ttuple _) ->
+          env, Fstandard (min_arity, min_arity)
+        | Some (ety) ->
+          (* We need to figure out the underlying type of the unpacked expr type.
+           *
+           * For example, assume the call is:
+           *    $lambda(...$y);
+           * where $y is a variadic or collection of strings.
+           *
+           * $y may have the type Tarraykind or Traversable, however we need to
+           * pass Fvariadic a param of type string.
+           *
+           * Assuming $y has type Tarraykind, in order to get the underlying type
+           * we create a fresh_type(), wrap it in a Traversable and make that
+           * Traversable a super type of the expr type (Tarraykind). This way
+           * we can infer the underlying type and create the correct param for
+           * Fvariadic.
+           *)
+          let env, ty = Env.fresh_type env pos in
+          let traversable_ty = make_unpacked_traversable_ty pos ty in
+          let env = Type.sub_type pos Reason.URparam env ety traversable_ty in
+          let param =
+             { fp_pos = pos;
+               fp_name = None;
+               fp_type = ty;
+               fp_kind = FPnormal;
+               fp_accept_disposable = false;
+               fp_mutability = None;
+               fp_rx_annotation = None;
+             }
+           in
+           env, Fvariadic (min_arity, param)
+      in
+      let env, tuel, uety_opt, uepos = expr_for_unpacked_expr_list env uel in
+      let tyl = append_tuple_types tyl uety_opt in
+      let env, call_arity = determine_arity env (List.length tyl) uepos uety_opt in
+      let anon = Env.get_anonymous env id in
+      let fpos = Reason.to_pos r2 in
+      (match anon with
+        | None ->
+          Errors.anonymous_recursive_call pos;
+          env, tel, tuel, err_witness env pos
+        | Some (reactivity, is_coroutine, ftys, _, anon) ->
+          let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
+          let tyl = List.map tyl TUtils.default_fun_param in
+          let env, _, ty = anon ~el env tyl call_arity in
+          let fty =
+            (Reason.Rlambda_use pos, Tfun {
+              ft_pos = fpos;
+              ft_deprecated = None;
+              ft_abstract = false;
+              ft_is_coroutine = is_coroutine;
+              ft_arity = arity;
+              ft_tparams = ([], FTKtparams);
+              ft_where_constraints = [];
+              ft_params = tyl;
+              ft_ret = ty;
+              ft_reactive = reactivity;
+              ft_return_disposable = false;
+              ft_mutability = None;
+              ft_returns_mutable = false;
+              ft_decl_errors = None;
+              ft_returns_void_to_rx = false;
+            }) in
+          ftys := TUtils.add_function_type env fty !ftys;
+          env, tel, tuel, ty)
+    | _, Tarraykind _ when not (Env.is_strict env) ->
+      (* Relaxing call_user_func to work with an array in partial mode *)
+      let env = call_untyped_unpack env uel in
+      env, [], [], (Reason.Rnone, Typing_utils.tany env)
+    | ty ->
+      bad_call env pos ty;
+      let env = call_untyped_unpack env uel in
+      env, [], [], err_witness env pos
+  end in
+  match resl with
+  | [res] -> res
+  | _ ->
+    bad_call env pos fty;
     let env = call_untyped_unpack env uel in
     env, [], [], err_witness env pos
-  )
 
 and call_param env param ((pos, _ as e), arg_ty) ~is_variadic =
   (match param.fp_name with

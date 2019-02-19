@@ -6,7 +6,7 @@ File "constmap.php", line 12, characters 30-34:
 Considering that this type argument is invariant with respect to ConstMap
 File "constmap.php", line 13, characters 20-25:
 It is incompatible with a string
-File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 47-48:
+File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 59-60:
   via this generic Tk
 File "hhi_lib__srcs/collections/interfaces.hhi", line 1126, characters 47-48:
   via this generic Tk

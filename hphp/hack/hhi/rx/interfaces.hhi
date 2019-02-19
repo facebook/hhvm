@@ -442,6 +442,7 @@ interface KeyedIterable<Tk, +Tv>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toMap(): \Map<Tk, Tv>;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the

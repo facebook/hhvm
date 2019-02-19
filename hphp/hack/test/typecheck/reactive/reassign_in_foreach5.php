@@ -5,12 +5,12 @@ class A {
 }
 
 <<__Rx>>
-function f(Map<A, int> $g): void {
-  $k = HH\Rx\mutable(new A(10));
-  $k->x = 100;
+function f(Map<int, A> $g): void {
+  $a = HH\Rx\mutable(new A(10));
+  $a->x = 100;
   foreach ($g as $k => $a)
   {
     // ERROR
-    $k->x = 42;
+    $a->x = 42;
   }
 }

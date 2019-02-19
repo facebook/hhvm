@@ -48,46 +48,46 @@ function usleep(
   int $usecs,
 ): Awaitable<void> {}
 
-function mm<Tk, Tv, Tr>(
+function mm<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, Tr>> {}
 
-function mmk<Tk, Tv, Tr>(
+function mmk<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, Tr>> {}
 
-function mf<Tk, Tv>(
+function mf<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, Tv>> {}
 
-function mfk<Tk, Tv>(
+function mfk<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, Tv>> {}
 
-function mw<Tk, Tv>(
+function mw<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tv>>> {}
 
-function mmw<Tk, Tv, Tr>(
+function mmw<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tr>>> {}
 
-function mmkw<Tk, Tv, Tr>(
+function mmkw<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tr>>> {}
 
-function mfw<Tk,T>(
+function mfw<Tk as arraykey,T>(
   KeyedTraversable<Tk, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<T>>> {}
 
-function mfkw<Tk, T>(
+function mfkw<Tk as arraykey, T>(
   KeyedTraversable<Tk, T> $inputs,
   (function (Tk, T): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<T>>> {}
@@ -136,7 +136,7 @@ function vfkw<Tk, T>(
   (function (Tk, T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<T>>> {}
 
-function m<Tk, Tv>(
+function m<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {}
 

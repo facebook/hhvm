@@ -9,7 +9,7 @@
  *
  */
 
-function testmap(): Map<mixed, int> {
+function testmap(): Map<arraykey, mixed> {
   $m = Map{"s" => 1, "t" => 2};
   $m[2] = 100;
   return $m;

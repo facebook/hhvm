@@ -82,6 +82,7 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toMap(): Map<Tk, Tv>;
 
   /* HH_FIXME[4110] T40426954 */
@@ -206,6 +207,7 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toMap(): Map<Tk, Tv>;
 
   /* HH_FIXME[4110] T40426954 */

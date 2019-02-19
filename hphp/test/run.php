@@ -1003,8 +1003,6 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $cmd .= ' -vDeploymentId="' . $options['jitsample'] . '"';
     $cmd .= ' --instance-id="' . $test . '"';
     $cmd .= ' -vEval.JitSampleRate=1';
-    $cmd .= " -vScribe.Tables.hhvm_jit.include.*=instance_id";
-    $cmd .= " -vScribe.Tables.hhvm_jit.include.*=deployment_id";
   }
 
   // Command line arguments

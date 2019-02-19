@@ -17,7 +17,6 @@ let global_options =
     ~po_allow_goto:false
     ~po_enable_concurrent:false
     ~po_enable_await_as_an_expression:false
-    ~po_default_mode:"strict"
     ~tco_log_inference_constraints:false
     ~tco_experimental_features:TypecheckerOptions.experimental_all
     ~tco_migration_flags:SSet.empty

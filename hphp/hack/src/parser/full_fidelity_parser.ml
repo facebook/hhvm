@@ -193,10 +193,11 @@ let parse_mode_from_header default text suffix =
           if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
             String.trim (String.sub s 2 (l - 2))
         in
-        try
-          let mode = List.hd (Str.split (Str.regexp " +") mode) in
-          FileInfo.parse_mode ~default mode
-        with _ -> Some FileInfo.Mpartial
+        let mode =
+          try List.hd (Str.split (Str.regexp " +") mode)
+          with _ -> ""
+        in
+        FileInfo.parse_mode ~default mode
       end
   | _ -> Some FileInfo.Mphp
 

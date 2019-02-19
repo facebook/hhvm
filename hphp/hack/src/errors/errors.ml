@@ -2910,8 +2910,8 @@ let nullsafe_not_needed p nonnull_witness =
  ] @ nonnull_witness)
 
 let generic_at_runtime p =
-  add (Typing.err_code Typing.GenericAtRuntime) p
-    "Generics can only be used in type hints since they are erased at runtime."
+  add (Typing.err_code Typing.ErasedGenericAtRuntime) p
+    "Erased generics can only be used in type hints since they are erased at runtime."
 
 let trivial_strict_eq p b left right left_trail right_trail =
   let msg = "This expression is always "^b in

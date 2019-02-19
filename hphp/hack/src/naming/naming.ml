@@ -37,13 +37,11 @@ module GEnv = NamingGlobal.GEnv
 type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = (Ast.constraint_kind * Ast.hint) list
-type aast_type_constraint = (Ast.constraint_kind * Aast.hint) list
+type type_constraint = bool * (Ast.constraint_kind * Ast.hint) list
+type aast_type_constraint = bool * (Ast.constraint_kind * Aast.hint) list
 
-let convert_type_constraints_to_aast tcl =
-  List.map
-    ~f:(fun (ck, h) -> (ck, Ast_to_nast.on_hint h))
-    tcl
+let convert_type_constraints_to_aast =
+  Tuple.T2.map_snd ~f:(List.map ~f:(Tuple.T2.map_snd ~f:Ast_to_nast.on_hint))
 
 type genv = {
 
@@ -416,13 +414,6 @@ end = struct
       )
     | _ -> ()
 
-  (* Check and see if the user might have been trying to use one of the
-   * generics in scope as a runtime value *)
-  let check_no_runtime_generic genv (p, name) =
-    let tparaml = SMap.keys genv.type_params in
-    if List.mem tparaml name ~equal:(=) then Errors.generic_at_runtime p;
-    ()
-
   let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
     match get_canon name with
       | Some canonical ->
@@ -583,8 +574,11 @@ end = struct
     get_name genv (Naming_heap.ConstPosHeap.get) fq_x
 
   let type_name (genv, _) x ~allow_typedef =
-    (* Generic names are not allowed to shadow class names *)
-    check_no_runtime_generic genv x;
+    let (p, name) = x in
+    begin match SMap.find_opt name genv.type_params with
+    | Some (reified, _) ->
+      if not reified then Errors.generic_at_runtime p
+    | None -> () end;
     let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
     match Naming_heap.TypeIdHeap.get name with
     | Some (_def_pos, `Class) ->
@@ -1725,14 +1719,14 @@ module Make (GetLocals : GetLocals) = struct
   and aast_make_constraints paraml =
     List.fold_right
       ~init:SMap.empty
-      ~f:(fun { Aast.tp_name = (_, x); tp_constraints; _ } acc ->
-        SMap.add x tp_constraints acc)
+      ~f:(fun { Aast.tp_name = (_, x); tp_constraints; tp_reified; _ } acc ->
+        SMap.add x (tp_reified, tp_constraints) acc)
       paraml
 
   and aast_extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
-      ~f:begin fun { Aast.tp_name = (_, x); tp_constraints = cstr_list; _ } acc ->
-        SMap.add x cstr_list acc
+      ~f:begin fun { Aast.tp_name = (_, x); tp_constraints = cstr_list; tp_reified = r; _ } acc ->
+        SMap.add x (r, cstr_list) acc
       end in
     { genv with type_params = params }
 

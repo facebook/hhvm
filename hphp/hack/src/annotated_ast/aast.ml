@@ -301,7 +301,7 @@ and class_tparams = {
   (* TODO: remove this and use tp_constraints *)
   (* keeping around the ast version of the constraint only
    * for the purposes of Naming.class_meth_bodies *)
-  c_tparam_constraints: ((Ast.constraint_kind * hint) list SMap.t) [@opaque]
+  c_tparam_constraints: (bool * (Ast.constraint_kind * hint) list) SMap.t [@opaque]
 }
 
 and class_ = {

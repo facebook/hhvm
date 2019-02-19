@@ -361,7 +361,7 @@ module Typing                               = struct
   | DeclaredContravariant
   | UnsetInStrictDEPRECATED
   | StrictMembersNotKnown
-  | GenericAtRuntime
+  | ErasedGenericAtRuntime
   | DynamicClassDEPRECATED
   | AttributeTooManyArguments
   | AttributeParamType

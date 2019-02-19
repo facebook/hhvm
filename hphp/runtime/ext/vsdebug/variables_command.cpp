@@ -50,7 +50,7 @@ Variant m_debugDisplay;
 protected:
   const Object &m_obj;
 
-  virtual void callPHPCode() override;
+  void callPHPCode() override;
 };
 
 DebugSummaryPHPExecutor::DebugSummaryPHPExecutor(

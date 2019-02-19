@@ -161,7 +161,7 @@ struct HashContext : SweepableResourceData {
     }
   }
 
-  ~HashContext() {
+  ~HashContext() override {
     /* Just in case the algo has internally allocated resources */
     if (context) {
       assertx(ops->digest_size >= 0);

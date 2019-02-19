@@ -46,7 +46,7 @@ protected:
   int m_frameDepth;
   bool m_evalSilent;
 
-  virtual void callPHPCode() override;
+  void callPHPCode() override;
 };
 }
 

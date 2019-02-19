@@ -119,14 +119,14 @@ struct WatchmanThreadEventBase : folly::Executor {
   { }
 
   // (INIT)
-  ~WatchmanThreadEventBase() {
+  ~WatchmanThreadEventBase() override {
     drain();
     m_eventBase.terminateLoopSoon();
     m_eventThread.join();
   }
 
   // (PHP)
-  virtual void add(folly::Func f) override {
+  void add(folly::Func f) override {
     m_eventBase.add([f = std::move(f)] () mutable { // (ASYNC entry-point)
       std::lock_guard<std::mutex> g(HPHP::s_sharedDataMutex);
       f();
@@ -487,7 +487,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // after the markAsFinished() above which is the only place mutating the state
   // of the data used here. markAsFinished() can only be called once as it is
   // only called (indirectly) from construction of this object instance.
-  void unserialize(Cell& result) {
+  void unserialize(Cell& result) override {
     if (m_exception) {
       SystemLib::throwInvalidOperationExceptionObject(
         m_exception.what().c_str());

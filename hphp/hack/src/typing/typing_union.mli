@@ -27,10 +27,5 @@ This is quadratic, so if this requires more than 20 two by two unions,
 fall back to simply flatten the unions, bubble up the option and remove
 duplicates. *)
 val union_list: Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
-(** normalize a union of types, i.e. flatten the unions, bubble up the option
-and remove duplicates. Return as a bare set of types, and an optional reason
-for it to be null. *)
-val normalize_union: Env.env -> locl ty list -> (Reason.t option * Typing_set.t)
-(** Make a union type from a set of type.
-If a reason is provided, make the union nullable with that reason *)
-val make_union: Env.env -> Reason.t -> Typing_set.t -> Reason.t option -> locl ty
+(** A cheap type difference. If ty1 is a union, remove ty2 from this union. *)
+val diff: locl ty -> locl ty -> locl ty

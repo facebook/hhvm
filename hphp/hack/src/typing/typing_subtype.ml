@@ -2476,9 +2476,8 @@ let var_as_ty var = (Reason.Rnone, Tvar var)
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
-  let nullable, lower_bounds = TUtils.normalize_union env (TySet.elements lower_bounds) in
-  let lower_bounds = TySet.remove (var_as_ty var) lower_bounds in
-  let ty = TUtils.make_union env r lower_bounds nullable in
+  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
+  let ty = TUtils.diff ty (var_as_ty var) in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
    *   Cov<C>, Contra<D> <: v
@@ -2495,8 +2494,8 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
 let bind_to_upper_bound env r var upper_bounds =
   (* Remove bounds which are the union of var and something else *)
   let upper_bounds = TySet.filter (fun bound ->
-    let _reason_nullable_opt, tys = TUtils.normalize_union env [bound] in
-    not (TySet.mem (var_as_ty var) tys)) upper_bounds in
+    is_sub_type_alt env (var_as_ty var) bound ~no_top_bottom:true <> Some true)
+    upper_bounds in
   match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->

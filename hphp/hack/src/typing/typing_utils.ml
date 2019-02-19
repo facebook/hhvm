@@ -93,13 +93,13 @@ type union = Env.env -> locl ty -> locl ty -> Env.env * locl ty
 let (union_ref: union ref) = ref not_implemented
 let union x = !union_ref x
 
-type normalize_union = Env.env -> locl ty list -> (Reason.t option * Typing_set.t)
-let (normalize_union_ref : normalize_union ref) = ref not_implemented
-let normalize_union x = !normalize_union_ref x
+type union_list = Env.env -> Reason.t -> locl ty list -> (Env.env * locl ty)
+let (union_list_ref : union_list ref) = ref not_implemented
+let union_list x = !union_list_ref x
 
-type make_union = Env.env -> Reason.t -> Typing_set.t -> Reason.t option -> locl ty
-let (make_union_ref : make_union ref) = ref not_implemented
-let make_union x = !make_union_ref x
+type diff = locl ty -> locl ty -> locl ty
+let (diff_ref : diff ref) = ref not_implemented
+let diff x = !diff_ref x
 
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent (`this, []), Some ty)

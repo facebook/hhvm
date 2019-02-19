@@ -437,8 +437,13 @@ let union_list env r tyl =
       union_ty_w_tyl env ty tyl [] iter) in
   env, make_union env r tyl r_null
 
-let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
+let diff ty1 ty2 =
+  let filter tyl = List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)) in
+  match ty1 with
+  | r, Toption (r', Tunresolved tyl) -> r, Toption (r', Tunresolved (filter tyl))
+  | r, Tunresolved tyl -> r, Tunresolved (filter tyl)
+  | _ -> ty1
 
 let () = Typing_utils.union_ref := union
-let () = Typing_utils.normalize_union_ref := normalize_union
-let () = Typing_utils.make_union_ref := make_union
+let () = Typing_utils.union_list_ref := union_list
+let () = Typing_utils.diff_ref := diff

@@ -208,13 +208,12 @@ and union_ env ty1 ty2 r =
   with Dont_unify ->
     env, (r, Tunresolved [ty1; ty2])
 
-and union_unresolved env tyl1 tyl2 r =
-  let unify env ty1 ty2 =
-    begin match union env ty1 ty2 with
-    | _, (_, Tunresolved _) -> env, None
-    | env, ty -> env, Some ty
-    end in
+and try_union env ty1 ty2 =
+  match union env ty1 ty2 with
+  | _, (_, Tunresolved _) -> env, None
+  | env, ty -> env, Some ty
 
+and union_unresolved env tyl1 tyl2 r =
   let attempt_union env tyl ty2 res_is_opt =
     let rec go env tyl ty2 missed res_is_opt =
       match tyl with
@@ -229,7 +228,7 @@ and union_unresolved env tyl1 tyl2 r =
         | r, Tprim Nast.Tnull ->
           go env tyl ty2 missed (Some r)
         | _ ->
-          begin match unify env ety1 ty2 with
+          begin match try_union env ety1 ty2 with
           | _, None -> go env tyl ty2 (ety1::missed) res_is_opt
           | env, Some ty -> env, missed @ (ty::tyl), res_is_opt
           end
@@ -420,11 +419,25 @@ let normalize_union env tyl =
       reason_nullable, TySet.union tys' tys in
   normalize_union tyl None
 
-let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
+let union_list env r tyl =
+  let max_n_iter = 20 in
+  let r_null, tys = normalize_union env tyl in
+  let env, tyl, _ = List.fold (TySet.elements tys) ~init:(env, [], 0)
+    ~f:(fun (env, tyl, iter) ty ->
+      let rec union_ty_w_tyl env ty tyl tyl_acc iter =
+        match tyl with
+        | [] -> env, ty :: tyl_acc, iter
+        | tyl when iter >= max_n_iter -> env, tyl @ (ty :: tyl_acc), iter
+        | ty' :: tyl ->
+          let env, union_opt = try_union env ty ty' in
+          let iter = iter + 1 in
+          match union_opt with
+          | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc) iter
+          | Some union -> env, tyl @ (union :: tyl_acc), iter in
+      union_ty_w_tyl env ty tyl [] iter) in
+  env, make_union env r tyl r_null
 
-let union_list_approx env tyl r =
-  let reason_nullable, tys = normalize_union env tyl in
-  make_union env r tys reason_nullable
+let make_union env r tys nullable = make_union env r (TySet.elements tys) nullable
 
 let () = Typing_utils.union_ref := union
 let () = Typing_utils.normalize_union_ref := normalize_union

@@ -22,13 +22,14 @@ This approximation is necessary to avoid type growing exponentially in size.
 We have seen cases where it would otherwise generate unions involving all
 the subsets of a set of types. *)
 val union: Env.env -> locl ty -> locl ty -> Env.env * locl ty
-(** Since computing the union of a list is quadratic, this is a linear
-approximation which simply normalize the union - removes duplicate Tunresolved
-and Toption and removes duplicates from the list.
-If the result is a singleton union, discard the union constructor. *)
-val union_list_approx: Env.env -> locl ty list -> Typing_reason.t -> locl ty
-(** Same as union_list_approx, but return the union as a set of types and an
-optional reason for it to be nullable. *)
+(** Computes the union of a list of types by union types two by two.
+This is quadratic, so if this requires more than 20 two by two unions,
+fall back to simply flatten the unions, bubble up the option and remove
+duplicates. *)
+val union_list: Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
+(** normalize a union of types, i.e. flatten the unions, bubble up the option
+and remove duplicates. Return as a bare set of types, and an optional reason
+for it to be null. *)
 val normalize_union: Env.env -> locl ty list -> (Reason.t option * Typing_set.t)
 (** Make a union type from a set of type.
 If a reason is provided, make the union nullable with that reason *)

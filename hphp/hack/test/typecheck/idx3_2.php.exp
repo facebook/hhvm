@@ -6,7 +6,7 @@ File "idx3_2.php", line 3, characters 27-29:
 It is incompatible with an int
 File "hhi_lib__srcs/collections/Map.hhi", line 57, characters 63-64:
   via this generic Tv
-File "hhi_lib__srcs/collections/interfaces.hhi", line 1126, characters 51-52:
+File "hhi_lib__srcs/collections/interfaces.hhi", line 1126, characters 63-64:
   via this generic Tv
 File "hhi_lib__srcs/collections/interfaces.hhi", line 856, characters 56-57:
   via this generic Tv

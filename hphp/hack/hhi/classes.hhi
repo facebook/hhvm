@@ -156,7 +156,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromDict<Tk as arraykey, Tv>(
     dict<Tk, Awaitable<Tv>> $deps
   ): Awaitable<void>;
-  public static function fromMap<Tk, Tv>(
+  public static function fromMap<Tk as arraykey, Tv>(
     ConstMap<Tk, Awaitable<Tv>> $deps
   ): Awaitable<void>;
   public static function fromVec<T>(

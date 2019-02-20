@@ -526,6 +526,12 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
     case CURLOPT_KEEP_SENDING_ON_ERROR:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_SSLVERSION:
+    case CURLOPT_PROXY_SSL_OPTIONS:
+    case CURLOPT_PROXY_SSL_VERIFYHOST:
+    case CURLOPT_PROXY_SSL_VERIFYPEER:
+#endif
 #if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
     case CURLOPT_SUPPRESS_CONNECT_HEADERS:
 #endif
@@ -597,6 +603,10 @@ bool CurlResource::isStringFilePathOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
     case CURLOPT_SSH_KNOWNHOSTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_CRLFILE:
+    case CURLOPT_PROXY_SSLCERT:
 #endif
       return true;
     default:
@@ -681,6 +691,19 @@ bool CurlResource::isStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
     case CURLOPT_DEFAULT_PROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_CAINFO:
+    case CURLOPT_PROXY_CAPATH:
+    case CURLOPT_PROXY_KEYPASSWD:
+    case CURLOPT_PROXY_PINNEDPUBLICKEY:
+    case CURLOPT_PROXY_SSLCERTTYPE:
+    case CURLOPT_PROXY_SSLKEY:
+    case CURLOPT_PROXY_SSLKEYTYPE:
+    case CURLOPT_PROXY_SSL_CIPHER_LIST:
+    case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+    case CURLOPT_PROXY_TLSAUTH_TYPE:
+    case CURLOPT_PROXY_TLSAUTH_USERNAME:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
     case CURLOPT_PROXY_TLS13_CIPHERS:

@@ -8,6 +8,7 @@
  *)
 
 open Tast
+open Core_kernel
 
 module Env = Tast_env
 module Cls = Typing_classes_heap
@@ -34,6 +35,14 @@ let check_method_body env m =
   if not (Typing_env.is_decl tenv) && not m.m_abstract && named_body.fb_ast = []
   then Errors.not_abstract_without_body m.m_name
 
+let check_class _ c =
+  if c.c_kind = Ast.Cabstract && c.c_final then begin
+    let err m =
+      Errors.nonstatic_method_in_abstract_final_class (fst m.m_name) in
+    List.iter c.c_methods err;
+    Option.iter c.c_constructor err
+  end
+
 let handler = object
   inherit Tast_visitor.handler_base
 
@@ -41,4 +50,5 @@ let handler = object
 
   method! at_method_ env m = check_method_body env m
 
+  method! at_class_ env c = check_class env c
 end

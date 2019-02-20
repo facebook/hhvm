@@ -622,11 +622,6 @@ and class_ tenv c =
   | Ast.Cabstract, false
   | Ast.Cnormal, _ -> ();
   end;
-  if c.c_kind = Ast.Cabstract && c.c_final then begin
-    List.iter c.c_methods (fun m -> Errors.nonstatic_method_in_abstract_final_class (fst m.m_name));
-    Option.iter c.c_constructor
-      (fun m -> Errors.nonstatic_method_in_abstract_final_class (fst m.m_name))
-  end;
 
   if c.c_kind = Ast.Cinterface then begin
     interface c;

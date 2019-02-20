@@ -1487,7 +1487,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
       "bailing because Eval.AbortBuildOnVerifyError is set\n",
       uep->m_filepath->data()
     );
-    std::exit(1);
+    _Exit(1);
   }
 
   auto const& ue = *uep;

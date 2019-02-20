@@ -190,6 +190,7 @@ interface Iterable<+Tv>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe.
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
@@ -198,7 +199,7 @@ interface Iterable<+Tv>
    *
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
   /**
    * Returns a lazy, access elements only when needed view of the current

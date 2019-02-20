@@ -330,6 +330,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - a `Set` converted from the current `Iterable`.
    */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
@@ -338,6 +339,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
+  /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
   /**
    * Returns a lazy, access elements only when needed view of the current

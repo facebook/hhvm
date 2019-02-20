@@ -9,12 +9,12 @@
  *
  */
 
-function covariance(ConstSet<mixed> $x): void {}
-function test1(Set<int> $c): ConstSet<mixed> {
+function covariance(ConstSet<arraykey> $x): void {}
+function test1(Set<int> $c): ConstSet<arraykey> {
   covariance($c);
   return $c;
 }
-function test2(ImmSet<int> $c): ConstSet<mixed> {
+function test2(ImmSet<int> $c): ConstSet<arraykey> {
   covariance($c);
   return $c;
 }
@@ -25,7 +25,7 @@ class C<Tv> {
     $this->covariance($c);
     return $c;
   }
-  public function test2<Tu as Tv>(ImmSet<Tu> $c): ConstSet<Tv> {
+  public function test2<Tu as Tv as arraykey>(ImmSet<Tu> $c): ConstSet<Tv> {
     $this->covariance($c);
     return $c;
   }

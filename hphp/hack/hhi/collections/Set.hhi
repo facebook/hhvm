@@ -119,8 +119,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Map` that that contains the values of the current `Set`, with
    *           each key of the `Map` being the same as its value.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function toMap(): Map<arraykey, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  public function toMap(): Map<Tv, Tv>;
 
   /**
    * Returns an immutable map (`ImmMap`) based on the values of the current
@@ -131,15 +131,15 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - an `ImmMap` that that contains the values of the current `Set`,
    *           with each key of the Map being the same as its value.
    */
-  <<__Rx, __MaybeMutable>>
-  public function toImmMap(): ImmMap<arraykey, Tv>;
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  public function toImmMap(): ImmMap<Tv, Tv>;
 
   /**
    * Returns a deep copy of the current `Set`.
    *
    * @return - a `Set` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
   /**
@@ -149,7 +149,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -159,7 +159,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function immutable(): ImmSet<Tv>;
 
   /**
@@ -175,8 +175,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  public function lazy(): HH\Rx\KeyedIterable<Tv, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.

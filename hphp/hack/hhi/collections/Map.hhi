@@ -130,7 +130,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - a `Set` with the current values of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
   /**
@@ -139,7 +139,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - an `ImmSet` with the current values of the current `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   /**

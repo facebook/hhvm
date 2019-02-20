@@ -135,7 +135,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
    *
    * @return - an `ImmSet` with the current values of the current `ImmMap`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   /**

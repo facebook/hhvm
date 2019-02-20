@@ -31,8 +31,10 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
+ /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   public function lazy(): Iterable<Tv>;
@@ -91,8 +93,10 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
+  /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   public function lazy(): KeyedIterable<Tk,Tv>;
@@ -156,8 +160,10 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
+  /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   public function lazy(): Iterable<Tv>;
@@ -216,8 +222,10 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
+  /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   public function lazy(): KeyedIterable<Tk,Tv>;

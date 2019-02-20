@@ -125,7 +125,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Set` containing the unique values of the current `Vector`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toSet(): Set<Tv>;
 
   /**
@@ -134,7 +134,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - An `ImmSet` containing the unique values of the current `Vector`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
   public function toImmSet(): ImmSet<Tv>;
 
   /**

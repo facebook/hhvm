@@ -41,7 +41,7 @@
  * @guide /hack/collections/classes
  */
 
-final class ImmSet<+Tv> implements ConstSet<Tv> {
+final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
    * `null` is passed.
@@ -165,7 +165,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    */
   <<__Rx>>
   public static function fromKeysOf<Tk, Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
+    ?KeyedContainer<Tk,Tv2> $container /* HH_FIXME[4110] T40426954 */
   ): ImmSet<Tk>;
 
   /**
@@ -321,7 +321,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): ImmSet<Tu>;
+  /* HH_FIXME[4110] T40426954 */
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): /* HH_FIXME[4110] T40426954 */ ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -341,8 +342,9 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           operation on the current `ImmSet`'s values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback):
-    ImmSet<Tu>;
+  /* HH_FIXME[4110] T40426954 */
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback):
+  /* HH_FIXME[4110] T40426954 */ ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -400,8 +402,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           with the provided `Traversable`; one of these must be empty or
    *           an exception is thrown.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  public function zip<Tu as arraykey>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ImmSet<arraykey>;
 
   /**
    * Returns an `ImmSet` containing the first n values of the current `ImmSet`.

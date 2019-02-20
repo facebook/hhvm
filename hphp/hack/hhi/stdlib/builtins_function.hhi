@@ -16,10 +16,6 @@ function function_exists(string $function_name, bool $autoload = true): bool;
 function is_callable($v, bool $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
-<<__PHPStdLib>>
-function forward_static_call_array<T>($function, Container<T> $params);
-<<__PHPStdLib>>
-function forward_static_call($function, ...);
 /* A get_called_class is treated at static::class */
 <<__Rx>>
 function get_called_class(): string; // false if called from outside class

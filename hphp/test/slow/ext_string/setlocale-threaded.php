@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function send_to_pagelet($relative_file_path, $locale) {
-  $headers = array();
+  $headers = darray[];
   $task = pagelet_server_task_start(
     "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
   );

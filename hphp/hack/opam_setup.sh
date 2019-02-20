@@ -14,18 +14,18 @@ if [ -f "$MINI_TARBALL" ]
 then
 	rm -rf "$MINI_REPO" ||:
 	tar xzf "$MINI_TARBALL" -C "$ROOT/_build"
-	opam init offline_clone "$MINI_REPO" --no-setup
+	opam init --reinit offline_clone "$MINI_REPO" --no-setup
 else
-	opam init --no-setup
+	opam init --reinit --no-setup
 fi
 
-eval "$(opam config env)"
+eval "$(opam env)"
 opam install \
 	core_kernel.v0.11.1 \
-	dune.1.2.1 \
+	dune.1.6.3 \
 	lwt.4.1.0 \
 	lwt_log.1.1.0 \
 	lwt_ppx.1.2.1 \
-	pcre.7.3.4 \
+	pcre.7.4.0 \
 	ppx_deriving.4.2.1 \
 	visitors.20180513

@@ -187,7 +187,7 @@ bool PageletTransport::isPipelineEmpty() {
 Array PageletTransport::getAsyncResults(bool allow_empty) {
   auto results = Array::Create();
   PageletServerTaskEvent* next_event = nullptr;
-  int code;
+  int code = 0;
 
   {
     Lock lock(this);
@@ -199,8 +199,9 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
       m_pipeline.pop_front();
     }
 
-    code = m_code;
+
     if (m_done) {
+      code = m_code;
       String response(m_response.c_str(), m_response.size(), CopyString);
       results.append(response);
     } else {

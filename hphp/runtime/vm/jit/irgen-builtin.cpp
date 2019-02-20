@@ -334,8 +334,7 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
 }
 
 /*
- * Transforms in_array with a static haystack argument into an AKExistsArr with
- * the haystack flipped.
+ * Transforms in_array with a static haystack argument into an AKExistsKeyset.
  */
 SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   if (params.size() != 3 && params.size() != 2) return nullptr;
@@ -343,7 +342,8 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(params[0].value->type() <= TStr)) {
+  auto const needle = params[0].value;
+  if (!(needle->type() <= TStr)) {
     return nullptr;
   }
 
@@ -358,47 +358,36 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
     return cns(env, false);
   }
 
-  ArrayInit flipped{haystack->size(), ArrayInit::Map{}};
+  KeysetInit flipped{haystack->size()};
+  bool failed{false};
+  IterateVNoInc(
+    haystack,
+    [&](TypedValue key) {
 
-  for (auto iter = ArrayIter{haystack}; iter; ++iter) {
-    auto const key = iter.secondRval().unboxed();
-    int64_t ignoredInt;
-    double ignoredDbl;
+      if (!isStringType(type(key)) || val(key).pstr->isNumeric()) {
+        // Numeric strings will complicate matters because the loose comparisons
+        // done with array keys are not quite the same as loose comparisons done
+        // by in_array. For example: in_array('0', array('0000')) is true, but
+        // doing array('0000' => true)['0'] will say "undefined index".
+        // This seems unlikely to affect real-world usage.
+        failed = true;
+        return true;
+      }
 
-    if (!isStringType(key.type()) ||
-        key.val().pstr
-          ->isNumericWithVal(ignoredInt, ignoredDbl, false) != KindOfNull) {
-      // Numeric strings will complicate matters because the loose comparisons
-      // done with array keys are not quite the same as loose comparisons done
-      // by in_array. For example: in_array('0', array('0000')) is true, but
-      // doing array('0000' => true)['0'] will say "undefined index". This seems
-      // unlikely to affect real-world usage.
-      return nullptr;
+      flipped.add(val(key).pstr);
+      return false;
     }
-
-    flipped.set(StrNR(key.val().pstr), init_null_variant);
+  );
+  if (failed) {
+    return nullptr;
   }
 
-  auto const needle = params[0].value;
-  auto array = flipped.toArray();
-  if (RuntimeOption::EvalHackArrCompatNotices) {
-    // AKExistsArr can throw with HackArrCompatNotices enabled, so we need to
-    // manually provide a catch trace.
-    return gen(
-      env,
-      AKExistsArr,
-      make_opt_catch(env, params),
-      cns(env, ArrayData::GetScalarArray(std::move(array))),
-      needle
-    );
-  } else {
-    return gen(
-      env,
-      AKExistsArr,
-      cns(env, ArrayData::GetScalarArray(std::move(array))),
-      needle
-    );
-  }
+  return gen(
+    env,
+    AKExistsKeyset,
+    cns(env, ArrayData::GetScalarArray(flipped.toArray())),
+    needle
+  );
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {

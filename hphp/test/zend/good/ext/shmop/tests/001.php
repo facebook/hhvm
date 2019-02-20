@@ -37,7 +37,6 @@ echo "data in memory is: " . shmop_read($shm_id, 0, $written) . "\n";
 
 /* try to append data to the shared memory segment, this should fail */
 @shmop_write($shm_id, $write_d1, $written);
-echo $php_errormsg . "\n";
 
 shmop_close($shm_id);
 

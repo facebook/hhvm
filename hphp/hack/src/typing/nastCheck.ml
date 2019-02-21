@@ -449,16 +449,6 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
-  let inout = List.find f.f_params ~f:(
-    fun x -> x.param_callconv = Some Ast.Pinout) in
-  (match inout with
-    | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes ||
-         Attributes.mem SN.UserAttributes.uaMemoizeLSB f.f_user_attributes
-      then Errors.inout_params_memoize p param.param_pos;
-      ()
-    | _ -> ()
-  );
   (match f.f_variadic with
     | FVvariadicArg vparam ->
       if vparam.param_is_reference then
@@ -828,16 +818,6 @@ and method_ (env, is_static) m =
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
-  let inout = List.find m.m_params ~f:(
-    fun x -> x.param_callconv = Some Ast.Pinout) in
-  (match inout with
-    | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
-         Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
-      then Errors.inout_params_memoize p param.param_pos;
-      ()
-    | _ -> ()
-  );
   (match m.m_variadic with
     | FVvariadicArg vparam ->
       if vparam.param_is_reference then
@@ -886,19 +866,9 @@ and check_maybe_rx_attributes_on_params env parent_attrs params =
     Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
   | _ -> ()
 
-and fun_param env (_pos, name) f_type byref param =
+and fun_param env (_pos, _name) _f_type _byref param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
-
-  match param.param_callconv with
-  | None -> ()
-  | Some Ast.Pinout ->
-    let pos = param.param_pos in
-    if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
-    if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-    Option.iter byref ~f:(fun param ->
-      Errors.inout_params_mix_byref pos param.param_pos);
-    ()
 
 and stmt env = function
   | Return (p, _) when env.t_is_finally ->

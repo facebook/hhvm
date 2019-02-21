@@ -440,7 +440,7 @@ module Full = struct
       (* Type is nullable single type *)
       | _, [ty] ->
         if show_verbose env
-          then Concat [text "(null|"; k ty; text ")"]
+          then Concat [text "(null |"; k ty; text ")"]
           else Concat [text "?"; k ty]
       (* Type is nullable unresolved type *)
       | _, _ ->

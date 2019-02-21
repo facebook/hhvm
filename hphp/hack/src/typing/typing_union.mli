@@ -27,5 +27,8 @@ This is quadratic, so if this requires more than 20 two by two unions,
 fall back to simply flatten the unions, bubble up the option and remove
 duplicates. *)
 val union_list: Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
-(** A cheap type difference. If ty1 is a union, remove ty2 from this union. *)
+(** Simplify unions in a type. *)
+val simplify_unions: Env.env -> locl ty -> Env.env * locl ty
+(** A cheap type difference. If ty1 is a union, remove ty2 from this union.
+Assumes ty1 is a flattened union or an option of a flattened union. *)
 val diff: locl ty -> locl ty -> locl ty

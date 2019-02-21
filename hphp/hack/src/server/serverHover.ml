@@ -27,7 +27,8 @@ let type_at (file, line, char) tcopt files_info =
     GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
   } in
   let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
-  ServerInferType.type_at_pos tast line char
+  let env_ty_opt = ServerInferType.type_at_pos tast line char in
+  Option.map env_ty_opt ~f:(fun (env, ty) -> env, Tast_expand.expand_ty env ty)
 
 (** When we get a Class occurrence and a Method occurrence, that means that the
 user is hovering over an invocation of the constructor, and would therefore only

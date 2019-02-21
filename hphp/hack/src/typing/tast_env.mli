@@ -166,6 +166,9 @@ val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any). *)
 
+val simplify_unions: env -> Tast.ty -> env * Tast.ty
+(** Simplify unions in a type. *)
+
 val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
 (** Return {true} when the given type can be used in a context where string is
     required after resolving unbound type variables in the type (if any).

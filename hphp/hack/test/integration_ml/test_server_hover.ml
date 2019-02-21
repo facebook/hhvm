@@ -893,9 +893,10 @@ function test_duplicate_result_class(bool $x): void {
 
 let duplicate_results_cases = [
   ("duplicate_results.php", 22, 7), [{
-    snippet = "public (function(): void)";
+    snippet = "public function foo(): void";
     addendum = [
       "Doc block.";
+      "Return type: `void`";
       "Full name: `DuplicateResultTrait::foo`";
     ];
     pos = pos_at (22, 7) (22, 9);

@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Hh_core
 open Typing_defs
 
@@ -51,9 +52,8 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
     | _ -> raise Not_equiv in
   env, ty
 
-let make_union env r tyl reason_nullable_opt =
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  match new_inference, reason_nullable_opt, tyl with
+let make_union r tyl reason_nullable_opt ~discard_singletons =
+  match discard_singletons, reason_nullable_opt, tyl with
   | _, Some null_r, [] ->  (null_r, Tprim Nast.Tnull)
   | true, None, [ty] -> ty
   | _, None, tyl -> (r, Tunresolved tyl)
@@ -252,7 +252,8 @@ and union_unresolved env tyl1 tyl2 r =
         normalize_union env tyl1 tyl2 res_is_opt
       end in
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
-  env, make_union env r tyl res_is_opt
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  env, make_union r tyl res_is_opt ~discard_singletons:new_inference
 
 and union_arraykind env ak1 ak2 =
   match ak1, ak2 with
@@ -405,24 +406,24 @@ and union_reason r1 r2 =
 
 let normalize_union env tyl =
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let rec normalize_union tyl reason_nullable =
+  let orr r_opt r = Some (Option.value r_opt ~default:r) in
+  let rec normalize_union tyl r_null r_union =
     match tyl with
-    | [] -> reason_nullable, TySet.empty
+    | [] -> r_null, r_union, TySet.empty
     | ty :: tyl ->
       let ty = if new_inference then Typing_expand.fully_expand env ty else ty in
-      let reason_nullable, tys' = match ty with
-        | (r, Tprim Nast.Tnull) -> normalize_union [] (Some r)
-        | (r, Toption ty) -> normalize_union [ty] (Some r)
-        | (_, Tunresolved tyl') -> normalize_union tyl' reason_nullable
-        | ty -> reason_nullable, TySet.singleton ty in
-      let reason_nullable, tys = normalize_union tyl reason_nullable in
-      reason_nullable, TySet.union tys' tys in
-  normalize_union tyl None
+      let r_null, r_union, tys' = match ty with
+        | (r, Tprim Nast.Tnull) -> normalize_union [] (orr r_null r) r_union
+        | (r, Toption ty) -> normalize_union [ty] (orr r_null r) r_union
+        | (r, Tunresolved tyl') -> normalize_union tyl' r_null (orr r_union r)
+        | ty -> r_null, r_union, TySet.singleton ty in
+      let r_null, r_union, tys = normalize_union tyl r_null r_union in
+      r_null, r_union, TySet.union tys' tys in
+  normalize_union tyl None None
 
-let union_list env r tyl =
+let union_list_2_by_2 env tyl =
   let max_n_iter = 20 in
-  let r_null, tys = normalize_union env tyl in
-  let env, tyl, _ = List.fold (TySet.elements tys) ~init:(env, [], 0)
+  let env, tyl, _ = List.fold tyl ~init:(env, [], 0)
     ~f:(fun (env, tyl, iter) ty ->
       let rec union_ty_w_tyl env ty tyl tyl_acc iter =
         match tyl with
@@ -435,7 +436,19 @@ let union_list env r tyl =
           | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc) iter
           | Some union -> env, tyl @ (union :: tyl_acc), iter in
       union_ty_w_tyl env ty tyl [] iter) in
-  env, make_union env r tyl r_null
+  env, tyl
+
+let union_list env r tyl =
+  let r_null, _r_union, tys = normalize_union env tyl in
+  let env, tyl = union_list_2_by_2 env (TySet.elements tys) in
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  env, make_union r tyl r_null ~discard_singletons:new_inference
+
+let simplify_unions env (r, _ as ty) =
+  let r_null, r_union, tys = normalize_union env [ty] in
+  let env, tyl = union_list_2_by_2 env (TySet.elements tys) in
+  let r = Option.value r_union ~default:r in
+  env, make_union r tyl r_null ~discard_singletons:true
 
 let diff ty1 ty2 =
   let filter tyl = List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)) in

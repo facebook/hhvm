@@ -91,10 +91,10 @@
            (Return ([18:3-20],
               (Some (([18:10-19], (int | string)),
                      (Call (Cnormal,
-                        (([18:10-17], ((function(): int) | (function(): string))),
+                        (([18:10-17], (function(): (int | string))),
                          (Obj_get (
                             (([18:10-12], (C1 | C2)), (Lvar ([18:10-12], $x))),
-                            (([18:14-17], ((function(): int) | (function(): string))),
+                            (([18:14-17], (function(): (int | string))),
                              (Id ([18:14-17], "foo"))),
                             OG_nullthrows))),
                         [], [], []))))

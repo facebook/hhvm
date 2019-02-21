@@ -61,6 +61,7 @@
     typing_tdef
     typing_unify
     typing_unify_recursive
+    typing_union
     typing_utils
     typing_visibility
     typing_xhp)
@@ -134,7 +135,6 @@
     typing_shapes
     typing_structure
     typing_try
-    typing_union
     typing_variance)
   (libraries
     logging

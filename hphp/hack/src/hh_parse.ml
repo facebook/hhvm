@@ -328,22 +328,11 @@ end
 
 open FullFidelityParseArgs
 
-let print_error error = error
-  |> Errors.to_absolute
-  |> Errors.to_string
-  |> output_string stdout
-
 (* Prints a single FFP error. *)
 let print_full_fidelity_error source_text error =
   let text = SyntaxError.to_positioned_string
     error (SourceText.offset_to_position source_text) in
   Printf.printf "%s\n" text
-
-(* Computes and prints list of all FFP errors from syntax pass and parser pass.
- * Specifying all_errors=false will attempt to filter out duplicate errors. *)
-let print_full_fidelity_errors ~source_text ~error_env =
-  let errors = ParserErrors.parse_errors error_env in
-  List.iter (print_full_fidelity_error source_text) errors
 
 let handle_existing_file args filename =
   let popt = ParserOptions.default in
@@ -379,12 +368,43 @@ let handle_existing_file args filename =
     let pretty = Libhackfmt.format_tree syntax_tree in
     Printf.printf "%s\n" pretty
   end;
+  if args.full_fidelity_s_expr then begin
+    let root = SyntaxTree.root syntax_tree in
+    let str = DebugPos.dump_syntax root in
+    Printf.printf "%s\n" str
+  end;
 
   let print_errors =
        args.codegen
     || args.full_fidelity_errors
     || args.full_fidelity_errors_all
   in
+  let dump_needed = args.full_fidelity_ast_s_expr || args.dump_nast in
+  let lowered = if dump_needed || print_errors then begin
+    let popt =
+      if args.dump_nast
+      then { popt with GlobalOptions.po_enable_concurrent = true }
+      else popt in
+    let env =
+      Full_fidelity_ast.make_env
+        ~codegen:args.codegen
+        ~php5_compat_mode:args.php5_compat_mode
+        ~elaborate_namespaces:args.elaborate_namespaces
+        ~include_line_comments:args.include_line_comments
+        ~keep_errors:(args.keep_errors && not print_errors)
+        ~quick_mode:args.quick_mode
+        ~lower_coroutines:args.lower_coroutines
+        ~enable_hh_syntax:args.enable_hh_syntax
+        ~enable_xhp:args.enable_hh_syntax
+        ~parser_options:popt
+        ~fail_open:args.fail_open
+        ~is_hh_file:args.is_hh_file
+        ~pocket_universes:args.pocket_universes
+        file
+    in
+    try Some (Full_fidelity_ast.from_file env) with
+    | _ when print_errors -> None
+  end else None in
   if print_errors then begin
     let level = if args.full_fidelity_errors_all
       then ParserErrors.Maximum
@@ -398,46 +418,24 @@ let handle_existing_file args filename =
       ~codegen:args.codegen
       ~parser_options:popt
     in
-    print_full_fidelity_errors ~source_text ~error_env
+    let errors = ParserErrors.parse_errors error_env in
+    List.iter (print_full_fidelity_error source_text) errors
   end;
 
-  if args.full_fidelity_s_expr then begin
-    let root = SyntaxTree.root syntax_tree in
-    let str = DebugPos.dump_syntax root in
-    Printf.printf "%s\n" str
-  end;
-  if args.full_fidelity_ast_s_expr || args.dump_nast then begin
-    let module Lowerer = Full_fidelity_ast in
-    let popt =
-      if args.dump_nast
-      then { popt with GlobalOptions.po_enable_concurrent = true }
-      else popt in
-    let env =
-      Lowerer.make_env
-        ~codegen:args.codegen
-        ~php5_compat_mode:args.php5_compat_mode
-        ~elaborate_namespaces:args.elaborate_namespaces
-        ~include_line_comments:args.include_line_comments
-        ~keep_errors:args.keep_errors
-        ~quick_mode:args.quick_mode
-        ~lower_coroutines:args.lower_coroutines
-        ~enable_hh_syntax:args.enable_hh_syntax
-        ~enable_xhp:args.enable_hh_syntax
-        ~parser_options:popt
-        ~fail_open:args.fail_open
-        ~is_hh_file:args.is_hh_file
-        ~pocket_universes:args.pocket_universes
-        file
-    in
-    let res = Lowerer.from_file env in
-    let ast = res.Lowerer.ast in
-    let str =
-      if args.dump_nast then
-        Nast.show_program (Ast_to_nast.convert ast)
-      else
-        Debug.dump_ast (Ast.AProgram ast) in
-    Printf.printf "%s\n" str
-  end;
+  match lowered with
+  | Some res ->
+    let ast = res.Full_fidelity_ast.ast in
+    if print_errors then
+      Ast_check.check_program ast
+      |> List.iter (print_full_fidelity_error source_text);
+    if dump_needed then
+      let str =
+        if args.dump_nast then
+          Nast.show_program (Ast_to_nast.convert ast)
+        else
+          Debug.dump_ast (Ast.AProgram ast) in
+      Printf.printf "%s\n" str
+  | None -> ();
   if args.full_fidelity_json then begin
     let json = SyntaxTree.to_json syntax_tree in
     let str = Hh_json.json_to_string json in

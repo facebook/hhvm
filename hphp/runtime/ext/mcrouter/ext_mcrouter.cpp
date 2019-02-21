@@ -15,6 +15,7 @@
 #include "mcrouter/McrouterClient.h" // @nolint
 #include "mcrouter/McrouterInstance.h" // @nolint
 #include "mcrouter/lib/McResUtil.h" // @nolint
+#include "mcrouter/lib/carbon/Result.h" // @nolint
 #include "mcrouter/lib/network/CarbonMessageList.h" // @nolint
 #include "mcrouter/lib/network/gen/Memcache.h" // @nolint
 #include "mcrouter/options.h" // @nolint
@@ -39,10 +40,36 @@ const StaticString
 
 static Class* c_MCRouterException = nullptr;
 
+/**
+ * Below are to maintain the compatibility during the migration
+ * from mc_res_t to enum class carbon::Result
+ */
+namespace compatibility {
+#ifdef CARBON_RESULT_ENUM_CLASS
+const carbon::Result mc_res_unknown = carbon::Result::UNKNOWN;
+const carbon::Result mc_res_deleted = carbon::Result::DELETED;
+const carbon::Result mc_res_ok = carbon::Result::OK;
+const carbon::Result mc_nres = carbon::Result::NUM_RESULTS;
+
+const char* carbonResultToString(const carbon::Result result) {
+  return carbon::resultToString(result);
+}
+#else
+const carbon::Result mc_res_unknown = ::mc_res_unknown;
+const carbon::Result mc_res_deleted = ::mc_res_deleted;
+const carbon::Result mc_res_ok = ::mc_res_ok;
+const carbon::Result mc_nres = ::mc_nres;
+
+const char* carbonResultToString(const carbon::Result result) {
+  return mc_res_to_string(result);
+}
+#endif
+} // namespace compatibility
+
 [[noreturn]]
 static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
-                               mc_res_t result = mc_res_unknown,
+                               carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
   if (!c_MCRouterException) {
     c_MCRouterException = Unit::lookupClass(s_MCRouterException.get());
@@ -233,7 +260,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
     if (mc::isErrorResult(reply.result())) {
       setResultException(request, reply);
     } else {
-      const auto mc_op = 
+      const auto mc_op =
           mc::OpFromType<Request, mc::RequestOpMapping>::value;
       switch (mc_op) {
         case mc_op_add:
@@ -249,14 +276,14 @@ struct MCRouterResult : AsioExternalThreadEvent {
           break;
 
         case mc_op_flushall:
-          if (reply.result() != mc_res_ok) {
+          if (reply.result() != compatibility::mc_res_ok) {
             setResultException(request, reply);
             break;
           }
           break;
 
         case mc_op_delete:
-          if (reply.result() != mc_res_deleted) {
+          if (reply.result() != compatibility::mc_res_deleted) {
             setResultException(request, reply);
             break;
           }
@@ -308,7 +335,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
     m_replyCode = reply.result();
     m_exception  = mc_op_to_string(m_op);
     m_exception += " failed with result ";
-    m_exception += mc_res_to_string(m_replyCode);
+    m_exception += compatibility::carbonResultToString(m_replyCode);
     if (!reply.message().empty()) {
       m_exception += ": ";
       m_exception += reply.message();
@@ -325,7 +352,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
 
   // Deferred exception data
   mc_op_t m_op;
-  mc_res_t m_replyCode;
+  carbon::Result m_replyCode;
   std::string m_exception, m_key;
 };
 
@@ -337,7 +364,7 @@ void MCRouter::send(std::unique_ptr<const Request> request,
       *requestPtr,
       [res, request = std::move(request)](const Request& req,
                                           mc::ReplyT<Request>&& reply) {
-        if (reply.result() == mc_res_unknown) {
+        if (reply.result() == compatibility::mc_res_unknown) {
           // McrouterClient has signaled this request is cancelled
           res->cancel();
         } else {
@@ -450,11 +477,11 @@ static String HHVM_STATIC_METHOD(MCRouter, getOpName, int64_t op) {
 }
 
 static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
-  auto name = mc_res_to_string((mc_res_t)res);
+  auto name = compatibility::carbonResultToString((carbon::Result)res);
   if (!name) {
     std::string msg = "Unknown mc_res_* value: ";
     msg += res;
-    mcr_throwException(msg, mc_op_unknown, (mc_res_t)res);
+    mcr_throwException(msg, mc_op_unknown, (carbon::Result)res);
   }
   return name;
 }
@@ -507,10 +534,11 @@ struct MCRouterExtension : Extension {
         makeStaticString(name),
         i);
     }
-    for (int i = 0; i < mc_nres; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(compatibility::mc_nres); ++i) {
       Native::registerClassConstant<KindOfInt64>(
         s_MCRouter.get(),
-        makeStaticString(mc_res_to_string((mc_res_t)i)),
+        makeStaticString(
+          compatibility::carbonResultToString(static_cast<carbon::Result>(i))),
         i);
     }
 

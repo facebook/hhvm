@@ -141,7 +141,7 @@ module CheckFunctionBody = struct
 
   and found_await ftype p =
     match ftype with
-    | Ast.FCoroutine -> Errors.await_in_coroutine p
+    | Ast.FCoroutine -> ()
     | Ast.FSync | Ast.FGenerator -> Errors.await_in_sync_function p
     | _ -> ()
 
@@ -344,13 +344,8 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
-    | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _) ->
-      Errors.yield_in_coroutine p
-    | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
-      Errors.suspend_outside_of_coroutine p
-    | Ast.FCoroutine, Suspend _ ->
-      if env.t_is_finally
-      then Errors.suspend_in_finally p
+    | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _ | Suspend _)
+    | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ -> ()
     | _, Special_func func ->
         (match func with
           | Gena e

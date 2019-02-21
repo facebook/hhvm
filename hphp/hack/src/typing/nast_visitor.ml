@@ -14,26 +14,44 @@
   - We can add fields as we need them to the
   Nast_env we've created here.
 *)
+open Core_kernel
+open Nast
+
 
 type env = {
   def_type: string;
+  is_reactive: bool;
 }
 
-let fun_env _ =
-  { def_type = "fun" }
+let is_some_reactivity_attribute { ua_name = (_, name); _ } =
+  name = SN.UserAttributes.uaReactive ||
+  name = SN.UserAttributes.uaLocalReactive ||
+  name = SN.UserAttributes.uaShallowReactive
+
+(* During NastCheck, all reactivity kinds are the same *)
+let fun_is_reactive user_attributes =
+  List.exists user_attributes ~f:is_some_reactivity_attribute
+
+let fun_env env f =
+  { def_type = "fun";
+    is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes; }
+
+let method_env env m =
+  { env with
+    is_reactive = fun_is_reactive m.m_user_attributes; }
+
+let empty_env = { def_type = ""; is_reactive = false; }
 
 let def_env x =
   match x with
-  | Nast.Fun x -> fun_env x
-  | Nast.Class _ -> { def_type = "class" }
-  | Nast.Typedef _ -> { def_type = "typedef" }
+  | Nast.Fun f -> fun_env empty_env f
+  | Nast.Class _ -> empty_env
+  | Nast.Typedef _ -> empty_env
   | Nast.Constant _
   | Nast.Stmt _
   | Nast.Namespace _
   | Nast.NamespaceUse _
-  | Nast.SetNamespaceEnv _ -> { def_type = "" }
-
-open Core_kernel
+  | Nast.SetNamespaceEnv _ -> empty_env
 
 class virtual iter = object (self)
   inherit [_] Nast.iter as super
@@ -43,7 +61,8 @@ class virtual iter = object (self)
 
   method go_def x = self#on_def (def_env x) x
 
-  method! on_fun_ _env x = super#on_fun_ (fun_env x) x
+  method! on_fun_ env x = super#on_fun_ (fun_env env x) x
+  method! on_method_ env x = super#on_method_ (method_env env x) x
 end
 
 
@@ -51,12 +70,15 @@ class type handler = object
 
   method at_fun_ : env -> Nast.fun_ -> unit
   method at_class_ : env -> Nast.class_ -> unit
+  method at_method_ : env -> Nast.method_ -> unit
+
 end
 
 class virtual handler_base : handler = object
 
   method at_fun_ _ _ = ()
   method at_class_ _ _ = ()
+  method at_method_ _ _ = ()
 end
 
 let iter_with (handlers : handler list) : iter = object
@@ -70,5 +92,9 @@ let iter_with (handlers : handler list) : iter = object
   method! on_class_ env x =
     List.iter handlers (fun v -> v#at_class_ env x);
     super#on_class_ env x;
+
+  method! on_method_ env x =
+    List.iter handlers (fun v -> v#at_method_ env x);
+    super#on_method_ env x;
 
 end

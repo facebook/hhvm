@@ -6,6 +6,7 @@ open Core_kernel
 
 let visitor = Nast_visitor.iter_with [
   Const_prohibited_check.handler;
+  Mutability_check.handler;
 ]
 
 let program = visitor#go

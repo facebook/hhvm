@@ -443,14 +443,6 @@ and func env f named_body =
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
-  (* Functions can't be mutable, only methods can *)
-  if Attributes.mem SN.UserAttributes.uaMutable f.f_user_attributes then
-    Errors.mutable_attribute_on_function p;
-  if Attributes.mem SN.UserAttributes.uaMaybeMutable f.f_user_attributes then
-    Errors.maybe_mutable_attribute_on_function p;
-  if Attributes.mem SN.UserAttributes.uaMutableReturn f.f_user_attributes
-    && not env.is_reactive then
-    Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
 
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
@@ -831,30 +823,6 @@ and method_ (env, is_static) m =
     && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
   then Errors.illegal_destructor p;
 
-  let is_mutable =
-    Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes in
-
-  let is_maybe_mutable =
-    Attributes.mem SN.UserAttributes.uaMaybeMutable m.m_user_attributes in
-
-  (* Mutable methods must be reactive *)
-  if not env.is_reactive then begin
-    if is_mutable
-    then Errors.mutable_methods_must_be_reactive p name;
-    if is_maybe_mutable
-    then Errors.maybe_mutable_methods_must_be_reactive p name;
-  end;
-  if is_mutable
-  then begin
-    if is_maybe_mutable
-    then Errors.conflicting_mutable_and_maybe_mutable_attributes p;
-  end;
-
-  (*Methods annotated with MutableReturn attribute must be reactive *)
-  if Attributes.mem SN.UserAttributes.uaMutableReturn m.m_user_attributes
-    && not env.is_reactive then
-    Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
-
   check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
   check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
 
@@ -918,23 +886,9 @@ and check_maybe_rx_attributes_on_params env parent_attrs params =
     Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
   | _ -> ()
 
-and param_is_mutable p =
-  Attributes.mem SN.UserAttributes.uaMutable p.param_user_attributes
-
-and param_is_maybe_mutable p =
-  Attributes.mem SN.UserAttributes.uaMaybeMutable p.param_user_attributes
-
 and fun_param env (_pos, name) f_type byref param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
-  let is_mutable = param_is_mutable param in
-  let is_maybe_mutable = param_is_maybe_mutable param in
-  if not env.is_reactive then begin
-    if is_mutable
-    then Errors.mutable_methods_must_be_reactive param.param_pos name;
-    if is_maybe_mutable
-    then Errors.maybe_mutable_methods_must_be_reactive param.param_pos name;
-  end;
 
   match param.param_callconv with
   | None -> ()

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * keys of an array that results from array_filter on a Container are mixed
  */

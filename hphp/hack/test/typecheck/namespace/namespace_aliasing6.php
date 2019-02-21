@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH\Lib\Dict {
   function foo(): string {

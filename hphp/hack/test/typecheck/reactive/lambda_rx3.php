@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Rx, __AtMostRxAsArgs>>
 function g(<<__AtMostRxAsFunc>> (function(): int) $a): int {

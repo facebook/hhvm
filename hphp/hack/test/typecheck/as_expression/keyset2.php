@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function get_mixed(): mixed {
   return keyset[];

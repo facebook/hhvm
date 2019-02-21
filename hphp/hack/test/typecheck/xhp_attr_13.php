@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class :something extends :xhp {
   attribute Foo x @required;

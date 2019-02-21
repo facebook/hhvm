@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function foo(): array<int> {
   $n = 10;

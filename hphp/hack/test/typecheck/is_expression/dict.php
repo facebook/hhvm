@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(mixed $x): void {
   if ($x is dict) {

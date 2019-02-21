@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function foo(): keyset<int> {
   $x = keyset[1, 2, 3];

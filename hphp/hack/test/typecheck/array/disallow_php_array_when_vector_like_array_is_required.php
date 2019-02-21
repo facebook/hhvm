@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function consumesArrayOfInt(array<int> $array): void {}
 

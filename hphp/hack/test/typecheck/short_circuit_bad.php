@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function h(): ?array {
   throw new Exception('');

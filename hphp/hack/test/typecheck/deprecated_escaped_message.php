@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Deprecated('testing \n \t \\ \''.' foo')>>
 function foo() {}

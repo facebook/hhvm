@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 class C {
   private function bar() {
     static $k = 0;

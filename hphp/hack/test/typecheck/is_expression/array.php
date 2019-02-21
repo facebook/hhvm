@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function foo(mixed $x) {
   if ($x is array) {

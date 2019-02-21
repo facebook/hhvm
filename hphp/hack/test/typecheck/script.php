@@ -1,4 +1,4 @@
 #!/usr/bin/env php
-<?hh
+<?hh // partial
 
 function test(): int { return ''; }

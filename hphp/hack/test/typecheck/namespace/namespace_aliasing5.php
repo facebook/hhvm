@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace Dict\Foo\Bar {
   function foo(): int {

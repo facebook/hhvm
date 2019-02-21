@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function testForEach(dynamic $x, $y): void {
   foreach ($x as $id) {

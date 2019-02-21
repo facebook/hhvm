@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 type A<T> = (function(...): T);
 

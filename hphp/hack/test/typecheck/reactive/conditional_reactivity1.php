@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 <<__Rx, __AtMostRxAsArgs>>
 function map_with_key<Tk as arraykey, Tv1, Tv2>(
   <<

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class D<T> {
   public function f(C<T, T> $x): void {}

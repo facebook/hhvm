@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 enum Foo: int {
   FOO = 1;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Rx>>
 function function_1(<<__Mutable>>inout int $x): void {

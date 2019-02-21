@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function varray<T>(mixed $x): varray<T> {
   $result = varray[];

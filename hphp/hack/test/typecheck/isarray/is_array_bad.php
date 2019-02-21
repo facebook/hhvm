@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test_is_array(array $m): ?varray_or_darray<int> {

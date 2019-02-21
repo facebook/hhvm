@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C<reify T1, T2, reify T3> {}
 

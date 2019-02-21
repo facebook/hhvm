@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function bar(): array<int, ?int> {
   return array(123 => null, 456 => 789);

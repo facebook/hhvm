@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class FooParent {
   protected function __construct(private string $prop) {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class T {
   public function f<T>($a): bool {

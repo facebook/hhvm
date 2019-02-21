@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 interface Base {}
 interface ILoader<T as Base> {}
 

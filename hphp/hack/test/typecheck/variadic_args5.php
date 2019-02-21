@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // Due to inheriting from an interface, this code fatals in HHVM.
 

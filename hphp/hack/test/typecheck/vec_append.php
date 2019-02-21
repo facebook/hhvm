@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function Ref<T>(T $initial_value): Ref<T> {
   return new Ref($initial_value);

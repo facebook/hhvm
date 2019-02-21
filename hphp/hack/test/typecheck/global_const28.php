@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 const MUST_PREPARE = /* UNSAFE_EXPR */ "lol";
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 type Metadata = Map<int, int>;
 type HandlerTable = Map<int, Metadata>;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Regression test: newlines in strings used to mess up line numbers in error

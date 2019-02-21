@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class BaseClass {
   public abstract function XYZ(): bool;

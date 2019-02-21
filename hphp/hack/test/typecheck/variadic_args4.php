@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C1 {
   public function meth(...$args): void {}

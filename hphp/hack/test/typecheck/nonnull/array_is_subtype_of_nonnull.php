@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function cast_array(array $x): nonnull {
   return $x;

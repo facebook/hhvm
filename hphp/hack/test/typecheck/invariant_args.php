@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class C {
   abstract public function y(): int;

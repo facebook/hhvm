@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A {
   public function f(int $x): void {}

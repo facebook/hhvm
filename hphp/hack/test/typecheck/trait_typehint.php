@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface IParent {
   const CBAR = 'bar';

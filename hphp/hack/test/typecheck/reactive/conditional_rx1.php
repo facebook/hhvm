@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__RxLocal, __AtMostRxAsArgs>>
 async function f(

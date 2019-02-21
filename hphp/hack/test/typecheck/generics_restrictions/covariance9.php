@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface Y<+T1, -T2> {}
 

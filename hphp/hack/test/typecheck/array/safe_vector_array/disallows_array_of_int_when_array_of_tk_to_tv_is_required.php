@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function consumeArrayOfTkToTv<Tk, Tv>(array<Tk, Tv> $_): void {}
 

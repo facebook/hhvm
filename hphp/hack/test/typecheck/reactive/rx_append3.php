@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Rx>>
 function a(Map<int, int> $a): void {

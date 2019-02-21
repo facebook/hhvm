@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 class A {
   <<__Rx>>
   public function __construct(public int $x) {}

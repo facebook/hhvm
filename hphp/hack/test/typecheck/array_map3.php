@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function take_ints(array<int> $x) {}
 

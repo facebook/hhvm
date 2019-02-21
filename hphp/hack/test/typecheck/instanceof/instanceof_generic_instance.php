@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f<T>($x, T $y): T {
   if (!$x instanceof $y) {

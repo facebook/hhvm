@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 async function f() {
   return 10;

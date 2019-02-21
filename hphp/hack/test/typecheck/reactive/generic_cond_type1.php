@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface IRxReactiveItem<T> {
   <<__Rx>>

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 class P {
   public function foo(): num {
     return 0;

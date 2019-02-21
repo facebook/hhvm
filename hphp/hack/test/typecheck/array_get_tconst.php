@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class C {
   abstract const type MyArray as array<mixed, mixed>;

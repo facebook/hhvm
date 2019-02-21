@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class FooException extends Exception {}
 

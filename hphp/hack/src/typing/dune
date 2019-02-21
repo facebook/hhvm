@@ -24,6 +24,7 @@
     tast_expand
     tast_utils
     tast_visitor
+    nast_visitor
     type_mapper
     type_parameter_env
     type_visitor
@@ -142,6 +143,7 @@
     procs_multi_worker
     tast
     tast_check
+    nast_check
     typing_naming_body))
 
 (library
@@ -166,6 +168,7 @@
     decl
     errors
     file_info
+    nast
     global_options
     heap_global_storage
     procs_bucket

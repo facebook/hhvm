@@ -608,21 +608,6 @@ and class_ tenv c =
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
-  (* Const handling:
-   * prevent for abstract final classes, traits, and interfaces
-   *)
-  if Attributes.mem SN.UserAttributes.uaConst c.c_user_attributes
-  then begin match c.c_kind, c.c_final with
-  | Ast.Cabstract, true
-  | Ast.Cinterface, _
-  | Ast.Ctrait, _
-  | Ast.Cenum, _ ->
-    Errors.const_attribute_prohibited
-      (fst c.c_name) (Typing_print.class_kind c.c_kind c.c_final);
-  | Ast.Cabstract, false
-  | Ast.Cnormal, _ -> ();
-  end;
-
   if c.c_kind = Ast.Cinterface then begin
     interface c;
   end

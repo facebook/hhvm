@@ -6724,6 +6724,7 @@ let nast_to_tast opts nast =
     | Nast.SetNamespaceEnv _ ->
       failwith "Invalid nodes in NAST. These nodes should be removed during naming."
   in
+  Nast_check.program nast;
   let tast = List.map nast convert_def in
   Tast_check.program tast;
   tast

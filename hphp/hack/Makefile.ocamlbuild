@@ -82,6 +82,7 @@ MODULES=\
   third-party/ppx_deriving\
   typing\
   typing/tast_check\
+  typing/nast_check\
   utils\
   utils/collections\
   utils/config_file\

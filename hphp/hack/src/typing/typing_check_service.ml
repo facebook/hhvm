@@ -38,6 +38,7 @@ let type_fun opts fn x =
   match Parser_heap.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
+    Nast_check.def (Nast.Fun fun_);
     let def_opt = Typing.fun_def opts fun_
       |> Option.map ~f:(fun f -> Tast.Fun f) in
     Option.iter def_opt Tast_check.def;
@@ -48,6 +49,7 @@ let type_class opts fn x =
   match Parser_heap.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
+    Nast_check.def (Nast.Class class_);
     let def_opt =
       Typing.class_def opts class_
       |> Option.map ~f:(fun c -> Tast.Class c)
@@ -60,6 +62,7 @@ let check_typedef opts fn x =
   match Parser_heap.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef t in
+    Nast_check.def (Nast.Typedef typedef);
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;
     let def = Tast.Typedef ret in

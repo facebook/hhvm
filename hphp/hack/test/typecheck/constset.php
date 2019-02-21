@@ -19,7 +19,7 @@ function test2(ImmSet<int> $c): ConstSet<arraykey> {
   return $c;
 }
 
-class C<Tv> {
+class C<Tv as arraykey> {
   public function covariance(ConstSet<Tv> $x): void {}
   public function test1<Tu as Tv>(Set<Tu> $c): ConstSet<Tv> {
     $this->covariance($c);

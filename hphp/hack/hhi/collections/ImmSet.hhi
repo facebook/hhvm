@@ -164,8 +164,8 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * @return - An `ImmSet` built from the keys of the specified container.
    */
   <<__Rx>>
-  public static function fromKeysOf<Tk, Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container /* HH_FIXME[4110] T40426954 */
+  public static function fromKeysOf<Tk as arraykey, Tv2>(
+    ?KeyedContainer<Tk,Tv2> $container
   ): ImmSet<Tk>;
 
   /**

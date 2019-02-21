@@ -195,7 +195,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` built from the keys of the specified container.
    */
   <<__Rx>>
-  public static function fromKeysOf<Tk>(
+  public static function fromKeysOf<Tk as arraykey>(
     ?KeyedContainer<Tk, mixed> $container,
   ): ImmVector<Tk>;
 

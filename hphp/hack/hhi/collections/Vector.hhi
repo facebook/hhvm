@@ -777,7 +777,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` built from the keys of the specified container.
    */
   <<__Rx, __MutableReturn>>
-  public static function fromKeysOf<Tk,Tv2>(
+  public static function fromKeysOf<Tk as arraykey,Tv2>(
     ?KeyedContainer<Tk,Tv2> $container
   ): Vector<Tk>;
 

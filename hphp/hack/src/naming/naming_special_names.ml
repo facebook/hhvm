@@ -322,7 +322,7 @@ module Typehints = struct
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
-    x = dynamic  || x = wildcard
+    x = dynamic  || x = wildcard || x = nonnull
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =

@@ -126,6 +126,8 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     return srcIdx == 2;
   case StStk:
     return srcIdx == 1;
+  case InitPackedLayoutArray:
+    return srcIdx == 1;
   default:
     return false;
   }

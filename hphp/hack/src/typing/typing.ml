@@ -4156,7 +4156,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                      ~pos_params env cid ty (p, mid)
             in env, ty
         end in
-      let env, method_ = TUtils.in_var env (fst cty, Tunresolved tyl) in
+      let env, ty = Union.union_list env (fst cty) tyl in
+      let env, method_ = TUtils.in_var env ty in
       env, method_, None
   | _, Tabstract (_, Some ty) ->
       class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
@@ -4515,7 +4516,8 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
           let vis = TVis.min_vis_opt vis vis' in
           (env, vis), ty
         end in
-      let env, method_ = TUtils.in_var env (fst ety1, Tunresolved (tyl)) in
+      let env, ty = Union.union_list env (fst ety1) tyl in
+      let env, method_ = TUtils.in_var env ty in
       env, method_, vis
 
   | p', (Tabstract(ak, Some ty)) ->

@@ -1,13 +1,13 @@
 module Test = Integration_test_base
 
-let foo_contents = Printf.sprintf {|<?hh
+let foo_contents = Printf.sprintf {|<?hh // partial
 class Foo {
   %s
   public function f() {}
 }
 |}
 
-let baz_contents = {|<?hh
+let baz_contents = {|<?hh // partial
 class Baz extends Foo {
 
 }

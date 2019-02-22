@@ -9,6 +9,7 @@ let global_options =
   GlobalOptions.make
     ~tco_assume_php:true
     ~po_allow_goto:false
+    ~po_default_mode:"strict"
     ~tco_unsafe_rx:false
     ()
 

@@ -16,7 +16,7 @@ let diagnostic_subscription_id = 223
 
 let foo_name = "foo.php"
 
-let foo_contents = "<?hh
+let foo_contents = "<?hh // partial
 {
 "
 
@@ -72,7 +72,7 @@ let () =
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   assert_no_push_message loop_outputs;
   (* Change the file, but still no new errors *)
-  let env, _ = Test.edit_file env foo_name "<?hh\n" in
+  let env, _ = Test.edit_file env foo_name "<?hh // partial\n" in
   let env = Test.wait env in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_diagnostics loop_outputs

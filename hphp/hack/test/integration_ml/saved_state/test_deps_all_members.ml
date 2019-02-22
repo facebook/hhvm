@@ -5,13 +5,13 @@ module Test = Integration_test_base
 
 let enum_name = "my_enum.php"
 
-let enum_contents = {|<?hh
+let enum_contents = {|<?hh // partial
 enum MyEnum : string {
   FIELD_1 = "field 1";
 }
 |}
 
-let enum_contents_with_one_more_field =  {|<?hh //strict
+let enum_contents_with_one_more_field =  {|<?hh // strict
 enum MyEnum : string {
   FIELD_1 = "field 1"
   FIELD_2 = "field 2"
@@ -19,7 +19,7 @@ enum MyEnum : string {
 |}
 
 let enum_user_name = Printf.sprintf "my_enum_user_%d.php"
-let enum_user_contents = Printf.sprintf {|<?hh //strict
+let enum_user_contents = Printf.sprintf {|<?hh // strict
 function enum_user_%d(): void {
   MyEnum::FIELD_1;
 }
@@ -29,7 +29,7 @@ let enum_users = List.init 10 (fun n -> enum_user_name n, enum_user_contents n)
 
 let enum_switch_name = "enum_switch.php"
 
-let enum_switch_contents = {|<?hh //strict
+let enum_switch_contents = {|<?hh // strict
 function enum_switch(MyEnum $x) : void {
   /* HH_FIXME[4019] non-exhaustive check */
   switch($x) {

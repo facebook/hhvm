@@ -342,6 +342,7 @@ val trivial_strict_not_nullable_compare_null : Pos.t -> string -> (Pos.t * strin
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val noreturn_usage : Pos.t -> (Pos.t * string) list -> unit
 val generic_at_runtime : Pos.t -> unit
+val generics_not_allowed : Pos.t -> unit
 val interface_with_partial_typeconst : Pos.t -> unit
 val multiple_xhp_category : Pos.t -> unit
 val not_abstract_without_typeconst : Pos.t * string -> unit

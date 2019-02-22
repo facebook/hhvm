@@ -2913,6 +2913,10 @@ let generic_at_runtime p =
   add (Typing.err_code Typing.ErasedGenericAtRuntime) p
     "Erased generics can only be used in type hints since they are erased at runtime."
 
+let generics_not_allowed p =
+  add (Typing.err_code Typing.GenericsNotAllowed) p
+    "Generics are not allowed in this position."
+
 let trivial_strict_eq p b left right left_trail right_trail =
   let msg = "This expression is always "^b in
   let left_trail = List.map left_trail typedef_trail_entry in

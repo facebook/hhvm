@@ -130,7 +130,7 @@ module Env : sig
   val aast_lvar : genv * lenv -> Aast.lid -> positioned_ident
   val let_local : genv * lenv -> Ast.id -> positioned_ident option
   val global_const : genv * lenv -> Ast.id -> Ast.id
-  val type_name : genv * lenv -> Ast.id -> allow_typedef:bool -> Ast.id
+  val type_name : genv * lenv -> Ast.id -> allow_typedef:bool -> allow_generics:bool -> Ast.id
   val fun_id : genv * lenv -> Ast.id -> Ast.id
   val bind_class_const : genv * lenv -> Ast.id -> unit
   val goto_label : genv * lenv -> string -> Pos.t option
@@ -573,30 +573,32 @@ end = struct
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
     get_name genv (Naming_heap.ConstPosHeap.get) fq_x
 
-  let type_name (genv, _) x ~allow_typedef =
+  let type_name (genv, _) x ~allow_typedef ~allow_generics =
     let (p, name) = x in
-    begin match SMap.find_opt name genv.type_params with
+    match SMap.find_opt name genv.type_params with
     | Some (reified, _) ->
-      if not reified then Errors.generic_at_runtime p
-    | None -> () end;
-    let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
-    match Naming_heap.TypeIdHeap.get name with
-    | Some (_def_pos, `Class) ->
-      (* Don't let people use strictly internal classes
-       * (except when they are being declared in .hhi files) *)
-      if name = SN.Classes.cHH_BuiltinEnum &&
-        not (string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
-      then Errors.using_internal_class pos (strip_ns name);
-      pos, name
-    | Some (def_pos, `Typedef) when not allow_typedef ->
-      let full_pos, _ = GEnv.get_full_pos (def_pos, name) in
-      Errors.unexpected_typedef pos full_pos;
-      pos, name
-    | Some (_def_pos, `Typedef) -> pos, name
+      if not allow_generics then Errors.generics_not_allowed p;
+      if not reified then Errors.generic_at_runtime p;
+      x
     | None ->
-      handle_unbound_name genv
-        GEnv.type_pos
-        GEnv.type_canon_name x `cls
+      let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
+      match Naming_heap.TypeIdHeap.get name with
+      | Some (_def_pos, `Class) ->
+        (* Don't let people use strictly internal classes
+         * (except when they are being declared in .hhi files) *)
+        if name = SN.Classes.cHH_BuiltinEnum &&
+          not (string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
+        then Errors.using_internal_class pos (strip_ns name);
+        pos, name
+      | Some (def_pos, `Typedef) when not allow_typedef ->
+        let full_pos, _ = GEnv.get_full_pos (def_pos, name) in
+        Errors.unexpected_typedef pos full_pos;
+        pos, name
+      | Some (_def_pos, `Typedef) -> pos, name
+      | None ->
+        handle_unbound_name genv
+          GEnv.type_pos
+          GEnv.type_canon_name x `cls
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
@@ -742,7 +744,7 @@ let convert_shape_name env = function
         match (fst env).current_cls with
         | Some (cid, _) -> cid
         | None -> Errors.self_outside_class pos; (pos, SN.Classes.cUnknown)
-      else Env.type_name env x ~allow_typedef:false in
+      else Env.type_name env x ~allow_typedef:false ~allow_generics:false in
     (pos, Ast.SFclass_const (class_name, (pos, y)))
 
 let arg_unpack_unexpected = function
@@ -1030,7 +1032,7 @@ module Make (GetLocals : GetLocals) = struct
           Errors.tparam_with_tparam p x;
           N.Habstr x
       | _ ->
-        let name = Env.type_name env id ~allow_typedef in
+        let name = Env.type_name env id ~allow_typedef ~allow_generics:false in
         (* Note that we are intentionally setting allow_typedef to `true` here.
          * In general, generics arguments can be typedefs -- there is no
          * runtime restriction. *)
@@ -1200,7 +1202,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.aast_make_class_env constraints c in
     (* Checking for a code smell *)
     List.iter c.Aast.c_tparams.Aast.c_tparam_list aast_check_constraint;
-    let name = Env.type_name env c.Aast.c_name ~allow_typedef:false in
+    let name = Env.type_name env c.Aast.c_name ~allow_typedef:false ~allow_generics:false in
     let smethods = List.map ~f:(aast_method_ (fst env)) c.Aast.c_static_methods in
     let sprops = List.map ~f:(aast_class_prop_static env) c.Aast.c_static_vars in
     let attrs = aast_user_attributes env c.Aast.c_user_attributes in
@@ -1316,7 +1318,7 @@ module Make (GetLocals : GetLocals) = struct
       let ua_name =
         if String.is_prefix name ~prefix:"__"
         then ua_name
-        else Env.type_name env ua_name ~allow_typedef:false in
+        else Env.type_name env ua_name ~allow_typedef:false ~allow_generics:false in
       if not (validate_seen ua_name)
       then acc
       else
@@ -2192,7 +2194,7 @@ module Make (GetLocals : GetLocals) = struct
       begin
         match Naming_heap.TypeIdHeap.get name with
         | Some (_, `Typedef) when (snd x2) = "class" ->
-          N.Typename (Env.type_name env x1 ~allow_typedef:true)
+          N.Typename (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ ->
           N.Class_const (make_class_id env x1, x2)
       end
@@ -2203,7 +2205,7 @@ module Make (GetLocals : GetLocals) = struct
       begin
         match Naming_heap.TypeIdHeap.get name with
         | Some (_, `Typedef) when (snd x2) = "class" ->
-          N.Typename (Env.type_name env x1 ~allow_typedef:true)
+          N.Typename (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ ->
           N.Class_const (make_class_id env x1, x2)
       end
@@ -2263,10 +2265,10 @@ module Make (GetLocals : GetLocals) = struct
             begin
               match (aast_expr env e1), (aast_expr env e2) with
               | (pc, N.String cl), (pm, N.String meth) ->
-                N.Method_caller (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
+                N.Method_caller (Env.type_name env (pc, cl) ~allow_typedef:false ~allow_generics:false, (pm, meth))
               | (_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth)
                 when mem = SN.Members.mClass ->
-                  N.Method_caller (Env.type_name env cl ~allow_typedef:false, (pm, meth))
+                  N.Method_caller (Env.type_name env cl ~allow_typedef:false ~allow_generics:false, (pm, meth))
               | (p, _), _ -> Errors.illegal_meth_caller p; N.Any
             end
           | _ -> Errors.naming_too_many_arguments p; N.Any
@@ -2282,7 +2284,7 @@ module Make (GetLocals : GetLocals) = struct
             begin
               match (aast_expr env e1), (aast_expr env e2) with
               | (pc, N.String cl), (pm, N.String meth) ->
-                N.Smethod_id (Env.type_name env (pc, cl) ~allow_typedef:false, (pm, meth))
+                N.Smethod_id (Env.type_name env (pc, cl) ~allow_typedef:false ~allow_generics:false, (pm, meth))
               | (_, N.Id (_, const)), (pm, N.String meth)
                 when const = SN.PseudoConsts.g__CLASS__ ->
                   (* All of these that use current_cls aren't quite correct
@@ -2296,7 +2298,7 @@ module Make (GetLocals : GetLocals) = struct
                   | None -> Errors.illegal_class_meth p; N.Any)
               | (_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth)
                 when mem = SN.Members.mClass ->
-                N.Smethod_id (Env.type_name env cl ~allow_typedef:false, (pm, meth))
+                N.Smethod_id (Env.type_name env cl ~allow_typedef:false ~allow_generics:false, (pm, meth))
               | (p, N.Class_const ((_, (N.CIself | N.CIstatic)), (_, mem))),
                 (pm, N.String meth) when mem = SN.Members.mClass ->
                   (match (fst env).current_cls with
@@ -2487,7 +2489,7 @@ module Make (GetLocals : GetLocals) = struct
             N.CI (px, SN.Classes.cUnknown)
           else N.CIstatic
         | _ ->
-          N.CI (Env.type_name env x ~allow_typedef:false)
+          N.CI (Env.type_name env x ~allow_typedef:false ~allow_generics:false)
       in
       N.InstanceOf (aast_expr env e, (p, id))
     | Aast.InstanceOf (e1, (_, Aast.CIexpr (_,
@@ -2560,7 +2562,7 @@ module Make (GetLocals : GetLocals) = struct
        * it does not seem to affect typechecking... *)
       N.Efun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
-      N.Xml (Env.type_name env x ~allow_typedef:false, aast_attrl env al,
+      N.Xml (Env.type_name env x ~allow_typedef:false ~allow_generics:false, aast_attrl env al,
         aast_exprl env el)
     | Aast.Shape fdl ->
       let (shp, _) = begin List.fold_left fdl ~init:([], Ast.ShapeSet.empty)
@@ -2675,7 +2677,7 @@ module Make (GetLocals : GetLocals) = struct
            * like "$$::someMethod()". *)
           N.CIexpr(p, N.Lvar (p, Env.found_dollardollar env p))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
-      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false)
+      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:false)
 
   and aast_casel env l =
     List.map_env [] l (aast_case env)
@@ -2703,7 +2705,7 @@ module Make (GetLocals : GetLocals) = struct
           then Env.new_lvar env (p2, name2)
           else Env.new_let_local env (p2, name2) in
         let all_locals, b = aast_branch env b in
-        all_locals :: acc, (Env.type_name env (p1, lid1) ~allow_typedef:true, x2, b))
+        all_locals :: acc, (Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false, x2, b))
 
   and aast_afield env field =
     match field with

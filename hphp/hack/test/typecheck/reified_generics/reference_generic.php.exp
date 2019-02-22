@@ -1,6 +1,6 @@
 File "reference_generic.php", line 5, characters 7-7:
-Erased generics can only be used in type hints since they are erased at runtime. (Typing[4124])
+Generics are not allowed in this position. (Typing[4306])
 File "reference_generic.php", line 5, characters 7-7:
-Unbound name: T (an object type) (Naming[2049])
+Erased generics can only be used in type hints since they are erased at runtime. (Typing[4124])
 File "reference_generic.php", line 9, characters 7-7:
-Unbound name: T (an object type) (Naming[2049])
+Generics are not allowed in this position. (Typing[4306])

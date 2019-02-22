@@ -537,4 +537,5 @@ InvalidEnforceableTypeArgument = 4302
 RequireArgsReify = 4303
 TypecheckerTimeout = 4304
 ErasedGenericPassedToReified = 4305
+GenericsNotAllowed = 4306
   |}]

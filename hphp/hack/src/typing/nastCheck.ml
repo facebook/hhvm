@@ -783,12 +783,6 @@ and add_constraint pos tenv (ty1, ck, ty2) =
 and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
-and check_static_memoized_function m =
-  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
-     Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes then
-    Errors.static_memoized_function (fst m.m_name);
-  ()
-
 and method_ (env, is_static) m =
   let env =
     { env with is_reactive = fun_is_reactive m.m_user_attributes } in

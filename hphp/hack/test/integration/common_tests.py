@@ -1085,3 +1085,38 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         ],
             options=['--lint-xcontroller', '{root}in_list.txt'],
         )
+
+    def test_incremental_typecheck_same_file(self):
+        self.maxDiff = None
+        self.start_hh_server()
+
+        # Important: typecheck the file after creation but before adding contents
+        # to test forward naming table updating.
+        open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ).close()
+        self.check_cmd(["No errors!"])
+
+        with open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ) as f:
+            f.write(
+                """<?hh // strict
+
+                // test_incremental_typecheck_same_file
+                class TestIncrementalTypecheckSameFile {}
+            """
+            )
+        self.check_cmd(["No errors!"])
+
+        # Notice how the only change is the removed doc block.
+        with open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ) as f:
+            f.write(
+                """<?hh // strict
+
+                class TestIncrementalTypecheckSameFile {}
+            """
+            )
+        self.check_cmd(["No errors!"])

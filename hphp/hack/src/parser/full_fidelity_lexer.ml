@@ -1719,7 +1719,11 @@ let skip_to_end_of_markup lexer ~is_leading_section =
       else index
     end
     else offset lexer in
-  aux lexer start_offset
+  if is_leading_section && !ParserOptions.is_ide_mode && not (
+    peek lexer start_offset == '<' &&
+    peek_def ~def:'\x00' lexer (succ start_offset) == '?')
+  then lexer, make_markup_token lexer, None
+  else aux lexer start_offset
 
 let scan_markup lexer ~is_leading_section =
   let lexer = start_new_lexeme lexer in

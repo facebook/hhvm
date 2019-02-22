@@ -199,6 +199,7 @@ let parse_mode_from_header default text suffix =
         in
         FileInfo.parse_mode ~default mode
       end
+  | _ when !ParserOptions.is_ide_mode -> Some FileInfo.Mstrict
   | _ -> Some FileInfo.Mphp
 
 let parse_mode ?(default = ParserOptions.(default_mode default)) text =

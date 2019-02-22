@@ -514,7 +514,7 @@ let parse tcopt path content =
     (* path is needed because of different leading markup behavior in .hack *)
     (* files vs .php files *)
     let env = make_env ~parser_options:tcopt path in
-    let {Parser_return.ast; _} = from_text_with_legacy env content in
+    let {Parser_return.ast; _} = ParserOptions.with_ide_mode ~f:(fun () -> from_text_with_legacy env content) in
     ast
   end
 

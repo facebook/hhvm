@@ -84,7 +84,7 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
     Fixmes.DECL_HH_FIXMES.(remove_batch @@ KeySet.singleton path);
-    let ast = make_ast () in
+    let ast = ParserOptions.with_ide_mode ~f:make_ast in
     let funs, classes, typedefs, consts =
       List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
         match def with

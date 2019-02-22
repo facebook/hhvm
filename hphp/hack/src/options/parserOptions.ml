@@ -47,3 +47,8 @@ let make
   GlobalOptions.po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
   GlobalOptions.po_enable_stronger_await_binding = enable_stronger_await_binding;
 }
+
+let is_ide_mode = ref false
+let with_ide_mode ~f =
+  is_ide_mode := true;
+  Core_kernel.protect ~f ~finally:(fun () -> is_ide_mode := false)

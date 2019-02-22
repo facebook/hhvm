@@ -1,4 +1,3 @@
-(* open Core_kernel *)
 [@@@warning "-33"]
 open Core_kernel
 [@@@warning "+33"]
@@ -11,6 +10,7 @@ let visitor = Nast_visitor.iter_with [
   Naming_coroutine_check.handler;
   Interface_check.handler;
   Nast_reactivity_check.handler;
+  Illegal_name_check.handler;
 ]
 
 let program = visitor#go

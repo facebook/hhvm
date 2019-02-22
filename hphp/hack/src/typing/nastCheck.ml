@@ -388,10 +388,7 @@ let rec fun_ tenv f named_body =
   func env f named_body
 
 and func env f named_body =
-  let p, fname = f.f_name in
-  let fname_lower = String.lowercase (strip_ns fname) in
-  if fname_lower = SN.Members.__construct || fname_lower = "using"
-  then Errors.illegal_function_name p fname;
+  let p, _ = f.f_name in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
@@ -706,18 +703,12 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
   let env = { env with function_name = Some (snd m.m_name) } in
-  let p, name = m.m_name in
   (* Add method type parameters to environment and localize the bounds *)
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
   let env = { env with tenv = tenv } in
-
-  (* If this is a destructor make sure it is allowed *)
-  if name = SN.Members.__destruct
-    && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
-  then Errors.illegal_destructor p;
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
@@ -851,7 +842,7 @@ and block env stl =
 and expr env (p, e) =
   expr_ env p e
 
-and expr_ env p = function
+and expr_ env _p = function
   | Collection _
   | Import _
   | Lfun _
@@ -882,18 +873,7 @@ and expr_ env p = function
       expr env e2
   | Class_get _  ->
     ()
-  (* Check that __CLASS__ and __TRAIT__ are used appropriately *)
-  | Id (pos, const) ->
-      if SN.PseudoConsts.is_pseudo_const const then
-        if const = SN.PseudoConsts.g__CLASS__ then
-          (match env.class_kind with
-            | Some _ -> ()
-            | _ -> Errors.illegal_CLASS pos)
-        else if const = SN.PseudoConsts.g__TRAIT__ then
-          (match env.class_kind with
-            | Some Ast.Ctrait -> ()
-            | _ -> Errors.illegal_TRAIT pos);
-      ()
+  | Id _ -> ()
   | Array afl ->
       List.iter afl (afield env);
       ()
@@ -941,14 +921,6 @@ and expr_ env p = function
       ()
   | Unop (Ast.Uref, e) ->
     expr env e;
-    begin match snd e with
-      | This ->
-        Errors.illegal_by_ref_expr p SN.SpecialIdents.this
-      | Dollardollar (_, id)
-        when Local_id.to_string id = SN.SpecialIdents.dollardollar ->
-        Errors.illegal_by_ref_expr p SN.SpecialIdents.dollardollar
-      | _ -> ()
-    end
   | Unop (_, e) -> expr env e;
   | Yield_break -> ()
   | Special_func func ->

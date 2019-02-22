@@ -149,21 +149,7 @@ module CheckFunctionBody = struct
     List.iter stl (stmt f_type env)
 
   and start f_type env stl =
-    match stl with
-    | [If ((_, Id (_, c)), then_stmt, else_stmt ) ]
-      (*
-        (* this is the only case when HH\Rx\IS_ENABLED can appear in
-           function body, other occurences are considered errors *)
-        {
-          if (HH\Rx\IS_ENABLED) {}
-          else {}
-        }
-      *)
-      when c = SN.Rx.is_enabled ->
-      block f_type env then_stmt;
-      block f_type env else_stmt;
-    | _ ->
-      block f_type env stl
+    block f_type env stl
 
   and case f_type env = function
     | Default b -> block f_type env b
@@ -245,8 +231,6 @@ module CheckFunctionBody = struct
     | _, Typename _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
-    | _, Id (pos, const) when const = SN.Rx.is_enabled ->
-        Errors.rx_is_enabled_invalid_location pos
     | _, Id _ -> ()
 
     | _, ImmutableVar _

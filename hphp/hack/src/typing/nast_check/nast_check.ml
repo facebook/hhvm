@@ -10,6 +10,7 @@ let visitor = Nast_visitor.iter_with [
   Inout_check.handler;
   Naming_coroutine_check.handler;
   Interface_check.handler;
+  Nast_reactivity_check.handler;
 ]
 
 let program = visitor#go

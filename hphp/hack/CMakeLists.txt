@@ -92,7 +92,17 @@ else()
 endif()
 list(APPEND extra_native_libraries "sqlite3")
 
-endif() # WITH_DUNE
+else()
+message(STATUS "Dune build detected")
+
+list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
+list(APPEND extra_lib_paths ${LZ4_LIBRARY})
+list(APPEND extra_native_libraries "lz4")
+
+list(APPEND extra_include_paths ${LIBSQLITE3_INCLUDE_DIR})
+list(APPEND extra_lib_paths ${LIBSQLITE3_LIBRARY})
+list(APPEND extra_native_libraries "sqlite3")
+endif(NOT WITH_DUNE)
 
 # Xcode/Ninja generators undefined MAKE
 if(NOT MAKE)
@@ -144,6 +154,9 @@ add_custom_target(
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune
+        EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+        EXTRA_LIB_PATHS="${extra_lib_paths}"
+        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
         BYTECODE="${EMIT_OCAML_BYTECODE}"
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"

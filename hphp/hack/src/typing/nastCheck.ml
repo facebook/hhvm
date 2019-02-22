@@ -364,25 +364,6 @@ let is_magic =
 let is_parent e =
   snd e = CIparent
 
-let check_conditionally_reactive_annotation_params p params ~is_method =
-  match params with
-  | [_, Class_const (_, (_, prop))] when prop = "class" -> ()
-  | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
-
-let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
-  let rec check l seen =
-    match l with
-    | [] -> ()
-    | { ua_name = (_, name); ua_params } :: xs when name = SN.UserAttributes.uaOnlyRxIfImpl ->
-      begin
-        if seen
-          then Errors.multiple_conditionally_reactive_annotations p method_name
-        else if is_reactive
-          then check_conditionally_reactive_annotation_params ~is_method:true p ua_params;
-        check xs true
-      end
-    | _ :: xs -> check xs seen in
-  check user_attributes false
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   name = SN.UserAttributes.uaReactive ||
@@ -422,8 +403,6 @@ and func env f named_body =
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
-
-  check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
@@ -740,9 +719,6 @@ and method_ (env, is_static) m =
     && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
   then Errors.illegal_destructor p;
 
-  check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
-  check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
-
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
   (match m.m_variadic with
@@ -767,31 +743,6 @@ and method_ (env, is_static) m =
       else ()
   | None -> assert false)
 
-and check_maybe_rx_attributes_on_params env parent_attrs params =
-  let parent_only_rx_if_args =
-    Attributes.find SN.UserAttributes.uaAtMostRxAsArgs parent_attrs in
-  let check_param seen_atmost_rx_as_rxfunc p =
-    let only_rx_if_rxfunc_attr =
-      Attributes.find SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes in
-    let only_rx_if_impl_attr =
-      Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes in
-    match only_rx_if_rxfunc_attr, only_rx_if_impl_attr with
-    | Some { ua_name = (p, _); _ }, _ ->
-      if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.atmost_rx_as_rxfunc_invalid_location p;
-      true
-    | _, Some { ua_name = (p, _); ua_params; _ } ->
-      if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.atmost_rx_as_rxfunc_invalid_location p
-      else check_conditionally_reactive_annotation_params ~is_method:false p ua_params;
-      true
-    | _ ->  seen_atmost_rx_as_rxfunc in
-  let has_param_with_atmost_rx_as_rxfunc =
-    List.fold_left params ~init:false ~f:check_param in
-  match parent_only_rx_if_args, has_param_with_atmost_rx_as_rxfunc with
-  | Some { ua_name = (p, _); _ }, false ->
-    Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
-  | _ -> ()
 
 and fun_param env (_pos, _name) _f_type _byref param =
   maybe hint env param.param_hint;

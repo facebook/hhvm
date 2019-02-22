@@ -664,7 +664,7 @@ void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
-    !isForcedToInterpret() &&
+    (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
     !getDebuggerForceIntr();
 }
 

@@ -805,8 +805,9 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
 
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
-      "Created new request info for thread %d, flags=%u",
-      getCurrentThreadId(),
+      "Created new request info for request %d (current thread=%d), flags=%u",
+      threadId,
+      (int64_t)Process::GetThreadId(),
       static_cast<unsigned int>(requestInfo->m_allFlags)
     );
 
@@ -819,7 +820,7 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
       "Found existing request info for thread %d, flags=%u",
-      getCurrentThreadId(),
+      threadId,
       static_cast<unsigned int>(requestInfo->m_allFlags)
     );
   }

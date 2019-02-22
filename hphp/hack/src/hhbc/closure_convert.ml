@@ -712,8 +712,9 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
   | Call ((_, Id (_, meth_caller)), _, [(pc, cls); (pf, func)], [])
-    when (String.lowercase @@ SU.strip_global_ns meth_caller = "hh\\meth_caller") &&
-         (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
+    when let name = String.lowercase @@ SU.strip_global_ns meth_caller in
+      (name = "hh\\meth_caller" || name = "meth_caller") &&
+      (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
     let cls = match cls with
       | Class_const (cid, (_, cs)) when SU.is_class cs ->
         let _, (_, ex) = convert_expr env st cid in

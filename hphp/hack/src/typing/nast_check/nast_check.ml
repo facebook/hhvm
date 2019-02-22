@@ -11,6 +11,7 @@ let visitor = Nast_visitor.iter_with [
   Interface_check.handler;
   Nast_reactivity_check.handler;
   Illegal_name_check.handler;
+  Variadic_check.handler;
 ]
 
 let program = visitor#go

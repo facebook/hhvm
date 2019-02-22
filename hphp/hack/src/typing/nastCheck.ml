@@ -404,12 +404,6 @@ and func env f named_body =
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
-  (match f.f_variadic with
-    | FVvariadicArg vparam ->
-      if vparam.param_is_reference then
-        Errors.variadic_byref_param vparam.param_pos
-    | _ -> ()
-  );
   block env named_body.fb_ast;
   CheckFunctionBody.start
     f.f_fun_kind
@@ -712,12 +706,6 @@ and method_ (env, is_static) m =
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
-  (match m.m_variadic with
-    | FVvariadicArg vparam ->
-      if vparam.param_is_reference then
-        Errors.variadic_byref_param vparam.param_pos
-    | _ -> ()
-  );
   List.iter m.m_tparams (tparam env);
   block env named_body.fb_ast;
   maybe hint env m.m_ret;

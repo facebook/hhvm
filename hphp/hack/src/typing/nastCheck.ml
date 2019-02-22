@@ -585,10 +585,7 @@ and class_ tenv c =
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
-  if c.c_kind = Ast.Cinterface then begin
-    interface c;
-  end
-  else begin
+  if not (c.c_kind = Ast.Cinterface) then begin
     maybe method_ (env, true) c.c_constructor;
   end;
   List.iter c.c_tparams.c_tparam_list (tparam env);
@@ -658,49 +655,6 @@ and check_class_property_initialization prop =
       rec_assert_static_literal expr2
     in
     rec_assert_static_literal e;
-  end
-
-and interface c =
-  let enforce_no_body = begin fun m ->
-    match m.m_body.fb_ast with
-    | [] ->
-      if m.m_visibility = Private
-      then Errors.not_public_or_protected_interface (fst m.m_name)
-      else ()
-    | _ -> Errors.abstract_body (fst m.m_name)
-  end in
-  (* make sure that interface methods are not async, in line with HHVM *)
-  let enforce_not_async = begin fun m ->
-    match m.m_fun_kind with
-    | Ast.FAsync -> Errors.async_in_interface (fst m.m_name)
-    | Ast.FAsyncGenerator -> Errors.async_in_interface (fst m.m_name)
-    | _ -> ()
-  end in
-  (* make sure that interfaces only have empty public methods *)
-  List.iter (c.c_static_methods @ c.c_methods) enforce_no_body;
-  List.iter (c.c_static_methods @ c.c_methods) enforce_not_async;
-  (* make sure constructor has no body *)
-  Option.iter c.c_constructor enforce_no_body;
-  Option.iter c.c_constructor enforce_not_async;
-  List.iter (c.c_uses) (fun (p, _) ->
-    Errors.interface_use_trait p
-  );
-  (* make sure that interfaces don't have any member variables *)
-  match c.c_vars with
-  | hd::_ ->
-    let pos = fst (hd.cv_id) in
-    Errors.interface_with_member_variable pos
-  | _ -> ();
-  (* make sure that interfaces don't have static variables *)
-  match c.c_static_vars with
-  | hd::_ ->
-    let pos = fst (hd.cv_id) in
-    Errors.interface_with_static_member_variable pos
-  | _ -> ();
-  (* make sure interfaces do not contain partially abstract type constants *)
-  List.iter c.c_typeconsts begin fun tc ->
-    if tc.c_tconst_constraint <> None && tc.c_tconst_type <> None then
-      Errors.interface_with_partial_typeconst (fst tc.c_tconst_name)
   end
 
 and class_const env (h, _, e) =

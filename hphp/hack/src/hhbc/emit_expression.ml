@@ -717,7 +717,7 @@ and emit_cast env pos hint expr =
       Emit_fatal.raise_fatal_parse pos "Invalid cast type"
     end in
   gather [
-    emit_expr ~last_pos:pos ~need_ref:false env expr;
+    emit_expr ~need_ref:false env expr;
     emit_pos pos;
     op;
   ]
@@ -757,7 +757,7 @@ and emit_conditional_expression env pos etest etrue efalse =
   | None ->
     let end_label = Label.next_regular () in
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env etest;
+      emit_expr ~need_ref:false env etest;
       instr_dup;
       instr_jmpnz end_label;
       instr_popc;
@@ -1113,13 +1113,13 @@ and emit_class_const_impl env cid id =
 and emit_yield env pos = function
   | A.AFvalue e ->
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos pos;
       instr_yield;
     ]
   | A.AFkvalue (e1, e2) ->
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e1;
+      emit_expr ~need_ref:false env e1;
       emit_expr ~need_ref:false env e2;
       emit_pos pos;
       instr_yieldk;
@@ -1141,7 +1141,7 @@ and emit_string2 env pos exprs =
   match exprs with
   | [e] ->
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos pos;
       instr (IOp CastString)
     ]
@@ -1427,7 +1427,7 @@ and emit_exit env expr_opt =
 and emit_idx env pos es =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
-    emit_exprs env pos es;
+    emit_exprs env es;
     emit_pos pos;
     default;
     instr_idx;
@@ -1799,7 +1799,7 @@ and emit_reified_type env pos name =
   | Some instrs -> instrs
   | None -> Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
-and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
+and emit_expr env ~need_ref (pos, expr_ as expr) =
   match expr_ with
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
@@ -1811,7 +1811,7 @@ and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
     emit_expr ~need_ref env e
   | A.Lvar id ->
     gather [
-      emit_pos (Option.value ~default:pos last_pos);
+      emit_pos pos;
       emit_local ~notice:Notice ~need_ref env id
     ]
   | A.Class_const (cid, id) ->
@@ -2999,7 +2999,7 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
   match snd e with
   | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
   | _ ->
-    let instrs, flavor = emit_flavored_expr ~last_pos:pop_pos env e in
+    let instrs, flavor = emit_flavored_expr env e in
     gather [
       instrs;
       emit_pos_then pop_pos @@ instr_pop flavor;
@@ -3186,11 +3186,11 @@ and emit_fcall call_pos args uargs async_eager_label =
   ]
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
-and emit_object_expr env ?last_pos (_, expr_ as expr) =
+and emit_object_expr env (_, expr_ as expr) =
   match expr_ with
   | A.Lvar(_, x) when is_local_this env x ->
     instr_this
-  | _ -> emit_expr ?last_pos ~need_ref:false env expr
+  | _ -> emit_expr ~need_ref:false env expr
 
 and is_inout_arg = function
   | _, A.Callconv (A.Pinout, _) -> true
@@ -3238,7 +3238,7 @@ and emit_call_lhs
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
     when str.[0] = '$' ->
     gather [
-      emit_object_expr ~last_pos:outer_pos env obj;
+      emit_object_expr env obj;
       instr_cgetl (get_local env id);
       instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
@@ -3251,7 +3251,7 @@ and emit_call_lhs
         (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else name in
     gather [
-      emit_object_expr env ~last_pos:outer_pos obj;
+      emit_object_expr env obj;
       emit_pos outer_pos;
       (if does_not_have_non_tparam_generics then
         instr_fpushobjmethodd nargs name null_flavor
@@ -3261,7 +3261,7 @@ and emit_call_lhs
   | A.Obj_get (obj, method_expr, null_flavor) ->
     gather [
       emit_pos outer_pos;
-      emit_object_expr env ~last_pos:outer_pos obj;
+      emit_object_expr env obj;
       emit_expr ~need_ref:false env method_expr;
       instr_fpushobjmethod nargs null_flavor inout_arg_positions;
     ]
@@ -3569,7 +3569,7 @@ and emit_special_function env pos id args uargs default =
       | Some (nargs, i) when nargs = List.length args ->
         Some (
           gather [
-          emit_exprs env pos args;
+          emit_exprs env args;
           emit_pos pos;
           instr i
         ])
@@ -3619,13 +3619,13 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
  *)
-and emit_flavored_expr env ?last_pos expr =
+and emit_flavored_expr env expr =
   match snd expr with
   | A.Binop (A.Eq None, _, e) when expr_starts_with_ref e ->
     (* binary assignment rhs starts with ref *)
-    emit_expr ?last_pos ~need_ref:true env expr, Flavor.Ref
+    emit_expr ~need_ref:true env expr, Flavor.Ref
   | _ ->
-    emit_expr ?last_pos ~need_ref:false env expr, Flavor.Cell
+    emit_expr ~need_ref:false env expr, Flavor.Cell
 
 and emit_final_member_op stack_index op mk =
   match op with
@@ -4009,26 +4009,26 @@ and emit_unop ~need_ref env pos op e =
   match op with
   | A.Utild ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Unot ->
     emit_box_if_necessary pos need_ref @@ gather [
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uplus ->
     emit_box_if_necessary pos need_ref @@ gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uminus ->
     emit_box_if_necessary pos need_ref @@ gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
-      emit_expr ~last_pos:pos ~need_ref:false env e;
+      emit_expr ~need_ref:false env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
@@ -4049,12 +4049,12 @@ and emit_unop ~need_ref env pos op e =
         instr_try_fault fault_label body fault
       ]
 
-and emit_exprs env pos exprs =
+and emit_exprs env exprs =
   match exprs with
   | [] -> empty
   | expr::exprs ->
-    gather (emit_expr ~last_pos:pos ~need_ref:false env expr ::
-      List.map exprs (emit_expr ~last_pos:pos ~need_ref:false env))
+    gather (emit_expr ~need_ref:false env expr ::
+      List.map exprs (emit_expr ~need_ref:false env))
 
 (* allows to create a block of code that will
 - get a fresh temporary local

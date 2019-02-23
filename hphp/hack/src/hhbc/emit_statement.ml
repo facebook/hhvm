@@ -246,7 +246,7 @@ let rec emit_stmt env (pos, st_) =
     ]
   | A.Return (Some expr) ->
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env expr;
+      emit_expr ~need_ref:false env expr;
       Emit_pos.emit_pos pos;
       emit_return env;
     ]

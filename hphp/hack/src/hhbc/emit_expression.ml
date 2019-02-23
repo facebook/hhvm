@@ -3315,7 +3315,8 @@ and emit_call_lhs
     | _ ->
       (* TODO(T31677864): Implement reification here *)
       gather [
-        of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_id_string));
+        instr_string method_id_string;
+        emit_load_class_ref env pos cexpr;
         instr_fpushclsmethod nargs []
       ]
     end

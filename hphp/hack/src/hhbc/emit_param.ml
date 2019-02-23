@@ -27,7 +27,7 @@ let resolve_class_id ~scope cid =
   match cexpr with
   | Class_id ((p, _) as cid) -> p, A.Id cid
   | Class_parent | Class_self | Class_static | Class_expr _
-  | Class_reified _ | Class_unnamed_local _ -> cid
+  | Class_reified _ -> cid
 
 let resolver_visitor =
 object(_)

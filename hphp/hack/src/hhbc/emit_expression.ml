@@ -619,8 +619,7 @@ and emit_instanceof env pos e1 e2 =
         instr_instanceofd n;
       ]
     | Class_reified _
-    | Class_expr _
-    | Class_unnamed_local _ ->
+    | Class_expr _ ->
       failwith "cannot get this shape from from A.Id"
     end
   | _ ->
@@ -973,7 +972,6 @@ and emit_load_class_ref env pos cexpr =
   | Class_parent -> instr (IMisc (Parent 0))
   | Class_self -> instr (IMisc (Self 0))
   | Class_id id -> emit_known_class_id env id
-  | Class_unnamed_local l -> instr (IGet (ClsRefGetL (l, 0)))
   | Class_expr expr ->
     begin match snd expr with
     | A.Lvar ((_, id) as pos_id)
@@ -1015,44 +1013,7 @@ and emit_load_class_const env pos cexpr id =
     ]
 
 and emit_class_expr env cexpr prop =
-  match cexpr with
-  | Class_expr ((pos, (A.BracedExpr _ |
-                     A.Call _ |
-                     A.Lvar (_, "$this") |
-                     A.Binop _ |
-                     A.Class_get _)) as e) ->
-    (* if class is stored as dollar or braced expression (computed dynamically)
-       it needs to be stored in unnamed local and eventually cleaned.
-       Here we don't use stash_in_local because shape of the code generated
-       for class case is different (PopC / UnsetL is the part of try block) *)
-    let cexpr_local =
-      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
-    empty,
-    Local.scope @@ fun () ->
-      let temp = Local.get_unnamed_local () in
-      let instrs = emit_class_expr env (Class_unnamed_local temp) prop in
-      let fault_label = Label.next_fault () in
-      let block =
-        instr_try_fault
-          fault_label
-          (* try block *)
-          (gather [
-            instr_popc;
-            of_pair @@ instrs;
-            instr_unsetl temp
-          ])
-          (* fault block *)
-          (gather [
-            instr_unsetl temp;
-            emit_pos pos;
-            instr_unwind ]) in
-      gather [
-        cexpr_local;
-        instr_setl temp;
-        block
-      ]
-  | _ ->
-  let load_prop =
+  let load_prop () =
     match prop with
     | pos, A.Id (_, id) ->
       emit_pos_then pos @@
@@ -1063,8 +1024,44 @@ and emit_class_expr env cexpr prop =
     | e ->
       emit_expr ~need_ref:false env e
   in
-  let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
-  load_prop, load_cls_ref
+  match cexpr with
+  | Class_expr ((pos, (A.BracedExpr _ |
+                     A.Call _ |
+                     A.Lvar (_, "$this") |
+                     A.Binop _ |
+                     A.Class_get _)) as e) ->
+    (* if class is stored as dollar or braced expression (computed dynamically)
+       it needs to be stored in unnamed local and eventually cleaned.
+       Here we don't use stash_in_local because shape of the code generated
+       for class case is different (PushL is the part of try block) *)
+    let cexpr_local =
+      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+    empty,
+    Local.scope @@ fun () ->
+      let temp = Local.get_unnamed_local () in
+      let fault_label = Label.next_fault () in
+      let block =
+        instr_try_fault
+          fault_label
+          (* try block *)
+          (gather [
+            load_prop ();
+            instr_pushl temp;
+            instr_clsrefgetc;
+          ])
+          (* fault block *)
+          (gather [
+            instr_unsetl temp;
+            emit_pos pos;
+            instr_unwind ]) in
+      gather [
+        cexpr_local;
+        instr_popl temp;
+        block
+      ]
+  | _ ->
+    load_prop (),
+    emit_load_class_ref env (fst prop) cexpr
 
 and emit_class_get env qop need_ref cid prop =
   let cexpr = expr_to_class_expr ~resolve_self:false

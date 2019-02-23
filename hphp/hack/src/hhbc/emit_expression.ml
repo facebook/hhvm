@@ -3225,13 +3225,6 @@ and emit_call_lhs
       instr_fpushclsmethods nargs clsref;
     ] in
   match expr_ with
-  | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
-    when str.[0] = '$' ->
-    gather [
-      emit_object_expr env obj;
-      instr_cgetl (get_local env id);
-      instr_fpushobjmethod nargs null_flavor inout_arg_positions;
-    ]
   | A.Obj_get (obj, (_, A.String id), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     let name = Hhbc_id.Method.from_ast_name id in

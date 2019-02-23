@@ -148,6 +148,9 @@ val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
 val get_reified: env -> string -> bool
 (** Get the reification of the type parameter with the given name. *)
 
+val get_enforceable: env -> string -> bool
+(** Get whether the type parameter supports testing with is/as. *)
+
 val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being

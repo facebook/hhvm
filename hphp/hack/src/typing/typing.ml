@@ -5742,8 +5742,9 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
    * with unique suffix *)
   let env, (tparams_with_new_names : (decl tparam * string) option list) =
     List.map_env env (Cls.tparams class_info)
-      (fun env ({tp_name = (_, name); tp_reified; _ } as tp) ->
-        let env, name = Env.add_fresh_generic_parameter env name tp_reified in
+      (fun env ({tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } as tp) ->
+        let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
+        let env, name = Env.add_fresh_generic_parameter env name ~reified ~enforceable in
         env, Some (tp, name)) in
   let new_names = List.map
     ~f:(fun x -> snd @@ Option.value_exn x)
@@ -5771,7 +5772,8 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let pad_len = tparams_len - (List.length hint_tyl) in
   let hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
-  let replace_wildcard env hint_ty ({ tp_name = (_, tparam_name); tp_reified; _ } as tp) =
+  let replace_wildcard env hint_ty ({ tp_name = (_, tparam_name); tp_reified = reified; tp_user_attributes; _ } as tp) =
+    let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
     match hint_ty with
       | Some (_, Tabstract (AKgeneric name, _))
         when Env.is_fresh_generic_parameter name ->
@@ -5779,7 +5781,7 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
       | Some ty ->
         env, (None, ty)
       | None ->
-        let env, new_name = Env.add_fresh_generic_parameter env tparam_name tp_reified in
+        let env, new_name = Env.add_fresh_generic_parameter env tparam_name ~reified ~enforceable in
         env, (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
   in
   let env, tparams_and_tyl = List.map2_env env hint_tyl (Cls.tparams class_info)
@@ -5873,10 +5875,10 @@ and get_instance_var env = function
 and is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:begin fun env arg_ty ->
     let r = Reason.Rpredicated (p, pred_name) in
-    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" false in
+    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" ~reified:false ~enforceable:false in
     let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
     let env = SubType.add_constraint p env Ast.Constraint_as tarrkey (MakeType.arraykey r) in
-    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" false in
+    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" ~reified:false ~enforceable:false in
     let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
     (* This is the refined type of e inside the branch *)
     let refined_ty =

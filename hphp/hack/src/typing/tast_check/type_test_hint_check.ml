@@ -77,8 +77,14 @@ let visitor = object(this)
 
       let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
       List.fold_left bounds ~f:this#on_type ~init:acc
-    | AKgeneric _ -> update acc @@
-      Invalid (r, "a generic type parameter, because generics are erased at runtime")
+    | AKgeneric name ->
+      begin match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
+      | false, _ -> update acc @@
+        Invalid (r, "an erased generic type parameter")
+      | true, false -> update acc @@
+        Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
+      | true, true ->
+        acc end
     | AKnewtype _ -> update acc @@ Invalid (r, "a newtype")
     | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
   method! on_tanon acc r _arity _id =

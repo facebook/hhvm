@@ -9,14 +9,14 @@ definition:
    params:
      $collection
        kind: param
-       position: line 29, characters 46-56
-       span: line 29, character 22 - line 29, character 56
+       position: line 29, characters 58-68
+       span: line 29, character 34 - line 29, character 68
        modifiers: 
 
      $index
        kind: param
-       position: line 29, characters 59-64
-       span: line 29, character 59 - line 29, character 64
+       position: line 29, characters 71-76
+       span: line 29, character 71 - line 29, character 76
        modifiers: 
 
      $default

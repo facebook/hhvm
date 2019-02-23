@@ -13,7 +13,7 @@ function test(
   array<string> $vector_array,
   array<X, string> $hashtable_array,
   $untyped,
-  KeyedContainer<X, string> $keyed_container,
+  KeyedContainer<arraykey, string> $keyed_container,
   Container<string> $container,
   Vector<string> $vector,
 ) {

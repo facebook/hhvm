@@ -17,8 +17,8 @@ function test4(array<int, C> $x): void { foo4($x); }
 function foo5(Container<B> $x): void {}
 function test5(array<C> $x): void { foo5($x); }
 
-function foo6(KeyedContainer<mixed, B> $x): void {}
+function foo6(KeyedContainer<arraykey, B> $x): void {}
 function test6(array<int, C> $x): void { foo6($x); }
 
-function foo7(KeyedContainer<mixed, B> $x): void {}
+function foo7(KeyedContainer<arraykey, B> $x): void {}
 function test7(array<int, C> $x): void { foo7($x); }

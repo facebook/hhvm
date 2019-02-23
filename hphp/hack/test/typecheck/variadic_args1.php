@@ -26,7 +26,7 @@ function takes_container<T>(Container<T> $arg): ?T {
   return null;
 }
 
-function takes_keyed_container<Tk,Tv>(KeyedContainer<Tk,Tv> $c): void {}
+function takes_keyed_container<Tk as arraykey,Tv>(KeyedContainer<Tk,Tv> $c): void {}
 
 function takes_vec_array<Tv>(array<Tv> $c): void {}
 

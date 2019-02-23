@@ -603,6 +603,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    */
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf<Tv2>(
+    /* HH_FIXME[4110] T40426954 */
     ?KeyedContainer<Tv,Tv2> $container,
   ): Vector<Tv>;
 

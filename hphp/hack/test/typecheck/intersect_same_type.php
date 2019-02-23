@@ -1,6 +1,6 @@
 <?hh //strict
 
-function assertVectorLike(bool $b, KeyedContainer<mixed, mixed> $x): void {
+function assertVectorLike(bool $b, KeyedContainer<arraykey, mixed> $x): void {
   if ($b) {
     $i = 0;
   } else {
@@ -10,7 +10,7 @@ function assertVectorLike(bool $b, KeyedContainer<mixed, mixed> $x): void {
   expect_int($i);
 }
 
-function contains_key<Tk, Tv>(
+function contains_key<Tk as arraykey, Tv>(
   KeyedContainer<Tk, Tv> $container,
   Tk $key,
 ): bool {

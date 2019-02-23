@@ -115,7 +115,7 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * @guide /hack/collections/read-write
  */
 <<__Sealed(ConstVector::class, ConstMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
-interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
+interface KeyedContainer<+Tk as arraykey, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides

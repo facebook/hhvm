@@ -17,7 +17,7 @@ function test4(Vector<C> $x): void { foo4($x); }
 function foo5(KeyedIterable<string, B> $x): void {}
 function test5(Map<string, C> $x): void { foo5($x); }
 
-function foo6(KeyedContainer<mixed, B> $x): void {}
+function foo6(KeyedContainer<arraykey, B> $x): void {}
 function test6(Map<string, C> $x): void { foo6($x); }
 
 function foo7(Iterator<B> $x): void {}

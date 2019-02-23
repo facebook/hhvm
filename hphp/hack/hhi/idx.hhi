@@ -26,5 +26,5 @@
  * `null` is a valid key in the container.
  */
 <<__Rx>>
-function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, $index,
+function idx<Tk as arraykey, Tv>(?KeyedContainer<Tk, Tv> $collection, $index,
   $default = null) {}

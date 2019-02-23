@@ -3775,7 +3775,7 @@ and is_abstract_ft fty = match fty with
             let ret = MakeType.nullable rret (rret, Tgeneric "Tv") in
             [param1; param2], ret
           | 3 ->
-            let param2 = { param2 with fp_type = (r2, Tgeneric "Tk") } in
+            let param2 = { param2 with fp_type = MakeType.nullable r2 (r2, Tgeneric "Tk") } in
             let param3 = { param3 with fp_type = (r3, Tgeneric "Tv") } in
             let ret = (fst fty.ft_ret, Tgeneric "Tv") in
             [param1; param2; param3], ret

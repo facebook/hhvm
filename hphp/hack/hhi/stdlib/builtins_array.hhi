@@ -85,7 +85,7 @@ function array_flip($trans);
 <<__PHPStdLib, __Rx>>
 function key_exists($key, $search);
 <<__PHPStdLib, __Rx>>
-function array_keys<Tk, Tv>(
+function array_keys<Tk as arraykey, Tv>(
   KeyedContainer<Tk, Tv> $input,
   ?Tv $search_value = null,
   bool $strict = false

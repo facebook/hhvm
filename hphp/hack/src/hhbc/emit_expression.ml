@@ -3284,21 +3284,23 @@ and emit_call_lhs
       if does_not_have_non_tparam_generics then
         instr_fpushclsmethodsd nargs clsref method_id
       else reified_clsmethods_call method_id_string clsref
-    | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
-       let name_instrs =
+    | Class_expr expr ->
+      let name_instrs =
         if does_not_have_non_tparam_generics then instr_string method_id_string
         else reified_call_body method_id_string in
-       gather [
-         name_instrs;
-         emit_local ~notice:Notice ~need_ref:false env this;
-         instr_clsrefgetc;
-         instr_fpushclsmethod nargs []
-       ]
-    | _ ->
+      gather [
+        name_instrs;
+        emit_expr ~need_ref:false env expr;
+        instr_clsrefgetc;
+        instr_fpushclsmethod nargs []
+      ]
+    | Class_reified instrs ->
       (* TODO(T31677864): Implement reification here *)
       gather [
         instr_string method_id_string;
-        emit_load_class_ref env pos cexpr;
+        emit_pos pos;
+        instrs;
+        instr_clsrefgetc;
         instr_fpushclsmethod nargs []
       ]
     end
@@ -3312,21 +3314,31 @@ and emit_call_lhs
         Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
       | _ -> cexpr in
     begin match cexpr with
+    | Class_id cid ->
+      gather [
+        expr_instrs;
+        emit_pos pos;
+        emit_known_class_id env cid;
+        emit_pos outer_pos;
+        instr_fpushclsmethod nargs inout_arg_positions
+      ]
     | Class_special clsref ->
        gather [expr_instrs;
          emit_pos outer_pos; instr_fpushclsmethods nargs clsref]
-    | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
+    | Class_expr expr ->
        gather [
         expr_instrs;
-        emit_local ~notice:Notice ~need_ref:false env this;
+        emit_expr ~need_ref:false env expr;
         instr_clsrefgetc;
         emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
        ]
-    | _ ->
+    | Class_reified instrs ->
       gather [
         expr_instrs;
-        emit_load_class_ref env pos cexpr;
+        emit_pos pos;
+        instrs;
+        instr_clsrefgetc;
         emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
       ]

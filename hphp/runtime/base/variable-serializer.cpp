@@ -1881,6 +1881,10 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       write(obj->getClassName());
       return;
     }
+    if (obj->hasNativeData() &&
+        obj->getVMClass()->getNativeDataInfo()->isSerializable()) {
+      serializableNativeData = Native::nativeDataSleep(obj);
+    }
   }
 
   if (UNLIKELY(handleSleep)) {

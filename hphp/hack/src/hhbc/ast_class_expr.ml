@@ -8,6 +8,7 @@
 *)
 
 open Core_kernel
+open Hhbc_ast
 
 module A = Ast
 module SN = Naming_special_names
@@ -15,9 +16,7 @@ module SU = Hhbc_string_utils
 
 (* Class expressions; similar to Nast.class_id *)
 type class_expr =
-| Class_parent
-| Class_self
-| Class_static
+| Class_special of SpecialClsRef.t
 | Class_id of Ast.id
 | Class_expr of Ast.expr
 | Class_reified of Instruction_sequence.t
@@ -65,16 +64,16 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
 
 let expr_to_class_expr ?(check_traits=false) ~resolve_self scope (_, expr_ as expr) =
   match expr_ with
-  | A.Id (_, id) when SU.is_static id -> Class_static
+  | A.Id (_, id) when SU.is_static id -> Class_special SpecialClsRef.Static
   | A.Id (pos, id) when SU.is_parent id ->
     begin match get_original_parent_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
-    | None -> Class_parent
+    | None -> Class_special SpecialClsRef.Parent
     end
   | A.Id (pos, id) when SU.is_self id ->
     begin match get_original_class_name ~resolve_self ~check_traits scope with
     | Some name -> Class_id (pos, name)
-    | None -> Class_self
+    | None -> Class_special SpecialClsRef.Self
     end
   | A.Id id -> Class_id id
   | _ -> Class_expr expr

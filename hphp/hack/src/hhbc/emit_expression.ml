@@ -599,18 +599,13 @@ and emit_instanceof env pos e1 e2 =
       ] in
     let scope = Emit_env.get_scope env in
     begin match expr_to_class_expr ~resolve_self:true scope e2 with
-    | Class_static ->
-      from_class_ref @@ instr_fcallbuiltin 0 0 "get_called_class"
-    | Class_parent ->
-      from_class_ref @@ gather [
-        instr_parent;
-        instr_clsrefname;
-      ]
-    | Class_self ->
-      from_class_ref @@ gather [
-        instr_self;
-        instr_clsrefname;
-      ]
+    | Class_special clsref ->
+      let instr_clsref = match clsref with
+        | SpecialClsRef.Self -> instr_self
+        | SpecialClsRef.Static -> instr_lateboundcls
+        | SpecialClsRef.Parent -> instr_parent
+      in
+      from_class_ref @@ gather [ instr_clsref; instr_clsrefname ]
     | Class_id name ->
       let n, _ =
         Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) name in
@@ -839,9 +834,7 @@ and emit_new env pos expr targs args uargs =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [ emit_pos pos; instr_newobjd fq_id ]
-  | Class_static -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Static ]
-  | Class_self -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Self ]
-  | Class_parent -> gather [ emit_pos pos; instr_newobjs SpecialClsRef.Parent ]
+  | Class_special clsref -> gather [ emit_pos pos; instr_newobjs clsref ]
   | Class_reified instrs when has_generics = H.MaybeGenerics ->
     gather [ instrs; instr_clsrefgetts; instr_newobj 0 has_generics ]
   | _ ->
@@ -968,9 +961,9 @@ and emit_known_class_id env id =
 and emit_load_class_ref env pos cexpr =
   emit_pos_then pos @@
   match cexpr with
-  | Class_static -> instr (IMisc (LateBoundCls 0))
-  | Class_parent -> instr (IMisc (Parent 0))
-  | Class_self -> instr (IMisc (Self 0))
+  | Class_special SpecialClsRef.Self -> instr_self
+  | Class_special SpecialClsRef.Static -> instr_lateboundcls
+  | Class_special SpecialClsRef.Parent -> instr_parent
   | Class_id id -> emit_known_class_id env id
   | Class_expr expr ->
     begin match snd expr with
@@ -997,7 +990,7 @@ and emit_load_class_const env pos cexpr id =
    * Eventually remove this to match PHP7 *)
   match Ast_scope.Scope.get_class (Emit_env.get_scope env) with
   | Some cd when cd.A.c_kind = A.Ctrait
-              && cexpr = Class_self
+              && cexpr = (Class_special SpecialClsRef.Self)
               && SU.is_class id ->
     emit_pos_then pos @@
     instr_string @@ SU.strip_global_ns @@ snd cd.A.c_name
@@ -3287,18 +3280,10 @@ and emit_call_lhs
         instr_fpushclsmethodd nargs method_id fq_cid
       else
         reified_clsmethod_call method_id_string fq_cid_string)
-    | Class_static ->
+    | Class_special clsref ->
       if does_not_have_non_tparam_generics then
-        instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
-      else reified_clsmethods_call method_id_string SpecialClsRef.Static
-    | Class_self ->
-      if does_not_have_non_tparam_generics then
-        instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
-      else reified_clsmethods_call method_id_string SpecialClsRef.Self
-    | Class_parent ->
-      if does_not_have_non_tparam_generics then
-        instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
-      else reified_clsmethods_call method_id_string SpecialClsRef.Parent
+        instr_fpushclsmethodsd nargs clsref method_id
+      else reified_clsmethods_call method_id_string clsref
     | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
        let name_instrs =
         if does_not_have_non_tparam_generics then instr_string method_id_string
@@ -3327,15 +3312,9 @@ and emit_call_lhs
         Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
       | _ -> cexpr in
     begin match cexpr with
-    | Class_static ->
+    | Class_special clsref ->
        gather [expr_instrs;
-         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Static]
-    | Class_self ->
-       gather [expr_instrs;
-         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Self]
-    | Class_parent ->
-       gather [expr_instrs;
-         emit_pos outer_pos; instr_fpushclsmethods nargs SpecialClsRef.Parent]
+         emit_pos outer_pos; instr_fpushclsmethods nargs clsref]
     | Class_expr (_, A.Lvar ((_, x) as this)) when x = SN.SpecialIdents.this ->
        gather [
         expr_instrs;

@@ -146,6 +146,8 @@ let instr_clsrefname =
   instr (IMisc (ClsRefName class_ref_rewrite_sentinel))
 let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
+let instr_lateboundcls =
+  instr (IMisc (LateBoundCls class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
 let instr_fthrow_on_ref_mismatch by_refs =

@@ -194,7 +194,8 @@ let instr_basesc y mode =
   instr (IBase(BaseSC(y, class_ref_rewrite_sentinel, mode)))
 let instr_baseh = instr (IBase BaseH)
 let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
-let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
+let instr_fpushfuncd n id = instr (ICall(FPushFuncD(n, id)))
+let instr_fpushfuncu n id fallback = instr (ICall(FPushFuncU(n, id, fallback)))
 let instr_fcall fcall_args =
   let no_class = Hhbc_id.Class.from_raw_string "" in
   let no_func = Hhbc_id.Function.from_raw_string "" in

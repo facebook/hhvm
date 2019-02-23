@@ -3189,40 +3189,19 @@ and is_inout_arg = function
 and has_inout_args es =
   List.exists es ~f:is_inout_arg
 
-and emit_call_lhs
-  env outer_pos (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
+and emit_call_lhs_and_fpush
+  env (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
-  let reified_call_body name =
+  let reified_call_body name tmp_local =
     let targs = List.map ~f:fst targs in
     let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;
       instr_string name;
       instr_reified_name (List.length reified_targs + 1) H.FunGeneric;
-    ] in
-  let reified_fun_name_call name =
-    gather [
-      reified_call_body name;
-      instr_fpushfunc nargs inout_arg_positions;
-    ] in
-  let reified_objmethod_call name nullf =
-    gather [
-      reified_call_body name;
-      instr_fpushobjmethod nargs nullf inout_arg_positions;
-    ] in
-  let reified_clsmethod_call name cid =
-    gather [
-      reified_call_body name;
-      instr_string cid;
-      instr_clsrefgetc;
-      instr_fpushclsmethod nargs [];
-    ] in
-  let reified_clsmethods_call name clsref =
-    gather [
-      reified_call_body name;
-      instr_fpushclsmethods nargs clsref;
+      instr_popl tmp_local
     ] in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)
@@ -3233,20 +3212,27 @@ and emit_call_lhs
       then Hhbc_id.Method.add_suffix name
         (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else name in
-    gather [
-      emit_object_expr env obj;
-      emit_pos outer_pos;
-      (if does_not_have_non_tparam_generics then
-        instr_fpushobjmethodd nargs name null_flavor
-      else
-        reified_objmethod_call id null_flavor)
-    ]
+    let obj = emit_object_expr env obj in
+    if does_not_have_non_tparam_generics then
+      obj,
+      instr_fpushobjmethodd nargs name null_flavor
+    else
+      let tmp = Local.get_unnamed_local () in
+      gather [ obj; reified_call_body id tmp ],
+      gather [
+        instr_pushl tmp;
+        instr_fpushobjmethod nargs null_flavor inout_arg_positions
+      ]
   | A.Obj_get (obj, method_expr, null_flavor) ->
+    let tmp = Local.get_unnamed_local () in
     gather [
-      emit_pos outer_pos;
       emit_object_expr env obj;
       emit_expr ~need_ref:false env method_expr;
-      instr_fpushobjmethod nargs null_flavor inout_arg_positions;
+      instr_popl tmp
+    ],
+    gather [
+      instr_pushl tmp;
+      instr_fpushobjmethod nargs null_flavor inout_arg_positions
     ]
 
   | A.Class_const (cid, (_, id)) ->
@@ -3269,30 +3255,50 @@ and emit_call_lhs
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
       Emit_symbol_refs.add_class fq_cid_string;
-      (if does_not_have_non_tparam_generics then
+      if does_not_have_non_tparam_generics then
+        empty,
         instr_fpushclsmethodd nargs method_id fq_cid
       else
-        reified_clsmethod_call method_id_string fq_cid_string)
+        let tmp = Local.get_unnamed_local () in
+        reified_call_body method_id_string tmp,
+        gather [
+          instr_pushl tmp;
+          instr_string fq_cid_string;
+          instr_clsrefgetc;
+          instr_fpushclsmethod nargs []
+        ]
     | Class_special clsref ->
       if does_not_have_non_tparam_generics then
+        empty,
         instr_fpushclsmethodsd nargs clsref method_id
-      else reified_clsmethods_call method_id_string clsref
+      else
+        let tmp = Local.get_unnamed_local () in
+        reified_call_body method_id_string tmp,
+        gather [
+          instr_pushl tmp;
+          instr_fpushclsmethods nargs clsref
+        ]
     | Class_expr expr ->
-      let name_instrs =
-        if does_not_have_non_tparam_generics then instr_string method_id_string
-        else reified_call_body method_id_string in
-      gather [
-        name_instrs;
+      let emit_fpush instr_meth = gather [
+        instr_meth;
         emit_expr ~need_ref:false env expr;
         instr_clsrefgetc;
         instr_fpushclsmethod nargs []
-      ]
+      ] in
+      if does_not_have_non_tparam_generics then
+        empty,
+        emit_fpush (instr_string method_id_string)
+      else
+        let tmp = Local.get_unnamed_local () in
+        reified_call_body method_id_string tmp,
+        emit_fpush (instr_pushl tmp)
     | Class_reified instrs ->
       (* TODO(T31677864): Implement reification here *)
+      let tmp = Local.get_unnamed_local () in
+      gather [ instrs; instr_popl tmp ],
       gather [
         instr_string method_id_string;
-        emit_pos pos;
-        instrs;
+        instr_pushl tmp;
         instr_clsrefgetc;
         instr_fpushclsmethod nargs []
       ]
@@ -3301,43 +3307,60 @@ and emit_call_lhs
   | A.Class_get (cid, e) ->
     let cexpr = expr_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
-    let expr_instrs = emit_expr ~need_ref:false env e in
+    let emit_meth_name () = emit_expr ~need_ref:false env e in
     let cexpr = match cexpr with
       | Class_id (_, name) ->
         Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
       | _ -> cexpr in
     begin match cexpr with
     | Class_id cid ->
+      let tmp = Local.get_unnamed_local () in
+      gather [ emit_meth_name (); instr_popl tmp ],
       gather [
-        expr_instrs;
-        emit_pos pos;
+        instr_pushl tmp;
         emit_known_class_id env cid;
-        emit_pos outer_pos;
         instr_fpushclsmethod nargs inout_arg_positions
       ]
     | Class_special clsref ->
-       gather [expr_instrs;
-         emit_pos outer_pos; instr_fpushclsmethods nargs clsref]
-    | Class_expr expr ->
-       gather [
-        expr_instrs;
-        emit_expr ~need_ref:false env expr;
-        instr_clsrefgetc;
-        emit_pos outer_pos;
-        instr_fpushclsmethod nargs inout_arg_positions
-       ]
-    | Class_reified instrs ->
+      let tmp = Local.get_unnamed_local () in
+      gather [ emit_meth_name (); instr_popl tmp ],
       gather [
-        expr_instrs;
-        emit_pos pos;
-        instrs;
+        instr_pushl tmp;
+        instr_fpushclsmethods nargs clsref
+      ]
+    | Class_expr expr ->
+      let cls = Local.get_unnamed_local () in
+      let meth = Local.get_unnamed_local () in
+      gather [
+        emit_expr ~need_ref:false env expr;
+        instr_popl cls;
+        emit_meth_name ();
+        instr_popl meth
+      ],
+      gather [
+        instr_pushl meth;
+        instr_pushl cls;
         instr_clsrefgetc;
-        emit_pos outer_pos;
+        instr_fpushclsmethod nargs inout_arg_positions
+      ]
+    | Class_reified instrs ->
+      let cls = Local.get_unnamed_local () in
+      let meth = Local.get_unnamed_local () in
+      gather [
+        instrs;
+        instr_popl cls;
+        emit_meth_name ();
+        instr_popl meth
+      ],
+      gather [
+        instr_pushl meth;
+        instr_pushl cls;
+        instr_clsrefgetc;
         instr_fpushclsmethod nargs inout_arg_positions
       ]
     end
 
-  | A.Id (_, s as id)->
+  | A.Id (_, s as id) ->
     let fq_id, id_opt =
       Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) id in
     let fq_id, id_opt =
@@ -3351,22 +3374,37 @@ and emit_call_lhs
       then Hhbc_id.Function.add_suffix
         fq_id (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else fq_id in
-    emit_pos_then outer_pos @@
-    begin match id_opt with
-    | _ when not does_not_have_non_tparam_generics ->
-      reified_fun_name_call (Hhbc_id.Function.to_raw_string fq_id)
-    | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
-    | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
-    end
+    if does_not_have_non_tparam_generics then
+      empty,
+      match id_opt with
+      | Some id -> instr_fpushfuncu nargs fq_id id
+      | None -> instr_fpushfuncd nargs fq_id
+    else
+      let tmp = Local.get_unnamed_local () in
+      reified_call_body (Hhbc_id.Function.to_raw_string fq_id) tmp,
+      gather [
+        instr_pushl tmp;
+        instr_fpushfunc nargs inout_arg_positions
+      ]
   | A.String s ->
-    emit_pos_then outer_pos @@
-    (if does_not_have_non_tparam_generics then
+    if does_not_have_non_tparam_generics then
+      empty,
       instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
-     else reified_fun_name_call s)
+    else
+      let tmp = Local.get_unnamed_local () in
+      reified_call_body s tmp,
+      gather [
+        instr_pushl tmp;
+        instr_fpushfunc nargs inout_arg_positions
+      ]
   | _ ->
+    let tmp = Local.get_unnamed_local () in
     gather [
       emit_expr ~need_ref:false env expr;
-      emit_pos outer_pos;
+      instr_popl tmp
+    ],
+    gather [
+      instr_pushl tmp;
       instr_fpushfunc nargs inout_arg_positions
     ]
 
@@ -3573,6 +3611,8 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () = Local_helpers.scope_with_handler @@ fun () ->
+    let instr_lhs, instr_fpush = emit_call_lhs_and_fpush
+      env expr targs nargs (uargs <> []) inout_arg_positions in
     let instr_args, instr_inout_setters =
       emit_args_and_inout_setters env args in
     let instr_uargs = match uargs with
@@ -3581,8 +3621,9 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
     in
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
-      emit_call_lhs
-        env pos expr targs nargs (not (List.is_empty uargs)) inout_arg_positions;
+      instr_lhs;
+      emit_pos pos;
+      instr_fpush;
       instr_args;
       instr_uargs;
       emit_fcall pos args uargs async_eager_label;

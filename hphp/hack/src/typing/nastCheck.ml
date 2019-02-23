@@ -616,49 +616,9 @@ and class_const env (h, _, e) =
   maybe expr env e;
   ()
 
-and typeconst (env, class_tparams) tconst =
+and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint;
-  (* need to ensure that tconst.c_tconst_type is not Habstr *)
-  maybe check_no_class_tparams class_tparams tconst.c_tconst_type;
-  maybe check_no_class_tparams class_tparams tconst.c_tconst_constraint
-
-(* Check to make sure we are not using class type params for type const decls *)
-and check_no_class_tparams class_tparams (pos, ty)  =
-  let check_tparams = check_no_class_tparams class_tparams in
-  let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
-  let matches_class_tparam tp_name =
-    List.iter class_tparams begin fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
-      if c_tp_name = tp_name
-      then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
-    end in
-  match ty with
-    | Hany | Hmixed | Hnonnull | Hprim _ | Hthis | Hdynamic -> ()
-    (* We have found a type parameter. Make sure its name does not match
-     * a name in class_tparams *)
-    | Habstr tparam_name ->
-        matches_class_tparam tparam_name
-    | Harray (ty1, ty2) ->
-        maybe_check_tparams ty1;
-        maybe_check_tparams ty2
-    | Hdarray (ty1, ty2) ->
-        check_tparams ty1;
-        check_tparams ty2
-    | Hvarray_or_darray ty
-    | Hvarray ty ->
-        check_tparams ty
-    | Htuple tyl -> List.iter tyl check_tparams
-    | Hoption ty_ -> check_tparams ty_
-    | Hfun (_, _, tyl, _, _, _, ty_, _) ->
-        List.iter tyl check_tparams;
-        check_tparams ty_
-    | Happly (_, tyl) -> List.iter tyl check_tparams
-    | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-        ShapeMap.iter (fun _ v -> check_tparams v.sfi_hint) nsi_field_map
-    | Haccess (root_ty, _) ->
-        check_tparams root_ty
-    | Hsoft ty_ -> check_tparams ty_
-
 and class_var env cv =
   check_class_property_initialization cv;
   let hint_env =

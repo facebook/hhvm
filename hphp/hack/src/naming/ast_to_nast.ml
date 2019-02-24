@@ -225,7 +225,7 @@ and on_xhp_attribute a : Aast.xhp_attribute =
   | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
   | Xhp_spread e -> Aast.Xhp_spread (on_expr e)
 
-and on_targ (h, r) : Aast.targ = (on_hint h, r)
+and on_targ h : Aast.targ = on_hint h
 
 and on_expr (p, e) : Aast.expr =
   let node = match e with

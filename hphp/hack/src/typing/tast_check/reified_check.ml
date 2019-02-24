@@ -44,7 +44,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     Errors.require_args_reify decl_pos expr_pos;
   (* Unequal_lengths case handled elsewhere *)
   List.iter2 tparams targs ~f:begin fun tparam targ ->
-    verify_targ_valid_for_reified_tparam env tparam (fst targ)
+    verify_targ_valid_for_reified_tparam env tparam targ
   end |> ignore
 
 let handler = object

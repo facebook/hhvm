@@ -767,7 +767,7 @@ and get_erased_tparams env =
 and has_non_tparam_generics env targs =
   let erased_tparams = get_erased_tparams env in
   List.exists targs ~f:(function
-    | ((_, A.Happly ((_, id), _)), _)
+    | _, A.Happly ((_, id), _)
       when List.mem ~equal:String.equal erased_tparams id -> false
     | _ -> true)
 
@@ -791,7 +791,7 @@ and emit_new env pos expr targs args uargs =
       Option.value_map cls ~default:true ~f:(fun cls ->
       match cls.A.c_extends with
       | (_, A.Happly (_, l)) :: _ ->
-        not @@ has_non_tparam_generics env @@ List.map ~f:(fun h -> h, false) l
+        not @@ has_non_tparam_generics env l
       | _ -> true)
     | _ -> true in
   let cexpr = expr_to_class_expr ~resolve_self scope expr in
@@ -808,7 +808,6 @@ and emit_new env pos expr targs args uargs =
         cexpr, H.NoGenerics
       | None ->
         let cexpr_instrs name =
-          let targs = List.map ~f:fst targs in
           let reified_targs = emit_reified_targs env pos targs in
           gather [
             gather reified_targs;
@@ -3188,7 +3187,6 @@ and emit_call_lhs_and_fpush
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
   let reified_call_body name tmp_local =
-    let targs = List.map ~f:fst targs in
     let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;

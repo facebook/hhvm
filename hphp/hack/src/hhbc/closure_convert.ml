@@ -967,9 +967,9 @@ and convert_hint env st (p, h as hint) =
 
 and convert_targs env st targs =
   List.fold_right ~init:(st, []) targs
-    ~f:(fun (h, is_reified) (st, acc) ->
+    ~f:(fun h (st, acc) ->
         let st, h = convert_hint env st h in
-        st, (h, is_reified) :: acc
+        st, h :: acc
      )
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars

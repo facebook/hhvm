@@ -1114,26 +1114,15 @@ module Make (GetLocals : GetLocals) = struct
 
   let aast_constraint_ ?(forbid_this=false) env (ck, h) = ck, aast_hint ~forbid_this env h
 
-  let check_type_args_for_reified env p tal =
-    if not (TypecheckerOptions.experimental_feature_enabled
-        (fst env).tcopt
-      TypecheckerOptions.experimental_reified_generics)
-      && List.exists tal ~f:snd
-    then
-      Errors.experimental_feature p "reified generics"
-
-  let aast_targl env p tal =
-    check_type_args_for_reified env p tal;
-    List.map ~f:(fun (h, is_reified) ->
-      let h =
-        aast_hint
+  let aast_targl env _ tal =
+    List.map tal ~f:(
+      aast_hint
         ~allow_wildcard:true
         ~forbid_this:false
         ~allow_typedef:true
         ~allow_retonly:true
         ~tp_depth:1
-        env h in
-      h, is_reified) tal
+        env)
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"
@@ -2504,21 +2493,18 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.As (e, h, b) ->
       N.As (aast_expr env e, aast_hint ~allow_wildcard:true env h, b)
     | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, uel, _) ->
-      check_type_args_for_reified env p tal;
       N.New (make_class_id env x,
         aast_targl env p tal,
         aast_exprl env el,
         aast_exprl env uel,
         p)
     | Aast.New ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, uel, p) ->
-      check_type_args_for_reified env p tal;
       N.New (make_class_id env (pos, Local_id.to_string x),
         aast_targl env p tal,
         aast_exprl env el,
         aast_exprl env uel,
         p)
     | Aast.New ((_, Aast.CIexpr(p, _e)), tal, el, uel, _) ->
-      check_type_args_for_reified env p tal;
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown),

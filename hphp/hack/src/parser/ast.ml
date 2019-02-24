@@ -104,7 +104,7 @@ and gconst = {
   cst_span: pos;
 }
 
-and targ = hint * reified
+and targ = hint
 
 and tparam = {
   tp_variance: variance;

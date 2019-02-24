@@ -29,7 +29,7 @@ and call_type =
 and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
-and targ = hint * is_reified
+and targ = hint
 
 and param_mutability = PMutable | POwnedMutable | PMaybeMutable
 and import_flavor =

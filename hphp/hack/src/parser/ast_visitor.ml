@@ -97,7 +97,7 @@ class type ['a] ast_visitor_type = object
   method on_string : 'a -> string -> 'a
   method on_suspend: 'a -> expr -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
-  method on_targ : 'a -> (hint * bool) -> 'a
+  method on_targ : 'a -> hint -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_true : 'a -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
@@ -206,7 +206,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       let acc = List.fold_left this#on_id acc idl in
       acc
 
-  method on_targ acc (h, _) =
+  method on_targ acc h =
     let acc = this#on_hint acc h in
     acc
 

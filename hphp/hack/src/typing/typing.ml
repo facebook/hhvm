@@ -3634,8 +3634,7 @@ and is_abstract_ft fty = match fty with
                   ~f:(fun env _ -> Env.fresh_unresolved_type env p) in
                 env, vars, tr end
               else
-              let hl, _is_reified_list = List.unzip tal in
-              let env, vars_and_tr = List.map_env env hl Phase.localize_hint_with_self in
+              let env, vars_and_tr = List.map_env env tal Phase.localize_hint_with_self in
               let vars, trl = List.split_n vars_and_tr (List.length vars_and_tr - 1) in
               (* Since we split the arguments and return type at the last index and the length is
                  non-zero this is safe. *)
@@ -3889,9 +3888,8 @@ and is_abstract_ft fty = match fty with
       then begin
         (* in static context, you can only call parent::foo() on static
          * methods *)
-        let hl, _is_reified_list = List.unzip tal in
         let env, fty, _ =
-          class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
+          class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
         let env, tel, tuel, ty =
@@ -3935,9 +3933,8 @@ and is_abstract_ft fty = match fty with
             make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
               tal [] [] method_
         else
-            let hl, _is_reified_list = List.unzip tal in
             let env, fty, _ =
-              class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
+              class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
             let env, tel, tuel, ty =
@@ -3950,9 +3947,8 @@ and is_abstract_ft fty = match fty with
   (* Call class method *)
   | Class_const ((pid, e1), m) ->
       let env, te1, ty1 = static_class_id ~check_constraints:true pid env [] e1 in
-      let hl, _is_reified_list = List.unzip tal in
       let env, fty, _ =
-        class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
+        class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
         ~pos_params:el env ty1 m e1 in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
@@ -4012,9 +4008,8 @@ and is_abstract_ft fty = match fty with
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
-      let hl, _is_reified_list = List.unzip tal in
       let env, ty = obj_get ~obj_pos:p ~is_method:true ~nullsafe ~pos_params:el
-                      ~explicit_tparams:hl env ty1 infer_e m fn in
+                      ~explicit_tparams:tal env ty1 infer_e m fn in
       let tfty =
         match !tftyl with
         | [fty] -> fty
@@ -4042,9 +4037,8 @@ and is_abstract_ft fty = match fty with
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
-      let hl, _is_reified_list = List.unzip tal in
       let env, ty = obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
-                      ~explicit_tparams:hl env ty1 (CIexpr e1) m k in
+                      ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
       let tfty =
         match !tftyl with
         | [fty] -> fty
@@ -4100,9 +4094,8 @@ and fun_type_of_id env x tal =
   | None -> let env, _, ty = unbound_name env x in env, ty
   | Some fty ->
       let ety_env = Phase.env_with_self env in
-      let hl, _is_reified_list = List.unzip tal in
       let env, fty =
-        Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
+        Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:tal ~ety_env env fty in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty)
 
 (**
@@ -4753,10 +4746,9 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       | None ->
         make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
-        let hint_list, _ = List.unzip tal in
         let env, ty =
           resolve_type_arguments_and_check_constraints ~exact ~check_constraints
-            env p c e1 (Cls.tparams class_) hint_list in
+            env p c e1 (Cls.tparams class_) tal in
         make_result env (T.CI c) ty
     )
   | CIexpr (p, _ as e) ->

@@ -84,7 +84,6 @@ let add_reified_attribute attrs params =
 
 let add_reified_parent_attribute env attrs = function
   | ((_, Ast.Happly (_, hl))) :: _ ->
-    if Emit_expression.has_non_tparam_generics env @@
-         List.map ~f:(fun h -> h, false) hl
+    if Emit_expression.has_non_tparam_generics env hl
     then (Hhas_attribute.make "__HasReifiedParent" []) :: attrs else attrs
   | _ -> attrs

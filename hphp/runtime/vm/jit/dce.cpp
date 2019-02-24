@@ -285,6 +285,7 @@ bool canDCE(IRInstruction* inst) {
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
+  case MangleReifiedName:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -749,6 +750,8 @@ bool canDCE(IRInstruction* inst) {
   case KillClsRefTS:
   case BoxPtr:
   case AsTypeStruct:
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case CheckRDSInitialized:
   case MarkRDSInitialized:

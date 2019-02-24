@@ -1648,6 +1648,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Unreachable code kills every memory location.
     return may_load_store_kill(AEmpty, AEmpty, AUnknown);
 
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList: {
+    auto const extra = inst.extra<StackRangeData>();
+    auto const stack_in = AStack {
+      inst.src(0),
+      extra->offset + static_cast<int32_t>(extra->size) - 1,
+      static_cast<int32_t>(extra->size)
+    };
+    return may_load_store(stack_in, AEmpty);
+  }
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1783,6 +1794,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Select:
   case LookupSPropSlot:
   case ConvPtrToLval:
+  case MangleReifiedName:
     return IrrelevantEffects {};
 
   case StClosureArg:

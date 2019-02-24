@@ -2734,31 +2734,10 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   }
 }
 
-namespace {
-
-// Creates a list of reified generics from the stack and adds them to the
-// reified generics table
-ALWAYS_INLINE std::pair<StringData*, ArrayData*>
-recordReifiedGenericsAndGetInfo(uint32_t n) {
-  assertx(n != 0);
-  auto tsList = ArrayData::CreateVArray();
-  for (int i = 0; i < n; ++i) {
-    auto a = vmStack().indC(n - i - 1);
-    isValidTSType(*a, true);
-    tsList = tsList->appendInPlace(*a);
-  }
-  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  addToReifiedGenericsTable(mangledName, tsList);
-  return std::make_pair(mangledName, tsList);
-}
-
-} // namespace
-
 OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   assertx(n != 0);
-  auto const result = recordReifiedGenericsAndGetInfo(n);
-  auto tsList = result.second;
-  ArrayData::GetScalarArray(&tsList);
+  auto const tsList =
+    jit::recordReifiedGenericsAndGetTSList(n, vmStack().topC());
   vmStack().ndiscard(n);
   if (RuntimeOption::EvalHackArrDVArrs) {
     vmStack().pushStaticVec(tsList);
@@ -2769,8 +2748,8 @@ OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
 
 OPTBLD_INLINE void iopReifiedName(uint32_t n, const StringData* name) {
   assertx(n != 0);
-  auto const result = recordReifiedGenericsAndGetInfo(n);
-  auto const mangledName = mangleReifiedName(name, result.first);
+  auto const result = jit::recordReifiedGenericsAndGetName(n, vmStack().topC());
+  auto const mangledName = mangleReifiedName(name, result);
   vmStack().ndiscard(n);
   vmStack().pushStaticString(mangledName);
 }

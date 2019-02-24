@@ -611,6 +611,7 @@ static CallMap s_callMap {
                              {{extra(&ParamData::paramId)}, {SSA, 0}}},
     {VerifyReifiedReturnType, VerifyReifiedReturnTypeImpl, DNone, SSync,
                               {{TV, 0}, {SSA, 1}}},
+    {MangleReifiedName, mangleReifiedName, DSSA,  SNone, {{SSA, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

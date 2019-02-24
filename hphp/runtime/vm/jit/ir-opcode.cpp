@@ -515,6 +515,8 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseUninitLoc:
   case RaiseVarEnvDynCall:
   case RaiseWarning:
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case ReturnHook:
   case SetElem:
@@ -911,6 +913,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LtRes:
   case LtStr:
   case LtStrInt:
+  case MangleReifiedName:
   case MapIsset:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:

@@ -1076,6 +1076,31 @@ void emitAsTypeStructC(IRGS& env, TypeStructResolveOp op) {
   decRef(env, a);
 }
 
+void emitRecordReifiedGeneric(IRGS& env, uint32_t n) {
+  assertx(n != 0);
+  auto const result = gen(
+    env,
+    RecordReifiedGenericsAndGetTSList,
+    StackRangeData { spOffBCFromIRSP(env), static_cast<uint32_t>(n) },
+    sp(env)
+  );
+  discard(env, n);
+  push(env, result);
+}
+
+void emitReifiedName(IRGS& env, uint32_t n, const StringData* name) {
+  assertx(n != 0);
+  auto const result = gen(
+    env,
+    RecordReifiedGenericsAndGetName,
+    StackRangeData { spOffBCFromIRSP(env), static_cast<uint32_t>(n) },
+    sp(env)
+  );
+  auto const mangledName = gen(env, MangleReifiedName, cns(env, name), result);
+  discard(env, n);
+  push(env, mangledName);
+}
+
 namespace {
 
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,

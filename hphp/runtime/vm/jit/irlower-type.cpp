@@ -296,4 +296,36 @@ void cgProfileType(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void implRecordReifiedGenericsAndGetData(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<StackRangeData>();
+  auto& v = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .imm(extra->size)
+    .addr(sp, cellsToBytes(extra->offset.offset));
+
+  auto func = inst->op() == RecordReifiedGenericsAndGetName
+              ? CallSpec::direct(recordReifiedGenericsAndGetName)
+              : CallSpec::direct(recordReifiedGenericsAndGetTSList);
+
+  cgCallHelper(v, env, func, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+} // namespace
+
+void cgRecordReifiedGenericsAndGetName(IRLS& env, const IRInstruction* inst) {
+  implRecordReifiedGenericsAndGetData(env, inst);
+}
+
+void cgRecordReifiedGenericsAndGetTSList(IRLS& env, const IRInstruction* inst) {
+  implRecordReifiedGenericsAndGetData(env, inst);
+}
+
+IMPL_OPCODE_CALL(MangleReifiedName)
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

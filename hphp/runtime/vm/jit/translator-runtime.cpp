@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -1052,6 +1053,38 @@ void asTypeStructHelper(ArrayData* a, Cell c) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
+}
+
+namespace {
+
+// Creates a list of reified generics from the stack and adds them to the
+// reified generics table
+std::pair<StringData*, ArrayData*>
+recordReifiedGenericsAndGetInfo(uint32_t n, const TypedValue* values) {
+  assertx(n != 0);
+  auto tsList = ArrayData::CreateVArray();
+  for (int i = 0; i < n; ++i) {
+    auto a = values[n - i - 1];
+    isValidTSType(a, true);
+    tsList = tsList->appendInPlace(a);
+  }
+  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
+  addToReifiedGenericsTable(mangledName, tsList);
+  return std::make_pair(mangledName, tsList);
+}
+
+} // namespace
+
+StringData*
+recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values) {
+  return recordReifiedGenericsAndGetInfo(n, values).first;
+}
+
+ArrayData*
+recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values) {
+  auto tsList = recordReifiedGenericsAndGetInfo(n, values).second;
+  ArrayData::GetScalarArray(&tsList);
+  return tsList;
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {

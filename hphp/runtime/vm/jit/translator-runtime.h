@@ -224,6 +224,11 @@ ArrayData* resolveTypeStructHelper(
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);
 
+/* Reified generics helpers */
+StringData*
+recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values);
+ArrayData*
+recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values);
 /*
  * Throw a VMSwitchMode exception.
  */

@@ -401,12 +401,33 @@ let get_queryMOpMode need_ref op =
   | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
 
-let extract_shape_field_name_pstring = function
+(* Returns either Some (index, is_soft) or None *)
+let is_reified_tparam ~is_fun env name =
+  let scope = Emit_env.get_scope env in
+  let tparams =
+    if is_fun then Ast_scope.Scope.get_fun_tparams scope
+    else Ast_scope.Scope.get_class_tparams scope
+  in
+  let is_soft =
+    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
+  List.find_mapi tparams
+    ~f:(fun i { A.tp_name = (_, id)
+              ; A.tp_reified = is_reified
+              ; A.tp_user_attributes = ual
+              ; _ } ->
+      if is_reified && id = name then Some (i, is_soft ual) else None)
+
+let extract_shape_field_name_pstring env = function
   | A.SFlit_int s -> A.Int (snd s)
   | A.SFlit_str s ->
     Emit_type_constant.check_shape_key s;
     A.String (snd s)
-  | A.SFclass_const ((pn, _) as id, p) -> A.Class_const ((pn, A.Id id), p)
+  | A.SFclass_const ((pn, name) as id, p) ->
+    if Option.is_some (is_reified_tparam ~is_fun:true env name) ||
+       Option.is_some (is_reified_tparam ~is_fun:false env name) then
+      Emit_fatal.raise_fatal_parse pn
+        "Reified generics cannot be used in shape keys";
+    A.Class_const ((pn, A.Id id), p)
 
 let rec text_of_expr e = match e with
   (* Note we force string literals to become single-quoted, regardless of
@@ -886,7 +907,7 @@ and emit_shape env expr fl =
   let fl =
     List.map fl
              ~f:(fun (fn, e) ->
-                   ((p, extract_shape_field_name_pstring fn), e))
+                   ((p, extract_shape_field_name_pstring env fn), e))
   in
   emit_expr ~need_ref:false env (p, A.Darray fl)
 
@@ -1710,22 +1731,6 @@ and emit_inline_hhas s =
     end
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
-
-(* Returns either Some (index, is_soft) or None *)
-and is_reified_tparam ~is_fun env name =
-  let scope = Emit_env.get_scope env in
-  let tparams =
-    if is_fun then Ast_scope.Scope.get_fun_tparams scope
-    else Ast_scope.Scope.get_class_tparams scope
-  in
-  let is_soft =
-    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
-  List.find_mapi tparams
-    ~f:(fun i { A.tp_name = (_, id)
-              ; A.tp_reified = is_reified
-              ; A.tp_user_attributes = ual
-              ; _ } ->
-      if is_reified && id = name then Some (i, is_soft ual) else None)
 
 and get_reified_var_cexpr env pos name =
   match emit_reified_type_opt env pos name with

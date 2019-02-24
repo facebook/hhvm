@@ -331,14 +331,12 @@ let check_instruct_get asn i i' =
   | VGetL l, VGetL l'
   | PushL l, PushL l' (* TODO: this also unsets but don't track that yet *)
     -> reads asn l l' (* these instructions read locals *)
-  | ClsRefGetL (l,cr), ClsRefGetL (l',cr') ->
-    if cr = cr' then reads asn l l' else None
   | VGetL _, _
   | _, VGetL _ ->
     (* can't handle the possible  aliasing here, so bail *)
     None
   | CGetL _, _ | CGetQuietL _, _ | CGetL2 _, _ | CUGetL _, _
-  | PushL _, _ | ClsRefGetL _, _ -> None
+  | PushL _, _ -> None
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | CGetG, _ | CGetQuietG, _ | CGetS _, _

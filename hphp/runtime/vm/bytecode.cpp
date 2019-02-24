@@ -3395,14 +3395,6 @@ OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
-  auto const cell = tvToCell(fr.ptr);
-  if (isStringType(cell->m_type)) {
-    raise_str_to_class_notice(cell->m_data.pstr);
-  }
-  slot.put(nullptr, lookupClsRef(cell));
-}
-
 OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
   auto const cell = vmStack().topC();
   if (!tvIsDictOrDArray(cell)) {

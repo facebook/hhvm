@@ -76,8 +76,7 @@ let stk_data : instruct -> stack_sig = function
   | IIncludeEvalDefine DefClsNop _
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _
-  | IGenerator ContCheck _
-  | IGet ClsRefGetL _                      -> [], []
+  | IGenerator ContCheck _                 -> [], []
   | ICall FPushObjMethod _                 -> ["C"; "C"], []
   | IOp Fatal _
   | IContFlow JmpZ _

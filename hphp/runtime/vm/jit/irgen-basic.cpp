@@ -72,20 +72,6 @@ void emitClsRefGetC(IRGS& env, uint32_t slot) {
   }
 }
 
-void emitClsRefGetL(IRGS& env, int32_t id, uint32_t slot) {
-  auto const ldrefExit = makeExit(env);
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  if (src->type().subtypeOfAny(TObj, TStr)) {
-    if (src->isA(TStr) && !src->hasConstVal()) {
-      gen(env, RaiseStrToClassNotice, src);
-    }
-    implClsRefGet(env, src, slot, false);
-  } else {
-    PUNT(ClsRefGetL);
-  }
-}
-
 void emitCGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);

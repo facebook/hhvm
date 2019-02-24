@@ -250,7 +250,6 @@ static const struct {
   { OpVGetG,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpVGetS,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpClsRefGetC,  {Stack1,           None,         OutNone         }},
-  { OpClsRefGetL,  {Local,            None,         OutNone         }},
   { OpClsRefGetTS, {Stack1,           None,         OutNone         }},
 
   /*** 6. Isset, Empty, and type querying instructions ***/
@@ -892,7 +891,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AddO:
   case Op::ClsRefGetC:
   case Op::ClsRefGetTS:
-  case Op::ClsRefGetL:
   case Op::AKExists:
   case Op::AddElemC:
   case Op::AddNewElemC:

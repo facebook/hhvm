@@ -601,7 +601,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           ONE(CAR),         ONE(CV),         ONE(VV),    NF) \
   O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
-  O(ClsRefGetL,      TWO(LA,CAW),      NOV,             NOV,        NF) \
   O(ClsRefGetTS,     ONE(CAW),         ONE(CV),         NOV,        NF) \
   O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \

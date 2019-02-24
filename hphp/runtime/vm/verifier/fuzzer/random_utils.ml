@@ -276,8 +276,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
        (fun () -> IMutator (IncDecS (random_incdec_op (),
                                      Random.int cls_ref_slts)));
        (fun () -> IGet (ClsRefGetC (Random.int cls_ref_slts)));
-       (fun () -> IMutator (BindS (Random.int cls_ref_slts)));
-       (fun () -> IGet (ClsRefGetL (random_local (), Random.int cls_ref_slts)))]
+       (fun () -> IMutator (BindS (Random.int cls_ref_slts)))]
     end
 
 (* Generators for base instructions *)

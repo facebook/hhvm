@@ -223,8 +223,6 @@ let string_of_get x =
   | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
-  | ClsRefGetL (id, cr) ->
-    sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
   | ClsRefGetC cr -> sep ["ClsRefGetC"; string_of_int cr]
   | ClsRefGetTS cr -> sep ["ClsRefGetTS"; string_of_int cr]
 

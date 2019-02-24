@@ -313,7 +313,6 @@ type instruct_get =
   | VGetL of local_id
   | VGetG
   | VGetS of classref_id
-  | ClsRefGetL of local_id * classref_id
   | ClsRefGetC of classref_id
   | ClsRefGetTS of classref_id
 

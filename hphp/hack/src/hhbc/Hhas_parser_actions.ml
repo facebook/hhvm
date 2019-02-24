@@ -1067,9 +1067,6 @@ match s with
  | "ClsCnsD" ->
    ILitConst(ClsCnsD (const_id_of_iarg arg1, class_id_of_iarg arg2))
 
- (* instruct_get *)
- | "ClsRefGetL" -> IGet (ClsRefGetL (localidofiarg arg1, intofiarg arg2))
-
  (* instruct_isset *)
  | "IsTypeL" -> IIsset (IsTypeL (localidofiarg arg1, typeopofiarg arg2))
 

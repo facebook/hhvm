@@ -1745,17 +1745,6 @@ void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
   putClsRefSlot(env, slot, std::move(cls));
 }
 
-void in(ISS& env, const bc::ClsRefGetL& op) {
-  if (locIsThis(env, op.loc1)) {
-    auto const subop = peekLocRaw(env, op.loc1).couldBe(BUninit) ?
-      BareThisOp::Notice : BareThisOp::NoNotice;
-    return reduce(env,
-                  bc::BareThis { subop },
-                  bc::ClsRefGetC { op.slot });
-  }
-  clsRefGetImpl(env, locAsCell(env, op.loc1), op.slot);
-}
-
 void in(ISS& env, const bc::ClsRefGetC& op) {
   clsRefGetImpl(env, popC(env), op.slot);
 }

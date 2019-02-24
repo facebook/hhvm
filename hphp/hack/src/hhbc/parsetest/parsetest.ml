@@ -46,7 +46,8 @@ f(<\"HH\\\\int\" \"HH\\\\int\" hh_type > $x, <\"HH\\\\int\" \"HH\\\\int\" hh_typ
   Jmp L0\n\
   Int 42\n String \"foo\"\n\
   PushL _0\n\
-  ClsRefGetL $t 0\n\
+  CGetL $t\n\
+  ClsRefGetC 0\n\
   QueryM 1 CGet EC:0\n\
   RetC\n
   }\n\n\

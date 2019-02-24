@@ -453,7 +453,6 @@ let get_num_cls_ref_slots instrseq =
         | IMisc (LateBoundCls id)
         | IMisc (Self id)
         | IMisc (ClsRefName id)
-        | IGet (ClsRefGetL (_, id))
         | IGet (ClsRefGetTS id)
         | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
@@ -517,7 +516,6 @@ let rewrite_user_labels instrseq =
 
 (* TODO: What other instructions manipulate the class ref stack *)
 let rewrite_class_refs_instr num = function
-| IGet (ClsRefGetL (lid, _)) -> (num + 1, IGet (ClsRefGetL (lid, num + 1)))
 | IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
 | IGet (ClsRefGetTS _) -> (num + 1, IGet (ClsRefGetTS (num + 1)))
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
@@ -800,7 +798,6 @@ let get_input_output_count i =
     | CGetL2 _ -> (1, 2)
     | CGetG | CGetQuietG | CGetS _
     | VGetG | VGetS _ -> (1, 1)
-    | ClsRefGetL _ -> (0, 0)
     | ClsRefGetC _ | ClsRefGetTS _ -> (1, 0)
     end
   | IMutator i ->
@@ -984,8 +981,7 @@ let collect_locals f instrs =
     match i with
     | ILitConst (NewLikeArrayL (l, _))
     | IGet (
-      CGetL l | CGetQuietL l |CGetL2 l | CUGetL l | PushL l |
-      VGetL l | ClsRefGetL (l, _))
+      CGetL l | CGetQuietL l |CGetL2 l | CUGetL l | PushL l | VGetL l)
     | IIsset (IssetL l | EmptyL l | IsTypeL (l, _))
     | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
                 UnsetL l)

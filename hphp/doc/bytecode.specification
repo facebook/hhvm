@@ -1710,7 +1710,6 @@ VGetS <class-ref slot>    [C]  ->  [V]
 
 ClsRefGetC  <class-ref slot>                        [C]  ->  []
 ClsRefGetTS <class-ref slot>                        [C]  ->  []
-ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
 
   Fetch class. This instruction first loads a value into x as shown by the
   following table:
@@ -1719,7 +1718,6 @@ ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
     ---------------+----
       ClsRefGetC   | $1
       ClsRefGetTS  | $1['classname']
-      ClsRefGetL   | %1
 
   If the flavor is TS, then this instruction checks whether $1 is a type
   structure. If not, it throws a fatal error. Loads the classname field onto
@@ -1737,7 +1735,7 @@ ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
   instruction throws a fatal error.
 
   Next, this instruction writes a classref that refers to the class named y to
-  %1 for ClsRefGetC, %2 for ClsRefGetL.
+  %1.
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------

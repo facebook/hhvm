@@ -301,8 +301,6 @@ let mut_imms (is : IS.t) : IS.t =
     | VGetL       id     -> VGetL      (mutate_local_id id !mag)
     | VGetS       i      -> VGetS      (mutate_int      i  !mag)
     | ClsRefGetC  i      -> ClsRefGetC (mutate_int      i  !mag)
-    | ClsRefGetL (id, i) ->
-        ClsRefGetL ((mutate_local_id id !mag), (mutate_int i !mag))
     | _ -> s in  (*TODO: in general it might be worthwhile to get rid of wild
                    card cases like this. It would make the code more verbose,
                    but it will make adding new bytecodes easier since this will

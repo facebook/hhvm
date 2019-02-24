@@ -966,18 +966,11 @@ and emit_load_class_ref env pos cexpr =
   | Class_special SpecialClsRef.Parent -> instr_parent
   | Class_id id -> emit_known_class_id env id
   | Class_expr expr ->
-    begin match snd expr with
-    | A.Lvar ((_, id) as pos_id)
-      when id <> SN.SpecialIdents.this || (Emit_env.get_needs_local_this env) ->
-      let local = get_local env pos_id in
-      instr (IGet (ClsRefGetL (local, 0)))
-    | _ ->
-      gather [
-        emit_pos pos;
-        emit_expr ~need_ref:false env expr;
-        instr_clsrefgetc
-      ]
-    end
+    gather [
+      emit_pos pos;
+      emit_expr ~need_ref:false env expr;
+      instr_clsrefgetc
+    ]
   | Class_reified instrs ->
     gather [
       emit_pos pos;

@@ -1123,18 +1123,6 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
   pop(env);
 }
 
-void dce(Env& env, const bc::ClsRefGetL& op) {
-  auto const ty = locRaw(env, op.loc1);
-  if (clsRefGetHelper(env, ty, op.slot)) {
-    assert(!readCouldHaveSideEffects(ty));
-    commitActions(env, false, slotUsage(env, op.slot).actions);
-    return;
-  }
-
-  addLocGen(env, op.loc1);
-  writeSlot(env, op.slot);
-}
-
 void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
   if (safe && !isSlotLive(env, slot)) {
     commitActions(env, false, slotUsage(env, slot).actions);

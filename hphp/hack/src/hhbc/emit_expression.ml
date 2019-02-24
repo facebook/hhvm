@@ -828,22 +828,19 @@ and emit_new env pos expr targs args uargs =
       | None when not (has_non_tparam_generics env targs) ->
         cexpr, H.NoGenerics
       | None ->
-        let cexpr_instrs name =
-          let reified_targs = emit_reified_targs env pos targs in
-          gather [
-            gather reified_targs;
-            name;
-            instr_reified_name (List.length reified_targs + 1) H.ClsGeneric;
-          ]
-        in
         let instrs = match cexpr with
           | Class_id id ->
-            let fq_id, _ =
-              Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
-            cexpr_instrs @@ instr_string (Hhbc_id.Class.to_raw_string fq_id)
-          | Class_expr e -> cexpr_instrs @@ emit_expr ~need_ref:false env e
+            let fq_id =
+              Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
+              |> fst |> Hhbc_id.Class.to_raw_string in
+            let reified_targs = emit_reified_targs env pos targs in
+            gather [
+              gather reified_targs;
+              instr_reified_name (List.length reified_targs) fq_id;
+            ]
           | Class_reified instrs -> instrs
-          | _ -> failwith "Internal error: This node can only be id or expr" in
+          | _ -> failwith "Internal error: This node can only be id or reified"
+        in
         Class_reified instrs, H.HasGenerics
       end
     | _ -> cexpr, H.NoGenerics in
@@ -3195,8 +3192,7 @@ and emit_call_lhs_and_fpush
     let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;
-      instr_string name;
-      instr_reified_name (List.length reified_targs + 1) H.FunGeneric;
+      instr_reified_name (List.length reified_targs) name;
       instr_popl tmp_local
     ] in
   match expr_ with

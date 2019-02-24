@@ -743,12 +743,6 @@ let typestructresolveofiarg arg =
   | IAId "DontResovle" -> DontResolve
   | _ -> report_error "bad type struct resolve op"
 
-let reifiedgenericopofiarg arg =
-  match arg with
-  | IAId "ClsGeneric" -> ClsGeneric
-  | IAId "FunGeneric" -> FunGeneric
-  | _ -> report_error "bad reified generic op"
-
 let hasgenericsopofiarg arg =
   match arg with
   | IAId "NoGenerics" -> NoGenerics
@@ -1136,7 +1130,7 @@ match s with
    IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))
 
  | "ReifiedName" ->
-   IMisc (ReifiedName (intofiarg arg1, reifiedgenericopofiarg arg2))
+   IMisc (ReifiedName (intofiarg arg1, stringofiarg arg2))
 
  | _ -> failwith ("NYI binary: " ^ s)
 

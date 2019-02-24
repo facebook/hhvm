@@ -463,7 +463,7 @@ void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t)
                                               { INTERP }
 void emitRecordReifiedGeneric(IRGS& env, uint32_t)
                                               { INTERP }
-void emitReifiedName(IRGS& env, uint32_t, ReifiedGenericOp)
+void emitReifiedName(IRGS& env, uint32_t, const StringData*)
                                               { INTERP }
 void emitClsRefGetTS(IRGS& env, uint32_t)     { INTERP }
 

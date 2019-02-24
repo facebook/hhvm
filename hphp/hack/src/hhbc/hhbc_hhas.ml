@@ -140,10 +140,6 @@ let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
 
-let string_of_reifiedgeneric_op = function
-  | ClsGeneric -> "ClsGeneric"
-  | FunGeneric -> "FunGeneric"
-
 let string_of_has_generics_op = function
   | NoGenerics -> "NoGenerics"
   | HasGenerics -> "HasGenerics"
@@ -531,8 +527,8 @@ let string_of_misc instruction =
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
-    | ReifiedName (n, op) ->
-      sep ["ReifiedName"; string_of_int n; string_of_reifiedgeneric_op op]
+    | ReifiedName (n, name) ->
+      sep ["ReifiedName"; string_of_int n; SU.quote_string name]
     | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
     | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]

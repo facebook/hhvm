@@ -2576,19 +2576,15 @@ void in(ISS& env, const bc::RecordReifiedGeneric& op) {
 void in(ISS& env, const bc::ReifiedName& op) {
   // TODO(T31677864): implement real optimizations
   assertx(op.arg1 > 0);
-  auto const name = popC(env);
-  auto valid = name.couldBe(BStr);
+  auto valid = true;
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  for (int i = 1; i < op.arg1; ++i) {
+  for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
     valid &= t.couldBe(requiredTSType);
   }
   if (!valid) return unreachable(env);
   nothrow(env);
-  if (auto const tvname = tv(name)) {
-    return push(env, rname(tvname->m_data.pstr));
-  }
-  push(env, TSStr);
+  return push(env, rname(op.str2));
 }
 
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {

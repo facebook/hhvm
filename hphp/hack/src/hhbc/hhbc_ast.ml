@@ -167,10 +167,6 @@ type typestruct_resolve_op =
   | Resolve
   | DontResolve
 
-type reified_generic_op =
-  | ClsGeneric
-  | FunGeneric
-
 type has_generics_op =
   | NoGenerics
   | MaybeGenerics
@@ -502,7 +498,7 @@ type instruct_misc =
   | Parent of classref_id
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
-  | ReifiedName of int * reified_generic_op
+  | ReifiedName of int * string
   | RecordReifiedGeneric of int
   | CheckReifiedGenericMismatch
   | NativeImpl

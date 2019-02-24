@@ -16,8 +16,8 @@
 
 .function <"" N  > f() {
   .numclsrefslots 1;
-  String "C"
-  ReifiedName 1 ClsGeneric
+  NewDArray 0
+  ReifiedName 1 "C"
   ClsRefGetC 0
   NewObj 0 MaybeGenerics
   Dup

@@ -1039,12 +1039,6 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
-static const char* ReifiedGenericOp_names[] = {
-#define OP(x) #x,
-  REIFIED_GENERIC_OPS
-#undef OP
-};
-
 static const char* HasGenericsOp_names[] = {
 #define OP(x) #x,
   HAS_GENERICS_OPS
@@ -1142,8 +1136,6 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
-X(ReifiedGenericOp,
-                  static_cast<int>(ReifiedGenericOp::ClsGeneric))
 X(HasGenericsOp,  static_cast<int>(HasGenericsOp::NoGenerics))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))

@@ -214,7 +214,6 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(ReifiedGenericOp) { return "ReifiedGenericOp"; }
 inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -2740,10 +2739,10 @@ namespace {
 // Creates a list of reified generics from the stack and adds them to the
 // reified generics table
 ALWAYS_INLINE std::pair<StringData*, ArrayData*>
-recordReifiedGenericsAndGetInfo(uint32_t first, uint32_t n) {
-  assertx(first < n);
+recordReifiedGenericsAndGetInfo(uint32_t n) {
+  assertx(n != 0);
   auto tsList = ArrayData::CreateVArray();
-  for (int i = 0; i < n - first; ++i) {
+  for (int i = 0; i < n; ++i) {
     auto a = vmStack().indC(n - i - 1);
     isValidTSType(*a, true);
     tsList = tsList->appendInPlace(*a);
@@ -2757,7 +2756,7 @@ recordReifiedGenericsAndGetInfo(uint32_t first, uint32_t n) {
 
 OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   assertx(n != 0);
-  auto const result = recordReifiedGenericsAndGetInfo(0, n);
+  auto const result = recordReifiedGenericsAndGetInfo(n);
   auto tsList = result.second;
   ArrayData::GetScalarArray(&tsList);
   vmStack().ndiscard(n);
@@ -2768,14 +2767,11 @@ OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   }
 }
 
-OPTBLD_INLINE void iopReifiedName(uint32_t n, ReifiedGenericOp op) {
+OPTBLD_INLINE void iopReifiedName(uint32_t n, const StringData* name) {
   assertx(n != 0);
-  auto const name = vmStack().topC();
-  if (!tvIsString(name)) raise_error("Reified name must be a string");
-  auto const result = recordReifiedGenericsAndGetInfo(1, n);
-  auto const mangledName = mangleReifiedName(name->m_data.pstr, result.first);
-  vmStack().popC();
-  vmStack().ndiscard(n-1);
+  auto const result = recordReifiedGenericsAndGetInfo(n);
+  auto const mangledName = mangleReifiedName(name, result.first);
+  vmStack().ndiscard(n);
   vmStack().pushStaticString(mangledName);
 }
 

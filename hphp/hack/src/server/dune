@@ -163,6 +163,7 @@
     serverFormat
     serverHighlightRefs
     serverHotClasses
+    serverHotClassesDescription
     serverHover
     serverIdle
     serverInferType
@@ -194,14 +195,16 @@
     parsing_service
     search
     server_env
-    server_hot_classes_description
     server_services
     sys_utils
     typed_positioned_syntax
     typed_syntax_transforms
     typing
     utils_core
-    watchman_utils))
+    watchman_utils
+    (select serverHotClassesDescription.ml from
+    (facebook utils.facebook.signed_source -> facebook/serverHotClassesDescription.ml)
+    (-> ../stubs/serverHotClassesDescription.ml))))
 
 (library
   (name hh_server_monitor)

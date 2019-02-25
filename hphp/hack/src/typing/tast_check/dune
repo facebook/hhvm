@@ -4,7 +4,9 @@
   (libraries
     ast
     core_kernel
-    coroutine_check
     nast
     tast
-    utils_core))
+    utils_core
+    (select coroutine_check.ml from
+    (facebook -> facebook/coroutine_check.ml)
+    (-> ../../stubs/coroutine_check.ml))))

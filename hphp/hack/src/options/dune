@@ -8,12 +8,13 @@
     errors)
   (preprocess (pps ppx_deriving.std)))
 
-; FIXME copy buildOptions via dune instead of manually
 (library
   (name build_options)
   (wrapped false)
-  (modules
-    buildOptions))
+  (modules buildOptions)
+  (libraries (select buildOptions.ml from
+    (facebook -> facebook/buildOptions.ml)
+    (-> default_buildOptions.ml))))
 
 (library
   (name parser_options)

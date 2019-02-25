@@ -204,11 +204,19 @@ if(NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_test sqlite3)
 endif()
 
+if (NOT WITH_DUNE)
 configure_file(
   "src/options/buildOptions.ml.in"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/options/buildOptions.ml"
   ESCAPE_QUOTES
 )
+else()
+configure_file(
+  "src/options/buildOptions.ml.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/options/default_buildOptions.ml"
+  ESCAPE_QUOTES
+)
+endif(NOT WITH_DUNE)
 
 configure_file(
   "src/fsnotify/dune.in"

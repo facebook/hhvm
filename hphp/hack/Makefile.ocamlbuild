@@ -182,6 +182,7 @@ clean:
 	$(OCAMLBUILD) -clean
 	find ./bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f src/utils/get_build_id.gen.c
+	rm -f src/options/buildOptions.ml
 
 build-hack: $(TARGETS)
 

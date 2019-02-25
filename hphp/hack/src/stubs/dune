@@ -14,20 +14,6 @@
     buildMain))
 
 (library
-  (name coroutine_check)
-  (wrapped false)
-  (modules
-    coroutine_check)
-  (libraries
-    tast))
-
-(library
-  (name coroutine_errors)
-  (wrapped false)
-  (modules
-    coroutine_errors))
-
-(library
   (name debug)
   (wrapped false)
   (modules
@@ -40,12 +26,6 @@
   (wrapped false)
   (modules
     hackc_parse_delegator))
-
-(library
-  (name ignore)
-  (wrapped false)
-  (modules
-    filesToIgnore))
 
 (library
   (name linting)
@@ -85,12 +65,6 @@
   (wrapped false)
   (modules
     clientMessages))
-
-(library
-  (name server_hot_classes_description)
-  (wrapped false)
-  (modules
-    serverHotClassesDescription))
 
 (library
   (name state_loader)

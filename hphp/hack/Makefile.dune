@@ -16,6 +16,7 @@ all: build-hack copy-hack-files
 clean:
 	find ./bin -mindepth 1 -not -path ./bin/README -delete
 	rm -f $(ROOT)/src/utils/get_build_id.gen.c
+	rm -f $(ROOT)/src/options/default_buildOptions.ml
 	dune clean
 
 build-hack: _build/default/src/utils/get_build_id.gen.c

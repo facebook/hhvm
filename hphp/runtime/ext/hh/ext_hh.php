@@ -150,6 +150,18 @@ namespace HH\rqtrace {
 type EventStats = shape('duration' => int, 'count' => int);
 
 /**
+ * Checks wither rqtrace is enabled for the current request.
+ */
+<<__Native>>
+function is_enabled(): bool;
+
+/**
+ * Forcibly enable rqtrace for the current request if it is not already enabled.
+ */
+<<__Native>>
+function force_enable(): void;
+
+/**
  * Return a map of event_name->EventStats for all events which occurred up to
  * the point that this function was called within the current request.
  */

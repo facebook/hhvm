@@ -1,0 +1,16 @@
+Requesting 'test_rqtrace.php'
+string(%d) "bool(false)
+dict(2) {
+  ["duration"]=>
+  int(0)
+  ["count"]=>
+  int(0)
+}
+NULL
+bool(true)
+dict(2) {
+  ["duration"]=>
+  int(%d)
+  ["count"]=>
+  int(%d)
+}"

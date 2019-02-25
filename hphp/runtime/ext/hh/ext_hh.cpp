@@ -514,6 +514,18 @@ ArrayData* from_stats_list(T stats) {
   return init.create();
 }
 
+bool HHVM_FUNCTION(is_enabled) {
+  return g_context->getRequestTrace() != nullptr;
+}
+
+void HHVM_FUNCTION(force_enable) {
+  if (g_context->getRequestTrace()) return;
+  if (auto const transport = g_context->getTransport()) {
+    transport->forceInitRequestTrace();
+    g_context->setRequestTrace(transport->getRequestTrace());
+  }
+}
+
 TypedValue HHVM_FUNCTION(all_request_stats) {
   if (auto const trace = g_context->getRequestTrace()) {
     return tvReturn(from_stats_list(trace->stats()));
@@ -564,6 +576,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
 
+    HHVM_NAMED_FE(HH\\rqtrace\\is_enabled, HHVM_FN(is_enabled));
+    HHVM_NAMED_FE(HH\\rqtrace\\force_enable, HHVM_FN(force_enable));
     HHVM_NAMED_FE(HH\\rqtrace\\all_request_stats, HHVM_FN(all_request_stats));
     HHVM_NAMED_FE(HH\\rqtrace\\all_process_stats, HHVM_FN(all_process_stats));
     HHVM_NAMED_FE(HH\\rqtrace\\request_event_stats,

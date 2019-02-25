@@ -1,5 +1,5 @@
 ////file1.php
-<?hh
+<?hh // partial
 
 interface I<T> {}
 interface I2 extends I<int> {}

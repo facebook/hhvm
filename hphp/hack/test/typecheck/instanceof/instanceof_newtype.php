@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // partial
 class Foo {
   public $field;
 }

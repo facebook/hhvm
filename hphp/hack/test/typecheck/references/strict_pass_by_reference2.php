@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // partial
 
 function array_extend(&$dst, $src) {
   foreach ($src as $x) {

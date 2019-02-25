@@ -4,7 +4,7 @@
 class C {}
 
 //// partial.php
-<?hh
+<?hh // partial
 
 class D extends C {
   public function f() {

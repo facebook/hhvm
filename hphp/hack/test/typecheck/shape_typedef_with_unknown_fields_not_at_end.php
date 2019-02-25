@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 type ShapeWithUnknownFieldsNotAtEnd = shape(
   'a' => int,

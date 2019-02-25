@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // partial
 
 async function foo() {
   yield 10;

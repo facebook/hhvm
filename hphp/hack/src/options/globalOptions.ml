@@ -45,6 +45,7 @@ type t = {
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
   ignored_fixme_codes : ISet.t;
+  ignored_fixme_regex : string option;
   log_levels : int SMap.t;
   po_enable_stronger_await_binding : bool;
   po_disable_lval_as_an_expression : bool;
@@ -246,6 +247,7 @@ let default = {
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
+ ignored_fixme_regex = None;
  log_levels = SMap.empty;
  po_enable_stronger_await_binding = false;
  po_disable_lval_as_an_expression = false;
@@ -290,6 +292,7 @@ let make
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
+  ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
   ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
   ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
@@ -307,6 +310,7 @@ let make
   po_auto_namespace_map;
   po_enable_hh_syntax_for_hhvm = false;
   ignored_fixme_codes;
+  ignored_fixme_regex;
   po_deregister_php_stdlib;
   po_disallow_execution_operator;
   po_disable_define;
@@ -383,6 +387,7 @@ let tco_new_inference_no_eager_solve t = t.tco_new_inference_no_eager_solve
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let ignored_fixme_codes t = t.ignored_fixme_codes
+let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression

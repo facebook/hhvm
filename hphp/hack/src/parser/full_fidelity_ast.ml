@@ -3356,21 +3356,28 @@ let scour_comments
         -> if not collect_fixmes then cmts, fm
            else
            let open Str in
-           let pos = pPos node env in
-           let line = Pos.line pos in
-           let ignores = try IMap.find line fm with Caml.Not_found -> IMap.empty in
            let txt = Trivia.text t in
-           try
-             ignore (search_forward ignore_error txt 0);
-             let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
-             let code = int_of_string (matched_group 2 txt) in
-             let ignores = IMap.add code p ignores in
-             cmts, IMap.add line ignores fm
-           with
-           | Not_found_s _
-           | Caml.Not_found ->
-             Errors.fixme_format pos;
-             cmts, fm
+           let ignore_fixme =
+             match GlobalOptions.ignored_fixme_regex env.parser_options with
+             | Some s -> string_match (Str.regexp s) txt 0
+             | None -> false in
+           if ignore_fixme
+           then cmts, fm
+           else
+             let pos = pPos node env in
+             let line = Pos.line pos in
+             let ignores = try IMap.find line fm with Caml.Not_found -> IMap.empty in
+             try
+               ignore (search_forward ignore_error txt 0);
+               let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
+               let code = int_of_string (matched_group 2 txt) in
+               let ignores = IMap.add code p ignores in
+               cmts, IMap.add line ignores fm
+             with
+             | Not_found_s _
+             | Caml.Not_found ->
+               Errors.fixme_format pos;
+               cmts, fm
     in
     let rec aux (_cmts, _fm as acc : accumulator) (node : node) : accumulator =
       let recurse () = List.fold_left ~f:aux ~init:acc (children node) in

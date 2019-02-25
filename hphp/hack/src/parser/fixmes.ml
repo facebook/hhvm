@@ -33,10 +33,10 @@ module DECL_HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relat
   let use_sqlite_fallback () = false
   end)
 
-  let get_fixmes_from_heap filename =
-    match HH_FIXMES.get filename with
-    | None -> DECL_HH_FIXMES.get filename
-    | Some x -> Some x
+let get_fixmes_from_heap filename =
+  match HH_FIXMES.get filename with
+  | None -> DECL_HH_FIXMES.get filename
+  | Some x -> Some x
 
 (*****************************************************************************)
 (* We register the function that can look up a position and determine if

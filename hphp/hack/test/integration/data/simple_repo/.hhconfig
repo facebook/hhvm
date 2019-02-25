@@ -2,3 +2,5 @@
 assume_php = false
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
+
+ignored_fixme_regex = .*new_inference.*

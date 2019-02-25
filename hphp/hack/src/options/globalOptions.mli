@@ -201,6 +201,12 @@ type t = {
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
+ (*
+  * Regular expression controlling which HH_FIXMEs are to be ignored by the
+  * parser.
+  *)
+ ignored_fixme_regex : string option;
+
  (* Initial hh_log_level settings *)
  log_levels : int SMap.t;
 
@@ -255,6 +261,7 @@ val make :
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
   ?ignored_fixme_codes: ISet.t ->
+  ?ignored_fixme_regex: string ->
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
   ?po_disable_lval_as_an_expression: bool ->
@@ -325,6 +332,7 @@ val tco_experimental_pocket_universes : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
+val ignored_fixme_regex : t -> string option
 val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
 val po_disable_lval_as_an_expression : t -> bool

@@ -90,7 +90,6 @@ struct RepoOptions {
   H(bool,      DisableLvalAsAnExpression,      false)            \
   E(bool,      CreateInOutWrapperFunctions,    true)             \
   E(bool,      HHJSUniqueFilenames,            false)            \
-  E(bool,      HHJSModules,                    true)             \
   E(bool,      EmitFuncPointers,               true)             \
   E(bool,      EmitClsMethPointers,            EmitFuncPointers) \
   E(bool,      EmitInstMethPointers,           EmitFuncPointers) \

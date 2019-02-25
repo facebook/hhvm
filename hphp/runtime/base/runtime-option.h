@@ -586,6 +586,9 @@ struct RuntimeOption {
   // Disables non-top-level declarations
   // true => error, false => default behaviour
   static bool DisableNontoplevelDeclarations;
+  // Disables static closures
+  // true => error, false => default behaviour
+  static bool DisableStaticClosures;
   // Disables static local variables
   // true => error, false => default behaviour
   static bool DisableStaticLocalVariables;

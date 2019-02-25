@@ -672,6 +672,9 @@ let statement_without_await_in_concurrent_block =
 let concurrent_is_disabled =
   "Concurrent is disabled"
 
+let static_closures_are_disabled =
+  "Static closures are not supported in Hack"
+
 let static_locals_variables_are_disabled =
   "Static local variables are not supported in Hack"
 

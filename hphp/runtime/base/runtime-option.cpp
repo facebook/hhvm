@@ -706,6 +706,7 @@ bool RuntimeOption::DisallowExecutionOperator = true;
 bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
+bool RuntimeOption::DisableStaticClosures = false;
 bool RuntimeOption::DisableStaticLocalVariables = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -1502,6 +1503,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableNontoplevelDeclarations, ini, config,
                  "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
                  DisableNontoplevelDeclarations);
+    Config::Bind(DisableStaticClosures, ini, config,
+                 "Hack.Lang.Phpism.DisableStaticClosures",
+                 DisableStaticClosures);
     Config::Bind(DisableStaticLocalVariables, ini, config,
                  "Hack.Lang.Phpism.DisableStaticLocalVariables",
                  DisableStaticLocalVariables);

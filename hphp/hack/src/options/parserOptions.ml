@@ -19,6 +19,7 @@ let default_mode = GlobalOptions.po_default_mode
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
+let disable_static_closures = GlobalOptions.po_disable_static_closures
 let disable_static_local_variables = GlobalOptions.po_disable_static_local_variables
 let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
@@ -39,6 +40,7 @@ let make
   ~disallow_execution_operator
   ~disable_define
   ~disable_nontoplevel_declarations
+  ~disable_static_closures
   ~disable_static_local_variables
   ~enable_stronger_await_binding
   ~disable_lval_as_an_expression = {
@@ -50,6 +52,7 @@ let make
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
   GlobalOptions.po_disable_define = disable_define;
   GlobalOptions.po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
+  GlobalOptions.po_disable_static_closures = disable_static_closures;
   GlobalOptions.po_disable_static_local_variables = disable_static_local_variables;
   GlobalOptions.po_enable_stronger_await_binding = enable_stronger_await_binding;
   GlobalOptions.po_disable_lval_as_an_expression = disable_lval_as_an_expression;

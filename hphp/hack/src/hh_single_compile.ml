@@ -443,27 +443,20 @@ let parse_hh_file filename body =
 (*****************************************************************************)
 
 let make_popt () =
+  let open Hhbc_options in
+  let co = !compiler_options in
   ParserOptions.make
-    ~auto_namespace_map:
-      Hhbc_options.(aliased_namespaces !compiler_options)
-    ~disallow_execution_operator:
-      Hhbc_options.(phpism_disallow_execution_operator !compiler_options)
-    ~enable_concurrent:
-      Hhbc_options.(enable_concurrent !compiler_options)
-    ~enable_await_as_an_expression:
-      Hhbc_options.(enable_await_as_an_expression !compiler_options)
-    ~disable_define:
-      Hhbc_options.(phpism_disable_define !compiler_options)
-    ~disable_nontoplevel_declarations:
-      Hhbc_options.(phpism_disable_nontoplevel_declarations !compiler_options)
-    ~disable_static_local_variables:
-      Hhbc_options.(phpism_disable_static_local_variables !compiler_options)
-    ~enable_hh_syntax_for_hhvm:
-      Hhbc_options.(enable_hiphop_syntax !compiler_options)
-    ~enable_stronger_await_binding:
-      Hhbc_options.(enable_stronger_await_binding !compiler_options)
-    ~disable_lval_as_an_expression:
-      Hhbc_options.(disable_lval_as_an_expression !compiler_options)
+    ~auto_namespace_map:(aliased_namespaces co)
+    ~disallow_execution_operator:(phpism_disallow_execution_operator co)
+    ~enable_concurrent:(enable_concurrent co)
+    ~enable_await_as_an_expression:(enable_await_as_an_expression co)
+    ~disable_define:(phpism_disable_define co)
+    ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
+    ~disable_static_closures:(phpism_disable_static_closures co)
+    ~disable_static_local_variables:(phpism_disable_static_local_variables co)
+    ~enable_hh_syntax_for_hhvm:(enable_hiphop_syntax co)
+    ~enable_stronger_await_binding:(enable_stronger_await_binding co)
+    ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
 
 let process_single_source_unit ?(for_debugger_eval = false) compiler_options
   handle_output handle_exception filename source_text =

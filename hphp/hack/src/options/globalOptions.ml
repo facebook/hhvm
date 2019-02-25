@@ -21,6 +21,7 @@ type t = {
   po_disallow_execution_operator : bool;
   po_disable_define : bool;
   po_disable_nontoplevel_declarations : bool;
+  po_disable_static_closures : bool;
   po_disable_static_local_variables : bool;
   po_allow_goto: bool;
   po_enable_concurrent : bool;
@@ -223,6 +224,7 @@ let default = {
  po_deregister_php_stdlib = false;
  po_disable_define = false;
  po_disable_nontoplevel_declarations = false;
+ po_disable_static_closures = false;
  po_disable_static_local_variables = false;
  po_allow_goto = true;
  po_enable_concurrent = false;
@@ -263,6 +265,7 @@ let make
   ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
   ?(po_disable_define = default.po_disable_define)
   ?(po_disable_nontoplevel_declarations = default.po_disable_nontoplevel_declarations)
+  ?(po_disable_static_closures = default.po_disable_static_closures)
   ?(po_disable_static_local_variables = default.po_disable_static_local_variables)
   ?(po_allow_goto = default.po_allow_goto)
   ?(po_enable_concurrent = default.po_enable_concurrent)
@@ -315,6 +318,7 @@ let make
   po_disallow_execution_operator;
   po_disable_define;
   po_disable_nontoplevel_declarations;
+  po_disable_static_closures;
   po_disable_static_local_variables;
   po_allow_goto;
   po_enable_concurrent;
@@ -359,6 +363,7 @@ let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_disable_define t = t.po_disable_define
 let po_disable_nontoplevel_declarations t = t.po_disable_nontoplevel_declarations
+let po_disable_static_closures t = t.po_disable_static_closures
 let po_disable_static_local_variables t = t.po_disable_static_local_variables
 let po_allow_goto t = t.po_allow_goto
 let po_enable_concurrent t = t.po_enable_concurrent

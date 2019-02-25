@@ -1764,6 +1764,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; php7_anonymous_use = anonymous_use
       ; php7_anonymous_body = anonymous_body
       ; _ } ->
+        if (ParserOptions.disable_static_closures env.parser_options) &&
+           Some TK.Static = token_kind anonymous_static_keyword then
+        raise_parsing_error env (`Node node) SyntaxError.static_closures_are_disabled;
         begin match syntax node with
           | Php7AnonymousFunction _ when is_typechecker env ->
             raise_parsing_error env (`Node node) SyntaxError.php7_anonymous_function

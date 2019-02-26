@@ -13,6 +13,7 @@ let visitor = Nast_visitor.iter_with [
   Illegal_name_check.handler;
   Variadic_check.handler;
   Class_tparams_check.handler;
+  Control_context_check.handler;
 ]
 
 let program = visitor#go

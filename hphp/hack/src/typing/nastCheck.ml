@@ -695,18 +695,9 @@ and stmt env = function
   | Goto _
   | Noop
   | Unsafe_block _
-  | Fallthrough -> ()
-  | Break p -> begin
-    match env.imm_ctrl_ctx with
-      | Toplevel -> Errors.toplevel_break p
-      | _ -> ()
-    end
-  | Continue p -> begin
-    match env.imm_ctrl_ctx with
-      | Toplevel -> Errors.toplevel_continue p
-      | SwitchContext -> Errors.continue_in_switch p
-      | LoopContext -> ()
-    end
+  | Fallthrough
+  | Break _
+  | Continue _ -> ()
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e

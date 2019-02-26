@@ -19,13 +19,14 @@ module Env = struct
   let is_hh_file = ref true
   let backend_is_codegen = ref true
   let enable_unsafe_expr = ref true
-
+  let enable_unsafe_block = ref true
   let set_is_hh_file b = is_hh_file := b
-  let set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr =
+  let set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr ~disable_unsafe_block =
     force_hh_opt := force_hh;
     enable_xhp_opt := enable_xhp;
     backend_is_codegen := codegen;
-    enable_unsafe_expr := not disable_unsafe_expr
+    enable_unsafe_expr := not disable_unsafe_expr;
+    enable_unsafe_block := not disable_unsafe_block
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
   let force_kw_in_lowercase () = is_hh () && not !backend_is_codegen
@@ -49,6 +50,7 @@ module Lexer : sig
     ?enable_xhp:bool ->
     ?codegen:bool ->
     ?disable_unsafe_expr:bool ->
+    ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> SourceText.t -> int -> t
   val start : t -> int
@@ -83,11 +85,12 @@ end = struct
     ?(enable_xhp = false)
     ?(codegen = false)
     ?(disable_unsafe_expr = false)
+    ?(disable_unsafe_block = false)
     text =
     (* this can be overridden in scan_markup, but we need to explicitly reset *)
     (* it, as `scan_markup` is never called for `.hack` files *)
     if (force_hh) then Env.set_is_hh_file true;
-    Env.set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr;
+    Env.set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr ~disable_unsafe_block;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -104,7 +107,17 @@ end = struct
   let with_start_offset lexer start offset = {lexer with start = start; offset = offset}
 
   let make_at ?is_experimental_mode text start_offset =
-    with_start_offset (make ?is_experimental_mode text) start_offset start_offset
+    with_start_offset
+      (make
+        ?is_experimental_mode
+        ~force_hh:!Env.force_hh_opt
+        ~enable_xhp:!Env.enable_xhp_opt
+        ~codegen:!Env.backend_is_codegen
+        ~disable_unsafe_expr:(not !Env.enable_unsafe_expr)
+        ~disable_unsafe_block:(not !Env.enable_unsafe_block)
+        text)
+      start_offset
+      start_offset
 
   let with_offset_errors lexer offset errors = {
     lexer with offset = offset; errors = errors
@@ -1276,7 +1289,7 @@ let scan_single_line_comment lexer =
   let c =
     if remainder >= 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
       Trivia.make_fallthrough (source lexer) (start lexer) w
-    else if remainder >= 6 && peek_string lexer_ws 6 = "UNSAFE" then
+    else if remainder >= 6 && peek_string lexer_ws 6 = "UNSAFE" && !Env.enable_unsafe_block then
       Trivia.make_unsafe (source lexer) (start lexer) w
     else
       Trivia.make_single_line_comment (source lexer) (start lexer) w in

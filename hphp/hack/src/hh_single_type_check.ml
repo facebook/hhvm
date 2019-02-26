@@ -198,6 +198,7 @@ let parse_options () =
   let typecheck_xhp_cvars = ref (Some false) in
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
+  let disable_unsafe_block = ref None in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -398,6 +399,9 @@ let parse_options () =
     "--disable-unsafe-expr",
       Arg.Unit (set_bool disable_unsafe_expr),
       "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
+    "--disable-unsafe-block",
+      Arg.Unit (set_bool disable_unsafe_block),
+      "Treat UNSAFE block comments as just comments, the typecheker will ignore them";
     "--check-xhp-cvar-arity",
       Arg.Unit (set_bool typecheck_xhp_cvars),
       "Typechecks xhp cvar arity";
@@ -432,6 +436,7 @@ let parse_options () =
     ?po_enable_await_as_an_expression:(!enable_await_as_an_expression)
     ?po_enable_stronger_await_binding:(!enable_stronger_await_binding)
     ?po_disable_unsafe_expr:(!disable_unsafe_expr)
+    ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ~log_levels:(!log_levels)
     ()

@@ -49,6 +49,7 @@ type t = {
   po_enable_stronger_await_binding : bool;
   po_disable_lval_as_an_expression : bool;
   po_disable_unsafe_expr : bool;
+  po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
 } [@@deriving show]
 
@@ -250,6 +251,7 @@ let default = {
  po_enable_stronger_await_binding = false;
  po_disable_lval_as_an_expression = false;
  po_disable_unsafe_expr = false;
+ po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
 }
 
@@ -294,6 +296,7 @@ let make
   ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
   ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
+  ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ()
 = {
@@ -338,6 +341,7 @@ let make
   po_enable_stronger_await_binding;
   po_disable_lval_as_an_expression;
   po_disable_unsafe_expr;
+  po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
 }
 let tco_assume_php t = t.tco_assume_php
@@ -387,6 +391,7 @@ let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
+let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 
 let setup_pocket_universes env enabled =

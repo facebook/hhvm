@@ -1,0 +1,6 @@
+File "unsafeblock1.php", line 7, characters 10-16:
+Invalid return type (Typing[4110])
+  File "unsafeblock1.php", line 5, characters 17-19:
+  This is an int
+  File "unsafeblock1.php", line 7, characters 10-16:
+  It is incompatible with a string

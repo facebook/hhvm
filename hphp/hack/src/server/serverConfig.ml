@@ -281,6 +281,7 @@ let load config_filename options =
     ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)
     ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)
+    ?po_disable_unsafe_block:(bool_opt "disable_unsafe_block" config)
     ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ?ignored_fixme_regex:(string_opt "ignored_fixme_regex" config)

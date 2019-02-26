@@ -69,6 +69,7 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression : bool;
     pocket_universes : bool;
     disable_unsafe_expr : bool;
+    disable_unsafe_block : bool;
   }
 
   let make
@@ -100,7 +101,8 @@ module FullFidelityParseArgs = struct
     enable_stronger_await_binding
     disable_lval_as_an_expression
     pocket_universes
-    disable_unsafe_expr = {
+    disable_unsafe_expr
+    disable_unsafe_block = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -129,7 +131,8 @@ module FullFidelityParseArgs = struct
     enable_stronger_await_binding;
     disable_lval_as_an_expression;
     pocket_universes;
-    disable_unsafe_expr
+    disable_unsafe_expr;
+    disable_unsafe_block;
   }
 
   let parse_args () =
@@ -177,6 +180,7 @@ module FullFidelityParseArgs = struct
     let files = ref [] in
     let push_file file = files := file :: !files in
     let disable_unsafe_expr = ref false in
+    let disable_unsafe_block = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -292,6 +296,9 @@ No errors are filtered out.";
       "--disable-unsafe-expr",
         Arg.Set disable_unsafe_expr,
         "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
+      "--disable-unsafe-block",
+        Arg.Set disable_unsafe_block,
+        "Treat UNSAFE block comments as just comments, the typechecker will ignore them";
       ] in
     Arg.parse options push_file usage;
     make
@@ -324,6 +331,7 @@ No errors are filtered out.";
       !disable_lval_as_an_expression
       !pocket_universes
       !disable_unsafe_expr
+      !disable_unsafe_block
 end
 
 open FullFidelityParseArgs
@@ -353,6 +361,7 @@ let handle_existing_file args filename =
     ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_unsafe_expr:args.disable_unsafe_expr
+    ~disable_unsafe_block:args.disable_unsafe_block
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

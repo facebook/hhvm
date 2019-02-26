@@ -3058,18 +3058,9 @@ let class_property_only_static_literal pos =
     "Initialization of class property must be a static literal expression." in
   add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteral) pos msg
 
-let reference_expr pos allowed_in_partial =
-  let msg =
-    if allowed_in_partial then
-      "References are only permitted in function calls when in strict mode."
-    else
-      "References are only permitted in function calls."
-  in
-  add (Typing.err_code Typing.ReferenceExpr) pos msg
-
-let reference_expr_partial pos =
-  let msg = "References are only permitted in function calls." in
-  add (Typing.err_code Typing.ReferenceExprPartial) pos msg
+let reference_expr pos =
+  let msg = "References are only permitted as function call arguments." in
+  add (Typing.err_code Typing.ReferenceExprNotFunctionArg) pos msg
 
 let pass_by_ref_annotation_missing pos1 pos2 =
   let msg1 = pos1, "This argument should be annotated with &" in

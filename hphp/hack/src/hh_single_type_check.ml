@@ -180,7 +180,6 @@ let parse_options () =
   let no_fallback_in_namespaces = ref None in
   let dynamic_view = ref None in
   let allow_array_as_tuple = ref (Some false) in
-  let disallow_assign_by_ref = ref None in
   let allow_array_cell_pass_by_ref = ref (Some false) in
   let allow_anon_use_capture_by_ref = ref (Some false) in
   let allow_user_attributes = ref None in
@@ -349,9 +348,6 @@ let parse_options () =
     "--allow-array-as-tuple",
         Arg.Unit (set_bool allow_array_as_tuple),
         " Allow tuples to be passed as untyped arrays and vice versa";
-    "--disallow-assign-by-ref",
-        Arg.Unit (set_bool disallow_assign_by_ref),
-        " Disallow assignment by reference";
     "--allow-array-cell-pass-by-ref",
         Arg.Unit (set_bool allow_array_cell_pass_by_ref),
         " Allow binding of array cells by reference as arguments to function calls";
@@ -428,7 +424,6 @@ let parse_options () =
     ?tco_disallow_array_literal:(!disallow_array_literal)
     ?tco_dynamic_view:(!dynamic_view)
     ?tco_disallow_array_as_tuple:(not_ !allow_array_as_tuple)
-    ?tco_disallow_assign_by_ref:(!disallow_assign_by_ref)
     ?tco_disallow_array_cell_pass_by_ref:(not_ !allow_array_cell_pass_by_ref)
     ?tco_disallow_anon_use_capture_by_ref:(not_ !allow_anon_use_capture_by_ref)
     ?tco_disallow_unset_on_varray:(!disallow_unset_on_varray)

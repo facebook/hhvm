@@ -370,8 +370,7 @@ val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
 val class_property_only_static_literal : Pos.t -> unit
-val reference_expr : Pos.t -> bool -> unit
-val reference_expr_partial : Pos.t -> unit
+val reference_expr : Pos.t -> unit
 val unification_cycle : Pos.t -> string -> unit
 val eq_incompatible_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val comparison_invalid_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit

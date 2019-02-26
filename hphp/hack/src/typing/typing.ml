@@ -5304,8 +5304,6 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
         | _ -> make_result env te (MakeType.num (Reason.Rarith_ret p))
       end
   | Ast.Uref ->
-     let disallow_refs_in_partial = TypecheckerOptions.disallow_assign_by_ref (Env.get_tcopt env)
-     in
       if Env.env_local_reactive env
          && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
       then Errors.reference_in_rx p;
@@ -5328,10 +5326,7 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
              (* foo(&x); // permitted *)
              ()
         end
-      else if Env.is_strict env
-      then Errors.reference_expr p disallow_refs_in_partial (* &x; *)
-      else if disallow_refs_in_partial
-      then Errors.reference_expr_partial p; (* &x; // in a partial mode file *)
+      else Errors.reference_expr p; (* &$x; *)
 
       (* any check omitted because would return the same anyway *)
       make_result env te ty

@@ -391,7 +391,7 @@ module Typing                               = struct
   | NotNullableCompareNullTrivial
   | ClassPropertyOnlyStaticLiteral
   | AttributeTooFewArguments
-  | ReferenceExpr
+  | ReferenceExprDEPRECATED
   | UnificationCycle
   | KeysetSet
   | EqIncompatibleTypes
@@ -536,7 +536,7 @@ module Typing                               = struct
   | UnknownObjectMember
   | UnknownType
   | InvalidArrayKey
-  | ReferenceExprPartial
+  | ReferenceExprNotFunctionArg
   | RedundantRxCondition
   | RedeclaringMissingMethod
   | InvalidEnforceableTypeArgument

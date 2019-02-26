@@ -481,6 +481,17 @@ let localize_generic_parameters_with_bounds
   let env, cstrss = List.map_env env tparams localize_bound in
   env, List.concat cstrss
 
+let localize_where_constraints
+    ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
+  let add_constraint env (h1, ck, h2) =
+    let env, ty1 =
+      localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
+    let env, ty2 =
+      localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
+    TUtils.add_constraint (fst h1) env ck ty1 ty2
+  in
+  List.fold_left where_constraints ~f:add_constraint ~init:env
+
 (* Helper functions *)
 
 (* Ensure that types are equivalent i.e. subtypes of each other *)

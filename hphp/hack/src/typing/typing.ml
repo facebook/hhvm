@@ -480,13 +480,13 @@ and fun_def tcopt f : Tast.fun_def option =
    * have a guarantee that we are using a clean typing environment. *)
   let tfun_def = Env.fresh_tenv env (
     fun env ->
+      let ety_env = Phase.env_with_self env in
       let env, constraints =
         Phase.localize_generic_parameters_with_bounds env f.f_tparams
-                  ~ety_env:(Phase.env_with_self env) in
+          ~ety_env in
       let env = add_constraints pos env constraints in
       let env =
-        localize_where_constraints
-          ~ety_env:(Phase.env_with_self env) env f.f_where_constraints in
+        Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
       let env, ty =
         match f.f_ret with
         | None ->
@@ -6354,17 +6354,6 @@ and class_var_def env ~is_static c cv =
     }
   end
 
-and localize_where_constraints
-    ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
-  let add_constraint env (h1, ck, h2) =
-    let env, ty1 =
-      Phase.localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
-    let env, ty2 =
-      Phase.localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
-    SubType.add_constraint (fst h1) env ck ty1 ty2
-  in
-  List.fold_left where_constraints ~f:add_constraint ~init:env
-
 and add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
     SubType.add_constraint p env ck ty1 ty2 in
@@ -6474,7 +6463,7 @@ and method_def env m =
     ~ety_env:ety_env in
   let env = add_constraints pos env constraints in
   let env =
-    localize_where_constraints ~ety_env env m.m_where_constraints in
+    Phase.localize_where_constraints ~ety_env env m.m_where_constraints in
   let env =
     if Env.is_static env then env
     else Env.set_local env this (Env.get_self env) in

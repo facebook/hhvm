@@ -389,11 +389,15 @@ let rec fun_ tenv f named_body =
 
 and func env f named_body =
   let p, _ = f.f_name in
-  (* Add type parameters to typing environment and localize the bounds *)
+  (* Add type parameters to typing environment and localize the bounds
+     and where constraints *)
+  let ety_env = Phase.env_with_self env.tenv in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
-       ~ety_env:(Phase.env_with_self env.tenv) in
+      ~ety_env in
   let tenv = add_constraints p tenv constraints in
+  let tenv =
+    Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints in
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
@@ -657,11 +661,15 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
   let env = { env with function_name = Some (snd m.m_name) } in
-  (* Add method type parameters to environment and localize the bounds *)
+  (* Add method type parameters to environment and localize the bounds
+     and where constraints *)
+  let ety_env = Phase.env_with_self env.tenv in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
-               ~ety_env:(Phase.env_with_self env.tenv) in
+      ~ety_env in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
+  let tenv =
+    Phase.localize_where_constraints ~ety_env tenv m.m_where_constraints in
   let env = { env with tenv = tenv } in
 
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in

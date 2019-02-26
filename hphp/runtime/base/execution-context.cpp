@@ -901,16 +901,12 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
-      auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = RuntimeOption::EnableContextInErrorHandler
-        ? getDefinedVariables(ar)
-        : empty_array();
       m_deferredErrors = Array::CreateVec();
       SCOPE_EXIT { m_deferredErrors = Array::CreateVec(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
-                     fileAndLine.first, fileAndLine.second, context,
+                     fileAndLine.first, fileAndLine.second, empty_darray(),
                      backtrace)),
                 false)) {
         return true;

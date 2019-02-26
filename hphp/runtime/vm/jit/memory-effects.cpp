@@ -2360,26 +2360,11 @@ MemEffects memory_effects(const IRInstruction& inst) {
       return may_load_store(AUnknown, AUnknown);
     };
 
-    // Modify a GeneralEffects for instructions that could call the user error
-    // handler for the current frame (ie something that can raise a
-    // warning/notice/error, or a builtin call), because the error handler gets
-    // a context array which contains all the locals.
-    auto may_raise = [&] (GeneralEffects x) {
-      return may_reenter(
-        inst,
-        GeneralEffects {
-          x.loads |
-            (RuntimeOption::EnableContextInErrorHandler ? AFrameAny : AEmpty),
-          x.stores, x.moves, x.kills
-        }
-      );
-    };
-
     // Calls are implicitly MayRaise, all other instructions must use the
     // GeneralEffects or UnknownEffects class of memory effects
     return match<MemEffects>(
       inner,
-      [&] (GeneralEffects x)   { return may_raise(x); },
+      [&] (GeneralEffects x)   { return may_reenter(inst, x); },
       [&] (CallEffects x)      { return x; },
       [&] (UnknownEffects x)   { return x; },
       [&] (PureLoad)           { return fail(); },

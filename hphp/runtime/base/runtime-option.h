@@ -501,7 +501,6 @@ struct RuntimeOption {
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
-  static bool EnableContextInErrorHandler;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;

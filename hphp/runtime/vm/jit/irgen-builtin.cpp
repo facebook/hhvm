@@ -615,7 +615,7 @@ SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
   // Type might be a Ptr here, so the maybe() below will go wrong if we don't
   // bail out here.
   if (!(type <= TInitCell)) return nullptr;
-
+  if (type <= TClsMeth) return cns(env, true);
   if (!type.maybe(TArrLike)) return cns(env, false);
   if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
     return cns(env, true);
@@ -751,6 +751,7 @@ SSATmp* opt_foldable(IRGS& env,
       // TODO (T29639296)
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         return nullptr;
     }
   } catch (...) {
@@ -2124,6 +2125,7 @@ void emitArrayIdx(IRGS& env) {
   if (arrType <= TVec) return implVecIdx(env, nullptr);
   if (arrType <= TDict) return implDictKeysetIdx(env, true, nullptr);
   if (arrType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
+  if (arrType <= TClsMeth) PUNT(ArrayIdx_clsmeth);
 
   if (!(arrType <= TArr)) {
     // raise fatal

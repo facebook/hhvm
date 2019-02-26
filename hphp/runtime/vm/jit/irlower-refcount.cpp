@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/stats.h"
 
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -299,6 +300,8 @@ CallSpec getDtorCallSpec(DataType type) {
       return CallSpec::method(&ResourceHdr::release);
     case KindOfRef:
       return CallSpec::method(&RefData::release);
+    case KindOfClsMeth:
+      return CallSpec::direct(ClsMethDataRef::Release);
     DT_UNCOUNTED_CASE:
       break;
   }

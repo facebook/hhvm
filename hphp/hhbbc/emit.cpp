@@ -1242,6 +1242,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptObj:
   case T::OptFunc:
   case T::OptCls:
+  case T::OptClsMeth:
   case T::OptUncArrKey:
   case T::OptArrKey:
   case T::OptUncStrLike:
@@ -1269,6 +1270,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Obj:
   case T::Func:
   case T::Cls:
+  case T::ClsMeth:
     return;
 
   case T::OptSArr:

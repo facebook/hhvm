@@ -124,6 +124,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         v << copy{v.cns(pcns->m_data.num), dst.reg(0)};
         break;
       case KindOfDouble:

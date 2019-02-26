@@ -95,6 +95,7 @@
 #include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -821,6 +822,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfResource:
   case KindOfFunc:
   case KindOfClass:
+  case KindOfClsMeth:
     os << "C:";
     break;
   }
@@ -920,9 +922,18 @@ static std::string toStringElm(const TypedValue* tv) {
          << ")";
       continue;
     case KindOfClass:
-    os << ":Class("
-       << tv->m_data.pclass->name()->data()
+      os << ":Class("
+         << tv->m_data.pclass->name()->data()
+         << ")";
+      continue;
+    case KindOfClsMeth:
+      os << ":ClsMeth("
+       << tv->m_data.pclsmeth->getCls()->name()->data()
+       << ", "
+       << tv->m_data.pclsmeth->getFunc()->fullDisplayName()->data()
        << ")";
+       continue;
+
     case KindOfRef:
       break;
     }
@@ -2993,6 +3004,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfRef:
             case KindOfFunc:
             case KindOfClass:
+            case KindOfClsMeth:
               not_reached();
           }
           if (val->m_type == KindOfString) tvDecRefStr(val);
@@ -3028,6 +3040,11 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfPersistentArray:
           match = SwitchMatch::DEFAULT;
           return;
+
+        case KindOfClsMeth:
+          tvDecRefClsMeth(val);
+          match = SwitchMatch::DEFAULT;
+          break;
 
         case KindOfObject:
           intval = val->m_data.pobj->toInt64();
@@ -4448,7 +4465,14 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Str:    return is_string(val);
   case IsTypeOp::Res:    return val->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
-  case IsTypeOp::ArrLike: return isArrayLikeType(val->m_type);
+  case IsTypeOp::ArrLike:
+    if (isClsMethType(val->m_type)) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+      }
+      return true;
+    }
+    return isArrayLikeType(val->m_type);
   case IsTypeOp::VArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
@@ -4628,7 +4652,13 @@ OPTBLD_INLINE void iopArrayIdx() {
   TypedValue* def = vmStack().topTV();
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
-
+  if (isClsMethType(type(arr))) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      tvCastToVecInPlace(arr);
+    } else {
+      tvCastToVArrayInPlace(arr);
+    }
+  }
   auto const result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
                                               tvAsCVarRef(key),
                                               tvAsCVarRef(def));
@@ -5061,6 +5091,49 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     return;
   }
 
+  if (isClsMethType(c1->m_type)) {
+    auto const clsMeth = c1->m_data.pclsmeth;
+    assertx(clsMeth->getCls());
+    assertx(clsMeth->getFunc());
+
+    ArrayData* reifiedGenerics = nullptr;
+    const Func* func = clsMeth->getFunc();
+    ObjectData* thiz = nullptr;
+    Class* cls = clsMeth->getCls();
+
+    // Handle inout name mangling
+    if (UNLIKELY(n)) {
+      auto const func_name = func->fullDisplayName();
+      auto const v = Variant::attach(appendSuffix(func_name));
+      bool dynamic = false;
+      StringData* invName = nullptr;
+      func = vm_decode_function(
+        v,
+        vmfp(),
+        /* forwarding */ false,
+        thiz,
+        cls,
+        invName,
+        dynamic,
+        reifiedGenerics,
+        DecodeFlags::NoWarn
+      );
+      if (func == nullptr) raise_call_to_undefined(func_name);
+    }
+    vmStack().popC();
+    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
+    if (thiz) {
+      ar->setThis(thiz);
+    } else if (cls) {
+      ar->setClass(cls);
+    } else {
+      ar->trashThis();
+    }
+
+    ar->setDynamicCall();
+    return;
+  }
+
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
@@ -5224,7 +5297,8 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
 }
 
 namespace {
-void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
+void resolveMethodImpl(
+  Cell* c1, Cell* c2, const char* meth_type, bool emitClsMeth = false) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
@@ -5254,17 +5328,24 @@ void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
     );
     SystemLib::throwInvalidOperationExceptionObject(msg.c_str());
   }
-  if (!thiz) {
-    assertx(cls);
-    arr.set(0, Variant{cls});
-  }
-  arr.set(1, Variant{func});
-  vmStack().popC();
-  vmStack().popC();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushVecNoRc(arr.detach());
+  if (emitClsMeth) {
+    ClsMethDataRef clsMeth(cls, const_cast<Func*>(func));
+    vmStack().popC();
+    vmStack().popC();
+    vmStack().pushClsMethNoRc(clsMeth);
   } else {
-    vmStack().pushArrayNoRc(arr.detach());
+    if (!thiz) {
+      assertx(cls);
+      arr.set(0, Variant{cls});
+    }
+    arr.set(1, Variant{func});
+    vmStack().popC();
+    vmStack().popC();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushVecNoRc(arr.detach());
+    } else {
+      vmStack().pushArrayNoRc(arr.detach());
+    }
   }
 }
 }
@@ -5276,7 +5357,7 @@ OPTBLD_INLINE void iopResolveClsMethod() {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
   if (!isStringType(c2->m_type)) raise_error("class name must be a string.");
-  resolveMethodImpl(c1, c2, "class_meth");
+  resolveMethodImpl(c1, c2, "class_meth", true);
 }
 
 OPTBLD_INLINE void iopResolveObjMethod() {

@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -280,6 +281,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_array(sb, depth, tv.m_data.parr);
       break;
 
+    case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
+      serialize_memoize_array(
+        sb, depth, clsMethToVecHelper(tv.m_data.pclsmeth).get());
+      break;
     case KindOfObject:
       serialize_memoize_obj(sb, depth, tv.m_data.pobj);
       break;

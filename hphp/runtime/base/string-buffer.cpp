@@ -198,6 +198,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       append(v.toString());
   }
 }

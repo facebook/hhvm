@@ -55,7 +55,7 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
       // enough.
       return !t.maybe(TCounted) ||
              t.subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset, TObj,
-                            TRes, TBoxedCell);
+                            TRes, TBoxedCell, TClsMeth);
 
     case DataTypeBoxAndCountnessInit:
       return typeFitsConstraint(t, DataTypeBoxAndCountness) &&

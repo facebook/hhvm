@@ -522,6 +522,21 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
+    case KindOfClsMeth: {
+      Array arr = var.toArray();
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        assertx(arr->isVecArray());
+        fb_compact_serialize_vec(sb, std::move(arr), depth);
+      } else {
+        assertx(arr->isPHPArray());
+        int64_t index_limit;
+        fb_compact_serialize_is_list(arr, index_limit);
+        fb_compact_serialize_array_as_list_map(
+          sb, std::move(arr), index_limit, depth);
+      }
+      return 0;
+    }
+
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

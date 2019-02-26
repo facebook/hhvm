@@ -535,6 +535,20 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   decRef(env, arr);
 }
 
+void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
+  auto const clsMeth = popC(env);
+  auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
+  auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
+  fpushActRec(
+    env,
+    func,
+    cls,
+    numParams,
+    nullptr,
+    cns(env, true)
+  );
+}
+
 SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
   assertx(ctx->type() <= TCtx);
   assertx(funcTmp->type() <= TFunc);
@@ -965,6 +979,9 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
     );
     return;
   }
+  if (topC(env)->isA(TClsMeth)) {
+    return fpushFuncClsMeth(env, numParams);
+  }
 
   if (!topC(env)->isA(TStr)) {
     PUNT(FPushFunc_not_Str);
@@ -1216,15 +1233,15 @@ void emitResolveClsMethod(IRGS& env) {
     funcTmp = loadClsMethodUnknown(env, data, slowExit);
     clsTmp = gen(env, LdClsCached, cns(env, className));
   }
-  auto op = RuntimeOption::EvalHackArrDVArrs ? AllocVecArray : AllocVArray;
-  auto methPair = gen(env, op, PackedArrayData { 2 });
-  gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, clsTmp);
-  gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
+
+  assertx(clsTmp);
+  assertx(funcTmp);
+  auto const clsMeth = gen(env, NewClsMeth, clsTmp, funcTmp);
   decRef(env, name);
   decRef(env, cls);
   popC(env);
   popC(env);
-  push(env, methPair);
+  push(env, clsMeth);
 }
 
 namespace {

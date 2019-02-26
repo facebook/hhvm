@@ -534,6 +534,8 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
         raise_notice("Implicit Class to string conversion for type-hint");
       case AnnotAction::ConvertClass:
         return false; // verifyFail will deal with the conversion
+      case AnnotAction::ClsMethCheck:
+        return false;
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(td->type == AnnotType::Object);
@@ -736,6 +738,8 @@ bool TypeConstraint::checkImpl(tv_rval val,
       raise_notice("Implicit Class to string conversion for type-hint");
     case AnnotAction::ConvertClass:
       return false; // verifyFail will handle the conversion
+    case AnnotAction::ClsMethCheck:
+      return false;
   }
   not_reached();
 }
@@ -790,6 +794,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::ConvertFunc:
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
+      case AnnotAction::ClsMethCheck:
         // Can't get these with objects
         break;
     }
@@ -843,6 +848,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::ConvertFunc:
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
+    case AnnotAction::ClsMethCheck:
       return false;
   }
   not_reached();
@@ -934,6 +940,7 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
+    case KindOfClsMeth:       return "clsmeth";
     case KindOfRef:
       break;
     case KindOfObject: {
@@ -1051,6 +1058,28 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     return;
   }
 
+  if (!isSoft() && isClsMethType(c->m_type)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (isClsMethCompactVec()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint_outparam_notice(
+            func, displayName(func->cls()), paramNum);
+        }
+        tvCastToVecInPlace(c);
+        return;
+      }
+    } else {
+      if (isClsMethCompactVArr()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint_outparam_notice(
+            func, displayName(func->cls()), paramNum);
+        }
+        tvCastToVArrayInPlace(c);
+        return;
+      }
+    }
+  }
+
   raise_return_typehint_error(
     folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be of type "
@@ -1084,6 +1113,28 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
     if (valCls->preClass()->userAttributes().count(s___MockClass.get()) &&
         valCls->parent() == thisCls) {
       return;
+    }
+  }
+
+  if (isClsMethType(val.type())) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (isClsMethCompactVec()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint_property_notice(
+            declCls, propName, displayName(nullptr), isStatic);
+        }
+        // No clsmeth to vec/varr converison for prop type
+        return;
+      }
+    } else {
+      if (isClsMethCompactVArr()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint_property_notice(
+            declCls, propName, displayName(nullptr), isStatic);
+        }
+        // No clsmeth to vec/varr converison for prop type
+        return;
+      }
     }
   }
 
@@ -1184,6 +1235,30 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
         : const_cast<StringData*>(c->m_data.pclass->name());
       c->m_type = KindOfPersistentString;
       return;
+    }
+  }
+
+  if (!isSoft() && isClsMethType(c->m_type)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (isClsMethCompactVec()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint(
+            func, name,
+            id != ReturnId ? folly::make_optional(id) : folly::none);
+        }
+        tvCastToVecInPlace(c);
+        return;
+      }
+    } else {
+      if (isClsMethCompactVArr()) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint(
+            func, name,
+            id != ReturnId ? folly::make_optional(id) : folly::none);
+        }
+        tvCastToVArrayInPlace(c);
+        return;
+      }
     }
   }
 
@@ -1295,6 +1370,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfShape:
         case KindOfPersistentArray:
         case KindOfArray:
+        case KindOfClsMeth:
         case KindOfResource:
         case KindOfNull:         return MK::None;
         case KindOfUninit:

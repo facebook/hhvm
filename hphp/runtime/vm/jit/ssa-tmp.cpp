@@ -110,6 +110,7 @@ Variant SSATmp::variantVal() const {
       return Variant{const_cast<Class*>(clsVal())};
     case KindOfFunc:
       return Variant{funcVal()};
+    case KindOfClsMeth:
     case KindOfString:
     case KindOfVec:
     case KindOfDict:

@@ -396,7 +396,7 @@ static const struct {
   { OpResolveObjMethod,
                    {StackTop2,        Stack1,       OutVArray        }},
   { OpResolveClsMethod,
-                   {StackTop2,        Stack1,       OutVArray        }},
+                   {StackTop2,        Stack1,       OutClsMeth       }},
 
   /*** 14. Generator instructions ***/
 

@@ -240,6 +240,7 @@ void callFunc(const Func* func, void *ctx,
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef: {
@@ -393,6 +394,7 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         not_reached();
     }
   }
@@ -618,6 +620,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
+    case KindOfClsMeth:      return ty == T::ClsMeth;
   }
   not_reached();
 }

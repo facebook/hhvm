@@ -277,6 +277,16 @@ struct TypeConstraint {
     return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr;
   }
 
+  bool isClsMethCompactVec() const {
+    return isVec() || isVecOrDict() || isArrayLike() ||
+           interface_supports_vec(m_typeName);
+  }
+
+  bool isClsMethCompactVArr() const {
+    return isVArray() || isVArrayOrDArray() || isArray() || isArrayLike() ||
+           interface_supports_array(m_typeName);
+  }
+
   AnnotType type()  const { return m_type; }
 
   bool validForProp() const {

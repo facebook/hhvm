@@ -80,6 +80,17 @@ struct VariantControllerImpl {
       case KindOfPersistentKeyset:
       case KindOfKeyset:
         throw HPHP::serialize::KeysetSerializeError{};
+
+      case KindOfClsMeth:
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+            return HPHP::serialize::Type::LIST;
+          }
+          throw HPHP::serialize::HackArraySerializeError{};
+        } else {
+          return HPHP::serialize::Type::MAP;
+        }
+
       case KindOfResource:
       case KindOfRef:
         throw HPHP::serialize::SerializeError(
@@ -91,8 +102,8 @@ struct VariantControllerImpl {
   static bool asBool(const_variant_ref obj) { return obj.toInt64() != 0; }
   static double asDouble(const_variant_ref obj) { return obj.toDouble(); }
   static String asString(const_variant_ref obj) { return obj.toString(); }
-  static const Array& asMap(const_variant_ref obj) { return obj.toCArrRef(); }
-  static const Array& asVector(const_variant_ref obj) { return obj.toCArrRef(); }
+  static Array asMap(const_variant_ref obj) { return obj.toArray(); }
+  static Array asVector(const_variant_ref obj) { return obj.toArray(); }
 
   // variant creators
   static VariantType createNull() { return init_null(); }

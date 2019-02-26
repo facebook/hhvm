@@ -58,6 +58,7 @@ CASE(Resource)
 CASE(Ref)
 CASE(Func)
 CASE(Class)
+CASE(ClsMeth)
 
 #undef CASE
 

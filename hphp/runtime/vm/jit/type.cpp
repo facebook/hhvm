@@ -139,6 +139,14 @@ std::string Type::constValString() const {
     return folly::format("Cls({})", m_clsVal ? m_clsVal->name()->data()
                                              : "nullptr").str();
   }
+  if (*this <= TClsMeth) {
+    return folly::format("ClsMeth({},{})",
+      m_clsmethVal->getCls() ?
+      m_clsmethVal->getCls()->name()->data() : "nullptr",
+      m_clsmethVal->getFunc() ?
+      m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
+    ).str();
+  }
   if (*this <= TCctx) {
     if (!m_intVal) {
       return "Cctx(Cls(nullptr))";
@@ -515,6 +523,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfObject           : return kObj;
     case KindOfFunc             : return kFunc;
     case KindOfClass            : return kCls;
+    case KindOfClsMeth          : return kClsMeth;
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
@@ -549,6 +558,7 @@ DataType Type::toDataType() const {
   if (*this <= TRes)         return KindOfResource;
   if (*this <= TFunc)        return KindOfFunc;
   if (*this <= TCls)         return KindOfClass;
+  if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TBoxedCell)   return KindOfRef;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
@@ -879,6 +889,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptObj:         return TObj        | TInitNull;
     case T::OptFunc:        return TFunc       | TInitNull;
     case T::OptCls:         return TCls        | TInitNull;
+    case T::OptClsMeth:     return TClsMeth    | TInitNull;
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
     case T::OptStrLike:     return TFunc | TStr | TInitNull;
@@ -896,6 +907,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Obj:            return TObj;
     case T::Func:           return TFunc;
     case T::Cls:            return TCls;
+    case T::ClsMeth:        return TClsMeth;
 
     case T::Cell:           return TCell;
     case T::Ref:            return TBoxedInitCell;

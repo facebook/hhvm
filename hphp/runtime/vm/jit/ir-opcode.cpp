@@ -317,7 +317,8 @@ bool opcodeMayRaise(Opcode opc) {
   // and EvalIsExprEnableUnresolvedWarning.
   case IsTypeStruct:
     return RuntimeOption::EvalHackArrCompatIsArrayNotices
-      || RuntimeOption::EvalIsExprEnableUnresolvedWarning;
+      || RuntimeOption::EvalIsExprEnableUnresolvedWarning
+      || RuntimeOption::EvalIsVecNotices;
 
   case AddElemIntKey:
   case AddElemStrKey:

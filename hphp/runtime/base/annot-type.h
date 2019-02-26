@@ -141,6 +141,7 @@ enum class AnnotAction {
   ConvertFunc,
   WarnClass,
   ConvertClass,
+  ClsMethCheck,
 };
 
 /*
@@ -222,6 +223,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               isFuncType(dt) || dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArray:
+      if (isClsMethType(dt)) {
+        return RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
         ? AnnotAction::VArrayCheck
@@ -232,15 +237,26 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::DArrayCheck
         : AnnotAction::Pass;
     case AnnotMetaType::VArrOrDArr:
+      if (isClsMethType(dt)) {
+        return RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
         ? AnnotAction::VArrayOrDArrayCheck
         : AnnotAction::Pass;
     case AnnotMetaType::VecOrDict:
+      if (isClsMethType(dt)) {
+        return !RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
       return (isVecType(dt) || isDictType(dt))
         ? AnnotAction::Pass
         : AnnotAction::Fail;
     case AnnotMetaType::ArrayLike:
+      if (isClsMethType(dt)) {
+        return AnnotAction::ClsMethCheck;
+      }
       return (isArrayType(dt) || isVecType(dt) ||
               isDictType(dt) || isKeysetType(dt))
         ? AnnotAction::Pass
@@ -264,6 +280,18 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     return RuntimeOption::EvalStringHintNotices
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
   }
+  if (isClsMethType(dt)) {
+    if ((at == AnnotType::VArray) || (at == AnnotType::Array) ||
+        (at == AnnotType::ArrayLike)) {
+      return RuntimeOption::EvalHackArrDVArrs ?
+        AnnotAction::Fail : AnnotAction::ClsMethCheck;
+    }
+    if ((at == AnnotType::Vec) || (at == AnnotType::ArrayLike)) {
+      return !RuntimeOption::EvalHackArrDVArrs ?
+        AnnotAction::Fail : AnnotAction::ClsMethCheck ;
+    }
+  }
+
   if (at != AnnotType::Object) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
@@ -319,6 +347,14 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
             ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
         }
         return AnnotAction::Fail;
+      case KindOfClsMeth:
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          return interface_supports_vec(annotClsName) ?
+            AnnotAction::ClsMethCheck : AnnotAction::Fail;
+        } else {
+          return interface_supports_array(annotClsName) ?
+            AnnotAction::ClsMethCheck : AnnotAction::Fail;
+        }
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:

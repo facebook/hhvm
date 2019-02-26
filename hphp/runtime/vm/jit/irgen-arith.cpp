@@ -695,6 +695,47 @@ void implShapeCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   push(env, gen(env, toShapeCmpOpcode(op), left, right));
 }
 
+const StaticString
+  s_funcToStringWarning("Func to string conversion"),
+  s_clsToStringWarning("Class to string conversion");
+
+namespace {
+
+SSATmp* equalClsMeth(IRGS& env, SSATmp* left, SSATmp* right) {
+  assertx(left->type() <= TClsMeth);
+  assertx(right->type() <= TClsMeth);
+  return cond(
+      env,
+      [&](Block* taken) {
+        auto const leftCls = gen(env, LdClsFromClsMeth, left);
+        auto const rightCls = gen(env, LdClsFromClsMeth, right);
+        assertx(leftCls->type() <= TCls);
+        assertx(rightCls->type() <= TCls);
+        gen(env, JmpZero, taken, gen(env, EqCls, leftCls, rightCls));
+      },
+      [&] {
+        auto const leftFunc = gen(env, LdFuncFromClsMeth, left);
+        auto const rightFunc = gen(env, LdFuncFromClsMeth, right);
+        assertx(leftFunc->type() <= TFunc);
+        assertx(rightFunc->type() <= TFunc);
+        return gen(env, EqFunc, leftFunc, rightFunc);
+       },
+      [&] {
+        return cns(env, false);
+       }
+    );
+}
+
+void raiseClsMethToVecWarningHelper(IRGS& env) {
+  if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+    gen(env, RaiseNotice, cns(env, makeStaticString(
+      folly::sformat("Implicit clsmeth to {} conversion",
+        RuntimeOption::EvalHackArrDVArrs ? "vec" : "varray"))));
+  }
+}
+
+}
+
 void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TArr);
   auto const rightTy = right->type();
@@ -734,6 +775,15 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     } else {
       implShapeCmp(env, op, left, right);
     }
+  } else if (rightTy <= TClsMeth) {
+    raiseClsMethToVecWarningHelper(env);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedVecCmp(env, op));
+    } else {
+      auto const arr = convertClsMethToVec(env, right);
+      push(env, gen(env, toArrCmpOpcode(op), left, arr));
+      decRef(env, arr);
+    }
   } else {
     // Array is always greater than everything else.
     push(env, emitConstCmp(env, op, true, false));
@@ -747,6 +797,15 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   // Left operand is a vec.
   if (rightTy <= TVec) {
     push(env, gen(env, toVecCmpOpcode(op), left, right));
+  } else if (rightTy <= TClsMeth ) {
+    raiseClsMethToVecWarningHelper(env);
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      auto const arr = convertClsMethToVec(env, right);
+      push(env, gen(env, toVecCmpOpcode(op), left, arr));
+      decRef(env, arr);
+    } else {
+      push(env, emitMixedVecCmp(env, op));
+    }
   } else {
     push(env, emitMixedVecCmp(env, op));
   }
@@ -1021,10 +1080,6 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 }
 
-const StaticString
-  s_funcToStringWarning("Func to string conversion"),
-  s_clsToStringWarning("Class to string conversion");
-
 void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   auto const rightTy = right->type();
 
@@ -1077,6 +1132,39 @@ void implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 
   PUNT(Cls-cmp);
+}
+
+void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  auto const rightTy = right->type();
+  if (rightTy <= TClsMeth) {
+    if (op == Op::Eq || op == Op::Same) {
+      push(env, equalClsMeth(env, left, right));
+      return;
+    }
+    if (op == Op::Neq || op == Op::NSame) {
+      push(
+        env, gen(env, XorBool, equalClsMeth(env, left, right), cns(env, true)));
+      return;
+    }
+  }
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (rightTy <= TVec) {
+      raiseClsMethToVecWarningHelper(env);
+      auto const arr = convertClsMethToVec(env, left);
+      implVecCmp(env, op, arr, right);
+      decRef(env, arr);
+      return;
+    }
+  } else {
+    if (rightTy <= TArr) {
+      raiseClsMethToVecWarningHelper(env);
+      auto const arr = convertClsMethToVec(env, left);
+      implArrCmp(env, op, arr, right);
+      decRef(env, arr);
+      return;
+    }
+  }
+  PUNT(ClsMeth-cmp);
 }
 
 /*
@@ -1139,7 +1227,12 @@ void implCmp(IRGS& env, Op op) {
       (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||
       (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
       (isClassType(leftTy.toDataType()) && isStringType(rightTy.toDataType()))||
-      (isStringType(leftTy.toDataType()) && isClassType(rightTy.toDataType()));
+      (isStringType(leftTy.toDataType()) &&
+        isClassType(rightTy.toDataType())) ||
+      (isClsMethType(leftTy.toDataType()) &&
+        isArrayLikeType(rightTy.toDataType())) ||
+      (isArrayLikeType(leftTy.toDataType()) &&
+        isClsMethType(rightTy.toDataType()));
   };
 
   // If it's a same-ish comparison and the types don't match (taking into
@@ -1162,6 +1255,7 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
   else if (leftTy <= TFunc) implFunCmp(env, op, left, right);
   else if (leftTy <= TCls) implClsCmp(env, op, left, right);
+  else if (leftTy <= TClsMeth) implClsMethCmp(env, op, left, right);
   else always_assert(false);
 
   decRef(env, left);

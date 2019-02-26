@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
@@ -705,6 +706,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);
       return;
+    case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

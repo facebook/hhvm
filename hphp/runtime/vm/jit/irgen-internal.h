@@ -1015,6 +1015,12 @@ Block* create_catch_block(IRGS& env, Body body) {
 // $this and return it.
 SSATmp* checkAndLoadThis(IRGS& env);
 
+//////////////////////////////////////////////////////////////////////
+/*
+ * clsmeth helpers.
+ */
+ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
+
 }}}
 
 #endif

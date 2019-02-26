@@ -300,6 +300,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfKeyset:
         case KindOfFunc:
         case KindOfClass:
+        case KindOfClsMeth:
           always_assert(false);
       }
 
@@ -399,6 +400,7 @@ void stringsOfArray(
         case KindOfKeyset:
         case KindOfFunc:
         case KindOfClass:
+        case KindOfClsMeth:
           // this should be an always_assert(false), but that appears to trigger
           // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
           // can't always_assert(false) here until we stop supporting gcc-4.9
@@ -615,6 +617,26 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
+    case KindOfClsMeth: {
+      auto const clsmeth = tv.m_data.pclsmeth;
+      auto const sz = sizeof(*clsmeth);
+      size += sz;
+      if (clsmeth->isRefCounted()) {
+        auto ref_count = int{tvGetCount(tv)};
+        FTRACE(3, " ClsMeth tv: clsmeth at {} with ref count {}\n",
+              (void*)clsmeth.get(), ref_count);
+        if (one_bit_refcount) {
+          sized += sz;
+        } else {
+          assertx(ref_count > 0);
+          sized += (sz / (double)(ref_count));
+        }
+      } else {
+        FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
+              (void*)clsmeth.get());
+      }
+      break;
+    }
   }
 
   return std::make_pair(size, sized);
@@ -635,7 +657,8 @@ void tvGetStrings(
     case HPHP::KindOfInt64:
     case HPHP::KindOfDouble:
     case HPHP::KindOfFunc:
-    case HPHP::KindOfClass: {
+    case HPHP::KindOfClass:
+    case HPHP::KindOfClsMeth: {
       // Not strings
       break;
     }
@@ -653,7 +676,7 @@ void tvGetStrings(
     case HPHP::KindOfShape:
     case HPHP::KindOfPersistentArray:
     case HPHP::KindOfArray: {
-      ArrayData* arr = tv.m_data.parr;
+      auto* arr = tv.m_data.parr;
       stringsOfArray(arr, metrics, path, pointers, val_stack);
       break;
     }

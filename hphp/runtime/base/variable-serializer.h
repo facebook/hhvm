@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,6 +191,7 @@ private:
   void serializeString(const String&);
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
+  void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);
 
   Array getSerializeProps(const ObjectData* obj) const;
 

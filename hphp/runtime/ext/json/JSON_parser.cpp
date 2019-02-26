@@ -888,6 +888,7 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       z = uninit_null();
       return;
   }

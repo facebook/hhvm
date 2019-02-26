@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
@@ -265,6 +266,7 @@ private:
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
 
+  template <bool incRef = true>
   void arrInit(const ArrayData* arr);
 
   template <bool incRef>
@@ -401,12 +403,19 @@ bool IterateV(const TypedValue& it,
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
+   do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     return IterateV<ArrFn, false>(adata, arrFn);
   }
   if (std::is_same<PreCollFn, bool>::value) {
     return ArrayData::call_helper(preCollFn, nullptr);
+  }
+  if (isClsMethType(it.m_type)) {
+    raiseClsMethToVecWarningHelper();
+    adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
+    if (adata) goto do_array_no_incref;
+    return false;
   }
   if (it.m_type != KindOfObject) return false;
   auto odata = it.m_data.pobj;
@@ -494,12 +503,19 @@ bool IterateKV(const TypedValue& it,
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
+   do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (preArrFn(adata)) return true;
     return IterateKV<ArrFn, false>(adata, arrFn);
   }
   if (std::is_same<PreCollFn, bool>::value) {
     return ArrayData::call_helper(preCollFn, nullptr);
+  }
+  if (isClsMethType(it.m_type)) {
+    raiseClsMethToVecWarningHelper();
+    adata = clsMethToVecHelper(it.m_data.pclsmeth).detach();
+    if (adata) goto do_array_no_incref;
+    return false;
   }
   if (it.m_type != KindOfObject) return false;
   auto odata = it.m_data.pobj;

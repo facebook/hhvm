@@ -100,6 +100,7 @@ ScalarExpression::ScalarExpression
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         break;
     }
     not_reached();

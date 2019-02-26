@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
@@ -717,6 +718,12 @@ public:
   void pushFunc(Func* f) {
     m_top--;
     *m_top = make_tv<KindOfFunc>(f);
+  }
+
+  ALWAYS_INLINE
+  void pushClsMethNoRc(ClsMethDataRef clsMeth) {
+    m_top--;
+    *m_top = make_tv<KindOfClsMeth>(clsMeth);
   }
 
   ALWAYS_INLINE

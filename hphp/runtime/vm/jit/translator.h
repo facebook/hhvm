@@ -287,6 +287,7 @@ enum OutTypeConstraints {
 
   OutFunc,              // for function pointers
   OutClass,             // for class pointers
+  OutClsMeth,           // For ClsMeth pointers
 
   OutNone,
 };

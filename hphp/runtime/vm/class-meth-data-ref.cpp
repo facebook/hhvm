@@ -28,6 +28,11 @@ void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
   else raise_notice("Implicit clsmeth to %s conversion for %s()", t, fn);
 }
 
+void raiseClsMethConvertWarningHelper(const char* toType) {
+  if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;
+  raise_notice("Implicit clsmeth to %s conversion", toType);
+}
+
 Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
   return make_varray(clsMeth->getCls(), clsMeth->getFunc());
 }

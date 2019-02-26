@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP {
@@ -125,6 +126,9 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfPersistentArray:
     case KindOfArray:
       throw_bad_array_operand(cell.m_data.parr);
+    case KindOfClsMeth:
+      throw ExtendedException("Invalid operand type was used: cannot perform "
+                              "this operation with clsmeth");
 
     case KindOfObject:
       return make_int(cell.m_data.pobj->toInt64());
@@ -528,6 +532,7 @@ void cellIncDecOp(Op op, tv_lval cell) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfClsMeth:
       return;
 
     case KindOfRef:
@@ -835,6 +840,7 @@ void cellBitNot(Cell& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
+    case KindOfClsMeth:
       raise_error("Unsupported operand type for ~");
   }
 }

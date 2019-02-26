@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/array-init.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
@@ -121,8 +122,9 @@ static_assert(typeToDestrIdx(KindOfString)   == 5, "String destruct index");
 static_assert(typeToDestrIdx(KindOfObject)   == 7, "Object destruct index");
 static_assert(typeToDestrIdx(KindOfResource) == 8, "Resource destruct index");
 static_assert(typeToDestrIdx(KindOfRef)      == 9, "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfClsMeth)  == 10, "ClsMeth destruct index");
 
-static_assert(kDestrTableSize == 10,
+static_assert(kDestrTableSize == 11,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -137,6 +139,7 @@ RawDestructor g_destructors[] = {
                                                       // KindOfObject
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
   (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
+  (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
 };
 
 #define IMPLEMENT_SET(argType, setOp)                     \
@@ -302,6 +305,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return m_type;
 
     case KindOfInt64:
@@ -338,6 +342,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfClsMeth:
       return false;
 
     case KindOfBoolean:
@@ -394,6 +399,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return false;
   }
   not_reached();
@@ -439,6 +445,9 @@ bool Variant::toBooleanHelper() const {
       return funcToStringHelper(m_data.pfunc)->toBoolean();
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toBoolean();
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("bool");
+      return true;
     case KindOfRef:           return m_data.pref->var()->toBoolean();
       always_assert(false);
   }
@@ -470,6 +479,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       return funcToStringHelper(m_data.pfunc)->toInt64();
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toInt64();
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("int");
+      return 1;
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
       always_assert(false);
   }
@@ -501,6 +513,9 @@ double Variant::toDoubleHelper() const {
       return funcToStringHelper(m_data.pfunc)->toDouble();
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toDouble();
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("double");
+      return 1.0;
     case KindOfRef:           return m_data.pref->var()->toDouble();
       always_assert(false);
   }
@@ -536,6 +551,10 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfClass:
       return make_packed_array(Variant{classToStringHelper(m_data.pclass),
                                        PersistentStrInit{}});
+    case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
+      return make_packed_array(
+        m_data.pclsmeth->getCls(), m_data.pclsmeth->getFunc());
     case KindOfRef:           return m_data.pref->var()->toArray();
       always_assert(false);
 
@@ -565,6 +584,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfObject:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
@@ -664,6 +684,16 @@ void Variant::setEvalScalar() {
     case KindOfFunc:
     case KindOfClass:
       break;
+
+    case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
+      auto const clsMeth = m_data.pclsmeth;
+      m_data.parr = clsMethToVecHelper(clsMeth).detach();
+      m_type = RuntimeOption::EvalHackArrDVArrs ?
+               KindOfPersistentVec : KindOfPersistentArray;
+      decRefClsMeth(clsMeth);
+      do_array();
+      return;
   }
   not_reached();
 }

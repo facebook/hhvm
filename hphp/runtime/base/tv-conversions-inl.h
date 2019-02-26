@@ -33,6 +33,8 @@ namespace HPHP {
 // forward declarations here is more feasible and simpler.
 const StringData* funcToStringHelper(const Func* func);
 const StringData* classToStringHelper(const Class* cls);
+Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
+void raiseClsMethConvertWarningHelper(const char* toType);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,6 +66,9 @@ inline bool cellToBool(Cell cell) {
       return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toBoolean();
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("bool");
+      return true;
   }
   not_reached();
 }
@@ -96,6 +101,9 @@ inline int64_t cellToInt(Cell cell) {
       return funcToStringHelper(cell.m_data.pfunc)->toInt64(10);
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64(10);
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("int");
+      return 1;
   }
   not_reached();
 }
@@ -156,6 +164,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     case KindOfResource:
       return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
 
+    case KindOfClsMeth:
     case KindOfPersistentShape:
     case KindOfShape:
     case KindOfPersistentArray:

@@ -43,6 +43,7 @@ Type arithOpResult(Type t1, Type t2) {
   if (both.maybe(TVec)) return TVec;
   if (both.maybe(TDict)) return TDict;
   if (both.maybe(TKeyset)) return TKeyset;
+  if (both.maybe(TClsMeth)) return TClsMeth;
   if (both.maybe(TStr)) return TCell;
   return TInt;
 }
@@ -186,6 +187,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     }
     case OutFunc: return TFunc;
     case OutClass: return TCls;
+    case OutClsMeth: return TClsMeth;
   }
   not_reached();
 }

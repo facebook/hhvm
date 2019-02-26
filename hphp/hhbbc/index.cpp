@@ -4546,6 +4546,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfPersistentArray:
       case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
+      case KindOfClsMeth:      return TClsMeth;
       case KindOfObject:
         return resolve_class_or_type_alias(ctx, name, candidate);
       case KindOfUninit:

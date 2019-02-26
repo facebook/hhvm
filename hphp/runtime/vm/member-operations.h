@@ -231,6 +231,9 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_vec();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_dict();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_keyset();
+[[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
+[[noreturn]] void throw_cannot_write_for_clsmeth();
+[[noreturn]] void throw_cannot_unset_for_clsmeth();
 
 [[noreturn]] void unknownBaseType(DataType);
 
@@ -462,6 +465,48 @@ inline tv_rval ElemKeyset(ArrayData* base, key_type<keyType> key) {
 }
 
 /**
+ * Elem when base is a ClsMeth
+ */
+template<MOpMode mode>
+inline TypedValue ElemClsMethPre(ClsMethDataRef base, int64_t key) {
+  if (key == 0) return make_tv<KindOfClass>(base->getCls());
+  else if (key == 1) return make_tv<KindOfFunc>(base->getFunc());
+  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+    SystemLib::throwOutOfBoundsExceptionObject(
+      folly::sformat("Out of bounds clsmeth access: invalid index {}", key));
+  }
+  return make_tv<KindOfNull>();
+}
+
+template<MOpMode mode>
+inline TypedValue ElemClsMethPre(ClsMethDataRef base, StringData* key) {
+  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid clsmeth key: expected a key of type int, string given");
+  }
+  return make_tv<KindOfNull>();
+}
+
+template<MOpMode mode>
+inline TypedValue ElemClsMethPre(ClsMethDataRef base, TypedValue key) {
+  if (LIKELY(isIntType(type(key)))) {
+    return ElemClsMethPre<mode>(base, val(key).num);
+  }
+  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid clsmeth key: expected a key of type int");
+  }
+  return make_tv<KindOfNull>();
+}
+
+template<MOpMode mode, KeyType keyType>
+inline tv_rval ElemClsMeth(
+  TypedValue& tvRef, ClsMethDataRef base, key_type<keyType> key) {
+  tvRef = ElemClsMethPre<mode>(base, key);
+  return tv_rval{ &tvRef };
+}
+
+/**
  * Elem when base is an Int64, Double, or Resource.
  */
 inline tv_rval ElemScalar() {
@@ -593,6 +638,12 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
       return ElemArray<mode, keyType, intishCast>(base.val().parr, key);
     case KindOfObject:
       return ElemObject<mode, keyType>(tvRef, base.val().pobj, key);
+
+    case KindOfClsMeth: {
+      raiseClsMethToVecWarningHelper();
+      return ElemClsMeth<mode, keyType>(tvRef, base.val().pclsmeth, key);
+    }
+
     case KindOfRef:
       break;
   }
@@ -1023,6 +1074,9 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       return ElemDArray<mode, reffy, intishCast, keyType>(base, key);
     case KindOfObject:
       return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
+
+    case KindOfClsMeth:
+      throw_cannot_write_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -1277,6 +1331,8 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
+    case KindOfClsMeth:
+      throw_cannot_unset_for_clsmeth();
     case KindOfPersistentVec:
     case KindOfVec:
       return ElemUVec<keyType>(base, key);
@@ -1411,6 +1467,8 @@ inline tv_lval NewElem(TypedValue& tvRef,
       return NewElemArray<reffy>(base);
     case KindOfObject:
       return NewElemObject(tvRef, base);
+    case KindOfClsMeth:
+      throw_cannot_use_newelem_for_lval_read_clsmeth();
     case KindOfRef:
       break;
   }
@@ -1833,6 +1891,8 @@ StringData* SetElemSlow(tv_lval base,
     case KindOfObject:
       SetElemObject<keyType>(base, key, value);
       return nullptr;
+    case KindOfClsMeth:
+      throw_cannot_write_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2042,6 +2102,8 @@ inline void SetNewElem(tv_lval base,
       return SetNewElemArray(base, value);
     case KindOfObject:
       return SetNewElemObject(base, value);
+    case KindOfClsMeth:
+      throw_cannot_write_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2175,6 +2237,8 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
       return result;
     }
 
+    case KindOfClsMeth:
+      throw_cannot_write_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2269,6 +2333,8 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
       return result;
     }
 
+    case KindOfClsMeth:
+      throw_cannot_use_newelem_for_lval_read_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2422,6 +2488,8 @@ inline Cell IncDecElem(
       return dest;
     }
 
+    case KindOfClsMeth:
+      throw_cannot_write_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2518,6 +2586,8 @@ inline Cell IncDecNewElem(
       return IncDecBody(op, result);
     }
 
+    case KindOfClsMeth:
+      throw_cannot_use_newelem_for_lval_read_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2760,6 +2830,8 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
       return;
     }
 
+    case KindOfClsMeth:
+      throw_cannot_unset_for_clsmeth();
     case KindOfRef:
       break;
   }
@@ -2907,6 +2979,18 @@ bool IssetEmptyElemKeyset(ArrayData* a, key_type<keyType> key) {
 }
 
 /**
+ * IssetEmptyElem when base is a ClsMeth
+ */
+template <bool useEmpty, KeyType keyType>
+bool IssetEmptyElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
+  const TypedValue result = ElemClsMethPre<MOpMode::None>(base, key);
+  if (useEmpty) {
+    return !cellToBool(tvAssertCell(result));
+  }
+  return !cellIsNull(tvAssertCell(result));
+}
+
+/**
  * isset/empty($base[$key])
  */
 template <bool useEmpty, KeyType keyType, ICMode intishCast>
@@ -2965,6 +3049,11 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
 
     case KindOfObject:
       return IssetEmptyElemObj<useEmpty, keyType>(val(base).pobj, key);
+
+    case KindOfClsMeth: {
+      raiseClsMethToVecWarningHelper();
+      return IssetEmptyElemClsMeth<useEmpty, keyType>(val(base).pclsmeth, key);
+    }
 
     case KindOfRef:
       break;
@@ -3140,6 +3229,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
       return propPreNull<mode>(tvRef, pState);
 
     case KindOfObject:
@@ -3179,6 +3269,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfArray:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       tvWriteNull(tvRef);
       raise_notice("Cannot access property on non-object");
       return &tvRef;
@@ -3324,6 +3415,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return SetPropNull<setResult>(val);
 
     case KindOfPersistentString:
@@ -3407,6 +3499,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -3494,6 +3587,7 @@ inline Cell IncDecProp(
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return IncDecPropNull();
 
     case KindOfPersistentString:

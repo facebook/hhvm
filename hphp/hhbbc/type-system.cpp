@@ -3070,6 +3070,9 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return IsTypeOp::DArray;
   }
+  if (t.subtypeOf(BClsMeth)) {
+    return RuntimeOption::EvalHackArrDVArrs ? IsTypeOp::Vec : IsTypeOp::VArray;
+  }
   return folly::none;
 }
 
@@ -3242,9 +3245,10 @@ Type from_cell(Cell cell) {
   case KindOfResource:
   case KindOfFunc:
   case KindOfClass:
+  case KindOfClsMeth:
     break;
   }
-  always_assert(0 && "reference counted/class/func type in from_cell");
+  always_assert(0 && "reference counted/class/func/clsmeth type in from_cell");
 }
 
 Type from_DataType(DataType dt) {
@@ -3271,6 +3275,7 @@ Type from_DataType(DataType dt) {
   case KindOfResource: return TRes;
   case KindOfFunc:     return TFunc;
   case KindOfClass:    return TCls;
+  case KindOfClsMeth:  return TClsMeth;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }
@@ -5437,6 +5442,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptFunc)
   X(Cls)
   X(OptCls)
+  X(ClsMeth)
+  X(OptClsMeth)
   X(UncArrKey)
   X(ArrKey)
   X(OptUncArrKey)

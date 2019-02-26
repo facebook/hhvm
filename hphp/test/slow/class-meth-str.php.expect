@@ -1,7 +1,5 @@
-array(2) {
-  [0]=>
-  string(3) "Bar"
-  [1]=>
-function(Bar::g)
+classMeth{
+    class(Bar)
+    function(g)
 }
 string(6) "Bar::g"

@@ -2149,8 +2149,12 @@ void isTypeObj(ISS& env, const Type& ty) {
 }
 
 void isTypeArrLike(ISS& env, const Type& ty) {
-  if (ty.subtypeOfAny(TArr, TVec, TDict, TKeyset)) return push(env, TTrue);
-  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset)) return push(env, TFalse);
+  if (ty.subtypeOf(BArr | BVec | BDict | BKeyset | BClsMeth))  {
+    return push(env, TTrue);
+  }
+  if (!ty.couldBe(BArr | BVec | BDict | BKeyset | BClsMeth))  {
+    return push(env, TFalse);
+  }
   push(env, TBool);
 }
 
@@ -2938,14 +2942,9 @@ void in(ISS& env, const bc::ResolveObjMethod& op) {
 }
 
 void in(ISS& env, const bc::ResolveClsMethod& op) {
-  // TODO (T29639296)
   popC(env);
   popC(env);
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    push(env, TVec);
-  } else {
-    push(env, TVArr);
-  }
+  push(env, TClsMeth);
 }
 
 const StaticString s_nullFunc { "__SystemLib\\__86null" };
@@ -4103,9 +4102,20 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
     // VerifyRetType will convert a TFunc to a TStr implicitly
     // (and possibly warn)
     if (tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls)) {
-      stackT |= TStr;
-      popC(env);
-      push(env, stackT);
+      topC(env, (int)ts_flavor) = stackT |= TStr;
+    }
+
+    // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
+    if (stackT.couldBe(BClsMeth)) {
+      if (tcT.couldBe(BVec)) {
+        topC(env, (int)ts_flavor) = stackT |= TVec;
+      }
+      if (tcT.couldBe(BVArr)) {
+        topC(env, (int)ts_flavor) = stackT |= TVArr;
+      }
+      if (tcT.couldBe(TArr)) {
+        topC(env, (int)ts_flavor) = stackT |= TArr;
+      }
     }
   }
 
@@ -4342,10 +4352,11 @@ void idxImpl(ISS& env, bool arraysOnly) {
   if (arraysOnly) {
     // If ArrayIdx, we'll raise an error for anything other than array-like and
     // null. This op is only terminal if null isn't possible.
-    if (!base.couldBeAny(TArr, TVec, TDict, TKeyset)) {
+    if (!base.couldBe(BArr | BVec | BDict | BKeyset | BClsMeth)) {
       return finish(key.couldBe(BInitNull) ? def : TBottom, true);
     }
-  } else if (!base.couldBeAny(TArr, TVec, TDict, TKeyset, TStr, TObj)) {
+  } else if (
+    !base.couldBe(BArr | BVec | BDict | BKeyset | BStr | BObj | BClsMeth)) {
     // Otherwise, any strange bases for Idx will just return the default value
     // without raising.
     return finish(def, false);

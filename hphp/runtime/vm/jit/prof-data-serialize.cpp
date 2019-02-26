@@ -1278,6 +1278,36 @@ Func* read_func(ProfDataDeserializer& ser) {
   return ret;
 }
 
+void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth) {
+  SCOPE_EXIT {
+    ITRACE(2, "ClsMeth: {}, {}\n",
+      clsMeth->getCls() ? clsMeth->getCls()->name() : staticEmptyString(),
+      clsMeth->getFunc() ? clsMeth->getFunc()->fullName() : staticEmptyString()
+    );
+  };
+  ITRACE(2, "ClsMeth>\n");
+  if (ser.serialize(clsMeth->getCls())) {
+    Trace::Indent _i;
+    write_raw(ser, uintptr_t(-1));
+    write_class(ser, clsMeth->getCls());
+  }
+  if (ser.serialize(clsMeth->getFunc())) {
+    Trace::Indent _i;
+    write_raw(ser, uintptr_t(-1));
+    write_func(ser, clsMeth->getFunc());
+  }
+}
+
+ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser) {
+  ITRACE(2, "ClsMeth>\n");
+  auto const cls = read_class(ser);
+  auto const func = read_func(ser);
+  ITRACE(2, "ClsMeth: {}, {}\n",
+    cls ? cls->name() : staticEmptyString(),
+    func ? func->fullName() : staticEmptyString());
+  return ClsMethDataRef(cls, func);
+}
+
 std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename};

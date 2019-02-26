@@ -223,6 +223,14 @@ vm_decode_function(const_variant_ref function,
     return function.toFuncVal();
   }
 
+  if (function.isClsMeth()) {
+    dynamic = true;
+    this_ = nullptr;
+    auto const clsmeth = function.toClsMethVal();
+    cls = clsmeth->getCls();
+    return clsmeth->getFunc();
+  }
+
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);

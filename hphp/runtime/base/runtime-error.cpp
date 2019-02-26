@@ -656,6 +656,39 @@ void raise_str_to_class_notice(const StringData* name) {
   }
 }
 
+void raise_clsmeth_compat_type_hint(
+  const Func* func, const std::string& displayName,
+  folly::Optional<int> param) {
+  if (param) {
+    raise_notice(
+      "class_meth Compat: Argument %d passed to %s()"
+      " must be of type %s, clsmeth given",
+      *param + 1, func->fullDisplayName()->data(), displayName.c_str());
+  } else {
+    raise_notice(
+      "class_meth Compat: Value returned from function %s()"
+      " must be of type %s, clsmeth given",
+      func->fullDisplayName()->data(), displayName.c_str());
+  }
+}
+
+void raise_clsmeth_compat_type_hint_outparam_notice(
+  const Func* func, const std::string& displayName, int paramNum) {
+  raise_notice(
+    "class_meth Compat: Argument %d returned from %s()"
+    " must be of type %s, clsmeth given",
+    paramNum + 1, func->fullDisplayName()->data(), displayName.c_str());
+}
+
+void raise_clsmeth_compat_type_hint_property_notice(
+  const Class* declCls, const StringData* propName,
+  const std::string& displayName, bool isStatic) {
+  raise_notice(
+    "class_meth Compat: %s '%s::%s' declared as type %s, clsmeth assigned",
+    isStatic ? "Static property" : "Property",
+    declCls->name()->data(), propName->data(), displayName.c_str());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HC(Opt, ...) \

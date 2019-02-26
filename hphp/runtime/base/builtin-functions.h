@@ -99,11 +99,29 @@ inline bool is_string(const Cell* c) {
 
 inline bool is_array(const Cell* c) {
   assertx(cellIsPlausible(*c));
+  if (tvIsClsMeth(c)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
+      }
+      return true;
+    }
+    return false;
+  }
   return tvIsArrayOrShape(c);
 }
 
 inline bool is_vec(const Cell* c) {
   assertx(cellIsPlausible(*c));
+  if (tvIsClsMeth(c)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+      }
+      return true;
+    }
+    return false;
+  }
   return tvIsVec(c);
 }
 
@@ -118,6 +136,15 @@ inline bool is_keyset(const Cell* c) {
 }
 
 inline bool is_varray(const Cell* c) {
+  if (tvIsClsMeth(c)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_VARR);
+      }
+      return true;
+    }
+    return false;
+  }
   return RuntimeOption::EvalHackArrDVArrs
     ? tvIsVec(c)
     : (tvIsArray(c) && c->m_data.parr->isVArray());

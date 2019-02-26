@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -104,6 +105,15 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfObject:
       cls = Unit::lookupClass(ne);
       return cls && tv->m_data.pobj->instanceof(cls);
+
+    case KindOfClsMeth:
+      cls = Unit::lookupClass(ne);
+      if (cls && (RuntimeOption::EvalHackArrDVArrs ?
+        interface_supports_vec(cls->name()) :
+        interface_supports_array(cls->name()))) {
+        return true;
+      }
+      return false;
 
     case KindOfRef:
       break;
@@ -567,15 +577,44 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
         }
       }
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+          }
+          result = true;
+        } else {
+          result = false;
+        }
+        break;
+      }
       result = isVecType(type);
       break;
     case TypeStructure::Kind::T_keyset:
       result = isKeysetType(type);
       break;
     case TypeStructure::Kind::T_vec_or_dict:
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+          }
+          result = true;
+        } else {
+          result = false;
+        }
+        break;
+      }
       result = isVecType(type) || isDictOrShapeType(type);
       break;
     case TypeStructure::Kind::T_arraylike:
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalIsVecNotices) {
+          raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+        }
+        result = true;
+        break;
+      }
       result = isArrayType(type) || isVecType(type) ||
                isDictType(type) || isShapeType(type) || isKeysetType(type);
       break;

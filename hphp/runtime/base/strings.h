@@ -121,6 +121,11 @@ auto constexpr REIFIED_GENERICS_NOT_GIVEN =
 auto constexpr NEW_STATIC_ON_REIFIED_CLASS =
   "Cannot call new static since class %s has reified generics";
 
+auto constexpr CLSMETH_COMPAT_IS_ARR = "is_array() called on clsmeth";
+auto constexpr CLSMETH_COMPAT_IS_VEC = "is_vec() called on clsmeth";
+auto constexpr CLSMETH_COMPAT_IS_VARR = "is_varray() called on clsmeth";
+auto constexpr CLSMETH_COMPAT_IS_ANY_ARR = "is_any_array() called on clsmeth";
+
 } // namespace Strings
 } // namespace HPHP
 

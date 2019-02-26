@@ -18,7 +18,7 @@
 #define incl_HPHP_TYPED_VALUE_H_
 
 #include "hphp/runtime/base/datatype.h"
-
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/type-scan.h"
 #include "hphp/util/type-traits.h"
 
@@ -61,6 +61,7 @@ union Value {
   MemoCacheBase* pcache; // Not valid except when in a MemoSlot
   const Func*   pfunc;  // KindOfFunc
   Class*        pclass; // KindOfClass
+  ClsMethDataRef pclsmeth; // KindOfClsMeth
 };
 
 enum VarNrFlag { NR_FLAG = 1 << 29 };
@@ -281,6 +282,7 @@ X(KindOfString,       StringData*);
 X(KindOfPersistentString, const StringData*);
 X(KindOfFunc,         Func*);
 X(KindOfClass,        Class*);
+X(KindOfClsMeth,      ClsMethDataRef);
 
 #undef X
 
@@ -304,6 +306,12 @@ typename std::enable_if<
 }
 
 inline Value make_value(double d) { Value v; v.dbl = d; return v; }
+
+inline Value make_value(ClsMethDataRef clsMeth) {
+  Value v;
+  v.pclsmeth = clsMeth;
+  return v;
+}
 
 /*
  * Pack a base data element into a TypedValue for use elsewhere in the runtime.

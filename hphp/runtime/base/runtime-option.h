@@ -1033,6 +1033,11 @@ struct RuntimeOption {
   /* Raise a notice if a Func type is passed to function that expects a
      string */                                                          \
   F(bool, StringHintNotices, false)                                     \
+  /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
+  F(bool, IsVecNotices, false)                                          \
+  /*  Raise a notice if a ClsMeth type is passed to a function that
+   *  expects a vec/varray */                                           \
+  F(bool, VecHintNotices, false)                                        \
   /* Switches on miscellaneous junk. */                                 \
   F(bool, NoticeOnCreateDynamicProp, false)                             \
   F(bool, NoticeOnReadDynamicProp, false)                               \

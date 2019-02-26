@@ -403,7 +403,8 @@ const StaticString
   s_resource("resource"),
   s_ref("reference"),
   s_func("function"),
-  s_class("class");
+  s_class("class"),
+  s_clsmeth("clsmeth");
 
 StaticString getDataTypeString(DataType t) {
   switch (t) {
@@ -430,6 +431,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfRef:        return s_ref;
     case KindOfFunc:       return s_func;
     case KindOfClass:      return s_class;
+    case KindOfClsMeth:    return s_clsmeth;
   }
   not_reached();
 }

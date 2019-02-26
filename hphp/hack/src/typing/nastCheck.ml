@@ -46,7 +46,6 @@ type env = {
   function_name: string option;
   class_name: string option;
   class_kind: Ast.class_kind option;
-  imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
   is_array_append_allowed: bool;
   is_reactive: bool; (* The enclosing function is reactive *)
@@ -378,7 +377,6 @@ let rec fun_ tenv f named_body =
   let env = { t_is_finally = false;
               is_array_append_allowed = false;
               class_name = None; class_kind = None;
-              imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               tenv = tenv;
               function_name = None;
@@ -530,7 +528,6 @@ and class_ tenv c =
               is_array_append_allowed = false;
               class_name = cname;
               class_kind = Some c.c_kind;
-              imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               is_reactive = false;
               function_name = None;
@@ -728,12 +725,12 @@ and stmt env = function
     block env b2;
     ()
   | Do (b, e) ->
-    block { env with imm_ctrl_ctx = LoopContext } b;
+    block env b;
     expr env e;
     ()
   | While (e, b) ->
       expr env e;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Using { us_expr = e; us_block = b; _ } ->
       expr env e;
@@ -743,16 +740,16 @@ and stmt env = function
       expr env e1;
       expr env e2;
       expr env e3;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Switch (e, cl) ->
       expr env e;
-      List.iter cl (case { env with imm_ctrl_ctx = SwitchContext });
+      List.iter cl (case env);
       ()
   | Foreach (e1, ae, b) ->
       expr env e1;
       as_expr env ae;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Try (b, cl, fb) ->
       block env b;
@@ -941,7 +938,6 @@ and expr_ env _p = function
       List.iter uel (expr env);
       ()
   | Efun (f, _) ->
-      let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()
   | Xml (_, attrl, el) ->
@@ -978,7 +974,6 @@ let typedef tenv t =
   let env = { t_is_finally = false;
               is_array_append_allowed = false;
               class_name = None; class_kind = None;
-              imm_ctrl_ctx = Toplevel;
               function_name = None;
               (* Since typedefs cannot have constraints we shouldn't check
                * if its type params satisfy the constraints of any tapply it

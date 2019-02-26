@@ -167,6 +167,17 @@ and class_elt =
   | MethodTraitResolution of method_trait_resolution
   | XhpCategory of pos * (pstring list)
   | XhpChild of pos * xhp_child
+  (* Pocket Universes definition embedded in a class *)
+  | ClassEnum of bool * id * pufield list
+
+and pufield =
+  | PUAtomDecl of id * pumapping list
+  | PUCaseType of id
+  | PUCaseTypeExpr of hint * id
+
+and pumapping =
+  | PUMappingID of id * expr
+  | PUMappingType of id * hint
 
 and xhp_child =
   | ChildName of id
@@ -467,6 +478,8 @@ and expr_ =
   | Import of import_flavor * expr
   | Callconv of param_kind * expr
   | Execution_operator of expr list
+  (* Pocket Universe citizen, :@foo *)
+  | PU_atom of id
 
 and import_flavor =
   | Include

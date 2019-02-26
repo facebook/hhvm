@@ -925,6 +925,7 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Execution_operator el ->
     let st, el = convert_exprs env st el in
     st, (p, Execution_operator el)
+  | PU_atom id -> st, (p, PU_atom id)
 
 and convert_prop_expr env st (_, expr_ as expr) =
   match expr_ with

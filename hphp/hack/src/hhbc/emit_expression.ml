@@ -1785,7 +1785,7 @@ and emit_reified_type env pos name =
 
 and emit_expr env ~need_ref (pos, expr_ as expr) =
   match expr_ with
-  | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
+  | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True | A.PU_atom _ ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@
@@ -3710,7 +3710,7 @@ and can_use_as_rhs_in_list_assignment expr =
   match expr with
   | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
-  | A.Lvar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
+  | A.Lvar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _ | A.PU_atom _
   | A.Call _ | A.New _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
   | A.Array _ | A.Varray _ | A.Darray _ | A.Collection _ | A.Clone _ | A.Unop _
   | A.As _ | A.Await _ -> true

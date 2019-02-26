@@ -190,6 +190,7 @@ and on_class_elt trait_or_interface body elt : class_body =
   | TypeConst tc ->
     let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
     { body with c_typeconsts = typeconsts; }
+  | ClassEnum _ -> failwith "TODO(T36532222): Pocket Universes"
 
 and on_as_expr aw e : Aast.as_expr =
   match aw, e with
@@ -300,6 +301,7 @@ and on_expr (p, e) : Aast.expr =
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
   | Execution_operator el -> Aast.Execution_operator (on_list on_expr el)
+  | PU_atom _ -> failwith "TODO(T36532222): Pocket Universes" (* Aast.PU_atom (snd id) *)
   in
   (p, node)
 

@@ -5948,6 +5948,9 @@ and check_implements_tparaml (env: Env.env) ht =
             Type.sub_type_decl ty_pos Reason.URnone env cstr ty
           | Ast.Constraint_super ->
             Type.sub_type_decl ty_pos Reason.URnone env cstr ty
+          | Ast.Constraint_pu_from ->
+            failwith "Typing.check_implements_tparaml: \
+                      implement typing for 'from' constraints"
         end
       end class_.dc_tparams paraml
 

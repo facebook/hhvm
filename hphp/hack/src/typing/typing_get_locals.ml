@@ -311,6 +311,7 @@ and expr acc (_, e) =
   | Efun _
   | Lfun _
   | Lvar _
+  | PU_atom _
   | Unsafeexpr _ -> acc
 
 let rec aast_lvalue (nsenv, m as acc) (p, e) =

@@ -412,6 +412,7 @@ and fun_where_constraint tcopt root env (ty1, ck, ty2) =
     let var2 = Vcontravariant [pos2, Rwhere_as, Pcontravariant] in
     type_ tcopt root var1 env ty1;
     type_ tcopt root var2 env ty2
+  | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 and fun_ret tcopt root static env (reason, _ as ty) =
   let pos = Reason.to_pos reason in
@@ -603,5 +604,6 @@ and constraint_ tcopt root env (ck, (r, _ as ty)) =
       let reasons = [pos, Rconstraint_eq, Pinvariant] in
       Vinvariant (reasons, reasons)
     | Ast.Constraint_super -> Vcovariant [pos, Rconstraint_super, Pcovariant]
+    | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
   in
   type_ tcopt root var env ty

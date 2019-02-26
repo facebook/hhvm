@@ -1138,6 +1138,7 @@ and string_of_param_default_value ~env expr =
       | _ -> id
     in
     Php_escaping.escape id
+  | A.PU_atom (_, litstr)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr

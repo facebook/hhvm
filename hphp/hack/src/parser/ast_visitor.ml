@@ -149,6 +149,12 @@ class type ['a] ast_visitor_type = object
   method on_xhpCategory: 'a -> pstring list -> 'a
   method on_xhp_child: 'a -> xhp_child -> 'a
 
+  (* Pocket Universes *)
+  method on_pu_atom : 'a -> id -> 'a
+  method on_pumapping : 'a -> pumapping -> 'a
+  method on_pufield : 'a -> pufield -> 'a
+  method on_class_enum_ : 'a -> id -> pufield list -> 'a
+
 end
 
 (*****************************************************************************)
@@ -423,6 +429,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Omitted                     -> this#on_omitted  acc
    | Suspend e  -> this#on_suspend acc e
    | Callconv    (kind, e)   -> this#on_callconv acc kind e
+   | PU_atom id    -> this#on_pu_atom acc id
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
@@ -740,6 +747,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | ClassVars cv -> this#on_classVars acc cv
     | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n
     | Method m -> this#on_method_ acc m
+    | ClassEnum (_, id, fields) -> this#on_class_enum_ acc id fields
 
   method on_const acc h_opt consts =
     let acc = match h_opt with
@@ -832,5 +840,33 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     acc
 
   method on_pstring acc _ = acc
+
+  method on_pu_atom acc _ = acc
+
+  method on_pumapping acc = function
+    | PUMappingID (id, e) ->
+      let acc = this#on_id acc id in
+      let acc = this#on_expr acc e in
+      acc
+    | PUMappingType (id, h) ->
+      let acc = this#on_id acc id in
+      let acc = this#on_hint acc h in
+      acc
+
+  method on_pufield acc = function
+    | PUAtomDecl (id, mappings) ->
+      let acc = this#on_id acc id in
+      let acc = List.fold_left this#on_pumapping acc mappings in
+      acc
+    | PUCaseType id -> this#on_id acc id
+    | PUCaseTypeExpr (h, id) ->
+      let acc = this#on_hint acc h in
+      let acc = this#on_id acc id in
+      acc
+
+  method on_class_enum_ acc id fields =
+    let acc = this#on_id acc id in
+    let acc = List.fold_left this#on_pufield acc fields in
+    acc
 
 end

@@ -18,7 +18,7 @@ let rec check_lvalue errorf = function
     errorf pos "->: syntax is not supported for lvalues"
   | pos, Array_get ((_, Class_const _), _) ->
     errorf pos "Array-like class consts are not valid lvalues"
-  | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ |
+  | _, (PU_atom _ | Lvar _ | Obj_get _ | Array_get _ | Class_get _ |
     Unsafeexpr _ | Omitted | BracedExpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _, _) ->
     errorf pos "Tuple cannot be used as an lvalue. Maybe you meant list?"

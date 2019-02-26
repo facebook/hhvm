@@ -2293,6 +2293,7 @@ and decompose_constraint
   | Ast.Constraint_eq ->
     let env' = decompose_subtype p env ty_sub ty_super in
     decompose_subtype p env' ty_super ty_sub
+  | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily

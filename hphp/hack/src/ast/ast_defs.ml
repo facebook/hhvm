@@ -31,6 +31,7 @@ and constraint_kind =
   | Constraint_as
   | Constraint_eq
   | Constraint_super
+  | Constraint_pu_from
 
 and reified = bool
 

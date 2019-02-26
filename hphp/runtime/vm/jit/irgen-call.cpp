@@ -602,10 +602,6 @@ void fpushFuncCommon(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_http_response_header("http_response_header"),
-  s_php_errormsg("php_errormsg");
-
 /*
  * Could `inst' read from the locals in the environment of `caller'?
  *
@@ -613,10 +609,6 @@ const StaticString
  */
 bool callReadsLocals(const NormalizedInstruction& inst,
                      const Func* caller) {
-  // We don't handle these two cases, because we don't compile functions
-  // containing them:
-  assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
-  assertx(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto const unit = caller->unit();
 

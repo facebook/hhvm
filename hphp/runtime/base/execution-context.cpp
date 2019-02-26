@@ -743,8 +743,7 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
   if (UNLIKELY(m_throwAllErrors)) {
     throw Exception(folly::sformat("throwAllErrors: {}", errnum));
   }
-  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum) ||
-      RID().hasTrackErrors()) {
+  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum)) {
     return true;
   }
   if (callUserHandler) {
@@ -783,7 +782,6 @@ const StaticString
   s_file("file"),
   s_function("function"),
   s_line("line"),
-  s_php_errormsg("php_errormsg"),
   s_error_num("error-num"),
   s_error_string("error-string"),
   s_error_file("error-file"),
@@ -849,26 +847,8 @@ void ExecutionContext::handleError(const std::string& msg,
     not_reached();
   }
   if (!handled) {
-    VMRegAnchor _;
-    auto fp = vmfp();
 
-    if (RID().hasTrackErrors() && fp) {
-      // Set $php_errormsg in the parent scope
-      Variant msg(ee.getMessage());
-      if (fp->func()->isBuiltin()) {
-        fp = getPrevVMState(fp);
-      }
-      assertx(fp);
-      auto id = fp->func()->lookupVarId(s_php_errormsg.get());
-      if (!RuntimeOption::DisableReservedVariables) {
-        if (id != kInvalidId) {
-          auto local = frame_local(fp, id);
-          tvSet(*msg.asTypedValue(), *tvToCell(local));
-        } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-          fp->getVarEnv()->set(s_php_errormsg.get(), msg.asTypedValue());
-        }
-      }
-    }
+
 
     // If we're inside an error handler already, queue it up on the deferred
     // list.

@@ -328,7 +328,6 @@ struct RequestInjectionData {
   // may be modified
   void setSafeFileAccess(bool b);
   bool hasSafeFileAccess() const;
-  bool hasTrackErrors() const;
   bool hasHtmlErrors() const;
 
   bool logFunctionCalls() const;

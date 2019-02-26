@@ -32,7 +32,6 @@ type t = {
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_untyped_nonstrict_lambda_parameters: bool;
-  tco_disallow_array_cell_pass_by_ref: bool;
   tco_language_feature_logging : bool;
   tco_unsafe_rx : bool;
   tco_disallow_implicit_returns_in_non_void_functions : bool;
@@ -234,7 +233,6 @@ let default = {
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
  tco_untyped_nonstrict_lambda_parameters = false;
- tco_disallow_array_cell_pass_by_ref = false;
  tco_language_feature_logging = false;
  tco_unsafe_rx = true;
  tco_disallow_implicit_returns_in_non_void_functions = true;
@@ -279,7 +277,6 @@ let make
   ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
   ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
   ?(tco_untyped_nonstrict_lambda_parameters = default.tco_untyped_nonstrict_lambda_parameters)
-  ?(tco_disallow_array_cell_pass_by_ref = default.tco_disallow_array_cell_pass_by_ref)
   ?(tco_language_feature_logging = default.tco_language_feature_logging)
   ?(tco_unsafe_rx = default.tco_unsafe_rx)
   ?(tco_disallow_implicit_returns_in_non_void_functions = default.tco_disallow_implicit_returns_in_non_void_functions)
@@ -326,7 +323,6 @@ let make
   tco_disallow_array_typehint;
   tco_disallow_array_literal;
   tco_untyped_nonstrict_lambda_parameters;
-  tco_disallow_array_cell_pass_by_ref;
   tco_language_feature_logging;
   tco_unsafe_rx;
   tco_disallow_implicit_returns_in_non_void_functions;
@@ -372,7 +368,6 @@ let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let tco_untyped_nonstrict_lambda_parameters t = t.tco_untyped_nonstrict_lambda_parameters
-let tco_disallow_array_cell_pass_by_ref t = t.tco_disallow_array_cell_pass_by_ref
 let tco_language_feature_logging t = t.tco_language_feature_logging
 let tco_unsafe_rx t = t.tco_unsafe_rx
 let tco_disallow_implicit_returns_in_non_void_functions t =

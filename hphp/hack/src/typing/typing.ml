@@ -5316,16 +5316,13 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
         | NoArray -> ()
       else if is_func_arg (* Normal function calls, excludes e.g. isset(&x); *)
       then
-        begin
-          if TypecheckerOptions.disallow_array_cell_pass_by_ref (Env.get_tcopt env)
-          then match snd te with
-          | T.Array_get _ ->
-             (* foo(&x[0]); *)
-             Errors.passing_array_cell_by_ref p
-          | _ ->
-             (* foo(&x); // permitted *)
-             ()
-        end
+        match snd te with
+        | T.Array_get _ ->
+           (* foo(&x[0]); *)
+           Errors.passing_array_cell_by_ref p
+        | _ ->
+           (* foo(&x); // permitted *)
+           ()
       else Errors.reference_expr p; (* &$x; *)
 
       (* any check omitted because would return the same anyway *)

@@ -67,7 +67,6 @@ let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
 let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple
-let disallow_array_cell_pass_by_ref = GlobalOptions.tco_disallow_array_cell_pass_by_ref
 let disallow_implicit_returns_in_non_void_functions =
   GlobalOptions.tco_disallow_implicit_returns_in_non_void_functions
 let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray

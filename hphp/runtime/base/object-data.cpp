@@ -274,6 +274,12 @@ bool ObjectData::toBooleanImpl() const noexcept {
   // Note: if you add more cases here, hhbbc/class-util.cpp also needs
   // to be changed.
   if (isCollection()) {
+    if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+      raise_notice(
+        "%s to boolean cast",
+        collections::typeToString((CollectionType)m_kind)->data()
+      );
+    }
     return collections::toBool(this);
   }
 

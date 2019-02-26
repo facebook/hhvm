@@ -146,8 +146,21 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   emitLdObjClass(v, src, cls);
   v << testbim{Class::CallToImpl, cls[Class::RTAttrsOff()], sf};
 
+  auto const callToBoolean = [&] (Vout& v) {
+    auto const d = v.makeReg();
+    cgCallHelper(v, env,
+                 CallSpec::method(&ObjectData::toBoolean),
+                 CallDest{DestType::Byte, d},
+                 SyncOptions::Sync,
+                 argGroup(env, inst).ssa(0));
+    return d;
+  };
+
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {
+      if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+        return callToBoolean(v);
+      }
       auto const sf = emitIsCollection(v, src);
       return cond(v, CC_BE, sf, v.makeReg(),
         [&] (Vout& v) { // src points to native collection
@@ -158,13 +171,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
           return d;
         },
         [&] (Vout& v) { // src is not a native collection
-          auto const d = v.makeReg();
-          cgCallHelper(v, env,
-                       CallSpec::method(&ObjectData::toBoolean),
-                       CallDest{DestType::Byte, d},
-                       SyncOptions::Sync,
-                       argGroup(env, inst).ssa(0));
-          return d;
+          return callToBoolean(v);
         });
     },
     [&] (Vout& v) { return v.cns(true); }

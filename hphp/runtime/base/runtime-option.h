@@ -1052,6 +1052,7 @@ struct RuntimeOption {
   F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
+  F(bool, NoticeOnCollectionToBool, false)                              \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \

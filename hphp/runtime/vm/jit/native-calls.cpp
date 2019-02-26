@@ -191,7 +191,7 @@ static CallMap s_callMap {
     {ConvObjToKeyset,    convObjToKeysetHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
-    {ConvCellToBool,     cellToBool, DSSA, SNone,
+    {ConvCellToBool,     cellToBool, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,

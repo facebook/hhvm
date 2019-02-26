@@ -2287,7 +2287,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
         }
       }
     }
-    return gen(env, ConvObjToBool, src);
+    return gen(env, ConvObjToBool, inst->taken(), src);
   }
   if (srcType <= TRes)  return cns(env, true);
 
@@ -2417,6 +2417,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   if (ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
+    if (RuntimeOption::EvalNoticeOnCollectionToBool) return nullptr;
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -2463,7 +2464,7 @@ SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
   if (isSimplifyOkay(inst) &&
       srcType.subtypeOfAny(TNull, TDbl, TInt, TStr)) {
     if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToBool, src);
+    return gen(env, ConvCellToBool, inst->taken(), src);
   }
 
   // We actually know that any other type will fail causing us to side exit

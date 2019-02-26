@@ -466,7 +466,6 @@ bool RuntimeOption::ServerLogSettingsOnStartup = false;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
 bool RuntimeOption::ServerWarmupConcurrently = false;
-int RuntimeOption::ServerWarmupThreadCount = 1;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 std::string RuntimeOption::ServerCleanupRequest;
 int RuntimeOption::ServerInternalWarmupThreads = 0;
@@ -1915,8 +1914,6 @@ void RuntimeOption::Load(
                  "Server.Forking.LogForkAttempts", false);
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
-    Config::Bind(ServerWarmupThreadCount, ini, config,
-                 "Server.WarmupThreadCount", 1);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
     Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
     Config::Bind(ServerInternalWarmupThreads, ini, config,

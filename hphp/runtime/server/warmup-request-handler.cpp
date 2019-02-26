@@ -18,8 +18,9 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/server/http-server.h"
+
 #include "hphp/runtime/server/replay-transport.h"
+
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/timer.h"
 
@@ -73,25 +74,33 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
   m_server->saturateWorkers();
 }
 
-void InternalWarmupWorker::doJob(WarmupJob job) {
-  HttpServer::CheckMemAndWait();
-  folly::StringPiece f(job.hdfFile);
-  auto const pos = f.rfind('/');
+void InternalWarmupWorker::run() {
+  folly::StringPiece f(m_hdfFile);
+  auto pos = f.rfind('/');
   auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
-  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, job.index),
+  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, m_index),
                          RuntimeOption::ServerExecutionMode());
+
+  // hphp_thread_init() and hphp_thread_exit() are called when we create the
+  // thread, through AsyncFuncImpl::SetThreadInitFunc() and
+  // AsyncFuncImpl::SetThreadFiniFunc().
+  //
+  // HttpRequestHandler takes care of doing hphp_session_init(),
+  // hphp_session_exit(), and hphp_context_exit().
+
   try {
     HttpRequestHandler handler(0);
     ReplayTransport rt;
-    Logger::FInfo("Replaying warmup request {}:{}", job.hdfFile, job.index);
+    Logger::FInfo("Replaying warmup request {}:{}", m_hdfFile, m_index);
+
     timespec start;
     Timer::GetMonotonicTime(start);
     rt.onRequestStart(start);
-    rt.replayInput(Hdf(job.hdfFile));
+    rt.replayInput(Hdf(m_hdfFile));
     handler.run(&rt);
   } catch (std::exception& e) {
     Logger::FWarning("Got exception during warmup request {}:{}, {}",
-                     job.hdfFile, job.index, e.what());
+                     m_hdfFile, m_index, e.what());
   }
 }
 

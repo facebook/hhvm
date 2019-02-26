@@ -36,6 +36,7 @@ end = struct
       | Tanon _ -> ()
       | Tthis -> ()
       | Tmixed -> ()
+      | Tnothing -> ()
       | Tdynamic | Tany | Terr | Tnonnull | Tprim _ -> ()
       | Tarraykind akind ->
         begin match akind with

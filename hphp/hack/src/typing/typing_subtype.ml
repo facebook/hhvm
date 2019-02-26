@@ -944,7 +944,22 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.float r) ty_super &&&
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.int r) ty_super
 
-  | _, Tunresolved tyl ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunresolved [] ->
+    if new_inference
+    then simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+    else default ()
+  | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunresolved [] ->
+    if new_inference
+    then simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
+    else default ()
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
+    Tunresolved [] ->
+    if new_inference
+    then invalid ()
+    else default ()
+
+  | _, Tunresolved (_ :: _ as tyl) ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
      * But we deal with unions on the left first (see case above), so this

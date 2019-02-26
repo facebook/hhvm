@@ -21,6 +21,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
     match ty with
     | Tmixed ->
       ty
+    | Tnothing ->
+      ty
     | Tany
     | Tnonnull
     | Tdynamic

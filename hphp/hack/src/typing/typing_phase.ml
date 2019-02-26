@@ -113,6 +113,8 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       env, (ety_env, x)
   | r, Tmixed ->
       env, (ety_env, MakeType.mixed r)
+  | r, Tnothing ->
+      env, (ety_env, MakeType.nothing r)
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty

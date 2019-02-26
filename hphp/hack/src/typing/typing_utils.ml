@@ -567,7 +567,11 @@ let rec push_option_out pos env ty =
     let env, ty = push_option_out pos env ty in
     env, if is_option ty then ty else (r, Toption ty)
   | r, Tprim N.Tnull ->
-    env, (r, Toption (r, Tany))
+    let ty =
+      if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
+      then (r, Tunresolved [])
+      else (r, Tany) in
+    env, (r, Toption ty)
   | r, Tunresolved tyl ->
     let env, tyl = List.map_env env tyl (push_option_out pos) in
     if List.exists tyl is_option then
@@ -689,6 +693,7 @@ let unwrap_class_type = function
       | Tany
       | Tmixed
       | Tnonnull
+      | Tnothing
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _

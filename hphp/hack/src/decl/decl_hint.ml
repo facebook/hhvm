@@ -28,6 +28,7 @@ and hint_ p env = function
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
   | Hdynamic -> Tdynamic
+  | Hnothing -> Tnothing
   | Harray (h1, h2) ->
     if env.Decl_env.mode = FileInfo.Mstrict && h1 = None
     then Errors.generic_array_strict p;

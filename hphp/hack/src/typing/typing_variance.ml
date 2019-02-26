@@ -447,7 +447,7 @@ and generic_ env variance name =
 
 and type_ tcopt root variance env (reason, ty) =
   match ty with
-  | Tany | Tmixed | Tnonnull | Terr | Tdynamic -> ()
+  | Tany | Tmixed | Tnonnull | Terr | Tdynamic | Tnothing -> ()
   | Tarray (ty1, ty2) ->
     type_option tcopt root variance env ty1;
     type_option tcopt root variance env ty2

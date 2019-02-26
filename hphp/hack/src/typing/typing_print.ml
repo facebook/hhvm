@@ -55,6 +55,7 @@ module ErrorString = struct
     | Tany               -> "an untyped value"
     | Terr               -> "a type error"
     | Tdynamic           -> "a dynamic value"
+    | Tnothing           -> "a missing value"
     | Tunresolved l      -> unresolved l
     | Tarray (x, y)      -> array (x, y)
     | Tdarray (_, _)     -> darray
@@ -205,6 +206,7 @@ module Suggest = struct
     | Terr                   -> "..."
     | Tmixed                 -> "mixed"
     | Tnonnull               -> "nonnull"
+    | Tnothing               -> "nothing"
     | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
     | Toption (_, Tnonnull)  -> "mixed"
@@ -329,6 +331,7 @@ module Full = struct
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
+    | Tnothing -> text "nothing"
     | Tdarray (x, y) -> list "darray<" k [x; y] ">"
     | Tvarray x -> list "varray<" k [x] ">"
     | Tvarray_or_darray x -> list "varray_or_darray<" k [x] ">"
@@ -764,6 +767,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "nonnull"
   | Tdynamic ->
     obj @@ kind "dynamic"
+  | Tnothing ->
+    obj @@ kind "nothing"
   | Tgeneric s ->
     obj @@ kind "generic" @ is_array false @ name s
   | Tabstract (AKgeneric s, opt_ty) ->

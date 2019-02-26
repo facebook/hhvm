@@ -887,7 +887,7 @@ module Make (GetLocals : GetLocals) = struct
           env id
           hl in
       (match hint_id with
-      | N.Hprim _ | N.Hmixed | N.Hnonnull ->
+      | N.Hprim _ | N.Hmixed | N.Hnonnull | N.Hnothing ->
         if hl <> [] then Errors.unexpected_type_arguments p
       | _ -> ()
       );
@@ -940,7 +940,8 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hvarray_or_darray _
     | Aast.Hprim _
     | Aast.Hthis
-    | Aast.Hdynamic ->
+    | Aast.Hdynamic
+    | Aast.Hnothing ->
       Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
       N.Hany
 
@@ -967,7 +968,7 @@ module Make (GetLocals : GetLocals) = struct
         | x when x = SN.Typehints.wildcard ->
           Errors.wildcard_disallowed p;
           N.Hany
-        | x when x.[0] = '\\' &&
+        | x when
           (  x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.null)
           || x = ("\\"^SN.Typehints.noreturn)
@@ -988,6 +989,10 @@ module Make (GetLocals : GetLocals) = struct
           ) ->
           Errors.primitive_toplevel p;
           N.Hany
+      | x when x = "\\"^SN.Typehints.nothing &&
+                 TypecheckerOptions.new_inference (fst env).tcopt ->
+         Errors.primitive_toplevel p;
+         N.Hany
       | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
       | x when x = SN.Typehints.void ->
          Errors.return_only_typehint p `void;
@@ -1003,6 +1008,9 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.mixed -> N.Hmixed
       | x when x = SN.Typehints.nonnull -> N.Hnonnull
       | x when x = SN.Typehints.dynamic -> N.Hdynamic
+      | x when x = SN.Typehints.nothing &&
+                 TypecheckerOptions.new_inference (fst env).tcopt ->
+        N.Hnothing
       | x when x = SN.Typehints.this && not forbid_this ->
           if not (phys_equal hl [])
           then Errors.this_no_argument p;

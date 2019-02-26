@@ -135,6 +135,7 @@ let get_implements (_, x) =
             | Terr
             | Tmixed
             | Tnonnull
+            | Tnothing
             | Tarray (_, _)
             | Tdarray (_, _)
             | Tvarray _

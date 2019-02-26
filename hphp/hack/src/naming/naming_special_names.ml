@@ -293,6 +293,7 @@ module Typehints = struct
   let nonnull  = "nonnull"
   let this     = "this"
   let dynamic  = "dynamic"
+  let nothing  = "nothing"
 
   let int     = "int"
   let bool    = "bool"
@@ -322,7 +323,7 @@ module Typehints = struct
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
-    x = dynamic  || x = wildcard || x = nonnull
+    x = dynamic  || x = wildcard || x = nonnull  || x = nothing
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =

@@ -421,7 +421,8 @@ and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Hany  | Hmixed | Hnonnull | Hprim _  | Hthis | Haccess _ | Habstr _  | Hdynamic ->
+  | Hany  | Hmixed | Hnonnull | Hprim _  | Hthis | Haccess _ | Habstr _  |
+    Hdynamic | Hnothing ->
      ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;

@@ -3315,6 +3315,7 @@ and call_parent_construct pos env el uel =
         | Tdynamic
         | Tmixed
         | Tnonnull
+        | Tnothing
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _
@@ -4553,7 +4554,11 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
 
   | _, Toption ty -> nullable_obj_get ty
   | r, Tprim Nast.Tnull ->
-    nullable_obj_get (r, Tany)
+    let ty =
+      if TypecheckerOptions.new_inference (Env.get_tcopt env)
+      then (r, Tunresolved [])
+      else (r, Tany) in
+    nullable_obj_get ty
   (* We are trying to access a member through a value of unknown type *)
   | r, Tvar _ ->
     Errors.unknown_object_member id_str id_pos (Reason.to_string "It is unknown" r);
@@ -6216,6 +6221,7 @@ and check_extend_abstract_const ~is_final p seq =
         | Tany
         | Tmixed
         | Tnonnull
+        | Tnothing
         | Tarray (_, _)
         | Tdarray (_, _)
         | Tvarray _

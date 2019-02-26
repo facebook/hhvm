@@ -57,7 +57,7 @@ let rec check_hint env (pos, hint) =
     check_hint env h
   | Aast.Haccess _ -> ()
   | Aast.Hany  | Aast.Hmixed | Aast.Hnonnull | Aast.Hprim _
-  | Aast.Hthis | Aast.Habstr _  | Aast.Hdynamic -> ()
+  | Aast.Hthis | Aast.Habstr _  | Aast.Hdynamic | Aast.Hnothing -> ()
 
 and check_tparams env p x tparams hl =
   let arity = List.length tparams in

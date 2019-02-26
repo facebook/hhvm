@@ -112,6 +112,8 @@ and _ ty_ =
    *)
   | Tmixed : decl ty_
 
+  | Tnothing : decl ty_
+
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany
   | Tnonnull

@@ -32,11 +32,11 @@ function get_class(<<__MaybeMutable>> $object = null);
 function get_parent_class(<<__MaybeMutable>> $object = null);
 <<__PHPStdLib, __Rx>>
 function is_a(<<__MaybeMutable>> $class_or_object, string $class_name, bool $allow_string = false): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function is_subclass_of($class_or_object, string $class_name, bool $allow_string = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function method_exists($class_or_object, string $method_name): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function property_exists($class_or_object, string $property): ?bool;
 <<__Rx>>
 function get_object_vars(<<__MaybeMutable>> $object): ?darray;

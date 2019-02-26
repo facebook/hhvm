@@ -37,10 +37,13 @@
 
 namespace HPHP { namespace jit {
 
-// If a new event type is added, please add the corresponding event
-// caption in perf-events.cpp and tc-prod-print.sh.
+// Enumerates all of the predefined event types. Any replacement event types
+// passed with -E will start numbering at NUM_PREDEFINED_EVENT_TYPES. Change
+// MAX_NUM_EVENT_TYPES if you need more than 12 (20 - 8 predefined) replacements
+// events in one run.
 enum PerfEventType {
-  EVENT_CYCLES,
+  EVENT_NULL = -1,
+  EVENT_CYCLES = 0,
   EVENT_BRANCH_MISSES,
   EVENT_ICACHE_MISSES,
   EVENT_DCACHE_MISSES,
@@ -48,12 +51,17 @@ enum PerfEventType {
   EVENT_LLC_STORE_MISSES,
   EVENT_ITLB_MISSES,
   EVENT_DTLB_MISSES,
-  NUM_EVENT_TYPES
+  NUM_PREDEFINED_EVENT_TYPES,
+  MAX_NUM_EVENT_TYPES = 20
 };
 
+size_t getFirstEventType();
+size_t getNumEventTypes();
+void addEventType(std::string eventId);
 PerfEventType commandLineArgumentToEventType(const char* argument);
-PerfEventType perfScriptOutputToEventType(const char* eventId);
+PerfEventType perfScriptOutputToEventType(std::string eventId);
 const char* eventTypeToCommandLineArgument(PerfEventType eventType);
+const char* eventTypeToSmallCaption(PerfEventType eventType);
 
 struct PerfEvent {
   PerfEventType type;
@@ -90,13 +98,13 @@ public:
 
 template<typename KeyType>
 struct PerfEventsMap {
-  typedef std::array<uint64_t, NUM_EVENT_TYPES> EventsArray;
+  typedef std::array<uint64_t, MAX_NUM_EVENT_TYPES> EventsArray;
 
 private:
   typedef std::map<KeyType, EventsArray> MapType;
   MapType eventsMap;
 
-  typedef std::array<StackTraceTree, NUM_EVENT_TYPES> ArrayOfTrees;
+  typedef std::array<StackTraceTree, MAX_NUM_EVENT_TYPES> ArrayOfTrees;
   typedef std::map<KeyType, ArrayOfTrees> KeyToTreesMap;
   KeyToTreesMap treesMap;
 
@@ -115,7 +123,11 @@ private:
     outputAlignedKey(keyColName, keyColWidth);
     std::cout << " ";
     for (size_t i = 0; i < etypes.size(); i++) {
-      outputAligned(eventTypeToCommandLineArgument(etypes[i]));
+      std::string header(eventTypeToCommandLineArgument(etypes[i]));
+      header.append("(");
+      header.append(eventTypeToSmallCaption(etypes[i]));
+      header.append(")");
+      outputAligned(header.c_str());
       std::cout << " ";
     }
     std::cout << "\n";
@@ -158,7 +170,8 @@ public:
                 const std::vector<std::string>& trace=
                   std::vector<std::string>()) {
 
-    assert(event.type < NUM_EVENT_TYPES);
+    assert(event.type != EVENT_NULL);
+    assert(event.type < MAX_NUM_EVENT_TYPES);
 
     typename MapType::iterator it = eventsMap.find(key);
     if (it == eventsMap.end()) it = getInitialized(key);
@@ -170,7 +183,7 @@ public:
   void addEvents(KeyType key, const EventsArray& events) {
     typename MapType::iterator it = eventsMap.find(key);
     if (it == eventsMap.end()) it = getInitialized(key);
-    for (size_t i = 0; i < NUM_EVENT_TYPES; i++) it->second[i] += events[i];
+    for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) it->second[i] += events[i];
   }
 
   uint64_t getEventCount(KeyType key, PerfEventType type) const {
@@ -189,7 +202,7 @@ public:
    * *closed* interval [low, high].
    */
   uint64_t getEventCount(KeyType low, KeyType high, PerfEventType type) const {
-    assert(low <= high && type < NUM_EVENT_TYPES);
+    assert(low <= high && type != EVENT_NULL && type < MAX_NUM_EVENT_TYPES);
     uint64_t eventCount = 0;
 
     typename MapType::const_iterator itLow, itHigh;
@@ -235,7 +248,7 @@ public:
         itTrees = treesMap.find(itEvents->first);
 
       if (itTrees != treesMap.end()) {
-        for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+        for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
           newMap.aggregateStackTraceTree(*newKey,
                                          (PerfEventType)i,
                                          itTrees->second[i]);
@@ -258,7 +271,7 @@ public:
     const size_t kErrBuffSize = 100;
     static char errBuff[kErrBuffSize];
 
-    always_assert(sortBy < NUM_EVENT_TYPES);
+    always_assert(sortBy != EVENT_NULL && sortBy < MAX_NUM_EVENT_TYPES);
 
     // Sort the keys by the appropriate event.
     std::vector<std::pair<uint64_t, KeyType> > ranking;
@@ -273,7 +286,7 @@ public:
     EventsArray eventTotals;
     eventTotals.fill(0);
     for (const_iterator it = begin(); it != end(); it++) {
-      for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+      for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
         eventTotals[i] += it->second[i];
       }
     }
@@ -281,13 +294,13 @@ public:
     // We only summarize events that are non-zero for some key.
     std::vector<PerfEventType> printedEvents;
     printedEvents.push_back(sortBy);
-    for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+    for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
       if (i == sortBy || !eventTotals[i]) continue;
       printedEvents.push_back((PerfEventType)i);
     }
 
     if (!verbose) {
-      // Otherwise, we print them multilple times below.
+      // Otherwise, we print them multiple times below.
       printColumnHeaders(keyColName, keyColWidth, printedEvents);
     }
 
@@ -336,7 +349,7 @@ public:
     EventsArray events = getAllEvents(key);
 
     bool anyEvents = false;
-    for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+    for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
       if (events[i]) {
         anyEvents = true;
         break;
@@ -346,7 +359,7 @@ public:
     if (anyEvents) {
       printf("  == Perf events ==\n");
 
-      for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
+      for (size_t i = 0; i < MAX_NUM_EVENT_TYPES; i++) {
         if (events[i]) {
           printf("  %-16s = %" PRIu64  "\n",
                  eventTypeToCommandLineArgument((PerfEventType)i),

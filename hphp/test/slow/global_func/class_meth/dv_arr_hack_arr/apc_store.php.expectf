@@ -1,0 +1,6 @@
+
+Notice: Implicit clsmeth to vec conversion in %s/apc_store.php on line 10
+vec(2) {
+  string(1) "A"
+  string(5) "func1"
+}

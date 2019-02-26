@@ -1,0 +1,22 @@
+
+Notice: Implicit clsmeth to bool conversion in %s/mutate.php on line 11
+bool(false)
+
+Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 12
+
+Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 12
+
+Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 12
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 13
+
+Notice: Implicit clsmeth to varray conversion in %s/mutate.php on line 13
+class(C)
+function(C::func1)
+bool(true)
+int(1)
+Cannot use [] with clsmeth for writing

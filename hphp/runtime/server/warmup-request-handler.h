@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/util/job-queue.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,17 +73,16 @@ private:
   Server *m_server;
 };
 
-// Play an internal warmup request.
-struct InternalWarmupWorker {
-  InternalWarmupWorker(const std::string& file, unsigned index)
-    : m_hdfFile(file)
-    , m_index(index) {}
-  void run();
- private:
-  const std::string m_hdfFile;
-  const unsigned m_index;
+struct WarmupJob {
+  const std::string& hdfFile;
+  unsigned index;
 };
 
+struct InternalWarmupWorker : JobQueueWorker<WarmupJob> {
+  void doJob(WarmupJob job) override;
+};
+
+using InternalWarmupDispatcher = JobQueueDispatcher<InternalWarmupWorker>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

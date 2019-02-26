@@ -243,6 +243,7 @@ struct RuntimeOption {
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
   static bool ServerWarmupConcurrently;
+  static int ServerWarmupThreadCount;
   static std::vector<std::string> ServerWarmupRequests;
   static std::string ServerCleanupRequest;
   static int ServerInternalWarmupThreads;

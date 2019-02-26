@@ -1167,33 +1167,21 @@ static int start_server(const std::string &username, int xhprof) {
     profileWarmupEnd();
   }
 
-  // If we have any warmup requests, replay them before listening for
-  // real connections
   {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    using WarmupThread = AsyncFunc<InternalWarmupWorker>;
-    std::vector<std::unique_ptr<InternalWarmupWorker>> workers;
-    std::vector<std::unique_ptr<WarmupThread>> threads;
+    auto const threadCount = RuntimeOption::ServerWarmupThreadCount;
+    InternalWarmupDispatcher dispatcher(threadCount, threadCount,
+                                        0, false, nullptr);
+    auto const RDSSize = rds::perThreadCapacity(RuntimeOption::EvalRDSSize);
+    dispatcher.setWorkerStackConfig(0, 0, RDSSize / 1024);
+    dispatcher.start();
     std::map<std::string, unsigned> seen;
     for (auto const& file : RuntimeOption::ServerWarmupRequests) {
-      HttpServer::CheckMemAndWait();
-      auto const count = ++seen[file];
-      auto worker = std::make_unique<InternalWarmupWorker>(file, count);
-      auto workerThread =
-        std::make_unique<WarmupThread>(worker.get(),
-                                       &InternalWarmupWorker::run);
-      workerThread->start();
-      if (RuntimeOption::ServerWarmupConcurrently) {
-        // destruct worker and workerThread later, after the threads are joined.
-        workers.emplace_back(std::move(worker));
-        threads.emplace_back(std::move(workerThread));
-      } else {
-        workerThread->waitForEnd();
-      }
+      dispatcher.enqueue(WarmupJob{file, ++seen[file]});
     }
-    for (auto& t : threads) t->waitForEnd();
+    dispatcher.waitEmpty();
   }
   BootStats::mark("warmup");
 

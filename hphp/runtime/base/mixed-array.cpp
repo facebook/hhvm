@@ -295,8 +295,8 @@ MixedArray* MixedArray::MakeStructDArray(uint32_t size,
                         ArrayData::kDArray);
 }
 
-MixedArray* MixedArray::MakeMixed(uint32_t size,
-                                  const TypedValue* keysAndValues) {
+template<HeaderKind hdr, ArrayData::DVArray dv>
+MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   assertx(size > 0);
 
   auto const scale = computeScaleFromSize(size);
@@ -305,20 +305,20 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   ad->initHash(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kNotDVArray);
+  ad->initHeader_16(hdr, OneReference, dv);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
   // Append values by moving -- no refcounts are updated.
   auto const data = ad->data();
   for (uint32_t i = 0; i < size; i++) {
-    auto& kTv = keysAndValues[i * 2];
+    auto& kTv = kvs[i * 2];
     if (kTv.m_type == KindOfString) {
       auto k = kTv.m_data.pstr;
       auto h = k->hash();
       auto ei = ad->findForInsertUpdate(k, h);
       if (isValidPos(ei)) {
-        // it's the caller's responsibility to free keysAndValues
+        // it's the caller's responsibility to free kvs
         ad->setZombie();
         Release(ad);
         return nullptr;
@@ -331,7 +331,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
       auto h = hash_int64(k);
       auto ei = ad->findForInsertUpdate(k, h);
       if (isValidPos(ei)) {
-        // it's the caller's responsibility to free keysAndValues
+        // it's the caller's responsibility to free kvs
         ad->setZombie();
         Release(ad);
         return nullptr;
@@ -339,15 +339,80 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
       data[i].setIntKey(k, h);
       *ei = i;
     }
-    const auto& tv = keysAndValues[(i * 2) + 1];
+    const auto& tv = kvs[(i * 2) + 1];
     data[i].data.m_data = tv.m_data;
     data[i].data.m_type = tv.m_type;
   }
 
   assertx(ad->m_size == size);
   assertx(ad->m_pos == 0);
-  assertx(ad->kind() == kMixedKind);
-  assertx(ad->isNotDVArray());
+  assertx(ad->m_scale == scale);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_used == size);
+  assertx(ad->m_nextKI == 0);
+  assertx(ad->checkInvariants());
+  return ad;
+}
+
+MixedArray* MixedArray::MakeMixed(uint32_t size, const TypedValue* kvs) {
+  auto const ad =
+    MakeMixedImpl<HeaderKind::Mixed, ArrayData::kNotDVArray>(size, kvs);
+  assertx(ad == nullptr || ad->kind() == kMixedKind);
+  assertx(ad == nullptr || ad->isNotDVArray());
+  return ad;
+}
+
+MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
+  if (RuntimeOption::EvalHackArrDVArrs) return MakeDict(size, kvs);
+
+  auto const ad =
+    MakeMixedImpl<HeaderKind::Mixed, ArrayData::kDArray>(size, kvs);
+  assertx(ad == nullptr || ad->kind() == kMixedKind);
+  assertx(ad == nullptr || ad->isDArray());
+  return ad;
+}
+
+MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
+  auto const ad =
+    MakeMixedImpl<HeaderKind::Dict, ArrayData::kNotDVArray>(size, kvs);
+  assertx(ad == nullptr || ad->kind() == kDictKind);
+  return ad;
+}
+
+MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
+                                          const TypedValue* vals) {
+  assertx(size > 0);
+
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = reqAlloc(scale);
+
+  ad->initHash(scale);
+
+  ad->m_sizeAndPos       = size; // pos=0
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    ad->initHeader_16(HeaderKind::Dict, OneReference, ArrayData::kNotDVArray);
+  } else {
+    ad->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kDArray);
+  }
+  ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
+  ad->m_nextKI           = 0;
+
+  // Append values by moving -- no refcounts are updated.
+  auto const data = ad->data();
+  for (uint32_t i = 0; i < size; i++) {
+    auto h = hash_int64(i);
+    auto ei = ad->findForInsertUpdate(i, h);
+    assertx(!isValidPos(ei));
+    data[i].setIntKey(i, h);
+    *ei = i;
+
+    const auto& tv = vals[i];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
+  }
+
+  assertx(ad->m_size == size);
+  assertx(ad->m_pos == 0);
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == size);

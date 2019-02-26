@@ -234,7 +234,18 @@ struct MixedArray final : ArrayData,
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
    */
-  static MixedArray* MakeMixed(uint32_t size, const TypedValue* keysAndValues);
+  static MixedArray* MakeMixed(uint32_t size, const TypedValue* kvs);
+  static MixedArray* MakeDArray(uint32_t size, const TypedValue* kvs);
+  static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
+private:
+  template<HeaderKind hdr, ArrayData::DVArray dv>
+  static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
+
+public:
+  /*
+   * Same semantics as PackedArray::MakeNatural().
+   */
+  static MixedArray* MakeDArrayNatural(uint32_t size, const TypedValue* vals);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.

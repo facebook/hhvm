@@ -330,9 +330,9 @@ struct SimpleParser {
    * Returns false for unsupported or malformed input (does not distinguish).
    */
   static bool TryParse(const char* inp, int length,
-                       TypedValue* buf,
-                       Variant& out) {
-    SimpleParser parser(inp, length, buf);
+                       TypedValue* buf, Variant& out,
+                       JSONContainerType container_type) {
+    SimpleParser parser(inp, length, buf, container_type);
     bool ok = parser.parseValue();
     parser.skipSpace();
     if (!ok || parser.p != inp + length) {
@@ -345,10 +345,13 @@ struct SimpleParser {
   }
 
  private:
-  SimpleParser(const char* input, int length, TypedValue* buffer)
-      : p(input),
-        top(buffer),
-        array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */ {
+  SimpleParser(const char* input, int length, TypedValue* buffer,
+               JSONContainerType container_type)
+    : p(input)
+    , top(buffer)
+    , array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */
+    , container_type(container_type)
+  {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
   }
 
@@ -449,8 +452,27 @@ struct SimpleParser {
       --array_depth;
       if (!matchSeparator(']')) return false;  // Trailing ',' not supported.
     }
-    auto arr = top == fp ? staticEmptyArray() :
-                           PackedArray::MakePackedNatural(top - fp, fp);
+    auto arr = [&] {
+      if (container_type == JSONContainerType::HACK_ARRAYS) {
+        return top == fp
+          ? staticEmptyVecArray()
+          : PackedArray::MakeVecNatural(top - fp, fp);
+      }
+      if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
+        return top == fp
+          ? staticEmptyVArray()
+          : PackedArray::MakeVArrayNatural(top - fp, fp);
+      }
+      if (container_type == JSONContainerType::DARRAYS) {
+        return top == fp
+          ? staticEmptyDArray()
+          : MixedArray::MakeDArrayNatural(top - fp, fp);
+      }
+      assertx(container_type == JSONContainerType::PHP_ARRAYS);
+      return top == fp
+        ? staticEmptyArray()
+        : PackedArray::MakePackedNatural(top - fp, fp);
+    }();
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();
@@ -465,9 +487,11 @@ struct SimpleParser {
         if (!matchSeparator('\"')) return false;  // Only support string keys.
         if (!parseString()) return false;
         TypedValue& tv = top[-1];
+
         // PHP array semantics: integer-like keys are converted.
         int64_t num;
-        if (tv.m_data.pstr->isStrictlyInteger(num)) {
+        if (container_type != JSONContainerType::HACK_ARRAYS &&
+            tv.m_data.pstr->isStrictlyInteger(num)) {
           tv.m_type = KindOfInt64;
           tv.m_data.pstr->release();
           tv.m_data.num = num;
@@ -479,9 +503,23 @@ struct SimpleParser {
       --array_depth;
       if (!matchSeparator('}')) return false;  // Trailing ',' not supported.
     }
-    auto const arr = top == fp ?
-      staticEmptyArray() :
-      MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
+    auto arr = [&] {
+      if (container_type == JSONContainerType::HACK_ARRAYS) {
+        return top == fp
+          ? staticEmptyDictArray()
+          : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
+      }
+      if (container_type == JSONContainerType::DARRAYS ||
+          container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
+        return top == fp
+          ? staticEmptyDArray()
+          : MixedArray::MakeDArray((top - fp) >> 1, fp)->asArrayData();
+      }
+      assertx(container_type == JSONContainerType::PHP_ARRAYS);
+      return top == fp
+        ? staticEmptyArray()
+        : MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
+    }();
     // MixedArray::MakeMixed can return nullptr if there are duplicate keys
     if (!arr) return false;
     top = fp;
@@ -567,13 +605,14 @@ struct SimpleParser {
 
   void pushArrayData(ArrayData* data) {
     auto const tv = top++;
-    tv->m_type = KindOfArray;
+    tv->m_type = data->toDataType();
     tv->m_data.parr = data;
   }
 
   const char* p;
   TypedValue* top;
   int array_depth;
+  JSONContainerType container_type;
 };
 
 /*
@@ -1026,10 +1065,15 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // if its array nesting depth check is *more* restrictive than what the user
   // asks for, to ensure that the precise semantics of the general case is
   // applied for all nesting overflows.
-  if (assoc && options == k_JSON_FB_LOOSE &&
+  if (assoc &&
+      options == (options & (k_JSON_FB_LOOSE |
+                             k_JSON_FB_DARRAYS |
+                             k_JSON_FB_DARRAYS_AND_VARRAYS |
+                             k_JSON_FB_HACK_ARRAYS)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
       length <= RuntimeOption::EvalSimpleJsonMaxLength &&
-      SimpleParser::TryParse(p, length, json->tl_buffer.tv, z)) {
+      SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
+                             get_container_type_from_options(options))) {
     return true;
   }
 

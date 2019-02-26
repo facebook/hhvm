@@ -19,7 +19,6 @@ if (!isset($g)) {
 class A {
   const FOO = B::FOO;
   const BAR = "A::BAR";
-  const WIZ = WIZ;
 }
 if (!isset($g)) {
   class B {
@@ -32,7 +31,6 @@ class C extends A {
 
 # Test recursive non-scalar class constant initialization.
 class D {
-  const CD = DCD;
 }
 class E extends D {
 }
@@ -73,15 +71,6 @@ function main() {
   var_dump(C::FOO);
   var_dump(C::BAR);
 
-  # Zend apparently stores A::WIZ and C::WIZ separately, so the following should
-  # cause them to end up with different values.
-  var_dump(C::WIZ);
-  define('WIZ', "--- WIZ ---");
-  var_dump(A::WIZ);
-  var_dump(C::WIZ);
-
-  define('DCD', "DCD");
-  var_dump(F::CD);
 
   var_dump(K::WEE);
   var_dump(K::WOO);

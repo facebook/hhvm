@@ -1,4 +1,6 @@
 <?php
+const pass3 = 1;
+const pass2 = 1;
 if (defined("pass3")) {
 
   class ErrorClass {
@@ -17,13 +19,11 @@ if (defined("pass3")) {
 } else {
 
   function errorHandler($errorNumber, $errorMessage, $fileName, $lineNumber) {
-    define("pass3", 1);
     include(__FILE__);
     die("Error: $errorMessage ($fileName:$lineNumber)\n");
   }
 
   set_error_handler('errorHandler');
-  define("pass2", 1);
   include(__FILE__);
   print "ok\n";
 }

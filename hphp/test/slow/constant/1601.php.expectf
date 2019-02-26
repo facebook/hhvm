@@ -1,5 +1,0 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 6
-
-Notice: Constant AF_UNIX already defined in %s on line 6
-bool(false)
-int(1)

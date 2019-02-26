@@ -1,5 +1,3 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 2
-
 Warning: corrupt JPEG data: 3 extraneous bytes before marker in %s%ebug72278.php on line %d
 array(7) {
   [0]=>

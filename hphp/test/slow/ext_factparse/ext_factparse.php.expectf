@@ -1,15 +1,12 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 44
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 45
 array(3) {
-  [%s]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(-2687792260769790814)
     ["md5sum1"]=>
-    int(%i)
+    int(6227342274834965783)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "03bf5e7ef8ee748a037781ad9a8fd163f95b362e"
     ["types"]=>
     array(13) {
       [0]=>
@@ -270,14 +267,14 @@ array(3) {
       string(3) "TA2"
     }
   }
-  [%s]=>
+  ["/tmp/%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(5977809332653255667)
     ["md5sum1"]=>
-    int(%i)
+    int(-5525899916509458722)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "8e50057b9d19c7637bfae2e0a6d2d04cb93de718"
     ["types"]=>
     array(13) {
       [0]=>
@@ -514,11 +511,19 @@ array(3) {
       string(5) "NS\f6"
     }
     ["constants"]=>
-    array(2) {
+    array(6) {
       [0]=>
       string(6) "NS\CO0"
       [1]=>
       string(6) "NS\CO1"
+      [2]=>
+      string(6) "NS\CO2"
+      [3]=>
+      string(6) "NS\CO3"
+      [4]=>
+      string(6) "NS\CO4"
+      [5]=>
+      string(6) "NS\CO5"
     }
     ["typeAliases"]=>
     array(3) {
@@ -530,14 +535,14 @@ array(3) {
       string(6) "NS\TA2"
     }
   }
-  [%s]=>
+  ["/tmp/%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(5762632347350713052)
     ["md5sum1"]=>
-    int(%i)
+    int(5431836495130451241)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "4bf999aaf5637dcbe7cc794589414557581365c7"
     ["types"]=>
     array(13) {
       [0]=>
@@ -774,11 +779,19 @@ array(3) {
       string(8) "NS\NS\f6"
     }
     ["constants"]=>
-    array(2) {
+    array(6) {
       [0]=>
       string(9) "NS\NS\CO0"
       [1]=>
       string(9) "NS\NS\CO1"
+      [2]=>
+      string(9) "NS\NS\CO2"
+      [3]=>
+      string(9) "NS\NS\CO3"
+      [4]=>
+      string(9) "NS\NS\CO4"
+      [5]=>
+      string(9) "NS\NS\CO5"
     }
     ["typeAliases"]=>
     array(3) {
@@ -793,7 +806,7 @@ array(3) {
 }
 PASSED md5sum
 array(3) {
-  [%s]=>
+  ["/tmp/%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL
@@ -805,6 +818,6 @@ PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
 
-Warning: HH\facts_parse() expects parameter 2 to be array, null given in %s on line %d
+Warning: HH\facts_parse() expects parameter 2 to be array, null given in %s on line 256
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."

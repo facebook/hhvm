@@ -2,7 +2,7 @@
 	include "resourcebundle.inc";
 
 	// fall back
-	$r = new ResourceBundle( 'en_US', BUNDLE );
+	$r = new ResourceBundle( 'en_US', $bundle );
 
 	foreach ($r as $onekey => $oneval) {
 		echo "Here comes $onekey:\n";

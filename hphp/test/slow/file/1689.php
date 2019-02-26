@@ -7,9 +7,9 @@ function flock_or_die($filename, $resource, $flock_op) {
 
 <<__EntryPoint>>
 function main_1689() {
-define('FILENAME', '/tmp/flock_file.dat');
-$resource = fopen(FILENAME, 'w');
-flock_or_die(FILENAME, $resource, LOCK_EX);
-flock_or_die(FILENAME, $resource, LOCK_UN);
-unlink(FILENAME);
+$filename = '/tmp/flock_file.dat';
+$resource = fopen($filename, 'w');
+flock_or_die($filename, $resource, LOCK_EX);
+flock_or_die($filename, $resource, LOCK_UN);
+unlink($filename);
 }

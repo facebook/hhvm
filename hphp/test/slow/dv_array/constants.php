@@ -14,23 +14,17 @@ class A {
 
 <<__EntryPoint>>
 function main_constants() {
-define('VCONST1', varray[1, 2, 3]);
-define('DCONST1', darray[100 => 'abc', 'def' => 200]);
 
-var_dump(VCONST1);
 var_dump(VCONST2);
 var_dump(A::VCONST3);
 var_dump(A::VCONST4);
-var_dump(DCONST1);
 var_dump(DCONST2);
 var_dump(A::DCONST3);
 var_dump(A::DCONST4);
 
-var_dump(is_varray(VCONST1));
 var_dump(is_varray(VCONST2));
 var_dump(is_varray(A::VCONST3));
 var_dump(is_varray(A::VCONST4));
-var_dump(is_darray(DCONST1));
 var_dump(is_darray(DCONST2));
 var_dump(is_darray(A::DCONST3));
 var_dump(is_darray(A::DCONST4));

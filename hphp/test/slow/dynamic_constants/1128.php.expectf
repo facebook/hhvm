@@ -1,5 +1,0 @@
-Notice: Use of undefined constant TEST - assumed 'TEST' in %s on line 10
-string(4) "TEST"
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 11
-int(15)

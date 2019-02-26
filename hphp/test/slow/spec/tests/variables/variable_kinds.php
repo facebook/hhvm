@@ -8,24 +8,6 @@
 
 error_reporting(-1);
 
-echo "---------------- Local constants -------------------\n";
-
-function localConst($p)
-{
-    echo "Inside " . __FUNCTION__ . "\n";
-    define('COEFFICIENT_1', 2.345); // define two d-constants
-    echo "COEFFICIENT_1 = " . COEFFICIENT_1 . "\n";
-    if ($p)
-    {
-        echo "COEFFICIENT_1 = " . COEFFICIENT_1 . "\n";
-        define('FAILURE', TRUE);
-        echo "FAILURE = " . FAILURE . "\n";
-    }
-}
-
-localConst(TRUE);
-echo "COEFFICIENT_1 = " . COEFFICIENT_1 . "\n";
-echo "FAILURE = " . FAILURE . "\n"; // as it's visible here, it's not really a local!
 
 echo "---------------- Local variables -------------------\n";
 
@@ -83,8 +65,8 @@ echo "---------------- Global Constants -------------------\n";
 
 const MAX_HEIGHT2 = 10.5;       // define two c-constants
 const UPPER_LIMIT2 = MAX_HEIGHT2;
-define('COEFFICIENT_2', 2.345); // define two d-constants
-define('FAILURE2', TRUE);
+const COEFFICIENT_2 = 2.345; // define two d-constants
+const FAILURE2 = TRUE;
 echo "MAX_HEIGHT2 = " . MAX_HEIGHT2 . "\n";
 
 function globalConst()

@@ -1,14 +1,3 @@
----------------- Local constants -------------------
-Inside localConst
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
-COEFFICIENT_1 = 2.345
-COEFFICIENT_1 = 2.345
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
-FAILURE = 1
-COEFFICIENT_1 = 2.345
-FAILURE = 1
 ---------------- Local variables -------------------
 ---------------- Array elements -------------------
 ---------------- Function statics -------------------
@@ -24,10 +13,6 @@ $fs3 = 101
 ---------------- recursive function example -------------------
 $result = 3628800
 ---------------- Global Constants -------------------
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line %d
 MAX_HEIGHT2 = 10.5
 Inside globalConst
 MAX_HEIGHT2 = 10.5

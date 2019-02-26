@@ -2,7 +2,7 @@
 	include "resourcebundle.inc";
 
 	// fall back
-	$r = new ResourceBundle( 'en_US', BUNDLE );
+	$r = new ResourceBundle( 'en_US', $bundle );
 
 	printf( "length: %d\n", count($r) );
 	printf( "teststring: %s\n", $r['teststring'] );

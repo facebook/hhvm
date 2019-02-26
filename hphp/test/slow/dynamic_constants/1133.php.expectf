@@ -1,6 +1,0 @@
-Notice: Use of undefined constant BAR - assumed 'BAR' in %s on line 6
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 6
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 7
-BARBAR

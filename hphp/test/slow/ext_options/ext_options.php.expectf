@@ -26,9 +26,5 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 48
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 49
-bool(true)
+bool(false)
 bool(true)

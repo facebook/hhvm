@@ -1,11 +1,11 @@
 <?php
 
 
+const AAA = true;
+const BBB = false;
+const CCC = null;
 <<__EntryPoint>>
 function main_1595() {
-define('AAA', true);
-define('BBB', false);
-define('CCC', null);
 if (AAA){
   echo "AAA";
 }

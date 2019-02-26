@@ -4,8 +4,8 @@ function func($params) {
 }
 
 
+const VALUE = 1;
 <<__EntryPoint>>
 function main_547() {
-define('VALUE', 1);
 func(array('key' => @VALUE));
 }

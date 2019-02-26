@@ -6,9 +6,6 @@ function main_1215() {
 for ($i = 0;
  $i < 4;
  $i++) {
-  if ($i > 1 && !defined('CON')) {
-    define(/*|Dynamic|*/'CON', 1);
-  }
   if (defined('CON')) {
     var_dump(CON);
   }

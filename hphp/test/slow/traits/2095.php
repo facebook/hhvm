@@ -7,8 +7,8 @@ class c {
  }
 
 
+const INIT1 = 123;
 <<__EntryPoint>>
 function main_2095() {
-define('INIT1', 123);
 var_dump(c::$x);
 }

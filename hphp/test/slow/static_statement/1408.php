@@ -9,9 +9,9 @@ function foo() {
 }
 
 
+const FOO = 1;
 <<__EntryPoint>>
 function main_1408() {
-define('FOO', 1);
 foo();
 echo a::$b;
 }

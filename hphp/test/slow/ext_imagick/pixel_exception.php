@@ -14,7 +14,7 @@ try {
   echo "setColor\n";
 }
 
-define('IMAGICK_COLOR_INVALID', -1);
+const IMAGICK_COLOR_INVALID = -1;
 
 try {
   $pixel->getColorValue(IMAGICK_COLOR_INVALID);

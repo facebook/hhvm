@@ -41,9 +41,9 @@ trait TR1<T> {
 
 const CO0 = 1;
 const CO1 = "abc";
-define('CO2', 1);
-define('CO3', 'abc');
-@define('CO4', 2);
+const CO2 = 1;
+const CO3 = 'abc';
+const CO4 = 2;
 
 type TA0 = int;
 newtype TA1 = int;
@@ -107,8 +107,8 @@ function f7() {
   }
 }
 
+const CO5 = 1;
 function f6() {
-  define('CO5', 1);
 
   nEw stdclass; // make sure the parser can handle "weird" keywords
   NeW stdclass;

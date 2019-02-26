@@ -1,4 +1,3 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 9
 array(1) {
   ["key"]=>
   int(1)

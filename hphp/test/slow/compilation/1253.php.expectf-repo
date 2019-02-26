@@ -1,6 +1,0 @@
-Notice: Use of undefined constant MAX_LATITUDE - assumed 'MAX_LATITUDE' in %s on line 3
-
-Notice: Use of undefined constant MAX_LATITUDE - assumed 'MAX_LATITUDE' in %s on line 4
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 4
-done

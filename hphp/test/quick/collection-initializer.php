@@ -86,19 +86,16 @@ function main() {
 
   echo "=========\n";
 
-  define('FOO', 123);
-  define('BAR', "blah");
   class Z {
     const FOO = 456;
     const BAR = "yo";
-    public $prop = Map {FOO => BAR, Z::FOO => Z::BAR};
+    public $prop = Map {Z::FOO => Z::BAR};
   }
   $obj1 = new Z;
-  var_dump($obj1->prop[FOO], $obj1->prop[Z::FOO], count($obj1->prop));
+  var_dump($obj1->prop[Z::FOO], count($obj1->prop));
   $obj2 = new Z;
-  $obj1->prop[FOO] = 42;
   $obj1->prop[Z::FOO] = 73;
-  var_dump($obj2->prop[FOO], $obj2->prop[Z::FOO]);
+  var_dump($obj2->prop[Z::FOO]);
 
   echo "=========\n";
 

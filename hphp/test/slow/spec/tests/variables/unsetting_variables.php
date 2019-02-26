@@ -16,7 +16,7 @@ const CON1 = 1;
 //var_dump(isset(CON1));    // invalid
 var_dump(defined('CON1'));  // TRUE
 
-define('CON2', 2);
+const CON2 = 2;
 //unset(CON2);              // invalid
 //var_dump(isset(CON2));    // invalid
 var_dump(defined('CON2'));  // TRUE
@@ -40,11 +40,12 @@ echo "Top1: \$gVar1 = " . $gVar1 . "\n";
 //unset($gVar1);    // unsets this variable
 //echo "Top1: \$gVar1 = " . $gVar1 . "\n";
 
+const CON3 = 3;
+const CON4 = 4;
 function f($p)
 {
     echo "--- Inside " . __FUNCTION__ . ", block-level 1\n";
 ///*
-    define('CON3', 3);
     echo "f:1 CON1 = " . CON1 . "\n";
     echo "f:1 CON2 = " . CON2 . "\n";
     echo "f:1 CON3 = " . CON3 . "\n";
@@ -53,7 +54,6 @@ function f($p)
     {
         echo "--- Inside " . __FUNCTION__ . ", block-level 2\n";
 ///*
-        define('CON4', 4);
         echo "f:2 CON1 = " . CON1 . "\n";
         echo "f:2 CON2 = " . CON2 . "\n";
         echo "f:2 CON3 = " . CON3 . "\n";
@@ -66,7 +66,7 @@ function f($p)
         echo "f:2 \$sVar1 = " . $sVar1 . "\n";
         ++$sVar1;
 //      unset($sVar1);  // removes this alias; doesn't unset the inner static itself
-        
+
         global $gVar1;
         echo "f:2 \$gVar1 = " . $gVar1 . "\n";
         $gVar1 = 25;

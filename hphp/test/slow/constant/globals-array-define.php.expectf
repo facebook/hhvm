@@ -1,3 +1,0 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 7
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/globals-array-define.php on line 7

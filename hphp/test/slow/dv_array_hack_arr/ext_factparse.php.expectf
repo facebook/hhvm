@@ -1,15 +1,12 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 44
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 45
 dict(3) {
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(7562199080179187756)
     ["md5sum1"]=>
-    int(%i)
+    int(2615428409791837154)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "5ddd0044c06da015903e01048cf24d239cc14034"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -202,21 +199,19 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(4) {
       string(2) "f1"
       string(2) "f2"
       string(2) "f7"
       string(2) "f8"
-      string(2) "f6"
     }
     ["constants"]=>
-    vec(6) {
+    vec(5) {
       string(3) "CO0"
       string(3) "CO1"
       string(3) "CO2"
       string(3) "CO3"
       string(3) "CO4"
-      string(3) "CO5"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -225,14 +220,14 @@ dict(3) {
       string(3) "TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(-1123512332818657949)
     ["md5sum1"]=>
-    int(%i)
+    int(2705388130729917127)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "126916a5def6c56df22045300d7d4200ffaf2741"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -425,17 +420,19 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(4) {
       string(5) "NS\f1"
       string(5) "NS\f2"
       string(5) "NS\f7"
       string(5) "NS\f8"
-      string(5) "NS\f6"
     }
     ["constants"]=>
-    vec(2) {
+    vec(5) {
       string(6) "NS\CO0"
       string(6) "NS\CO1"
+      string(6) "NS\CO2"
+      string(6) "NS\CO3"
+      string(6) "NS\CO4"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -444,14 +441,14 @@ dict(3) {
       string(6) "NS\TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(3628288412421782587)
     ["md5sum1"]=>
-    int(%i)
+    int(-3522983641158051642)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "88c6b2144715db76d713f5b9a337ba0f6821acc2"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -644,17 +641,19 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(4) {
       string(8) "NS\NS\f1"
       string(8) "NS\NS\f2"
       string(8) "NS\NS\f7"
       string(8) "NS\NS\f8"
-      string(8) "NS\NS\f6"
     }
     ["constants"]=>
-    vec(2) {
+    vec(5) {
       string(9) "NS\NS\CO0"
       string(9) "NS\NS\CO1"
+      string(9) "NS\NS\CO2"
+      string(9) "NS\NS\CO3"
+      string(9) "NS\NS\CO4"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -666,7 +665,7 @@ dict(3) {
 }
 PASSED md5sum
 dict(3) {
-  [%s]=>
+  ["%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL

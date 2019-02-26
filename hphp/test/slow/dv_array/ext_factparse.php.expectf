@@ -1,15 +1,12 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 44
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 45
 array(3) {
-  [%s]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(-4408260768914629492)
     ["md5sum1"]=>
-    int(%i)
+    int(4922032008249338070)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "fae7c50fdbdaaa13aa98fd66fc66a6f47468a87b"
     ["types"]=>
     array(13) {
       [0]=>
@@ -233,7 +230,7 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(4) {
       [0]=>
       string(2) "f1"
       [1]=>
@@ -242,11 +239,9 @@ array(3) {
       string(2) "f7"
       [3]=>
       string(2) "f8"
-      [4]=>
-      string(2) "f6"
     }
     ["constants"]=>
-    array(6) {
+    array(5) {
       [0]=>
       string(3) "CO0"
       [1]=>
@@ -257,8 +252,6 @@ array(3) {
       string(3) "CO3"
       [4]=>
       string(3) "CO4"
-      [5]=>
-      string(3) "CO5"
     }
     ["typeAliases"]=>
     array(3) {
@@ -270,14 +263,14 @@ array(3) {
       string(3) "TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(2453916728222249959)
     ["md5sum1"]=>
-    int(%i)
+    int(-6425394565676953670)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "1d71114a68fa6668d39f58bd0d68872165fc11bd"
     ["types"]=>
     array(13) {
       [0]=>
@@ -501,7 +494,7 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(4) {
       [0]=>
       string(5) "NS\f1"
       [1]=>
@@ -510,15 +503,19 @@ array(3) {
       string(5) "NS\f7"
       [3]=>
       string(5) "NS\f8"
-      [4]=>
-      string(5) "NS\f6"
     }
     ["constants"]=>
-    array(2) {
+    array(5) {
       [0]=>
       string(6) "NS\CO0"
       [1]=>
       string(6) "NS\CO1"
+      [2]=>
+      string(6) "NS\CO2"
+      [3]=>
+      string(6) "NS\CO3"
+      [4]=>
+      string(6) "NS\CO4"
     }
     ["typeAliases"]=>
     array(3) {
@@ -530,14 +527,14 @@ array(3) {
       string(6) "NS\TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(4528447671847429514)
     ["md5sum1"]=>
-    int(%i)
+    int(5874635357166494392)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "42d054b2a94d73993478f15ef9ed7b75e0b17007"
     ["types"]=>
     array(13) {
       [0]=>
@@ -761,7 +758,7 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(4) {
       [0]=>
       string(8) "NS\NS\f1"
       [1]=>
@@ -770,15 +767,19 @@ array(3) {
       string(8) "NS\NS\f7"
       [3]=>
       string(8) "NS\NS\f8"
-      [4]=>
-      string(8) "NS\NS\f6"
     }
     ["constants"]=>
-    array(2) {
+    array(5) {
       [0]=>
       string(9) "NS\NS\CO0"
       [1]=>
       string(9) "NS\NS\CO1"
+      [2]=>
+      string(9) "NS\NS\CO2"
+      [3]=>
+      string(9) "NS\NS\CO3"
+      [4]=>
+      string(9) "NS\NS\CO4"
     }
     ["typeAliases"]=>
     array(3) {
@@ -793,7 +794,7 @@ array(3) {
 }
 PASSED md5sum
 array(3) {
-  [%s]=>
+  ["%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL

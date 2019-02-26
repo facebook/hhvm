@@ -12,8 +12,6 @@ Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): d
 
 Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: Req
 
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s/test/slow/rx/body/defines-includes.php on line 9
 Included
 Included
 Included

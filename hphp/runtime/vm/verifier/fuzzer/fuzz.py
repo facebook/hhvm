@@ -38,11 +38,11 @@ hhvm_build_dbgo_cov = "buck build @mode/dbgo-cov -c " \
 
 hhvm_build_dbgo = "buck build @mode/dbgo //hphp/hhvm:hhvm"
 
-profdata = fbcode + "/third-party2/llvm-fb/stable/gcc-5-glibc-2.23/" \
-    "03859b5/bin/llvm-profdata merge -sparse"
+profdata = fbcode + "third-party-buck/gcc-5-glibc-2.23/tools/llvm-fb/bin/" \
+    "llvm-profdata merge -sparse"
 
-cov = fbcode + "/third-party2/llvm-fb/stable/gcc-5-glibc-2.23/" \
-    "03859b5/bin/llvm-cov"
+cov = fbcode + "third-party-buck/gcc-5-glibc-2.23/tools/llvm-fb/bin/" \
+    "llvm-cov"
 
 verbose = False
 coverage = False

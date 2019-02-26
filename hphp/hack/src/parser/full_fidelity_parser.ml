@@ -92,14 +92,9 @@ type t = {
 }
 
 let make (env:Env.t) text =
-  let force_hh = (Env.force_hh env) || text
-    |> SourceText.file_path
-    |> Relative_path.suffix
-    |> fun suffix -> String_utils.string_ends_with suffix ".hack"
-  in
   let lexer = Lexer.make
     ~is_experimental_mode:(Env.is_experimental_mode env)
-    ~force_hh
+    ~force_hh:(Env.force_hh env)
     ~enable_xhp:(Env.enable_xhp env)
     ~codegen:(Env.codegen env)
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
@@ -154,8 +149,8 @@ module Syntax = Full_fidelity_minimal_syntax
 module Parser = WithSyntax(Syntax)
 open Syntax
 
-(* Parsing only the header of the file for language and mode information *)
-let parse_mode_from_header text suffix =
+let parse_mode text =
+  let suffix = Relative_path.suffix (SourceText.file_path text) in
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let header = Parser.parse_header_only (Env.make ()) text in
   match syntax header with
@@ -201,10 +196,4 @@ let parse_mode_from_header text suffix =
         in
         FileInfo.parse_mode mode
       end
-  | _ -> Some FileInfo.Mphp
-
-let parse_mode text =
-  let suffix = Relative_path.suffix (SourceText.file_path text) in
-  let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
-  if has_dot_hack_extension then Some FileInfo.Mstrict
-  else parse_mode_from_header text suffix
+  | _ -> Some FileInfo.Mstrict (* no header - assume .hack file *)

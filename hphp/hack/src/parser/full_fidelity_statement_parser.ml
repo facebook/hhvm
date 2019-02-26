@@ -182,9 +182,6 @@ module WithExpressionAndDeclAndTypeParser
     | Name when peek_token_kind ~lookahead:1 parser = Colon ->
       parse_goto_label parser
     | Goto -> parse_goto_statement parser
-    | QuestionGreaterThan ->
-      let (p, s, _) = parse_markup_section parser ~is_leading_section:false in
-      (p, s)
     | Semicolon -> parse_expression_statement parser
     (* ERROR RECOVERY: when encountering a token that's invalid now but the
      * context says is expected later, make the whole statement missing
@@ -194,19 +191,15 @@ module WithExpressionAndDeclAndTypeParser
       Make.missing parser (pos parser)
     | _ -> parse_expression_statement parser
 
-  and parse_markup_section parser ~is_leading_section =
+  and parse_header parser =
     let parser, prefix =
       (* for markup section at the beginning of the file
          treat ?> as a part of markup text *)
       (* The closing ?> tag is not legal hack, but accept it here and give an
          error in a later pass *)
-      if not is_leading_section
-        && peek_token_kind parser = TokenKind.QuestionGreaterThan then
-        fetch_token parser
-      else
-        Make.missing parser (pos parser)
+      Make.missing parser (pos parser)
     in
-    let parser, markup, suffix_opt = scan_markup parser ~is_leading_section in
+    let parser, markup, suffix_opt = scan_header parser in
     let (parser, markup) = Make.token parser markup in
     let (parser, suffix, is_echo_tag, has_suffix) =
       match suffix_opt with

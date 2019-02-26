@@ -87,8 +87,8 @@ end = struct
     ?(disable_unsafe_expr = false)
     ?(disable_unsafe_block = false)
     text =
-    (* this can be overridden in scan_markup, but we need to explicitly reset *)
-    (* it, as `scan_markup` is never called for `.hack` files *)
+    (* this can be overridden in scan_header, but we need to explicitly reset *)
+    (* it, as `scan_header` is never called for `.hack` files *)
     if (force_hh) then Env.set_is_hh_file true;
     Env.set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr ~disable_unsafe_block;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
@@ -1687,7 +1687,7 @@ let next_xhp_name lexer =
 let make_markup_token lexer =
   Token.make TokenKind.Markup (source lexer) (start lexer) (width lexer) [] []
 
-let skip_to_end_of_markup lexer ~is_leading_section =
+let skip_to_end_of_markup lexer =
   let make_markup_and_suffix lexer =
     let markup_text = make_markup_token lexer in
     let less_than_question_token =
@@ -1702,10 +1702,7 @@ let skip_to_end_of_markup lexer ~is_leading_section =
       (* single line comments that follow the language in leading markup_text
         determine the file check mode, read the trailing trivia and attach it
         to the language token *)
-      let lexer, trailing =
-        if is_leading_section then scan_trailing_php_trivia lexer
-        else lexer, []
-      in
+      let lexer, trailing = scan_trailing_php_trivia lexer in
       let name = Token.make TokenKind.Name
         (source lexer) name_token_offset size [] trailing in
       lexer, markup_text, Some (less_than_question_token, Some name)
@@ -1733,36 +1730,25 @@ let skip_to_end_of_markup lexer ~is_leading_section =
       Env.set_is_hh_file false;
       lexer, markup_text, Some (less_than_question_token, None)
   in
-  let rec aux lexer index =
-    (* It's not an error to run off the end of one of these. *)
-    if at_end_index lexer index then
-      let lexer' = with_offset lexer index in
-      lexer', (make_markup_token lexer'), None
-    else begin
-      let ch = peek lexer index in
-      if ch = '<' && peek_def lexer (succ index) ~def:'\x00' = '?' then
-        (* Found a beginning tag that delimits markup from the script *)
-        make_markup_and_suffix (with_offset lexer index)
-      else
-        aux lexer (succ index)
-    end
-  in
   let start_offset =
-    if is_leading_section
-    then begin
-      (* if leading section starts with #! - it should span the entire line *)
-      let index = offset lexer in
-      if peek_def ~def:'\x00' lexer index = '#' &&
-         peek_def ~def:'\x00' lexer (succ index)  = '!'
-      then skip_while_to_offset lexer not_newline
-      else index
-    end
-    else offset lexer in
-  aux lexer start_offset
+    (* if leading section starts with #! - it should span the entire line *)
+    let index = offset lexer in
+    if index != 0 then failwith "Should only try to lex header at start of document";
+    if peek_def ~def:'\x00' lexer index = '#' &&
+       peek_def ~def:'\x00' lexer (succ index) = '!'
+    then succ (skip_while_to_offset lexer not_newline)
+    else index
+  in
+  if peek lexer start_offset = '<' && peek_def ~def:'\x00' lexer (succ start_offset) = '?'
+  then make_markup_and_suffix (with_offset lexer start_offset)
+  else begin
+    Env.set_is_hh_file true; (* no header means it's a .hack file *)
+    lexer, make_markup_token lexer, None
+  end
 
-let scan_markup lexer ~is_leading_section =
+let scan_header lexer =
   let lexer = start_new_lexeme lexer in
-  skip_to_end_of_markup lexer ~is_leading_section
+  skip_to_end_of_markup lexer
 
 let is_next_xhp_category_name lexer =
   let (lexer, _) = scan_leading_php_trivia lexer in

@@ -131,9 +131,9 @@ module WithParser(Parser : Parser_S) = struct
   let peek_token_kind ?(lookahead=0) parser =
     Token.kind (peek_token ~lookahead parser)
 
-  let scan_markup parser ~is_leading_section =
+  let scan_header parser =
     let (lexer, markup, suffix) =
-      Lexer.scan_markup (lexer parser) ~is_leading_section
+      Lexer.scan_header (lexer parser)
     in
     with_lexer parser lexer, markup, suffix
 

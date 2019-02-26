@@ -2378,13 +2378,10 @@ and pMarkup node env =
     let filename = Pos.filename pos in
     let has_dot_hack_extension = String_utils.string_ends_with (Relative_path.suffix filename) ".hack" in
     if env.is_hh_file then
-      if (is_missing markup_prefix) && not has_dot_hack_extension &&
-      (width markup_text) > 0 && not (is_hashbang markup_text) then
-        raise_parsing_error env (`Node node) SyntaxError.error1001
-      else if has_dot_hack_extension && not (is_missing markup_prefix) then
+      if has_dot_hack_extension then
         raise_parsing_error env (`Node node) SyntaxError.error1060
-      else if (token_kind markup_prefix) = Some TK.QuestionGreaterThan then
-        raise_parsing_error env (`Node node) SyntaxError.error2067;
+      else if (is_missing markup_prefix) && (width markup_text) > 0 && not (is_hashbang markup_text) then
+        raise_parsing_error env (`Node node) SyntaxError.error1001;
     let expr =
       match syntax markup_expression with
       | Missing -> None

@@ -286,6 +286,9 @@ bool ObjectData::toBooleanImpl() const noexcept {
   if (instanceof(SimpleXMLElement_classof())) {
     // SimpleXMLElement is the only non-collection class that has custom bool
     // casting.
+    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+      raise_notice("SimpleXMLElement to boolean cast");
+    }
     return SimpleXMLElement_objectCast(this, KindOfBoolean).toBoolean();
   }
 
@@ -296,12 +299,18 @@ bool ObjectData::toBooleanImpl() const noexcept {
 int64_t ObjectData::toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
   assertx(instanceof(SimpleXMLElement_classof()));
+  if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    raise_notice("SimpleXMLElement to integer cast");
+  }
   return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
 }
 
 double ObjectData::toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only class that has custom double casting.
   assertx(instanceof(SimpleXMLElement_classof()));
+  if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    raise_notice("SimpleXMLElement to double cast");
+  }
   return SimpleXMLElement_objectCast(this, KindOfDouble).toDouble();
 }
 
@@ -329,6 +338,9 @@ Object ObjectData::iterableObject(bool& isIterable,
     obj.reset(o);
   }
   if (!isIterator() && obj->instanceof(SimpleXMLElement_classof())) {
+    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+      raise_notice("SimpleXMLElement used as iterator");
+    }
     isIterable = true;
     return create_object(
       s_SimpleXMLElementIterator,
@@ -597,6 +609,9 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
     assertx(instanceof(SimpleXMLElement_classof()));
+    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+      raise_notice("SimpleXMLElement to array cast");
+    }
     return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass)) ||
              UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
@@ -938,6 +953,9 @@ bool ObjectData::equal(const ObjectData& other) const {
   }
   if (getVMClass() != other.getVMClass()) return false;
   if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
+    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+      raise_notice("SimpleXMLElement equality comparison");
+    }
     // Compare the whole object (including native data), not just props
     auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
     auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
@@ -1042,6 +1060,9 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   // Return 1 for different classes to match PHP7 behavior.
   if (getVMClass() != other.getVMClass()) return 1;
   if (UNLIKELY(instanceof(SimpleXMLElement_classof()))) {
+    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+      raise_notice("SimpleXMLElement comparison");
+    }
     // Compare the whole object (including native data), not just props
     auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
     auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
@@ -1743,6 +1764,9 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
     // We only get here for SimpleXMLElement or collections
     if (LIKELY(!isCollection())) {
       assertx(instanceof(SimpleXMLElement_classof()));
+      if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+        raise_notice("SimpleXMLElement empty() property check");
+      }
       return SimpleXMLElement_propEmpty(this, key);
     }
   }

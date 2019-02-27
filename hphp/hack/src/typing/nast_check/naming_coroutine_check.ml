@@ -16,6 +16,7 @@ type ctx = {
   is_coroutine: bool;
   is_async: bool;
   is_final: bool;
+  is_generator: bool;
 }
 
 let set_ctx ctx f =
@@ -23,25 +24,30 @@ let set_ctx ctx f =
   | Ast.FCoroutine ->
     { ctx with is_coroutine = true }
   | Ast.FSync
-  | Ast.FAsync
+  | Ast.FAsync ->
+    { ctx with is_async = true}
   | Ast.FGenerator
   | Ast.FAsyncGenerator ->
-    { ctx with is_async = true }
+    { ctx with is_async = true; is_generator = true; }
 
 let default_ctx = {
   is_coroutine = false;
   is_async = false;
   is_final = false;
+  is_generator = false;
 }
 
 let visitor = object(self)
   inherit [ctx] Nast_visitor.iter_with_state as super
 
+  method! on_Efun (env, ctx) = super#on_Efun (env, { ctx with is_generator = false })
+  method! on_Lfun (env, ctx) = super#on_Lfun (env, { ctx with is_generator = false })
+
   method! on_fun_ (env, ctx) f =
     super#on_fun_ (env, set_ctx ctx f) f
 
   method! on_expr (env, ctx) (p, e) =
-    match e with
+    begin match e with
     | Yield _
     | Yield_break
     | Yield_from _ ->
@@ -51,7 +57,8 @@ let visitor = object(self)
     | Suspend _ ->
       if ctx.is_coroutine && ctx.is_final then Errors.suspend_in_finally p;
       if ctx.is_async && not ctx.is_coroutine then Errors.suspend_outside_of_coroutine p
-    | _ -> ();
+    | _ -> ()
+    end;
     super#on_expr (env, ctx) (p, e)
 
   method! on_stmt (env, ctx) s =
@@ -63,6 +70,15 @@ let visitor = object(self)
       Errors.await_in_coroutine p
     | Try (_, _, fb) ->
       self#on_block (env, { ctx with is_final = true }) fb
+    | _ -> ()
+    end;
+    if ctx.is_generator then
+    begin match s with
+    | Return (p, e) ->
+      begin match e with
+      | None -> ()
+      | Some _ -> Errors.return_in_gen p
+      end
     | _ -> ()
     end;
     super#on_stmt (env, ctx) s

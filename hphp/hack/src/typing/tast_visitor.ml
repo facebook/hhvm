@@ -178,6 +178,7 @@ class type handler = object
   method at_fun_def : Env.t -> Tast.fun_def -> unit
   method at_method_ : Env.t -> Tast.method_ -> unit
   method at_static_method : Env.t -> Tast.static_method -> unit
+  method at_constructor : Env.t -> Tast.constructor -> unit
 
   method at_expr : Env.t -> Tast.expr -> unit
   method at_stmt : Env.t -> Tast.stmt -> unit
@@ -202,6 +203,7 @@ class virtual handler_base : handler = object
   method at_fun_def _ _ = ()
   method at_method_ _ _ = ()
   method at_static_method _ _ = ()
+  method at_constructor _ _ = ()
 
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
@@ -259,5 +261,9 @@ let iter_with (handlers : handler list) : iter = object
   method! on_hint env h =
     List.iter handlers (fun v -> v#at_hint env h);
     super#on_hint env h;
+
+  method! on_constructor env h =
+    List.iter handlers (fun v -> v#at_constructor env h);
+    super#on_constructor env h;
 
 end

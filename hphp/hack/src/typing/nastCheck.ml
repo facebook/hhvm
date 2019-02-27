@@ -542,7 +542,7 @@ and class_ tenv c =
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
   if not (c.c_kind = Ast.Cinterface) then begin
-    maybe method_ (env, true) c.c_constructor;
+    maybe method_ env c.c_constructor;
   end;
   List.iter c.c_tparams.c_tparam_list (tparam env);
   List.iter c.c_extends (hint env);
@@ -551,8 +551,8 @@ and class_ tenv c =
   List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
   List.iter c.c_static_vars (class_var env);
   List.iter c.c_vars (class_var env);
-  List.iter c.c_static_methods (method_ (env, true));
-  List.iter c.c_methods (method_ (env, false));
+  List.iter c.c_static_methods (method_ env);
+  List.iter c.c_methods (method_ env);
 
 (* Class properties can only be initialized with a static literal expression. *)
 and check_class_property_initialization prop =
@@ -636,28 +636,16 @@ and class_var env cv =
   maybe expr env cv.cv_expr;
   ()
 
-and check__toString m is_static =
-  if snd m.m_name = SN.Members.__toString
-  then begin
-    if m.m_visibility <> Public || is_static
-    then Errors.toString_visibility (fst m.m_name);
-    match m.m_ret with
-      | Some (_, Hprim Tstring) -> ()
-      | Some (p, _) -> Errors.toString_returns_string p
-      | None -> ()
-  end
-
 and add_constraint pos tenv (ty1, ck, ty2) =
   Typing_subtype.add_constraint pos tenv ck ty1 ty2
 
 and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
-and method_ (env, is_static) m =
+and method_ env m =
   let env =
     { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   let named_body = assert_named_body m.m_body in
-  check__toString m is_static;
   let env = { env with function_name = Some (snd m.m_name) } in
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)

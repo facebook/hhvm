@@ -51,6 +51,7 @@ type t = {
   po_disable_unsafe_expr : bool;
   po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
+  tco_ignore_collection_expr_type_arguments : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -253,6 +254,7 @@ let default = {
  po_disable_unsafe_expr = false;
  po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
+ tco_ignore_collection_expr_type_arguments = false;
 }
 
 let make
@@ -298,6 +300,7 @@ let make
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
   ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
+  ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
   ()
 = {
   tco_assume_php;
@@ -343,6 +346,7 @@ let make
   po_disable_unsafe_expr;
   po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
+  tco_ignore_collection_expr_type_arguments;
 }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -394,6 +398,7 @@ let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
 let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 
+let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in
   let exp_features = if enabled then

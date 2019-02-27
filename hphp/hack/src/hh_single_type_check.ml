@@ -196,6 +196,7 @@ let parse_options () =
   let disallow_invalid_arraykey = ref None in
   let enable_stronger_await_binding = ref None in
   let typecheck_xhp_cvars = ref (Some false) in
+  let ignore_collection_expr_type_arguments = ref (Some false) in
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
@@ -405,6 +406,9 @@ let parse_options () =
     "--check-xhp-cvar-arity",
       Arg.Unit (set_bool typecheck_xhp_cvars),
       "Typechecks xhp cvar arity";
+    "--ignore-collection-expr-type-arguments",
+      Arg.Unit (set_bool ignore_collection_expr_type_arguments),
+      "Typechecker ignores type arguments to vec<T>[...] style expressions";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -438,6 +442,7 @@ let parse_options () =
     ?po_disable_unsafe_expr:(!disable_unsafe_expr)
     ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
+    ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ~log_levels:(!log_levels)
     ()
   in

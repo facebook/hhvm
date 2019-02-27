@@ -1464,11 +1464,11 @@ and expr_
         | Some (
           ((pk, _) as tk),
           ((pv, _) as tv)
-        ) ->
+        ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtk = Phase.localize_hint_with_self env tk in
           let env, localtv = Phase.localize_hint_with_self env tv in
           env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
-        | None -> (* no explicit typehint, fallback to supplied expect *)
+        | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
             | env, Some (pos, ur, ety) ->
               begin match get_darray_inst ety with
@@ -1495,10 +1495,11 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match th with
-        | Some ((pv, _) as tv) ->
+        | Some ((pv, _) as tv)
+          when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtv = Phase.localize_hint_with_self env tv in
           env, Some (pv, Reason.URhint, localtv)
-        | None -> (* no explicit typehint, fallback to supplied expect *)
+        | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_varray_inst ety with
@@ -1518,10 +1519,11 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match th with
-        | Some ((pv, _) as tv) ->
+        | Some ((pv, _) as tv)
+          when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtv = Phase.localize_hint_with_self env tv in
           env, Some (pv, Reason.URhint, localtv)
-        | None ->
+        | _ ->
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_vc_inst kind ety with
@@ -1550,11 +1552,11 @@ and expr_
         | Some (
           ((pk, _) as tk),
           ((pv, _) as tv)
-        ) ->
+        ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtk = Phase.localize_hint_with_self env tk in
           let env, localtv = Phase.localize_hint_with_self env tv in
           env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
-        | None -> (* no explicit typehint, fallback to supplied expect *)
+        | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_kvc_inst kind ety with

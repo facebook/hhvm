@@ -80,3 +80,4 @@ let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
+let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_expr_type_arguments

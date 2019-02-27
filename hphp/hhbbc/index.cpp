@@ -4774,6 +4774,10 @@ Type Index::lookup_foldable_return_type(Context ctx,
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
 
+  // Don't fold functions when staticness mismatches
+  if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TTop;
+  if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TTop;
+
   auto const& finfo = *func_info(*m_data, func);
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
     return finfo.returnTy;

@@ -620,9 +620,21 @@ void missing_this_check_helper(const Func* f, EF ef, NF nf) {
     return;
   }
 
-  if (RuntimeOption::EvalRaiseMissingThis && !f->isStatic()) {
+  auto const notices =
+    RuntimeOption::EvalNoticeOnBadMethodStaticness ||
+    RuntimeOption::EvalRaiseMissingThis;
+
+  if (notices && !f->isStatic()) {
     nf();
     return;
+  }
+}
+
+void raise_has_this_need_static(const Func* f) {
+  auto constexpr msg =
+    "Static method %s should not be called on instance";
+  if (RuntimeOption::EvalNoticeOnBadMethodStaticness && f->isStatic()) {
+    raise_notice(msg, f->fullName()->data());
   }
 }
 
@@ -639,6 +651,8 @@ void raise_missing_this(const Func* f) {
 
       if (RuntimeOption::PHP7_DeprecationWarnings) {
         raise_deprecated(msg, f->fullName()->data());
+      } else if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+        raise_notice(msg, f->fullName()->data());
       } else {
         raise_strict_warning(msg, f->fullName()->data());
       }

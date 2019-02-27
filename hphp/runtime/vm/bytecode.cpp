@@ -5183,6 +5183,13 @@ void fPushObjMethodImpl(StringData* name,
   if (res == LookupResult::MethodFoundNoThis) {
     decRefObj(obj);
     ar->setClass(cls);
+
+    if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+      raise_notice(
+        "Static method %s should not be called on instance",
+        ar->func()->fullName()->data()
+      );
+    }
   } else {
     assertx(res == LookupResult::MethodFoundWithThis ||
            res == LookupResult::MagicCallFound);

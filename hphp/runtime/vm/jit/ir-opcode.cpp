@@ -508,6 +508,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
+  case RaiseHasThisNeedStatic:
   case RaiseMissingArg:
   case RaiseMissingThis:
   case RaiseNotice:

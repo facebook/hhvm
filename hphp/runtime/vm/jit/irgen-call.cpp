@@ -133,6 +133,7 @@ SSATmp* lookupObjMethodExactFunc(
   objOrCls = obj;
   implIncStat(env, Stats::ObjMethod_known);
   if (func->isStaticInPrologue()) {
+    gen(env, RaiseHasThisNeedStatic, cns(env, func));
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
@@ -163,6 +164,7 @@ SSATmp* lookupObjMethodInterfaceFunc(
                   cls);
   objOrCls = obj;
   if (ifaceFunc->attrs() & AttrStatic) {
+    gen(env, RaiseHasThisNeedStatic, func);
     decRef(env, obj);
     objOrCls = cls;
   }
@@ -183,6 +185,7 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
   );
   objOrCls = obj;
   if (func->isStaticInPrologue()) {
+    gen(env, RaiseHasThisNeedStatic, funcTmp);
     decRef(env, obj);
     objOrCls = clsTmp;
   }

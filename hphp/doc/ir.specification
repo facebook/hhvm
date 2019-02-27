@@ -2257,6 +2257,11 @@ To string conversions:
   called with null $this. In most cases its a notice, but for
   builtins and special class methods its a fatal.
 
+| RaiseHasThisNeedStatic, ND, S(Func), NF
+
+  Raises a notice to indicate that func was called on an object but is a static
+  method.
+
 | FatalMissingThis, ND, S(Func), T
 
   Similar to RaiseMissingThis, but for cases where we know it will fatal.

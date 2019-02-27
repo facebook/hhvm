@@ -1,0 +1,4 @@
+
+Notice: Non-static method Foo::a() should not be called statically in %s/bad-dispatch.php on line 13
+
+Notice: Static method Foo::b should not be called on instance in %s/bad-dispatch.php on line 14

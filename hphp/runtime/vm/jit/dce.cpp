@@ -533,6 +533,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyPropFailHard:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
+  case RaiseHasThisNeedStatic:
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:

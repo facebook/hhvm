@@ -49,6 +49,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 ///////////////////////////////////////////////////////////////////////////////
 
 void NEVER_INLINE raise_missing_this(const Func* f);
+void NEVER_INLINE raise_has_this_need_static(const Func* f);
 bool NEVER_INLINE needs_missing_this_check(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_get_object_prop();

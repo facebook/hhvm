@@ -374,6 +374,16 @@ SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyRaiseHasThisNeedStatic(State& env, const IRInstruction* inst) {
+  if (!RuntimeOption::EvalNoticeOnBadMethodStaticness) return gen(env, Nop);
+
+  auto const funcTmp = inst->src(0);
+  if (funcTmp->hasConstVal() && !funcTmp->funcVal()->isStatic()) {
+    return gen(env, Nop);
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
 
@@ -3922,6 +3932,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsClsDynConstructible)
   X(LdFuncRxLevel)
   X(RaiseMissingThis)
+  X(RaiseHasThisNeedStatic)
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)

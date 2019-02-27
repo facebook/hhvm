@@ -18,7 +18,7 @@ let get_array3 i0 i1 i2 =
   let index0 = p, i0 in
   let index1 = p, i1 in
   let index2 = p, i2 in
-  A.Varray [index0; index1; index2]
+  A.Varray (None, [index0; index1; index2])
 
 let xhp_attribute_declaration_method ?p name kind body =
   let p = match p with
@@ -73,7 +73,7 @@ let emit_xhp_attribute_array ~ns xal =
   let get_enum_attributes = function
     | None ->
       failwith "Xhp attribute that's supposed to be an enum but not really"
-    | Some (_, es) -> p, A.Varray es
+    | Some (_, es) -> p, A.Varray (None, es)
   in
   let get_attribute_array_values id enumo =
     let id, _ = Hhbc_id.Class.elaborate_id ns (p, id) in
@@ -114,10 +114,10 @@ let emit_xhp_attribute_array ~ns xal =
     in
     let is_req = Hhas_xhp_attribute.is_required xa in
     let k = p, A.String (SU.Xhp.clean name) in
-    let v = p, A.Varray (inner_array ho expo enumo is_req) in
+    let v = p, A.Varray (None, (inner_array ho expo enumo is_req)) in
     (k, v)
   in
-  p, A.Darray (List.map ~f:aux xal)
+  p, A.Darray (None, (List.map ~f:aux xal))
 
 let emit_xhp_use_attributes xual =
   let aux = function
@@ -292,7 +292,7 @@ let get_category_array categories =
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_category_declaration ast_class (cat_pos, categories) =
   (* return categories; *)
-  let category_arr = p, A.Darray (get_category_array categories) in
+  let category_arr = p, A.Darray (None, (get_category_array categories)) in
   let token1 = p, A.Return (Some category_arr) in
   let body = [token1] in
   let m =

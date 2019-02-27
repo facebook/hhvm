@@ -371,10 +371,10 @@ and expr_ env acc p e =
   match e with
   | Any -> acc
   | Array fdl -> List.fold_left ~f:afield ~init:acc fdl
-  | Darray fdl -> List.fold_left ~f:field ~init:acc fdl
-  | Varray fdl -> List.fold_left ~f:expr ~init:acc fdl
-  | ValCollection (_, el) -> exprl acc el
-  | KeyValCollection (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
+  | Darray (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
+  | Varray (_, fdl) -> List.fold_left ~f:expr ~init:acc fdl
+  | ValCollection (_, _, el) -> exprl acc el
+  | KeyValCollection (_, _, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | This -> check_all_init p env acc; acc
   | Fun_id _
   | Method_id _

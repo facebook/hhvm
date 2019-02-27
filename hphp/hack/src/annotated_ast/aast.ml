@@ -117,11 +117,13 @@ and class_id_ =
 and expr = expr_annotation * expr_
 and expr_ =
   | Array of afield list
-  | Darray of (expr * expr) list
-  | Varray of expr list
+  | Darray of (targ * targ) option * (expr * expr) list
+  | Varray of targ option * expr list
   | Shape of (shape_field_name * expr) list
-  | ValCollection of vc_kind * expr list (* TODO: T38184446 Consolidate collections in AAST *)
-  | KeyValCollection of kvc_kind * field list (* TODO: T38184446 Consolidate collections in AAST *)
+    (* TODO: T38184446 Consolidate collections in AAST *)
+  | ValCollection of vc_kind * targ option * expr list
+    (* TODO: T38184446 Consolidate collections in AAST *)
+  | KeyValCollection of kvc_kind * (targ * targ) option * field list
   | Null
   | This
   | True
@@ -172,7 +174,8 @@ and expr_ =
   (* We'll add this for now, but later on we should go straight to an Efun *)
   | Lfun of fun_
   | Import of import_flavor * expr
-  | Collection of sid * afield list (* TODO: T38184446 Consolidate collections in AAST *)
+  (* TODO: T38184446 Consolidate collections in AAST *)
+  | Collection of sid * collection_targ option * afield list
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   (* None of these constructors exist in the AST *)

@@ -1122,15 +1122,17 @@ module Make (GetLocals : GetLocals) = struct
 
   let aast_constraint_ ?(forbid_this=false) env (ck, h) = ck, aast_hint ~forbid_this env h
 
-  let aast_targl env _ tal =
-    List.map tal ~f:(
+  let aast_targ env t =
       aast_hint
         ~allow_wildcard:true
         ~forbid_this:false
         ~allow_typedef:true
         ~allow_retonly:true
         ~tp_depth:1
-        env)
+        env t
+  let aast_targl env _ tal =
+    List.map tal ~f:(aast_targ env)
+
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"
@@ -1539,11 +1541,11 @@ module Make (GetLocals : GetLocals) = struct
       Option.iter e2 (aast_check_constant_expr env);
       aast_check_constant_expr env e3
     | Aast.Array l -> List.iter l ~f:(aast_check_afield_constant_expr env)
-    | Aast.Darray l ->
+    | Aast.Darray (_, l) ->
       List.iter l ~f:(fun (e1, e2) ->
         aast_check_constant_expr env e1;
         aast_check_constant_expr env e2)
-    | Aast.Varray l -> List.iter l ~f:(aast_check_constant_expr env)
+    | Aast.Varray (_, l) -> List.iter l ~f:(aast_check_constant_expr env)
     | Aast.Shape fdl ->
         (* Only check the values because shape field names are always legal *)
         List.iter fdl ~f:(fun (_, e) -> aast_check_constant_expr env e)
@@ -1552,7 +1554,7 @@ module Make (GetLocals : GetLocals) = struct
         (* Tuples are not really function calls, they are just parsed that way*)
         arg_unpack_unexpected uel;
         List.iter el ~f:(aast_check_constant_expr env)
-    | Aast.Collection (id, l) ->
+    | Aast.Collection (id, _, l) ->
       let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       (* Only vec/keyset/dict are allowed because they are value types *)
       if cn = SN.Collections.cVec
@@ -2109,17 +2111,31 @@ module Make (GetLocals : GetLocals) = struct
       if TypecheckerOptions.disallow_array_literal tcopt
       then Errors.array_literals_disallowed p;
       N.Array (List.map l (aast_afield env))
-    | Aast.Varray l -> N.Varray (List.map l (aast_expr env))
-    | Aast.Darray l ->
-      N.Darray (List.map l (fun (e1, e2) -> aast_expr env e1, aast_expr env e2))
-    | Aast.Collection (id, l) ->
+    | Aast.Varray (ta, l) ->
+        N.Varray (Option.map ~f:(aast_targ env) ta, List.map l (aast_expr env))
+    | Aast.Darray (tap, l) ->
+      let nargs = Option.map ~f:(fun (t1, t2) -> aast_targ env t1, aast_targ env t2) tap in
+      N.Darray (
+        nargs,
+        List.map l (fun (e1, e2) -> aast_expr env e1, aast_expr env e2))
+    | Aast.Collection (id, tal, l) ->
       let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       begin
         match cn with
         | x when N.is_vc_kind x ->
-          N.ValCollection ((N.get_vc_kind cn), (List.map l (aast_afield_value env cn)))
+          let ta = begin match tal with
+          | Some Aast.CollectionTV tv -> Some (aast_targ env tv)
+          | Some Aast.CollectionTKV _ -> Errors.naming_too_many_arguments p; None
+          | None -> None
+          end in
+          N.ValCollection ((N.get_vc_kind cn), ta, (List.map l (aast_afield_value env cn)))
         | x when N.is_kvc_kind x ->
-          N.KeyValCollection ((N.get_kvc_kind cn),
+          let ta = begin match tal with
+          | Some Aast.CollectionTV _ -> Errors.naming_too_few_arguments p; None
+          | Some Aast.CollectionTKV (tk, tv) -> Some (aast_targ env tk, aast_targ env tv)
+          | None -> None
+          end in
+          N.KeyValCollection ((N.get_kvc_kind cn), ta,
             (List.map l (aast_afield_kvalue env cn)))
         | x when x = SN.Collections.cPair ->
           begin

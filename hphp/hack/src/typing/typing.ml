@@ -1457,19 +1457,25 @@ and expr_
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
           (Reason.Rwitness p, Tarraykind (AKmap (key_ty, value_ty)))
 
-  | Darray l ->
+  | Darray (th, l) ->
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
-        match expand_expected env expected with
-        | env, Some (pos, ur, ety) ->
-          begin match get_darray_inst ety with
-          | Some (kty, vty) ->
-            env, Some (pos, ur, kty), Some (pos, ur, vty)
-          | None ->
-            env, None, None
-          end
-        | _ ->
-          env, None, None in
+        match th with
+        | Some _ ->
+          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
+          env, None, None
+        | None -> (* no explicit typehint, fallback to supplied expect *)
+          begin match expand_expected env expected with
+            | env, Some (pos, ur, ety) ->
+              begin match get_darray_inst ety with
+              | Some (kty, vty) ->
+                env, Some (pos, ur, kty), Some (pos, ur, vty)
+              | None ->
+                env, None, None
+              end
+            | _ ->
+              env, None, None
+          end in
       let keys, values = List.unzip l in
       let env, value_exprs, value_ty =
         compute_exprs_and_supertype ~expected:vexpected p env values array_value in
@@ -1478,41 +1484,48 @@ and expr_
           (arraykey_value p "darray") in
       let field_exprs = List.zip_exn key_exprs value_exprs in
       make_result env p
-        (T.Darray field_exprs)
+        (T.Darray (th, field_exprs))
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
 
-  | Varray values ->
+  | Varray (th, values) ->
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
-        match expand_expected env expected with
-        | env, Some (pos, ur, ety) ->
-          begin match get_varray_inst ety with
-          | Some vty ->
-            env, Some (pos, ur, vty)
-          | _ ->
-            env, None
-          end
-        | _ ->
+        match th with
+        | Some _ ->
+          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
           env, None
+        | None -> (* no explicit typehint, fallback to supplied expect *)
+          begin match expand_expected env expected with
+          | env, Some (pos, ur, ety) ->
+            begin match get_varray_inst ety with
+            | Some vty -> env, Some (pos, ur, vty)
+            | _ -> env, None
+            end
+          | _ -> env, None
+          end
         in
       let env, value_exprs, value_ty =
         compute_exprs_and_supertype ~expected:elem_expected p env values array_value in
       make_result env p
-        (T.Varray value_exprs)
+        (T.Varray (th, value_exprs))
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
-  | ValCollection (kind, el) ->
+  | ValCollection (kind, th, el) ->
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
-        match expand_expected env expected with
-        | env, Some (pos, ur, ety) ->
-          begin match get_vc_inst kind ety with
-          | Some vty ->
-            env, Some (pos, ur, vty)
-          | None ->
-            env, None
-          end
-        | _ -> env, None in
+        match th with
+        | Some _ ->
+          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
+          env, None
+        | None ->
+          begin match expand_expected env expected with
+          | env, Some (pos, ur, ety) ->
+            begin match get_vc_inst kind ety with
+            | Some vty -> env, Some (pos, ur, vty)
+            | None -> env, None
+            end
+          | _ -> env, None
+          end in
       let class_name = vc_kind_to_name kind in
       let subtype_val =
         match kind with
@@ -1525,19 +1538,24 @@ and expr_
         compute_exprs_and_supertype ~expected:elem_expected ~reason:Reason.URvector
           p env el subtype_val in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [elem_ty] in
-      make_result env p (T.ValCollection (kind, tel)) ty
-  | KeyValCollection (kind, l) ->
+      make_result env p (T.ValCollection (kind, th, tel)) ty
+  | KeyValCollection (kind, th, l) ->
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
-        match expand_expected env expected with
-        | env, Some (pos, ur, ety) ->
-          begin match get_kvc_inst kind ety with
-          | Some (kty, vty) ->
-            env, Some (pos, ur, kty), Some (pos, ur, vty)
-          | None ->
-            env, None, None
-          end
-        | _ -> env, None, None in
+        match th with
+        | Some _ ->
+          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
+          env, None, None
+        | None -> (* no explicit typehint, fallback to supplied expect *)
+          begin match expand_expected env expected with
+          | env, Some (pos, ur, ety) ->
+            begin match get_kvc_inst kind ety with
+            | Some (kty, vty) ->
+              env, Some (pos, ur, kty), Some (pos, ur, vty)
+            | None -> env, None, None
+            end
+          | _ -> env, None, None
+          end in
       let kl, vl = List.unzip l in
       let class_name = kvc_kind_to_name kind in
       let env, tkl, k =
@@ -1547,7 +1565,7 @@ and expr_
         compute_exprs_and_supertype ~expected:vexpected ~reason:Reason.URvalue
           p env vl array_value in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [k; v] in
-      make_result env p (T.KeyValCollection (kind, List.zip_exn tkl tvl)) ty
+      make_result env p (T.KeyValCollection (kind, th, List.zip_exn tkl tvl)) ty
   | Clone e ->
     let env, te, ty = expr env e in
     (* Clone only works on objects; anything else fatals at runtime *)

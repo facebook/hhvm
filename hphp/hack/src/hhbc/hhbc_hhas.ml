@@ -1050,9 +1050,9 @@ and string_of_xml ~env (_, id) attributes children =
   let _, attributes =
     List.fold_right ~f:(string_of_xhp_attr p) attributes ~init:(0, [])
   in
-  let attributes = string_of_param_default_value ~env (p, A.Darray attributes) in
+  let attributes = string_of_param_default_value ~env (p, A.Darray (None, attributes)) in
   let children = string_of_param_default_value ~env
-   (p, A.Varray children)
+   (p, A.Varray (None, children))
   in
   "new "
   ^ name
@@ -1152,10 +1152,10 @@ and string_of_param_default_value ~env expr =
    * https://fburl.com/tzom2qoe *)
   | A.Array afl ->
     "array(" ^ string_of_afield_list ~env afl ^ ")"
-  | A.Collection ((_, name), afl) when
+  | A.Collection ((_, name), _, afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
     name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
-  | A.Collection ((_, name), afl) ->
+  | A.Collection ((_, name), _, afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in
     begin match name with
     | "Set" | "Pair" | "Vector" | "Map"
@@ -1174,7 +1174,7 @@ and string_of_param_default_value ~env expr =
           (shape_field_name_to_expr f_name, e))
         fl
     in
-    string_of_param_default_value ~env (fst expr, A.Darray fl)
+    string_of_param_default_value ~env (fst expr, A.Darray (None, fl))
   | A.Binop (bop, e1, e2) ->
     let bop = string_of_bop bop in
     let e1 = string_of_param_default_value ~env e1 in
@@ -1276,10 +1276,10 @@ and string_of_param_default_value ~env expr =
     let o = if b then " ?as " else " as " in
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
-  | A.Varray es ->
+  | A.Varray (_, es) ->
     let es = List.map ~f:(string_of_param_default_value ~env) es in
     "varray[" ^ (String.concat ~sep:", " es) ^ "]"
-  | A.Darray es ->
+  | A.Darray (_, es) ->
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     "darray[" ^ (string_of_afield_list ~env es) ^ "]"
   | A.List l ->

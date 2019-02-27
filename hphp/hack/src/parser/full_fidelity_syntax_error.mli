@@ -300,6 +300,7 @@ val php7_anonymous_function : string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string
+val collection_intrinsic_many_typeargs: string
 val invalid_shape_field_name : string
 val invalid_reference : string
 val invalid_hack_mode : string

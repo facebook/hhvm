@@ -963,6 +963,12 @@ let rec pHint : hint parser = fun node env ->
   check_valid_reified_hint env node hint;
   hint
 
+let expand_type_args env ty or_else =
+  match syntax ty with
+  | TypeArguments { type_arguments_types; _ } ->
+    couldMap ~f:pHint type_arguments_types env
+  | _ -> or_else ()
+
 type fun_hdr =
   { fh_suspension_kind : suspension_kind
   ; fh_name            : pstring
@@ -983,9 +989,15 @@ let empty_fun_hdr =
   ; fh_param_modifiers = []
   }
 
-let prevent_intrinsic_generic env node ty =
-  if not (is_missing ty) && not env.codegen then
-    raise_parsing_error env (`Node node) SyntaxError.collection_intrinsic_generic
+let check_intrinsic_type_arg_varity env node ty =
+  match ty with
+  | [tk;tv] -> Some (CollectionTKV (tk, tv))
+  | [tv] -> Some (CollectionTV tv)
+  | [] -> None
+  | _ -> raise_parsing_error env (`Node node)
+    SyntaxError.collection_intrinsic_many_typeargs;
+    None
+
 
 let rec pSimpleInitializer node env =
   match syntax node with
@@ -1220,9 +1232,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; vector_intrinsic_members = members
       ; _ }
       ->
-      prevent_intrinsic_generic env node ty;
       if env.is_hh_file || env.enable_hh_syntax then
-        Collection (pos_name kw env, couldMap ~f:pAField members env)
+        let hints = expand_type_args env ty (fun () -> []) in
+        let hints = check_intrinsic_type_arg_varity env node hints in
+        Collection (pos_name kw env, hints, couldMap ~f:pAField members env)
       else
         (* If php, this is a subscript expression, not a collection. *)
         let subscript_receiver = pExpr kw env in
@@ -1238,26 +1251,38 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       { collection_literal_name         = collection_name
       ; collection_literal_initializers = members
       ; _ } ->
-      let collection_name =
+      let hints = None in
+      let collection_name, hints =
         match syntax collection_name with
         | SimpleTypeSpecifier { simple_type_specifier = class_type } ->
-          pos_name class_type env
+          (pos_name class_type env), hints
         | GenericTypeSpecifier { generic_class_type = class_type; _ } ->
-          prevent_intrinsic_generic env node class_type;
-          pos_name class_type env
-        | _ -> pos_name collection_name env in
-      Collection (collection_name, couldMap ~f:pAField members env)
+          let hints = expand_type_args env class_type (fun () -> []) in
+          let hints = check_intrinsic_type_arg_varity env node hints in
+          (pos_name class_type env), hints
+        | _ -> (pos_name collection_name env), hints in
+      Collection (collection_name, hints, couldMap ~f:pAField members env)
 
     | VarrayIntrinsicExpression
     { varray_intrinsic_members = members
     ; varray_intrinsic_explicit_type = ty; _ } ->
-      prevent_intrinsic_generic env node ty;
-      Varray (couldMap ~f:pExpr members env)
+      let hints = expand_type_args env ty (fun () -> []) in
+      let hints = check_intrinsic_type_arg_varity env node hints in
+      let targ = match hints with
+        | Some CollectionTV ty -> Some ty
+        | None -> None
+        | _ -> missing_syntax "VarrayIntrinsicExpression type args" node env in
+      Varray (targ, couldMap ~f:pExpr members env)
     | DarrayIntrinsicExpression
     { darray_intrinsic_members = members
     ; darray_intrinsic_explicit_type = ty; _ } ->
-      prevent_intrinsic_generic env node ty;
-      Darray (couldMap ~f:pMember members env)
+      let hints = expand_type_args env ty (fun () -> []) in
+      let hints = check_intrinsic_type_arg_varity env node hints in
+      begin match hints with
+      | Some CollectionTKV (tk, tv) -> Darray(Some (tk, tv), couldMap ~f:pMember members env)
+      | None -> Darray(None, couldMap ~f:pMember members env)
+      | _ -> missing_syntax "DarrayIntrinsicExpression type args" node env
+      end
     | ArrayIntrinsicExpression { array_intrinsic_members = members; _ }
     | ArrayCreationExpression  { array_creation_members  = members; _ }
     ->

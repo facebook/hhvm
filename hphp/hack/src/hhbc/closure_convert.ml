@@ -675,17 +675,33 @@ let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Null | True | False | Omitted | Yield_break
   | Int _ | Float _ | String _ -> st, expr
-  | Varray es ->
+  | Varray (targ, es) ->
     let st, es = List.map_env st es (convert_expr env) in
-    st, (p, Varray es)
-  | Darray es ->
+    let st, targ = begin match targ with
+      | None -> st, None
+      | Some targ ->
+        let st, targ = convert_hint env st targ in
+        st, Some targ
+    end in
+    st, (p, Varray (targ, es))
+  | Darray (tarp, es) ->
     let convert_pair st (e1, e2) = begin
       let st, e1 = convert_expr env st e1 in
       let st, e2 = convert_expr env st e2 in
       st, (e1, e2)
     end in
+    let convert_tarp st (t1, t2) = begin
+      let st, t1 = convert_hint env st t1 in
+      let st, t2 = convert_hint env st t2 in
+      st, (t1, t2)
+    end in
     let st, es =  List.map_env st es convert_pair in
-    st, (p, Darray es)
+    begin match tarp with
+    | Some typepair ->
+      let st, tp = convert_tarp st typepair in
+      st, (p, Darray (Some tp, es))
+    | None -> st, (p, Darray (None, es))
+    end
   | Array afl ->
     let st, afl = List.map_env st afl (convert_afield env) in
     st, (p, Array afl)
@@ -694,9 +710,19 @@ let rec convert_expr env st (p, expr_ as expr) =
       let st, e = convert_expr env st e in
       st, (n, e)) in
     st, (p, Shape pairs)
-  | Collection (id, afl) ->
+  | Collection (id, targs, afl) ->
     let st, afl = List.map_env st afl (convert_afield env) in
-    st, (p, Collection (id, afl))
+    let st, ta = begin match targs with
+    | Some CollectionTV tv ->
+      let st, ta = convert_hint env st tv in
+      st, Some (CollectionTV ta)
+    | Some CollectionTKV (tk, tv) ->
+      let st, tk = convert_hint env st tk in
+      let st, tv = convert_hint env st tv in
+      st, Some (CollectionTKV (tk, tv))
+    | None -> st, None
+    end in
+    st, (p, Collection (id, ta, afl))
   | Lvar id ->
     let st = add_var env st (snd id) in
     st, (p, Lvar id)
@@ -748,14 +774,14 @@ let rec convert_expr env st (p, expr_ as expr) =
     when SU.is_parent cid ->
     let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, targs, el2, el3))
   | Call ((_, Id (_, id)), _, es, _)
     when String.lowercase id = "tuple" &&
       Emit_env.is_hh_syntax_enabled () ->
-    convert_expr env st (p, Varray es)
+    convert_expr env st (p, Varray (None, es))
   | Call (e, targs, el2, el3) ->
     let st =
       begin match snd e, el2 with
@@ -765,7 +791,7 @@ let rec convert_expr env st (p, expr_ as expr) =
       | _ -> st
       end in
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, targs, el2, el3))
@@ -818,7 +844,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, As (e, h, b))
   | New (e, targs, el1, el2) ->
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (e, targs, el1, el2))
@@ -965,13 +991,6 @@ and convert_hint env st (p, h as hint) =
     st, (p, Hshape info)
   | Haccess _
   | Hfun _ -> st, hint
-
-and convert_targs env st targs =
-  List.fold_right ~init:(st, []) targs
-    ~f:(fun h (st, acc) ->
-        let st, h = convert_hint env st h in
-        st, h :: acc
-     )
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.

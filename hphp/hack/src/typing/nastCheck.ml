@@ -241,16 +241,16 @@ module CheckFunctionBody = struct
     | _, Array afl ->
         List.iter afl (afield f_type env);
         ()
-    | _, Darray afl ->
+    | _, Darray (_, afl) ->
         List.iter afl (expr2 f_type env);
         ()
-    | _, Varray afl ->
+    | _, Varray (_, afl) ->
         List.iter afl (expr f_type env);
         ()
-    | _, ValCollection (_, el) ->
+    | _, ValCollection (_, _, el) ->
         List.iter el (expr f_type env);
         ()
-    | _, KeyValCollection (_, fdl) ->
+    | _, KeyValCollection (_, _, fdl) ->
         List.iter fdl (expr2 f_type env);
         ()
     | _, Clone e -> expr f_type env e; ()
@@ -579,18 +579,18 @@ and check_class_property_initialization prop =
               rec_assert_static_literal expr1;
               rec_assert_static_literal expr2;
         end
-      | Darray fl -> List.iter fl assert_static_literal_for_field_list
-      | Varray el -> List.iter el rec_assert_static_literal
+      | Darray (_, fl) -> List.iter fl assert_static_literal_for_field_list
+      | Varray (_, el) -> List.iter el rec_assert_static_literal
       | Shape fl -> List.iter ~f:(fun (_, e) -> rec_assert_static_literal e) fl
       | List el
       | Expr_list el
       | String2 el
-      | ValCollection (_, el) -> List.iter el rec_assert_static_literal
+      | ValCollection (_, _, el) -> List.iter el rec_assert_static_literal
       | Pair (expr1, expr2)
       | Binop (_, expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
-      | KeyValCollection (_, field_list) ->
+      | KeyValCollection (_, _, field_list) ->
         List.iter field_list assert_static_literal_for_field_list
       | Cast (_, e)
       | Unop (_, e) ->
@@ -801,16 +801,16 @@ and expr_ env _p = function
   | Array afl ->
       List.iter afl (afield env);
       ()
-  | Darray fdl ->
+  | Darray (_, fdl) ->
       List.iter fdl (field env);
       ()
-  | Varray el ->
+  | Varray (_, el) ->
       List.iter el (expr env);
       ()
-  | ValCollection (_, el) ->
+  | ValCollection (_, _, el) ->
       List.iter el (expr env);
       ()
-  | KeyValCollection (_, fdl) ->
+  | KeyValCollection (_, _, fdl) ->
       List.iter fdl (field env);
       ()
   | Clone e -> expr env e; ()

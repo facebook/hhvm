@@ -30,6 +30,9 @@ and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
 and targ = hint
+and collection_targ =
+  | CollectionTV of targ
+  | CollectionTKV of targ * targ
 
 and param_mutability = PMutable | POwnedMutable | PMaybeMutable
 and import_flavor =

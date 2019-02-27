@@ -611,15 +611,15 @@ let rec can_initialize_static_var e =
       | A.AFkvalue (k, v) ->
         can_initialize_static_var k
         && can_initialize_static_var v)
-  | A.Darray es ->
+  | A.Darray (_, es) ->
     List.for_all es ~f:(fun (k, v) ->
       can_initialize_static_var k
       && can_initialize_static_var v)
-  | A.Varray es ->
+  | A.Varray (_, es) ->
     List.for_all es ~f:can_initialize_static_var
   | A.Class_const(_, (_, name)) ->
     String.lowercase name = Naming_special_names.Members.mClass
-  | A.Collection ((_, name), fields) ->
+  | A.Collection ((_, name), _, fields) ->
     let name =
       Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
     begin match name with

@@ -284,8 +284,8 @@ let enforce_mutable_constructor_call env ctor_fty el =
 let is_valid_rx_mutable_arg env e =
   match snd e with
   | New _
-  | KeyValCollection ((`Map | `ImmMap), _)
-  | ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _)
+  | KeyValCollection ((`Map | `ImmMap), _, _)
+  | ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _, _)
   | Pair _
   | Xml _ ->
     true
@@ -512,8 +512,8 @@ let check = object(self)
         allow_mutable_locals ctx
       end in
     match expr with
-    | _, Varray els
-    | _, ValCollection (_, els) ->
+    | _, Varray (_, els)
+    | _, ValCollection (_, _, els) ->
       let ctx = disallow_mutable_locals ctx in
       List.iter els ~f:(self#on_expr (env,ctx))
     | _, Array fs ->
@@ -525,8 +525,8 @@ let check = object(self)
         self#on_expr (env,ctx) k;
         self#on_expr (env,ctx) v
       )
-    | _, Darray els
-    | _, KeyValCollection (_, els)->
+    | _, Darray (_, els)
+    | _, KeyValCollection (_, _, els)->
       let ctx = disallow_mutable_locals ctx in
       List.iter els ~f:(fun (k, v) ->
         self#on_expr (env,ctx) k;

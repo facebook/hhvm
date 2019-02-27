@@ -55,13 +55,13 @@ struct
   let e' =
     match e with
     | S.Array afl -> T.Array (List.map afl (map_afield menv))
-    | S.Darray fl -> T.Darray (List.map fl (map_field menv))
-    | S.Varray el -> T.Varray (map_exprl menv el)
+    | S.Darray (tap, fl) -> T.Darray (tap, List.map fl (map_field menv))
+    | S.Varray (ta, el) -> T.Varray (ta, map_exprl menv el)
     | S.Shape sm -> T.Shape
       (List.map ~f:(fun (n, e) -> (n, map_expr menv e)) sm)
-    | S.ValCollection (k, el) -> T.ValCollection (k, map_exprl menv el)
-    | S.KeyValCollection (k, fl) ->
-      T.KeyValCollection (k, List.map fl (map_field menv))
+    | S.ValCollection (k, ta, el) -> T.ValCollection (k, ta, map_exprl menv el)
+    | S.KeyValCollection (k, tap, fl) ->
+      T.KeyValCollection (k, tap, List.map fl (map_field menv))
     | S.This -> T.This
     | S.Any -> T.Any
     | S.Id id -> T.Id id
@@ -126,7 +126,7 @@ struct
       T.NewAnonClass (List.map el1 (map_expr menv), List.map el2 (map_expr menv), map_class menv c)
     | S.Lfun f -> T.Lfun (map_fun menv f)
     | S.Import (f, e) -> T.Import (f, map_expr menv e)
-    | S.Collection (id, fl) -> T.Collection (id, List.map fl (map_afield menv))
+    | S.Collection (id, tal, fl) -> T.Collection (id, tal, List.map fl (map_afield menv))
     | S.BracedExpr e -> T.BracedExpr (map_expr menv e)
     | S.ParenthesizedExpr e -> T.ParenthesizedExpr (map_expr menv e)
   in

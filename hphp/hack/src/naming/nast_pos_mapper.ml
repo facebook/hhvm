@@ -16,8 +16,8 @@ let rec expr f (p, e) =
 and expr_ f = function
   | Any -> Any
   | Array afl -> Array (List.map afl (afield f))
-  | Darray fl -> Darray (List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
-  | Varray el -> Varray (List.map el (expr f))
+  | Darray (tap, fl) -> Darray (tap, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | Varray (ta, el) -> Varray (ta, List.map el (expr f))
   | Shape sh -> Shape (shape f sh)
   | True -> True
   | False -> False
@@ -76,9 +76,9 @@ and expr_ f = function
   | Unsafe_expr e -> Unsafe_expr (expr f e)
   | Callconv (kind, e) -> Callconv (kind, expr f e)
   | Execution_operator (e) -> Execution_operator (List.map e (expr f))
-  | ValCollection (s, el) -> ValCollection (s, List.map el (expr f))
-  | KeyValCollection (s, fl) ->
-    KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | ValCollection (s, ta, el) -> ValCollection (s, ta, List.map el (expr f))
+  | KeyValCollection (s, tap, fl) ->
+    KeyValCollection (s, tap, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Omitted -> Omitted
   | NewAnonClass (el1, el2, c) -> NewAnonClass (el1, el2, c)
   | Lfun f ->

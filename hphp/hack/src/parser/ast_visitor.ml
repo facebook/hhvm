@@ -40,9 +40,9 @@ class type ['a] ast_visitor_type = object
   method on_class_const : 'a -> expr -> pstring -> 'a
   method on_class_get : 'a -> expr -> expr -> 'a
   method on_clone : 'a -> expr -> 'a
-  method on_collection: 'a -> id -> afield list -> 'a
+  method on_collection: 'a -> id -> collection_targ option -> afield list -> 'a
   method on_continue : 'a -> expr option -> 'a
-  method on_darray : 'a -> (expr * expr) list -> 'a
+  method on_darray : 'a -> (targ * targ) option -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
@@ -104,7 +104,7 @@ class type ['a] ast_visitor_type = object
   method on_unop : 'a -> uop -> expr -> 'a
   method on_unsafe: 'a -> 'a
   method on_using: 'a -> using_stmt -> 'a
-  method on_varray : 'a -> expr list -> 'a
+  method on_varray : 'a -> targ option -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_declare : 'a -> bool -> expr -> block -> 'a
   method on_xml : 'a -> id -> xhp_attribute list -> expr list -> 'a
@@ -382,12 +382,12 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_expr_ acc e =
     match e with
    | Unsafeexpr e-> this#on_expr acc e
-   | Collection (i, afl) -> this#on_collection acc i afl
+   | Collection (i, tal, afl) -> this#on_collection acc i tal afl
    | Lfun f          -> this#on_lfun acc f
    | Import (ifv, e) -> this#on_import acc ifv e
    | Array afl   -> this#on_array acc afl
-   | Darray fl -> this#on_darray acc fl
-   | Varray el -> this#on_varray acc el
+   | Darray (tap, fl) -> this#on_darray acc tap fl
+   | Varray (ta, el) -> this#on_varray acc ta el
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc
    | False       -> this#on_false acc
@@ -434,13 +434,23 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
 
-  method on_darray acc fl =
+  method on_darray acc tap fl =
+    let acc = match tap with
+    | Some ta ->
+      let acc = this#on_targ acc (fst ta) in
+      let acc = this#on_targ acc (snd ta) in
+      acc
+    | None -> acc in
+
     let on_field acc (e1, e2) =
       let acc = this#on_expr acc e1 in
       this#on_expr acc e2 in
     List.fold_left on_field acc fl
 
-  method on_varray acc el =
+  method on_varray acc ta el =
+    let acc = match ta with
+    | Some t -> this#on_targ acc t
+    | None -> acc in
     List.fold_left this#on_expr acc el
 
   method on_shape acc sfnel =
@@ -609,8 +619,16 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_sfclass_const acc (p, _ as id) c =
     this#on_class_const acc (p, Id id) c
 
-  method on_collection acc i afl =
+  method on_collection acc i ta afl =
     let acc = this#on_id acc i in
+    let acc = match ta with
+    | Some CollectionTV t ->
+      this#on_targ acc t
+    | Some CollectionTKV (tk, tv) ->
+      let acc = this#on_targ acc tk in
+      let acc = this#on_targ acc tv in
+      acc
+    | None -> acc in
     let acc = List.fold_left this#on_afield acc afl in
     acc
 

@@ -105,6 +105,9 @@ and gconst = {
 }
 
 and targ = hint
+and collection_targ =
+  | CollectionTV of targ
+  | CollectionTKV of targ * targ
 
 and tparam = {
   tp_variance: variance;
@@ -418,10 +421,10 @@ and block = stmt list
 and expr = pos * expr_
 and expr_ =
   | Array of afield list
-  | Varray of expr list
-  | Darray of (expr * expr) list
+  | Varray of targ option * expr list
+  | Darray of (targ * targ) option * (expr * expr) list
   | Shape of (shape_field_name * expr) list
-  | Collection of id * afield list
+  | Collection of id * collection_targ option * afield list
   | Null
   | True
   | False

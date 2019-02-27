@@ -25,10 +25,10 @@ let rec expr_requires_deep_init (_, expr_) =
     expr_requires_deep_init e1 || expr_requires_deep_init e2
   | A.Lvar _ | A.Null | A.False | A.True | A.Int _
   | A.Float _ | A.String _ -> false
-  | A.Array fields | A.Collection ((_, ("keyset" | "vec" | "dict")), fields) ->
+  | A.Array fields | A.Collection ((_, ("keyset" | "vec" | "dict")), _, fields) ->
     List.exists fields aexpr_requires_deep_init
-  | A.Varray fields -> List.exists fields expr_requires_deep_init
-  | A.Darray fields -> List.exists fields expr_pair_requires_deep_init
+  | A.Varray (_, fields) -> List.exists fields expr_requires_deep_init
+  | A.Darray (_, fields) -> List.exists fields expr_pair_requires_deep_init
   | A.Id(_, ("__FILE__" | "__DIR__")) -> false
   | A.Class_const ((_, A.Id (_, s)), (_, p)) ->
     class_const_requires_deep_init s p
@@ -132,7 +132,7 @@ let from_ast
                          (Hhbc_id.Prop.to_raw_string pid));
       let is_collection_map =
         match snd expr with
-        | A.Collection ((_, ("Map" | "ImmMap")), _) -> true
+        | A.Collection ((_, ("Map" | "ImmMap")), _, _) -> true
         | _ -> false
       in
       let deep_init = not is_static && expr_requires_deep_init expr in

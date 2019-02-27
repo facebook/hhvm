@@ -559,6 +559,9 @@ let non_re_prefix = "Only `re`-prefixed strings allowed."
 let collection_intrinsic_generic =
   "Cannot initialize collection builtins with type parameters"
 
+let collection_intrinsic_many_typeargs =
+  "Collection expression must have less than three type arguments"
+
 let invalid_hack_mode =
   "Incorrect comment; possible values include strict, partial, or empty"
 

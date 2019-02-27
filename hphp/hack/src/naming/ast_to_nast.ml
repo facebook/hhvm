@@ -60,6 +60,8 @@ let optional f = function
   | None -> None
   | Some x -> Some (f x)
 
+let both f (p1, p2) = (f p1, f p2)
+
 let rec on_variadic_hint h =
   match h with
   | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
@@ -228,13 +230,18 @@ and on_xhp_attribute a : Aast.xhp_attribute =
 
 and on_targ h : Aast.targ = on_hint h
 
+and on_collection_targ targ = match targ with
+  | Some CollectionTKV (tk, tv) -> Some (Aast.CollectionTKV (on_targ tk, on_targ tv))
+  | Some CollectionTV tv -> Some (Aast.CollectionTV (on_targ tv))
+  | None -> None
+
 and on_expr (p, e) : Aast.expr =
   let node = match e with
   | Array al -> Aast.Array (on_list on_afield al)
-  | Varray el -> Aast.Varray (on_list on_expr el)
-  | Darray d -> Aast.Darray (on_list on_darray_element d)
+  | Varray (ta, el) -> Aast.Varray (optional on_targ ta, on_list on_expr el)
+  | Darray (tap, d) -> Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
   | Shape s -> Aast.Shape (on_list on_shape s)
-  | Collection (id, al) -> Aast.Collection (id, on_list on_afield al)
+  | Collection (id, tal, al) -> Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
   | Null -> Aast.Null
   | True -> Aast.True
   | False -> Aast.False

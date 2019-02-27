@@ -906,7 +906,7 @@ and emit_shape env expr fl =
              ~f:(fun (fn, e) ->
                    ((p, extract_shape_field_name_pstring env fn), e))
   in
-  emit_expr ~need_ref:false env (p, A.Darray fl)
+  emit_expr ~need_ref:false env (p, A.Darray (None, fl))
 
 and emit_call_expr env pos e targs args uargs async_eager_label =
   match snd e, targs, args, uargs with
@@ -1248,7 +1248,7 @@ and emit_xhp env p id attributes children =
         (spread_id + 1, attr::attrs) in
   let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
   let attribute_map = p, A.Shape (List.rev attributes) in
-  let children_vec = p, A.Varray children in
+  let children_vec = p, A.Varray (None, children) in
   let filename = p, A.Id (p, "__FILE__") in
   let line = p, A.Id (p, "__LINE__") in
   let renamed_id = rename_xhp id in
@@ -1848,17 +1848,17 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.Array es ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_collection env expr es
-  | A.Darray es ->
+  | A.Darray (ta, es) ->
     emit_pos_then pos @@
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    let darray_e = fst expr, A.Darray es in
+    let darray_e = fst expr, A.Darray (ta, es) in
     emit_box_if_necessary pos need_ref @@ emit_collection env darray_e es2
-  | A.Varray es ->
+  | A.Varray (ta, es) ->
     emit_pos_then pos @@
     let es2 = List.map ~f:(fun e -> A.AFvalue e) es in
-    let varray_e = fst expr, A.Varray es in
+    let varray_e = fst expr, A.Varray (ta, es) in
     emit_box_if_necessary pos need_ref @@ emit_collection env varray_e es2
-  | A.Collection ((pos, name), fields) ->
+  | A.Collection ((pos, name), _, fields) ->
     emit_box_if_necessary pos need_ref
       @@ emit_named_collection env expr pos name fields
   | A.Clone e ->
@@ -2053,16 +2053,16 @@ and is_struct_init env es allow_numerics =
 and emit_dynamic_collection env (pos, expr_) es =
   let count = List.length es in
   match expr_ with
-  | A.Collection ((_, "vec"), _) ->
+  | A.Collection ((_, "vec"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewVecArray n)
-  | A.Collection ((_, "keyset"), _) ->
+  | A.Collection ((_, "keyset"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewKeysetArray n)
-  | A.Collection ((_, "dict"), _) ->
+  | A.Collection ((_, "dict"), _, _) ->
      if is_struct_init env es true then
        emit_struct_array env pos es instr_newstructdict
      else
        emit_keyvalue_collection "dict" env pos es (NewDictArray count)
-  | A.Collection ((_, name), _)
+  | A.Collection ((_, name), _, _)
      when SU.strip_ns name = "Set"
       || SU.strip_ns name = "ImmSet"
       || SU.strip_ns name = "Map"
@@ -2112,7 +2112,7 @@ and emit_named_collection env expr pos name fields =
       instr_newcol collection_type
     else
     gather [
-      emit_collection env (pos, A.Collection ((pos, "vec"), fields)) fields;
+      emit_collection env (pos, A.Collection ((pos, "vec"), None, fields)) fields;
       instr_colfromarray collection_type;
     ]
   | "Map" | "ImmMap" | "Set" | "ImmSet" ->

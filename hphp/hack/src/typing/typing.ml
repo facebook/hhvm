@@ -1461,9 +1461,13 @@ and expr_
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
         match th with
-        | Some _ ->
-          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
-          env, None, None
+        | Some (
+          ((pk, _) as tk),
+          ((pv, _) as tv)
+        ) ->
+          let env, localtk = Phase.localize_hint_with_self env tk in
+          let env, localtv = Phase.localize_hint_with_self env tv in
+          env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
         | None -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
             | env, Some (pos, ur, ety) ->
@@ -1491,9 +1495,9 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match th with
-        | Some _ ->
-          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
-          env, None
+        | Some ((pv, _) as tv) ->
+          let env, localtv = Phase.localize_hint_with_self env tv in
+          env, Some (pv, Reason.URhint, localtv)
         | None -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
@@ -1514,9 +1518,9 @@ and expr_
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match th with
-        | Some _ ->
-          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
-          env, None
+        | Some ((pv, _) as tv) ->
+          let env, localtv = Phase.localize_hint_with_self env tv in
+          env, Some (pv, Reason.URhint, localtv)
         | None ->
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
@@ -1543,9 +1547,13 @@ and expr_
       (* Use expected type to determine expected key and value types *)
       let env, kexpected, vexpected =
         match th with
-        | Some _ ->
-          Errors.unimplemented_feature p "explicit intrinsic type arguments unsupported.";
-          env, None, None
+        | Some (
+          ((pk, _) as tk),
+          ((pv, _) as tv)
+        ) ->
+          let env, localtk = Phase.localize_hint_with_self env tk in
+          let env, localtv = Phase.localize_hint_with_self env tv in
+          env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
         | None -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->

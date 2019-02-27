@@ -1,0 +1,2 @@
+<?hh
+hphp_debug_break();

@@ -42,6 +42,76 @@ void Debugger::setTransport(DebugTransport* transport) {
   setClientConnected(m_transport->clientConnected());
 }
 
+bool Debugger::getDebuggerOption(const HPHP::String& option) {
+  std::string optionStr = option.toCppString();
+
+  // It's easier for the user if this routine is not case-sensitive.
+  std::transform(optionStr.begin(), optionStr.end(), optionStr.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+
+  DebuggerOptions options = getDebuggerOptions();
+
+  if (optionStr == "showdummyonasyncpause") {
+    return options.showDummyOnAsyncPause;
+  } else if (optionStr == "warnoninterceptedfunctions") {
+    return options.warnOnInterceptedFunctions;
+  } else if (optionStr == "notifyonbpcalibration") {
+    return options.notifyOnBpCalibration;
+  } else if (optionStr == "disableuniquevarref") {
+    return options.disableUniqueVarRef;
+  } else if (optionStr == "disabledummypsps") {
+    return options.disableDummyPsPs;
+  } else {
+    raise_error("setDebuggerOption: Unknown option specified");
+  }
+}
+
+void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
+  std::string optionStr = option.toCppString();
+
+  // It's easier for the user if this routine is not case-sensitive.
+  std::transform(optionStr.begin(), optionStr.end(), optionStr.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+
+  DebuggerOptions options = getDebuggerOptions();
+
+  if (optionStr == "showdummyonasyncpause") {
+    options.showDummyOnAsyncPause = value;
+  } else if (optionStr == "warnoninterceptedfunctions") {
+    options.warnOnInterceptedFunctions = value;
+  } else if (optionStr == "notifyonbpcalibration") {
+    options.notifyOnBpCalibration = value;
+  } else if (optionStr == "disableuniquevarref") {
+    options.disableUniqueVarRef = value;
+  } else if (optionStr == "disabledummypsps") {
+    options.disableDummyPsPs = value;
+  } else {
+    raise_error("getDebuggerOption: Unknown option specified");
+  }
+
+  setDebuggerOptions(options);
+}
+
+void Debugger::setDebuggerOptions(DebuggerOptions options) {
+  Lock lock(m_lock);
+  m_debuggerOptions = options;
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Client options set:\n"
+      "showDummyOnAsyncPause: %s\n"
+      "warnOnInterceptedFunctions: %s\n"
+      "notifyOnBpCalibration: %s\n"
+      "disableUniqueVarRef: %s\n",
+      "disableDummyPsPs: %s\n",
+    options.showDummyOnAsyncPause ? "YES" : "NO",
+    options.warnOnInterceptedFunctions ? "YES" : "NO",
+    options.notifyOnBpCalibration ? "YES" : "NO",
+    options.disableUniqueVarRef ? "YES" : "NO",
+    options.disableDummyPsPs ? "YES" : "NO"
+  );
+}
+
 void Debugger::runSessionCleanupThread() {
   bool terminating = false;
   std::unordered_set<DebuggerSession*> sessionsToDelete;

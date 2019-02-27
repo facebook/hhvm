@@ -673,8 +673,6 @@ and fun_param env (_pos, _name) _f_type _byref param =
   maybe expr env param.param_expr;
 
 and stmt env = function
-  | Return (p, _) when env.t_is_finally ->
-    Errors.return_in_finally p; ()
   | Return (_, None)
   | GotoLabel _
   | Goto _

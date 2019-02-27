@@ -17,25 +17,37 @@ type control_context =
 | LoopContext
 | SwitchContext
 
-type ctx = { imm_ctrl_ctx: control_context }
+type ctx = {
+  control_context: control_context;
+  is_finally: bool;
+}
 
-let default_ctx = { imm_ctrl_ctx = Toplevel }
+let default_ctx = {
+  control_context = Toplevel;
+  is_finally = false;
+}
 
-let visitor = object(_this)
+let visitor = object(this)
   inherit [ctx] Nast_visitor.iter_with_state as super
 
-  method! on_Do (env, _) = super#on_Do (env, { imm_ctrl_ctx = LoopContext })
-  method! on_While (env, _) = super#on_While (env, { imm_ctrl_ctx = LoopContext })
-  method! on_For (env, _) = super#on_For (env, { imm_ctrl_ctx = LoopContext })
-  method! on_Foreach (env, _) = super#on_Foreach (env, { imm_ctrl_ctx = LoopContext })
-  method! on_Switch (env, _) = super#on_Switch (env, { imm_ctrl_ctx = SwitchContext })
-  method! on_Efun (env, _) = super#on_Efun (env, { imm_ctrl_ctx = Toplevel })
+  method! on_Do (env, ctx) = super#on_Do (env, { ctx with control_context = LoopContext })
+  method! on_While (env, ctx) = super#on_While (env, { ctx with control_context = LoopContext })
+  method! on_For (env, ctx) = super#on_For (env, { ctx with control_context = LoopContext })
+  method! on_Foreach (env, ctx) = super#on_Foreach (env, { ctx with control_context = LoopContext })
+  method! on_Switch (env, ctx) = super#on_Switch (env, { ctx with control_context = SwitchContext })
+  method! on_Efun (env, _) = super#on_Efun (env, default_ctx)
+  method! on_Lfun (env, _) = super#on_Lfun (env, default_ctx)
+
+  method! on_Try (env, ctx) b _cl fb =
+    this#on_block (env, ctx) b;
+    this#on_block (env, { ctx with is_finally = true }) fb;
 
   method! on_stmt (env, ctx) s =
-    begin match s, ctx.imm_ctrl_ctx with
+    begin match s, ctx.control_context with
     | Break p, Toplevel -> Errors.toplevel_break p
     | Continue p, Toplevel -> Errors.toplevel_continue p
     | Continue p, SwitchContext -> Errors.continue_in_switch p
+    | Return (p, _), _ when ctx.is_finally -> Errors.return_in_finally p
     | _ -> ()
     end;
     super#on_stmt (env, ctx) s

@@ -6,4 +6,4 @@
     sys_utils
     utils_core
     utils_ocaml_overrides
-    utils_stack))
+    stack_utils))

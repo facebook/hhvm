@@ -129,16 +129,18 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * @return - a `Set` with the current values of the current `Pair`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toSet(): Set<arraykey>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toSet(): Set<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) with the values of the current `Pair`.
    *
    * @return - an `ImmSet` with the current values of the current `Pair`.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toImmSet(): ImmSet<arraykey>;
+  <<__Rx, __MaybeMutable>>
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toImmSet(): ImmSet<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns a lazy, access elements only when needed view of the current

@@ -125,8 +125,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Set` containing the unique values of the current `Vector`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toSet(): Set<Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) based on the values of the current
@@ -134,8 +134,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - An `ImmSet` containing the unique values of the current `Vector`.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toImmSet(): ImmSet<Tv>;
+  <<__Rx, __MaybeMutable>>
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable copy (`ImmVector`) of the current `Vector`.
@@ -603,9 +603,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    */
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf<Tv2>(
-    /* HH_FIXME[4110] T40426954 */
     ?KeyedContainer<Tv,Tv2> $container,
-  ): Vector<Tv>;
+  ): Vector<Tv> where Tv as arraykey;
 
   /**
    * Removes the key/value pair with the specified key from the current

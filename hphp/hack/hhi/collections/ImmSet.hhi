@@ -321,8 +321,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4110] T40426954 */
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): /* HH_FIXME[4110] T40426954 */ ImmSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -342,9 +341,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *           operation on the current `ImmSet`'s values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  /* HH_FIXME[4110] T40426954 */
-  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback):
-  /* HH_FIXME[4110] T40426954 */ ImmSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -402,8 +399,11 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *           with the provided `Traversable`; one of these must be empty or
    *           an exception is thrown.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function zip<Tu as arraykey>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ImmSet<arraykey>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+  /* HH_FIXME[4110] need bottom type as generic */
+  ): ImmSet<Pair<Tv, Tu>>;
 
   /**
    * Returns an `ImmSet` containing the first n values of the current `ImmSet`.

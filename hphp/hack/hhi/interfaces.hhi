@@ -330,8 +330,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - a `Set` converted from the current `Iterable`.
    */
-  /* HH_FIXME[4110] T40426954 */
-  public function toSet(): Set<Tv>;
+  public function toSet(): Set<Tv> where Tv as arraykey;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
    *
@@ -339,8 +338,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
-  /* HH_FIXME[4110] T40426954 */
-  public function toImmSet(): ImmSet<Tv>;
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `Iterable`.
@@ -562,16 +560,15 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - a `Map` that has the keys and associated values of the current
    *           `KeyedIterable`.
    */
-  /* HH_FIXME[4110] T40426954 */
-  public function toMap(): Map<Tk, Tv>;
+  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
    *
    * @return - an `ImmMap` that has the keys and associated values of the
    *           current `KeyedIterable`.
-   */ /* HH_FIXME[4110] T40426954 */
-  public function toImmMap(): ImmMap<Tk, Tv>;
+   */
+  public function toImmMap(): ImmMap<Tk, Tv> where Tk as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `KeyedIterable`.

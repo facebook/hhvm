@@ -1442,8 +1442,9 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): /* HH_FIXME[4110] T40426954 */ ConstSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  /* HH_FIXME[4110] explicitly not compatible with parent */
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1461,8 +1462,9 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    * @return - a `ConstSet` containing the values after a user-specified
    *           operation on the current `ConstSet`'s values is applied.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): /* HH_FIXME[4110] T40426954 */ ConstSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  /* HH_FIXME[4110] explicitly not compatible with parent */
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to each value.
@@ -1518,8 +1520,11 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
    * @return - The `ConstSet` that combines the values of the current
    *           `ConstSet` with the provided `Traversable`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): /* HH_FIXME[4110] T40426954 */ ConstSet<Pair<Tv, Tu>>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+  /* HH_FIXME[4110] need bottom type as generic */
+  ): ConstSet<Pair<Tv, Tu>>;
   /**
    * Returns a `ConstSet` containing the first `n` values of the current
    * `ConstSet`.
@@ -1720,8 +1725,8 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): /* HH_FIXME[4110] T40426954 */ MutableSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1739,8 +1744,8 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @return - a `MutableSet` containing the values after a user-specified
    *           operation on the current `MutableSet`'s values is applied.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): /* HH_FIXME[4110] T40426954 */ MutableSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to each value.
@@ -1797,9 +1802,10 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
    * @return - The `MutableSet` that combines the values of the current
    *           `MutableSet` with the provided `Traversable`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
-    /* HH_FIXME[4110] T40426954 */ MutableSet<Pair<Tv, Tu>>;
+  /* HH_FIXME[4110] need bottom type as generic */
+  MutableSet<Pair<Tv, Tu>>;
   /**
    * Returns a `MutableSet` containing the first `n` values of the current
    * `MutableSet`.

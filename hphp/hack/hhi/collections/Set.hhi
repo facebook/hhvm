@@ -66,7 +66,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *           each key of the `array` are the same as each value.
    */
   <<__Rx, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tv, Tv>;
+  public function toArray(): array<arraykey, Tv>;
 
   /**
    * Returns an `array` containing the values from the current `Set`.
@@ -119,8 +119,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - a `Map` that that contains the values of the current `Set`, with
    *           each key of the `Map` being the same as its value.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toMap(): Map<Tv, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function toMap(): Map<arraykey, Tv>;
 
   /**
    * Returns an immutable map (`ImmMap`) based on the values of the current
@@ -131,15 +131,15 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - an `ImmMap` that that contains the values of the current `Set`,
    *           with each key of the Map being the same as its value.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toImmMap(): ImmMap<Tv, Tv>;
+  <<__Rx, __MaybeMutable>>
+  public function toImmMap(): ImmMap<arraykey, Tv>;
 
   /**
    * Returns a deep copy of the current `Set`.
    *
    * @return - a `Set` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): Set<Tv>;
 
   /**
@@ -149,7 +149,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  <<__Rx, __MaybeMutable>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -159,7 +159,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
+  <<__Rx, __MaybeMutable>>
   public function immutable(): ImmSet<Tv>;
 
   /**
@@ -175,8 +175,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function lazy(): HH\Rx\KeyedIterable<Tv, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function lazy(): HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Set`.
@@ -217,8 +217,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): /* HH_FIXME[4110] T40426954 */ Set<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -237,8 +237,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - a `Set` containing the values after a user-specified operation
    *           on the current `Set`'s values is applied.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): /* HH_FIXME[4110] T40426954 */ Set<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -334,8 +334,11 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *           the provided `Traversable`; one of these must be empty or an
    *           exception is thrown.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): /* HH_FIXME[4110] T40426954 */ Set<Pair<Tv, Tu>>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+  /* HH_FIXME[4110] need bottom type as generic */
+  ): Set<Pair<Tv, Tu>>;
 
   /**
    * Returns a `Set` containing the first `n` values of the current `Set`.
@@ -647,8 +650,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
    *           if the `Traversable` is `null`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn>> /* HH_FIXME[4110] T40426954 */
-  public static function fromItems<Tv2>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv2> $items): /* HH_FIXME[4110] T40426954 */ Set<Tv2>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Set<Tv>;
 
   /**
    * Creates a `Set` from the keys of the specified container.

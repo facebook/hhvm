@@ -667,15 +667,6 @@ and method_ env m =
     m.m_fun_kind
     env
     named_body.fb_ast;
-  (match env.class_name with
-  | Some cname ->
-      let p, mname = m.m_name in
-      if String.lowercase (strip_ns cname) = String.lowercase mname
-          && env.class_kind <> Some Ast.Ctrait
-      then Errors.dangerous_method_name p
-      else ()
-  | None -> assert false)
-
 
 and fun_param env (_pos, _name) _f_type _byref param =
   maybe hint env param.param_hint;
@@ -909,11 +900,7 @@ and expr_ env _p = function
   | Assert (AE_assert e) ->
       expr env e;
       ()
-  | InstanceOf (e, e2) ->
-      (match e2 with
-      | _, CIexpr (_, Class_const ((_, CI (_, classname)), (p, "class"))) ->
-        Errors.classname_const_instanceof (Utils.strip_ns classname) p;
-      | _ -> ());
+  | InstanceOf (e, _) ->
       expr env e;
       ()
   | Is (e, h)

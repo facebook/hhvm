@@ -35,6 +35,12 @@ let handler = object
       then Errors.illegal_CLASS pos
       else if const = SN.PseudoConsts.g__TRAIT__ && ck <> Some Ast.Ctrait
       then Errors.illegal_TRAIT pos
+    | InstanceOf (_, e) ->
+      begin match snd e with
+      | CIexpr (_, Class_const ((_, CIexpr (_, Id(_, classname))), (p, "class"))) ->
+        Errors.classname_const_instanceof (Utils.strip_ns classname) p;
+      | _ -> ()
+      end;
     | _ -> ()
 
   method! at_fun_ _ f =

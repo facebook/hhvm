@@ -42,6 +42,7 @@ type control_context =
   | SwitchContext
 
 type env = {
+  t_is_finally: bool;
   function_name: string option;
   class_name: string option;
   class_kind: Ast.class_kind option;
@@ -63,7 +64,10 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Return (_, Some e) ->
         expr_allow_await f_type env e;
         ()
-    | (Ast.FGenerator | Ast.FAsyncGenerator), Return _ ->
+    | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
+        (match e with
+        None -> ()
+        | Some _ -> Errors.return_in_gen p);
         ()
     | Ast.FCoroutine, Return (_, e) ->
         Option.iter e ~f:(expr f_type env)
@@ -120,7 +124,7 @@ module CheckFunctionBody = struct
     | _, Try (b, cl, fb) ->
         block f_type env b;
         List.iter cl (catch f_type env);
-        block f_type env fb;
+        block f_type { env with t_is_finally = true } fb;
         ()
     | _, Def_inline _ -> ()
     | _, Let ((p, x), _, e) ->
@@ -370,7 +374,8 @@ let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let rec fun_ tenv f named_body =
-  let env = { is_array_append_allowed = false;
+  let env = { t_is_finally = false;
+              is_array_append_allowed = false;
               class_name = None; class_kind = None;
               typedef_tparams = [];
               tenv = tenv;
@@ -393,6 +398,7 @@ and func env f named_body =
     Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints in
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
+    t_is_finally = false;
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
@@ -518,7 +524,8 @@ and check_happly unchecked_tparams env h =
 
 and class_ tenv c =
   let cname = Some (snd c.c_name) in
-  let env = { is_array_append_allowed = false;
+  let env = { t_is_finally = false;
+              is_array_append_allowed = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               typedef_tparams = [];
@@ -726,7 +733,7 @@ and stmt env = function
   | Try (b, cl, fb) ->
       block env b;
       List.iter cl (catch env);
-      block env fb;
+      block { env with t_is_finally = true } fb;
       ()
   | Def_inline _ -> ()
   | Let ((p, x), _, e) ->
@@ -939,7 +946,8 @@ and field env (e1, e2) =
   ()
 
 let typedef tenv t =
-  let env = { is_array_append_allowed = false;
+  let env = { t_is_finally = false;
+              is_array_append_allowed = false;
               class_name = None; class_kind = None;
               function_name = None;
               (* Since typedefs cannot have constraints we shouldn't check

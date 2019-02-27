@@ -208,6 +208,17 @@ function hh_codegen_binary_routes() {
   );
 }
 
+function hhjs_babel_transform_path() {
+  return hphp_home().
+      '/buck-out/gen/hphp/hack/src/facebook/hhjs/babel_transforms/transform/transform.jsar';
+}
+
+// given a config file, returns true if the file contains hhvm.enable_hhjs = 1
+function is_hhjs_enabled($config) {
+  $contents = file_get_contents($config);
+  return preg_match('/^hhvm\.enable_hhjs\s*=\s*1$/', $contents) === 1;
+}
+
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
@@ -847,6 +858,10 @@ function extra_args($options): string {
 
 function hhvm_cmd_impl($options, $config, ...$extra_args) {
   $modes = (array)mode_cmd($options);
+  $hhjs_babel_transform_arg = is_hhjs_enabled($config)
+    ? '-vEval.HHJSBabelTransform='.hhjs_babel_transform_path()
+    : '';
+
   $cmds = array();
   foreach ($modes as $mode) {
     $args = array(
@@ -867,7 +882,7 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
         .escapeshellarg(bin_root().'/hackc_%{schema}'),
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
-
+      $hhjs_babel_transform_arg,
       extra_args($options),
     );
 

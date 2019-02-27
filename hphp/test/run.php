@@ -271,7 +271,7 @@ function hhvm_path() {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      exec("which hhvm 2> /dev/null", $output);
+      exec("which hhvm 2> /dev/null", &$output);
       if (isset($output[0]) && $output[0]) {
         return $output[0];
       }

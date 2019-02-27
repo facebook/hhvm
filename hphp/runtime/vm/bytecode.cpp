@@ -5705,25 +5705,17 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-    if (func->hasVariadicCaptureParam()) {
-      assertx(numArgs > 0);
-      assertx(
-        RuntimeOption::EvalHackArrDVArrs
-          ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-          : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-      );
-    }
-    Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
-  } else {
-    if (func->attrs() & AttrParamCoerceModeNull) {
-      ret.m_type = KindOfNull;
-    } else {
-      assertx(func->attrs() & AttrParamCoerceModeFalse);
-      ret.m_type = KindOfBoolean;
-      ret.m_data.num = 0;
-    }
+  Native::coerceFCallArgs(args, numArgs, numNonDefault, func);
+
+  if (func->hasVariadicCaptureParam()) {
+    assertx(numArgs > 0);
+    assertx(
+      RuntimeOption::EvalHackArrDVArrs
+        ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
+        : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
+    );
   }
+  Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);

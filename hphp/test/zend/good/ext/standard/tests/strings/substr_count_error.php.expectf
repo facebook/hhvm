@@ -1,17 +1,10 @@
 *** Testing error conditions ***
 
 Warning: %s
-NULL
 
 Notice: %s
 
 Warning: %s
-NULL
-
-Notice: %s
-
-Warning: %s
-bool(false)
 
 Notice: %s
 
@@ -26,7 +19,11 @@ bool(false)
 Notice: %s
 
 Warning: %s
-NULL
+bool(false)
+
+Notice: %s
+
+Warning: %s
 
 Notice: %s
 

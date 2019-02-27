@@ -1,7 +1,7 @@
 <?php
 
-var_dump(gmp_div_q());
-var_dump(gmp_div_q(""));
+try { var_dump(gmp_div_q()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_div_q("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 var_dump(gmp_div_q(0,1));
 var_dump(gmp_div_q(1,0));

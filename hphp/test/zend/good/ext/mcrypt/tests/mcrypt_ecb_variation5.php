@@ -106,7 +106,7 @@ $inputs = array(
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump(bin2hex( mcrypt_ecb($cipher, $key, $data, $mode, $value)));
+      try { var_dump(bin2hex( mcrypt_ecb($cipher, $key, $data, $mode, $value))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 fclose($fp);

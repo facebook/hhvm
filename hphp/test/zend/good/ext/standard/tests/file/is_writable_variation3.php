@@ -24,8 +24,8 @@ $misc_files = array(
 /* loop through to test each element in the above array 
    is a writable file */
 foreach( $misc_files as $misc_file ) {
-  var_dump( is_writable($misc_file) );
-  var_dump( is_writeable($misc_file) );
+  try { var_dump( is_writable($misc_file) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( is_writeable($misc_file) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   clearstatcache();
 }
 

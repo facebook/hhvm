@@ -9,7 +9,7 @@ $extra_arg_string = "Hello";
 echo "*** Testing gd_info() : error conditions ***\n";
 
 echo "\n-- Testing gd_info() function with more than expected number of arguments --\n";
-var_dump(gd_info($extra_arg_number));
-var_dump(gd_info($extra_arg_string, $extra_arg_number));
+try { var_dump(gd_info($extra_arg_number)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gd_info($extra_arg_string, $extra_arg_number)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

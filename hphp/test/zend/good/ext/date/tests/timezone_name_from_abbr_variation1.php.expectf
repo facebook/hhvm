@@ -21,22 +21,18 @@ string(13) "Europe/London"
 -- empty array --
 
 Warning: %s
-bool(false)
 
 -- int indexed array --
 
 Warning: %s
-bool(false)
 
 -- associative array --
 
 Warning: %s
-bool(false)
 
 -- nested arrays --
 
 Warning: %s
-bool(false)
 
 -- uppercase NULL --
 string(13) "Europe/London"
@@ -80,7 +76,6 @@ string(13) "Europe/London"
 -- instance of classWithoutToString --
 
 Warning: %s
-bool(false)
 
 -- undefined var --
 string(13) "Europe/London"
@@ -91,5 +86,4 @@ string(13) "Europe/London"
 -- resource --
 
 Warning: %s
-bool(false)
 ===DONE===

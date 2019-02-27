@@ -6,11 +6,11 @@
 echo "*** Testing str_rot13() : error conditions ***\n";
 
 echo "-- Testing str_rot13() function with Zero arguments --\n";
-var_dump( str_rot13() );
+try { var_dump( str_rot13() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n\n-- Testing str_rot13() function with more than expected no. of arguments --\n";
 $str = "str_rot13() tests starting";
 $extra_arg = 10;
-var_dump( str_rot13( $str, $extra_arg) );
+try { var_dump( str_rot13( $str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

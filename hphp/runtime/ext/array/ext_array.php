@@ -1542,7 +1542,7 @@ function hphp_array_idx(
  *
  */
 <<__Native("ActRec", "VariadicByRef")>>
-function array_multisort(mixed &$arr1, ...): bool;
+function array_multisort(mixed &$arr1, ...): mixed;
 
 namespace __SystemLib {
   /* array_map() returns an array containing all the elements of arr1 after

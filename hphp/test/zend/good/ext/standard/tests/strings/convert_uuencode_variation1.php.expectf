@@ -20,15 +20,12 @@ string(40) "2c2c3360512c432c542d3338572c2360500a600a"
 -- Iteration 10 --
 
 Warning: %s
-string(0) ""
 -- Iteration 11 --
 
 Warning: %s
-string(0) ""
 -- Iteration 12 --
 
 Warning: %s
-string(0) ""
 -- Iteration 13 --
 string(16) "212c3060600a600a"
 -- Iteration 14 --
@@ -46,7 +43,6 @@ string(48) "2d3c56254d3c26514528265d423a4635433d6060600a600a"
 -- Iteration 20 --
 
 Warning: %s
-string(0) ""
 -- Iteration 21 --
 string(0) ""
 -- Iteration 22 --

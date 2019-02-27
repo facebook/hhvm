@@ -72,7 +72,6 @@ enum class ExceptionKind {
   PhpException,
   CppException,
   InvalidSetMException,
-  TVCoercionException,
 };
 
 struct TIHash {
@@ -214,9 +213,6 @@ void unknownExceptionHandler() {
     } catch (const InvalidSetMException&) {
       ek = ExceptionKind::InvalidSetMException;
       throw;
-    } catch (const TVCoercionException&) {
-      ek = ExceptionKind::TVCoercionException;
-      throw;
     } catch (const req::root<Object>&) {
       ek = ExceptionKind::PhpException;
       throw;
@@ -293,7 +289,6 @@ tc_unwind_personality(int version,
   }();
 
   InvalidSetMException* ism = nullptr;
-  TVCoercionException* tce = nullptr;
 
   switch (exceptionKind) {
     case ExceptionKind::InvalidSetMException:
@@ -301,13 +296,6 @@ tc_unwind_personality(int version,
       if (actions & _UA_SEARCH_PHASE) {
         FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
                ism->tv().pretty());
-        return _URC_HANDLER_FOUND;
-      }
-      break;
-    case ExceptionKind::TVCoercionException:
-      tce = static_cast<TVCoercionException*>(exceptionFromUE(ue));
-      if (actions & _UA_SEARCH_PHASE) {
-        FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
         return _URC_HANDLER_FOUND;
       }
       break;
@@ -372,13 +360,13 @@ tc_unwind_personality(int version,
       sync_regstate(ip, context);
     }
 
-    TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
+    TypedValue tv = ism ? ism->tv() : TypedValue();
     // If we have a catch trace at the IP in the frame given by `context',
     // install it.
-    if (install_catch_trace(context, ip, ue, ism || tce, tv)) {
+    if (install_catch_trace(context, ip, ue, bool(ism), tv)) {
       // Note that we should always have a catch trace for the special runtime
       // helper exceptions above.
-      always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
+      always_assert(bool(ism) == bool(actions & _UA_HANDLER_FRAME));
       return _URC_INSTALL_CONTEXT;
     }
     always_assert(!(actions & _UA_HANDLER_FRAME));

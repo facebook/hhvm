@@ -24,10 +24,10 @@ var_dump( trim("\ttesting trim  ", true) );
 echo "\n*** Testing error conditions ***\n";
 
 //Zero arguments
-var_dump( trim() );
+try { var_dump( trim() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 // More than expected number of args */
-var_dump( trim("\tstring\n", "\t\n", $null_var) );
-var_dump( trim(NULL, "", NULL ) );
+try { var_dump( trim("\tstring\n", "\t\n", $null_var) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( trim(NULL, "", NULL ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 /* Use of class and objects */

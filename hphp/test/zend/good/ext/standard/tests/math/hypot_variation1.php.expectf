@@ -51,37 +51,30 @@ float(5)
 -- Iteration 17 --
 
 Warning: %s
-NULL
 
 -- Iteration 18 --
 
 Warning: %s
-NULL
 
 -- Iteration 19 --
 
 Warning: %s
-NULL
 
 -- Iteration 20 --
 
 Warning: %s
-NULL
 
 -- Iteration 21 --
 
 Warning: %s
-NULL
 
 -- Iteration 22 --
 
 Warning: %s
-NULL
 
 -- Iteration 23 --
 
 Warning: %s
-NULL
 
 -- Iteration 24 --
 float(5)
@@ -92,5 +85,4 @@ float(5)
 -- Iteration 26 --
 
 Warning: %s
-NULL
 ===Done===

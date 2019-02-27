@@ -41,13 +41,13 @@ function return_values() {
 
 function parameters() {
   __hhvm_intrinsics\dummy_varray_builtin(varray[1,2,3]);
-  __hhvm_intrinsics\dummy_varray_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_varray_builtin([1,2,3]);
+  try { __hhvm_intrinsics\dummy_varray_builtin(darray['a'=>1,'b'=>2,'c'=>3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { __hhvm_intrinsics\dummy_varray_builtin([1,2,3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo "====================================================\n";
 
-  __hhvm_intrinsics\dummy_darray_builtin(varray[1,2,3]);
+  try { __hhvm_intrinsics\dummy_darray_builtin(varray[1,2,3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   __hhvm_intrinsics\dummy_darray_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
-  __hhvm_intrinsics\dummy_darray_builtin([1,2,3]);
+  try { __hhvm_intrinsics\dummy_darray_builtin([1,2,3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo "====================================================\n";
 
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(varray[1,2,3]);
@@ -55,8 +55,8 @@ function parameters() {
   __hhvm_intrinsics\dummy_varr_or_darr_builtin([1,2,3]);
   echo "====================================================\n";
 
-  __hhvm_intrinsics\dummy_array_builtin(varray[1,2,3]);
-  __hhvm_intrinsics\dummy_array_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
+  try { __hhvm_intrinsics\dummy_array_builtin(varray[1,2,3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { __hhvm_intrinsics\dummy_array_builtin(darray['a'=>1,'b'=>2,'c'=>3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   __hhvm_intrinsics\dummy_array_builtin([1,2,3]);
   echo "====================================================\n";
 }

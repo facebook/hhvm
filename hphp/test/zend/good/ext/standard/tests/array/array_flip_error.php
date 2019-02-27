@@ -8,13 +8,13 @@ echo "*** Testing array_flip() : error conditions ***\n";
 
 // Zero arguments
 echo "-- Testing array_flip() function with Zero arguments --\n";
-var_dump( array_flip() );
+try { var_dump( array_flip() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //one more than the expected number of arguments
 echo "-- Testing array_flip() function with more than expected no. of arguments --\n";
 $input = array(1 => 'one', 2 => 'two');
 $extra_arg = 10;
-var_dump( array_flip($input, $extra_arg) );
+try { var_dump( array_flip($input, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done"
 ?>

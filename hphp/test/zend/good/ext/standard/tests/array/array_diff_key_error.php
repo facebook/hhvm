@@ -11,10 +11,10 @@ $array1 = array('blue' => 1, 'red' => 2, 'green' => 3, 'purple' => 4);
 
 // Testing array_diff_key with one less than the expected number of arguments
 echo "\n-- Testing array_diff_key() function with less than expected no. of arguments --\n";
-var_dump( array_diff_key($array1) );
+try { var_dump( array_diff_key($array1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing array_diff_key with no arguments
 echo "\n-- Testing array_diff_key() function with no arguments --\n";
-var_dump( array_diff_key() );
+try { var_dump( array_diff_key() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

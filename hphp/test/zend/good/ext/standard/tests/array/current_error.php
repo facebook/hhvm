@@ -13,12 +13,12 @@ echo "*** Testing current() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing current() function with Zero arguments --\n";
-var_dump( current() );
+try { var_dump( current() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test current with one more than the expected number of arguments
 echo "\n-- Testing current() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( current(&$array_arg, $extra_arg) );
+try { var_dump( current(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

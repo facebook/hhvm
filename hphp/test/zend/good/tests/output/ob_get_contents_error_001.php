@@ -8,11 +8,11 @@
 
 echo "*** Testing ob_get_contents() : error cases ***\n";
 
-var_dump(ob_get_contents("bob"));
+try { var_dump(ob_get_contents("bob")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ob_start();
 
-var_dump(ob_get_contents("bob2",345));
+try { var_dump(ob_get_contents("bob2",345)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

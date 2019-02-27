@@ -1,5 +1,5 @@
 <?php
 $image = imagecreatetruecolor(180, 30);
-$gamma = imagegammacorrect($image, 'string', 5);
+try { $gamma = imagegammacorrect($image, 'string', 5); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>

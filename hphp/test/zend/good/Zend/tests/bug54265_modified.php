@@ -16,6 +16,6 @@ function my_errorhandler($errno, $errormsg) {
   return null;
 }
 set_error_handler("my_errorhandler");
-$my_var = str_repeat("A", $my_var[0]->errormsg = "xyz");
+try { $my_var = str_repeat("A", $my_var[0]->errormsg = "xyz"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($my_var);
 ?>

@@ -16,8 +16,12 @@ function asdf($pattern) {
 function main() {
   $foo = new Foo();
   for ($i=0; $i<100; $i++) {
-    asdf(new Foo());
-    asdf(array());
+    try {
+      asdf(new Foo());
+    } catch (Exception $e) {}
+    try {
+      asdf(array());
+    } catch (Exception $e) {}
   }
 }
 main();

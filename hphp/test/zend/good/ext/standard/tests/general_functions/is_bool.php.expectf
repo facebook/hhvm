@@ -143,8 +143,6 @@ bool(false)
 *** Testing error conditions ***
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 Done

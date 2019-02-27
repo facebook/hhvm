@@ -3,25 +3,20 @@
 -- Testing escapeshellarg() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing escapeshellarg() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing escapeshellarg() function with a object supplied for argument --
 
 Warning: %s
-NULL
 
 -- Testing escapeshellarg() function with a resource supplied for argument --
 
 Warning: %s
-NULL
 
 -- Testing escapeshellarg() function with a array supplied for argument --
 
 Warning: %s
-NULL
 ===Done===

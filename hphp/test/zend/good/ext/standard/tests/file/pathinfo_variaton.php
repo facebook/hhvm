@@ -77,11 +77,11 @@ $counter = 1;
 /* loop through $paths to test each $path in the above array */
 foreach($paths as $path) {
   echo "-- Iteration $counter --\n";
-  var_dump( pathinfo($path) );
-  var_dump( pathinfo($path, PATHINFO_DIRNAME) );
-  var_dump( pathinfo($path, PATHINFO_BASENAME) );
-  var_dump( pathinfo($path, PATHINFO_EXTENSION) );
-  var_dump( pathinfo($path, PATHINFO_FILENAME) );
+  try { var_dump( pathinfo($path) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( pathinfo($path, PATHINFO_DIRNAME) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( pathinfo($path, PATHINFO_BASENAME) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( pathinfo($path, PATHINFO_EXTENSION) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( pathinfo($path, PATHINFO_FILENAME) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter++;
 }
 

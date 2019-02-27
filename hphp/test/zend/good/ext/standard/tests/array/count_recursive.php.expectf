@@ -84,20 +84,15 @@ For mode '' count is => int(3)
 
 -- Testing error conditions --
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Notice: %s
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Done

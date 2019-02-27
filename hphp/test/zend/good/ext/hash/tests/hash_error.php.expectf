@@ -3,15 +3,12 @@
 -- Testing hash() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Testing hash() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing hash() function with invalid hash algorithm --
 

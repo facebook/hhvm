@@ -1,7 +1,6 @@
 -- Too many arguments --
 
 Warning: %s
-NULL
 
 -- Bad Arg types --
 
@@ -25,13 +24,11 @@ float(%s)
 }
 
 Warning: %s
-NULL
 
 --> bad arg: object(stdClass)#%d (0) {
 }
 
 Warning: %s
-NULL
 
 --> bad arg: int(1)
 float(%s)

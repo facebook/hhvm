@@ -3,12 +3,10 @@
 -- Testing posix_getpwuid() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_getpwuid() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_getpwuid() function negative uid --
 bool(false)

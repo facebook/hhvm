@@ -3,5 +3,4 @@
 -- Testing get_declared_interfaces() function with one argument --
 
 Warning: %s
-NULL
 Done

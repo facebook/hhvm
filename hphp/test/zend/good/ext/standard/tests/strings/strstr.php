@@ -92,7 +92,7 @@ var_dump(strstr("$obj_string", "$obj_needle"));
 
 echo "\n-- passing an array as string and needle --\n";
 $needles = array("hello", "?world", "!$%**()%**[][[[&@#~!");
-var_dump( strstr($needles, $needles) );  // won't work
+try { var_dump( strstr($needles, $needles) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // won't work
 var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", "$needles[1]") );  // works
 var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", "$needles[2]") );  // works
 
@@ -100,8 +100,8 @@ var_dump( strstr("hello?world,!$%**()%**[][[[&@#~!", "$needles[2]") );  // works
 echo "\n-- passing Resources as string and needle --\n"; 
 $resource1 = fopen(__FILE__, "r");
 $resource2 = opendir(".");
-var_dump( strstr($resource1, $resource1) );
-var_dump( strstr($resource1, $resource2) );
+try { var_dump( strstr($resource1, $resource1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( strstr($resource1, $resource2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "\n-- Posiibilities with null --\n";
@@ -159,9 +159,9 @@ var_dump( strstr($str, chr(256)) );
 
 echo "\n*** Testing error conditions ***";
 var_dump( strstr($string, ""));
-var_dump( strstr() );  // zero argument
-var_dump( strstr("") );  // null argument 
-var_dump( strstr($string) );  // without "needle"
+try { var_dump( strstr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // zero argument
+try { var_dump( strstr("") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // null argument 
+try { var_dump( strstr($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // without "needle"
 var_dump( strstr("a", "b", "c") );  // args > expected
 var_dump( strstr(NULL, "") );
 

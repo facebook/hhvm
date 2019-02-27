@@ -24,7 +24,8 @@
 		curl_multi_exec($mh,&$running);
 	} while ($running>0);
 
-	$results1=curl_multi_getcontent(); //no parameter
+  $results1 = null;
+	try { $results1=curl_multi_getcontent(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  //no parameter
         $results2=curl_multi_getcontent($ch2);
 
 	//CLOSE

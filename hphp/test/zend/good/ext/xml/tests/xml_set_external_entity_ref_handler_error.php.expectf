@@ -3,10 +3,8 @@
 -- Testing xml_set_external_entity_ref_handler() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing xml_set_external_entity_ref_handler() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

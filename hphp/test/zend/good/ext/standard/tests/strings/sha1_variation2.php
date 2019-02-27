@@ -78,7 +78,7 @@ $values = array(
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1)." --\n";
   // use bin2hex to catch those cases were raw is true
-  var_dump( bin2hex(sha1($string, $values[$count])) );
+  try { var_dump( bin2hex(sha1($string, $values[$count])) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 //closing resource

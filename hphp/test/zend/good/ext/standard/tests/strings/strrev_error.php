@@ -6,9 +6,9 @@
 
 echo "*** Testing strrev() : error conditions ***\n";
 echo "-- Testing strrev() function with Zero arguments --";
-var_dump( strrev() );
+try { var_dump( strrev() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing strrev() function with more than expected no. of arguments --";
-var_dump( strrev("string", 'extra_arg') );
+try { var_dump( strrev("string", 'extra_arg') ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "*** Done ***";
 ?>

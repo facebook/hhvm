@@ -11,11 +11,9 @@ Warning: %s
 int(0)
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)
 
 Warning: %s
-NULL
 Done

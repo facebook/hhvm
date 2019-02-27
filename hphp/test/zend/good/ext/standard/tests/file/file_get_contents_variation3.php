@@ -108,7 +108,7 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( file_get_contents($absFile, $value) );
+      try { var_dump( file_get_contents($absFile, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 unlink($absFile);

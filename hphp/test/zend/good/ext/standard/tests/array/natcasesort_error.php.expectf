@@ -3,10 +3,8 @@
 -- Testing natcasesort() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing natcasesort() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

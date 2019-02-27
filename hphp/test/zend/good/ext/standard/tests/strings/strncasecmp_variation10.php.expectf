@@ -32,31 +32,26 @@ int(-%d)
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 16 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 17 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 18 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 19 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 20 --
 int(-%d)
 -- Iteration 21 --
@@ -82,7 +77,6 @@ int(-%d)
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 31 --
 int(-%d)
 *** Done ***

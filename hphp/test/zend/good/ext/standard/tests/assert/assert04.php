@@ -6,14 +6,14 @@ assert(1);
  
 /* Wrong parameter count in assert */
 assert_options(ASSERT_ACTIVE, 1);
-assert(2, "failure", 3);
+try { assert(2, "failure", 3); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 /* Wrong parameter count in assert_options */
-assert_options(ASSERT_ACTIVE, 0, 2);
+try { assert_options(ASSERT_ACTIVE, 0, 2); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 /* Wrong parameter name in assert_options */
 $test="ASSERT_FRED";
-assert_options($test, 1);
+try { assert_options($test, 1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 /* Assert false */
 assert(0);

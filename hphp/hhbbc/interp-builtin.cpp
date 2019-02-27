@@ -394,7 +394,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
           return folly::none;
         }
       }
-      return native_function_return_type(exact, false);
+      return native_function_return_type(exact);
     }();
     if (!precise_ty) return env.index.lookup_return_type(env.ctx, func);
     return *precise_ty;

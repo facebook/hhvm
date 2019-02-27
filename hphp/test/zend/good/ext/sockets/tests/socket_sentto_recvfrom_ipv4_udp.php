@@ -8,7 +8,7 @@
     }
 
     $address = '127.0.0.1';
-    socket_sendto($socket, '', 1, 0, $address); // cause warning
+    try { socket_sendto($socket, '', 1, 0, $address); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
     if (!socket_bind($socket, $address, 1223)) {
         die("Unable to bind to $address:1223");
     }
@@ -26,8 +26,8 @@
 
     $from = "";
     $port = 0;
-    socket_recvfrom($socket, &$buf, 12, 0); // cause warning
-    socket_recvfrom($socket, &$buf, 12, 0, &$from); // cause warning
+    try { socket_recvfrom($socket, &$buf, 12, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
+    try { socket_recvfrom($socket, &$buf, 12, 0, &$from); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
     $bytes_received = socket_recvfrom($socket, &$buf, 12, 0, &$from, &$port);
     if ($bytes_received == -1) {
         die('An error occurred while receiving from the socket');

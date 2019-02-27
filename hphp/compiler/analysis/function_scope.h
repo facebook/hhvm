@@ -111,7 +111,6 @@ struct FunctionScope : BlockScope {
   bool isRefReturn() const { return m_refReturn;}
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   void setDynamicInvoke();
-  bool isParamCoerceMode() const;
   bool mayContainThis();
   bool isClosure() const;
   bool isLambdaClosure() const;
@@ -226,7 +225,6 @@ struct FunctionScope : BlockScope {
 private:
   void init(AnalysisResultConstRawPtr ar);
 
-  int m_coerceMode{0};
   int m_minParam;
   int m_numDeclParams;
   int m_attribute;

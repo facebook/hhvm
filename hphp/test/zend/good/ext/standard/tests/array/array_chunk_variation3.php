@@ -62,7 +62,7 @@ $count = 1;
 // loop through each element of the array for preserve_keys
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump( array_chunk($input, $size, $value) );
+  try { var_dump( array_chunk($input, $size, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 

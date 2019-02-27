@@ -89,7 +89,7 @@ $values = array(
 // loop through each element of the array for red
 foreach($values as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( imagecolorallocate($im, $value, $green, $blue) );
+      try { var_dump( imagecolorallocate($im, $value, $green, $blue) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 ?>
 ===DONE===

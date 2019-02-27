@@ -19,15 +19,15 @@ $str = "john";
 
 /* Zero args */
 echo"\n*** Output for Zero Argument ***\n";
-array_slice();
+try { array_slice(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Single args */
 echo"\n*** Output for Single array Argument ***\n";
-array_slice($var_array);
+try { array_slice($var_array); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* More than valid no. of args (ie. >4 )  */
 echo"\n*** Output for invalid number of Arguments ***\n";
-array_slice($var_array, 2, 4, true, 3);
+try { array_slice($var_array, 2, 4, true, 3); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar arg */
 echo"\n*** Output for scalar Argument ***\n";

@@ -12,12 +12,12 @@ echo "*** Testing ctype_print() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing ctype_print() function with Zero arguments --\n";
-var_dump( ctype_print() );
+try { var_dump( ctype_print() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test ctype_print with one more than the expected number of arguments
 echo "\n-- Testing ctype_print() function with more than expected no. of arguments --\n";
 $c = 1;
 $extra_arg = 10;
-var_dump( ctype_print($c, $extra_arg) );
+try { var_dump( ctype_print($c, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

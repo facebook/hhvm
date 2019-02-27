@@ -84,7 +84,7 @@ for($index = 0; $index < count($values); $index ++)
   echo "-- Iteration $counter --\n";
   $num = $values[$index];
 
-  var_dump( array_fill($start_key,$num,$val) );
+  try { var_dump( array_fill($start_key,$num,$val) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
   $counter ++;
 }

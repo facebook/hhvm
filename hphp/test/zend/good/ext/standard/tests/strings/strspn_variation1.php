@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
-                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
+                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -89,9 +89,9 @@ $values = array(
 
 foreach($values as $value) {
       echo "\n-- Iteration with str value as \"$value\"\n";
-      var_dump( strspn($value,$mask) ); // with default args
-      var_dump( strspn($value,$mask,$start) );  // with default len value
-      var_dump( strspn($value,$mask,$start,$len) );  //  with all args
+      try { var_dump( strspn($value,$mask) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with default args
+      try { var_dump( strspn($value,$mask,$start) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // with default len value
+      try { var_dump( strspn($value,$mask,$start,$len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  //  with all args
 };
 
 // closing the resource

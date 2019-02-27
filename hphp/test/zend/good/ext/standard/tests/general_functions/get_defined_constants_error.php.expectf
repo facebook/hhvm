@@ -3,5 +3,4 @@
 -- Testing get_defined_constants() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

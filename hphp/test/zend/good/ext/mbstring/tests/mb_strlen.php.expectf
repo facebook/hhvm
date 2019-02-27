@@ -14,8 +14,10 @@
 43
 101
 == WRONG PARAMETERS ==
-ERR: Warning
 
-ERR: Warning
+Warning: strlen() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strlen.php on line 55
+
+
+Warning: strlen() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strlen.php on line 60
 
 ERR: Warning

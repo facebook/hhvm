@@ -71,10 +71,6 @@ struct ParamPrep {
   jit::vector<Info> info;
   uint32_t numByAddr{0};
 
-  // if set, coerceFailure determines the target of a failed coercion;
-  // if not set, we side-exit to the next byte-code instruction (only
-  //   applies to an inlined NativeImpl, or an FCallBuiltin).
-  Block* coerceFailure{nullptr};
   bool forNativeImpl{false};
 };
 
@@ -992,12 +988,11 @@ template <class LoadParam>
 ParamPrep
 prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
                SSATmp* numArgsExpr, uint32_t numArgs, uint32_t numNonDefault,
-               Block* coerceFailure, LoadParam loadParam) {
+               bool forNativeImpl, LoadParam loadParam) {
   auto ret = ParamPrep(numArgs);
   ret.thiz = thiz;
   ret.count = numArgsExpr;
-  ret.coerceFailure = coerceFailure;
-  ret.forNativeImpl = coerceFailure != nullptr;
+  ret.forNativeImpl = forNativeImpl;
 
   // Fill in in reverse order, since they may come from popC's (depending on
   // what loadParam wants to do).
@@ -1097,53 +1092,6 @@ struct CatchMaker {
     return exit;
   }
 
-  Block* makeParamCoerceCatch() const {
-    auto const exit = defBlock(env, Block::Hint::Unlikely);
-
-    BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
-    gen(env, BeginCatch);
-
-    // Determine whether we're dealing with a TVCoercionException or a php
-    // exception.  If it's a php-exception, we'll go to the taken block.
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
-      },
-      [&] {
-        hint(env, Block::Hint::Unused);
-        decRefParams();
-        prepareForCatch();
-        gen(env, EndCatch,
-          IRSPRelOffsetData { spOffBCFromIRSP(env) },
-          fp(env), sp(env));
-      }
-    );
-
-    // prepareForCatch() in the ifThen() above messed with irb's marker, so we
-    // have to update it on the fallthru path here.
-    updateMarker(env);
-
-    if (m_params.coerceFailure) {
-      gen(env, Jmp, m_params.coerceFailure);
-    } else {
-      // From here on we're on the side-exit path, due to a failure to coerce.
-      // We need to push the unwinder value and then side-exit to the next
-      // instruction.
-      hint(env, Block::Hint::Unlikely);
-      decRefParams();
-      if (m_params.thiz && m_params.thiz->type() <= TObj) {
-        decRef(env, m_params.thiz);
-      }
-
-      auto const val = gen(env, LdUnwinderValue, TCell);
-      push(env, val);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-    }
-
-    return exit;
-  }
-
   /*
    * DecRef the params in preparation for an exception or side
    * exit. Parameters that are not being passed through the stack
@@ -1226,21 +1174,21 @@ SSATmp* coerce_value(IRGS& env,
       return gen(env,
                  CoerceCellToInt,
                  FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
+                 maker.makeUnusualCatch(),
                  oldVal);
     }
     if (ty <= TDbl) {
       return gen(env,
                  CoerceCellToDbl,
                  FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
+                 maker.makeUnusualCatch(),
                  oldVal);
     }
     if (ty <= TBool) {
       return gen(env,
                  CoerceCellToBool,
                  FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
+                 maker.makeUnusualCatch(),
                  oldVal);
     }
 
@@ -1259,7 +1207,7 @@ SSATmp* coerce_value(IRGS& env,
   gen(env, StMem, misAddr, oldVal);
   gen(env, CoerceMem, ty,
       CoerceMemData { callee, paramIdx + 1 },
-      maker.makeParamCoerceCatch(), misAddr);
+      maker.makeUnusualCatch(), misAddr);
   return gen(env, LdMem, ty, misAddr);
 }
 
@@ -1275,7 +1223,7 @@ void coerce_stack(IRGS& env,
         CoerceStk,
         ty,
         CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
-        maker.makeParamCoerceCatch(),
+        maker.makeUnusualCatch(),
         sp(env));
   } else {
     always_assert(ty.isKnownDataType() || ty <= TNullableObj);
@@ -1441,7 +1389,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           }
           if (callee->isParamCoerceMode()) {
             gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
-                maker.makeParamCoerceCatch(), param.value);
+                maker.makeUnusualCatch(), param.value);
           } else {
             gen(env, CastMem, ty, maker.makeUnusualCatch(), param.value);
           }
@@ -1645,7 +1593,7 @@ void nativeImplInlined(IRGS& env) {
     nullptr,
     numArgs,
     numNonDefault,
-    nullptr,
+    false,
     [&] (uint32_t i, const Type) {
       return ldLoc(env, i, nullptr, DataTypeSpecific);
     }
@@ -1721,7 +1669,7 @@ void emitFCallBuiltin(IRGS& env,
     env, callee,
     nullptr, // no $this; FCallBuiltin never happens for methods
     nullptr, // count is constant numNonDefault
-    numArgs, numNonDefault, nullptr, [&](uint32_t /*i*/, const Type ty) {
+    numArgs, numNonDefault, false, [&](uint32_t /*i*/, const Type ty) {
       auto specificity =
         ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
       return pop(env, specificity);
@@ -1798,36 +1746,27 @@ void emitNativeImpl(IRGS& env) {
       }
     },
     [&] {
-      auto const ret = cond(
+      auto params = prepare_params(
         env,
-        [&] (Block* fail) {
-          auto params = prepare_params(
-            env,
-            callee,
-            thiz,
-            callee->takesNumArgs() ? numParams : nullptr,
-            callee->numParams(),
-            callee->numParams(),
-            fail,
-            [&] (uint32_t i, const Type) {
-              return gen(env, LdLocAddr, LocalId(i), fp(env));
-            }
-          );
-          auto const catcher = CatchMaker {
-            env,
-            CatchMaker::Kind::NotInlining,
-            callee,
-            &params
-          };
+        callee,
+        thiz,
+        callee->takesNumArgs() ? numParams : nullptr,
+        callee->numParams(),
+        callee->numParams(),
+        true,
+        [&] (uint32_t i, const Type) {
+          return gen(env, LdLocAddr, LocalId(i), fp(env));
+        }
+      );
+      auto const catcher = CatchMaker {
+        env,
+        CatchMaker::Kind::NotInlining,
+        callee,
+        &params
+      };
 
-          return builtinCall(env, callee, params,
-                             callee->numParams(), catcher);
-        },
-        [&] (SSATmp* ret) { return ret; },
-        [&] {
-          return callee->attrs() & AttrParamCoerceModeFalse ?
-            cns(env, false) : cns(env, TInitNull);
-        });
+      auto const ret = builtinCall(env, callee, params,
+                                   callee->numParams(), catcher);
       push(env, ret);
       emitRetC(env);
     },

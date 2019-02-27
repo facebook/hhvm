@@ -3,12 +3,10 @@
 -- Testing posix_getgrgid() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_getgrgid() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_getgrgid() function with a negative group id --
 bool(false)

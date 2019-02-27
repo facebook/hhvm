@@ -26,7 +26,7 @@ $operations = array(
 $i = 0;
 foreach($operations as $operation) {
   echo "\n--- Iteration $i ---";
-  var_dump(flock($fp, $operation));
+  try { var_dump(flock($fp, $operation)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $i++;
 }
 
@@ -36,14 +36,14 @@ $fp = fopen($file, "w");
 fclose($fp);
 var_dump(flock($fp, LOCK_SH|LOCK_NB));
 
-var_dump(flock("", "", &$var));
+try { var_dump(flock("", "", &$var)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args leass than expected */
-var_dump(flock());
-var_dump(flock($fp));
+try { var_dump(flock()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(flock($fp)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args greater than expected */
-var_dump(flock($fp, "", &$var, ""));
+try { var_dump(flock($fp, "", &$var, "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
 ?>

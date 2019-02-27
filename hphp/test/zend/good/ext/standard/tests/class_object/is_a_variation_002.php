@@ -71,7 +71,7 @@ $values = array(
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( is_a($object, $value) );
+      try { var_dump( is_a($object, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

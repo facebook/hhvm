@@ -12,12 +12,12 @@ echo "*** Testing end() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing end() function with Zero arguments --\n";
-var_dump( end() );
+try { var_dump( end() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test end with one more than the expected number of arguments
 echo "\n-- Testing end() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( end(&$array_arg, $extra_arg) );
+try { var_dump( end(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

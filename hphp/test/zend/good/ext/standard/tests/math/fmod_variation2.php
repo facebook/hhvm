@@ -76,7 +76,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(fmod(123456, $input));
+	try { var_dump(fmod(123456, $input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	$iterator++;
 };
 fclose($fp);

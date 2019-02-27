@@ -6,7 +6,7 @@
    while(!$dir->isFile()) {
       $dir->next();
    }
-   echo $dir->getBasename(array());
+   try { echo $dir->getBasename(array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 <?php error_reporting(0); ?>
 <?php

@@ -19,16 +19,20 @@
 --float .5--
 0.5
 --empty array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
+Warning: fwrite() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --int indexed array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
+Warning: fwrite() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --associative array--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
+Warning: fwrite() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --nested arrays--
-Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
+Warning: fwrite() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --uppercase NULL--
 
@@ -49,7 +53,8 @@ Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
 --instance of classWithToString--
 Class A object
 --instance of classWithoutToString--
-Error: 2 - fwrite() expects parameter 2 to be string, object given, %s(%d)
+
+Warning: fwrite() expects parameter 2 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --undefined var--
 

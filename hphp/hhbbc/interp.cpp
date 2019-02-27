@@ -1584,10 +1584,8 @@ void in(ISS& env, const bc::NativeImpl&) {
   mayUseVV(env);
 
   if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
-    assert(env.ctx.func->attrs & AttrParamCoerceModeNull);
     auto const resCls = env.index.builtin_class(env.ctx.cls->name);
-    // Can still return null if parameter coercion fails
-    return doRet(env, union_of(objExact(resCls), TInitNull), true);
+    return doRet(env, objExact(resCls), true);
   }
 
   if (env.ctx.func->nativeInfo) {

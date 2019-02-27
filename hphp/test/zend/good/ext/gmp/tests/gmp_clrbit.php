@@ -24,9 +24,9 @@ var_dump(gmp_strval($n));
 
 $n = array();
 gmp_clrbit(&$n, 3);
-gmp_clrbit(&$n, 3, 1);
-gmp_clrbit(&$n);
-gmp_clrbit();
+try { gmp_clrbit(&$n, 3, 1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { gmp_clrbit(&$n); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { gmp_clrbit(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

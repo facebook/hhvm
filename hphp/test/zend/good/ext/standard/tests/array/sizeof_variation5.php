@@ -58,7 +58,7 @@ for($i = 0; $i < count($mode_values); $i++)
   echo "-- Iteration $counter --\n";
   $mode = $mode_values[$i];
   
-  var_dump( sizeof($array1, $mode) );
+  try { var_dump( sizeof($array1, $mode) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter++;
 }

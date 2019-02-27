@@ -466,9 +466,6 @@ struct Func final {
    *    - If the return type is a string, array-like, object, ref, or resource
    *      type, null may also be returned.
    *
-   *    - If the function is marked with AttrParamCoerceModeFalse, then the
-   *      function can also return bool in addition to this type.
-   *
    *    - Likewise, if the function is marked AttrParamCoerceModeNull, null
    *      might also be returned.
    *

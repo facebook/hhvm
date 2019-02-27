@@ -39,22 +39,18 @@ float(%f)
 --empty array--
 
 Warning: %s
-NULL
 
 --int indexed array--
 
 Warning: %s
-NULL
 
 --associative array--
 
 Warning: %s
-NULL
 
 --nested arrays--
 
 Warning: %s
-NULL
 
 --uppercase NULL--
 array(4) {
@@ -149,12 +145,10 @@ float(%f)
 --instance of classWithToString--
 
 Warning: %s
-NULL
 
 --instance of classWithoutToString--
 
 Warning: %s
-NULL
 
 --undefined var--
 array(4) {

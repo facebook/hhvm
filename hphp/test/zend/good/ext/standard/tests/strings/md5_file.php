@@ -42,10 +42,10 @@ var_dump( md5_file(12) );
 var_dump( md5_file(NULL) );
 
 /* Zero arguments */
- var_dump ( md5_file() );
+ try { var_dump ( md5_file() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* More than valid number of arguments ( valid is 2)  */
-var_dump ( md5_file("md5_EmptyFile.txt", true, NULL) );
+try { var_dump ( md5_file("md5_EmptyFile.txt", true, NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Hexadecimal Output for Empty file as input */
 echo "\n*** Hexadecimal Output for Empty file as Argument ***\n";

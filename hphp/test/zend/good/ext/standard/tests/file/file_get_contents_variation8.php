@@ -26,7 +26,7 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  var_dump(file_get_contents($names_arr[$i]));
+  try { var_dump(file_get_contents($names_arr[$i])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 echo "\n*** Done ***\n";

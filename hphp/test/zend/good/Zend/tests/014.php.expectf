@@ -10,7 +10,6 @@ array(2) {
 }
 
 Warning: %s
-NULL
 array(2) {
   [0]=>
   string(%d) "%s"
@@ -19,7 +18,6 @@ array(2) {
 }
 
 Warning: %s
-NULL
 array(2) {
   [0]=>
   string(%d) "%s"

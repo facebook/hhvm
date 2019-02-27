@@ -3,5 +3,4 @@
 -- Testing ob_implicit_flush() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

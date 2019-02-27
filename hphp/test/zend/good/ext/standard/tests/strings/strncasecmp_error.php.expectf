@@ -2,18 +2,14 @@
 
 -- Testing strncasecmp() function with Zero arguments --
 Warning: %s
-NULL
 
 -- Testing strncasecmp() function with less than expected number of arguments --
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Testing strncasecmp() function with more than expected number of arguments --
 Warning: %s
-NULL
 
 -- Testing strncasecmp() function with invalid argument --
 Warning: %s

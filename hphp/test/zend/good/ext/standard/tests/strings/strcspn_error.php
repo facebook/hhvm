@@ -14,7 +14,7 @@ echo "*** Testing strcspn() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing strcspn() function with Zero arguments --\n";
-var_dump( strcspn() );
+try { var_dump( strcspn() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test strcspn with one more than the expected number of arguments
 echo "\n-- Testing strcspn() function with more than expected no. of arguments --\n";
@@ -25,12 +25,12 @@ $len = 20;
 
 
 $extra_arg = 10;
-var_dump( strcspn($str,$mask,$start,$len, $extra_arg) );
+try { var_dump( strcspn($str,$mask,$start,$len, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing strcspn withone less than the expected number of arguments
 echo "\n-- Testing strcspn() function with less than expected no. of arguments --\n";
 $str = 'string_val';
-var_dump( strcspn($str) );
+try { var_dump( strcspn($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done"
 ?>

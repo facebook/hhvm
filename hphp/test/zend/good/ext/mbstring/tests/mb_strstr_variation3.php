@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another 
+ * Description: Finds first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strstr() : usage variation ***\n";
@@ -100,22 +100,23 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for part
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      $res = mb_strstr($haystack, $needle, $value, $encoding);
+			$res = false;
+      try { $res = mb_strstr($haystack, $needle, $value, $encoding); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ($res === false) {
          var_dump($res);
       }
       else {
          var_dump(bin2hex($res));
-      }      
+      }
 };
 
 fclose($fp);

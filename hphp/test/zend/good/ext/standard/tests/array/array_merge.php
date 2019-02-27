@@ -75,7 +75,7 @@ var_dump(array_merge($begin_array[4], (array)"type1", (array)10, (array)12.34));
 
 echo "\n*** Testing error conditions ***";
 /* Invalid arguments */
-var_dump(array_merge());
+try { var_dump(array_merge()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(array_merge(100, 200));
 var_dump(array_merge($begin_array[0], $begin_array[1], 100));
 var_dump(array_merge($begin_array[0], $begin_array[1], $arr4));

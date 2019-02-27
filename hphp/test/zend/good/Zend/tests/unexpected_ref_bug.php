@@ -6,7 +6,7 @@ function my_errorhandler($errno,$errormsg) {
 }
 set_error_handler("my_errorhandler");
 $my_var = str_repeat("A",64);
-$data = call_user_func_array("explode",array(new StdClass(), &$my_var));
+try { $data = call_user_func_array("explode",array(new StdClass(), &$my_var)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $my_var=array(1,2,3);
 $data = call_user_func_array("implode",array(&$my_var, new StdClass()));
 echo "Done.\n";

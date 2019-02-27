@@ -20,15 +20,12 @@ string(19) "!---Hello World---!"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 string(19) "!---Hello World---!"
 -- Iteration 14 --
@@ -46,7 +43,6 @@ string(19) "!---Hello World---!"
 -- Iteration 20 --
 
 Warning: %s
-NULL
 -- Iteration 21 --
 string(19) "!---Hello World---!"
 -- Iteration 22 --

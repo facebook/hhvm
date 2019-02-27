@@ -3,12 +3,10 @@
 -- Too few arguments --
 
 Warning: %s
-NULL
 
 -- Too many arguments --
 
 Warning: %s
-NULL
 
 -- Invalid extension name --
 bool(false)

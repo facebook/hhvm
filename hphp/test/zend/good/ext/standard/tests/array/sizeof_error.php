@@ -11,13 +11,13 @@
 echo "*** Testing sizeof() : error conditions ***\n";
 
 echo "-- Testing sizeof() with zero arguments --\n";
-var_dump( sizeof() );
+try { var_dump( sizeof() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "-- Testing sizeof() function with more than two arguments under COUNT_NORMAL mode --\n";
 $var = 100;
 $extra_arg = 10;;
-var_dump( sizeof($var, COUNT_NORMAL, $extra_arg) );
+try { var_dump( sizeof($var, COUNT_NORMAL, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "-- Testing sizeof() function with more than two arguments under COUNT_RECURSIVE mode --\n";
-var_dump( sizeof($var, COUNT_RECURSIVE, $extra_arg) );
+try { var_dump( sizeof($var, COUNT_RECURSIVE, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

@@ -3,7 +3,6 @@
 -- Testing json_encode() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing json_encode() function with more than expected no. of arguments --
 string(5) ""abc""

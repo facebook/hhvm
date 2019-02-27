@@ -4,7 +4,7 @@
 // output to linux. This could be a php.net bug on windows or a windows querk.
 $filename = dirname(__FILE__)."/touch.dat";
 
-var_dump(touch());
+try { var_dump(touch()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(touch($filename));
 var_dump(filemtime($filename));
 @unlink($filename);

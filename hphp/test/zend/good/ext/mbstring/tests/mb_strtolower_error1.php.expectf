@@ -3,10 +3,8 @@
 -- Testing mb_strtolower() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing mb_strtolower() function with zero arguments --
 
 Warning: %s
-NULL
 Done

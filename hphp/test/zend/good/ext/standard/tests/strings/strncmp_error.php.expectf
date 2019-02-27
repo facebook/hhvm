@@ -1,16 +1,12 @@
 *** Testing strncmp() function: error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)

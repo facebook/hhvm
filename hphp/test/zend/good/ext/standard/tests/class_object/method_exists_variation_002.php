@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists 
+ * Description: Checks if the class method exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function __autoload($className) {
@@ -73,8 +73,8 @@ $values = array(
 // loop through each element of the array for method
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( method_exists($object, $value) );
+      echo "\nArg value $value\n";
+      try { var_dump( method_exists($object, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

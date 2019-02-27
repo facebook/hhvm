@@ -3,10 +3,8 @@
 -- Testing mcrypt_encrypt() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing mcrypt_encrypt() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

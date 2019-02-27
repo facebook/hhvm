@@ -14,9 +14,9 @@ var_dump(openssl_decrypt($wrong, $method, $password));
 var_dump(openssl_decrypt($wrong, $wrong, $password));
 var_dump(openssl_decrypt($encrypted, $wrong, $wrong));
 var_dump(openssl_decrypt($wrong, $wrong, $wrong));
-var_dump(openssl_decrypt(array(), $method, $password));
-var_dump(openssl_decrypt($encrypted, array(), $password));
-var_dump(openssl_decrypt($encrypted, $method, array()));
+try { var_dump(openssl_decrypt(array(), $method, $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(openssl_decrypt($encrypted, array(), $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(openssl_decrypt($encrypted, $method, array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // invalid using of an authentication tag
 var_dump(openssl_encrypt($data, $method, $password, 0, $iv, &$wrong));

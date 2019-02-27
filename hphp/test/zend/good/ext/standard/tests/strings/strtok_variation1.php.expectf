@@ -26,23 +26,18 @@ string(3) "0.5"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(1) "1"
 -- Iteration 16 --
@@ -68,5 +63,4 @@ bool(false)
 -- Iteration 26 --
 
 Warning: %s
-NULL
 Done

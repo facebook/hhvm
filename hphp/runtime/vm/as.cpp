@@ -2556,9 +2556,7 @@ MaybeDataType type_constraint_to_data_type(LowStringPtr user_type,
 }
 
 static const StaticString
-  s_AllowStatic("__AllowStatic"),
-  s_ParamCoerceModeNull("__ParamCoerceModeNull"),
-  s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
+  s_AllowStatic("__AllowStatic");
 
 
 /*
@@ -2595,17 +2593,6 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
     // set extra attributes for builtin native functions
     if (!SystemLib::s_inited) {
       as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
-    }
-
-    if (as.fe->userAttributes.count(s_ParamCoerceModeFalse.get())) {
-      as.fe->attrs |= AttrParamCoerceModeFalse;
-    }
-    if (as.fe->userAttributes.count(s_ParamCoerceModeNull.get())) {
-      as.fe->attrs |= AttrParamCoerceModeNull;
-    }
-    if (!(as.fe->attrs &
-        (AttrParamCoerceModeFalse | AttrParamCoerceModeNull))) {
-      as.fe->attrs |= AttrParamCoerceModeNull;
     }
 
     for (auto& pi : as.fe->params) {

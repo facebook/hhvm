@@ -3,10 +3,8 @@
 -- Testing mb_substr_count() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing mb_substr_count() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

@@ -8,9 +8,7 @@ if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($info)) {
 	var_inspect($info);
 }
 
-if (!is_null($tmp = @mysql_get_client_info("too many arguments"))) {
-	printf("[003] Expecting NULL/NULL got %s/%s\n", $tmp, gettype($tmp));
-}
+try { mysql_get_client_info("too many arguments"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 print "done!";
 ?>

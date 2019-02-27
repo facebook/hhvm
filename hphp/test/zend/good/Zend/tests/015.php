@@ -1,8 +1,8 @@
 <?php
 
-var_dump(trigger_error());
+try { var_dump(trigger_error()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(trigger_error("error"));
-var_dump(trigger_error(array()));
+try { var_dump(trigger_error(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(trigger_error("error", -1));
 var_dump(trigger_error("error", 0));
 var_dump(trigger_error("error", E_USER_WARNING));

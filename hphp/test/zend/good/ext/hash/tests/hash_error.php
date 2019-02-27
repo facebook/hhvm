@@ -8,12 +8,12 @@
 echo "*** Testing hash() : error conditions ***\n";
 
 echo "\n-- Testing hash() function with less than expected no. of arguments --\n";
-var_dump(hash());
-var_dump(hash('adler32'));
+try { var_dump(hash()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(hash('adler32')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing hash() function with more than expected no. of arguments --\n";
 $extra_arg= 10; 
-var_dump(hash('adler32', '', false, $extra_arg));
+try { var_dump(hash('adler32', '', false, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing hash() function with invalid hash algorithm --\n";
 var_dump(hash('foo', ''));

@@ -3,5 +3,4 @@
 -- Testing array_push() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

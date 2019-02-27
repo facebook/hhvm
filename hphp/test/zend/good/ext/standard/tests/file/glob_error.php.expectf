@@ -2,16 +2,12 @@
 -- Testing glob() with unexpected no. of arguments --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Testing glob() with invalid arguments --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

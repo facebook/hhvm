@@ -9,11 +9,11 @@
 echo "*** Testing rtrim() : error conditions ***\n";
 
 echo "\n-- Testing rtrim() function with no arguments --\n";
-var_dump( rtrim() );
+try { var_dump( rtrim() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing rtrim() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( rtrim("Hello World",  "Heo", $extra_arg) );
+try { var_dump( rtrim("Hello World",  "Heo", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 $hello = "  Hello World\n";

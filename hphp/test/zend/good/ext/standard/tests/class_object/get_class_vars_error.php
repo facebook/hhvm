@@ -12,11 +12,11 @@ echo "*** Testing get_class_vars() : error conditions ***\n";
 echo "\n-- Testing get_class_vars() function with more than expected no. of arguments --\n";
 $obj = new stdclass();
 $extra_arg = 10;
-var_dump(get_class_vars($obj,$extra_arg) );
+try { var_dump(get_class_vars($obj,$extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing get_class_vars with one less than the expected number of arguments
 echo "\n-- Testing get_class_vars() function with less than expected no. of arguments --\n";
-var_dump(get_class_vars());
+try { var_dump(get_class_vars()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

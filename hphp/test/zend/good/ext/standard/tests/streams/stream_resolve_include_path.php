@@ -11,7 +11,7 @@ mkdir($include_path_nested);
 file_put_contents($include_path_file, 'include_path');
 file_put_contents($include_path_nested_file, 'include_path');
 
-var_dump(stream_resolve_include_path());
+try { var_dump(stream_resolve_include_path()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 set_include_path($include_path . PATH_SEPARATOR . $include_path_nested);
 var_dump(stream_resolve_include_path('file-does-not-exist'));

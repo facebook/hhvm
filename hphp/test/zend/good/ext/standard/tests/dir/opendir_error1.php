@@ -12,7 +12,7 @@ echo "*** Testing opendir() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing opendir() function with Zero arguments --\n";
-var_dump( opendir() );
+try { var_dump( opendir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test opendir with one more than the expected number of arguments
 echo "\n-- Testing opendir() function with more than expected no. of arguments --\n";
@@ -21,7 +21,7 @@ mkdir($path);
 $context = stream_context_create();
 
 $extra_arg = 10;
-var_dump( opendir($path, $context, $extra_arg) );
+try { var_dump( opendir($path, $context, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===
 <?php error_reporting(0); ?>

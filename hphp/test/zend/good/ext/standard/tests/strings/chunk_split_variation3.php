@@ -80,7 +80,7 @@ $values = array(
 // loop through each element of values for 'ending'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1)." --\n";
-  var_dump( chunk_split($str, $chunklen, $values[$count]) );
+  try { var_dump( chunk_split($str, $chunklen, $values[$count]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 echo "Done";

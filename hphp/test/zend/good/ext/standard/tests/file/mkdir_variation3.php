@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory 
+ * Description: Create a directory
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mkdir() : usage variation ***\n";
@@ -102,7 +102,8 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      $h = mkdir($pathname, $mode, $value);
+			$h = null;
+      try { $h = mkdir($pathname, $mode, $value); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ($h === true) {
          echo "Directory created\n";
          rmdir($pathname);

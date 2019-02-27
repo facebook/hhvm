@@ -3,5 +3,4 @@
 -- Testing posix_getpid() function with one argument --
 
 Warning: %s
-NULL
 Done

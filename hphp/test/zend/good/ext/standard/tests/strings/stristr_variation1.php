@@ -69,7 +69,7 @@ $pad_length = "20";
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  var_dump( stristr($input, " ") );
+  try { var_dump( stristr($input, " ") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

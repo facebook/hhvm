@@ -27,68 +27,48 @@ string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br 
 -- Iteration 4 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 5 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 6 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 7 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 8 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 9 --
 string(25) "testing
 wordwrap
@@ -124,42 +104,30 @@ bool(false)
 -- Iteration 13 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 15 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 16 --
 string(25) "testing
 wordwrap
@@ -181,42 +149,30 @@ bool(false)
 -- Iteration 18 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 19 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 20 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 21 --
 string(25) "testing
 wordwrap

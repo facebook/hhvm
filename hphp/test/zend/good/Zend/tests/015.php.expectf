@@ -1,12 +1,10 @@
 
 Warning: %s
-NULL
 
 Notice: %s
 bool(true)
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)

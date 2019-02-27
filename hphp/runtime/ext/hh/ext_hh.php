@@ -66,7 +66,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
@@ -86,13 +86,13 @@ function ffp_parse_string(string $program): array {
  * Operates on a single class at a time. Clearing the cache for $cls::$func
  * does not clear the cache for $otherClass::$func, for any other class.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
 
 /**
  * Clear memoization data on object instance
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_instance_memoization(object $obj) : bool;
 
 /**

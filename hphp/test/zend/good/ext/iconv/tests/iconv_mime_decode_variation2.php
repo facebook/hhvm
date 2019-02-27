@@ -88,7 +88,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( bin2hex(iconv_mime_decode($header, $input, $charset)));
+  try { var_dump( bin2hex(iconv_mime_decode($header, $input, $charset))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 

@@ -3,135 +3,108 @@
 Arg value 0 
 
 Warning: %s
-bool(false)
 
 Arg value 1 
 
 Warning: %s
-bool(false)
 
 Arg value 12345 
 
 Warning: %s
-bool(false)
 
 Arg value -2345 
 
 Warning: %s
-bool(false)
 
 Arg value 10.5 
 
 Warning: %s
-bool(false)
 
 Arg value -10.5 
 
 Warning: %s
-bool(false)
 
 Arg value 101234567000 
 
 Warning: %s
-bool(false)
 
 Arg value 1.07654321E-9 
 
 Warning: %s
-bool(false)
 
 Arg value 0.5 
 
 Warning: %s
-bool(false)
 
 Arg value Array 
 
 Warning: %s
-bool(false)
 
 Arg value Array 
 
 Warning: %s
-bool(false)
 
 Arg value Array 
 
 Warning: %s
-bool(false)
 
 Arg value Array 
 
 Warning: %s
-bool(false)
 
 Arg value Array 
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value 1 
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value 1 
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value string 
 
 Warning: %s
-bool(false)
 
 Arg value string 
 
 Warning: %s
-bool(false)
 
 Arg value testClass 
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 
 Arg value  
 
 Warning: %s
-bool(false)
 Done

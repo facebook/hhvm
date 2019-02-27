@@ -3,10 +3,8 @@
 -- Testing current() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing current() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

@@ -30,22 +30,18 @@ bool(false)
 --empty array--
 
 Warning: %s
-NULL
 
 --int indexed array--
 
 Warning: %s
-NULL
 
 --associative array--
 
 Warning: %s
-NULL
 
 --nested arrays--
 
 Warning: %s
-NULL
 
 --uppercase NULL--
 bool(false)
@@ -77,7 +73,6 @@ bool(false)
 --instance of classWithoutToString--
 
 Warning: %s
-NULL
 
 --undefined var--
 bool(false)

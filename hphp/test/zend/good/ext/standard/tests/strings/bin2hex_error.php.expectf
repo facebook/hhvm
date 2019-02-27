@@ -3,11 +3,9 @@
 -- Testing bin2hex() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing bin2hex() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
  
 ===DONE===

@@ -16,7 +16,8 @@ $signals = array(
 
 foreach ($signals as $signal) {
   $process = proc_open($cmd, $descriptors, &$pipes);
-  $result = proc_terminate($process, $signal);
+  $result = false;
+  try { $result = proc_terminate($process, $signal); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   var_dump($result);
 }
 }

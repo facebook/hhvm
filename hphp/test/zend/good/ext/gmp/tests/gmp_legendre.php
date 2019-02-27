@@ -19,9 +19,9 @@ var_dump(gmp_legendre(3, array()));
 var_dump(gmp_legendre(array(), 3));
 var_dump(gmp_legendre(array(), array()));
 
-var_dump(gmp_legendre(array(), array(), 1));
-var_dump(gmp_legendre(array()));
-var_dump(gmp_legendre());
+try { var_dump(gmp_legendre(array(), array(), 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_legendre(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_legendre()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

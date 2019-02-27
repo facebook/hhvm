@@ -1,6 +1,5 @@
 
 Warning: %s
-NULL
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "10"

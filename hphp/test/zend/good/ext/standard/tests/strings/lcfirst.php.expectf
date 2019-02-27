@@ -37,7 +37,6 @@ string(8) "12twelve"
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
 Warning: %s
-NULL
 
 --- Testing lowercamelcase action call example ---
 string(%d) "partnerName"

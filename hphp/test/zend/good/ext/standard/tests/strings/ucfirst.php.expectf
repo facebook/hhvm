@@ -37,7 +37,6 @@ string(8) "12twelve"
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
 Warning: %s
-NULL
 
 --- Testing objects ---
 string(12) "Hello, world"

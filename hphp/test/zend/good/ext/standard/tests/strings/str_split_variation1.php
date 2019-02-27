@@ -81,7 +81,7 @@ $values = array(
 // loop through each element of $values for 'str' argument
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1)." --\n";
-  var_dump( str_split($values[$count], $split_length) );
+  try { var_dump( str_split($values[$count], $split_length) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 //closing resource

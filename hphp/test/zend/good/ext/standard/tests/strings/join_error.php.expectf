@@ -3,12 +3,10 @@
 -- Testing join() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing join() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing join() with less than expected no. of arguments --
 

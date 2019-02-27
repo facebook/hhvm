@@ -1,10 +1,10 @@
 <?php
 /* Prototype  : string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another, case insensitive 
+ * Description: Finds first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
- 
+
 echo "*** Testing mb_stristr() : usage variation ***\n";
 
 // Define error handler
@@ -100,16 +100,17 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for part
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      $res = mb_stristr($haystack, $needle, $value, $encoding);
+      $res = false;
+      try { $res = mb_stristr($haystack, $needle, $value, $encoding); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ($res === false) {
          var_dump($res);
       }

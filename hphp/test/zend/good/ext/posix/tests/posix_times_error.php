@@ -10,7 +10,7 @@ echo "*** Testing posix_times() : error conditions ***\n";
 // One argument
 echo "\n-- Testing posix_times() function with one argument --\n";
 $extra_arg = 10;;
-var_dump( posix_times($extra_arg) );
+try { var_dump( posix_times($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

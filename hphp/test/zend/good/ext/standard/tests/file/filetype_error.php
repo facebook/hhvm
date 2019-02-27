@@ -14,10 +14,10 @@ print( filetype("string") );
 print( filetype(100) );
 
 /* No.of args less than expected */
-print( filetype() );
+try { print( filetype() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args greater than expected */
-print( filetype("file", "file") );
+try { print( filetype("file", "file") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
 ?>

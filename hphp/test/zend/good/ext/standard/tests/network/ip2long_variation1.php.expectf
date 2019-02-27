@@ -28,20 +28,20 @@ bool(false)
 bool(false)
 
 --empty array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --int indexed array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --associative array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --nested arrays--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --uppercase NULL--
 bool(false)
@@ -71,8 +71,8 @@ bool(false)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - ip2long() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --undefined var--
 bool(false)
@@ -81,6 +81,6 @@ bool(false)
 bool(false)
 
 --resource--
-Error: 2 - ip2long() expects parameter 1 to be string, resource given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 ===DONE===

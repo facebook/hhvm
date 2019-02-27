@@ -2,5 +2,4 @@ Basic test of POSIX posix_getcwd function
 string(%d) "%s"
 
 Warning: %s
-NULL
 ===DONE===

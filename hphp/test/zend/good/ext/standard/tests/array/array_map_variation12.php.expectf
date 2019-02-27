@@ -11,18 +11,6 @@ array(3) {
 -- with built-in function 'pow' and one parameter --
 
 Warning: %s
-
-Warning: %s
-
-Warning: %s
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
 -- with language construct --
 
 Warning: %s

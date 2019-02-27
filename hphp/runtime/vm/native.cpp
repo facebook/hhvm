@@ -274,13 +274,16 @@ void callFunc(const Func* func, void *ctx,
     auto ty = args[-i].m_type;                                  \
     if (!tvCoerceParamTo##kind##InPlace(&args[-i],              \
                                         func->isBuiltin())) {   \
-      raise_param_type_warning(                                 \
+      auto msg = param_type_error_message(                      \
         func->displayName()->data(),                            \
         i+1,                                                    \
         KindOf##warn_kind,                                      \
         args[-i].m_type                                         \
       );                                                        \
-      return false;                                             \
+      if (RuntimeOption::PHP7_EngineExceptions) {               \
+        SystemLib::throwTypeErrorObject(msg);                   \
+      }                                                         \
+      SystemLib::throwRuntimeExceptionObject(msg);              \
     } else {                                                    \
       if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&       \
           !equivDataTypes(ty, KindOf##warn_kind) &&             \
@@ -304,7 +307,7 @@ void callFunc(const Func* func, void *ctx,
     COERCE_OR_CAST(kind, kind)                          \
     break; /* end of case */
 
-bool coerceFCallArgs(TypedValue* args,
+void coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assertx(numArgs == func->numParams());
@@ -359,7 +362,7 @@ bool coerceFCallArgs(TypedValue* args,
 
     if (RuntimeOption::PHP7_ScalarTypes && call_uses_strict_types(func)) {
       tc.verifyParam(&args[-i], func, i);
-      return true;
+      return;
     }
 
     switch (*targetType) {
@@ -399,7 +402,7 @@ bool coerceFCallArgs(TypedValue* args,
     }
   }
 
-  return true;
+  return;
 }
 
 #undef CASE
@@ -433,18 +436,18 @@ bool nativeWrapperCheckArgs(ActRec* ar) {
     const Func::ParamInfoVec& paramInfo = func->params();
     for (auto i = numNonDefault; i < numArgs; ++i) {
       if (InvalidAbsoluteOffset == paramInfo[i].funcletOff) {
-        // There's at least one non-default param which wasn't passed
+        // There's at least one non-default param which wasn't passed, throw a
+        // RuntimeException
         throw_wrong_arguments_nr(getInvokeName(ar)->data(),
-              numNonDefault, minNumArgs(ar), numArgs, 1);
-        return false;
+              numNonDefault, minNumArgs(ar), numArgs);
       }
     }
   } else if (numNonDefault > numArgs && !func->hasVariadicCaptureParam()) {
-    // Too many arguments passed, raise a warning ourselves this time
+    // Too many arguments passed, throw a RuntimeException
     throw_wrong_arguments_nr(getInvokeName(ar)->data(),
-      numNonDefault, minNumArgs(ar), numArgs, 1);
-    return false;
+      numNonDefault, minNumArgs(ar), numArgs);
   }
+
   // Looks good
   return true;
 }
@@ -456,17 +459,16 @@ TypedValue* functionWrapper(ActRec* ar) {
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   TypedValue* args = ((TypedValue*)ar) - 1;
-  TypedValue rv;
-  rv.m_type = KindOfNull;
 
-  if (((numNonDefault == numArgs) ||
-       (nativeWrapperCheckArgs(ar))) &&
-      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
-    callFunc<usesDoubles>(func, nullptr, args, numNonDefault, rv);
-  } else if (func->attrs() & AttrParamCoerceModeFalse) {
-    rv.m_type = KindOfBoolean;
-    rv.m_data.num = 0;
+  if (numNonDefault != numArgs) {
+    nativeWrapperCheckArgs(ar);
   }
+
+  coerceFCallArgs(args, numArgs, numNonDefault, func);
+
+  TypedValue rv;
+  rv.m_type = KindOfUninit;
+  callFunc<usesDoubles>(func, nullptr, args, numNonDefault, rv);
 
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
@@ -482,33 +484,32 @@ TypedValue* methodWrapper(ActRec* ar) {
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
   TypedValue* args = ((TypedValue*)ar) - 1;
-  TypedValue rv;
-  rv.m_type = KindOfNull;
 
-  if (((numNonDefault == numArgs) ||
-       (nativeWrapperCheckArgs(ar))) &&
-      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
-    // Prepend a context arg for methods
-    // Class when it's being called statically Foo::bar()
-    // Object when it's being called on an instance $foo->bar()
-    void* ctx;  // ObjectData* or Class*
-    if (ar->hasThis()) {
-      if (isStatic) {
-        throw_instance_method_fatal(getInvokeName(ar)->data());
-      }
-      ctx = ar->getThis();
-    } else {
-      if (!isStatic) {
-        throw_instance_method_fatal(getInvokeName(ar)->data());
-      }
-      ctx = ar->getClass();
-    }
-
-    callFunc<usesDoubles>(func, ctx, args, numNonDefault, rv);
-  } else if (func->attrs() & AttrParamCoerceModeFalse) {
-    rv.m_type = KindOfBoolean;
-    rv.m_data.num = 0;
+  if (numNonDefault != numArgs) {
+    nativeWrapperCheckArgs(ar);
   }
+
+  coerceFCallArgs(args, numArgs, numNonDefault, func);
+
+  // Prepend a context arg for methods
+  // Class when it's being called statically Foo::bar()
+  // Object when it's being called on an instance $foo->bar()
+  void* ctx;  // ObjectData* or Class*
+  if (ar->hasThis()) {
+    if (isStatic) {
+      throw_instance_method_fatal(getInvokeName(ar)->data());
+    }
+    ctx = ar->getThis();
+  } else {
+    if (!isStatic) {
+      throw_instance_method_fatal(getInvokeName(ar)->data());
+    }
+    ctx = ar->getClass();
+  }
+
+  TypedValue rv;
+  rv.m_type = KindOfUninit;
+  callFunc<usesDoubles>(func, ctx, args, numNonDefault, rv);
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {

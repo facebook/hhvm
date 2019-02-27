@@ -3,10 +3,8 @@
 -- Testing xml_set_object() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing xml_set_object() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

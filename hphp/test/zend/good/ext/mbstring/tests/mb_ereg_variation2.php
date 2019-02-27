@@ -88,7 +88,7 @@ foreach($inputs as $input) {
 		$regs = null;
 	}
 	echo "\n-- Iteration $iterator --\n";
-	var_dump( mb_ereg($pattern, $input, &$regs) );
+	try { var_dump( mb_ereg($pattern, $input, &$regs) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	var_dump($regs);
 	$iterator++;
 };

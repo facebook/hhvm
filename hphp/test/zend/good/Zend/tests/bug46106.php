@@ -8,7 +8,7 @@ set_error_handler('foobar');
 function test($x) {
 	global $foo;
 
-	$x->invokeArgs(array(0));
+	try { $x->invokeArgs(array(0)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 $x = new ReflectionFunction('str_pad');

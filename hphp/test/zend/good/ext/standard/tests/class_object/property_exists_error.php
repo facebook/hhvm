@@ -13,11 +13,11 @@ $extra_arg = 10;
 
 
 echo "\n-- Testing property_exists() function with more than expected no. of arguments --\n";
-var_dump( property_exists($object_or_class, $property_name, $extra_arg) );
+try { var_dump( property_exists($object_or_class, $property_name, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "\n-- Testing property_exists() function with less than expected no. of arguments --\n";
-var_dump( property_exists($object_or_class) );
+try { var_dump( property_exists($object_or_class) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing property_exists() function with incorrect arguments --\n";
 var_dump( property_exists(10, $property_name) );

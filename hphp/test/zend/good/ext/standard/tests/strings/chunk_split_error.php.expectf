@@ -1,8 +1,6 @@
 *** Testing chunk_split() : error conditions ***
 -- Testing chunk_split() function with Zero arguments --
 Warning: %s
-NULL
 -- Testing chunk_split() function with more than expected no. of arguments --
 Warning: %s
-NULL
 Done

@@ -1,6 +1,5 @@
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)
@@ -11,7 +10,6 @@ string(%d) "%a"
 string(%d) "%a"
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)

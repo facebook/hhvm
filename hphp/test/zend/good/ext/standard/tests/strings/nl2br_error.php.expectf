@@ -2,9 +2,7 @@
 
 -- Testing nl2br() function with Zero arguments --
 Warning: %s
-NULL
 
 -- Testing nl2br() function with more than expected no. of arguments --
 Warning: %s
-NULL
 Done

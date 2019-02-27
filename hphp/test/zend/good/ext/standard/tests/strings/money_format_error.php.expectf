@@ -3,15 +3,12 @@
 -- Testing money_format() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing money_format() function with insufficient arguments --
 
 Warning: %s
-NULL
 
 -- Testing money_format() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

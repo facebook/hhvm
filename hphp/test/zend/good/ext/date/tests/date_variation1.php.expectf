@@ -24,22 +24,18 @@ string(3) "0.5"
 -- empty array --
 
 Warning: %s
-bool(false)
 
 -- int indexed array --
 
 Warning: %s
-bool(false)
 
 -- associative array --
 
 Warning: %s
-bool(false)
 
 -- nested arrays --
 
 Warning: %s
-bool(false)
 
 -- uppercase NULL --
 string(0) ""
@@ -83,7 +79,6 @@ string(64) "CFridayam3030 AM 2009b27Europe/London2009-02-27T10:44:30+00:0028"
 -- instance of classWithoutToString --
 
 Warning: %s
-bool(false)
 
 -- undefined var --
 string(0) ""
@@ -94,5 +89,4 @@ string(0) ""
 -- resource --
 
 Warning: %s
-bool(false)
 ===DONE===

@@ -29,7 +29,7 @@ $names_arr = array(
 for( $i=0; $i<count($names_arr); $i++ ) {
   $name = $names_arr[$i];
   echo "-- testing '$name' --\n";  
-  readfile($name);
+  try { readfile($name); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 echo "\n*** Done ***\n";

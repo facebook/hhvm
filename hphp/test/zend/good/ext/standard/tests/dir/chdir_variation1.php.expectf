@@ -88,7 +88,6 @@ bool(false)
 -- Iteration 18 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 19 --
 bool(true)
@@ -117,5 +116,4 @@ bool(false)
 -- Iteration 25 --
 
 Warning: %s
-bool(false)
 ===DONE===

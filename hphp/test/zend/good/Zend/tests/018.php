@@ -1,10 +1,10 @@
 <?php
 
-var_dump(constant());
-var_dump(constant("", ""));
+try { var_dump(constant()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(constant("", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(constant(""));
 
-var_dump(constant(array()));
+try { var_dump(constant(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 const TEST_CONST = 1;
 var_dump(constant("TEST_CONST"));

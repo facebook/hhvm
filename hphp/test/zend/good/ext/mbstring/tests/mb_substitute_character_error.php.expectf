@@ -3,5 +3,4 @@
 -- Testing mb_substitute_character() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

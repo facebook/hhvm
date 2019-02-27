@@ -20,8 +20,8 @@ class bar extends foo {
 	}
 }
 
-var_dump(property_exists());
-var_dump(property_exists(""));
+try { var_dump(property_exists()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(property_exists("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(property_exists("foo","pp1"));
 var_dump(property_exists("foo","pp2"));
 var_dump(property_exists("foo","pp3"));

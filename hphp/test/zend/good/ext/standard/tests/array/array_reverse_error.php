@@ -8,14 +8,14 @@ echo "*** Testing array_reverse() : error conditions ***\n";
 
 // zero arguments
 echo "\n-- Testing array_reverse() function with Zero arguments --\n";
-var_dump( array_reverse() );
+try { var_dump( array_reverse() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // more than the expected number of arguments
 echo "\n-- Testing array_diff() function with more than expected no. of arguments --\n";
 $array = array(1, 2, 3, 4, 5, 6);
 $extra_arg = 10;
-var_dump( array_reverse($array, true, $extra_arg) );
-var_dump( array_reverse($array, false, $extra_arg) );
+try { var_dump( array_reverse($array, true, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( array_reverse($array, false, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

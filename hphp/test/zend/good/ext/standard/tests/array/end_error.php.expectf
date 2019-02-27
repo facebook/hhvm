@@ -3,10 +3,8 @@
 -- Testing end() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing end() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

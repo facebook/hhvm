@@ -14,15 +14,12 @@ string(24) "313031323334353637303030"
 -- Iteration 7 --
 
 Warning: %s
-NULL
 -- Iteration 8 --
 
 Warning: %s
-NULL
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 string(2) "31"
 -- Iteration 11 --
@@ -40,7 +37,6 @@ string(26) "73616d706c65206f626a656374"
 -- Iteration 17 --
 
 Warning: %s
-NULL
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --

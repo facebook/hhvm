@@ -10,11 +10,11 @@ echo "*** Testing imagecolorstotal() : error conditions ***\n";
 $im = fopen(__FILE__, 'r');
 
 echo "\n-- Testing imagecolorstotal() function with Zero arguments --\n";
-var_dump( imagecolorstotal() );
+try { var_dump( imagecolorstotal() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing imagecolorstotal() function with more than expected no. of arguments --\n";
 $extra_arg = false;
-var_dump( imagecolorstotal($im, $extra_arg) );
+try { var_dump( imagecolorstotal($im, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing imagecolorstotal() function with a invalid resource\n";
 var_dump( imagecolorstotal($im) );

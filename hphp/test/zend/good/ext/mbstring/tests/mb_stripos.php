@@ -97,13 +97,13 @@ $r = mb_stripos($euc_jp,b"\n");
 // Invalid Parameters
 echo "== INVALID PARAMETER TEST ==\n";
 
-$r = mb_stripos($euc_jp,'','EUC-JP');
+try { $r = mb_stripos($euc_jp,'','EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_NULL\n") : print("NG_NULL\n");
-$r = mb_stripos($euc_jp, $t_ary, 'EUC-JP');
+try { $r = mb_stripos($euc_jp, $t_ary, 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-$r = mb_stripos($euc_jp, $t_obj, 'EUC-JP');
+try { $r = mb_stripos($euc_jp, $t_obj, 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-$r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
+try { $r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 
 

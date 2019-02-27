@@ -1,6 +1,6 @@
 <?php
 
-var_dump(bzopen());
+try { var_dump(bzopen()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(bzopen("", ""));
 var_dump(bzopen("", "r"));
 var_dump(bzopen("", "w"));

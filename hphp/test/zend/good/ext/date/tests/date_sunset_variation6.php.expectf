@@ -23,46 +23,34 @@ int(1218199253)
 --empty array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --int indexed array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --associative array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --nested arrays--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --uppercase NULL--
 string(5) "12:40"
@@ -97,90 +85,66 @@ int(1218199253)
 --empty string DQ--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --empty string SQ--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --string DQ--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --string SQ--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --mixed case string--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --heredoc--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --instance of classWithToString--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --instance of classWithoutToString--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --undefined var--
 string(5) "12:40"

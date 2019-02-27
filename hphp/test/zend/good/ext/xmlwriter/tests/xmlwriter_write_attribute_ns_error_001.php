@@ -3,7 +3,7 @@ $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);
 xmlwriter_start_document($xw, NULL, "UTF-8");
 xmlwriter_start_element($xw, 'root');
-xmlwriter_write_attribute_ns($xw, 'prefix', '', 'http://www.php.net/uri');
+try { xmlwriter_write_attribute_ns($xw, 'prefix', '', 'http://www.php.net/uri'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 xmlwriter_start_element($xw, 'elem1');
 xmlwriter_write_attribute($xw, 'attr1', 'first');
 xmlwriter_end_element($xw);

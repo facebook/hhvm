@@ -20,23 +20,18 @@ string(5) "0. 5 "
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(1) " "
 -- Iteration 16 --
@@ -66,5 +61,4 @@ string(1) " "
 -- Iteration 28 --
 
 Warning: %s
-NULL
 Done

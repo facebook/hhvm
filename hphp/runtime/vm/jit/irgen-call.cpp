@@ -1697,10 +1697,7 @@ Type callReturnType(const Func* callee) {
   if (callee->isCPPBuiltin()) {
     // If the function is builtin, use the builtin's return type, then take into
     // account coercion failures.
-    auto type = builtinReturnType(callee);
-    if (callee->attrs() & AttrParamCoerceModeNull) type |= TInitNull;
-    if (callee->attrs() & AttrParamCoerceModeFalse) type |= Type::cns(false);
-    return type;
+    return builtinReturnType(callee);
   }
 
   // Otherwise use HHBBC's analysis if present

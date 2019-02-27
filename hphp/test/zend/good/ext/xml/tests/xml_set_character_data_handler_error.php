@@ -13,12 +13,12 @@ echo "\n-- Testing xml_set_character_data_handler() function with more than expe
 
 $hdl = 'string_val';
 $extra_arg = 10;
-var_dump( xml_set_character_data_handler(null, $hdl, $extra_arg) );
+try { var_dump( xml_set_character_data_handler(null, $hdl, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing xml_set_character_data_handler with one less than the expected number of arguments
 echo "\n-- Testing xml_set_character_data_handler() function with less than expected no. of arguments --\n";
 
-var_dump( xml_set_character_data_handler(null) );
+try { var_dump( xml_set_character_data_handler(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

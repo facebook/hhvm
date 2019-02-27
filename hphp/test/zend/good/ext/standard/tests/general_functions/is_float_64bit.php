@@ -122,14 +122,14 @@ foreach ($not_floats as $value ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_float() );
-var_dump( is_double() );
-var_dump( is_real() );
+try { var_dump( is_float() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_double() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_real() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_float( $floats[0], $floats[1]) );
-var_dump( is_double( $floats[0], $floats[1]) );
-var_dump( is_real( $floats[0], $floats[1]) );
+try { var_dump( is_float( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_double( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_real( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 ?>

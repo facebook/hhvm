@@ -52,32 +52,26 @@ int(8)
 -- Iteration 16 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 17 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 18 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 19 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 20 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 21 --
 
 Warning: %s
-bool(false)
 
 -- Iteration 22 --
 int(8)
@@ -88,5 +82,4 @@ int(8)
 -- Iteration 24 --
 
 Warning: %s
-bool(false)
 Done

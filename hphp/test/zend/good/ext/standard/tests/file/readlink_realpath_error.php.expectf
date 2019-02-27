@@ -1,10 +1,8 @@
 *** Testing readlink(): error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing readlink() on a non-existent link ***
 
@@ -23,10 +21,8 @@ bool(false)
 *** Testing realpath(): error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing realpath() on a non-existent file ***
 %s

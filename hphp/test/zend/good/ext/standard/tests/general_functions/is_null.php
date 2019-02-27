@@ -126,10 +126,10 @@ foreach ($not_null_types as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_null() );
+try { var_dump( is_null() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_null(NULL, null) );
+try { var_dump( is_null(NULL, null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 

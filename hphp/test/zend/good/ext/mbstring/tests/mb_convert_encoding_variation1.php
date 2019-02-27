@@ -87,7 +87,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump(bin2hex( mb_convert_encoding($sourcestring, $input, 'ISO-8859-1') ));
+  try { var_dump(bin2hex( mb_convert_encoding($sourcestring, $input, 'ISO-8859-1') )); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 

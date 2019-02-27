@@ -12,9 +12,9 @@ class classA
 }
 
 echo "Incorrect number of arguments\n";
-base_convert();
-base_convert(35);
-base_convert(35,2);
+try { base_convert(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { base_convert(35); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { base_convert(35,2); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 base_convert(1234, 1, 10);
 base_convert(1234, 10, 37);
 

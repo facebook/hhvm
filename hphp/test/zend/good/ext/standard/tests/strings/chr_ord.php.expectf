@@ -83,16 +83,12 @@ int(97)
 *** Testing chr() error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing ord() error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

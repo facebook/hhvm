@@ -12,12 +12,12 @@ echo "*** Testing ctype_cntrl() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing ctype_cntrl() function with Zero arguments --\n";
-var_dump( ctype_cntrl() );
+try { var_dump( ctype_cntrl() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test ctype_cntrl with one more than the expected number of arguments
 echo "\n-- Testing ctype_cntrl() function with more than expected no. of arguments --\n";
 $c = 1;
 $extra_arg = 10;
-var_dump( ctype_cntrl($c, $extra_arg) );
+try { var_dump( ctype_cntrl($c, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

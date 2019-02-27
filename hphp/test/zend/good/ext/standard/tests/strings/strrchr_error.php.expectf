@@ -2,13 +2,10 @@
 
 -- Testing strrchr() function with Zero arguments --
 Warning: %s
-NULL
 
 -- Testing strrchr() function with less than expected no. of arguments --
 Warning: %s
-NULL
 
 -- Testing strrchr() function with more than expected no. of arguments --
 Warning: %s
-NULL
 *** Done ***

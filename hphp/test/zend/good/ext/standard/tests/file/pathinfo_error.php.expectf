@@ -1,8 +1,6 @@
 *** Testing pathinfo() for error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

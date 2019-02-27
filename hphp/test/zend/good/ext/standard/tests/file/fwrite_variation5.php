@@ -99,7 +99,7 @@ $inputs = array(
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       $fp = fopen($filename,'w');
-      fwrite($fp, $value);
+      try { fwrite($fp, $value); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       fclose($fp);
       readfile($filename);
 };

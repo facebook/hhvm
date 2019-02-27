@@ -2,11 +2,11 @@ array(3) {
   ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(-2687792260769790814)
+    int(1643830044039019320)
     ["md5sum1"]=>
-    int(6227342274834965783)
+    int(-8034797507396892117)
     ["sha1sum"]=>
-    string(40) "03bf5e7ef8ee748a037781ad9a8fd163f95b362e"
+    string(40) "6730a2ecfccea59db3eba251d34dac160caa2e2d"
     ["types"]=>
     array(13) {
       [0]=>
@@ -270,11 +270,11 @@ array(3) {
   ["/tmp/%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(5977809332653255667)
+    int(-2290607048394802670)
     ["md5sum1"]=>
-    int(-5525899916509458722)
+    int(-3504825627077465599)
     ["sha1sum"]=>
-    string(40) "8e50057b9d19c7637bfae2e0a6d2d04cb93de718"
+    string(40) "764cb8afd8fbf9b3065d89f7f6c5b4e857c24f05"
     ["types"]=>
     array(13) {
       [0]=>
@@ -538,11 +538,11 @@ array(3) {
   ["/tmp/%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(5762632347350713052)
+    int(-6117641779479300928)
     ["md5sum1"]=>
-    int(5431836495130451241)
+    int(1155436758753464789)
     ["sha1sum"]=>
-    string(40) "4bf999aaf5637dcbe7cc794589414557581365c7"
+    string(40) "e9e2f89ba273ff6c54c50794b387317b9d2a4edb"
     ["types"]=>
     array(13) {
       [0]=>
@@ -817,7 +817,6 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-
-Warning: HH\facts_parse() expects parameter 2 to be array, null given in %s on line 256
+string(60) "HH\facts_parse() expects parameter 2 to be array, null given"
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."

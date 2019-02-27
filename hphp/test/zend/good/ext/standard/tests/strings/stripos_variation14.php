@@ -75,7 +75,7 @@ $offsets =  array (
 $counter = 1;
 for($index = 0; $index < count($offsets); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( stripos($haystack, $needle, $offsets[$index]) );
+  try { var_dump( stripos($haystack, $needle, $offsets[$index]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

@@ -13,7 +13,7 @@ $variation = array(
 
 
 foreach ( $variation as $var ) {
-  var_dump(gzfile( $var ,  $use_include_path ) );
+  try { var_dump(gzfile( $var ,  $use_include_path ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 ?>
 ===DONE===

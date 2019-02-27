@@ -7,10 +7,10 @@
  echo "\n *** Output for Error Conditions ***\n";
 
  echo "\n *** Output for zero argument ***\n";
- var_dump( ltrim() );
+ try { var_dump( ltrim() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
  echo "\n *** Output for more than valid number of arguments (Valid are 1 or 2 arguments) ***\n";
- var_dump( ltrim("", " ", 1) );
+ try { var_dump( ltrim("", " ", 1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* heredoc string */
 $str = <<<EOD

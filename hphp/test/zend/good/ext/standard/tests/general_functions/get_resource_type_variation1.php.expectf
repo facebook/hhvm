@@ -3,35 +3,28 @@
 -- bool --
 
 Warning: %s
-NULL
 
 -- int 10 --
 
 Warning: %s
-NULL
 
 -- float 10.5 --
 
 Warning: %s
-NULL
 
 -- string --
 
 Warning: %s
-NULL
 
 -- array --
 
 Warning: %s
-NULL
 
 -- NULL --
 
 Warning: %s
-NULL
 
 -- Object --
 
 Warning: %s
-NULL
 ===DONE===

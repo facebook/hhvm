@@ -10,13 +10,13 @@ $needle = "Hello";
 $extra_arg = "Hello";
 
 echo "\n-- Testing strrchr() function with Zero arguments --";
-var_dump( strrchr() );
+try { var_dump( strrchr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing strrchr() function with less than expected no. of arguments --";
-var_dump( strrchr($haystack) );
+try { var_dump( strrchr($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing strrchr() function with more than expected no. of arguments --";
-var_dump( strrchr($haystack, $needle, $extra_arg) );
+try { var_dump( strrchr($haystack, $needle, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "*** Done ***";
 ?>

@@ -110,6 +110,11 @@ void raise_message(ErrorMode mode, const char *fmt, va_list ap);
 void raise_message(ErrorMode mode,
   ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
 void raise_message(ErrorMode mode, bool skipTop, const std::string& msg);
+std::string param_type_error_message(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,

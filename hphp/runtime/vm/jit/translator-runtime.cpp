@@ -414,10 +414,12 @@ StringData* convResToStrHelper(ResourceHdr* r) {
 
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
-  raise_param_type_warning(func->displayName()->data(),
-                           argNum, expected, actual);
-
-  throw TVCoercionException(func, argNum, actual, expected);
+  auto msg = param_type_error_message(func->displayName()->data(),
+                                      argNum, expected, actual);
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    SystemLib::throwTypeErrorObject(msg);
+  }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
 void builtinCoercionWarningHelper(DataType ty, DataType expKind,
@@ -1254,25 +1256,6 @@ void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
 
   auto const& tc = func->params()[argNum - 1].typeConstraint;
   tc.verifyParam(&tv, func, argNum - 1);
-}
-
-TVCoercionException::TVCoercionException(const Func* func,
-                                         int arg_num,
-                                         DataType actual,
-                                         DataType expected)
-    : std::runtime_error(
-        folly::format("Unable to coerce param {} to {}() "
-                      "from {} to {}",
-                      arg_num,
-                      func->name(),
-                      actual,
-                      expected).str())
-{
-  if (func->attrs() & AttrParamCoerceModeFalse) {
-    m_tv = make_tv<KindOfBoolean>(false);
-  } else {
-    m_tv = make_tv<KindOfNull>();
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

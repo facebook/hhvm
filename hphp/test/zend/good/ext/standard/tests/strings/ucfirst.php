@@ -47,7 +47,7 @@ echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
 $str_arr = array("hello", "?world", "!$%**()%**[][[[&@#~!", array());
-var_dump( ucfirst($str_arr) );
+try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";
 /* we get "Catchable fatal error: saying Object of class could not be converted
@@ -120,10 +120,10 @@ var_dump(ucfirst(ucfirst("hello")));
 
 echo "\n#### error conditions ####";
 /* Zero arguments */
-ucfirst();
+try { ucfirst(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 /* More than expected no. of args */
-ucfirst($str_array[0], $str_array[1]);
-ucfirst((int)10, (int)20);
+try { ucfirst($str_array[0], $str_array[1]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { ucfirst((int)10, (int)20); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

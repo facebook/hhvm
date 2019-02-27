@@ -96,7 +96,7 @@ $format = 'H:m:s \m \i\s\ \m\o\n\t\h';
 
 foreach($inputs as $variation =>$object) {
       echo "\n-- $variation --\n";
-      var_dump( date_format($object, $format) );
+      try { var_dump( date_format($object, $format) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 // closing the resource

@@ -16,10 +16,10 @@ $extra_arg = 10;
 
 // Zero arguments
 echo "\n-- Testing date_sunrise() function with Zero arguments --\n";
-var_dump( date_sunrise() );
+try { var_dump( date_sunrise() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test date_sunrise with one more than the expected number of arguments
 echo "\n-- Testing date_sunrise() function with more than expected no. of arguments --\n";
-var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $zenith, $gmt_offset, $extra_arg) );
+try { var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $zenith, $gmt_offset, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

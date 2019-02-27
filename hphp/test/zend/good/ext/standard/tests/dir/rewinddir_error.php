@@ -20,7 +20,7 @@ mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 $extra_arg = 10;
 
-var_dump( rewinddir($dir_handle, $extra_arg) );
+try { var_dump( rewinddir($dir_handle, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 closedir($dir_handle);
 ?>
 ===DONE===

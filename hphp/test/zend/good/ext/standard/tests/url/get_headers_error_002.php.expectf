@@ -3,15 +3,12 @@
 -- Testing get_headers() function with format argument as type string --
 
 Warning: %s
-NULL
 
 -- Testing get_headers() function with format argument as type array --
 
 Warning: %s
-NULL
 
 -- Testing get_headers() function with format argument as type object --
 
 Warning: %s
-NULL
 Done

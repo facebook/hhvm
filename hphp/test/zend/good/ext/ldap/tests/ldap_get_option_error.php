@@ -5,14 +5,16 @@ $link = ldap_connect($host, $port);
 $option = null;
 
 // Too few parameters
-var_dump(ldap_get_option());
-var_dump(ldap_get_option($link));
-var_dump(ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION));
+try { var_dump(ldap_get_option()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(ldap_get_option($link)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Too many parameters
-var_dump(
-	ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, &$option, "Additional data"),
-	$option
-);
+try {
+	var_dump(
+		ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, &$option, "Additional data"),
+		$option
+	);
+} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

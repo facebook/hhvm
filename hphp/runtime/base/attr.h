@@ -200,13 +200,6 @@ enum Attr {
   // Does this function have a `...' parameter?   |          |         //
   AttrVariadicParam        = (1u << 28), //       |          |    X    //
                                          //       |          |         //
-  // Indicates that a function will attempt to coerce parameters to the correct
-  // type.  This isn't the same as casting---for example, a string can be cast
-  // to an array, but cannot be coerced to an array.  If it fails, the function
-  // returns either false or null, depending on the mode.  This behavior is
-  // common in PHP5 builtins.            //       |          |         //
-  AttrParamCoerceModeFalse = (1u << 29), //       |          |    X    //
-  AttrParamCoerceModeNull  = (1u << 30), //       |          |    X    //
   // Indicates that this function wraps either a function taking inout or ref
   // parameters.                         //       |          |         //
   AttrIsInOutWrapper       = (1u << 31), //       |          |    X    //

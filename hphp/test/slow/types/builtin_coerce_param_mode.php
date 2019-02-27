@@ -1,16 +1,11 @@
 <?php
 
 // HNI ParamCoerceModeNull
-var_dump(bcscale([]));
+try { var_dump(bcscale([])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $x = 'bcscale';
-var_dump($x([]));
+try { var_dump($x([])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // IDL ParamCoerceModeNull
-var_dump(sqrt([]));
+try { var_dump(sqrt([])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $x = 'sqrt';
-var_dump($x([]));
-
-// HNI ParamCoerceModeFalse
-var_dump(grapheme_extract([], 1));
-$x = 'grapheme_extract';
-var_dump($x([], 1));
+try { var_dump($x([])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

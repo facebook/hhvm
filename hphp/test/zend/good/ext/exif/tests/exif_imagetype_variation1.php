@@ -79,7 +79,7 @@ echo "\n--- Testing exif_imagetype() by supplying different values for 'filename
 $counter = 1;
 foreach($values as $filename) {
   echo "-- Iteration $counter --\n";
-  var_dump( exif_imagetype($filename) );
+  try { var_dump( exif_imagetype($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

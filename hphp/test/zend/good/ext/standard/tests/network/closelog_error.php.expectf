@@ -3,5 +3,4 @@
 -- Testing closelog() function with one argument --
 
 Warning: %s
-NULL
 ===DONE===

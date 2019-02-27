@@ -1,2 +1,3 @@
-
-Warning: class_alias() expects at least 2 parameters, 0 given in %s on line 4
+Fatal error: Uncaught exception 'RuntimeException' with message 'class_alias() expects at least 2 parameters, 0 given' in %s/hphp/test/quick/no_arg_class_alias.php:4
+Stack trace:
+%A

@@ -72,7 +72,6 @@ Warning: Invalid argument: simplexml_load_string() expects parameter 2 to be a c
 NULL
 
 Warning: stream_get_contents() expects parameter 1 to be resource, string given in %s/test/slow/invalid_argument/1381.php on line %d
-bool(false)
 
 Warning: Invalid argument: length (negative): -1 in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)

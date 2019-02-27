@@ -85,7 +85,7 @@ $value = 1234.56;
 
 foreach($formats as $format) {
   echo "-- Iteration $count --\n";
-  echo gettype(money_format($format, $value))."\n";
+  try { echo gettype(money_format($format, $value))."\n"; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

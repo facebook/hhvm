@@ -40,53 +40,38 @@ string(29) "testing0.5wordwrap0.5function"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(25) "testing1wordwrap1function"
 string(25) "testing1wordwrap1function"
@@ -118,13 +103,10 @@ bool(false)
 -- Iteration 19 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 20 --
 
 Warning: %s
@@ -168,13 +150,10 @@ bool(false)
 -- Iteration 24 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 25 --
 
 Warning: %s

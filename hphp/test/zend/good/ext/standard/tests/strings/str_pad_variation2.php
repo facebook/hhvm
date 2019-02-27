@@ -73,7 +73,7 @@ $input = "Test string";
 $count = 1;
 foreach($pad_lengths as $pad_length) {
   echo "-- Iteration $count --\n";
-  var_dump( str_pad($input, $pad_length) );
+  try { var_dump( str_pad($input, $pad_length) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

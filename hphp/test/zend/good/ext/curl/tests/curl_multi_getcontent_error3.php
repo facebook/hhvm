@@ -26,7 +26,8 @@
 
 	$ch1="string";
 
-	$results1=curl_multi_getcontent($ch1); //incorrect parameter type
+  $results1 = null;
+	try { $results1=curl_multi_getcontent($ch1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  //incorrect parameter type
         $results2=curl_multi_getcontent($ch2);
 
 	//CLOSE

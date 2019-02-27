@@ -274,18 +274,6 @@ uintptr_t tlsBaseNoInline();
  */
 void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
 
-/*
- * Exception thrown to indicate that a parameter could not be coerced when
- * calling an HNI builtin function.
- */
-struct TVCoercionException : std::runtime_error {
-  TVCoercionException(const Func* func, int arg_num,
-                      DataType actual, DataType expected);
-  TypedValue tv() const { return m_tv; }
-private:
-  req::root<TypedValue> m_tv;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 }}

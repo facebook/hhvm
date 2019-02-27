@@ -26,7 +26,7 @@ $dirnames = array(
 
 /* loop through to test each element the above array */
 foreach($dirnames as $dirname) {
-  var_dump( is_dir($dirname) );
+  try { var_dump( is_dir($dirname) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 closedir($dir_handle);
 

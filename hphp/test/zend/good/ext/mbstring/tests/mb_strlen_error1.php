@@ -12,14 +12,14 @@ echo "*** Testing mb_strlen() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing mb_strlen() function with Zero arguments --\n";
-var_dump( mb_strlen() );
+try { var_dump( mb_strlen() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test mb_strlen with one more than the expected number of arguments
 echo "\n-- Testing mb_strlen() function with more than expected no. of arguments --\n";
 $str = 'string_val';
 $encoding = 'string_val';
 $extra_arg = 10;
-var_dump( mb_strlen($str, $encoding, $extra_arg) );
+try { var_dump( mb_strlen($str, $encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

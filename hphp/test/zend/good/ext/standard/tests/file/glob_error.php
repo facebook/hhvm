@@ -14,12 +14,12 @@ fclose($fp);
 echo "*** Testing glob() : error conditions ***\n";
 
 echo "-- Testing glob() with unexpected no. of arguments --\n";
-var_dump( glob() );  // args < expected
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", GLOB_ERR, 3) );  // args > expected
+try { var_dump( glob() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args < expected
+try { var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", GLOB_ERR, 3) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n-- Testing glob() with invalid arguments --\n";
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", '') );
-var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", "string") );
+try { var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", '') ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( glob(dirname(__FILE__)."/glob_error/wonder12345", "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

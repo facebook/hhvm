@@ -20,23 +20,18 @@ string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(22) "This is simple string."
 -- Iteration 16 --
@@ -62,5 +57,4 @@ string(22) "This is simple string."
 -- Iteration 26 --
 
 Warning: %s
-NULL
 Done

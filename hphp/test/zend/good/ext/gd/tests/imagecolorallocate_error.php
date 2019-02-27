@@ -14,11 +14,11 @@ echo "*** Testing imagecolorallocate() : error conditions ***\n";
 
 //Test imagecolorallocate with one more than the expected number of arguments
 echo "\n-- Testing imagecolorallocate() function with more than expected no. of arguments --\n";
-var_dump( imagecolorallocate($im, $red, $green, $blue, $extra_arg) );
+try { var_dump( imagecolorallocate($im, $red, $green, $blue, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing imagecolorallocate with one less than the expected number of arguments
 echo "\n-- Testing imagecolorallocate() function with less than expected no. of arguments --\n";
-var_dump( imagecolorallocate() );
-var_dump( imagecolorallocate($im, $red, $green) );
+try { var_dump( imagecolorallocate() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( imagecolorallocate($im, $red, $green) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

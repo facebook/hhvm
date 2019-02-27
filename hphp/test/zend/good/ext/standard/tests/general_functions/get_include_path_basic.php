@@ -15,7 +15,7 @@ if (ini_get("include_path") == get_include_path()) {
 }		
 
 echo "\nError cases:\n";
-var_dump(get_include_path(TRUE));
+try { var_dump(get_include_path(TRUE)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 ?>

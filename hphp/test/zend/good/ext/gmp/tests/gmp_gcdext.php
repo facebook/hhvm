@@ -25,9 +25,9 @@ foreach ($a as $val) {
 
 var_dump(gmp_gcdext($val[0],array()));
 var_dump(gmp_gcdext(array(),array()));
-var_dump(gmp_gcdext(array(),array(),1));
-var_dump(gmp_gcdext(array()));
-var_dump(gmp_gcdext());
+try { var_dump(gmp_gcdext(array(),array(),1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_gcdext(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_gcdext()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

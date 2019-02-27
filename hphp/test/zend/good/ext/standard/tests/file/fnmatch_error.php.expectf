@@ -1,20 +1,14 @@
 *** Testing error conditions for fnmatch() ***
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Done ***

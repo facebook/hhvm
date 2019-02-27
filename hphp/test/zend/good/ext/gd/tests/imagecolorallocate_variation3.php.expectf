@@ -18,22 +18,18 @@ int(655370)
 --empty array--
 
 Warning: %s
-NULL
 
 --int indexed array--
 
 Warning: %s
-NULL
 
 --associative array--
 
 Warning: %s
-NULL
 
 --nested arrays--
 
 Warning: %s
-NULL
 
 --uppercase NULL--
 int(655370)
@@ -56,42 +52,34 @@ int(655370)
 --empty string DQ--
 
 Warning: %s
-NULL
 
 --empty string SQ--
 
 Warning: %s
-NULL
 
 --string DQ--
 
 Warning: %s
-NULL
 
 --string SQ--
 
 Warning: %s
-NULL
 
 --mixed case string--
 
 Warning: %s
-NULL
 
 --heredoc--
 
 Warning: %s
-NULL
 
 --instance of classWithToString--
 
 Warning: %s
-NULL
 
 --instance of classWithoutToString--
 
 Warning: %s
-NULL
 
 --undefined var--
 int(655370)
@@ -102,5 +90,4 @@ int(655370)
 --file resource--
 
 Warning: %s
-NULL
 ===DONE===

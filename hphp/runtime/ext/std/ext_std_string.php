@@ -11,7 +11,7 @@
  * given width, it is broken apart.
  * @return mixed - Returns the given string wrapped at the specified length.
  */
-<<__Native, __ParamCoerceModeNull>>
+<<__Native>>
 function wordwrap(string $str, int $width = 75, string $break = "\n",
                   bool $cut = false): mixed;
 

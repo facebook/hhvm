@@ -276,17 +276,12 @@ void throw_object(const String& s, const Array& params, bool init = true) {
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc, int level = 0,
-                                   TypedValue *rv = nullptr)
+                                   const char *expectDesc)
   __attribute__((__cold__));
-void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr)
+void throw_missing_arguments_nr(const char *fn, int expected, int got)
+
   __attribute__((__cold__));
-void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr)
-  __attribute__((__cold__));
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level = 0, TypedValue *rv = nullptr)
+void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax)
   __attribute__((__cold__));
 
 /**

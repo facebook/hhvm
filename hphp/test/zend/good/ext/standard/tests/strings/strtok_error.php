@@ -12,7 +12,7 @@ echo "*** Testing strtok() : error conditions ***\n";
 
 // Zero argument
 echo "\n-- Testing strtok() function with Zero arguments --\n";
-var_dump( strtok() );
+try { var_dump( strtok() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // More than expected number of arguments
 echo "\n-- Testing strtok() function with more than expected no. of arguments --\n";
@@ -20,7 +20,7 @@ $str = 'sample string';
 $token = ' ';
 $extra_arg = 10;
 
-var_dump( strtok($str, $token, $extra_arg) );
+try { var_dump( strtok($str, $token, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( $str );
 
 // Less than expected number of arguments 

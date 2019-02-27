@@ -48,16 +48,12 @@ Constant: IMAGETYPE_XBM
 	Without dot: xbm
 
 Warning: %s
+
+Warning: %s
 bool(false)
 
 Warning: %s
 bool(false)
-bool(false)
 
 Warning: %s
-bool(false)
-bool(false)
-
-Warning: %s
-bool(false)
 Done

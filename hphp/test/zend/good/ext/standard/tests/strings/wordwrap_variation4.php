@@ -70,7 +70,7 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $cut = $values [$index];
 
-  var_dump( wordwrap($str, $width, $break, $cut) );
+  try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }

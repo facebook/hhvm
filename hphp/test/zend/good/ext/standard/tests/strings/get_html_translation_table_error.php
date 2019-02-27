@@ -12,7 +12,7 @@ $table = HTML_ENTITIES;
 $quote_style = ENT_COMPAT;
 $extra_arg = 10;
 
-var_dump( get_html_translation_table($table, $quote_style, "UTF-8", $extra_arg) );
+try { var_dump( get_html_translation_table($table, $quote_style, "UTF-8", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

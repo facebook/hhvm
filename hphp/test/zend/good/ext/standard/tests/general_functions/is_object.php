@@ -137,10 +137,10 @@ foreach ($not_objects as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_object() );
+try { var_dump( is_object() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_object($myClass_object, $myClass_object) );
+try { var_dump( is_object($myClass_object, $myClass_object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 

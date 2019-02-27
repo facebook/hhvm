@@ -28,20 +28,20 @@ string(13) "-123456789000"
 string(3) "0.5"
 
 --empty array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 
 --int indexed array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 
 --associative array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 
 --nested arrays--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 
 --uppercase NULL--
 string(0) ""
@@ -71,8 +71,8 @@ string(0) ""
 string(14) "Class A object"
 
 --instance of classWithoutToString--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 
 --undefined var--
 string(0) ""
@@ -81,6 +81,6 @@ string(0) ""
 string(0) ""
 
 --resource--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, resource given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 103
 ===DONE===

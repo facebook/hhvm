@@ -84,7 +84,7 @@ $preserve_keys = array (
 $iterator = 1;
 foreach($preserve_keys as $preserve_key) {
   echo "-- Iteration $iterator --\n";
-  var_dump( array_reverse($array, $preserve_key) );
+  try { var_dump( array_reverse($array, $preserve_key) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 

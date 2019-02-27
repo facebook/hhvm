@@ -1,6 +1,6 @@
 <?php
 
-var_dump(gzdeflate());
+try { var_dump(gzdeflate()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzdeflate("", 1000));
 var_dump(gzdeflate("", -1));
 
@@ -14,7 +14,7 @@ Desolation, grief and agony";
 var_dump($data1 = gzdeflate($string));
 var_dump($data2 = gzdeflate($string, 9));
 
-var_dump(gzinflate());
+try { var_dump(gzinflate()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzinflate(""));
 var_dump(gzinflate("asfwe", 1000));
 var_dump(gzinflate("asdf", -1));

@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL 
+ * Description: Output a file or a URL
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing readfile() : usage variation ***\n";
@@ -105,7 +105,8 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      $res = readfile($filename, $value);
+			$res = false;
+      try { $res = readfile($filename, $value); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ($res == false) {
          echo "File not read\n";
       }

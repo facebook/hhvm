@@ -10,20 +10,20 @@ string(15) "255.255.255.246"
 string(7) "0.0.0.0"
 
 --empty array--
-Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 
 --int indexed array--
-Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 
 --associative array--
-Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 
 --nested arrays--
-Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 
 --uppercase NULL--
 string(7) "0.0.0.0"
@@ -65,8 +65,8 @@ string(7) "0.0.0.0"
 string(7) "0.0.0.0"
 
 --instance of classWithoutToString--
-Error: 2 - long2ip() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 
 --undefined var--
 string(7) "0.0.0.0"
@@ -75,6 +75,6 @@ string(7) "0.0.0.0"
 string(7) "0.0.0.0"
 
 --resource--
-Error: 2 - long2ip() expects parameter 1 to be string, resource given, %s(%d)
-NULL
+
+Warning: long2ip() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/standard/tests/network/long2ip_variation1.php on line 101
 ===DONE===

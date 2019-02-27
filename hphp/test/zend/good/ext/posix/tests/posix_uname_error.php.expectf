@@ -3,5 +3,4 @@
 -- Testing posix_uname() function with one argument --
 
 Warning: %s
-NULL
 Done

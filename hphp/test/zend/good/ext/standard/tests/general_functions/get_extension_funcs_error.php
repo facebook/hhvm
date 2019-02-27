@@ -8,11 +8,11 @@
 echo "*** Testing get_extension_funcs() : error conditions ***\n";
 
 echo "\n-- Too few arguments --\n";
-var_dump(get_extension_funcs());
+try { var_dump(get_extension_funcs()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $extra_arg = 1;
 echo "\n-- Too many arguments --\n";
-var_dump(get_extension_funcs("standard", $extra_arg));
+try { var_dump(get_extension_funcs("standard", $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Invalid extension name --\n";
 var_dump(get_extension_funcs("foo"));

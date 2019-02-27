@@ -70,7 +70,7 @@ $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
   // strip white space and any "minus" signs
-  var_dump( ltrim($input, " \t-") );
+  try { var_dump( ltrim($input, " \t-") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

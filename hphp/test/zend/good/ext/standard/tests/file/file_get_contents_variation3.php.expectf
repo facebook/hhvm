@@ -28,20 +28,20 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 --empty array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int indexed array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --associative array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --nested arrays--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --uppercase NULL--
 string(%d) "contents read"
@@ -80,12 +80,12 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 --instance of classWithToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --instance of classWithoutToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/hphp/test/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --undefined var--
 string(%d) "contents read"

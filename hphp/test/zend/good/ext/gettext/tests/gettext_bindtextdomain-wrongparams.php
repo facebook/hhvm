@@ -1,4 +1,4 @@
 <?php
 chdir(dirname(__FILE__));
-bindtextdomain('foobar');
-bindtextdomain();
+try { bindtextdomain('foobar'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { bindtextdomain(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

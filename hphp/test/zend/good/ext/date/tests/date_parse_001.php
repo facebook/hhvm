@@ -9,6 +9,6 @@
     var_dump(date_parse("03-03"));
     var_dump(date_parse("0-0"));
     var_dump(date_parse(""));
-    var_dump(date_parse(array()));
+    try { var_dump(date_parse(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     echo "Done\n";
 ?>

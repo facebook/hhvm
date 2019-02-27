@@ -155,17 +155,14 @@ string(5) "world"
 -- passing an array as string and needle --
 
 Warning: %s
-NULL
 string(27) "?world,!$%**()%**[][[[&@#~!"
 string(20) "!$%**()%**[][[[&@#~!"
 
 -- passing Resources as string and needle --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Posiibilities with null --
 bool(false)
@@ -222,13 +219,10 @@ Warning: %s
 bool(false)
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 bool(false)
 
 Warning: %s

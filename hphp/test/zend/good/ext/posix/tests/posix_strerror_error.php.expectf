@@ -3,12 +3,10 @@
 -- Testing posix_strerror() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_strerror() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_strerror() function with invalid error number --
 string

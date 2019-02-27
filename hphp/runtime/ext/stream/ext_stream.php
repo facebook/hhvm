@@ -113,7 +113,7 @@ function stream_copy_to_stream(resource $source,
  * @return mixed - Returns a string or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function stream_get_contents(resource $handle,
                              int $maxlen = -1,
                              int $offset = -1): mixed;

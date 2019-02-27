@@ -126,10 +126,10 @@ foreach ($not_bool_types as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_bool() );
+try { var_dump( is_bool() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_bool(TRUE, FALSE) );
+try { var_dump( is_bool(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 

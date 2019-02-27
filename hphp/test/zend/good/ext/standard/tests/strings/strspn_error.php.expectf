@@ -3,15 +3,12 @@
 -- Testing strspn() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing strspn() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing strspn() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

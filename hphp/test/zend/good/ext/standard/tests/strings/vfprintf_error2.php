@@ -11,9 +11,9 @@ $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with less than expected no. of arguments --\n";
 $format = 'string_val';
-var_dump( vfprintf($fp, $format) );
-var_dump( vfprintf( $fp ) );
-var_dump( vfprintf() );
+try { var_dump( vfprintf($fp, $format) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( vfprintf( $fp ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( vfprintf() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Close handle
 fclose($fp);

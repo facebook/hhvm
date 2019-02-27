@@ -28,20 +28,20 @@ string(32) "bfb155997017986c01090afebd62c7ca"
 string(16) "cc60ac201164b6c7"
 
 --empty array--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 
 --int indexed array--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 
 --associative array--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 
 --nested arrays--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 
 --uppercase NULL--
 string(16) "6ece228c41457539"
@@ -71,8 +71,8 @@ string(16) "6ece228c41457539"
 string(32) "749c3b4d16731d98370128754b7c930f"
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, object given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, object given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 
 --undefined var--
 string(16) "6ece228c41457539"
@@ -81,6 +81,6 @@ string(16) "6ece228c41457539"
 string(16) "6ece228c41457539"
 
 --resource--
-Error: 2 - mcrypt_ecb() expects parameter 3 to be string, resource given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 3 to be string, resource given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation3.php on line 109
 ===DONE===

@@ -133,20 +133,20 @@ check_basename( $file_path_variations );
 
 echo "\n*** Testing error conditions ***\n";
 // zero arguments 
-var_dump( basename() );
+try { var_dump( basename() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // more than expected no. of arguments
-var_dump( basename("/var/tmp/bar.gz", ".gz", ".gz") );
+try { var_dump( basename("/var/tmp/bar.gz", ".gz", ".gz") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // passing invalid type arguments 
 $object = new stdclass;
-var_dump( basename( array("string/bar") ) );
-var_dump( basename( array("string/bar"), "bar" ) );
-var_dump( basename( "bar", array("string/bar") ) );
-var_dump( basename( $object, "bar" ) );
-var_dump( basename( $object ) );
-var_dump( basename( $object, $object ) );
-var_dump( basename( "bar", $object ) );
+try { var_dump( basename( array("string/bar") ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( array("string/bar"), "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( "bar", array("string/bar") ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( $object, "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( $object, $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename( "bar", $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

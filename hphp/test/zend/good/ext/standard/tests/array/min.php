@@ -1,6 +1,6 @@
 <?php
 
-var_dump(min());
+try { var_dump(min()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(min(1));
 var_dump(min(array()));
 var_dump(min(new stdclass));

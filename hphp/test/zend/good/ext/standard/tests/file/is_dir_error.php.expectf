@@ -1,8 +1,6 @@
 *** Testing is_dir() error conditions ***
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 bool(false)
 *** Done ***

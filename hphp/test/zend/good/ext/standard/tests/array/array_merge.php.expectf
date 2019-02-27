@@ -657,7 +657,6 @@ array(7) {
 
 *** Testing error conditions ***
 Warning: %s
-NULL
 
 Warning: %s
 NULL

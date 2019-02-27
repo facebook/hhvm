@@ -108,19 +108,14 @@ string(21) "array( array(), null)"
 -- Iteration 9 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 10 --
 array(3) {
   ["dirname"]=>

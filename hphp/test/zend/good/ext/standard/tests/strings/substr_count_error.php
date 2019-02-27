@@ -2,10 +2,10 @@
 
 echo "\n*** Testing error conditions ***\n";
 /* Zero argument */
-var_dump( substr_count() );
+try { var_dump( substr_count() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* more than expected no. of args */
-var_dump( substr_count($str, "t", 0, 15, 30) );
+try { var_dump( substr_count($str, "t", 0, 15, 30) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	
 /* offset as negative value */
 var_dump(substr_count($str, "t", -5));
@@ -18,7 +18,7 @@ var_dump(substr_count($str, "t", 25));
 var_dump( substr_count($str, "i", 5, 15) );
 
 /* length as Null */
-var_dump( substr_count($str, "t", "", "") );
+try { var_dump( substr_count($str, "t", "", "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( substr_count($str, "i", NULL, NULL) );
 	
 echo "Done\n";	

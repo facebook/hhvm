@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [,int start [,int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -86,8 +86,8 @@ $values = array(
 
 foreach($values as $value) {
       echo "\n-- Iteration with start value as \"$value\" --\n";
-      var_dump( strcspn($str,$mask,$value) );  // with default len value
-      var_dump( strcspn($str,$mask,$value,$len) );  // with all args
+      try { var_dump( strcspn($str,$mask,$value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with default len value
+      try { var_dump( strcspn($str,$mask,$value,$len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with all args
 };
 
 // closing the resource

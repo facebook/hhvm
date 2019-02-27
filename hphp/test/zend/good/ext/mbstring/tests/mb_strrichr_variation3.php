@@ -1,10 +1,10 @@
 <?php
 /* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another, case insensitive 
+ * Description: Finds the last occurrence of a character in a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
- 
+
 echo "*** Testing mb_strrichr() : usage variation ***\n";
 
 // Define error handler
@@ -100,22 +100,23 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource variable
-      'resource' => $fp      
+      'resource' => $fp
 );
 
 // loop through each element of the array for part
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      $res = mb_strrichr($haystack, $needle, $value, $encoding);
+      $res = false;
+      try { $res = mb_strrichr($haystack, $needle, $value, $encoding); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ($res === false) {
          var_dump($res);
       }
       else {
          var_dump(bin2hex($res));
-      }         
+      }
 };
 
 fclose($fp);

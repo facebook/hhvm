@@ -2,11 +2,11 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(7562199080179187756)
+    int(5098566860913063763)
     ["md5sum1"]=>
-    int(2615428409791837154)
+    int(-8552486878384085698)
     ["sha1sum"]=>
-    string(40) "5ddd0044c06da015903e01048cf24d239cc14034"
+    string(40) "9ab7eab9f2245a624164fef618116a9d92cc5504"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -223,11 +223,11 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(-1123512332818657949)
+    int(8598647957194051814)
     ["md5sum1"]=>
-    int(2705388130729917127)
+    int(-3377370178672581398)
     ["sha1sum"]=>
-    string(40) "126916a5def6c56df22045300d7d4200ffaf2741"
+    string(40) "7c2bcec4b961d71fa21dd519aa538c6aa7762d83"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -444,11 +444,11 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(3628288412421782587)
+    int(4959926527188612616)
     ["md5sum1"]=>
-    int(-3522983641158051642)
+    int(-8862174259395731545)
     ["sha1sum"]=>
-    string(40) "88c6b2144715db76d713f5b9a337ba0f6821acc2"
+    string(40) "b6b9526b3402dfce2ead35dd88fcbd60427f5cda"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -676,7 +676,6 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-
-Warning: HH\facts_parse() expects parameter 2 to be vec, null given in %s on line %d
+string(58) "HH\facts_parse() expects parameter 2 to be vec, null given"
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."

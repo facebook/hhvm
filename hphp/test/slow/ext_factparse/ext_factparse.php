@@ -254,7 +254,7 @@ if ((int)HH\ext_factparse_version()) {
 
 try {
   HH\facts_parse(null, null, null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }
 try {

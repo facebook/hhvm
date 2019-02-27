@@ -3,11 +3,9 @@
 -- Testing stripslashes() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing stripslashes() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 string(18) "\"hello\"\"world\""
 Done

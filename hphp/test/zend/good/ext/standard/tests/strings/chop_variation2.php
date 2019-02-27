@@ -87,7 +87,7 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $charlist = $values [$index];
 
-  var_dump( chop($str, $charlist) );
+  try { var_dump( chop($str, $charlist) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }

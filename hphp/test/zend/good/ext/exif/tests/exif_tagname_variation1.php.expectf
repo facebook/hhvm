@@ -26,23 +26,18 @@ bool(false)
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -54,11 +49,9 @@ bool(false)
 -- Iteration 19 --
 
 Warning: %s
-NULL
 -- Iteration 20 --
 
 Warning: %s
-NULL
 -- Iteration 21 --
 bool(false)
 -- Iteration 22 --
@@ -66,11 +59,9 @@ bool(false)
 -- Iteration 23 --
 
 Warning: %s
-NULL
 -- Iteration 24 --
 
 Warning: %s
-NULL
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

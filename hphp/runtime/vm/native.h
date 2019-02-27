@@ -238,7 +238,7 @@ enum Attr {
  *
  * Uses typehints in Func and tvCast*InPlace
  */
-bool coerceFCallArgs(TypedValue* args,
+void coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func);
 

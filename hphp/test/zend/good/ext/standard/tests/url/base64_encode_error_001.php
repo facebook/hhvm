@@ -9,13 +9,13 @@ echo "*** Testing base64_encode() : error conditions - wrong number of args ***\
 
 // Zero arguments
 echo "\n-- Testing base64_encode() function with Zero arguments --\n";
-var_dump( base64_encode() );
+try { var_dump( base64_encode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test base64_encode with one more than the expected number of arguments
 echo "\n-- Testing base64_encode() function with more than expected no. of arguments --\n";
 $str = 'string_val';
 $extra_arg = 10;
-var_dump( base64_encode($str, $extra_arg) );
+try { var_dump( base64_encode($str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

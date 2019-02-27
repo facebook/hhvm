@@ -564,6 +564,27 @@ void raise_deprecated(const char *fmt, ...) {
   raise_notice_helper(ErrorMode::PHP_DEPRECATED, false, msg);
 }
 
+std::string param_type_error_message(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type) {
+
+  // slice off fg1_
+  if (strncmp(func_name, "fg1_", 4) == 0) {
+    func_name += 4;
+  } else if (strncmp(func_name, "tg1_", 4) == 0) {
+    func_name += 4;
+  }
+  assertx(param_num > 0);
+  return folly::sformat(
+    "{}() expects parameter {} to be {}, {} given",
+    func_name,
+    param_num,
+    getDataTypeString(expected_type).data(),
+    getDataTypeString(actual_type).data());
+}
+
 void raise_param_type_warning(
     const char* func_name,
     int param_num,
@@ -574,19 +595,11 @@ void raise_param_type_warning(
   // end of the string
   auto is_constructor = is_constructor_name(func_name);
   if (!is_constructor && !warning_freq_check()) return;
-  // slice off fg1_
-  if (strncmp(func_name, "fg1_", 4) == 0) {
-    func_name += 4;
-  } else if (strncmp(func_name, "tg1_", 4) == 0) {
-    func_name += 4;
-  }
-  assertx(param_num > 0);
-  auto msg = folly::sformat(
-    "{}() expects parameter {} to be {}, {} given",
-    func_name,
-    param_num,
-    getDataTypeString(expected_type).data(),
-    getDataTypeString(actual_type).data());
+
+  auto msg = param_type_error_message(func_name,
+                                      param_num,
+                                      expected_type,
+                                      actual_type);
 
   if (is_constructor) {
     SystemLib::throwExceptionObject(msg);

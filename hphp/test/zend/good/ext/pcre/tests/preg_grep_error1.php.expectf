@@ -23,7 +23,6 @@ bool(false)
 Arg value is Array
 
 Warning: %s
-NULL
 
 Arg value is /[a-zA-Z]/
 array(2) {
@@ -34,5 +33,4 @@ array(2) {
 }
 
 Warning: %s
-NULL
 Done

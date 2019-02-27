@@ -95,7 +95,7 @@ $timestamp = mktime(10, 44, 30, 2, 27, 2009);
 
 foreach($inputs as $variation =>$format) {
       echo "\n-- $variation --\n";
-      var_dump( date($format, $timestamp) );
+      try { var_dump( date($format, $timestamp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 // closing the resource

@@ -24,6 +24,6 @@ $variation_array = array(
 
 
 foreach ( $variation_array as $var ) {
-  var_dump(getservbyname( $var ,  $protocol ) );
+  try { var_dump(getservbyname( $var ,  $protocol ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 ?>

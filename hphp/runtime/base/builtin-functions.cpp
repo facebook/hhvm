@@ -864,13 +864,7 @@ bool is_constructor_name(const char* fn) {
 }
 
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc,
-                                   int level /* = 0 */,
-                                   TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
+                                   const char *expectDesc) {
   auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
                                   fn,
                                   expectDesc,
@@ -878,50 +872,29 @@ void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
                                   expected == 1 ? "" : "s",
                                   got);
 
-  if (level == 2) {
-    raise_error(msg);
-  } else {
-    if (is_constructor_name(fn)) {
-      SystemLib::throwExceptionObject(msg);
-    }
-    raise_warning(msg);
-  }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
-void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
+void throw_missing_arguments_nr(const char *fn, int expected, int got) {
+  throw_wrong_argument_count_nr(fn, expected, got, "exactly");
 }
 
-void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
-}
-
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */,
-                              TypedValue *rv /* = nullptr */) {
+void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax) {
   if (cmin >= 0 && count < cmin) {
     if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmin, count, "at least", level, rv);
+      throw_wrong_argument_count_nr(fn, cmin, count, "at least");
     } else {
-      throw_wrong_argument_count_nr(fn, cmin, count, "exactly", level, rv);
+      throw_wrong_argument_count_nr(fn, cmin, count, "exactly");
     }
     return;
   }
   if (cmax >= 0 && count > cmax) {
     if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmax, count, "at most", level, rv);
+      throw_wrong_argument_count_nr(fn, cmax, count, "at most");
     } else {
-      throw_wrong_argument_count_nr(fn, cmax, count, "exactly", level, rv);
+      throw_wrong_argument_count_nr(fn, cmax, count, "exactly");
     }
     return;
-  }
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
   }
   assertx(false);
 }

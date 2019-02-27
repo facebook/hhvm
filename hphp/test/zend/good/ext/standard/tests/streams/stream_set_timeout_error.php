@@ -24,13 +24,13 @@ $client = fsockopen("tcp://127.0.0.1:$port");
 $seconds = 10;
 $microseconds = 10;
 $extra_arg = 10;
-var_dump( stream_set_timeout($client, $seconds, $microseconds, $extra_arg) );
+try { var_dump( stream_set_timeout($client, $seconds, $microseconds, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing stream_set_timeout with one less than the expected number of arguments
 echo "\n-- Testing stream_set_timeout() function with less than expected no. of arguments --\n";
 
 $seconds = 10;
-var_dump( stream_set_timeout($client) );
+try { var_dump( stream_set_timeout($client) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "\n-- Testing stream_set_timeout() function with a closed socket --\n";
@@ -38,7 +38,7 @@ fclose($client);
 var_dump( stream_set_timeout($client, $seconds) );
 
 echo "\n-- Testing stream_set_timeout() function with an invalid stream --\n";
-var_dump( stream_set_timeout($seconds, $seconds) );
+try { var_dump( stream_set_timeout($seconds, $seconds) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing stream_set_timeout() function with a stream that does not support timeouts --\n";
 $filestream = fopen(__FILE__, "r");

@@ -48,7 +48,7 @@ var_dump(gmp_strval($r[0]));
 var_dump(gmp_strval($r[1]));
 
 var_dump(gmp_sqrtrem(array()));
-var_dump(gmp_sqrtrem());
+try { var_dump(gmp_sqrtrem()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

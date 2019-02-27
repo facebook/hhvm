@@ -1,5 +1,4 @@
 *** Testing clearstatcache() function: error conditions ***
 
 Warning: %s
-NULL
 *** Done ***

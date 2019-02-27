@@ -17,6 +17,6 @@ $inputs = array(
 
 foreach ($inputs as $input) {
   var_dump($input);
-  var_dump(htmlspecialchars($input, ENT_QUOTES, 'UTF-8'));
+  try { var_dump(htmlspecialchars($input, ENT_QUOTES, 'UTF-8')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 }

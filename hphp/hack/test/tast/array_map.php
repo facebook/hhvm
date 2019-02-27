@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function test(
   (function(int): bool) $f,

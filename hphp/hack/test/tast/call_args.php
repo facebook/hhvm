@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function takes_string(string $s): void {}
 

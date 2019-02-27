@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function test_array_filter(
   array $untyped_array,

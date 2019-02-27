@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A implements HH\TypeParameterAttribute {}
 class B implements HH\TypeParameterAttribute {}

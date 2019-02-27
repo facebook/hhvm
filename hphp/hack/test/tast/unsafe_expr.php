@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class Three {
   public function __toString(): string {

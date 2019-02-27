@@ -78,22 +78,23 @@ struct RepoOptions {
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
-  N(StringMap, AliasedNamespaces,              StringMap{})      \
-  P(bool,      UVS,                            s_PHP7_master)    \
-  P(bool,      LTRAssign,                      s_PHP7_master)    \
-  H(bool,      EnableIsExprPrimitiveMigration, true)             \
-  H(bool,      EnableCoroutines,               true)             \
-  H(bool,      Hacksperimental,                false)            \
-  H(bool,      EnableConcurrent,               false)            \
-  H(bool,      EnableAwaitAsAnExpression,      false)            \
-  H(bool,      EnableStrongerAwaitBinding,     false)            \
-  H(bool,      DisableLvalAsAnExpression,      false)            \
-  E(bool,      CreateInOutWrapperFunctions,    true)             \
-  E(bool,      HHJSUniqueFilenames,            false)            \
-  E(bool,      EmitFuncPointers,               true)             \
-  E(bool,      EmitClsMethPointers,            EmitFuncPointers) \
-  E(bool,      EmitInstMethPointers,           EmitFuncPointers) \
-  E(bool,      EmitMethCallerFuncPointers,     false)            \
+  N(StringMap,      AliasedNamespaces,              StringMap{})      \
+  P(bool,           UVS,                            s_PHP7_master)    \
+  P(bool,           LTRAssign,                      s_PHP7_master)    \
+  H(bool,           EnableIsExprPrimitiveMigration, true)             \
+  H(bool,           EnableCoroutines,               true)             \
+  H(bool,           Hacksperimental,                false)            \
+  H(bool,           EnableConcurrent,               false)            \
+  H(bool,           EnableAwaitAsAnExpression,      false)            \
+  H(bool,           EnableStrongerAwaitBinding,     false)            \
+  H(bool,           DisableLvalAsAnExpression,      false)            \
+  E(bool,           CreateInOutWrapperFunctions,    true)             \
+  E(bool,           HHJSUniqueFilenames,            false)            \
+  E(std::string,    HHJSBabelTransform,             "")               \
+  E(bool,           EmitFuncPointers,               true)             \
+  E(bool,           EmitClsMethPointers,            EmitFuncPointers) \
+  E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
+  E(bool,           EmitMethCallerFuncPointers,     false)            \
   /**/
 
   std::string path() const { return m_path; }

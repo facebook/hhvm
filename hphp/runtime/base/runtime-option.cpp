@@ -125,6 +125,7 @@ std::string mangleForKey(const RepoOptions::StringMap& map) {
   }
   return s;
 }
+std::string mangleForKey(std::string s) { return s; }
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
 }
@@ -138,7 +139,14 @@ void hdfExtract(
   if (config.exists() && !config.isEmpty()) config.configGet(map);
   else map = dv;
 }
-
+void hdfExtract(
+  const Hdf& hdf,
+  const char* name,
+  std::string& val,
+  std::string dv
+) {
+  val = hdf[name].configGetString(dv);
+}
 folly::dynamic toIniValue(bool b) {
   return b ? "1" : "0";
 }
@@ -149,6 +157,10 @@ folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
     obj[kv.first] = kv.second;
   }
   return obj;
+}
+
+folly::dynamic toIniValue(const std::string& str) {
+  return str;
 }
 
 struct CachedRepoOptions {

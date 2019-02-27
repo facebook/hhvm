@@ -47,6 +47,7 @@ type t = {
   option_enable_hhjs                      : bool;
   option_dump_hhjs                        : bool;
   option_hhjs_unique_filenames            : bool;
+  option_hhjs_babel_transform             : string;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
   option_phpism_undefined_const_as_string : bool;
@@ -103,6 +104,7 @@ let default = {
   option_enable_hhjs = false;
   option_dump_hhjs = false;
   option_hhjs_unique_filenames = false;
+  option_hhjs_babel_transform = "";
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
   option_phpism_undefined_const_as_string = true;
@@ -155,6 +157,7 @@ let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
+let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
@@ -307,6 +310,8 @@ let set_option options name value =
     { options with option_dump_hhjs = as_bool value }
   | "eval.hhjsuniquefilenames" ->
     { options with option_hhjs_unique_filenames = as_bool value }
+  | "eval.hhjsbabeltransform" ->
+    { options with option_hhjs_babel_transform = value }
   | "hack.lang.phpism.undefinedconstasstring" ->
     { options with option_phpism_undefined_const_as_string = as_bool value }
   | "hack.lang.phpism.undefinedconstfallback" ->
@@ -472,6 +477,8 @@ let value_setters = [
      fun opts v -> { opts with option_dump_hhjs = (v = 1) });
   (set_value "hhvm.hhjs_unique_filenames" get_value_from_config_int @@
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
+  (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@
+     fun opts v -> { opts with option_hhjs_babel_transform = v });
   (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@

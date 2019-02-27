@@ -89,7 +89,7 @@ function array_keys<Tk as arraykey, Tv>(
   KeyedContainer<Tk, Tv> $input,
   ?Tv $search_value = null,
   bool $strict = false
-): array<Tk>;
+): varray<Tk>;
 /**
  * array_map signature is rewritten based on the arity of the call:
  *

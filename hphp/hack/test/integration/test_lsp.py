@@ -191,7 +191,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         # We want the path to the builtins directory. This is best we can do.
         (output, err, retcode) = self.run_check(
             options=["--identify-function", "2:21", "--json"],
-            stdin="<?hh\nfunction f():void {PHP_EOL;}\n",
+            stdin="<?hh // partial\nfunction f():void {PHP_EOL;}\n",
         )
         self.assertEqual(retcode, 0)
         constants_path = json.loads(output)[0]["definition_pos"]["filename"]

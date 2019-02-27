@@ -1,4 +1,4 @@
-<?hh
+<?hh //partial
 
         function h(): string {
             return "a";

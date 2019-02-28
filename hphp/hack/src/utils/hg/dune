@@ -5,4 +5,6 @@
     hg
     hg_sig)
   (libraries
-    utils_process))
+    process
+    process_types
+    future))

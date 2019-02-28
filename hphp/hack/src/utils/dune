@@ -12,7 +12,6 @@
     prim_defs
     random_id
     stats
-    string_utils
     utils)
   (c_names
     get_build_id
@@ -22,6 +21,7 @@
     (:include config/build-id-opt)
     (:include config/build-timestamp-opt)))
   (libraries
+    string
     imported_core
     hh_json
     str
@@ -37,8 +37,6 @@
     trie)
   (libraries
     utils_core))
-
-
 
 (library
   (name utils_find)
@@ -109,7 +107,11 @@
   (libraries
     relative_path))
 
-; placeholder for the string library
+(library
+  (name string)
+  (wrapped false)
+  (modules string_utils)
+  (libraries str))
 
 (library
   (name stack_utils)
@@ -147,17 +149,20 @@
   (name marshal_tools)
   (wrapped false)
   (modules
-    marshal_tools
+    marshal_tools)
+  (libraries
+    sys_utils))
+
+(library
+  (name marshal_tools_lwt)
+  (wrapped false)
+  (modules
     marshal_tools_lwt)
   (libraries
+    marshal_tools
     lwt
     lwt.unix
-    lwt_log
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx)))
-
-; placeholder for marshal_tools_lwt
+    lwt_log))
 
 (library
   (name buffered_line_reader)
@@ -168,7 +173,15 @@
   (libraries
     utils_core))
 
-; placeholder for buffered_line_reader_lwt
+(library
+  (name buffered_line_reader_lwt)
+  (wrapped false)
+  (modules
+    buffered_line_reader_lwt)
+  (libraries
+    buffered_line_reader
+    lwt
+    lwt.unix))
 
 (library
   (name jsonrpc)
@@ -180,6 +193,7 @@
     hh_json
     http_lite
     marshal_tools
+    marshal_tools_lwt
     sys_utils)
   (preprocess
     (pps lwt_ppx)))

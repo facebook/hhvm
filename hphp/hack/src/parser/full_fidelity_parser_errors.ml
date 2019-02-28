@@ -1851,7 +1851,7 @@ let redeclaration_errors env node parents namespace_name names errors =
           t_functions = strmap_add function_name def names.t_functions }, errors
       | _ ->
         (* Only check this in strict mode. *)
-        if not @@ is_strict env then names, errors else
+        if not (is_typechecker env && is_strict env) then names, errors else
         let error = make_error_from_node
           ~error_type:SyntaxError.ParseError
           node

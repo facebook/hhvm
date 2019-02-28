@@ -107,6 +107,10 @@ void Package::addDirectory(const std::string &path, bool force) {
   m_directories[path] |= force;
 }
 
+void Package::addHHJSDirectory(const std::string &path, bool force) {
+  m_hhjsDirectories[path] |= force;
+}
+
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto const& dir : m_directories) {
     std::vector<std::string> files;
@@ -164,22 +168,25 @@ std::shared_ptr<FileCache> Package::getFileCache() {
 namespace {
 
 struct ParseItem {
-  ParseItem() : fileName(nullptr), check(false), force(false) {}
-  ParseItem(const std::string* file, bool check) :
+  ParseItem() : fileName(nullptr), check(false), force(false), js(false) {}
+  ParseItem(const std::string* file, bool check, bool js) :
       fileName(file),
       check(check),
-      force(false)
+      force(false),
+      js(js)
     {}
-  ParseItem(const std::string& dir, bool force) :
+  ParseItem(const std::string& dir, bool force, bool js) :
       dirName(dir),
       fileName(nullptr),
       check(false),
-      force(force)
+      force(force),
+      js(js)
     {}
   std::string dirName;
   const std::string* fileName;
   bool check; // whether its an error if the file isn't found
   bool force; // true to skip filters
+  bool js; // whether to check for JS files
 };
 
 struct ParserWorker
@@ -192,7 +199,7 @@ struct ParserWorker
         if (job.fileName) {
           return m_context->parseImpl(job.fileName);
         }
-        m_context->addPHPDirectory(job.dirName, job.force);
+        m_context->addSourceDirectory(job.dirName, job.force, job.js);
         return true;
       } catch (Exception& e) {
         Logger::Error(e.getMessage());
@@ -223,7 +230,8 @@ using ParserDispatcher = JobQueueDispatcher<ParserWorker>;
 ///////////////////////////////////////////////////////////////////////////////
 
 void Package::addSourceFile(const std::string& fileName,
-                            bool check /* = false */) {
+                            bool check /* = false */,
+                            bool js /* = false */) {
   if (!fileName.empty()) {
     auto canonFileName =
       FileUtil::canonicalize(String(fileName)).toCppString();
@@ -234,14 +242,16 @@ void Package::addSourceFile(const std::string& fileName,
     }();
 
     if (file) {
-      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({ file, check });
+      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({file, check, js});
     }
   }
 }
 
-void Package::addPHPDirectory(const std::string& path, bool force) {
+void Package::addSourceDirectory(const std::string& path,
+                                 bool force,
+                                 bool js /* = false */) {
   FileUtil::find(m_root, path,
-    /* php */ true, /* js */ RuntimeOption::EvalEnableHHJS, /* other */ false,
+    /* php */ true, /* js */ js, /* other */ false,
     [&] (const std::string& name, bool dir) {
       if (!dir) {
         if (!force) {
@@ -250,7 +260,7 @@ void Package::addPHPDirectory(const std::string& path, bool force) {
             return false;
           }
         }
-        addSourceFile(name, true);
+        addSourceFile(name, true, js);
         return true;
       }
       if (!force && Option::PackageExcludeDirs.count(name)) {
@@ -266,14 +276,15 @@ void Package::addPHPDirectory(const std::string& path, bool force) {
         return true;
       }
       // Process the directory as a new job
-      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({ name, force });
+      static_cast<ParserDispatcher*>(m_dispatcher)->enqueue({name, force, js});
       // Don't iterate the directory in this job.
       return false;
     });
 }
 
 bool Package::parse(bool check) {
-  if (m_filesToParse.empty() && m_directories.empty()) {
+  if (m_filesToParse.empty() && m_directories.empty() &&
+      m_hhjsDirectories.empty()) {
     return true;
   }
 
@@ -293,7 +304,12 @@ bool Package::parse(bool check) {
     addSourceFile(file, check);
   }
   for (auto const& dir : m_directories) {
-    addPHPDirectory(dir.first, dir.second);
+    addSourceDirectory(dir.first, dir.second);
+  }
+  if (RuntimeOption::EvalEnableHHJS) {
+    for (auto const& dir : m_hhjsDirectories) {
+      addSourceDirectory(dir.first, dir.second, /* js */ true);
+    }
   }
   dispatcher.waitEmpty();
 

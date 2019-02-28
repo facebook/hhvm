@@ -44,12 +44,14 @@ struct Package {
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
-  void addSourceFile(const std::string& fileName, bool check = false);
+  void addSourceFile(const std::string& fileName, bool check = false,
+                     bool js = false);
   void addInputList(const std::string& listFileName);
   void addStaticFile(const std::string& fileName);
   void addDirectory(const std::string &path, bool force);
+  void addHHJSDirectory(const std::string &path, bool force);
   void addStaticDirectory(const std::string& path);
-  void addPHPDirectory(const std::string& path, bool force);
+  void addSourceDirectory(const std::string& path, bool force, bool js = false);
 
   bool parse(bool check);
   bool parseImpl(const std::string* fileName);
@@ -78,6 +80,7 @@ private:
 
   std::shared_ptr<FileCache> m_fileCache;
   std::map<std::string,bool> m_directories;
+  std::map<std::string,bool> m_hhjsDirectories;
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;

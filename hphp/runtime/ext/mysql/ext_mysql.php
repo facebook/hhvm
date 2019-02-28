@@ -106,7 +106,7 @@ function mysql_connect_with_ssl(string $server,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
                                ?MySSLContextProvider $ssl_context = null,
-                               darray<string, string> $conn_attrs = [darray]): mixed;
+                               darray<string, string> $conn_attrs = darray[]): mixed;
 
 /**
  * Create a MySQL database

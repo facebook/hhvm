@@ -1085,7 +1085,7 @@ and simplify_subtype_variance
         then
           env |>
           simplify_subtype child super' &&&
-          simplify_subtype super child
+          simplify_subtype super' child
         else
           env, TL.IsEqual (child, super')
       end &&&

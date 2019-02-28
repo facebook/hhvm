@@ -4,3 +4,5 @@ Invalid return type (Typing[4110])
   This is a string
   File "transitive_error_3.php", line 14, characters 22-24:
   It is incompatible with an int
+  File "transitive_error_3.php", line 14, characters 22-24:
+  Considering that this type argument is invariant with respect to Inv

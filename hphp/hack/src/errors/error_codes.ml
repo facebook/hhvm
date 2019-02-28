@@ -389,7 +389,7 @@ module Typing                               = struct
   | InvalidMemoizedParam
   | IllegalTypeStructure
   | NotNullableCompareNullTrivial
-  | ClassPropertyOnlyStaticLiteral
+  | ClassPropertyOnlyStaticLiteralDEPRECATED
   | AttributeTooFewArguments
   | ReferenceExprDEPRECATED
   | UnificationCycle

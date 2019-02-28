@@ -554,65 +554,6 @@ and class_ tenv c =
   List.iter c.c_static_methods (method_ env);
   List.iter c.c_methods (method_ env);
 
-(* Class properties can only be initialized with a static literal expression. *)
-and check_class_property_initialization prop =
-  (* Only do the check if property is initialized. *)
-  Option.iter prop.cv_expr ~f:begin fun e ->
-    let rec rec_assert_static_literal e =
-      match (snd e) with
-      | Collection _
-      | Import _
-      | Lfun _
-      | NewAnonClass _
-      | Omitted
-      | BracedExpr _
-      | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
-      | Any | Typename _
-      | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ | PrefixedString _ | Unsafe_expr _
-      | Execution_operator _ ->
-        ()
-      | Array field_list ->
-        List.iter field_list begin function
-          | AFvalue expr -> rec_assert_static_literal expr
-          | AFkvalue (expr1, expr2) ->
-              rec_assert_static_literal expr1;
-              rec_assert_static_literal expr2;
-        end
-      | Darray (_, fl) -> List.iter fl assert_static_literal_for_field_list
-      | Varray (_, el) -> List.iter el rec_assert_static_literal
-      | Shape fl -> List.iter ~f:(fun (_, e) -> rec_assert_static_literal e) fl
-      | List el
-      | Expr_list el
-      | String2 el
-      | ValCollection (_, _, el) -> List.iter el rec_assert_static_literal
-      | Pair (expr1, expr2)
-      | Binop (_, expr1, expr2) ->
-        rec_assert_static_literal expr1;
-        rec_assert_static_literal expr2;
-      | KeyValCollection (_, _, field_list) ->
-        List.iter field_list assert_static_literal_for_field_list
-      | Cast (_, e)
-      | Unop (_, e) ->
-        rec_assert_static_literal e;
-      | Eif (expr1, optional_expr, expr2) ->
-        rec_assert_static_literal expr1;
-        Option.iter optional_expr rec_assert_static_literal;
-        rec_assert_static_literal expr2;
-      | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
-      | Method_id _
-      | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
-      | Call _ | Special_func _ | Yield_break | Yield _ | Yield_from _ | Suspend _
-      | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
-      | Assert _ | Clone _ | As _ | Pipe _ ->
-        Errors.class_property_only_static_literal (fst e)
-    and assert_static_literal_for_field_list (expr1, expr2) =
-      rec_assert_static_literal expr1;
-      rec_assert_static_literal expr2
-    in
-    rec_assert_static_literal e;
-  end
-
 and class_const env (h, _, e) =
   maybe hint env h;
   maybe expr env e;
@@ -622,7 +563,6 @@ and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint;
 and class_var env cv =
-  check_class_property_initialization cv;
   let hint_env =
     (* If this is an XHP attribute and we're in strict mode,
        relax to partial mode to allow the use of generic

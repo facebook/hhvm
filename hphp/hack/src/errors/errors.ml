@@ -3074,7 +3074,7 @@ let illegal_typeconst_direct_access pos =
 let class_property_only_static_literal pos =
   let msg =
     "Initialization of class property must be a static literal expression." in
-  add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteral) pos msg
+  add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteralDEPRECATED) pos msg
 
 let reference_expr pos =
   let msg = "References are only permitted as function call arguments." in

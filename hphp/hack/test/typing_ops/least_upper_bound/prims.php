@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
   function test () {
     new least_upper_bound<int, int, int>();

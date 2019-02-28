@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 function foo()  {
   $x = " hello ";
   return 5;

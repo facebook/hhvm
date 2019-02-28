@@ -92,13 +92,18 @@ let handler = object
     | (pos, _), Call (_, ((_, (_, Tfun { ft_pos; ft_tparams; _ })), _), targs, _, _) ->
       let tparams = fst ft_tparams in
       verify_call_targs env pos ft_pos tparams targs
-    | (pos, _), New ((_, CI (_, class_id)), targs, _, _, _) ->
-      begin match Env.get_class env class_id with
-      | Some cls ->
-        let tparams = Typing_classes_heap.tparams cls in
-        let class_pos = Typing_classes_heap.pos cls in
-        verify_call_targs env pos class_pos tparams targs
-      | None -> () end
+    | (pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _) ->
+      begin match ty with
+      | (_, Tabstract (AKgeneric ci, None)) when ci = class_id ->
+        if not (Env.get_newable env ci) then
+          Errors.new_without_newable pos ci
+      | _ ->
+        match Env.get_class env class_id with
+        | Some cls ->
+          let tparams = Typing_classes_heap.tparams cls in
+          let class_pos = Typing_classes_heap.pos cls in
+          verify_call_targs env pos class_pos tparams targs
+        | None -> () end
     | _ -> ()
 
   method! at_hint env = function

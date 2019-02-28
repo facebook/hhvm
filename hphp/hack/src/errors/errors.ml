@@ -2481,6 +2481,10 @@ let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) =
     def_pos, def_name ^ " is reified"
   ]
 
+let new_without_newable pos name =
+  add (Typing.err_code Typing.NewWithoutNewable) pos
+    (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")
+
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos
   ("Result of freeze operation is unused. Note that freeze unsets local variable \

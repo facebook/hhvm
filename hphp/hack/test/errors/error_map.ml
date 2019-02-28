@@ -540,4 +540,5 @@ ErasedGenericPassedToReified = 4305
 GenericsNotAllowed = 4306
 InvalidNewableTypeArgument = 4307
 InvalidNewableTypeParamConstraints = 4308
+NewWithoutNewable = 4309
   |}]

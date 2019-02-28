@@ -151,6 +151,9 @@ val get_reified: env -> string -> bool
 val get_enforceable: env -> string -> bool
 (** Get whether the type parameter supports testing with is/as. *)
 
+val get_newable: env -> string -> bool
+(** Indicates whether the type parameter with the given name is <<__Newable>>. *)
+
 val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being

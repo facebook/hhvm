@@ -94,6 +94,7 @@ let is_untyped env ty =
 
 let get_reified = Typing_env.get_reified
 let get_enforceable = Typing_env.get_enforceable
+let get_newable = Typing_env.get_newable
 
 let subtype env ty_sub ty_super =
   Errors.ignore_ (fun () ->

@@ -188,6 +188,12 @@ let get_tpenv_enforceable tpenv name =
 match SMap.get name tpenv with
 | None -> false
 | Some {enforceable; _} -> enforceable
+
+let get_tpenv_newable tpenv name =
+match SMap.get name tpenv with
+| None -> false
+| Some {newable; _} -> newable
+
 let get_lower_bounds env name =
   let local = get_tpenv_lower_bounds env.lenv.tpenv name in
   let global = get_tpenv_lower_bounds env.global_tpenv name in
@@ -206,6 +212,11 @@ let get_reified env name =
 let get_enforceable env name =
   let local = get_tpenv_enforceable env.lenv.tpenv name in
   let global = get_tpenv_enforceable env.global_tpenv name in
+  local || global
+
+let get_newable env name =
+  let local = get_tpenv_newable env.lenv.tpenv name in
+  let global = get_tpenv_newable env.global_tpenv name in
   local || global
 
 (* Get bounds that are both an upper and lower of a given generic *)
@@ -233,10 +244,13 @@ let add_upper_bound_ tpenv name ty =
   else match SMap.get name tpenv with
   | None ->
     SMap.add name
-      {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty; reified = false; enforceable = false} tpenv
-  | Some {lower_bounds; upper_bounds; reified; enforceable} ->
-    SMap.add name
-      {lower_bounds; upper_bounds = ty++upper_bounds; reified; enforceable} tpenv
+      { lower_bounds = empty_bounds;
+        upper_bounds = singleton_bound ty;
+        reified = false;
+        enforceable = false;
+        newable = false } tpenv
+  | Some tp ->
+    SMap.add name { tp with upper_bounds = ty++tp.upper_bounds; } tpenv
 
 (* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
 let add_lower_bound_ tpenv name ty =
@@ -247,10 +261,13 @@ let add_lower_bound_ tpenv name ty =
   match SMap.get name tpenv with
   | None ->
     SMap.add name
-      {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds; reified = false; enforceable = false} tpenv
-  | Some {lower_bounds; upper_bounds; reified; enforceable} ->
-    SMap.add name
-      {lower_bounds = ty++lower_bounds; upper_bounds; reified; enforceable} tpenv
+      { lower_bounds = singleton_bound ty;
+        upper_bounds = empty_bounds;
+        reified = false;
+        enforceable = false;
+        newable = false } tpenv
+  | Some tp ->
+    SMap.add name { tp with lower_bounds = ty++tp.lower_bounds } tpenv
 
 let env_with_tpenv env tpenv =
   { env with lenv = { env.lenv with tpenv = tpenv } }
@@ -390,7 +407,8 @@ let add_upper_bound_global env name ty =
      let lower_bounds = get_tpenv_lower_bounds env.lenv.tpenv name in
      let reified = get_tpenv_reified env.lenv.tpenv name in
      let enforceable = get_tpenv_enforceable env.lenv.tpenv name in
-     env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds; reified; enforceable} tpenv)
+     let newable = get_tpenv_newable env.lenv.tpenv name in
+     env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds; reified; enforceable; newable} tpenv)
 
 (* Add a single new upper lower [ty] to generic parameter [name] in the
  * local type parameter environment [env].
@@ -417,17 +435,20 @@ let add_lower_bound ?union env name ty =
     let upper_bounds = get_tpenv_upper_bounds env.lenv.tpenv name in
     let reified = get_tpenv_reified env.lenv.tpenv name in
     let enforceable = get_tpenv_enforceable env.lenv.tpenv name in
-    env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds; reified; enforceable} tpenv)
+    let newable = get_tpenv_newable env.lenv.tpenv name in
+    env_with_tpenv env (SMap.add name {lower_bounds; upper_bounds; reified; enforceable; newable} tpenv)
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters env tparaml =
-  let add_empty_bounds tpenv { tp_name = (_, name); tp_reified; tp_user_attributes; _ } =
+  let add_empty_bounds tpenv { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } =
     let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
+    let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
     SMap.add name {lower_bounds = empty_bounds;
                    upper_bounds = empty_bounds;
-                   reified = tp_reified;
-                   enforceable} tpenv in
+                   reified;
+                   enforceable;
+                   newable} tpenv in
   env_with_tpenv env
     (List.fold_left tparaml ~f:add_empty_bounds ~init:env.lenv.tpenv)
 
@@ -438,10 +459,10 @@ let get_generic_parameters env =
   SMap.keys (SMap.union env.lenv.tpenv env.global_tpenv)
 
 let get_tpenv_size env =
-  let local = SMap.fold (fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _ } count ->
+  let local = SMap.fold (fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _; newable = _ } count ->
     count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
     env.lenv.tpenv 0 in
-    SMap.fold (fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _ } count ->
+    SMap.fold (fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _ ; newable = _ } count ->
       count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
       env.global_tpenv local
 
@@ -563,7 +584,7 @@ let add_subtype_prop env prop =
 
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
-let add_fresh_generic_parameter env prefix ~reified ~enforceable =
+let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
   let rec iterate i =
     let name = Printf.sprintf "%s#%d" prefix i in
     if is_generic_parameter env name then iterate (i+1) else name in
@@ -573,7 +594,8 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable =
       (SMap.add name {lower_bounds = empty_bounds;
                       upper_bounds = empty_bounds;
                       reified;
-                      enforceable} env.lenv.tpenv) in
+                      enforceable;
+                      newable} env.lenv.tpenv) in
   env, name
 
 let is_fresh_generic_parameter name =
@@ -597,7 +619,7 @@ let get_tparams_aux env acc ty = (tparams_visitor env)#on_type acc ty
 let get_tparams env ty = get_tparams_aux env SSet.empty ty
 
 let get_tpenv_tparams env =
-  SMap.fold begin fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _ } acc ->
+  SMap.fold begin fun _x { lower_bounds; upper_bounds; reified = _; enforceable = _ ; newable = _ } acc ->
     let folder ty acc =
       match ty with
       | _, Tabstract (AKgeneric _, _) -> acc

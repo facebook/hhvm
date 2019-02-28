@@ -19,6 +19,7 @@ type tparam_info = {
   upper_bounds : tparam_bounds;
   reified      : bool;
   enforceable  : bool;
+  newable      : bool;
 }
 
 type tpenv = tparam_info SMap.t
@@ -46,6 +47,11 @@ let pp_tparam_info fmt tpi =
 
   Format.fprintf fmt "@[%s =@ " "enforceable";
   Format.pp_print_bool fmt tpi.enforceable;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "newable";
+  Format.pp_print_bool fmt tpi.newable;
   Format.fprintf fmt "@]";
 
   Format.fprintf fmt " }@]"

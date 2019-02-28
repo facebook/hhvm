@@ -221,7 +221,8 @@ and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints 
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
       let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
-      let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable in
+      let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
+      let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in
       let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
       let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let env, ty = localize ~ety_env env ty in

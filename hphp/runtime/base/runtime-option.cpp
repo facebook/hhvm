@@ -222,6 +222,8 @@ RepoOptionCache s_repoOptionCache;
 }
 
 const RepoOptions& RepoOptions::forFile(const char* path) {
+  if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
+
   const char* filename = ".hhvmconfig.hdf";
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();

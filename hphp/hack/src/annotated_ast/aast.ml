@@ -442,7 +442,6 @@ and gconst = {
   cst_name: sid;
   cst_type: hint option;
   cst_value: expr option;
-  cst_is_define: bool;
   cst_namespace: nsenv;
 }
 

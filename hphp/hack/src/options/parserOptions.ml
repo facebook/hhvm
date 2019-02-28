@@ -17,7 +17,6 @@ let enable_concurrent = GlobalOptions.po_enable_concurrent
 let enable_await_as_an_expression = GlobalOptions.po_enable_await_as_an_expression
 let default_mode = GlobalOptions.po_default_mode
 let default = GlobalOptions.default
-let disable_define = GlobalOptions.po_disable_define
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let disable_static_closures = GlobalOptions.po_disable_static_closures
 let disable_static_local_variables = GlobalOptions.po_disable_static_local_variables
@@ -38,7 +37,6 @@ let make
   ~enable_concurrent
   ~enable_await_as_an_expression
   ~disallow_execution_operator
-  ~disable_define
   ~disable_nontoplevel_declarations
   ~disable_static_closures
   ~disable_static_local_variables
@@ -50,7 +48,6 @@ let make
   GlobalOptions.po_enable_concurrent = enable_concurrent;
   GlobalOptions.po_enable_await_as_an_expression = enable_await_as_an_expression;
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
-  GlobalOptions.po_disable_define = disable_define;
   GlobalOptions.po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
   GlobalOptions.po_disable_static_closures = disable_static_closures;
   GlobalOptions.po_disable_static_local_variables = disable_static_local_variables;

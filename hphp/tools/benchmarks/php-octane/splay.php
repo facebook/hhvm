@@ -38,9 +38,9 @@
 
 
 // Configuration.
-define('kSplayTreeSize', 8000);
-define('kSplayTreeModifications', 80);
-define('kSplayTreePayloadDepth', 5);
+const kSplayTreeSize = 8000;
+const kSplayTreeModifications = 80;
+const kSplayTreePayloadDepth = 5;
 
 $splayTree = null;
 $splaySampleTimeStart = 0.0;

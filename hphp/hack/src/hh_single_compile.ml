@@ -450,7 +450,6 @@ let make_popt () =
     ~disallow_execution_operator:(phpism_disallow_execution_operator co)
     ~enable_concurrent:(enable_concurrent co)
     ~enable_await_as_an_expression:(enable_await_as_an_expression co)
-    ~disable_define:(phpism_disable_define co)
     ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
     ~disable_static_closures:(phpism_disable_static_closures co)
     ~disable_static_local_variables:(phpism_disable_static_local_variables co)

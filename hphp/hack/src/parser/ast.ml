@@ -55,8 +55,6 @@ and def =
   | FileAttributes of file_attributes
 
 and cst_kind =
-  (* The constant was introduced with: define('X', ...); *)
-  | Cst_define
   (* The constant was introduced with: const X = ...; *)
   | Cst_const
 

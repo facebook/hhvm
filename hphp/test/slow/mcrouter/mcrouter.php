@@ -1,6 +1,6 @@
 <?hh
 
-define('PREFIX', 'HPHP_TEST_MCROUTER|');
+const PREFIX = 'HPHP_TEST_MCROUTER|';
 
 async function set_get_del(MCRouter $mcr): Awaitable<string> {
   $key = PREFIX . 'set-get-del';

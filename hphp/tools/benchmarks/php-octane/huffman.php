@@ -4,7 +4,7 @@
 
 $asciiMap = array();
 $symbolMap = array();
-define('SYMBOL_SIZE', 8);
+const SYMBOL_SIZE = 8;
 
 for ($i = 0; $i < 256; ++$i) {
   $binary = decbin($i);

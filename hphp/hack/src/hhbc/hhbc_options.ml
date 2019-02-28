@@ -53,7 +53,6 @@ type t = {
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
   option_phpism_disallow_execution_operator: bool;
-  option_phpism_disable_define            : bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_phpism_disable_static_closures : bool;
   option_phpism_disable_static_local_variables : bool;
@@ -110,7 +109,6 @@ let default = {
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
   option_phpism_disallow_execution_operator = false;
-  option_phpism_disable_define = true;
   option_phpism_disable_nontoplevel_declarations = false;
   option_phpism_disable_static_closures = false;
   option_phpism_disable_static_local_variables = false;
@@ -163,7 +161,6 @@ let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
-let phpism_disable_define o = o.option_phpism_disable_define
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
 let phpism_disable_static_local_variables o = o.option_phpism_disable_static_local_variables
@@ -221,7 +218,6 @@ let to_string o =
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
-    ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
     ; Printf.sprintf "phpism_disable_static_closures %B"
@@ -318,8 +314,6 @@ let set_option options name value =
     { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
-  | "hack.lang.phpism.disabledefine" ->
-    { options with option_phpism_disable_define = int_of_string value > 0 }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
     { options with option_phpism_disable_nontoplevel_declarations = as_bool value }
   | "hack.lang.phpism.disablestaticclosures" ->
@@ -485,8 +479,6 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
-  (set_value "hhvm.hack.lang.phpism.disable_define" get_value_from_config_int @@
-     fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_nontoplevel_declarations = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_static_closures" get_value_from_config_int @@

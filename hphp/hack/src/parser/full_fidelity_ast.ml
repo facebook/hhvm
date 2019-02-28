@@ -3223,25 +3223,6 @@ let pProgram : program parser = fun node env  ->
       let result = post_process il [] in
       post_process el (Namespace (n, result) :: acc)
     | (Stmt (_, Noop) :: el) -> post_process el acc
-    | ((Stmt (_, Expr (pos, (Call
-        ( (_, (Id (_, "define")))
-        , []
-        , [ (_, (String name))
-          ; value
-          ]
-        , []
-        )
-      )))) :: el) when not(ParserOptions.disable_define env.parser_options) ->
-      let const = Constant
-        { cst_mode      = mode_annotation env.fi_mode
-        ; cst_kind      = Cst_define
-        ; cst_name      = pos, name
-        ; cst_type      = None
-        ; cst_value     = value
-        ; cst_namespace = Namespace_env.empty env.parser_options
-        ; cst_span      = pos
-        } in
-      post_process el (const :: acc)
     | (Stmt (_, Markup _) as e)::el
     | (Stmt (_, Expr (_, Import _)) as e)::el ->
       post_process el (e :: acc)
@@ -3278,34 +3259,6 @@ let pProgram : program parser = fun node env  ->
       env.ignore_pos <- local_ignore_pos
       end;
     aux env acc nodel
-  (* There's an incompatibility between the Full-Fidelity (FF) and the AST view
-   * of the world; `define` is an *expression* in FF, but a *definition* in AST.
-   * Luckily, `define` only happens at the level of definitions.
-   *)
-  | { syntax = ExpressionStatement
-      { expression_statement_expression =
-        { syntax = DefineExpression
-          { define_keyword; define_argument_list = args; _ }
-        ; _ }
-      ; _ }
-    ; _ } as cur_node :: nodel ->
-      let def =
-        match List.map ~f:(fun x -> pExpr x env) (as_list args) with
-        | [ pos, String name; e ] -> Constant
-          { cst_mode      = mode_annotation env.fi_mode
-          ; cst_kind      = Cst_define
-          ; cst_name      = pos, name
-          ; cst_type      = None
-          ; cst_value     = e
-          ; cst_namespace = Namespace_env.empty env.parser_options
-          ; cst_span      = pPos cur_node env
-          }
-        | args ->
-          let name = pos_name define_keyword env in
-          Stmt (pPos cur_node env,
-            Expr (fst name, Call ((fst name, Id name), [], args, [])))
-      in
-      aux env ([def] :: acc) nodel
   | node :: nodel ->
     let acc =
       match pDef node env with

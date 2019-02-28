@@ -873,7 +873,7 @@ let const_decl cst =
   | None ->
     match cst.cst_value >>= Decl_utils.infer_const with
     | Some ty -> ty
-    | None when cst.cst_mode = FileInfo.Mstrict && (not cst.cst_is_define) ->
+    | None when cst.cst_mode = FileInfo.Mstrict ->
       Errors.missing_typehint cst_pos;
       Reason.Rwitness cst_pos, Tany
     | None ->

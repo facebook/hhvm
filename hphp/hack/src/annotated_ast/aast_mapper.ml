@@ -408,7 +408,6 @@ struct
     T.cst_name = c.S.cst_name;
     T.cst_type = c.S.cst_type;
     T.cst_value = Option.map c.S.cst_value (map_expr menv);
-    T.cst_is_define = c.S.cst_is_define;
     T.cst_namespace = c.S.cst_namespace;
   }
 

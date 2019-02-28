@@ -2872,14 +2872,6 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.aast_make_const_env cst in
     let hint = Option.map cst.Aast.cst_type (aast_hint env) in
     let e =
-      (* Define allows any expression, so don't call check_constant.
-       * Furthermore it often appears at toplevel, which we don't track at
-       * all, so don't type or even name that expression, it may refer to
-       * "undefined" variables that actually exist, just untracked since
-       * they're toplevel. *)
-      if cst.Aast.cst_is_define
-      then None
-      else
         let _ = check_constant_name (fst env) cst in
         let _ = check_constant_hint cst in
         Option.map cst.Aast.cst_value (aast_constant_expr env) in
@@ -2888,7 +2880,6 @@ module Make (GetLocals : GetLocals) = struct
       cst_name = cst.Aast.cst_name;
       cst_type = hint;
       cst_value = e;
-      cst_is_define = cst.Aast.cst_is_define;
       cst_namespace = cst.Aast.cst_namespace;
     }
 

@@ -37,7 +37,7 @@
 // Martin Richards.
 
 
-define('COUNT', 1000);
+const COUNT = 1000;
 
 /**
  * These two constants specify how many times a packet is queued and
@@ -46,23 +46,23 @@ define('COUNT', 1000);
  * correct run so if the actual queue or hold count is different from
  * the expected there must be a bug in the implementation.
  **/
-define('EXPECTED_QUEUE_COUNT', 2322);
-define('EXPECTED_HOLD_COUNT', 928);
+const EXPECTED_QUEUE_COUNT = 2322;
+const EXPECTED_HOLD_COUNT = 928;
 
 
-define('ID_IDLE',       0);
-define('ID_WORKER',     1);
-define('ID_HANDLER_A',  2);
-define('ID_HANDLER_B',  3);
-define('ID_DEVICE_A',   4);
-define('ID_DEVICE_B',   5);
-define('NUMBER_OF_IDS', 6);
+const ID_IDLE =       0;
+const ID_WORKER =     1;
+const ID_HANDLER_A =  2;
+const ID_HANDLER_B =  3;
+const ID_DEVICE_A =   4;
+const ID_DEVICE_B =   5;
+const NUMBER_OF_IDS = 6;
 
-define('KIND_DEVICE',   0);
-define('KIND_WORK',     1);
+const KIND_DEVICE =   0;
+const KIND_WORK =     1;
 
 
-define('DATA_SIZE', 4);
+const DATA_SIZE = 4;
 
 
 /**

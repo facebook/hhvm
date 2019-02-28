@@ -923,11 +923,6 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     when String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
     emit_idx env pos args
 
-  | A.Id (_, id), _, [(_, A.String s); e], []
-    when String.lowercase id = "define"
-      && is_global_namespace env
-      && not(Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options) ->
-    emit_define env pos s e
   | A.Id (_, id), _, [arg1], []
     when String.lowercase id = "eval" ->
     emit_eval env pos arg1
@@ -1431,13 +1426,6 @@ and emit_idx env pos es =
     emit_pos pos;
     default;
     instr_idx;
-  ]
-
-and emit_define env pos s e =
-  gather [
-    emit_expr ~need_ref:false env e;
-    emit_pos pos;
-    instr_defcns s;
   ]
 
 and emit_eval env pos e =

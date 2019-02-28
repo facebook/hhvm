@@ -690,7 +690,6 @@ and on_constant (c : gconst) : Aast.gconst =
     cst_name = c.cst_name;
     cst_type = optional on_hint c.cst_type;
     cst_value = Some (on_expr c.cst_value);
-    cst_is_define = (c.cst_kind = Cst_define);
     cst_namespace = c.cst_namespace;
   }
 

@@ -652,48 +652,46 @@ and get_type_structure_for_hint env ~targ_map h =
   if hack_arr_dv_arrs () then
     instr (ILitConst (Dict i)) else instr (ILitConst (Array i))
 
-and emit_as env pos e h is_nullable =
-  (* Creates equivalent to while avoiding double evaluation of e
-   * (e is h) ? e : (gather [e; else_block])
-   *)
-  let emit_as_if_then_else_block else_block =
-    Local.scope @@ fun () ->
-      let local = Local.get_unnamed_local () in
-      let true_label = Label.next_regular () in
-      let done_label = Label.next_regular () in
+(* NOTE: Make sure the type structure retrieval code is synced with emit_is. *)
+and emit_as env pos e h is_nullable = Local.scope @@ fun () ->
+  let arg_local = Local.get_unnamed_local () in
+  let type_struct_local = Local.get_unnamed_local () in
+  let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
+  let then_label = Label.next_regular () in
+  let done_label = Label.next_regular () in
+  let push_typestructc_args_block = gather [
+    instr_pushl arg_local;
+    instr_pushl type_struct_local ] in
+  (* Set aside the argument value. *)
+  gather [
+    emit_expr ~need_ref:false env e;
+    instr_setl arg_local;
+    (* Store type struct in a variable and reuse it. *)
+    if is_static then
       gather [
-        emit_expr ~need_ref:false env e;
-        instr_setl local;
-        emit_is env pos h;
-        instr_jmpnz true_label;
-        instr_pushl local;
-        else_block;
-        instr_jmp done_label;
-        instr_label true_label;
-        instr_pushl local;
-        instr_label done_label;
-      ]
-  in
-  if is_nullable then
-    (* (e is h) ? e : null *)
-    emit_as_if_then_else_block @@ gather [ instr_popc; instr_null ]
-  else
-    (* (e is h) ? e : (e as h) *)
-    emit_as_if_then_else_block @@
-      Local.scope @@ fun () -> begin
-        let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
-        begin if is_static then
-          gather [
-            get_type_structure_for_hint env ~targ_map:SMap.empty h;
-            instr_astypestructc Resolve;
-          ]
+        get_type_structure_for_hint env ~targ_map:SMap.empty h;
+        instr_setl type_struct_local;
+        instr_istypestructc Resolve;
+        instr_jmpnz then_label;
+        if is_nullable then instr_null
         else
-          gather [
-            ts_instrs;
-            instr_astypestructc DontResolve;
-          ]
-        end
-      end
+          gather [push_typestructc_args_block; instr_astypestructc Resolve]
+      ]
+    else
+      gather [
+        ts_instrs;
+        instr_setl type_struct_local;
+        instr_istypestructc DontResolve;
+        instr_jmpnz then_label;
+        if is_nullable then instr_null
+        else
+          gather [push_typestructc_args_block; instr_astypestructc DontResolve]
+      ];
+    instr_jmp done_label;
+    instr_label then_label;
+    instr_pushl arg_local;
+    instr_label done_label;
+  ]
 
 and emit_is env pos h =
   let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in

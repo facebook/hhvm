@@ -14,6 +14,8 @@ type env = {
   is_reactive: bool;
   class_kind: Ast.class_kind option;
   class_name: string option;
+  function_name: string option;
+  file_mode: FileInfo.mode;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -28,6 +30,7 @@ let fun_is_reactive user_attributes =
 let fun_env env f =
   { env with
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
+    file_mode = f.f_mode;
   }
 
 let method_env env m =
@@ -35,15 +38,28 @@ let method_env env m =
     is_reactive = fun_is_reactive m.m_user_attributes; }
 
 let class_env env c =
-  { env with class_kind = Some c.c_kind; class_name = Some (snd c.c_name); }
+  { env with
+    class_kind = Some c.c_kind;
+    class_name = Some (snd c.c_name);
+    file_mode = c.c_mode;
+  }
 
-let empty_env = { is_reactive = false; class_kind = None; class_name = None; }
+let typedef_env env t =
+  { env with file_mode = t.t_mode; }
+
+let empty_env = {
+  is_reactive = false;
+  class_kind = None;
+  class_name = None;
+  function_name = None;
+  file_mode = FileInfo.Mstrict;
+}
 
 let def_env x =
   match x with
   | Nast.Fun f -> fun_env empty_env f
   | Nast.Class c -> class_env empty_env c
-  | Nast.Typedef _ -> empty_env
+  | Nast.Typedef t -> typedef_env empty_env t
   | Nast.Constant _
   | Nast.Stmt _
   | Nast.Namespace _
@@ -84,7 +100,7 @@ class type handler = object
   method at_method_ : env -> Nast.method_ -> unit
   method at_expr : env -> Nast.expr -> unit
   method at_stmt : env -> Nast.stmt -> unit
-
+  method at_hint : env -> Nast.hint -> unit
 end
 
 class virtual handler_base : handler = object
@@ -94,6 +110,7 @@ class virtual handler_base : handler = object
   method at_method_ _ _ = ()
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
+  method at_hint _ _ = ()
 
 end
 
@@ -120,5 +137,9 @@ let iter_with (handlers : handler list) : iter = object
   method! on_stmt env x =
     List.iter handlers (fun v -> v#at_stmt env x);
     super#on_stmt env x;
+
+  method! on_hint env h =
+    List.iter handlers (fun v -> v#at_hint env h);
+    super#on_hint env h;
 
 end

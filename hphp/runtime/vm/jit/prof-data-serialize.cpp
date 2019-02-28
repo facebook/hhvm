@@ -1271,6 +1271,7 @@ Func* read_func(ProfDataDeserializer& ser) {
         not_reached();
       }();
       ser.recordFid(fid, func->getFuncId());
+      const_cast<Func*>(func)->setHot();
       return const_cast<Func*>(func);
     }
   );

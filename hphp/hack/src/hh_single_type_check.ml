@@ -1208,11 +1208,12 @@ let main_hack ({files; mode; tcopt; _} as opts) =
 let _ =
   if ! Sys.interactive
   then ()
-  else
+  else (
     (* On windows, setting 'binary mode' avoids to output CRLF on
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
-    Out_channel.set_binary_mode stdout true;
-    let options = parse_options () in
-    Unix.handle_unix_error main_hack options
+    Out_channel.set_binary_mode stdout true
+  );
+  let options = parse_options () in
+  Unix.handle_unix_error main_hack options

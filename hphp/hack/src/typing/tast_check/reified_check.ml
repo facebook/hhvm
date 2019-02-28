@@ -13,9 +13,42 @@ open Typing_defs
 
 module Env = Tast_env
 module UA = Naming_special_names.UserAttributes
+module Cls = Typing_classes_heap
 
 let tparams_has_reified tparams =
   List.exists ~f:(fun t -> t.tp_reified) tparams
+
+let valid_newable_hint env tp (pos, hint) =
+  match hint with
+  | Aast.Happly ((p, h), _) ->
+    begin match Tast_env.get_class env h with
+    | Some cls ->
+      if Cls.kind cls <> Ast.Cnormal then
+        Errors.invalid_newable_type_argument tp p
+    | None ->
+      (* This case should never happen *)
+      Errors.invalid_newable_type_argument tp p end
+  | _ ->
+    Errors.invalid_newable_type_argument tp pos
+
+let verify_has_consistent_bound env (tparam: Tast.tparam) =
+  let upper_bounds = Typing_set.elements (Tast_env.get_upper_bounds env (snd tparam.tp_name)) in
+  let bound_classes = List.filter_map upper_bounds ~f:(function
+    | _, Tclass ((_, class_id), _, _) ->
+      Env.get_class env class_id
+    | _ -> None) in
+  let valid_classes = List.filter bound_classes ~f:(fun cls ->
+    match Cls.kind cls with
+    | Ast.Cnormal
+    | Ast.Cabstract ->
+      Cls.final cls || snd (Cls.construct cls)
+    (* There is currently a bug with interfaces that allows constructors to change
+     * their signature, so they are not considered here. TODO: T41093452 *)
+    | _ -> false) in
+  if List.length valid_classes <> 1 then
+    let cbs = List.map ~f:(Cls.name) valid_classes in
+    Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
+
 
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
@@ -33,9 +66,12 @@ let verify_targ_valid_for_reified_tparam env tparam targ =
       Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ
     | _ -> () end;
 
-  if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
+  begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Type_test_hint_check.validate_hint env targ
-      (Errors.invalid_enforceable_type_argument tparam.tp_name)
+      (Errors.invalid_enforceable_type_argument tparam.tp_name) end;
+
+  begin if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
+    valid_newable_hint env tparam.tp_name targ end
 
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
@@ -85,5 +121,10 @@ let handler = object
       )
     | _ ->
       ()
+
+  method! at_tparam env tparam =
+    (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
+    if List.exists tparam.tp_user_attributes (fun { ua_name; _ } -> UA.uaNewable = snd ua_name) then
+      verify_has_consistent_bound env tparam
 
 end

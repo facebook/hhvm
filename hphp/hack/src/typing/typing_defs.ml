@@ -516,6 +516,7 @@ and class_type = {
   tc_sprops              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
+  (* the bool represents final constructor or __ConsistentConstruct *)
   tc_construct           : class_elt option * bool;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)

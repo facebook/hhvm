@@ -538,4 +538,6 @@ RequireArgsReify = 4303
 TypecheckerTimeout = 4304
 ErasedGenericPassedToReified = 4305
 GenericsNotAllowed = 4306
+InvalidNewableTypeArgument = 4307
+InvalidNewableTypeParamConstraints = 4308
   |}]

@@ -2838,6 +2838,24 @@ let invalid_enforceable_type_argument (tp_pos, tp_name) targ_pos ty_pos ty_str =
     ty_pos, "This type argument is not enforceable because it has " ^ ty_str
   ]
 
+let invalid_newable_type_argument (tp_pos, tp_name) ta_pos =
+  add_list (Typing.err_code Typing.InvalidNewableTypeArgument) [
+    ta_pos, "A newable type argument must be a concrete class.";
+    tp_pos, "Type parameter " ^ tp_name ^ " was declared __Newable here";
+  ]
+
+let invalid_newable_type_param_constraints (tparam_pos, tparam_name) constraint_list =
+  let partial =
+    if List.is_empty constraint_list
+    then "No constraints"
+    else "The constraints " ^ (String.concat ~sep:", " (List.map ~f:Utils.strip_ns constraint_list)) in
+  let msg = "The type parameter " ^ tparam_name ^ " has the <<__Newable>> attribute. " ^
+    "Newable type parameters must be constrained with `as`, and exactly one of those constraints " ^
+    "must be a valid newable class. The class must either be final or have a constructor that is " ^
+    "consistent. This can be accomplished by making the constructor final or " ^
+    "having <<__ConsistentConstruct>>. " ^ partial ^ " are valid newable classes" in
+  add (Typing.err_code Typing.InvalidNewableTypeParamConstraints) tparam_pos msg
+
 let override_final ~parent ~child =
   add_list (Typing.err_code Typing.OverrideFinal) [child, "You cannot override this method";
             parent, "It was declared as final"]

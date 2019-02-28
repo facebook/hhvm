@@ -2844,7 +2844,7 @@ let invalid_enforceable_type_argument (tp_pos, tp_name) targ_pos ty_pos ty_str =
 
 let invalid_newable_type_argument (tp_pos, tp_name) ta_pos =
   add_list (Typing.err_code Typing.InvalidNewableTypeArgument) [
-    ta_pos, "A newable type argument must be a concrete class.";
+    ta_pos, "A newable type argument must be a concrete class or a newable type parameter.";
     tp_pos, "Type parameter " ^ tp_name ^ " was declared __Newable here";
   ]
 

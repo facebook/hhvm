@@ -28,6 +28,9 @@ let valid_newable_hint env tp (pos, hint) =
     | None ->
       (* This case should never happen *)
       Errors.invalid_newable_type_argument tp p end
+  | Aast.Habstr name ->
+    if not @@ Tast_env.get_newable env name then
+      Errors.invalid_newable_type_argument tp pos
   | _ ->
     Errors.invalid_newable_type_argument tp pos
 

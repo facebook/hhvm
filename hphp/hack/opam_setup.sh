@@ -26,6 +26,6 @@ opam install \
 	lwt.4.1.0 \
 	lwt_log.1.1.0 \
 	lwt_ppx.1.2.1 \
-	pcre.7.4.0 \
+	pcre.7.3.4 \
 	ppx_deriving.4.2.1 \
 	visitors.20180513

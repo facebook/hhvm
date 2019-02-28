@@ -212,21 +212,21 @@ let mode_annotation = function
 let with_new_nonconcurrent_scope env f =
   let saved_lifted_awaits = env.lifted_awaits in
   env.lifted_awaits <- None;
-  let result = f () in
-  env.lifted_awaits <- saved_lifted_awaits;
-  result
+  Utils.try_finally
+    ~f
+    ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;)
 
 let with_new_concurrent_scope env f =
-  let saved_lifted_awaits = env.lifted_awaits in
   let lifted_awaits =
     { awaits = []; name_counter = 1; lift_kind = LiftedFromConcurrent } in
+  let saved_lifted_awaits = env.lifted_awaits in
   env.lifted_awaits <- Some lifted_awaits;
-  let result = f () in
-  env.lifted_awaits <- saved_lifted_awaits;
+  let result = Utils.try_finally
+    ~f
+    ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
   (lifted_awaits, result)
 
 let with_new_statement_scope env f =
-  let saved_lifted_awaits = env.lifted_awaits in
   match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
   | false, _
   | true, Some { lift_kind = LiftedFromConcurrent; _ } ->
@@ -235,9 +235,11 @@ let with_new_statement_scope env f =
   | true, None ->
     let lifted_awaits =
       { awaits = []; name_counter = 1; lift_kind = LiftedFromStatement } in
+    let saved_lifted_awaits = env.lifted_awaits in
     env.lifted_awaits <- Some lifted_awaits;
-    let result = f () in
-    env.lifted_awaits <- saved_lifted_awaits;
+    let result = Utils.try_finally
+      ~f
+      ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
     let lifted_awaits =
       if List.is_empty lifted_awaits.awaits then None else Some lifted_awaits in
     (lifted_awaits, result)

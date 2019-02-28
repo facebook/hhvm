@@ -2430,6 +2430,14 @@ let await_as_an_expression_errors await_node parents errors =
   errors
 
 let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
+  let is_new_scope = match syntax node with
+    | AnonymousFunction _
+    | Php7AnonymousFunction _
+    | LambdaExpression _
+    | AwaitableCreationExpression _ ->
+      true
+    | _ -> false in
+  if is_new_scope then false, false else
   let is_await n = match syntax n with
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await -> true

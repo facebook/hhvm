@@ -2,7 +2,7 @@
 
 async function f() {
   concurrent {
-    async () ==> {
+    await async {
       await g();
     };
     await h();

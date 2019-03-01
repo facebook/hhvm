@@ -104,6 +104,7 @@ let rec reason = function
   | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
   | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
   | Rtype_variable p -> Rtype_variable (pos p)
+  | Rsolve_fail p -> Rsolve_fail (pos p)
 
 let string_id (p, x) = pos p, x
 

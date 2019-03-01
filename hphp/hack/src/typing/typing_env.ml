@@ -74,6 +74,7 @@ let env_with_tvenv env tvenv =
 
 let empty_tvar_info =
   { tyvar_pos = Pos.none;
+    eager_solve_fail = false;
     lower_bounds = empty_bounds;
     upper_bounds = empty_bounds;
     appears_covariantly = false;
@@ -135,9 +136,20 @@ let get_type_unsafe env x =
       env, (Reason.none, Tany)
   | Some ty -> env, ty
 
+let get_tyvar_info env var =
+  Option.value (IMap.get var env.tvenv) ~default:empty_tvar_info
+
+let get_tyvar_eager_solve_fail env var =
+  let tvinfo = get_tyvar_info env var in
+  tvinfo.eager_solve_fail
+
 let expand_type env x =
   match x with
-  | r, Tvar x -> get_type env r x
+  | r, Tvar x ->
+    let env, ty = get_type env r x in
+    if get_tyvar_eager_solve_fail env x
+    then env, (Reason.Rsolve_fail (Reason.to_pos r), snd ty)
+    else env, ty
   | x -> env, x
 
 let tyvar_is_solved env x =
@@ -491,6 +503,7 @@ let rec is_tvar ~elide_nullable ty var =
 
 let merge_tvar_info tvinfo1 tvinfo2 =
   { tyvar_pos = tvinfo1.tyvar_pos;
+    eager_solve_fail = tvinfo1.eager_solve_fail || tvinfo2.eager_solve_fail;
     lower_bounds = TySet.union tvinfo1.lower_bounds tvinfo2.lower_bounds;
     upper_bounds = TySet.union tvinfo1.upper_bounds tvinfo2.upper_bounds;
     appears_covariantly = tvinfo1.appears_covariantly || tvinfo2.appears_covariantly;
@@ -502,14 +515,19 @@ let merge_tvar_info tvinfo1 tvinfo2 =
         ~combine:(fun _tconstid ty1 _ty2 -> Some ty1);
   }
 
-let get_tyvar_info env var =
-  Option.value (IMap.get var env.tvenv) ~default:empty_tvar_info
-
 let set_tyvar_info env var tvinfo =
   env_with_tvenv env (IMap.add var tvinfo env.tvenv)
 
 let remove_tyvar env var =
-  env_with_tvenv env (IMap.remove var env.tvenv)
+  (* Don't remove it entirely if we have marked it as eager_solve_fail *)
+  let tvinfo = get_tyvar_info env var in
+  if tvinfo.eager_solve_fail
+  then set_tyvar_info env var { empty_tvar_info with eager_solve_fail = true }
+  else env_with_tvenv env (IMap.remove var env.tvenv)
+
+let set_tyvar_eager_solve_fail env var =
+  let tvinfo = get_tyvar_info env var in
+  set_tyvar_info env var { tvinfo with eager_solve_fail = true }
 
 let reachable_from source get_adjacent =
   let rec dfs pending visited = match pending with

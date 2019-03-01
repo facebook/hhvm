@@ -2477,6 +2477,14 @@ let bind env r var ty =
     [Log_head (Printf.sprintf "Typing_subtype.bind #%d" var,
     [Log_type ("ty", ty)])]));
 
+  (* If there has been a use of this type variable that led to an "unknown type"
+   * error (e.g. method invocation), then record this in the reason info. We
+   * can make use of this for linters and code mods that suggest annotations *)
+  let ty =
+    if Env.get_tyvar_eager_solve_fail env var
+    then (Reason.Rsolve_fail (Reason.to_pos (fst ty)), snd ty)
+    else ty in
+
   (* Update the variance *)
   let env = Env.update_variance_after_bind env var ty in
 
@@ -2597,7 +2605,8 @@ let expand_type_and_solve env ~description_of_expected p ty =
     begin match ety with
     | _, Tvar _ ->
       Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
-      env, (Reason.Rwitness p, TUtils.terr env)
+      let env = Env.set_tyvar_eager_solve_fail env v in
+      env, (Reason.Rsolve_fail p, TUtils.terr env)
     | _ -> env, ety
     end
   | _ ->

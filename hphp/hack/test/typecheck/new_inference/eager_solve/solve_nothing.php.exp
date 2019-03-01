@@ -6,13 +6,9 @@ Was expecting an array or collection but type is unknown (Typing[4297])
     via this generic Tv
 File "solve_nothing.php", line 26, characters 27-28:
 Was expecting an array or collection but type is unknown (Typing[4297])
-  File "solve_nothing.php", line 25, characters 20-24:
-  It is unknown because a type could not be determined here
   File "solve_nothing.php", line 10, characters 23-24:
-    via this generic Tv
+  It is unknown because a type could not be determined here
 File "solve_nothing.php", line 26, characters 33-34:
 Was expecting an array or collection but type is unknown (Typing[4297])
-  File "solve_nothing.php", line 25, characters 20-24:
-  It is unknown because a type could not be determined here
   File "solve_nothing.php", line 10, characters 23-24:
-    via this generic Tv
+  It is unknown because a type could not be determined here

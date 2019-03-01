@@ -94,7 +94,13 @@ let show_tfun _ = "<tfun>"
 let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
 type tyvar_info = {
+  (* Where was the type variable introduced? (e.g. generic method invocation,
+   * new object construction)
+   *)
   tyvar_pos: Pos.t;
+  (* Set to true if a call to expand_type_and_solve on this variable cannot resolve
+   *)
+  eager_solve_fail: bool;
   (* Does this type variable appear covariantly in the type of the expression?
    *)
   appears_covariantly: bool;

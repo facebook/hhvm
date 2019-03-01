@@ -167,12 +167,16 @@ val set_tyvar_appears_covariantly :
   env -> Ident.t -> env
 val set_tyvar_appears_contravariantly :
   env -> Ident.t -> env
+val set_tyvar_eager_solve_fail :
+  env -> Ident.t -> env
 val get_tyvar_appears_covariantly :
   env -> Ident.t -> bool
 val get_tyvar_appears_contravariantly :
   env -> Ident.t -> bool
 val get_tyvar_info :
   env -> Ident.t -> tyvar_info
+val get_tyvar_eager_solve_fail :
+  env -> Ident.t -> bool
 val get_tyvar_type_const :
   env -> int -> Nast.sid -> (Nast.sid * locl ty) option
 val set_tyvar_type_const :

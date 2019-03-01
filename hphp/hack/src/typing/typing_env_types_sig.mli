@@ -48,6 +48,7 @@
 
  type tyvar_info = {
    tyvar_pos: Pos.t;
+   eager_solve_fail: bool;
    appears_covariantly: bool;
    appears_contravariantly: bool;
    lower_bounds : TySet.t;

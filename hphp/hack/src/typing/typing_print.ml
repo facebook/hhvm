@@ -319,7 +319,11 @@ module Full = struct
     List.map fields f_field
 
   let rec ty: type a. _ -> _ -> _ -> a ty -> Doc.t =
-    fun to_doc st env (_, x) -> ty_ to_doc st env x
+    fun to_doc st env (r, x) ->
+      let d = ty_ to_doc st env x in
+      match r with
+      | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
+      | _ -> d
 
   and ty_: type a. _ -> _ -> _ -> a ty_ -> Doc.t =
     fun to_doc st env x ->

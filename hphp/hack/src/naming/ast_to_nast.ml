@@ -216,9 +216,9 @@ and on_awaitall_expr (e1, e2) =
   let e2 = on_expr e2 in
   let e1 =
     match e1 with
-    | Some e ->
-      let e = Pos.none, Local_id.make_unscoped (snd e) in
-      Some (Pos.none, Aast.Lvar e)
+    | Some (pos, name) ->
+      let e = pos, Local_id.make_unscoped name in
+      Some e
     | None -> None
   in
   (e1, e2)

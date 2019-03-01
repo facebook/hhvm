@@ -38,7 +38,7 @@
        f_body =
        { fb_ast =
          [(Awaitall ([12:3-16:4],
-             [((Some (([Pos.none], string), (Lvar ([Pos.none], __tmp$2)))),
+             [((Some ([Pos.none], __tmp$2)),
                (([15:10-27], Awaitable<string>),
                 (Call (Cnormal,
                    (([15:16-25], (function(): Awaitable<string>)),
@@ -50,7 +50,7 @@
                     (([14:11-20], (function(): Awaitable<string>)),
                      (Id ([14:11-20], "\\genString"))),
                     [], [], []))));
-               ((Some (([Pos.none], int), (Lvar ([Pos.none], __tmp$1)))),
+               ((Some ([Pos.none], __tmp$1)),
                 (([13:10-24], Awaitable<int>),
                  (Call (Cnormal,
                     (([13:16-22], (function(): Awaitable<int>)),

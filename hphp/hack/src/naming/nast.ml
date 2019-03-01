@@ -214,7 +214,7 @@ class type ['a] visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
   method on_global_var : 'a -> expr list -> 'a
-  method on_awaitall : 'a -> (expr option * expr) list -> 'a
+  method on_awaitall : 'a -> (id option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
@@ -339,7 +339,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
     let acc = match x with
-    | Some x -> this#on_expr acc x
+    | Some x -> this#on_lvar acc x
     | None -> acc in
     let acc = this#on_expr acc y in
     acc

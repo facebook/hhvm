@@ -941,8 +941,8 @@ and stmt env st =
       let env, ty2 = Async.overload_extract_from_awaitable env (fst e2) ty2 in
       (match e1 with
       | Some e1 ->
-        let env, te1, _ = assign (fst e1) env e1 ty2 in
-        (env, (Some te1, te2) :: tel)
+        let env, _, _ = assign (fst e1) env (fst e1, Lvar e1) ty2 in
+        (env, (Some e1, te2) :: tel)
       | None -> (env, (None, te2) :: tel)
       )
     ) in

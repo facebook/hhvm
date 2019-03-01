@@ -284,11 +284,8 @@ and stmt env acc st =
     | Global_var el
        -> List.fold_left ~f:expr ~init:acc el
     | Awaitall (_, el) ->
-      List.fold_left el ~init:acc ~f:(fun acc (e1, e2) ->
-        let acc = expr acc e2 in
-        match e1 with
-        | Some e -> assign_expr env acc e
-        | None -> acc
+      List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
+        expr acc e2
       )
     | If (e1, b1, b2) ->
       let acc = expr acc e1 in

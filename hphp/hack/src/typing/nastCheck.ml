@@ -75,10 +75,7 @@ module CheckFunctionBody = struct
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
          | Static_var _ | Global_var _ | Unsafe_block _ ) -> ()
     | _, Awaitall (_, el) ->
-        List.iter el (fun (x, y) ->
-          (match x with
-          | Some x -> expr f_type env x;
-          | None -> ());
+        List.iter el (fun (_, y) ->
           expr f_type env y;
         );
         ()
@@ -621,10 +618,7 @@ and stmt env = function
   | Global_var _ ->
     ()
   | Awaitall (_, el) ->
-      List.iter el (fun (x, y) ->
-        (match x with
-        | Some x -> expr env x
-        | None -> ());
+      List.iter el (fun (_, y) ->
         expr env y;
       );
       ()

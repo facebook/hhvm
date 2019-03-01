@@ -223,9 +223,7 @@ struct
     | S.Static_var el -> T.Static_var (map_exprl menv el)
     | S.Global_var el -> T.Global_var (map_exprl menv el)
     | S.Awaitall (pos, el) ->
-      let el = List.map el (fun (e1, e2) ->
-        (Option.map e1 (map_expr menv), map_expr menv e2)
-      ) in
+      let el = List.map el (fun (lid, expr) -> (lid, map_expr menv expr)) in
       T.Awaitall (pos, el)
     | S.If(e, b1, b2) -> T.If (map_expr menv e, map_block menv b1, map_block menv b2)
     | S.Do(b, e) -> T.Do(map_block menv b, map_expr menv e)

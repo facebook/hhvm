@@ -2079,14 +2079,13 @@ module Make (GetLocals : GetLocals) = struct
           let e2 = aast_expr env e2 in
           let e1 =
             match e1 with
-            | Some (_, Aast.Lvar e) ->
-              let e = Pos.none, Aast.Lvar e in
+            | Some lid ->
+              let e = Pos.none, Aast.Lvar lid in
               let nsenv = (fst env).namespace in
               let _, vars =
                 GetLocals.aast_lvalue (nsenv, SMap.empty) e in
               SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
-              Some (aast_expr env e)
-            | Some _ -> failwith "ast_to_nast error in awaitall lvar"
+              e1
             | None -> None in
           (e1, e2))
       el in

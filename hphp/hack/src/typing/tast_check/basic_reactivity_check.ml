@@ -467,10 +467,9 @@ let check = object(self)
     disallow_static_or_global ~is_static:true el;
     super#on_Static_var s el
 
-  method! on_Awaitall ((env, ctx) as s) _ els =
+  method! on_Awaitall (env, ctx) _ els =
     let allow_awaitable_s = (env, allow_awaitable ctx) in
-    List.iter els ~f:(fun (lhs, rhs) ->
-      Option.iter lhs ~f:(super#on_expr s);
+    List.iter els ~f:(fun (_, rhs) ->
       super#on_expr allow_awaitable_s rhs
     )
 

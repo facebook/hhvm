@@ -3832,33 +3832,6 @@ let declare_errors _env node parents errors =
     errors
   | _ -> errors
 
-let reified_function_call_errors node errors =
-  match syntax node with
-  | FunctionCallWithTypeArgumentsExpression
-    { function_call_with_type_arguments_receiver = receiver
-    ; function_call_with_type_arguments_type_args = targs
-    ; _
-    } ->
-    let targs = match syntax targs with
-      | TypeArguments { type_arguments_types; _ } ->
-        syntax_to_list_no_separators type_arguments_types
-      | _ -> [] in
-    let has_reification =
-      List.exists targs
-        ~f:(function { syntax = ReifiedTypeArgument _; _ } -> true | _ -> false)
-    in
-    if not has_reification then errors else
-    begin
-    let valid = match syntax receiver with
-      | ScopeResolutionExpression { scope_resolution_name = name; _ } ->
-        not @@ is_token_kind name TokenKind.Variable
-      | _ -> true
-    in
-    if valid then errors else
-      (make_error_from_node node SyntaxError.invalid_reified) :: errors
-    end
-  | _ -> errors
-
 let dynamic_method_call_errors node errors =
   match syntax node with
   | FunctionCallWithTypeArgumentsExpression
@@ -3966,7 +3939,6 @@ let find_syntax_errors env =
           methodish_errors env node errors in
         trait_require_clauses, names, errors
       | FunctionCallWithTypeArgumentsExpression _ ->
-        let errors = reified_function_call_errors node errors in
         let errors = dynamic_method_call_errors node errors in
         trait_require_clauses, names, errors
       | InstanceofExpression _

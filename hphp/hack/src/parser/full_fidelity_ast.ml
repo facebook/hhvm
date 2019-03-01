@@ -959,6 +959,9 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
+    | ReifiedTypeArgument _ ->
+      raise_parsing_error env (`Node node) SyntaxError.invalid_reified;
+      missing_syntax "reified type" node env
     | _ -> missing_syntax "type hint" node env
   in
   let hint = pPos node env, pHint_ node env in

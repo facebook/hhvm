@@ -1,0 +1,3 @@
+<?hh
+
+f<reify int>();

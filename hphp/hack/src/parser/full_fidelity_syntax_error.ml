@@ -576,7 +576,7 @@ let nested_unary_reference = "References cannot be followed by unary operators"
 let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
 let invalid_reified =
-  "Invalid place to put reified"
+  "Reify keyword can only appear at function or class type parameter position"
 let reified_in_interface =
   "Invalid to use a reified type within an interface's type parameters"
 let shadowing_reified =

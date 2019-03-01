@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-local.h"
 
@@ -33,9 +34,13 @@ namespace HPHP {
 
 static int s_pcre_has_jit = 0;
 
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
                                  int flags /* = 0 */) {
-  return preg_grep(pattern, input, flags);
+  if (!isContainer(input)) {
+    raise_warning("input to preg_grep must be an array or collection");
+    return init_null();
+  }
+  return preg_grep(pattern, input.toArray(), flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

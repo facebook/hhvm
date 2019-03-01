@@ -29,7 +29,7 @@ Variant HHVM_FUNCTION(preg_filter, const Variant& pattern,
                                    const Variant& subject,
                                    int limit = -1,
                                    VRefParam count = uninit_null());
-Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
+Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
                                  int flags = 0);
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
                                     const Variant& subject, int limit = -1,

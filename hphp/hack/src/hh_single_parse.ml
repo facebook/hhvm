@@ -61,12 +61,14 @@ let run_ffp
   (file : Relative_path.t)
 : Lowerer.result =
   let env =
+    let popt = ParserOptions.setup_pocket_universes ParserOptions.default
+        pocket_universes in
     Lowerer.make_env
       ~codegen
       ~include_line_comments:true
       ~fail_open:allow_malformed
       ~keep_errors:(not allow_malformed)
-      ~pocket_universes
+      ~parser_options:popt
       file
   in
   if iters < 1 then () else
@@ -99,7 +101,9 @@ let run_validated_ffp : bool -> Relative_path.t -> Lowerer.result =
     Full_fidelity_editable_positioned_syntax.from_positioned_syntax
       invalidated in
   let is_hh_file = is_hack tree in
-  let env = Lowerer.make_env ~is_hh_file ~pocket_universes file in
+  let popt = ParserOptions.setup_pocket_universes ParserOptions.default
+      pocket_universes in
+  let env = Lowerer.make_env ~is_hh_file ~parser_options:popt file in
   let comments = Lowerer.scour_comments_and_add_fixmes env source_text script in
   let module Lowerer = Lowerer.WithPositionedSyntax(Full_fidelity_editable_positioned_syntax) in
   Lowerer.lower env ~source_text ~script:invalidated comments

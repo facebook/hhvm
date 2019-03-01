@@ -396,6 +396,8 @@ let handle_existing_file args filename =
       if args.dump_nast
       then { popt with GlobalOptions.po_enable_concurrent = true }
       else popt in
+    let popt =
+      GlobalOptions.setup_pocket_universes popt args.pocket_universes in
     let env =
       Full_fidelity_ast.make_env
         ~codegen:args.codegen
@@ -410,7 +412,6 @@ let handle_existing_file args filename =
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file
-        ~pocket_universes:args.pocket_universes
         file
     in
     try Some (Full_fidelity_ast.from_file env) with

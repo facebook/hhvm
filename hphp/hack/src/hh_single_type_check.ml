@@ -200,6 +200,7 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
+  let pocket_universes = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -409,6 +410,9 @@ let parse_options () =
     "--ignore-collection-expr-type-arguments",
       Arg.Unit (set_bool ignore_collection_expr_type_arguments),
       "Typechecker ignores type arguments to vec<T>[...] style expressions";
+    "--pocket-universes",
+      Arg.Set pocket_universes,
+      "Enables support for Pocket Universes";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -458,6 +462,7 @@ let parse_options () =
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in
+  let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
   { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;

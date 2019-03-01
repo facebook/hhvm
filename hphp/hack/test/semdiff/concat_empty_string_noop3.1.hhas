@@ -1,9 +1,0 @@
-.main {
-  Int 1
-  CastString
-  String ""
-  Concat
-  PopC
-  Int 1
-  RetC
-}

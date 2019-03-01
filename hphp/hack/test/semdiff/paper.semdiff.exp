@@ -1,9 +1,0 @@
-comparing .main
-Semdiff succeeded
-comparing key silly
-Semdiff succeeded
-comparing key test
-Semdiff succeeded
-comparing .class Closure$test;0
-comparing key __invoke
-Semdiff succeeded

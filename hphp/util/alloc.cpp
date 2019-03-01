@@ -19,7 +19,6 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>

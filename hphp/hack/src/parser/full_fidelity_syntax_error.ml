@@ -359,7 +359,7 @@ let xhp_class_multiple_category_decls =
 let inout_param_in_generator =
   "Parameters may not be marked inout on generators"
 let inout_param_in_async_generator =
-  "Parameters may not be marked inout on an async generators"
+  "Parameters may not be marked inout on async generators"
 let inout_param_in_async =
   "Parameters may not be marked inout on async functions"
 let inout_param_in_construct =

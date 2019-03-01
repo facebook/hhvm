@@ -32,4 +32,12 @@ function test(): void {
 
   $v = vec[];
   z(inout &$v); // ERROR
+
+  $c = async function(inout $v) {}; // ERROR
+  $c = async (inout $v) ==> 42; // ERROR
+}
+
+async function gen_test(): void {
+  $c = function(inout $f) {}; // no error
+  $c = (inout $v) ==> 42; // no error
 }

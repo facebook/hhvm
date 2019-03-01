@@ -3172,12 +3172,11 @@ and emit_call_lhs_and_fpush
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
-  let reified_call_body name tmp_local =
+  let reified_call_body name =
     let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;
       instr_reified_name (List.length reified_targs) name;
-      instr_popl tmp_local
     ] in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)
@@ -3193,10 +3192,9 @@ and emit_call_lhs_and_fpush
       obj,
       instr_fpushobjmethodd nargs name null_flavor
     else
-      let tmp = Local.get_unnamed_local () in
-      gather [ obj; reified_call_body id tmp ],
+      obj,
       gather [
-        instr_pushl tmp;
+        reified_call_body id;
         instr_fpushobjmethod nargs null_flavor inout_arg_positions
       ]
   | A.Obj_get (obj, method_expr, null_flavor) ->
@@ -3235,10 +3233,9 @@ and emit_call_lhs_and_fpush
         empty,
         instr_fpushclsmethodd nargs method_id fq_cid
       else
-        let tmp = Local.get_unnamed_local () in
-        reified_call_body method_id_string tmp,
+        empty,
         gather [
-          instr_pushl tmp;
+          reified_call_body method_id_string;
           instr_string fq_cid_string;
           instr_clsrefgetc;
           instr_fpushclsmethod nargs []
@@ -3248,10 +3245,9 @@ and emit_call_lhs_and_fpush
         empty,
         instr_fpushclsmethodsd nargs clsref method_id
       else
-        let tmp = Local.get_unnamed_local () in
-        reified_call_body method_id_string tmp,
+        empty,
         gather [
-          instr_pushl tmp;
+          reified_call_body method_id_string;
           instr_fpushclsmethods nargs clsref
         ]
     | Class_expr expr ->
@@ -3265,9 +3261,8 @@ and emit_call_lhs_and_fpush
         empty,
         emit_fpush (instr_string method_id_string)
       else
-        let tmp = Local.get_unnamed_local () in
-        reified_call_body method_id_string tmp,
-        emit_fpush (instr_pushl tmp)
+        empty,
+        emit_fpush (reified_call_body method_id_string)
     | Class_reified instrs ->
       (* TODO(T31677864): Implement reification here *)
       let tmp = Local.get_unnamed_local () in
@@ -3356,10 +3351,9 @@ and emit_call_lhs_and_fpush
       | Some id -> instr_fpushfuncu nargs fq_id id
       | None -> instr_fpushfuncd nargs fq_id
     else
-      let tmp = Local.get_unnamed_local () in
-      reified_call_body (Hhbc_id.Function.to_raw_string fq_id) tmp,
+      empty,
       gather [
-        instr_pushl tmp;
+        reified_call_body (Hhbc_id.Function.to_raw_string fq_id);
         instr_fpushfunc nargs inout_arg_positions
       ]
   | A.String s ->
@@ -3367,10 +3361,9 @@ and emit_call_lhs_and_fpush
       empty,
       instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
     else
-      let tmp = Local.get_unnamed_local () in
-      reified_call_body s tmp,
+      empty,
       gather [
-        instr_pushl tmp;
+        reified_call_body s;
         instr_fpushfunc nargs inout_arg_positions
       ]
   | _ ->

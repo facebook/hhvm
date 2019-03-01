@@ -212,7 +212,7 @@ function transliterator_transliterate(mixed $tOrId,
                                       string $subject,
                                       int $start = 0,
                                       int $end = -1): mixed {
-  if (!($tOrId instanceof Transliterator)) {
+  if (!($tOrId is Transliterator)) {
     $tOrId = Transliterator::create((string)$tOrId,
                                     Transliterator::FORWARD);
     if (!$tOrId) {

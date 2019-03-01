@@ -109,7 +109,7 @@ class IntlCalendar {
    */
   public static function fromDateTime(mixed $dateTime,
                                       string $locale = ""): IntlCalendar {
-    if (!($dateTime instanceof DateTime)) {
+    if (!($dateTime is DateTime)) {
       $dateTime = new DateTime($dateTime);
     }
     if (empty($locale)) {

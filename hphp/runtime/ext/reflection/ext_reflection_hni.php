@@ -526,7 +526,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   <<__Rx>>
   public function __construct($name_or_closure) {
-    if ($name_or_closure instanceof Closure) {
+    if ($name_or_closure is Closure) {
       $this->closure = $name_or_closure;
       $this->__initClosure($name_or_closure);
     } else if (is_string($name_or_closure)){
@@ -1064,7 +1064,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
         return null;
       }
       $cls_name = $this->getDeclaringClassname();
-      if (!($object instanceof $cls_name)) {
+      if (!is_a($object, $cls_name)) {
         throw new ReflectionException(
           'Given object is not an instance of the class this method was '.
           'declared in' // mention declaringClassname / originalClass here ?
@@ -1204,7 +1204,7 @@ class ReflectionClass implements Reflector {
     if ($docComment = $this->getDocComment()) {
       $ret .= $docComment . "\n";
     }
-    if ($this instanceof ReflectionObject) {
+    if ($this is ReflectionObject) {
       $ret .= 'Object of class [ ';
     } elseif ($this->isInterface()) {
       $ret .= 'Interface [ ';
@@ -2161,7 +2161,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function implementsInterface($cls): bool {
-    if ($cls instanceof ReflectionClass) { $cls = $cls->getName(); }
+    if ($cls is ReflectionClass) { $cls = $cls->getName(); }
 
     // Normalize to avoid calling __autoload twice for undefined classes
     $normalized_cls = $cls[0] == '\\' ? substr($cls, 1) : $cls;
@@ -2201,7 +2201,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function isSubclassOf($cls): bool {
-    if ($cls instanceof ReflectionClass) {
+    if ($cls is ReflectionClass) {
       $cls = $cls->getName();
     }
     return is_subclass_of($this->getName(), $cls);

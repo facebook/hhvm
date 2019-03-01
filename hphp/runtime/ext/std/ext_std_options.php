@@ -373,7 +373,7 @@ namespace __SystemLib {
       if ($children) {
         foreach ($children as $v) {
           if ($v === null) {
-          } else if ($v instanceof \DOMElement) {
+          } else if ($v is \DOMElement) {
             $el->appendChild($v);
           } else if (is_array($v)) {
             $this->appendChildren($el, $v);

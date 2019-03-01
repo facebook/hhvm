@@ -898,12 +898,12 @@ class mysqli_result {
 
   public function __construct(mixed $result,
                               int $resulttype = MYSQLI_STORE_RESULT) {
-    if (!is_resource($result) && !($result instanceof mysqli)) {
+    if (!is_resource($result) && !($result is mysqli)) {
       $msg = "Argument to mysqli_result::__construct must be of type "
            . "resource or mysqli";
       throw new Exception($msg);
     }
-   if ($result instanceof mysqli) {
+   if ($result is mysqli) {
       $this->__result = $this->get_mysqli_conn_resource($result);
     } else {
       $this->__result = is_resource($result) ? $result : null;

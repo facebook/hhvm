@@ -372,7 +372,7 @@ namespace {
                                     mixed $read = null, mixed $write = null,
                                     mixed $destroy = null,
                                     mixed $gc = null): bool {
-    if ($open instanceof SessionHandlerInterface) {
+    if ($open is SessionHandlerInterface) {
       return \__SystemLib\session_set_save_handler($open, $close);
     }
     return \__SystemLib\session_set_save_handler(

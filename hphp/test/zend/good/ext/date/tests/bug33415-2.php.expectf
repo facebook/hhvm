@@ -80,10 +80,10 @@ tStamp=Wednesday 1985-12-25 17:17:17 +0530 0
 result=Wednesday 1986-01-01 00:15:00 +0545 0
 wanted=Wednesday            00:15:00
 
-TZ=Pacific/Nauru - Is it OK for this to be 0:30? yes
-tStamp=Tuesday 1979-04-24 17:17:17 +1130 0
-result=Tuesday 1979-05-01 00:30:00 +12 0
-wanted=Tuesday            00:30:00
+TZ=Pacific/Nauru - Is it OK for this to be 0:30? does not
+tStamp=Wednesday 1979-02-07 17:17:17 +1130 0
+result=Sunday 1979-02-11 00:00:00 +12 0
+wanted=Sunday            00:00:00
 
 TZ=Pacific/Niue - Is it OK for this to be 0:30 AM? yes
 tStamp=Sunday 1978-09-24 17:17:17 -1130 0

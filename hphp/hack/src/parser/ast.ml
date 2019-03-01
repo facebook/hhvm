@@ -54,10 +54,6 @@ and def =
   | SetNamespaceEnv of nsenv
   | FileAttributes of file_attributes
 
-and cst_kind =
-  (* The constant was introduced with: const X = ...; *)
-  | Cst_const
-
 and ns_kind =
   | NSNamespace
   | NSClass
@@ -94,7 +90,6 @@ and file_attributes = {
 
 and gconst = {
   cst_mode: fimode;
-  cst_kind: cst_kind;
   cst_name: id;
   cst_type: hint option;
   cst_value: expr;

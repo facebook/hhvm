@@ -3134,7 +3134,6 @@ and pDef : def list parser = fun node env ->
             }
           -> Constant
             { cst_mode      = mode_annotation env.fi_mode
-            ; cst_kind      = Cst_const
             ; cst_name      = pos_name name env
             ; cst_type      = mpOptional pHint ty env
             ; cst_value     = pSimpleInitializer init env

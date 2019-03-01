@@ -420,7 +420,7 @@ StatCache::NodePtr StatCache::Node::getChild(const std::string& childName,
 // StatCache.
 
 StatCache::StatCache()
-  : m_lock(false /*reentrant*/, RankStatCache), m_ifd(-1),
+  : m_lock(false /*reentrant*/, RankStatCache), m_ifd(-1), m_should_clear(false),
     m_lastRefresh(time(nullptr)) {
 }
 
@@ -649,6 +649,13 @@ void StatCache::refresh() {
 #ifdef __linux__
   SimpleLock lock(m_lock);
 
+  // Check if we should reset the cache
+  // as part of this refresh
+  if (m_should_clear) {
+    m_should_clear = false;
+    reset();
+  }
+
   if (m_ifd == -1) {
     return;
   }
@@ -675,6 +682,12 @@ void StatCache::refresh() {
     }
   }
 #endif
+}
+
+void StatCache::markShouldClearImpl() {
+  SimpleLock lock(m_lock);
+
+  m_should_clear = true;
 }
 
 time_t StatCache::lastRefresh() {
@@ -914,6 +927,7 @@ StatCache StatCache::s_sc;
 
 void StatCache::requestInit() {
   if (!RuntimeOption::ServerStatCache) return;
+  TRACE(5, "StatCache: requestInit refresh");
   s_sc.refresh();
 }
 
@@ -935,6 +949,11 @@ std::string StatCache::readlink(const std::string& path) {
 std::string StatCache::realpath(const char* path) {
   if (!RuntimeOption::ServerStatCache) return realpathLibc(path);
   return s_sc.realpathImpl(path);
+}
+
+void StatCache::clear_cache() {
+  if (!RuntimeOption::ServerStatCache) return;
+  s_sc.markShouldClearImpl();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

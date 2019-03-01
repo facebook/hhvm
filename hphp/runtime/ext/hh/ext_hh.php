@@ -190,3 +190,27 @@ function request_event_stats(string $event): mixed /* EventStats */;
 function process_event_stats(string $event): mixed /* EventStats */;
 
 }
+
+namespace HH\ReifiedGenerics {
+
+  /**
+   * Returns the type structure representation of the reified type
+   */
+  function getType<reify T>(): mixed {
+    return ${'0ReifiedGenerics'}[0];
+  }
+
+  /**
+   * Returns the name of the class represented by this reified type.
+   * If this type does not represent a class, throws an exception
+   */
+  function getClassname<reify T>(): classname<T> {
+    $clsname = idx(getType<T>(), 'classname', null);
+    if ($clsname is null) {
+      throw new \Exception('Trying to get the classname out of a reified type'.
+                           ' that does not represent a class');
+    }
+    return $clsname;
+  }
+
+}

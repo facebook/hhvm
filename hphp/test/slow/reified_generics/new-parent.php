@@ -2,13 +2,13 @@
 
 class C<reify T> {
   function f() {
-    var_dump(__hhvm_intrinsics\get_reified_type(T));
+    var_dump(HH\ReifiedGenerics\getType<T>());
   }
 }
 
 class D<reify T> extends C<bool> {
   function f() {
-    var_dump(__hhvm_intrinsics\get_reified_type(T));
+    var_dump(HH\ReifiedGenerics\getType<T>());
   }
   function h() {
     $c = new parent();

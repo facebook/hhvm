@@ -20,8 +20,8 @@ class E {
   const type T1 = bool;
   public function f<reify T>() {
     // we want T to be shape('a' => int, 'b' => int)
-    //since self/this should be bound from class C
-    var_dump(__hhvm_intrinsics\get_reified_type(T));
+    // since self/this should be bound from class C
+    var_dump(HH\ReifiedGenerics\getType<T>());
   }
 }
 

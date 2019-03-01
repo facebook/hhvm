@@ -2,7 +2,7 @@
 
 class C {
   public function f<reify T>() {
-    var_dump(__hhvm_intrinsics\get_reified_type(T));
+    var_dump(HH\ReifiedGenerics\getType<T>());
     echo "yep\n";
   }
 }

@@ -283,7 +283,8 @@ let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
 
 let reified_generics () =
-  Hhbc_options.enable_reified_generics !Hhbc_options.compiler_options
+  Hhbc_options.enable_reified_generics !Hhbc_options.compiler_options ||
+  Emit_env.is_systemlib ()
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
@@ -953,9 +954,6 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
   | A.Id (_, s), _, [arg1], []
     when (String.lowercase s = "exit" || String.lowercase s = "die") ->
     emit_pos_then pos @@ emit_exit env (Some arg1)
-  | A.Id (_, "__hhvm_intrinsics\\get_reified_type"), _, [ (_, A.Id (_, s)) ], []
-    when enable_intrinsics_extension () ->
-    emit_pos_then pos @@ emit_reified_type env pos s
   | _, _, _, _ ->
     let instrs = emit_call env pos e targs args uargs async_eager_label in
     emit_pos_then pos instrs

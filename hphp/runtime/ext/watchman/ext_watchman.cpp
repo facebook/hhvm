@@ -324,6 +324,14 @@ struct ActiveSubscription {
         throw std::runtime_error(
           folly::sformat("Unit '{}' no longer exists.", m_callbackFile));
       }
+      if (!RuntimeOption::EvalPreludePath.empty()) {
+        auto const doc = unit->filepath()->data();
+        invoke_prelude_script(
+            m_path.c_str(),
+            doc,
+            RuntimeOption::EvalPreludePath,
+            m_path.c_str());
+      }
       auto unit_result = Variant::attach(context->invokeUnit(unit));
       auto func = Unit::loadFunc(String(m_callbackFunc.c_str()).get());
       if (!func) {

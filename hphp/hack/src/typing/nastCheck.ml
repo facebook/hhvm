@@ -304,6 +304,9 @@ module CheckFunctionBody = struct
         ()
     | _, Efun _ -> ()
 
+    | _, PU_atom _ -> ()
+    | _, PU_identifier _ -> ()
+
     | Ast.FGenerator, Yield_break
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
@@ -709,6 +712,8 @@ and expr_ env _p = function
   | ImmutableVar _
   | Lplaceholder _
   | Dollardollar _
+  | PU_identifier _
+  | PU_atom _
   | Unsafe_expr _ -> ()
   | Class_const (cid, ((_, m_name) as mid)) ->
     let func_name = env.function_name in

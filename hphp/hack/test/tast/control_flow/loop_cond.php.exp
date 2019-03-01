@@ -10,7 +10,7 @@
       c_constructor = None; c_static_methods = []; c_methods = [];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_doc_comment = None });
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =

@@ -854,6 +854,8 @@ module Make (GetLocals : GetLocals) = struct
   and aast_hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
             ~in_where_clause ?(tp_depth=0)
         env x =
+    let pu_enabled = TypecheckerOptions.experimental_feature_enabled
+        (fst env).tcopt GlobalOptions.tco_experimental_pocket_universes in
     let aast_hint =
       aast_hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
@@ -910,7 +912,14 @@ module Make (GetLocals : GetLocals) = struct
             match h with
             | N.Hthis
             | N.Happly _ -> h
-            | N.Habstr _ when in_where_clause -> h
+            (* Pocket Universes: we want to be able to write `FieldName::Type`
+               in various locations (class, pu enum definitions, function
+               signatures), not just in `where` clauses.
+               This syntax is not (yet) allowed in Hack so
+               I guard its handling behind the experimental PU flag.
+            *)
+            | N.Habstr _ when in_where_clause && not pu_enabled -> h
+            | N.Habstr _ when pu_enabled -> h
             | _ -> Errors.invalid_type_access_root root; N.Hany
           end
         | _ ->
@@ -1227,6 +1236,7 @@ module Make (GetLocals : GetLocals) = struct
       | _ -> parents in
     let methods = List.map ~f:(aast_class_method env) c.Aast.c_methods in
     let uses = List.map ~f:(aast_hint ~allow_typedef:false env) c.Aast.c_uses in
+    let pu_enums = List.map ~f:(aast_class_pu_enum env) c.Aast.c_pu_enums in
     let redeclarations =
       List.map ~f:(aast_method_redeclaration env) c.Aast.c_method_redeclarations in
     let xhp_attr_uses =
@@ -1296,6 +1306,7 @@ module Make (GetLocals : GetLocals) = struct
       N.c_namespace             = c.Aast.c_namespace;
       N.c_enum                  = enum;
       N.c_doc_comment           = c.Aast.c_doc_comment;
+      N.c_pu_enums              = pu_enums;
       (* Naming and typechecking shouldn't use these fields *)
       N.c_attributes            = [];
       N.c_xhp_children          = [];
@@ -2179,6 +2190,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Lplaceholder p
     | Aast.Lvar x ->
         N.Lvar (Env.aast_lvar env x)
+    | Aast.PU_atom x -> N.PU_atom x
     | Aast.Obj_get (e1, e2, nullsafe) ->
       (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
          is being used for instance property access; see the case below for
@@ -2221,7 +2233,17 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
           N.Class_const (make_class_id env x1, x2)
       end
-    | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
+    | Aast.Class_const ((_, c), s2) ->
+      begin
+        let pu_enabled = TypecheckerOptions.experimental_feature_enabled
+            (fst env).tcopt GlobalOptions.tco_experimental_pocket_universes in
+        match c with
+        | Aast.CIexpr (_, Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), s1))
+            when pu_enabled -> N.PU_identifier (make_class_id env x1, s1, s2)
+        | _ -> (* TODO: report error in strict mode *) N.Any
+      end
+    | Aast.PU_identifier (_, _, _) ->
+      failwith "Error in Ast_to_nast module. PU_identifier are generated here"
     | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel;
@@ -2744,6 +2766,25 @@ module Make (GetLocals : GetLocals) = struct
 
   and aast_string2 env idl =
     List.map idl (aast_expr env)
+
+  and aast_class_pu_enum env pu_enum =
+    let aux (s, h) = (s, aast_hint ~forbid_this:true env h) in
+    let aast_pu_member m =
+      let pum_types = List.map ~f:aux m.Aast.pum_types in
+      let pum_exprs = List.map ~f:(fun (s, e) -> (s, aast_expr env e))
+          m.Aast.pum_exprs in
+      { Aast.pum_atom = m.Aast.pum_atom
+      ; pum_types
+      ; pum_exprs
+      } in
+    let pu_case_values = List.map ~f:aux pu_enum.Aast.pu_case_values in
+    let pu_members = List.map ~f:aast_pu_member pu_enum.Aast.pu_members in
+    { Aast.pu_name = pu_enum.Aast.pu_name
+    ; Aast.pu_is_final = pu_enum.Aast.pu_is_final
+    ; Aast.pu_case_types = pu_enum.Aast.pu_case_types
+    ; pu_case_values
+    ; pu_members
+    }
 
   (**************************************************************************)
   (* Function/Method Body Naming: *)

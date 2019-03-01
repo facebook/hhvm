@@ -507,6 +507,8 @@ let rec aast_expr acc (_, e) =
   | Aast.Efun _
   | Aast.Lfun _
   | Aast.Lvar _
+  | Aast.PU_atom _
+  | Aast.PU_identifier _
   | Aast.Unsafe_expr _ -> acc
   (* These are not in the original AST *)
   | Aast.This

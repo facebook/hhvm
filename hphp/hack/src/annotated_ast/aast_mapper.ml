@@ -129,6 +129,9 @@ struct
     | S.Collection (id, tal, fl) -> T.Collection (id, tal, List.map fl (map_afield menv))
     | S.BracedExpr e -> T.BracedExpr (map_expr menv e)
     | S.ParenthesizedExpr e -> T.ParenthesizedExpr (map_expr menv e)
+    | S.PU_atom id -> T.PU_atom id
+    | S.PU_identifier (cid, s1, s2) ->
+        T.PU_identifier (map_class_id menv cid, s1, s2)
   in
   let p' = menv.map_expr_annotation p in
     (p', e')
@@ -169,6 +172,23 @@ struct
   {
     T.ua_name = ua.S.ua_name;
     T.ua_params = map_exprl menv ua.S.ua_params;
+  }
+
+  and map_pu_enum menv pue =
+  {
+    T.pu_name = pue.S.pu_name;
+    T.pu_is_final = pue.S.pu_is_final;
+    T.pu_case_types = pue.S.pu_case_types;
+    T.pu_case_values = pue.S.pu_case_values;
+    T.pu_members = List.map pue.S.pu_members ~f:(map_pu_member menv);
+  }
+
+  and map_pu_member menv pum =
+    let pum_expr (id, expr) = (id, map_expr menv expr) in
+  {
+    T.pum_atom = pum.S.pum_atom;
+    T.pum_types = pum.S.pum_types;
+    T.pum_exprs = List.map pum.S.pum_exprs ~f:pum_expr;
   }
 
   and map_tparam menv t =
@@ -301,6 +321,7 @@ struct
     T.c_attributes = List.map c.S.c_attributes (map_attribute menv);
     T.c_xhp_children = c.S.c_xhp_children;
     T.c_xhp_attrs = List.map c.S.c_xhp_attrs (map_xhp_attr menv);
+    T.c_pu_enums = List.map c.S.c_pu_enums (map_pu_enum menv);
   }
 
   and map_xhp_attr menv (h, var, b, maybe_enum) =

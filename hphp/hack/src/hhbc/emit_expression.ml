@@ -434,7 +434,7 @@ let rec text_of_expr e = match e with
   (* Note we force string literals to become single-quoted, regardless of
      whether they were single- or double-quoted in the source. Gross. *)
   | p, A.String s -> (p, "'" ^ s ^ "'")
-  | _, A.Id id | _, A.Lvar id -> id
+  | _, A.Id id | _, A.PU_atom id | _, A.Lvar id -> id
   | _, A.Array_get ((p, A.Lvar (_, id)), Some e) ->
     (p, id ^ "[" ^ snd (text_of_expr e) ^ "]")
   | _ -> Pos.none, "unknown" (* TODO: get text of expression *)

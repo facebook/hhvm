@@ -36,7 +36,7 @@ Errors:
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_doc_comment = None });
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [9:1-12:2]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -69,5 +69,6 @@ Errors:
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_doc_comment = None })
+       c_file_attributes = []; c_enum = None; c_pu_enums = [];
+       c_doc_comment = None })
   ]

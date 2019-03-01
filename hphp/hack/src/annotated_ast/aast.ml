@@ -189,6 +189,8 @@ and expr_ =
   | Pair of expr * expr
   | Assert of assert_expr
   | Typename of sid
+  | PU_atom of string
+  | PU_identifier of class_id * pstring * pstring
   | Any
 
 and class_get_expr =
@@ -339,6 +341,7 @@ and class_ = {
   c_user_attributes: user_attribute list;
   c_file_attributes: file_attribute list;
   c_enum           : enum_ option     ;
+  c_pu_enums       : pu_enum list     ;
   c_doc_comment    : string option    ;
 }
 
@@ -445,6 +448,20 @@ and gconst = {
   cst_namespace: nsenv;
 }
 
+and pu_enum = {
+  pu_name: sid;
+  pu_is_final: bool;
+  pu_case_types: sid list;
+  pu_case_values: (sid * hint) list;
+  pu_members: pu_member list;
+}
+
+and pu_member = {
+  pum_atom: sid;
+  pum_types: (sid * hint) list;
+  pum_exprs: (sid * expr) list;
+}
+
 and fun_def = fun_
 
 and def =
@@ -529,5 +546,7 @@ let expr_to_string expr =
   | Collection _ -> "Collection"
   | BracedExpr _ -> "BracedExpr"
   | ParenthesizedExpr _ -> "ParenthesizedExpr"
+  | PU_atom _ -> "PU_atom"
+  | PU_identifier _ -> "PU_identifier"
 
 end (* of AnnotatedAST functor *)

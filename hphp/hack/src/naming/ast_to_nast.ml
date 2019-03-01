@@ -28,6 +28,7 @@ type class_body =
   c_attributes     : Aast.class_attr list                 ;
   c_xhp_children   : (pos * Aast.xhp_child) list          ;
   c_xhp_attrs      : Aast.xhp_attr list                   ;
+  c_pu_enums       : Aast.pu_enum list                    ;
 }
 
 let make_empty_class_body = {
@@ -47,6 +48,7 @@ let make_empty_class_body = {
   c_attributes = [];
   c_xhp_children = [];
   c_xhp_attrs = [];
+  c_pu_enums = [];
 }
 
 let on_list f l = List.map f l
@@ -192,7 +194,10 @@ and on_class_elt trait_or_interface body elt : class_body =
   | TypeConst tc ->
     let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
     { body with c_typeconsts = typeconsts; }
-  | ClassEnum _ -> failwith "TODO(T36532222): Pocket Universes"
+  | ClassEnum (pu_is_final, pu_name, fields) ->
+    let pu_enum = on_pu pu_name pu_is_final fields in
+    let pu_enums = pu_enum :: body.c_pu_enums in
+    { body with c_pu_enums = pu_enums }
 
 and on_as_expr aw e : Aast.as_expr =
   match aw, e with
@@ -308,7 +313,7 @@ and on_expr (p, e) : Aast.expr =
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
   | Execution_operator el -> Aast.Execution_operator (on_list on_expr el)
-  | PU_atom _ -> failwith "TODO(T36532222): Pocket Universes" (* Aast.PU_atom (snd id) *)
+  | PU_atom id -> Aast.PU_atom (snd id)
   in
   (p, node)
 
@@ -598,6 +603,34 @@ and on_method ?(trait_or_interface=false) m : Aast.method_ =
     m_doc_comment     = m.m_doc_comment;
   }
 
+and on_pu_mapping pum_atom mappings =
+  let rec aux types exprs = function
+    | (PUMappingType (id, hint)) :: tl ->
+      aux ((id, on_hint hint) :: types) exprs tl
+    | (PUMappingID (id, expr)) :: tl ->
+      aux types ((id, on_expr expr) :: exprs) tl
+    | [] -> (List.rev types, List.rev exprs) in
+  let (pum_types, pum_exprs) = aux [] [] mappings in
+  Aast.{ pum_atom; pum_types; pum_exprs }
+
+and on_pu pu_name pu_is_final fields =
+  let rec aux case_types case_values members = function
+    | (PUCaseType id) :: tl ->
+      aux (id :: case_types) case_values members tl
+    | (PUCaseTypeExpr (h, id)) :: tl ->
+      aux case_types ((id, on_hint h) :: case_values) members tl
+    | (PUAtomDecl (id, maps)) :: tl ->
+      let member = on_pu_mapping id maps in
+      aux case_types case_values (member :: members) tl
+    | [] -> (List.rev case_types, List.rev case_values, List.rev members) in
+  let (pu_case_types, pu_case_values, pu_members) = aux [] [] [] fields in
+  Aast.{ pu_name
+       ; pu_is_final
+       ; pu_case_types
+       ; pu_case_values
+       ; pu_members
+       }
+
 and on_class_body trait_or_interface cb =
   let reversed_body = List.fold_left (on_class_elt trait_or_interface) make_empty_class_body cb in
   { reversed_body with
@@ -616,6 +649,7 @@ and on_class_body trait_or_interface cb =
     c_attributes = List.rev reversed_body.c_attributes;
     c_xhp_children = List.rev reversed_body.c_xhp_children;
     c_xhp_attrs = List.rev reversed_body.c_xhp_attrs;
+    c_pu_enums = List.rev reversed_body.c_pu_enums;
   }
 
 and on_class c : Aast.class_ =
@@ -658,6 +692,7 @@ and on_class c : Aast.class_ =
       c_namespace             = c.c_namespace;
       c_enum                  = optional on_enum c.c_enum;
       c_doc_comment           = c.c_doc_comment;
+      c_pu_enums              = body.c_pu_enums
     }
   in
   named_class

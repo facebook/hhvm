@@ -89,6 +89,9 @@ and expr_ f = function
   | BracedExpr _
   | ParenthesizedExpr _
   | Import _ -> failwith "NAST should not contain these nodes"
+  | PU_atom s -> PU_atom s
+  | PU_identifier (cid, s1, s2) ->
+    PU_identifier (class_id f cid, s1, s2)
 
 and class_get_expr f = function
   | CGstring s -> CGstring (pstring f s)

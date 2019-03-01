@@ -2488,8 +2488,8 @@ and expr_
                 | None -> (k, (v, None))
                 | Some sft -> (k, (v, Some (pos, ur, sft.sft_ty)))) fdm in
           env, fdme
-      | _ ->
-        env, List.map ~f:(fun (k, v) -> (k, (v, None))) fdm in
+        | _ ->
+          env, List.map ~f:(fun (k, v) -> (k, (v, None))) fdm in
 
       (* allow_inter adds a type-variable *)
       let env, tfdm =
@@ -2513,6 +2513,10 @@ and expr_
        * using shape keyword and we know exactly what fields are set. *)
       make_result env p (T.Shape (List.map ~f:(fun (k,(te,_)) -> (k, te)) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
+
+  | PU_atom _ -> failwith "TODO PU (typing)"
+  | PU_identifier _ -> failwith "Unexpected pocket universe"
+
   with Typing_lenv_cont.Continuation_not_found _ ->
     expr_any env p (Reason.Rwitness p)
 
@@ -6183,6 +6187,7 @@ and class_def_ env c tc =
     T.c_attributes = [];
     T.c_xhp_children = c.c_xhp_children;
     T.c_xhp_attrs = [];
+    T.c_pu_enums = []; (* TODO PU (typing) *)
   }
 
 and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =

@@ -378,6 +378,7 @@ and expr_ env acc p e =
   | Smethod_id _
   | Method_caller _
   | Typename _
+  | PU_atom _
   | Id _ -> acc
   | Lvar _
   | ImmutableVar _
@@ -503,6 +504,7 @@ and expr_ env acc p e =
   | Collection _ -> acc
   | BracedExpr _ -> acc
   | ParenthesizedExpr _ -> acc
+  | PU_identifier _ -> acc
 
 and case env acc = function
   | Default b

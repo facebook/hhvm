@@ -300,6 +300,9 @@ class type ['a] visitor_type = object
 
   method on_markup: 'a -> pstring -> expr option -> 'a
   method on_declare: 'a -> bool -> expr -> block -> 'a
+
+  method on_pu_atom : 'a -> string -> 'a
+  method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
 end
 
 (*****************************************************************************)
@@ -527,6 +530,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Collection (_, tal, fl) -> this#on_collection acc tal fl
    | BracedExpr e -> this#on_expr acc e
    | ParenthesizedExpr e -> this#on_expr acc e
+   | PU_atom sid -> this#on_pu_atom acc sid
+   | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
 
   method on_array acc afl =
     List.fold_left afl ~f:this#on_afield ~init:acc
@@ -790,6 +795,12 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       | Some h -> this#on_hint acc h
       | None -> acc in
     acc
+
+  method on_pu_identifier acc cid _ _ =
+    this#on_class_id acc cid
+
+  method on_pu_atom acc s =
+    this#on_string acc s
 
   method on_typedef acc t =
     let acc = this#on_id acc t.t_name in

@@ -19,7 +19,7 @@
            ];
          fa_namespace = <opaque> }
         ];
-      c_enum = None; c_doc_comment = None });
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [9:1-18]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -39,5 +39,5 @@
             ];
           fa_namespace = <opaque> }
          ];
-       c_enum = None; c_doc_comment = None })
+       c_enum = None; c_pu_enums = []; c_doc_comment = None })
   ]

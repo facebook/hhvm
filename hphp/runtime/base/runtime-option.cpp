@@ -403,6 +403,7 @@ bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::EnableReifiedGenerics = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
+bool RuntimeOption::EnablePocketUniverses = false;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -1832,6 +1833,9 @@ void RuntimeOption::Load(
 
     Config::Bind(EnableReifiedGenerics, ini, config,
                  "Hack.Lang.EnableReifiedGenerics",
+                 false);
+    Config::Bind(EnablePocketUniverses, ini, config,
+                 "Hack.Lang.EnablePocketUniverses",
                  false);
   }
   {

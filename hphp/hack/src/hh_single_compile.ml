@@ -274,7 +274,10 @@ let parse_text compiler_options popt fn text =
     Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
   let lower_coroutines =
     Hhbc_options.enable_coroutines !Hhbc_options.compiler_options in
+  let pocket_universes =
+    Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options in
   let systemlib_compat_mode = Emit_env.is_systemlib () in
+  let popt = ParserOptions.setup_pocket_universes popt pocket_universes in
   let env = Full_fidelity_ast.make_env
     ~parser_options:popt
     ~ignore_pos

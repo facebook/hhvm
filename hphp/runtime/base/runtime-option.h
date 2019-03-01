@@ -520,6 +520,7 @@ struct RuntimeOption {
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
   static bool DumpPreciseProfData;
+  static bool EnablePocketUniverses;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;

@@ -1502,7 +1502,7 @@ class ReflectionClass implements Reflector {
     if (null === $filter) {
       return self::getMethodOrderCache($this->getName());
     }
-    return $this->getMethodOrder($this->getName(), $filter);
+    return self::getMethodOrder($this->getName(), $filter);
   }
 
   <<__Memoize, __Rx>>
@@ -1579,7 +1579,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function getConstants(): darray<string, mixed> {
-    return $this->getConstantsCache($this->getName());
+    return self::getConstantsCache($this->getName());
   }
 
   <<__Memoize, __Rx>>
@@ -1601,7 +1601,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function getAbstractConstantNames(): darray<string, string> {
-    return $this->getAbstractConstantNamesCache($this->getName());
+    return self::getAbstractConstantNamesCache($this->getName());
   }
 
   <<__Memoize, __Rx>>
@@ -1613,7 +1613,7 @@ class ReflectionClass implements Reflector {
 
   <<__Rx, __MaybeMutable>>
   private function getTypeConstantNamesWithCaching(): darray<string, string> {
-    return $this->getTypeConstantNamesCache($this->getName());
+    return self::getTypeConstantNamesCache($this->getName());
   }
 
   <<__Memoize, __Rx>>

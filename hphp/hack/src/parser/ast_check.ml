@@ -47,14 +47,49 @@ let _mk_error ?(error_type=SyntaxError.ParseError) pos error =
   let (start_offset, end_offset) = Pos.info_raw pos in
   SyntaxError.make ~error_type start_offset end_offset error
 
-let check_program program =
-  let visitor = object(_)
-    inherit [context * (SyntaxError.t list)] Ast_visitor.ast_visitor as _super
-
-    (* TODO: override on_* and modify context and errors accordingly for each check *)
+module ESet = Set.Make(
+  struct
+    let compare = SyntaxError.compare
+    type error_t = SyntaxError.t
+    type t = error_t
   end
-  in snd @@ visitor#on_program (
+)
+
+(* TODO: put complicated reducers into separate files *)
+let reducer_TODO = object(_)
+  inherit [_, _] Ast_visitor.reducer
+    (fun () -> ESet.empty)
+    ESet.union
+  as super
+
+  (* TODO: override at_* and return errors set (ESet) accordingly for each check *)
+  method! at_TODO (ctx : 'b) =
+    super#at_TODO ctx
+end
+
+let check_program program =
+  (* This is analogous to the iter_with but with reducers instead of handlers: *)
+  let reducers : (ESet.t, context) Ast_visitor.reducer_type list =
+    [ reducer_TODO
+    ] in
+  let visitor = object(this)
+    inherit [_] Ast.reduce as super
+
+    method zero = ESet.empty
+    method plus = ESet.union
+
+    method private to_fold_fun map_fun =
+      fun acc x -> this#plus acc (map_fun x)
+
+    method private reduce map_fun =
+      List.fold_left (this#to_fold_fun map_fun) this#zero reducers
+
+    (* TODO: override on_* and modify context accordingly for each check *)
+    method! on_expr ctx e = this#plus
+      (super#on_expr ctx e)
+      (this#reduce (fun r -> r#at_TODO ctx))
+  end
+  in ESet.elements @@ visitor#on_program
     {
       _unused = ();
-    }, []
-    ) program
+    } program

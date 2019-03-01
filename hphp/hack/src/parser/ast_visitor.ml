@@ -16,8 +16,31 @@
 
 open Ast
 
+(** A {!reducer} is a AST visitor which is not in control of the iteration
+ * (and thus cannot change the order of the iteration or choose not to visit
+ * some subtrees).
+ *
+ * Intended to be used with {!Ast.reduce} to aggregate many checks into a
+ * single pass over a AST.  The type parameters are as follows:
+ * - 'a result being reduced (accumulated)
+ * - 'b context type, which is updated by a {!Ast.reduce} visitor
+ *)
+class type ['a, 'b] reducer_type = object
+  (* TODO: gradually add methods with signature: 'b -> param1 ... -> 'a *)
+  method at_TODO : 'b -> 'a
+end
+
+class ['a, 'b] reducer
+  (_zero : unit -> 'a)
+  (_plus : 'a -> 'a -> 'a)
+  : ['a, 'b] reducer_type
+= object
+  method at_TODO (_ctx : 'b) = _zero ()
+end
+
 (*****************************************************************************)
-(* The signature of the visitor. *)
+(* The signature of the hand-rolled visitor. *)
+(* DEPRECATED: use {!Ast.reduce} or {!Ast.iter} auto-generated visitors *)
 (*****************************************************************************)
 
 class type ['a] ast_visitor_type = object
@@ -158,7 +181,8 @@ class type ['a] ast_visitor_type = object
 end
 
 (*****************************************************************************)
-(* The generic visitor ('a is the type of the accumulator). *)
+(* The generic but hand-rolled visitor ('a is the type of the accumulator). *)
+(* DEPRECATED: use {!Ast.reduce} or {!Ast.iter} auto-generated visitors *)
 (*****************************************************************************)
 
 class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)

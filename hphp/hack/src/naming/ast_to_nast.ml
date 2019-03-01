@@ -487,8 +487,6 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
       Errors.abstract_with_typeconst tc.tconst_name;
       None
     | h, _ -> h in
-  if tc.tconst_tparams <> []
-  then Errors.no_tparams_on_type_consts (fst tc.tconst_name);
   Aast.{
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;

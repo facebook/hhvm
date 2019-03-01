@@ -2645,12 +2645,11 @@ and pClassElt : class_elt list parser = fun node env ->
       then raise_parsing_error env (`Node node) SyntaxError.tparams_in_tconst;
       [ TypeConst
         { tconst_user_attributes = pUserAttributes env type_const_attribute_spec
-        ; tconst_abstract        = not (is_missing type_const_abstract)
-        ; tconst_name            = pos_name type_const_name env
-        ; tconst_tparams         = pTParaml type_const_type_parameters env
-        ; tconst_constraint      = mpOptional pTConstraintTy type_const_type_constraint env
-        ; tconst_type            = mpOptional pHint type_const_type_specifier env
-        ; tconst_span            = pPos node env
+        ; tconst_abstract   = not (is_missing type_const_abstract)
+        ; tconst_name       = pos_name type_const_name env
+        ; tconst_constraint = mpOptional pTConstraintTy type_const_type_constraint env
+        ; tconst_type       = mpOptional pHint type_const_type_specifier env
+        ; tconst_span       = pPos node env
         }
       ]
   | PropertyDeclaration

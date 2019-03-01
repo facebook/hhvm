@@ -87,6 +87,7 @@ struct RepoOptions {
   H(bool,           EnableConcurrent,               false)            \
   H(bool,           EnableAwaitAsAnExpression,      false)            \
   H(bool,           EnableStrongerAwaitBinding,     false)            \
+  H(bool,           EnableReifiedGenerics,          false)            \
   H(bool,           DisableLvalAsAnExpression,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           HHJSUniqueFilenames,            false)            \

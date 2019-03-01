@@ -385,10 +385,7 @@ bool checkReifiedGenericsMatch(
     if (!strict) return true;
     // Before returning false, lets check if all the generics are wildcards
     // If not all wildcard, since this is not a reified class, then it is false
-    // TODO(T31677864): `!RuntimeOption::EnableReifiedGenerics ||` needs to be
-    // removed but because by using abstract type constants, you can trick the
-    // typechecker, it will be removed after codebase is fixed.
-    return !RuntimeOption::EnableReifiedGenerics || isTSAllWildcards(ts.get());
+    return isTSAllWildcards(ts.get());
   }
   auto const obj_generics = getClsReifiedGenericsProp(cls, obj);
   auto const generics = ts[s_generic_types].getArrayData();

@@ -215,7 +215,7 @@ class DateTimeZone {
   public function __construct(string $timezone);
   public function getLocation(): darray { }
   public function getName(): string { }
-  public function getOffset(DateTime $datetime);
+  public function getOffset(DateTimeInterface $datetime);
   public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
                                  int $timestamp_end = PHP_INT_MAX);
   static public function listAbbreviations();

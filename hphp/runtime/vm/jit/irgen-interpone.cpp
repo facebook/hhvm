@@ -463,7 +463,6 @@ void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
 void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t)
                                               { INTERP }
-void emitClsRefGetTS(IRGS& env, uint32_t)     { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

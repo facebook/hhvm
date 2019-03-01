@@ -1268,7 +1268,7 @@ Variant HHVM_FUNCTION(lstat,
 
 void HHVM_FUNCTION(clearstatcache, bool /*clear_realpath_cache*/ /* = false */,
                    const Variant& /*filename*/ /* = uninit_variant */) {
-  // we are not having a cache for file stats, so do nothing here
+  StatCache::clearCache();
 }
 
 Variant HHVM_FUNCTION(readlink_internal,

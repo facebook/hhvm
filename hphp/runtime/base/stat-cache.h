@@ -78,6 +78,7 @@ struct StatCache {
     int m_wd;                // Watch descriptor; -1 if a file.
 
     bool m_valid;            // True if m_stat/m_lstat are currently valid.
+
     struct stat m_stat;      // Cached stat() result.
     struct stat m_lstat;     // Cached lstat() result.
     std::string m_link;      // Cached readlink() result.
@@ -100,6 +101,7 @@ struct StatCache {
   static int lstat(const std::string& path, struct stat* buf);
   static std::string readlink(const std::string& path);
   static std::string realpath(const char* path);
+  static void clearCache();
 
  private:
   bool init();
@@ -127,6 +129,7 @@ struct StatCache {
 
   SimpleMutex m_lock;       // Protects the following fields.
   int m_ifd;
+  bool m_shouldClear;      // True if we should clear the cache on the next request
 #ifdef __linux__
   static const size_t kReadBufSize = 10 * (sizeof(struct inotify_event)
                                            + NAME_MAX + 1);

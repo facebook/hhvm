@@ -8,9 +8,12 @@
  *
  */
 
-const resource STDIN = /* UNSAFE_EXPR */ 0;
-const resource STDOUT = /* UNSAFE_EXPR */ 0;
-const resource STDERR = /* UNSAFE_EXPR */ 0;
+/* HH_FIXME[4110] */
+const resource STDIN = 0;
+/* HH_FIXME[4110] */
+const resource STDOUT = 0;
+/* HH_FIXME[4110] */
+const resource STDERR = 0;
 
 const PATHINFO_DIRNAME = 0;
 const PATHINFO_BASENAME = 0;

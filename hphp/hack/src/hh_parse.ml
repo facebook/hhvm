@@ -350,6 +350,8 @@ let handle_existing_file args filename =
     (args.enable_await_as_an_expression) in
   let popt = ParserOptions.with_disable_lval_as_an_expression popt
     (args.disable_lval_as_an_expression) in
+  let popt = ParserOptions.setup_pocket_universes popt
+    (args.pocket_universes) in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

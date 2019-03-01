@@ -1930,6 +1930,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         List.map ~f:(fun x -> pEmbedded unesc_xhp x env) (aggregate_tokens body)
       in
       Xml (name, attrs, exprs)
+    (* Pocket Universes *)
+    | PocketAtomExpression { pocket_atom_expression } ->
+      PU_atom (pos_name pocket_atom_expression env)
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax ?fallback:(Some Null) "expression" node env
     in
@@ -2402,6 +2405,7 @@ and pTConstraint : (constraint_kind * hint) parser = fun node env ->
       | Some TK.As    -> Constraint_as
       | Some TK.Super -> Constraint_super
       | Some TK.Equal -> Constraint_eq
+      | Some TK.From  -> Constraint_pu_from
       | _ -> missing_syntax "constraint operator" constraint_keyword env
       )
     , pHint constraint_type env
@@ -2908,6 +2912,18 @@ and pClassElt : class_elt list parser = fun node env ->
     let p = pPos node env in
     let pNameSansPercent node _env = drop_pstr 1 (pos_name node env) in
     [ XhpCategory (p, couldMap ~f:pNameSansPercent cats env) ]
+  (* Pocket Universe *)
+  | PocketEnumDeclaration
+    { pocket_enum_modifiers = mods
+    ; pocket_enum_name      = name
+    ; pocket_enum_fields    = fields
+    ; _
+    } ->
+      let kinds = pKinds (fun _ -> ()) mods env in
+      let final = List.mem kinds Final ~equal:(=) in
+      let id = pos_name name env in
+      let flds = List.map ~f:(fun x -> pPUField x env) (as_list fields) in
+      [ ClassEnum (final, id, flds) ]
   | _ -> missing_syntax "class element" node env
   in
   try pClassElt_ (syntax node) with
@@ -2938,6 +2954,30 @@ and pXhpChild : xhp_child parser = fun node env ->
     let children = List.map ~f:(fun x -> pXhpChild x env) children in
     ChildList children
   | _ -> missing_syntax "xhp children" node env
+
+and pPUField: pufield parser = fun node env ->
+  match syntax node with
+  | PocketAtomMappingDeclaration
+    { pocket_atom_mapping_expression = expr
+    ; pocket_atom_mapping_mappings   = mappings
+    ; _
+    } -> let id = pos_name expr env in
+    let maps = List.map ~f:(fun x -> pPUMapping x env) (as_list mappings) in
+    PUAtomDecl (id, maps)
+  | PocketFieldTypeExprDeclaration
+    { pocket_field_type_expr_type = ty
+    ; pocket_field_type_expr_name = name
+    ; _
+    } -> let typ = pHint ty env in
+    let id = pos_name name env in
+    PUCaseTypeExpr (typ, id)
+  | PocketFieldTypeDeclaration
+    { pocket_field_type_name = name
+    ; _
+    } -> let id = pos_name name env in
+    PUCaseType id
+  | _ -> missing_syntax "pufield" node env
+
 
 
 (*****************************************************************************(
@@ -3204,6 +3244,24 @@ and pDef : def list parser = fun node env ->
   | _ when env.fi_mode = FileInfo.Mdecl || env.fi_mode = FileInfo.Mphp
         && not env.codegen -> []
   | _ -> [ Stmt (pStmt node env) ]
+
+and pPUMapping : pumapping parser = fun node env ->
+  match syntax node with
+  | PocketMappingIdDeclaration
+    { pocket_mapping_id_name        = name
+    ; pocket_mapping_id_initializer = init
+    } -> let id = pos_name name env in
+    let init_val = pSimpleInitializer init env in
+    PUMappingID (id, init_val)
+  | PocketMappingTypeDeclaration
+    { pocket_mapping_type_name = name
+    ; pocket_mapping_type_type = ty
+    ; _
+    } -> let id = pos_name name env in
+    let hint = pHint ty env in
+    PUMappingType (id, hint)
+  | _ -> missing_syntax "pumapping" node env
+
 let pProgram : program parser = fun node env  ->
   let rec post_process program acc =
     let span (p : 'a -> bool) =

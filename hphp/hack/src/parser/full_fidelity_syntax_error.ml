@@ -711,3 +711,16 @@ let reified_attribute = "__Reified and __HasReifiedParent attributes may not be 
 
 let lval_as_expression =
   "Lval can no longer be used as an expression. Pull it out into it's own statement."
+
+let pocket_universe_final_expected =
+  "The 'final' keyword is expected here."
+
+let pocket_universe_enum_expected =
+  "The 'enum' keyword is expected here."
+
+(* this one is currently too wide, but will be enough for prototyping *)
+let pocket_universe_invalid_field n =
+  "Invalid pocket universe field syntax: " ^ (string_of_int n) ^"."
+
+let type_keyword =
+    "The 'type' keyword is expected here."

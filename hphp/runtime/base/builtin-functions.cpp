@@ -306,6 +306,15 @@ vm_decode_function(const_variant_ref function,
             } else {
               cls = ar->getClass();
             }
+            if (flags != DecodeFlags::NoWarn && cls) {
+              if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+                raise_warning(
+                  "vm_decode_function() used to decode a LSB class "
+                  "method on %s",
+                  cls->name()->data()
+                );
+              }
+            }
           }
         } else {
           if (flags == DecodeFlags::Warn && nameContainsClass) {
@@ -361,6 +370,15 @@ vm_decode_function(const_variant_ref function,
             cc = ar->getThis()->getVMClass();
           } else {
             cc = ar->getClass();
+          }
+        }
+        if (flags != DecodeFlags::NoWarn && cc) {
+          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+            raise_warning(
+              "vm_decode_function() used to decode a LSB class "
+              "method on %s",
+              cc->name()->data()
+            );
           }
         }
       } else {
@@ -426,6 +444,16 @@ vm_decode_function(const_variant_ref function,
           this_ = obj;
           cls = obj->getVMClass();
         }
+        if (flags != DecodeFlags::NoWarn && this_) {
+          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+            raise_warning(
+              "vm_decode_function() used to decode a method on $this, an "
+              "instance of %s, from the caller, %s",
+              cls->name()->data(),
+              ar->func()->fullName()->data()
+            );
+          }
+        }
       }
       if (!f) {
         if (this_) {
@@ -476,6 +504,15 @@ vm_decode_function(const_variant_ref function,
       // a descendent of cls
       if (fwdCls->classof(cls)) {
         cls = fwdCls;
+      }
+
+      if (flags != DecodeFlags::NoWarn && fwdCls) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() forwarded the calling context, %s",
+            fwdCls->name()->data()
+          );
+        }
       }
     }
 

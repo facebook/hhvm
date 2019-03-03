@@ -22,10 +22,10 @@
 #include <boost/variant.hpp>
 #include <memory>
 
-#include "hphp/util/trace.h"
-#include "hphp/util/match.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/low-ptr.h"
+#include "hphp/util/match.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 struct StringData;
@@ -97,36 +97,46 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
+void profile_memory(const char* what, const char* when, const std::string& );
+
 struct trace_time {
-  using clock      = std::chrono::high_resolution_clock;
+  using clock      = std::chrono::system_clock;
   using time_point = clock::time_point;
 
   explicit trace_time(const char* what,
                       const std::string& extra = std::string{})
     : what(what)
     , start(clock::now())
+    , extra(extra)
   {
+    profile_memory(what, "start", extra);
     if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
       Trace::traceRelease(
         "%s",
-        folly::format("{}: start{}\n",
+        folly::sformat(
+          "{}: {}: start{}\n",
+          ts(start),
           what,
           !extra.empty() ? folly::format(" ({})", extra).str() : extra
-        ).str().c_str()
+        ).c_str()
       );
     }
   }
 
   ~trace_time() {
     namespace C = std::chrono;
-    DEBUG_ONLY auto const elapsed = C::duration_cast<C::milliseconds>(
-      clock::now() - start
+    auto const end = clock::now();
+    auto const elapsed = C::duration_cast<C::milliseconds>(
+      end - start
     );
+    profile_memory(what, "end", extra);
     if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
       Trace::traceRelease(
         "%s",
-        folly::format("{}: {}ms elapsed\n", what, elapsed.count())
-          .str().c_str()
+        folly::sformat(
+          "{}: {}: {}ms elapsed\n",
+          ts(end), what, elapsed.count())
+          .c_str()
       );
     }
   }
@@ -135,8 +145,17 @@ struct trace_time {
   trace_time& operator=(const trace_time&) = delete;
 
 private:
+  std::string ts(time_point t) {
+    char snow[64];
+    auto tm = std::chrono::system_clock::to_time_t(t);
+    ctime_r(&tm, snow);
+    // Eliminate trailing newline from ctime_r.
+    snow[24] = '\0';
+    return snow;
+  }
   const char* what;
   time_point start;
+  std::string extra;
 };
 
 //////////////////////////////////////////////////////////////////////

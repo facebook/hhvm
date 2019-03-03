@@ -55,6 +55,12 @@ struct Options {
    */
   OpcodeSet TraceBytecodes;
 
+  /*
+   * If non-empty, dump jemalloc memory profiles at key points during
+   * the build, using this as a prefix.
+   */
+  std::string profileMemory;
+
   //////////////////////////////////////////////////////////////////////
 
   /*

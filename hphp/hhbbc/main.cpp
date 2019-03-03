@@ -130,6 +130,9 @@ void parse_options(int argc, char** argv) {
     ("extended-stats",
       po::bool_switch(&options.extendedStats),
       "Spend time to produce extra stats")
+    ("profile-memory",
+     po::value(&options.profileMemory)->default_value(""),
+      "If non-empty, dump jemalloc memory profiles at key points")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
@@ -224,6 +227,11 @@ void parse_options(int argc, char** argv) {
 
   options.TraceFunctions = make_method_map(trace_fns);
   options.TraceBytecodes = make_bytecode_map(trace_bcs);
+
+  if (!options.profileMemory.empty()) {
+    mallctlWrite("prof.active", true);
+    mallctlWrite("prof.thread_active_init", true);
+  }
 
   logging = !no_logging;
 }

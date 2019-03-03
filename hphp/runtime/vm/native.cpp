@@ -328,6 +328,9 @@ void coerceFCallArgs(TypedValue* args,
       // purposes.  The ABI-passed type will still be mixed/Variant.
       targetType = tc.underlyingDataType();
     }
+    if (!targetType && !func->byRef(i)) {
+      targetType = tc.underlyingDataType();
+    }
 
     // Skip tvCoerceParamTo*() call if we're already the right type, or if its a
     // Variant.

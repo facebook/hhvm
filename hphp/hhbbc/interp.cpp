@@ -1224,7 +1224,7 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
 
   // Lookup the wrapped function. This should always resolve to a precise
   // function but we don't rely on it.
-  auto const memo_impl_func = [&]{
+  auto const memo_impl_func = [&] {
     if (env.ctx.func->cls) {
       auto const clsTy = selfClsExact(env);
       return env.index.resolve_method(
@@ -1264,7 +1264,9 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   }();
 
   auto retTy = env.index.lookup_return_type(
-    CallContext { env.ctx, args, ctxType },
+    env.ctx,
+    args,
+    ctxType,
     memo_impl_func
   );
   auto const effectFree = env.index.is_effect_free(memo_impl_func);
@@ -3388,8 +3390,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
 
     auto ty = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, *ar.func)
-      : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
-                                     *ar.func);
+      : env.index.lookup_return_type(env.ctx, args, ar.context, *ar.func);
     if (ar.kind == FPIKind::ObjMethNS) {
       ty = union_of(std::move(ty), TInitNull);
     }
@@ -3398,7 +3399,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     }
     auto ty2 = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, *ar.fallbackFunc)
-      : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
+      : env.index.lookup_return_type(env.ctx, args, ar.context,
                                      *ar.fallbackFunc);
     return union_of(std::move(ty), std::move(ty2));
   }();

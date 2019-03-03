@@ -244,7 +244,7 @@ struct CallContextHashCompare {
 
   size_t hash(const CallContext& c) const {
     auto ret = folly::hash::hash_combine(
-      c.caller.func,
+      c.callee,
       c.args.size(),
       c.context.hash()
     );
@@ -255,9 +255,6 @@ struct CallContextHashCompare {
   }
 };
 
-// Note: CallContext contains the caller Context primarily to reduce
-// the contention in this tbb.  (And because everywhere you need a
-// CallContext you also need that caller Context.)
 using ContextRetTyMap = tbb::concurrent_hash_map<
   CallContext,
   Type,
@@ -312,20 +309,6 @@ struct res::Func::FuncInfo {
    * Whether the function is effectFree.
    */
   bool effectFree{false};
-
-  /*
-   * Call-context sensitive return types are cached here.  This is not
-   * an optimization.
-   *
-   * The reason we need to retain this information about the
-   * calling-context-sensitive return types is that once the Index is
-   * frozen (during the final optimization pass), calls to
-   * lookup_return_type with a CallContext can't look at the bytecode
-   * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
-   * that so we can return it again.
-   */
-  ContextRetTyMap contextualReturnTypes{};
 
   /*
    * Type info for local statics.
@@ -1064,6 +1047,20 @@ struct Index::IndexData {
    * bytecode could be modified while we do so.
    */
   ContextRetTyMap foldableReturnTypeMap;
+
+  /*
+   * Call-context sensitive return types are cached here.  This is not
+   * an optimization.
+   *
+   * The reason we need to retain this information about the
+   * calling-context-sensitive return types is that once the Index is
+   * frozen (during the final optimization pass), calls to
+   * lookup_return_type with a CallContext can't look at the bytecode
+   * bodies of functions other than the calling function.  So we need
+   * to know what we determined the last time we were alloewd to do
+   * that so we can return it again.
+   */
+  ContextRetTyMap contextualReturnTypes{};
 
   /*
    * Vector of class aliases that need to be added to the index when
@@ -3154,12 +3151,11 @@ void check_invariants(IndexData& data) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type context_sensitive_return_type(const Index& index,
-                                   FuncInfo* finfo,
+Type context_sensitive_return_type(IndexData& data,
                                    CallContext callCtx) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
-
+  auto const finfo = func_info(data, callCtx.callee);
   auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
 
   auto checkParam = [&] (int i) {
@@ -3173,7 +3169,8 @@ Type context_sensitive_return_type(const Index& index,
           const_cast<php::Func*>(finfo->func),
           finfo->func->cls
         };
-        auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
+        auto t = loosen_dvarrayness(
+          data.m_index->lookup_constraint(ctx, constraint));
         if (!callCtx.args[i].moreRefined(t)) return true;
         if (!callCtx.args[i].equivalentlyRefined(t)) return true;
         return false;
@@ -3213,19 +3210,17 @@ Type context_sensitive_return_type(const Index& index,
     return returnType.subtypeOf(BUnc) ? ty : loosen_staticness(ty);
   };
 
-  if (index.frozen()) {
+  {
     ContextRetTyMap::const_accessor acc;
-    if (finfo->contextualReturnTypes.find(acc, callCtx)) {
-      return maybe_loosen_staticness(acc->second);
+    if (data.contextualReturnTypes.find(acc, callCtx)) {
+      if (data.frozen || acc->second == TBottom || is_scalar(acc->second)) {
+        return maybe_loosen_staticness(acc->second);
+      }
     }
-    return returnType;
   }
 
-  ContextRetTyMap::accessor acc;
-  if (finfo->contextualReturnTypes.insert(acc, callCtx)) {
-    acc->second = TTop;
-  } else if (acc->second == TBottom || is_scalar(acc->second)) {
-    return maybe_loosen_staticness(acc->second);
+  if (data.frozen) {
+    return returnType;
   }
 
   auto contextType = [&] {
@@ -3238,7 +3233,7 @@ Type context_sensitive_return_type(const Index& index,
       finfo->func->cls
     };
     auto const ty =
-      analyze_func_inline(index, calleeCtx,
+      analyze_func_inline(*data.m_index, calleeCtx,
                           callCtx.context, callCtx.args).inferredReturn;
     return return_with_context(ty, callCtx.context);
   }();
@@ -3253,7 +3248,9 @@ Type context_sensitive_return_type(const Index& index,
   auto ret = intersection_of(std::move(returnType),
                              std::move(contextType));
 
-  if (ret.strictSubtypeOf(acc->second)) {
+  ContextRetTyMap::accessor acc;
+  if (data.contextualReturnTypes.insert(acc, callCtx) ||
+      ret.strictSubtypeOf(acc->second)) {
     acc->second = ret;
   }
 
@@ -4785,7 +4782,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
   add_dependency(*m_data, func, ctx, Dep::ReturnTy);
 
   auto const calleeCtx = CallContext {
-    { func->unit, const_cast<php::Func*>(func), func->cls },
+    func,
     std::move(args),
     std::move(ctxType)
   };
@@ -4833,12 +4830,14 @@ Type Index::lookup_foldable_return_type(Context ctx,
     ++interp_nesting_level;
     SCOPE_EXIT { --interp_nesting_level; };
 
-    auto const fa = analyze_func_inline(*this,
-                                        calleeCtx.caller,
-                                        calleeCtx.context,
-                                        calleeCtx.args,
-                                        CollectionOpts::TrackConstantArrays |
-                                        CollectionOpts::EffectFreeOnly);
+    auto const fa = analyze_func_inline(
+      *this,
+      Context { func->unit, const_cast<php::Func*>(func), func->cls },
+      calleeCtx.context,
+      calleeCtx.args,
+      CollectionOpts::TrackConstantArrays |
+      CollectionOpts::EffectFreeOnly
+    );
     return fa.effectFree ? fa.inferredReturn : TTop;
   }();
 
@@ -4883,32 +4882,37 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     });
 }
 
-Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
+Type Index::lookup_return_type(Context caller,
+                               const CompactVector<Type>& args,
+                               const Type& context,
+                               res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
     [&](res::Func::FuncName) {
-      return lookup_return_type(callCtx.caller, rfunc);
+      return lookup_return_type(caller, rfunc);
     },
     [&](res::Func::MethodName) {
-      return lookup_return_type(callCtx.caller, rfunc);
+      return lookup_return_type(caller, rfunc);
     },
     [&](FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
-      return context_sensitive_return_type(*this, finfo, callCtx);
+      add_dependency(*m_data, finfo->func, caller, Dep::ReturnTy);
+      return context_sensitive_return_type(*m_data,
+                                           { finfo->func, args, context });
     },
     [&](const MethTabEntryPair* mte) {
-      add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
+      add_dependency(*m_data, mte->second.func, caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
-      return context_sensitive_return_type(*this, finfo, callCtx);
+      return context_sensitive_return_type(*m_data,
+                                           { finfo->func, args, context });
     },
     [&] (FuncFamily* fam) {
       auto ret = TBottom;
       for (auto& pf : fam->possibleFuncs) {
-        add_dependency(*m_data, pf->second.func, callCtx.caller, Dep::ReturnTy);
+        add_dependency(*m_data, pf->second.func, caller, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) ret |= TInitCell;
-        else ret |= return_with_context(finfo->returnTy, callCtx.context);
+        else ret |= return_with_context(finfo->returnTy, context);
       }
       return ret;
     }
@@ -4943,7 +4947,6 @@ Type Index::lookup_return_type_and_clear(
   const php::Func* f) const {
   auto it = func_info(*m_data, f);
 
-  it->contextualReturnTypes = ContextRetTyMap{};
   it->localStaticTypes.clear();
 
   return std::move(it->returnTy);

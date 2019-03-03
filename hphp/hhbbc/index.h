@@ -702,7 +702,10 @@ struct Index {
    * During analyze phases, this function may re-enter analyze in
    * order to interpret the callee with these argument types.
    */
-  Type lookup_return_type(CallContext, res::Func) const;
+  Type lookup_return_type(Context caller,
+                          const CompactVector<Type>& args,
+                          const Type& context,
+                          res::Func) const;
 
   /*
    * Look up the return type for an unresolved function.  The

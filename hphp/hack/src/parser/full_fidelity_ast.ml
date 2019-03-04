@@ -1258,8 +1258,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         match syntax collection_name with
         | SimpleTypeSpecifier { simple_type_specifier = class_type } ->
           (pos_name class_type env), hints
-        | GenericTypeSpecifier { generic_class_type = class_type; _ } ->
-          let hints = expand_type_args env class_type (fun () -> []) in
+        | GenericTypeSpecifier { generic_class_type = class_type; generic_argument_list } ->
+          let hints = expand_type_args env generic_argument_list (fun () -> []) in
           let hints = check_intrinsic_type_arg_varity env node hints in
           (pos_name class_type env), hints
         | _ -> (pos_name collection_name env), hints in

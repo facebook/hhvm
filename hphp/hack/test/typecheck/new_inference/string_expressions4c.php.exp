@@ -1,8 +1,7 @@
 File "string_expressions4c.php", line 32, characters 12-19:
-This is an array key (int/string) (Typing[4110])
-  File "string_expressions4c.php", line 31, characters 30-34:
-  It is incompatible with an object of exactly the class Other
+You cannot use this object as a string
+Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
 File "string_expressions4c.php", line 32, characters 20-24:
-This is an array key (int/string) (Typing[4110])
+You cannot use this object as a string (Typing[4067])
   File "string_expressions4c.php", line 32, characters 20-24:
-  It is incompatible with an object of type Meh
+  This object doesn't implement __toString

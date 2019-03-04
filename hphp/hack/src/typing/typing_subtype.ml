@@ -237,6 +237,7 @@ and simplify_subtype
   ~(seen_generic_params : SSet.t option)
   ?(deep : bool = true)
   ~(no_top_bottom : bool)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ?(this_ty : locl ty option = None)
   (ty_sub : locl ty)
   (ty_super : locl ty)
@@ -245,7 +246,11 @@ and simplify_subtype
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  let uerror () = TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
+  let uerror = match error with
+    | Some f ->
+      fun () -> f env ety_sub ety_super
+    | None ->
+      fun () -> TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
   let invalid () = invalid_with uerror in
@@ -258,9 +263,9 @@ and simplify_subtype
     if new_inference
     then env, TL.IsSubtype (ety_sub, ety_super)
     else env, TL.IsSubtype (ty_sub, ty_super) in
-  let simplify_subtype = simplify_subtype ~no_top_bottom in
-  let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom in
-  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~no_top_bottom ~error in
+  let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom ~error in
+  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom ~error in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -1056,6 +1061,7 @@ and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
   ~(deep : bool)
   ~(no_top_bottom : bool)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   (cid : string)
   (variancel : Ast.variance list)
   (children_tyl : locl ty list)
@@ -1063,7 +1069,7 @@ and simplify_subtype_variance
   : Env.env -> Env.env * TL.subtype_prop
   = fun env ->
   let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params
-    ~deep ~this_ty:None in
+    ~deep ~error ~this_ty:None in
   let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom
     ~seen_generic_params ~deep in
   match variancel, children_tyl, super_tyl with
@@ -1599,7 +1605,8 @@ and check_subtype_funs_attributes
    ~(seen_generic_params : SSet.t option)
    ~(deep : bool)
    ~(no_top_bottom : bool)
-  ~(check_return : bool)
+   ~(check_return : bool)
+   ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ?(extra_info: reactivity_extra_info option)
   (r_sub : Reason.t)
   (ft_sub : locl fun_type)
@@ -1614,7 +1621,7 @@ and check_subtype_funs_attributes
     | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
     | _ -> None in
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep ~error in
   let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
     ~no_top_bottom ~deep in
 
@@ -1649,10 +1656,11 @@ and check_subtype_funs_attributes
 
 (* One of the main entry points to this module *)
 and sub_type
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-    sub_type_inner env ~this_ty:None ty_sub ty_super
+    sub_type_inner env ~error ~this_ty:None ty_sub ty_super
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
@@ -1777,6 +1785,7 @@ and tvenv_to_prop tvenv =
 
 and sub_type_inner
   (env : Env.env)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ~(this_ty : locl ty option)
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
@@ -1786,6 +1795,7 @@ and sub_type_inner
     ~seen_generic_params:empty_seen
     ~deep:new_inference
     ~no_top_bottom:false
+    ~error
     ~this_ty ty_sub ty_super env in
   let env, prop = if new_inference then prop_to_env env prop else env, prop in
   let env =
@@ -2015,12 +2025,22 @@ let rec sub_string
                MakeType.float r;
                MakeType.resource r;
                MakeType.dynamic r] in
+    let stringish =
+      (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
     let tyl =
       if stringish_deprecated
       then tyl
-      else (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, []))::tyl in
-    let stringish = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
-    sub_type env ty2 stringish
+      else stringish::tyl in
+    let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
+    let error env ty_sub ty_super = match snd ty_sub with
+      | _ when is_sub_type_alt ~no_top_bottom:true env ty_sub stringish = Some true &&
+               stringish_deprecated ->
+        Errors.object_string_deprecated p
+      | Tclass _ ->
+        Errors.object_string p (Reason.to_pos (fst ty_sub))
+      | _ ->
+        TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+    sub_type ~error:(Some error) env ty2 stringlike
   else
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in

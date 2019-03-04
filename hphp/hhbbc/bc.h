@@ -359,7 +359,7 @@ namespace imm {
 #define IMM_TY_CAR      ClsRefSlotId
 #define IMM_TY_CAW      ClsRefSlotId
 #define IMM_TY_DA       double
-#define IMM_TY_SA       SString
+#define IMM_TY_SA       LSString
 #define IMM_TY_RATA     RepoAuthType
 #define IMM_TY_AA       SArray
 #define IMM_TY_BA       BlockId

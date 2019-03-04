@@ -1465,8 +1465,8 @@ and expr_
           ((pk, _) as tk),
           ((pv, _) as tv)
         ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
-          let env, localtk = Phase.localize_hint_with_self env tk in
-          let env, localtv = Phase.localize_hint_with_self env tv in
+          let env, localtk = resolve_type_argument env tk in
+          let env, localtv = resolve_type_argument env tv in
           env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
@@ -1497,7 +1497,7 @@ and expr_
         match th with
         | Some ((pv, _) as tv)
           when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
-          let env, localtv = Phase.localize_hint_with_self env tv in
+          let env, localtv = resolve_type_argument env tv in
           env, Some (pv, Reason.URhint, localtv)
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
@@ -1521,7 +1521,7 @@ and expr_
         match th with
         | Some ((pv, _) as tv)
           when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
-          let env, localtv = Phase.localize_hint_with_self env tv in
+          let env, localtv = resolve_type_argument env tv in
           env, Some (pv, Reason.URhint, localtv)
         | _ ->
           begin match expand_expected env expected with
@@ -1553,8 +1553,8 @@ and expr_
           ((pk, _) as tk),
           ((pv, _) as tv)
         ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
-          let env, localtk = Phase.localize_hint_with_self env tk in
-          let env, localtv = Phase.localize_hint_with_self env tv in
+          let env, localtk = resolve_type_argument env tk in
+          let env, localtv = resolve_type_argument env tv in
           env, Some (pk, Reason.URhint, localtk), Some (pv, Reason.URhint, localtv)
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
@@ -4655,15 +4655,15 @@ and trait_most_concrete_req_class trait env =
 
 (* If there are no explicit type arguments then generate fresh type variables
  * for all of them. Otherwise, check the arity, and use the explicit types. *)
-and resolve_type_arguments env p _class_id tparaml hintl =
+and resolve_type_argument env hint =
   (* For explicit type arguments we support a wildcard syntax `_` for which
-   * Hack will generate a fresh type variable *)
-  let resolve_type_argument env hint =
-    match hint with
-    | (p, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
-      Env.fresh_unresolved_type env p
-    | _ ->
-      Phase.localize_hint_with_self env hint in
+  * Hack will generate a fresh type variable *)
+   match hint with
+   | (p, Happly((_, id), [])) when id = SN.Typehints.wildcard  ->
+     Env.fresh_unresolved_type env p
+   | _ ->
+     Phase.localize_hint_with_self env hint
+and resolve_type_arguments env p _class_id tparaml hintl =
   let length_hintl = List.length hintl in
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml

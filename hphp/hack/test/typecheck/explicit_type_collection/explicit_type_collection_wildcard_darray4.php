@@ -1,8 +1,8 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
-function expect(Map<string,bool> $m):void { }
+function expect(darray<string,bool> $m):void { }
 function testit():void {
-  $m = Map<arraykey,bool>{ 'a' => true };
+  $m = darray<string,_>[ 1 => true ];
   hh_show($m);
   expect($m);
 }

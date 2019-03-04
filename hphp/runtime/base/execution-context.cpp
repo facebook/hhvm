@@ -120,8 +120,10 @@ ExecutionContext::ExecutionContext()
     RuntimeOption::SerializationSizeLimit;
   tvWriteUninit(m_headerCallback);
 
-  m_shutdowns = Array::CreateDArray();
-  m_shutdownsBackup = Array::CreateDArray();
+  m_shutdowns[ShutdownType::ShutDown] = empty_vec_array();
+  m_shutdowns[ShutdownType::PostSend] = empty_vec_array();
+  m_shutdownsBackup[ShutdownType::ShutDown] = empty_vec_array();
+  m_shutdownsBackup[ShutdownType::PostSend] = empty_vec_array();
 }
 
 namespace rds { namespace local {
@@ -534,28 +536,35 @@ void ExecutionContext::resetCurrentBuffer() {
 void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                 Array arguments,
                                                 ShutdownType type) {
-  Array callback = make_map_array(s_name, function, s_args, arguments);
-  if (!m_shutdowns.exists(type)) {
-    m_shutdowns.set(type, Array::CreateVArray());
-  }
-  auto const funcs = m_shutdowns.lvalAt(type);
-  forceToDArray(funcs).append(callback);
+  auto& funcs = m_shutdowns[type];
+  assertx(funcs.isVecArray());
+  funcs.append(make_dict_array(
+    s_name, function,
+    s_args, arguments
+  ));
 }
+
 
 bool ExecutionContext::removeShutdownFunction(const Variant& function,
                                               ShutdownType type) {
   bool ret = false;
-  auto& funcs = forceToDArray(m_shutdowns.lvalAt(type));
-  VArrayInit newFuncs(funcs.size());
+  auto const& funcs = m_shutdowns[type];
+  assertx(funcs.isVecArray());
+  VecArrayInit newFuncs(funcs.size());
 
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    if (!same(iter.second().toArray()[s_name], function)) {
-      newFuncs.appendWithRef(iter.secondVal());
-    } else {
-      ret = true;
+  IterateV(
+    funcs.get(),
+    [&] (TypedValue v) {
+      auto const& arr = asCArrRef(&v);
+      assertx(arr->isDict());
+      if (!same(arr[s_name], function)) {
+        newFuncs.append(v);
+      } else {
+        ret = true;
+      }
     }
-  }
-  funcs = newFuncs.toArray();
+  );
+  m_shutdowns[type] = newFuncs.toArray();
   return ret;
 }
 
@@ -650,24 +659,23 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
   RID().resetTimer(RuntimeOption::PspTimeoutSeconds);
   RID().resetCPUTimer(RuntimeOption::PspCpuTimeoutSeconds);
 
-  if (m_shutdowns.exists(type)) {
-    SCOPE_EXIT {
-      try { m_shutdowns.remove(type); } catch (...) {}
-    };
-    // We mustn't destroy any callbacks until we're done with all
-    // of them. So hold them in tmp.
-    Array tmp;
-    while (true) {
-      auto const lval = m_shutdowns.lvalAt(type);
-      if (!isArrayLikeType(lval.unboxed().type())) break;
-      auto funcs = tvCastToArrayLike(lval.tv());
-      tvUnset(lval);
-      for (int pos = 0; pos < funcs.size(); ++pos) {
-        Array callback = funcs[pos].toArray();
-        vm_call_user_func(callback[s_name], callback[s_args].toArray());
+  // We mustn't destroy any callbacks until we're done with all
+  // of them. So hold them in tmp.
+  // XXX still true in a world without destructors?
+  auto tmp = empty_vec_array();
+  while (true) {
+    Array funcs = m_shutdowns[type];
+    if (funcs.empty()) break;
+    m_shutdowns[type] = empty_vec_array();
+    IterateV(
+      funcs.get(),
+      [](TypedValue v) {
+        auto const& cb = asCArrRef(&v);
+        assertx(cb->isDict());
+        vm_call_user_func(cb[s_name], cb[s_args].toArray());
       }
-      tmp.append(funcs);
-    }
+    );
+    tmp.append(funcs);
   }
 }
 

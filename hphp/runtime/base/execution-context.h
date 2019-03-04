@@ -132,8 +132,8 @@ struct ExecutionContext {
   friend ThrowAllErrorsSetter;
 
   enum ShutdownType {
-    ShutDown,
-    PostSend,
+    ShutDown = 0,
+    PostSend = 1,
   };
 
   enum class ErrorThrowMode {
@@ -547,7 +547,7 @@ private:
 
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
-  Array m_shutdowns;
+  std::array<Array, 2> m_shutdowns;
   bool m_acceptRequestEventHandlers;
 
   // error handling
@@ -567,7 +567,7 @@ private:
   Variant m_softLateInitDefault;
 
   // session backup/restore for RPCRequestHandler
-  Array m_shutdownsBackup;
+  std::array<Array, 2> m_shutdownsBackup;
   req::vector<std::pair<Variant,int>> m_userErrorHandlersBackup;
   req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;

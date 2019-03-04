@@ -2512,6 +2512,20 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
     if freshen
     then freshen_inside_ty_wrt_variance env ty
     else env, ty in
+  (* If any of the components of the union are type variables, then remove
+  * var from their upper bounds. Why? Because if we construct
+  *   v1 , ... , vn , t <: var
+  * for type variables v1, ..., vn and non-type variable t
+  * then necessarily we must have var as an upper bound on each of vi
+  * so after binding var we end up with redundant bounds
+  *   vi <: v1 | ... | vn | t
+  *)
+  let env =
+    TySet.fold (fun ty env ->
+      match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_upper_bound env v var
+      | env, _ -> env) lower_bounds env in
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 
@@ -2523,6 +2537,19 @@ let bind_to_upper_bound env r var upper_bounds =
   match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->
+    (* If ty is a variable (in future, if any of the types in the list are variables),
+      * then remove var from their lower bounds. Why? Because if we construct
+      *   var <: v1 , ... , vn , t
+      * for type variables v1 , ... , vn and non-type variable t
+      * then necessarily we must have var as a lower bound on each of vi
+      * so after binding var we end up with redundant bounds
+      *   v1 & ... & vn & t <: vi
+      *)
+    let env =
+      (match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_lower_bound env v var
+      | env, _ -> env) in
     bind env r var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env

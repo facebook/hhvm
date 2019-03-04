@@ -42,6 +42,7 @@ type t = {
   tco_new_inference_no_eager_solve : bool;
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
+  tco_disable_instanceof_refinement : bool;
   ignored_fixme_codes : ISet.t;
   ignored_fixme_regex : string option;
   log_levels : int SMap.t;
@@ -244,6 +245,7 @@ let default = {
  tco_new_inference_no_eager_solve = false;
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
+ tco_disable_instanceof_refinement = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  ignored_fixme_regex = None;
  log_levels = SMap.empty;
@@ -289,6 +291,7 @@ let make
   ?(tco_new_inference_no_eager_solve = default.tco_new_inference_no_eager_solve)
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
+  ?(tco_disable_instanceof_refinement = default.tco_disable_instanceof_refinement)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
   ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
@@ -336,6 +339,7 @@ let make
   tco_new_inference_no_eager_solve;
   tco_timeout;
   tco_disallow_invalid_arraykey;
+  tco_disable_instanceof_refinement;
   log_levels;
   po_enable_stronger_await_binding;
   po_disable_lval_as_an_expression;
@@ -384,6 +388,7 @@ let tco_new_inference t = t.tco_new_inference > 0.0
 let tco_new_inference_no_eager_solve t = t.tco_new_inference_no_eager_solve
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
+let tco_disable_instanceof_refinement t = t.tco_disable_instanceof_refinement
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels

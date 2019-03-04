@@ -278,6 +278,7 @@ let load config_filename options =
     ?tco_new_inference_no_eager_solve:(bool_opt "new_inference_no_eager_solve" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
+    ?tco_disable_instanceof_refinement:(bool_opt "disable_instanceof_refinement" config)
     ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)
     ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)

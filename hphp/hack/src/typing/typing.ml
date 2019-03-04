@@ -5567,6 +5567,9 @@ and condition_isset env = function
 and condition ?lhs_of_null_coalesce env tparamet
     ((p, ty as pty), e as te: Tast.expr) =
   let condition = condition ?lhs_of_null_coalesce in
+  let enable_instanceof_refinement =
+    not (TypecheckerOptions.disable_instanceof_refinement (Env.get_tcopt env))
+  in
   match e with
   | T.True
   | T.Expr_list [] when not tparamet ->
@@ -5629,7 +5632,7 @@ and condition ?lhs_of_null_coalesce env tparamet
   | T.Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | T.InstanceOf (ivar, (_, cid))
-    when tparamet && is_instance_var (T.to_nast_expr ivar) ->
+    when enable_instanceof_refinement && tparamet && is_instance_var (T.to_nast_expr ivar) ->
       let ivar = T.to_nast_expr ivar in
       (* Check the expession and determine its static type *)
       let env, _te, x_ty = raw_expr env ivar in

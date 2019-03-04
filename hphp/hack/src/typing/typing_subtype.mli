@@ -110,6 +110,14 @@ val expand_type_and_solve :
   locl ty ->
   Env.env * locl ty
 
+val expand_type_and_narrow :
+  Env.env ->
+  description_of_expected:string ->
+  (Env.env -> locl ty -> Env.env * locl ty option) ->
+  Pos.t ->
+  locl ty ->
+  Env.env * locl ty
+
 val close_tyvars_and_solve :
   Env.env ->
   Env.env

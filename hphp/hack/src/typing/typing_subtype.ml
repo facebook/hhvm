@@ -2515,13 +2515,18 @@ let bind env r var ty =
 
 let var_as_ty var = (Reason.Rnone, Tvar var)
 
+(* For the types that are lower bounds on a variable `var`, compute
+ * a union type. Remove `var` itself, as this is redundant. *)
+let lower_bounds_as_union env r var lower_bounds =
+  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
+  env, TUtils.diff ty (var_as_ty var)
+
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
-  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
-  let ty = TUtils.diff ty (var_as_ty var) in
+  let env, ty = lower_bounds_as_union env r var lower_bounds in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
    *   Cov<C>, Contra<D> <: v
@@ -2591,7 +2596,8 @@ let bind_to_upper_bound env r var upper_bounds =
 let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d" force_solve force_solve_to_nothing var, [])]));
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d"
+      force_solve force_solve_to_nothing var, [])]));
 
   (* Don't try and solve twice *)
   if Env.tyvar_is_solved env var
@@ -2656,6 +2662,98 @@ let expand_type_and_solve env ~description_of_expected p ty =
       env, (Reason.Rsolve_fail p, TUtils.terr env)
     | _ -> env, ety
     end
+  | _ ->
+    env, ety
+
+(* When applied to concrete types (typically classes), the `widen_concrete_type`
+ * function should produce the largest supertype that is valid for an operation.
+ * For example, if we have an expression $x->f for $x:v and exact C <: v, then
+ * we widen `exact C` to `B`, if `B` is the base class from which `C` inherits
+ * field f.
+ *
+ * The `widen` function extends this to unions, nullables, and abstract types.
+ *)
+let rec widen env widen_concrete_type ty =
+  let env, ty = Env.expand_type env ty in
+  match ty with
+  | r, Toption ty ->
+    begin match widen env widen_concrete_type ty with
+    | env, Some ty -> env, Some (r, Toption ty)
+    | env, None -> env, None
+    end
+  (* Don't widen the `this` type, because the field type changes up the hierarchy
+   * so we lose precision
+   *)
+  | _, Tabstract (AKdependent (`this, _), _) ->
+    env, Some ty
+  (* For other abstract types, just widen to the bound, if possible *)
+  | _, Tabstract (_, Some ty) ->
+    widen env widen_concrete_type ty
+  (* For unions, widen pointwise *)
+  | (r, Tunresolved tyl) ->
+    let rec widen_tys env tyl res =
+      match tyl with
+      | [] ->
+        (* We really don't want to just guess `nothing` *)
+        if List.is_empty res then env, None
+        else env, Some (r, Tunresolved res)
+      | ty :: tyl ->
+        match widen env widen_concrete_type ty with
+        | env, None -> widen_tys env tyl res
+        | env, Some ty -> widen_tys env tyl (ty :: res)
+    in widen_tys env tyl []
+  | _ ->
+    widen_concrete_type env ty
+
+let expand_type_and_try_solve env ty =
+  let env, ety = Env.expand_type env ty in
+  match ety with
+  | (r, Tvar var) ->
+    let tyvar_info = Env.get_tyvar_info env var in
+    let lower_bounds = tyvar_info.Env.lower_bounds in
+    let upper_bounds = tyvar_info.Env.upper_bounds in
+    begin match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
+    | Some ty ->
+      let env = bind env r var ty in
+      env, ty
+    | None -> env, ety
+    end
+  | _ ->
+    env, ety
+
+(* Using the `widen_concrete_type` function to compute an upper bound,
+ * narrow the constraints on a type that are valid for an operation.
+ * For example, if we have an expression $x->f for $x:#1 and exact C <: #1, then
+ * we can add #1 <: B if C inherits the property f from base class B.
+ * Likewise, if we have an expression $x[3] for $x:#2 and vec<string> <: #2, then
+ * we can add #2 <: KeyedCollection<int,#3> because that is the largest type
+ * consistent with vec for which indexing is valid.
+ *
+ * Note that if further information arises on the type variable, then
+ * this approach is not complete. For example, we might have an unrelated
+ * exact A <: #1, for which A does not inherit from base class B.
+ *
+ * But in general, narrowing is a useful technique for delaying the complete
+ * solving of a constraint whilst supporting checking of operations such as
+ * member access and array indexing.
+ *)
+let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
+  (* First see if we already have an equality in the constraints *)
+  let env, ety = expand_type_and_try_solve env ty in
+  match ety with
+  | (r, Tvar var) ->
+    let tyvar_info = Env.get_tyvar_info env var in
+    let env, lowerty = lower_bounds_as_union env r var tyvar_info.Env.lower_bounds in
+    let env, new_upper = widen env widen_concrete_type lowerty in
+    begin match new_upper with
+    | None ->
+      (* Default behaviour is currently to force solve *)
+      expand_type_and_solve env ~description_of_expected p ty
+    | Some widety ->
+      let env = sub_type env ty widety in
+      env, widety
+    end
+
   | _ ->
     env, ety
 

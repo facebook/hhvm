@@ -4506,12 +4506,51 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
       (Reason.to_pos (fst concrete_ty));
     default ()
 
+and widen_class_for_obj_get member_name env ty =
+  match ty with
+  | (r2, Tclass ((_, class_name) as class_id, _, tyl)) ->
+    let default () =
+      let ty = (r2, Tclass (class_id, Nonexact, tyl)) in
+      env, Some ty in
+    begin match Env.get_class env class_name with
+    | None -> default ()
+    | Some class_info ->
+      match Env.get_member false (*is_method*) env class_info member_name with
+      | Some { ce_origin; _ } ->
+        (* If this member was inherited then we obtain the type from which
+         * it is inherited as our wider type *)
+        if ce_origin = class_name
+        then default ()
+        else
+          begin match Cls.get_ancestor class_info ce_origin with
+          | None -> default ()
+          | Some basety ->
+            let ety_env =
+            {
+              type_expansions = [];
+              substs = Subst.make (Cls.tparams class_info) tyl;
+              this_ty = ty;
+              from_class = None;
+              validate_dty = None;
+            } in
+            let env, basety = Phase.localize ~ety_env env basety in
+            env, Some basety
+          end
+      | None ->
+        env, None
+    end
+  | _ ->
+    env, None
+
 (* k_lhs takes the type of the object receiver *)
 and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   ~(pos_params : expr list option) ?(explicit_tparams=[])
-    env ty1 cid (id_pos, id_str as id) k k_lhs =
-  let env, ety1 = SubType.expand_type_and_solve
-    ~description_of_expected:"an object" env obj_pos ty1 in
+  env ty1 cid (id_pos, id_str as id) k k_lhs =
+  let env, ety1 =
+    if is_method
+    then SubType.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1
+    else SubType.expand_type_and_narrow env ~description_of_expected:"an object"
+      (widen_class_for_obj_get id_str) obj_pos ty1 in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
         let env, method_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind

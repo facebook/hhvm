@@ -254,7 +254,6 @@ let load config_filename options =
     ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
     ?po_enable_concurrent:(bool_opt "enable_concurrent" config)
     ?po_enable_await_as_an_expression:(bool_opt "enable_await_as_an_expression" config)
-    ?po_default_mode:(string_opt "default_mode" config)
     ?po_allow_goto:(Option.map ~f:not (bool_opt "disallow_goto" config))
     ?po_disable_static_closures:(bool_opt "disable_static_closures" config)
     ?po_disable_static_local_variables:(bool_opt "disable_static_local_variables" config)

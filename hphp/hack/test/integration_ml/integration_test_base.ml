@@ -24,7 +24,6 @@ let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 let global_opts = GlobalOptions.make
   ~po_deregister_php_stdlib:true
   ~po_allow_goto:false
-  ~po_default_mode:"strict"
   ~tco_unsafe_rx:false
   ()
 let server_config = ServerConfig.set_tc_options server_config global_opts

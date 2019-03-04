@@ -177,7 +177,7 @@ State entry_state(const Index& index, Context const ctx,
   }
   auto const useVars = ctx.func->isClosureBody
     ? index.lookup_closure_use_vars(ctx.func)
-    : std::vector<Type>{};
+    : CompactVector<Type>{};
 
   /*
    * Reified functions have a hidden local that's always the first

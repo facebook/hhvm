@@ -1084,9 +1084,9 @@ struct Index::IndexData {
    */
   IfaceSlotMap ifaceSlotMap;
 
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
-    std::vector<Type>
+    CompactVector<Type>
   > closureUseVars;
 
   bool useClassDependencies;
@@ -4980,7 +4980,7 @@ Type Index::lookup_return_type(Context caller,
   );
 }
 
-std::vector<Type>
+CompactVector<Type>
 Index::lookup_closure_use_vars(const php::Func* func,
                                bool move) const {
   assert(func->isClosureBody);
@@ -4989,7 +4989,7 @@ Index::lookup_closure_use_vars(const php::Func* func,
   if (!numUseVars) return {};
   auto const it = m_data->closureUseVars.find(func->cls);
   if (it == end(m_data->closureUseVars)) {
-    return std::vector<Type>(numUseVars, TGen);
+    return CompactVector<Type>(numUseVars, TGen);
   }
   if (move) return std::move(it->second);
   return it->second;
@@ -5574,7 +5574,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,
-                                    const std::vector<Type>& vars) {
+                                    const CompactVector<Type>& vars) {
   assert(is_closure(*cls));
 
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {

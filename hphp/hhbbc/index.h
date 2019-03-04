@@ -730,7 +730,7 @@ struct Index {
    * If move is true, the value will be moved out of the index. This
    * should only be done at emit time.
    */
-  std::vector<Type>
+  CompactVector<Type>
     lookup_closure_use_vars(const php::Func*,
                             bool move = false) const;
 
@@ -911,7 +911,7 @@ struct Index {
    * Returns: true if the types have changed.
    */
   bool refine_closure_use_vars(const php::Class*,
-                               const std::vector<Type>&);
+                               const CompactVector<Type>&);
 
   /*
    * Refine the private property types for a class, based on a round

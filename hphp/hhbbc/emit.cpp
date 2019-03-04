@@ -1506,7 +1506,7 @@ void emit_class(EmitUnitState& state,
     emit_finish_func(state, *m, *fe, info);
   }
 
-  std::vector<Type> useVars;
+  CompactVector<Type> useVars;
   if (is_closure(cls)) {
     auto f = find_method(&cls, s_invoke.get());
     useVars = state.index.lookup_closure_use_vars(f, true);

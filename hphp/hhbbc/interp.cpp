@@ -4228,14 +4228,14 @@ void in(ISS& env, const bc::CreateCl& op) {
    * with what we saw last time.
    */
   if (nargs) {
-    std::vector<Type> usedVars(nargs);
+    CompactVector<Type> usedVars(nargs);
     for (auto i = uint32_t{0}; i < nargs; ++i) {
       usedVars[nargs - i - 1] = unctx(popT(env));
     }
     merge_closure_use_vars_into(
       env.collect.closureUseTypes,
       clsPair.second,
-      usedVars
+      std::move(usedVars)
     );
   }
 

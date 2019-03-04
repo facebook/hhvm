@@ -420,7 +420,7 @@ StatCache::NodePtr StatCache::Node::getChild(const std::string& childName,
 // StatCache.
 
 StatCache::StatCache()
-  : m_lock(false /*reentrant*/, RankStatCache), m_ifd(-1), m_should_clear(false),
+  : m_lock(false /*reentrant*/, RankStatCache), m_ifd(-1), m_shouldClear(false),
     m_lastRefresh(time(nullptr)) {
 }
 
@@ -651,8 +651,8 @@ void StatCache::refresh() {
 
   // Check if we should reset the cache
   // as part of this refresh
-  if (m_should_clear) {
-    m_should_clear = false;
+  if (m_shouldClear) {
+    m_shouldClear = false;
     reset();
   }
 
@@ -682,12 +682,6 @@ void StatCache::refresh() {
     }
   }
 #endif
-}
-
-void StatCache::markShouldClearImpl() {
-  SimpleLock lock(m_lock);
-
-  m_should_clear = true;
 }
 
 time_t StatCache::lastRefresh() {
@@ -951,9 +945,11 @@ std::string StatCache::realpath(const char* path) {
   return s_sc.realpathImpl(path);
 }
 
-void StatCache::clear_cache() {
+void StatCache::clearCache() {
   if (!RuntimeOption::ServerStatCache) return;
-  s_sc.markShouldClearImpl();
+
+  SimpleLock lock(s_sc.m_lock);
+  s_sc.m_shouldClear = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

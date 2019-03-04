@@ -101,7 +101,7 @@ struct StatCache {
   static int lstat(const std::string& path, struct stat* buf);
   static std::string readlink(const std::string& path);
   static std::string realpath(const char* path);
-  static void clear_cache();
+  static void clearCache();
 
  private:
   bool init();
@@ -121,7 +121,6 @@ struct StatCache {
   int lstatImpl(const std::string& path, struct stat* buf);
   std::string readlinkImpl(const std::string& path);
   std::string realpathImpl(const char* path);
-  void markShouldClearImpl();
 
   static StatCache s_sc;
 
@@ -130,7 +129,7 @@ struct StatCache {
 
   SimpleMutex m_lock;       // Protects the following fields.
   int m_ifd;
-  bool m_should_clear;      // True if we should clear the cache on the next request
+  bool m_shouldClear;      // True if we should clear the cache on the next request
 #ifdef __linux__
   static const size_t kReadBufSize = 10 * (sizeof(struct inotify_event)
                                            + NAME_MAX + 1);

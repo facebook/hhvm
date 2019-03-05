@@ -178,6 +178,11 @@ bool opcodeChangesPC(const Op op);
 bool opcodeBreaksBB(const Op op, bool inlining);
 
 /*
+ * Return true if the instruction doesn't care about the inner types.
+ */
+bool opcodeIgnoresInnerType(const Op op);
+
+/*
  * Similar to opcodeBreaksBB but more strict.  We break profiling blocks after
  * any instruction that can side exit, including instructions with predicted
  * output, and before any control flow merge point.
@@ -219,10 +224,9 @@ struct InputInfoVec : public std::vector<InputInfo> {
 };
 
 /*
- * Get input location info and flags for a NormalizedInstruction.  Some flags
- * on `ni' may be updated.
+ * Get input location info and flags for a NormalizedInstruction.
  */
-InputInfoVec getInputs(NormalizedInstruction&, FPInvOffset bcSPOff);
+InputInfoVec getInputs(const NormalizedInstruction&, FPInvOffset bcSPOff);
 
 /*
  * Return the index of op's local immediate.
@@ -309,9 +313,7 @@ enum Operands {
   FStack          = 1 << 5,  // output of FPushFuncD and friends
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]
-  AllLocals       = 1 << 8, // All locals (used by RetC)
   DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
-  IgnoreInnerType = 1 << 10, // Instruction doesnt care about the inner types
   DontGuardAny    = 1 << 11, // Dont force a guard for any input
   This            = 1 << 12, // Input to CheckThis
   StackN          = 1 << 13, // pop N cells from stack; n = imm[0].u_IVA

@@ -92,8 +92,7 @@ static const struct {
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopV,        {Stack1|
-                    DontGuardStack1|
-                    IgnoreInnerType,  None,         OutNone         }},
+                    DontGuardStack1,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
@@ -222,10 +221,10 @@ static const struct {
    * RetC and RetM consume values from the stack, and these values' types needs
    * to be known at compile-time.
    */
-  { OpRetC,        {AllLocals,        None,         OutNone         }},
-  { OpRetM,        {AllLocals,        None,         OutNone         }},
+  { OpRetC,        {None,             None,         OutNone         }},
+  { OpRetM,        {None,             None,         OutNone         }},
   { OpRetCSuspended,
-                   {AllLocals,        None,         OutNone         }},
+                   {None,             None,         OutNone         }},
   { OpThrow,       {Stack1,           None,         OutNone         }},
   { OpUnwind,      {None,             None,         OutNone         }},
 
@@ -276,8 +275,7 @@ static const struct {
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpBindL,       {Stack1|Local|
-                    IgnoreInnerType,  Stack1|Local, OutSameAsInput1  }},
+  { OpBindL,       {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
   { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
@@ -489,8 +487,8 @@ const InstrInfo& getInstrInfo(Op op) {
 
 namespace {
 int64_t countOperands(uint64_t mask) {
-  const uint64_t ignore = Local | Iter | AllLocals | DontGuardStack1 |
-    IgnoreInnerType | DontGuardAny | This | MBase | StackI | MKey | LocalRange |
+  const uint64_t ignore = Local | Iter | DontGuardStack1 |
+    DontGuardAny | This | MBase | StackI | MKey | LocalRange |
     DontGuardBase;
   mask &= ~ignore;
 
@@ -687,7 +685,7 @@ size_t memberKeyImmIdx(Op op) {
 /*
  * Get location metadata for the inputs of `ni'.
  */
-InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
+InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   InputInfoVec inputs;
   if (isAlwaysNop(ni)) return inputs;
 
@@ -708,7 +706,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     stackOff -= (ni.imm[0].u_FCA.hasUnpack() ? 1 : 0);  // unpack
     stackOff -= kNumActRecCells;  // ActRec is torn down as well
   }
-  if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
 
   if (flags & Stack1) {
     SKTRACE(1, sk, "getInputs: Stack1 %d\n", stackOff.offset);
@@ -784,7 +781,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
     }
   }
-  if (flags & AllLocals) ni.ignoreInnerType = true;
 
   if (flags & MKey) {
     auto mk = ni.imm[memberKeyImmIdx(ni.op())].u_KA;

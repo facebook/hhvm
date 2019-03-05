@@ -280,8 +280,6 @@ void initNormalizedInstruction(
   // its inputs, so we still populate the rest of the instruction even if
   // this is true.
   inst.interp = toInterp;
-
-  auto const inputInfos = getInputs(inst, irgs.irb->fs().bcSPOff());
 }
 
 bool shouldTrySingletonInline(const RegionDesc& region,

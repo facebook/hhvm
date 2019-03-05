@@ -168,8 +168,8 @@ bool consumeInput(Env& env, const InputInfo& input) {
   }
 
   if (!(type <= TBoxedCell) ||
-      env.inst.ignoreInnerType ||
-      input.dontGuardInner) {
+      input.dontGuardInner ||
+      opcodeIgnoresInnerType(env.inst.op())) {
     return true;
   }
 

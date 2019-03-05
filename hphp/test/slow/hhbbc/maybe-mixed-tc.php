@@ -10,4 +10,4 @@ if (__hhvm_intrinsics\launder_value(true)) {
 function test(Disable $c) {
   var_dump($c);
 }
-test();
+test(null);

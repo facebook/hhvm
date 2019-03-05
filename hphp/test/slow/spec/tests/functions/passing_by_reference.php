@@ -50,10 +50,7 @@ var_dump($a);
          // so using it will raise a fatal error."
 var_dump($a);
 
-f();     // So just what is f's $p aliased to? Presumably, nothing; $p is simply
-         // undefined on entry to f. Then when assigned 200, $p becomes a local
-         // variable that dies when it goes out of scope when the function terminates.
-//*/
+try { f(); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ///*
 // passing by reference with a default argument value

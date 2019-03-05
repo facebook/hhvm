@@ -31,6 +31,14 @@ var_dump(isset($v1, $v2, $v3));
 
 echo "--------- undefined parameter -------------\n";
 
+function e()
+{
+    var_dump($p);
+    var_dump(isset($p));
+    unset($p);
+    var_dump(isset($p));
+}
+
 function f($p)
 {
     var_dump($p);
@@ -39,7 +47,7 @@ function f($p)
     var_dump(isset($p));
 }
 
-f();
+e();
 f(NULL);
 f(10);
 

@@ -44,5 +44,5 @@ g(0, &$x, 2);
 h(0, &$x, array(1, 2), 3);
 $x = 10;
 i(&$x);
-i();
+try { i(); } catch (Exception $e) { var_dump($e->getMessage()); }
 }

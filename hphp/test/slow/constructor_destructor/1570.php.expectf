@@ -4,11 +4,3 @@ string(6) "caught"
 string(6) "caught"
 string(6) "caught"
 string(6) "caught"
-
-Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 20
-
-Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 20
-
-Warning: __construct() expects exactly 1 parameter, 0 given in %s/test/slow/constructor_destructor/1570.php on line 20
-
-Notice: Undefined variable: a in %s/test/slow/constructor_destructor/1570.php on line 20

@@ -20,18 +20,8 @@ f1: # arguments passed is 3
 
 Notice: Array to string conversion in %s/functions/basics.php on line 25
 	arg[2] = >Array<
-
-Warning: %a
-
-Notice: Undefined variable: p1 in %s/functions/basics.php on line 49
-
-Notice: Undefined variable: p2 in %s/functions/basics.php on line 50
-f2: $p1 = NULL, $p2 = NULL
-
-Warning: %s
-
-Notice: Undefined variable: p2 in %s/functions/basics.php on line 50
-f2: $p1 = 10, $p2 = NULL
+string(42) "f2() expects exactly 2 parameters, 0 given"
+string(42) "f2() expects exactly 2 parameters, 1 given"
 f2: $p1 = 10, $p2 = 20
 f2: $p1 = 10, $p2 = 20
 5 squared = 25

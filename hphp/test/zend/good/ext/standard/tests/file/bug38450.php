@@ -4,7 +4,7 @@ class VariableStream {
 	var $position;
 	var $varname;
 
-	function VariableStream($var) {
+	function VariableStream($var = null) {
 		var_dump("constructor!");
 	}
 

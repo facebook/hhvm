@@ -53,8 +53,8 @@ function f2($p1, $p2)
 // if fewer arguments are passed than there are paramaters declared, a warning is issued
 // and the parameters corresponding to each each omitted argument are undefined
 
-f2();           // pass 0 (< 2)
-f2(10);         // pass 1 (< 2)
+try { f2(); } catch (Exception $e) { var_dump($e->getMessage()); } // pass 0 (< 2)
+try { f2(10); } catch (Exception $e) { var_dump($e->getMessage()); } // pass 1 (< 2)
 f2(10, 20);     // pass 2 (== 2)
 f2(10, 20, 30); // pass 3 (> 2)
 

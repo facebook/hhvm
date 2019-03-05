@@ -7,7 +7,7 @@ function test($str) {
 <<__EntryPoint>>
 function main_28() {
 try { var_dump(strlen()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(test());
+try { test(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 var_dump(strlen('test'));
 var_dump(test('test'));

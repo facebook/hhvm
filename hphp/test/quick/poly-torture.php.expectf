@@ -11,14 +11,7 @@ T2::dubiousArgs 1
     randObj: C
     randObj: B
 T1::dubiousArgs 2, 2
---
-Warning: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given in %s on line 41
-C also has this method with params: 
-Notice: Undefined variable: d in %s on line 41
- 
-Notice: Undefined variable: e in %s on line 41
-
---C also has this method with params: 3 4
+--RuntimeException: noSuchMethodBoyeee() expects exactly 5 parameters, 0 given
     randObj: A
     randObj: C
 C::__call dubiousArgs

@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : mixed array_reduce(array input, mixed callback [, int initial])
- * Description: Iteratively reduce the array to a single value via the callback. 
+ * Description: Iteratively reduce the array to a single value via the callback.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_reduce() : variation ***\n";
@@ -22,7 +22,7 @@ echo "\n--- Testing with a callback with too few parameters ---\n";
 var_dump(array_reduce($array, "oneArg", 2));
 
 echo "\n--- Testing with a callback with too many parameters ---\n";
-var_dump(array_reduce($array, "threeArgs", 2));
+try { var_dump(array_reduce($array, "threeArgs", 2)); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ?>
 ===DONE===

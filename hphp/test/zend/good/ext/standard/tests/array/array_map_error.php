@@ -11,7 +11,7 @@ $arr1 = array(1, 2);
 function callback2($p, $q) {
   return $p * $q;
 }
-var_dump( array_map('callback2', $arr1) );
+try { var_dump( array_map('callback2', $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "\n-- Testing array_map() function with more no. of arrays than callback function arguments --\n";
 $arr2 = array(3, 4);

@@ -1,6 +1,7 @@
 <?php
 
-function foo($x) {
+function foo() {
+  var_dump($x);
   if (is_string($x)) {
     $y = "asd";
   } else {

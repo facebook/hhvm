@@ -48,8 +48,8 @@ function main() {
   echo "\n";
 
   // too few arguments
-  var_dump(idx($s));
-  var_dump(idx());
+  try { var_dump(idx($s)); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { var_dump(idx()); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
 

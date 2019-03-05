@@ -15,16 +15,16 @@ function unary_function($x) {
   return UNDEFINED === $x;
 }
 
-function binary_function($x, $y) {}
+function binary_function(string $x, $y) {}
 
 fb_intercept('binary_function', 'unary_function', 'unary_function');
 
 try {
-  call_user_func_array('binary_function', array(12));
+  call_user_func_array('binary_function', array(12, 12));
 } catch (Exception $x) {
   echo "We hit our handler.\n";
   throw new Exception("Sup");
 }
 
 // Try it with no catch also.
-call_user_func_array('binary_function', array(12));
+call_user_func_array('binary_function', array(12, 12));

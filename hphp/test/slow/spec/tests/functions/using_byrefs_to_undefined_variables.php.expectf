@@ -1,10 +1,5 @@
-Warning: %s
-$p is not set
-$q is not set
-$p is set
-int(-10)
 
-Notice: Undefined variable: x in %s/functions/using_byrefs_to_undefined_variables.php on line 33
+Notice: Undefined variable: x in %s/functions/using_byrefs_to_undefined_variables.php on line 31
 NULL
 $p is not set
 $q is not set
@@ -61,12 +56,6 @@ array(5) {
   ["red"]=>
   int(-10)
 }
-
-Warning: %s
-$p is not set
-$p is not set
-NULL
-NULL
 int(-10)
 $p is set
 $p is set

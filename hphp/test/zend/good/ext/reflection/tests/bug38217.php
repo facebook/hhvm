@@ -15,7 +15,7 @@ class Object1 {
 }
 
 $class= new ReflectionClass('Object1');
-var_dump($class->newInstanceArgs());
+try { var_dump($class->newInstanceArgs()); } catch (Exception $e) { var_dump($e->getMessage()); }
 var_dump($class->newInstanceArgs(array('test')));
 
 

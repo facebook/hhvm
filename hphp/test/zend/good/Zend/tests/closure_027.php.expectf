@@ -3,8 +3,6 @@ object(stdClass)#%d (0) {
 NULL
 
 Notice: %s
-
-Warning: %s
-NULL
+string(47) "__invoke() expects exactly 1 parameter, 0 given"
 
 Catchable fatal error: %s

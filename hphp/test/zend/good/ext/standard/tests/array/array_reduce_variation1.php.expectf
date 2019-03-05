@@ -4,9 +4,5 @@
 int(2)
 
 --- Testing with a callback with too many parameters ---
-
-Warning: %s
-
-Notice: %s
-int(3)
+string(49) "threeArgs() expects exactly 3 parameters, 2 given"
 ===DONE===

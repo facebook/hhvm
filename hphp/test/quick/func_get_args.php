@@ -17,8 +17,6 @@ function f($a, $b) {
   }
 }
 
-f();
-f(12);
 f(12, 34);
 f(12, 34, 56);
 
@@ -36,7 +34,6 @@ function defaulte($a, $b=999) {
   }
 }
 
-defaulte();
 defaulte(12);
 defaulte(12, 34);
 defaulte(12, 34, 56);

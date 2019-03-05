@@ -998,8 +998,7 @@ void raiseArgumentImpl(const Func* func, int got, bool missing) {
                                   value == 1 ? "" : "s",
                                   got);
 
-  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
-      (missing && RuntimeOption::EvalThrowOnMissingArgument)) {
+  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1) {
     SystemLib::throwRuntimeExceptionObject(Variant(msg));
   } else {
     raise_warning(msg);

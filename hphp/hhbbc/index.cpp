@@ -3440,9 +3440,7 @@ PublicSPropEntry lookup_public_static_impl(
     return PublicSPropEntry {
       union_of(
         knownClsPart->inferredType,
-        adjust_type_for_prop(
-          *data.m_index, *knownCInfo->cls, knownClsPart->tc, *unkPart
-        )
+        *unkPart
       ),
       knownClsPart->initializerType,
       nullptr,

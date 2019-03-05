@@ -16,6 +16,8 @@ type env = {
   class_name: string option;
   function_name: string option;
   file_mode: FileInfo.mode;
+  function_kind: Ast.fun_kind option;
+  is_finally: bool;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -32,12 +34,14 @@ let fun_env env f =
     function_name = Some (snd f.f_name);
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
     file_mode = f.f_mode;
+    function_kind = Some f.f_fun_kind;
   }
 
 let method_env env m =
   { env with
     is_reactive = fun_is_reactive m.m_user_attributes;
     function_name = Some (snd m.m_name);
+    function_kind = Some m.m_fun_kind;
   }
 
 let class_env env c =
@@ -56,6 +60,8 @@ let empty_env = {
   class_name = None;
   function_name = None;
   file_mode = FileInfo.Mstrict;
+  function_kind = None;
+  is_finally = false;
 }
 
 let def_env x =
@@ -80,6 +86,9 @@ class virtual iter = object (self)
   method! on_fun_ env x = super#on_fun_ (fun_env env x) x
   method! on_method_ env x = super#on_method_ (method_env env x) x
   method! on_class_ env x = super#on_class_ (class_env env x) x
+  method! on_Try env b cl fb =
+    self#on_block { env with is_finally = true } fb;
+    super#on_Try env b cl fb
 end
 
 class virtual ['state] iter_with_state = object (self)

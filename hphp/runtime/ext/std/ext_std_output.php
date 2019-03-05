@@ -182,30 +182,6 @@ function ob_implicit_flush(bool $flag = true): void;
 <<__Native>>
 function ob_list_handlers(): array;
 
-/* This function adds another name/value pair to the URL rewrite mechanism.
- * The name and value will be added to URLs (as GET parameter) and forms (as
- * hidden input fields) the same way as the session ID when transparent URL
- * rewriting is enabled with session.use_trans_sid. Please note that absolute
- * URLs (http://example.com/..) aren't rewritten.  This function's behavior is
- * controlled by the url_rewriter.tags php.ini parameter. Calling this
- * function will implicitly start output buffering if it is not active
- * already.
- * @param string $name - The variable name.
- * @param string $value - The variable value.
- * @return bool - Returns TRUE on success or FALSE on failure.
- */
-<<__Native>>
-function output_add_rewrite_var(string $name,
-                                string $value): bool;
-
-/* This function resets the URL rewriter and removes all rewrite variables
- * previously set by the output_add_rewrite_var() function or the session
- * mechanism (if session.use_trans_sid was set on session_start()).
- * @return bool - Returns TRUE on success or FALSE on failure.
- */
-<<__Native>>
-function output_reset_rewrite_vars(): bool;
-
 /* Adds an entry to a log file that's written when server crashes. This is
  * useful for diagnose why server crashed. For example, logged-on user's ID.
  * @param string $name - Name of the value.

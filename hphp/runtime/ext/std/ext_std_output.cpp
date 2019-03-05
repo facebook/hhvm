@@ -136,13 +136,6 @@ void HHVM_FUNCTION(ob_implicit_flush, bool flag /* = true */) {
 Array HHVM_FUNCTION(ob_list_handlers) {
   return g_context->obGetHandlers();
 }
-bool HHVM_FUNCTION(output_add_rewrite_var, const String& /*name*/,
-                   const String& /*value*/) {
-  throw_not_supported(__func__, "bad coding style");
-}
-bool HHVM_FUNCTION(output_reset_rewrite_vars) {
-  throw_not_supported(__func__, "bad coding style");
-}
 
 void HHVM_FUNCTION(hphp_crash_log, const String& name, const String& value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
@@ -287,8 +280,6 @@ void StandardExtension::initOutput() {
   HHVM_FE(ob_get_status);
   HHVM_FE(ob_implicit_flush);
   HHVM_FE(ob_list_handlers);
-  HHVM_FE(output_add_rewrite_var);
-  HHVM_FE(output_reset_rewrite_vars);
   HHVM_FE(hphp_crash_log);
   HHVM_FE(hphp_stats);
   HHVM_FE(hphp_get_stats);

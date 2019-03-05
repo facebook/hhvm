@@ -3528,6 +3528,18 @@ and emit_special_function env pos id args uargs default =
              (string_of_int nargs) ^ " given")
       end
 
+  | "__hhvm_internal_whresult", [_, A.Lvar (_, param)]
+    when Emit_env.is_systemlib () ->
+    Some (gather [
+      instr_cgetl (Local.Named param);
+      instr_whresult;
+    ])
+
+  | "__hhvm_internal_newlikearrayl", [_, A.Lvar (_, param); _, A.Int n]
+    when Emit_env.is_systemlib () ->
+    Some (instr (ILitConst (NewLikeArrayL (Local.Named param,
+                                           int_of_string n))))
+
   | _ ->
     begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
     | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->

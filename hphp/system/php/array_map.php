@@ -25,7 +25,7 @@ function array_map($func, $arr, ...$extra) {
     return null;
   }
 
-  $res = \HH\asm('NewLikeArrayL $arr 0');
+  $res = \__hhvm_internal_newlikearrayl($arr, 0);
   foreach ($arr as $k => $v) {
     $res[$k] = $func($v);
   }

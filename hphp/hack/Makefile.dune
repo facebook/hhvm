@@ -26,7 +26,8 @@ build-hack: _build/default/src/utils/get_build_id.gen.c
 		src/hh_single_type_check.exe \
 		src/hackfmt.exe \
 		src/hh_parse.exe \
-		src/hh_single_compile.exe
+		src/hh_single_compile.exe \
+		src/hh_single_parse.exe
 
 _build/default/src/utils/get_build_id.gen.c:
 	cd $(ROOT) && \
@@ -40,6 +41,7 @@ copy-hack-files: build-hack
 	cp _build/default/src/hackfmt.exe ./bin/hackfmt
 	cp _build/default/src/hh_parse.exe ./bin/hh_parse
 	cp _build/default/src/hh_single_compile.exe ./bin/hh_single_compile
+	cp _build/default/src/hh_single_parse.exe ./bin/hh_single_parse
 
 .PHONY: test do-test
 test: build-hack copy-hack-files

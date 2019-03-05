@@ -8,6 +8,7 @@
  *)
 
 let dump_ast _ = ""
+let dump_sorted_ast _ = ""
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   let dump_syntax _ = ""

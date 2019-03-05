@@ -14,10 +14,11 @@
     buildMain))
 
 (library
-  (name debug)
+  (name debug_stubs)
   (wrapped false)
   (modules
-    debug)
+    debug
+    sof)
   (libraries
     parser_sigs))
 

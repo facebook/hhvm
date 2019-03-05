@@ -103,3 +103,17 @@
     hackfmt_debug
     utils_config_file
     utils_ocaml_overrides))
+
+(executable
+  (name hh_single_parse)
+  (modules
+    hh_single_parse)
+  (libraries
+    debug
+    global_config
+    hackfmt
+    nast
+    parser_heap
+    parser_syntax
+    parser_syntax_transforms
+    parser_syntax_tree))

@@ -29,13 +29,16 @@ let fun_is_reactive user_attributes =
 
 let fun_env env f =
   { env with
+    function_name = Some (snd f.f_name);
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
     file_mode = f.f_mode;
   }
 
 let method_env env m =
   { env with
-    is_reactive = fun_is_reactive m.m_user_attributes; }
+    is_reactive = fun_is_reactive m.m_user_attributes;
+    function_name = Some (snd m.m_name);
+  }
 
 let class_env env c =
   { env with

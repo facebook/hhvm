@@ -13,6 +13,13 @@ open Utils
 
 module SN = Naming_special_names
 
+let is_magic =
+  let h = Caml.Hashtbl.create 23 in
+  let a x = Caml.Hashtbl.add h x true in
+  let _ = SSet.iter (fun m -> if m <> SN.Members.__toString then a m) SN.Members.as_set in
+  fun (_, s) ->
+    Caml.Hashtbl.mem h s
+
 let handler = object
   inherit Nast_visitor.handler_base
 
@@ -41,6 +48,12 @@ let handler = object
         Errors.classname_const_instanceof (Utils.strip_ns classname) p;
       | _ -> ()
       end;
+    | Class_const ((_, CIexpr (_, (Id(_, "parent")))), (_, m_name))
+      when env.Nast_visitor.function_name = Some m_name -> ()
+    | Class_const (_, ((_, m_name) as mid))
+      when is_magic mid && env.Nast_visitor.function_name <> Some m_name ->
+      Errors.magic mid;
+    | Obj_get (_, (_, Id s), _) when is_magic s -> Errors.magic s
     | _ -> ()
 
   method! at_fun_ _ f =
@@ -56,10 +69,10 @@ let handler = object
     then Errors.illegal_destructor pos;
     begin match env.Nast_visitor.class_name with
     | Some cname ->
-        let p, mname = m.m_name in
-        if String.lowercase (strip_ns cname) = String.lowercase mname
-            && env.Nast_visitor.class_kind <> Some Ast.Ctrait
-        then Errors.dangerous_method_name p
+      let p, mname = m.m_name in
+      if String.lowercase (strip_ns cname) = String.lowercase mname
+        && env.Nast_visitor.class_kind <> Some Ast.Ctrait
+      then Errors.dangerous_method_name p
     | None -> assert false
     end
 

@@ -344,17 +344,6 @@ module CheckFunctionBody = struct
 
 end
 
-let is_magic =
-  let h = Caml.Hashtbl.create 23 in
-  let a x = Caml.Hashtbl.add h x true in
-  let _ = SSet.iter (fun m -> if m <> SN.Members.__toString then a m) SN.Members.as_set in
-  fun (_, s) ->
-    Caml.Hashtbl.mem h s
-
-let is_parent e =
-  snd e = CIparent
-
-
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   name = SN.UserAttributes.uaReactive ||
   name = SN.UserAttributes.uaLocalReactive ||
@@ -706,12 +695,8 @@ and expr_ env _p = function
   | Dollardollar _
   | PU_identifier _
   | PU_atom _
-  | Unsafe_expr _ -> ()
-  | Class_const (cid, ((_, m_name) as mid)) ->
-    let func_name = env.function_name in
-    if is_magic mid &&
-      (not(is_parent cid) || func_name <> Some m_name)
-    then Errors.magic mid;
+  | Unsafe_expr _
+  | Class_const _ ->
     ()
   | Pipe (_, e1, e2) ->
       expr env e1;
@@ -735,12 +720,6 @@ and expr_ env _p = function
       List.iter fdl (field env);
       ()
   | Clone e -> expr env e; ()
-  | Obj_get (e, (_, Id s), _) ->
-      if is_magic s
-      then Errors.magic s;
-      let env' = {env with is_array_append_allowed = false} in
-      expr env' e;
-      ()
   | Obj_get (e1, e2, _) ->
       let env' = {env with is_array_append_allowed = false} in
       expr env' e1;

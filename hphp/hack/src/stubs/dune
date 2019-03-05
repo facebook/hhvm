@@ -43,7 +43,7 @@
     loadScriptUtils))
 
 (library
-  (name messages)
+  (name messages_stubs)
   (wrapped false)
   (modules
     clientMessages))

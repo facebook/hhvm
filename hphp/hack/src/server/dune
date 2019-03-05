@@ -227,7 +227,7 @@
   (libraries
     build
     load_script
-    logging
+    bad_files
     lwt
     parent
     server

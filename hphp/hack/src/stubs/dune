@@ -42,25 +42,6 @@
     loadScriptUtils))
 
 (library
-  (name logging)
-  (wrapped false)
-  (modules
-    bad_files
-    featureLogging
-    hackEventLogger
-    hackcEventLogger
-    hackfmtEventLogger
-    typingLogger)
-  (flags (:standard -w @a-27)))
-
-(library
-  (name logging_event)
-  (wrapped false)
-  (modules
-    eventLogger
-    scuba))
-
-(library
   (name messages)
   (wrapped false)
   (modules

@@ -3,8 +3,8 @@ Linearization for class \I:
 Linearization for class \C:
 [\C(child)]
 Linearization for class \T:
-[\T(child), \I(req impl), \C(req ext), \I(parent)]
+[\T(child), \I(parent), \I(req impl), \C(req ext)]
 Linearization for class \T2:
 [\T2(child)]
 Linearization for class \D:
-[\D(child), \I(interface), \T(trait), \I(trait, synthesized), \C(trait, synthesized), \I(trait), \C(parent)]
+[\D(child), \I(interface), \T(trait), \I(trait), \C(parent), \I(trait, synthesized), \C(trait, synthesized)]

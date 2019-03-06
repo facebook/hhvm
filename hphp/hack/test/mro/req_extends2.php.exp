@@ -3,6 +3,6 @@ Linearization for class \A:
 Linearization for class \T:
 [\T(child), \A<mixed>(req ext)]
 Linearization for class \B:
-[\B(child), \T(trait), \A<mixed>(trait, synthesized), \A<int>(parent)]
+[\B(child), \T(trait), \A<int>(parent), \A<mixed>(trait, synthesized)]
 Linearization for class \C:
-[\C(child), \B(parent), \T(parent), \A<mixed>(parent, synthesized), \A<int>(parent)]
+[\C(child), \B(parent), \T(parent), \A<int>(parent), \A<mixed>(parent, synthesized)]

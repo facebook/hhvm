@@ -1,6 +1,6 @@
 Linearization for class \I:
-[\I(child)]
+[\I]
 Linearization for class \T:
-[\T(child), \I(interface), \I(parent)]
+[\T(copy_private_members), \I(consts_only), \I]
 Linearization for class \C:
-[\C(child), \T(trait), \I(trait)]
+[\C, \T(copy_private_members), \I(consts_only), \I]

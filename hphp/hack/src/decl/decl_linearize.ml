@@ -49,11 +49,11 @@ module Cache = SharedMem.LocalCache (StringKey) (struct
 end)
 
 let ancestor_from_ty
-    (new_source : source_type)
+    (source : source_type)
     (ty : decl ty)
   : string * decl ty list * source_type =
   let _, (_, class_name), type_args = Decl_utils.unwrap_class_type ty in
-  class_name, type_args, new_source
+  class_name, type_args, source
 
 let from_parent (c : shallow_class) : decl ty list =
   (* In an abstract class or a trait, we assume the interfaces
@@ -69,7 +69,7 @@ let rec ancestor_linearization
     (env : env)
     (ancestor : string * decl ty list * source_type)
   : linearization =
-  let class_name, type_args, new_source = ancestor in
+  let class_name, type_args, source = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin = Sequence.map lin ~f:begin fun c ->
@@ -77,10 +77,19 @@ let rec ancestor_linearization
       | ReqImpl | ReqExtends -> true
       | Child | Parent | Trait | XHPAttr | Interface -> false
     in
-    let mro_synthesized = c.mro_synthesized || is_synthesized new_source in
+    let is_interface = function
+      | Interface | ReqImpl -> true
+      | Child | Parent | Trait | XHPAttr | ReqExtends -> false
+    in
+    let mro_synthesized = c.mro_synthesized || is_synthesized source in
+    let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
+    let mro_consts_only = c.mro_consts_only || is_interface source in
+    let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
     { c with
-      mro_source = new_source;
       mro_synthesized;
+      mro_xhp_attrs_only;
+      mro_consts_only;
+      mro_copy_private_members;
     }
   end in
   match Sequence.next lin with
@@ -108,8 +117,10 @@ and linearize (env : env) (c : shallow_class) : linearization =
   let child = {
     mro_name;
     mro_type_args = [];
-    mro_source = Child;
     mro_synthesized = false;
+    mro_xhp_attrs_only = false;
+    mro_consts_only = false;
+    mro_copy_private_members = c.sc_kind = Ast.Ctrait;
   } in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
   let interfaces     = get_ancestors Interface c.sc_implements in

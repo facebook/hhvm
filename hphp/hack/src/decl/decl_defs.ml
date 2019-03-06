@@ -50,15 +50,6 @@ type subst_context = {
 type source_type = Child | Parent | Trait | XHPAttr | Interface | ReqImpl | ReqExtends
   [@@deriving show]
 
-let source_type_to_string = function
-  | Child -> "child"
-  | Parent -> "parent"
-  | Trait -> "trait"
-  | XHPAttr -> "xhp"
-  | Interface -> "interface"
-  | ReqImpl -> "req impl"
-  | ReqExtends -> "req ext"
-
 type mro_element = {
   (* The class's name *)
   mro_name : string;
@@ -66,15 +57,22 @@ type mro_element = {
      first class in the linearization (the one which was linearized) will have
      an empty list here, even when it takes type parameters. *)
   mro_type_args : decl ty list;
-  (* The relationship this class has to the linearized class. (Not the original
-    relationship it had with the linearization that the class came from, but to the
-    original linearized class. For example, if a class C uses trait T, and T extends
-    TParent, mro_source for TParent would be Parent for the linearization of T, but
-    Trait for the linearization of C.) *)
-  mro_source : source_type;
   (* True if this element is included in the linearization because of a require
      extends or require implements relationship. *)
   mro_synthesized : bool;
+  (* True if this element is included in the linearization because of any
+     XHP-attribute-inclusion relationship, and thus, the linearized class
+     inherits only the XHP attributes from this element. *)
+  mro_xhp_attrs_only : bool;
+  (* True if this element is included in the linearization because of a
+     interface-implementation relationship, and thus, the linearized class
+     inherits only the class constants and type constants from this element. *)
+  mro_consts_only : bool;
+  (* True if this element is included in the linearization via an unbroken chain
+     of trait-use relationships, and thus, the linearized class inherits the
+     private members of this element (on account of the runtime behavior where
+     they are effectively copied into the linearized class). *)
+  mro_copy_private_members : bool;
 } [@@deriving show]
 
 type linearization = mro_element Sequence.t

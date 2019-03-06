@@ -1,8 +1,8 @@
 Linearization for class \A:
-[\A(child)]
+[\A]
 Linearization for class \T:
-[\T(child), \A<mixed>(req ext)]
+[\T(copy_private_members), \A<mixed>(synthesized)]
 Linearization for class \B:
-[\B(child), \T(trait), \A<int>(parent), \A<mixed>(trait, synthesized)]
+[\B, \T(copy_private_members), \A<int>, \A<mixed>(synthesized)]
 Linearization for class \C:
-[\C(child), \B(parent), \T(parent), \A<int>(parent), \A<mixed>(parent, synthesized)]
+[\C, \B, \T, \A<int>, \A<mixed>(synthesized)]

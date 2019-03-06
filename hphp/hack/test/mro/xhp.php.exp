@@ -1,6 +1,6 @@
 Linearization for class \:x:
-[\:x(child)]
+[\:x]
 Linearization for class \:h:
-[\:h(child)]
+[\:h]
 Linearization for class \:g:
-[\:g(child), \:x(xhp), \:h(parent)]
+[\:g, \:x(xhp_attrs_only), \:h]

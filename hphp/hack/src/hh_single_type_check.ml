@@ -1140,13 +1140,20 @@ let handle_mode
               Typing_print.full tenv ty
             ) in
           let targs = if targs = [] then "" else "<"^(String.concat ~sep:"," targs)^">" in
-          Printf.sprintf "%s%s(%s%s)"
+          let open Decl_defs in
+          let modifiers =
+            [ if mro.mro_synthesized    then Some "synthesized"    else None
+            ; if mro.mro_xhp_attrs_only then Some "xhp_attrs_only" else None
+            ; if mro.mro_consts_only    then Some "consts_only"    else None
+            ; if mro.mro_copy_private_members then Some "copy_private_members" else None
+            ]
+            |> List.filter_map ~f:(fun x -> x)
+            |> String.concat ~sep:", "
+          in
+          Printf.sprintf "%s%s%s"
             name
             targs
-            (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
-            (match mro.Decl_defs.mro_synthesized, mro.Decl_defs.mro_source with
-            | false, _ | _, Decl_defs.(ReqImpl | ReqExtends) -> ""
-            | true, _ -> ", synthesized")
+            (if modifiers = "" then "" else Printf.sprintf "(%s)" modifiers)
           )
           |> Sequence.to_list
         in

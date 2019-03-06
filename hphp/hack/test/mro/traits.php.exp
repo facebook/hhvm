@@ -1,20 +1,20 @@
 Linearization for class \T1:
-[\T1(child)]
+[\T1(copy_private_members)]
 Linearization for class \T2:
-[\T2(child)]
+[\T2(copy_private_members)]
 Linearization for class \T3:
-[\T3(child)]
+[\T3(copy_private_members)]
 Linearization for class \C:
-[\C(child), \T3(trait), \T2(trait), \T1(trait)]
+[\C, \T3(copy_private_members), \T2(copy_private_members), \T1(copy_private_members)]
 Linearization for class \T:
-[\T(child), \T3(trait), \T2(trait)]
+[\T(copy_private_members), \T3(copy_private_members), \T2(copy_private_members)]
 Linearization for class \D:
-[\D(child), \T3(trait), \T(trait), \T2(trait)]
+[\D, \T3(copy_private_members), \T(copy_private_members), \T2(copy_private_members)]
 Linearization for class \I:
-[\I(child)]
+[\I]
 Linearization for class \I2:
-[\I2(child)]
+[\I2]
 Linearization for class \Timplements:
-[\Timplements(child), \I(interface), \I(parent)]
+[\Timplements(copy_private_members), \I(consts_only), \I]
 Linearization for class \A:
-[\A(child), \I2(interface), \Timplements(trait), \I(trait)]
+[\A, \I2(consts_only), \Timplements(copy_private_members), \I(consts_only), \I]

@@ -39,19 +39,19 @@
        { fb_ast =
          [(Awaitall ([12:3-16:4],
              [((Some ([Pos.none], __tmp$2)),
-               (([15:10-27], Awaitable<string>),
+               (([15:16-27], Awaitable<string>),
                 (Call (Cnormal,
                    (([15:16-25], (function(): Awaitable<string>)),
                     (Id ([15:16-25], "\\genString"))),
                    [], [], []))));
                (None,
-                (([14:5-22], Awaitable<string>),
+                (([14:11-22], Awaitable<string>),
                  (Call (Cnormal,
                     (([14:11-20], (function(): Awaitable<string>)),
                      (Id ([14:11-20], "\\genString"))),
                     [], [], []))));
                ((Some ([Pos.none], __tmp$1)),
-                (([13:10-24], Awaitable<int>),
+                (([13:16-24], Awaitable<int>),
                  (Call (Cnormal,
                     (([13:16-22], (function(): Awaitable<int>)),
                      (Id ([13:16-22], "\\genInt"))),

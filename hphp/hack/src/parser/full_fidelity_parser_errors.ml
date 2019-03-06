@@ -2225,12 +2225,19 @@ let does_binop_create_write_on_left = function
 let find_invalid_lval_usage errors nodes =
   let get_errors = rec_walk ~f:(fun errors syntax_node parents ->
     let node = syntax syntax_node in
-    let errors = match node_lval_type node parents with
-    | LvalTypeFinal
-    | LvalTypeNone -> errors
-    | LvalTypeNonFinal ->
-      make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
-    errors, true
+    match node with
+    | AnonymousFunction _
+    | Php7AnonymousFunction _
+    | LambdaExpression _
+    | AwaitableCreationExpression _ ->
+      errors, false
+    | _ ->
+      let errors = match node_lval_type node parents with
+      | LvalTypeFinal
+      | LvalTypeNone -> errors
+      | LvalTypeNonFinal ->
+        make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
+      errors, true
   ) in
 
   List.fold_left
@@ -2331,6 +2338,12 @@ let await_as_an_expression_errors await_node parents errors =
       when phys_equal node switch_expression -> errors
     | ForeachStatement { foreach_collection; _ }
       when phys_equal node foreach_collection -> errors
+    | UsingStatementBlockScoped { using_block_expressions; _ }
+      when phys_equal node using_block_expressions -> errors
+    | UsingStatementFunctionScoped { using_function_expression; _ }
+      when phys_equal node using_function_expression -> errors
+    | LambdaExpression { lambda_body; _ }
+      when phys_equal node lambda_body -> errors
 
     (* Unary based expressions have their own custom fanout *)
     | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
@@ -2842,6 +2855,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         make_error_from_node node SyntaxError.toplevel_await_use :: errors
       | _ -> errors
     in
+    if ParserOptions.enable_await_as_an_expression env.parser_options
+      then await_as_an_expression_errors node parents errors
+      else
     begin match parents with
       | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
         errors
@@ -2867,8 +2883,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | us :: _
          when (is_using_statement_block_scoped us ||
                is_using_statement_function_scoped us) -> errors
-      | _ when ParserOptions.enable_await_as_an_expression env.parser_options ->
-        await_as_an_expression_errors node parents errors
       | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
     end
   | VariableExpression { variable_expression } when

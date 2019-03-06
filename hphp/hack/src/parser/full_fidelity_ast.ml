@@ -223,6 +223,16 @@ let with_new_concurrent_scope env f =
     ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
   (lifted_awaits, result)
 
+let clear_statement_scope env f =
+  match env.lifted_awaits with
+  | Some { lift_kind = LiftedFromStatement; _ } ->
+    let saved_lifted_awaits = env.lifted_awaits in
+    env.lifted_awaits <- None;
+    Utils.try_finally
+      ~f
+      ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;)
+  | _ -> f ()
+
 let with_new_statement_scope env f =
   match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
   | false, _
@@ -1474,9 +1484,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Await                   ->
             begin match env.lifted_awaits with
             | Some lifted_awaits ->
-                let e = snd expr in
-                let p = pPos node env in
-                lift_await (p, e) lifted_awaits ~with_temp_local:(location <> AsStatement)
+                lift_await expr lifted_awaits ~with_temp_local:(location <> AsStatement)
             | None -> Await expr
             end
         | Some TK.Suspend                 -> Suspend expr
@@ -2028,6 +2036,7 @@ and pStmtUnsafe : stmt list parser = fun node env ->
   | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Pos.none, Unsafe; stmt]
   | _ -> [stmt]
 and pStmt : stmt parser = fun node env ->
+  clear_statement_scope env (fun () ->
   extract_and_push_docblock node;
   let pos = pPos node env in
   let result = match syntax node with
@@ -2342,7 +2351,7 @@ and pStmt : stmt parser = fun node env ->
     result
   | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
-  result
+  result)
 
 and lift_awaits_in_statement env pos f =
   let (lifted_awaits, result) =

@@ -130,6 +130,11 @@ and next_state (env : env) (state, ancestors, acc) =
   | Ancestor lin, ancestors ->
     match Sequence.next lin with
     | None -> Skip (Next_ancestor, ancestors, acc)
+    (* Lazy.Undefined occurs if we attempt to include a linearization within
+       itself. This will only happen when we have a class dependency cycle (and
+       only in some particular circumstances), so it will not arise in legal
+       programs. *)
+    | exception Lazy.Undefined -> Skip (Next_ancestor, ancestors, acc)
     | Some (next, rest) ->
       if List.mem acc next ~equal:(=)
       then Skip (Ancestor rest, ancestors, acc)

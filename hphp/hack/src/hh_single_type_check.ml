@@ -1135,14 +1135,14 @@ let handle_mode
         let linearization = Decl_linearize.get_linearization classname in
         let linearization = Sequence.map linearization (fun mro ->
           let name = mro.Decl_defs.mro_name in
-          let params = List.map mro.Decl_defs.mro_params (fun ty ->
+          let targs = List.map mro.Decl_defs.mro_type_args (fun ty ->
               let tenv = Typing_env.empty tcopt ~droot:None file in
               Typing_print.full tenv ty
             ) in
-          let params = if params = [] then "" else "<"^(String.concat ~sep:"," params)^">" in
+          let targs = if targs = [] then "" else "<"^(String.concat ~sep:"," targs)^">" in
           Printf.sprintf "%s%s(%s%s)"
             name
-            params
+            targs
             (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
             (match mro.Decl_defs.mro_synthesized, mro.Decl_defs.mro_source with
             | false, _ | _, Decl_defs.(ReqImpl | ReqExtends) -> ""

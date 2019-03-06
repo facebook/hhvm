@@ -42,8 +42,8 @@ let ancestor_from_ty
     (new_source : source_type)
     (ty : decl ty)
   : string * decl ty list * source_type =
-  let _, (_, class_name), type_params = Decl_utils.unwrap_class_type ty in
-  class_name, type_params, new_source
+  let _, (_, class_name), type_args = Decl_utils.unwrap_class_type ty in
+  class_name, type_args, new_source
 
 let from_parent (c : shallow_class) : decl ty list =
   (* In an abstract class or a trait, we assume the interfaces
@@ -58,7 +58,7 @@ let from_parent (c : shallow_class) : decl ty list =
 let rec ancestor_linearization
     (env : env)
     (class_name : string)
-    (type_params : decl ty list)
+    (type_args : decl ty list)
     (new_source : source_type)
   : linearization =
   Decl_env.add_extends_dependency env.decl_env class_name;
@@ -78,16 +78,16 @@ let rec ancestor_linearization
   | None -> Sequence.empty
   | Some (c, rest) ->
     (* Fill in the type parameterization of the starting class *)
-    let c = { c with mro_params = type_params } in
+    let c = { c with mro_type_args = type_args } in
     (* Instantiate its linearization with those type parameters *)
     let tparams =
       Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
-    let subst = Decl_subst.make tparams type_params in
+    let subst = Decl_subst.make tparams type_args in
     let rest = Sequence.map rest ~f:begin fun c ->
-      { c with mro_params =
-        List.map c.mro_params ~f:(Decl_instantiate.instantiate subst)
+      { c with mro_type_args =
+        List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst)
       }
     end in
     Sequence.append (Sequence.singleton c) rest
@@ -98,7 +98,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
   (* The first class doesn't have its type parameters filled in *)
   let child = {
     mro_name;
-    mro_params = [];
+    mro_type_args = [];
     mro_source = Child;
     mro_synthesized = false;
   } in

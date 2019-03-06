@@ -62,8 +62,10 @@ let source_type_to_string = function
 type mro_element = {
   (* The class's name *)
   mro_name : string;
-  (* The type parameters on the class *)
-  mro_params : decl ty list;
+  (* The type arguments with which this ancestor class was instantiated. The
+     first class in the linearization (the one which was linearized) will have
+     an empty list here, even when it takes type parameters. *)
+  mro_type_args : decl ty list;
   (* The relationship this class has to the linearized class. (Not the original
     relationship it had with the linearization that the class came from, but to the
     original linearized class. For example, if a class C uses trait T, and T extends

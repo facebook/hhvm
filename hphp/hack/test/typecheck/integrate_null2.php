@@ -16,3 +16,7 @@ function foo(array<int> $arr): ?array<int> {
   }
   return $x;
 }
+
+function coin_flip(): bool {
+  return true;
+}

@@ -12,3 +12,7 @@ function g(): void {
       para
     </p>;
 }
+
+class :p {
+  attribute string class;
+}

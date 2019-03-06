@@ -53,3 +53,23 @@ class BirthdayStoryPreparable extends Preparable {
     return false;
   }
 }
+
+const MUST_PREPARE = null;
+
+function must_prepare($_) {}
+function DT($_, $_) {}
+
+class Preparable {
+  public function waitFor($_) {}
+}
+class ViewerContext {}
+class Ent {
+  public static function load(...$_) {}
+  public static function createEnforcingLoaderDynamic(...$_) {}
+}
+enum PicSizeConst : string {
+  SQUARE = 'SQUARE';
+}
+class IDAssert {
+  public static function allUid($_) {}
+}

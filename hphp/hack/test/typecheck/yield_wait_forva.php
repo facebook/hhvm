@@ -16,7 +16,7 @@ async function as_tuple(): Awaitable<(int, string)> {
 
 async function maybe_null(): Awaitable<(int, ?int)> {
   $gen = null;
-  if (flip_coin()) {
+  if (coin_flip()) {
     $gen = gen_int();
   }
   $ret = await genva(gen_int(), $gen);
@@ -42,4 +42,8 @@ async function gen_int_opt(): Awaitable<?int> {
 
 async function gen_string(): Awaitable<string> {
   return 'hello';
+}
+
+function coin_flip(): bool {
+  return true;
 }

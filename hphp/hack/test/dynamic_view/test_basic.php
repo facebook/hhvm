@@ -8,6 +8,6 @@ function foo()  {
 function test() : int {
   // partial class
   $x = foo();
-  hh_show($x);
+  /* HH_IGNORE_ERROR[2049] */ hh_show($x);
   return $x;
 }

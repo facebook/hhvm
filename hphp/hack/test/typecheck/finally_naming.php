@@ -25,3 +25,5 @@ function naming_finally(): int {
   }
   return $a;
 }
+
+class YourException extends Exception {}

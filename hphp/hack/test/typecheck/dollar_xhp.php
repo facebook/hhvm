@@ -14,3 +14,5 @@ class Bloo {
     $x = <div>$</div>;
   }
 }
+
+class :div {}

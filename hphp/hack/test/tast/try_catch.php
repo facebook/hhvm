@@ -29,3 +29,6 @@ function terminal_catch_can_do_whatever(): int {
 
   return $a;
 }
+
+class YourException extends Exception {}
+class MyException extends Exception {}

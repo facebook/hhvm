@@ -1,5 +1,5 @@
 <?hh
-
+namespace {
 use namespace HH\Lib\{C, Math, Vec};
 
 func_foo();
@@ -13,3 +13,15 @@ foo();
 $x = Vec\range(1, 99);
 
 func_foo();
+
+function func_foo() {}
+function foo() {}
+}
+
+namespace My\Full {
+  function func_foo() {}
+}
+
+namespace HH\Lib\Vec {
+  function range($_, $_) {}
+}

@@ -29,3 +29,12 @@ class Blah {
     $y = "$x";
   }
 }
+
+class Foo {}
+class Bar {}
+class SingleAttribute {}
+class SingleAttributeWithOneParam {}
+class SingleAttributeWithTwoParams {}
+class Multiple {}
+class Attributes {}
+class Data {}

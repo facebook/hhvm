@@ -19,3 +19,5 @@ function test(): void {
 
   $y[0][0] = 0;
 }
+
+function my_php_function() {}

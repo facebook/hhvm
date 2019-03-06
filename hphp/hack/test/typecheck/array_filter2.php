@@ -11,3 +11,5 @@ function take_int(int $x): void {}
 function key_type<Tk, Tv>(array<Tk, Tv> $x): Tk {
   //UNSAFE
 }
+
+class X {}

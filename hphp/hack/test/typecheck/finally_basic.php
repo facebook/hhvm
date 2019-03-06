@@ -43,3 +43,6 @@ class TestInit {
     }
   }
 }
+
+class NonTerminalException extends Exception {}
+class SomeException extends Exception {}

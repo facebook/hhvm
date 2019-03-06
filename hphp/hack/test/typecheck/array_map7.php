@@ -35,3 +35,5 @@ function take_bool_array(array<bool> $_): void {}
 function take_X_bool_array(array<X, bool> $_): void {}
 function take_arraykey_bool_array(array<arraykey, bool> $_): void {}
 function take_mixed_bool_array(array<mixed, bool> $_): void {}
+
+type X = arraykey;

@@ -85,3 +85,5 @@ function expect_nullable_bool(?bool $x): void {}
 function expect_object(Object $x): void {}
 function expect_A(A $a): void {}
 function expect_mixed(mixed $a): void {}
+
+class Object {}

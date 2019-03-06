@@ -25,3 +25,6 @@ async function gen_filter_with_key<Tk as arraykey, Tv>(
   $result = dict[];
   return $result;
 }
+
+<<__Rx>>
+function gen($_) {}

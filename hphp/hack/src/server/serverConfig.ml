@@ -248,7 +248,6 @@ let load config_filename options =
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let global_opts = GlobalOptions.make
-    ?tco_assume_php:(bool_opt "assume_php" config)
     ?tco_safe_array:(bool_opt "safe_array" config)
     ?tco_safe_vector_array:(bool_opt "safe_vector_array" config)
     ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)

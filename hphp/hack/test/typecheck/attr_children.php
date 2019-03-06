@@ -12,3 +12,7 @@
 function test(): void {
   $x = <xx children=""/>;
 }
+
+class :xx {
+  attribute string children;
+}

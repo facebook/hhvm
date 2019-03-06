@@ -38,3 +38,8 @@ abstract class ValueFactory {
     return $r;
   }
 }
+
+class TLoader {
+  <<__Rx>>
+  public function gen() {}
+}

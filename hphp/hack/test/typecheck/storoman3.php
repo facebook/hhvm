@@ -21,7 +21,7 @@ class WebHelp2FrequentQuestionController extends WebHelp2Controller {}
 
 
 function test(string $huri, bool $cmsid): WebHelp2Controller {
-  $controller = Vector();
+  $controller = Vector {};
 
   switch ($huri) {
   case 'hub':

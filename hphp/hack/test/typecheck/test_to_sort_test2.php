@@ -50,4 +50,18 @@ class AddressBook extends AddressBookContactCollection {
   }
 }
 
-function f() {}
+class AddressBookContactCollection {
+  public function __construct($_) {}
+  public function addContact($_) {}
+}
+class AddressBookLoader {
+  public function getOwnerId() {}
+  public function getContacts() {}
+  public static function isIncomingAssocType($_) {}
+}
+class AddressBookContact {
+  public function getOwnerId() {}
+  public function setOwnerId($_) {}
+  public function getRemoteId() {}
+  public function getAssocType() {}
+}

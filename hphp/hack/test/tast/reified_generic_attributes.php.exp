@@ -1,4 +1,5 @@
 Errors:
+  [7:17-28] Unbound name: Enforceable (an object type)
   [7:17-28] Unrecognized user attribute: Enforceable does not have a class. Please declare a class for the attribute.
   [10:15-16] This constructor expects no argument
   [6:48-49] The type parameter T has the <<__Newable>> attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final or have a constructor that is consistent. This can be accomplished by making the constructor final or having <<__ConsistentConstruct>>. No constraints are valid newable classes

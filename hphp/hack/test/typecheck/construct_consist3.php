@@ -14,3 +14,5 @@ class C3 extends C2 {
     parent::__construct(new A());
   }
 }
+
+class A {}

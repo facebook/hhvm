@@ -23,3 +23,7 @@ function foo(bool $cond): my_shape {
     return $s;
   }
 }
+
+function careful_I_can_throw(): void {
+  throw new Exception('');
+}

@@ -12,3 +12,9 @@
 async function foo(): Awaitable<void> {
   $bar = await SomePreparable::gen();
 }
+
+class SomePreparable {
+  public static async function gen(): Awaitable<int> {
+    return 0;
+  }
+}

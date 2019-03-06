@@ -19,3 +19,6 @@ function foo(bool $b) {
     qux();
   }
 }
+
+function bar() {}
+function qux() {}

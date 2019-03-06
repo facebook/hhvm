@@ -12,7 +12,7 @@ abstract class BaseField<T> {
       $field instanceof static,
       '%s is not a valid %s',
       $class_name,
-      get_called_class(),
+      /* HH_IGNORE_ERROR[2049] */ get_called_class(),
     );
     hh_show($field);
 
@@ -37,3 +37,5 @@ interface INeedsFoo<T> {
 
   public function setFoo(T $arg): this;
 }
+
+interface HasFoo {}

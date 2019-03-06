@@ -23,3 +23,5 @@ function foo(): int {
   }
   return $a;
 }
+
+class MyException extends Exception {}

@@ -17,3 +17,5 @@ function foo(cAmelCase $arg): :xhp {
 function ret(): camelcase {
   return new cAMELcASE();
 }
+
+class :xhp {}

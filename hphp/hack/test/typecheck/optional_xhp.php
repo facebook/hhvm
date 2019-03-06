@@ -16,3 +16,5 @@ class A {
     return null;
   }
 }
+
+class :x:base {}

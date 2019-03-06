@@ -10,3 +10,5 @@ function g(): void {
       {f(1)}
     </p>;
 }
+
+class :p {}

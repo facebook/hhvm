@@ -16,3 +16,5 @@ class Meh {
     return <div></div>;
   }
 }
+
+class :blah {}

@@ -7,5 +7,5 @@ function providesArrayOfInt(): array<int> {
 }
 
 function test(): void {
-  consumesUnknownArray(providesArrayOfStringToInt());
+  consumesUnknownArray(providesArrayOfInt());
 }

@@ -398,6 +398,7 @@ module Rx = struct
   let cTraversable = "\\HH\\Rx\\Traversable"
   let is_enabled = "\\HH\\Rx\\IS_ENABLED"
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
+  let cAsyncIterator = "\\HH\\Rx\\AsyncIterator"
   let move = "\\HH\\Rx\\move"
 end
 

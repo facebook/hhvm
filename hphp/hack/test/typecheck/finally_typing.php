@@ -45,3 +45,5 @@ function finally_typing2(): string {
 //   }
 //   return $a;
 // }
+
+function do_something(): void {}

@@ -26,3 +26,7 @@ async function gen(): Awaitable<A> {
     return await gen2();
   }
 }
+
+function coin_flip(): bool {
+  return true;
+}

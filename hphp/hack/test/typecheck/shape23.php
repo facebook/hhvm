@@ -9,6 +9,6 @@ type t = shape(
   ...
 );
 
-function test(s $s): t {
+function test(t $s): t {
   return shape('x' => 4, 'y' => 'aaa');
 }

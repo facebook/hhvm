@@ -406,11 +406,10 @@ end = struct
     match v with
     | None ->
       (match genv.in_mode with
-        | FileInfo.Mstrict | FileInfo.Mexperimental -> unbound_name_error genv p x `const
-        | FileInfo.Mpartial | FileInfo.Mdecl when not
-            (TypecheckerOptions.assume_php genv.tcopt) ->
+        | FileInfo.Mstrict | FileInfo.Mexperimental
+        | FileInfo.Mpartial | FileInfo.Mdecl ->
           unbound_name_error genv p x `const
-        | FileInfo.Mphp | FileInfo.Mdecl | FileInfo.Mpartial -> ()
+        | FileInfo.Mphp -> ()
       )
     | _ -> ()
 
@@ -427,8 +426,7 @@ end = struct
       | None ->
         (match genv.in_mode with
           | FileInfo.Mpartial | FileInfo.Mdecl
-              when TypecheckerOptions.assume_php genv.tcopt
-              || name = SN.Classes.cUnknown -> ()
+              when name = SN.Classes.cUnknown -> ()
           | FileInfo.Mphp -> ()
           | FileInfo.Mstrict | FileInfo.Mexperimental -> unbound_name_error genv p name kind
           | FileInfo.Mpartial | FileInfo.Mdecl ->

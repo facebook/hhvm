@@ -8,10 +8,6 @@
  *)
 
 type t = {
- (* When we encounter an unknown class|function|constant name outside
-  * of strict mode, is that an error? *)
- tco_assume_php : bool;
-
  (**
   * Enforces array subtyping relationships.
   *
@@ -223,7 +219,6 @@ type t = {
 } [@@deriving show]
 
 val make :
-  ?tco_assume_php: bool ->
   ?tco_safe_array: bool ->
   ?tco_safe_vector_array: bool ->
   ?po_deregister_php_stdlib: bool ->
@@ -269,7 +264,6 @@ val make :
   unit ->
   t
 
-val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool

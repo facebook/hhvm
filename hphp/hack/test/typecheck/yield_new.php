@@ -12,3 +12,5 @@
 function foo() {
   yield new A();
 }
+
+class A {}

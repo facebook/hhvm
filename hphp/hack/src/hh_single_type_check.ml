@@ -184,7 +184,6 @@ let parse_options () =
   let allow_user_attributes = ref None in
   let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
-  let dont_assume_php = ref (Some false) in
   let unsafe_rx = ref (Some false) in
   let enable_concurrent = ref None in
   let enable_await_as_an_expression = ref None in
@@ -253,9 +252,6 @@ let parse_options () =
     "--no-builtins",
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
-    "--dont-assume-php",
-      Arg.Unit (set_bool dont_assume_php),
-      " Don't assume that undefined names are in PHP files";
     "--dump-deps",
       Arg.Unit (set_mode Dump_deps),
       " Print dependencies";
@@ -421,7 +417,6 @@ let parse_options () =
     | x -> x in
   let not_ = Option.map ~f:not in
   let tcopt = GlobalOptions.make
-    ?tco_assume_php:(not_ !dont_assume_php)
     ?tco_unsafe_rx:(!unsafe_rx)
     ?tco_safe_array:(!safe_array)
     ?tco_safe_vector_array:(!safe_vector_array)

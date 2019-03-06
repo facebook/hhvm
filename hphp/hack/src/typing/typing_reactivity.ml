@@ -258,6 +258,9 @@ let check_call env method_info pos reason ft arg_types =
 let rxTraversableType =
   MakeType.class_type Reason.none Naming_special_names.Rx.cTraversable [(Reason.Rnone, Tany)]
 
+let rxAsyncIteratorType =
+  MakeType.class_type Reason.none Naming_special_names.Rx.cAsyncIterator [(Reason.Rnone, Tany)]
+
 let check_foreach_collection env p t =
   (* do nothing if unsafe_rx is set *)
   if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then ()
@@ -272,7 +275,9 @@ let check_foreach_collection env p t =
     | t ->
       (* collection type should be subtype or conditioned to Rx\Traversable *)
       if not (SubType.is_sub_type env t rxTraversableType ||
-              condition_type_matches ~is_self:false env t rxTraversableType)
+              SubType.is_sub_type env t rxAsyncIteratorType ||
+              condition_type_matches ~is_self:false env t rxTraversableType ||
+              condition_type_matches ~is_self:false env t rxAsyncIteratorType)
       then begin
         Errors.invalid_traversable_in_rx p;
         false

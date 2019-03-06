@@ -30,7 +30,7 @@ function test_array_filter(
   /* HH_IGNORE_ERROR[4110] */
   hh_show(array_filter($int, $f));
   hh_show(array_filter($untyped, $f));
-  take_arraykey_nullable(array_filter($intersection_type, $f));
+  take_arraykey_nullable_string_array(array_filter($intersection_type, $f));
 }
 
 function take_int_string_array(array<int, string> $_) {}

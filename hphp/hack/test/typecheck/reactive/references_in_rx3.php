@@ -5,3 +5,6 @@ function foo(): void {
   $foo = 'f';
   $z = call(&$foo); // bad
 }
+
+<<__Rx>>
+function call($_) {}

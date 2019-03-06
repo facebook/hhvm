@@ -30,3 +30,9 @@ async function nullable(): Awaitable<?int> {
   }
   return null;
 }
+
+function something(): void {}
+
+function coin_flip(): bool {
+  return true;
+}

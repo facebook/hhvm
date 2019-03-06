@@ -13,3 +13,9 @@ function foo(A $a): int {
   $p = inst_meth($a, 'f1');
   return $p('moo');
 }
+
+class A {
+  public function f1(string $s): int {
+    return 0;
+  }
+}

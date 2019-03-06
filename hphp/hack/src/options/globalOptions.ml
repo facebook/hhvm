@@ -8,7 +8,6 @@
  *)
 
 type t = {
-  tco_assume_php : bool;
   tco_safe_array : bool;
   tco_safe_vector_array : bool;
   tco_experimental_features : SSet.t;
@@ -209,7 +208,6 @@ let tco_migration_flags_all =
     ]
 
 let default = {
- tco_assume_php = false;
  tco_safe_array = true;
  tco_safe_vector_array = true;
  (** Default all features for testing. Actual options are set by reading
@@ -258,7 +256,6 @@ let default = {
 }
 
 let make
-  ?(tco_assume_php = default.tco_assume_php)
   ?(tco_safe_array = default.tco_safe_array)
   ?(tco_safe_vector_array = default.tco_safe_vector_array)
   ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
@@ -303,7 +300,6 @@ let make
   ?(tco_disallow_unsafe_construct = default.tco_disallow_unsafe_construct)
   ()
 = {
-  tco_assume_php;
   tco_safe_array;
   tco_safe_vector_array;
   tco_experimental_features;
@@ -348,7 +344,6 @@ let make
   tco_ignore_collection_expr_type_arguments;
   tco_disallow_unsafe_construct;
 }
-let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
 let tco_experimental_feature_enabled t s =

@@ -8,7 +8,6 @@
  *)
 
 type t = GlobalOptions.t
-let assume_php = GlobalOptions.tco_assume_php
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda

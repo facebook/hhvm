@@ -15,12 +15,12 @@ class IntlCalendar {
                       int $amount): bool;
 
   /**
-   * Whether this objectʼs time is after that of the passed object
+   * Whether this object's time is after that of the passed object
    *
    * @param IntlCalendar $other -
    *
-   * @return bool - Returns TRUE if this objectʼs current time is after
-   *   that of the calendar argumentʼs time. Returns FALSE otherwise. Also
+   * @return bool - Returns TRUE if this object's current time is after
+   *   that of the calendar argument's time. Returns FALSE otherwise. Also
    *   returns FALSE on failure. You can use exceptions or
    *   intl_get_error_code() to detect error conditions.
    */
@@ -28,12 +28,12 @@ class IntlCalendar {
   public function after(IntlCalendar $other): bool;
 
   /**
-   * Whether this objectʼs time is before that of the passed object
+   * Whether this object's time is before that of the passed object
    *
    * @param IntlCalendar $other -
    *
-   * @return bool - Returns TRUE if this objectʼs current time is before
-   *   that of the calendar argumentʼs time. Returns FALSE otherwise. Also
+   * @return bool - Returns TRUE if this object's current time is before
+   *   that of the calendar argument's time. Returns FALSE otherwise. Also
    *   returns FALSE on failure. You can use exceptions or
    *   intl_get_error_code() to detect error conditions.
    */
@@ -86,7 +86,7 @@ class IntlCalendar {
   public function equals(IntlCalendar $other): bool;
 
   /**
-   * Calculate difference between given time and this objectʼs time
+   * Calculate difference between given time and this object's time
    *
    * @param float $when -
    * @param int $field -
@@ -131,7 +131,7 @@ class IntlCalendar {
   public function get(int $field): mixed;
 
   /**
-   * The maximum value for a field, considering the objectʼs current time
+   * The maximum value for a field, considering the object's current time
    *
    * @param int $field -
    *
@@ -142,11 +142,11 @@ class IntlCalendar {
   public function getActualMaximum(int $field): mixed;
 
   /**
-   * The minimum value for a field, considering the objectʼs current time
+   * The minimum value for a field, considering the object's current time
    *
    * @param int $field -
    *
-   * @return int - An int representing the minimum value in the fieldʼs
+   * @return int - An int representing the minimum value in the field's
    *   unit.
    */
   <<__Native>>
@@ -194,10 +194,10 @@ class IntlCalendar {
   public function getErrorMessage(): string;
 
   /**
-   * Get the first day of the week for the calendarʼs locale
+   * Get the first day of the week for the calendar's locale
    *
    * @return int - One of the constants IntlCalendar::DOW_SUNDAY,
-   *   IntlCalendar::DOW_MONDAY, …, IntlCalendar::DOW_SATURDAY.
+   *   IntlCalendar::DOW_MONDAY, ..., IntlCalendar::DOW_SATURDAY.
    */
   <<__Native>>
   public function getFirstDayOfWeek(): mixed;
@@ -207,7 +207,7 @@ class IntlCalendar {
    *
    * @param int $field -
    *
-   * @return int - An int representing a field value, in the fieldʼs
+   * @return int - An int representing a field value, in the field's
    *   unit,.
    */
   <<__Native>>
@@ -233,7 +233,7 @@ class IntlCalendar {
    *
    * @param int $field -
    *
-   * @return int - An int representing a field value in the fieldʼs
+   * @return int - An int representing a field value in the field's
    *   unit.
    */
   <<__Native>>
@@ -254,7 +254,7 @@ class IntlCalendar {
    *
    * @param int $field -
    *
-   * @return int - An int representing a field value in the fieldʼs
+   * @return int - An int representing a field value in the field's
    *   unit.
    */
   <<__Native>>
@@ -274,7 +274,7 @@ class IntlCalendar {
    * @param int $field -
    *
    * @return int - An int representing a value for the given field in the
-   *   fieldʼs unit.
+   *   field's unit.
    */
   <<__Native>>
   public function getMinimum(int $field): mixed;
@@ -316,7 +316,7 @@ class IntlCalendar {
   public function getTime(): mixed;
 
   /**
-   * Get the objectʼs timezone
+   * Get the object's timezone
    *
    * @return IntlTimeZone - An IntlTimeZone object corresponding to the
    *   one used internally in this object.
@@ -345,7 +345,7 @@ class IntlCalendar {
   public function getWeekendTransition(int $dayOfWeek): mixed;
 
   /**
-   * Whether the objectʼs time is in Daylight Savings Time
+   * Whether the object's time is in Daylight Savings Time
    *
    * @return bool - Returns TRUE if the date is in Daylight Savings Time,
    *   FALSE otherwise. The value FALSE may also be returned on failure,
@@ -409,7 +409,7 @@ class IntlCalendar {
    *
    * @param float $date -
    *
-   * @return bool - A bool indicating whether the given or this objectʼs
+   * @return bool - A bool indicating whether the given or this object's
    *   time occurs in a weekend.   The value FALSE may also be returned on
    *   failure, for instance after giving a date out of bounds on
    *   non-lenient mode; use exceptions or query intl_get_error_code() to
@@ -543,7 +543,7 @@ class IntlCalendar {
    * Convert an IntlCalendar into a DateTime object
    *
    * @return DateTime - A DateTime object with the same timezone as this
-   *   object (though using PHPʼs database instead of ICUʼs) and the same
+   *   object (though using PHP's database instead of ICU's) and the same
    *   time, except for the smaller precision (second precision instead of
    *   millisecond). Returns FALSE on failure.
    */
@@ -571,13 +571,13 @@ function intlcal_add(IntlCalendar $cal,
 }
 
 /**
- * Whether this objectʼs time is after that of the passed object
+ * Whether this object's time is after that of the passed object
  *
  * @param IntlCalendar $cal -
  * @param IntlCalendar $other -
  *
- * @return bool - Returns TRUE if this objectʼs current time is after
- *   that of the calendar argumentʼs time. Returns FALSE otherwise. Also
+ * @return bool - Returns TRUE if this object's current time is after
+ *   that of the calendar argument's time. Returns FALSE otherwise. Also
  *   returns FALSE on failure. You can use exceptions or
  *   intl_get_error_code() to detect error conditions.
  */
@@ -587,13 +587,13 @@ function intlcal_after(IntlCalendar $cal,
 }
 
 /**
- * Whether this objectʼs time is before that of the passed object
+ * Whether this object's time is before that of the passed object
  *
  * @param IntlCalendar $cal -
  * @param IntlCalendar $other -
  *
- * @return bool - Returns TRUE if this objectʼs current time is before
- *   that of the calendar argumentʼs time. Returns FALSE otherwise. Also
+ * @return bool - Returns TRUE if this object's current time is before
+ *   that of the calendar argument's time. Returns FALSE otherwise. Also
  *   returns FALSE on failure. You can use exceptions or
  *   intl_get_error_code() to detect error conditions.
  */
@@ -648,7 +648,7 @@ function intlcal_equals(IntlCalendar $cal,
 }
 
 /**
- * Calculate difference between given time and this objectʼs time
+ * Calculate difference between given time and this object's time
  *
  * @param IntlCalendar $cal -
  * @param float $when -
@@ -691,7 +691,7 @@ function intlcal_get(IntlCalendar $cal,
 }
 
 /**
- * The maximum value for a field, considering the objectʼs current time
+ * The maximum value for a field, considering the object's current time
  *
  * @param IntlCalendar $cal -
  * @param int $field -
@@ -705,12 +705,12 @@ function intlcal_get_actual_maximum(IntlCalendar $cal,
 }
 
 /**
- * The minimum value for a field, considering the objectʼs current time
+ * The minimum value for a field, considering the object's current time
  *
  * @param IntlCalendar $cal -
  * @param int $field -
  *
- * @return int - An int representing the minimum value in the fieldʼs
+ * @return int - An int representing the minimum value in the field's
  *   unit.
  */
 function intlcal_get_actual_minimum(IntlCalendar $cal,
@@ -770,12 +770,12 @@ function intlcal_get_error_message(IntlCalendar $cal): string {
 }
 
 /**
- * Get the first day of the week for the calendarʼs locale
+ * Get the first day of the week for the calendar's locale
  *
  * @param IntlCalendar $cal -
  *
  * @return int - One of the constants IntlCalendar::DOW_SUNDAY,
- *   IntlCalendar::DOW_MONDAY, …, IntlCalendar::DOW_SATURDAY.
+ *   IntlCalendar::DOW_MONDAY, ..., IntlCalendar::DOW_SATURDAY.
  */
 function intlcal_get_first_day_of_week(IntlCalendar $cal): mixed {
   return $cal->getFirstDayOfWeek();
@@ -787,7 +787,7 @@ function intlcal_get_first_day_of_week(IntlCalendar $cal): mixed {
  * @param IntlCalendar $cal -
  * @param int $field -
  *
- * @return int - An int representing a field value, in the fieldʼs
+ * @return int - An int representing a field value, in the field's
  *   unit,.
  */
 function intlcal_get_greatest_minimum(IntlCalendar $cal,
@@ -817,7 +817,7 @@ function intlcal_get_keyword_values_for_locale(string $key,
  * @param IntlCalendar $cal -
  * @param int $field -
  *
- * @return int - An int representing a field value in the fieldʼs unit.
+ * @return int - An int representing a field value in the field's unit.
  */
 function intlcal_get_least_maximum(IntlCalendar $cal,
                                    int $field): mixed {
@@ -843,7 +843,7 @@ function intlcal_get_locale(IntlCalendar $cal,
  * @param IntlCalendar $cal -
  * @param int $field -
  *
- * @return int - An int representing a field value in the fieldʼs unit.
+ * @return int - An int representing a field value in the field's unit.
  */
 function intlcal_get_maximum(IntlCalendar $cal,
                              int $field): mixed {
@@ -868,7 +868,7 @@ function intlcal_get_minimal_days_in_first_week(IntlCalendar $cal): mixed {
  * @param int $field -
  *
  * @return int - An int representing a value for the given field in the
- *   fieldʼs unit.
+ *   field's unit.
  */
 function intlcal_get_minimum(IntlCalendar $cal,
                              int $field): mixed {
@@ -922,7 +922,7 @@ function intlcal_get_time(IntlCalendar $cal): mixed {
 }
 
 /**
- * Get the objectʼs timezone
+ * Get the object's timezone
  *
  * @param IntlCalendar $cal -
  *
@@ -960,7 +960,7 @@ function intlcal_get_weekend_transition(IntlCalendar $cal,
 }
 
 /**
- * Whether the objectʼs time is in Daylight Savings Time
+ * Whether the object's time is in Daylight Savings Time
  *
  * @param IntlCalendar $cal -
  *
@@ -1019,7 +1019,7 @@ function intlcal_is_set(IntlCalendar $cal,
  * @param IntlCalendar $cal -
  * @param float $date -
  *
- * @return bool - A bool indicating whether the given or this objectʼs
+ * @return bool - A bool indicating whether the given or this object's
  *   time occurs in a weekend.   The value FALSE may also be returned on
  *   failure, for instance after giving a date out of bounds on non-lenient
  *   mode; use exceptions or query intl_get_error_code() to disambiguate.
@@ -1170,7 +1170,7 @@ function intlcal_set_time_zone(IntlCalendar $cal,
  * @param IntlCalendar $cal -
  *
  * @return DateTime - A DateTime object with the same timezone as this
- *   object (though using PHPʼs database instead of ICUʼs) and the same
+ *   object (though using PHP's database instead of ICU's) and the same
  *   time, except for the smaller precision (second precision instead of
  *   millisecond). Returns FALSE on failure.
  */

@@ -275,6 +275,22 @@ let enum_type hint e =
     te_constraint = Option.map e.e_constraint hint;
   }
 
+let add_condition_type acc ft =
+  match ft.ft_reactive with
+  | Reactive (Some (_, Tapply ((_, cls), [])))
+  | Shallow (Some (_, Tapply ((_, cls), [])))
+  | Local (Some (_, Tapply ((_, cls), [])))  -> SSet.add cls acc
+  | _ -> acc
+
+let add_condition_types sc acc =
+  let acc = List.fold sc.sc_methods ~init:acc
+    ~f:(fun acc sm -> add_condition_type acc sm.sm_type) in
+  let acc = List.fold sc.sc_static_methods ~init:acc
+    ~f:(fun acc sm -> add_condition_type acc sm.sm_type) in
+  let acc = List.fold sc.sc_method_redeclarations ~init:acc
+    ~f:(fun acc smr -> add_condition_type acc smr.smr_type) in
+  acc
+
 let class_ env c =
   let hint = Decl_hint.hint env in
   {

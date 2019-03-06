@@ -27,7 +27,8 @@ let check_param params p user_attributes f_type name =
   end;
   begin match inout with
   | Some param ->
-    if Attributes.mem2 SN.UserAttributes.uaMemoize SN.UserAttributes.uaMemoize user_attributes
+    if Attributes.mem2
+      SN.UserAttributes.uaMemoize SN.UserAttributes.uaMemoizeLSB user_attributes
     then Errors.inout_params_memoize p param.param_pos
   | _ -> ()
   end

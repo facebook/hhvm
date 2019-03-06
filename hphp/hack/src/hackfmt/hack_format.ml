@@ -3007,7 +3007,7 @@ and transform_keyword_expression_statement env kw expr semi =
     t env kw;
     when_present expr (fun () -> Concat [
       Space;
-      SplitWith Cost.Base;
+      SplitWith Cost.Moderate;
       Nest [t env expr];
     ]);
     t env semi;
@@ -3069,7 +3069,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
       Space;
       t env operator;
       Space;
-      SplitWith Cost.NoCost;
+      SplitWith Cost.Moderate;
       Nest [t env right];
     ]
   else

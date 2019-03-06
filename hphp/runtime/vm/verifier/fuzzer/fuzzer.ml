@@ -101,16 +101,6 @@ let print_output : Hhas_program.t -> unit =
     if (!out_dir <> "") then Caml.close_out out;
     m_no := !m_no + 1
 
-let parse_file program_parser filename =
-  let channel = Caml.open_in filename in
-  let prog =
-    try program_parser (Lexing.from_channel channel)
-    with Parsing.Parse_error -> (
-      Printf.eprintf "Parsing of file failed\n";
-      raise Parsing.Parse_error
-      ) in
-  Caml.close_in channel; prog
-
 let read_input () : Hhas_program.t =
   let filename = ref ""  in
   let purpose = "Hhas fuzzing tool" in
@@ -122,9 +112,10 @@ let read_input () : Hhas_program.t =
               purpose Sys.argv.(0) in
   begin try Arg.parse options (fun file -> filename := file) usage
         with _ -> die usage end;
-  let program_parser = Hhas_parser.program Hhas_lexer.read in
   if !filename = "" then die usage else
-  parse_file program_parser !filename
+  (* PARSE FILE HERE *)
+  Emit_program.emit_fatal_program ~ignore_message:true
+    Hhbc_ast.FatalOp.Runtime Pos.none "Fuzzer is unsupported"
 
 let debug_print str = if !debug then print_endline str
 

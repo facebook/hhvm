@@ -1,6 +1,3 @@
-(ocamllex hhas_lexer)
-(ocamlyacc hhas_parser)
-
 (library
   (name hhbc)
   (wrapped false)

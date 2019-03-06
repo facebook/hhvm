@@ -184,6 +184,9 @@ type t = {
  (* Turn off type refinement via the `instanceof` operator. *)
  tco_disable_instanceof_refinement : bool;
 
+ (* Produces an error if a by-ref parameter is defined on a constructor. *)
+ tco_disallow_ref_param_on_constructor : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
@@ -251,6 +254,7 @@ val make :
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
   ?tco_disable_instanceof_refinement: bool ->
+  ?tco_disallow_ref_param_on_constructor: bool ->
   ?ignored_fixme_codes: ISet.t ->
   ?ignored_fixme_regex: string ->
   ?log_levels: int SMap.t ->
@@ -297,6 +301,7 @@ val tco_new_inference_no_eager_solve : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
 val tco_disable_instanceof_refinement : t -> bool
+val tco_disallow_ref_param_on_constructor : t -> bool
 val default : t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string

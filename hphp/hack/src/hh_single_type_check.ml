@@ -196,6 +196,7 @@ let parse_options () =
   let enable_stronger_await_binding = ref None in
   let typecheck_xhp_cvars = ref (Some false) in
   let ignore_collection_expr_type_arguments = ref (Some false) in
+  let allow_ref_param_on_constructor = ref (Some false) in
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
@@ -406,6 +407,9 @@ let parse_options () =
     "--ignore-collection-expr-type-arguments",
       Arg.Unit (set_bool ignore_collection_expr_type_arguments),
       "Typechecker ignores type arguments to vec<T>[...] style expressions";
+    "--allow-ref-param-on-constructor",
+      Arg.Unit (set_bool allow_ref_param_on_constructor),
+      " Allow class constructors to take reference parameters";
     "--pocket-universes",
       Arg.Set pocket_universes,
       "Enables support for Pocket Universes";
@@ -442,6 +446,7 @@ let parse_options () =
     ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
+    ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
     ~log_levels:(!log_levels)
     ()
   in

@@ -78,6 +78,7 @@ let new_inference_no_eager_solve = GlobalOptions.tco_new_inference_no_eager_solv
 let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
 let disable_instanceof_refinement = GlobalOptions.tco_disable_instanceof_refinement
+let disallow_ref_param_on_constructor = GlobalOptions.tco_disallow_ref_param_on_constructor
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
 let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_expr_type_arguments

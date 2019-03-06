@@ -1,0 +1,2 @@
+File "byref_on_construct.php", line 4, characters 55-56:
+Constructors cannot take parameters by reference (NastCheck[3077])

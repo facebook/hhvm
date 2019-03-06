@@ -16,6 +16,7 @@ type control_context =
   | SwitchContext
 
 type env = {
+  tcopt: TypecheckerOptions.t;
   is_reactive: bool;
   class_kind: Ast.class_kind option;
   class_name: string option;
@@ -61,7 +62,8 @@ let class_env env c =
 let typedef_env env t =
   { env with file_mode = t.t_mode; }
 
-let empty_env = {
+let get_empty_env () = {
+  tcopt = GlobalNamingOptions.get ();
   is_reactive = false;
   class_kind = None;
   class_name = None;
@@ -74,6 +76,7 @@ let empty_env = {
 }
 
 let def_env x =
+  let empty_env = get_empty_env () in
   match x with
   | Nast.Fun f -> fun_env empty_env f
   | Nast.Class c -> class_env empty_env c

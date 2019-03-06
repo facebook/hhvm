@@ -380,8 +380,7 @@ and func env f named_body =
   maybe hint env f.f_ret;
 
   List.iter f.f_tparams (tparam env);
-  let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
-  List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
+  List.iter f.f_params (fun_param env);
   block env named_body.fb_ast;
   CheckFunctionBody.start
     f.f_fun_kind
@@ -570,8 +569,7 @@ and method_ env m =
     Phase.localize_where_constraints ~ety_env tenv m.m_where_constraints in
   let env = { env with tenv = tenv } in
 
-  let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
-  List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
+  List.iter m.m_params (fun_param env);
   List.iter m.m_tparams (tparam env);
   block env named_body.fb_ast;
   maybe hint env m.m_ret;
@@ -580,7 +578,7 @@ and method_ env m =
     env
     named_body.fb_ast;
 
-and fun_param env (_pos, _name) _f_type _byref param =
+and fun_param env param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
 

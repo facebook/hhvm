@@ -230,6 +230,7 @@ InterfaceUsesTrait = 3073
 NonstaticMethodInAbstractFinalClass = 3074
 MutableOnStaticDEPRECATED = 3075
 ClassnameConstInstanceOf = 3076
+ByRefParamOnConstruct = 3077
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

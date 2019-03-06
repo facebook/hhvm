@@ -12,19 +12,23 @@ open Nast
 
 module SN = Naming_special_names
 
-let check_param params p user_attributes f_type name =
-  let inout = List.find params (fun x -> x.param_callconv = Some Ast.Pinout) in
+let check_param env params p user_attributes f_type name =
   let byref = List.find params (fun x -> x.param_is_reference) in
   List.iter params begin fun param ->
     match param.param_callconv with
-    | None -> ()
     | Some Ast.Pinout ->
       let pos = param.param_pos in
       if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
       if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-      Option.iter byref ~f:(fun param ->
-        Errors.inout_params_mix_byref pos param.param_pos);
+      Option.iter byref ~f:(fun p ->
+        Errors.inout_params_mix_byref pos p.param_pos)
+    | None when param.param_is_reference && name = SN.Members.__construct ->
+      if TypecheckerOptions.disallow_ref_param_on_constructor
+        env.Nast_visitor.tcopt
+      then Errors.byref_on_construct param.param_pos
+    | None -> ()
   end;
+  let inout = List.find params (fun x -> x.param_callconv = Some Ast.Pinout) in
   begin match inout with
   | Some param ->
     if Attributes.mem2
@@ -37,14 +41,14 @@ let check_param params p user_attributes f_type name =
 let handler = object
   inherit Nast_visitor.handler_base
 
-  method! at_fun_ _env f =
+  method! at_fun_ env f =
     let (p, name) = f.f_name in
     let f_type = f.f_fun_kind in
-    check_param f.f_params p f.f_user_attributes f_type name
+    check_param env f.f_params p f.f_user_attributes f_type name
 
-  method! at_method_ _env m =
+  method! at_method_ env m =
     let (p, name) = m.m_name in
     let f_type = m.m_fun_kind in
-    check_param m.m_params p m.m_user_attributes f_type name
+    check_param env m.m_params p m.m_user_attributes f_type name
 
 end

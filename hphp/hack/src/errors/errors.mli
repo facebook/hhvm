@@ -523,6 +523,7 @@ val coroutine_in_constructor : Pos.t -> unit
 val illegal_by_ref_expr : Pos.t -> string -> unit
 val variadic_byref_param : Pos.t -> unit
 val classname_const_instanceof : string -> Pos.t -> unit
+val byref_on_construct : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit
 val anon_use_capture_by_ref : Pos.t -> unit
 val no_tparams_on_type_consts : Pos.t -> unit

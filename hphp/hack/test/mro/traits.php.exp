@@ -17,4 +17,4 @@ Linearization for class \I2:
 Linearization for class \Timplements:
 [\Timplements(child), \I(interface), \I(parent)]
 Linearization for class \A:
-[\A(child), \Timplements(trait), \I(trait), \I2(interface)]
+[\A(child), \I2(interface), \Timplements(trait), \I(trait)]

@@ -103,8 +103,6 @@ and linearize (env : env) (c : shallow_class) : linearization =
     mro_synthesized = false;
   } in
   let ancestors = List.concat [
-    (* Add traits in backwards order *)
-    List.map (List.rev c.sc_uses) (ancestor_from_ty Trait);
     (* Add interfaces(interfaces can define constants)
     TODO(jjwu): implemented interfaces are *only* important for constants and
     otherwise don't need to take up so much space in the linearization.
@@ -112,9 +110,11 @@ and linearize (env : env) (c : shallow_class) : linearization =
     List.map c.sc_implements (ancestor_from_ty Interface);
     (* Same with req_implements *)
     List.map c.sc_req_implements (ancestor_from_ty ReqImpl);
+    List.map c.sc_xhp_attr_uses (ancestor_from_ty XHPAttr);
+    (* Add traits in backwards order *)
+    List.map (List.rev c.sc_uses) (ancestor_from_ty Trait);
     (* Add requirements *)
     List.map c.sc_req_extends (ancestor_from_ty ReqExtends);
-    List.map c.sc_xhp_attr_uses (ancestor_from_ty XHPAttr);
     List.map (from_parent c) (ancestor_from_ty Parent);
   ] in
   Sequence.unfold_step ~init:(Child child, ancestors, []) ~f:(next_state env)

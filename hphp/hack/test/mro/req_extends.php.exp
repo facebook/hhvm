@@ -7,4 +7,4 @@ Linearization for class \T:
 Linearization for class \T2:
 [\T2(child)]
 Linearization for class \D:
-[\D(child), \T(trait), \I(trait, synthesized), \C(trait, synthesized), \I(trait), \I(interface), \C(parent)]
+[\D(child), \I(interface), \T(trait), \I(trait, synthesized), \C(trait, synthesized), \I(trait), \C(parent)]

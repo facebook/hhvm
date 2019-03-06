@@ -1181,7 +1181,6 @@ void VariablesCommand::forEachInstanceProp(
     const std::string& objectClassName,
     const std::string& propName,
     const std::string& propClassName,
-    const std::string& displayName,
     const char* visibilityDescription,
     folly::dynamic& presentationHint,
     const Variant& propertyVariant
@@ -1226,10 +1225,6 @@ void VariablesCommand::forEachInstanceProp(
       propName = propName.substr(classNameEnd + 1);
     }
 
-    const std::string displayName = isArrayObjectType(className)
-      ? propName
-      : "$" + propName;
-
     folly::dynamic presentationHint = folly::dynamic::object;
     presentationHint["visibility"] = visibilityDescription;
 
@@ -1241,7 +1236,6 @@ void VariablesCommand::forEachInstanceProp(
                              className,
                              propName,
                              propClassName,
-                             displayName,
                              visibilityDescription,
                              presentationHint,
                              propertyVariant
@@ -1270,7 +1264,6 @@ void VariablesCommand::addClassPrivateProps(
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant
@@ -1296,7 +1289,7 @@ void VariablesCommand::addClassPrivateProps(
           session,
           m_debugger,
           requestId,
-          displayName,
+          propName,
           propertyVariant,
           true,
           &presentationHint
@@ -1338,7 +1331,6 @@ int VariablesCommand::addObjectChildren(
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant
@@ -1371,14 +1363,14 @@ int VariablesCommand::addObjectChildren(
         return true;
       }
 
-      if (properties.find(displayName) != properties.end()) {
+      if (properties.find(propName) != properties.end()) {
         // A property with this name has already been added by a derived class,
         // since we're walking the class inheritance hierarchy from the object
         // upwards, the derived property shadows this property.
         return true;
       }
 
-      properties.insert(displayName);
+      properties.insert(propName);
       propCount++;
 
       if (start >= 0 && propCount < start) {
@@ -1390,7 +1382,7 @@ int VariablesCommand::addObjectChildren(
           session,
           debugger,
           requestId,
-          displayName,
+          propName,
           propertyVariant,
           true,
           &presentationHint

@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2018-11-27-0001",
+  "version" : "2019-03-01-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -415,12 +415,6 @@
     { "token_kind" : "BinaryLiteral",
       "token_text" : null },
     { "token_kind" : "FloatingLiteral",
-      "token_text" : null },
-    { "token_kind" : "ExecutionStringLiteral",
-      "token_text" : null },
-    { "token_kind" : "ExecutionStringLiteralHead",
-      "token_text" : null },
-    { "token_kind" : "ExecutionStringLiteralTail",
       "token_text" : null },
     { "token_kind" : "SingleQuotedStringLiteral",
       "token_text" : null },

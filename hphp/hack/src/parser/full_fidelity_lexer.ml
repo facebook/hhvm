@@ -165,7 +165,6 @@ let empty = make SourceText.empty
 let source_text_string (l : lexer) = SourceText.text (source l)
 
 type string_literal_kind =
-  | Literal_execution_string
   | Literal_double_quoted
   | Literal_heredoc of string
 [@@deriving show]
@@ -579,12 +578,8 @@ let scan_integer_literal_in_string lexer =
    for content interpretation except for \"" character - it is escaped in
    double quoted string and remain intact in execution string literals *)
 let scan_double_quote_like_string_literal_from_start lexer start_char =
-  let literal_token_kind =
-    if start_char = '`' then TokenKind.ExecutionStringLiteral
-    else TokenKind.DoubleQuotedStringLiteral in
-  let head_token_kind =
-    if start_char = '`' then TokenKind.ExecutionStringLiteralHead
-    else TokenKind.DoubleQuotedStringLiteralHead in
+  let literal_token_kind = TokenKind.DoubleQuotedStringLiteral in
+  let head_token_kind = TokenKind.DoubleQuotedStringLiteralHead in
   let rec aux lexer =
     (* If there's nothing interesting in this double-quoted string then
        we can just hand it back as-is. *)
@@ -644,7 +639,6 @@ let is_heredoc_tail lexer name =
 let get_tail_token_kind literal_kind =
   match literal_kind with
   | Literal_heredoc _-> TokenKind.HeredocStringLiteralTail
-  | Literal_execution_string -> TokenKind.ExecutionStringLiteralTail
   | Literal_double_quoted -> TokenKind.DoubleQuotedStringLiteralTail
 
 let get_string_literal_body_or_double_quoted_tail literal_kind =
@@ -657,9 +651,7 @@ let scan_string_literal_in_progress lexer literal_kind =
     match literal_kind with
     | Literal_heredoc name -> true, name
     | _ -> false, "" in
-  let start_char =
-    if literal_kind = Literal_execution_string then '`'
-    else '"' in
+  let start_char = '"' in
   let ch0 = peek_char lexer 0 in
   if is_name_nondigit ch0 then
     if is_heredoc && (is_heredoc_tail lexer name) then
@@ -680,9 +672,6 @@ let scan_string_literal_in_progress lexer literal_kind =
             lexer
             start_char in
         (lexer, TokenKind.StringLiteralBody)
-    | '`' when literal_kind = Literal_execution_string ->
-      (* '`' terminates execution string *)
-      (advance lexer 1, TokenKind.ExecutionStringLiteralTail)
     | '"' ->
       let kind = get_string_literal_body_or_double_quoted_tail literal_kind in
       (advance lexer 1, kind)

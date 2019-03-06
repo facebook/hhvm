@@ -193,8 +193,6 @@ module WithStatementAndDeclAndTypeParser
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in
     match (Token.kind token) with
-    (* TODO: Make these an error in Hack *)
-    | ExecutionStringLiteral
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -216,9 +214,6 @@ module WithStatementAndDeclAndTypeParser
     | DoubleQuotedStringLiteralHead ->
       parse_double_quoted_like_string
         parser1 token Lexer.Literal_double_quoted
-    | ExecutionStringLiteralHead ->
-      parse_double_quoted_like_string
-        parser1 token Lexer.Literal_execution_string
     | Variable -> parse_variable_or_lambda parser
     | XHPClassName ->
       let (parser, token) = Make.token parser1 token in
@@ -230,7 +225,6 @@ module WithStatementAndDeclAndTypeParser
       in
       let (parser1, str_maybe) = next_token_no_trailing parser in
       begin match Token.kind str_maybe with
-      | ExecutionStringLiteral | ExecutionStringLiteralHead
       | SingleQuotedStringLiteral | NowdocStringLiteral
       | HeredocStringLiteral | HeredocStringLiteralHead ->
         (* Treat as an attempt to prefix a non-double-quoted string *)
@@ -651,22 +645,16 @@ module WithStatementAndDeclAndTypeParser
       let k = match (Token.kind head, Token.kind token) with
       | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteral
-      | (ExecutionStringLiteralHead, ExecutionStringLiteralTail) ->
-        ExecutionStringLiteral
       | (HeredocStringLiteralHead, HeredocStringLiteralTail) ->
         HeredocStringLiteral
       | (DoubleQuotedStringLiteralHead, _) ->
         DoubleQuotedStringLiteralHead
-      | (ExecutionStringLiteralHead, _) ->
-        ExecutionStringLiteralHead
       | (HeredocStringLiteralHead, _) ->
         HeredocStringLiteralHead
       | (_, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteralTail
       | (_, HeredocStringLiteralTail) ->
         HeredocStringLiteralTail
-      | (_, ExecutionStringLiteralTail) ->
-        ExecutionStringLiteralTail
       | _ ->
         StringLiteralBody
       in
@@ -681,8 +669,7 @@ module WithStatementAndDeclAndTypeParser
       let token = match Token.kind token with
       | StringLiteralBody
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail
-      | ExecutionStringLiteralTail ->
+      | DoubleQuotedStringLiteralTail ->
         token
       | _ ->
         Token.with_kind token StringLiteralBody
@@ -811,8 +798,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser1, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail
-      | ExecutionStringLiteralTail ->
+      | DoubleQuotedStringLiteralTail ->
         put_opt parser1 (merge token head) acc
       | LeftBrace ->
         handle_left_brace parser head acc

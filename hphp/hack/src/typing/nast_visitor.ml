@@ -24,6 +24,7 @@ type env = {
   function_kind: Ast.fun_kind option;
   is_finally: bool;
   control_context: control_context;
+  rx_is_enabled_allowed: bool;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -69,6 +70,7 @@ let empty_env = {
   function_kind = None;
   is_finally = false;
   control_context = Toplevel;
+  rx_is_enabled_allowed = false;
 }
 
 let def_env x =
@@ -104,6 +106,14 @@ class virtual iter = object (self)
   method! on_Switch env = super#on_Switch ({ env with control_context = SwitchContext })
   method! on_Efun env = super#on_Efun ({ env with is_finally = false; control_context = Toplevel })
   method! on_Lfun env = super#on_Lfun ({ env with is_finally = false; control_context = Toplevel })
+
+  method! on_func_body env fb =
+    match fb.fb_ast with
+    | [If ((_, Id (_, c) as id), then_stmt, else_stmt)] ->
+      super#on_expr { env with rx_is_enabled_allowed = (c = SN.Rx.is_enabled) } id;
+      self#on_block env then_stmt;
+      self#on_block env else_stmt
+    | _ -> super#on_func_body env fb
 
 end
 

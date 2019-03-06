@@ -57,52 +57,19 @@ let check_maybe_rx_attributes_on_params is_reactive parent_attrs params =
     Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
   | _ -> ()
 
-
-(* context used in the iter_with_state visitor *)
-type ctx = { rx_is_enabled_allowed : bool; }
-
-let default_context = { rx_is_enabled_allowed = false; }
-
-let visitor = object(this)
-  inherit [ctx] Nast_visitor.iter_with_state as super
-
-  method! on_expr (env, ctx) (p, e) =
-    match e with
-    | Id (pos, const) ->
-      let const = Utils.add_ns const in
-      if const = SN.Rx.is_enabled && not ctx.rx_is_enabled_allowed
-      then
-      Errors.rx_is_enabled_invalid_location pos
-    | _ -> ();
-    super#on_expr (env, ctx) (p, e)
-
-  method! on_fun_ (env, ctx) f =
-    let nb = f.f_body.fb_ast in
-    match nb with
-    | [If ((_, Id (_, c) as id), then_stmt, else_stmt)] ->
-      (*
-        (* this is the only case when HH\Rx\IS_ENABLED can appear in
-           function body, other occurences are considered errors *)
-        {
-          if (HH\Rx\IS_ENABLED) {}
-          else {}
-        }
-      *)
-      if c = SN.Rx.is_enabled then begin
-        this#on_expr (env, { rx_is_enabled_allowed = true }) id;
-        super#on_block (env, ctx) then_stmt;
-        super#on_block (env, ctx) else_stmt
-      end
-    | _ -> super#on_fun_ (env, ctx) f
-
-end
-
 let handler = object
   inherit Nast_visitor.handler_base
 
   method! at_fun_ env f =
-    visitor#on_fun_ (env, default_context) f;
     check_maybe_rx_attributes_on_params env.Nast_visitor.is_reactive f.f_user_attributes f.f_params;
+
+  method! at_expr env (_, e) =
+    match e with
+    | Id (pos, const) ->
+      let const = Utils.add_ns const in
+      if const = SN.Rx.is_enabled && not env.Nast_visitor.rx_is_enabled_allowed
+      then Errors.rx_is_enabled_invalid_location pos
+    | _ -> ();
 
   method! at_method_ _env m =
     let ua = m.m_user_attributes in

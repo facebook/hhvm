@@ -54,9 +54,11 @@
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
+#include "hphp/util/service-data.h"
 
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
@@ -415,7 +417,8 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
   auto const tas = unit->typeAliases();
   for (auto const& ta : tas) {
     if (ta.name == name) {
-      switch (get_ts_kind(ta.typeStructure.get())) {
+      auto const kind = get_ts_kind(ta.typeStructure.get());
+      switch (kind) {
         case TypeStructure::Kind::T_unresolved: {
           auto const clsname = get_ts_classname(ta.typeStructure.get());
           if (!write_type_alias_or_class(ser,
@@ -445,6 +448,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_vec_or_dict:
         case TypeStructure::Kind::T_arraylike:
         case TypeStructure::Kind::T_nonnull:
+        case TypeStructure::Kind::T_mixed:
           break;
 
         case TypeStructure::Kind::T_fun:
@@ -452,9 +456,16 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_shape:
         case TypeStructure::Kind::T_typeaccess:
         case TypeStructure::Kind::T_xhp:
-        case TypeStructure::Kind::T_mixed:
-        case TypeStructure::Kind::T_reifiedtype:
+        case TypeStructure::Kind::T_reifiedtype: {
+          Logger::Warning("jit_serialize: TypedAlias %s of Kind %d skipped",
+                          name->data(), (int)kind);
+          static auto missedTypeAliasCounter = ServiceData::createTimeSeries(
+            "jit.serialize.skipped_type_aliases",
+            {ServiceData::StatsType::COUNT}
+          );
+          missedTypeAliasCounter->addValue(1);
           return false;
+        }
 
         case TypeStructure::Kind::T_class:
         case TypeStructure::Kind::T_interface:

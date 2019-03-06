@@ -10,6 +10,11 @@
 open Core_kernel
 open Nast
 
+type control_context =
+  | Toplevel
+  | LoopContext
+  | SwitchContext
+
 type env = {
   is_reactive: bool;
   class_kind: Ast.class_kind option;
@@ -18,6 +23,7 @@ type env = {
   file_mode: FileInfo.mode;
   function_kind: Ast.fun_kind option;
   is_finally: bool;
+  control_context: control_context;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -62,6 +68,7 @@ let empty_env = {
   file_mode = FileInfo.Mstrict;
   function_kind = None;
   is_finally = false;
+  control_context = Toplevel;
 }
 
 let def_env x =
@@ -89,6 +96,15 @@ class virtual iter = object (self)
   method! on_Try env b cl fb =
     self#on_block { env with is_finally = true } fb;
     super#on_Try env b cl fb
+
+  method! on_Do env = super#on_Do ({ env with control_context = LoopContext })
+  method! on_While env = super#on_While ({ env with control_context = LoopContext })
+  method! on_For env = super#on_For ({ env with control_context = LoopContext })
+  method! on_Foreach env = super#on_Foreach ({ env with control_context = LoopContext })
+  method! on_Switch env = super#on_Switch ({ env with control_context = SwitchContext })
+  method! on_Efun env = super#on_Efun ({ env with is_finally = false; control_context = Toplevel })
+  method! on_Lfun env = super#on_Lfun ({ env with is_finally = false; control_context = Toplevel })
+
 end
 
 class virtual ['state] iter_with_state = object (self)

@@ -472,7 +472,6 @@ and expr_ =
   | Unsafeexpr of expr
   | Import of import_flavor * expr
   | Callconv of param_kind * expr
-  | Execution_operator of expr list
   (* Pocket Universe citizen, :@foo *)
   | PU_atom of id
 

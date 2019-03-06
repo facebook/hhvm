@@ -925,9 +925,6 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Callconv (k, e) ->
     let st, e = convert_expr env st e in
     st, (p, Callconv (k, e))
-  | Execution_operator el ->
-    let st, el = convert_exprs env st el in
-    st, (p, Execution_operator el)
   | PU_atom id -> st, (p, PU_atom id)
 
 and convert_prop_expr env st (_, expr_ as expr) =

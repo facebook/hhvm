@@ -118,7 +118,6 @@ struct
       ), map_exprl menv el)
     | S.Unsafe_expr e -> T.Unsafe_expr (map_expr menv e)
     | S.Callconv (k, e) -> T.Callconv (k, map_expr menv e)
-    | S.Execution_operator e -> T.Execution_operator (map_exprl menv e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
     | S.Omitted -> T.Omitted

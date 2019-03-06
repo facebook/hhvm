@@ -434,7 +434,6 @@ and expr_ env acc p e =
   | String _
   | String2 _
   | PrefixedString _
-  | Execution_operator _
   | Unsafe_expr _ -> acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e

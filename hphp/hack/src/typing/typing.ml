@@ -2476,7 +2476,6 @@ and expr_
   | Callconv (kind, e) ->
       let env, te, ty = expr env e in
       make_result env p (T.Callconv (kind, te)) ty
-  | Execution_operator _ -> failwith "Execution operator is forbidden in Hack, so this shouldn't occur"
   | Shape fdm ->
       let env, fdm_with_expected =
         match expand_expected env expected with

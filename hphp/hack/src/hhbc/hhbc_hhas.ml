@@ -1247,10 +1247,6 @@ and string_of_param_default_value ~env expr =
     String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es
   | A.PrefixedString (name, e) ->
     String.concat ~sep:" . " @@ [name; string_of_param_default_value ~env e]
-  | A.Execution_operator es ->
-    let s =
-      String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es in
-    "shell_exec(" ^ s ^ ")"
   | A.Eif (cond, etrue, efalse) ->
     let cond = string_of_param_default_value ~env cond in
     let etrue =

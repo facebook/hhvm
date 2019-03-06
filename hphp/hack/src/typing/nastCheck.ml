@@ -334,7 +334,6 @@ module CheckFunctionBody = struct
     | _, Callconv (_, e) ->
         expr f_type env e;
         ()
-    | _, Execution_operator _ -> ()
     | _, Assert (AE_assert e) ->
         expr f_type env e;
         ()
@@ -828,7 +827,6 @@ and expr_ env _p = function
       in
       if not (aux e) then Errors.inout_argument_bad_expr (fst e);
       ()
-  | Execution_operator _ -> ()
   | Shape fdm ->
       List.iter ~f:(fun (_, v) -> expr env v) fdm
 

@@ -259,7 +259,6 @@ class type ['a] visitor_type = object
   method on_list : 'a -> expr list -> 'a
   method on_pair : 'a -> expr -> expr -> 'a
   method on_expr_list : 'a -> expr list -> 'a
-  method on_execution_operator : 'a -> expr list -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
   method on_unop : 'a -> Ast.uop -> expr -> 'a
   method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
@@ -515,7 +514,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | Unsafe_expr (e)              -> this#on_unsafe_expr acc e
    | Callconv    (kind, e)        -> this#on_callconv acc kind e
-   | Execution_operator (e)       -> this#on_execution_operator acc e
    | ValCollection    (s, ta, el)     ->
        this#on_valCollection acc s ta el
    | KeyValCollection (s, tap, fl)     ->
@@ -656,10 +654,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_expr_list acc el =
-    let acc = List.fold_left el ~f:this#on_expr ~init:acc in
-    acc
-
-  method on_execution_operator acc el =
     let acc = List.fold_left el ~f:this#on_expr ~init:acc in
     acc
 

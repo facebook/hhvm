@@ -1113,18 +1113,6 @@ and emit_yield env pos = function
       instr_yieldk;
     ]
 
-and emit_execution_operator env pos exprs =
-  let instrs =
-    match exprs with
-    (* special handling of ``*)
-    | [_, A.String "" as e] -> emit_expr ~need_ref:false env e
-    | _ ->  emit_string2 env pos exprs in
-  gather [
-    instr_fpushfuncd 1 (Hhbc_id.Function.from_raw_string "shell_exec");
-    instrs;
-    instr_fcall (make_fcall_args 1);
-  ]
-
 and emit_string2 env pos exprs =
   match exprs with
   | [e] ->
@@ -1799,9 +1787,6 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.Call (e, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_call_expr env pos e targs args uargs None
-  | A.Execution_operator es ->
-    emit_box_if_necessary pos need_ref @@
-      emit_execution_operator env pos es
   | A.New (typeexpr, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_new env pos typeexpr targs args uargs
@@ -3690,7 +3675,7 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.PrefixedString _ | A.Yield_break | A.Yield_from _ | A.Suspend _
   | A.InstanceOf _ | A.Is _ | A.BracedExpr _ | A.ParenthesizedExpr _
   | A.NewAnonClass _ | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _
-  | A.Import _ | A.Callconv _ | A.Execution_operator _ | A.List _ -> false
+  | A.Import _ | A.Callconv _ | A.List _ -> false
 
 
 (* Generate code for each lvalue assignment in a list destructuring expression.

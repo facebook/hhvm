@@ -312,7 +312,6 @@ and on_expr (p, e) : Aast.expr =
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
-  | Execution_operator el -> Aast.Execution_operator (on_list on_expr el)
   | PU_atom id -> Aast.PU_atom (snd id)
   in
   (p, node)

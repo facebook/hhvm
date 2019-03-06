@@ -243,7 +243,6 @@ and expr acc (_, e) =
   | Varray (_, es)
   | List es
   | Expr_list es
-  | Execution_operator es
   | String2 es ->
     exprs acc es
   | PrefixedString (_, e) -> expr acc e
@@ -432,7 +431,6 @@ let rec aast_expr acc (_, e) =
   | Aast.Varray (_, es)
   | Aast.List es
   | Aast.Expr_list es
-  | Aast.Execution_operator es
   | Aast.String2 es ->
     exprs acc es
   | Aast.PrefixedString (_, e) -> aast_expr acc e

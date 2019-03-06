@@ -30,7 +30,7 @@ let rec check_lvalue errorf = function
     | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
     | Binop _ | Eif _ | InstanceOf _
     | New _ | NewAnonClass _ | Efun _ | Lfun _
-    | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | Execution_operator _ | As _
+    | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | As _
     | ParenthesizedExpr _) ->
       errorf pos "Invalid lvalue"
 

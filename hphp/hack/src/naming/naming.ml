@@ -2169,9 +2169,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Int s -> N.Int s
     | Aast.Float s -> N.Float s
     | Aast.String s -> N.String s
-    | Aast.String2 idl
-    (* treat execution operator similar to interpolated strings *)
-    | Aast.Execution_operator idl -> N.String2 (aast_string2 env idl)
+    | Aast.String2 idl -> N.String2 (aast_string2 env idl)
     | Aast.PrefixedString (n, e) -> N.PrefixedString (n, (aast_expr env e))
     | Aast.Id x ->
       (** TODO: Emit proper error messages T28473207. Currently the error message

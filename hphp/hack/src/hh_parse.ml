@@ -417,6 +417,7 @@ let handle_existing_file args filename =
     try Some (Full_fidelity_ast.from_file env) with
     | _ when print_errors -> None
   end else None in
+
   if print_errors then begin
     let level = if args.full_fidelity_errors_all
       then ParserErrors.Maximum
@@ -433,21 +434,22 @@ let handle_existing_file args filename =
     let errors = ParserErrors.parse_errors error_env in
     List.iter (print_full_fidelity_error source_text) errors
   end;
-
-  match lowered with
-  | Some res ->
-    let ast = res.Full_fidelity_ast.ast in
-    if print_errors then
-      Ast_check.check_program ast
-      |> List.iter (print_full_fidelity_error source_text);
-    if dump_needed then
-      let str =
-        if args.dump_nast then
-          Nast.show_program (Ast_to_nast.convert ast)
-        else
-          Debug.dump_ast (Ast.AProgram ast) in
-      Printf.printf "%s\n" str
-  | None -> ();
+  begin
+    match lowered with
+    | Some res ->
+      let ast = res.Full_fidelity_ast.ast in
+      if print_errors then
+        Ast_check.check_program ast
+        |> List.iter (print_full_fidelity_error source_text);
+      if dump_needed then
+        let str =
+          if args.dump_nast then
+            Nast.show_program (Ast_to_nast.convert ast)
+          else
+            Debug.dump_ast (Ast.AProgram ast) in
+        Printf.printf "%s\n" str
+    | None -> ()
+  end;
   if args.full_fidelity_json then begin
     let json = SyntaxTree.to_json syntax_tree in
     let str = Hh_json.json_to_string json in

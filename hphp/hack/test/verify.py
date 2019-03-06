@@ -247,6 +247,12 @@ def filter_ocaml_stacktrace(text: str) -> str:
     return "\n".join(out)
 
 
+def filter_version_field(text: str) -> str:
+    """given a string, remove the part that looks like the schema version"""
+    assert isinstance(text, str)
+    return re.sub(r',"version":"\d{4}-\d{2}-\d{2}-\d{4}"', '', text, count=1)
+
+
 def compare_expected(expected, out):
     if (expected == "No errors\n" or out == "No errors\n"):
         return expected == out
@@ -256,8 +262,7 @@ def compare_expected(expected, out):
 
 # Strip leading and trailing whitespace from every line
 def strip_lines(text: str) -> str:
-    lines = [line.strip() for line in text.splitlines()]
-    return "\n".join(lines)
+    return "\n".join(line.strip() for line in text.splitlines())
 
 
 def check_result(test_case: TestCase, default_expect_regex,
@@ -271,6 +276,7 @@ def check_result(test_case: TestCase, default_expect_regex,
         strip_lines(test_case.expected) == strip_lines(out)
         or (ignore_error_messages and compare_expected(test_case.expected, out))
         or test_case.expected == filter_ocaml_stacktrace(out)
+        or filter_version_field(test_case.expected) == filter_version_field(out)
         or (
             default_expect_regex is not None
             and re.search(default_expect_regex, out) is not None

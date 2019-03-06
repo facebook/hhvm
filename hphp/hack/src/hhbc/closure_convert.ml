@@ -56,14 +56,12 @@ type env = {
 }
 
 type per_function_state = {
-  inline_hhas_blocks: string list;
   has_finally: bool;
   has_goto: bool;
   labels: bool SMap.t
 }
 
 let empty_per_function_state = {
-  inline_hhas_blocks = [];
   has_finally = false;
   has_goto = false;
   labels = SMap.empty;
@@ -117,8 +115,6 @@ type state = {
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: (bool SMap.t) SMap.t;
   seen_strict_types: bool option;
-  (* map  functions -> list of inline hhas blocks *)
-  functions_with_hhas_blocks: (string list) SMap.t;
   (* most recent definition of lexical-scoped `let` variables *)
   let_vars: int SMap.t;
   (* maps unique name of lambda to Rx level of the declaring scope *)
@@ -129,11 +125,6 @@ let set_has_finally st =
   if st.current_function_state.has_finally then st
   else { st with current_function_state =
        { st.current_function_state with has_finally = true } }
-
-let set_inline_hhas st hhas =
-  { st with current_function_state =
-  { st.current_function_state with inline_hhas_blocks =
-    hhas :: st.current_function_state.inline_hhas_blocks }}
 
 let set_label st l v =
   { st with current_function_state =
@@ -165,7 +156,6 @@ let initial_state popt =
   functions_with_finally = SSet.empty;
   function_to_labels_map = SMap.empty;
   seen_strict_types = None;
-  functions_with_hhas_blocks = SMap.empty;
   let_vars = SMap.empty;
   lambda_rx_of_scope = SMap.empty;
 }
@@ -403,9 +393,8 @@ let reset_function_counts st =
     closure_cnt_per_fun = 0;
     anon_cls_cnt_per_fun = 0 }
 
-let record_function_state key { inline_hhas_blocks; has_finally; has_goto; labels } rx_of_scope st =
-  if List.is_empty inline_hhas_blocks &&
-     not has_finally &&
+let record_function_state key {has_finally; has_goto; labels } rx_of_scope st =
+  if not has_finally &&
      not has_goto &&
      SMap.is_empty labels &&
      rx_of_scope = Rx.NonRx
@@ -419,16 +408,11 @@ let record_function_state key { inline_hhas_blocks; has_finally; has_goto; label
     if not @@ SMap.is_empty labels
     then SMap.add key labels st.function_to_labels_map
     else st.function_to_labels_map in
-  let functions_with_hhas_blocks =
-    if not @@ List.is_empty inline_hhas_blocks
-    then SMap.add key (List.rev inline_hhas_blocks) st.functions_with_hhas_blocks
-    else st.functions_with_hhas_blocks in
   let lambda_rx_of_scope =
     if rx_of_scope <> Rx.NonRx
     then SMap.add key rx_of_scope st.lambda_rx_of_scope
     else st.lambda_rx_of_scope in
-  { st with functions_with_finally; function_to_labels_map;
-    functions_with_hhas_blocks; lambda_rx_of_scope }
+  { st with functions_with_finally; function_to_labels_map; lambda_rx_of_scope }
 
 let add_function ~has_inout_params env st fd =
   let n = env.defined_function_count
@@ -783,13 +767,6 @@ let rec convert_expr env st (p, expr_ as expr) =
       Emit_env.is_hh_syntax_enabled () ->
     convert_expr env st (p, Varray (None, es))
   | Call (e, targs, el2, el3) ->
-    let st =
-      begin match snd e, el2 with
-      | Id (_, s), [_, String arg] when
-        String.lowercase @@ SU.strip_global_ns s = "hh\\asm"->
-        set_inline_hhas st arg
-      | _ -> st
-      end in
     let st, e = convert_expr env st e in
     let st, targs = convert_hints env st targs in
     let st, el2 = convert_exprs env st el2 in
@@ -1537,7 +1514,6 @@ let convert_toplevel_prog ~popt defs =
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
       ; global_functions_with_finally = st.functions_with_finally
       ; global_function_to_labels_map = st.function_to_labels_map
-      ; global_functions_with_hhas_blocks = st.functions_with_hhas_blocks
       ; global_lambda_rx_of_scope = st.lambda_rx_of_scope }) in
   {
     ast_defs;

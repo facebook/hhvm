@@ -21,9 +21,6 @@ module SU = Hhbc_string_utils
 module ULS = Unique_list_string
 module Opts = Hhbc_options
 
-let inline_hhas_blocks_: (Hhas_asm.t SMap.t) ref = ref SMap.empty
-let set_inline_hhas_blocks s = inline_hhas_blocks_ := s
-
 let can_inline_gen_functions () =
   let opts = !Opts.compiler_options in
   Emit_env.is_hh_syntax_enabled () &&
@@ -1694,24 +1691,6 @@ and emit_callconv _env kind _e =
   match kind with
   | A.Pinout ->
     failwith "emit_callconv: This should have been caught at emit_arg"
-
-and emit_inline_hhas s =
-  match SMap.get s !inline_hhas_blocks_ with
-  | Some asm ->
-    let instrs =
-      Label_rewriter.clone_with_fresh_regular_labels @@ Hhas_asm.instrs asm in
-    (* TODO: handle case when code after inline hhas is unreachable
-      i.e. fallthrough return should not be emitted *)
-    begin match get_estimated_stack_depth instrs with
-    | 0 -> gather [ instrs; instr_null ]
-      | 1 -> instrs
-    | _ ->
-      Emit_fatal.raise_fatal_runtime Pos.none
-        "Inline assembly expressions should leave the stack unchanged, \
-        or push exactly one cell onto the stack."
-    end
-  | None ->
-    failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
 and get_reified_var_cexpr env pos name =
   match emit_reified_type_opt env pos name with
@@ -3423,9 +3402,6 @@ and emit_special_function env pos id args uargs default =
     let p = Pos.none in
     Some (emit_call env pos (p,
         A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [] None)
-
-  | "hh\\asm", [_, A.String s] ->
-    Some (emit_inline_hhas s)
 
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in

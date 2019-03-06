@@ -26,7 +26,6 @@ type global_state =
 ; global_closure_enclosing_classes: Ast.class_ SMap.t
 ; global_functions_with_finally: SSet.t
 ; global_function_to_labels_map: (bool SMap.t) SMap.t
-; global_functions_with_hhas_blocks: (string list) SMap.t
 ; global_lambda_rx_of_scope: Rx.t SMap.t
 }
 
@@ -36,7 +35,6 @@ let empty_global_state =
 ; global_closure_enclosing_classes = SMap.empty
 ; global_functions_with_finally = SSet.empty
 ; global_function_to_labels_map = SMap.empty
-; global_functions_with_hhas_blocks = SMap.empty
 ; global_lambda_rx_of_scope = SMap.empty
 }
 
@@ -59,9 +57,6 @@ let get_functions_with_finally () =
   (!global_state_).global_functions_with_finally
 let get_function_to_labels_map () =
   (!global_state_).global_function_to_labels_map
-let get_inline_hhas_blocks key =
-  SMap.get key (!global_state_).global_functions_with_hhas_blocks
-  |> Option.value ~default:[]
 
 let get_unique_id_for_main () =
   "|"

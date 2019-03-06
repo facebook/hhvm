@@ -132,19 +132,7 @@ and emit_defs env defs =
   in
   emit_markup env defs
 
-let check_redefinition v1 v2 text =
-  if v1 > 0 && v2 > 0
-  then Emit_fatal.raise_fatal_runtime Pos.none ("Multiple " ^ text ^ " directives")
-  else max v1 v2
-
-let check_num_iters n1 n2 = check_redefinition n1 n2 ".numiters"
-let check_num_cls_ref_slots n1 n2 = check_redefinition n1 n2 ".numclsrefslots"
-let deduplicate l =
-  l
-  |> List.fold_left ~init:Unique_list_string.empty ~f:Unique_list_string.add
-  |> Unique_list_string.items
-
-let make_body_ function_directives_opt body_instrs decl_vars
+let make_body body_instrs decl_vars
               is_memoize_wrapper is_memoize_wrapper_lsb
               params return_type_info static_inits doc_comment
               env =
@@ -157,14 +145,6 @@ let make_body_ function_directives_opt body_instrs decl_vars
   let num_iters =
     if is_memoize_wrapper then 0 else !Iterator.num_iterators in
   let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
-  let num_iters, num_cls_ref_slots, is_memoize_wrapper, static_inits =
-    match function_directives_opt with
-    | Some (iters_hhas, cls_ref_slots_hhas, is_memoize_wrapper_hhas, static_inits_hhas) ->
-      check_num_iters num_iters iters_hhas,
-      check_num_cls_ref_slots num_cls_ref_slots cls_ref_slots_hhas,
-      is_memoize_wrapper || is_memoize_wrapper_hhas,
-      deduplicate @@ List.append static_inits static_inits_hhas
-    | None -> num_iters, num_cls_ref_slots, is_memoize_wrapper, static_inits in
   Hhas_body.make
     body_instrs
     decl_vars
@@ -178,51 +158,9 @@ let make_body_ function_directives_opt body_instrs decl_vars
     doc_comment
     env
 
-let make_body body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
-              return_type_info static_inits doc_comment env =
-  make_body_ None body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
-             return_type_info static_inits doc_comment env
-
-let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
-  assert (not @@ List.is_empty hhas_blocks);
-  let param_names =
-    List.fold params
-      ~init:SSet.empty
-      ~f:(fun acc v -> SSet.add (Hhas_param.name v) acc) in
-  let is_param v = SSet.mem v param_names in
-  let parse_hhas s =
-    let lexer = Lexing.from_string (s ^ "\n") in
-    try s, Hhas_parser.functionbodywithdirectives Hhas_lexer.read lexer
-    with Parsing.Parse_error ->
-      Emit_fatal.raise_fatal_parse Pos.none @@
-        "Error parsing inline hhas:\n" ^ s in
-  let hhas_blocks = List.map hhas_blocks ~f:parse_hhas in
-  let text_to_block =
-    List.fold_left hhas_blocks
-      ~init:SMap.empty
-        ~f:(fun acc (k, v) -> SMap.add k v acc) in
-  let combine (used_vars, num_iters, num_cls_ref_slots, is_memoize, static_init) (_, b) =
-    let can_use v = not @@ is_param v in
-    let locals =
-      Instruction_sequence.collect_locals can_use (Hhas_asm.instrs b) in
-    List.append used_vars (Unique_list_string.items locals),
-    check_num_iters num_iters (Hhas_asm.num_iters b),
-    check_num_cls_ref_slots num_cls_ref_slots (Hhas_asm.num_cls_ref_slots b),
-    is_memoize || (Hhas_asm.is_memoize_wrapper b),
-    List.append static_init (Hhas_asm.static_inits b) in
-  let decl_vars, num_iters, num_cls_ref_slots, is_memoize, static_init =
-    List.fold_left hhas_blocks ~init:(decl_vars, 0, 0, false, []) ~f:combine in
-  deduplicate decl_vars,
-  text_to_block,
-  Some (num_iters, num_cls_ref_slots, is_memoize, deduplicate static_init)
-
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
-
-
-
-
   match ret with
   | None ->
     Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
@@ -447,15 +385,6 @@ let emit_body
       "'ScopeItem.Function fd' for function or " ^
       "empty scope for top level" in
 
-  let inline_hhas_blocks =
-    Emit_env.get_inline_hhas_blocks function_state_key in
-
-  let decl_vars, inline_hhas_blocks, function_directives_opt =
-    if List.is_empty inline_hhas_blocks
-    then decl_vars, SMap.empty, None
-    else prepare_inline_hhas_blocks decl_vars params inline_hhas_blocks in
-  Emit_expression.set_inline_hhas_blocks inline_hhas_blocks;
-
   let should_reserve_locals =
     SSet.mem function_state_key @@ Emit_env.get_functions_with_finally () in
 
@@ -530,8 +459,7 @@ let emit_body
   ] in
   let fault_instrs = extract_fault_funclets body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
-  make_body_
-    function_directives_opt
+  make_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)

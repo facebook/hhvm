@@ -8,6 +8,6 @@
     naming_attributes
     nast_pos_mapper
     parser_heap
-    procs_multi_worker
+    procs_procs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

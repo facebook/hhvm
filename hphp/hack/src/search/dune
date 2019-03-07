@@ -7,6 +7,6 @@
     heap_shared_mem
     naming_heap
     parser_heap
-    procs_multi_worker
+    procs_procs
     pos
     trie))

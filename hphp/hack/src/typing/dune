@@ -141,7 +141,7 @@
   (libraries
     logging
     pcre
-    procs_multi_worker
+    procs_procs
     tast
     tast_check
     nast_check

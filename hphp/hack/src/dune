@@ -117,3 +117,14 @@
     parser_syntax
     parser_syntax_transforms
     parser_syntax_tree))
+
+(executable
+  (name generate_full_fidelity)
+  (modules
+    generate_full_fidelity)
+  (libraries
+    procs_procs_lwt
+    core_kernel
+    str
+    parser_schema
+    collections))

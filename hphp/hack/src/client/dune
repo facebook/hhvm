@@ -3,8 +3,7 @@
   (wrapped false)
   (modules
     (:standard
-      \ clientLogCommand
-      \ clientTraceAi))
+      \ clientLogCommand))
   (libraries
     hh_server_monitor
     logging

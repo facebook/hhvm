@@ -48,7 +48,7 @@
     core_kernel
     decl
     global_config
-    procs_multi_worker
+    procs_procs
     server_monitor
     sys_utils
     utils_core
@@ -203,7 +203,7 @@
     utils_core
     watchman_utils
     (select serverHotClassesDescription.ml from
-    (facebook utils.facebook.signed_source -> facebook/serverHotClassesDescription.ml)
+    (facebook signed_source_fb -> facebook/serverHotClassesDescription.ml)
     (-> ../stubs/serverHotClassesDescription.ml))))
 
 (library

@@ -1,5 +1,5 @@
 (library
-  (name ai)
+  (name ai_stubs)
   (wrapped false)
   (modules
     ai
@@ -35,7 +35,7 @@
     linting_service))
 
 (library
-  (name load_script)
+  (name load_script_stubs)
   (wrapped false)
   (modules
     load_script

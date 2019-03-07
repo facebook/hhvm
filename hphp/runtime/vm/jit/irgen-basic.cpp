@@ -629,6 +629,11 @@ void emitDiscardClsRef(IRGS& env, uint32_t slot)   { killClsRef(env, slot); }
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopU(IRGS& env)   { popU(env); }
+void emitPopU2(IRGS& env) {
+  auto const src = popC(env, DataTypeGeneric);
+  popU(env);
+  push(env, src);
+}
 
 void emitPopL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);

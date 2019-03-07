@@ -95,6 +95,8 @@ static const struct {
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
+  { OpPopU2,       {StackTop2|
+                    DontGuardAny,     Stack1,       OutSameAsInput1 }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
@@ -1002,6 +1004,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PopC:
   case Op::PopV:
   case Op::PopU:
+  case Op::PopU2:
   case Op::PopL:
   case Op::Print:
   case Op::PushL:

@@ -966,6 +966,10 @@ PopU                  [U]  ->  []
 
   Pop. Discards the value on the top of the stack.
 
+PopU2                 [U C:<T>]  ->  [C:<T>]
+
+  Pop two. Discards the uninit underneath the cell on top of the stack.
+
 PopL <local variable id>    [C]  ->  []
 
   Teleport value from the stack into a local. This instruction marks the local

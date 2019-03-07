@@ -1775,6 +1775,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Select:
     case Op::PopC:
     case Op::PopU:
+    case Op::PopU2:
     case Op::PopL:
     case Op::CGetL:
     case Op::CGetQuietL:

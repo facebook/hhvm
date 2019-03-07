@@ -1980,6 +1980,12 @@ OPTBLD_INLINE void iopPopU() {
   vmStack().popU();
 }
 
+OPTBLD_INLINE void iopPopU2() {
+  assertx(vmStack().indC(1)->m_type == KindOfUninit);
+  *vmStack().indC(1) = *vmStack().topC();
+  vmStack().discard();
+}
+
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();

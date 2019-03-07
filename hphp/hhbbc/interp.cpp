@@ -209,6 +209,13 @@ void in(ISS& env, const bc::PopC&) {
   popC(env);
 }
 void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
+void in(ISS& env, const bc::PopU2&) {
+  effect_free(env);
+  auto equiv = topStkEquiv(env);
+  auto val = popC(env);
+  popU(env);
+  push(env, std::move(val), equiv != StackDupId ? equiv : NoLocalId);
+}
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
 
 void in(ISS& env, const bc::EntryNop&) { effect_free(env); }

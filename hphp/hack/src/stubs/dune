@@ -29,7 +29,7 @@
     hackc_parse_delegator))
 
 (library
-  (name linting)
+  (name linting_stubs)
   (wrapped false)
   (modules
     linting_service))

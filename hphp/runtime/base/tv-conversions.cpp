@@ -1922,10 +1922,6 @@ enable_if_lval_t<T, bool> tvCoerceParamToArrayInPlace(T tv, bool /*builtin*/) {
 
     case KindOfObject:
       if (LIKELY(val(tv).pobj->isCollection())) {
-        if (RuntimeOption::EvalHackArrCompatCollectionCoercionNotices) {
-          raise_hack_arr_compat_collection_coerce_notice(
-              val(tv).pobj->getClassName().c_str());
-        }
         ObjectData* obj = val(tv).pobj;
         assign(tv, obj->toArray<intishCast>());
         return true;

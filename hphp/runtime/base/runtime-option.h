@@ -1021,8 +1021,6 @@ struct RuntimeOption {
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
-  /* Raises notice when a Hack Collection is coerced to a PHP array */  \
-  F(bool, HackArrCompatCollectionCoercionNotices, false)                \
   /* Disables intish cast wherever we would have warned for             \
    * HackArrCompatCheckIntishCast--this includes intish key cast in any \
    * PHP code and much of the runtime and extensions */                 \

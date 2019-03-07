@@ -201,10 +201,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
                name.c_str());
 }
 
-void raise_hack_arr_compat_collection_coerce_notice(const std::string& name) {
-  raise_notice("Hack Array Compat: Coercing %s to array", name.c_str());
-}
-
 void raise_undefined_const_fallback_notice(const StringData* name,
                                            const StringData* fallback) {
   // If the option is set to 2, we won't emit CnsU or CnsUE, meaning this

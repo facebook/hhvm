@@ -174,3 +174,12 @@ let rec find_sketchy_types env acc ty =
   | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty
+
+let valid_newable_class cls =
+  match Cls.kind cls with
+  | Ast.Cnormal
+  | Ast.Cabstract ->
+    Cls.final cls || snd (Cls.construct cls)
+  (* There is currently a bug with interfaces that allows constructors to change
+   * their signature, so they are not considered here. TODO: T41093452 *)
+  | _ -> false

@@ -1,5 +1,6 @@
 File "new_generic.php", line 13, characters 3-16:
-  <expr#1> as Tobj
+  Tobj
+  where Tobj as \C<Targ>
 File "new_generic.php", line 18, characters 3-32:
   C<int>
 File "new_generic.php", line 19, characters 3-38:

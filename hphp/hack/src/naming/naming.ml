@@ -2704,7 +2704,7 @@ module Make (GetLocals : GetLocals) = struct
            * like "$$::someMethod()". *)
           N.CIexpr(p, N.Lvar (p, Env.found_dollardollar env p))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
-      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:false)
+      | _ -> N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
 
   and aast_casel env l =
     List.map_env [] l (aast_case env)

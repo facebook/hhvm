@@ -40,14 +40,7 @@ let verify_has_consistent_bound env (tparam: Tast.tparam) =
     | _, Tclass ((_, class_id), _, _) ->
       Env.get_class env class_id
     | _ -> None) in
-  let valid_classes = List.filter bound_classes ~f:(fun cls ->
-    match Cls.kind cls with
-    | Ast.Cnormal
-    | Ast.Cabstract ->
-      Cls.final cls || snd (Cls.construct cls)
-    (* There is currently a bug with interfaces that allows constructors to change
-     * their signature, so they are not considered here. TODO: T41093452 *)
-    | _ -> false) in
+  let valid_classes = List.filter bound_classes ~f:Tast_utils.valid_newable_class in
   if List.length valid_classes <> 1 then
     let cbs = List.map ~f:(Cls.name) valid_classes in
     Errors.invalid_newable_type_param_constraints tparam.tp_name cbs

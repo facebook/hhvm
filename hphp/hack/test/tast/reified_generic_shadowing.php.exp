@@ -1,8 +1,8 @@
 Errors:
   [6:12-16] Name already bound: Tcat
   [4:7-11] Previous definition is here
-  [7:7-11] Generics are not allowed in this position.
   [7:7-11] Erased generics can only be used in type hints since they are erased at runtime.
+  [7:3-13] Tcat cannot be used with `new` because it does not have the <<__Newable>> attribute
 [(Class
     { c_span = [4:1-14]; c_annotation = (); c_mode = <opaque>;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -28,9 +28,9 @@ Errors:
        f_body =
        { fb_ast =
          [(Expr
-             (([7:3-13], object),
-              (New ((([7:7-11], _), (CI ([7:7-11], "Tcat"))), [], [], 
-                 [], ([7:7-11], _)))))
+             (([7:3-13], Tcat),
+              (New ((([7:7-11], Tcat), (CI ([7:7-11], "Tcat"))), [], 
+                 [], [], ([7:7-11], _)))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

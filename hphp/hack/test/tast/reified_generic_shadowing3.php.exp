@@ -1,7 +1,7 @@
 Errors:
-  [5:7-8] Generics are not allowed in this position.
   [5:7-8] Erased generics can only be used in type hints since they are erased at runtime.
   [6:7-8] Unbound name: U (an object type)
+  [5:3-10] T cannot be used with `new` because it does not have the <<__Newable>> attribute
 [(Fun
     { f_span = [4:1-7:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([4:18-22], (Hprim Tvoid))); f_name = ([4:10-11], "\\f");
@@ -13,8 +13,8 @@ Errors:
       f_body =
       { fb_ast =
         [(Expr
-            (([5:3-10], object),
-             (New ((([5:7-8], _), (CI ([5:7-8], "T"))), [], [], [],
+            (([5:3-10], T),
+             (New ((([5:7-8], T), (CI ([5:7-8], "T"))), [], [], [],
                 ([5:7-8], _)))));
           (Expr
              (([6:3-10], object),

@@ -1,6 +1,2 @@
 File "no_shape_keys_generics.php", line 9, characters 5-5:
 Generics are not allowed in this position. (Typing[4306])
-File "no_shape_keys_generics.php", line 9, characters 5-8:
-A shape field name must be an int or string (Typing[4052])
-  File "no_shape_keys_generics.php", line 9, characters 5-5:
-  Not an untyped value

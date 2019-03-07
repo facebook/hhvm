@@ -2916,8 +2916,13 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
   let env, tcid, classes = instantiable_cid ~exact:Exact p env cid tal in
   let finish env tcid tel tuel ty ctor_fty =
     let env, new_ty =
-      if check_parent then env, ty
-      else ExprDepTy.make env cid ty in
+      let (_, cid_ty), _ = tcid in
+      match cid_ty with
+      | _, Tabstract (AKgeneric _, _) ->
+        env, cid_ty
+      | _ ->
+        if check_parent then env, ty
+        else ExprDepTy.make env cid ty in
     env, tcid, tel, tuel, new_ty, ctor_fty in
   let rec gather env tel tuel res classes =
     match classes with
@@ -4657,7 +4662,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
 
 and class_id_for_new ~exact p env cid tal =
-  let env, te, ty = static_class_id ~exact ~check_constraints:false p env tal cid in
+  let env, te, cid_ty = static_class_id ~exact ~check_constraints:false p env tal cid in
   (* Need to deal with union case *)
   let rec get_info res tyl =
     match tyl with
@@ -4676,13 +4681,25 @@ and class_id_for_new ~exact p env cid tal =
             let class_ = Env.get_class env (snd sid) in
             match class_ with
             | None -> get_info res tyl
-            | Some class_info -> get_info ((sid, class_info, ty)::res) tyl
+            | Some class_info ->
+              match te, cid_ty with
+              (* When computing the classes for a new T() where T is a generic,
+               * the class must be consistent (final, final constructor, or
+               * <<__ConsistentConstruct>>) for its constructor to be considered *)
+              | (_, T.CI (_, c)), (_, Tabstract (AKgeneric cg, _)) when c = cg ->
+                (* Only have this choosing behavior for new T(), not all generic types
+                 * i.e. new classname<T>, TODO: T41190512 *)
+                if Tast_utils.valid_newable_class class_info
+                then get_info ((sid, class_info, ty)::res) tyl
+                else get_info res tyl
+              | _ ->
+                get_info ((sid, class_info, ty)::res) tyl
           end
         | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ | Tdynamic ) ->
           get_info res tyl in
-  get_info [] [ty]
+  get_info [] [cid_ty]
 
 (* To be a valid trait declaration, all of its 'require extends' must
  * match; since there's no multiple inheritance, it follows that all of
@@ -4834,17 +4851,23 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       | Tclass(c, _, tyl) -> Tclass(c, exact, tyl)
       | self -> self in
     make_result env T.CIself (Reason.Rwitness p, self)
-  | CI c as e1 ->
-    let class_ = Env.get_class env (snd c) in
-    (match class_ with
-      | None ->
-        make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
-      | Some class_ ->
-        let env, ty =
-          resolve_type_arguments_and_check_constraints ~exact ~check_constraints
-            env p c e1 (Cls.tparams class_) tal in
-        make_result env (T.CI c) ty
-    )
+  | CI ((p, id) as c) as e1 ->
+    if Env.is_generic_parameter env id
+    then
+      let r = Reason.Rhint p in
+      let tgeneric = (r, Tabstract (AKgeneric id, None)) in
+      make_result env (T.CI c) tgeneric
+    else
+      let class_ = Env.get_class env (snd c) in
+      (match class_ with
+        | None ->
+          make_result env (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
+        | Some class_ ->
+          let env, ty =
+            resolve_type_arguments_and_check_constraints ~exact ~check_constraints
+              env p c e1 (Cls.tparams class_) tal in
+          make_result env (T.CI c) ty
+      )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
       let rec resolve_ety env ty =

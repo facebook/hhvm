@@ -394,6 +394,7 @@ ResponseCompressorManager::ResponseCompressorManager(
     m_compressionDecision(CompressionDecision::NotDecidedYet),
     m_impls(std::move(impls)),
     m_selectedImpl(nullptr),
+    m_shadowImpls(),
     m_chunkedEncoding(false) {
   enable();
 }
@@ -454,7 +455,7 @@ StringHolder ResponseCompressorManager::compressResponse(
     if (!m_chunkedEncoding && len < 75) {
       // probably not worth compressing. skip.
     } else {
-      for (auto &impl : m_impls) {
+      for (const auto &impl : m_impls) {
         if (impl->isEnabled() && impl->isAccepted()) {
           response = impl->compressResponse(data, len, last);
           if (response.data() == nullptr) {
@@ -465,6 +466,14 @@ StringHolder ResponseCompressorManager::compressResponse(
             m_selectedImpl = impl.get();
             break;
           }
+        }
+      }
+      // also build the list of shadow impls
+      for (const auto &impl : m_impls) {
+        if (impl->shouldShadow() && !(impl->isEnabled() && impl->isAccepted()) && impl.get() != m_selectedImpl) {
+          // ensure we don't *also* shadow traffic to the selected impl, which
+          // would pollute its history.
+          m_shadowImpls.push_back(impl.get());
         }
       }
     }
@@ -479,6 +488,16 @@ StringHolder ResponseCompressorManager::compressResponse(
             "committed us to using this algorithm. :("
         );
       }
+    }
+  }
+
+  // shadow the response
+  for (auto *shadowImpl : m_shadowImpls) {
+    try {
+      shadowImpl->compressResponse(data, len, last);
+    } catch (const std::runtime_error& ex) {
+      // Don't let failures in shadowed code block execution.
+      Logger::Error("Shadowed ResponseCompressor threw error: %s", ex.what());
     }
   }
 

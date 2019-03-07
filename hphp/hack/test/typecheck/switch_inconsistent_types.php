@@ -14,7 +14,7 @@ function f(): int {
     case 1:
       $x = false;
       break;
-    case 3:
+    default:
       $x = 8;
       break;
   }

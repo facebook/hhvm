@@ -1051,7 +1051,7 @@ and case_list parent_locals ty env switch_pos cl =
   let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
     if not @@ List.is_empty block then
       begin match rest_of_list with
-      | [] -> ()
+      | [] | [Default []] -> ()
       | _ ->
         begin match LEnv.get_cont_option env C.Next with
         | Some _ ->
@@ -1062,21 +1062,37 @@ and case_list parent_locals ty env switch_pos cl =
       end (* match *)
     else () in
 
-  match cl with
-  | [] -> env, []
-  | Default b :: rl ->
-    let env = initialize_next_cont env in
-    let env, tb = block env b in
-    check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
-    let env, tcl = case_list parent_locals ty env switch_pos rl in
-    env, T.Default tb::tcl
-  | (Case ((pos, _) as e, b)) :: rl ->
-    let env = initialize_next_cont env in
-    let env, te, _ = expr env e in
-    let env, tb = block env b in
-    check_fallthrough env switch_pos pos b rl ~is_default:false;
-    let env, tcl = case_list parent_locals ty env switch_pos rl in
-    env, T.Case (te, tb)::tcl
+  let make_exhaustive_equivalent_case_list cl =
+    let has_default = List.exists cl ~f:(function Default _ -> true | _ -> false) in
+    let is_enum = match snd @@ snd @@ Env.expand_type env ty with
+      | Tabstract (AKenum _, _) -> true
+      | _ -> false in
+    (* If there is no default case and this is not a switch on enum (since
+     * exhaustiveness is garanteed elsewhere on enums),
+     * then add a default case for control flow correctness
+     *)
+    if has_default || is_enum then cl, false else cl @ [Default []], true in
+
+  let rec case_list env = function
+    | [] -> env, []
+    | Default b :: rl ->
+      let env = initialize_next_cont env in
+      let env, tb = block env b in
+      check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
+      let env, tcl = case_list env rl in
+      env, T.Default tb::tcl
+    | (Case ((pos, _) as e, b)) :: rl ->
+      let env = initialize_next_cont env in
+      let env, te, _ = expr env e in
+      let env, tb = block env b in
+      check_fallthrough env switch_pos pos b rl ~is_default:false;
+      let env, tcl = case_list env rl in
+      env, T.Case (te, tb)::tcl in
+
+  let cl, added_empty_default = make_exhaustive_equivalent_case_list cl in
+  let env, tcl = case_list env cl in
+  let tcl = if added_empty_default then List.take tcl (List.length tcl - 1) else tcl in
+  env, tcl
 
 and catch catchctx env (sid, exn, b) =
   let env = LEnv.replace_cont env C.Next catchctx in

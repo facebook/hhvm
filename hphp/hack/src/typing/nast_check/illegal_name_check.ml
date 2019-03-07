@@ -10,6 +10,7 @@
 open Core_kernel
 open Nast
 open Utils
+open Nast_check_env
 
 module SN = Naming_special_names
 
@@ -35,7 +36,7 @@ let handler = object
       end
     | Id (pos, const) ->
       let const = add_ns const in
-      let ck = env.Nast_visitor.class_kind in
+      let ck = env.class_kind in
       if not (SN.PseudoConsts.is_pseudo_const const)
       then ()
       else if const = SN.PseudoConsts.g__CLASS__ && ck = None
@@ -49,9 +50,9 @@ let handler = object
       | _ -> ()
       end;
     | Class_const ((_, CIexpr (_, (Id(_, "parent")))), (_, m_name))
-      when env.Nast_visitor.function_name = Some m_name -> ()
+      when env.function_name = Some m_name -> ()
     | Class_const (_, ((_, m_name) as mid))
-      when is_magic mid && env.Nast_visitor.function_name <> Some m_name ->
+      when is_magic mid && env.function_name <> Some m_name ->
       Errors.magic mid;
     | Obj_get (_, (_, Id s), _) when is_magic s -> Errors.magic s
     | _ -> ()
@@ -67,12 +68,12 @@ let handler = object
     if name = SN.Members.__destruct
       && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
     then Errors.illegal_destructor pos;
-    begin match env.Nast_visitor.class_name with
+    begin match env.class_name with
     | Some cname ->
-      let p, mname = m.m_name in
-      if String.lowercase (strip_ns cname) = String.lowercase mname
-        && env.Nast_visitor.class_kind <> Some Ast.Ctrait
-      then Errors.dangerous_method_name p
+        let p, mname = m.m_name in
+        if String.lowercase (strip_ns cname) = String.lowercase mname
+            && env.class_kind <> Some Ast.Ctrait
+        then Errors.dangerous_method_name p
     | None -> assert false
     end
 

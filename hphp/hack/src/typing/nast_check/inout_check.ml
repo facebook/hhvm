@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Nast
+open Nast_check_env
 
 module SN = Naming_special_names
 
@@ -24,7 +25,7 @@ let check_param env params p user_attributes f_type name =
         Errors.inout_params_mix_byref pos p.param_pos)
     | None when param.param_is_reference && name = SN.Members.__construct ->
       if TypecheckerOptions.disallow_ref_param_on_constructor
-        env.Nast_visitor.tcopt
+        env.tcopt
       then Errors.byref_on_construct param.param_pos
     | None -> ()
   end;

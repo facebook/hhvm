@@ -9,18 +9,19 @@
 
 open Core_kernel
 open Nast
+open Nast_check_env
 
 module SN = Naming_special_names
 
 let is_coroutine env =
-  env.Nast_visitor.function_kind = Some Ast.FCoroutine
+  env.function_kind = Some Ast.FCoroutine
 
 let is_generator env =
-  let fun_kind = env.Nast_visitor.function_kind in
+  let fun_kind = env.function_kind in
   fun_kind = Some Ast.FGenerator || fun_kind = Some Ast.FAsyncGenerator
 
 let is_sync env =
-  let fun_kind = env.Nast_visitor.function_kind in
+  let fun_kind = env.function_kind in
   fun_kind = Some Ast.FGenerator || fun_kind = Some Ast.FSync
 
 let handler = object
@@ -37,7 +38,7 @@ let handler = object
       if is_sync env then Errors.await_in_sync_function p
     | Suspend _ ->
       if not (is_coroutine env) then Errors.suspend_outside_of_coroutine p
-      else if env.Nast_visitor.is_finally then Errors.suspend_in_finally p
+      else if env.is_finally then Errors.suspend_in_finally p
     | _ -> ()
     end;
 

@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Nast
+open Nast_check_env
 
 module SN = Naming_special_names
 
@@ -61,20 +62,20 @@ let handler = object
   inherit Nast_visitor.handler_base
 
   method! at_fun_ env f =
-    check_maybe_rx_attributes_on_params env.Nast_visitor.is_reactive f.f_user_attributes f.f_params;
+    check_maybe_rx_attributes_on_params env.is_reactive f.f_user_attributes f.f_params;
 
   method! at_expr env (_, e) =
     match e with
     | Id (pos, const) ->
       let const = Utils.add_ns const in
-      if const = SN.Rx.is_enabled && not env.Nast_visitor.rx_is_enabled_allowed
+      if const = SN.Rx.is_enabled && not env.rx_is_enabled_allowed
       then Errors.rx_is_enabled_invalid_location pos
     | _ -> ();
 
   method! at_method_ _env m =
     let ua = m.m_user_attributes in
     let (p, name) = m.m_name in
-    let is_reactive = Nast_visitor.fun_is_reactive ua in
+    let is_reactive = fun_is_reactive ua in
     check_conditionally_reactive_annotations is_reactive p name ua;
     check_maybe_rx_attributes_on_params is_reactive ua m.m_params;
 

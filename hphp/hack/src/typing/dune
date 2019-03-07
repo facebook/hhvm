@@ -26,6 +26,7 @@
     tast_utils
     tast_visitor
     nast_visitor
+    nast_check_env
     type_mapper
     type_parameter_env
     type_visitor

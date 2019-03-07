@@ -9,16 +9,9 @@
 
 open Core_kernel
 open Nast
+open Nast_check_env
 
 module UA = Naming_special_names.UserAttributes
-
-let is_some_reactivity_attribute { ua_name = (_, name); _ } =
-  name = UA.uaReactive ||
-  name = UA.uaLocalReactive ||
-  name = UA.uaShallowReactive
-
-let fun_is_reactive user_attributes =
-  List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let is_mutable user_attributes =
   Attributes.mem UA.uaMutable user_attributes
@@ -48,9 +41,9 @@ let handler = object
     (* Functions can't be mutable, only methods can *)
     if is_mutable ua then Errors.mutable_attribute_on_function pos;
     if is_maybe_mutable ua then Errors.maybe_mutable_attribute_on_function pos;
-    if is_mutable_return ua && not env.Nast_visitor.is_reactive then
+    if is_mutable_return ua && not env.is_reactive then
       Errors.mutable_return_annotated_decls_must_be_reactive "function" pos fname;
-    List.iter f.f_params (check_param env.Nast_visitor.is_reactive fname)
+    List.iter f.f_params (check_param env.is_reactive fname)
 
   method! at_method_ _env m =
     let (pos, name) = m.m_name in

@@ -8,6 +8,7 @@
  *)
 
 open Nast
+open Nast_check_env
 
 module SN = Naming_special_names
 
@@ -30,7 +31,7 @@ let handler = object
   method! at_hint env (p, h) =
     match h with
     | Hfun (_, _, _hl, _, _, Hvariadic None, _, _)
-      when is_strict env.Nast_visitor.file_mode ->
+      when is_strict env.file_mode ->
       Errors.ellipsis_strict_mode ~require:`Type p
     | _ -> ()
 end

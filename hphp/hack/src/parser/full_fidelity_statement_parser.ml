@@ -283,13 +283,8 @@ module WithExpressionAndDeclAndTypeParser
         (fun p ->
           DeclParser.parse_function_declaration p missing)
       in
-      let parser = if not toplevel &&
-        (Env.is_typechecker (env parser) || Env.disable_nontoplevel_declarations (env parser))
-      then
-        with_error parser SyntaxError.inline_function_def
-      else
-        parser
-      in
+      let parser = if toplevel then parser else
+        with_error parser SyntaxError.inline_function_def in
       parser, missing
 
   and parse_php_class parser =

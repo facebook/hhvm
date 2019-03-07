@@ -670,7 +670,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ReqOnce,         NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqDoc,          NA,               ONE(CV),         ONE(CV),    CF) \
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
-  O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
   O(AliasCls,        TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \

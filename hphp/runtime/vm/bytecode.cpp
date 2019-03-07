@@ -5987,11 +5987,6 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
   vm->evalUnit(unit, origpc, pc, EventHook::Eval);
 }
 
-OPTBLD_INLINE void iopDefFunc(uint32_t fid) {
-  Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
-  Unit::defFunc(f, isDebuggerAttached());
-}
-
 OPTBLD_INLINE void iopDefCls(uint32_t cid) {
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);

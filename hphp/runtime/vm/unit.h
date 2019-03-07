@@ -243,14 +243,10 @@ public:
    * Allocated with a variable-length pointer array in m_mergeables, structured
    * as follows:
    *  - the Unit's pseudomain
-   *  - non-hoistable functions that might be DefFunc'd in the pseudomain
    *  - hoistable functions (i.e., toplevel functions that need to be available
    *    from the beginning of the pseudomain)
    *  - all other mergeable objects, with the bottom three bits of the pointer
    *    tagged with a MergeKind
-   *
-   * Note that the non-hoistable function list may include functions which are
-   * not mergeable, since DefFunc also uses this list as its mapping from ID's.
    */
   struct MergeInfo {
     using FuncRange = folly::Range<Func* const*>;

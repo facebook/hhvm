@@ -337,7 +337,6 @@ static const struct {
   { OpReqOnce,     {Stack1,           Stack1,       OutUnknown      }},
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown      }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown      }},
-  { OpDefFunc,     {None,             None,         OutNone         }},
   { OpDefTypeAlias,{None,             None,         OutNone         }},
   { OpDefCls,      {None,             None,         OutNone         }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
@@ -940,7 +939,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ContGetReturn:
   case Op::CreateCl:
   case Op::DefCns:
-  case Op::DefFunc:
   case Op::Dir:
   case Op::Div:
   case Op::Double:

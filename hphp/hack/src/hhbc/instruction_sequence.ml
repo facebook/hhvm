@@ -271,8 +271,6 @@ let instr_defclsnop n =
   instr (IIncludeEvalDefine (DefClsNop n))
 let instr_deftypealias n =
   instr (IIncludeEvalDefine (DefTypeAlias n))
-let instr_deffunc n =
-  instr (IIncludeEvalDefine (DefFunc n))
 let instr_defcns s =
   instr (IIncludeEvalDefine (DefCns (Hhbc_id.Const.from_raw_string s)))
 let instr_eval = instr (IIncludeEvalDefine Eval)

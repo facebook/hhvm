@@ -414,16 +414,6 @@ let record_function_state key {has_finally; has_goto; labels } rx_of_scope st =
     else st.lambda_rx_of_scope in
   { st with functions_with_finally; function_to_labels_map; lambda_rx_of_scope }
 
-let add_function ~has_inout_params env st fd =
-  let n = env.defined_function_count
-        + List.length st.hoisted_functions
-        + List.length st.inout_wrappers in
-  let inout_wrappers =
-    if has_inout_params then fd :: st.inout_wrappers else st.inout_wrappers in
-  let hoisted_functions = fd :: st.hoisted_functions in
-  { st with hoisted_functions; inout_wrappers},
-  { fd with f_body = []; f_name = (fst fd.f_name, string_of_int n) }
-
 (* Make a stub class purely for the purpose of emitting the DefCls instruction
  *)
 let make_defcls cd n =
@@ -1181,15 +1171,6 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
         let st, cd = convert_class env st cd in
         let st, stub_cd = add_class env st cd in
         st, (p, Def_inline (Class stub_cd))
-      | Fun fd :: _defs ->
-        let st, fd = convert_fun env st fd in
-        let has_inout_params =
-          let wrapper, _ =
-            Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
-          Option.is_some wrapper in
-        let st, stub_fd =
-          add_function ~has_inout_params:has_inout_params env st fd in
-        st, (p, Def_inline (Fun stub_fd))
       | _ ->
         failwith "expected single class or function declaration" in
     process_inline_defs st defs

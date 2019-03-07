@@ -72,7 +72,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _
   | ICall FPushFuncU _
-  | IIncludeEvalDefine DefFunc _
   | IIncludeEvalDefine DefClsNop _
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _

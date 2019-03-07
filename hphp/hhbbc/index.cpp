@@ -2175,7 +2175,6 @@ std::unique_ptr<php::Func> clone_meth_helper(
         case Op::DefCls:
         case Op::DefClsNop:
         case Op::NewObjI:
-        case Op::DefFunc:
           return nullptr;
         default:
           break;

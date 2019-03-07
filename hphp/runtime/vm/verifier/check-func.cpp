@@ -1323,19 +1323,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
-    case Op::DefFunc: {
-      auto id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->fevec().size()) {
-        ferror("{} references nonexistent function ({})\n",
-                opcodeToName(op), id);
-        return false;
-      }
-      if (id == 0) {
-        ferror("Cannot DefFunc main\n");
-        return false;
-      }
-      break;
-    }
     case Op::DefTypeAlias: {
       auto id = getImm(pc, 0).u_IVA;
       if (id >= unit()->typeAliases().size()) {
@@ -2050,7 +2037,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: defines and includes
-    case Op::DefFunc:
     case Op::DefCls:
     case Op::DefClsNop:
     case Op::AliasCls:

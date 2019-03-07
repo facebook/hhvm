@@ -3615,13 +3615,6 @@ Eval    [C]  ->  [C]
   The pseudo-main function from (string)$1 inherits the caller's variable
   environment.
 
-DefFunc <function id>    []  ->  []
-
-  Define function. Bind the function specified by %1. If the function specified
-  by %1 is already bound, this instruction does nothing. If another function is
-  already bound to the name associated with %1, this instruction throws a fatal
-  error.
-
 DefCls <class id>    []  ->  []
 
   Define class. Bind the class specified by %1. If the class specified by %1 is

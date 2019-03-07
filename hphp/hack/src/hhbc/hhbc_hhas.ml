@@ -38,8 +38,6 @@ let string_of_prop_id id =
   SU.quote_string (Hhbc_id.Prop.to_raw_string id)
 let string_of_class_num id =
   string_of_int id
-let string_of_function_num id =
-  string_of_int id
 let string_of_typedef_num id =
   string_of_int id
 let string_of_pos pos =
@@ -715,7 +713,6 @@ let string_of_include_eval_define = function
   | Eval -> "Eval"
   | AliasCls (c1, c2) ->
     sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
-  | DefFunc id -> sep ["DefFunc"; string_of_function_num id]
   | DefCls id -> sep ["DefCls"; string_of_class_num id]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]

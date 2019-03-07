@@ -102,12 +102,6 @@ Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
   return euState.pceInfo.back().pce->id();
 }
 
-Id recordFunc(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto func = euState.unit->funcs[id - 1].get();
-  euState.feInfo.push_back({ ue.newFuncEmitter(func->name), id });
-  return euState.feInfo.back().fe->id();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
@@ -663,10 +657,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto defclsnop  = [&] { clsid_impl(inst.DefClsNop.arg1, false); };
     auto createcl   = [&] { clsid_impl(inst.CreateCl.arg2, true); };
     auto newobji    = [&] { clsid_impl(inst.NewObjI.arg1, false); };
-    auto deffun     = [&] {
-      const_cast<uint32_t&>(inst.DefFunc.arg1) =
-        recordFunc(euState, ue, inst.DefFunc.arg1);
-    };
     auto deftype   = [&] {
       euState.typeAliasInfo.push_back(inst.DefTypeAlias.arg1);
       const_cast<uint32_t&>(inst.DefTypeAlias.arg1) =
@@ -753,7 +743,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (Op::opcode == Op::DefClsNop)    defclsnop();  \
       if (Op::opcode == Op::CreateCl)     createcl();   \
       if (Op::opcode == Op::NewObjI)      newobji();    \
-      if (Op::opcode == Op::DefFunc)      deffun();     \
       if (Op::opcode == Op::DefTypeAlias) deftype();    \
       if (isRet(Op::opcode))              ret_assert(); \
       ue.emitOp(Op::opcode);                            \

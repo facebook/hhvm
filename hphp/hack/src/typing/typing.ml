@@ -681,6 +681,8 @@ and save_and_merge_next_in_catch env =
     then LEnv.save_and_merge_next_in_cont env C.Catch
     else env
 
+and might_throw env = save_and_merge_next_in_catch env
+
 and gather_defined_in_block env b =
   let locals = Typing_gather_defined.block env b in
   Env.env_with_locals env locals
@@ -1856,7 +1858,7 @@ and expr_
       expr_error env p (Reason.Rwitness p)
   | Dollardollar id ->
       let ty = Env.get_local_check_defined env id in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       make_result env p (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
       if not accept_using_var
@@ -1906,7 +1908,7 @@ and expr_
       make_result env p (T.Expr_list tel) ty
   | Array_get (e, None) ->
       let env, te, _ = update_array_type p env e None valkind in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       (* NAST check reports an error if [] is used for reading in an
          lvalue context. *)
       let ty = (Reason.Rwitness p, Typing_utils.terr env) in
@@ -1916,7 +1918,7 @@ and expr_
         update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, te2, ty2 = expr env e2 in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let is_lvalue = phys_equal valkind `lvalue in
       let env, ty =
         Typing_array_access.array_get ~array_pos:(fst e1) ~expr_pos:p ?lhs_of_null_coalesce
@@ -1949,7 +1951,7 @@ and expr_
           tel,
           [])) ty
   | Call (call_type, e, hl, el, uel) ->
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, te, ty = check_call ~is_using_clause ~expected
         env p call_type e hl el uel ~in_suspend:false in
       env, te, ty
@@ -2031,7 +2033,7 @@ and expr_
   | Binop (bop, e1, e2) ->
       let env, te1, ty1 = raw_expr env e1 in
       let env, te2, ty2 = raw_expr env e2 in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, te3, ty =
         binop p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       env, te3, ty
@@ -2056,7 +2058,7 @@ and expr_
       make_result env p (T.Pipe(e0, te1, te2)) ty2
   | Unop (uop, e) ->
       let env, te, ty = raw_expr env e in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       unop ~is_func_arg ~array_ref_ctx p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
   | Typename sid ->
@@ -2093,7 +2095,7 @@ and expr_
         make_result env p (T.Class_get (te, T.CGstring (py, y))) ty
   | Class_get ((cpos, cid), CGstring mid) ->
       let env, te, cty = static_class_id ~check_constraints:false cpos env [] cid in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
@@ -2109,7 +2111,7 @@ and expr_
   | Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
   | Obj_get (e, (pid, Id (py, y)), nf)
     when Env.FakeMembers.get env e y <> None ->
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, local = Env.FakeMembers.make p env e y in
       let local = p, Lvar (p, local) in
       let env, _, ty = expr env local in
@@ -2124,7 +2126,7 @@ and expr_
           | OG_nullsafe -> Some p
         ) in
       let env, te1, ty1 = expr ~accept_using_var:true env e1 in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, result =
         obj_get ~obj_pos:(fst e1) ~is_method:false ~nullsafe ~valkind
           env ty1 (CIexpr e1) m (fun x -> x) in
@@ -2148,7 +2150,7 @@ and expr_
       (Reason.Rwitness p, Typing_utils.tany env)
     in
     let (pos, _), te2 = te2 in
-    let env = save_and_merge_next_in_catch env in
+    let env = might_throw env in
     let te2 = T.make_typed_expr pos ty te2 in
     make_result env p (T.Obj_get(te1, te2, nullflavor)) ty
   | Yield_break ->
@@ -2219,6 +2221,7 @@ and expr_
     let env = Env.forget_members env p in
     make_result env p (T.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
+      let env = might_throw env in
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let env, te, rty =
         expr ~is_using_clause env e in
@@ -2243,7 +2246,7 @@ and expr_
 
   | Special_func func -> special_func env p func
   | New ((pos, c), tal, el, uel, p1) ->
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, tc, tel, tuel, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c tal el uel in
@@ -2256,7 +2259,7 @@ and expr_
       expr_error env p (Reason.Rwitness p)
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       if (TypecheckerOptions.experimental_feature_enabled
         (Env.get_tcopt env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
@@ -2280,7 +2283,7 @@ and expr_
       else safely_refine_type env p reason lpos lty rty
     in
     let env, te, expr_ty = expr env e in
-    let env = save_and_merge_next_in_catch env in
+    let env = might_throw env in
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env hint in
     let env, hint_ty =
@@ -3213,7 +3216,7 @@ and assign_ p ur env e1 ty2 =
         | OG_nullthrows -> None
         | OG_nullsafe -> Some pobj in
       let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
-      let env = save_and_merge_next_in_catch env in
+      let env = might_throw env in
       let env, ty2' = Env.unbind env ty2 in
       let k (env, member_ty, vis) =
         let env = Type.coerce_type p ur env ty2' member_ty in

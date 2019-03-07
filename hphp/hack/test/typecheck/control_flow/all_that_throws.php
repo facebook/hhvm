@@ -17,6 +17,7 @@ class M {}
 class N {}
 class O {}
 class P {}
+class Q {}
 
 function might_throw(): void {}
 class Thrower {
@@ -26,7 +27,12 @@ class Thrower {
   public static function might_throw_s(): void {}
 }
 
-function test(vec<int> $v, int $i, string $s): void {
+async function test(
+  vec<int> $v,
+  int $i,
+  string $s,
+  Awaitable<void> $a
+): Awaitable<void> {
   $x = new P();
   try {
     $x = new A();
@@ -58,6 +64,8 @@ function test(vec<int> $v, int $i, string $s): void {
     $x = new N();
     $i as string;
     $x = new O();
+    await $a;
+    $x = new Q();
   } catch (Exception $e) {
     hh_show($x);
   }

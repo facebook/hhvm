@@ -7,7 +7,6 @@
  *
 *)
 
-open Nast
 open Tast
 
 module Env = Tast_env

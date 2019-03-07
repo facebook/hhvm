@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Ast_defs
-open Aast_defs
 open Tast
 open Typing_defs
 

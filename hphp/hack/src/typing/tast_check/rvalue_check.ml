@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Nast
 open Tast
 open Typing_defs
 

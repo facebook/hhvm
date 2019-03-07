@@ -1,5 +1,5 @@
 
-Notice: Undefined variable: i in %s/test/slow/redeclared_classes/1467.php on line 27
+Notice: Undefined variable: i in %s/test/slow/redeclared_classes/1467.php on line 21
 int(1)
 object(p)#1 (1) {
   ["data1"]=>
@@ -9,4 +9,3 @@ object(c)#2 (1) {
   ["data1"]=>
   NULL
 }
-r1

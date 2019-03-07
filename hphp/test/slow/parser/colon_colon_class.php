@@ -12,10 +12,10 @@ function main() {
   var_dump(A::class);
   A::b();
 
-  function c($c = A::class) {
+  $c = function ($c = A::class) {
     var_dump($c);
-  }
-  c();
+  };
+  $c();
 
   var_dump(Vector::class);
 

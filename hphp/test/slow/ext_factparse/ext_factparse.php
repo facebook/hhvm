@@ -11,9 +11,7 @@
 
 function f1() {}
 
-if (rand()) {
-  function f2() {}
-}
+function f2() {}
 
 class CL0 {
   # negative test
@@ -92,18 +90,6 @@ if (rand()) {
   }
 } else {
   abstract class M1 {
-  }
-}
-
-# Need to be careful when writing an autoloader to handle these cases properly.
-# The output facts will show f8() is defined in this file. However, it won't
-# actually be callable unless f7() is called first (e.g. via the pesudo-main
-# in this source module which will be executed when the file is require'd).
-# As such an autoloader must be careful to call function_exists('f8') after
-# require'ing this file and return failure if f8() did not actually materialize.
-
-function f7() {
-  function f8() {
   }
 }
 

@@ -1,10 +1,10 @@
 <?hh
 function main() {
-  function f($x = Vector {}) {
+  $f = function ($x = Vector {}) {
     return $x;
-  }
-  $v1 = f();
-  $v2 = f();
+  };
+  $v1 = $f();
+  $v2 = $f();
   $v1[] = 11;
   $v2[] = 22;
   $v2[] = 33;
@@ -12,12 +12,12 @@ function main() {
 
   echo "=========\n";
 
-  function g() {
+  $g = function () {
     static $x = Vector {};
     return $x;
-  }
-  $v1 = g();
-  $v2 = g();
+  };
+  $v1 = $g();
+  $v2 = $g();
   $v1[] = 11;
   $v2[] = 22;
   $v2[] = 33;

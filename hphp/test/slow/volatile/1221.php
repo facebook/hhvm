@@ -19,75 +19,27 @@ function z() {
   var_dump(class_exists('cex'));
 }
 function test() {
-  function t1() {
     new cNew();
-  }
-  t1();
-  function t2() {
     new cNew_r();
-  }
-  t2();
-  function t4() {
     $x = 'cNew_d';
     new $x();
-  }
-  t4();
-  function t5() {
     var_dump(csm::$mem);
-  }
-  t5();
-  function t6() {
     var_dump(csm_r::$mem);
-  }
-  t6();
-  function t7() {
     var_dump(CcOn::C);
-  }
-  t7();
-  function t8() {
     var_dump(CcOn_r::C);
-  }
-  t8();
-  function t9() {
     var_dump(constant('CcOn_d::C'));
-  }
-  t9();
-  function t10() {
     csmeth::m();
-  }
-  t10();
-  function t11() {
     csmeth_r::m();
-  }
-  t11();
-  function t12() {
     call_user_func(array('csmeth_d', 'm'));
-  }
-  t12();
-  function t13() {
     class a extends cpar {
 }
     new a;
-  }
-  t13();
-  function t14() {
     class b extends cpar_r {
 }
     new b;
-  }
-  t14();
-  function t15() {
     new ReflectionClass('cref');
-  }
-  t15();
-  function t16() {
     var_dump(class_exists('cex'));
-  }
-  t16();
-  function t17() {
     var_dump(class_exists('cex_r'));
-  }
-  t17();
 }
 function __autoload($name) {
   var_dump('autoload ' . $name);

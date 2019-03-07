@@ -20,9 +20,3 @@ var_dump(defined('foo'));
 var_dump(defined('bar', false));
 var_dump(constant('foo'));
 var_dump(constant('bar'));
-if (0) {
-  function foo() {
-}
-  function foo() {
-}
-}

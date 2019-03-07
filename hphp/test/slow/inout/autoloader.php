@@ -3,21 +3,13 @@
 function loader($kind, $name) {
   echo "autoloading $kind: $name\n";
   if ($name === 'partial') {
-    function partial($x) {
-      echo "whoops!\n";
-    }
+    include 'autoloader1.inc';
   } else if ($name === 'hit1') {
-    function hit1(inout $x) {
-      $x = 'hit1';
-    }
+    include 'autoloader2.inc';
   } else if ($name === 'hit2') {
-    function hit2(inout $x) {
-      $x = 'hit2';
-    }
+    include 'autoloader3.inc';
   } else if ($name === 'hit3') {
-    function hit3(&$x) {
-      $x = 'hit3';
-    }
+    include 'autoloader4.inc';
   }
 }
 

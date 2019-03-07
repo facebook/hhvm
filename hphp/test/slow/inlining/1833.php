@@ -1,9 +1,6 @@
 <?php
 
 function g($a) {
- function t(){
-}
-;
  return $a ? array(1,2,3) : 'foo';
  }
 function f($a) {

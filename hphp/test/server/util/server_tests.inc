@@ -280,9 +280,7 @@ function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
 }
 
 if (!function_exists("request")) {
-  function request($host, $port, $path, $timeout = 1200) {
-    return http_request($host, $port, $path, $timeout);
-  }
+  include 'server_tests1.inc';
 }
 
 function killChildren($pid, $safe_children) {

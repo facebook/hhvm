@@ -8,12 +8,10 @@
 function main_1240() {
 $a = bar();
  if ($a) {
- function fOO() {
-}
+   include '1240-1.inc';
  }
  else {
- function Foo() {
-}
+   include '1240-2.inc';
  }
  foo();
 }

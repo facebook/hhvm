@@ -2,11 +2,11 @@ array(3) {
   ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(1643830044039019320)
+    int(7065037137264201511)
     ["md5sum1"]=>
-    int(-8034797507396892117)
+    int(-8840447037912950012)
     ["sha1sum"]=>
-    string(40) "6730a2ecfccea59db3eba251d34dac160caa2e2d"
+    string(40) "94e273c432ac7e3d2c92bfe477b2b037c9403ada"
     ["types"]=>
     array(13) {
       [0]=>
@@ -230,16 +230,12 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(3) {
       [0]=>
       string(2) "f1"
       [1]=>
       string(2) "f2"
       [2]=>
-      string(2) "f7"
-      [3]=>
-      string(2) "f8"
-      [4]=>
       string(2) "f6"
     }
     ["constants"]=>
@@ -267,14 +263,14 @@ array(3) {
       string(3) "TA2"
     }
   }
-  ["/tmp/%s"]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(-2290607048394802670)
+    int(-818427246748115209)
     ["md5sum1"]=>
-    int(-3504825627077465599)
+    int(-8044729644988883135)
     ["sha1sum"]=>
-    string(40) "764cb8afd8fbf9b3065d89f7f6c5b4e857c24f05"
+    string(40) "1ee9c2848ecb10d3f182a0e6f21fa21b0952285e"
     ["types"]=>
     array(13) {
       [0]=>
@@ -498,16 +494,12 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(3) {
       [0]=>
       string(5) "NS\f1"
       [1]=>
       string(5) "NS\f2"
       [2]=>
-      string(5) "NS\f7"
-      [3]=>
-      string(5) "NS\f8"
-      [4]=>
       string(5) "NS\f6"
     }
     ["constants"]=>
@@ -535,14 +527,14 @@ array(3) {
       string(6) "NS\TA2"
     }
   }
-  ["/tmp/%s"]=>
+  ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(-6117641779479300928)
+    int(8668181983997422502)
     ["md5sum1"]=>
-    int(1155436758753464789)
+    int(-5325433471542458446)
     ["sha1sum"]=>
-    string(40) "e9e2f89ba273ff6c54c50794b387317b9d2a4edb"
+    string(40) "d95101e87fab7b2c25ebed634fb5821d56af9363"
     ["types"]=>
     array(13) {
       [0]=>
@@ -766,16 +758,12 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(5) {
+    array(3) {
       [0]=>
       string(8) "NS\NS\f1"
       [1]=>
       string(8) "NS\NS\f2"
       [2]=>
-      string(8) "NS\NS\f7"
-      [3]=>
-      string(8) "NS\NS\f8"
-      [4]=>
       string(8) "NS\NS\f6"
     }
     ["constants"]=>
@@ -806,7 +794,7 @@ array(3) {
 }
 PASSED md5sum
 array(3) {
-  ["/tmp/%s"]=>
+  ["%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL

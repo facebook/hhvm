@@ -9,12 +9,9 @@ function VERIFY($x) { VS($x != false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-// TODO(#2512714): set this to true and you'll SEGV :)
-$want_to_segv = false;
-if ($want_to_segv != true) {
-  function hello() {
-    return 'Hello World';
-  }
+// TODO(#2512714): if you comment out the function hello and you'll SEGV :)
+function hello() {
+  return 'Hello World';
 }
 
 function add($a, $b) {

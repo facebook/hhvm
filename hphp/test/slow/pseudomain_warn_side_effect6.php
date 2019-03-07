@@ -1,4 +1,4 @@
 <?hh
 if (3 > 1) {
-  function x() {}
+  $i_am_global = 1;
 }

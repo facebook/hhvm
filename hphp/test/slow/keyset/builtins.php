@@ -34,16 +34,27 @@ var_dump(array_column(
   'baz',
 ));
 
+function nocase($a, $b) {
+  $la = strtolower($a);
+  $lb = strtolower($b);
+  return ($la === $lb) ? 0 : (($la > $lb) ? 1 : (-1));
+}
+
+function vowel($c) {
+  $k = keyset['a', 'e', 'i', 'o', 'u'];
+  return isset($k[$c]);
+}
+
+function inc($s) {
+  $s++;
+  return $s;
+}
+
 function with_keyset($k1) {
   echo "---- running " . __FUNCTION__ . " with\n";
   var_dump($k1);
   $k2 = keyset['q', 'n'];
   $k3 = keyset['q', 'N'];
-  function nocase($a, $b) {
-    $la = strtolower($a);
-    $lb = strtolower($b);
-    return ($la === $lb) ? 0 : (($la > $lb) ? 1 : (-1));
-  }
   echo "array_diff_assoc: ";
   var_dump(array_diff_assoc($k1, $k2));
   echo "array_diff: ";
@@ -80,18 +91,10 @@ function with_keyset($k1) {
   var_dump(array_intersect($k1, $k2));
   echo "array_uintersect: ";
   var_dump(array_uintersect($k1, $k3, 'nocase'));
-  function vowel($c) {
-    $k = keyset['a', 'e', 'i', 'o', 'u'];
-    return isset($k[$c]);
-  }
   echo "array_filter: ";
   var_dump(array_filter($k1, 'vowel'));
   echo "array_flip: ";
   var_dump(array_flip($k1));
-  function inc($s) {
-    $s++;
-    return $s;
-  }
   echo "array_map: ";
   var_dump(array_map('inc', keyset['H', 'A', 'L']));
   echo "array_merge: ";

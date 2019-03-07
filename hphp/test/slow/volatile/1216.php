@@ -4,22 +4,6 @@ function bar() {
   for ($i = 0;
  $i < 4;
  $i++) {
-    if ($i > 1 && !function_exists('foo')) {
-      function foo() {
-        echo "foo called\n";
-      }
-    }
-    $foo = 'foo';
-    if (function_exists($foo)) {
-      foo();
-    }
- else {
-      echo "foo does not exists\n";
-    }
-  }
-  for ($i = 0;
- $i < 4;
- $i++) {
     if ($i > 1 && !class_exists('goo')) {
       class goo {
         function goo() {

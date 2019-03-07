@@ -2,11 +2,11 @@ array(3) {
   ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(-9081410224842163753)
+    int(4383056505853746297)
     ["md5sum1"]=>
-    int(2112077218297386100)
+    int(-2974079675222806495)
     ["sha1sum"]=>
-    string(40) "688f2d5ccd90508452dcbf061a6f428b11942c40"
+    string(40) "394475b1e5c57740f3fde1b4cc1e10efc49265ba"
     ["types"]=>
     array(13) {
       [0]=>
@@ -230,15 +230,9 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(4) {
+    array(1) {
       [0]=>
       string(2) "f1"
-      [1]=>
-      string(2) "f2"
-      [2]=>
-      string(2) "f7"
-      [3]=>
-      string(2) "f8"
     }
     ["constants"]=>
     array(5) {
@@ -266,11 +260,11 @@ array(3) {
   ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(-9121506360469795360)
+    int(-766628480674557984)
     ["md5sum1"]=>
-    int(-5561358563872375913)
+    int(4132325208887423240)
     ["sha1sum"]=>
-    string(40) "9848fd7a3348a1482b5e26905c8521fbb738e3b5"
+    string(40) "50e891dd1b93031067bca08fb2adcd3bc9a4d0e4"
     ["types"]=>
     array(13) {
       [0]=>
@@ -494,15 +488,9 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(4) {
+    array(1) {
       [0]=>
       string(5) "NS\f1"
-      [1]=>
-      string(5) "NS\f2"
-      [2]=>
-      string(5) "NS\f7"
-      [3]=>
-      string(5) "NS\f8"
     }
     ["constants"]=>
     array(5) {
@@ -530,11 +518,11 @@ array(3) {
   ["%s"]=>
   array(7) {
     ["md5sum0"]=>
-    int(2023709596825882474)
+    int(177695044982738465)
     ["md5sum1"]=>
-    int(8535380003990387063)
+    int(321704508444983991)
     ["sha1sum"]=>
-    string(40) "419372c92eb5371c5728a0fb5cb3e8df5c5a416a"
+    string(40) "9d0fa69dd74b7da21b9fa8b3c56ef5456feffd51"
     ["types"]=>
     array(13) {
       [0]=>
@@ -758,15 +746,9 @@ array(3) {
       }
     }
     ["functions"]=>
-    array(4) {
+    array(1) {
       [0]=>
       string(8) "NS\NS\f1"
-      [1]=>
-      string(8) "NS\NS\f2"
-      [2]=>
-      string(8) "NS\NS\f7"
-      [3]=>
-      string(8) "NS\NS\f8"
     }
     ["constants"]=>
     array(5) {

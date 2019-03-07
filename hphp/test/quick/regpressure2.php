@@ -12,7 +12,6 @@ function test() {
   $i = 9;
   $j = 10;
   $k = 11;
-  function foo() {}
   class bar {}
   var_dump($a, $b, $c, $d, $e, $f, $g, $h, $i, $j, $k);
   }

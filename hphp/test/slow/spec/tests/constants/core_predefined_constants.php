@@ -55,15 +55,6 @@ function ComputeResult()
     trace("__CLASS__", __CLASS__);
     trace("__TRAIT__", __TRAIT__);
     trace("__NAMESPACE__", __NAMESPACE__);
-
-    function Inner()
-    {
-        echo "Inside ComputeResult\n";
-        trace("__FUNCTION__", __FUNCTION__);
-        trace("__METHOD__", __METHOD__);
-    }
-
-    Inner();
 }
 
 ComputeResult();

@@ -9,9 +9,9 @@ function main() {
 <<__EntryPoint>>
 function main_hack_array_fpass() {
 if (isset($g)) {
-  function foo(&$x) {}
+  include 'hack-array-fpass1.inc';
 } else {
-  function foo($x) { var_dump($x); }
+  include 'hack-array-fpass2.inc';
 }
 
 main();

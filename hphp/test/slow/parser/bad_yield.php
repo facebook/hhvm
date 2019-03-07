@@ -2,8 +2,7 @@
 
 class C {
   function __construct() {
-    function foo() {}
-    yield foo();
+    yield 1;
   }
 }
 

@@ -21,11 +21,10 @@ function manipulate($arr) {
 }
 
 function main() {
-  function init($b) {
-    if ($b) { return 'a'; }
-    return 'b';
-  }
-  $foo = keyset[init(true), init(false)];
+  $foo = keyset[
+    __hhvm_intrinsics\launder_value('a'),
+    __hhvm_intrinsics\launder_value('b'),
+  ];
   $foo[] = 1;
   $foo[] = '2';
   $foo[] = 3;

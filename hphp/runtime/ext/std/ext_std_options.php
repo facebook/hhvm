@@ -61,8 +61,7 @@ function get_cfg_var(string $option): mixed;
 function get_current_user(): string;
 
 /* Returns the names and values of all the constants currently defined. This
- * includes those created by extensions as well as those created with the
- * define() function.
+ * includes those created by extensions.
  */
 <<__Native>>
 function get_defined_constants(bool $categorize = false): array;

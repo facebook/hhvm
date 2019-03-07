@@ -73,23 +73,6 @@ function connection_timeout(): int;
 <<__Native>>
 function constant(string $name): mixed;
 
-/* Defines a named constant at runtime.
- * @param string $name - The name of the constant.
- * @param mixed $value - The value of the constant; only scalar and null
- * values are allowed. Scalar values are integer, float, string or boolean
- * values. It is possible to define resource constants, however it is not
- * recommended and may cause unpredictable behavior.
- * @param bool $case_insensitive - If set to TRUE, the constant will be
- * defined case-insensitive. The default behavior is case-sensitive; i.e.
- * CONSTANT and Constant represent different values.  Case-insensitive
- * constants are stored as lower-case.
- * @return bool - Returns TRUE on success or FALSE on failure.
- */
-<<__Native>>
-function define(string $name,
-                mixed $value,
-                bool $case_insensitive = false): bool;
-
 /* Checks whether the given constant exists and is defined.  If you want to
  * see if a variable exists, use isset() as defined() only applies to
  * constants. If you want to see if a function exists, use function_exists().

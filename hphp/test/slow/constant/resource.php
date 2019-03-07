@@ -1,9 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-// define('FOO1', xml_parser_create());
-// define('FOO2', [xml_parser_create(), xml_parser_create()]);
-//
 // const BAR1 = FOO1;
 // const BAR2 = [FOO1, FOO1];
 // const BAR3 = vec[FOO1, FOO1];

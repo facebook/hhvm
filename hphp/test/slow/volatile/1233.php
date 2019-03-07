@@ -11,7 +11,6 @@ var_dump(HH\autoload_set_paths(
 const foo = 0;
 const bar = 0;
 function failure($kind, $name) {
-  if ($kind == 'constant' && $name == 'bar') define('bar', 'baz');
   var_dump($kind, $name);
 }
 var_dump(function_exists('foo'));

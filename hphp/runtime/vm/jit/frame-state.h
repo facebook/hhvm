@@ -529,7 +529,7 @@ private:
   /*
    * Stack state update helpers.
    */
-  void spillFrameStack(IRSPRelOffset, FPInvOffset, const IRInstruction*);
+  void spillFrameStack(const IRInstruction*);
   void writeToSpilledFrame(IRSPRelOffset, const SSATmp*);
 
   /*

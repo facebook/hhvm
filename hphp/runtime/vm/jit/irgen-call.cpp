@@ -726,11 +726,9 @@ void fpushActRec(IRGS& env,
                  uint32_t numArgs,
                  const StringData* invName,
                  SSATmp* dynamicCall) {
+  env.irb->fs().incBCSPDepth(kNumActRecCells);
   ActRecInfo info;
-  info.spOffset = offsetFromIRSP(
-    env,
-    BCSPRelOffset{-int32_t{kNumActRecCells}}
-  );
+  info.spOffset = offsetFromIRSP(env, BCSPRelOffset{0});
   info.numArgs = numArgs;
 
   gen(

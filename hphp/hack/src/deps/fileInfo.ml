@@ -38,6 +38,13 @@ let parse_mode = function
   | "experimental" -> Some Mexperimental
   | _ -> None
 
+let is_strict = function
+  | Mstrict
+  | Mexperimental -> true
+  | Mphp
+  | Mdecl
+  | Mpartial -> false
+
 let string_of_mode = function
   | Mphp          -> "php"
   | Mdecl         -> "decl"

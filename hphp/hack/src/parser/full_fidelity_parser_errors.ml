@@ -146,7 +146,9 @@ let is_typechecker env =
   is_hack env && (not env.codegen)
 
 let is_strict env =
-  SyntaxTree.mode env.syntax_tree = Some FileInfo.Mstrict
+  match SyntaxTree.mode env.syntax_tree with
+  | Some mode -> FileInfo.is_strict mode
+  | None -> false
 
 let global_namespace_name = "\\"
 

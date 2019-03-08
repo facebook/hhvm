@@ -120,10 +120,11 @@ let is_php tree =
   tree.mode = Some FileInfo.Mphp
 
 let is_strict tree =
-  (is_hack tree) && tree.mode = Some FileInfo.Mstrict
+  match tree.mode with
+  | Some mode -> FileInfo.is_strict mode
+  | None -> false
 
-let is_decl tree =
-  (is_hack tree) && tree.mode = Some FileInfo.Mdecl
+let is_decl tree = tree.mode = Some FileInfo.Mdecl
 
 let errors_no_bodies tree =
   let not_in_body error =

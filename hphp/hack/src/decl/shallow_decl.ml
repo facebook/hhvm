@@ -39,12 +39,12 @@ let class_const env c (h, name, e) =
           begin match Decl_utils.infer_const e with
             | Some ty -> ty, false
             | None ->
-              if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
+              if FileInfo.is_strict c.c_mode && c.c_kind <> Ast.Cenum
               then Errors.missing_typehint pos;
               (Reason.Rwitness pos, Tany), false
           end
         | None, None ->
-          if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
+          if FileInfo.is_strict c.c_mode then Errors.missing_typehint pos;
           let r = Reason.Rwitness pos in
           (r, Tany), true
     in
@@ -91,7 +91,7 @@ let prop env cv =
          hack to support existing code for now. *)
       (* Task #5815945: Get rid of this Hack *)
       let env =
-        if Decl_env.mode env = FileInfo.Mstrict
+        if FileInfo.is_strict (Decl_env.mode env)
         then { env with Decl_env.mode = FileInfo.Mpartial }
         else env
       in
@@ -124,7 +124,7 @@ and static_prop env c cv =
     SN.UserAttributes.uaSoftLateInit
     cv.cv_user_attributes in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
-  if cv.cv_expr = None && FileInfo.(c.c_mode = Mstrict || c.c_mode = Mpartial)
+  if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)

@@ -31,6 +31,7 @@ type mode =
   | Mexperimental (* Experimental mode - strict mode plus experimental features *)
 [@@deriving show]
 
+val is_strict : mode -> bool
 val parse_mode : string -> mode option
 val string_of_mode : mode -> string
 

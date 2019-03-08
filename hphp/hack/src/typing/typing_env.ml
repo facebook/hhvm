@@ -1051,8 +1051,7 @@ let set_mode env mode =
 
 let get_mode env = env.decl_env.mode
 
-let is_strict env = let mode = get_mode env in
-                    mode = FileInfo.Mstrict || mode = FileInfo.Mexperimental
+let is_strict env = FileInfo.is_strict (get_mode env)
 let is_decl env = get_mode env = FileInfo.Mdecl
 
 let iter_anonymous env f =

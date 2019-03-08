@@ -18,9 +18,6 @@ let check_variadic v =
     Errors.variadic_byref_param vparam.param_pos
   | _ -> ()
 
-let is_strict mode =
-  mode = FileInfo.Mstrict || mode = FileInfo.Mexperimental
-
 let handler = object
   inherit Nast_visitor.handler_base
 
@@ -31,7 +28,7 @@ let handler = object
   method! at_hint env (p, h) =
     match h with
     | Hfun (_, _, _hl, _, _, Hvariadic None, _, _)
-      when is_strict env.file_mode ->
+      when FileInfo.is_strict env.file_mode ->
       Errors.ellipsis_strict_mode ~require:`Type p
     | _ -> ()
 end

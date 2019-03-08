@@ -4916,7 +4916,7 @@ and call_construct p env class_ params el uel cid =
   match (fst cstr) with
     | None ->
       if el <> [] &&
-        (mode = FileInfo.Mstrict || mode = FileInfo.Mpartial) &&
+        (FileInfo.is_strict mode || mode = FileInfo.Mpartial) &&
         (Cls.members_fully_known class_)
       then Errors.constructor_no_args p;
       let env, tel, _tyl = exprs env el in

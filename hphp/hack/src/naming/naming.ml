@@ -1084,7 +1084,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.darray ->
         Some (match hl with
           | [] ->
-              if (fst env).in_mode = FileInfo.Mstrict then
+              if FileInfo.is_strict (fst env).in_mode then
                 Errors.too_few_type_arguments p;
               N.Hdarray ((p, N.Hany), (p, N.Hany))
           | [_] -> Errors.too_few_type_arguments p; N.Hany
@@ -1093,7 +1093,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.varray ->
         Some (match hl with
           | [] ->
-              if (fst env).in_mode = FileInfo.Mstrict then
+              if FileInfo.is_strict (fst env).in_mode then
                 Errors.too_few_type_arguments p;
               N.Hvarray (p, N.Hany)
           | [val_] -> N.Hvarray (aast_hint env val_)
@@ -1101,7 +1101,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.varray_or_darray ->
         Some (match hl with
           | [] ->
-              if (fst env).in_mode = FileInfo.Mstrict then
+              if FileInfo.is_strict (fst env).in_mode then
                 Errors.too_few_type_arguments p;
               N.Hvarray_or_darray (p, N.Hany)
           | [val_] -> N.Hvarray_or_darray (aast_hint env val_)
@@ -1194,7 +1194,7 @@ module Make (GetLocals : GetLocals) = struct
     match e with
     | (_, (Aast.Id _ | Aast.Lvar _)) -> ()
     | (p, _) ->
-      if (fst env).in_mode = FileInfo.Mstrict
+      if FileInfo.is_strict (fst env).in_mode
       then err p
 
   (* Naming of a class *)
@@ -1713,7 +1713,7 @@ module Make (GetLocals : GetLocals) = struct
     Env.add_lvar env (p, name) (p, ident);
     let ty = Option.map param.Aast.param_hint (aast_hint env) in
     let eopt = Option.map param.Aast.param_expr (aast_expr env) in
-    if param.Aast.param_is_reference && (fst env).in_mode = FileInfo.Mstrict
+    if param.Aast.param_is_reference && FileInfo.is_strict (fst env).in_mode
     then Errors.reference_in_strict_mode p;
     { N.param_annotation = p;
       param_hint = ty;
@@ -2443,7 +2443,7 @@ module Make (GetLocals : GetLocals) = struct
             match x with
             | x when x = SN.Typehints.object_cast ->
               (* (object) is a valid cast but not a valid type annotation *)
-              if (fst env).in_mode = FileInfo.Mstrict then Errors.object_cast p None;
+              if FileInfo.is_strict (fst env).in_mode then Errors.object_cast p None;
               p, N.Hany
             | x when x = SN.Typehints.void ->
               Errors.void_cast p;
@@ -2546,7 +2546,7 @@ module Make (GetLocals : GetLocals) = struct
         aast_exprl env uel,
         p)
     | Aast.New ((_, Aast.CIexpr(p, _e)), tal, el, uel, _) ->
-      if (fst env).in_mode = FileInfo.Mstrict
+      if FileInfo.is_strict (fst env).in_mode
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown),
         aast_targl env p tal,
@@ -2892,7 +2892,7 @@ module Make (GetLocals : GetLocals) = struct
 
   let check_constant_hint cst =
     match cst.Aast.cst_type with
-    | None when cst.Aast.cst_mode = FileInfo.Mstrict ->
+    | None when FileInfo.is_strict cst.Aast.cst_mode ->
         Errors.add_a_typehint (fst cst.Aast.cst_name)
     | None
     | Some _ -> ()

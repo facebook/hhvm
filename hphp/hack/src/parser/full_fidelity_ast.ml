@@ -3282,7 +3282,8 @@ let pProgram : program parser = fun node env  ->
       post_process el (e :: acc)
     (* Toplevel statements not allowed in strict mode *)
     | (Stmt (p, _) as e)::el
-        when (env.keep_errors) && (not env.codegen) && env.fi_mode = FileInfo.Mstrict ->
+      when (env.keep_errors) && (not env.codegen) &&
+           FileInfo.is_strict env.fi_mode ->
       (* We've already lowered at this point, so raise_parsing_error doesn't
         really fit. This is only a typechecker error anyway, so do it anyway *)
       raise_parsing_error env (`Pos p) SyntaxError.toplevel_statements;

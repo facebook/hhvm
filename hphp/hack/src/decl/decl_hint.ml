@@ -30,7 +30,7 @@ and hint_ p env = function
   | Hdynamic -> Tdynamic
   | Hnothing -> Tnothing
   | Harray (h1, h2) ->
-    if env.Decl_env.mode = FileInfo.Mstrict && h1 = None
+    if FileInfo.is_strict env.Decl_env.mode && h1 = None
     then Errors.generic_array_strict p;
     let h1 = Option.map h1 (hint env) in
     let h2 = Option.map h2 (hint env) in

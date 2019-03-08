@@ -236,7 +236,7 @@ let gamma_from_params env (params:ETast.fun_param list) =
   List.fold ~init:empty_gamma ~f:add_param_to_gamma params
 
 let check_fun env (f:ETast.fun_def) =
-  if f.f_mode <> FileInfo.Mstrict then () else
+  if not (FileInfo.is_strict f.f_mode) then () else
   let gamma = gamma_from_params env f.f_params in
   if f.f_tparams <> []
     || f.f_where_constraints <> []

@@ -416,7 +416,7 @@ and class_decl c =
   let ext_strict = List.fold_left c.sc_uses
     ~f:(trait_exists env) ~init:ext_strict in
   if not ext_strict &&
-      (env.Decl_env.mode = FileInfo.Mstrict) then
+     (FileInfo.is_strict env.Decl_env.mode) then
     let p, name = c.sc_name in
     Errors.strict_members_not_known p name
   else ();
@@ -876,7 +876,7 @@ let const_decl cst =
   | None ->
     match cst.cst_value >>= Decl_utils.infer_const with
     | Some ty -> ty
-    | None when cst.cst_mode = FileInfo.Mstrict ->
+    | None when FileInfo.is_strict cst.cst_mode ->
       Errors.missing_typehint cst_pos;
       Reason.Rwitness cst_pos, Tany
     | None ->

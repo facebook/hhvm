@@ -403,7 +403,7 @@ function verify_hhbc() {
 }
 
 function read_opts_file($file) {
-  if (!file_exists($file)) {
+  if ($file === null || !file_exists($file)) {
     return "";
   }
 
@@ -2552,11 +2552,11 @@ function msg_loop($num_tests, $queue) {
       $fill = $bar_cols - ($passed_ticks + $skipped_ticks + $failed_ticks);
       if ($fill < 0) $fill = 0;
 
-      $fill = str_repeat('-', $fill);
+      $fill = str_repeat('-', (int)$fill);
 
-      $passed_ticks = str_repeat('#',  $passed_ticks);
-      $skipped_ticks = str_repeat('#', $skipped_ticks);
-      $failed_ticks = str_repeat('#',  $failed_ticks);
+      $passed_ticks = str_repeat('#',  (int)$passed_ticks);
+      $skipped_ticks = str_repeat('#', (int)$skipped_ticks);
+      $failed_ticks = str_repeat('#',  (int)$failed_ticks);
 
       echo
         "\033[2K\033[1G[",

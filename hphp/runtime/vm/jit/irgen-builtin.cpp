@@ -1700,7 +1700,7 @@ void emitFCallBuiltin(IRGS& env,
   auto const callee = Unit::lookupBuiltin(funcName);
 
   if (!callee) PUNT(Missing-builtin);
-  emitCallerRxChecks(env, callee);
+  emitCallerRxChecks(env, callee, /* unused, known callee */ IRSPRelOffset {});
 
   auto params = prepare_params(
     env, callee,

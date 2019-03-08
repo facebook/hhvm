@@ -1176,11 +1176,6 @@ bool instrAllowsFallThru(Op opcode) {
   return (opFlags & TF) == 0;
 }
 
-bool instrReadsCurrentFpi(Op opcode) {
-  InstrFlags opFlags = instrFlags(opcode);
-  return (opFlags & FF) != 0;
-}
-
 PC skipCall(PC callPC) {
   assertx(instrMayVMCall(peek_op(callPC)));
   return callPC + instrLen(callPC);
@@ -1225,15 +1220,6 @@ IterTable getIterTable(PC opcode) {
     return iterTableFromStream(ptr);
   }
   not_reached();
-}
-
-int instrFpToArDelta(const Func* func, PC opcode) {
-  // This function should only be called for instructions that read the current
-  // FPI
-  assertx(instrReadsCurrentFpi(peek_op(opcode)));
-  auto const fpi = func->findFPI(func->unit()->offsetOf(opcode));
-  assertx(fpi != nullptr);
-  return fpi->m_fpOff;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

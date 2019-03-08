@@ -90,10 +90,6 @@ inline bool isCF(PC pc) {
   return instrIsNonCallControlFlow(peek_op(pc));
 }
 
-inline bool isFF(PC pc) {
-  return instrReadsCurrentFpi(peek_op(pc));
-}
-
 inline bool isRet(PC pc) {
   auto const op = peek_op(pc);
   return op == Op::RetC || op == Op::RetCSuspended || op == Op::RetM;

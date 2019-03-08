@@ -253,16 +253,8 @@ void debuggerPreventReturnsToTC();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
-  return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
-}
-
 inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
   return (ActRec*)(intptr_t(ar) + intptr_t(offset * sizeof(TypedValue)));
-}
-
-inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
-  return arAtOffset(sp, offset);
 }
 
 void frame_free_locals_no_hook(ActRec* fp);

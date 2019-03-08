@@ -173,7 +173,6 @@ void printInstr(const UnitEmitter* unit, PC pc) {
   std::cout << "  " << std::setw(4) << (pc - unit->bc()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
-               (isFF(pc) ? "F":" ") <<
                std::setw(3) << instrLen(pc) <<
                " " << instrToString(pc, unit) << std::endl;
 }

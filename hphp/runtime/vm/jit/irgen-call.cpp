@@ -1383,17 +1383,12 @@ void emitFPushClsMethodSD(IRGS& env,
 
 namespace {
 
-SSATmp* ldPreLiveFunc(IRGS& env) {
+SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
   auto const& fpiStack = env.irb->fs().fpiStack();
   if (!fpiStack.empty() && fpiStack.back().func) {
     return cns(env, fpiStack.back().func);
   }
 
-  auto off = instrFpToArDelta(curFunc(env), curSrcKey(env).pc());
-  if (resumeMode(env) != ResumeMode::None) {
-    off -= curFunc(env)->numSlotsInFrame();
-  }
-  auto const actRecOff = offsetFromIRSP(env, FPInvOffset { off });
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
 }
 
@@ -1404,7 +1399,7 @@ SSATmp* ldPreLiveFunc(IRGS& env) {
 namespace {
 
 bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
-                               const FCallArgs& fca) {
+                               const FCallArgs& fca, IRSPRelOffset actRecOff) {
   if (!fca.enforceReffiness()) return true;
 
   if (callee) {
@@ -1418,7 +1413,7 @@ bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
     return true;
   }
 
-  auto const func = ldPreLiveFunc(env);
+  auto const func = ldPreLiveFunc(env, actRecOff);
   auto const exitSlow = makeExitSlow(env);
 
   SSATmp* numParams = nullptr;
@@ -1452,7 +1447,7 @@ bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
 
 void emitCallerDynamicCallChecks(IRGS& env,
                                  const Func* callee,
-                                 uint32_t numStackInputs) {
+                                 IRSPRelOffset actRecOff) {
   if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
   if (callee && callee->isDynamicallyCallable()) return;
 
@@ -1460,11 +1455,10 @@ void emitCallerDynamicCallChecks(IRGS& env,
   ifElse(
     env,
     [&] (Block* skip) {
-      auto const calleeAROff = spOffBCFromIRSP(env) + numStackInputs;
       auto const dynamic = gen(
         env,
         LdARIsDynamic,
-        IRSPRelOffsetData { calleeAROff },
+        IRSPRelOffsetData { actRecOff },
         sp(env)
       );
       gen(env, JmpZero, skip, dynamic);
@@ -1476,7 +1470,7 @@ void emitCallerDynamicCallChecks(IRGS& env,
           env,
           LdARFuncPtr,
           TFunc,
-          IRSPRelOffsetData { calleeAROff },
+          IRSPRelOffsetData { actRecOff },
           sp(env)
         );
         auto const dyncallable = gen(env, IsFuncDynCallable, func);
@@ -1513,7 +1507,8 @@ void emitCallerDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   );
 }
 
-void emitCallerRxChecks(IRGS& env, const Func* callee) {
+void emitCallerRxChecks(IRGS& env, const Func* callee,
+                        IRSPRelOffset actRecOff) {
   if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
   if (!rxEnforceCallsInLevel(callerLevel)) return;
@@ -1528,7 +1523,8 @@ void emitCallerRxChecks(IRGS& env, const Func* callee) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const calleeLevel = gen(env, LdFuncRxLevel, ldPreLiveFunc(env));
+      auto const func = ldPreLiveFunc(env, actRecOff);
+      auto const calleeLevel = gen(env, LdFuncRxLevel, func);
       auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
       gen(env, JmpNZero, taken, lt);
     },
@@ -1546,15 +1542,16 @@ void emitFCall(IRGS& env,
                const StringData*,
                const StringData*) {
   auto const callee = env.currentNormalizedInstruction->funcd;
+  auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
   auto const readLocals = callee
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
-  if (!emitCallerReffinessChecks(env, callee, fca)) return;
-  emitCallerDynamicCallChecks(
-    env, callee, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-  emitCallerRxChecks(env, callee);
+  if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
+  emitCallerDynamicCallChecks(env, callee, actRecOff);
+  emitCallerRxChecks(env, callee, actRecOff);
 
   if (fca.hasUnpack()) {
     auto const data = CallUnpackData {
@@ -1635,7 +1632,7 @@ void emitFCall(IRGS& env,
     env,
     [&] (Block* taken) {
       auto const supportsAsyncEagerReturn =
-        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env));
+        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env, actRecOff));
       gen(env, JmpNZero, taken, supportsAsyncEagerReturn);
     },
     [&] {

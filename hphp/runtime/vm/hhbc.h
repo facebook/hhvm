@@ -203,15 +203,11 @@ enum InstrFlags {
    * not affect what vmpc() is set to after the instruction completes. */
   CF = 0x2,
 
-  /* Instruction uses current FPI. */
-  FF = 0x4,
-
   /* Instruction pushes an FPI */
-  PF = 0x8,
+  PF = 0x4,
 
   /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
-  CF_FF = (CF | FF)
 };
 
 #define INCDEC_OPS    \
@@ -662,7 +658,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjS,         ONE(OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    NF) \
   O(FPushCtor,       ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
+  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
@@ -999,7 +995,6 @@ struct StackTransInfo {
 bool instrIsNonCallControlFlow(Op opcode);
 
 bool instrAllowsFallThru(Op opcode);
-bool instrReadsCurrentFpi(Op opcode);
 
 constexpr InstrFlags instrFlagsData[] = {
 #define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
@@ -1153,11 +1148,6 @@ int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);
 StackTransInfo instrStackTransInfo(PC opcode);
-
-/*
- * Delta from FP to top pre-live ActRec.
- */
-int instrFpToArDelta(const Func* func, PC opcode);
 
 }
 

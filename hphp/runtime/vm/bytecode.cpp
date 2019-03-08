@@ -244,25 +244,6 @@ inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
-// find the AR for the current FPI region using func metadata
-static inline ActRec* arFromInstr(PC pc) {
-  const ActRec* fp = vmfp();
-  auto const func = fp->m_func;
-  if (fp->resumed()) {
-    fp = reinterpret_cast<const ActRec*>(Stack::resumableStackBase(fp) +
-                                         func->numSlotsInFrame());
-  }
-
-  return arAtOffset(fp, -instrFpToArDelta(func, pc));
-}
-
-// Find the AR for the current FPI region by indexing from sp
-static inline ActRec* arFromSp(int32_t n) {
-  auto ar = reinterpret_cast<ActRec*>(vmStack().top() + n);
-  assertx(ar == arFromInstr(vmpc()));
-  return ar;
-}
-
 namespace {
 
 // wrapper for local variable LA operand
@@ -5622,6 +5603,15 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
   return true;
 }
 
+namespace {
+
+// Find the AR for the current FPI region by indexing from sp
+inline ActRec* arFromSp(int32_t n) {
+  return reinterpret_cast<ActRec*>(vmStack().top() + n);
+}
+
+}
+
 bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
@@ -5636,8 +5626,9 @@ bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCall(PC origpc, PC& pc, ActRec* ar, FCallArgs fca,
+void iopFCall(PC origpc, PC& pc, FCallArgs fca,
               const StringData* /*clsName*/, const StringData* funcName) {
+  auto const ar = arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   auto const func = ar->func();
   assertx(
     funcName->empty() ||
@@ -7064,20 +7055,6 @@ OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
 }
 
 /*
- * arFromInstr() is always correct for FPI-using instructions, but many opcodes
- * can use the much faster arFromSp().
- */
-template<Op op, class Imm>
-ALWAYS_INLINE ActRec* ar_for_inst(PC origpc, Imm) {
-  return arFromInstr(origpc);
-}
-
-template<>
-ALWAYS_INLINE ActRec* ar_for_inst<Op::FCall, FCallArgs>(PC, FCallArgs fca) {
-  return arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-}
-
-/*
  * Some bytecodes with SA immediates want the raw Id to look up a NamedEntity
  * quickly, and some want the const StringData*. Support both by decoding to
  * this struct and implicitly converting to what the callee wants.
@@ -7102,10 +7079,8 @@ struct litstr_id {
 #define FLAG_NF
 #define FLAG_TF
 #define FLAG_CF , pc
-#define FLAG_FF , ar_for_inst<op>(origpc, imm1)
 #define FLAG_PF
 #define FLAG_CF_TF FLAG_CF
-#define FLAG_CF_FF FLAG_CF FLAG_FF
 
 #define DECODE_IVA decode_iva(pc)
 #define DECODE_I64A decode<int64_t>(pc)
@@ -7156,10 +7131,8 @@ OPCODES
 #undef FLAG_NF
 #undef FLAG_TF
 #undef FLAG_CF
-#undef FLAG_FF
 #undef FLAG_PF
 #undef FLAG_CF_TF
-#undef FLAG_CF_FF
 
 #undef DECODE_IVA
 #undef DECODE_I64A

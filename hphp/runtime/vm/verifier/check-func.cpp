@@ -130,7 +130,7 @@ struct FuncChecker {
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkFpi(State* cur, PC pc);
+  bool checkFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
@@ -1029,7 +1029,7 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
   return true;
 }
 
-bool FuncChecker::checkFpi(State* cur, PC pc) {
+bool FuncChecker::checkFCall(State* cur, PC pc) {
   assertx(isFCallStar(peek_op(pc)));
 
   if (cur->fpilen <= 0) {
@@ -2190,9 +2190,9 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (flags & FF) ok &= checkFpi(&cur, pc);
+    if (op == Op::FCall) ok &= checkFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
-    if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
+    if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require_once('test_base.inc');
 

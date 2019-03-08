@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $port = $_ENV['SERVERPORT'];

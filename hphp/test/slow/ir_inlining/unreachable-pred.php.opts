@@ -1,1 +1,1 @@
--vEval.JitPGOThreshold=100 -vEval.HHIRGenerateAsserts=0 -vEval.JitEnableRenameFunction=0
+-vEval.JitPGOThreshold=100 -vEval.HHIRGenerateAsserts=0 -vEval.JitEnableRenameFunction=0 -vEval.EnablePHP=1

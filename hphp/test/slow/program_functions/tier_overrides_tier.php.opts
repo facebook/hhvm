@@ -1,1 +1,2 @@
 -v Machine.tier=westcoast
+-vEval.EnablePHP=1

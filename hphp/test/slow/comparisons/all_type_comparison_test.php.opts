@@ -1,1 +1,2 @@
 -vEval.JitMaxTranslations=500000
+-vEval.EnablePHP=1

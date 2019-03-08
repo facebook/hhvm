@@ -1,3 +1,4 @@
 -vEval.RaiseClassConversionWarning=1
 
 -vEval.EmitFuncPointers=1
+-vEval.EnablePHP=1

@@ -1,1 +1,2 @@
 -dhhvm.php7.all=true
+-vEval.EnablePHP=1

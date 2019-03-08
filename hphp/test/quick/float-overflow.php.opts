@@ -1,2 +1,3 @@
 -vEval.EnableHipHopSyntax=false
 -vHack.Lang.IntsOverflowToInts=false
+-vEval.EnablePHP=1

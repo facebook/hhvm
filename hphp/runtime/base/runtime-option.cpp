@@ -390,7 +390,7 @@ bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnablePHP = true;
+bool RuntimeOption::EnablePHP = false;
 bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;

@@ -1,2 +1,3 @@
 -vRuntime.Eval.HackArrCompatNotices=true
 -vRuntime.Eval.HackArrCompatCheckFalseyPromote=true
+-vEval.EnablePHP=1

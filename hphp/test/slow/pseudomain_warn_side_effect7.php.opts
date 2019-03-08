@@ -1,1 +1,2 @@
 -vEval.WarnOnRealPseudomain=1 -vEval.WarnOnUncalledPseudomain=2
+-vEval.EnablePHP=1

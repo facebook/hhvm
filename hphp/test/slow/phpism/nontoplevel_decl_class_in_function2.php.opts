@@ -1,1 +1,2 @@
 -vHack.Lang.Phpism.DisableNontoplevelDeclarations=false
+-vEval.EnablePHP=1

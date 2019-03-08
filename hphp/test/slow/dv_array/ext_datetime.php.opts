@@ -2,3 +2,4 @@
 -vEval.HackArrCompatNotices=true
 -vEval.HackArrCompatCheckFalseyPromote=true
 -vEval.EnableHipHopSyntax=1
+-vEval.EnablePHP=1

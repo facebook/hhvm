@@ -1,4 +1,4 @@
-<?php
+<?hh
 setcookie($_GET['cookie_name'],
           $_GET['cookie_value'],
           0,

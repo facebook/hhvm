@@ -1,1 +1,2 @@
 -vEval.JitAHotSize=1024 -vEval.JitAHotSizeRoundUp=false
+-vEval.EnablePHP=1

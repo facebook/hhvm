@@ -1,1 +1,2 @@
 -vEval.JitPGOThreshold=100
+-vEval.EnablePHP=1

@@ -1,1 +1,2 @@
 -vLog.Header=true -vLog.UseLogFile=true
+-vEval.EnablePHP=1

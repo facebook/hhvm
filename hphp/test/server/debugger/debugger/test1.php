@@ -1,4 +1,4 @@
-<?php
+<?hh
 include 'break1.php';
 
 function test_break() {

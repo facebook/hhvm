@@ -1,1 +1,1 @@
-<?php var_dump($_GET['name']);
+<?hh var_dump($_GET['name']);

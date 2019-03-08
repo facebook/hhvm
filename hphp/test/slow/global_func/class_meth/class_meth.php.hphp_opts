@@ -1,3 +1,4 @@
 -vHackArrDVArrs=1
 
 -vRuntime.Eval.EmitFuncPointers=1
+-vEval.EnablePHP=1

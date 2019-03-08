@@ -1,1 +1,2 @@
 -vEval.NoticeOnArrayAccessUse=true
+-vEval.EnablePHP=1

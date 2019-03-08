@@ -1,1 +1,2 @@
 -vEval.AllowScopeBinding=true
+-vEval.EnablePHP=1

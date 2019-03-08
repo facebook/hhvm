@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function apc_apache_note() {
   apache_note('what', apc_fetch('what'));

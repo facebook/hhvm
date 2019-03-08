@@ -1,3 +1,4 @@
 -vEval.HackArrDVArrs=true
 
 -vEval.EmitFuncPointers=1
+-vEval.EnablePHP=1

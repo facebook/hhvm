@@ -67,10 +67,15 @@ let typeconst env c tc =
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
       let constr = Option.map tc.c_tconst_constraint (Decl_hint.hint env) in
       let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
+      let enforceable =
+        match Attrs.find SN.UserAttributes.uaEnforceable tc.c_tconst_user_attributes with
+        | Some { ua_name = (pos, _); _ } -> pos, true
+        | None -> Pos.none, false in
       Some {
         stc_name = tc.c_tconst_name;
         stc_constraint = constr;
         stc_type = ty;
+        stc_enforceable = enforceable;
       }
 
 let prop env cv =

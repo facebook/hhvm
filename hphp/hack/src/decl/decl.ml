@@ -672,14 +672,24 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
   | Ast.Ctrait | Ast.Cenum -> acc
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+    let name = (snd stc.stc_name) in
     let c_name = (snd c.sc_name) in
     let ts = typeconst_structure c stc in
-    let consts = SMap.add (snd stc.stc_name) ts consts in
+    let consts = SMap.add name ts consts in
+    let enforceable =
+      (* Without the positions, this is a simple OR, but this way allows us to
+       * report the position of the <<__Enforceable>> attribute to the user *)
+      if snd stc.stc_enforceable
+      then stc.stc_enforceable
+      else match SMap.get name typeconsts with
+        | Some ptc -> ptc.ttc_enforceable
+        | None -> Pos.none, false in
     let tc = {
       ttc_name = stc.stc_name;
       ttc_constraint = stc.stc_constraint;
       ttc_type = stc.stc_type;
       ttc_origin = c_name;
+      ttc_enforceable = enforceable;
     } in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts

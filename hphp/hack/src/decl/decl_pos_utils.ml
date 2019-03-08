@@ -193,6 +193,7 @@ let rec ty (p, x) =
       ttc_constraint = ty_opt tc.ttc_constraint;
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
+      ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
     }
 
   and user_attribute ua =

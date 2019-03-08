@@ -533,6 +533,7 @@ and typeconst_type = {
   ttc_constraint  : decl ty option;
   ttc_type        : decl ty option;
   ttc_origin      : string;
+  ttc_enforceable : Pos.t * bool;
 }
 
 and enum_type = {

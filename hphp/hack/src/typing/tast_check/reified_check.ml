@@ -64,7 +64,7 @@ let verify_targ_valid_for_reified_tparam env tparam targ =
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Type_test_hint_check.validate_hint env targ
-      (Errors.invalid_enforceable_type_argument tparam.tp_name) end;
+      (Errors.invalid_enforceable_type "parameter" tparam.tp_name) end;
 
   begin if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name targ end
@@ -127,5 +127,22 @@ let handler = object
     (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
     if List.exists tparam.tp_user_attributes (fun { ua_name; _ } -> UA.uaNewable = snd ua_name) then
       verify_has_consistent_bound env tparam
+
+  method! at_class_typeconst env { c_tconst_name = (_, name); c_tconst_type; _ } =
+    let open Option in
+    let t = Tast_env.get_self_id env >>=
+      Tast_env.get_class env >>=
+      (fun cls -> Typing_classes_heap.get_typeconst cls name) in
+    match t with
+    | Some { ttc_enforceable = (pos, enforceable); _ } ->
+      (* using c_tconst_type here instead of ttc_type because the Type_test_hint_check works on
+       * hints instead of decl tys *)
+      begin match c_tconst_type with
+      | Some h when enforceable ->
+        Type_test_hint_check.validate_hint env h
+          (Errors.invalid_enforceable_type "constant" (pos, name))
+      | _ -> () end
+    | _ ->
+      ()
 
 end

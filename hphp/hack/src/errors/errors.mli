@@ -262,7 +262,7 @@ val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : SSet.t -> Pos.t -> unit
 val trait_reuse : Pos.t -> string -> Pos.t * string -> string -> unit
 val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
-val invalid_enforceable_type_argument : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
+val invalid_enforceable_type : string -> Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 val invalid_newable_type_argument : Pos.t * string -> Pos.t -> unit
 val invalid_newable_type_param_constraints: (Pos.t * string) -> string list -> unit
 val override_final : parent:Pos.t -> child:Pos.t -> unit

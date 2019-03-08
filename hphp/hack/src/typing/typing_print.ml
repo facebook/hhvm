@@ -1411,6 +1411,7 @@ module PrintClass = struct
     ttc_constraint = tc_constraint;
     ttc_type = tc_type;
     ttc_origin = origin;
+    ttc_enforceable = (_, enforceable);
   } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl tcopt x in
@@ -1424,7 +1425,8 @@ module PrintClass = struct
       | None -> ""
       | Some x -> " = "^ty x
     in
-    name^constraint_^type_^" (origin:"^origin^")"
+    name^constraint_^type_^" (origin:"^origin^")" ^
+      (if enforceable then " (enforceable)" else "")
 
   let typeconsts tcopt m =
     Sequence.fold m ~init:"" ~f:begin fun acc (_, v) ->

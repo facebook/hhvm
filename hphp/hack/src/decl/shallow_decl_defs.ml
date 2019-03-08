@@ -18,9 +18,10 @@ type shallow_class_const = {
 } [@@deriving show]
 
 type shallow_typeconst = {
-  stc_constraint : decl ty option;
-  stc_name       : Aast.sid;
-  stc_type       : decl ty option;
+  stc_constraint  : decl ty option;
+  stc_name        : Aast.sid;
+  stc_type        : decl ty option;
+  stc_enforceable : Pos.t * bool;
 } [@@deriving show]
 
 type shallow_prop = {

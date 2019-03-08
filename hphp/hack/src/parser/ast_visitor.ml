@@ -27,7 +27,7 @@ open Ast
  *)
 class type ['a, 'b] reducer_type = object
   (* TODO: gradually add methods with signature: 'b -> param1 ... -> 'a *)
-  method at_TODO : 'b -> 'a
+  method at_expr : 'b -> expr -> 'a
 end
 
 class ['a, 'b] reducer
@@ -35,7 +35,7 @@ class ['a, 'b] reducer
   (_plus : 'a -> 'a -> 'a)
   : ['a, 'b] reducer_type
 = object
-  method at_TODO (_ctx : 'b) = _zero ()
+  method at_expr _ctx _e = _zero ()
 end
 
 (*****************************************************************************)

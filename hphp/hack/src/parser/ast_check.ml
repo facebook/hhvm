@@ -40,10 +40,11 @@ let rec check_lvalue errorf = function
  *)
 
 type context = {
+  in_callable : bool;
   _unused : unit;  (* TODO: dummy for easier rebasing until we have 2+ fields *)
 }
 
-let _mk_error ?(error_type=SyntaxError.ParseError) pos error =
+let mk_error ?(error_type=SyntaxError.ParseError) pos error =
   let (start_offset, end_offset) = Pos.info_raw pos in
   SyntaxError.make ~error_type start_offset end_offset error
 
@@ -56,21 +57,22 @@ module ESet = Set.Make(
 )
 
 (* TODO: put complicated reducers into separate files *)
-let reducer_TODO = object(_)
+let reducer_await_toplevel = object(_)
   inherit [_, _] Ast_visitor.reducer
     (fun () -> ESet.empty)
     ESet.union
-  as super
 
-  (* TODO: override at_* and return errors set (ESet) accordingly for each check *)
-  method! at_TODO (ctx : 'b) =
-    super#at_TODO ctx
+  method! at_expr ctx (pos, e) =
+    match e with
+    | Await _ when not ctx.in_callable ->
+      ESet.singleton @@ mk_error pos SyntaxError.toplevel_await_use
+    | _ -> ESet.empty
 end
 
 let check_program program =
   (* This is analogous to the iter_with but with reducers instead of handlers: *)
   let reducers : (ESet.t, context) Ast_visitor.reducer_type list =
-    [ reducer_TODO
+    [ reducer_await_toplevel
     ] in
   let visitor = object(this)
     inherit [_] Ast.reduce as super
@@ -84,12 +86,20 @@ let check_program program =
     method private reduce map_fun =
       List.fold_left (this#to_fold_fun map_fun) this#zero reducers
 
-    (* TODO: override on_* and modify context accordingly for each check *)
     method! on_expr ctx e = this#plus
       (super#on_expr ctx e)
-      (this#reduce (fun r -> r#at_TODO ctx))
+      (this#reduce (fun r -> r#at_expr ctx e))
+
+    method! on_fun_ ctx =
+      super#on_fun_
+        { ctx with in_callable = true }
+
+    method! on_method_ ctx =
+      super#on_method_
+        { ctx with in_callable = true }
   end
   in ESet.elements @@ visitor#on_program
     {
+      in_callable = false;
       _unused = ();
     } program

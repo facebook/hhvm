@@ -2852,11 +2852,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
-    let errors = match env.context.active_callable with
-      | None ->
-        make_error_from_node node SyntaxError.toplevel_await_use :: errors
-      | _ -> errors
-    in
     if ParserOptions.enable_await_as_an_expression env.parser_options
       then await_as_an_expression_errors node parents errors
       else

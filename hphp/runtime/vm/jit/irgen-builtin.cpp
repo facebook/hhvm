@@ -106,7 +106,9 @@ const StaticString
   s_container_first("HH\\Lib\\_Private\\Native\\first"),
   s_container_last("HH\\Lib\\_Private\\Native\\last"),
   s_container_first_key("HH\\Lib\\_Private\\Native\\first_key"),
-  s_container_last_key("HH\\Lib\\_Private\\Native\\last_key");
+  s_container_last_key("HH\\Lib\\_Private\\Native\\last_key"),
+  s_class_meth_get_class("HH\\class_meth_get_class"),
+  s_class_meth_get_method("HH\\class_meth_get_method");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -882,6 +884,37 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+namespace {
+const StaticString s_CLASS_CONVERSION("Class to string conversion");
+const StaticString s_FUNC_CONVERSION("Func to string conversion");
+}
+
+SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TClsMeth) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseNotice, cns(env, s_CLASS_CONVERSION.get()));
+    }
+    return gen(env, LdClsName, gen(env, LdClsFromClsMeth, value));
+  }
+  return nullptr;
+}
+
+SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TClsMeth) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseNotice, cns(env, s_FUNC_CONVERSION.get()));
+    }
+    return gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, value));
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
@@ -926,6 +959,8 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(container_last)
     X(container_first_key)
     X(container_last_key)
+    X(class_meth_get_class)
+    X(class_meth_get_method)
 
 #undef X
 

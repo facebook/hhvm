@@ -57,6 +57,8 @@ Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
 
 void getMethodNames(Class* cls, Class* ctx, Array& result);
 
+String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v);
+String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

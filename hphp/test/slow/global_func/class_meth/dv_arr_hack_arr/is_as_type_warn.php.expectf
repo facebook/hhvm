@@ -10,6 +10,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(false)
 * test_is_type - clsmeth:
 bool(false)
 
@@ -30,9 +31,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
 * test_as_type:
 
-Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 26
+Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 28
 classMeth{
     class(A)
     function(func1)

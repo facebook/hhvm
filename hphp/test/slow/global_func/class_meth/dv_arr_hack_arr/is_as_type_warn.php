@@ -19,6 +19,8 @@ function test_is_type($x) {
   var_dump(HH\is_list_like($x));
   var_dump($x is HH\Container);
   var_dump($x is HH\Traversable);
+
+  var_dump(HH\is_class_meth($x));
 }
 
 function test_as_type($x) {

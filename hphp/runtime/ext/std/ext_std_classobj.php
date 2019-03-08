@@ -1,5 +1,6 @@
 <?hh
 
+namespace {
 /**
  * Call a user method given with an array of parameters [deprecated]
  *
@@ -272,3 +273,25 @@ function trait_exists(string $traitname,
 <<__Native>>
 function enum_exists(string $enumname,
                       bool $autoload = true): bool;
+
+}
+
+namespace HH {
+
+/**
+ * Get class name from class_meth
+ * @param mixed $class_meth
+ * @return class name
+ */
+<<__Native, __Rx>>
+function class_meth_get_class(mixed $class_meth): string;
+
+/**
+ * Get method name from class_meth
+ * @param mixed $class_meth
+ * @return method name
+ */
+<<__Native,  __Rx>>
+function class_meth_get_method(mixed $class_meth): string;
+
+}

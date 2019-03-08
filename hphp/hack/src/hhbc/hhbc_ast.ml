@@ -327,6 +327,7 @@ type istype_op =
   | OpArrLike (* Arr or Vec or Dict or Keyset *)
   | OpVArray
   | OpDArray
+  | OpClsMeth
 
 type instruct_isset =
   | IssetC

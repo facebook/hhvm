@@ -337,6 +337,26 @@ Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
+  if (!tvIsClsMeth(v)) {
+    raise_error("Argument 1 passed to %s must be a class_meth",
+                __FUNCTION__+5);
+  }
+  auto const c = val(v).pclsmeth->getCls();
+  return String::attach(const_cast<StringData*>(classToStringHelper(c)));
+}
+
+String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
+  if (!tvIsClsMeth(v)) {
+    raise_error("Argument 1 passed to %s must be a class_meth",
+                __FUNCTION__+5);
+  }
+  auto const c = val(v).pclsmeth->getFunc();
+  return String::attach(const_cast<StringData*>(funcToStringHelper(c)));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void StandardExtension::initClassobj() {
   HHVM_FE(get_declared_classes);
   HHVM_FE(get_declared_interfaces);
@@ -358,6 +378,8 @@ void StandardExtension::initClassobj() {
   HHVM_FE(property_exists);
   HHVM_FE(get_object_vars);
   HHVM_FE(call_user_method_array);
+  HHVM_FALIAS(HH\\class_meth_get_class, HH_class_meth_get_class);
+  HHVM_FALIAS(HH\\class_meth_get_method, HH_class_meth_get_method);
 
   loadSystemlib("std_classobj");
 }

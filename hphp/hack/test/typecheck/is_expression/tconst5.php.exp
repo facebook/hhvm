@@ -1,4 +1,4 @@
 File "tconst5.php", line 16, characters 13-24:
 Invalid "is" expression hint (Typing[4195])
   File "tconst5.php", line 16, characters 13-24:
-  The "is" operator cannot be used with the abstract type constant T because it is not enforceable
+  The "is" operator cannot be used with the abstract type constant T because it is not marked <<__Enforceable>>

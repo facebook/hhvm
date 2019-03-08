@@ -9,14 +9,14 @@ $xml =<<<EOF
 </root>
 EOF;
 
-$sxe = simplexml_load_string($xml);
+ZendGoodExtSimplexmlTests024::$sxe = simplexml_load_string($xml);
 
 function test($xpath)
 {
-	global $sxe;
+
 
 	echo "===$xpath===\n";
-	var_dump($sxe->xpath($xpath));
+	var_dump(ZendGoodExtSimplexmlTests024::$sxe->xpath($xpath));
 }
 
 test('elem/@attr2');
@@ -24,5 +24,9 @@ test('//@attr2');
 test('//@*');
 test('elem[2]/@attr2');
 
+
+abstract final class ZendGoodExtSimplexmlTests024 {
+  public static $sxe;
+}
 ?>
 ===DONE===

@@ -1,12 +1,12 @@
 <?php
 
-$handler = NULL;
+ZendGoodZendTestsBug61165::$handler = NULL;
 class T {
     public $_this;
 
     public function __toString() {
-		global $handler;
-	    $handler = $this;
+
+	    ZendGoodZendTestsBug61165::$handler = $this;
         $this->_this = $this; // <-- uncoment this
         return 'A';
     }
@@ -17,4 +17,8 @@ for ($i = 0; $i < 3; $i++) {
     strip_tags($t);
 	strip_tags(new T);
 }
-var_dump($handler);
+var_dump(ZendGoodZendTestsBug61165::$handler);
+
+abstract final class ZendGoodZendTestsBug61165 {
+  public static $handler;
+}

@@ -1,13 +1,13 @@
 <?php
 function test() {
-	global $server;
-	$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));
-	$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test2", "Hello Header!"));
+
+	ZendGoodExtSoapTestsServer023::$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));
+	ZendGoodExtSoapTestsServer023::$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test2", "Hello Header!"));
 	return "Hello Body!";
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
+ZendGoodExtSoapTestsServer023::$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+ZendGoodExtSoapTestsServer023::$server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -23,6 +23,9 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </SOAP-ENV:Envelope>
 EOF;
 
-$server->handle($HTTP_RAW_POST_DATA);
+ZendGoodExtSoapTestsServer023::$server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>
+
+abstract final class ZendGoodExtSoapTestsServer023 {
+  public static $server;
+}

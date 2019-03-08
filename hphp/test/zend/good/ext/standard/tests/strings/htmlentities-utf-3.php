@@ -2,7 +2,7 @@
 
 /* conformance to Unicode 5.2, section 3.9, D92 */
 
-$val_ranges = array(
+ZendGoodExtStandardTestsStringsHtmlentitiesUtf3::$val_ranges = array(
 	array(array(0x00, 0x7F)),
 	array(array(0xC2, 0xDF), array(0x80, 0xBF)),
 	array(array(0xE0, 0xE0), array(0xA0, 0xBF), array(0x80, 0xBF)),
@@ -15,9 +15,9 @@ $val_ranges = array(
 );
 
 function is_valid($seq) {
-	global $val_ranges;
+
 	$b = ord($seq[0]);
-	foreach ($val_ranges as $l) {
+	foreach (ZendGoodExtStandardTestsStringsHtmlentitiesUtf3::$val_ranges as $l) {
 		if ($b >= $l[0][0] && $b <= $l[0][1]) {
 			if (count($l) != strlen($seq)) {
 				return false;
@@ -76,3 +76,7 @@ for ($b1 = 0xF0; $b1 < 0xFF; $b1++) {
 	}
 }
 echo "Done.\n";
+
+abstract final class ZendGoodExtStandardTestsStringsHtmlentitiesUtf3 {
+  public static $val_ranges;
+}

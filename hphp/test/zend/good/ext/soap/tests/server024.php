@@ -12,14 +12,14 @@ class TestHeader2 extends SoapHeader {
 }
 
 function test() {
-	global $server;
-	$server->addSoapHeader(new TestHeader1("Hello Header!"));
-	$server->addSoapHeader(new TestHeader2("Hello Header!"));
+
+	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader1("Hello Header!"));
+	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader2("Hello Header!"));
 	return "Hello Body!";
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
+ZendGoodExtSoapTestsServer024::$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+ZendGoodExtSoapTestsServer024::$server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -35,6 +35,9 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </SOAP-ENV:Envelope>
 EOF;
 
-$server->handle($HTTP_RAW_POST_DATA);
+ZendGoodExtSoapTestsServer024::$server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>
+
+abstract final class ZendGoodExtSoapTestsServer024 {
+  public static $server;
+}

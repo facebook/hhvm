@@ -10,12 +10,16 @@
  * 
  */
 function my_errorhandler($errno, $errormsg) {
-  global $my_var;
-  $my_var = 0;
+
+  ZendGoodZendTestsBug54265Modified::$my_var = 0;
   echo "EROOR: $errormsg\n";
   return null;
 }
 set_error_handler("my_errorhandler");
 try { $my_var = str_repeat("A", $my_var[0]->errormsg = "xyz"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump($my_var);
+var_dump(ZendGoodZendTestsBug54265Modified::$my_var);
+
+abstract final class ZendGoodZendTestsBug54265Modified {
+  public static $my_var;
+}
 ?>

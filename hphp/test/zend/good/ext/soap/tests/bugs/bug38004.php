@@ -1,8 +1,8 @@
 <?php
 function Test($param) {
-	global $g;
-	$g = $param->strA."\n".$param->strB."\n";
-	return $g;
+
+	ZendGoodExtSoapTestsBugsBug38004::$g = $param->strA."\n".$param->strB."\n";
+	return ZendGoodExtSoapTestsBugsBug38004::$g;
 }
 
 class TestSoapClient extends SoapClient {
@@ -26,5 +26,8 @@ $strA = 'test &amp; test';
 $strB = 'test & test';
 $res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));
 print_r($res);
-print_r($g);
-?>
+print_r(ZendGoodExtSoapTestsBugsBug38004::$g);
+
+abstract final class ZendGoodExtSoapTestsBugsBug38004 {
+  public static $g;
+}

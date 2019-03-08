@@ -10,10 +10,10 @@
                 returns true if valid function name, false otherwise
 */
 function check_iscallable_objects( $methods ) {
-  global $loop_counter;
+
   $counter = 1;
   foreach($methods as $method) {
-    echo "-- Innerloop iteration $counter of Outerloop iteration $loop_counter --\n";
+    echo "-- Innerloop iteration $counter of Outerloop iteration ".ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2::$loop_counter." --\n";
     var_dump( is_callable($method) );
     var_dump( is_callable($method, true) );
     var_dump( is_callable($method, false) );
@@ -99,9 +99,9 @@ $objects = array (
  *  expected: true if valid callback
  *            false otherwise
  */
-$loop_counter = 1;
+ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2::$loop_counter = 1;
 foreach($objects as $object) {
-  echo "--- Outerloop iteration $loop_counter ---\n";
+  echo "--- Outerloop iteration ".ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2::$loop_counter." ---\n";
   $methods = array (
     array( $object, 'foo1' ),
     array( $object, 'foo2' ),
@@ -117,8 +117,11 @@ foreach($objects as $object) {
   /* use check_iscallable_objects() to check whether given object/string
      has valid method name */
   check_iscallable_objects($methods);
-  $loop_counter++;
+  ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2::$loop_counter++;
 }
 
+abstract final class ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2 {
+  public static $loop_counter;
+}
 ?>
 ===DONE===

@@ -14,7 +14,7 @@ mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp";
+ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename = basename(__FILE__, ".php") . ".tmp";
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -31,14 +31,17 @@ rmdir($thisTestDir);
 
 
 function runtest() {
-   global $filename;
+
    //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
    // in the include path. In this case it doesn't so the file should be written in the current dir.
-   file_put_contents($filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
-   $line = file_get_contents($filename);
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
+   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
    echo "$line\n";
-   unlink($filename);
+   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
 }
 
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
+  public static $filename;
+}
 ?>
 ===DONE===

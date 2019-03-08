@@ -75,13 +75,15 @@ list($cc,,$dd) = array(10,20,30,40);
 echo "CC=$cc DD=$dd\n";
 
 // expect the inner array to be defined 
-$ee = array("original array");
+LangEngineAssignexecutionorder002::$ee = array("original array");
 function f() {
-  global $ee;
-  $ee = array("array created in f()");
+
+  LangEngineAssignexecutionorder002::$ee = array("array created in f()");
   return 1;
 }
-$ee["array entry created after f()"][f()] = "hello";
-print_r($ee);
+LangEngineAssignexecutionorder002::$ee["array entry created after f()"][f()] = "hello";
+print_r(LangEngineAssignexecutionorder002::$ee);
 
-?>
+abstract final class LangEngineAssignexecutionorder002 {
+  public static $ee;
+}

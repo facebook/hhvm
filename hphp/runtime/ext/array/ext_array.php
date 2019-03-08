@@ -189,12 +189,10 @@ function key_exists(
  * @return mixed - Returns an array of all the keys in input.
  *
  */
-<<__Native("NumArgs"), __IsFoldable, __Rx, __AtMostRxAsArgs>>
+<<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
 function array_keys(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
     $input,
-  mixed $search_value = null,
-  bool $strict = false,
 ): mixed;
 
 /**

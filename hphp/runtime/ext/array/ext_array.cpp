@@ -402,55 +402,24 @@ bool HHVM_FUNCTION(key_exists,
   return HHVM_FN(array_key_exists)(key, search);
 }
 
-TypedValue array_keys_helper(TypedValue input,
-                             TypedValue search_value /* = uninit_null */,
-                             bool strict /* = false */) {
+TypedValue HHVM_FUNCTION(array_keys,
+                         TypedValue input) {
   if (UNLIKELY(!isClsMethCompactContainer(input))) {
     raise_warning("array_keys() expects parameter 1 to be an array "
                   "or collection");
     return make_tv<KindOfNull>();
   }
 
-  if (LIKELY(search_value.m_type == KindOfUninit)) {
-    VArrayInit ai(getClsMethCompactContainerSize(input));
-    IterateKV(
-      input,
-      [](ArrayData*) { return false; },
-      [&](Cell k, TypedValue) {
-        ai.append(k);
-      },
-      [](ObjectData*) {}
-    );
-    return make_array_like_tv(ai.create());
-  } else {
-    auto ai = Array::attach(staticEmptyVArray());
-    IterateKV(
-      input,
-      [](ArrayData*) { return false; },
-      [&](Cell k, TypedValue v) {
-        if (strict ?
-            tvSame(v, search_value) :
-            tvEqual(v, search_value)) {
-          ai.append(k);
-        }
-      },
-      [](ObjectData*) {}
-    );
-    return make_array_like_tv(ai.detach());
-  }
-}
-
-static
-TypedValue HHVM_FUNCTION(array_keys,
-                         int64_t argc,
-                         TypedValue input,
-                         TypedValue search_value /*=null*/,
-                         bool strict /*=false*/) {
-  return array_keys_helper(
+  VArrayInit ai(getClsMethCompactContainerSize(input));
+  IterateKV(
     input,
-    argc < 2 ? make_tv<KindOfUninit>() : search_value,
-    strict
+    [](ArrayData*) { return false; },
+    [&](Cell k, TypedValue) {
+      ai.append(k);
+    },
+    [](ObjectData*) {}
   );
+  return make_array_like_tv(ai.create());
 }
 
 static bool couldRecur(const Variant& v, const ArrayData* arr) {

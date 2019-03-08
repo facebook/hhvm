@@ -48,9 +48,8 @@ bool HHVM_FUNCTION(array_key_exists,
 bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
-TypedValue array_keys_helper(TypedValue input,
-                             TypedValue search_value = make_tv<KindOfUninit>(),
-                             bool strict = false);
+TypedValue HHVM_FUNCTION(array_keys,
+                         TypedValue input);
 TypedValue HHVM_FUNCTION(array_map,
                          const Variant& callback,
                          const Variant& arr1,

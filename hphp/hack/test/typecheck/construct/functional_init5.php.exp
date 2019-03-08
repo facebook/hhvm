@@ -1,3 +1,8 @@
 File "functional_init5.php", line 21, characters 5-15:
 Until the initialization of $this is over, you can only call private methods
 The initialization is not over because $this->x can still potentially be null (NastCheck[3004])
+File "functional_init5.php", line 17, characters 19-29:
+Class A does not initialize all of its members; x is not always initialized.
+Make sure you systematically set $this->x when the method __construct is called.
+Alternatively, you can define the member as optional (?...)
+ (NastCheck[3015])

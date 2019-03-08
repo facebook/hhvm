@@ -934,8 +934,6 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
       emit_pos pos;
       instr_alias_cls c1 c2
     ]
-  | A.Id (_, "get_class"), _, [], [] ->
-    emit_get_class_no_args ()
   | A.Id (_, id), _, [arg1], []
     when String.lowercase id = "hh\\set_frame_metadata" ||
          String.lowercase id = "\\hh\\set_frame_metadata" ->
@@ -1166,6 +1164,7 @@ and emit_id env (p, s as id) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
+  | "__CLASS__" -> gather [instr_self; instr_clsrefname]
   | "__METHOD__" -> instr (ILitConst Method)
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
@@ -1420,12 +1419,6 @@ and emit_xhp_obj_get env pos e s nullflavor =
   let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
   let args = [pos, A.String (SU.Xhp.clean s)] in
   emit_call env pos fn_name [] args [] None
-
-and emit_get_class_no_args () =
-  gather [
-    instr_fpushfuncd 0 (Hhbc_id.Function.from_raw_string "get_class");
-    instr_fcall (make_fcall_args 0)
-  ]
 
 and try_inline_gen_call env e =
   if not (can_inline_gen_functions ()) then None

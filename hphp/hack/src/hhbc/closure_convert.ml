@@ -490,33 +490,25 @@ let make_closure ~class_num
               f_name = (p, string_of_int class_num) } in
   inline_fundef, cd, md
 
-let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
-  let get_class_call =
-    p, Call ((pe, Id (pe, "get_class")), [], [], [])
-  in
-  let name c = p, String (SU.Xhp.mangle @@ strip_id c.c_name) in
-  let empty_str = p, String ("") in
-  match Scope.get_class env.scope with
-  | Some c when trait ->
-    if c.c_kind = Ctrait then name c else empty_str
-  | Some c ->
-    if c.c_kind = Ctrait then get_class_call else name c
-  | None ->
-    if fallback_to_empty_string then p, String ("")
-    else get_class_call
-
 (* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
  * literal strings. It's necessary to do this before closure conversion
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let str = String.uppercase str in
   let return newstr = (p, String newstr) in
+  let name c = p, String (SU.Xhp.mangle @@ strip_id c.c_name) in
   match str with
-  | "__CLASS__" | "__TRAIT__"->
-    inline_class_name_if_possible
-      ~trait:(str = "__TRAIT__")
-      ~fallback_to_empty_string:true
-      env p pid
+  | "__TRAIT__" ->
+    begin match Scope.get_class env.scope with
+    | Some c when c.c_kind = Ctrait -> name c
+    | _ -> return ""
+    end
+  | "__CLASS__" ->
+    begin match Scope.get_class env.scope with
+    | Some c when c.c_kind <> Ctrait -> name c
+    | Some _ -> p, Id (pid, (snd id))
+    | None -> return ""
+    end
   | "__METHOD__" ->
     begin match env.scope with
     | ScopeItem.Method _ :: ScopeItem.Class { c_name = (_, n); _ } :: _
@@ -736,12 +728,6 @@ let rec convert_expr env st (p, expr_ as expr) =
       | _ -> Emit_fatal.raise_fatal_parse pf "Func must be a string type"
       in
     convert_meth_caller_to_func_ptr env st p pc cls pf func
-  | Call ((_, Id (pe, "get_class")), _, [], [])
-    when st.namespace.Namespace_env.ns_name = None ->
-    st, inline_class_name_if_possible
-      ~trait:false
-      ~fallback_to_empty_string:false
-      env p pe
   | Call ((_, (Class_const ((_, Id (_, cid)), _)
              | Class_get ((_, Id (_, cid)), _))) as e,
     targs, el2, el3)

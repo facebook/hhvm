@@ -56,7 +56,7 @@ class HierarchyTests(object):
 
     def test_method_signature_change(self):
         with open(os.path.join(self.repo_dir, 'qux.php'), 'w') as f:
-            f.write('''<?hh
+            f.write('''<?hh //partial
 class Qux {
   public function f() {
     $x = new Foo();
@@ -68,7 +68,7 @@ class Qux {
         self.check_cmd(['No errors!'])
         debug_sub = self.subscribe_debug()
         with open(os.path.join(self.repo_dir, 'foo.php'), 'w') as f:
-            f.write('''<?hh
+            f.write('''<?hh //partial
 class Foo {
   public function f(): void {}
   public final function g() {}

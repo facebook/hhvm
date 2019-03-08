@@ -47,8 +47,10 @@ let default_fcall_flags = {
   supports_async_eager_return = false;
 }
 let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
-  ?async_eager_label num_args =
-  flags, num_args, num_rets, async_eager_label
+  ?(by_refs=[]) ?async_eager_label num_args =
+  if by_refs <> [] && (List.length by_refs) <> num_args then
+    failwith "length of by_refs must be either zero or num_args";
+  flags, num_args, num_rets, by_refs, async_eager_label
 
 let instr_lit_const l =
   instr (ILitConst l)
@@ -150,8 +152,6 @@ let instr_lateboundcls =
   instr (IMisc (LateBoundCls class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
-let instr_fthrow_on_ref_mismatch by_refs =
-  instr (ICall (FThrowOnRefMismatch by_refs))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)

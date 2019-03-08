@@ -305,8 +305,6 @@ static const struct {
   { OpNewObjI,     {None,             Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpFPushCtor,   {Stack1,           FStack,       OutFDesc        }},
-  { OpFThrowOnRefMismatch,
-                   {None,             None,         OutNone         }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -603,7 +601,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
-#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -665,7 +662,6 @@ size_t memberKeyImmIdx(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
-#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA
@@ -840,7 +836,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNS:
   case Op::FCall:
   case Op::ClsCnsD:
-  case Op::FThrowOnRefMismatch:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
   case Op::NewStructDArray:
@@ -1122,7 +1117,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_SLA(n)     ni.immVec
 #define IMM_ILA(n)     ni.immIters
 #define IMM_I32LA(n)   ni.immVec
-#define IMM_BLLA(n)   ni.immVec
 #define IMM_VSA(n)     ni.immVec
 #define IMM_IVA(n)     ni.imm[n].u_IVA
 #define IMM_I64A(n)    ni.imm[n].u_I64A
@@ -1166,7 +1160,6 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

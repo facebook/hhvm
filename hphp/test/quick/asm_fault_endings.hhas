@@ -1,7 +1,7 @@
 .main {
   .try {
     FPushFuncD 0 "main"
-    FCall <> 0 1 - "" ""
+    FCall <> 0 1 "" - "" ""
     RetC
   } .catch {
     PopC
@@ -22,7 +22,7 @@
       Dup
       FPushCtor 1
       String "ex"
-      FCall <> 1 1 - "" ""
+      FCall <> 1 1 "" - "" ""
       PopC
       Throw
     } .catch {

@@ -752,17 +752,6 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto decode_argvb = [&] {
-    CompactVector<bool> ret;
-    auto const vecLen = decode_iva(pc);
-    uint8_t tmp = 0;
-    for (uint32_t i = 0; i < vecLen; ++i) {
-      if (i % 8 == 0) tmp = decode<uint8_t>(pc);
-      ret.emplace_back((tmp >> (i % 8)) & 1);
-    }
-    return ret;
-  };
-
   auto defcns = [&] () {
     puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
   };
@@ -804,7 +793,6 @@ void populate_block(ParseUnitState& puState,
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
 #define IMM_I32LA(n)   auto argv = decode_argv32();
-#define IMM_BLLA(n)    auto argv = decode_argvb();
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
@@ -846,13 +834,21 @@ void populate_block(ParseUnitState& puState,
                        }();
 #define IMM_FCA(n)     auto fca = [&] {                                   \
                          auto const fca = decodeFCallArgs(pc);            \
+                         auto const numBytes = (fca.numArgs + 7) / 8;     \
+                         auto byRefs = fca.enforceReffiness()             \
+                           ? std::make_unique<uint8_t[]>(numBytes)        \
+                           : nullptr;                                     \
+                         if (byRefs) {                                    \
+                           memcpy(byRefs.get(), fca.byRefs, numBytes);    \
+                         }                                                \
                          auto const aeOffset = fca.asyncEagerOffset;      \
                          auto const aeTarget = aeOffset != kInvalidOffset \
                            ? findBlock(opPC + aeOffset - ue.bc())->id     \
                            : NoBlockId;                                   \
                          assertx(aeTarget == NoBlockId || next == past);  \
                          return FCallArgs(fca.flags, fca.numArgs,         \
-                                          fca.numRets, aeTarget);         \
+                                          fca.numRets, std::move(byRefs), \
+                                          aeTarget);                      \
                        }();
 
 #define IMM_NA
@@ -983,7 +979,6 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

@@ -338,7 +338,6 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_SLA        const ImmVector&
 #define IMM_ILA        const IterTable&
 #define IMM_I32LA      const ImmVector&
-#define IMM_BLLA       const ImmVector&
 #define IMM_VSA        const ImmVector&
 #define IMM_IVA        uint32_t
 #define IMM_I64A       int64_t
@@ -379,7 +378,6 @@ Type predictedType(const IRGS&, const Location&);
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_VSA
 #undef IMM_IVA
 #undef IMM_I64A

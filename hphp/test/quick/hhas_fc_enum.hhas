@@ -4,11 +4,11 @@
   DefCls 0
   FPushFuncD 1 "test"
   ClsCnsD "FOO" "Foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   FPushFuncD 1 "test"
   String "hi"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   Int 1
   RetC

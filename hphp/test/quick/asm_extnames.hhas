@@ -4,10 +4,10 @@
   NewObjI 0
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   FPushObjMethodD 0 "print$foo" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   Int 1
   RetC

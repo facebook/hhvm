@@ -3328,39 +3328,6 @@ void in(ISS& env, const bc::FPushCtor& op) {
   fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dobj.cls, rfunc });
 }
 
-void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
-  auto& ar = fpiTop(env);
-  if (!ar.func || ar.fallbackFunc) return;
-
-  for (auto i = 0; i < op.argv.size(); ++i) {
-    auto const kind = env.index.lookup_param_prep(env.ctx, *ar.func, i);
-    if (ar.foldable && kind != PrepKind::Val) {
-      fpiNotFoldable(env);
-      return;
-    }
-    if (kind == PrepKind::Unknown) return;
-
-    if (kind != (op.argv[i] ? PrepKind::Ref : PrepKind::Val)) {
-      auto const exCls = makeStaticString("InvalidArgumentException");
-      auto const err = makeStaticString(formatParamRefMismatch(
-        ar.func->name()->data(), i, !op.argv[i]));
-
-      return reduce(
-        env,
-        bc::NewObjD { exCls },
-        bc::Dup {},
-        bc::FPushCtor { 1, false },
-        bc::String { err },
-        bc::FCall { FCallArgs(1), staticEmptyString(), staticEmptyString() },
-        bc::PopC {},
-        bc::Throw {}
-      );
-    }
-  }
-
-  reduce(env, bc::Nop {});
-}
-
 Type typeFromWH(Type t) {
   if (!t.couldBe(BObj)) {
     // Exceptions will be thrown if a non-object is awaited.
@@ -3516,6 +3483,53 @@ void in(ISS& env, const bc::FCall& op) {
   auto const fca = op.fca;
   auto const ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
+    if (fca.enforceReffiness()) {
+      bool match = true;
+      for (auto i = 0; i < fca.numArgs; ++i) {
+        auto const kind = env.index.lookup_param_prep(env.ctx, *ar.func, i);
+        if (ar.foldable && kind != PrepKind::Val) {
+          fpiNotFoldable(env);
+          fpiPop(env);
+          discard(env, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+          for (auto j = uint32_t{0}; j < fca.numRets; ++j) push(env, TBottom);
+          return;
+        }
+
+        if (kind == PrepKind::Unknown) {
+          match = false;
+          break;
+        }
+
+        if (kind != (fca.byRef(i) ? PrepKind::Ref : PrepKind::Val)) {
+          // Reffiness mismatch
+          auto const exCls = makeStaticString("InvalidArgumentException");
+          auto const err = makeStaticString(formatParamRefMismatch(
+            ar.func->name()->data(), i, !fca.byRef(i)));
+
+          return reduce(
+            env,
+            bc::NewObjD { exCls },
+            bc::Dup {},
+            bc::FPushCtor { 1, false },
+            bc::String { err },
+            bc::FCall {
+              FCallArgs(1), staticEmptyString(), staticEmptyString() },
+            bc::PopC {},
+            bc::Throw {}
+          );
+        }
+      }
+
+      if (match) {
+        // Optimize away the runtime reffiness check.
+        return reduce(env, bc::FCall {
+          FCallArgs(fca.flags, fca.numArgs, fca.numRets, nullptr,
+                    fca.asyncEagerTarget),
+          op.str2, op.str3
+        });
+      }
+    }
+
     // Infer whether the callee supports async eager return.
     if (fca.asyncEagerTarget != NoBlockId &&
         !fca.supportsAsyncEagerReturn()) {

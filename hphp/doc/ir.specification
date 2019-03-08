@@ -2280,7 +2280,7 @@ To string conversions:
 
   Raises a Hack array compat notice with the text in S0 as its message.
 
-| RaiseParamRefMismatchForFunc<paramIndex>, ND, S(Func), NF
+| RaiseParamRefMismatchForFunc<paramIndex>, ND, S(Func), T
 
   Raise a warning or exception indicating that the reffiness of a parameter was
   incorrectly annotated at the callsite.

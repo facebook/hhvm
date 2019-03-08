@@ -33,7 +33,9 @@ type fcall_flags = {
   has_unpack : bool;
   supports_async_eager_return : bool;
 }
-type fcall_args = fcall_flags * num_params * num_params * (Label.t option)
+type by_refs = bool list
+type fcall_args =
+  fcall_flags * num_params * num_params * by_refs * (Label.t option)
 type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
@@ -410,7 +412,6 @@ type instruct_call =
   | NewObjI of classref_id
   | NewObjS of SpecialClsRef.t
   | FPushCtor of num_params
-  | FThrowOnRefMismatch of bool list
   | FCall of fcall_args * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 

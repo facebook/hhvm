@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include "hphp/runtime/vm/hhbc.h"
+
 namespace HPHP {
 
 struct StringData;

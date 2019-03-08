@@ -111,21 +111,48 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::None, numArgs, 1, NoBlockId) {}
+    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId) {}
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
+                     std::unique_ptr<uint8_t[]> byRefs,
                      BlockId asyncEagerTarget)
     : FCallArgsBase(flags, numArgs, numRets)
-    , asyncEagerTarget(asyncEagerTarget) {
+    , asyncEagerTarget(asyncEagerTarget)
+    , byRefs(std::move(byRefs)) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
                     !supportsAsyncEagerReturn()));
   }
+  FCallArgs(const FCallArgs& o)
+    : FCallArgs(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget) {
+    if (o.byRefs) {
+      auto const numBytes = (numArgs + 7) / 8;
+      byRefs = std::make_unique<uint8_t[]>(numBytes);
+      memcpy(byRefs.get(), o.byRefs.get(), numBytes);
+    }
+  }
+  FCallArgs(FCallArgs&& o)
+    : FCallArgs(o.flags, o.numArgs, o.numRets, std::move(o.byRefs),
+                o.asyncEagerTarget) {}
+
+  bool enforceReffiness() const { return byRefs.get() != nullptr; }
+  bool byRef(uint32_t i) const {
+    assertx(enforceReffiness());
+    return byRefs[i / 8] & (1 << (i % 8));
+  }
   BlockId asyncEagerTarget;
+  std::unique_ptr<uint8_t[]> byRefs;
 };
 
 inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
+  auto const eq = [&] (uint8_t* a, uint8_t* b, uint32_t bytes) {
+    if (a == nullptr && b == nullptr) return true;
+    if (a == nullptr || b == nullptr) return false;
+    return memcmp(a, b, bytes) == 0;
+  };
+
   return
-    a.numArgs == b.numArgs && a.numRets == b.numRets &&
-    a.flags == b.flags && a.asyncEagerTarget == b.asyncEagerTarget;
+    a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
+    eq(a.byRefs.get(), b.byRefs.get(), (a.numArgs + 7 / 8)) &&
+    a.asyncEagerTarget == b.asyncEagerTarget;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -206,6 +233,11 @@ struct hasher_impl {
   static size_t hash(FCallArgs fca) {
     uint64_t hash = HPHP::hash_int64_pair(fca.numArgs, fca.numRets);
     hash = HPHP::hash_int64_pair(hash, fca.flags);
+    if (fca.byRefs) {
+      auto const br = reinterpret_cast<char*>(fca.byRefs.get());
+      auto const hash_br = hash_string_cs(br, (fca.numArgs + 7 / 8));
+      hash = HPHP::hash_int64_pair(hash, hash_br);
+    }
     hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);
     return static_cast<size_t>(hash);
   }
@@ -329,7 +361,6 @@ namespace imm {
 #define IMM_ID_SLA      SLA
 #define IMM_ID_ILA      ILA
 #define IMM_ID_I32LA    I32LA
-#define IMM_ID_BLLA     BLLA
 #define IMM_ID_IVA      IVA
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
@@ -351,7 +382,6 @@ namespace imm {
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
 #define IMM_TY_I32LA    CompactVector<uint32_t>
-#define IMM_TY_BLLA     CompactVector<bool>
 #define IMM_TY_IVA      uint32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
@@ -373,7 +403,6 @@ namespace imm {
 #define IMM_NAME_SLA(n)     targets
 #define IMM_NAME_ILA(n)     iterTab
 #define IMM_NAME_I32LA(n)   argv
-#define IMM_NAME_BLLA(n)    argv
 #define IMM_NAME_IVA(n)     arg##n
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
@@ -396,7 +425,6 @@ namespace imm {
 #define IMM_TARGETS_SLA(n)  for (auto& kv : targets) f(kv.second);
 #define IMM_TARGETS_ILA(n)
 #define IMM_TARGETS_I32LA(n)
-#define IMM_TARGETS_BLLA(n)
 #define IMM_TARGETS_IVA(n)
 #define IMM_TARGETS_I64A(n)
 #define IMM_TARGETS_LA(n)
@@ -421,7 +449,6 @@ namespace imm {
 #define IMM_EXTRA_SLA
 #define IMM_EXTRA_ILA
 #define IMM_EXTRA_I32LA
-#define IMM_EXTRA_BLLA
 #define IMM_EXTRA_IVA
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
@@ -714,7 +741,6 @@ OPCODES
 #undef IMM_TY_SLA
 #undef IMM_TY_ILA
 #undef IMM_TY_I32LA
-#undef IMM_TY_BLLA
 #undef IMM_TY_IVA
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
@@ -738,7 +764,6 @@ OPCODES
 // #undef IMM_NAME_SLA
 // #undef IMM_NAME_ILA
 // #undef IMM_NAME_I32LA
-// #undef IMM_NAME_BLLA
 // #undef IMM_NAME_IVA
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
@@ -759,7 +784,6 @@ OPCODES
 #undef IMM_TARGETS_SLA
 #undef IMM_TARGETS_ILA
 #undef IMM_TARGETS_I32LA
-#undef IMM_TARGETS_BLLA
 #undef IMM_TARGETS_IVA
 #undef IMM_TARGETS_I64A
 #undef IMM_TARGETS_LA
@@ -787,7 +811,6 @@ OPCODES
 #undef IMM_EXTRA_SLA
 #undef IMM_EXTRA_ILA
 #undef IMM_EXTRA_I32LA
-#undef IMM_EXTRA_BLLA
 #undef IMM_EXTRA_IVA
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA

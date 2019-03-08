@@ -333,12 +333,17 @@ let string_of_fcall_flags fl =
   ] in
   "<" ^ (String.concat ~sep:" " @@ List.filter ~f:(fun f -> f <> "") fl) ^ ">"
 
+let string_of_list_of_bools l =
+  let bool_to_str b = if b then "1" else "0" in
+  "\"" ^ (String.concat ~sep:"" (List.map ~f:bool_to_str l)) ^ "\""
+
 let string_of_fcall_args fcall_args =
-  let flags, num_args, num_rets, async_eager_label = fcall_args in
+  let flags, num_args, num_rets, by_refs, async_eager_label = fcall_args in
   sep [
     string_of_fcall_flags flags;
     string_of_int num_args;
     string_of_int num_rets;
+    string_of_list_of_bools by_refs;
     string_of_optional_label async_eager_label
   ]
 
@@ -455,11 +460,6 @@ let string_of_param_locations pl =
   if List.length pl = 0 then "" else
   "<" ^ (String.concat ~sep:", " (List.map ~f:string_of_int pl)) ^ ">"
 
-let string_of_list_of_bools l =
-  if List.length l = 0 then "" else
-  let bool_to_str b = if b then "1" else "0" in
-  "\"" ^ (String.concat ~sep:"" (List.map ~f:bool_to_str l)) ^ "\""
-
 let string_of_call instruction =
   match instruction with
   | FPushFunc (n, pl) ->
@@ -498,8 +498,6 @@ let string_of_call instruction =
     sep ["NewObjS"; SpecialClsRef.to_string r]
   | FPushCtor n ->
     sep ["FPushCtor"; string_of_int n]
-  | FThrowOnRefMismatch l ->
-    sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FCall (fcall_args, c, f) ->
     sep ["FCall";
       string_of_fcall_args fcall_args;

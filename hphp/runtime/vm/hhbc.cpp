@@ -93,7 +93,7 @@ namespace {
 
 bool argTypeIsVector(ArgType type) {
   return
-    type == BLA || type == SLA || type == VSA || type == I32LA || type == BLLA;
+    type == BLA || type == SLA || type == VSA || type == I32LA;
 }
 
 int immSize(ArgType type, PC immPC) {
@@ -146,13 +146,8 @@ int immSize(ArgType type, PC immPC) {
       case BLA:   vecElemSz = sizeof(Offset);     break;
       case SLA:   vecElemSz = sizeof(StrVecItem); break;
       case I32LA: vecElemSz = sizeof(uint32_t);   break;
-      case BLLA:  vecElemSz = sizeof(uint8_t);    break;
       case VSA:   vecElemSz = sizeof(Id);         break;
       default: not_reached();
-    }
-
-    if (type == BLLA) {
-      size = (size + 7) / 8;
     }
 
     return pc - immPC + vecElemSz * size;
@@ -267,7 +262,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_BLA 2
 #define IMM_ILA 0
 #define IMM_I32LA 0
-#define IMM_BLLA 0
 #define IMM_SLA 3
 #define IMM_LA 0
 #define IMM_IA 0
@@ -302,7 +296,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_BLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_SLA
 #undef IMM_OA
 #undef IMM_VSA
@@ -823,17 +816,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += ">";                                                  \
 } while (false)
 
-#define READBOOLVEC() do {                                     \
-  int sz = decode_iva(it);                                     \
-  uint8_t tmp = 0;                                             \
-  out += " \"";                                                \
-  for (int i = 0; i < sz; ++i) {                               \
-    if (i % 8 == 0) tmp = decode_raw<uint8_t>(it);             \
-    out += ((tmp >> (i % 8)) & 1) ? "1" : "0";                 \
-  }                                                            \
-  out += "\"";                                                 \
-} while (false)
-
 #define READITERTAB() do {                              \
   auto const sz = decode_iva(it);                       \
   out += " <";                                          \
@@ -864,7 +846,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_SLA READSVEC()
 #define H_ILA READITERTAB()
 #define H_I32LA READI32VEC()
-#define H_BLLA READBOOLVEC()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
@@ -896,7 +877,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
     ? showOffset(fca.asyncEagerOffset)                           \
     : "-";                                                       \
   out += ' ';                                                    \
-  out += show(fca, aeOffset);                                    \
+  out += show(fca, fca.byRefs, aeOffset);                        \
 } while (false)
 
 #define O(name, imm, push, pop, flags)    \
@@ -921,7 +902,6 @@ OPCODES
 #undef H_SLA
 #undef H_ILA
 #undef H_I32LA
-#undef H_BLLA
 #undef H_IVA
 #undef H_I64A
 #undef H_LA
@@ -1211,7 +1191,7 @@ ImmVector getImmVector(PC opcode) {
   int numImm = numImmediates(op);
   for (int k = 0; k < numImm; ++k) {
     ArgType t = immType(op, k);
-    if (t == BLA || t == SLA || t == I32LA || t == BLLA || t == VSA) {
+    if (t == BLA || t == SLA || t == I32LA || t == VSA) {
       PC vp = getImmPtr(opcode, k)->bytes;
       auto const size = decode_iva(vp);
       return ImmVector(vp, size, t == VSA ? size : 0);
@@ -1264,13 +1244,26 @@ std::string show(const LocalRange& range) {
   );
 }
 
-std::string show(const FCallArgsBase& fca, std::string asyncEagerLabel) {
+std::string show(const FCallArgsBase& fca, const uint8_t* byRefsRaw,
+                 std::string asyncEagerLabel) {
+  auto const byRefs = [&] {
+    if (!byRefsRaw) return std::string{"\"\""};
+    std::string out = "\"";
+    uint8_t tmp = 0;
+    for (int i = 0; i < fca.numArgs; ++i) {
+      if (i % 8 == 0) tmp = *(byRefsRaw++);
+      out += ((tmp >> (i % 8)) & 1) ? "1" : "0";
+    }
+    out += "\"";
+    return out;
+  }();
+
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
   return folly::sformat(
-    "<{}> {} {} {}",
-    folly::join(' ', flags), fca.numArgs, fca.numRets, asyncEagerLabel
+    "<{}> {} {} {} {}",
+    folly::join(' ', flags), fca.numArgs, fca.numRets, byRefs, asyncEagerLabel
   );
 }
 

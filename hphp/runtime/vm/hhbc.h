@@ -51,13 +51,14 @@ struct LocalRange {
 
 
 // Arguments to FCall opcodes.
-// hhas format: <flags> <numArgs> <numRets> <asyncEagerOffset>
+// hhas format: <flags> <numArgs> <numRets> <byRefs> <asyncEagerOffset>
 // hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
-//              ?<ba:asyncEagerOffset>
-//   flags            = flags except HasInOut / HasAsyncEagerOffset
+//              ?<boolvec:byRefs> ?<ba:asyncEagerOffset>
+//   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
 //   numRets          = flags & HasInOut ? decode_iva() : 1
+//   byRefs           = flags & EnforceReffiness ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
   enum Flags : uint8_t {
@@ -68,17 +69,19 @@ struct FCallArgsBase {
     SupportsAsyncEagerReturn = (1 << 1),
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 2),
+    // HHBC-only: should this FCall enforce argument reffiness?
+    EnforceReffiness         = (1 << 3),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 3),
+    HasAsyncEagerOffset      = (1 << 4),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 4),
+    NumArgsStart             = (1 << 5),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | SupportsAsyncEagerReturn;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 4;
+  static constexpr uint8_t kFirstNumArgsBit = 5;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs), numRets(numRets), flags(flags) {
@@ -95,19 +98,28 @@ struct FCallArgsBase {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     Offset asyncEagerOffset)
+                     const uint8_t* byRefs, Offset asyncEagerOffset)
     : FCallArgsBase(flags, numArgs, numRets)
-    , asyncEagerOffset(asyncEagerOffset) {
+    , asyncEagerOffset(asyncEagerOffset)
+    , byRefs(byRefs) {
+    assertx(IMPLIES(byRefs != nullptr, numArgs != 0));
     assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
                     !supportsAsyncEagerReturn()));
   }
+  bool enforceReffiness() const { return byRefs != nullptr; }
+  bool byRef(uint32_t i) const {
+    assertx(enforceReffiness());
+    return byRefs[i / 8] & (1 << (i % 8));
+  }
   Offset asyncEagerOffset;
+  const uint8_t* byRefs;
 };
 
 static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 std::string show(const LocalRange&);
-std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
+std::string show(const FCallArgsBase&, const uint8_t* byRefs,
+                 std::string asyncEagerLabel);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size
@@ -116,8 +128,8 @@ std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA, SLA, ILA, I32LA, BLLA and VSA are
- * meaningless since they are never read out of ArgUnion (they use ImmVector).
+ * The types in this macro for BLA, SLA, ILA, I32LA and VSA are meaningless
+ * since they are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -128,7 +140,6 @@ std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
   ARGTYPEVEC(I32LA,uint32_t)     /* Vector of 32-bit uint */                   \
-  ARGTYPEVEC(BLLA,bool)          /* Vector of booleans */                      \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
@@ -651,7 +662,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjS,         ONE(OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    NF) \
   O(FPushCtor,       ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -835,7 +845,6 @@ struct ImmVector {
 
   bool isValid() const { return m_start != 0; }
 
-  const uint8_t* vecu8() const { return m_start; }
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }

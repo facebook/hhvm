@@ -24,11 +24,23 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/rx.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
+
+inline void callerReffinessChecks(const Func* func, const FCallArgs& fca) {
+  for (auto i = 0; i < fca.numArgs; ++i) {
+    auto const byRef = func->byRef(i);
+    if (byRef != fca.byRef(i)) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
+    }
+  }
+}
 
 inline void callerDynamicCallChecks(const Func* func) {
   if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;

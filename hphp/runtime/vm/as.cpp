@@ -1157,23 +1157,6 @@ std::vector<uint32_t> read_argv32(AsmState& as) {
   return result;
 }
 
-// Read a vector of booleans formatted as a quoted string of '0' and '1'.
-std::vector<bool> read_argvb(AsmState& as) {
-  as.in.skipSpaceTab();
-  std::string strVal;
-  if (!as.in.readQuotedStr(strVal)) {
-    as.error("expected quoted string literal");
-  }
-
-  std::vector<bool> result;
-  for (auto c : strVal) {
-    if (c != '0' && c != '1') as.error("Was expecting a boolean (0 or 1)");
-    result.push_back(c == '1');
-  }
-
-  return result;
-}
-
 // Read in a vector of iterators the format for this vector is:
 // <(TYPE) ID LOCAL?, (TYPE) ID LOCAL?, ...>
 // Where TYPE := Iter | LIter
@@ -1351,13 +1334,41 @@ FCallArgs::Flags read_fcall_flags(AsmState& as) {
   return static_cast<FCallArgs::Flags>(flags);
 }
 
-std::pair<FCallArgsBase, std::string> read_fcall_args(AsmState& as) {
+// Read a vector of booleans formatted as a quoted string of '0' and '1'.
+std::unique_ptr<uint8_t[]> read_by_refs(AsmState& as, uint32_t numArgs) {
+  as.in.skipSpaceTab();
+  std::string strVal;
+  if (!as.in.readQuotedStr(strVal)) {
+    as.error("expected quoted string literal");
+  }
+
+  if (strVal.empty()) return nullptr;
+  if (strVal.length() != numArgs) {
+    as.error("reffiness vector must be either empty or match number of args");
+  }
+
+  auto result = std::make_unique<uint8_t[]>((numArgs + 7) / 8);
+  for (auto i = 0; i < numArgs; ++i) {
+    auto const c = strVal[i];
+    if (c != '0' && c != '1') as.error("Was expecting a boolean (0 or 1)");
+    result[i / 8] |= (c == '1' ? 1 : 0) << (i % 8);
+  }
+
+  return result;
+}
+
+std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string>
+read_fcall_args(AsmState& as) {
   auto const flags = read_fcall_flags(as);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
-  auto const asyncEagerLabel = read_opcode_arg<std::string>(as);
-  return std::make_pair(
-    FCallArgsBase(flags, numArgs, numRets), asyncEagerLabel);
+  auto byRefs = read_by_refs(as, numArgs);
+  auto asyncEagerLabel = read_opcode_arg<std::string>(as);
+  return std::make_tuple(
+    FCallArgsBase(flags, numArgs, numRets),
+    std::move(byRefs),
+    std::move(asyncEagerLabel)
+  );
 }
 
 Id create_litstr_id(AsmState& as) {
@@ -1409,11 +1420,15 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 #define IMM_FCA do {                                                \
     auto const fca = read_fcall_args(as);                           \
-    encodeFCallArgs(*as.ue, fca.first, fca.second != "-", [&] {     \
-      labelJumps.emplace_back(fca.second, as.ue->bcPos());          \
-      as.ue->emitInt32(0);                                          \
-    });                                                             \
-    immFCA = fca.first;                                             \
+    encodeFCallArgs(                                                \
+      *as.ue, std::get<0>(fca), std::get<1>(fca).get(),             \
+      std::get<2>(fca) != "-",                                      \
+      [&] {                                                         \
+        labelJumps.emplace_back(std::get<2>(fca), as.ue->bcPos());  \
+        as.ue->emitInt32(0);                                        \
+      }                                                             \
+    );                                                              \
+    immFCA = std::get<0>(fca);                                      \
   } while (0)
 
 // Record the offset of the immediate so that we can correlate it with its
@@ -1449,21 +1464,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
   for (auto i : vecImm) {                          \
     as.ue->emitInt32(i);                           \
   }                                                \
-} while (0)
-
-#define IMM_BLLA do {                              \
-  std::vector<bool> vecImm = read_argvb(as);       \
-  as.ue->emitIVA(vecImm.size());                   \
-  uint32_t i = 0;                                  \
-  uint8_t tmp = 0;                                 \
-  while (i < vecImm.size()) {                      \
-    tmp |= vecImm[i] << (i % 8);                   \
-    if ((++i % 8) == 0) {                          \
-      as.ue->emitByte(tmp);                        \
-      tmp = 0;                                     \
-    }                                              \
-  }                                                \
-  if (i % 8) as.ue->emitByte(tmp);                 \
 } while (0)
 
 #define IMM_BLA do {                                    \
@@ -1622,7 +1622,6 @@ OPCODES
 #undef IMM_BA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_OA

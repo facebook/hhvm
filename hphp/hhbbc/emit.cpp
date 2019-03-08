@@ -592,20 +592,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     };
 
-    auto emit_argvecb = [&] (const CompactVector<bool>& argv) {
-      ue.emitIVA(argv.size());
-      uint32_t i = 0;
-      uint8_t tmp = 0;
-      while (i < argv.size()) {
-        tmp |= argv[i] << (i % 8);
-        if ((++i % 8) == 0) {
-          ue.emitByte(tmp);
-          tmp = 0;
-        }
-      }
-      if (i % 8) ue.emitByte(tmp);
-    };
-
     auto emit_srcloc = [&] {
       auto const sl = srcLoc(func, inst.srcLoc);
       if (!sl.isValid()) return;
@@ -673,7 +659,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
 #define IMM_I32LA(n)   emit_argvec32(data.argv);
-#define IMM_BLLA(n)    emit_argvecb(data.argv);
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
@@ -692,7 +677,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
 #define IMM_FCA(n)     encodeFCallArgs(                                    \
-                         ue, data.fca,                                     \
+                         ue, data.fca, data.fca.byRefs.get(),              \
                          data.fca.asyncEagerTarget != NoBlockId,           \
                          [&] {                                             \
                            set_expected_depth(data.fca.asyncEagerTarget);  \
@@ -786,7 +771,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

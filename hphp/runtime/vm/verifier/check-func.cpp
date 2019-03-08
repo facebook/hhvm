@@ -479,12 +479,6 @@ bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   return true;
 }
 
-bool FuncChecker::checkImmBLLA(PC& pc, PC const /*instr*/) {
-  auto const len = decode_iva(pc);
-  pc += (len + 7) / 8;
-  return true;
-}
-
 bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
   auto const ids = iterBreakIds(pc);
   if (ids.size() < 1) {
@@ -1036,39 +1030,28 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
 }
 
 bool FuncChecker::checkFpi(State* cur, PC pc) {
+  assertx(isFCallStar(peek_op(pc)));
+
   if (cur->fpilen <= 0) {
     error("%s", "cannot access empty FPI stack\n");
     return false;
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  auto const op = peek_op(pc);
-
-  if (isFCallStar(op)) {
-    --cur->fpilen;
-    auto const fca = getImm(pc, 0).u_FCA;
-    int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
-    int push_params = getImmIva(at(fpi.fpush));
-    if (call_params != push_params) {
-      error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
-             call_params, push_params);
-      ok = false;
-    }
-    if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
-      error("wrong # of params were passed; got %d expected %d\n",
-            push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
-            push_params);
-      ok = false;
-    }
-  } else {
-    assertx(op == Op::FThrowOnRefMismatch);
-    int num_checked_params = getImmVector(pc).size();
-    int push_params = getImmIva(at(fpi.fpush));
-    if (num_checked_params > push_params) {
-      error("num_checked_params %d out of range [0:%d]\n", num_checked_params,
-             push_params);
-      return false;
-    }
+  --cur->fpilen;
+  auto const fca = getImm(pc, 0).u_FCA;
+  int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  int push_params = getImmIva(at(fpi.fpush));
+  if (call_params != push_params) {
+    error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
+           call_params, push_params);
+    ok = false;
+  }
+  if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
+    error("wrong # of params were passed; got %d expected %d\n",
+          push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
+          push_params);
+    ok = false;
   }
 
   return ok;
@@ -1147,7 +1130,6 @@ std::set<int> localImmediates(Op op) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
-#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1178,7 +1160,6 @@ std::set<int> localImmediates(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
-#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA
@@ -1840,7 +1821,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
     case Op::FPushCtor:
-    case Op::FThrowOnRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:
     case Op::NativeImpl:

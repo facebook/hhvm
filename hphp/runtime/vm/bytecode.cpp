@@ -310,20 +310,6 @@ template<class T> struct imm_array {
   }
 };
 
-template<> struct imm_array<bool> {
-  uint32_t const size;
-  PC const ptr;
-
-  explicit imm_array(uint32_t size, PC pc)
-    : size{size}
-    , ptr{pc}
-  {}
-
-  bool operator[](uint32_t i) const {
-    return ptr[i / 8] & (1 << (i % 8));
-  }
-};
-
 }
 
 ALWAYS_INLINE local_var decode_local(PC& pc) {
@@ -349,14 +335,6 @@ OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
   auto const arr_pc = pc;
   pc += size * sizeof(T);
   return imm_array<T>{size, arr_pc};
-}
-
-template<>
-OPTBLD_INLINE imm_array<bool> decode_imm_array(PC& pc) {
-  auto const size = decode_iva(pc);
-  auto const arr_pc = pc;
-  pc += (size + 7) / 8;
-  return imm_array<bool>{size, arr_pc};
 }
 
 OPTBLD_INLINE IterTable decode_iter_table(PC& pc) {
@@ -5603,18 +5581,6 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   ar->trashVarEnv();
 }
 
-OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
-  assertx(byRefs.size <= ar->numArgs());
-  auto const func = ar->func();
-  for (auto i = 0; i < byRefs.size; ++i) {
-    auto const byRef = func->byRef(i);
-    if (byRef != byRefs[i]) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
-    }
-  }
-}
-
 bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
@@ -5683,6 +5649,7 @@ void iopFCall(PC origpc, PC& pc, ActRec* ar, FCallArgs fca,
     )
   );
   assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
+  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
   if (ar->isDynamicCall()) callerDynamicCallChecks(func);
   if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
     callerRxChecks(vmfp(), func);
@@ -7159,7 +7126,6 @@ struct litstr_id {
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)
 #define DECODE_I32LA decode_imm_array<uint32_t>(pc)
-#define DECODE_BLLA decode_imm_array<bool>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 
 #define DECODE_NA
@@ -7214,7 +7180,6 @@ OPCODES
 #undef DECODE_SLA
 #undef DECODE_ILA
 #undef DECODE_I32LA
-#undef DECODE_BLLA
 #undef DECODE_VSA
 
 #undef DECODE_NA

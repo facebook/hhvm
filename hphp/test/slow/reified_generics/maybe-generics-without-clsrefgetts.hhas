@@ -4,11 +4,11 @@
   DefCls 0
   String "f"
   FPushFunc 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   FPushFuncD 1 "var_dump"
   String "done"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   Int 1
   RetC
@@ -22,7 +22,7 @@
   NewObj 0 MaybeGenerics
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   RetC
 }

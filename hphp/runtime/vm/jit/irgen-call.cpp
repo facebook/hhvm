@@ -1399,32 +1399,36 @@ SSATmp* ldPreLiveFunc(IRGS& env) {
 
 }
 
-void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
-  if (!immVec.size()) return;
+//////////////////////////////////////////////////////////////////////
 
-  auto const func = ldPreLiveFunc(env);
-  auto const byRefs = immVec.vecu8();
-  if (func->hasConstVal(TFunc)) {
-    auto const f = func->funcVal();
-    for (auto i = 0; i < immVec.size(); ++i) {
-      if (f->byRef(i) != ((byRefs[i / 8] >> (i % 8)) & 1)) {
+namespace {
+
+bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
+                               const FCallArgs& fca) {
+  if (!fca.enforceReffiness()) return true;
+
+  if (callee) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (callee->byRef(i) != fca.byRef(i)) {
+        auto const func = cns(env, callee);
         gen(env, RaiseParamRefMismatchForFunc, ParamData { i }, func);
-        return;
+        return false;
       }
     }
-    return;
+    return true;
   }
 
+  auto const func = ldPreLiveFunc(env);
   auto const exitSlow = makeExitSlow(env);
 
   SSATmp* numParams = nullptr;
-  for (uint32_t i = 0; i * 8 < immVec.size(); i += 8) {
+  for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
     uint64_t vals = 0;
-    for (uint32_t j = 0; j < 8 && (i + j) * 8 < immVec.size(); ++j) {
-      vals |= ((uint64_t)byRefs[i + j]) << (8 * j);
+    for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
+      vals |= ((uint64_t)fca.byRefs[i + j]) << (8 * j);
     }
 
-    uint64_t bits = immVec.size() - i * 8;
+    uint64_t bits = fca.numArgs - i * 8;
     uint64_t mask = bits >= 64
       ? std::numeric_limits<uint64_t>::max()
       : (1UL << bits) - 1;
@@ -1440,9 +1444,11 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
     gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
         numParams);
   }
+
+  return true;
 }
 
-//////////////////////////////////////////////////////////////////////
+}
 
 void emitCallerDynamicCallChecks(IRGS& env,
                                  const Func* callee,
@@ -1545,6 +1551,7 @@ void emitFCall(IRGS& env,
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
+  if (!emitCallerReffinessChecks(env, callee, fca)) return;
   emitCallerDynamicCallChecks(
     env, callee, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   emitCallerRxChecks(env, callee);

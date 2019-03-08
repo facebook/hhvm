@@ -11,7 +11,7 @@
   DefCls 5
   DefCls 6
   FPushFuncD 0 "main"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   RetC
 }
 
@@ -71,58 +71,58 @@
   NewObjD "UseFrob"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "frob" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "AliasFrob"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "heh" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "Publicize"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "foo" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "Resolution"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "frob" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "yo" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   Int 1

@@ -3088,19 +3088,10 @@ and emit_fcall call_pos args uargs async_eager_label =
   let num_rets = List.fold_left args ~init:1
     ~f:(fun acc arg -> if is_inout_arg arg then acc + 1 else acc) in
   let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
+  let by_refs = List.map args expr_starts_with_ref in
   let fcall_args = make_fcall_args
-    ~flags ~num_rets ?async_eager_label num_args in
-  let instr_enforce_hint =
-    if args <> []
-    then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
-    else empty
-  in
-  gather [
-    (* emit call*)
-    emit_pos call_pos;
-    instr_enforce_hint;
-    instr_fcall fcall_args;
-  ]
+    ~flags ~num_rets ~by_refs ?async_eager_label num_args in
+  emit_pos_then call_pos @@ instr_fcall fcall_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env (_, expr_ as expr) =

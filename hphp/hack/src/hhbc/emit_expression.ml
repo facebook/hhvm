@@ -982,24 +982,15 @@ and emit_load_class_ref env pos cexpr =
     ]
 
 and emit_load_class_const env pos cexpr id =
-  (* TODO(T21932293): HHVM does not match Zend here.
-   * Eventually remove this to match PHP7 *)
-  match Ast_scope.Scope.get_class (Emit_env.get_scope env) with
-  | Some cd when cd.A.c_kind = A.Ctrait
-              && cexpr = (Class_special SpecialClsRef.Self)
-              && SU.is_class id ->
-    emit_pos_then pos @@
-    instr_string @@ SU.strip_global_ns @@ snd cd.A.c_name
-  | _ ->
-    let load_const =
-      if SU.is_class id
-      then instr (IMisc (ClsRefName 0))
-      else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
-    in
-    gather [
-      emit_load_class_ref env pos cexpr;
-      load_const
-    ]
+  let load_const =
+    if SU.is_class id
+    then instr (IMisc (ClsRefName 0))
+    else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
+  in
+  gather [
+    emit_load_class_ref env pos cexpr;
+    load_const
+  ]
 
 and emit_class_expr env cexpr prop =
   let load_prop () =

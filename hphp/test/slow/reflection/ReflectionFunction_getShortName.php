@@ -2,15 +2,18 @@
 
 namespace foo\bar;
 
+abstract final class FStatics {
+  public static $staticX = 4;
+  public static $staticY;
+}
+
 #===============================================================================
 # ReflectionFunction.
 
 function f($a, &$b, $c=null) {
-  static $staticX = 4;
-  static $staticY;
   print "In f()\n";
-  $staticX++;
-  $x = $staticX;
+  FStatics::$staticX++;
+  $x = FStatics::$staticX;
   return $x;
 }
 

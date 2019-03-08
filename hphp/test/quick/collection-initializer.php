@@ -1,4 +1,9 @@
 <?hh
+
+abstract final class GStatics {
+  public static Vector $x = Vector {};
+}
+
 function main() {
   $f = function ($x = Vector {}) {
     return $x;
@@ -13,8 +18,7 @@ function main() {
   echo "=========\n";
 
   $g = function () {
-    static $x = Vector {};
-    return $x;
+    return GStatics::$x;
   };
   $v1 = $g();
   $v2 = $g();

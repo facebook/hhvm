@@ -34,7 +34,7 @@ function parse_php_functions(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $function_regex =
+  $function_regex =
     "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $functions = Map {};
@@ -91,7 +91,7 @@ function parse_cpp_functions(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $function_regex =
+  $function_regex =
             "#^(?:static )?(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $functions = Map {};
@@ -124,8 +124,8 @@ function parse_php_methods(string $file):
     return ImmMap {};
   }
 
-  static $class_regex = "#class ([^\\s{/]+)[^{/\\)]*\\{(.*?)\n\\}#ms";
-  static $method_regex =
+  $class_regex = "#class ([^\\s{/]+)[^{/\\)]*\\{(.*?)\n\\}#ms";
+  $method_regex =
     "#<<[^>]*__Native([^>]*)>>\n\\s*.*?function +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $methods = Map {};
@@ -191,7 +191,7 @@ function parse_cpp_methods(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $method_regex =
+  $method_regex =
     "#^(?:static )?(\S+) +HHVM_(?:STATIC_)?METHOD\(([^,)]+),\s+([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $methods = Map {};

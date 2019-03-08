@@ -14,9 +14,10 @@ class X {
 }
 
 class Y {
+
+  private static $getI;
   function get() : ?Y {
-    static $i;
-    if ($i++ & 1) return $this;
+    if (self::$getI++ & 1) return $this;
     return null;
   }
 }

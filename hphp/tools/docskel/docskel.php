@@ -115,7 +115,7 @@ function getMethod(string $name, array $classes): array {
 }
 
 function generateCPPStub(array $func, array $classes): string {
-  static $typemap = [
+  $typemap = [
     // type =>     [return,     param,              actrec]
     'bool' =>      ['bool',     'bool',             'KindOfBoolean'],
     'int' =>       ['int64_t',  'int64_t',          'KindOfInt64'],

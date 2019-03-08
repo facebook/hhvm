@@ -2,7 +2,7 @@
 
 class V { const X = 10; }
 function values() {
-  static $VALUES = array(
+  $VALUES = array(
     'X'                        => V::X,
   );
   return $VALUES;

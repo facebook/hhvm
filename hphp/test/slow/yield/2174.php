@@ -30,7 +30,6 @@ $c = Y::g(32);
 var_dump($c->getOrigFuncName());
 var_dump($c->getCalledClass());
 $fcn = function ($x) {
-  static $q;
   yield $x;
 };
 $c = $fcn(32);

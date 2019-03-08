@@ -1,7 +1,10 @@
 <?php
+
+abstract final class FStatics {
+  public static $count = 1;
+}
 function f() {
-  static $count = 1;
-  throw new Exception($count);
+  throw new Exception(FStatics::$count);
 }
 
 

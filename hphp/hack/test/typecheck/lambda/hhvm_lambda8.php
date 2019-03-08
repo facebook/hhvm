@@ -1,9 +1,11 @@
 <?hh // partial
 class C {
+
+  private static $barK = 0;
+
   private function bar() {
-    static $k = 0;
-    ++$k;
-    echo "$k\n";
+    ++self::$barK;
+    echo self::$barK . "\n";
     var_dump($this);
   }
   public function foo1() {

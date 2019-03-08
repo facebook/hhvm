@@ -1,31 +1,43 @@
 <?hh
 class A {
+
+  private static $oneArgMethI = 10;
   <<__Memoize>>
   public function oneArgMeth($a) {
-    static $i = 10;
-    return $i++;
+    return self::$oneArgMethI++;
   }
+
+  private static $multiArgMethI = 20;
   <<__Memoize>>
   public function multiArgMeth($a, $b, $c) {
-    static $i = 20;
-    return $i++;
+    return self::$multiArgMethI++;
   }
+
+  private static $oneArgStaticI = 30;
   <<__Memoize>>
   public static function oneArgStatic($a) {
-    static $i = 30;
-    return $i++;
+    return self::$oneArgStaticI++;
   }
+
+  private static $multiArgStaticI = 40;
   <<__Memoize>>
   public static function multiArgStatic($a, $b, $c) {
-    static $i = 40;
-    return $i++;
+    return self::$multiArgStaticI++;
   }
 }
 
+abstract final class OneargtoplevelStatics {
+  public static $i = 50;
+}
+
 <<__Memoize>>
-function oneArgTopLevel($a) {static $i = 50; return $i++;}
+function oneArgTopLevel($a) {return OneargtoplevelStatics::$i++;}
+
+abstract final class MultiargtoplevelStatics {
+  public static $i = 60;
+}
 <<__Memoize>>
-function multiArgTopLevel($a, $b, $c) {static $i = 60; return $i++;}
+function multiArgTopLevel($a, $b, $c) {return MultiargtoplevelStatics::$i++;}
 <<__Memoize>>
 function passthrough($a) {return $a;}
 

@@ -6,9 +6,10 @@
 function foo($x = 1, $y = 1) { return $x * $y; }
 
 class X {
+
+  private static $barF = 1;
   static function bar($x = 1, $y = 1) {
-    static $f = 1;
-    return $f++ * $x + $y;
+    return self::$barF++ * $x + $y;
   }
 }
 

@@ -1,4 +1,4 @@
-(3,7)-(3,38) lambda_expression is not allowed in write context
-(3,7)-(3,38) Only variables, members, and the results of function calls can be used as references
+(3,7)-(3,35) lambda_expression is not allowed in write context
+(3,7)-(3,35) Only variables, members, and the results of function calls can be used as references
 (4,6)-(4,21) ?-> is not allowed in write context
 (4,7)-(4,21) ?-> operator is not allowed in write context

@@ -1,8 +1,11 @@
 <?hh
 class C {
+
+  private static $barK = 0;
+
   private function bar() {
-    static $k = 0;
-    ++$k;
+    ++self::$barK;
+    $k = self::$barK;
     echo "$k\n";
     var_dump($this);
   }
@@ -32,4 +35,3 @@ function main() {
   var_dump($x instanceof Closure);
 }
 main();
-

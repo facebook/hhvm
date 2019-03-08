@@ -15,11 +15,12 @@ if ($not_there["invalid_var"]) {
 }
 
 class something {
+
+  private static $get_objectObject =NULL;
   public static function get_object() {
-    static $object=NULL;
-    if ($object===NULL)
-    $object=new something;
-    return $object;
+    if (self::$get_objectObject===NULL)
+    self::$get_objectObject=new something;
+    return self::$get_objectObject;
   }
 
   public static function do_something() {

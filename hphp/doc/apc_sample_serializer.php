@@ -38,7 +38,7 @@ class CacheArchiveHphpSerializer extends CacheArchiveSerializer {
   }
 
   private function s($s) {
-    static $esc_chars = "\0\n\r\t\\\"?";
+    $esc_chars = "\0\n\r\t\\\"?";
     $slen = strlen($s);
     $s = addcslashes($s, $esc_chars);
     return "\"$s\",S($slen)";

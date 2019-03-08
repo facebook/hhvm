@@ -2,16 +2,20 @@
 
 class X {
   public $bar = 5;
+
+  private static $fooV;
   function foo() {
- static $v;
- if (!$v) $v = $this;
- return $v;
- }
+    if (!self::$fooV) self::$fooV = $this;
+    return self::$fooV;
+  }
+}
+
+abstract final class FooStatics {
+  public static $v;
 }
 function foo() {
-  static $v;
-  if (!$v) $v = new X;
-  return $v;
+  if (!FooStatics::$v) FooStatics::$v = new X;
+  return FooStatics::$v;
 }
 function test() {
   $x = new X;

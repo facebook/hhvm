@@ -1,15 +1,17 @@
 <?php
+
+abstract final class AutoloadStatics {
+  public static $i = 0;
+}
   function __autoload($name)
   {
       echo "IN:  " . __METHOD__ . "($name)\n";
-      
-      static $i = 0;
-      if ($i++ > 10) {
+      if (AutoloadStatics::$i++ > 10) {
           echo "-> Recursion detected - as expected.\n";
           return;
       }
       
-      class_exists('UndefinedClass' . $i);
+      class_exists('UndefinedClass' . AutoloadStatics::$i);
       
       echo "OUT: " . __METHOD__ . "($name)\n";
   }

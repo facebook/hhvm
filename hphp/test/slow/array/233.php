@@ -1,10 +1,13 @@
 <?php
 
 $stack = array();
+
+abstract final class PushStackStatics {
+  public static $index = 0;
+}
 function push_stack(){
   global $stack;
-  static $index = 0;
-  $val = $index++;
+  $val = PushStackStatics::$index++;
   array_push(&$stack, $val);
 }
 function pop_stack(){

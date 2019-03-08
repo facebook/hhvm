@@ -10,9 +10,12 @@ function expect_fail($lambda) {
   throw new Exception('Call failed to fail.');
 }
 
+abstract final class FooStatics {
+  public static $num = 0;
+}
+
 function foo($a, $b, &$c) {
-  static $num = 0;
-  $c[$a][$b] = $num++;
+  $c[$a][$b] = FooStatics::$num++;
 }
 
 function main($foo, $cuf, $cufa) {

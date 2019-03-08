@@ -7,15 +7,18 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+abstract final class GetRandomPortStatics {
+  public static $base = -1;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // so we run on different range of ports every time
 function get_random_port() {
-  static $base = -1;
-  if ($base == -1) {
-    $base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
+  if (GetRandomPortStatics::$base == -1) {
+    GetRandomPortStatics::$base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
   }
-  return ++$base;
+  return ++GetRandomPortStatics::$base;
 }
 
 // On the continuous integration server, it's not unlikely that we'll

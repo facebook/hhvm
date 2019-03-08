@@ -1,11 +1,14 @@
 <?php
 
 $x = 0;
+
+abstract final class FStatics {
+  public static $y = 0;
+}
 function f() {
   global $x;
-  static $y = 0;
   yield $x++;
-  yield $y++;
+  yield FStatics::$y++;
 }
 for ($i = 0;
  $i < 5;

@@ -11,7 +11,7 @@ async function ret() {
 }
 
 async function inFunc() {
-  $x = async function($a) { static $x; return $a; };
+  $x = async function($a) { return $a; };
   $y = async function($a) { await block(); return $a; };
   $xval = await $x(1);
   $yval = await $y(2);

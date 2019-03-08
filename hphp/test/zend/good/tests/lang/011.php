@@ -1,17 +1,20 @@
-<?php 
+<?php
 function F()
 {
 	$a = "Hello ";
 	return($a);
 }
 
+abstract final class GStatics {
+  public static $myvar = 4;
+}
+
 function G()
 {
-  static $myvar = 4;
-  
-  echo "$myvar ";
+
+  echo GStatics::$myvar . " ";
   echo F();
-  echo "$myvar";
+  echo GStatics::$myvar;
 }
 
 G();

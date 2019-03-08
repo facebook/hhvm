@@ -1,8 +1,11 @@
 <?php
+
+abstract final class CallbackStatics {
+  public static $callback_invocations;
+}
 function callback($string) {
-	static $callback_invocations;
-	$callback_invocations++;
-	return "[callback:$callback_invocations]$string\n";
+	CallbackStatics::$callback_invocations++;
+	return "[callback:" . CallbackStatics::$callback_invocations . "]$string\n";
 }
 
 ob_start('callback', 0, false);

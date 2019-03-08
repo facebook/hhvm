@@ -14,16 +14,19 @@ two();
 var_dump(fb_rename_function("three", "one"));
 one();
 
+abstract final class MyMicrotimeStatics {
+  public static $x = 0.0;
+}
+
 // Try it with a builtin, too.
 
 function my_microtime(bool $foob = false) {
-  static $x = 0.0;
   echo "ca\$h m0n3y\n";
-  $x += 1.0;
+  MyMicrotimeStatics::$x += 1.0;
   if (false) {
-    return $x;
+    return MyMicrotimeStatics::$x;
   }
-  return (string)$x;
+  return (string)MyMicrotimeStatics::$x;
 }
 
 var_dump(fb_rename_function('microtime', '__dont_call_microtime'));

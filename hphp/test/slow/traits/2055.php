@@ -1,10 +1,12 @@
 <?php
 
 trait T1 {
+
+  <<__LSB>>
+  private static $incX =0;
   public function inc($who) {
-    static $x=0;
-    $x++;
-    echo $who . " (" . __class__ . "): " . $x . "\n";
+    static::$incX++;
+    echo $who . " (" . __class__ . "): " . static::$incX . "\n";
   }
 }
 class B {

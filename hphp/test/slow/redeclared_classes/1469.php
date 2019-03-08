@@ -1,10 +1,11 @@
 <?php
 
 class A {
+  <<__LSB>>
+  private static $fooZ = 0;
   static function foo() {
-    static $z = 0;
-    $z++;
-    var_dump($z);
+    static::$fooZ++;
+    var_dump(static::$fooZ);
   }
 }
 class B extends A{

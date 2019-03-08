@@ -7,12 +7,13 @@ function thing_get() {
 final class thing {
   function x() { echo "ok\n"; }
 
+  private static $getInstance = null;
+
   public static function get() {
-    static $instance = null;
-    if ($instance === null) {
-      $instance = new self();
+    if (self::$getInstance === null) {
+      self::$getInstance = new self();
     }
-    return $instance;
+    return self::$getInstance;
   }
 }
 

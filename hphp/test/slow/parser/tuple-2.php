@@ -6,7 +6,7 @@ function f2($x = tuple (2)) {
   var_dump($x);
 }
 function f3() {
-  static $x = tuple(3,4);
+  $x = tuple(3,4);
   var_dump($x);
 }
 class C {

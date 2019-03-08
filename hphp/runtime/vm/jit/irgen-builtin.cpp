@@ -209,6 +209,8 @@ SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   auto const mode = params[1].value;
   auto const val = params[0].value;
 
+  if (val->isA(TClsMeth)) return cns(env, 2);
+
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
 

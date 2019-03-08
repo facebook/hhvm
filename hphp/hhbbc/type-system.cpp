@@ -3044,6 +3044,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::DArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return TDArr;
+  case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
@@ -3070,9 +3071,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return IsTypeOp::DArray;
   }
-  if (t.subtypeOf(BClsMeth)) {
-    return RuntimeOption::EvalHackArrDVArrs ? IsTypeOp::Vec : IsTypeOp::VArray;
-  }
+  if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
   return folly::none;
 }
 
@@ -5029,16 +5028,34 @@ bool could_copy_on_write(const Type& t) {
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
-  if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
-    if (testTy.subtypeOf(BVArr)) return valTy.couldBe(BVec);
-    if (testTy.subtypeOf(BDArr)) return valTy.couldBe(BDict);
-    if (testTy.subtypeOf(BArr))  return valTy.couldBe(BVec | BDict | BKeyset);
-  } else if (RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
-    if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
-    if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
+  if (testTy == TStrLike) {
+    return valTy.couldBe(BFunc | BCls);
+  } else if (testTy == TArr) {
+    if (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        valTy.couldBe(BVec | BDict | BKeyset)) {
+      return true;
+    }
+    return RuntimeOption::EvalIsVecNotices &&
+          !RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth);
+  } else if (testTy == TVArr) {
+    if (RuntimeOption::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BVec)) {
+      return true;
+    }
+    return RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth);
+  } else if (testTy == TDArr) {
+    return RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+           valTy.couldBe(BDict);
+ } else if (testTy == TVec) {
+   if (RuntimeOption::EvalHackArrCompatIsVecDictNotices &&
+       valTy.couldBe(BVArr)) {
+     return true;
+   }
+   return RuntimeOption::EvalIsVecNotices &&
+          RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth);
+  } else if (testTy == TDict) {
+    return RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+           valTy.couldBe(BDArr);
   }
-  if (testTy.subtypeOf(BStrLike)) return valTy.couldBe(BFunc | BCls);
-  if (testTy.subtypeOf(BArrLike)) return valTy.couldBe(BClsMeth);
   return false;
 }
 

@@ -163,6 +163,11 @@ inline bool is_object(const Cell* c) {
     c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
 }
 
+inline bool is_clsmeth(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsClsMeth(c);
+}
+
 inline bool is_empty_string(const Cell* c) {
   return tvIsString(c) && c->m_data.pstr->empty();
 }

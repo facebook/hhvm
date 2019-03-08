@@ -1155,16 +1155,32 @@ template<class IsType, class JmpOp>
 void isTypeHelper(ISS& env,
                   IsTypeOp typeOp, LocalId location,
                   const IsType& istype, const JmpOp& jmp) {
-
+  auto bail = [&] { impl(env, istype, jmp); };
   if (typeOp == IsTypeOp::Scalar || typeOp == IsTypeOp::ArrLike) {
-    return impl(env, istype, jmp);
+    return bail();
   }
 
-  auto const val = istype.op == Op::IsTypeC ?
-    topT(env) : locRaw(env, location);
-  auto const testTy = type_of_istype(typeOp);
+  auto const val = istype.op == Op::IsTypeC ? topT(env) : locRaw(env, location);
+
+  // If the type could be ClsMeth and Arr/Vec, skip location refining.
+  // Otherwise, refine location based on the testType.
+  auto testTy = type_of_istype(typeOp);
+  if (val.couldBe(BClsMeth)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if ((typeOp == IsTypeOp::Vec) || (typeOp == IsTypeOp::VArray)) {
+        if (val.couldBe(BVec | BVArr)) return bail();
+        testTy = TClsMeth;
+      }
+    } else {
+      if ((typeOp == IsTypeOp::Arr) || (typeOp == IsTypeOp::VArray)) {
+        if (val.couldBe(BArr | BVArr)) return bail();
+        testTy = TClsMeth;
+      }
+    }
+  }
+
   if (!val.subtypeOf(BCell) || val.subtypeOf(testTy) || !val.couldBe(testTy)) {
-    return impl(env, istype, jmp);
+    return bail();
   }
 
   if (istype.op == Op::IsTypeC) {
@@ -2165,10 +2181,55 @@ void isTypeArrLike(ISS& env, const Type& ty) {
   push(env, TBool);
 }
 
+namespace {
+template<typename MarkNoThrowFun>
+bool isCompactTypeClsMeth(
+  ISS& env, IsTypeOp op, const Type& t, MarkNoThrowFun fn) {
+  if (t.couldBe(BClsMeth)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (op == IsTypeOp::Vec || op == IsTypeOp::VArray) {
+        if (!RuntimeOption::EvalIsVecNotices) fn();
+        if (t.subtypeOf(
+            op == IsTypeOp::Vec ? BClsMeth | BVec : BClsMeth | BVArr)) {
+          push(env, TTrue);
+        } else if (t.couldBe(op == IsTypeOp::Vec ? BVec : BVArr)) {
+          push(env, TBool);
+        } else {
+          isTypeImpl(env, t, TClsMeth);
+        }
+        return true;
+      }
+    } else {
+      if (op == IsTypeOp::Arr || op == IsTypeOp::VArray) {
+        if (!RuntimeOption::EvalIsVecNotices) fn();
+        if (t.subtypeOf(
+            op == IsTypeOp::VArray ? BClsMeth | BVArr : BClsMeth | BArr)) {
+          push(env, TTrue);
+        } else if (t.couldBe(op == IsTypeOp::VArray ? BVArr : BArr)) {
+          push(env, TBool);
+        } else {
+          isTypeImpl(env, t, TClsMeth);
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
-  if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   auto const loc = locAsCell(env, op.loc1);
+  auto const markNoThrow = [&] () {
+    if (!locCouldBeUninit(env, op.loc1)) {
+      nothrow(env);
+      constprop(env);
+    }
+  };
+  if (isCompactTypeClsMeth(env, op.subop2, loc, markNoThrow)) return;
+
+  markNoThrow();
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
@@ -2179,8 +2240,11 @@ void isTypeLImpl(ISS& env, const Op& op) {
 
 template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
-  nothrow(env);
   auto const t1 = popC(env);
+  if (isCompactTypeClsMeth(env, op.subop1, t1, [&] () { nothrow(env); })) {
+    return;
+  }
+  nothrow(env);
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);
@@ -2264,6 +2328,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::DArray:
     case IsTypeOp::ArrLike:
     case IsTypeOp::Scalar:
+    case IsTypeOp::ClsMeth:
       return false;
   }
   not_reached();

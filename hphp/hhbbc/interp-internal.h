@@ -943,29 +943,24 @@ void killLocals(ISS& env) {
 
 void specialFunctionEffects(ISS& env, const res::Func& func) {
   /*
-   * Skip-frame functions won't write or read to the caller's frame, but they
-   * might dynamically call a function which can. So, skip-frame functions kill
-   * our locals unless they can't call such functions.
+   * Skip-frame functions won't read from the caller's frame, but they might
+   * dynamically call a function which can. So, skip-frame functions read our
+   * locals unless they can't call such functions.
    */
   if ((RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
        func.mightBeSkipFrame())) {
     readUnknownLocals(env);
-    killLocals(env);
-    mayUseVV(env);
-    return;
   }
 
   if (func.mightReadCallerFrame()) {
-    if (func.name()->isame(s_func_num_args.get())) return;
     if (func.name()->isame(s_func_get_args.get()) ||
         func.name()->isame(s_func_get_arg.get()) ||
         func.name()->isame(s_func_slice_args.get())) {
       readUnknownParams(env);
-    } else {
+    } else if (!func.name()->isame(s_func_num_args.get())) {
       readUnknownLocals(env);
     }
     mayUseVV(env);
-    return;
   }
 }
 
@@ -977,8 +972,6 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
     if (!ar.func) {
       if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON) {
         readUnknownLocals(env);
-        killLocals(env);
-        mayUseVV(env);
       }
       return;
     }
@@ -995,15 +988,13 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
     /*
      * Methods cannot read or write to the caller's frame, but they can be
      * skip-frame (if they're a builtin). So, its possible they'll dynamically
-     * call a function which reads or writes to the caller's frame. If we don't
+     * call a function which reads from the caller's frame. If we don't
      * forbid this, we have to be pessimistic. Imagine something like
      * Vector::map calling assert.
      */
     if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
         (!ar.func || ar.func->mightBeSkipFrame())) {
       readUnknownLocals(env);
-      killLocals(env);
-      mayUseVV(env);
     }
     break;
   }

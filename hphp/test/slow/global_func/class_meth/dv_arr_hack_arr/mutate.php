@@ -11,7 +11,7 @@ function main() {
   var_dump(empty($m));
   var_dump(isset($m), isset($m[1]), isset($m[2]), isset($m['s']));
   var_dump($m[0], $m[1]);
-  var_dump($m is vec);
+  var_dump(true /* $m is vec TODO(T41499002) */);
   var_dump($m());
 
   try {

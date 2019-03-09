@@ -5,7 +5,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
-    int(13)
+    int(14)
     ["function"]=>
     string(7) "profile"
   }
@@ -14,7 +14,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
-    int(18)
+    int(19)
     ["function"]=>
     string(3) "foo"
     ["class"]=>
@@ -27,7 +27,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
-    int(21)
+    int(22)
     ["function"]=>
     string(4) "main"
   }

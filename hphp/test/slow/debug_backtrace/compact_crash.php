@@ -8,6 +8,7 @@ function profile($what, $fn) {
 }
 
 class X {
+  <<__NEVER_INLINE>>
   function foo() {
     var_dump('hello');
   }

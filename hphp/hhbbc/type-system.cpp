@@ -5059,6 +5059,17 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   return false;
 }
 
+bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
+  switch (testOp) {
+    case IsTypeOp::ArrLike:
+      return RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth);
+    case IsTypeOp::Scalar:
+      return false;
+    default:
+      return is_type_might_raise(type_of_istype(testOp), valTy);
+  }
+}
+
 bool inner_types_might_raise(const Type& t1, const Type& t2) {
   assertx(t1.subtypeOf(BArrLike));
   assertx(t2.subtypeOf(BArrLike));

@@ -2154,7 +2154,6 @@ void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
 void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {
-  if (!is_type_might_raise(test, locOrCell)) constprop(env);
   if (locOrCell.subtypeOf(test))  return push(env, TTrue);
   if (!locOrCell.couldBe(test))   return push(env, TFalse);
   push(env, TBool);
@@ -2182,13 +2181,10 @@ void isTypeArrLike(ISS& env, const Type& ty) {
 }
 
 namespace {
-template<typename MarkNoThrowFun>
-bool isCompactTypeClsMeth(
-  ISS& env, IsTypeOp op, const Type& t, MarkNoThrowFun fn) {
+bool isCompactTypeClsMeth(ISS& env, IsTypeOp op, const Type& t) {
   if (t.couldBe(BClsMeth)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (op == IsTypeOp::Vec || op == IsTypeOp::VArray) {
-        if (!RuntimeOption::EvalIsVecNotices) fn();
         if (t.subtypeOf(
             op == IsTypeOp::Vec ? BClsMeth | BVec : BClsMeth | BVArr)) {
           push(env, TTrue);
@@ -2201,7 +2197,6 @@ bool isCompactTypeClsMeth(
       }
     } else {
       if (op == IsTypeOp::Arr || op == IsTypeOp::VArray) {
-        if (!RuntimeOption::EvalIsVecNotices) fn();
         if (t.subtypeOf(
             op == IsTypeOp::VArray ? BClsMeth | BVArr : BClsMeth | BArr)) {
           push(env, TTrue);
@@ -2221,15 +2216,13 @@ bool isCompactTypeClsMeth(
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   auto const loc = locAsCell(env, op.loc1);
-  auto const markNoThrow = [&] () {
-    if (!locCouldBeUninit(env, op.loc1)) {
-      nothrow(env);
-      constprop(env);
-    }
-  };
-  if (isCompactTypeClsMeth(env, op.subop2, loc, markNoThrow)) return;
+  if (!locCouldBeUninit(env, op.loc1) && !is_type_might_raise(op.subop2, loc)) {
+    constprop(env);
+    nothrow(env);
+  }
 
-  markNoThrow();
+  if (isCompactTypeClsMeth(env, op.subop2, loc)) return;
+
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
@@ -2241,10 +2234,13 @@ void isTypeLImpl(ISS& env, const Op& op) {
 template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
   auto const t1 = popC(env);
-  if (isCompactTypeClsMeth(env, op.subop1, t1, [&] () { nothrow(env); })) {
-    return;
+  if (!is_type_might_raise(op.subop1, t1)) {
+    constprop(env);
+    nothrow(env);
   }
-  nothrow(env);
+
+  if (isCompactTypeClsMeth(env, op.subop1, t1)) return;
+
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);

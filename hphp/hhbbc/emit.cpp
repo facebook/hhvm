@@ -123,7 +123,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * regions, and insert "fake" edges to the block containing the
  * corresponding call.
  */
-std::vector<php::Block*> initial_sort(const php::Func& f) {
+std::vector<const php::Block*> initial_sort(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
   FTRACE(4, "Initial sort {}\n", f.name);
@@ -132,10 +132,10 @@ std::vector<php::Block*> initial_sort(const php::Func& f) {
   auto nextFpi = 0;
   // Map from fpi region id to the block containing its FCall.
   // Needs value stability because extraEdges holds pointers into this map.
-  hphp_hash_map<int, php::Block*> fpiToCallBlkMap;
+  hphp_hash_map<int, const php::Block*> fpiToCallBlkMap;
   // Map from the ids of terminal blocks within fpi regions to the
   // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  hphp_fast_map<BlockId, std::vector<php::Block**>> extraEdges;
+  hphp_fast_map<BlockId, std::vector<const php::Block**>> extraEdges;
   // The fpi state at the start of each block
   std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
   for (auto blk : sorted) {
@@ -241,7 +241,7 @@ std::vector<php::Block*> initial_sort(const php::Func& f) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<php::Block*> order_blocks(const php::Func& f) {
+std::vector<const php::Block*> order_blocks(const php::Func& f) {
   auto sorted = initial_sort(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -261,21 +261,11 @@ std::vector<php::Block*> order_blocks(const php::Func& f) {
   // after all that.
   std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (php::Block* a, php::Block* b) {
+    [&] (const php::Block* a, const php::Block* b) {
       using T = std::underlying_type<php::Block::Section>::type;
       return static_cast<T>(a->section) < static_cast<T>(b->section);
     }
   );
-
-  // If the first block is just a Nop, this means that there is a jump to the
-  // second block from somewhere in the function. We don't want this, so we
-  // change this nop to an EntryNop so it doesn't get optimized away
-  if (is_single_nop(*sorted.front())) {
-    sorted.front()->hhbcs.clear();
-    sorted.front()->hhbcs.push_back(bc::EntryNop{});
-    FTRACE(2, "      changing Nop to EntryNop in block {}\n",
-           sorted.front()->id);
-  }
 
   FTRACE(2, "      block order:{}\n",
     [&] {
@@ -339,7 +329,7 @@ struct EmitBcInfo {
     folly::Optional<uint32_t> expectedFPIDepth;
   };
 
-  std::vector<php::Block*> blockOrder;
+  std::vector<const php::Block*> blockOrder;
   uint32_t maxStackDepth;
   uint32_t maxFpiDepth;
   bool containsCalls;
@@ -858,39 +848,57 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     assert(*info.expectedFPIDepth <= fpiStack.size());
     while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
 
-    // If the block ends with JmpZ or JmpNZ to the next block, flip
-    // the condition to make the fallthrough the next block
-    if (b->hhbcs.back().op == Op::JmpZ ||
-        b->hhbcs.back().op == Op::JmpNZ) {
-      auto& bc = b->hhbcs.back();
-      auto const target =
-        bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
-      if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
-        if (bc.op == Op::JmpNZ) {
-          bc = bc_with_loc(bc.srcLoc, bc::JmpZ { b->fallthrough });
-        } else {
-          bc = bc_with_loc(bc.srcLoc, bc::JmpNZ { b->fallthrough });
+    auto fallthrough = b->fallthrough;
+    auto end = b->hhbcs.end();
+    auto flip = false;
+
+    if (is_single_nop(*b)) {
+      if (blockIt == begin(ret.blockOrder)) {
+        // If the first block is just a Nop, this means that there is
+        // a jump to the second block from somewhere in the
+        // function. We don't want this, so we change this nop to an
+        // EntryNop so it doesn't get optimized away
+        emit_inst(bc_with_loc(b->hhbcs.front().srcLoc, bc::EntryNop {}));
+      }
+    } else {
+      // If the block ends with JmpZ or JmpNZ to the next block, flip
+      // the condition to make the fallthrough the next block
+      if (b->hhbcs.back().op == Op::JmpZ ||
+          b->hhbcs.back().op == Op::JmpNZ) {
+        auto const& bc = b->hhbcs.back();
+        auto const target =
+          bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
+        if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
+          fallthrough = target;
+          --end;
+          flip = true;
         }
-        b->fallthrough = target;
+      }
+
+      for (auto iit = b->hhbcs.begin(); iit != end; ++iit) emit_inst(*iit);
+      if (flip) {
+        if (end->op == Op::JmpNZ) {
+          emit_inst(bc_with_loc(end->srcLoc, bc::JmpZ { b->fallthrough }));
+        } else {
+          emit_inst(bc_with_loc(end->srcLoc, bc::JmpNZ { b->fallthrough }));
+        }
       }
     }
 
-    for (auto& inst : b->hhbcs) emit_inst(inst);
-
     info.past = ue.bcPos();
 
-    if (b->fallthrough != NoBlockId) {
-      set_expected_depth(b->fallthrough);
+    if (fallthrough != NoBlockId) {
+      set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
-          blockIt[1]->id != b->fallthrough) {
+          blockIt[1]->id != fallthrough) {
         if (b->fallthroughNS) {
-          emit_inst(bc::JmpNS { b->fallthrough });
+          emit_inst(bc::JmpNS { fallthrough });
         } else {
-          emit_inst(bc::Jmp { b->fallthrough });
+          emit_inst(bc::Jmp { fallthrough });
         }
 
         auto const parent = commonParent(func,
-                                         func.blocks[b->fallthrough]->exnNodeId,
+                                         func.blocks[fallthrough]->exnNodeId,
                                          b->exnNodeId);
 
         auto depth = [&] (ExnNodeId eid) {
@@ -914,8 +922,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       for (auto DEBUG_ONLY id : b->unwindExits) FTRACE(4, " {}", id);
       FTRACE(4, "\n");
     }
-    if (b->fallthrough != NoBlockId) {
-      FTRACE(4, "      fallthrough: {}\n", b->fallthrough);
+    if (fallthrough != NoBlockId) {
+      FTRACE(4, "      fallthrough: {}\n", fallthrough);
     }
     FTRACE(2, "      block {} end: {}\n", b->id, info.past);
   }

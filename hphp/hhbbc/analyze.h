@@ -151,7 +151,7 @@ struct FuncAnalysis : FuncAnalysisResult {
   FuncAnalysis& operator=(FuncAnalysis&&) = default;
 
   // Blocks in a reverse post order, with DV initializers.
-  std::vector<php::Block*> rpoBlocks;
+  std::vector<const php::Block*> rpoBlocks;
 
   // Block data is indexed by Block::id.
   std::vector<BlockData> bdata;

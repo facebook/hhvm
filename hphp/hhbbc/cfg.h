@@ -129,7 +129,7 @@ void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
  * Obtain the blocks for a function in a reverse post order, starting
  * with the specified block.  The exact order is not specified.
  */
-std::vector<php::Block*>
+std::vector<const php::Block*>
 rpoSortFromBlock(const php::Func&, BlockId);
 
 /*
@@ -138,7 +138,7 @@ rpoSortFromBlock(const php::Func&, BlockId);
  *
  * DV initializer blocks will not appear in this list.
  */
-std::vector<php::Block*> rpoSortFromMain(const php::Func&);
+std::vector<const php::Block*> rpoSortFromMain(const php::Func&);
 
 /*
  * Obtain the blocks for a function in a reverse post order, taking
@@ -148,7 +148,7 @@ std::vector<php::Block*> rpoSortFromMain(const php::Func&);
  * virtual empty "entry" block, with edges to each DV entry point and
  * an edge to the main entry point.
  */
-std::vector<php::Block*> rpoSortAddDVs(const php::Func&);
+std::vector<const php::Block*> rpoSortAddDVs(const php::Func&);
 
 /*
  * Mappings from blocks to sets of blocks.
@@ -157,7 +157,7 @@ std::vector<php::Block*> rpoSortAddDVs(const php::Func&);
  * block pointers.
  */
 using BlockToBlocks = std::vector<
-  boost::container::flat_set<php::Block*>
+  boost::container::flat_set<const php::Block*>
 >;
 
 /*
@@ -169,7 +169,7 @@ using BlockToBlocks = std::vector<
  * in the list.
  */
 BlockToBlocks
-computeNonThrowPreds(const std::vector<php::Block*>&);
+computeNonThrowPreds(const std::vector<const php::Block*>&);
 
 /*
  * Find the immediate throw predecessors for each block in an
@@ -180,7 +180,7 @@ computeNonThrowPreds(const std::vector<php::Block*>&);
  * in the list.
  */
 BlockToBlocks
-computeThrowPreds(const std::vector<php::Block*>&);
+computeThrowPreds(const std::vector<const php::Block*>&);
 
 /*
  * Visit each leaf in the ExnNode tree.

@@ -50,7 +50,7 @@ namespace {
  */
 struct PostOrderWalker {
   const php::Func& func;
-  std::vector<php::Block*>& out;
+  std::vector<const php::Block*>& out;
   boost::dynamic_bitset<>& visited;
 
   void walk(BlockId blk) {
@@ -65,9 +65,9 @@ struct PostOrderWalker {
 };
 
 void postorderWalk(const php::Func& func,
-                   std::vector<php::Block*>& out,
+                   std::vector<const php::Block*>& out,
                    boost::dynamic_bitset<>& visited,
-                   php::Block& blk) {
+                   const php::Block& blk) {
   auto walker = PostOrderWalker { func, out, visited };
   walker.walk(blk.id);
 }
@@ -76,23 +76,23 @@ void postorderWalk(const php::Func& func,
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<php::Block*> rpoSortFromBlock(const php::Func& func,
-                                                       BlockId start) {
+std::vector<const php::Block*> rpoSortFromBlock(const php::Func& func,
+                                                BlockId start) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<php::Block*> ret;
+  std::vector<const php::Block*> ret;
   ret.reserve(func.blocks.size());
   postorderWalk(func, ret, visited, *func.blocks[start]);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<php::Block*> rpoSortFromMain(const php::Func& func) {
+std::vector<const php::Block*> rpoSortFromMain(const php::Func& func) {
   return rpoSortFromBlock(func, func.mainEntry);
 }
 
-std::vector<php::Block*> rpoSortAddDVs(const php::Func& func) {
+std::vector<const php::Block*> rpoSortAddDVs(const php::Func& func) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<php::Block*> ret;
+  std::vector<const php::Block*> ret;
   ret.reserve(func.blocks.size());
   postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
 
@@ -112,7 +112,7 @@ std::vector<php::Block*> rpoSortAddDVs(const php::Func& func) {
 }
 
 BlockToBlocks
-computeNonThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
+computeNonThrowPreds(const std::vector<const php::Block*>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {
@@ -130,7 +130,7 @@ computeNonThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
 }
 
 BlockToBlocks
-computeThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
+computeThrowPreds(const std::vector<const php::Block*>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
   for (auto& b : rpoBlocks) {

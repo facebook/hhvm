@@ -311,9 +311,10 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
 void insert_assertions(const Index& index,
                        const FuncAnalysis& ainfo,
                        CollectedInfo& collect,
-                       php::Block* const blk,
+                       BlockId bid,
                        State state) {
   BytecodeVec newBCs;
+  auto const blk = ainfo.ctx.func->blocks[bid].get();
   newBCs.reserve(blk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
@@ -373,7 +374,7 @@ void insert_assertions(const Index& index,
   blk->hhbcs = std::move(newBCs);
 }
 
-bool persistence_check(php::Block* const blk) {
+bool persistence_check(const php::Block* const blk) {
   for (auto& op : blk->hhbcs) {
     switch (op.op) {
       case Op::Nop:
@@ -517,9 +518,10 @@ php::Block* make_fatal_block(FuncAnalysis& ainfo,
 void first_pass(const Index& index,
                 FuncAnalysis& ainfo,
                 CollectedInfo& collect,
-                php::Block* const blk,
+                BlockId bid,
                 State state) {
   auto const ctx = ainfo.ctx;
+  auto const blk = ctx.func->blocks[bid].get();
 
   BytecodeVec newBCs;
   newBCs.reserve(blk->hhbcs.size());
@@ -878,7 +880,7 @@ void visit_blocks_impl(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo, collect, blk, state);
+    fun(index, ainfo, collect, blk->id, state);
   }
   assert(check(*ainfo.ctx.func));
 }
@@ -934,9 +936,10 @@ struct OptimizeIterState {
   void operator()(const Index& index,
                   const FuncAnalysis& ainfo,
                   CollectedInfo& collect,
-                  php::Block* const blk,
+                  BlockId bid,
                   State state) {
     auto const ctx = ainfo.ctx;
+    auto const blk = ctx.func->blocks[bid].get();
     auto interp = Interp { index, ctx, collect, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
@@ -1328,8 +1331,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
                  [&] (const Index&,
                       const FuncAnalysis&,
                       CollectedInfo&,
-                      php::Block* blk,
+                      BlockId bid,
                       const State&) {
+                   auto const blk = ainfo.ctx.func->blocks[bid].get();
                    if (persistent && !persistence_check(blk)) {
                      persistent = false;
                    }

@@ -38,7 +38,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     FTRACE(2, "Remove unreachable blocks: {}\n", ainfo.ctx.func->name);
   };
 
-  auto make_unreachable = [&](php::Block* blk) {
+  auto make_unreachable = [&](const php::Block* blk) {
     if (blk->id == NoBlockId) return false;
     auto const& state = ainfo.bdata[blk->id].stateIn;
     if (!state.initialized) return true;
@@ -70,11 +70,11 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     return state.initialized && !state.unreachable;
   };
 
-  for (auto const& blk : ainfo.rpoBlocks) {
-    if (!reachable(blk->id)) continue;
+  for (auto const& cblk : ainfo.rpoBlocks) {
+    if (!reachable(cblk->id)) continue;
     auto reachableTarget = NoBlockId;
     auto hasUnreachableTargets = false;
-    forEachNormalSuccessor(*blk, [&] (BlockId id) {
+    forEachNormalSuccessor(*cblk, [&] (BlockId id) {
         if (reachable(id)) {
           reachableTarget = id;
         } else {
@@ -83,15 +83,18 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
       });
     if (!hasUnreachableTargets || reachableTarget == NoBlockId) continue;
     header();
-    switch (blk->hhbcs.back().op) {
+    switch (cblk->hhbcs.back().op) {
       case Op::JmpNZ:
-      case Op::JmpZ:
-        FTRACE(2, "blk: {} - jcc -> jmp {}\n", blk->id, reachableTarget);
+      case Op::JmpZ: {
+        FTRACE(2, "blk: {} - jcc -> jmp {}\n", cblk->id, reachableTarget);
+        auto const blk = ainfo.ctx.func->blocks[cblk->id].get();
         blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
         blk->fallthrough = reachableTarget;
         break;
-      default:
-        FTRACE(2, "blk: {} -", blk->id, reachableTarget);
+      }
+      default: {
+        FTRACE(2, "blk: {} -", cblk->id, reachableTarget);
+        auto const blk = ainfo.ctx.func->blocks[cblk->id].get();
         forEachNormalSuccessor(*blk, [&] (const BlockId& id) {
             if (!reachable(id)) {
               FTRACE(2, " {}->{}", id, reachableTarget);
@@ -100,6 +103,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
           });
         FTRACE(2, "\n");
         break;
+      }
     }
   }
 }
@@ -276,13 +280,13 @@ Bytecode buildStringSwitch(SwitchInfo& switchInfo) {
 }
 
 bool buildSwitches(php::Func& func,
-                   php::Block* blk,
+                   BlockId bid,
                    std::vector<MergeBlockInfo>& blkInfos) {
   SwitchInfo switchInfo;
   std::vector<BlockId> blocks;
-  if (!analyzeSwitch(*blk, blkInfos, &switchInfo)) return false;
-  blkInfos[blk->id].couldBeSwitch = false;
-  blkInfos[blk->id].onlySwitch = false;
+  if (!analyzeSwitch(*func.blocks[bid], blkInfos, &switchInfo)) return false;
+  blkInfos[bid].couldBeSwitch = false;
+  blkInfos[bid].onlySwitch = false;
   while (true) {
     auto const& bInfo = blkInfos[switchInfo.defaultBlock];
     auto const nxt = func.blocks[switchInfo.defaultBlock].get();
@@ -298,6 +302,7 @@ bool buildSwitches(php::Func& func,
       auto bc = switchInfo.kind == KindOfInt64 ?
         buildIntSwitch(switchInfo) : buildStringSwitch(switchInfo);
       if (bc.op != Op::Nop) {
+        auto const blk = func.blocks[bid].get();
         auto it = blk->hhbcs.end();
         // blk->fallthrough implies it was a JmpZ JmpNZ block,
         // which means we have exactly 4 instructions making up
@@ -328,7 +333,10 @@ bool buildSwitches(php::Func& func,
         ret = true;
       }
     }
-    return (bInfo.couldBeSwitch && buildSwitches(func, nxt, blkInfos)) || ret;
+    if (bInfo.couldBeSwitch && buildSwitches(func, nxt->id, blkInfos)) {
+      ret = true;
+    }
+    return ret;
   }
 }
 
@@ -487,7 +495,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         (bInfo.multiplePreds || !bInfo.onlySwitch || !bInfo.followsSwitch)) {
       // This block looks like it could be part of a switch, and it's
       // not in the middle of a sequence of such blocks.
-      if (buildSwitches(func, blk.get(), blockInfo)) {
+      if (buildSwitches(func, blk->id, blockInfo)) {
         anyChanges = true;
       }
     }

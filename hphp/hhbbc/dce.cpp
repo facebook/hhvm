@@ -2038,7 +2038,7 @@ struct DceAnalysis {
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         CollectedInfo& collect,
-                        php::Block* const blk,
+                        const php::Block* const blk,
                         const State& stateIn,
                         const DceOutState& dceOutState) {
   if (auto dceState = dce_visit(index, fa, collect,
@@ -2154,7 +2154,7 @@ DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              CollectedInfo& collect,
-             php::Block* const blk,
+             const php::Block* const blk,
              const State& stateIn,
              const DceOutState& dceOutState) {
   auto dceState = dce_visit(index, fa, collect, blk, stateIn, dceOutState);
@@ -2292,10 +2292,11 @@ void remove_unused_clsref_slots(Context const ctx,
 void local_dce(const Index& index,
                const FuncAnalysis& ainfo,
                CollectedInfo& collect,
-               php::Block* const blk,
+               BlockId bid,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
+  auto const blk = ainfo.ctx.func->blocks[bid].get();
   auto const ret = optimize_dce(index, ainfo, collect, blk, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
@@ -2516,7 +2517,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     processForcedLive(result.forcedLiveLocations);
 
-    auto const isCFPushTaken = [] (php::Block* blk, BlockId succId) {
+    auto const isCFPushTaken = [] (const php::Block* blk, BlockId succId) {
       auto const& lastOpc = blk->hhbcs.back();
       if (!instrIsNonCallControlFlow(lastOpc.op)) return false;
       if (!lastOpc.numPush()) return false;

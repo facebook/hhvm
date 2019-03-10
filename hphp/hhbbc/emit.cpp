@@ -94,6 +94,37 @@ struct EmitUnitState {
   std::vector<Id>      typeAliasInfo;
 };
 
+/*
+ * Some bytecodes need to be mutated before being emitted. Pass those
+ * bytecodes by value to their respective emit_op functions.
+ */
+template<typename T>
+struct OpInfoHelper {
+  static constexpr bool by_value =
+    T::op == Op::DefCls      ||
+    T::op == Op::DefClsNop   ||
+    T::op == Op::CreateCl    ||
+    T::op == Op::NewObjI     ||
+    T::op == Op::DefTypeAlias;
+
+  using type = typename std::conditional<by_value, T, const T&>::type;
+};
+
+template<typename T>
+using OpInfo = typename OpInfoHelper<T>::type;
+
+/*
+ * Helper to conditionally call fun on data provided data is of the
+ * given type.
+ */
+template<Op op, typename F, typename Bc>
+std::enable_if_t<std::remove_reference_t<Bc>::op == op>
+caller(F&& fun, Bc&& data) { fun(std::forward<Bc>(data)); }
+
+template<Op op, typename F, typename Bc>
+std::enable_if_t<std::remove_reference_t<Bc>::op != op>
+caller(F&&, Bc&&) {}
+
 Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
   auto cls = euState.unit->classes[id].get();
   euState.pceInfo.push_back(
@@ -612,28 +643,27 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
 
-    auto clsid_impl = [&] (const uint32_t& id, bool closure) {
+    auto clsid_impl = [&] (uint32_t& id, bool closure) {
       if (euState.classOffsets[id] != kInvalidOffset) {
         always_assert(closure);
         for (auto const& elm : euState.pceInfo) {
           if (elm.origId == id) {
-            const_cast<uint32_t&>(id) = elm.pce->id();
+            id = elm.pce->id();
             return;
           }
         }
         always_assert(false);
       }
       euState.classOffsets[id] = startOffset;
-      const_cast<uint32_t&>(id) = recordClass(euState, ue, id);
+      id = recordClass(euState, ue, id);
     };
-    auto defcls     = [&] { clsid_impl(inst.DefCls.arg1, false); };
-    auto defclsnop  = [&] { clsid_impl(inst.DefClsNop.arg1, false); };
-    auto createcl   = [&] { clsid_impl(inst.CreateCl.arg2, true); };
-    auto newobji    = [&] { clsid_impl(inst.NewObjI.arg1, false); };
-    auto deftype   = [&] {
-      euState.typeAliasInfo.push_back(inst.DefTypeAlias.arg1);
-      const_cast<uint32_t&>(inst.DefTypeAlias.arg1) =
-        euState.typeAliasInfo.size() - 1;
+    auto defcls    = [&] (auto& data) { clsid_impl(data.arg1, false); };
+    auto defclsnop = [&] (auto& data) { clsid_impl(data.arg1, false); };
+    auto createcl  = [&] (auto& data) { clsid_impl(data.arg2, true); };
+    auto newobji   = [&] (auto& data) { clsid_impl(data.arg1, false); };
+    auto deftype   = [&] (auto& data) {
+      euState.typeAliasInfo.push_back(data.arg1);
+      data.arg1 = euState.typeAliasInfo.size() - 1;
     };
 
     auto emit_lar  = [&](const LocalRange& range) {
@@ -699,54 +729,55 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_INS_1(x)          push(1);
 #define PUSH_FCALL             push(data.fca.numRets);
 
-#define O(opcode, imms, inputs, outputs, flags)         \
-    auto emit_##opcode = [&] (const bc::opcode& data) { \
-      if (RuntimeOption::EnableIntrinsicsExtension) {   \
-        if (Op::opcode == Op::FCallBuiltin &&           \
-            inst.FCallBuiltin.str3->isame(              \
-              s_hhbbc_fail_verification.get())) {       \
-          ue.emitOp(Op::CheckProp);                     \
-          ue.emitInt32(                                 \
-            ue.mergeLitstr(inst.FCallBuiltin.str3));    \
-          ue.emitOp(Op::PopC);                          \
-        }                                               \
-      }                                                 \
-      if (Op::opcode == Op::DefCls)       defcls();     \
-      if (Op::opcode == Op::DefClsNop)    defclsnop();  \
-      if (Op::opcode == Op::CreateCl)     createcl();   \
-      if (Op::opcode == Op::NewObjI)      newobji();    \
-      if (Op::opcode == Op::DefTypeAlias) deftype();    \
-      if (isRet(Op::opcode))              ret_assert(); \
-      ue.emitOp(Op::opcode);                            \
-      POP_##inputs                                      \
-      if (isFCallStar(Op::opcode)) end_fpi(startOffset);\
-                                                        \
-      size_t numTargets = 0;                            \
-      std::array<BlockId, kMaxHhbcImms> targets;        \
-                                                        \
-      if (Op::opcode == Op::MemoGet) {                  \
-        IMM_##imms                                      \
-        assertx(numTargets == 1);                       \
-        set_expected_depth(targets[0]);                 \
-        PUSH_##outputs                                  \
-      } else if (Op::opcode == Op::MemoGetEager) {      \
-        IMM_##imms                                      \
-        assertx(numTargets == 2);                       \
-        set_expected_depth(targets[0]);                 \
-        PUSH_##outputs                                  \
-        set_expected_depth(targets[1]);                 \
-      } else {                                          \
-        PUSH_##outputs                                  \
-        IMM_##imms                                      \
-        for (size_t i = 0; i < numTargets; ++i) {       \
-          set_expected_depth(targets[i]);               \
-        }                                               \
-      }                                                 \
-                                                        \
-      if (isFPush(Op::opcode))     fpush();             \
-      if (isFCallStar(Op::opcode)) fcall(Op::opcode);   \
-      if (flags & TF) currentStackDepth = 0;            \
-      emit_srcloc();                                    \
+#define O(opcode, imms, inputs, outputs, flags)                 \
+    auto emit_##opcode = [&] (OpInfo<bc::opcode> data) {        \
+      if (RuntimeOption::EnableIntrinsicsExtension) {           \
+        if (Op::opcode == Op::FCallBuiltin &&                   \
+            inst.FCallBuiltin.str3->isame(                      \
+              s_hhbbc_fail_verification.get())) {               \
+          ue.emitOp(Op::CheckProp);                             \
+          ue.emitInt32(                                         \
+            ue.mergeLitstr(inst.FCallBuiltin.str3));            \
+          ue.emitOp(Op::PopC);                                  \
+        }                                                       \
+      }                                                         \
+      caller<Op::DefCls>(defcls, data);                         \
+      caller<Op::DefClsNop>(defclsnop, data);                   \
+      caller<Op::CreateCl>(createcl, data);                     \
+      caller<Op::NewObjI>(newobji, data);                       \
+      caller<Op::DefTypeAlias>(deftype, data);                  \
+                                                                \
+      if (isRet(Op::opcode)) ret_assert();                      \
+      ue.emitOp(Op::opcode);                                    \
+      POP_##inputs                                              \
+      if (isFCallStar(Op::opcode)) end_fpi(startOffset);        \
+                                                                \
+      size_t numTargets = 0;                                    \
+      std::array<BlockId, kMaxHhbcImms> targets;                \
+                                                                \
+      if (Op::opcode == Op::MemoGet) {                          \
+        IMM_##imms                                              \
+        assertx(numTargets == 1);                               \
+        set_expected_depth(targets[0]);                         \
+        PUSH_##outputs                                          \
+      } else if (Op::opcode == Op::MemoGetEager) {              \
+        IMM_##imms                                              \
+        assertx(numTargets == 2);                               \
+        set_expected_depth(targets[0]);                         \
+        PUSH_##outputs                                          \
+        set_expected_depth(targets[1]);                         \
+      } else {                                                  \
+        PUSH_##outputs                                          \
+        IMM_##imms                                              \
+        for (size_t i = 0; i < numTargets; ++i) {               \
+          set_expected_depth(targets[i]);                       \
+        }                                                       \
+      }                                                         \
+                                                                \
+      if (isFPush(Op::opcode))     fpush();                     \
+      if (isFCallStar(Op::opcode)) fcall(Op::opcode);           \
+      if (flags & TF) currentStackDepth = 0;                    \
+      emit_srcloc();                                            \
     };
 
     OPCODES

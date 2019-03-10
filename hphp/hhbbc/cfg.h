@@ -32,8 +32,8 @@ namespace HPHP { namespace HHBBC {
 namespace detail {
 
 template<class Fun>
-void visitExnLeaves(const php::ExnNode& n, Fun f) {
-  for (auto& c : n.children) visitExnLeaves(*c, f);
+void visitExnLeaves(const php::Func& func, const php::ExnNode& n, Fun f) {
+  for (auto& c : n.children) visitExnLeaves(func, func.exnNodes[c], f);
   f(n);
 }
 
@@ -188,7 +188,7 @@ computeThrowPreds(const std::vector<php::Block*>&);
 template<class Fun>
 void visitExnLeaves(const php::Func& func, Fun f) {
   for (auto& n : func.exnNodes) {
-    detail::visitExnLeaves(*n, f);
+    detail::visitExnLeaves(func, n, f);
   }
 }
 

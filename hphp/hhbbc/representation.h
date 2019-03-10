@@ -28,6 +28,7 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/copy-ptr.h"
 #include "hphp/util/md5.h"
 
 #include "hphp/runtime/base/user-attributes.h"
@@ -92,7 +93,7 @@ struct Block {
    * The pointer for this block's exception region, or nullptr if
    * there is none.
    */
-  ExnNode* exnNode;
+  ExnNodeId exnNodeId;
 
   /*
    * Edges coming out of blocks are repesented in three ways:
@@ -159,12 +160,10 @@ struct CatchRegion { BlockId catchEntry;
                      Id iterId; };
 
 struct ExnNode {
-  uint32_t id;
+  ExnNodeId idx;
   uint32_t depth;
-
-  ExnNode* parent;
-  CompactVector<std::unique_ptr<ExnNode>> children;
-
+  CompactVector<ExnNodeId> children;
+  ExnNodeId parent;
   boost::variant<FaultRegion,CatchRegion> info;
 };
 
@@ -285,13 +284,13 @@ struct FuncBase {
 
   /*
    * Try and fault regions form a tree structure.  The tree is hanging
-   * off the func here, with children pointers.  Each block that is
-   * within a try or fault region has a pointer to the inner-most
-   * ExnNode protecting it.
+   * off the func here, with children ids.  Each block that is
+   * within a try or fault region has the index into this array of the
+   * inner-most ExnNode protecting it.
    *
    * Note that this is updated during the concurrent analyze pass.
    */
-  CompactVector<std::unique_ptr<ExnNode>> exnNodes;
+  CompactVector<ExnNode> exnNodes;
 
   /*
    * For HNI-based extensions, additional information for functions

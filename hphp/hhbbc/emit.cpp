@@ -349,34 +349,39 @@ struct EmitBcInfo {
 
 using ExnNodePtr = php::ExnNode*;
 
-bool handleEquivalent (ExnNodePtr eh1, ExnNodePtr eh2) {
-  if (!eh1 && !eh2) return true;
-  if (!eh1 || !eh2 || eh1->depth != eh2->depth) return false;
-
-  auto entry = [](ExnNodePtr eh) {
-    return match<BlockId>(eh->info,
-          [] (const php::CatchRegion& c) { return c.catchEntry; },
-          [] (const php::FaultRegion& f) { return f.faultEntry; });
+bool handleEquivalent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
+  auto entry = [&] (ExnNodeId eid) {
+    return match<BlockId>(
+      func.exnNodes[eid].info,
+      [] (const php::CatchRegion& c) { return c.catchEntry; },
+      [] (const php::FaultRegion& f) { return f.faultEntry; });
   };
 
-  while (entry(eh1) == entry(eh2)) {
-    eh1 = eh1->parent;
-    eh2 = eh2->parent;
-    if (!eh1 && !eh2) return true;
+  while (eh1 != eh2) {
+    assertx(eh1 != NoExnNodeId &&
+            eh2 != NoExnNodeId &&
+            func.exnNodes[eh1].depth == func.exnNodes[eh2].depth);
+    if (entry(eh1) != entry(eh2)) return false;
+    eh1 = func.exnNodes[eh1].parent;
+    eh2 = func.exnNodes[eh2].parent;
   }
 
-  return false;
+  return true;
 };
 
 // The common parent P of eh1 and eh2 is the deepest region such that
 // eh1 and eh2 are both handle-equivalent to P or a child of P
-ExnNodePtr commonParent(ExnNodePtr eh1, ExnNodePtr eh2) {
-  if (!eh1 || !eh2) return nullptr;
-  while (eh1->depth > eh2->depth) eh1 = eh1->parent;
-  while (eh2->depth > eh1->depth) eh2 = eh2->parent;
-  while (!handleEquivalent(eh1, eh2)) {
-    eh1 = eh1->parent;
-    eh2 = eh2->parent;
+ExnNodeId commonParent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
+  if (eh1 == NoExnNodeId || eh2 == NoExnNodeId) return NoExnNodeId;
+  while (func.exnNodes[eh1].depth > func.exnNodes[eh2].depth) {
+    eh1 = func.exnNodes[eh1].parent;
+  }
+  while (func.exnNodes[eh2].depth > func.exnNodes[eh1].depth) {
+    eh2 = func.exnNodes[eh2].parent;
+  }
+  while (!handleEquivalent(func, eh1, eh2)) {
+    eh1 = func.exnNodes[eh1].parent;
+    eh2 = func.exnNodes[eh2].parent;
   }
   return eh1;
 };
@@ -884,13 +889,16 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
           emit_inst(bc::Jmp { b->fallthrough });
         }
 
-        auto parent = commonParent(func.blocks[b->fallthrough]->exnNode,
-                                   b->exnNode);
+        auto const parent = commonParent(func,
+                                         func.blocks[b->fallthrough]->exnNodeId,
+                                         b->exnNodeId);
+
+        auto depth = [&] (ExnNodeId eid) {
+          return eid == NoExnNodeId ? 0 : func.exnNodes[eid].depth;
+        };
         // If we are in an exn region we pop from the current region to the
         // common parent. If the common parent is null, we pop all regions
-        info.regionsToPop = b->exnNode ?
-                            b->exnNode->depth - (parent ? parent->depth : 0) :
-                            0;
+        info.regionsToPop = depth(b->exnNodeId) - depth(parent);
         assert(info.regionsToPop >= 0);
         FTRACE(4, "      popped fault regions: {}\n", info.regionsToPop);
       }
@@ -980,7 +988,7 @@ void emit_eh_region(FuncEmitter& fe,
                     const EHRegion* region,
                     const BlockInfo& blockInfo,
                     ParentIndexMap& parentIndexMap) {
-  FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->id);
+  FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->idx);
 
   auto const unreachable = [&] (const php::ExnNode& node) {
     return match<bool>(
@@ -1043,10 +1051,13 @@ void emit_eh_region(FuncEmitter& fe,
   assert(eh.m_handler != kInvalidOffset);
 }
 
-void exn_path(std::vector<const php::ExnNode*>& ret, const php::ExnNode* n) {
-  if (!n) return;
-  exn_path(ret, n->parent);
-  ret.push_back(n);
+void exn_path(const php::Func& func,
+              std::vector<const php::ExnNode*>& ret,
+              ExnNodeId id) {
+  if (id == NoExnNodeId) return;
+  auto const& n = func.exnNodes[id];
+  exn_path(func, ret, n.parent);
+  ret.push_back(&n);
 }
 
 // Return the count of shared elements in the front of two forward
@@ -1073,7 +1084,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  * reasonably likely to have the same ExnNode.  Try to coalesce the EH
  * regions we create for in those cases.
  */
-void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
+void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
                      const EmitBcInfo& info) {
   hphp_fast_map<
     const php::ExnNode*,
@@ -1115,13 +1126,13 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
   for (auto& b : info.blockOrder) {
     auto const offset = info.blockInfo[b->id].offset;
 
-    if (!b->exnNode) {
+    if (b->exnNodeId == NoExnNodeId) {
       while (!activeList.empty()) pop_active(offset);
       continue;
     }
 
     std::vector<const php::ExnNode*> current;
-    exn_path(current, b->exnNode);
+    exn_path(func, current, b->exnNodeId);
 
     auto const prefix = shared_prefix(current, activeList);
     for (size_t i = prefix, sz = activeList.size(); i < sz; ++i) {
@@ -1139,7 +1150,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
 
     if (debug && !activeList.empty()) {
       current.clear();
-      exn_path(current, activeList.back());
+      exn_path(func, current, activeList.back()->idx);
       assert(current == activeList);
     }
   }

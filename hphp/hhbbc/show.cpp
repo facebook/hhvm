@@ -55,10 +55,13 @@ std::string indent(int level, const std::string& s) {
     boost::replace_all_copy(s, "\n", "\n" + space)) + "\n";
 }
 
-void appendExnTreeString(std::string& ret,
-                         const php::ExnNode* p) {
-  ret += " " + folly::to<std::string>(p->id);
-  if (p->parent) appendExnTreeString(ret, p->parent);
+void appendExnTreeString(const php::Func& func,
+                         std::string& ret,
+                         ExnNodeId p) {
+  do {
+    ret += " " + folly::to<std::string>(p);
+    p = func.exnNodes[p].parent;
+  } while (p != NoExnNodeId);
 }
 
 std::string escaped_string(SString str) {
@@ -270,9 +273,9 @@ std::string show(const Func& func, const Block& block) {
     folly::toAppend("(fault funclet)\n", &ret);
   }
 
-  if (block.exnNode) {
+  if (block.exnNodeId != NoExnNodeId) {
     ret += "(exnNode:";
-    appendExnTreeString(ret, block.exnNode);
+    appendExnTreeString(func, ret, block.exnNodeId);
     ret += ")\n";
   }
 
@@ -369,9 +372,9 @@ std::string show(const Func& func) {
   }
 
   visitExnLeaves(func, [&] (const php::ExnNode& node) {
-    folly::format(&ret, "exn node #{} ", node.id);
-    if (node.parent) {
-      folly::format(&ret, "(^{}) ", node.parent->id);
+    folly::format(&ret, "exn node #{} ", node.idx);
+    if (node.parent != NoExnNodeId) {
+      folly::format(&ret, "(^{}) ", node.parent);
     }
     ret += match<std::string>(
       node.info,

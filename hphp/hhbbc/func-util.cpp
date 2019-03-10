@@ -66,49 +66,26 @@ namespace {
 
 using ExnNode = php::ExnNode;
 
-std::unique_ptr<ExnNode> cloneExnTree(
-  ExnNode* in,
-  BlockId delta,
-  hphp_fast_map<ExnNode*, ExnNode*>& processed) {
-
-  auto clone = std::make_unique<ExnNode>();
-  always_assert(!processed.count(in));
-  processed[in] = clone.get();
-
-  clone->id = in->id;
-  clone->depth = in->depth;
-  clone->parent = in->parent ? processed[in->parent] : nullptr;
-  clone->info = in->info;
-  for (auto& child : in->children) {
-    clone->children.push_back(cloneExnTree(child.get(), delta, processed));
-  }
-  if (delta) {
-    match<void>(clone->info,
-                [&](php::FaultRegion& fr) {
-                  fr.faultEntry += delta;
-                },
-                [&](php::CatchRegion& cr) {
-                  cr.catchEntry += delta;
-                });
-  }
-  return clone;
-}
-
 void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
   hphp_fast_map<ExnNode*, ExnNode*> processed;
 
   BlockId delta = dst->blocks.size();
-  for (auto& theirs : other.exnNodes) {
-    auto ours = cloneExnTree(theirs.get(), delta, processed);
-    dst->exnNodes.push_back(std::move(ours));
+  always_assert(!dst->exnNodes.size() || !other.exnNodes.size());
+  dst->exnNodes.reserve(dst->exnNodes.size() + other.exnNodes.size());
+  for (auto en : other.exnNodes) {
+    if (delta) {
+      match<void>(en.info,
+                  [&](php::FaultRegion& fr) {
+                    fr.faultEntry += delta;
+                  },
+                  [&](php::CatchRegion& cr) {
+                    cr.catchEntry += delta;
+                  });
+    }
+    dst->exnNodes.push_back(std::move(en));
   }
-
   for (auto& theirs : other.blocks) {
     auto ours = std::make_unique<php::Block>(*theirs);
-    if (theirs->exnNode) {
-      ours->exnNode = processed[theirs->exnNode];
-      assertx(ours->exnNode);
-    }
     if (delta) {
       ours->id += delta;
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;

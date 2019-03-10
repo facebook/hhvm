@@ -37,7 +37,7 @@ const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-bool DEBUG_ONLY checkBlock(const php::Block& b) {
+bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
   if (b.id == NoBlockId) {
     // the block was deleted
     return true;
@@ -56,10 +56,10 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
 
   // If the block has an exnNode, it should always have a throw edge to it (and
   // nothing else).
-  if (b.exnNode) {
+  if (b.exnNodeId != NoExnNodeId) {
     assert(b.throwExits.size() == 1);
     match<void>(
-      b.exnNode->info,
+      f.exnNodes[b.exnNodeId].info,
       [&] (const CatchRegion& cr) {
         assert(cr.catchEntry == b.throwExits[0]);
       },
@@ -74,7 +74,7 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
     // exit if it has an exnNode (which was checked above).
     assert(!ends_with_unwind(b));
     assert(b.unwindExits.empty());
-    assert(b.exnNode || b.throwExits.empty());
+    assert(b.exnNodeId != NoExnNodeId || b.throwExits.empty());
   } else if (!ends_with_unwind(b)) {
     // Only blocks which end with an unwind can have unwind exits.
     assert(b.unwindExits.empty());
@@ -116,22 +116,23 @@ bool has_edge_linear(const Container& c,
   return std::find(begin(c), end(c), target) != end(c);
 }
 
-void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
+void checkExnTreeBasic(const php::Func& f,
+                       boost::dynamic_bitset<>& seenIds,
                        const ExnNode* node,
-                       const ExnNode* expectedParent) {
+                       ExnNodeId expectedParent) {
   // All exnNode ids must be unique.
-  if (seenIds.size() < node->id + 1) {
-    seenIds.resize(node->id + 1);
+  if (seenIds.size() < node->idx + 1) {
+    seenIds.resize(node->idx + 1);
   }
-  assert(!seenIds[node->id]);
-  seenIds[node->id] = true;
+  assert(!seenIds[node->idx]);
+  seenIds[node->idx] = true;
 
   // Parent pointers should point to the node that has a given node as
   // a child.
   assert(node->parent == expectedParent);
 
   for (auto& c : node->children) {
-    checkExnTreeBasic(seenIds, c.get(), node);
+    checkExnTreeBasic(f, seenIds, &f.exnNodes[c], node->idx);
   }
 }
 
@@ -174,19 +175,30 @@ void checkExnTreeMore(const php::Func& func, const ExnNode* node) {
     [] (const CatchRegion&) {}
   );
 
-  for (auto& c : node->children) checkExnTreeMore(func, c.get());
+  for (auto& c : node->children) checkExnTreeMore(func, &func.exnNodes[c]);
 }
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
-  for (auto& n : f.exnNodes) checkExnTreeBasic(seenIds, n.get(), nullptr);
+  ExnNodeId idx{0};
+  for (auto& n : f.exnNodes) {
+    if (n.parent == NoExnNodeId && n.idx != NoExnNodeId) {
+      assertx(n.idx == idx);
+      checkExnTreeBasic(f, seenIds, &n, NoExnNodeId);
+    }
+    idx++;
+  }
 
   // ExnNode ids are contiguous.
-  for (size_t i = 0; i < seenIds.size(); ++i) assert(seenIds[i] == true);
+  for (size_t i = 0; i < seenIds.size(); ++i) {
+    assert(seenIds[i] == true || f.exnNodes[i].idx == NoExnNodeId);
+  }
 
   // The following assertions come after the above, because if the
   // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) checkExnTreeMore(f, n.get());
+  for (auto& n : f.exnNodes) {
+    if (n.idx != NoExnNodeId) checkExnTreeMore(f, &n);
+  }
   return true;
 }
 
@@ -201,7 +213,7 @@ bool DEBUG_ONLY checkName(SString name) {
 bool check(const php::Func& f) {
   assert(checkParams(f));
   assert(checkName(f.name));
-  for (DEBUG_ONLY auto& block : f.blocks) assert(checkBlock(*block));
+  for (DEBUG_ONLY auto& block : f.blocks) assert(checkBlock(f, *block));
 
   /*
    * Some of these relationships may change as async/await

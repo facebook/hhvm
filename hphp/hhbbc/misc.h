@@ -72,6 +72,8 @@ using ClsRefSlotId = uint32_t;
 constexpr const ClsRefSlotId NoClsRefSlotId = -1;
 using BlockId = uint32_t;
 constexpr const BlockId NoBlockId = -1;
+using ExnNodeId = uint32_t;
+constexpr const ExnNodeId NoExnNodeId = -1;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -483,7 +483,7 @@ php::Block* make_block(FuncAnalysis& ainfo,
   auto newBlk           = std::make_unique<php::Block>();
   newBlk->id            = ainfo.ctx.func->blocks.size();
   newBlk->section       = srcBlk->section;
-  newBlk->exnNode       = srcBlk->exnNode;
+  newBlk->exnNodeId     = srcBlk->exnNodeId;
   newBlk->throwExits    = srcBlk->throwExits;
   newBlk->unwindExits   = srcBlk->unwindExits;
   auto const blk        = newBlk.get();
@@ -510,7 +510,7 @@ php::Block* make_fatal_block(FuncAnalysis& ainfo,
   blk->fallthrough = NoBlockId;
   blk->throwExits = {};
   blk->unwindExits = {};
-  blk->exnNode = nullptr;
+  blk->exnNodeId = NoExnNodeId;
   return blk;
 }
 

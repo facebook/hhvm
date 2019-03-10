@@ -228,7 +228,7 @@ struct ExnTreeInfo {
    * Map from EHEnt to the ExnNode that will represent exception
    * behavior in that region.
    */
-  hphp_fast_map<const EHEnt*,php::ExnNode*> ehMap;
+  hphp_fast_map<const EHEnt*,ExnNodeId> ehMap;
 
   /*
    * Keep track of the start offsets for all fault funclets.  This is
@@ -255,41 +255,41 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
                            php::Func& func,
                            FindBlock findBlock) {
   ExnTreeInfo ret;
-  auto nextExnNode = uint32_t{0};
-
+  func.exnNodes.reserve(fe.ehtab.size());
   for (auto& eh : fe.ehtab) {
-    auto node = std::make_unique<php::ExnNode>();
-    node->id = nextExnNode++;
-    node->parent = nullptr;
-    node->depth = 1; // 0 depth means no ExnNode
+    auto node = php::ExnNode{};
+    node.idx = func.exnNodes.size();
+    node.parent = NoExnNodeId;
+    node.depth = 1; // 0 depth means no ExnNode
 
     switch (eh.m_type) {
     case EHEnt::Type::Fault:
       {
         auto const fault = findBlock(eh.m_handler);
         ret.faultFuncletStarts.insert(eh.m_handler);
-        node->info = php::FaultRegion { fault->id, eh.m_iterId };
+        node.info = php::FaultRegion { fault->id, eh.m_iterId };
       }
       break;
     case EHEnt::Type::Catch:
       {
         auto const catchBlk = findBlock(eh.m_handler);
-        node->info = php::CatchRegion { catchBlk->id, eh.m_iterId };
+        node.info = php::CatchRegion { catchBlk->id, eh.m_iterId };
       }
       break;
     }
 
-    ret.ehMap[&eh] = node.get();
+    ret.ehMap[&eh] = node.idx;
 
     if (eh.m_parentIndex != -1) {
       auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
       assert(it != end(ret.ehMap));
-      node->parent = it->second;
-      node->depth = node->parent->depth + 1;
-      it->second->children.emplace_back(std::move(node));
-    } else {
-      func.exnNodes.emplace_back(std::move(node));
+      assert(it->second < node.idx);
+      node.parent = it->second;
+      auto& parent = func.exnNodes[node.parent];
+      node.depth = parent.depth + 1;
+      parent.children.emplace_back(node.idx);
     }
+    func.exnNodes.emplace_back(std::move(node));
   }
 
   ret.faultFuncletStarts.insert(fe.past);
@@ -342,8 +342,8 @@ void build_exceptional_edges_simple(const php::Func& func) {
   for (auto& blk : func.blocks) {
     assert(blk->throwExits.empty());
     assert(blk->unwindExits.empty());
-    if (!blk->exnNode) continue;
-    blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+    if (blk->exnNodeId == NoExnNodeId) continue;
+    blk->throwExits.push_back(node_entry_block(func.exnNodes[blk->exnNodeId]));
   }
 }
 
@@ -372,7 +372,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
   if (std::all_of(
         func.exnNodes.begin(),
         func.exnNodes.end(),
-        [](auto const& n){ return n->children.empty(); })
+        [](auto const& n){ return n.children.empty(); })
      ) {
     return build_exceptional_edges_simple(func);
   }
@@ -398,8 +398,8 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     assert(blk.throwExits.empty());
     assert(blk.unwindExits.empty());
     if (node) blocksToNodes[blk.id].insert(node);
-    if (!blk.exnNode) return;
-    throws[node].insert(blk.exnNode);
+    if (blk.exnNodeId == NoExnNodeId) return;
+    throws[node].insert(&func.exnNodes[blk.exnNodeId]);
   };
 
   // There's no easy way to determine which blocks belong to which exceptional
@@ -425,10 +425,10 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
         | map([] (auto const& p) {
             return folly::sformat(
               "{} -> {}",
-              p.first ? folly::sformat("E{}", p.first->id) : "*",
+              p.first ? folly::sformat("E{}", p.first->idx) : "*",
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -448,7 +448,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
               p.first,
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -467,7 +467,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     using namespace folly::gen;
     return from(state)
     | map([&] (const php::ExnNode* n) {
-        return folly::sformat("E{}", n->id);
+        return folly::sformat("E{}", n->idx);
       })
     | unsplit<std::string>("->");
   };
@@ -556,15 +556,17 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
       // Handle the unwind case. While the top doesn't have a parent, pop. If
       // the stack is now empty, an unwind will exit the function, so there's no
       // new state.
-      while (!state.empty() && !state.back()->parent) state.pop_back();
+      while (!state.empty() && state.back()->parent == NoExnNodeId) {
+        state.pop_back();
+      }
       if (state.empty()) continue;
 
       // The stack is non-empty and the top has a parent. We'll unwind to the
       // top's parent, so record that new state and record the edge.
       auto const oldNode = state.back();
-      state.back() = oldNode->parent;
+      state.back() = &func.exnNodes[oldNode->parent];
       FTRACE(6, "          =>  {} (unwind E{} to E{})\n",
-             showState(state), oldNode->id, state.back()->id);
+             showState(state), oldNode->idx, state.back()->idx);
       newStates.insert(state);
       unwindEdges[current].insert(state.back());
     }
@@ -589,10 +591,10 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
         | map([] (auto const& p) {
             return folly::sformat(
               "E{} -> {}",
-              p.first->id,
+              p.first->idx,
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -626,8 +628,10 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
       blk->unwindExits = unwindExitsForBlock(blk->id);
     }
 
-    if (blk->exnNode) {
-      blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+    if (blk->exnNodeId != NoExnNodeId) {
+      blk->throwExits.push_back(
+        node_entry_block(func.exnNodes[blk->exnNodeId])
+      );
     } else if (blk->section != php::Block::Section::Main) {
       blk->throwExits = unwindExitsForBlock(blk->id);
     }
@@ -1069,7 +1073,7 @@ void build_cfg(ParseUnitState& puState,
       ptr               = std::make_unique<php::Block>();
       ptr->id           = blockMap.size() - 1;
       ptr->section      = php::Block::Section::Main;
-      ptr->exnNode      = nullptr;
+      ptr->exnNodeId    = NoExnNodeId;
     }
     return ptr.get();
   };
@@ -1088,7 +1092,7 @@ void build_cfg(ParseUnitState& puState,
     if (auto const eh = Func::findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
-      block->exnNode = it->second;
+      block->exnNodeId = it->second;
     }
 
     populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
@@ -1202,7 +1206,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       auto blk          = std::make_unique<php::Block>();
       blk->id           = mainEntry;
       blk->section      = php::Block::Section::Main;
-      blk->exnNode      = nullptr;
+      blk->exnNodeId    = NoExnNodeId;
 
       blk->hhbcs.push_back(gen_constant(it->second));
       blk->hhbcs.push_back(bc::RetC {});

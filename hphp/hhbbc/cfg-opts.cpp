@@ -59,7 +59,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     blk->fallthrough = NoBlockId;
     blk->throwExits = {};
     blk->unwindExits = {};
-    blk->exnNode = nullptr;
+    blk->exnNodeId = NoExnNodeId;
   }
 
   if (!options.RemoveDeadBlocks) return;
@@ -323,38 +323,13 @@ bool buildSwitches(php::Func& func,
           removed->fallthrough = NoBlockId;
           removed->throwExits = {};
           removed->unwindExits = {};
-          removed->exnNode = nullptr;
+          removed->exnNodeId = NoExnNodeId;
         }
         ret = true;
       }
     }
     return (bInfo.couldBeSwitch && buildSwitches(func, nxt, blkInfos)) || ret;
   }
-}
-
-bool strip_exn_tree(const php::Func& func,
-                    CompactVector<std::unique_ptr<php::ExnNode>>& nodes,
-                    const hphp_fast_set<php::ExnNode*>& seenNodes,
-                    uint32_t& nextId) {
-  auto it = std::remove_if(nodes.begin(), nodes.end(),
-                           [&] (const std::unique_ptr<php::ExnNode>& node) {
-                             if (seenNodes.count(node.get())) return false;
-                             FTRACE(2, "Stripping ExnNode {}\n", node->id);
-                             return true;
-                           });
-  auto ret = false;
-  if (it != nodes.end()) {
-    nodes.erase(it, nodes.end());
-    ret = true;
-  }
-  for (auto& n : nodes) {
-    n->id = nextId++;
-    if (strip_exn_tree(func, n->children, seenNodes, nextId)) {
-      ret = true;
-    }
-  }
-
-  return ret;
 }
 
 }
@@ -371,28 +346,48 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
   };
-  hphp_fast_set<php::ExnNode*> seenNodes;
+  hphp_fast_set<ExnNodeId> seenNodes;
 
   for (auto const& blk : ainfo.rpoBlocks) {
     if (!reachable(blk->id)) {
       FTRACE(4, "Unreachable: {}\n", blk->id);
       continue;
     }
-    if (auto node = blk->exnNode) {
-      do {
-        if (!seenNodes.insert(node).second) break;
-      } while ((node = node->parent) != nullptr);
+    auto idx = blk->exnNodeId;
+    while (idx != NoExnNodeId) {
+      if (!seenNodes.insert(idx).second) break;
+      idx = func.exnNodes[idx].parent;
     }
   }
 
-  uint32_t nextId = 0;
-  if (!strip_exn_tree(func, func.exnNodes, seenNodes, nextId)) {
-    return false;
+  auto changed = false;
+  for (auto& n : func.exnNodes) {
+    if (n.idx == NoExnNodeId) continue;
+    if (!seenNodes.count(n.idx)) {
+      n.idx = NoExnNodeId;
+      n.depth = 0;
+      n.children.clear();
+      n.parent = NoExnNodeId;
+      changed = true;
+    } else {
+      auto it = std::remove_if(n.children.begin(), n.children.end(),
+                               [&] (ExnNodeId c) {
+                                 if (seenNodes.count(c)) return false;
+                                 FTRACE(2, "Stripping ExnNode {}\n", c);
+                                 return true;
+                               });
+      if (it != n.children.end()) {
+        n.children.erase(it, n.children.end());
+        changed = true;
+      }
+    }
   }
+
+  if (!changed) return false;
 
   for (auto const& blk : func.blocks) {
     if (!reachable(blk->id)) {
-      blk->exnNode = nullptr;
+      blk->exnNodeId = NoExnNodeId;
       blk->throwExits = {};
       blk->unwindExits = {};
       continue;
@@ -461,7 +456,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       auto nxt = func.blocks[blk->fallthrough].get();
       if (blockInfo[blk->id].multipleSuccs ||
           blockInfo[nxt->id].multiplePreds ||
-          blk->exnNode != nxt->exnNode ||
+          blk->exnNodeId != nxt->exnNodeId ||
           blk->section != nxt->section ||
           blk->throwExits != nxt->throwExits) {
         break;

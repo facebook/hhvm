@@ -20,7 +20,6 @@
 #include <utility>
 #include <type_traits>
 
-#include <boost/mpl/has_xxx.hpp>
 #include <algorithm>
 
 #include <folly/Hash.h>
@@ -1052,11 +1051,11 @@ template<class T> Bytecode bc_with_loc(int32_t loc, const T& t) {
  * boost::apply_visitor or match().
  *
  * The `v' argument should be a function object that accepts a call
- * operator for all the bc::Foo types, with a nested member typedef
- * called result_type that indicates the return type of the call.
+ * operator for all the bc::Foo types. Its result type should be
+ * independent of bytecode, but may vary with constness.
  */
 template<class Visit>
-typename Visit::result_type visit(Bytecode& b, Visit v) {
+auto visit(Bytecode& b, Visit v) {
 #define O(opcode, ...) case Op::opcode: return v(b.opcode);
   switch (b.op) { OPCODES }
 #undef O
@@ -1064,7 +1063,7 @@ typename Visit::result_type visit(Bytecode& b, Visit v) {
 }
 
 template<class Visit>
-typename Visit::result_type visit(const Bytecode& b, Visit v) {
+auto visit(const Bytecode& b, Visit v) {
 #define O(opcode, ...) case Op::opcode: return v(b.opcode);
   switch (b.op) { OPCODES }
 #undef O
@@ -1073,35 +1072,32 @@ typename Visit::result_type visit(const Bytecode& b, Visit v) {
 
 //////////////////////////////////////////////////////////////////////
 
-BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_car, has_car_flag, false);
-BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_caw, has_caw_flag, false);
-
-//////////////////////////////////////////////////////////////////////
-
-struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
+struct ReadClsRefSlotVisitor {
   ReadClsRefSlotVisitor() {}
 
-  template <class T>
-  typename std::enable_if<!has_car<T>::value, ClsRefSlotId>::type
-  operator()(T const& /*t*/) const {
-    return NoClsRefSlotId;
+  template<typename T>
+  auto fun(T&, int) const { return NoClsRefSlotId; }
+
+  template<typename T>
+  auto fun(T& t, bool) const -> decltype(typename T::has_car_flag{},t.slot) {
+    return t.slot;
   }
 
-  template<class T>
-  typename std::enable_if<has_car<T>::value,ClsRefSlotId>::type
-  operator()(T const& t) const { return t.slot; }
+  template<typename T>
+  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
 };
 
-struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
-  template <class T>
-  typename std::enable_if<!has_caw<T>::value, ClsRefSlotId>::type
-  operator()(T const& /*t*/) const {
-    return NoClsRefSlotId;
+struct WriteClsRefSlotVisitor {
+  template<typename T>
+  auto fun(T&, int) const { return NoClsRefSlotId; }
+
+  template<typename T>
+  auto fun(T& t, bool) const -> decltype(typename T::has_caw_flag{},t.slot) {
+    return t.slot;
   }
 
-  template<class T>
-  typename std::enable_if<has_caw<T>::value,ClsRefSlotId>::type
-  operator()(T const& t) const { return t.slot; }
+  template<typename T>
+  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
 };
 
 //////////////////////////////////////////////////////////////////////

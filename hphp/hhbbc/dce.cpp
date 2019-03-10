@@ -1645,27 +1645,26 @@ void dce(Env& env, const bc::AKExists& op) {
  */
 
 template<typename Op>
-typename std::enable_if<has_car<Op>::value,void>::type
-dce_slot_default(Env& env, const Op& op) {
+auto dce_slot_default(Env& env, const Op& op, bool) ->
+  decltype(typename Op::has_car_flag{}, void()) {
   readSlot(env, op.slot);
 }
 
 template<typename Op>
-typename std::enable_if<has_caw<Op>::value,void>::type
-dce_slot_default(Env& env, const Op& op) {
+auto dce_slot_default(Env& env, const Op& op, bool) ->
+  decltype(typename Op::has_caw_flag{}, void()) {
   writeSlot(env, op.slot);
 }
 
 template <typename Op>
-typename std::enable_if<!has_car<Op>::value && !has_caw<Op>::value, void>::type
-dce_slot_default(Env& /*env*/, const Op& /*op*/) {}
+void dce_slot_default(Env&, const Op&, int) {}
 
 template<class Op>
 void dce(Env& env, const Op& op) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
   push_outputs(env, op.numPush());
   pop_inputs(env, op.numPop());
-  dce_slot_default(env, op);
+  dce_slot_default(env, op, true);
 }
 
 /*
@@ -1718,7 +1717,7 @@ template<class Op>
 void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
   push_outputs(env, op.numPush());
-  dce_slot_default(env, op);
+  dce_slot_default(env, op, true);
   auto const numPop = op.numPop();
   auto const stackRead = op.mkey.mcode == MEC || op.mkey.mcode == MPC ?
     op.mkey.idx : numPop;
@@ -2209,21 +2208,20 @@ void remove_unused_locals(Context const ctx,
 
 namespace {
 
-struct WritableClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId*> {
+struct WritableClsRefSlotVisitor {
   WritableClsRefSlotVisitor() {}
 
-  template <class T>
-  typename std::enable_if<!has_car<T>::value && !has_caw<T>::value,
-                          ClsRefSlotId*>::type
-  operator()(T& /*t*/) const {
-    return nullptr;
-  }
+  template<typename T>
+  std::nullptr_t fun(T&, int) const { return nullptr; }
 
-  template<class T>
-  typename std::enable_if<
-    has_car<T>::value || has_caw<T>::value, ClsRefSlotId*
-  >::type
-  operator()(T& t) const { return &t.slot; }
+  template<typename T>
+  auto fun(T& t, bool) const -> decltype(&t.slot) { return &t.slot; }
+
+  template<typename T>
+  ClsRefSlotId* operator()(T& t) const { return fun(t, true); }
+
+  template<typename T>
+  const ClsRefSlotId* operator()(const T& t) const { return fun(t, true); }
 };
 
 }

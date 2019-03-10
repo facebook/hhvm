@@ -85,6 +85,7 @@ let rec truthiness env ty =
 
   | Tclass ((_, cid), _, _) ->
     if cid = SN.Classes.cStringish then Possibly_falsy else
+    if cid = SN.Classes.cXHPChild then Possibly_falsy else
     if tclass_is_falsy_when_empty env ty then Possibly_falsy else
     if not (is_traversable env ty) then Always_truthy else
     (* Classes which implement Traversable but not Container will always be
@@ -134,7 +135,7 @@ let rec truthiness env ty =
     test, it indicates a potential logic error, since the truthiness of some
     values in the type may be surprising. *)
 type sketchy_type_kind =
-  | String | Arraykey | Stringish
+  | String | Arraykey | Stringish | XHPChild
   (** Truthiness tests on strings may not behave as expected. The user may not
       know that the string "0" is falsy, and may have intended only to check for
       emptiness. *)
@@ -153,6 +154,7 @@ let rec find_sketchy_types env acc ty =
 
   | Tclass ((_, cid), _, _) ->
     if cid = SN.Classes.cStringish then Stringish :: acc else
+    if cid = SN.Classes.cXHPChild then XHPChild :: acc else
     if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
     then acc
     else begin

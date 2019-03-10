@@ -541,7 +541,7 @@ val shapes_idx_with_non_existent_field :
 val ambiguous_object_access :
   Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
 val invalid_truthiness_test : Pos.t -> string -> unit
-val sketchy_truthiness_test : Pos.t -> string -> [< `String | `Arraykey | `Stringish | `Traversable ] -> unit
+val sketchy_truthiness_test : Pos.t -> string -> [< `String | `Arraykey | `Stringish | `XHPChild | `Traversable ] -> unit
 val unserializable_type : Pos.t -> string -> unit
 val invalid_arraykey : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 val invalid_argument_type_for_condition_in_rx :

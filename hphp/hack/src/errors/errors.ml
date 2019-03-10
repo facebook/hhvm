@@ -3373,6 +3373,13 @@ let sketchy_truthiness_test pos ty truthiness =
         but objects will be truthy even if their __toString returns '' or '0'.\n\
         To check for emptiness, convert to a string and use Str\\is_empty."
         ty
+    | `XHPChild ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of an %s may not behave as expected.\n\
+        The values '' and '0' are both considered falsy, \
+        but objects (including XHP elements) will be truthy \
+        even if their __toString returns '' or '0'."
+        ty
     | `Traversable ->
       (* We have a truthiness test on a value with an interface type which is a
          subtype of Traversable, but not a subtype of Container.

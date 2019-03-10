@@ -73,11 +73,14 @@
     compiler_id
     facts
     global_config
+    global_options
     hackc_parse_delegator
     hhbc
     heap_ident
     logging
-    parser_syntax_tree)
+    naming
+    parser_syntax_tree
+    typing)
   (flags (:standard -unsafe-string)))
 
 (executable

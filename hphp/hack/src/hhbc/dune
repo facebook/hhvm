@@ -2,8 +2,11 @@
   (name hhbc)
   (wrapped false)
   (libraries
+    annotated_ast
     ast
     core_kernel
     mutable_accumulator
     parser_heap
+    typing
+    typing_defs
     utils_php_escape))

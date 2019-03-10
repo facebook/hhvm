@@ -101,10 +101,10 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
         auto const blk = blocks[bid].get();
         forEachNormalSuccessor(
           *blk,
-          [&] (const BlockId& id) {
+          [&] (BlockId& id) {
             if (!reachable(id)) {
               FTRACE(2, " {}->{}", id, reachableTarget);
-              const_cast<BlockId&>(id) = reachableTarget;
+              id = reachableTarget;
             }
           }
         );
@@ -445,10 +445,10 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         bsi.hasPred = true;
       }
     };
-    forEachNormalSuccessor(*blk, [&](const BlockId& succId) {
+    forEachNormalSuccessor(*blk, [&](BlockId& succId) {
         auto skip = next_real_block(func, succId);
         if (skip != succId) {
-          const_cast<BlockId&>(succId) = skip;
+          succId = skip;
           anyChanges = true;
         }
         handleSucc(succId);

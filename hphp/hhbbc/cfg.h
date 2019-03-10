@@ -63,20 +63,12 @@ inline bool is_single_nop(const php::Block& b) {
 BlockId next_real_block(const php::Func& func, BlockId id);
 
 /*
- * Call a function for every jump target of a given bytecode.  If the
- * bytecode has no targets, the function is not called.
+ * Call a function for every jump target of a given bytecode, or Op.
+ * If the bytecode has no targets, the function is not called.
  */
-template<class Fun>
-void forEachTakenEdge(const Bytecode& b, Fun f) {
+template<typename Bc, class Fun>
+void forEachTakenEdge(Bc& b, Fun f) {
   b.forEachTarget(f);
-}
-
-/*
- * Opcode version of the above, for use in other visitors.
- */
-template<class Fun, class T>
-void forEachTakenEdge(const T& op, Fun f) {
-  op.forEachTarget(f);
 }
 
 /*
@@ -108,8 +100,8 @@ void forEachSuccessor(const php::Block& block, Fun f) {
  * Call a function for every successor of `block' that is reachable
  * through a fallthrough or taken edge.
  */
-template<class Fun>
-void forEachNormalSuccessor(const php::Block& block, Fun f) {
+template<class Block, class Fun>
+void forEachNormalSuccessor(Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }

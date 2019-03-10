@@ -543,8 +543,9 @@ void first_pass(const Index& index,
 
     auto const flags = step(interp, op);
 
-    auto gen = [&] (const Bytecode& newBC) {
-      const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
+    auto gen = [&] (const Bytecode& bc) {
+      auto newBC = bc;
+      newBC.srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(ctx.func, newBC));
       if (options.Peephole) {
         peephole.append(
@@ -636,8 +637,8 @@ void first_pass(const Index& index,
         if (bc->op != Op::Nop) gen(*bc);
         if (interp.state.speculatedPops) {
           auto const new_block = make_block(ainfo, blk, interp.state);
-          auto fixer = [&] (const BlockId& t) {
-            if (t == new_target) const_cast<BlockId&>(t) = new_block->id;
+          auto fixer = [&] (BlockId& t) {
+            if (t == new_target) t = new_block->id;
           };
           forEachTakenEdge(*bc, fixer);
           fixer(blk->fallthrough);

@@ -50,51 +50,53 @@ namespace {
  */
 struct PostOrderWalker {
   const php::Func& func;
-  std::vector<const php::Block*>& out;
+  std::vector<BlockId>& out;
   boost::dynamic_bitset<>& visited;
 
   void walk(BlockId blk) {
     if (visited[blk]) return;
     visited[blk] = true;
-    auto const blkPtr = func.blocks[blk].get();
-    forEachSuccessor(*blkPtr, [this] (BlockId next) {
+    forEachSuccessor(
+      *func.blocks[blk],
+      [this] (BlockId next) {
         walk(next);
-      });
-    out.push_back(blkPtr);
+      }
+    );
+    out.push_back(blk);
   }
 };
 
 void postorderWalk(const php::Func& func,
-                   std::vector<const php::Block*>& out,
+                   std::vector<BlockId>& out,
                    boost::dynamic_bitset<>& visited,
-                   const php::Block& blk) {
+                   BlockId blk) {
   auto walker = PostOrderWalker { func, out, visited };
-  walker.walk(blk.id);
+  walker.walk(blk);
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<const php::Block*> rpoSortFromBlock(const php::Func& func,
-                                                BlockId start) {
+std::vector<BlockId> rpoSortFromBlock(const php::Func& func,
+                                      BlockId start) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<const php::Block*> ret;
+  std::vector<BlockId> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, *func.blocks[start]);
+  postorderWalk(func, ret, visited, start);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<const php::Block*> rpoSortFromMain(const php::Func& func) {
+std::vector<BlockId> rpoSortFromMain(const php::Func& func) {
   return rpoSortFromBlock(func, func.mainEntry);
 }
 
-std::vector<const php::Block*> rpoSortAddDVs(const php::Func& func) {
+std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<const php::Block*> ret;
+  std::vector<BlockId> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
+  postorderWalk(func, ret, visited, func.mainEntry);
 
   /*
    * We've already marked the blocks reachable from the main entry
@@ -105,20 +107,22 @@ std::vector<const php::Block*> rpoSortAddDVs(const php::Func& func) {
   for (auto it = func.params.end(); it != func.params.begin(); ) {
     --it;
     if (it->dvEntryPoint == NoBlockId) continue;
-    postorderWalk(func, ret, visited, *func.blocks[it->dvEntryPoint]);
+    postorderWalk(func, ret, visited, it->dvEntryPoint);
   }
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
 BlockToBlocks
-computeNonThrowPreds(const std::vector<const php::Block*>& rpoBlocks) {
+computeNonThrowPreds(const php::Func& func,
+                     const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
-  for (auto& b : rpoBlocks) {
-    if (preds.size() < b->id + 1) {
-      preds.resize(b->id + 1);
+  for (auto const bid : rpoBlocks) {
+    if (preds.size() < bid + 1) {
+      preds.resize(bid + 1);
     }
+    auto const b = func.blocks[bid].get();
     forEachNonThrowSuccessor(*b, [&] (BlockId blkId) {
       if (preds.size() < blkId + 1) {
         preds.resize(blkId + 1);
@@ -130,13 +134,15 @@ computeNonThrowPreds(const std::vector<const php::Block*>& rpoBlocks) {
 }
 
 BlockToBlocks
-computeThrowPreds(const std::vector<const php::Block*>& rpoBlocks) {
+computeThrowPreds(const php::Func& func,
+                  const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
-  for (auto& b : rpoBlocks) {
-    if (preds.size() < b->id + 1) {
-      preds.resize(b->id + 1);
+  for (auto const bid : rpoBlocks) {
+    if (preds.size() < bid + 1) {
+      preds.resize(bid + 1);
     }
+    auto const b = func.blocks[bid].get();
     for (auto& ex : b->throwExits) {
       if (preds.size() < ex + 1) {
         preds.resize(ex + 1);

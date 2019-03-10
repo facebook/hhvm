@@ -2347,10 +2347,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   auto incompleteQ = dataflow_worklist<uint32_t,std::less<uint32_t>>(
     ai.rpoBlocks.size()
   );
-  for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b->id));
+  for (auto const bid : ai.rpoBlocks) incompleteQ.push(rpoId(bid));
 
-  auto const nonThrowPreds   = computeNonThrowPreds(ai.rpoBlocks);
-  auto const throwPreds      = computeThrowPreds(ai.rpoBlocks);
+  auto const nonThrowPreds   = computeNonThrowPreds(*ai.ctx.func, ai.rpoBlocks);
+  auto const throwPreds      = computeThrowPreds(*ai.ctx.func, ai.rpoBlocks);
 
   /*
    * Suppose a stack slot isn't used, but it was pushed on two separate
@@ -2484,20 +2484,20 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * block has exceptional exits.
    */
   while (!incompleteQ.empty()) {
-    auto const blk = ai.rpoBlocks[incompleteQ.pop()];
+    auto const bid = ai.rpoBlocks[incompleteQ.pop()];
 
     // skip unreachable blocks
-    if (!ai.bdata[blk->id].stateIn.initialized) continue;
+    if (!ai.bdata[bid].stateIn.initialized) continue;
 
-    FTRACE(2, "block #{}\n", blk->id);
+    FTRACE(2, "block #{}\n", bid);
 
-    auto& blockState = blockStates[blk->id];
+    auto& blockState = blockStates[bid];
     auto const result = analyze_dce(
       index,
       ai,
       collect,
-      blk,
-      ai.bdata[blk->id].stateIn,
+      ai.ctx.func->blocks[bid].get(),
+      ai.bdata[bid].stateIn,
       blockState
     );
 
@@ -2534,19 +2534,19 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
-    for (auto& pred : nonThrowPreds[blk->id]) {
+    for (auto& pred : nonThrowPreds[bid]) {
       FTRACE(2, "  -> {}\n", pred->id);
       auto& pbs = blockStates[pred->id];
       auto const oldPredLocLive = pbs.locLive;
       pbs.locLive |= result.locLiveIn;
       auto changed =
-        mergeUIVecs(pbs.slotUsage, result.slotUsage, blk->id, true);
+        mergeUIVecs(pbs.slotUsage, result.slotUsage, bid, true);
       auto const oldPredSlotLive = pbs.slotLive;
       pbs.slotLive |= result.slotLiveIn;
       // If any slotUsage entries were forced live, we also have to
       // mark the slot live.
       for (auto const& loc : forcedLiveLocations) {
-        if (loc.isSlot && loc.blk == blk->id) pbs.slotLive.set(loc.id);
+        if (loc.isSlot && loc.blk == bid) pbs.slotLive.set(loc.id);
       }
 
       if (pbs.locLive != oldPredLocLive ||
@@ -2554,13 +2554,13 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         changed = true;
       }
       changed |= [&] {
-        if (isCFPushTaken(pred, blk->id)) {
+        if (isCFPushTaken(pred, bid)) {
           auto stack = result.stack;
           stack.insert(stack.end(), pred->hhbcs.back().numPush(),
                        UseInfo{Use::Not});
-          return mergeUIVecs(pbs.dceStack, stack, blk->id, false);
+          return mergeUIVecs(pbs.dceStack, stack, bid, false);
         } else {
-          return mergeUIVecs(pbs.dceStack, result.stack, blk->id, false);
+          return mergeUIVecs(pbs.dceStack, result.stack, bid, false);
         }
       }();
       if (changed) {
@@ -2571,7 +2571,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     // Merge the liveIn into the liveOutExn state for each throw predecessor.
     // The liveIn computation also depends on the liveOutExn state, so again
     // reschedule if it changes.
-    for (auto& pred : throwPreds[blk->id]) {
+    for (auto& pred : throwPreds[bid]) {
       FTRACE(2, "  => {}\n", pred->id);
       auto& pbs = blockStates[pred->id];
       auto const oldPredLocLiveExn = pbs.locLiveExn;
@@ -2599,15 +2599,15 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
-  for (auto& b : ai.rpoBlocks) {
-    FTRACE(2, "block #{}\n", b->id);
+  for (auto const bid : ai.rpoBlocks) {
+    FTRACE(2, "block #{}\n", bid);
     auto ret = optimize_dce(
       index,
       ai,
       collect,
-      b,
-      ai.bdata[b->id].stateIn,
-      blockStates[b->id]
+      ai.ctx.func->blocks[bid].get(),
+      ai.bdata[bid].stateIn,
+      blockStates[bid]
     );
     usedLocals |= ret.usedLocals;
     usedSlots  |= ret.usedSlots;

@@ -490,7 +490,7 @@ php::Block* make_block(FuncAnalysis& ainfo,
   auto const blk        = newBlk.get();
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
-  ainfo.rpoBlocks.push_back(blk);
+  ainfo.rpoBlocks.push_back(blk->id);
   ainfo.bdata.push_back(FuncAnalysis::BlockData {
     static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
     state
@@ -869,10 +869,10 @@ void visit_blocks_impl(const char* what,
   };
 
   FTRACE(1, "|---- {}\n", what);
-  for (auto& blk : rpoBlocks) {
-    curBlk = blk->id;
-    FTRACE(2, "block #{}\n", blk->id);
-    auto const& state = ainfo.bdata[blk->id].stateIn;
+  for (auto const bid : rpoBlocks) {
+    curBlk = bid;
+    FTRACE(2, "block #{}\n", bid);
+    auto const& state = ainfo.bdata[bid].stateIn;
     if (!state.initialized) {
       FTRACE(2, "   unreachable\n");
       continue;
@@ -880,7 +880,7 @@ void visit_blocks_impl(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo, collect, blk->id, state);
+    fun(index, ainfo, collect, bid, state);
   }
   assert(check(*ainfo.ctx.func));
 }

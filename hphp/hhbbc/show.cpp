@@ -322,24 +322,25 @@ std::string dot_instructions(const Func& func, const Block& b) {
 // Output DOT-format graph.  Paste into dot -Txlib or similar.
 std::string dot_cfg(const Func& func) {
   std::string ret;
-  for (auto& b : rpoSortAddDVs(func)) {
+  for (auto const bid : rpoSortAddDVs(func)) {
+    auto const b = func.blocks[bid].get();
     ret += folly::format(
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
-      b->id, b->id, dot_instructions(func, *b)).str();
+      bid, bid, dot_instructions(func, *b)).str();
     bool outputed = false;
     forEachNormalSuccessor(*b, [&] (BlockId target) {
-      ret += folly::format("B{} -> B{};", b->id, target).str();
+      ret += folly::format("B{} -> B{};", bid, target).str();
       outputed = true;
     });
     if (outputed) ret += "\n";
     outputed = false;
     if (!is_single_nop(*b)) {
       for (auto ex : b->throwExits) {
-        ret += folly::sformat("B{} -> B{} [color=red];", b->id, ex);
+        ret += folly::sformat("B{} -> B{} [color=red];", bid, ex);
         outputed = true;
       }
       for (auto ex : b->unwindExits) {
-        ret += folly::sformat("B{} -> B{} [color=blue];", b->id, ex);
+        ret += folly::sformat("B{} -> B{} [color=blue];", bid, ex);
         outputed = true;
       }
     }

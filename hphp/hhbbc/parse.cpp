@@ -394,7 +394,8 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     folly::sorted_vector_set<const php::ExnNode*>
   > blocksToNodes;
 
-  auto const add = [&] (const php::Block& blk, const php::ExnNode* node) {
+  auto const add = [&] (BlockId bid, const php::ExnNode* node) {
+    auto const& blk = *func.blocks[bid];
     assert(blk.throwExits.empty());
     assert(blk.unwindExits.empty());
     if (node) blocksToNodes[blk.id].insert(node);
@@ -405,7 +406,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
   // There's no easy way to determine which blocks belong to which exceptional
   // regions, except by doing a walk from each region's entry block.
   auto const mainBlocks = rpoSortAddDVs(func);
-  for (auto const& blk : mainBlocks) add(*blk, nullptr);
+  for (auto const bid : mainBlocks) add(bid, nullptr);
 
   uint32_t nodeCount = 0;
   visitExnLeaves(
@@ -413,7 +414,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     [&] (const php::ExnNode& node) {
       ++nodeCount;
       auto const blocks = rpoSortFromBlock(func, node_entry_block(node));
-      for (auto const& blk : blocks) add(*blk, &node);
+      for (auto const bid : blocks) add(bid, &node);
     }
   );
 

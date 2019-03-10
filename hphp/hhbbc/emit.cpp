@@ -123,7 +123,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * regions, and insert "fake" edges to the block containing the
  * corresponding call.
  */
-std::vector<const php::Block*> initial_sort(const php::Func& f) {
+std::vector<BlockId> initial_sort(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
   FTRACE(4, "Initial sort {}\n", f.name);
@@ -132,36 +132,36 @@ std::vector<const php::Block*> initial_sort(const php::Func& f) {
   auto nextFpi = 0;
   // Map from fpi region id to the block containing its FCall.
   // Needs value stability because extraEdges holds pointers into this map.
-  hphp_hash_map<int, const php::Block*> fpiToCallBlkMap;
+  hphp_hash_map<int, BlockId> fpiToCallBlkMap;
   // Map from the ids of terminal blocks within fpi regions to the
   // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  hphp_fast_map<BlockId, std::vector<const php::Block**>> extraEdges;
+  hphp_fast_map<BlockId, std::vector<BlockId*>> extraEdges;
   // The fpi state at the start of each block
   std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
-  for (auto blk : sorted) {
-    auto& fpiState = blkFpiState[blk->id];
+  for (auto const bid : sorted) {
+    auto& fpiState = blkFpiState[bid];
     if (!fpiState) fpiState.emplace();
     auto curState = *fpiState;
-    for (auto const& bc : blk->hhbcs) {
+    for (auto const& bc : f.blocks[bid]->hhbcs) {
       if (isFPush(bc.op)) {
         FTRACE(4, "blk:{} FPush {} (nesting {})\n",
-               blk->id, nextFpi, curState.size());
+               bid, nextFpi, curState.size());
         curState.push_back(nextFpi++);
       } else if (isFCallStar(bc.op)) {
         FTRACE(4, "blk:{} FCall {} (nesting {})\n",
-               blk->id, curState.back(), curState.size() - 1);
-        fpiToCallBlkMap[curState.back()] = blk;
+               bid, curState.back(), curState.size() - 1);
+        fpiToCallBlkMap[curState.back()] = bid;
         curState.pop_back();
       }
     }
     auto hasNormalSucc = false;
     forEachNormalSuccessor(
-      *blk,
+      *f.blocks[bid],
       [&] (BlockId id) {
         hasNormalSucc = true;
         auto &succState = blkFpiState[id];
         FTRACE(4, "blk:{} propagate state to {}\n",
-               blk->id, id);
+               bid, id);
         if (!succState) {
           succState = curState;
         } else {
@@ -180,8 +180,8 @@ std::vector<const php::Block*> initial_sort(const php::Func& f) {
         // fpi region) might perturb the order; so we record a pointer
         // to the unordered_map element, in case it gets filled in
         // later.
-        auto curBlkPtr = &fpiToCallBlkMap[fpi];
-        extraEdges[blk->id].push_back(curBlkPtr);
+        auto const res = fpiToCallBlkMap.emplace(fpi, NoBlockId);
+        extraEdges[bid].push_back(&res.first->second);
       }
     }
   }
@@ -190,15 +190,15 @@ std::vector<const php::Block*> initial_sort(const php::Func& f) {
     auto changes = false;
     for (auto& elm : extraEdges) {
       auto const blk = f.blocks[elm.first].get();
-      for (auto const blkPtr : elm.second) {
-        if (!*blkPtr) {
+      for (auto const bidPtr : elm.second) {
+        if (*bidPtr == NoBlockId) {
           // There was no FCall, so no need to do anything
           continue;
         }
         changes = true;
         FTRACE(4, "blk:{} add throw edge to {}\n",
-               blk->id, (*blkPtr)->id);
-        blk->throwExits.push_back((*blkPtr)->id);
+               elm.first, *bidPtr);
+        blk->throwExits.push_back(*bidPtr);
       }
     }
     if (changes) {
@@ -207,8 +207,8 @@ std::vector<const php::Block*> initial_sort(const php::Func& f) {
       // Remove all the extra edges
       for (auto& elm : extraEdges) {
         auto const blk = f.blocks[elm.first].get();
-        for (auto const blkPtr : elm.second) {
-          if (*blkPtr) {
+        for (auto const bidPtr : elm.second) {
+          if (*bidPtr != NoBlockId) {
             blk->throwExits.pop_back();
           }
         }
@@ -241,7 +241,7 @@ std::vector<const php::Block*> initial_sort(const php::Func& f) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<const php::Block*> order_blocks(const php::Func& f) {
+std::vector<BlockId> order_blocks(const php::Func& f) {
   auto sorted = initial_sort(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -261,21 +261,24 @@ std::vector<const php::Block*> order_blocks(const php::Func& f) {
   // after all that.
   std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (const php::Block* a, const php::Block* b) {
+    [&] (BlockId a, BlockId b) {
+      auto const blka = f.blocks[a].get();
+      auto const blkb = f.blocks[b].get();
       using T = std::underlying_type<php::Block::Section>::type;
-      return static_cast<T>(a->section) < static_cast<T>(b->section);
+      return static_cast<T>(blka->section) < static_cast<T>(blkb->section);
     }
   );
 
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;
-      for (auto& b : sorted) {
+      for (auto const bid : sorted) {
+        auto const b = f.blocks[bid].get();
         ret += " ";
         if (b->section != php::Block::Section::Main) {
           ret += "f";
         }
-        ret += folly::to<std::string>(b->id);
+        ret += folly::to<std::string>(bid);
       }
       return ret;
     }()
@@ -329,7 +332,7 @@ struct EmitBcInfo {
     folly::Optional<uint32_t> expectedFPIDepth;
   };
 
-  std::vector<const php::Block*> blockOrder;
+  std::vector<BlockId> blockOrder;
   uint32_t maxStackDepth;
   uint32_t maxFpiDepth;
   bool containsCalls;
@@ -823,10 +826,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   auto blockIt          = begin(ret.blockOrder);
   auto const endBlockIt = end(ret.blockOrder);
   for (; blockIt != endBlockIt; ++blockIt) {
-    auto& b = *blockIt;
-    auto& info = blockInfo[b->id];
+    auto bid = *blockIt;
+    auto& info = blockInfo[bid];
+    auto const b = func.blocks[bid].get();
+
     info.offset = ue.bcPos();
-    FTRACE(2, "      block {}: {}\n", b->id, info.offset);
+    FTRACE(2, "      block {}: {}\n", bid, info.offset);
 
     for (auto& fixup : info.forwardJumps) {
       ue.emitInt32(info.offset - fixup.instrOff, fixup.jmpImmedOff);
@@ -868,7 +873,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         auto const& bc = b->hhbcs.back();
         auto const target =
           bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
-        if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
+        if (std::next(blockIt) != endBlockIt && blockIt[1] == target) {
           fallthrough = target;
           --end;
           flip = true;
@@ -890,7 +895,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     if (fallthrough != NoBlockId) {
       set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
-          blockIt[1]->id != fallthrough) {
+          blockIt[1] != fallthrough) {
         if (b->fallthroughNS) {
           emit_inst(bc::JmpNS { fallthrough });
         } else {
@@ -1131,8 +1136,9 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
    * then modify the active list by popping and then pushing nodes to
    * set it to the new block's path.
    */
-  for (auto& b : info.blockOrder) {
-    auto const offset = info.blockInfo[b->id].offset;
+  for (auto const bid : info.blockOrder) {
+    auto const b = func.blocks[bid].get();
+    auto const offset = info.blockInfo[bid].offset;
 
     if (b->exnNodeId == NoExnNodeId) {
       while (!activeList.empty()) pop_active(offset);
@@ -1150,10 +1156,10 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
       push_active(current[i], offset);
     }
 
-    for (int i = 0; i < info.blockInfo[b->id].regionsToPop; i++) {
+    for (int i = 0; i < info.blockInfo[bid].regionsToPop; i++) {
       // If the block ended in a jump out of the fault region, this effectively
       // ends all fault regions deeper than the one we are jumping to
-      pop_active(info.blockInfo[b->id].past);
+      pop_active(info.blockInfo[bid].past);
     }
 
     if (debug && !activeList.empty()) {
@@ -1164,7 +1170,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
   }
 
   while (!activeList.empty()) {
-    pop_active(info.blockInfo[info.blockOrder.back()->id].past);
+    pop_active(info.blockInfo[info.blockOrder.back()].past);
   }
 
   /*

@@ -382,7 +382,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
   // Used to force blocks that depended on the types of local statics
   // to be re-analyzed when the local statics change.
-  hphp_fast_map<const php::Block*, hphp_fast_map<LocalId, Type>>
+  hphp_fast_map<BlockId, hphp_fast_map<LocalId, Type>>
     usedLocalStatics;
 
   /*
@@ -395,12 +395,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
    */
   do {
     while (!incompleteQ.empty()) {
-      auto const blk = ai.rpoBlocks[incompleteQ.pop()];
+      auto const bid = ai.rpoBlocks[incompleteQ.pop()];
 
-      totalVisits[blk->id]++;
+      totalVisits[bid]++;
 
-      FTRACE(2, "block #{}\nin {}{}", blk->id,
-             state_string(*ctx.func, ai.bdata[blk->id].stateIn, collect),
+      FTRACE(2, "block #{}\nin {}{}", bid,
+             state_string(*ctx.func, ai.bdata[bid].stateIn, collect),
              property_state_string(collect.props));
       ++interp_counter;
 
@@ -428,10 +428,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
       };
 
-      auto stateOut = ai.bdata[blk->id].stateIn;
-      auto interp   = Interp { index, ctx, collect, blk, stateOut };
+      auto stateOut = ai.bdata[bid].stateIn;
+      auto interp   = Interp {
+        index, ctx, collect, ctx.func->blocks[bid].get(), stateOut
+      };
       auto flags    = run(interp, propagate);
-      auto& stateIn = ai.bdata[blk->id].stateIn;
+      auto& stateIn = ai.bdata[bid].stateIn;
       stateIn.speculated                = stateOut.speculated;
       stateIn.speculatedPops            = stateOut.speculatedPops;
       stateIn.speculatedIsUnconditional = stateOut.speculatedIsUnconditional;
@@ -442,9 +444,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
       }
       // We only care about the usedLocalStatics from the last visit
       if (flags.usedLocalStatics) {
-        usedLocalStatics[blk] = std::move(*flags.usedLocalStatics);
+        usedLocalStatics[bid] = std::move(*flags.usedLocalStatics);
       } else {
-        usedLocalStatics.erase(blk);
+        usedLocalStatics.erase(bid);
       }
 
       if (flags.returned) {
@@ -480,7 +482,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
     for (auto const& elm : usedLocalStatics) {
       for (auto const& ls : elm.second) {
         if (collect.localStaticTypes[ls.first] != ls.second) {
-          incompleteQ.push(rpoId(ai, elm.first->id));
+          incompleteQ.push(rpoId(ai, elm.first));
           break;
         }
       }
@@ -525,7 +527,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
         &ret,
         "{}block {}:\nin {}",
         sep,
-        ai.rpoBlocks[bd.rpoId]->id,
+        ai.rpoBlocks[bd.rpoId],
         state_string(*ctx.func, bd.stateIn, collect)
       );
     }
@@ -644,7 +646,7 @@ FuncAnalysis::FuncAnalysis(Context ctx)
   , bdata{ctx.func->blocks.size()}
 {
   for (auto rpoId = size_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
-    bdata[rpoBlocks[rpoId]->id].rpoId = rpoId;
+    bdata[rpoBlocks[rpoId]].rpoId = rpoId;
   }
 }
 

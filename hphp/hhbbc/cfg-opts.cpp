@@ -70,37 +70,44 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     return state.initialized && !state.unreachable;
   };
 
-  for (auto const& cblk : ainfo.rpoBlocks) {
-    if (!reachable(cblk->id)) continue;
+  auto& blocks = ainfo.ctx.func->blocks;
+  for (auto const bid : ainfo.rpoBlocks) {
+    if (!reachable(bid)) continue;
     auto reachableTarget = NoBlockId;
     auto hasUnreachableTargets = false;
-    forEachNormalSuccessor(*cblk, [&] (BlockId id) {
+    forEachNormalSuccessor(
+      *blocks[bid],
+      [&] (BlockId id) {
         if (reachable(id)) {
           reachableTarget = id;
         } else {
           hasUnreachableTargets = true;
         }
-      });
+      }
+    );
     if (!hasUnreachableTargets || reachableTarget == NoBlockId) continue;
     header();
-    switch (cblk->hhbcs.back().op) {
+    switch (blocks[bid]->hhbcs.back().op) {
       case Op::JmpNZ:
       case Op::JmpZ: {
-        FTRACE(2, "blk: {} - jcc -> jmp {}\n", cblk->id, reachableTarget);
-        auto const blk = ainfo.ctx.func->blocks[cblk->id].get();
+        FTRACE(2, "blk: {} - jcc -> jmp {}\n", bid, reachableTarget);
+        auto const blk = blocks[bid].get();
         blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
         blk->fallthrough = reachableTarget;
         break;
       }
       default: {
-        FTRACE(2, "blk: {} -", cblk->id, reachableTarget);
-        auto const blk = ainfo.ctx.func->blocks[cblk->id].get();
-        forEachNormalSuccessor(*blk, [&] (const BlockId& id) {
+        FTRACE(2, "blk: {} -", bid, reachableTarget);
+        auto const blk = blocks[bid].get();
+        forEachNormalSuccessor(
+          *blk,
+          [&] (const BlockId& id) {
             if (!reachable(id)) {
               FTRACE(2, " {}->{}", id, reachableTarget);
               const_cast<BlockId&>(id) = reachableTarget;
             }
-          });
+          }
+        );
         FTRACE(2, "\n");
         break;
       }
@@ -356,12 +363,12 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
   };
   hphp_fast_set<ExnNodeId> seenNodes;
 
-  for (auto const& blk : ainfo.rpoBlocks) {
-    if (!reachable(blk->id)) {
-      FTRACE(4, "Unreachable: {}\n", blk->id);
+  for (auto const bid : ainfo.rpoBlocks) {
+    if (!reachable(bid)) {
+      FTRACE(4, "Unreachable: {}\n", bid);
       continue;
     }
-    auto idx = blk->exnNodeId;
+    auto idx = func.blocks[bid]->exnNodeId;
     while (idx != NoExnNodeId) {
       if (!seenNodes.insert(idx).second) break;
       idx = func.exnNodes[idx].parent;
@@ -458,7 +465,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
     }
   }
 
-  for (auto& blk : func.blocks) {
+  for (auto const& blk : func.blocks) {
     if (blk->id == NoBlockId) continue;
     while (blk->fallthrough != NoBlockId) {
       auto nxt = func.blocks[blk->fallthrough].get();

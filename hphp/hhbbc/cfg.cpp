@@ -52,6 +52,7 @@ struct PostOrderWalker {
   const php::Func& func;
   std::vector<BlockId>& out;
   boost::dynamic_bitset<>& visited;
+  const hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds;
 
   void walk(BlockId blk) {
     if (visited[blk]) return;
@@ -62,15 +63,23 @@ struct PostOrderWalker {
         walk(next);
       }
     );
+    if (extraIds) {
+      auto const it = extraIds->find(blk);
+      if (it != extraIds->end()) {
+        for (auto next : it->second) walk(next);
+      }
+    }
     out.push_back(blk);
   }
 };
 
-void postorderWalk(const php::Func& func,
-                   std::vector<BlockId>& out,
-                   boost::dynamic_bitset<>& visited,
-                   BlockId blk) {
-  auto walker = PostOrderWalker { func, out, visited };
+void postorderWalk(
+    const php::Func& func,
+    std::vector<BlockId>& out,
+    boost::dynamic_bitset<>& visited,
+    BlockId blk,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds = nullptr) {
+  auto walker = PostOrderWalker { func, out, visited, extraIds };
   walker.walk(blk);
 }
 
@@ -78,18 +87,22 @@ void postorderWalk(const php::Func& func,
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<BlockId> rpoSortFromBlock(const php::Func& func,
-                                      BlockId start) {
+std::vector<BlockId> rpoSortFromBlock(
+    const php::Func& func,
+    BlockId start,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds) {
   boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<BlockId> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, start);
+  postorderWalk(func, ret, visited, start, extraIds);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<BlockId> rpoSortFromMain(const php::Func& func) {
-  return rpoSortFromBlock(func, func.mainEntry);
+std::vector<BlockId> rpoSortFromMain(
+    const php::Func& func,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds) {
+  return rpoSortFromBlock(func, func.mainEntry, extraIds);
 }
 
 std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {

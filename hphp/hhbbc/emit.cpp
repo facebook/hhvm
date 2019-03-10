@@ -187,32 +187,21 @@ std::vector<BlockId> initial_sort(const php::Func& f) {
   }
 
   if (!extraEdges.empty()) {
-    auto changes = false;
+    hphp_fast_map<BlockId, std::vector<BlockId>> extraIds;
     for (auto& elm : extraEdges) {
-      auto const blk = f.blocks[elm.first].get();
       for (auto const bidPtr : elm.second) {
         if (*bidPtr == NoBlockId) {
           // There was no FCall, so no need to do anything
           continue;
         }
-        changes = true;
-        FTRACE(4, "blk:{} add throw edge to {}\n",
+        FTRACE(4, "blk:{} add extra edge to {}\n",
                elm.first, *bidPtr);
-        blk->throwExits.push_back(*bidPtr);
+        extraIds[elm.first].push_back(*bidPtr);
       }
     }
-    if (changes) {
+    if (extraIds.size()) {
       // redo the sort with the extra edges in place
-      sorted = rpoSortFromMain(f);
-      // Remove all the extra edges
-      for (auto& elm : extraEdges) {
-        auto const blk = f.blocks[elm.first].get();
-        for (auto const bidPtr : elm.second) {
-          if (*bidPtr != NoBlockId) {
-            blk->throwExits.pop_back();
-          }
-        }
-      }
+      sorted = rpoSortFromMain(f, &extraIds);
     }
   }
 

@@ -14,9 +14,24 @@ from lspcommand import LspCommandProcessor, Transcript
 
 
 class LspTestDriver(common_tests.CommonTestDriver):
-    def write_load_config(self, *changed_files):
-        # use default .hhconfig and hh.conf in the template repo
-        pass
+    def write_load_config(self, use_saved_state=False):
+        # Will use the .hhconfig already in the repo directory
+        # As for hh.conf, we'll write it explictly each test.
+        # Note that hh.conf uses lower-case...
+        use_saved_state = "true" if use_saved_state else "false"
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            f.write("""
+use_watchman = true
+watchman_subscribe_v2 = true
+interrupt_on_watchman = true
+interrupt_on_client = true
+load_state_natively_v4 = {use_saved_state}
+use_mini_state = {use_saved_state}
+require_mini_state = {use_saved_state}
+lazy_decl = {use_saved_state}
+lazy_parse = {use_saved_state}
+lazy_init2 = {use_saved_state}
+""".format(use_saved_state=use_saved_state))
 
     def assertEqualString(self, first, second, msg=None):
         pass

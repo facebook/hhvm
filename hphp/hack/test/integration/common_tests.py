@@ -52,7 +52,7 @@ class CommonTestDriver(object):
         shutil.rmtree(cls.bin_dir)
         shutil.rmtree(cls.hh_tmp_dir)
 
-    def write_load_config(self, *changed_files):
+    def write_load_config(self, use_saved_state=False):
         """
         Writes out a script that will print the list of changed files,
         and adds the path to that script to .hhconfig

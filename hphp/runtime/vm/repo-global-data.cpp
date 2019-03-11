@@ -62,6 +62,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(ReffinessInvariance);
   SHOW(AbortBuildOnVerifyError);
   SHOW(UndefinedConstFallback);
+  SHOW(UndefinedFunctionFallback);
   SHOW(Signature);
 #undef SHOW
   return out;

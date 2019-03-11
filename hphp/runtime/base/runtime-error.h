@@ -237,6 +237,9 @@ HAC_CHECK_OPTS
 void raise_undefined_const_fallback_notice(const StringData* name,
                                            const StringData* fallback);
 
+void raise_undefined_function_fallback_notice(const StringData* name,
+                                              const StringData* fallback);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void raise_str_to_class_notice(const StringData* name);

@@ -557,6 +557,12 @@ struct RuntimeOption {
   // 1 => raise notice and fall back to root namespace
   // 2 => raise error
   static uint64_t UndefinedConstFallback;
+  // Controls PHP's behavior of falling back to the default namespace for
+  // undefined functions.
+  // 0 => fall back to root namespace (default)
+  // 1 => raise notice and fall back to root namespace
+  // 2 => raise error
+  static uint64_t UndefinedFunctionFallback;
   // Disables PHP's call_user_func function.
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.

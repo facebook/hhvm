@@ -585,7 +585,7 @@ struct Index {
    * program point (it could require a function autoload that might
    * fail).
    */
-  std::pair<res::Func, folly::Optional<res::Func>>
+  std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
     resolve_func_fallback(Context,
                           SString name,
                           SString fallback) const;

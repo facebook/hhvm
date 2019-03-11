@@ -4501,7 +4501,7 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   return resolve_func_helper(funcs, name);
 }
 
-std::pair<res::Func, folly::Optional<res::Func>>
+std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
 Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
                              SString fallbackName) const {
   assert(!needsNSNormalization(nsName));
@@ -4524,9 +4524,11 @@ Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
   }
 
   assert(RuntimeOption::RepoAuthoritative);
-  return begin(r2) == end(r2)
-    ? std::make_pair(resolve_func_helper(r1, nsName), folly::none)
-    : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);
+  if (begin(r2) == end(r2)) {
+    return std::make_pair(resolve_func_helper(r1, nsName), folly::none);
+  } else {
+    return std::make_pair(folly::none, resolve_func_helper(r2, fallbackName));
+  }
 }
 
 /*

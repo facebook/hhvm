@@ -201,6 +201,12 @@ struct Repo::GlobalData {
   uint64_t UndefinedConstFallback = 0;
 
   /*
+   * Controls PHP's behavior of falling back to the default namespace for
+   * undefined functions.
+   */
+  uint64_t UndefinedFunctionFallback = 0;
+
+  /*
    * A more-or-less unique identifier for the repo
    */
   uint64_t Signature = 0;
@@ -243,6 +249,7 @@ struct Repo::GlobalData {
       (Signature)
       (AbortBuildOnVerifyError)
       (UndefinedConstFallback)
+      (UndefinedFunctionFallback)
       ;
   }
 };

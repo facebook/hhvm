@@ -267,6 +267,9 @@ let phpism_undefined_const_as_string () =
 let phpism_undefined_const_fallback () =
   Hhbc_options.phpism_undefined_const_fallback !Hhbc_options.compiler_options
 
+let phpism_undefined_function_fallback () =
+  Hhbc_options.phpism_undefined_function_fallback !Hhbc_options.compiler_options
+
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -3288,8 +3291,8 @@ and emit_call_lhs_and_fpush
     if does_not_have_non_tparam_generics then
       empty,
       match id_opt with
-      | Some id -> instr_fpushfuncu nargs fq_id id
-      | None -> instr_fpushfuncd nargs fq_id
+      | Some id when phpism_undefined_function_fallback () -> instr_fpushfuncu nargs fq_id id
+      | _ -> instr_fpushfuncd nargs fq_id
     else
       empty,
       gather [

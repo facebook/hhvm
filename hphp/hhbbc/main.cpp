@@ -302,6 +302,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalEnableIntishCast = gd.EnableIntishCast;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedConstFallback = gd.UndefinedConstFallback;
+  RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
       [&] (const std::pair<std::string,MD5>& kv) {
@@ -371,6 +372,7 @@ void write_global_data(
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.UndefinedConstFallback      = RuntimeOption::UndefinedConstFallback;
+  gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =

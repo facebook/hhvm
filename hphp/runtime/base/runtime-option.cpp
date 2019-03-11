@@ -715,6 +715,7 @@ uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 uint64_t RuntimeOption::DisableDefine = 2;
 bool RuntimeOption::UndefinedConstAsString = true;
 uint64_t RuntimeOption::UndefinedConstFallback = 0;
+uint64_t RuntimeOption::UndefinedFunctionFallback = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisallowExecutionOperator = true;
 bool RuntimeOption::DisableReservedVariables = true;
@@ -1496,6 +1497,9 @@ void RuntimeOption::Load(
     Config::Bind(UndefinedConstFallback, ini, config,
                  "Hack.Lang.Phpism.UndefinedConstFallback",
                  UndefinedConstFallback);
+    Config::Bind(UndefinedFunctionFallback, ini, config,
+                 "Hack.Lang.Phpism.UndefinedFunctionFallback",
+                 UndefinedFunctionFallback);
     Config::Bind(DisableCallUserFunc, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFunc",
                  DisableCallUserFunc);

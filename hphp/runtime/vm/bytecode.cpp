@@ -5120,6 +5120,7 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
     const NamedEntityPair nep2 = unit->lookupNamedEntityPairId(globalFunc);
+    raise_undefined_function_fallback_notice(nep.first, nep2.first);
     func = Unit::loadFunc(nep2.second, nep2.first);
     if (func == nullptr) {
       raise_call_to_undefined(unit->lookupLitstrId(nsFunc));

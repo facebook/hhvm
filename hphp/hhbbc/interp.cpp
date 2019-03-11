@@ -2975,11 +2975,17 @@ void in(ISS& env, const bc::FPushFunc& op) {
 void in(ISS& env, const bc::FPushFuncU& op) {
   auto const rfuncPair =
     env.index.resolve_func_fallback(env.ctx, op.str2, op.str3);
-  if (options.ElideAutoloadInvokes && !rfuncPair.second) {
-    return reduce(
-      env,
-      bc::FPushFuncD { op.arg1, rfuncPair.first.name(), op.has_unpack }
-    );
+  if (options.ElideAutoloadInvokes) {
+    auto const fpushfuncd = [&](auto const& fn) {
+      return reduce(env, bc::FPushFuncD { op.arg1, fn->name(), op.has_unpack });
+    };
+    if (rfuncPair.first && !rfuncPair.second) {
+      return fpushfuncd(rfuncPair.first);
+    }
+    if (!rfuncPair.first && rfuncPair.second &&
+        RuntimeOption::UndefinedFunctionFallback == 0) {
+      return fpushfuncd(rfuncPair.second);
+    }
   }
   fpiPushNoFold(
     env,

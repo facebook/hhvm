@@ -138,7 +138,9 @@ let rec collect_class
           | None -> decls
     in
     let ancestors =
-      SSet.union (keys_to_sset data.dc_ancestors) data.dc_xhp_attr_deps
+      keys_to_sset data.dc_ancestors
+      |> SSet.union data.dc_xhp_attr_deps
+      |> SSet.union data.dc_req_ancestors_extends
     in
     collect_classes requested_classes decls ancestors
 

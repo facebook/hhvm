@@ -86,7 +86,7 @@ array(6) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(34)
+    int(33)
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -169,7 +169,7 @@ array(6) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(34)
+    int(33)
     ["function"]=>
     string(4) "main"
     ["args"]=>
@@ -252,66 +252,7 @@ array(6) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(34)
-    ["function"]=>
-    string(4) "main"
-    ["args"]=>
-    array(0) {
-    }
-  }
-}
-array(2) {
-  [0]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(32)
-    ["function"]=>
-    string(13) "error_handler"
-    ["args"]=>
-    array(6) {
-      [0]=>
-      int(8)
-      [1]=>
-      string(63) "Use of undefined constant FakeConstant - assumed 'FakeConstant'"
-      [2]=>
-      string(%d) "%s"
-      [3]=>
-      int(32)
-      [4]=>
-      array(0) {
-      }
-      [5]=>
-      array(2) {
-        [0]=>
-        array(2) {
-          ["file"]=>
-          string(%d) "%s"
-          ["line"]=>
-          int(32)
-        }
-        [1]=>
-        array(4) {
-          ["file"]=>
-          string(%d) "%s"
-          ["line"]=>
-          int(34)
-          ["function"]=>
-          string(4) "main"
-          ["args"]=>
-          array(0) {
-          }
-        }
-      }
-    }
-  }
-  [1]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(34)
+    int(33)
     ["function"]=>
     string(4) "main"
     ["args"]=>

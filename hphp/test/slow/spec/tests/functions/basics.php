@@ -27,9 +27,7 @@ function f1()
 }
 
 var_dump(f1()); // call f1, default return value is NULL
-f1;             // valid, but vacuous, as it has no side effect and its value is not used
-var_dump(f1);   // string with value "f1"
-$f = f1;        // assign this string to a variable
+$f = 'f1';        // assign this string to a variable
 $f();           // call f1 indirectly via $f
 //"f1"();           // call f1 via the string "f1" -- Can't be a string literal!!!
 
@@ -62,7 +60,7 @@ f2(10, 20, 30); // pass 3 (> 2)
 
 function square($v) { return $v * $v; }
 echo "5 squared = ".square(5)."\n";
-var_dump($funct = square);
+var_dump($funct = 'square');
 var_dump($funct(-2.3));
 
 echo strlen("abcedfg")."\n";

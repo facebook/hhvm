@@ -12,7 +12,7 @@ set_error_handler('error_handler');
 function unary_function($x) {
   // Raise a warning and throw from
   // the user error handler.
-  return UNDEFINED === $x;
+  trigger_error("raise a notice", E_USER_NOTICE);
 }
 
 function binary_function(string $x, $y) {}

@@ -1,12 +1,12 @@
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
               : Chunks an array into size  large chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'size' argument 
+* Testing array_chunk() function with unexpected values for 'size' argument
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";
@@ -55,12 +55,6 @@ $values = array (
 
         // object data
 /*21*/  new stdclass(),
-
-        // undefined data
-/*22*/  @undefined_var,
-
-        // unset data
-/*23*/  @unset_var
 
 );
 

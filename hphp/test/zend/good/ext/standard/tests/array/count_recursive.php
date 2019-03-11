@@ -114,7 +114,6 @@ try { var_dump( count() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 try { var_dump( count(array(), COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected
 
 /* Testing Invalid type arguments */
-try { var_dump( count("string", ABCD) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( count(100, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( count(array(), "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

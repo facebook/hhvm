@@ -5,7 +5,6 @@
 
   class C
   {
-      const c0 = UNDEFINED;
 
       const c1 = 1, c2 = 1.5;
       const c3 =  + 1, c4 =  + 1.5;
@@ -27,7 +26,6 @@
   }
 
   echo "\nAttempt to access various kinds of class constants:\n";
-  var_dump(C::c0);
   var_dump(C::c1);
   var_dump(C::c2);
   var_dump(C::c3);

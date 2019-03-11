@@ -12,7 +12,6 @@ $str_array = array(
                     "\x000",
                     "abcd",		// double quoted string
                     'xyz',		// single quoted string
-                    string,		// without quotes
                     "-3",
                     -3,
                     '-3.344',

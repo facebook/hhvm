@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool sort(&array &array_arg [, int $sort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 
@@ -59,20 +59,14 @@ $unexpected_values = array (
        // object data
 /*20*/ new stdclass(),
 
-       // undefined data
-/*21*/ @undefined_var,
-
-       // unset data
-/*22*/ @unset_var,
-
        // resource variable
 /*23*/ $fp
 );
 
 // loop though each element of the array and check the working of sort()
-// when $array argument is supplied with different values from $unexpected_values 
+// when $array argument is supplied with different values from $unexpected_values
 echo "\n-- Testing sort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n";
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {

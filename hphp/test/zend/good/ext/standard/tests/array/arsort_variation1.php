@@ -59,14 +59,8 @@ $unexpected_values = array (
   // object data
   19 => new stdclass(),
 
-  // undefined data
-  20 => @undefined_var,
-
-  // unset data
-  21 => @unset_var,
-
   // resource variable
-  22 => $fp
+  20 => $fp
 
 );
 

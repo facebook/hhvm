@@ -1,14 +1,11 @@
 Attempt to access various kinds of class constants:
-
-Notice: %s
-string(9) "UNDEFINED"
 int(1)
 float(1.5)
 int(1)
 float(1.5)
 int(-1)
 float(-1.5)
-int(14)
+int(13)
 string(%d) "%s"
 string(1) "C"
 string(1) "C"

@@ -167,11 +167,6 @@ let tco_experimental_decl_linearization = "decl_linearization"
 let tco_experimental_track_subtype_prop = "track_subtype_prop"
 
 (**
- * Enable the `null` typehint.
- *)
-let tco_experimental_null_type = "null_type"
-
-(**
  * Enable support for the Pocket Universes
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
@@ -199,7 +194,6 @@ let tco_experimental_all =
      tco_experimental_type_const_attributes;
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
-     tco_experimental_null_type;
    ]
 
 let tco_migration_flags_all =

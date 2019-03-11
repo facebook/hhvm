@@ -59,9 +59,6 @@ let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization
 let experimental_track_subtype_prop =
   GlobalOptions.tco_experimental_track_subtype_prop
-let experimental_null_type =
-  GlobalOptions.tco_experimental_null_type
-
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view

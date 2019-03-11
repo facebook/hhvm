@@ -323,7 +323,6 @@ val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_type_const_attributes : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
-val tco_experimental_null_type : string
 val tco_experimental_pocket_universes : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t

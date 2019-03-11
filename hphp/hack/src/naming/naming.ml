@@ -955,10 +955,6 @@ module Make (GetLocals : GetLocals) = struct
   and aast_hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =
     let params = (fst env).type_params in
-    let allow_null = TypecheckerOptions.experimental_feature_enabled
-      (fst env).tcopt
-      TypecheckerOptions.experimental_null_type
-    in
     (* some common Xhp screw ups *)
     if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
     then Errors.disallowed_xhp_type p x;
@@ -1008,7 +1004,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Hany
-      | x when x = SN.Typehints.null && allow_null -> N.Hprim N.Tnull
+      | x when x = SN.Typehints.null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey

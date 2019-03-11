@@ -1,13 +1,13 @@
 <?php
 
-$x = 0;
 
 abstract final class FStatics {
   public static $y = 0;
 }
+
 function f() {
-  global $x;
-  yield $x++;
+
+  yield Yield2172::$x++;
   yield FStatics::$y++;
 }
 for ($i = 0;
@@ -17,4 +17,8 @@ for ($i = 0;
     var_dump($value);
   }
 }
-var_dump($x);
+var_dump(Yield2172::$x);
+
+abstract final class Yield2172 {
+  public static $x = 0;
+}

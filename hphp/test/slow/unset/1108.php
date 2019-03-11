@@ -1,11 +1,15 @@
 <?php
 
-$a = array(10);
+Unset1108::$a = array(10);
  function test() {
- global $a;
- unset($a[0]);
- var_dump($a);
+
+ unset(Unset1108::$a[0]);
+ var_dump(Unset1108::$a);
 }
-var_dump($a);
+var_dump(Unset1108::$a);
  test();
- var_dump($a);
+ var_dump(Unset1108::$a);
+
+abstract final class Unset1108 {
+  public static $a;
+}

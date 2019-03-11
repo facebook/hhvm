@@ -1,8 +1,8 @@
 <?hh
 function throw_one_time($why, $what) {
-  global $counter;
+
   if ($what === 'a' && $why == 'exit') {
-    if ($counter++ == 1) {
+    if (AsyncSuspendHookThrow::$counter++ == 1) {
       echo "throwing\n";
       throw new exception('x');
     }
@@ -17,14 +17,14 @@ async function a() {
 }
 
 async function d() {
-  global $z;
-  try { await $z; } catch (Exception $x) { echo "d_catch\n"; }
+
+  try { await AsyncSuspendHookThrow::$z; } catch (Exception $x) { echo "d_catch\n"; }
   echo "heyo d\n";
 }
 
 async function c() {
-  global $z;
-  try { await $z; } catch (Exception $x) { echo "c_catch\n"; }
+
+  try { await AsyncSuspendHookThrow::$z; } catch (Exception $x) { echo "c_catch\n"; }
   echo "c woke up\n";
 }
 
@@ -35,11 +35,15 @@ $counter = 0;
 
 fb_setprofile('throw_one_time');
 
-global $z;
-$z = a();
+AsyncSuspendHookThrow::$z = a();
 $l = d();
 
 $k = c();
 HH\Asio\join($l);
 HH\Asio\join($k);
+}
+
+abstract final class AsyncSuspendHookThrow {
+  public static $counter;
+  public static $z;
 }

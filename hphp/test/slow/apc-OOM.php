@@ -1,9 +1,9 @@
 <?hh
 // Generate giant string and store it into APC
 function dump($i, $flag): int {
-  global $prefixKey, $prefixValue;
-  $keyi = $prefixKey . "{$i}";
-  $valuei = $prefixValue . "{$i}";
+
+  $keyi = ApcOom::$prefixKey . "{$i}";
+  $valuei = ApcOom::$prefixValue . "{$i}";
   apc_store($keyi,$valuei);
   if ($flag == true) gc_collect_cycles();
   apc_delete($keyi);
@@ -37,4 +37,9 @@ echo "APC out of memory test begins!\n";
 OOM_auto_trigger_test();
 OOM_leak_test();
 echo "passed\n";
+}
+
+abstract final class ApcOom {
+  public static $prefixKey;
+  public static $prefixValue;
 }

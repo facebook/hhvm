@@ -140,7 +140,7 @@ function heapsort_r($n, &$ra) {
 }
 
 function heapsort($N = 20000) {
-  global $LAST;
+
 
   for ($i=1; $i<=$N; $i++) {
     $ary[$i] = ($N - $i);
@@ -352,6 +352,7 @@ function fannkuch($n = 9) {
   printf("Pfannkuchen(%d) = %d\n", $n, Fannkuch_run($n));
 }
 
+<<__EntryPoint>>
 function main_function() {
   ackermann(2);
   ary(500);
@@ -367,11 +368,4 @@ function main_function() {
   strcat(80);
   binary_trees(3);
   fannkuch(6);
-}
-
-
-
-<<__EntryPoint>>
-function main_mixedbag() {
-main_function();
 }

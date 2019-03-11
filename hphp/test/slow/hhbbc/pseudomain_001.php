@@ -1,13 +1,16 @@
 <?php
 
 function foo() {
-  global $x;
-  $x = 'yep';
+
+  HhbbcPseudomain001::$x = 'yep';
   return 'hehehe';
 }
 
 function al() { return 2; }
-unset($x);
-$x = al();
+HhbbcPseudomain001::$x = al();
 var_dump(foo());
-var_dump($x);
+var_dump(HhbbcPseudomain001::$x);
+
+abstract final class HhbbcPseudomain001 {
+  public static $x;
+}

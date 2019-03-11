@@ -3,9 +3,8 @@
 include (__DIR__ . '/redis.inc');
 
 $r = NewRedisTestInstance();
-global $prefix;
-$prefix = GetTestKeyName(__FILE__) . ':';
-$r->setOption(Redis::OPT_PREFIX, $prefix);
+ExtRedisScan::$prefix = GetTestKeyName(__FILE__) . ':';
+$r->setOption(Redis::OPT_PREFIX, ExtRedisScan::$prefix);
 $r->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
 $ret = $r->delete('scan');
 $ret = $r->mset(array('key:one' => 'one', 'key:two' => 'two',
@@ -21,9 +20,9 @@ function performScan($fn){
 	$returns = array();
 	while (($retval = $fn($cursor))){
 		foreach ($retval as $key){
-			global $prefix;
-			if (strstr($key, $prefix) !== false){
-				$returns []= substr($key, strlen($prefix));
+
+			if (strstr($key, ExtRedisScan::$prefix) !== false){
+				$returns []= substr($key, strlen(ExtRedisScan::$prefix));
 			}
 		}
 	}
@@ -57,4 +56,8 @@ try {
 	$r->delete('key:two');
 	$r->delete('key:three');
 	$r->delete('key:four');
+}
+
+abstract final class ExtRedisScan {
+  public static $prefix;
 }

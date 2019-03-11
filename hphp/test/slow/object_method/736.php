@@ -23,8 +23,8 @@ class B {
     return $x=$a+12;
   }
   function trace($s) {
-    global $trace;
-    $trace = "<$s(".$this->id.")>";
+
+    ObjectMethod736::$trace = "<$s(".$this->id.")>";
   }
   private function f4helper($a) {
     return $x=$a+12;
@@ -97,8 +97,8 @@ class G extends B {
 }
 class H {
   function f($a) {
-    global $trace;
-    $trace="H::f,";
+
+    ObjectMethod736::$trace="H::f,";
     return "";
   }
   function f3($a) {
@@ -140,9 +140,7 @@ function error_handler ($errnor, $errstr, $errfile, $errline) {
 <<__EntryPoint>>
 function main_736() {
 $fix249639=0;
- // when this task is fixed or o_id on static calls
 
-global $trace;
 // test invoke_builtin_static_method
 //echo "bar == ",
 //    call_user_func_array(array('Normalizer','normalize'),array("bar")), "\n";
@@ -188,11 +186,11 @@ $res = call_user_func_array("H::f",array(2));
 // trying to exhause f_call_user_func_array cases
 $res = call_user_func_array(array($g,'f'),array(20));
  // ok
-echo "dynamic call \$g->'f' $trace, 20 == $res\n";
+echo "dynamic call \$g->'f' ".ObjectMethod736::$trace.", 20 == $res\n";
 
 $res= call_user_func_array(array($g,'G::f'),array(21));
  // G::G::f a bit weird
-echo "dynamic call \$g->'G::f' $trace, 21 == $res\n";
+echo "dynamic call \$g->'G::f' ".ObjectMethod736::$trace.", 21 == $res\n";
 //echo "dynamic call \$g->'H::f' $trace, FAIL = ",
 //      call_user_func_array(array($g,'H::f'),array(22)),"\n";
  // G::H::f better break
@@ -223,8 +221,8 @@ $f = 'missing';
 
 
 // test methodIndexLookupReverse
-echo "dynamic call \$g->'missing' $trace, Calling G object method 'missing' 2 = ", call_user_func_array(array($g,'missing'),array(2)),"\n";
-echo "dynamic call 'missing(2)' $trace, FAIL =", call_user_func_array('missing',array(2)),"\n";
+echo "dynamic call \$g->'missing' ".ObjectMethod736::$trace.", Calling G object method 'missing' 2 = ", call_user_func_array(array($g,'missing'),array(2)),"\n";
+echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_func_array('missing',array(2)),"\n";
 
 // more __call testing
 $j = new J();
@@ -239,4 +237,8 @@ fclose($ourFileHandle);
 unlink($ourFileName);
 
 echo "done\n";
+}
+
+abstract final class ObjectMethod736 {
+  public static $trace;
 }

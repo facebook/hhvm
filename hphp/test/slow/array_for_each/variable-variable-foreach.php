@@ -1,34 +1,39 @@
 <?php
-$rows=array(1,2,3);
+ArrayForEachVariableVariableForeach::$rows=array(1,2,3);
 
 
 function fn1() {
-    global $rows;
-    global $row;
+
+
     $a="rows";
     $b="row";
 
     // TYPICAL FOREACH
-    foreach($rows as $row) {
+    foreach(ArrayForEachVariableVariableForeach::$rows as ArrayForEachVariableVariableForeach::$row) {
         fn2();
     }
 
     // THE MALFORMED ARRAY
-    foreach($rows as $row) {
+    foreach(ArrayForEachVariableVariableForeach::$rows as ArrayForEachVariableVariableForeach::$row) {
         fn2();
     }
 }
 
 function fn2() {
-    global $row;
+    $row = ArrayForEachVariableVariableForeach::$row;
     echo "row=${row}\n";
 }
 
 // ORIGINAL ARRAY
-print_r($rows);
+print_r(ArrayForEachVariableVariableForeach::$rows);
 
 // SOME ITERATIONS
 fn1();
 
 // THE MALFORMED ARRAY
-print_r($rows);
+print_r(ArrayForEachVariableVariableForeach::$rows);
+
+abstract final class ArrayForEachVariableVariableForeach {
+  public static $rows;
+  public static $row;
+}

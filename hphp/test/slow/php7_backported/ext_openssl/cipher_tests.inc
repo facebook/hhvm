@@ -1,5 +1,5 @@
 <?php
-$php_openssl_cipher_tests = array(
+Php7BackportedExtOpensslCipherTestsInc::$php_openssl_cipher_tests = array(
 	'aes-128-ccm' => array(
 		array(
 			'key' => '8c89a2ebc96c7602707fcf24b32d3833',
@@ -190,11 +190,11 @@ $php_openssl_cipher_tests = array(
 
 function openssl_get_cipher_tests($method)
 {
-	global $php_openssl_cipher_tests;
+
 
 	$tests = array();
 
-	foreach ($php_openssl_cipher_tests[$method] as $instance) {
+	foreach (Php7BackportedExtOpensslCipherTestsInc::$php_openssl_cipher_tests[$method] as $instance) {
 		$test = array();
 		foreach ($instance as $field_name => $field_value) {
 			$test[$field_name] = pack("H*", $field_value);
@@ -206,4 +206,8 @@ function openssl_get_cipher_tests($method)
 	}
 
 	return $tests;
+}
+
+abstract final class Php7BackportedExtOpensslCipherTestsInc {
+  public static $php_openssl_cipher_tests;
 }

@@ -175,9 +175,9 @@ function checkForOutput($testProcess, $expectedOutput, $expectedCategory, $error
   }
 }
 
-$bpId = 0;
+ExtVsdebugCommonInc::$bpId = 0;
 function setBreakpoints($breakpoints, $verify = true) {
-  global $bpId;
+
   foreach ($breakpoints as $bpsForFile) {
     $setBreakpointsCommand = array(
       "command" => "setBreakpoints",
@@ -196,8 +196,8 @@ function setBreakpoints($breakpoints, $verify = true) {
     foreach ($bpsForFile{'breakpoints'} as $bp) {
       array_push(&$setBreakpointsCommand{'arguments'}{'breakpoints'},
           array("line" => $bp{'line'}, "condition" => $bp{'condition'}));
-      array_push(&$responseBps, array("id" => ++$bpId, "verified" => false));
-      $responseLines{$bpId} = $bp{'calibratedLine'};
+      array_push(&$responseBps, array("id" => ++ExtVsdebugCommonInc::$bpId, "verified" => false));
+      $responseLines{ExtVsdebugCommonInc::$bpId} = $bp{'calibratedLine'};
     }
 
     $seq = sendVsCommand($setBreakpointsCommand);
@@ -472,4 +472,8 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
   }
 
   proc_close($process);
+}
+
+abstract final class ExtVsdebugCommonInc {
+  public static $bpId;
 }

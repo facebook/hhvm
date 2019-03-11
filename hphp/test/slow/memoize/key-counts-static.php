@@ -1,78 +1,78 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-$do_echo = true;
+MemoizeKeyCountsStaticPhp::$do_echo = true;
 
 class A {
   <<__Memoize>> public static function func0() {
-    global $do_echo;
-    if ($do_echo) echo "A::func0()\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func0()\n";
     return json_encode([]);
   }
   <<__Memoize>> public static function func1($p1) {
-    global $do_echo;
-    if ($do_echo) echo "A::func1($p1)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func1($p1)\n";
     return json_encode([$p1]);
   }
   <<__Memoize>> public static function func2($p1, $p2) {
-    global $do_echo;
-    if ($do_echo) echo "A::func2($p1, $p2)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func2($p1, $p2)\n";
     return json_encode([$p1, $p2]);
   }
   <<__Memoize>> public static function func3($p1, $p2, $p3) {
-    global $do_echo;
-    if ($do_echo) echo "A::func3($p1, $p2, $p3)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func3($p1, $p2, $p3)\n";
     return json_encode([$p1, $p2, $p3]);
   }
   <<__Memoize>> public static function func4($p1, $p2, $p3, $p4) {
-    global $do_echo;
-    if ($do_echo) echo "A::func4($p1, $p2, $p3, $p4)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func4($p1, $p2, $p3, $p4)\n";
     return json_encode([$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>> public static function func5($p1, $p2, $p3, $p4, $p5) {
-    global $do_echo;
-    if ($do_echo) echo "A::func5($p1, $p2, $p3, $p4, $p5)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func5($p1, $p2, $p3, $p4, $p5)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>> public static function func6($p1, $p2, $p3, $p4, $p5, $p6) {
-    global $do_echo;
-    if ($do_echo) echo "A::func6($p1, $p2, $p3, $p4, $p5, $p6)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func6($p1, $p2, $p3, $p4, $p5, $p6)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>> public static function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
-    global $do_echo;
-    if ($do_echo) echo "A::func7($p1, $p2, $p3, $p4, $p5, $p6, $p7)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func7($p1, $p2, $p3, $p4, $p5, $p6, $p7)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>> public static function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
-    global $do_echo;
-    if ($do_echo) echo "A::func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>> public static function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
-    global $do_echo;
-    if ($do_echo) echo "A::func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>> public static function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
-    global $do_echo;
-    if ($do_echo) echo "A::func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10]);
   }
   <<__Memoize>> public static function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) {
-    global $do_echo;
-    if ($do_echo) echo "A::func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11]);
   }
   <<__Memoize>> public static function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) {
-    global $do_echo;
-    if ($do_echo) echo "A::func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12)\n";
+
+    if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12)\n";
     return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12]);
   }
 }
 
 function test() {
-  global $do_echo;
+
 
   var_dump(A::func0());
   var_dump(A::func1(1.1));
@@ -130,7 +130,7 @@ function test() {
   var_dump(A::func11(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.115));
   var_dump(A::func12(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.125));
 
-  $do_echo = false;
+  MemoizeKeyCountsStaticPhp::$do_echo = false;
   for ($i = 0; $i < 30000; $i++) {
     A::func1(1.15+$i);
     A::func2(1.1, 2.25+$i);
@@ -146,7 +146,7 @@ function test() {
     A::func12(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.125+$i);
   }
 
-  $do_echo = true;
+  MemoizeKeyCountsStaticPhp::$do_echo = true;
   var_dump(A::func0());
   var_dump(A::func1(1.19));
   var_dump(A::func2(1.19, 2.2));
@@ -163,3 +163,7 @@ function test() {
 
 }
 test();
+
+abstract final class MemoizeKeyCountsStaticPhp {
+  public static $do_echo;
+}

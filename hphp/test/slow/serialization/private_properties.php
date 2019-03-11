@@ -2,24 +2,24 @@
 
 error_reporting(-1);
 
-global $g;
+
 
 class A {
   private $a = 1;
   public function __sleep() {
-    return $GLOBALS['g'];
+    return SerializationPrivateProperties::$g;
   }
   public function seta($a) { $this->a = $a; }
 }
 class B extends A {
   public function __sleep() {
-    return $GLOBALS['g'];
+    return SerializationPrivateProperties::$g;
   }
 
   static function test($a, $elems, $p = null) {
-    global $g;
+
     $a->seta(42);
-    $g = $elems;
+    SerializationPrivateProperties::$g = $elems;
     $s = serialize($a);
     var_export($s);
     echo "\n";
@@ -42,3 +42,7 @@ B::test(new B, array("\0A\0a"));
 B::test(new B, array("\0*\0a"));
 B::test(new B, array("\0*\0b"), "b");
 B::test(new B, array("\0B\0b"), "b");
+
+abstract final class SerializationPrivateProperties {
+  public static $g;
+}

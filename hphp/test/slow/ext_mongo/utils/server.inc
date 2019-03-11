@@ -339,10 +339,10 @@ function rsname() {
 }
 function logCallback($module, $level, $message)
 {
-    global $_LOG_CALLBACK_REGEX;
 
-    if ($_LOG_CALLBACK_REGEX) {
-        if (preg_match($_LOG_CALLBACK_REGEX, $message)) {
+
+    if (ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX) {
+        if (preg_match(ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX, $message)) {
             echo $message, "\n";
         }
     } else {
@@ -352,13 +352,13 @@ function logCallback($module, $level, $message)
 
 function printLogs($module = MongoLog::ALL, $level = MongoLog::ALL, $containing = null)
 {
-    global $_LOG_CALLBACK_REGEX;
+
 
     MongoLog::setModule($module);
     MongoLog::setLevel($level);
 
     if ($containing) {
-        $_LOG_CALLBACK_REGEX = $containing;
+        ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX = $containing;
     }
     MongoLog::setCallback("logCallback");
 }
@@ -369,3 +369,7 @@ list($REPLICASET_SECONDARY, $REPLICASET_SECONDARY_PORT) = explode(":", $config["
 list($REPLICASET_PRIMARY, $REPLICASET_PRIMARY_PORT) = explode(":", $config["hosts"][0]);
  */
 
+
+abstract final class ExtMongoUtilsServerInc {
+  public static $_LOG_CALLBACK_REGEX;
+}

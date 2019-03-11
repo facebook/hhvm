@@ -6,8 +6,8 @@ function __autoload($cls) {
       const BAR = H1::FOO;
     }
   } else if ($cls == "I2") {
-    global $cls_i2_is_recursive;
-    if ($cls_i2_is_recursive) {
+
+    if (I1::$i2_is_recursive) {
       class I2 {
         const BAR = I1::FOO;
       }
@@ -66,7 +66,7 @@ class H1 {
 }
 
 class I1 {
-  const FOO = I2::BAR;
+  public static $i2_is_recursive = false; const FOO = I2::BAR;
 }
 
 const BOOLCNS1 = true;
@@ -106,13 +106,11 @@ function test16() { var_dump(G::FOO); }
 function test17() { var_dump(G::BAR); }
 function test18() { var_dump(H1::FOO); }
 function test19() {
-  global $cls_i2_is_recursive;
-  $cls_i2_is_recursive = false;
+  I1::$i2_is_recursive = false;
   var_dump(I1::FOO);
 }
 function test20() {
-  global $cls_i2_is_recursive;
-  $cls_i2_is_recursive = true;
+  I1::$i2_is_recursive = true;
   var_dump(I1::FOO);
 }
 function test21() { var_dump(J1::FOO); }
@@ -147,6 +145,7 @@ const TESTS = vec[
   'test24'
 ];
 
+<<__EntryPoint>>
 function main() {
   $count = apc_fetch("count");
   if ($count === false) {
@@ -161,12 +160,4 @@ function main() {
 
   echo "================ $test ===================\n";
   $test();
-}
-
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-<<__EntryPoint>>
-function main_recursive() {
-$cls_i2_is_recursive = false;
-main();
 }

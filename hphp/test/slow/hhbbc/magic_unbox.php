@@ -9,13 +9,17 @@ class B {
 }
 
 class C {
-  function __call($x, $y) { global $x; return $x; }
+  function __call($x, $y) { return HhbbcMagicUnbox::$x; }
 }
 
-$x = 'heh';
+HhbbcMagicUnbox::$x = 'heh';
 
 function bar($z) {
   return $z->hehe();
 }
 
 var_dump(bar(new C));
+
+abstract final class HhbbcMagicUnbox {
+  public static $x;
+}

@@ -79,19 +79,19 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
                     "\n Result: " . dump( $res_val );
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
-        global $test_num;
+
 
         $res_str .= "\n\n".
-                    "Test $test_num.$md5:" .
+                    "Test ".ExtCollator1810::$test_num.".$md5:" .
                     $res_dump;
-        ++$test_num;
+        ++ExtCollator1810::$test_num;
     }
     return $res_str;
 }
 function ut_main1()
 {
-    global $test_num;
-    $test_num = 1;
+
+    ExtCollator1810::$test_num = 1;
     $res_str = '';
     // Sort an array in SORT_REGULAR mode using en_US locale.
     $test_params = array(
@@ -276,18 +276,18 @@ function sort_arrays_with_sort_keys( $locale, $arrays )
 
         // Preppend test signature to output string
         $md5 = md5( $res_dump );
-        global $test_num;
+
         $res_str .= "\n\n".
-                    "Test $test_num.$md5:" .
+                    "Test ".ExtCollator1810::$test_num.".$md5:" .
                     $res_dump;
-        ++$test_num;
+        ++ExtCollator1810::$test_num;
     }
     return $res_str;
 }
 function ut_main6()
 {
-    global $test_num;
-    $test_num = 1;
+
+    ExtCollator1810::$test_num = 1;
     $res_str = '';
     // Sort an array in SORT_REGULAR mode using en_US locale.
     $test_params = array(
@@ -326,4 +326,8 @@ ut_run('ut_main3');
 ut_run('ut_main4');
 ut_run('ut_main5');
 ut_run('ut_main6');
+}
+
+abstract final class ExtCollator1810 {
+  public static $test_num;
 }

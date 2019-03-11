@@ -41,30 +41,30 @@ class ClassForSecondCapture { }
 // We do some consolidation here because the behavior when testing
 // is really non-deterministic. Both on order of scans and also
 // whether things are in CPP or PHP (based on mode of test)
-$echobuf = varray[];
+DvArrayHackArrExtHeapgraphPhp::$echobuf = varray[];
 function echo_buffer($str) {
-  global $echobuf;
+
   // new root names
   $str = str_replace('HPHP::CppStack', 'onsome-stack', $str);
   $str = str_replace('HPHP::PhpStack', 'onsome-stack', $str);
   $str = str_replace('HPHP::RdsLocal', 'rds-local', $str);
-  $echobuf[] = $str;
+  DvArrayHackArrExtHeapgraphPhp::$echobuf[] = $str;
 }
 function echo_flush() {
-  global $echobuf;
-  $echobuf_uniq = array_unique($echobuf);
+
+  $echobuf_uniq = array_unique(DvArrayHackArrExtHeapgraphPhp::$echobuf);
   sort(&$echobuf_uniq);
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }
-  $echobuf = varray[];
+  DvArrayHackArrExtHeapgraphPhp::$echobuf = varray[];
 }
 
-$hg_for_closure = null;
-$id_of_rootclass = null;
+DvArrayHackArrExtHeapgraphPhp::$hg_for_closure = null;
+DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass = null;
 function showTestClasses($node) {
-  global $hg_for_closure;
-  global $id_of_rootclass;
+
+
 
   $classname = idx($node, 'class', 'no class...');
   $kind = $node['kind'];
@@ -76,14 +76,14 @@ function showTestClasses($node) {
   ];
   if ($kind === "Object" && idx($testclasses, $classname)) {
     echo_buffer("$classname\n");
-    $same_node = heapgraph_node($hg_for_closure, $node['index']);
+    $same_node = heapgraph_node(DvArrayHackArrExtHeapgraphPhp::$hg_for_closure, $node['index']);
     $same_class = idx($same_node, 'class', 'null');
     if ($same_class != $classname) {
       echo "heapgraph_node broken: $classname != $same_class\n";
     }
 
     if ($classname == "RootClass") {
-      $id_of_rootclass = $node['index'];
+      DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass = $node['index'];
     }
   }
 }
@@ -108,7 +108,7 @@ function edgeName($hg, $edge) {
 }
 
 function showTestEdge($edge) {
-  global $hg_for_closure;
+
   $testedges = darray[
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
@@ -116,10 +116,10 @@ function showTestEdge($edge) {
     'Property:closure' => 1,
     'Property:children' => 1,
   ];
-  $name = edgeName($hg_for_closure, $edge);
+  $name = edgeName(DvArrayHackArrExtHeapgraphPhp::$hg_for_closure, $edge);
   if (idx($testedges, $name)) {
     echo_buffer("$name\n");
-    $same_edge = heapgraph_edge($hg_for_closure, $edge['index']);
+    $same_edge = heapgraph_edge(DvArrayHackArrExtHeapgraphPhp::$hg_for_closure, $edge['index']);
     if ($same_edge != $edge) {
       echo"heapgraph_edge broken: $edge != $same_edge\n";
     }
@@ -161,11 +161,11 @@ function printEdge($edge) {
   echo "\n";
 }
 
-$visited = darray[];
+DvArrayHackArrExtHeapgraphPhp::$visited = darray[];
 function dfsPrintNode($hg, $node) {
-  global $visited;
+
   $id = $node['index'];
-  $visited[$id] = true;
+  DvArrayHackArrExtHeapgraphPhp::$visited[$id] = true;
   printNode($node);
   $in_edges = heapgraph_node_in_edges($hg, $id);
   foreach ($in_edges as $edge) {
@@ -173,7 +173,7 @@ function dfsPrintNode($hg, $node) {
   }
   foreach ($in_edges as $edge) {
     $from = $edge['from'];
-    if (!isset($visited[$from])) {
+    if (!isset(DvArrayHackArrExtHeapgraphPhp::$visited[$from])) {
       dfsPrintNode($hg, heapgraph_node($hg, $from));
     }
   }
@@ -206,17 +206,17 @@ echo_flush();
 
 // TRAVERSAL
 echo "\nTraversing second capture:\n";
-$hg_for_closure = $hg2;
+DvArrayHackArrExtHeapgraphPhp::$hg_for_closure = $hg2;
 heapgraph_foreach_node($hg2, 'showTestClasses');
 echo_flush();
 
 echo "\nTraversing first capture:\n";
-$hg_for_closure = $hg;
+DvArrayHackArrExtHeapgraphPhp::$hg_for_closure = $hg;
 heapgraph_foreach_node($hg, 'showTestClasses');
 echo_flush();
 
 echo "\nTraversing edges for first capture:\n";
-$hg_for_closure = $hg;
+DvArrayHackArrExtHeapgraphPhp::$hg_for_closure = $hg;
 heapgraph_foreach_edge($hg, 'showTestEdge');
 echo_flush();
 
@@ -226,22 +226,29 @@ echo_flush();
 
 // CHILDREN / PARENTS
 echo "\nGetting in edges of root class:\n";
-$in_edges = heapgraph_node_in_edges($hg, $id_of_rootclass);
+$in_edges = heapgraph_node_in_edges($hg, DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass);
 showAllEdges($hg, $in_edges);
 echo_flush();
 
 echo "\nGetting out edges of root class:\n";
-$out_edges = heapgraph_node_out_edges($hg, $id_of_rootclass);
+$out_edges = heapgraph_node_out_edges($hg, DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass);
 showAllEdges($hg, $out_edges);
 echo_flush();
 
 // DFS NODES
 echo "\nDoing DFS from root class on nodes:\n";
-heapgraph_dfs_nodes($hg, varray[$id_of_rootclass], varray[], 'showClassOnly');
+heapgraph_dfs_nodes($hg, varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], varray[], 'showClassOnly');
 echo_flush();
 
 echo "\nDoing DFS from root class on nodes (skipping root):\n";
 heapgraph_dfs_nodes(
-  $hg, varray[$id_of_rootclass], varray[$id_of_rootclass], 'showClass'
+  $hg, varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], varray[DvArrayHackArrExtHeapgraphPhp::$id_of_rootclass], 'showClass'
 );
 echo_flush();
+
+abstract final class DvArrayHackArrExtHeapgraphPhp {
+  public static $echobuf;
+  public static $hg_for_closure;
+  public static $id_of_rootclass;
+  public static $visited;
+}

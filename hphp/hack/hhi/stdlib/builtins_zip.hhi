@@ -66,6 +66,10 @@ class ZipArchive {
   const CM_LZMA = 14;
   const CM_LZ77 = 19;
   const CM_PPMD = 98;
+  const EM_NONE = 0;
+  const EM_AES_128 = 257;
+  const EM_AES_192 = 258;
+  const EM_AES_256 = 259;
 
   // Properties
   public int $status;
@@ -125,6 +129,16 @@ class ZipArchive {
     int $index,
     int $comp_method,
     int $comp_flags = 0,
+  ): bool;
+  public function setEncryptionIndex(
+    int $index,
+    int $encryption_method,
+    string $password,
+  ): bool;
+  public function setEncryptionName(
+    string $name,
+    int $encryption_method,
+    string $password,
   ): bool;
   public function statIndex(int $index, int $flags = 0): darray;
   public function statName(string $name, int $flags = 0): darray;

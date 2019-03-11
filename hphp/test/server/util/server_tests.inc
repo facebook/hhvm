@@ -76,7 +76,7 @@ function get_random_port($exclude1, $exclude2) {
 # Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                       $customArgs = '', $serverId = null, $repoArgs = '') {
-  global $test_run_id, $LOG_ROOT, $next_instance_id;
+  global $test_run_id, $LOG_ROOT, $next_instance_id, $repo_builds;
   $instance_id = $next_instance_id++;
 
   $portConfig = ' -vServer.Port='.$serverPort;
@@ -100,12 +100,30 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $hhvm = PHP_BINARY;
 
   if (ini_get('hhvm.repo.authoritative')) {
-    $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id} ".
-      "--input-dir $root $repoArgs";
-    tlog('Building repo with command: '.$cmd);
-    tlog(exec($cmd));
+    if (!isset($repo_builds)) {
+       $repo_builds=dict[];
+       register_shutdown_function(
+         function() {
+           global $repo_builds;
+           foreach ($repo_builds as $dir) {
+             @unlink($dir . "/hhvm.hhbc");
+             @rmdir($dir);
+           }
+         }
+       );
+    }
+    $repoKey = 'x'.$root.':'.$repoArgs;
+    if (!isset($repo_builds[$repoKey])) {
+      $repo_builds[$repoKey] =
+        "${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
+      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . $repo_builds[$repoKey] .
+        " --input-dir $root $repoArgs";
+
+      tlog('Building repo with command: '.$cmd);
+      tlog(exec($cmd));
+    }
     $repoConfig .=
-      " -vRepo.Local.Path=${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}/hhvm.hhbc".
+      " -vRepo.Local.Path=".$repo_builds[$repoKey]."/hhvm.hhbc".
       " -vRepo.Authoritative=true";
   }
 
@@ -211,11 +229,10 @@ function stopServer($adminPort, $serverProc) {
   @unlink("${LOG_ROOT}_test_client$test_run_id.log");
   @unlink("${LOG_ROOT}_client$test_run_id.hhbc");
   @unlink("${LOG_ROOT}_curl$test_run_id.log");
+  @unlink("${LOG_ROOT}_access_log$test_run_id.log");
 
   for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
     @unlink("${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
-    @unlink("${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}/hhvm.hhbc");
-    @rmdir("${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}");
   }
 }
 

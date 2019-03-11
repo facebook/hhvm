@@ -316,7 +316,6 @@ val tco_experimental_coroutines: string
 val tco_experimental_disallow_static_memoized : string
 val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_no_trait_reuse : string
-val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_reified_generics : string
 val tco_experimental_type_param_shadowing : string
 val tco_experimental_trait_method_redeclarations : string

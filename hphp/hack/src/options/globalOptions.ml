@@ -132,11 +132,6 @@ let tco_experimental_disable_optional_and_unknown_shape_fields =
 let tco_experimental_no_trait_reuse = "no_trait_reuse"
 
 (**
- * Enable the null coalescence assignment (`??=`) operator.
- *)
-let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
-
-(**
  * Enable reified generics
  *)
 let tco_experimental_reified_generics = "reified_generics"
@@ -187,7 +182,6 @@ let tco_experimental_all =
      tco_experimental_disallow_static_memoized;
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
-     tco_experimental_null_coalesce_assignment;
      tco_experimental_reified_generics;
      tco_experimental_type_param_shadowing;
      tco_experimental_trait_method_redeclarations;

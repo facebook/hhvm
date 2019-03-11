@@ -2166,12 +2166,18 @@ std::unique_ptr<php::Func> clone_meth_helper(
     return true;
   };
 
-  for (auto& b : cloneMeth->blocks) {
-    for (auto& bc : b->hhbcs) {
+  hphp_fast_map<size_t, hphp_fast_map<size_t, uint32_t>> updates;
+  for (size_t bid = 0; bid < cloneMeth->blocks.size(); bid++) {
+    auto const b = cloneMeth->blocks[bid].get();
+    for (size_t ix = 0; ix < b->hhbcs.size(); ix++) {
+      auto const& bc = b->hhbcs[ix];
       switch (bc.op) {
-        case Op::CreateCl:
-          if (!recordClosure(&bc.CreateCl.arg2)) return nullptr;
+        case Op::CreateCl: {
+          auto clsId = bc.CreateCl.arg2;
+          if (!recordClosure(&clsId)) return nullptr;
+          updates[bid][ix] = clsId;
           break;
+        }
         case Op::DefCls:
         case Op::DefClsNop:
         case Op::NewObjI:
@@ -2179,6 +2185,14 @@ std::unique_ptr<php::Func> clone_meth_helper(
         default:
           break;
       }
+    }
+  }
+
+  for (auto elm : updates) {
+    auto& cblk = cloneMeth->blocks[elm.first];
+    auto const blk = cblk.mutate();
+    for (auto const& ix : elm.second) {
+      blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
     }
   }
 

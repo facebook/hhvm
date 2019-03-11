@@ -47,11 +47,12 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
            blk->hhbcs.back().op != Op::Fatal;
   };
 
-  for (auto const& blk : ainfo.ctx.func->blocks) {
-    if (!make_unreachable(blk.get())) continue;
+  for (auto& cblk : ainfo.ctx.func->blocks) {
+    if (!make_unreachable(cblk.get())) continue;
     header();
-    FTRACE(2, "Marking {} unreachable\n", blk->id);
-    auto const srcLoc = blk->hhbcs.front().srcLoc;
+    FTRACE(2, "Marking {} unreachable\n", cblk->id);
+    auto const srcLoc = cblk->hhbcs.front().srcLoc;
+    auto const blk = cblk.mutate();
     blk->hhbcs = {
       bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
       bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
@@ -91,14 +92,14 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
       case Op::JmpNZ:
       case Op::JmpZ: {
         FTRACE(2, "blk: {} - jcc -> jmp {}\n", bid, reachableTarget);
-        auto const blk = blocks[bid].get();
+        auto const blk = blocks[bid].mutate();
         blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
         blk->fallthrough = reachableTarget;
         break;
       }
       default: {
         FTRACE(2, "blk: {} -", bid, reachableTarget);
-        auto const blk = blocks[bid].get();
+        auto const blk = blocks[bid].mutate();
         forEachNormalSuccessor(
           *blk,
           [&] (BlockId& id) {
@@ -309,7 +310,7 @@ bool buildSwitches(php::Func& func,
       auto bc = switchInfo.kind == KindOfInt64 ?
         buildIntSwitch(switchInfo) : buildStringSwitch(switchInfo);
       if (bc.op != Op::Nop) {
-        auto const blk = func.blocks[bid].get();
+        auto const blk = func.blocks[bid].mutate();
         auto it = blk->hhbcs.end();
         // blk->fallthrough implies it was a JmpZ JmpNZ block,
         // which means we have exactly 4 instructions making up
@@ -329,7 +330,7 @@ bool buildSwitches(php::Func& func,
         blk->fallthrough = NoBlockId;
         for (auto id : blocks) {
           if (blkInfos[id].multiplePreds) continue;
-          auto const removed = func.blocks[id].get();
+          auto const removed = func.blocks[id].mutate();
           removed->id = NoBlockId;
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
@@ -400,8 +401,9 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
 
   if (!changed) return false;
 
-  for (auto const& blk : func.blocks) {
-    if (!reachable(blk->id)) {
+  for (auto& cblk : func.blocks) {
+    if (!reachable(cblk->id)) {
+      auto const blk = cblk.mutate();
       blk->exnNodeId = NoExnNodeId;
       blk->throwExits = {};
       blk->unwindExits = {};
@@ -426,16 +428,16 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
   };
   // find all the blocks with multiple preds; they can't be merged
   // into their predecessors
-  for (auto const& blk : func.blocks) {
-    if (blk->id == NoBlockId) continue;
-    auto& bbi = blockInfo[blk->id];
+  for (auto& cblk : func.blocks) {
+    if (cblk->id == NoBlockId) continue;
+    auto& bbi = blockInfo[cblk->id];
     int numSucc = 0;
-    if (!reachable(blk->id)) {
+    if (!reachable(cblk->id)) {
       bbi.multiplePreds = true;
       bbi.multipleSuccs = true;
       continue;
     } else {
-      analyzeSwitch(*blk, blockInfo, nullptr);
+      analyzeSwitch(*cblk, blockInfo, nullptr);
     }
     auto handleSucc = [&] (BlockId succId) {
       auto& bsi = blockInfo[succId];
@@ -445,17 +447,31 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         bsi.hasPred = true;
       }
     };
-    forEachNormalSuccessor(*blk, [&](BlockId& succId) {
-        auto skip = next_real_block(func, succId);
-        if (skip != succId) {
-          succId = skip;
-          anyChanges = true;
-        }
-        handleSucc(succId);
+    auto followSucc = false;
+    forEachNormalSuccessor(
+      *cblk,
+      [&] (BlockId succId) {
+        auto const realSucc = next_real_block(func, succId);
+        if (succId != realSucc) followSucc = true;
+        handleSucc(realSucc);
         numSucc++;
-      });
-    for (auto& ex : blk->throwExits)  handleSucc(ex);
-    for (auto& ex : blk->unwindExits) handleSucc(ex);
+      }
+    );
+    if (followSucc) {
+      anyChanges = true;
+      auto const blk = cblk.mutate();
+      forEachNormalSuccessor(
+        *blk,
+        [&] (BlockId& succId) {
+          auto skip = next_real_block(func, succId);
+          if (skip != succId) {
+            succId = skip;
+          }
+        }
+      );
+    }
+    for (auto& ex : cblk->throwExits)  handleSucc(ex);
+    for (auto& ex : cblk->unwindExits) handleSucc(ex);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
   blockInfo[func.mainEntry].multiplePreds = true;
@@ -465,44 +481,46 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
     }
   }
 
-  for (auto const& blk : func.blocks) {
-    if (blk->id == NoBlockId) continue;
-    while (blk->fallthrough != NoBlockId) {
-      auto nxt = func.blocks[blk->fallthrough].get();
-      if (blockInfo[blk->id].multipleSuccs ||
-          blockInfo[nxt->id].multiplePreds ||
-          blk->exnNodeId != nxt->exnNodeId ||
-          blk->section != nxt->section ||
-          blk->throwExits != nxt->throwExits) {
+  for (auto& cblk : func.blocks) {
+    if (cblk->id == NoBlockId) continue;
+    while (cblk->fallthrough != NoBlockId) {
+      auto& cnxt = func.blocks[cblk->fallthrough];
+      if (blockInfo[cblk->id].multipleSuccs ||
+          blockInfo[cnxt->id].multiplePreds ||
+          cblk->exnNodeId != cnxt->exnNodeId ||
+          cblk->section != cnxt->section ||
+          cblk->throwExits != cnxt->throwExits) {
         break;
       }
 
-      FTRACE(2, "   merging: {} into {}\n", nxt->id, blk->id);
-      auto& bInfo = blockInfo[blk->id];
-      auto const& nInfo = blockInfo[nxt->id];
+      FTRACE(2, "   merging: {} into {}\n", cnxt->id, cblk->id);
+      auto& bInfo = blockInfo[cblk->id];
+      auto const& nInfo = blockInfo[cnxt->id];
       bInfo.multipleSuccs = nInfo.multipleSuccs;
       bInfo.couldBeSwitch = nInfo.couldBeSwitch;
       bInfo.onlySwitch = false;
 
-      blk->fallthrough = nxt->fallthrough;
-      blk->fallthroughNS = nxt->fallthroughNS;
+      auto const blk = cblk.mutate();
+      blk->fallthrough = cnxt->fallthrough;
+      blk->fallthroughNS = cnxt->fallthroughNS;
       // The predecessor should not have any unwind exits (because that
       // would make the block terminal), while the successor might.
       assert(blk->unwindExits.empty());
-      blk->unwindExits = nxt->unwindExits;
-      std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
+      blk->unwindExits = cnxt->unwindExits;
+      std::copy(cnxt->hhbcs.begin(), cnxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
+      auto const nxt = cnxt.mutate();
       nxt->fallthrough = NoBlockId;
       nxt->id = NoBlockId;
       nxt->hhbcs = { bc::Nop {} };
       anyChanges = true;
     }
-    auto const& bInfo = blockInfo[blk->id];
+    auto const& bInfo = blockInfo[cblk->id];
     if (bInfo.couldBeSwitch &&
         (bInfo.multiplePreds || !bInfo.onlySwitch || !bInfo.followsSwitch)) {
       // This block looks like it could be part of a switch, and it's
       // not in the middle of a sequence of such blocks.
-      if (buildSwitches(func, blk->id, blockInfo)) {
+      if (buildSwitches(func, cblk->id, blockInfo)) {
         anyChanges = true;
       }
     }

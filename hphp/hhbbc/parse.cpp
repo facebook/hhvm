@@ -338,12 +338,14 @@ BlockId node_entry_block(const php::ExnNode& node) {
  * jump to the associated handler (and any throw in the handler will exit the
  * function).
  */
-void build_exceptional_edges_simple(const php::Func& func) {
+void build_exceptional_edges_simple(php::Func& func) {
   for (auto& blk : func.blocks) {
     assert(blk->throwExits.empty());
     assert(blk->unwindExits.empty());
     if (blk->exnNodeId == NoExnNodeId) continue;
-    blk->throwExits.push_back(node_entry_block(func.exnNodes[blk->exnNodeId]));
+    blk.mutate()->throwExits.push_back(
+      node_entry_block(func.exnNodes[blk->exnNodeId])
+    );
   }
 }
 
@@ -366,7 +368,7 @@ void build_exceptional_edges_simple(const php::Func& func) {
  * which edges can be traversed by the unwinder. Once we have the unwinder
  * edges, we can then calculate the throw edges.
  */
-void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
+void build_exceptional_edges(const ExnTreeInfo& tinfo, php::Func& func) {
   // Check for the simple and quicker cases
   if (func.exnNodes.empty()) return;
   if (std::all_of(
@@ -621,7 +623,8 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     return exits;
   };
 
-  for (auto& blk : func.blocks) {
+  for (auto& cblk : func.blocks) {
+    auto const blk = cblk.mutate();
     assert(blk->throwExits.empty());
     assert(blk->unwindExits.empty());
 
@@ -1065,18 +1068,19 @@ void build_cfg(ParseUnitState& puState,
     }()
   );
 
-  std::map<Offset,std::unique_ptr<php::Block>> blockMap;
+  std::map<Offset,copy_ptr<php::Block>> blockMap;
   auto const bc = fe.ue().bc();
 
   auto findBlock = [&] (Offset off) {
     auto& ptr = blockMap[off];
     if (!ptr) {
-      ptr               = std::make_unique<php::Block>();
-      ptr->id           = blockMap.size() - 1;
-      ptr->section      = php::Block::Section::Main;
-      ptr->exnNodeId    = NoExnNodeId;
+      auto blk = php::Block{};
+      blk.id           = blockMap.size() - 1;
+      blk.section      = php::Block::Section::Main;
+      blk.exnNodeId    = NoExnNodeId;
+      ptr.emplace(blk);
     }
-    return ptr.get();
+    return ptr.mutate();
   };
 
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
@@ -1108,9 +1112,10 @@ void build_cfg(ParseUnitState& puState,
 
   func.blocks.resize(blockMap.size());
   for (auto& kv : blockMap) {
-    auto const id = kv.second->id;
-    kv.second->multiSucc = predSuccCounts[id].second > 1;
-    kv.second->multiPred = predSuccCounts[id].first > 1;
+    auto const blk = kv.second.mutate();
+    auto const id = blk->id;
+    blk->multiSucc = predSuccCounts[id].second > 1;
+    blk->multiPred = predSuccCounts[id].first > 1;
     func.blocks[id] = std::move(kv.second);
   }
 
@@ -1204,14 +1209,14 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
       auto const mainEntry = BlockId{0};
 
-      auto blk          = std::make_unique<php::Block>();
-      blk->id           = mainEntry;
-      blk->section      = php::Block::Section::Main;
-      blk->exnNodeId    = NoExnNodeId;
+      auto blk         = php::Block{};
+      blk.id           = mainEntry;
+      blk.section      = php::Block::Section::Main;
+      blk.exnNodeId    = NoExnNodeId;
 
-      blk->hhbcs.push_back(gen_constant(it->second));
-      blk->hhbcs.push_back(bc::RetC {});
-      ret->blocks.push_back(std::move(blk));
+      blk.hhbcs.push_back(gen_constant(it->second));
+      blk.hhbcs.push_back(bc::RetC {});
+      ret->blocks.push_back(copy_ptr<php::Block>(std::move(blk)));
 
       ret->dvEntries.resize(fe.params.size(), NoBlockId);
       ret->mainEntry = mainEntry;

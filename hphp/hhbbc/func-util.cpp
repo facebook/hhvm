@@ -84,9 +84,9 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
     }
     dst->exnNodes.push_back(std::move(en));
   }
-  for (auto& theirs : other.blocks) {
-    auto ours = std::make_unique<php::Block>(*theirs);
+  for (auto theirs : other.blocks) {
     if (delta) {
+      auto const ours = theirs.mutate();
       ours->id += delta;
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
       for (auto &id : ours->throwExits) id += delta;
@@ -100,7 +100,7 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
         bc.forEachTarget([&] (BlockId& b) { b += delta; });
       }
     }
-    dst->blocks.push_back(std::move(ours));
+    dst->blocks.push_back(std::move(theirs));
   }
 }
 
@@ -117,8 +117,9 @@ bool append_func(php::Func* dst, const php::Func& src) {
   bool ok = false;
   for (auto& b : dst->blocks) {
     if (b->hhbcs.back().op != Op::RetC) continue;
-    b->hhbcs.back() = bc::PopC {};
-    b->fallthrough = dst->blocks.size();
+    auto const blk = b.mutate();
+    blk->hhbcs.back() = bc::PopC {};
+    blk->fallthrough = dst->blocks.size();
     ok = true;
   }
   if (!ok) return false;

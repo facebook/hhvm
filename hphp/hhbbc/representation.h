@@ -280,7 +280,7 @@ struct FuncBase {
    * to represent control flow arcs. The id of a block is its
    * index in this vector.
    */
-  CompactVector<std::unique_ptr<Block>> blocks;
+  CompactVector<copy_ptr<Block>> blocks;
 
   /*
    * Try and fault regions form a tree structure.  The tree is hanging

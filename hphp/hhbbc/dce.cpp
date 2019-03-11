@@ -2057,7 +2057,7 @@ DceAnalysis analyze_dce(const Index& index,
 /*
  * Do the actual updates to the bytecodes.
  */
-void dce_perform(const php::Func& func,
+void dce_perform(php::Func& func,
                  const DceActionMap& actionMap,
                  const DceReplaceMap& replaceMap) {
 
@@ -2069,7 +2069,7 @@ void dce_perform(const php::Func& func,
   };
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
-    auto const b = func.blocks[id.blk].get();
+    auto const b = func.blocks[id.blk].mutate();
     FTRACE(1, "{} {}\n", show(elm), show(func, b->hhbcs[id.idx]));
     switch (elm.second.action) {
       case DceAction::PopInputs:
@@ -2266,14 +2266,17 @@ void remove_unused_clsref_slots(Context const ctx,
     }()
   );
 
-  // Do the actually rewriting
+  // Do the actual rewriting
   if (!rewrites.empty()) {
     for (auto& block : func->blocks) {
-      for (auto& bcop : block->hhbcs) {
-        if (auto* slot = visit(bcop, WritableClsRefSlotVisitor{})) {
-          auto const iter = rewrites.find(*slot);
+      for (size_t ix = 0; ix < block->hhbcs.size(); ++ix) {
+        auto const bcop = block->hhbcs[ix];
+        if (auto const cslot = visit(bcop, WritableClsRefSlotVisitor{})) {
+          auto const iter = rewrites.find(*cslot);
           if (iter == rewrites.end()) continue;
           auto const oldOp = bcop;
+          auto const slot = visit(block.mutate()->hhbcs[ix],
+                                  WritableClsRefSlotVisitor{});
           *slot = iter->second;
           FTRACE(4, "    rewriting {} to {}\n",
                  show(func, oldOp), show(func, bcop));

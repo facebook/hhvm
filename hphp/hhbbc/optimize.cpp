@@ -314,16 +314,16 @@ void insert_assertions(const Index& index,
                        BlockId bid,
                        State state) {
   BytecodeVec newBCs;
-  auto const blk = ainfo.ctx.func->blocks[bid].get();
-  newBCs.reserve(blk->hhbcs.size());
+  auto& cblk = ainfo.ctx.func->blocks[bid];
+  newBCs.reserve(cblk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
   auto const ctx = ainfo.ctx;
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  auto interp = Interp { index, ctx, collect, blk, state };
-  for (auto& op : blk->hhbcs) {
+  auto interp = Interp { index, ctx, collect, cblk.get(), state };
+  for (auto& op : cblk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
     auto gen = [&] (const Bytecode& newb) {
@@ -333,8 +333,11 @@ void insert_assertions(const Index& index,
     };
 
     if (state.unreachable) {
-      blk->fallthrough = NoBlockId;
-      blk->unwindExits = {};
+      if (cblk->fallthrough != NoBlockId || cblk->unwindExits.size()) {
+        auto const blk = cblk.mutate();
+        blk->fallthrough = NoBlockId;
+        blk->unwindExits = {};
+      }
       if (!(instrFlags(op.op) & TF)) {
         gen(bc::BreakTraceHint {});
         gen(bc::String { s_unreachable.get() });
@@ -371,7 +374,7 @@ void insert_assertions(const Index& index,
     gen(op);
   }
 
-  blk->hhbcs = std::move(newBCs);
+  if (cblk->hhbcs != newBCs) cblk.mutate()->hhbcs = std::move(newBCs);
 }
 
 bool persistence_check(const php::Block* const blk) {
@@ -481,13 +484,13 @@ php::Block* make_block(FuncAnalysis& ainfo,
   FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
   assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
 
-  auto newBlk           = std::make_unique<php::Block>();
-  newBlk->id            = ainfo.ctx.func->blocks.size();
-  newBlk->section       = srcBlk->section;
-  newBlk->exnNodeId     = srcBlk->exnNodeId;
-  newBlk->throwExits    = srcBlk->throwExits;
-  newBlk->unwindExits   = srcBlk->unwindExits;
-  auto const blk        = newBlk.get();
+  auto newBlk           = copy_ptr<php::Block>{php::Block{}};
+  auto const blk        = newBlk.mutate();
+  blk->id               = ainfo.ctx.func->blocks.size();
+  blk->section          = srcBlk->section;
+  blk->exnNodeId        = srcBlk->exnNodeId;
+  blk->throwExits       = srcBlk->throwExits;
+  blk->unwindExits      = srcBlk->unwindExits;
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
   ainfo.rpoBlocks.push_back(blk->id);
@@ -521,20 +524,24 @@ void first_pass(const Index& index,
                 BlockId bid,
                 State state) {
   auto const ctx = ainfo.ctx;
-  auto const blk = ctx.func->blocks[bid].get();
+
+  auto interp = Interp {
+    index, ctx, collect, ctx.func->blocks[bid].get(), state
+  };
 
   BytecodeVec newBCs;
-  newBCs.reserve(blk->hhbcs.size());
-
-  auto interp = Interp { index, ctx, collect, blk, state };
+  newBCs.reserve(interp.blk->hhbcs.size());
 
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
 
   auto peephole = make_peephole(newBCs, index, ctx);
   std::vector<PeepholeStackElem> srcStack(state.stack.size());
 
-  for (auto it = blk->hhbcs.begin(), end = blk->hhbcs.end(); it != end; ) {
-    auto& op = *it++;
+  for (size_t idx = 0, end = interp.blk->hhbcs.size(); idx != end; ) {
+    // mutate can change blocks[bid], but that should only ever happen
+    // on the last bytecode.
+    assertx(interp.blk == ctx.func->blocks[bid].get());
+    auto const& op = interp.blk->hhbcs[idx++];
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
     if (options.Peephole) {
@@ -558,19 +565,13 @@ void first_pass(const Index& index,
       }
     };
 
-    auto speculated = false;
     // The peephole wants the old values of srcStack, so defer the update to the
     // end of the loop.
     SCOPE_EXIT {
       // If we're on the last bytecode, there's no need to update
       // srcStack, and some opcodes (eg MemoGet) push differently on
-      // the taken path vs the non-taken path, so just skip if jmpDest
-      // is set.
-      if (flags.jmpDest != NoBlockId) return;
-      // similarly, if we speculated some blocks, state.stack may no
-      // longer match srcStack; but again, this only happens at the
-      // end of the block, so no need to update srcStack.
-      if (speculated) return;
+      // the taken path vs the non-taken path.
+      if (idx == end) return;
       if (op.op == Op::CGetL2) {
         srcStack.emplace(srcStack.end() - 1,
                          op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));
@@ -613,8 +614,12 @@ void first_pass(const Index& index,
       // might be part way through converting an FPush/FCall to an
       // FCallBuiltin, for example
       auto opc = genOut(&op);
-      blk->fallthrough = NoBlockId;
-      blk->unwindExits = {};
+      if (interp.blk->fallthrough != NoBlockId ||
+          interp.blk->unwindExits.size()) {
+        auto const blk = ctx.func->blocks[bid].mutate();
+        blk->fallthrough = NoBlockId;
+        blk->unwindExits = {};
+      }
       if (!(instrFlags(opc) & TF)) {
         gen(bc::BreakTraceHint {});
         gen(bc::String { s_unreachable.get() });
@@ -623,7 +628,7 @@ void first_pass(const Index& index,
       break;
     }
 
-    if (it != end || !options.RemoveDeadBlocks) {
+    if (idx != end || !options.RemoveDeadBlocks) {
       genOut(&op);
       continue;
     }
@@ -636,6 +641,7 @@ void first_pass(const Index& index,
       if (bc) {
         if (bc->op != Op::Nop) gen(*bc);
         if (interp.state.speculatedPops) {
+          auto const blk = ctx.func->blocks[bid].mutate();
           auto const new_block = make_block(ainfo, blk, interp.state);
           auto fixer = [&] (BlockId& t) {
             if (t == new_target) t = new_block->id;
@@ -667,15 +673,16 @@ void first_pass(const Index& index,
       genOut(&op);
       if (interp.state.speculated != NoBlockId &&
           interp.state.speculatedIsFallThrough) {
-        assertx(blk->fallthrough != NoBlockId);
+        assertx(interp.blk->fallthrough != NoBlockId);
         speculate(interp.state.speculated,
                   [&] () -> folly::Optional<Bytecode> {
                     FTRACE(2,
                            "Speculated fallthrough: B{}->B{}({})\n",
-                           blk->id,
+                           bid,
                            interp.state.speculated,
                            interp.state.speculatedPops);
-                    blk->fallthrough = interp.state.speculated;
+                    ctx.func->blocks[bid].mutate()->fallthrough =
+                      interp.state.speculated;
                     if (interp.state.speculatedPops) return { bc::Nop{} };
                     return folly::none;
                   });
@@ -685,7 +692,7 @@ void first_pass(const Index& index,
 
     auto const wasFallThrough =
       interp.state.speculatedIsUnconditional ?
-      interp.state.speculatedIsFallThrough : jmpDest == blk->fallthrough;
+      interp.state.speculatedIsFallThrough : jmpDest == interp.blk->fallthrough;
 
     switch (op.op) {
       /*
@@ -703,7 +710,7 @@ void first_pass(const Index& index,
           jmpDest,
           [&] () -> folly::Optional<Bytecode> {
             gen(bc::PopC {});
-            blk->fallthrough = jmpDest;
+            ctx.func->blocks[bid].mutate()->fallthrough = jmpDest;
             return folly::none;
           }
         );
@@ -715,15 +722,16 @@ void first_pass(const Index& index,
         speculate(
           jmpDest,
           [&] () -> folly::Optional<Bytecode> {
+            auto iterOp = op;
             auto set_target = [&] (BlockId t) {
-              if (op.op == Op::IterInit) {
-                op.IterInit.target2 = t;
-              } else if (op.op == Op::IterInitK) {
-                op.IterInitK.target2 = t;
-              } else if (op.op == Op::LIterInit) {
-                op.LIterInit.target3 = t;
-              } else if (op.op == Op::LIterInitK) {
-                op.LIterInitK.target3 = t;
+              if (iterOp.op == Op::IterInit) {
+                iterOp.IterInit.target2 = t;
+              } else if (iterOp.op == Op::IterInitK) {
+                iterOp.IterInitK.target2 = t;
+              } else if (iterOp.op == Op::LIterInit) {
+                iterOp.LIterInit.target3 = t;
+              } else if (iterOp.op == Op::LIterInitK) {
+                iterOp.LIterInitK.target3 = t;
               } else {
                 assertx(false);
               }
@@ -741,12 +749,13 @@ void first_pass(const Index& index,
                 if (op.op != Op::LIterInit && op.op != Op::LIterInitK) {
                   gen(bc::PopC {});
                 }
-                blk->fallthrough = jmpDest;
+                ctx.func->blocks[bid].mutate()->fallthrough = jmpDest;
                 return folly::none;
               }
               set_target(jmpDest);
+              auto const blk = ctx.func->blocks[bid].mutate();
               blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-              return op;
+              return iterOp;
             }
             /*
              * We can't ever optimize away iteration initialization if
@@ -755,9 +764,10 @@ void first_pass(const Index& index,
              * iterator. We can ensure, however, that the taken branch
              * is a fatal.
              */
+            auto const blk = ctx.func->blocks[bid].mutate();
             set_target(make_fatal_block(ainfo, blk, state)->id);
             blk->fallthrough = jmpDest;
-            return op;
+            return iterOp;
           }
         );
         break;
@@ -776,6 +786,7 @@ void first_pass(const Index& index,
              * can just free the iterator and let it fall-through. If
              * not, we can at least ensure the taken branch is a fatal.
              */
+            auto const blk = ctx.func->blocks[bid].mutate();
             blk->fallthrough = jmpDest;
             if (!flags.wasPEI) {
               if (op.op == Op::IterNext) {
@@ -793,16 +804,17 @@ void first_pass(const Index& index,
               return folly::none;
             }
             auto const fatal = make_fatal_block(ainfo, blk, state)->id;
-            if (op.op == Op::IterNext) {
-              op.IterNext.target2 = fatal;
-            } else if (op.op == Op::IterNextK) {
-              op.IterNextK.target2 = fatal;
-            } else if (op.op == Op::LIterNext) {
-              op.LIterNext.target3 = fatal;
+            auto iterOp = op;
+            if (iterOp.op == Op::IterNext) {
+              iterOp.IterNext.target2 = fatal;
+            } else if (iterOp.op == Op::IterNextK) {
+              iterOp.IterNextK.target2 = fatal;
+            } else if (iterOp.op == Op::LIterNext) {
+              iterOp.LIterNext.target3 = fatal;
             } else {
-              op.LIterNextK.target3 = fatal;
+              iterOp.LIterNextK.target3 = fatal;
             }
-            return op;
+            return iterOp;
           }
         );
         break;
@@ -811,19 +823,21 @@ void first_pass(const Index& index,
         speculate(
           jmpDest,
           [&] () -> folly::Optional<Bytecode> {
+            auto const blk = ctx.func->blocks[bid].mutate();
             if (!wasFallThrough) {
               if (!flags.wasPEI) {
                 blk->fallthrough = jmpDest;
                 return folly::none;
               }
-              if (op.op == Op::MemoGet) {
-                op.MemoGet.target1 = jmpDest;
+              auto iterOp = op;
+              if (iterOp.op == Op::MemoGet) {
+                iterOp.MemoGet.target1 = jmpDest;
               } else {
-                assertx(jmpDest != op.MemoGetEager.target2);
-                op.MemoGetEager.target1 = jmpDest;
+                assertx(jmpDest != iterOp.MemoGetEager.target2);
+                iterOp.MemoGetEager.target1 = jmpDest;
               }
               blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-              return op;
+              return iterOp;
             }
             blk->fallthrough = jmpDest;
             return op;
@@ -833,13 +847,21 @@ void first_pass(const Index& index,
       default:
         always_assert(0 && "unsupported jmpDest");
     }
+    // if we inserted extra blocks, we might have invalidated cblk;
+    // even without that, mutating it means our iterator is into the
+    // original block, not the new one.
+    break;
   }
 
   if (options.Peephole) {
     peephole.finalize();
   }
-  blk->hhbcs = std::move(newBCs);
-  auto& fpiStack = ainfo.bdata[blk->id].stateIn.fpiStack;
+
+  // note cblk might be dead
+  if (ctx.func->blocks[bid]->hhbcs != newBCs) {
+    ctx.func->blocks[bid].mutate()->hhbcs = std::move(newBCs);
+  }
+  auto& fpiStack = ainfo.bdata[bid].stateIn.fpiStack;
   auto it = std::remove_if(fpiStack.begin(), fpiStack.end(),
                            [](const ActRec& ar) {
                              return ar.kind == FPIKind::Builtin || ar.foldable;
@@ -1081,8 +1103,8 @@ void optimize_iterators(const Index& index,
 
   FTRACE(2, "Rewrites:\n");
   for (auto const& fixup : state.fixups) {
-    auto const& blk = func->blocks[fixup.block];
-    auto const& op = blk->hhbcs[fixup.op];
+    auto& cblk = func->blocks[fixup.block];
+    auto const& op = cblk->hhbcs[fixup.op];
 
     if (!state.eligible[fixup.init]) {
       // This iteration loop isn't eligible, so don't apply the fixup
@@ -1102,9 +1124,9 @@ void optimize_iterators(const Index& index,
             op.srcLoc,
             bc::LIterInit {
               op.IterInit.iter1,
-                fixup.base,
-                op.IterInit.target2,
-                op.IterInit.loc3
+              fixup.base,
+              op.IterInit.target2,
+              op.IterInit.loc3
             }
           )
         };
@@ -1116,10 +1138,10 @@ void optimize_iterators(const Index& index,
             op.srcLoc,
             bc::LIterInitK {
               op.IterInitK.iter1,
-                fixup.base,
-                op.IterInitK.target2,
-                op.IterInitK.loc3,
-                op.IterInitK.loc4
+              fixup.base,
+              op.IterInitK.target2,
+              op.IterInitK.loc3,
+              op.IterInitK.loc4
             }
           )
         };
@@ -1130,9 +1152,9 @@ void optimize_iterators(const Index& index,
             op.srcLoc,
             bc::LIterNext {
               op.IterNext.iter1,
-                fixup.base,
-                op.IterNext.target2,
-                op.IterNext.loc3
+              fixup.base,
+              op.IterNext.target2,
+              op.IterNext.loc3
             }
           )
         };
@@ -1143,10 +1165,10 @@ void optimize_iterators(const Index& index,
             op.srcLoc,
             bc::LIterNextK {
               op.IterNextK.iter1,
-                fixup.base,
-                op.IterNextK.target2,
-                op.IterNextK.loc3,
-                op.IterNextK.loc4
+              fixup.base,
+              op.IterNextK.target2,
+              op.IterNextK.loc3,
+              op.IterNextK.loc4
             }
           )
         };
@@ -1186,6 +1208,7 @@ void optimize_iterators(const Index& index,
       }()
     );
 
+    auto const blk = cblk.mutate();
     blk->hhbcs.erase(blk->hhbcs.begin() + fixup.op);
     blk->hhbcs.insert(blk->hhbcs.begin() + fixup.op,
                       newOps.begin(), newOps.end());

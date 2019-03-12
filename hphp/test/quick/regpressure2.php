@@ -12,8 +12,8 @@ function test() {
   $i = 9;
   $j = 10;
   $k = 11;
-  class bar {}
+  __hhvm_intrinsics\launder_value($a);
   var_dump($a, $b, $c, $d, $e, $f, $g, $h, $i, $j, $k);
-  }
+}
 
 test();

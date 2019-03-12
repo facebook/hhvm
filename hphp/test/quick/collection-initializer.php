@@ -3,6 +3,32 @@
 abstract final class GStatics {
   public static Vector $x = Vector {};
 }
+class C {
+  public $y = Vector {};
+  static public $z = Vector {};
+}
+class V {
+  public $x = array('a' => 1);
+  public $y = Map {'a' => 1};
+}
+class W extends V {
+  public $x = Map {'a' => 1};
+  public $y = array('a' => 1);
+}
+class X {
+  public $prop = array(Map {'a' => 1});
+}
+class Y {
+  public $prop = Vector {array(Map {'a' => 1})};
+}
+class Z {
+  const FOO = 456;
+  const BAR = "yo";
+  public $prop = Map {Z::FOO => Z::BAR};
+}
+class T {
+  public $prop = array(Set {'a'});
+}
 
 function main() {
   $f = function ($x = Vector {}) {
@@ -29,10 +55,6 @@ function main() {
 
   echo "=========\n";
 
-  class C {
-    public $y = Vector {};
-    static public $z = Vector {};
-  }
   $obj1 = new C;
   $obj2 = new C;
   $v1 = $obj1->y;
@@ -45,14 +67,6 @@ function main() {
 
   echo "=========\n";
 
-  class V {
-    public $x = array('a' => 1);
-    public $y = Map {'a' => 1};
-  }
-  class W extends V {
-    public $x = Map {'a' => 1};
-    public $y = array('a' => 1);
-  }
   $obj1 = new W;
   $obj2 = new W;
   var_dump($obj1->x === $obj2->x);
@@ -71,17 +85,11 @@ function main() {
 
   echo "=========\n";
 
-  class X {
-    public $prop = array(Map {'a' => 1});
-  }
   $obj1 = new X;
   $obj2 = new X;
   $obj1->prop[0]['a']++;
   var_dump($obj1->prop[0]['a']);
   var_dump($obj2->prop[0]['a']);
-  class Y {
-    public $prop = Vector {array(Map {'a' => 1})};
-  }
   $obj1 = new Y;
   $obj2 = new Y;
   $obj1->prop[0][0]['a']++;
@@ -90,11 +98,6 @@ function main() {
 
   echo "=========\n";
 
-  class Z {
-    const FOO = 456;
-    const BAR = "yo";
-    public $prop = Map {Z::FOO => Z::BAR};
-  }
   $obj1 = new Z;
   var_dump($obj1->prop[Z::FOO], count($obj1->prop));
   $obj2 = new Z;
@@ -103,9 +106,6 @@ function main() {
 
   echo "=========\n";
 
-  class T {
-    public $prop = array(Set {'a'});
-  }
   $obj1 = new T;
   $obj2 = new T;
   $obj1->prop[0][] = 'b';

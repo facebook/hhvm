@@ -1,6 +1,9 @@
 <?php
 
-function __autoload() { throw new Exception('sup'); class nufin {} }
+function __autoload() {
+  throw new Exception('sup');
+  include 'class_exists_throw1.inc';
+}
 
 function main() {
   echo class_exists('nufin');

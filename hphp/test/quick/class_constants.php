@@ -7,13 +7,7 @@ class X {
 }
 
 if (!isset($g)) {
-  class Y {
-    const BAR = X::BAZ;
-  }
-  class Z extends X {
-    const FOO = 6;
-    const WIZ = W::WIZ;
-  }
+  include 'class_constants-1.inc';
 }
 
 class A {
@@ -21,10 +15,7 @@ class A {
   const BAR = "A::BAR";
 }
 if (!isset($g)) {
-  class B {
-    const FOO = "B::FOO";
-    const BAR = A::BAR;
-  }
+  include 'class_constants-2.inc';
 }
 class C extends A {
 }
@@ -50,9 +41,7 @@ class L implements J {
 }
 
 function __autoload($cls) {
-  class AutoloadedClass {
-    const INDEED = 711;
-  }
+  include 'class_constants-3.inc';
 }
 
 function main() {

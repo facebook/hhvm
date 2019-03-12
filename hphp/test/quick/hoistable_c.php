@@ -12,7 +12,7 @@ if (!class_exists('Y')) print "ok 2\n";
 class Y extends X {}
 
 if (!isset($g)) {
-  class U {}
+  include 'hoistable_c.inc';
 }
 if (!class_exists('V')) print "ok 3\n";
 class V extends U {}

@@ -2,15 +2,15 @@
 function __autoload($cls) {
   echo "__autoload $cls\n";
   if ($cls === 'B') {
-    class b {}
+    include 'autoload3-1.inc';
   } else if ($cls === 'I') {
-    interface i {}
+    include 'autoload3-2.inc';
   } else if ($cls === 'j') {
-    interface j {}
+    include 'autoload3-3.inc';
   } else if ($cls === 'K') {
-    interface K {}
+    include 'autoload3-4.inc';
   } else if ($cls === 'l') {
-    interface L {}
+    include 'autoload3-5.inc';
   }
 }
 

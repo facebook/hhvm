@@ -13,6 +13,8 @@ class A {
   }
 };
 
+class C {}
+
 function main() {
   $a = new A;
   $a->y = "foo";
@@ -21,7 +23,6 @@ function main() {
   var_dump($b);
 
 
-  class C {}
   $ten = 10;
   $d = new C();
   $d->thing = &$ten;

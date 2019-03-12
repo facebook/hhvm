@@ -1,6 +1,6 @@
 <?hh
 function __autoload($name) {
   var_dump($name);
-  class TestA { public static $D; }
+  include 'autoload_case1.inc';
 }
 TestA::$D = 1;

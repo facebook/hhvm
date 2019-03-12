@@ -1660,12 +1660,199 @@ template <typename Op>
 void dce_slot_default(Env&, const Op&, int) {}
 
 template<class Op>
-void dce(Env& env, const Op& op) {
+void dce_default(Env& env, const Op& op) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
   push_outputs(env, op.numPush());
   pop_inputs(env, op.numPop());
   dce_slot_default(env, op, true);
 }
+
+void dce(Env& env, const bc::Add& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AddElemV& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AddNewElemC& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AddNewElemV& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AddO& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AliasCls& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AssertRATL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AssertRATStk& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AsTypeStructC& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Await& op) { dce_default(env, op); }
+void dce(Env& env, const bc::AwaitAll& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BaseGL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BaseH& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BaseL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BindG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BindL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BindS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BitAnd& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BitNot& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BitOr& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BitXor& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Box& op) { dce_default(env, op); }
+void dce(Env& env, const bc::BreakTraceHint& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastArray& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastBool& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastDArray& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastDict& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastDouble& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastInt& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastKeyset& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastObject& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastString& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastVArray& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CastVec& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Catch& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CGetCUNop& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CGetG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CGetQuietG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CGetS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ChainFaults& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CheckReifiedGenericMismatch& op) {
+  dce_default(env, op);
+}
+void dce(Env& env, const bc::CheckThis& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Clone& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ClsCns& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ClsCnsD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ClsRefGetTS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Cmp& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Cns& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CnsE& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CnsU& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CnsUE& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Concat& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ConcatN& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContAssignDelegate& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContCheck& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContCurrent& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContEnter& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContEnterDelegate& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContGetReturn& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContKey& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContRaise& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContUnsetDelegate& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ContValid& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CreateCl& op) { dce_default(env, op); }
+void dce(Env& env, const bc::CreateCont& op) { dce_default(env, op); }
+void dce(Env& env, const bc::DblAsBits& op) { dce_default(env, op); }
+void dce(Env& env, const bc::DefCls& op) { dce_default(env, op); }
+void dce(Env& env, const bc::DefClsNop& op) { dce_default(env, op); }
+void dce(Env& env, const bc::DefCns& op) { dce_default(env, op); }
+void dce(Env& env, const bc::DefTypeAlias& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Div& op) { dce_default(env, op); }
+void dce(Env& env, const bc::EmptyG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::EmptyL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::EmptyS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::EntryNop& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Eq& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Eval& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FCall& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FCallBuiltin& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushClsMethod& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushClsMethodD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushClsMethodS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushClsMethodSD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushCtor& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushFunc& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushFuncD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushFuncU& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushObjMethod& op) { dce_default(env, op); }
+void dce(Env& env, const bc::FPushObjMethodD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::GetMemoKeyL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Gt& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Gte& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IncDecG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IncDecS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Incl& op) { dce_default(env, op); }
+void dce(Env& env, const bc::InclOnce& op) { dce_default(env, op); }
+void dce(Env& env, const bc::InitProp& op) { dce_default(env, op); }
+void dce(Env& env, const bc::InstanceOf& op) { dce_default(env, op); }
+void dce(Env& env, const bc::InstanceOfD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IssetG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IssetL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IssetS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterBreak& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterFree& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterInit& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterInitK& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterNext& op) { dce_default(env, op); }
+void dce(Env& env, const bc::IterNextK& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Jmp& op) { dce_default(env, op); }
+void dce(Env& env, const bc::JmpNS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::JmpNZ& op) { dce_default(env, op); }
+void dce(Env& env, const bc::JmpZ& op) { dce_default(env, op); }
+void dce(Env& env, const bc::LIterFree& op) { dce_default(env, op); }
+void dce(Env& env, const bc::LIterInit& op) { dce_default(env, op); }
+void dce(Env& env, const bc::LIterInitK& op) { dce_default(env, op); }
+void dce(Env& env, const bc::LIterNext& op) { dce_default(env, op); }
+void dce(Env& env, const bc::LIterNextK& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Lt& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Lte& op) { dce_default(env, op); }
+void dce(Env& env, const bc::MemoGet& op) { dce_default(env, op); }
+void dce(Env& env, const bc::MemoGetEager& op) { dce_default(env, op); }
+void dce(Env& env, const bc::MemoSet& op) { dce_default(env, op); }
+void dce(Env& env, const bc::MemoSetEager& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Method& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Mod& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Mul& op) { dce_default(env, op); }
+void dce(Env& env, const bc::MulO& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NativeImpl& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Neq& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NewLikeArrayL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NewObj& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NewObjD& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NewObjI& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NewObjS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Nop& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Not& op) { dce_default(env, op); }
+void dce(Env& env, const bc::NSame& op) { dce_default(env, op); }
+void dce(Env& env, const bc::OODeclExists& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Pow& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Print& op) { dce_default(env, op); }
+void dce(Env& env, const bc::RecordReifiedGeneric& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Req& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ReqDoc& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ReqOnce& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ResolveClsMethod& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ResolveFunc& op) { dce_default(env, op); }
+void dce(Env& env, const bc::ResolveObjMethod& op) { dce_default(env, op); }
+void dce(Env& env, const bc::RetM& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Same& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Select& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SetG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SetOpG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SetOpS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SetRangeM& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SetS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Shl& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Shr& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Silence& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SSwitch& op) { dce_default(env, op); }
+void dce(Env& env, const bc::StaticLocCheck& op) { dce_default(env, op); }
+void dce(Env& env, const bc::StaticLocDef& op) { dce_default(env, op); }
+void dce(Env& env, const bc::StaticLocInit& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Sub& op) { dce_default(env, op); }
+void dce(Env& env, const bc::SubO& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Switch& op) { dce_default(env, op); }
+void dce(Env& env, const bc::This& op) { dce_default(env, op); }
+void dce(Env& env, const bc::UGetCUNop& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Unbox& op) { dce_default(env, op); }
+void dce(Env& env, const bc::UnsetG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Unwind& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyOutType& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyParamType& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyParamTypeTS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyRetNonNullC& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyRetTypeC& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VerifyRetTypeTS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VGetG& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VGetL& op) { dce_default(env, op); }
+void dce(Env& env, const bc::VGetS& op) { dce_default(env, op); }
+void dce(Env& env, const bc::WHResult& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Xor& op) { dce_default(env, op); }
+void dce(Env& env, const bc::Yield& op) { dce_default(env, op); }
+void dce(Env& env, const bc::YieldFromDelegate& op) { dce_default(env, op); }
+void dce(Env& env, const bc::YieldK& op) { dce_default(env, op); }
 
 /*
  * The minstr instructions can read a cell from the stack without
@@ -1701,13 +1888,13 @@ void minstr_touch(Env& env, int32_t depth) {
 
 template<class Op>
 void minstr_base(Env& env, const Op& op, int32_t ix) {
-  dce<Op>(env, op);
+  dce_default(env, op);
   minstr_touch(env, ix);
 }
 
 template<class Op>
 void minstr_dim(Env& env, const Op& op) {
-  dce<Op>(env, op);
+  dce_default(env, op);
   if (op.mkey.mcode == MEC || op.mkey.mcode == MPC) {
     minstr_touch(env, op.mkey.idx);
   }

@@ -16,7 +16,7 @@ class Foo {
 
 <<__EntryPoint>>
 function main_2227() {
-if (rand(0, 1)) {
+if (\rand(0, 1)) {
   class B {
     static $baz = 'baz';
     const FOO = 30;

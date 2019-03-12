@@ -8,5 +8,5 @@ namespace {
 namespace B {
 }
 namespace B {
-  foo();
+  \foo();
 }

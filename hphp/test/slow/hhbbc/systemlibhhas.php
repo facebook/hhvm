@@ -8,7 +8,7 @@ class WhateverTest {
       return "whatever";
     };
 
-    return array_map( $mapFunction, $array );
+    return \array_map( $mapFunction, $array );
   }
 }
 

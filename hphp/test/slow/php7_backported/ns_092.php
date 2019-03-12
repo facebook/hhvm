@@ -36,7 +36,7 @@ namespace Fiz\Biz\Buz {
     \var_dump(FOO);
     \var_dump(FOZ);
     \var_dump(BAR);
-    \var_dump(defined('B'));
+    \var_dump(\defined('B'));
     echo "===== FUNCTIONS ====\n";
     buz();
     fiz();

@@ -11,5 +11,5 @@ namespace B {
 }
 }
 namespace B {
-  call_user_func('foo');
+  \call_user_func('foo');
 }

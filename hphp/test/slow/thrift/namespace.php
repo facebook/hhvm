@@ -41,7 +41,7 @@ class DummyTransport {
     $this->buff .= $buff;
   }
   function read($n) {
-    $r = substr($this->buff, $this->pos, $n);
+    $r = \substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;
   }
@@ -137,9 +137,9 @@ function test() {
   $v1->anByte = 123;
   $v1->anI16 = 1234;
   \var_dump($v1);
-  thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
-  \var_dump(md5($p->getTransport()->buff));
-  \var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
+  \thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
+  \var_dump(\md5($p->getTransport()->buff));
+  \var_dump(\thrift_protocol_read_binary($p, '\A\TestStruct', true));
 }
 
 <<__EntryPoint>>

@@ -50,7 +50,7 @@ class C9 extends AnotherThing implements IDontcare, IReallyDont {
 
 <<__EntryPoint>>
 function main() {
-  $program = file_get_contents(__FILE__);
+  $program = \file_get_contents(__FILE__);
   $json = \HH\ffp_parse_string($program);
   $results = \HH\ExperimentalParserUtils\find_test_methods($json);
   \var_dump($results);

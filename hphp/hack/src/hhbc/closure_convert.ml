@@ -606,7 +606,7 @@ let convert_meth_caller_to_func_ptr env st p pc cls pf func =
     let obj_var = p, "$o" in
     let obj_lvar = p, Lvar obj_var in
     let assert_invariant = p, Call ((p, Id (p, "invariant")), [],
-      [(p, Call((p, Id (p, "is_a")), [], [obj_lvar; (pc, String cls)], []));
+      [(p, Call((p, Id (p, "\\is_a")), [], [obj_lvar; (pc, String cls)], []));
        (p, String ("object must be an instance of (" ^ cls ^ ")"))], []) in
 
     (* return $o-><func>(...$args); *)

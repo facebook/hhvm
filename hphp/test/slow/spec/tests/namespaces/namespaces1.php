@@ -9,7 +9,7 @@
 namespace NS1;          // define a level-1 namespace
 echo "Inside namespace " . __NAMESPACE__ . "\n";
 
-error_reporting(-1);
+\error_reporting(-1);
 
 
 // namespace;   // cannot omit name (unlike namespace {)

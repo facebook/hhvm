@@ -8,7 +8,7 @@
 
 namespace NS1
 {
-error_reporting(-1);
+\error_reporting(-1);
 
 echo "Inside namespace " . __NAMESPACE__ . "\n";
 echo "Inside function " . __FUNCTION__ . "\n";

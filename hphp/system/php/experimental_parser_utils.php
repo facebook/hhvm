@@ -8,10 +8,10 @@ namespace HH\ExperimentalParserUtils {
       $json,
       false,
       ($j) ==> {
-        if (array_key_exists($j["kind"],
+        if (\array_key_exists($j["kind"],
             keyset["lambda_expression", "anonymous_function", "methodish_declaration"])) {
           list($ln, $_) = find_boundary_token($j, false);
-          invariant(!array_key_exists($ln, $funs),
+          invariant(!\array_key_exists($ln, $funs),
             "Files with multiple lambdas on the same line are not supported");
 
           $funs[$ln] = $j;
@@ -84,7 +84,7 @@ namespace HH\ExperimentalParserUtils {
         $parts[] = '';
       }
     }
-    return implode('\\', $parts);
+    return \implode('\\', $parts);
   }
 
   function find_method_names_in_concrete_derived_class(
@@ -106,13 +106,13 @@ namespace HH\ExperimentalParserUtils {
       ? $class_decl["classish_name"]["token"]["text"]
       : $namespace . '\\' . $class_decl["classish_name"]["token"]["text"];
 
-    invariant(count($class_decl["classish_extends_list"]["elements"]) === 1,
+    invariant(\count($class_decl["classish_extends_list"]["elements"]) === 1,
               "class may only extend one parent");
     $parent_name = extract_name_from_node(
       $class_decl["classish_extends_list"]["elements"][0]["list_item"]["simple_type_specifier"]
     );
     invariant($parent_name !== null, "parent class may not have missing name");
-    if ($namespace !== null && substr($parent_name, 0, 1) !== '\\') {
+    if ($namespace !== null && \substr($parent_name, 0, 1) !== '\\') {
       $parent_name = $namespace . '\\' . $parent_name;
     }
 
@@ -165,7 +165,7 @@ namespace HH\ExperimentalParserUtils {
   // expects JSON of a file with a single type alias that is a shape
   function extract_type_of_only_shape_type_alias(array $json): dict<string, (string, bool)> {
     $elements = $json["parse_tree"]["script_declarations"]["elements"];
-    invariant(count($elements) === 3, "Supplied JSON must be parse tree of a single type alias.");
+    invariant(\count($elements) === 3, "Supplied JSON must be parse tree of a single type alias.");
     invariant($elements[0]["kind"] === "markup_section",
       "Supplied JSON has unexpected form.");
     $type_alias = $elements[1];
@@ -187,7 +187,7 @@ namespace HH\ExperimentalParserUtils {
     $ptext = $json["program_text"];
     foreach ($fields["elements"] as $field) {
       $field = $field["list_item"];
-      $field_name = trim($field["field_name"]["literal_expression"]["token"]["text"], "\"'");
+      $field_name = \trim($field["field_name"]["literal_expression"]["token"]["text"], "\"'");
 
       $ty = $field["field_type"];
       $left = find_boundary_token($ty, false);
@@ -197,7 +197,7 @@ namespace HH\ExperimentalParserUtils {
       list($_, $l) = $left;
       list($_, $r) = $right;
 
-      $type = substr($ptext, $l, $r - $l);
+      $type = \substr($ptext, $l, $r - $l);
       $optional = $field["field_question"]["kind"] !== "missing";
       $result[$field_name] = tuple($type, $optional);
     }
@@ -210,7 +210,7 @@ namespace HH\ExperimentalParserUtils {
     foreach ($decls as $d) {
       if ($d["kind"] === "enum_declaration") {
         $true_name = $d["enum_name"]["token"]["text"];
-        if (strcasecmp($true_name, $name) === 0) {
+        if (\strcasecmp($true_name, $name) === 0) {
           return $d["enum_enumerators"];
         }
       }
@@ -248,7 +248,7 @@ namespace HH\ExperimentalParserUtils {
           foreach ($inner_decls["elements"] as $id) {
             if ($id["kind"] === "methodish_declaration") {
               $true_name = $id["methodish_function_decl_header"]["function_name"]["token"]["text"];
-              if (strcasecmp($true_name, $method_name) === 0) {
+              if (\strcasecmp($true_name, $method_name) === 0) {
                 $candidates[] = $id;
               }
             }
@@ -258,7 +258,7 @@ namespace HH\ExperimentalParserUtils {
     }
 
     $method = null;
-    if (count($candidates) === 1) {
+    if (\count($candidates) === 1) {
       $method = $candidates[0];
     } else { // tiebreaker
       foreach ($candidates as $c) {
@@ -284,7 +284,7 @@ namespace HH\ExperimentalParserUtils {
 
     foreach ($params["elements"] as $param) {
       $param_name_token = $param["list_item"]["parameter_name"]["token"];
-      $param_name = substr($param_name_token["text"], 1); // remove $
+      $param_name = \substr($param_name_token["text"], 1); // remove $
 
       $description = collect_comments($param);
 
@@ -313,7 +313,7 @@ namespace HH\ExperimentalParserUtils {
     foreach ($elements["elements"] as $e) {
       if ($e["kind"] === "methodish_declaration") {
         $true_name = $e["methodish_function_decl_header"]["function_name"]["token"]["text"];
-        if (strcasecmp($true_name, $name) === 0) {
+        if (\strcasecmp($true_name, $name) === 0) {
           return $e;
         }
       }
@@ -326,7 +326,7 @@ namespace HH\ExperimentalParserUtils {
     foreach ($decls as $d) {
       if ($d["kind"] === "classish_declaration") {
         $true_name = $d["classish_name"]["token"]["text"];
-        if (strcasecmp($true_name, $name) === 0) {
+        if (\strcasecmp($true_name, $name) === 0) {
           return $d["classish_body"];
         }
       }
@@ -343,7 +343,7 @@ namespace HH\ExperimentalParserUtils {
     foreach ($elements["elements"] as $e) {
       if ($e["kind"] === "type_const_declaration") {
         $true_name = $e["type_const_name"]["token"]["text"];
-        if (strcasecmp($true_name, $name) === 0) {
+        if (\strcasecmp($true_name, $name) === 0) {
           $shape = extract_shape_from_type($e["type_const_type_specifier"]);
           return $shape;
         }
@@ -357,7 +357,7 @@ namespace HH\ExperimentalParserUtils {
     foreach ($decls as $d) {
       if ($d["kind"] === "alias_declaration") {
         $true_name = $d["alias_name"]["token"]["text"];
-        if (strcasecmp($true_name, $name) === 0) {
+        if (\strcasecmp($true_name, $name) === 0) {
           $type = $d["alias_type"];
           return tuple($true_name, extract_shape_from_type($type));
         }
@@ -377,7 +377,7 @@ namespace HH\ExperimentalParserUtils {
       $ty_list = $type["generic_argument_list"]["type_arguments_types"];
       invariant($ty_list["kind"] === "list",
         "Awaitable must have an argument");
-      invariant(count($ty_list["elements"]) === 1,
+      invariant(\count($ty_list["elements"]) === 1,
         "Only one argument to the Awaitable is allowed");
       $type = $ty_list["elements"][0]["list_item"];
       return extract_shape_from_type($type);
@@ -397,7 +397,7 @@ namespace HH\ExperimentalParserUtils {
     // next is a sibling in the tree, but its description belongs to the same element
     foreach ($shape["shape_type_fields"]["elements"] as $field) {
       $field_name_token = $field["list_item"]["field_name"]["literal_expression"]["token"];
-      $field_name = trim($field_name_token["text"], "\"'");
+      $field_name = \trim($field_name_token["text"], "\"'");
 
       $description = collect_comments($field);
 
@@ -413,7 +413,7 @@ namespace HH\ExperimentalParserUtils {
       $shape_field,
       false,
       ($j) ==> {
-        if (array_key_exists("leading", $j)) {
+        if (\array_key_exists("leading", $j)) {
           $trivia->addAll($j["leading"]);
           $trivia->addAll($j["trailing"]);
 
@@ -443,11 +443,11 @@ namespace HH\ExperimentalParserUtils {
     (function (array): array) $predicate,
     (function (array): bool) $skip_node = (($_) ==> false),
   ) {
-    if (!is_array($json)) {
+    if (!\is_array($json)) {
       return null;
     }
 
-    if (array_key_exists("kind", $json)) {
+    if (\array_key_exists("kind", $json)) {
       // early return
       if ($skip_node($json)) {
         return null;
@@ -462,7 +462,7 @@ namespace HH\ExperimentalParserUtils {
 
     // recursive case
     if ($right) {
-      $json = array_reverse($json);
+      $json = \array_reverse($json);
     }
     foreach ($json as $v) {
       $b = ffp_json_dfs($v, $right, $predicate, $skip_node);

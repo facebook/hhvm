@@ -40,7 +40,7 @@ namespace __SystemLib {
       int $datalen = 0,
     ) {
       if ($datalen <= 0) {
-        $datalen = strlen($data);
+        $datalen = \strlen($data);
       }
       $this->data = $data;
       $this->datalen = $datalen;
@@ -48,12 +48,12 @@ namespace __SystemLib {
 
     public function __toString() {
       if ($this->datalen >= 0) {
-        $len = min($this->datalen, strlen($this->data));
+        $len = \min($this->datalen, \strlen($this->data));
         if ($len == 0) {
           // substr returns false on empty strings
           return '';
         } else {
-          return substr($this->data, 0, $len);
+          return \substr($this->data, 0, $len);
         }
       } else {
         return $this->data;

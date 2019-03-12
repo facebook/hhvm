@@ -13,12 +13,12 @@ namespace __SystemLib {
       bool $preventHaltTokenCheck = true
     ) {
       $this->za = new ZipArchive();
-      if (file_exists($path)) {
+      if (\file_exists($path)) {
         $this->za->open($path);
         $this->fillEntries();
         if (
           !$preventHaltTokenCheck &&
-          strpos($this->stub, Phar::HALT_TOKEN) === false
+          \strpos($this->stub, Phar::HALT_TOKEN) === false
         ) {
           throw new PharException(
             Phar::HALT_TOKEN.' must be declared in a phar'
@@ -32,11 +32,11 @@ namespace __SystemLib {
     private function fillEntries() {
       for ($i = 0; $i < $this->za->numFiles; ++$i) {
         $fname = $this->za->getNameIndex($i);
-        if (substr($fname, -1) === '/') {
+        if (\substr($fname, -1) === '/') {
           continue;
         }
         // Hidden .phar directory should not appear in files listing
-        if (strpos($fname, '.phar') === 0) {
+        if (\strpos($fname, '.phar') === 0) {
           if ($fname == '.phar/stub.php') {
             $this->stub = $this->za->getFromName($fname);
           } else if ($fname == '.phar/alias.txt') {
@@ -62,7 +62,7 @@ namespace __SystemLib {
 
     public function getStream(string $path): resource {
       $stream = $this->za->getStream($path);
-      if (!is_resource($stream)) {
+      if (!\is_resource($stream)) {
         throw new PharException("No $path in phar");
       }
       return $stream;

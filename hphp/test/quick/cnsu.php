@@ -2,4 +2,4 @@
 
 
 namespace NamespacesAreUncool;
-var_dump(STDIN);
+\var_dump(STDIN);

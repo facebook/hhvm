@@ -36,26 +36,26 @@ namespace __SystemLib {
 
     public function onCreate(): bool {
       /* strip out prefix "convert.iconv." */
-      $filter = substr($this->filtername, 14);
-      if (false === strpos($filter, '/')) {
+      $filter = \substr($this->filtername, 14);
+      if (false === \strpos($filter, '/')) {
         return false;
       }
-      $encodingPair = explode('/', $filter, 2);
-      $this->fromEncoding = strtolower($encodingPair[0]);
-      $this->toEncoding = strtolower($encodingPair[1]);
+      $encodingPair = \explode('/', $filter, 2);
+      $this->fromEncoding = \strtolower($encodingPair[0]);
+      $this->toEncoding = \strtolower($encodingPair[1]);
       return true;
     }
 
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        $convertedData = iconv(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        $convertedData = \iconv(
           $this->fromEncoding,
           $this->toEncoding,
           $bucket->data
         );
-        stream_bucket_append(
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, $convertedData)
+          \stream_bucket_new($this->stream, $convertedData)
         );
       }
       return \PSFS_PASS_ON;
@@ -67,13 +67,13 @@ namespace __SystemLib {
 
     public function onCreate(): bool {
       /* strip out prefix "convert." */
-      $filterName = substr($this->filtername, 8);
+      $filterName = \substr($this->filtername, 8);
       switch ($filterName) {
         case 'base64-encode':
         case 'base64-decode':
         case 'quoted-printable-encode':
         case 'quoted-printable-decode':
-          $this->filterFunction = str_replace('-', '_', $filterName);
+          $this->filterFunction = \str_replace('-', '_', $filterName);
           break;
         default:
           return false;
@@ -83,11 +83,11 @@ namespace __SystemLib {
     }
 
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        stream_bucket_append(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream,
-                            call_user_func($this->filterFunction,
+          \stream_bucket_new($this->stream,
+                            \call_user_func($this->filterFunction,
                                            $bucket->data)
                             )
         );
@@ -107,10 +107,10 @@ namespace __SystemLib {
       $filterName = substr($this->filtername, 6);
       switch ($filterName) {
         case 'compress':
-          if (is_int($this->params)) {
+          if (\is_int($this->params)) {
             $blocks = $this->params;
             $work = self::DEFAULT_WORK;
-          } else if (is_array($this->params)) {
+          } else if (\is_array($this->params)) {
             $blocks = $this->params['blocks'] ?? self::DEFAULT_BLOCKS;
             $work = $this->params['work'] ?? self::DEFAULT_WORK;
           } else {
@@ -118,19 +118,19 @@ namespace __SystemLib {
             $work = self::DEFAULT_WORK;
           }
           $this->filterFunction = function($data) use($blocks, $work) {
-            return bzcompress($data, $blocks, $work);
+            return \bzcompress($data, $blocks, $work);
           };
           break;
         case 'decompress':
-          if (is_bool($this->params)) {
+          if (\is_bool($this->params)) {
             $small = $this->params;
-          } else if (is_array($this->params)) {
+          } else if (\is_array($this->params)) {
             $small = $this->params['small'] ?? false;
           } else {
             $small = false;
           }
           $this->filterFunction = function($data) use($small) {
-            return bzdecompress($data, $small);
+            return \bzdecompress($data, $small);
           };
           break;
         default:
@@ -141,11 +141,11 @@ namespace __SystemLib {
     }
 
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        stream_bucket_append(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream,
-                            call_user_func($this->filterFunction,
+          \stream_bucket_new($this->stream,
+                            \call_user_func($this->filterFunction,
                                            $bucket->data)
                             )
         );
@@ -159,22 +159,22 @@ namespace __SystemLib {
     private $buffer = '';
 
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
+      while ($bucket = \stream_bucket_make_writeable($in)) {
         $this->buffer .= $bucket->data;
       }
 
       if ($closing) {
-        if (is_int($this->params)) {
+        if (\is_int($this->params)) {
           $this->level = $this->params;
         }
-        if (is_array($this->params) && isset($this->params['level'])) {
+        if (\is_array($this->params) && isset($this->params['level'])) {
           $this->level = $this->params['level'];
         }
-        stream_bucket_append(
+        \stream_bucket_append(
           $out,
-          stream_bucket_new(
+          \stream_bucket_new(
             $this->stream,
-            gzdeflate($this->buffer, $this->level)
+            \gzdeflate($this->buffer, $this->level)
           )
         );
       }
@@ -190,14 +190,14 @@ namespace __SystemLib {
     }
 
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
+      while ($bucket = \stream_bucket_make_writeable($in)) {
         if ($this->impl->eof()) {
           return \PSFS_ERR_FATAL;
         }
         $this_chunk = $this->impl->inflateChunk($bucket->data);
-        stream_bucket_append(
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, $this_chunk)
+          \stream_bucket_new($this->stream, $this_chunk)
         );
       }
 
@@ -207,10 +207,10 @@ namespace __SystemLib {
 
   class StringToUpperStreamFilter extends \php_user_filter {
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        stream_bucket_append(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, strtoupper($bucket->data))
+          \stream_bucket_new($this->stream, \strtoupper($bucket->data))
         );
       }
       return \PSFS_PASS_ON;
@@ -219,10 +219,10 @@ namespace __SystemLib {
 
   class StringToLowerStreamFilter extends \php_user_filter {
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        stream_bucket_append(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, strtolower($bucket->data))
+          \stream_bucket_new($this->stream, \strtolower($bucket->data))
         );
       }
       return \PSFS_PASS_ON;
@@ -231,10 +231,10 @@ namespace __SystemLib {
 
   class StringRot13StreamFilter extends \php_user_filter {
     public function filter($in, $out, &$consumed, $closing): int {
-      while ($bucket = stream_bucket_make_writeable($in)) {
-        stream_bucket_append(
+      while ($bucket = \stream_bucket_make_writeable($in)) {
+        \stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, str_rot13($bucket->data))
+          \stream_bucket_new($this->stream, \str_rot13($bucket->data))
         );
       }
       return \PSFS_PASS_ON;

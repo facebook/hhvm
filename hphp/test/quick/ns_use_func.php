@@ -4,5 +4,5 @@ namespace A {
 }
 namespace B {
   use A\f;
-  var_dump(f());
+  \var_dump(f());
 }

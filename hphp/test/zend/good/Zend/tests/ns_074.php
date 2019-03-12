@@ -9,8 +9,8 @@ namespace foo {
 
   <<__EntryPoint>>
   function main() {
-    $x = function (\bar $x = NULL) { 
-      var_dump($x);	
+    $x = function (\bar $x = NULL) {
+      \var_dump($x);
     };
 
     $x(NULL);

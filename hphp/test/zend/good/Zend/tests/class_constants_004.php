@@ -15,7 +15,7 @@ interface Ifoo {
 $const  = __NAMESPACE__ .'\\foo';  // class
 $const2 = __NAMESPACE__ .'\\Ifoo'; // interface
 
-var_dump(
+\var_dump(
 			\foo\foo,
 			namespace\foo,
 			\foo\foo::foo,

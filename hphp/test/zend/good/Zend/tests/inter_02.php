@@ -2,14 +2,14 @@
 
 namespace foo;
 
-error_reporting(E_ALL);
+\error_reporting(E_ALL);
 
 interface foo {
     const foo = 2;
 }
 
 function foo($x = \foo\foo::foo) {
-    var_dump($x);
+    \var_dump($x);
 }
 
 foo();

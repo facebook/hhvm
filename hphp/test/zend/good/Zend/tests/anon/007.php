@@ -5,7 +5,7 @@ namespace lone {
     }
     class Outer {
         public function __construct() {
-             var_dump(
+             \var_dump(
                 my_factory());
         }
     }

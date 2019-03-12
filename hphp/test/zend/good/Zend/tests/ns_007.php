@@ -5,4 +5,4 @@ class Exception {
 }
 
 $x = "Exception";
-echo get_class(new $x),"\n";
+echo \get_class(new $x),"\n";

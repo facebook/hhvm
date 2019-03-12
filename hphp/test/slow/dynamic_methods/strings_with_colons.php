@@ -2,11 +2,11 @@
 
 class W {
   public function dyn() {
-    var_dump(get_called_class());
+    var_dump(static::class);
     var_dump(isset($this) ? $this : null);
   }
   public static function stc() {
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
 }
 

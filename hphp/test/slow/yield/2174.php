@@ -8,7 +8,7 @@ class X {
     yield $x;
   }
   static function g($x) {
-    yield get_called_class();
+    yield static::class;
   }
 }
 class Y extends X {

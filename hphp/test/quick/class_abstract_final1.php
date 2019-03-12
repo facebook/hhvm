@@ -4,7 +4,7 @@ class C {
   public $nonStaticInheritedProp;
 
   public function nonStaticInheritedMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
+    echo __METHOD__, ' of ', static::class, "\n";
     echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
   }
 }
@@ -15,7 +15,7 @@ trait Tr {
   public $nonStaticTraitProp;
 
   public function nonStaticTraitMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
+    echo __METHOD__, ' of ', static::class, "\n";
     echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
   }
   public static function staticTraitMethod() {

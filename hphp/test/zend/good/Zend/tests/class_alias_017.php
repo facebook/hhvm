@@ -2,7 +2,7 @@
 
 class foo {
 	public function __construct() {
-		echo get_called_class(), "\n";
+		echo static::class, "\n";
 	}
 	static public function test() {
 		echo get_class(), "\n";

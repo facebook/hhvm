@@ -206,20 +206,6 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
                  Variant::PersistentStrInit{}};
 }
 
-Variant HHVM_FUNCTION(get_called_class) {
-  EagerCallerFrame cf;
-  ActRec* ar = cf();
-  if (ar && ar->func()->cls()) {
-    auto const cls = ar->hasThis() ?
-      ar->getThis()->getVMClass() : ar->getClass();
-
-    return Variant{cls->name(), Variant::PersistentStrInit{}};
-  }
-
-  raise_warning("get_called_class() called from outside a class");
-  return false;
-}
-
 Variant HHVM_FUNCTION(get_parent_class,
                       const Variant& object /* = uninit_variant */) {
   const Class* cls;
@@ -370,7 +356,6 @@ void StandardExtension::initClassobj() {
   HHVM_FE(get_class_constants);
   HHVM_FE(get_class_vars);
   HHVM_FE(get_class);
-  HHVM_FE(get_called_class);
   HHVM_FE(get_parent_class);
   HHVM_FE(is_a);
   HHVM_FE(is_subclass_of);

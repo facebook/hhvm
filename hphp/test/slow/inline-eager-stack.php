@@ -12,18 +12,18 @@ set_error_handler(($errno, $errstr, $errfile, $errline, $errctx) ==> {
 
 <<__ALWAYS_INLINE>>
 function red() {
-  get_called_class();
+  trigger_error("test triggering error");
 }
 
 <<__ALWAYS_INLINE>>
 function green() {
-  get_called_class();
+  trigger_error("test triggering error");
   red();
 }
 
 <<__ALWAYS_INLINE>>
 function blue() {
-  get_called_class();
+  trigger_error("test triggering error");
   green();
 }
 

@@ -11,6 +11,5 @@ array(1) {
   [0]=>
   string(12) "func_get_arg"
 }
-string(56) "get_called_class() expects exactly 0 parameters, 1 given"
 string(53) "func_get_args() expects exactly 0 parameters, 1 given"
 string(53) "func_num_args() expects exactly 0 parameters, 1 given"

@@ -7,9 +7,9 @@ class S {
 }
 class C {
   public static function d() {
-    echo get_called_class();
-    S::t(get_called_class());
-    echo get_called_class();
+    echo static::class;
+    S::t(static::class);
+    echo static::class;
   }
 }
 

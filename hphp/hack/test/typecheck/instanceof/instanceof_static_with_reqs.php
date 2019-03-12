@@ -12,7 +12,7 @@ abstract class BaseField<T> {
       $field instanceof static,
       '%s is not a valid %s',
       $class_name,
-      /* HH_IGNORE_ERROR[2049] */ get_called_class(),
+      /* HH_IGNORE_ERROR[2049] */ static::class,
     );
     hh_show($field);
 

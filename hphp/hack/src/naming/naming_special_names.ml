@@ -273,7 +273,6 @@ module StdlibFunctions = struct
   let is_null     = "\\is_null"
 
   let get_class = "\\get_class"
-  let get_called_class = "\\get_called_class" (* treated as static::class *)
 
   let array_filter = "\\array_filter"
   let array_map = "\\array_map"

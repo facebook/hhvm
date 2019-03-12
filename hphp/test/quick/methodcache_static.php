@@ -9,7 +9,7 @@ class one {
 class two {
   public static function foo() {
     echo "two\n";
-    if (get_called_class() === "three") {
+    if (static::class === "three") {
       static::heh();
     }
   }

@@ -1,40 +1,34 @@
 <?hh
-function f() {
-  var_dump(get_called_class());
-}
-
 class C {
   public function __construct() {
     var_dump(isset($this));
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
   public function foo() {
     var_dump(isset($this));
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
   public static function bar() {
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
   public function yar() {
     var_dump(isset($this));
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
 }
 
 class D extends C {
   public function __construct() {
     var_dump(isset($this));
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
   public function yar() {
     var_dump(isset($this));
-    var_dump(get_called_class());
+    var_dump(static::class);
     C::yar();
   }
 }
 
-var_dump(get_called_class());
-f();
 echo "**************\n";
 $c = new C;
 $d = new D;

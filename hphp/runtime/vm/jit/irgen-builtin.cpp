@@ -85,7 +85,6 @@ const StaticString
   s_ini_get("ini_get"),
   s_in_array("in_array"),
   s_get_class("get_class"),
-  s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
   s_strlen("strlen"),
   s_clock_gettime_ns("clock_gettime_ns"),
@@ -407,15 +406,6 @@ SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
   }
 
   return nullptr;
-}
-
-SSATmp* opt_get_called_class(IRGS& env, const ParamPrep& params) {
-  if (params.forNativeImpl) return nullptr;
-  if (params.size() != 0) return nullptr;
-  if (!curClass(env)) return nullptr;
-  auto const ctx = ldCtx(env);
-  auto const cls = gen(env, LdClsCtx, ctx);
-  return gen(env, LdClsName, cls);
 }
 
 SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
@@ -931,7 +921,6 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 #define X(x) \
     if (fname->isame(s_##x.get())) return opt_##x(env, params);
 
-    X(get_called_class)
     X(get_class)
     X(in_array)
     X(ini_get)

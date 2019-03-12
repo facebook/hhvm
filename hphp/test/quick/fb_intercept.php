@@ -88,7 +88,7 @@ function test_variadic_function() {
 
 class Blark {
   public static function sfrap() {
-    echo "static frap " . get_called_class() . "\n";
+    echo "static frap " . static::class . "\n";
   }
   public function frap() {
     echo "non-static frap\n";

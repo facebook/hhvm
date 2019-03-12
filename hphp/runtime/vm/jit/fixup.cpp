@@ -208,7 +208,6 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
 bool eagerRecord(const Func* func) {
   const char* list[] = {
     "func_get_args",
-    "get_called_class",
     "func_num_args",
     "array_filter",
     "array_map",

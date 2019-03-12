@@ -6,7 +6,7 @@ trait T {
   }
   private static function test() {
     echo __CLASS__ . "\n";
-    echo get_called_class() . "\n";
+    echo static::class . "\n";
     self::blarg();
   }
   public static function doTest() {

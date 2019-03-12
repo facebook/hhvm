@@ -3564,14 +3564,6 @@ and is_abstract_ft fty = match fty with
           end;
         | _ ->
           make_call_special_from_def env id tel (Tprim Tvoid))
-  (* Pseudo-function `get_called_class` *)
-  | Id (_, get_called_class) when
-      get_called_class = SN.StdlibFunctions.get_called_class
-      && el = [] && uel = [] ->
-    check_function_in_suspend SN.StdlibFunctions.get_called_class;
-    (* get_called_class fetches the late-bound class *)
-    if Env.is_outside_class env then Errors.static_outside_class p;
-    class_const env p ((p, CIstatic), (p, SN.Members.mClass))
   (* Special function `array_filter` *)
   | Id ((_, array_filter) as id)
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->

@@ -4,7 +4,7 @@ class A {
 		if (!is_null($x)) {
 			echo "$x\n";
 		}
-		return get_called_class();
+		return static::class;
 	}
 }
 

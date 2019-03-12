@@ -61,15 +61,6 @@ function class_exists(string $class_name,
                       bool $autoload = true): bool;
 
 /**
- * the "Late Static Binding" class name
- *
- * @return string - Returns the class name. Returns FALSE if called from
- *   outside a class.
- */
-<<__Native, __Rx>>
-function get_called_class(): mixed;
-
-/**
  * Get the constants of the given class.
  *
  * @param string $class_name - The class name

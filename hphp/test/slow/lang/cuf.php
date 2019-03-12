@@ -2,22 +2,22 @@
 
 class A {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class B extends A {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public function doMeth() {
@@ -50,11 +50,11 @@ class B extends A {
 
 class C extends B {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   /**
@@ -600,33 +600,33 @@ class C extends B {
 
 class D extends C {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class F {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class G extends F {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public function doMeth() {
@@ -659,11 +659,11 @@ class G extends F {
 
 class H extends G {
   public function meth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . get_called_class() .
+    echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }

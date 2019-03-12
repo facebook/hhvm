@@ -1,6 +1,6 @@
 direct:
 
-in C::bar: get_called_class(): D, get_class($this): D
+in C::bar: static::class: D, get_class($this): D
 
 in parent function
 object(D)#%d (0) {
@@ -8,7 +8,7 @@ object(D)#%d (0) {
 
 nestedCapture:
 
-in C::bar: get_called_class(): D, get_class($this): D
+in C::bar: static::class: D, get_class($this): D
 
 in parent function
 object(D)#%d (0) {
@@ -16,7 +16,7 @@ object(D)#%d (0) {
 
 nestedNoCapture:
 
-in C::bar: get_called_class(): D, get_class($this): D
+in C::bar: static::class: D, get_class($this): D
 
 in parent function
 object(D)#%d (0) {

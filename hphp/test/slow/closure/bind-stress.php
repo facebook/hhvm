@@ -55,7 +55,7 @@ class Foo {
         var_dump(self::$foo);
       }
 
-      if (method_exists(get_called_class(), 'staticDo')) {
+      if (method_exists(static::class, 'staticDo')) {
         echo 'static::staticDo() = ';
         var_dump(static::staticDo());
       }

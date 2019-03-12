@@ -1659,6 +1659,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(stack_in, AEmpty);
   }
 
+  case ResolveTypeStruct: {
+    auto const extra = inst.extra<ResolveTypeStructData>();
+    auto const stack_in = AStack {
+      inst.src(0),
+      extra->offset + static_cast<int32_t>(extra->size) - 1,
+      static_cast<int32_t>(extra->size)
+    };
+    return may_load_store(AliasClass(stack_in)|AHeapAny, AHeapAny);
+  }
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -2167,7 +2177,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpCell:
   case SetOpCellVerify:
   case AsTypeStruct:
-  case ResolveTypeStruct:
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:
     return may_load_store(AHeapAny, AHeapAny);

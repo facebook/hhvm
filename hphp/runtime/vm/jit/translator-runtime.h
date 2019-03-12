@@ -216,10 +216,12 @@ bool methodExistsHelper(Class*, StringData*);
 
 /* Is/As Helpers */
 ArrayData* resolveTypeStructHelper(
-  const ArrayData*,
+  uint32_t n,
+  const TypedValue* values,
   const Class* declaringCls,
   const Class* calledCls,
-  bool suppress
+  bool suppress,
+  bool isOrAsOp
 );
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);

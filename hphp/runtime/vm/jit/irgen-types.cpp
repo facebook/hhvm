@@ -898,22 +898,32 @@ namespace {
 
 SSATmp* resolveTypeStructImpl(
   IRGS& env,
-  SSATmp* ts,
   bool typeStructureCouldBeNonStatic,
-  bool suppress
+  bool suppress,
+  uint32_t n,
+  bool isOrAsOp
 ) {
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
     declaringCls && typeStructureCouldBeNonStatic
       ? gen(env, LdClsCtx, ldCtx(env))
       : cns(env, nullptr);
-  return gen(
+  auto const result = gen(
     env,
     ResolveTypeStruct,
-    ResolveTypeStructData(declaringCls, suppress),
-    ts,
+    ResolveTypeStructData {
+      declaringCls,
+      suppress,
+      spOffBCFromIRSP(env),
+      static_cast<uint32_t>(n),
+      isOrAsOp
+    },
+    sp(env),
     calledCls
   );
+  popC(env);
+  discard(env, n - 1);
+  return result;
 }
 
 const ArrayData* staticallyResolveTypeStructure(
@@ -971,18 +981,30 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
   );
 };
 
+/*
+ * This function tries to emit is/as type struct operations without resolving
+ * the type structure when that's possible.
+ * When it returns true, it has popped two values from the stack, namely the
+ * type structure and the cell, and pushed one value back to stack, namely
+ * true/false if it is an is-operation or the cell if it is an as operation.
+ * This function does not modify the reference counts of these stack values,
+ * leaving that responsibility to the caller.
+ * When it returns false, it does not modify anything.
+ */
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
   bool asExpr
 ) {
-  auto const t = topC(env);
+  // Top of the stack is the type structure, so the thing we are checking is
+  // the next element
+  auto const t = topC(env, BCSPRelOffset { 1 });
   auto const is_nullable_ts = is_ts_nullable(ts);
 
   auto const cnsResult = [&] (bool value) {
-    auto const c = popC(env);
+    popC(env); // pop the ts that's on the stack
+    popC(env); // pop the cell
     push(env, cns(env, value));
-    decRef(env, c);
     return true;
   };
 
@@ -996,10 +1018,10 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     if (t->isA(nty)) return should_negate ? fail() : success();
     if (!t->type().maybe(nty)) return should_negate ? success() : fail();
     if (asExpr) return false;
+    popC(env); // pop the ts that's on the stack
     auto const c = popC(env);
     auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
     push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-    decRef(env, c);
     return true;
   };
 
@@ -1013,10 +1035,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     if (!t->type().maybe(ty)) return fail();
     if (asExpr) return false;
 
+    popC(env); // pop the ts that's on the stack
     auto const c = popC(env);
     chain_is_type(env, c, is_nullable_ts, ty1, ty2, rest...);
-    decRef(env, c);
-
     return true;
   };
 
@@ -1076,12 +1097,12 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec: {
       if (asExpr) return false;
+      popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = kind == TypeStructure::Kind::T_dict
         ? isDictImpl(env, c)
         : isVecImpl(env, c);
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-      decRef(env, c);
       return true;
     }
     case TypeStructure::Kind::T_class:
@@ -1098,10 +1119,10 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
         // we need to bail
         return false;
       }
+      popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = implInstanceOfD(env, c, clsname);
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-      decRef(env, c);
       return true;
     }
     case TypeStructure::Kind::T_noreturn:
@@ -1128,19 +1149,28 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
   not_reached();
 }
 
+/*
+ * shouldDefRef is set iff the resulting SSATmp is a newly allocated type
+ * structure
+ * This function does not modify the reference count of its inputs, leaving that
+ * to the caller
+ */
 SSATmp* handleIsAsResolutionAndCommonOpts(
   IRGS& env,
-  SSATmp* a,
   TypeStructResolveOp op,
   bool asExpr,
-  bool& done
+  bool& done,
+  bool& shouldDecRef
 ) {
+  auto const a = topC(env);
   auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
   if (!a->isA(required_ts_type)) PUNT(TypeStructC-NotArrayTypeStruct);
   if (!a->hasConstVal(required_ts_type)) {
-    return op == TypeStructResolveOp::Resolve
-           ? resolveTypeStructImpl(env, a, true, !asExpr)
-           : a;
+    if (op == TypeStructResolveOp::Resolve) {
+      return resolveTypeStructImpl(env, true, !asExpr, 1, true);
+    }
+    shouldDecRef = false;
+    return popC(env);
   }
   auto const ts =
     RuntimeOption::EvalHackArrDVArrs ? a->dictVal() : a->arrVal();
@@ -1150,6 +1180,7 @@ SSATmp* handleIsAsResolutionAndCommonOpts(
   if (op == TypeStructResolveOp::Resolve) {
     maybe_resolved =
       staticallyResolveTypeStructure(env, ts, partial, invalidType);
+    shouldDecRef = maybe_resolved != ts;
   }
   if (emitIsAsTypeStructWithoutResolvingIfPossible(env, maybe_resolved,
                                                    asExpr)) {
@@ -1157,25 +1188,29 @@ SSATmp* handleIsAsResolutionAndCommonOpts(
     return nullptr;
   }
   if (op == TypeStructResolveOp::Resolve && (partial || invalidType)) {
+    shouldDecRef = true;
     return resolveTypeStructImpl(
-      env, cns(env, ts), typeStructureCouldBeNonStatic(ArrNR(ts)), !asExpr);
+      env, typeStructureCouldBeNonStatic(ArrNR(ts)), !asExpr, 1, true);
   }
-
+  popC(env);
   return cns(env, maybe_resolved);
 }
 
 } // namespace
 
 void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
-  auto const a = popC(env);
-  bool done = false;
-  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, false, done);
+  auto const a = topC(env);
+  auto const c = topC(env, BCSPRelOffset { 1 });
+  bool done = false, shouldDecRef = true;
+  SSATmp* tc =
+    handleIsAsResolutionAndCommonOpts(env, op, false, done, shouldDecRef);
   if (done) {
+    decRef(env, c);
     decRef(env, a);
     return;
   }
-  auto const c = popC(env);
-  auto block = opcodeMayRaise(IsTypeStruct)
+  popC(env);
+  auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
     ? create_catch_block(env, [&]{ decRef(env, tc); })
     : nullptr;
   push(env, gen(env, IsTypeStruct, block, tc, c));
@@ -1189,26 +1224,24 @@ void emitAsTypeStructC(IRGS& env, TypeStructResolveOp op) {
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
-  auto const a = popC(env);
-  bool done = false;
-  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, true, done);
-  if (done) {
-    push(env, popC(env));
-    decRef(env, a);
-    return;
-  }
+  auto const a = topC(env);
+  bool done = false, shouldDecRef = true;
+  SSATmp* tc =
+    handleIsAsResolutionAndCommonOpts(env, op, true, done, shouldDecRef);
+  if (done) return decRef(env, a);
   auto const c = topC(env);
   ifThen(
     env,
     [&](Block* taken) {
-      auto block = opcodeMayRaise(IsTypeStruct)
+      auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
         ? create_catch_block(env, [&]{ decRef(env, tc); })
         : nullptr;
       auto const res = gen(env, IsTypeStruct, block, tc, c);
       gen(env, JmpZero, taken, res);
     },
     [&]{
-      auto block = create_catch_block(env, [&]{ decRef(env, tc); });
+      auto block = shouldDecRef
+        ? create_catch_block(env, [&]{ decRef(env, tc); }) : nullptr;
       gen(env, AsTypeStruct, block, tc, c);
     }
   );
@@ -1238,6 +1271,10 @@ void emitReifiedName(IRGS& env, uint32_t n, const StringData* name) {
   auto const mangledName = gen(env, MangleReifiedName, cns(env, name), result);
   discard(env, n);
   push(env, mangledName);
+}
+
+void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t n) {
+  push(env, resolveTypeStructImpl(env, true, false, n, false));
 }
 
 namespace {

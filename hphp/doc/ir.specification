@@ -910,10 +910,17 @@ To string conversions:
 
   Returns whether t instanceof S0 returns true when t is of the given type.
 
-| ResolveTypeStruct<class,suppress>,   DDArr, SDArr S(Cls|Nullptr),      NF
+| ResolveTypeStruct<class,suppress,offset,size,isOrAsOp>,
+|   DDArr, S(StkPtr) S(Cls|Nullptr), NF
 
-  Applies class/alias resolution on the S0 type structure. Returns a copy.
-  Raises an error if S0 contains traits, functions types or typevars.
+  Applies class/alias resolution on the type structure that is at the stack
+  offset given by S0 and offset. If size > 1, combine the type structures on
+  the stack into the first one's denoted holes. Returns a copy.
+  S1 is the calling class, used to resolve the this typehint.
+  If isOrAsOp is set, raises an error if S0 contains traits, function types or
+  typevars.
+  If there is an error during type structure resolution, this instruction raises
+  an error. If suppress is set, this error is demoted to a warning.
 
 | IsTypeStruct,                        D(Bool), SDArr S(Cell),           NF
 

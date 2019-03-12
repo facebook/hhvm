@@ -138,31 +138,52 @@ struct ClassData : IRExtraData {
 };
 
 /*
- * Class pointer and suppress flag needed for resolve type struct instruction
+ * Class pointer, suppress flag, is or as operation flag and range into the
+ * stack (for type structures) needed for resolve type struct instruction
  *
  * Class pointer could be null.
  */
 struct ResolveTypeStructData : IRExtraData {
-  explicit ResolveTypeStructData(const Class* cls, bool suppress = false)
-    : cls(cls), suppress(suppress)
+  explicit ResolveTypeStructData(
+    const Class* cls,
+    bool suppress,
+    IRSPRelOffset offset,
+    uint32_t size,
+    bool isOrAsOp
+  )
+    : cls(cls)
+    , suppress(suppress)
+    , offset(offset)
+    , size(size)
+    , isOrAsOp(isOrAsOp)
   {}
 
   std::string show() const {
-    return folly::sformat("{}{}",
+    return folly::sformat("{},{},{},{},{}",
                           cls ? cls->name()->data() : "nullptr",
-                          suppress ? ":suppress" : "");
+                          suppress ? "suppress" : "no-suppress",
+                          offset.offset,
+                          size,
+                          isOrAsOp);
   }
 
   bool equals(const ResolveTypeStructData& o) const {
-    return cls == o.cls && suppress == o.suppress;
+    return cls == o.cls && suppress == o.suppress &&
+           offset == o.offset && size == o.size && isOrAsOp == o.isOrAsOp;
   }
 
   size_t hash() const {
-    return pointer_hash<Class>()(cls) ^ (suppress ? -1 : 0);
+    return (pointer_hash<Class>()(cls)
+            + std::hash<int32_t>()(offset.offset)
+            + std::hash<uint32_t>()(size))
+           ^ ((int64_t)(suppress ? -1 : 0) << 32 | (isOrAsOp ? -1 : 0));
   }
 
   const Class* cls;
   bool suppress;
+  IRSPRelOffset offset;
+  uint32_t size;
+  bool isOrAsOp;
 };
 
 /*

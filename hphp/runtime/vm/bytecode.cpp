@@ -2629,12 +2629,13 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
-template <bool isAsOp>
-Array resolveAndVerifyTypeStructureHelper(
-  const Array& ts, const req::vector<Array>& tsList, bool suppress) {
+ArrayData* resolveAndVerifyTypeStructureHelper(
+  uint32_t n, const TypedValue* values, bool suppress, bool isOrAsOp) {
   Class* declaringCls = nullptr;
   Class* calledCls = nullptr;
-  if (typeStructureCouldBeNonStatic(ts)) {
+  auto const v = *values;
+  isValidTSType(v, true);
+  if (typeStructureCouldBeNonStatic(ArrNR(v.m_data.parr))) {
     auto const frame = vmfp();
     if (frame && frame->func()) {
       declaringCls = frame->func()->cls();
@@ -2645,43 +2646,41 @@ Array resolveAndVerifyTypeStructureHelper(
       }
     }
   }
-  return resolveAndVerifyTypeStructure<isAsOp>(
-           ts, declaringCls, calledCls, tsList, suppress);
+  return jit::resolveTypeStructHelper(n, values, declaringCls,
+                                      calledCls, suppress, isOrAsOp);
 }
 
-ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
-  const Cell a, TypeStructResolveOp op, bool suppress
+ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
+  TypeStructResolveOp op,
+  bool suppress
 ) {
-  isValidTSType(a, true);
-  Array ts(a.m_data.parr);
-  assertx(!ts.empty());
+  auto const a = vmStack().topC();
+  isValidTSType(*a, true);
 
   if (op == TypeStructResolveOp::Resolve) {
-    req::vector<Array> tsList;
-    return resolveAndVerifyTypeStructureHelper<true>(ts, tsList, suppress);
+    return resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
+                                               suppress, true);
   }
-  errorOnIsAsExpressionInvalidTypes(ts);
-  return ts;
+  errorOnIsAsExpressionInvalidTypes(ArrNR(a->m_data.parr));
+  return a->m_data.parr;
 }
 
 } // namespace
 
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
-  auto const a = vmStack().topC();
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, true);
-  auto b = checkTypeStructureMatchesCell(ts, *c);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
+  auto b = checkTypeStructureMatchesCell(ArrNR(ts), *c);
   vmStack().popC(); // pop ts
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
 OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
-  auto const a = vmStack().topC();
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, false);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(op, false);
   std::string givenType, expectedType, errorKey;
   if (!checkTypeStructureMatchesCell(
-        ts, *c, givenType, expectedType, errorKey)) {
+        ArrNR(ts), *c, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
@@ -2690,23 +2689,14 @@ OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
 
 OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   assertx(n != 0);
-  auto const a = vmStack().topC();
-  isValidTSType(*a, true);
-  req::vector<Array> tsList;
-
-  for (int i = n - 1; i > 0; --i) {
-    auto const a2 = vmStack().indC(i);
-    isValidTSType(*a2, true);
-    tsList.emplace_back(Array::attach(a2->m_data.parr));
-  }
-  auto resolved = resolveAndVerifyTypeStructureHelper<false>(
-                    Array::attach(a->m_data.parr), tsList, false);
+  auto const resolved =
+    resolveAndVerifyTypeStructureHelper(n, vmStack().topC(), false, false);
   vmStack().popC(); // pop the first TS
   vmStack().ndiscard(n-1);
   if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushDict(resolved.detach());
+    vmStack().pushDict(resolved);
   } else {
-    vmStack().pushArray(resolved.detach());
+    vmStack().pushArray(resolved);
   }
 }
 

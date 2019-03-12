@@ -324,6 +324,23 @@ void cgRecordReifiedGenericsAndGetTSList(IRLS& env, const IRInstruction* inst) {
   implRecordReifiedGenericsAndGetData(env, inst);
 }
 
+void cgResolveTypeStruct(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<ResolveTypeStructData>();
+  auto& v = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .imm(extra->size)      // num
+    .addr(sp, cellsToBytes(extra->offset.offset)) // values
+    .imm(extra->cls)       // declaring cls
+    .ssa(1)                // called cls
+    .imm(extra->suppress)  // suppress
+    .imm(extra->isOrAsOp); // isOrAsOp
+
+  cgCallHelper(v, env, CallSpec::direct(resolveTypeStructHelper),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
 IMPL_OPCODE_CALL(MangleReifiedName)
 
 ///////////////////////////////////////////////////////////////////////////////

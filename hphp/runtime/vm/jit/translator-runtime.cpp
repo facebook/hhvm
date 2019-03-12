@@ -1032,15 +1032,31 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
 }
 
 ArrayData* resolveTypeStructHelper(
-  const ArrayData* a,
+  uint32_t n,
+  const TypedValue* values,
   const Class* declaringCls,
   const Class* calledCls,
-  bool suppress
+  bool suppress,
+  bool isOrAsOp
 ) {
+  assertx(n != 0);
+  auto const v = *values;
+  isValidTSType(v, true);
+  auto const ts = v.m_data.parr;
   req::vector<Array> tsList;
-  auto const ts = ArrNR(a);
-  auto resolved = resolveAndVerifyTypeStructure<true>(
-                    ts, declaringCls, calledCls, tsList, suppress);
+  for (int i = 0; i < n - 1; ++i) {
+    auto const a = values[n - i - 1];
+    isValidTSType(a, true);
+    tsList.emplace_back(Array::attach(a.m_data.parr));
+  }
+  auto resolved = [&] {
+    if (isOrAsOp) {
+      return resolveAndVerifyTypeStructure<true>(
+               ArrNR(ts), declaringCls, calledCls, tsList, suppress);
+    }
+    return resolveAndVerifyTypeStructure<false>(
+             ArrNR(ts), declaringCls, calledCls, tsList, suppress);
+  }();
   return resolved.detach();
 }
 

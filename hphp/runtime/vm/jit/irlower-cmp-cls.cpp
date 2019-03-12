@@ -258,7 +258,6 @@ IMPL_OPCODE_CALL(InterfaceSupportsStr)
 IMPL_OPCODE_CALL(InterfaceSupportsInt)
 IMPL_OPCODE_CALL(InterfaceSupportsDbl)
 
-IMPL_OPCODE_CALL(ResolveTypeStruct)
 IMPL_OPCODE_CALL(IsTypeStruct)
 IMPL_OPCODE_CALL(AsTypeStruct)
 

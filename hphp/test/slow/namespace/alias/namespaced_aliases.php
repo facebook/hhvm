@@ -47,12 +47,12 @@ type UsesBaz = shape(\SomeNS\Baz::VALUE => int);
 type ExplicitRelative = shape(namespace\MyEnum::FOO => int);
 type ImplicitRelative = shape(MySubNS\MyEnum::VALUE => int);
 
-var_dump(type_structure(MyShape::class));
-var_dump(type_structure(T::class));
-var_dump(type_structure(UsesFoo::class));
-var_dump(type_structure(UsesBar::class));
-var_dump(type_structure(UsesBaz::class));
-var_dump(type_structure(ExplicitRelative::class));
-var_dump(type_structure(ImplicitRelative::class));
+\var_dump(type_structure(MyShape::class));
+\var_dump(type_structure(T::class));
+\var_dump(type_structure(UsesFoo::class));
+\var_dump(type_structure(UsesBar::class));
+\var_dump(type_structure(UsesBaz::class));
+\var_dump(type_structure(ExplicitRelative::class));
+\var_dump(type_structure(ImplicitRelative::class));
 
 }

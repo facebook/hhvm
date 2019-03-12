@@ -19,5 +19,5 @@ namespace NS1 {
     }
   };
 
-  var_dump($anon);
+  \var_dump($anon);
 }

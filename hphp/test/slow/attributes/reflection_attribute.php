@@ -14,10 +14,10 @@ namespace X\Y {
 
   function reflect () {
     $rj = new \ReflectionFunction("X\Y\j");
-    var_dump($rj->getAttributeClass(C::class)->i); // 6
+    \var_dump($rj->getAttributeClass(C::class)->i); // 6
     // Built in attributes don't get namespaced
     $rk = new \ReflectionFunction("X\Y\k");
-    var_dump($rk->getAttribute("__D")[0]); // 7
+    \var_dump($rk->getAttribute("__D")[0]); // 7
   }
 }
 
@@ -36,9 +36,9 @@ namespace {
 
   function reflect () {
     $rg = new ReflectionFunction("g");
-    var_dump($rg->getAttributeClass(B::class)->i); // 4
+    \var_dump($rg->getAttributeClass(B::class)->i); // 4
     $rh = new ReflectionFunction("h");
-    var_dump($rh->getAttributeClass(C::class)->i); // 5
+    \var_dump($rh->getAttributeClass(C::class)->i); // 5
   }
 
   echo reflect();

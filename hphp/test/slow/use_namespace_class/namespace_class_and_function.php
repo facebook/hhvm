@@ -3,20 +3,20 @@
 namespace Foo {
   class Derp {
     public function __construct(int $_) {
-      var_dump(__LINE__);
+      \var_dump(__LINE__);
     }
   }
 }
 
 namespace Bar {
   function Derp(string $_): void {
-    var_dump(__LINE__);
+    \var_dump(__LINE__);
   }
 }
 
 namespace Baz {
   function Derp(float $_): void {
-    var_dump(__LINE__);
+    \var_dump(__LINE__);
   }
 }
 

@@ -19,4 +19,4 @@ function foo(): ?int {
   return $b?->baz();
 }
 
-var_dump(foo());
+\var_dump(foo());

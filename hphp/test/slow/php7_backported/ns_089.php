@@ -35,7 +35,7 @@ namespace Fiz\Biz\Buz {
     foo();
     buz();
     bar();
-    var_dump(FOO);
-    var_dump(BOZ);
-    var_dump(BAR);
+    \var_dump(FOO);
+    \var_dump(BOZ);
+    \var_dump(BAR);
 }

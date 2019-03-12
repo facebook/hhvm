@@ -7,5 +7,5 @@ namespace foo\bar {
 namespace {
   use const foo\bar\baz;
 
-  var_dump(baz);
+  \var_dump(baz);
 }

@@ -17,7 +17,7 @@ class Child extends Base implements I {
 class GrandChild extends Child {
 }
 
-var_dump(type_structure(Child::class, 'T'));
-var_dump(type_structure(GrandChild::class, 'T'));
-var_dump(type_structure(I::class, 'U'));
-var_dump(type_structure(GrandChild::class, 'U'));
+\var_dump(type_structure(Child::class, 'T'));
+\var_dump(type_structure(GrandChild::class, 'T'));
+\var_dump(type_structure(I::class, 'U'));
+\var_dump(type_structure(GrandChild::class, 'U'));

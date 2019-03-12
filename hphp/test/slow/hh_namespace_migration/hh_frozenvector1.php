@@ -5,7 +5,7 @@
 
 function main() {
   $s = ImmVector {1, 2, 3};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
 

@@ -5,7 +5,7 @@
 
 function main() {
   $s = Pair {1, 2};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
 

@@ -136,10 +136,10 @@ function test() {
   $v1->aSet = array(10=>true, 11=>true);
   $v1->anByte = 123;
   $v1->anI16 = 1234;
-  var_dump($v1);
+  \var_dump($v1);
   thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
-  var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
+  \var_dump(md5($p->getTransport()->buff));
+  \var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
 }
 
 <<__EntryPoint>>

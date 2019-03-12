@@ -10,6 +10,6 @@ namespace N2\N3 {
 
 namespace N2 {
   use const \N1\C as CC;
-  var_dump(CC);
-  var_dump(N3\C);
+  \var_dump(CC);
+  \var_dump(N3\C);
 }

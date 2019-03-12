@@ -4,7 +4,7 @@ namespace A\B;
 class Foo {
   static $baz = 32;
   function __construct(array $a) {
-    var_dump($a);
+    \var_dump($a);
   }
   function callUnknownClassMethod($method) {
     return SomeUnknownClass::$method();
@@ -35,7 +35,7 @@ if (rand(0, 1)) {
   }
 }
 $f = new Foo(array(0));
-var_dump(Foo::$baz);
-var_dump(B::FOO);
-var_dump(B::$baz);
+\var_dump(Foo::$baz);
+\var_dump(B::FOO);
+\var_dump(B::$baz);
 }

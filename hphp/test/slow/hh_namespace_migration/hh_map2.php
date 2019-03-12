@@ -7,7 +7,7 @@ namespace {
 
 function main() {
   $m = Map {};
-  var_dump($m->isEmpty());
+  \var_dump($m->isEmpty());
 }
 
 main();

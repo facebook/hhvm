@@ -15,24 +15,24 @@ namespace Foo {
   const BAZ = 1;
 
   function main() {
-    var_dump(BAZ);
-    var_dump(Bar\BAZ);
+    \var_dump(BAZ);
+    \var_dump(Bar\BAZ);
 
     $func = (new Bar\C())->func();
-    var_dump($func());
+    \var_dump($func());
 
     $rm = new \ReflectionMethod($func, '__invoke');
-    var_dump($rm->getName());
-    var_dump($rm->getDeclaringClass()->getName());
+    \var_dump($rm->getName());
+    \var_dump($rm->getDeclaringClass()->getName());
 
     $rp = $rm->getParameters()[0];
-    var_dump($rp->getName());
-    var_dump($rp->getDeclaringFunction()->getName());
-    var_dump($rp->getDeclaringFunction()->getDeclaringClass()->getName());
-    var_dump($rp->getDeclaringClass()->getName());
-    var_dump($rp->getDefaultValue());
-    var_dump($rp->getDefaultValueText());
-    var_dump($rp->getDefaultValueConstantName()); // returning NULL for closures
+    \var_dump($rp->getName());
+    \var_dump($rp->getDeclaringFunction()->getName());
+    \var_dump($rp->getDeclaringFunction()->getDeclaringClass()->getName());
+    \var_dump($rp->getDeclaringClass()->getName());
+    \var_dump($rp->getDefaultValue());
+    \var_dump($rp->getDefaultValueText());
+    \var_dump($rp->getDefaultValueConstantName()); // returning NULL for closures
   }
 
   main();

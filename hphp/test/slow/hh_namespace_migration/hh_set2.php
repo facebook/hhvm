@@ -7,7 +7,7 @@ namespace {
 
 function main() {
   $s = Set {};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
 main();

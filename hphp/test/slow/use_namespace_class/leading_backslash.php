@@ -3,7 +3,7 @@
 namespace MyNS {
   class Foo {
     public function __construct() {
-      var_dump(__CLASS__);
+      \var_dump(__CLASS__);
     }
   }
 }

@@ -7,7 +7,7 @@ namespace A {
 namespace C {
   function main() {
     $name = '\\\\A\B';
-    var_dump(new $name);
+    \var_dump(new $name);
   }
   main();
 }

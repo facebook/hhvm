@@ -13,6 +13,6 @@ use lang\Value;
 $x = new class() implements Value {
 };
 
-var_dump($x);
+\var_dump($x);
 
 }

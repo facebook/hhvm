@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class RedisSessionModule implements SessionHandlerInterface {
   /**

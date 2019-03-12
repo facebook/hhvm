@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class ParentIterator extends RecursiveFilterIterator
  implements RecursiveIterator, OuterIterator {

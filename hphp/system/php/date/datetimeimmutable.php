@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class DateTimeImmutable implements DateTimeInterface {
   public function __construct(

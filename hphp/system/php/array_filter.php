@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function array_filter(\HH\KeyedTraversable $arr, $func = null, $flag = null) {
   if ($func !== null && !is_callable($func)) {

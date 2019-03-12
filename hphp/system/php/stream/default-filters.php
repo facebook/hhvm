@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace __SystemLib {
   function register_default_stream_filters() {

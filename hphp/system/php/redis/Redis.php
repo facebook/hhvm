@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class Redis {
   /* Redis servers run here by default */

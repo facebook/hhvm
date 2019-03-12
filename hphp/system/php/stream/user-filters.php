@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class php_user_filter {
   public function __construct(

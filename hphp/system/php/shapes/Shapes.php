@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
   abstract final class Shapes {

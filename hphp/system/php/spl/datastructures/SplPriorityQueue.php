@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class _SplPriorityQueueHeap extends SplMaxHeap {
 

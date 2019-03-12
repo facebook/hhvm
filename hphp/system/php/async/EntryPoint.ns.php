@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 namespace __SystemLib {
   function enter_async_entry_point<T>(
     (function(): Awaitable<T>) $entry_point

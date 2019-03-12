@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class GlobIterator extends FilesystemIterator
   implements SeekableIterator, Countable {

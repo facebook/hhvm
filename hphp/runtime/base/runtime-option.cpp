@@ -256,6 +256,27 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   return defaults();
 }
 
+static inline std::string hhjsBabelTransformDefault() {
+  std::vector<folly::StringPiece> searchPaths;
+  folly::split(":", hhjsBabelTransform(), searchPaths);
+  std::string here = current_executable_directory();
+
+  for (folly::StringPiece searchPath : searchPaths) {
+    std::string transform = searchPath.toString();
+    std::size_t found = transform.find("{}");
+
+    if (found != std::string::npos) {
+      transform.replace(found, 2, here);
+    }
+
+    if (::access(transform.data(), X_OK) == 0) {
+      return transform;
+    }
+  }
+
+  return "";
+}
+
 std::string RepoOptions::cacheKeyRaw() const {
   return std::string("")
 #define N(_, n, ...) + mangleForKey(n)

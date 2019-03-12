@@ -91,7 +91,8 @@ struct RepoOptions {
   H(bool,           DisableLvalAsAnExpression,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           HHJSUniqueFilenames,            true)             \
-  E(std::string,    HHJSBabelTransform,             "")               \
+  E(std::string,    HHJSBabelTransform,                               \
+                                         hhjsBabelTransformDefault()) \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitClsMethPointers,            EmitFuncPointers) \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \

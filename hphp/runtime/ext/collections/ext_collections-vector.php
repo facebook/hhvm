@@ -296,7 +296,7 @@ final class Vector implements \MutableVector {
   <<__Rx, __MaybeMutable>>
   public function toKeysArray(): varray {
     $count = $this->count();
-    return $count ? varray(range(0, $count - 1)) : varray[];
+    return $count ? varray(\range(0, $count - 1)) : varray[];
   }
 
   /* Returns an array built from the values from this Vector.
@@ -857,7 +857,7 @@ final class ImmVector implements \ConstVector {
   <<__Rx>>
   public function toKeysArray(): varray {
     $count = $this->count();
-    return $count ? varray(range(0, $count - 1)) : varray[];
+    return $count ? varray(\range(0, $count - 1)) : varray[];
   }
 
   /* Returns an array built from the values from this ImmVector.

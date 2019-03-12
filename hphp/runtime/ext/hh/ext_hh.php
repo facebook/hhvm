@@ -75,7 +75,7 @@ function ffp_parse_string_native(string $program): string;
 function ffp_parse_string(string $program): array {
   $json = ffp_parse_string_native($program);
   // 2048 is MAX_JSON_DEPTH to avoid making a global constant
-  return json_decode($json, true, 2048);
+  return \json_decode($json, true, 2048);
 }
 
 /**

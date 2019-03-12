@@ -76,7 +76,7 @@ namespace __SystemLib {
                 "name, got %s instead",
                 $filename,
               );
-              $next_file_name = trim($this->stream_get_contents($size));
+              $next_file_name = \trim($this->stream_get_contents($size));
               break;
 
             case '0':
@@ -145,7 +145,7 @@ namespace __SystemLib {
             list($offset, $size) = $offsets[$path];
             $fp = \fopen($full_path, 'wb');
             while ($size) {
-              $data = $this->stream_get_contents(min(1024, $size), $offset);
+              $data = $this->stream_get_contents(\min(1024, $size), $offset);
               \fwrite($fp, $data);
               $size -= \strlen($data);
               $offset += \strlen($data);
@@ -182,7 +182,7 @@ namespace __SystemLib {
         $header .= \str_repeat("\0", 8); // mode
         $header .= \str_repeat("\0", 8); // uid
         $header .= \str_repeat("\0", 8); // gid
-        $header .= \str_pad(\decoct(\strlen($archive_path)), 11, '0', STR_PAD_LEFT)
+        $header .= \str_pad(\decoct(\strlen($archive_path)), 11, '0', \STR_PAD_LEFT)
           ."\0"; // length
         $header .= \str_repeat("\0", 12); // mtime
         // Checksum in the middle...
@@ -195,7 +195,7 @@ namespace __SystemLib {
         foreach (\unpack('C*', $to_checksum) as $uint8) {
           $sum += $uint8;
         }
-        $checksum = \str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
+        $checksum = \str_pad(\decoct($sum), 6, '0', \STR_PAD_LEFT)."\0 ";
         \fwrite($this->fp, \str_pad($header.$checksum.$header2, 512, "\0"));
         $partial_block = \strlen($archive_path) % 512;
         $padding = '';
@@ -207,11 +207,11 @@ namespace __SystemLib {
 
       $stat = \stat($path);
       $header = \str_pad(\substr($archive_path, 0, 100), 100, "\0");
-      $header .= \str_pad(\decoct($stat['mode']), 7, '0', STR_PAD_LEFT)."\0";
-      $header .= \str_pad(\decoct($stat['uid']), 7, '0', STR_PAD_LEFT)."\0";
-      $header .= \str_pad(\decoct($stat['gid']), 7, '0', STR_PAD_LEFT)."\0";
-      $header .= \str_pad(\decoct($stat['size']), 11, '0', STR_PAD_LEFT)."\0";
-      $header .= \str_pad(\decoct($stat['mtime']), 11, '0', STR_PAD_LEFT)."\0";
+      $header .= \str_pad(\decoct($stat['mode']), 7, '0', \STR_PAD_LEFT)."\0";
+      $header .= \str_pad(\decoct($stat['uid']), 7, '0', \STR_PAD_LEFT)."\0";
+      $header .= \str_pad(\decoct($stat['gid']), 7, '0', \STR_PAD_LEFT)."\0";
+      $header .= \str_pad(\decoct($stat['size']), 11, '0', \STR_PAD_LEFT)."\0";
+      $header .= \str_pad(\decoct($stat['mtime']), 11, '0', \STR_PAD_LEFT)."\0";
       // Checksum in the middle...
       $header2 = '0'; // type == normal file
       $header2 .= \str_repeat("\0", 100);
@@ -222,7 +222,7 @@ namespace __SystemLib {
       foreach (\unpack('C*', $to_checksum) as $uint8) {
         $sum += $uint8;
       }
-      $checksum = \str_pad(\decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
+      $checksum = \str_pad(\decoct($sum), 6, '0', \STR_PAD_LEFT)."\0 ";
       \fwrite($this->fp, \str_pad($header.$checksum.$header2, 512, "\0"));
       $partial_block = $stat['size'] % 512;
       $padding = '';
@@ -235,8 +235,8 @@ namespace __SystemLib {
 
     public function close(): void {
       if ($this->fp !== null) {
-        fwrite($this->fp, str_repeat("\0", 1024));
-        fclose($this->fp);
+        \fwrite($this->fp, \str_repeat("\0", 1024));
+        \fclose($this->fp);
         $this->fp = null;
       }
     }

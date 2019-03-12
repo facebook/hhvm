@@ -73,6 +73,7 @@ struct UnitEmitter {
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
+  void setMd5(const MD5& md5) { m_md5 = md5; }
   /*
    * Commit this unit to a repo.
    */

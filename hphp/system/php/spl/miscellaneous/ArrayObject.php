@@ -41,7 +41,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
   public function __construct($input = null,
                                ?int $flags = null,
                                string $iterator_class = "ArrayIterator") {
-    if($input instanceof ArrayObject) {
+    if($input is ArrayObject) {
       $flags = ($flags === null) ? $input->getFlags() : $flags;
     }
     $this->check_array_object_or_iterator($input ?: darray[]);
@@ -492,8 +492,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
       throw new InvalidArgumentException(
         "Passed variable is not an array or object, using empty array instead"
       );
-    } else if (($input instanceof ArrayObject) ||
-               ($input instanceof ArrayIterator)) {
+    } else if (($input is ArrayObject) ||
+               ($input is ArrayIterator)) {
       $this->storage = $input->getArrayCopy();
     } else {
       $this->storage = $input;

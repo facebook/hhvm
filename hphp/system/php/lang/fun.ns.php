@@ -11,7 +11,7 @@ namespace __SystemLib {
     }
     public function __invoke($x, ...$args) {
       invariant(
-        $x instanceof $this->class,
+        \is_a($x, $this->class),
         'object must be an instance of ('.$this->class.'), instead it is ('.
         (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );

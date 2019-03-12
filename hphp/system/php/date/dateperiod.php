@@ -80,7 +80,7 @@ class DatePeriod implements Iterator {
         $end_date->add($interval);
       }
       $this->end = $end_date;
-    } else if ($end instanceof DateTimeInterface) {
+    } else if ($end is DateTimeInterface) {
       $this->end = clone $end;
     } else {
       $this->__throwConstructorUsageException();

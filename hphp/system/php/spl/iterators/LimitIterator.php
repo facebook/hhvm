@@ -111,7 +111,7 @@ class LimitIterator extends IteratorIterator implements OuterIterator {
 
     $iter = $this->getInnerIterator();
     if ($this->_getPosition() != $position &&
-        $iter instanceof SeekableIterator) {
+        $iter is SeekableIterator) {
       // We can use the underlying seek implementation.
       $iter->seek($position);
       $this->_setPosition($position);

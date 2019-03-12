@@ -105,7 +105,7 @@ class PharData extends Phar {
     }
     $ret = array();
     foreach ($it as $dest => $source) {
-      if ($source instanceof SplFileInfo) {
+      if ($source is SplFileInfo) {
         $source = $source->getPathName();
         $dest = str_replace($base_directory, '', $source);
       }

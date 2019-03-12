@@ -32,7 +32,7 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
    * @return     mixed   An ArrayIterator object.
    */
   public function __construct($array = darray[], $flags = null) {
-    if (($array instanceof ArrayObject) || ($array instanceof ArrayIterator)) {
+    if (($array is ArrayObject) || ($array is ArrayIterator)) {
       $this->storage = $array->getArrayCopy();
       $flags = ($flags === null) ? $array->getFlags() : $flags;
     } else if (gettype($array) === 'object') {

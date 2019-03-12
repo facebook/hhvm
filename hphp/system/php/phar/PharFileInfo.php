@@ -24,7 +24,7 @@ class PharFileInfo extends SplFileInfo {
    *                      phar://boo.phar/my/file.php.
    */
   public function __construct($entry, $data) {
-    if (!($data instanceof __SystemLib\ArchiveEntryStat)) {
+    if (!($data is __SystemLib\ArchiveEntryStat)) {
       throw new UnexpectedValueException(
         "PharFileInfo can only be constructed via Phar::offsetGet()"
       );

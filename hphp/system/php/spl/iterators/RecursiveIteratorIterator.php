@@ -61,10 +61,10 @@ class RecursiveIteratorIterator implements OuterIterator {
   public function __construct(\Traversable $iterator,
                               $mode = RecursiveIteratorIterator::LEAVES_ONLY,
                               $flags = 0) {
-    if ($iterator && ($iterator instanceof IteratorAggregate)) {
+    if ($iterator && ($iterator is IteratorAggregate)) {
       $iterator = $iterator->getIterator();
     }
-    if (!$iterator || !($iterator instanceof RecursiveIterator)) {
+    if (!$iterator || !($iterator is RecursiveIterator)) {
       throw new InvalidArgumentException(
         "An instance of RecursiveIterator or IteratorAggregate creating " .
         "it is required"
@@ -89,7 +89,7 @@ class RecursiveIteratorIterator implements OuterIterator {
    */
   public function getInnerIterator() {
     $it = $this->iterators[count($this->iterators)-1][0];
-    if (!$it instanceof RecursiveIterator) {
+    if (!$it is RecursiveIterator) {
       throw new Exception(
         "inner iterator must implement RecursiveIterator"
       );
@@ -205,7 +205,7 @@ class RecursiveIteratorIterator implements OuterIterator {
           $this->setInnerIteratorState(self::STATE_NEXT);
           return self::NEXT_REPEAT;
         }
-        if (!$children instanceof RecursiveIterator) {
+        if (!$children is RecursiveIterator) {
           throw new UnexpectedValueException(
             'Objects returned by RecursiveIterator::getChildren() must '.
             'implement RecursiveIterator'

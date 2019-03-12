@@ -2062,7 +2062,7 @@ folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
           CollectedInfo& collect,
-          const php::Block* const blk,
+          BlockId bid,
           const State& stateIn,
           const DceOutState& dceOutState) {
   if (!stateIn.initialized) {
@@ -2079,7 +2079,7 @@ dce_visit(const Index& index,
   }
 
   auto const states = locally_propagated_states(index, fa, collect,
-                                                blk, stateIn);
+                                                bid, stateIn);
 
   auto dceState = DceState{ index, fa };
   dceState.liveLocals = dceOutState.locLive;
@@ -2105,6 +2105,7 @@ dce_visit(const Index& index,
       states.back().first.clsRefSlots.size(), UseInfo { Use::Used });
   }
 
+  auto const blk = fa.ctx.func->blocks[bid].get();
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
@@ -2113,7 +2114,7 @@ dce_visit(const Index& index,
     auto visit_env = Env {
       dceState,
       op,
-      { blk->id, idx },
+      { bid, idx },
       NoLocalId,
       states[idx].first,
       states[idx].second,
@@ -2225,11 +2226,11 @@ struct DceAnalysis {
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         CollectedInfo& collect,
-                        const php::Block* const blk,
+                        BlockId bid,
                         const State& stateIn,
                         const DceOutState& dceOutState) {
   if (auto dceState = dce_visit(index, fa, collect,
-                                blk, stateIn, dceOutState)) {
+                                bid, stateIn, dceOutState)) {
     return DceAnalysis {
       dceState->liveLocals,
       dceState->liveSlots,
@@ -2341,10 +2342,10 @@ DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              CollectedInfo& collect,
-             const php::Block* const blk,
+             BlockId bid,
              const State& stateIn,
              const DceOutState& dceOutState) {
-  auto dceState = dce_visit(index, fa, collect, blk, stateIn, dceOutState);
+  auto dceState = dce_visit(index, fa, collect, bid, stateIn, dceOutState);
 
   if (!dceState) {
     return {std::bitset<kMaxTrackedLocals>{},
@@ -2486,8 +2487,7 @@ void local_dce(const Index& index,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto const blk = ainfo.ctx.func->blocks[bid].get();
-  auto const ret = optimize_dce(index, ainfo, collect, blk, stateIn,
+  auto const ret = optimize_dce(index, ainfo, collect, bid, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
   dce_perform(*ainfo.ctx.func, ret.actionMap, ret.replaceMap);
@@ -2686,7 +2686,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       index,
       ai,
       collect,
-      ai.ctx.func->blocks[bid].get(),
+      bid,
       ai.bdata[bid].stateIn,
       blockState
     );
@@ -2724,9 +2724,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
-    for (auto& pred : nonThrowPreds[bid]) {
-      FTRACE(2, "  -> {}\n", pred->id);
-      auto& pbs = blockStates[pred->id];
+    for (auto const pid : nonThrowPreds[bid]) {
+      FTRACE(2, "  -> {}\n", pid);
+      auto& pbs = blockStates[pid];
       auto const oldPredLocLive = pbs.locLive;
       pbs.locLive |= result.locLiveIn;
       auto changed =
@@ -2744,6 +2744,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         changed = true;
       }
       changed |= [&] {
+        auto const pred = ai.ctx.func->blocks[pid].get();
         if (isCFPushTaken(pred, bid)) {
           auto stack = result.stack;
           stack.insert(stack.end(), pred->hhbcs.back().numPush(),
@@ -2754,23 +2755,23 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         }
       }();
       if (changed) {
-        incompleteQ.push(rpoId(pred->id));
+        incompleteQ.push(rpoId(pid));
       }
     }
 
     // Merge the liveIn into the liveOutExn state for each throw predecessor.
     // The liveIn computation also depends on the liveOutExn state, so again
     // reschedule if it changes.
-    for (auto& pred : throwPreds[bid]) {
-      FTRACE(2, "  => {}\n", pred->id);
-      auto& pbs = blockStates[pred->id];
+    for (auto const pid : throwPreds[bid]) {
+      FTRACE(2, "  => {}\n", pid);
+      auto& pbs = blockStates[pid];
       auto const oldPredLocLiveExn = pbs.locLiveExn;
       pbs.locLiveExn |= result.locLiveIn;
       auto const oldPredSlotLiveExn = pbs.slotLiveExn;
       pbs.slotLiveExn |= result.slotLiveIn;
       if (pbs.locLiveExn != oldPredLocLiveExn ||
           pbs.slotLiveExn != oldPredSlotLiveExn) {
-        incompleteQ.push(rpoId(pred->id));
+        incompleteQ.push(rpoId(pid));
       }
     }
 
@@ -2795,7 +2796,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       index,
       ai,
       collect,
-      ai.ctx.func->blocks[bid].get(),
+      bid,
       ai.bdata[bid].stateIn,
       blockStates[bid]
     );

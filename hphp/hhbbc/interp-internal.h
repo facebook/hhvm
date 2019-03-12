@@ -60,6 +60,7 @@ struct ISS {
     : index(bag.index)
     , ctx(bag.ctx)
     , collect(bag.collect)
+    , bid(bag.bid)
     , blk(*bag.blk)
     , state(bag.state)
     , flags(flags)
@@ -69,6 +70,7 @@ struct ISS {
   const Index& index;
   const Context ctx;
   CollectedInfo& collect;
+  const BlockId bid;
   const php::Block& blk;
   State& state;
   StepFlags& flags;
@@ -457,7 +459,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
     auto const func = ar.func->exactFunc();
     if (!func) return false;
     if (func->attrs & AttrTakesInOutParams) return false;
-    if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.blk.id))) {
+    if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.bid))) {
       return false;
     }
     // Foldable builtins are always worth trying
@@ -501,7 +503,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   }();
   if (foldable) effect_free(env);
   ar.foldable = foldable;
-  ar.pushBlk = env.blk.id;
+  ar.pushBlk = env.bid;
 
   FTRACE(2, "    fpi+: {}\n", show(ar));
   env.state.fpiStack.push_back(std::move(ar));
@@ -510,7 +512,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
 
 void fpiPushNoFold(ISS& env, ActRec ar) {
   ar.foldable = false;
-  ar.pushBlk = env.blk.id;
+  ar.pushBlk = env.bid;
 
   FTRACE(2, "    fpi+: {}\n", show(ar));
   env.state.fpiStack.push_back(std::move(ar));

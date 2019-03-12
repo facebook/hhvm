@@ -950,7 +950,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     if (fallthrough != NoBlockId) {
       FTRACE(4, "      fallthrough: {}\n", fallthrough);
     }
-    FTRACE(2, "      block {} end: {}\n", b->id, info.past);
+    FTRACE(2, "      block {} end: {}\n", bid, info.past);
   }
 
   while (fpiStack.size()) end_fpi(lastOff);

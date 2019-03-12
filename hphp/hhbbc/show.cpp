@@ -365,10 +365,11 @@ std::string show(const Func& func) {
                   func.name, indent(2, dot_cfg(func)));
   }
 
-  for (auto& blk : func.blocks) {
-    if (blk->id == NoBlockId) continue;
+  for (auto const bid : func.blockRange()) {
+    auto const blk = func.blocks[bid].get();
+    if (blk->dead) continue;
     folly::format(&ret, "block #{} (section {})\n{}",
-                  blk->id, static_cast<size_t>(blk->section),
+                  bid, static_cast<size_t>(blk->section),
                   indent(2, show(func, *blk)));
   }
 

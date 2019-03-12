@@ -38,7 +38,7 @@ const StaticString s_invoke("__invoke");
 //////////////////////////////////////////////////////////////////////
 
 bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
-  if (b.id == NoBlockId) {
+  if (b.dead) {
     // the block was deleted
     return true;
   }
@@ -142,7 +142,6 @@ void checkFaultEntryRec(const php::Func& func,
                         const php::ExnNode& exnNode) {
 
   auto const& faultEntry = *func.blocks[faultEntryId];
-  assert(faultEntry.id == faultEntryId);
   // Loops in fault funclets could cause us to revisit the same block,
   // so we track the ones we've seen.
   if (seenBlocks.size() < faultEntryId + 1) {
@@ -229,19 +228,7 @@ bool check(const php::Func& f) {
            f.cls->parentName->isame(s_Closure.get()));
   }
 
-  boost::dynamic_bitset<> seenId(f.blocks.size());
-  for (auto& block : f.blocks) {
-    if (block->id == NoBlockId) continue;
-
-    // All blocks have unique ids in a given function; not necessarily
-    // consecutive.
-    assert(block->id < f.blocks.size());
-    assert(!seenId.test(block->id));
-    seenId.set(block->id);
-  }
-
   assert(checkExnTree(f));
-
   return true;
 }
 

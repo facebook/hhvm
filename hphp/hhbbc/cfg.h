@@ -149,11 +149,11 @@ std::vector<BlockId> rpoSortAddDVs(const php::Func&);
 /*
  * Mappings from blocks to sets of blocks.
  *
- * The first level is indexed by block->id.  The second is a set of
+ * The first level is indexed by block id.  The second is a set of
  * block pointers.
  */
 using BlockToBlocks = std::vector<
-  boost::container::flat_set<const php::Block*>
+  boost::container::flat_set<BlockId>
 >;
 
 /*

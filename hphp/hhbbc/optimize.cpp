@@ -322,7 +322,7 @@ void insert_assertions(const Index& index,
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  auto interp = Interp { index, ctx, collect, cblk.get(), state };
+  auto interp = Interp { index, ctx, collect, bid, cblk.get(), state };
   for (auto& op : cblk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
@@ -478,7 +478,7 @@ bool propagate_constants(const Bytecode& bc, State& state,
 /*
  * Create a block similar to another block (but with no bytecode in it yet).
  */
-php::Block* make_block(FuncAnalysis& ainfo,
+BlockId make_block(FuncAnalysis& ainfo,
                        const php::Block* srcBlk,
                        const State& state) {
   FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
@@ -486,26 +486,27 @@ php::Block* make_block(FuncAnalysis& ainfo,
 
   auto newBlk           = copy_ptr<php::Block>{php::Block{}};
   auto const blk        = newBlk.mutate();
-  blk->id               = ainfo.ctx.func->blocks.size();
   blk->section          = srcBlk->section;
   blk->exnNodeId        = srcBlk->exnNodeId;
   blk->throwExits       = srcBlk->throwExits;
   blk->unwindExits      = srcBlk->unwindExits;
+  auto const bid = ainfo.ctx.func->blocks.size();
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
-  ainfo.rpoBlocks.push_back(blk->id);
+  ainfo.rpoBlocks.push_back(bid);
   ainfo.bdata.push_back(FuncAnalysis::BlockData {
     static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
     state
   });
 
-  return blk;
+  return bid;
 }
 
-php::Block* make_fatal_block(FuncAnalysis& ainfo,
+BlockId make_fatal_block(FuncAnalysis& ainfo,
                              const php::Block* srcBlk,
                              const State& state) {
-  auto blk = make_block(ainfo, srcBlk, state);
+  auto bid = make_block(ainfo, srcBlk, state);
+  auto const blk = ainfo.ctx.func->blocks[bid].mutate();
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
   blk->hhbcs = {
     bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
@@ -515,7 +516,7 @@ php::Block* make_fatal_block(FuncAnalysis& ainfo,
   blk->throwExits = {};
   blk->unwindExits = {};
   blk->exnNodeId = NoExnNodeId;
-  return blk;
+  return bid;
 }
 
 void first_pass(const Index& index,
@@ -526,7 +527,7 @@ void first_pass(const Index& index,
   auto const ctx = ainfo.ctx;
 
   auto interp = Interp {
-    index, ctx, collect, ctx.func->blocks[bid].get(), state
+    index, ctx, collect, bid, ctx.func->blocks[bid].get(), state
   };
 
   BytecodeVec newBCs;
@@ -642,17 +643,18 @@ void first_pass(const Index& index,
         if (bc->op != Op::Nop) gen(*bc);
         if (interp.state.speculatedPops) {
           auto const blk = ctx.func->blocks[bid].mutate();
-          auto const new_block = make_block(ainfo, blk, interp.state);
+          auto const new_bid = make_block(ainfo, blk, interp.state);
           auto fixer = [&] (BlockId& t) {
-            if (t == new_target) t = new_block->id;
+            if (t == new_target) t = new_bid;
           };
           forEachTakenEdge(*bc, fixer);
           fixer(blk->fallthrough);
+          auto const new_block = ctx.func->blocks[new_bid].mutate();
           new_block->fallthrough = new_target;
           new_block->hhbcs.insert(new_block->hhbcs.end(),
                                   interp.state.speculatedPops,
                                   bc::PopC {});
-          auto& newState = ainfo.bdata[new_block->id].stateIn;
+          auto& newState = ainfo.bdata[new_bid].stateIn;
           newState.speculated = NoBlockId;
           newState.speculatedPops = 0;
           newState.speculatedIsUnconditional = false;
@@ -754,7 +756,7 @@ void first_pass(const Index& index,
               }
               set_target(jmpDest);
               auto const blk = ctx.func->blocks[bid].mutate();
-              blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
+              blk->fallthrough = make_fatal_block(ainfo, blk, state);
               return iterOp;
             }
             /*
@@ -765,7 +767,7 @@ void first_pass(const Index& index,
              * is a fatal.
              */
             auto const blk = ctx.func->blocks[bid].mutate();
-            set_target(make_fatal_block(ainfo, blk, state)->id);
+            set_target(make_fatal_block(ainfo, blk, state));
             blk->fallthrough = jmpDest;
             return iterOp;
           }
@@ -803,7 +805,7 @@ void first_pass(const Index& index,
               blk->multiSucc = false;
               return folly::none;
             }
-            auto const fatal = make_fatal_block(ainfo, blk, state)->id;
+            auto const fatal = make_fatal_block(ainfo, blk, state);
             auto iterOp = op;
             if (iterOp.op == Op::IterNext) {
               iterOp.IterNext.target2 = fatal;
@@ -836,7 +838,7 @@ void first_pass(const Index& index,
                 assertx(jmpDest != iterOp.MemoGetEager.target2);
                 iterOp.MemoGetEager.target1 = jmpDest;
               }
-              blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
+              blk->fallthrough = make_fatal_block(ainfo, blk, state);
               return iterOp;
             }
             blk->fallthrough = jmpDest;
@@ -963,7 +965,7 @@ struct OptimizeIterState {
                   State state) {
     auto const ctx = ainfo.ctx;
     auto const blk = ctx.func->blocks[bid].get();
-    auto interp = Interp { index, ctx, collect, blk, state };
+    auto interp = Interp { index, ctx, collect, bid, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
       if (!eligible.any()) break;
@@ -1005,11 +1007,11 @@ struct OptimizeIterState {
 
       auto const fixupForInit = [&] {
         auto const base = topStkLocal(state);
-        if (base == NoLocalId && eligible[blk->id]) {
-          FTRACE(2, "   - blk:{} ineligible\n", blk->id);
-          eligible[blk->id] = false;
+        if (base == NoLocalId && eligible[bid]) {
+          FTRACE(2, "   - blk:{} ineligible\n", bid);
+          eligible[bid] = false;
         }
-        fixups.emplace_back(Fixup{blk->id, opIdx, blk->id, base});
+        fixups.emplace_back(Fixup{bid, opIdx, bid, base});
         FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
       };
 
@@ -1021,7 +1023,7 @@ struct OptimizeIterState {
             if (ti.initBlock != NoBlockId) {
               assertx(iterFromInit(*ctx.func, ti.initBlock) == it);
               fixups.emplace_back(
-                Fixup{blk->id, opIdx, ti.initBlock, ti.baseLocal}
+                Fixup{bid, opIdx, ti.initBlock, ti.baseLocal}
               );
               FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
             }

@@ -320,12 +320,12 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
     std::string ret;
-    for (auto& blk : ctx.func->blocks) {
+    for (auto bid : ctx.func->blockRange()) {
       folly::format(&ret,
                     "block #{}\nin-{}\n{}",
-                    blk->id,
-                    state_string(*ctx.func, ai.bdata[blk->id].stateIn, collect),
-                    show(*ctx.func, *blk)
+                    bid,
+                    state_string(*ctx.func, ai.bdata[bid].stateIn, collect),
+                    show(*ctx.func, *ctx.func->blocks[bid])
                    );
     }
 
@@ -430,7 +430,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
       auto stateOut = ai.bdata[bid].stateIn;
       auto interp   = Interp {
-        index, ctx, collect, ctx.func->blocks[bid].get(), stateOut
+        index, ctx, collect, bid, ctx.func->blocks[bid].get(), stateOut
       };
       auto flags    = run(interp, propagate);
       auto& stateIn = ai.bdata[bid].stateIn;
@@ -966,14 +966,16 @@ std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
                           const FuncAnalysis& fa,
                           CollectedInfo& collect,
-                          const php::Block* blk,
+                          BlockId bid,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
 
   std::vector<std::pair<State,StepFlags>> ret;
+
+  auto const blk = fa.ctx.func->blocks[bid].get();
   ret.reserve(blk->hhbcs.size() + 1);
 
-  auto interp = Interp { index, fa.ctx, collect, blk, state };
+  auto interp = Interp { index, fa.ctx, collect, bid, blk, state };
 
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});

@@ -87,7 +87,6 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
   for (auto theirs : other.blocks) {
     if (delta) {
       auto const ours = theirs.mutate();
-      ours->id += delta;
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
       for (auto &id : ours->throwExits) id += delta;
       for (auto &id : ours->unwindExits) id += delta;

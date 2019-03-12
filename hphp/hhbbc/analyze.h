@@ -244,7 +244,7 @@ std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
                           const FuncAnalysis&,
                           CollectedInfo& collect,
-                          const php::Block*,
+                          BlockId bid,
                           State stateIn);
 
 //////////////////////////////////////////////////////////////////////

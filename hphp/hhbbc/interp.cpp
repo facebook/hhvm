@@ -3634,7 +3634,7 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
   };
 
   auto const fallthrough = [&]{
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.blk.id });
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
@@ -3672,7 +3672,7 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
   };
 
   auto const fallthrough = [&]{
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.blk.id });
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
@@ -4852,7 +4852,7 @@ BlockId speculate(Interp& interp) {
     interp.collect.opts = interp.collect.opts - CollectionOpts::Speculating;
   };
 
-  FTRACE(4, "  Speculate B{}\n", interp.blk->id);
+  FTRACE(4, "  Speculate B{}\n", interp.bid);
   auto const stop = end(interp.blk->hhbcs);
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
@@ -4911,7 +4911,7 @@ BlockId speculateHelper(Interp& interpIn, BlockId target, bool unconditional) {
     if (!state) state.emplace(interpIn.state);
 
     Interp interp {
-      interpIn.index, interpIn.ctx, interpIn.collect, targetBlk, *state
+      interpIn.index, interpIn.ctx, interpIn.collect, target, targetBlk, *state
     };
 
     auto const new_target = speculate(interp);

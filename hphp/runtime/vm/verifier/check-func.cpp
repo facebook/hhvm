@@ -1826,7 +1826,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NativeImpl:
     case Op::NewObj:
     case Op::NewObjD:
-    case Op::NewObjI:
     case Op::NewObjS:
     case Op::ResolveFunc:
     case Op::ResolveObjMethod:

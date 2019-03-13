@@ -1461,11 +1461,6 @@ class ReflectionClass implements Reflector {
       (!$this->hasMethod('__clone') || $this->getMethod('__clone')->isPublic());
   }
 
-  <<__Rx, __MaybeMutable>>
-  public function isAnonymous(): bool {
-    return strpos($this->getName(), 'class@anonymous') === 0;
-  }
-
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getmethod.php )
    *

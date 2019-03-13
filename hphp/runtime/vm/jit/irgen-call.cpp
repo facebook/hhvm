@@ -880,37 +880,6 @@ void emitNewObjD(IRGS& env, const StringData* className) {
   push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
 }
 
-void emitNewObjI(IRGS& env, uint32_t clsIx) {
-  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto const cls = [&] () -> Class* {
-    auto const c = preClass->namedEntity()->clsList();
-    if (c && (c->attrs() & AttrUnique)) return c;
-    return nullptr;
-  }();
-  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = canInstantiateClass(cls);
-  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()) {
-    push(env, allocObjFast(env, cls));
-    return;
-  }
-
-  if (persistentCls) {
-    push(env, gen(env, AllocObj, cns(env, cls)));
-    return;
-  }
-
-  auto const cachedCls = cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
-    },
-    [&] (SSATmp* val) { return val; },
-    [&] { return gen(env, DefCls, cns(env, clsIx)); }
-  );
-
-  push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
-}
-
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   auto const cls  = specialClsRefToCls(env, ref);
   auto const slot = specialClsReifiedPropSlot(env, ref);

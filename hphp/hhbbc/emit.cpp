@@ -104,7 +104,6 @@ struct OpInfoHelper {
     T::op == Op::DefCls      ||
     T::op == Op::DefClsNop   ||
     T::op == Op::CreateCl    ||
-    T::op == Op::NewObjI     ||
     T::op == Op::DefTypeAlias;
 
   using type = typename std::conditional<by_value, T, const T&>::type;
@@ -660,7 +659,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto defcls    = [&] (auto& data) { clsid_impl(data.arg1, false); };
     auto defclsnop = [&] (auto& data) { clsid_impl(data.arg1, false); };
     auto createcl  = [&] (auto& data) { clsid_impl(data.arg2, true); };
-    auto newobji   = [&] (auto& data) { clsid_impl(data.arg1, false); };
     auto deftype   = [&] (auto& data) {
       euState.typeAliasInfo.push_back(data.arg1);
       data.arg1 = euState.typeAliasInfo.size() - 1;
@@ -744,7 +742,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       caller<Op::DefCls>(defcls, data);                         \
       caller<Op::DefClsNop>(defclsnop, data);                   \
       caller<Op::CreateCl>(createcl, data);                     \
-      caller<Op::NewObjI>(newobji, data);                       \
       caller<Op::DefTypeAlias>(deftype, data);                  \
                                                                 \
       if (isRet(Op::opcode)) ret_assert();                      \

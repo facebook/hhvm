@@ -60,7 +60,6 @@ using namespace HPHP;
   Isset or empty expression
   Exit expression
   Instanceof expression
-  Anonymous class expression
 */
 static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   switch (rhs->getKindOf()) {
@@ -80,7 +79,6 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   case Construct::KindOfYieldExpression:
   case Construct::KindOfYieldFromExpression:
   case Construct::KindOfAwaitExpression:
-  case Construct::KindOfClassExpression:
     return ListAssignment::Regular;
 
   case Construct::KindOfListAssignment:

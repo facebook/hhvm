@@ -3278,8 +3278,8 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 }
 
-void newObjHelper(ISS& env, SString name) {
-  auto const rcls = env.index.resolve_class(env.ctx, name);
+void in(ISS& env, const bc::NewObjD& op) {
+  auto const rcls = env.index.resolve_class(env.ctx, op.str1);
   if (!rcls) {
     push(env, TObj);
     return;
@@ -3288,14 +3288,6 @@ void newObjHelper(ISS& env, SString name) {
   auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
     rcls->same(env.index.resolve_class(env.ctx.cls));
   push(env, setctx(objExact(*rcls), isCtx));
-}
-
-void in(ISS& env, const bc::NewObjD& op) {
-  newObjHelper(env, op.str1);
-}
-
-void in(ISS& env, const bc::NewObjI& op) {
-  newObjHelper(env, env.ctx.unit->classes[op.arg1]->name);
 }
 
 void in(ISS& env, const bc::NewObjS& op) {

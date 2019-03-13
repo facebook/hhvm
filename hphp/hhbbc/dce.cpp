@@ -1802,7 +1802,6 @@ void dce(Env& env, const bc::Neq& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewLikeArrayL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObj& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { dce_default(env, op); }
-void dce(Env& env, const bc::NewObjI& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Nop& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Not& op) { dce_default(env, op); }

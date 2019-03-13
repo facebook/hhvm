@@ -302,7 +302,6 @@ static const struct {
                    {None,             FStack,       OutFDesc        }},
   { OpNewObj,      {None,             Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjI,     {None,             Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpFPushCtor,   {Stack1,           FStack,       OutFDesc        }},
   /*
@@ -988,7 +987,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewDArray:
   case Op::NewObj:
   case Op::NewObjD:
-  case Op::NewObjI:
   case Op::NewObjS:
   case Op::Not:
   case Op::Null:

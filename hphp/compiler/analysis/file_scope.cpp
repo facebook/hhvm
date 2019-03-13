@@ -174,14 +174,6 @@ void FileScope::addClass(AnalysisResultConstRawPtr /*ar*/,
   m_classes[classScope->getScopeName()].push_back(classScope);
 }
 
-void FileScope::addAnonClass(ClassStatementPtr stmt) {
-  m_anonClasses.push_back(stmt);
-}
-
-const std::vector<ClassStatementPtr>& FileScope::getAnonClasses() const {
-  return m_anonClasses;
-}
-
 int FileScope::getFunctionCount() const {
   int total = FunctionContainer::getFunctionCount();
   for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {

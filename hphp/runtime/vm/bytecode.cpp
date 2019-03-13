@@ -5516,13 +5516,6 @@ OPTBLD_INLINE void iopNewObjD(Id id) {
   newObjImpl(cls, nullptr);
 }
 
-OPTBLD_INLINE void iopNewObjI(uint32_t clsIx) {
-  auto const func = vmfp()->m_func;
-  auto const preCls = func->unit()->lookupPreClassId(clsIx);
-  auto const cls = Unit::defClass(preCls, true);
-  newObjImpl(cls, nullptr);
-}
-
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(ref);
   if (ref == SpecialClsRef::Static && cls->hasReifiedGenerics()) {

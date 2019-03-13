@@ -2126,7 +2126,6 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
 
 NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
 NewObjD <litstr id>                        []  ->  [C:Obj]
-NewObjI <class id>                         []  ->  [C:Obj]
 NewObjS <mode>                             []  ->  [C:Obj]
 
   New object. First, these instructions load a value into x as given
@@ -2136,14 +2135,12 @@ NewObjS <mode>                             []  ->  [C:Obj]
     ------------+----
       NewObj    | %1
       NewObjD   | %1
-      NewObjI   | %1
       NewObjS   | %1
 
   When loading %1 into x, NewObjD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %1 into a classref, and
-  NewObjI will load the class in the current unit with id %1. NewObjS will
-  perform the same work as LateBoundCls/Self/Parent depending on the specified
-  mode.
+  ClsRefGetC instruction to convert the name given by %1 into a classref.
+  NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
+  the specified mode.
 
   This instruction pushes an uninitialized object onto the stack, to be
   initialized during FCall*.

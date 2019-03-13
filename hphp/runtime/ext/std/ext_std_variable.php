@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace {
 /* Finds whether the given variable is a boolean.

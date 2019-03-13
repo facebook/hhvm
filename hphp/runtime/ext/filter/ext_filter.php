@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Returns a list of all supported filters

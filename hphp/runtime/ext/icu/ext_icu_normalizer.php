@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Normalization is a process that involves transforming characters and

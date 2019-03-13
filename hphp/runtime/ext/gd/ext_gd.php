@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* Gets information about the version and capabilities of the installed GD
  * library.

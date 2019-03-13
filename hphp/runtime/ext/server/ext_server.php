@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Return thread type. See enum class ThreadType.

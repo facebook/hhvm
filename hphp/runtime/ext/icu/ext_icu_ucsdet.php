@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Guesses the encoding of an array of bytes in an

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * @return float - The value of pi as float.

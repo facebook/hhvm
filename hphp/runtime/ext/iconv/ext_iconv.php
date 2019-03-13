@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Retrieve internal configuration variables of iconv extension

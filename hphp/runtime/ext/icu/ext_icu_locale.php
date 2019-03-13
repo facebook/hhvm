@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A "Locale" is an identifier used to get language, culture, or

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Perform a regular expression search and replace.

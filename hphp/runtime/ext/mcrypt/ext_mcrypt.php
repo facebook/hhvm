@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Encrypts/decrypts data in CBC mode

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Check DNS records corresponding to a given Internet host name or IP address

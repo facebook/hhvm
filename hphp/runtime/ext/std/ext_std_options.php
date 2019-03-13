@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* Set the various assert() control options or just query their current
  * settings.

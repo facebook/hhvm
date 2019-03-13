@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Returns an array with all keys from input lowercased or uppercased.

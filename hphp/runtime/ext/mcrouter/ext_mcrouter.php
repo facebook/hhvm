@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Any failed MCRouter action will throw an

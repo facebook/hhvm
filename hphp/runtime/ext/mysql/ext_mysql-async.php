@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Initiate an asynchronous (non-blocking) connection to the specified MySQL

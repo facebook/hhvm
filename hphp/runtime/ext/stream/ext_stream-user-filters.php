@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Native>>
 function stream_get_filters(): array;

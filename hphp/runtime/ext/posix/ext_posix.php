@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * posix_access() checks the user's permission of a file.

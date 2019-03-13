@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Represents a connection between PHP and a MySQL database.

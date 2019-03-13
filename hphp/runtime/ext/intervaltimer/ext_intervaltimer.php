@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A timer that periodically interrupts a request thread.

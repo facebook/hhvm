@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Get number of affected rows in previous MySQL operation

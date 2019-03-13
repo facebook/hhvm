@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * fopen() binds a named resource, specified by filename, to a stream.

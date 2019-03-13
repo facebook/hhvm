@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Returns an array containing all supported encodings.

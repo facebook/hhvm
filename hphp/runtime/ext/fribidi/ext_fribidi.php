@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Native>>
 function fribidi_log2vis(

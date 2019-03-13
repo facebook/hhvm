@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Close an open gz-file pointer

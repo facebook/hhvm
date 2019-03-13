@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Close a bzip2 file

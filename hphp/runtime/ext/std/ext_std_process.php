@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * This function is identical to the backtick operator.

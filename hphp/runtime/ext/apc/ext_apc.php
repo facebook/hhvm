@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Caches a variable in the data store, only if it's not already stored.

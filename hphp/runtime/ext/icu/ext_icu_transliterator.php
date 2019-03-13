@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Transliterator provides transliteration of strings.

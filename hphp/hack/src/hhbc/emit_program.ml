@@ -7,6 +7,7 @@
  *
 *)
 
+open Core_kernel
 open Instruction_sequence
 open Hhbc_ast
 
@@ -72,7 +73,7 @@ let from_ast ~is_hh_file ~is_evaled ~popt ast =
           end
         else None in
       Emit_env.set_global_state global_state;
-      let flat_closed_ast = List.map snd closed_ast in
+      let flat_closed_ast = List.map ~f:snd closed_ast in
       let compiled_defs = emit_main is_evaled popt flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in

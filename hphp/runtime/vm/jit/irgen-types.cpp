@@ -191,8 +191,8 @@ void verifyTypeImpl(IRGS& env,
                     Callable callable,
                     VerifyCls verifyCls,
                     Giveup giveup) {
-  if (tc.isMixed() || (RuntimeOption::EvalThisTypeHintLevel == 0
-                       && !propCls && tc.isThis())) {
+  if (!tc.isCheckable() || (RuntimeOption::EvalThisTypeHintLevel == 0
+                            && !propCls && tc.isThis())) {
     return;
   }
 

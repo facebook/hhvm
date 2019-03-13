@@ -4086,7 +4086,20 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
   return resolve_class(ctx, ctx.cls->parentName);
 }
 
-Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
+Index::ResolvedInfo<folly::Optional<res::Class>>
+Index::resolve_type_name(SString inName) const {
+  auto const res = resolve_type_name_internal(inName);
+  return {
+    res.type,
+    res.nullable,
+    res.value.isNull()
+      ? folly::none
+      : folly::make_optional(res::Class{this, res.value})
+  };
+}
+
+Index::ResolvedInfo<Either<SString,ClassInfo*>>
+Index::resolve_type_name_internal(SString inName) const {
   folly::Optional<hphp_fast_set<const void*>> seen;
 
   auto nullable = false;
@@ -4161,7 +4174,7 @@ struct Index::ConstraintResolution {
 Index::ConstraintResolution Index::resolve_class_or_type_alias(
   const Context& ctx, SString name, const Type& candidate) const {
 
-  auto const res = resolve_type_name(name);
+  auto const res = resolve_type_name_internal(name);
 
   if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
 
@@ -4716,7 +4729,7 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
 bool Index::could_have_reified_type(const TypeConstraint& tc) const {
   if (!tc.isObject()) return false;
   auto const name = tc.typeName();
-  auto const resolved = resolve_type_name(name);
+  auto const resolved = resolve_type_name_internal(name);
   if (resolved.type != AnnotType::Object) return false;
   res::Class rcls{this, resolved.value};
   return rcls.couldHaveReifiedGenerics();

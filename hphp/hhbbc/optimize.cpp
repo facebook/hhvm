@@ -1225,43 +1225,27 @@ void optimize_iterators(const Index& index,
  * Use the information in the index to resolve a type-constraint to its
  * underlying type, if possible.
  */
-void fixTypeConstraint(Context ctx,
-                       const Index& index,
-                       TypeConstraint& tc,
-                       const Type& candidate) {
-  auto t = index.lookup_constraint(ctx, tc, candidate);
+void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
+  if (!tc.isCheckable() || !tc.isObject() || tc.isResolved()) return;
 
-  if (is_specialized_obj(t) &&
-      !dobj_of(t).cls.couldHaveMockedDerivedClass()) {
-    tc.setNoMockObjects();
-  }
-
-  if (!tc.isCheckable() || tc.isSoft() || !tc.isObject()) return;
-
-  auto const nullable = is_opt(t);
-  if (nullable) t = unopt(std::move(t));
-
-  auto retype = [&] (AnnotType t) {
-    tc.resolveType(t, nullable);
-    FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
-  };
+  if (interface_supports_non_objects(tc.typeName())) return;
+  auto const resolved = index.resolve_type_name(tc.typeName());
 
   assertx(!RuntimeOption::EvalHackArrDVArrs ||
-          (!t.subtypeOf(BVArr) && !t.subtypeOf(BDArr)));
+          (resolved.type != AnnotType::VArray &&
+           resolved.type != AnnotType::DArray));
 
-  if (t.subtypeOf(BInitNull)) return retype(AnnotType::Null);
-  if (t.subtypeOf(BBool))     return retype(AnnotType::Bool);
-  if (t.subtypeOf(BInt))      return retype(AnnotType::Int);
-  if (t.subtypeOf(BDbl))      return retype(AnnotType::Float);
-  if (t.subtypeOf(BStr))      return retype(AnnotType::String);
-  if (t.subtypeOf(BPArr))     return retype(AnnotType::Array);
-  if (t.subtypeOf(BVArr))     return retype(AnnotType::VArray);
-  if (t.subtypeOf(BDArr))     return retype(AnnotType::DArray);
-  // if (t.subtypeOf(BObj))   return retype(AnnotType::Object);
-  if (t.subtypeOf(BRes))      return retype(AnnotType::Resource);
-  if (t.subtypeOf(BDict))     return retype(AnnotType::Dict);
-  if (t.subtypeOf(BVec))      return retype(AnnotType::Vec);
-  if (t.subtypeOf(BKeyset))   return retype(AnnotType::Keyset);
+  if (resolved.type == AnnotType::Object) {
+    if (!resolved.value || !resolved.value->resolved()) return;
+    // Can't resolve if it resolves to a magic interface. If we mark it as
+    // resolved, we'll think its an object and not do the special magic
+    // interface checks at runtime.
+    if (interface_supports_non_objects(resolved.value->name())) return;
+    if (!resolved.value->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+  }
+
+  tc.resolveType(resolved.type, tc.isNullable() || resolved.nullable);
+  FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1375,18 +1359,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   }
 
   if (RuntimeOption::EvalHardTypeHints) {
-    for (auto& p : func->params) {
-      fixTypeConstraint(ainfo.ctx, index, p.typeConstraint, TTop);
-    }
+    for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
   }
 
   if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
-    auto const rtype = [&] {
-      if (!func->isAsync) return ainfo.inferredReturn;
-      if (!is_specialized_wait_handle(ainfo.inferredReturn)) return TGen;
-      return wait_handle_inner(ainfo.inferredReturn);
-    }();
-    fixTypeConstraint(ainfo.ctx, index, func->retTypeConstraint, rtype);
+    fixTypeConstraint(index, func->retTypeConstraint);
   }
 }
 
@@ -1472,10 +1449,8 @@ void optimize_class_prop_type_hints(const Index& index, Context ctx) {
   Trace::Bump bumper{Trace::hhbbc, bump};
   for (auto& prop : ctx.cls->properties) {
     fixTypeConstraint(
-      ctx,
       index,
-      const_cast<TypeConstraint&>(prop.typeConstraint),
-      TTop
+      const_cast<TypeConstraint&>(prop.typeConstraint)
     );
   }
 }

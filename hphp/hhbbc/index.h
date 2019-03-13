@@ -537,16 +537,18 @@ struct Index {
   folly::Optional<res::Class> selfCls(const Context& ctx) const;
   folly::Optional<res::Class> parentCls(const Context& ctx) const;
 
+  template <typename T>
   struct ResolvedInfo {
     AnnotType                               type;
     bool                                    nullable;
-    Either<SString,ClassInfo*> value;
+    T value;
   };
 
   /*
    * Try to resolve name, looking through TypeAliases and enums.
    */
-  ResolvedInfo resolve_type_name(SString name) const;
+  ResolvedInfo<folly::Optional<res::Class>>
+  resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -1053,6 +1055,9 @@ private:
     SString name, const Type& candidate) const;
 
   void init_return_type(const php::Func* func);
+
+  ResolvedInfo<Either<SString,ClassInfo*>>
+  resolve_type_name_internal(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

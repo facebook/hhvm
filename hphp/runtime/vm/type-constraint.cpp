@@ -85,7 +85,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if (isSoft()) {
     name += '@';
   }
-  if (isNullable() && isExtended()) {
+  if ((m_flags & Flags::DisplayNullable) && isExtended()) {
     name += '?';
   }
   if (isSelf()) {

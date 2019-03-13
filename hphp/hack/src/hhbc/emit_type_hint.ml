@@ -178,7 +178,7 @@ let rec hint_to_type_constraint
 
   | A.Hoption t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
-      t [TC.Nullable; TC.HHType; TC.ExtendedHint]
+      t [TC.Nullable; TC.DisplayNullable; TC.HHType; TC.ExtendedHint]
 
   | A.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
@@ -196,7 +196,7 @@ and make_tc_with_flags_if_non_empty_flags
   TC.make tc_name tc_flags
 
 let add_nullable ~nullable flags =
-  if nullable then List.stable_dedup (TC.Nullable :: flags) else flags
+  if nullable then List.stable_dedup (TC.Nullable :: TC.DisplayNullable :: flags) else flags
 
 let try_add_nullable ~nullable h flags =
   add_nullable ~nullable:(nullable && can_be_nullable h) flags
@@ -303,7 +303,7 @@ let emit_type_constraint_for_native_function tparams ret ti =
       in
       let flags = [TC.HHType; TC.ExtendedHint] in
       let rec get_flags t flags = match snd t with
-        | A.Hoption x -> TC.Nullable :: (get_flags x flags)
+        | A.Hoption x -> TC.Nullable :: TC.DisplayNullable :: (get_flags x flags)
         | A.Hsoft x -> TC.Soft :: (get_flags x flags)
         | A.Haccess _ -> TC.TypeConstant :: flags
         | A.Happly ((_, name), _) when List.mem ~equal:(=) tparams name ->

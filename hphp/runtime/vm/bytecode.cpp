@@ -6143,10 +6143,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(param.index < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
-  assertx(tc.hasConstraint());
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(param.ptr, func, param.index);
-  }
+  if (tc.isCheckable()) tc.verifyParam(param.ptr, func, param.index);
 }
 
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
@@ -6173,10 +6170,7 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
-  assertx(tc.hasConstraint());
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyOutParam(vmStack().topTV(), func, paramId);
-  }
+  if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
 }
 
 namespace {
@@ -6187,9 +6181,7 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   }
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().indC(ind), func);
-  }
+  if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
 }
 
 } // namespace

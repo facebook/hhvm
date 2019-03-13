@@ -3,8 +3,6 @@
  * Description: Shifts the first value of the array off and returns it.
  */
 
-array_shift(&$GLOBALS);
-
 $empty_array = array();
 $number = 5;
 $str = "abc";

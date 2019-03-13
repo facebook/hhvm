@@ -303,6 +303,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedConstFallback = gd.UndefinedConstFallback;
   RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
+  RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
       [&] (const std::pair<std::string,MD5>& kv) {
@@ -389,6 +390,7 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

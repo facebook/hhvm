@@ -2374,7 +2374,30 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     const folly::Optional<Type> deopt = folly::none
   ) {
     if (!type || is_type_might_raise(*type, t)) return result(TBool);
-    auto const test = type.value();
+    auto test = type.value();
+    if (t.couldBe(BClsMeth)) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        if (test == TVec) {
+          if (t.subtypeOf(BClsMeth | BVec)) return result(TTrue);
+          else if (t.couldBe(BVec)) return result(TBool);
+          else test = TClsMeth;
+        } else if (test == TVArr) {
+          if (t.subtypeOf(BClsMeth | BVArr)) return result(TTrue);
+          else if (t.couldBe(BVArr)) return result(TBool);
+          else test = TClsMeth;
+        }
+      } else {
+        if (test == TVArr) {
+          if (t.subtypeOf(BClsMeth | BVArr)) return result(TTrue);
+          else if (t.couldBe(BVArr)) return result(TBool);
+          else test = TClsMeth;
+        } else if (test == TArr) {
+          if (t.subtypeOf(BClsMeth | BArr)) return result(TTrue);
+          else if (t.couldBe(BArr)) return result(TBool);
+          else test = TClsMeth;
+        }
+      }
+    }
     if (t.subtypeOf(test)) return result(TTrue);
     if (!t.couldBe(test) && (!deopt || !t.couldBe(deopt.value()))) {
       return result(TFalse);

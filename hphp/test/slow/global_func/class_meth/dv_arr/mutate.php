@@ -11,7 +11,7 @@ function main() {
   var_dump(empty($m));
   var_dump(isset($m), isset($m[1]), isset($m[2]), isset($m['s']));
   var_dump($m[0], $m[1]);
-  var_dump(HH\is_varray(__hhvm_intrinsics\launder_value($m)));
+  var_dump(HH\is_varray($m));
   var_dump($m());
 
   try {

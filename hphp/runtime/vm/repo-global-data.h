@@ -211,6 +211,12 @@ struct Repo::GlobalData {
    */
   uint64_t Signature = 0;
 
+  /*
+   * If clsmeth type may raise,
+   * hhbbc IsTypeX optimization may be disabled.
+   */
+  bool IsVecNotices = false;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -250,6 +256,7 @@ struct Repo::GlobalData {
       (AbortBuildOnVerifyError)
       (UndefinedConstFallback)
       (UndefinedFunctionFallback)
+      (IsVecNotices)
       ;
   }
 };

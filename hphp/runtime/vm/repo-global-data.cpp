@@ -64,6 +64,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(UndefinedConstFallback);
   SHOW(UndefinedFunctionFallback);
   SHOW(Signature);
+  SHOW(IsVecNotices);
 #undef SHOW
   return out;
 }

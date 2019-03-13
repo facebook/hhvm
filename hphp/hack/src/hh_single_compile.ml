@@ -26,20 +26,21 @@ type mode =
   | DAEMON
 
 type options = {
-  filename         : string;
-  fallback         : bool;
-  config_list      : string list;
-  debug_time       : bool;
-  output_file      : string option;
-  config_file      : string option;
-  quiet_mode       : bool;
-  mode             : mode;
-  input_file_list  : string option;
-  dump_symbol_refs : bool;
-  dump_stats       : bool;
-  dump_config      : bool;
-  extract_facts    : bool;
-  log_stats        : bool;
+  filename          : string;
+  fallback          : bool;
+  config_list       : string list;
+  debug_time        : bool;
+  output_file       : string option;
+  config_file       : string option;
+  quiet_mode        : bool;
+  mode              : mode;
+  input_file_list   : string option;
+  dump_symbol_refs  : bool;
+  dump_stats        : bool;
+  dump_config       : bool;
+  extract_facts     : bool;
+  log_stats         : bool;
+  for_debugger_eval : bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -110,6 +111,7 @@ let parse_options () =
   let dump_stats = ref false in
   let dump_config = ref false in
   let log_stats = ref false in
+  let for_debugger_eval = ref false in
   let usage = P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0) in
   let options =
     [ ("--version"
@@ -178,6 +180,10 @@ let parse_options () =
       , Arg.Unit (fun () -> log_stats := false)
       , " Stop logging stats"
       );
+      ("--for-debugger-eval"
+      , Arg.Unit (fun () -> for_debugger_eval := true)
+      , " Mutate the program as if we're in the debugger repl"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -206,6 +212,7 @@ let parse_options () =
   ; dump_config        = !dump_config
   ; log_stats          = !log_stats
   ; extract_facts      = !extract_facts
+  ; for_debugger_eval  = !for_debugger_eval
   }
 
 let fail_daemon file error =
@@ -375,7 +382,7 @@ let modify_prog_for_debugger_eval ast hhas_prog =
       end
     | _ -> hhas_prog
 
-let do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval =
+let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
@@ -397,7 +404,7 @@ let do_compile filename compiler_options popt fail_or_ast debug_time for_debugge
           (is_file_path_for_evaled_code filename)
           popt
           ast in
-        if for_debugger_eval
+        if compiler_options.for_debugger_eval
           then modify_prog_for_debugger_eval ast hhas_prog
           else hhas_prog
       else Emit_program.emit_fatal_program ~ignore_message:true
@@ -460,7 +467,7 @@ let make_popt () =
     ~enable_stronger_await_binding:(enable_stronger_await_binding co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
 
-let process_single_source_unit ?(for_debugger_eval = false) compiler_options
+let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text =
   try
     let popt = make_popt () in
@@ -476,7 +483,7 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
           | None -> parse_file compiler_options popt filename source_text
         in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval
+        do_compile filename compiler_options popt fail_or_ast debug_time
       end in
     handle_output filename output debug_time
   with exc ->
@@ -569,8 +576,8 @@ let decl_and_run_mode compiler_options =
             (fun _af -> JSON_Object [])
             header in
           set_compiler_options (Some config_overrides);
+          let compiler_options = { compiler_options with for_debugger_eval } in
           let result = process_single_source_unit
-            ~for_debugger_eval
             compiler_options
             handle_output
             handle_exception

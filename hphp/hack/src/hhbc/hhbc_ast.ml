@@ -483,6 +483,7 @@ type instruct_misc =
   | BareThis of bare_this_op
   | CheckThis
   | InitThisLoc of local_id
+  | FuncNumArgs
   | StaticLocCheck of local_id * string
   | StaticLocDef of local_id * string
   | StaticLocInit of local_id * string

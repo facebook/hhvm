@@ -96,7 +96,6 @@ const StaticString
   s_abs("abs"),
   s_ord("ord"),
   s_chr("chr"),
-  s_func_num_args("func_num_args"),
   s_array_key_cast("hh\\array_key_cast"),
   s_type_structure("hh\\type_structure"),
   s_is_list_like("hh\\is_list_like"),
@@ -273,12 +272,6 @@ SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
   }
 
   return nullptr;
-}
-
-SSATmp* opt_func_num_args(IRGS& env, const ParamPrep& params) {
-  if (params.forNativeImpl) return nullptr;
-  if (params.size() != 0 || curFunc(env)->isPseudoMain()) return nullptr;
-  return gen(env, LdARNumParams, fp(env));
 }
 
 SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
@@ -939,7 +932,6 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(abs)
     X(ord)
     X(chr)
-    X(func_num_args)
     X(min2)
     X(array_key_cast)
     X(type_structure)

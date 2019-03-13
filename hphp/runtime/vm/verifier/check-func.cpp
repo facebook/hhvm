@@ -1959,6 +1959,10 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
     }
 
+    // undesirable: func_num_args()
+    case Op::FuncNumArgs:
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
     // unsafe: operations definitely involving boxes
     case Op::PopV:
     case Op::Box:

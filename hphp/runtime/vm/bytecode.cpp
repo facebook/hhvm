@@ -5996,6 +5996,17 @@ OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
   }
 }
 
+OPTBLD_INLINE void iopFuncNumArgs() {
+  if (vmfp()->func()->isPseudoMain()) {
+    raise_warning(
+      "func_num_args():  Called from the global scope - no function context"
+    );
+    vmStack().pushInt(-1);
+  } else {
+    vmStack().pushInt(vmfp()->numArgs());
+  }
+}
+
 static inline TypedValue* lookupClosureStatic(const StringData* name,
                                               const ActRec* fp) {
   auto const func = fp->m_func;

@@ -347,6 +347,7 @@ static const struct {
   { OpCheckThis,   {This,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
+  { OpFuncNumArgs, {None,             Stack1,       OutInt64        }},
   { OpStaticLocCheck,
                    {None,             Stack1|Local, OutBoolean      }},
   { OpStaticLocDef,
@@ -949,6 +950,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncD:
   case Op::FPushFuncU:
   case Op::FPushObjMethodD:
+  case Op::FuncNumArgs:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:

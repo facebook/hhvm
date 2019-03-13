@@ -210,21 +210,6 @@ Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset) {
   FUNC_GET_ARGS_IMPL(offset);
 }
 
-int64_t HHVM_FUNCTION(func_num_args) {
-  EagerCallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
-  if (ar == nullptr) {
-    return -1;
-  }
-  if (ar->func()->isPseudoMain()) {
-    raise_warning(
-      "func_num_args():  Called from the global scope - no function context"
-    );
-    return -1;
-  }
-  return ar->numArgs();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(register_postsend_function, const Variant& function,
@@ -248,7 +233,6 @@ void StandardExtension::initFunction() {
   HHVM_FE(func_get_arg);
   HHVM_FE(func_get_args);
   HHVM_FALIAS(__SystemLib\\func_slice_args, SystemLib_func_slice_args);
-  HHVM_FE(func_num_args);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
 

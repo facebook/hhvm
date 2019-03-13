@@ -573,6 +573,7 @@ let string_of_misc instruction =
     | Idx -> "Idx"
     | ArrayIdx -> "ArrayIdx"
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
+    | FuncNumArgs -> "FuncNumArgs"
     | AKExists -> "AKExists"
     | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
     | Silence (local, op) ->

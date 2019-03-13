@@ -4005,6 +4005,11 @@ void in(ISS& env, const bc::InitThisLoc& op) {
   env.state.thisLoc = op.loc1;
 }
 
+void in(ISS& env, const bc::FuncNumArgs& op) {
+  mayUseVV(env);
+  push(env, TInt);
+}
+
 void in(ISS& env, const bc::StaticLocDef& op) {
   if (staticLocHelper(env, op.loc1, topC(env))) {
     return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});

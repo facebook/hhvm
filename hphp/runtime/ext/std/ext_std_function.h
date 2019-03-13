@@ -44,8 +44,6 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset);
  */
 Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset);
 
-int64_t HHVM_FUNCTION(func_num_args);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(register_postsend_function,

@@ -212,6 +212,7 @@ let instr_memoset_eager range =
   instr (IMisc (MemoSetEager range))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_checkthis = instr (IMisc CheckThis)
+let instr_func_num_args = instr (IMisc FuncNumArgs)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
 let instr_verifyRetTypeTS = instr (IMisc VerifyRetTypeTS)
 let instr_verifyOutType i = instr (IMisc (VerifyOutType i))

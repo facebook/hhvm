@@ -38,7 +38,6 @@ struct LocalRange;
 
 TRACE_SET_MOD(hhbbc);
 
-const StaticString s_func_num_args("func_num_args");
 const StaticString s_func_get_args("func_get_args");
 const StaticString s_func_get_arg("func_get_arg");
 const StaticString s_func_slice_args("__SystemLib\\func_slice_args");
@@ -959,7 +958,7 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
         func.name()->isame(s_func_get_arg.get()) ||
         func.name()->isame(s_func_slice_args.get())) {
       readUnknownParams(env);
-    } else if (!func.name()->isame(s_func_num_args.get())) {
+    } else {
       readUnknownLocals(env);
     }
     mayUseVV(env);

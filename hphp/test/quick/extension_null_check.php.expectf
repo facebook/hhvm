@@ -12,4 +12,4 @@ array(1) {
   string(12) "func_get_arg"
 }
 string(53) "func_get_args() expects exactly 0 parameters, 1 given"
-string(53) "func_num_args() expects exactly 0 parameters, 1 given"
+string(43) "Unsupported dynamic call of func_num_args()"

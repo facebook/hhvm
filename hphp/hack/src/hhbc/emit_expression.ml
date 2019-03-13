@@ -941,12 +941,16 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
   | A.Id (_, id), _, [arg1], []
     when String.lowercase id = "hh\\set_frame_metadata" ||
          String.lowercase id = "\\hh\\set_frame_metadata" ->
-    gather[
+    gather [
       emit_expr ~need_ref:false env arg1;
       emit_pos pos;
       instr_popl (Local.Named "$86metadata");
       instr_null;
     ]
+  | A.Id (_, id), _, [], []
+    when String.lowercase id = "func_num_args" ||
+         String.lowercase id = "\\func_num_args" ->
+    emit_pos_then pos @@ instr_func_num_args
   | A.Id (_, s), _, [], []
     when (String.lowercase s = "exit" || String.lowercase s = "die") ->
     emit_pos_then pos @@ emit_exit env None

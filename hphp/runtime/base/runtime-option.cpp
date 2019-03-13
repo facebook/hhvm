@@ -1762,6 +1762,8 @@ void RuntimeOption::Load(
     EVALFLAGS()
 #undef F
 
+    if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
+
     EvalHackCompilerExtractPath = insertSchema(
       EvalHackCompilerExtractPath.data()
     );

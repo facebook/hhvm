@@ -69,6 +69,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file-util-defs.h"
@@ -219,41 +220,113 @@ using RepoOptionCache = tbb::concurrent_hash_map<
 >;
 RepoOptionCache s_repoOptionCache;
 
+template<class F>
+bool walkDirTree(std::string fpath, F func) {
+  const char* filename = ".hhvmconfig.hdf";
+  do {
+    auto const off = fpath.rfind('/');
+    if (off == std::string::npos) return false;
+    fpath.resize(off);
+    fpath += '/';
+    fpath += filename;
+
+    if (func(fpath)) return true;
+
+    fpath.resize(off);
+  } while (!fpath.empty() && fpath != "/");
+  return false;
+}
+
+RDS_LOCAL(std::string, s_lastSeenRepoConfig);
+
 }
 
 const RepoOptions& RepoOptions::forFile(const char* path) {
   if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
 
-  const char* filename = ".hhvmconfig.hdf";
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
-  do {
-    auto const off = fpath.rfind('/');
-    if (off == std::string::npos) return defaults();
-    fpath.resize(off);
-    fpath += '/';
-    fpath += filename;
 
-    if (!access(fpath.data(), R_OK)) {
-      struct stat st;
-      lstat(fpath.data(), &st);
+  // Fast path: we have an active request and it has cached a RepoOptions
+  // which has not been modified. This only works when the runtime option
+  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
+  // configs that were added between the current directory and the source file.
+  // (Loading these configs would result in a fatal anyway with this option)
+  if (!g_context.isNull()) {
+    if (auto const opts = g_context->getRepoOptionsForRequest()) {
+      // If path() is empty we have the default() options, which means we have
+      // negatively cached the existance of a .hhvmconfig.hdf for this request.
+      if (opts->path().empty()) return *opts;
 
-      RepoOptionCache::const_accessor rpathAcc;
-      s_repoOptionCache.insert(rpathAcc, fpath);
-
-      if (auto const opts = rpathAcc->second.fetch(st)) {
-        return *opts;
+      if (boost::starts_with(fpath, opts->path())) {
+        struct stat st;
+        if (lstat(opts->path().data(), &st) == 0) {
+          if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
+        }
       }
+    }
+  }
 
-      RepoOptions newOpts{fpath.data()};
-      newOpts.m_stat = st;
-      return *rpathAcc->second.update(std::move(newOpts));
+  auto const set = [&] (
+    RepoOptionCache::const_accessor& rpathAcc,
+    const std::string& path,
+    const struct stat& st
+  ) -> const RepoOptions* {
+    *s_lastSeenRepoConfig = path;
+    if (auto const opts = rpathAcc->second.fetch(st)) {
+      return opts;
+    }
+    RepoOptions newOpts{path.data()};
+    newOpts.m_stat = st;
+    return rpathAcc->second.update(std::move(newOpts));
+  };
+
+  auto const test = [&] (const std::string& path) -> const RepoOptions* {
+    struct stat st;
+    RepoOptionCache::const_accessor rpathAcc;
+    if (!s_repoOptionCache.find(rpathAcc, path)) return nullptr;
+    if (lstat(path.data(), &st) != 0) {
+      s_repoOptionCache.erase(rpathAcc);
+      return nullptr;
+    }
+    return set(rpathAcc, path, st);
+  };
+
+  const RepoOptions* ret{nullptr};
+
+  // WARNING: when Eval.CachePerRepoOptionsPath we cache the last used path for
+  //          RepoOptions per thread, and while we will detect changes to this
+  //          file, and do a rescan in the event that it is deleted or doesn't
+  //          match the current file being loaded, we will miss out on new
+  //          configs that may be added. Since we expect to see a single config
+  //          per repository we expect that this will be a reasonably safe,
+  //          optimization.
+  if (RuntimeOption::EvalCachePerRepoOptionsPath) {
+    if (!s_lastSeenRepoConfig->empty() &&
+        boost::starts_with(fpath, *s_lastSeenRepoConfig)) {
+      if (auto const r = test(*s_lastSeenRepoConfig)) return *r;
+      s_lastSeenRepoConfig->clear();
     }
 
-    fpath.resize(off);
-  } while (!fpath.empty() && fpath != "/");
+    // If the last seen path isn't set yet or is no longer accurate try checking
+    // other cached paths before falling back to the filesystem.
+    walkDirTree(fpath, [&] (const std::string& path) {
+      return (ret = test(path)) != nullptr;
+    });
+  }
 
-  return defaults();
+  if (ret) return *ret;
+
+  walkDirTree(fpath, [&] (const std::string& path) {
+    struct stat st;
+    if (lstat(path.data(), &st) != 0) return false;
+    RepoOptionCache::const_accessor rpathAcc;
+    s_repoOptionCache.insert(rpathAcc, path);
+    ret = set(rpathAcc, path, st);
+    return true;
+  });
+
+  return ret ? *ret : defaults();
 }
 
 static inline std::string hhjsBabelTransformDefault() {
@@ -390,7 +463,7 @@ PARSERFLAGS()
 #undef E
 
   filterNamespaces();
-  m_path = "{default options}";
+  m_path.clear();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

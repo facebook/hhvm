@@ -1199,10 +1199,12 @@ void ExecutionContext::onLoadWithOptions(
     return;
   }
   if (m_requestOptions != opts) {
+    auto const path =
+      opts.path().empty() ? "{default options}" : opts.path().data();
     raise_error(
       "Attempting to load file %s with incompatible parser settings from %s, "
       "this request is using parser settings from %s",
-      f, opts.path().data(), m_requestOptions->path().data()
+      f, path, m_requestOptions->path().data()
     );
   }
 }

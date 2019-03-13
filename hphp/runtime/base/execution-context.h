@@ -317,6 +317,8 @@ public:
 
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
 
+  const RepoOptions* getRepoOptionsForRequest() const;
+
   // When a file is loaded inside of a request context we perform a consistency
   // check to ensure that all files loaded within the request use the same
   // options.

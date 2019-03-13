@@ -1,9 +1,9 @@
 <?hh
 
-require "nested/inner.inc";
+require __DIR__."/../nested2/inner.inc";
 
 <<__EntryPoint>>
 function main() {
   var_dump(fun('main'));
-  inner();
+  inner2();
 }

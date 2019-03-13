@@ -706,6 +706,7 @@ struct RuntimeOption {
   F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   F(bool, EnablePerRepoOptions,        true)                            \
+  F(bool, CachePerRepoOptionsPath,     true)                            \
   /* Generate warning of side effect of the pseudomain is called by     \
      top-level code.*/                                                  \
   F(bool, WarnOnRealPseudomain, false)                                  \

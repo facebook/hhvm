@@ -231,6 +231,7 @@ let from_ast_wrapper : bool -> _ ->
         ~is_native
         ~is_async:method_is_async
         ~is_rx_body
+        ~debugger_modify_program:false
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
         ~default_dropthrough

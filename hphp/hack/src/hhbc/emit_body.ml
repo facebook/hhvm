@@ -240,6 +240,17 @@ let emit_verify_out params =
   let len = List.length param_instrs in
   if len = 0 then (0, empty) else (len, gather param_instrs)
 
+let modify_prog_for_debugger_eval instr_seq =
+  let instr_list = Instruction_sequence.instr_seq_to_list instr_seq in
+  let instr_length = List.length instr_list in
+  if instr_length < 4 then instr_seq else
+  let (h, t) = List.split_n instr_list (instr_length - 3) in
+  match t with
+    | [ Hhbc_ast.IBasic Hhbc_ast.PopC;
+        Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
+        Hhbc_ast.IContFlow Hhbc_ast.RetC ] -> gather [ instrs h; instr_retc ]
+    | _ -> instr_seq
+
 let emit_body
   ~pos
   ~scope
@@ -248,6 +259,7 @@ let emit_body
   ~is_native
   ~is_async
   ~is_rx_body
+  ~debugger_modify_program
   ~deprecation_info
   ~skipawaitable
   ~default_dropthrough
@@ -458,6 +470,9 @@ let emit_body
     default_value_setters;
   ] in
   let fault_instrs = extract_fault_funclets body_instrs in
+  let body_instrs = if debugger_modify_program
+    then modify_prog_for_debugger_eval body_instrs
+    else body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
   make_body
     body_instrs

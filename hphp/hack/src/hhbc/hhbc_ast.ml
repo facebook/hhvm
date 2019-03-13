@@ -409,7 +409,6 @@ type instruct_call =
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
   | NewObj of classref_id * has_generics_op
   | NewObjD of class_id
-  | NewObjI of classref_id
   | NewObjS of SpecialClsRef.t
   | FPushCtor of num_params
   | FCall of fcall_args * class_id * function_id

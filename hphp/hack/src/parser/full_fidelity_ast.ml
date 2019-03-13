@@ -1642,47 +1642,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       , args
       , varargs
       )
-    | AnonymousClass
-      { anonymous_class_argument_list = args
-      ; anonymous_class_extends_list = extends
-      ; anonymous_class_implements_list = implements
-      ; anonymous_class_body =
-        { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
-      ; _ } ->
-      let args, varargs = split_args_varargs args in
-      let c_mode = mode_annotation env.fi_mode in
-      let c_user_attributes = [] in
-      let c_file_attributes = [] in
-      let c_final = false in
-      let c_is_xhp = false in
-      let c_name = pos, "anonymous" in
-      let c_tparams = [] in
-      let c_extends = couldMap ~f:pHint extends env in
-      let c_implements = couldMap ~f:pHint implements env in
-      let c_body = List.concat (couldMap ~f:pClassElt elts env) in
-      let c_namespace = Namespace_env.empty env.parser_options in
-      let c_enum = None in
-      let c_span = pPos node env in
-      let c_kind = Cnormal in
-      let c_doc_comment = None in
-      let cls =
-        { c_mode
-        ; c_user_attributes
-        ; c_file_attributes
-        ; c_final
-        ; c_is_xhp
-        ; c_name
-        ; c_tparams
-        ; c_extends
-        ; c_implements
-        ; c_body
-        ; c_namespace
-        ; c_enum
-        ; c_span
-        ; c_kind
-        ; c_doc_comment
-        } in
-      NewAnonClass (args, varargs, cls)
     | GenericTypeSpecifier
       { generic_class_type
       ; _

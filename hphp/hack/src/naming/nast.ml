@@ -519,10 +519,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | KeyValCollection (s, tap, fl)     ->
        this#on_keyValCollection acc s tap fl
    | Omitted -> acc
-   | NewAnonClass (el1, el2, c) ->
-      let acc = this#on_list acc el1 in
-      let acc = this#on_list acc el2 in
-      this#on_class_ acc c
    | Lfun f -> this#on_fun_ acc f
    | Import (_, e) -> this#on_expr acc e
    | Collection (_, tal, fl) -> this#on_collection acc tal fl

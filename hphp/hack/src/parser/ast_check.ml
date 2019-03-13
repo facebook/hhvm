@@ -29,7 +29,7 @@ let rec check_lvalue errorf = function
     | String _ | String2 _ | Yield _ | Yield_break | Yield_from _
     | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
     | Binop _ | Eif _ | InstanceOf _
-    | New _ | NewAnonClass _ | Efun _ | Lfun _
+    | New _ | Efun _ | Lfun _
     | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | As _
     | ParenthesizedExpr _) ->
       errorf pos "Invalid lvalue"

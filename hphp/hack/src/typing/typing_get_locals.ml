@@ -285,10 +285,6 @@ and expr acc (_, e) =
     let _, acc2 = Option.value_map oe2 ~default:acc ~f:(expr acc) in
     let _, acc3 = expr acc e3 in
     smap_union acc (smap_inter acc2 acc3)
-  | NewAnonClass (es1, es2, _) ->
-    let acc = exprs acc es1 in
-    let acc = exprs acc es2 in
-    acc
   | Xml (_, attribs, es) ->
     let attrib acc a =
       match a with
@@ -480,10 +476,6 @@ let rec aast_expr acc (_, e) =
     let _, acc2 = Option.value_map oe2 ~default:acc ~f:(aast_expr acc) in
     let _, acc3 = aast_expr acc e3 in
     smap_union acc (smap_inter acc2 acc3)
-  | Aast.NewAnonClass (es1, es2, _) ->
-    let acc = exprs acc es1 in
-    let acc = exprs acc es2 in
-    acc
   | Aast.Xml (_, attribs, es) ->
     let attrib acc a =
       match a with

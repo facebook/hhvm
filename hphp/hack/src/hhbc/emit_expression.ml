@@ -873,26 +873,6 @@ and emit_new env pos expr targs args uargs =
     instr_popc
   ]
 
-and emit_new_anon env pos cls_idx args uargs =
-  if has_inout_args args then
-    Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
-  let nargs = List.length args + List.length uargs in
-  Local_helpers.scope_with_handler @@ fun () ->
-  let instr_args, _ = emit_args_and_inout_setters env args in
-  let instr_uargs = match uargs with
-    | [] -> empty
-    | uargs :: _ -> emit_expr ~need_ref:false env uargs
-  in
-  gather [
-    instr_newobji cls_idx;
-    instr_dup;
-    instr_fpushctor nargs;
-    instr_args;
-    instr_uargs;
-    emit_fcall pos args uargs None;
-    instr_popc
-  ]
-
 and emit_clone env expr =
   gather [
     emit_expr ~need_ref:false env expr;
@@ -1782,9 +1762,6 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.New (typeexpr, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_new env pos typeexpr targs args uargs
-  | A.NewAnonClass (args, uargs, { A.c_name = (_, cls_name); _ }) ->
-    let cls_idx = int_of_string cls_name in
-    emit_box_if_necessary pos need_ref @@ emit_new_anon env pos cls_idx args uargs
   | A.Array es ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_collection env expr es
@@ -3657,7 +3634,7 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.Int _ | A.Float _ | A.String _ | A.String2 _
   | A.PrefixedString _ | A.Yield_break | A.Yield_from _ | A.Suspend _
   | A.InstanceOf _ | A.Is _ | A.BracedExpr _ | A.ParenthesizedExpr _
-  | A.NewAnonClass _ | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _
+  | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _
   | A.Import _ | A.Callconv _ | A.List _ -> false
 
 

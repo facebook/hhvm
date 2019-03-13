@@ -51,8 +51,6 @@ type env = {
   defined_function_count : int;
   (* if we are immediately in using statement *)
   in_using: bool;
-  (* how many nested anonymous classes we are in *)
-  anonclass_depth: int;
 }
 
 type per_function_state = {
@@ -76,8 +74,6 @@ let empty_per_function_state = {
 type state = {
   (* Number of closures created in the current function *)
   closure_cnt_per_fun : int;
-  (* Number of anonymous classes created in the current function *)
-  anon_cls_cnt_per_fun : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
@@ -139,7 +135,6 @@ let set_has_goto st =
 let initial_state popt =
 {
   closure_cnt_per_fun = 0;
-  anon_cls_cnt_per_fun = 0;
   captured_vars = ULS.empty;
   captured_this = false;
   captured_generics = ULS.empty;
@@ -161,7 +156,7 @@ let initial_state popt =
 }
 
 let total_class_count env st =
-  List.length st.hoisted_classes + env.defined_class_count + env.anonclass_depth
+  List.length st.hoisted_classes + env.defined_class_count
 
 let set_in_using env =
   if env.in_using then env else { env with in_using = true }
@@ -335,8 +330,7 @@ let rec make_scope_name ns scope =
       (if String_utils.string_ends_with scope_name "::" then "" else "::") in
     scope_name ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
-    let n = make_class_name cd in
-    if Hhbc_string_utils.Classes.is_anonymous_class_name n then n ^ "::" else n
+    make_class_name cd
   | _ :: scope ->
     make_scope_name ns scope
 
@@ -356,7 +350,6 @@ let env_toplevel class_count function_count defs =
   ; defined_class_count = class_count
   ; defined_function_count = function_count
   ; in_using = false
-  ; anonclass_depth = 0
   }
 
 let env_with_method env md =
@@ -389,9 +382,7 @@ let set_namespace st ns =
   { st with namespace = ns }
 
 let reset_function_counts st =
-  { st with
-    closure_cnt_per_fun = 0;
-    anon_cls_cnt_per_fun = 0 }
+  { st with closure_cnt_per_fun = 0 }
 
 let record_function_state key {has_finally; has_goto; labels } rx_of_scope st =
   if not has_finally &&
@@ -429,11 +420,6 @@ let add_class env st cd =
 let make_closure_name env st =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
-    (make_scope_name st.namespace env.scope) per_fun_idx
-
-let make_anonymous_class_name env st =
-  let per_fun_idx = st.anon_cls_cnt_per_fun + 1 in
-  SU.Classes.mangle_anonymous_class
     (make_scope_name st.namespace env.scope) per_fun_idx
 
 let make_closure ~class_num
@@ -510,12 +496,6 @@ let convert_id (env:env) p (pid, str as id) =
     | None -> return ""
     end
   | "__METHOD__" ->
-    begin match env.scope with
-    | ScopeItem.Method _ :: ScopeItem.Class { c_name = (_, n); _ } :: _
-      when SU.Classes.is_anonymous_class_name n ->
-      (* HHVM does not inline method name in anonymous classes *)
-      p, Id (pid, (snd id))
-    | _ ->
     let prefix, is_trait =
       match Scope.get_class env.scope with
       | None -> "", false
@@ -538,7 +518,6 @@ let convert_id (env:env) p (pid, str as id) =
        * returns class name *)
       | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
-    end
     end
   | "__FUNCTION__" ->
     begin match env.scope with
@@ -801,48 +780,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (e, targs, el1, el2))
-  | NewAnonClass (args, varargs, cls) ->
-    let cls = { cls with
-      c_name = (fst cls.c_name, make_anonymous_class_name env st) } in
-    let class_idx = total_class_count env st in
-    let cls_condensed = { cls with
-      c_name = (fst cls.c_name, string_of_int class_idx);
-      c_body = [] } in
-    let add_ns_to_hint = function
-      | p, Happly (id, args) ->
-        let classname, _ = Hhbc_id.Class.elaborate_id st.namespace id in
-        p, Happly ((p, Hhbc_id.Class.to_raw_string classname), args)
-      | other -> other in
-    let elaborate_fun_param param = { param with
-      param_hint = Option.map param.param_hint add_ns_to_hint } in
-    let elaborate_method meth = { meth with
-      m_params = List.map meth.m_params elaborate_fun_param;
-      m_ret = Option.map meth.m_ret add_ns_to_hint } in
-    let elaborate_class_elt = function
-      | Method meth -> Method (elaborate_method meth)
-      | other -> other in
-    let cls = { cls with
-      c_extends = List.map cls.c_extends add_ns_to_hint;
-      c_implements = List.map cls.c_implements add_ns_to_hint;
-      c_body = List.map cls.c_body elaborate_class_elt } in
-    let prev_anonclass_depth = env.anonclass_depth in
-    let env = { env with anonclass_depth = prev_anonclass_depth + 1 } in
-    let num_hoisted_classes = List.length st.hoisted_classes in
-    let st, cls = convert_class env st cls in
-    let env = { env with anonclass_depth = prev_anonclass_depth } in
-    let re_ordered_hoisted_classes =
-      let new_classes, old_classes =
-        List.split_n st.hoisted_classes
-          (List.length st.hoisted_classes - num_hoisted_classes) in
-      new_classes @ (cls :: old_classes)
-    in
-    let st = { st with
-      anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
-      hoisted_classes = re_ordered_hoisted_classes } in
-    let env = env_with_class env cls in
-    let st, args = convert_exprs env st args in
-    let st, varargs = convert_exprs env st varargs in
-    st, (p, NewAnonClass (args, varargs, cls_condensed))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)
   | Lfun fd ->

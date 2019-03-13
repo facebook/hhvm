@@ -492,8 +492,6 @@ let string_of_call instruction =
     sep ["NewObj"; string_of_int id; string_of_has_generics_op op]
   | NewObjD cid ->
     sep ["NewObjD"; string_of_class_id cid]
-  | NewObjI id ->
-    sep ["NewObjI"; string_of_classref id]
   | NewObjS r ->
     sep ["NewObjS"; SpecialClsRef.to_string r]
   | FPushCtor n ->
@@ -1184,12 +1182,6 @@ and string_of_param_default_value ~env expr =
     let prefix = match snd expr with A.New (_, _, _, _) -> "new " | _ -> "" in
     prefix
     ^ e
-    ^ "("
-    ^ String.concat ~sep:", " es
-    ^ ")"
-  | A.NewAnonClass (es, ues, _) ->
-    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
-    "new class"
     ^ "("
     ^ String.concat ~sep:", " es
     ^ ")"

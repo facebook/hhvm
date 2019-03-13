@@ -294,8 +294,6 @@ and on_expr (p, e) : Aast.expr =
       on_list on_expr el2,
       p
     )
-  | NewAnonClass (el1, el2, c) ->
-    Aast.NewAnonClass (on_list on_expr el1, on_list on_expr el2, on_class c)
   | Efun (f, use_list) ->
     let ids = List.map
       (fun ((p, id), is_ref) ->

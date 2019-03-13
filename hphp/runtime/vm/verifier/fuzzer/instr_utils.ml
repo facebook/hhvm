@@ -146,7 +146,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator ContGetReturn
   | ICall NewObj _
   | ICall NewObjD _
-  | ICall NewObjI _
   | IGet CGetQuietL _                      -> [], ["C"]
   | IMutator SetG
   | IMutator SetOpG _

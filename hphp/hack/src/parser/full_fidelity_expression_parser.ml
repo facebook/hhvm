@@ -1286,56 +1286,8 @@ module WithStatementAndDeclAndTypeParser
         new object-creation-what
     *)
     let (parser, new_token) = assert_token parser New in
-    let (parser, new_what) =
-      let (parser1, token) = next_token parser in
-      begin match Token.kind token with
-      | Class -> parse_anonymous_class token parser1
-      | _ -> parse_constructor_call parser
-      end
-    in
+    let (parser, new_what) = parse_constructor_call parser in
     Make.object_creation_expression parser new_token new_what
-
-  and parse_anonymous_class class_token parser =
-    let (parser, class_token) = Make.token parser class_token in
-    let (parser, left, args, right) =
-      if peek_token_kind parser = LeftParen
-      then parse_expression_list_opt parser
-      else
-        let (parser, missing1) = Make.missing parser (pos parser) in
-        let (parser, missing2) = Make.missing parser (pos parser) in
-        let (parser, missing3) = Make.missing parser (pos parser) in
-        (parser, missing1, missing2, missing3)
-    in
-    let parser
-        , ( classish_extends
-          , classish_extends_list
-          , classish_implements
-          , classish_implements_list
-          , body
-          )
-    = with_decl_parser parser
-      (fun decl_parser ->
-        let (decl_parser, classish_extends, classish_extends_list) =
-          DeclParser.parse_classish_extends_opt decl_parser in
-        let (decl_parser, classish_implements, classish_implements_list) =
-          DeclParser.parse_classish_implements_opt decl_parser in
-        let (decl_parser, body) = DeclParser.parse_classish_body decl_parser in
-        decl_parser
-        , ( classish_extends
-          , classish_extends_list
-          , classish_implements
-          , classish_implements_list
-          , body
-          )
-      )
-    in
-    Make.anonymous_class
-      parser
-      class_token
-      left args right
-      classish_extends classish_extends_list
-      classish_implements classish_implements_list
-      body
 
   and parse_constructor_call parser =
     (* SPEC

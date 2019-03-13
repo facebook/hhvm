@@ -497,7 +497,6 @@ and expr_ env acc p e =
         ~init:acc
         fdm
   | Omitted -> acc
-  | NewAnonClass _ -> acc
   | Lfun _ -> acc
   | Import _ -> acc
   | Collection _ -> acc

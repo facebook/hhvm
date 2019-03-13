@@ -169,7 +169,6 @@ and expr_ =
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
-  | NewAnonClass of expr list * expr list * class_
   (* We'll add this for now, but later on we should go straight to an Efun *)
   | Lfun of fun_
   | Import of import_flavor * expr
@@ -538,7 +537,6 @@ let expr_to_string expr =
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
   | Omitted -> "Omitted"
-  | NewAnonClass _ -> "NewAnonClass"
   | Lfun _ -> "Lfun"
   | Import _ -> "Import"
   | Collection _ -> "Collection"

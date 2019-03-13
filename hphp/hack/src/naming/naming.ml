@@ -2550,9 +2550,6 @@ module Make (GetLocals : GetLocals) = struct
         aast_exprl env uel,
         p)
     | Aast.New _ -> failwith "ast_to_nast aast.new"
-    | Aast.NewAnonClass _ ->
-      Errors.experimental_feature p "Anonymous classes";
-      N.Null
     | Aast.Efun (f, idl) ->
       let idl =
         List.fold_right idl

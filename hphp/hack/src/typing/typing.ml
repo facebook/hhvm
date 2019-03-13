@@ -1403,7 +1403,6 @@ and expr_
   try
   match e with
   | Lfun _
-  | NewAnonClass _
   | Import _
   | Collection _
   | Omitted

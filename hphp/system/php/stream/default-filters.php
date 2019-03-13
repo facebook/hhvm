@@ -104,7 +104,7 @@ namespace __SystemLib {
 
     public function onCreate(): bool {
       /* strip out prefix "bizp2." */
-      $filterName = substr($this->filtername, 6);
+      $filterName = \substr($this->filtername, 6);
       switch ($filterName) {
         case 'compress':
           if (\is_int($this->params)) {

@@ -2419,16 +2419,7 @@ and expr_
             Typing_log.increment_feature_count env FL.Lambda.non_function_typed_context;
             check_body_under_known_params declared_ft
           | _ ->
-            (* If we're in partial mode then type-check definition anyway,
-             * so treating parameters without type hints as "untyped"
-            *)
-            if not (Env.is_strict env) && TypecheckerOptions.untyped_nonstrict_lambda_parameters
-              (Env.get_tcopt env)
-            then begin
-              Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
-              check_body_under_known_params declared_ft
-            end
-            else begin
+            begin
               Typing_log.increment_feature_count env FL.Lambda.unknown_params;
               (* check for recursive function calls *)
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in

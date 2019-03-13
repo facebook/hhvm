@@ -154,7 +154,7 @@ interface Iterable<+Tv>
    * @return - an `array` containing the values from the current `Iterable`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): varray;
+  public function toValuesArray(): varray<Tv>;
   /**
    * Returns a `Vector` converted from the current `Iterable`.
    *

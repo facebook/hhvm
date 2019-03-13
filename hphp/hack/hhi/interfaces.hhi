@@ -297,7 +297,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `array` containing the values from the current `Iterable`.
    */
-  public function toValuesArray(): varray;
+  public function toValuesArray(): varray<Tv>;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */

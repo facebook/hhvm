@@ -74,7 +74,9 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): varray;
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toValuesArray<Tu>(): varray<Tu>
+    where Tv1 as Tu, Tv2 as Tu;
 
   /**
    * Returns an `array` whose values are the keys from the current `Pair`.
@@ -82,7 +84,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` with the integer keys from the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toKeysArray(): varray;
+  public function toKeysArray(): varray<int>;
 
  /**
    * Returns a `Vector` containing the elements of the current `Pair`.

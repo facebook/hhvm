@@ -172,12 +172,15 @@ let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
     Printf.eprintf "Hack server disconnected suddenly [%s]\n   %s\n"
       (Exit_status.to_string finale_data.exit_status)
       finale_data.msg;
-    raise Exit_status.(Exit_with No_server_running)
+    if finale_data.exit_status = Exit_status.Failed_to_load_should_abort then
+      raise Exit_status.(Exit_with Server_hung_up_should_abort)
+    else
+      raise Exit_status.(Exit_with Server_hung_up_should_retry)
   | Server_hung_up None ->
     Printf.eprintf
       ("Hack server disconnected suddenly. Most likely a new one" ^^
        " is being initialized with a better saved state after a large rebase/update.\n");
-    raise Exit_status.(Exit_with No_server_running)
+    raise Exit_status.(Exit_with Server_hung_up_should_retry)
 
 let rec connect
     ?(first_attempt=false)
@@ -227,8 +230,8 @@ let rec connect
     | Ok (ic, oc, server_finale_file) ->
       let%lwt () =
         if env.do_post_handoff_handshake then
-          with_server_hung_up @@ fun () ->
-          wait_for_server_hello ic server_finale_file retries env.progress_callback start_time env.root
+          with_server_hung_up (fun () -> wait_for_server_hello
+            ic server_finale_file retries env.progress_callback start_time env.root)
         else
           Lwt.return_unit
       in
@@ -275,7 +278,7 @@ let rec connect
             "Error: no hh_server running. Either start hh_server"^^
             " yourself or run hh_client without --autostart-server false\n%!"
           end;
-          raise Exit_status.(Exit_with No_server_running)
+          raise Exit_status.(Exit_with No_server_running_should_retry)
         end
       | SMUtils.Server_dormant_out_of_retries ->
         Printf.eprintf begin
@@ -291,7 +294,7 @@ let rec connect
           " on next server to be started. Please wait patiently. If you really"^^
           " know what you're doing, maybe try --force-dormant-start\n%!"
         end;
-        raise Exit_status.(Exit_with No_server_running)
+        raise Exit_status.(Exit_with No_server_running_should_retry)
       | SMUtils.Monitor_socket_not_ready ->
         HackEventLogger.client_connect_once_busy start_time;
         Unix.sleepf 0.1;

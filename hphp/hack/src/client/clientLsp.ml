@@ -1830,7 +1830,8 @@ let rec connect (state: state) : state Lwt.t =
     (* Exit_with No_server_running: raised when (1) the server's simply not   *)
     (*   running, or there's some other reason why the connection was refused *)
     (*   or timed-out and no lockfile is present; (2) the server was dormant  *)
-    (*   and had already received too many pending connection requests.       *)
+    (*   and had already received too many pending connection requests;       *)
+    (*   (3) server failed to load saved-state but was required to do so.     *)
     (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
     (*   present but connection-attempt to the monitor times out - maybe it's *)
     (*   under DDOS, or maybe it's declining to answer new connections.       *)
@@ -1841,7 +1842,9 @@ let rec connect (state: state) : state Lwt.t =
     let open Exit_status in
     let new_hh_server_state = match e with
       | Exit_with Build_id_mismatch
-      | Exit_with No_server_running -> Hh_server_stopped
+      | Exit_with No_server_running_should_retry
+      | Exit_with Server_hung_up_should_retry
+      | Exit_with Server_hung_up_should_abort -> Hh_server_stopped
       | Exit_with Out_of_retries
       | Exit_with Out_of_time -> Hh_server_denying_connection
       | _ -> Hh_server_unknown

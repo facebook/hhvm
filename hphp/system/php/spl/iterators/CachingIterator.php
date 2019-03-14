@@ -23,7 +23,7 @@ class CachingIterator
   const CATCH_GET_CHILD = 16;
   const FULL_CACHE = 256;
 
-  function __construct(\Iterator $iterator, $flags = CachingIterator::CALL_TOSTRING) {
+  public function __construct(\Iterator $iterator, $flags = CachingIterator::CALL_TOSTRING) {
     $flags = $this->validateFlags($flags);
     if ($flags & self::FULL_CACHE) {
       $this->fullCacheIterator = new ArrayIterator();
@@ -117,7 +117,7 @@ class CachingIterator
    *
    * @return     mixed   No value is returned.
    */
-  function rewind() {
+  public function rewind() {
     if ($this->fullCacheIterator) {
       $this->fullCacheIterator = new ArrayIterator();
     }
@@ -163,7 +163,7 @@ class CachingIterator
    *
    * @return     mixed   No value is returned.
    */
-  function next() {
+  public function next() {
     $this->_setPosition($this->_getPosition() + 1);
     $this->_fetch(true);
     $this->moveInnerIteratorNext();
@@ -176,7 +176,7 @@ class CachingIterator
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  function valid() {
+  public function valid() {
     return $this->valid;
   }
 
@@ -187,7 +187,7 @@ class CachingIterator
    *
    * @return     mixed   Returns TRUE on success or FALSE on failure.
    */
-  function hasNext() {
+  public function hasNext() {
     return $this->getInnerIterator()->valid();
   }
 
@@ -198,7 +198,7 @@ class CachingIterator
    *
    * @return     mixed   The count of the elements iterated over.
    */
-  function count() {
+  public function count() {
     return $this->getFullCacheIterator()->count();
   }
 
@@ -213,7 +213,7 @@ class CachingIterator
    * @return     mixed   Returns TRUE if an entry referenced by the offset
    *                     exists, FALSE otherwise.
    */
-  function offsetExists($index) {
+  public function offsetExists($index) {
     return $this->getFullCacheIterator()->offsetExists($index);
   }
 
@@ -226,7 +226,7 @@ class CachingIterator
    *
    * @return     mixed   Description...
    */
-  function offsetGet($index) {
+  public function offsetGet($index) {
     return $this->getFullCacheIterator()->offsetGet($index);
   }
 
@@ -240,7 +240,7 @@ class CachingIterator
    *
    * @return     mixed   No value is returned.
    */
-  function offsetSet($index, $newval) {
+  public function offsetSet($index, $newval) {
     return $this->getFullCacheIterator()->offsetSet($index, $newval);
   }
 
@@ -254,7 +254,7 @@ class CachingIterator
    *
    * @return     mixed   No value is returned.
    */
-  function offsetUnset($index) {
+  public function offsetUnset($index) {
     return $this->getFullCacheIterator()->offsetUnset($index);
   }
 
@@ -265,7 +265,7 @@ class CachingIterator
    *
    * @return     mixed   Description...
    */
-  function getCache() {
+  public function getCache() {
     return $this->getFullCacheIterator()->getArrayCopy();
   }
 
@@ -276,7 +276,7 @@ class CachingIterator
    *
    * @return     mixed   The string representation of the current element.
    */
-  function __toString() {
+  public function __toString() {
     if ($this->flags & self::TOSTRING_USE_KEY) {
       return (string)$this->key();
     } else if ($this->flags & self::TOSTRING_USE_CURRENT) {

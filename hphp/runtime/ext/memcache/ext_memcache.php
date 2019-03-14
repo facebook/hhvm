@@ -5,7 +5,7 @@
  */
 <<__NativeData("MemcacheData")>>
 class Memcache {
-  function __construct() {}
+  public function __construct() {}
 
   /* Memcache::connect() establishes a connection to the memcached server. The
    * connection, which was opened using Memcache::connect() will be
@@ -24,7 +24,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function connect(string $host,
+  public function connect(string $host,
                    int $port = 0,
                    int $timeout = 0,
                    int $timeoutms = 0): bool;
@@ -45,7 +45,7 @@ class Memcache {
    * @param int $timeoutms
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  function pconnect(mixed $host,
+  public function pconnect(mixed $host,
                     mixed $port = 0,
                     mixed $timeout = 0,
                     mixed $timeoutms = 0): bool {
@@ -68,7 +68,7 @@ class Memcache {
    * to Memcache::set().
    */
   <<__Native>>
-  function add(string $key,
+  public function add(string $key,
                mixed $var,
                int $flag = 0,
                int $expire = 0): bool;
@@ -94,7 +94,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function set(string $key,
+  public function set(string $key,
                mixed $var,
                int $flag = 0,
                int $expire = 0): bool;
@@ -115,7 +115,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function replace(string $key,
+  public function replace(string $key,
                    mixed $var,
                    int $flag = 0,
                    int $expire = 0): bool;
@@ -134,7 +134,7 @@ class Memcache {
    * failure or if such key was not found.
    */
   <<__Native>>
-  function get(mixed $key,
+  public function get(mixed $key,
                mixed &$flags = null): mixed;
 
   /* Memcache::delete() deletes item with the key. If parameter timeout is
@@ -147,7 +147,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function delete(string $key,
+  public function delete(string $key,
                   int $expire = 0): bool;
 
   /* Memcache::increment() increments value of an item by the specified value.
@@ -162,7 +162,7 @@ class Memcache {
    * @return mixed - Returns new items value on success or FALSE on failure.
    */
   <<__Native>>
-  function increment(string $key,
+  public function increment(string $key,
                      int $offset = 1): mixed;
 
   /* Memcache::decrement() decrements value of the item by value. Similarly to
@@ -177,7 +177,7 @@ class Memcache {
    * @return mixed - Returns item's new value on success or FALSE on failure.
    */
   <<__Native>>
-  function decrement(string $key,
+  public function decrement(string $key,
                      int $offset = 1): mixed;
 
   /* Memcache::getVersion() returns a string with server's version number. Also
@@ -186,7 +186,7 @@ class Memcache {
    * failure.
    */
   <<__Native>>
-  function getversion(): mixed;
+  public function getversion(): mixed;
 
   /* Memcache::flush() immediately invalidates all existing items.
    * Memcache::flush() doesn't actually free any resources, it only marks all
@@ -196,12 +196,12 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function flush(int $expire = 0): bool;
+  public function flush(int $expire = 0): bool;
 
   /* @param int $timeoutms
    * @return bool
    */
-  function setoptimeout(mixed $timeoutms): bool {
+  public function setoptimeout(mixed $timeoutms): bool {
     $timeoutms = intval($timeoutms);
     if ($timeoutms < 1) {
       $timeoutms = 1000; // make default
@@ -218,7 +218,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function close(): bool;
+  public function close(): bool;
 
   /* Memcache::getServerStatus() returns a the servers online/offline status.
    * You can also use memcache_get_server_status() function.  This function has
@@ -230,7 +230,7 @@ class Memcache {
    * @return int - Returns a the servers status. 0 if server is failed, non-zero
    * otherwise
    */
-  function getserverstatus(string $host,
+  public function getserverstatus(string $host,
                            int $port = 0): int {
     /* intentionally doing nothing for now */
     return 1;
@@ -247,7 +247,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setcompressthreshold(int $threshold,
+  public function setcompressthreshold(int $threshold,
                                 float $min_savings = 0.2): bool;
 
   /* Memcache::getStats() returns an associative array with server's statistics.
@@ -266,7 +266,7 @@ class Memcache {
    * on failure.
    */
   <<__Native>>
-  function getstats(string $type = "",
+  public function getstats(string $type = "",
                     int $slabid = 0,
                     int $limit = 100): array;
 
@@ -289,7 +289,7 @@ class Memcache {
    * statistics or FALSE on failure.
    */
   <<__Native>>
-  function getextendedstats(string $type = "",
+  public function getextendedstats(string $type = "",
                             int $slabid = 0,
                             int $limit = 100): array;
 
@@ -319,7 +319,7 @@ class Memcache {
    * port of the failed server.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  function setserverparams(string $host,
+  public function setserverparams(string $host,
                            int $port = 11211,
                            int $timeout = 0,
                            int $retry_interval = 0,
@@ -381,7 +381,7 @@ class Memcache {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function addserver(string $host,
+  public function addserver(string $host,
                      int $port = 11211,
                      bool $persistent = false,
                      int $weight = 0,

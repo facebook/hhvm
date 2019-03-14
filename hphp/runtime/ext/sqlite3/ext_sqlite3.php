@@ -19,7 +19,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function __construct(string $filename,
+  public function __construct(string $filename,
                        int $flags = SQLITE3_OPEN_READWRITE |
                          SQLITE3_OPEN_CREATE,
                        ?string $encryption_key = null): void;
@@ -39,7 +39,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function open(string $filename,
+  public function open(string $filename,
                 int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
                 ?string $encryption_key = null): void;
 
@@ -55,7 +55,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function busytimeout(int $msecs): bool;
+  public function busytimeout(int $msecs): bool;
 
   /**
    * Closes the database connection.
@@ -64,7 +64,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function close(): bool;
+  public function close(): bool;
 
   /**
    * Executes a result-less query against a given database.
@@ -76,7 +76,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function exec(string $sql): bool;
+  public function exec(string $sql): bool;
 
   /**
    * Returns the SQLite3 library version as a string constant and as a number.
@@ -86,7 +86,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  static function version(): array;
+  public static function version(): array;
 
   /**
    * Returns the row ID of the most recent INSERT into the database.
@@ -96,7 +96,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function lastinsertrowid(): int;
+  public function lastinsertrowid(): int;
 
   /**
    * Returns the numeric result code of the most recent failed SQLite request.
@@ -106,7 +106,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function lasterrorcode(): int;
+  public function lasterrorcode(): int;
 
   /**
    * Returns English text describing the most recent failed SQLite request.
@@ -116,7 +116,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function lasterrormsg(): string;
+  public function lasterrormsg(): string;
 
   /**
    * Attempts to load an SQLite extension library.
@@ -130,7 +130,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function loadextension(string $extension): bool;
+  public function loadextension(string $extension): bool;
 
   /**
    * Returns the number of database rows that were changed (or inserted or
@@ -142,7 +142,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function changes(): int;
+  public function changes(): int;
 
   /**
    * Returns a string that has been properly escaped for safe inclusion in an
@@ -155,7 +155,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  static function escapestring(string $sql): string;
+  public static function escapestring(string $sql): string;
 
   /**
    * Prepares an SQL statement for execution and returns an SQLite3Stmt
@@ -168,7 +168,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function prepare(string $sql): mixed;
+  public function prepare(string $sql): mixed;
 
   /**
    * Executes an SQL query, returning an SQLite3Result object if the query
@@ -182,7 +182,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function query(string $sql): mixed;
+  public function query(string $sql): mixed;
 
   /**
    * Executes a query and returns a single result.
@@ -198,7 +198,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function querysingle(string $sql, bool $entire_row = false): mixed;
+  public function querysingle(string $sql, bool $entire_row = false): mixed;
 
   /**
    * Registers a PHP function or user-defined function for use as an SQL
@@ -218,7 +218,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function createfunction(string $name,
+  public function createfunction(string $name,
                           mixed $callback,
                           int $argcount = -1): bool;
 
@@ -241,13 +241,13 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  function createaggregate(string $name,
+  public function createaggregate(string $name,
                            mixed $step,
                            mixed $final,
                            int $argcount = -1): bool;
 
   <<__Native>>
-  function openblob(string $table,
+  public function openblob(string $table,
                     string $column,
                     int $rowid,
                     ?string $dbname = null): bool;
@@ -261,7 +261,7 @@ class SQLite3 {
 class SQLite3Stmt {
 
   <<__Native>>
-  function __construct(SQLite3 $dbobject, string $statement): void;
+  public function __construct(SQLite3 $dbobject, string $statement): void;
 
   /**
    * Returns the number of parameters within the prepared statement.
@@ -271,7 +271,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function paramcount(): int;
+  public function paramcount(): int;
 
   /**
    * Closes the prepared statement.
@@ -280,7 +280,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function close(): bool;
+  public function close(): bool;
 
   /**
    * Resets the prepared statement to its state prior to execution. All
@@ -291,7 +291,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function reset(): bool;
+  public function reset(): bool;
 
   /**
    * Clears all current bound parameters.
@@ -301,7 +301,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function clear(): bool;
+  public function clear(): bool;
 
   /**
    * Binds a parameter to a statement variable.
@@ -323,7 +323,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function bindparam(mixed $name,
+  public function bindparam(mixed $name,
                      mixed &$parameter,
                      int $type = SQLITE3_TEXT): bool;
 
@@ -347,7 +347,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function bindvalue(mixed $name,
+  public function bindvalue(mixed $name,
                      mixed $parameter,
                      int $type = SQLITE3_TEXT): bool;
 
@@ -359,7 +359,7 @@ class SQLite3Stmt {
    *
    */
   <<__Native>>
-  function execute(): mixed;
+  public function execute(): mixed;
 }
 
 /**
@@ -369,7 +369,7 @@ class SQLite3Stmt {
 <<__NativeData("SQLite3Result")>>
 class SQLite3Result {
 
-  function __construct(): void {}
+  public function __construct(): void {}
 
   /**
    * Returns the number of columns in the result set.
@@ -378,7 +378,7 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  function numcolumns(): int;
+  public function numcolumns(): int;
 
   /**
    * Returns the name of the column specified by the column_number.
@@ -390,7 +390,7 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  function columnname(int $column): string;
+  public function columnname(int $column): string;
 
   /**
    * Returns the type of the column identified by column_number.
@@ -403,7 +403,7 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  function columntype(int $column): int;
+  public function columntype(int $column): int;
 
   /**
    * Fetches a result row as an associative or numerically indexed array or
@@ -423,14 +423,14 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  function fetcharray(int $mode = SQLITE3_BOTH): mixed;
+  public function fetcharray(int $mode = SQLITE3_BOTH): mixed;
 
   /**
    * @return bool
    *
    */
   <<__Native>>
-  function reset(): bool;
+  public function reset(): bool;
 
   /**
    * Closes the result set.
@@ -439,5 +439,5 @@ class SQLite3Result {
    *
    */
   <<__Native>>
-  function finalize(): bool;
+  public function finalize(): bool;
 }

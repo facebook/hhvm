@@ -45,7 +45,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function addEmptyDir(string $dirname): bool;
+  public function addEmptyDir(string $dirname): bool;
 
   /**
    * Adds a file to a ZIP archive from the given path
@@ -61,7 +61,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function addFile(string $filename,
+  public function addFile(string $filename,
                    string $localname = "",
                    int $start = 0,
                    int $length = 0): bool;
@@ -76,7 +76,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function addFromString(string $localname,
+  public function addFromString(string $localname,
                          string $contents): bool;
 
   /**
@@ -89,7 +89,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function addGlob(string $pattern,
+  public function addGlob(string $pattern,
                    int $flags = 0,
                    darray $options = darray[]): bool;
 
@@ -103,7 +103,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function addPattern(string $pattern,
+  public function addPattern(string $pattern,
                       string $path = '.',
                       darray $options = darray[]): bool;
 
@@ -113,7 +113,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function close(): bool;
+  public function close(): bool;
 
   /**
    * delete an entry in the archive using its index
@@ -123,7 +123,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function deleteIndex(int $index): bool;
+  public function deleteIndex(int $index): bool;
 
   /**
    * delete an entry in the archive using its name
@@ -133,7 +133,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function deleteName(string $name): bool;
+  public function deleteName(string $name): bool;
 
   /**
    * Extract the archive contents
@@ -145,7 +145,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function extractTo(string $destination,
+  public function extractTo(string $destination,
                      mixed $entries = varray[]): bool;
 
   /**
@@ -157,7 +157,7 @@ class ZipArchive {
    * @return string - Returns the Zip archive comment.
    */
   <<__Native>>
-  function getArchiveComment(int $flags = 0): mixed;
+  public function getArchiveComment(int $flags = 0): mixed;
 
   /**
    * Returns the comment of an entry using the entry index
@@ -169,7 +169,7 @@ class ZipArchive {
    * @return string - Returns the comment on success.
    */
   <<__Native>>
-  function getCommentIndex(int $index,
+  public function getCommentIndex(int $index,
                            int $flags = 0): mixed;
 
   /**
@@ -182,7 +182,7 @@ class ZipArchive {
    * @return string - Returns the comment on success.
    */
   <<__Native>>
-  function getCommentName(string $name,
+  public function getCommentName(string $name,
                           int $flags = 0): mixed;
 
   /**
@@ -198,7 +198,7 @@ class ZipArchive {
    * @return string - Returns the contents of the entry on success.
    */
   <<__Native>>
-  function getFromIndex(int $index,
+  public function getFromIndex(int $index,
                         int $length = 0,
                         int $flags = 0): mixed;
 
@@ -215,7 +215,7 @@ class ZipArchive {
    * @return string - Returns the contents of the entry on success.
    */
   <<__Native>>
-  function getFromName(string $name,
+  public function getFromName(string $name,
                        int $length = 0,
                        int $flags = 0): mixed;
 
@@ -229,7 +229,7 @@ class ZipArchive {
    * @return string - Returns the name on success.
    */
   <<__Native>>
-  function getNameIndex(int $index,
+  public function getNameIndex(int $index,
                         int $flags = 0): mixed;
 
   /**
@@ -239,7 +239,7 @@ class ZipArchive {
    *   success.
    */
   <<__Native>>
-  function getStatusString(): mixed;
+  public function getStatusString(): mixed;
 
   /**
    * Get a file handler to the entry defined by its name (read only).
@@ -249,7 +249,7 @@ class ZipArchive {
    * @return resource - Returns a file pointer (resource) on success.
    */
   <<__Native>>
-  function getStream(string $name): mixed;
+  public function getStream(string $name): mixed;
 
   /**
    * Returns the index of the entry in the archive
@@ -262,7 +262,7 @@ class ZipArchive {
    * @return int - Returns the index of the entry on success.
    */
   <<__Native>>
-  function locateName(string $name,
+  public function locateName(string $name,
                       int $flags = 0): mixed;
 
   /**
@@ -283,7 +283,7 @@ class ZipArchive {
    *   ZipArchive::ER_SEEK   Seek error.
    */
   <<__Native>>
-  function open(string $filename,
+  public function open(string $filename,
                 int $flags = 0): mixed;
 
   /**
@@ -295,7 +295,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function renameIndex(int $index,
+  public function renameIndex(int $index,
                        string $newname): bool;
 
   /**
@@ -307,7 +307,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function renameName(string $name,
+  public function renameName(string $name,
                       string $newname): bool;
 
   /**
@@ -318,7 +318,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function setArchiveComment(string $comment): bool;
+  public function setArchiveComment(string $comment): bool;
 
   /**
    * Set the comment of an entry defined by its index
@@ -329,7 +329,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function setCommentIndex(int $index,
+  public function setCommentIndex(int $index,
                            string $comment): bool;
 
   /**
@@ -341,7 +341,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function setCommentName(string $name,
+  public function setCommentName(string $name,
                           string $comment): bool;
 
   /**
@@ -356,7 +356,7 @@ class ZipArchive {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setCompressionIndex(int $index, int $comp_method,
+  public function setCompressionIndex(int $index, int $comp_method,
                                int $comp_flags = 0): bool;
 
   /**
@@ -371,7 +371,7 @@ class ZipArchive {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setCompressionNAme(string $name, int $comp_method,
+  public function setCompressionNAme(string $name, int $comp_method,
                               int $comp_flags = 0): bool;
 
   /**
@@ -389,7 +389,7 @@ class ZipArchive {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setEncryptionIndex(int $index, int $encryption_method,
+  public function setEncryptionIndex(int $index, int $encryption_method,
                               string $password): bool;
 
   /**
@@ -407,7 +407,7 @@ class ZipArchive {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setEncryptionName(string $name, int $encryption_method,
+  public function setEncryptionName(string $name, int $encryption_method,
                              string $password): bool;
 
   /**
@@ -421,7 +421,7 @@ class ZipArchive {
    * @return array - Returns an array containing the entry details.
    */
   <<__Native>>
-  function statIndex(int $index,
+  public function statIndex(int $index,
                      int $flags = 0): mixed;
 
   /**
@@ -437,7 +437,7 @@ class ZipArchive {
    * @return array - Returns an array containing the entry details .
    */
   <<__Native>>
-  function statName(string $name,
+  public function statName(string $name,
                     int $flags = 0): mixed;
 
   /**
@@ -446,7 +446,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function unchangeAll(): bool;
+  public function unchangeAll(): bool;
 
   /**
    * Revert all global changes done in the archive.
@@ -454,7 +454,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function unchangeArchive(): bool;
+  public function unchangeArchive(): bool;
 
   /**
    * Revert all changes done to an entry at the given index
@@ -464,7 +464,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function unchangeIndex(int $index): bool;
+  public function unchangeIndex(int $index): bool;
 
   /**
    * Revert all changes done to an entry with the given name.
@@ -474,7 +474,7 @@ class ZipArchive {
    * @return bool -
    */
   <<__Native>>
-  function unchangeName(string $name): bool;
+  public function unchangeName(string $name): bool;
 
 }
 

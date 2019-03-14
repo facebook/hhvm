@@ -32,7 +32,7 @@ class RecursiveCachingIterator
    *
    * @return     mixed   The RecursiveCachingIterator.
    */
-  function __construct(
+  public function __construct(
     \Iterator $iterator,
     $flags = RecursiveCachingIterator::CALL_TOSTRING
   ) {
@@ -45,7 +45,7 @@ class RecursiveCachingIterator
     parent::__construct($iterator, $flags);
   }
 
-  function _fetch($check) {
+  public function _fetch($check) {
     $valid = parent::_fetch($check);
 
     if (!$check || $valid) {
@@ -72,7 +72,7 @@ class RecursiveCachingIterator
    * @return     mixed   TRUE if the inner iterator has children, otherwise
    *                     FALSE
    */
-  function hasChildren() {
+  public function hasChildren() {
     return $this->hasChildren;
   }
 
@@ -85,7 +85,7 @@ class RecursiveCachingIterator
    * @return     mixed   The inner iterator's children, as a
    *                     RecursiveCachingIterator.
    */
-  function getChildren() {
+  public function getChildren() {
     return $this->getChildren;
   }
 }

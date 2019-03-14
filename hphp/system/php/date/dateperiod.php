@@ -90,11 +90,11 @@ class DatePeriod implements Iterator {
     $this->current = clone $start;
   }
 
-  function current() {
+  public function current() {
     return clone $this->current;
   }
 
-  function rewind() {
+  public function rewind() {
     $this->current = clone $this->start;
 
     if ($this->options === DatePeriod::EXCLUDE_START_DATE) {
@@ -104,11 +104,11 @@ class DatePeriod implements Iterator {
     $this->iterKey = 0;
   }
 
-  function key() {
+  public function key() {
     return $this->iterKey;
   }
 
-  function next() {
+  public function next() {
     if ($this->valid()) {
       $current = clone $this->current;
       $this->current = $current->add($this->interval);
@@ -116,19 +116,19 @@ class DatePeriod implements Iterator {
     }
   }
 
-  function valid() {
+  public function valid() {
     return ($this->current >= $this->start && $this->current < $this->end);
   }
 
-  function getStartDate() {
+  public function getStartDate() {
     return clone $this->start;
   }
 
-  function getEndDate() {
+  public function getEndDate() {
     return clone $this->end;
   }
 
-  function getDateInterval() {
+  public function getDateInterval() {
     return clone $this->interval;
   }
 }

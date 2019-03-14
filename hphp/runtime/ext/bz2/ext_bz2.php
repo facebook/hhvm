@@ -142,9 +142,9 @@ namespace __SystemLib {
 <<__NativeData("__SystemLib\\ChunkedBunzipper")>>
 class ChunkedBunzipper {
   <<__Native>>
-  function eof(): bool;
+  public function eof(): bool;
 
   <<__Native>>
-  function inflateChunk(string $chunk): string;
+  public function inflateChunk(string $chunk): string;
 }
 }

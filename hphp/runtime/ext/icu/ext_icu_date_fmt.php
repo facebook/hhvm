@@ -99,7 +99,7 @@ class IntlDateFormatter {
    *   IntlDateFormatter::TRADITIONAL or IntlDateFormatter::GREGORIAN.
    */
   <<__Native>>
-  function getCalendar(): int;
+  public function getCalendar(): int;
 
   /**
    * Get the datetype used for the IntlDateFormatter
@@ -236,7 +236,7 @@ class IntlDateFormatter {
    * @return bool -
    */
   <<__Native>>
-  function setCalendar(mixed $which): bool;
+  public function setCalendar(mixed $which): bool;
 
   /**
    * Set the leniency of the parser

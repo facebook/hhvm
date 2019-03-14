@@ -50,7 +50,7 @@ abstract class FilterIterator extends IteratorIterator {
    * @return     mixed   TRUE if the current element is acceptable, otherwise
    *                     FALSE.
    */
-  abstract function accept();
+  public abstract function accept();
 
   private function fetch() {
     while ($this->it->valid()) {

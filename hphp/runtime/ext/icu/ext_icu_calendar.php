@@ -38,7 +38,7 @@ class IntlCalendar {
    *   intl_get_error_code() to detect error conditions.
    */
   <<__Native>>
-  function before(IntlCalendar $other): bool;
+  public function before(IntlCalendar $other): bool;
 
   /**
    * Clear a field or all fields

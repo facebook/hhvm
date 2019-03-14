@@ -3,7 +3,7 @@
 <<__NativeData("DOMNode")>>
 class DOMNode {
 
-  function __construct(): void {
+  public function __construct(): void {
   }
 
   /**
@@ -18,7 +18,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function appendChild(DOMNode $newnode): mixed;
+  public function appendChild(DOMNode $newnode): mixed;
 
   /**
    * Creates a copy of the node.
@@ -30,7 +30,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function cloneNode(bool $deep = false): mixed;
+  public function cloneNode(bool $deep = false): mixed;
 
   /**
    * Gets line number for where the node is defined.
@@ -40,7 +40,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function getLineNo(): int;
+  public function getLineNo(): int;
 
   /**
    * This method checks if the node has attributes. The tested node have to be
@@ -50,7 +50,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function hasAttributes(): bool;
+  public function hasAttributes(): bool;
 
   /**
    * This function checks if the node has children.
@@ -59,7 +59,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function hasChildNodes(): bool;
+  public function hasChildNodes(): bool;
 
   /**
    * This function inserts a new node right before the reference node. If you
@@ -74,7 +74,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function insertBefore(DOMNode $newnode, ?DOMNode $refnode = null): mixed;
+  public function insertBefore(DOMNode $newnode, ?DOMNode $refnode = null): mixed;
 
   /**
    * Tells whether namespaceURI is the default namespace.
@@ -86,7 +86,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function isDefaultNamespace(string $namespaceuri): bool;
+  public function isDefaultNamespace(string $namespaceuri): bool;
 
   /**
    * This function indicates if two nodes are the same node. The comparison is
@@ -98,7 +98,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function isSameNode(DOMNode $node): bool;
+  public function isSameNode(DOMNode $node): bool;
 
   /**
    * Checks if the asked feature is supported for the specified version.
@@ -112,7 +112,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function isSupported(string $feature, string $version): bool;
+  public function isSupported(string $feature, string $version): bool;
 
   /**
    * Gets the namespace URI of the node based on the prefix.
@@ -123,7 +123,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function lookupNamespaceUri(mixed $namespaceuri): mixed;
+  public function lookupNamespaceUri(mixed $namespaceuri): mixed;
 
   /**
    * Gets the namespace prefix of the node based on the namespace URI.
@@ -134,14 +134,14 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function lookupPrefix(string $prefix): mixed;
+  public function lookupPrefix(string $prefix): mixed;
 
   /**
    * Normalizes the node.
    *
    */
   <<__Native>>
-  function normalize(): void;
+  public function normalize(): void;
 
   /**
    * This functions removes a child from a list of children.
@@ -153,7 +153,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function removeChild(DOMNode $node): mixed;
+  public function removeChild(DOMNode $node): mixed;
 
   /**
    * This function replaces the child oldnode with the passed new node. If the
@@ -169,30 +169,30 @@ class DOMNode {
    *
    */
   <<__Native>>
-  function replaceChild(DOMNode $newchildobj, DOMNode $oldchildobj): mixed;
+  public function replaceChild(DOMNode $newchildobj, DOMNode $oldchildobj): mixed;
 
   <<__Native>>
-  function c14n(bool $exclusive = false,
+  public function c14n(bool $exclusive = false,
                 bool $with_comments = false,
                 mixed $xpath = null,
                 mixed $ns_prefixes = null): mixed;
 
   <<__Native>>
-  function c14nfile(string $uri,
+  public function c14nfile(string $uri,
                     bool $exclusive = false,
                     bool $with_comments = false,
                     mixed $xpath = null,
                     mixed $ns_prefixes = null): mixed;
 
   <<__Native>>
-  function getNodePath(): mixed;
+  public function getNodePath(): mixed;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 /**
@@ -202,7 +202,7 @@ class DOMNode {
 class DOMAttr extends DOMNode {
 
   <<__Native>>
-  function __construct(string $name, ?string $value = null): void;
+  public function __construct(string $name, ?string $value = null): void;
 
   /**
    * This function checks if the attribute is a defined ID.  According to the
@@ -214,14 +214,14 @@ class DOMAttr extends DOMNode {
    *
    */
   <<__Native>>
-  function isId(): bool;
+  public function isId(): bool;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 /**
@@ -240,7 +240,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  function appendData(string $arg): bool;
+  public function appendData(string $arg): bool;
 
   /**
    * Deletes count characters starting from position offset.
@@ -254,7 +254,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  function deleteData(int $offset, int $count): bool;
+  public function deleteData(int $offset, int $count): bool;
 
   /**
    * Inserts string data at position offset.
@@ -266,7 +266,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  function insertData(int $offset, string $data): bool;
+  public function insertData(int $offset, string $data): bool;
 
   /**
    * Replace count characters starting from position offset with data.
@@ -281,7 +281,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  function replaceData(int $offset, int $count, string $data): bool;
+  public function replaceData(int $offset, int $count, string $data): bool;
 
   /**
    * Returns the specified substring.
@@ -295,14 +295,14 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  function substringData(int $offset, int $count): string;
+  public function substringData(int $offset, int $count): string;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 /**
@@ -312,7 +312,7 @@ class DOMCharacterData extends DOMNode {
 class DOMComment extends DOMCharacterData {
 
   <<__Native>>
-  function __construct(?string $value = null): void;
+  public function __construct(?string $value = null): void;
 }
 
 /**
@@ -323,7 +323,7 @@ class DOMComment extends DOMCharacterData {
 class DOMText extends DOMCharacterData {
 
   <<__Native>>
-  function __construct(?string $value = null): void;
+  public function __construct(?string $value = null): void;
 
   /**
    * Indicates whether this text node contains whitespace. The text node is
@@ -334,7 +334,7 @@ class DOMText extends DOMCharacterData {
    *
    */
   <<__Native>>
-  function isWhitespaceInElementContent(): bool;
+  public function isWhitespaceInElementContent(): bool;
 
   /**
    * Indicates whether this text node contains whitespace. The text node is
@@ -345,7 +345,7 @@ class DOMText extends DOMCharacterData {
    *
    */
   <<__Native>>
-  function isElementContentWhitespace(): bool;
+  public function isElementContentWhitespace(): bool;
 
   /**
    * Breaks this node into two nodes at the specified offset, keeping both in
@@ -361,20 +361,20 @@ class DOMText extends DOMCharacterData {
    *
    */
   <<__Native>>
-  function splitText(int $offset): mixed;
+  public function splitText(int $offset): mixed;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 class DOMCdataSection extends DOMText {
 
   <<__Native>>
-  function __construct(string $value): void;
+  public function __construct(string $value): void;
 }
 
 /**
@@ -385,7 +385,7 @@ class DOMCdataSection extends DOMText {
 class DOMDocument extends DOMNode {
 
   <<__Native>>
-  function __construct(?string $version = null, ?string $encoding = null): void;
+  public function __construct(?string $version = null, ?string $encoding = null): void;
 
   /**
    * This function creates a new instance of class DOMAttr. This node will not
@@ -398,7 +398,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createAttribute(string $name): mixed;
+  public function createAttribute(string $name): mixed;
 
   /**
    * This function creates a new instance of class DOMAttr. This node will not
@@ -413,7 +413,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createAttributeNS(string $namespaceuri,
+  public function createAttributeNS(string $namespaceuri,
                              string $qualifiedname): mixed;
 
   /**
@@ -427,7 +427,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createCDATASection(string $data): mixed;
+  public function createCDATASection(string $data): mixed;
 
   /**
    * This function creates a new instance of class DOMComment. This node will
@@ -440,7 +440,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createComment(string $data): mixed;
+  public function createComment(string $data): mixed;
 
   /**
    * This function creates a new instance of class DOMDocumentFragment. This
@@ -451,7 +451,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createDocumentFragment(): mixed;
+  public function createDocumentFragment(): mixed;
 
   /**
    * This function creates a new instance of class DOMElement. This node will
@@ -468,7 +468,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createElement(string $name, ?string $value = null): mixed;
+  public function createElement(string $name, ?string $value = null): mixed;
 
   /**
    * This function creates a new element node with an associated namespace.
@@ -486,7 +486,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createElementNS(string $namespaceuri,
+  public function createElementNS(string $namespaceuri,
                            string $qualifiedname,
                            ?string $value = null): mixed;
 
@@ -502,7 +502,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createEntityReference(string $name): mixed;
+  public function createEntityReference(string $name): mixed;
 
   /**
    * This function creates a new instance of class DOMProcessingInstruction.
@@ -517,7 +517,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createProcessingInstruction(string $target,
+  public function createProcessingInstruction(string $target,
                                        ?string $data = null): mixed;
 
   /**
@@ -531,7 +531,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function createTextNode(string $data): mixed;
+  public function createTextNode(string $data): mixed;
 
   /**
    * This function is similar to DOMDocument::getElementsByTagName but
@@ -549,7 +549,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function getElementById(string $elementid): mixed;
+  public function getElementById(string $elementid): mixed;
 
   /**
    * This function returns a new instance of class DOMNodeList containing the
@@ -563,7 +563,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function getElementsByTagName(string $name): mixed;
+  public function getElementsByTagName(string $name): mixed;
 
   /**
    * Returns a DOMNodeList of all elements with a given local name and a
@@ -579,7 +579,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function getElementsByTagNameNS(string $namespaceuri,
+  public function getElementsByTagNameNS(string $namespaceuri,
                                   string $localname): mixed;
 
   /**
@@ -595,7 +595,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function importNode(DOMNode $importednode, bool $deep = false): mixed;
+  public function importNode(DOMNode $importednode, bool $deep = false): mixed;
 
   /**
    * Internal helper function for load()/loadXML()
@@ -723,7 +723,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function normalizeDocument(): void;
+  public function normalizeDocument(): void;
 
   /**
    * This method allows you to register your own extended DOM class to be used
@@ -740,7 +740,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function registerNodeClass(string $baseclass, string $extendedclass): bool;
+  public function registerNodeClass(string $baseclass, string $extendedclass): bool;
 
   /**
    * @param string $filename - The RNG file.
@@ -749,7 +749,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function relaxNGValidate(string $filename): bool;
+  public function relaxNGValidate(string $filename): bool;
 
   /**
    * @param string $source - A string containing the RNG schema.
@@ -758,7 +758,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function relaxNGValidateSource(string $source): bool;
+  public function relaxNGValidateSource(string $source): bool;
 
   /**
    * Creates an XML document from the DOM representation. This function is
@@ -774,7 +774,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function save(string $file, int $options = 0): mixed;
+  public function save(string $file, int $options = 0): mixed;
 
   /**
    * Creates an HTML document from the DOM representation. This function is
@@ -788,7 +788,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function saveHTML(?DOMNode $node = null): mixed;
+  public function saveHTML(?DOMNode $node = null): mixed;
 
   /**
    * Creates an HTML document from the DOM representation. This function is
@@ -802,7 +802,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function saveHTMLFile(string $file): mixed;
+  public function saveHTMLFile(string $file): mixed;
 
   /**
    * Creates an XML document from the DOM representation. This function is
@@ -818,7 +818,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function saveXML(?DOMNode $node = null, int $options = 0): mixed;
+  public function saveXML(?DOMNode $node = null, int $options = 0): mixed;
 
   /**
    * Validates a document based on the given schema file.
@@ -829,7 +829,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function schemaValidate(string $filename): bool;
+  public function schemaValidate(string $filename): bool;
 
   /**
    * Validates a document based on a schema defined in the given string.
@@ -840,7 +840,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function schemaValidateSource(string $source): bool;
+  public function schemaValidateSource(string $source): bool;
 
   /**
    * Validates the document based on its DTD.  You can also use the
@@ -851,7 +851,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function validate(): bool;
+  public function validate(): bool;
 
   /**
    * @param int $options - libxml parameters. Available since PHP 5.1.0 and
@@ -862,20 +862,20 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  function xinclude(int $options = 0): mixed;
+  public function xinclude(int $options = 0): mixed;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 class DOMDocumentFragment extends DOMNode {
 
   <<__Native>>
-  function __construct(): void;
+  public function __construct(): void;
 
   /**
    * Appends raw XML data to a DOMDocumentFragment.  This method is not part
@@ -891,7 +891,7 @@ class DOMDocumentFragment extends DOMNode {
    *
    */
   <<__Native>>
-  function appendXML(string $data): bool;
+  public function appendXML(string $data): bool;
 }
 
 /**
@@ -906,14 +906,14 @@ class DOMDocumentType extends DOMNode {
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 <<__NativeData("DOMElement")>>
 class DOMElement extends DOMNode {
 
   <<__Native>>
-  function __construct(string $name,
+  public function __construct(string $name,
                        ?string $value = null,
                        ?string $namespaceuri = null): void;
 
@@ -927,7 +927,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getAttribute(string $name): string;
+  public function getAttribute(string $name): string;
 
   /**
    * Returns the attribute node with name name for the current element.
@@ -938,7 +938,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getAttributeNode(string $name): mixed;
+  public function getAttributeNode(string $name): mixed;
 
   /**
    * Returns the attribute node in namespace namespaceURI with local name
@@ -951,7 +951,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getAttributeNodeNS(string $namespaceuri, string $localname): object;
+  public function getAttributeNodeNS(string $namespaceuri, string $localname): object;
 
   /**
    * Gets the value of the attribute in namespace namespaceURI with local name
@@ -965,7 +965,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getAttributeNS(string $namespaceuri, string $localname): string;
+  public function getAttributeNS(string $namespaceuri, string $localname): string;
 
   /**
    * This function returns a new instance of the class DOMNodeList of all
@@ -980,7 +980,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getElementsByTagName(string $name): object;
+  public function getElementsByTagName(string $name): object;
 
   /**
    * This function fetch all the descendant elements with a given localName
@@ -996,7 +996,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function getElementsByTagNameNS(string $namespaceuri,
+  public function getElementsByTagNameNS(string $namespaceuri,
                                   string $localname): object;
 
   /**
@@ -1008,7 +1008,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function hasAttribute(string $name): bool;
+  public function hasAttribute(string $name): bool;
 
   /**
    * Indicates whether attribute in namespace namespaceURI named localName
@@ -1021,7 +1021,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function hasAttributeNS(string $namespaceuri, string $localname): bool;
+  public function hasAttributeNS(string $namespaceuri, string $localname): bool;
 
   /**
    * Removes attribute named name from the element.
@@ -1032,7 +1032,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function removeAttribute(string $name): bool;
+  public function removeAttribute(string $name): bool;
 
   /**
    * Removes attribute oldnode from the element.
@@ -1043,7 +1043,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function removeAttributeNode(DOMAttr $oldattr): mixed;
+  public function removeAttributeNode(DOMAttr $oldattr): mixed;
 
   /**
    * Removes attribute is namespace namespaceURI named localName from the
@@ -1056,7 +1056,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function removeAttributeNS(string $namespaceuri, string $localname): mixed;
+  public function removeAttributeNS(string $namespaceuri, string $localname): mixed;
 
   /**
    * Sets an attribute with name name to the given value. If the attribute
@@ -1069,7 +1069,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setAttribute(string $name, string $value): mixed;
+  public function setAttribute(string $name, string $value): mixed;
 
   /**
    * Adds new attribute node attr to element.
@@ -1081,7 +1081,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setAttributeNode(DOMAttr $newattr): mixed;
+  public function setAttributeNode(DOMAttr $newattr): mixed;
 
   /**
    * Adds new attribute node attr to element.
@@ -1092,7 +1092,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setAttributeNodeNS(DOMAttr $newattr): mixed;
+  public function setAttributeNodeNS(DOMAttr $newattr): mixed;
 
   /**
    * Sets an attribute with namespace namespaceURI and name name to the given
@@ -1107,7 +1107,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setAttributeNS(string $namespaceuri,
+  public function setAttributeNS(string $namespaceuri,
                           string $name,
                           string $value): mixed;
 
@@ -1122,7 +1122,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setIDAttribute(string $name, bool $isid): mixed;
+  public function setIDAttribute(string $name, bool $isid): mixed;
 
   /**
    * Declares the attribute specified by attr to be of type ID.
@@ -1135,7 +1135,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setIDAttributeNode(DOMAttr $idattr, bool $isid): mixed;
+  public function setIDAttributeNode(DOMAttr $idattr, bool $isid): mixed;
 
   /**
    * Declares the attribute specified by localName and namespaceURI to be of
@@ -1151,7 +1151,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function setIDAttributeNS(string $namespaceuri,
+  public function setIDAttributeNS(string $namespaceuri,
                             string $localname,
                             bool $isid): mixed;
 
@@ -1160,7 +1160,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 
 }
 
@@ -1176,13 +1176,13 @@ class DOMEntity extends DOMNode {
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 class DOMEntityReference extends DOMNode {
 
   <<__Native>>
-  function __construct(string $name): void;
+  public function __construct(string $name): void;
 }
 
 class DOMNotation extends DOMNode {
@@ -1192,20 +1192,20 @@ class DOMNotation extends DOMNode {
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 class DOMProcessingInstruction extends DOMNode {
 
   <<__Native>>
-  function __construct(string $name, ?string $value = null): void;
+  public function __construct(string $name, ?string $value = null): void;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 class DOMNameSpaceNode extends DOMNode {
@@ -1214,29 +1214,29 @@ class DOMNameSpaceNode extends DOMNode {
 <<__NativeData("DOMNodeIterator")>>
 class DOMNodeIterator implements Iterator {
 
-  function __construct(): void {
+  public function __construct(): void {
   }
 
   <<__Native>>
-  function current(): mixed;
+  public function current(): mixed;
 
   <<__Native>>
-  function key(): mixed;
+  public function key(): mixed;
 
   <<__Native>>
-  function next(): mixed;
+  public function next(): mixed;
 
   <<__Native>>
-  function rewind(): mixed;
+  public function rewind(): mixed;
 
   <<__Native>>
-  function valid(): mixed;
+  public function valid(): mixed;
 }
 
 <<__NativeData("DOMIterable")>>
 class DOMNamedNodeMap implements IteratorAggregate {
 
-  function __construct(): void {
+  public function __construct(): void {
   }
 
   /**
@@ -1249,7 +1249,7 @@ class DOMNamedNodeMap implements IteratorAggregate {
    *
    */
   <<__Native>>
-  function getNamedItem(string $name): mixed;
+  public function getNamedItem(string $name): mixed;
 
   /**
    * Retrieves a node specified by localName and namespaceURI.
@@ -1262,7 +1262,7 @@ class DOMNamedNodeMap implements IteratorAggregate {
    *
    */
   <<__Native>>
-  function getNamedItemNS(string $namespaceuri, string $localname): mixed;
+  public function getNamedItemNS(string $namespaceuri, string $localname): mixed;
 
   /**
    * Retrieves a node specified by index within the DOMNamedNodeMap object.
@@ -1275,16 +1275,16 @@ class DOMNamedNodeMap implements IteratorAggregate {
    *
    */
   <<__Native>>
-  function item(int $index): mixed;
+  public function item(int $index): mixed;
 
   <<__Native>>
-  function getIterator(): mixed;
+  public function getIterator(): mixed;
 }
 
 <<__NativeData("DOMIterable")>>
 class DOMNodeList implements IteratorAggregate {
 
-  function __construct(): void {
+  public function __construct(): void {
   }
 
   /**
@@ -1299,17 +1299,17 @@ class DOMNodeList implements IteratorAggregate {
    *
    */
   <<__Native>>
-  function item(int $index): mixed;
+  public function item(int $index): mixed;
 
   <<__Native>>
-  function getIterator(): mixed;
+  public function getIterator(): mixed;
 
   /**
    * @return array - var_dump() compat output helper.
    *
    */
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 /**
@@ -1320,7 +1320,7 @@ class DOMNodeList implements IteratorAggregate {
  */
 class DOMImplementation {
 
-  function __construct(): void {
+  public function __construct(): void {
   }
 
   /**
@@ -1340,7 +1340,7 @@ class DOMImplementation {
    *
    */
   <<__Native,__AllowStatic>>
-  function createDocument(?string $namespaceuri = null,
+  public function createDocument(?string $namespaceuri = null,
                           ?string $qualifiedname = null,
                           ?DOMDocumentType $doctypeobj = null): mixed;
 
@@ -1359,7 +1359,7 @@ class DOMImplementation {
    *
    */
   <<__Native,__AllowStatic>>
-  function createDocumentType(?string $qualifiedname = null,
+  public function createDocumentType(?string $qualifiedname = null,
                               ?string $publicid = null,
                               ?string $systemid = null): mixed;
 
@@ -1372,7 +1372,7 @@ class DOMImplementation {
    *
    */
   <<__Native,__AllowStatic>>
-  function hasFeature(string $feature, string $version): bool;
+  public function hasFeature(string $feature, string $version): bool;
 }
 
 /**
@@ -1383,7 +1383,7 @@ class DOMImplementation {
 class DOMXPath {
 
   <<__Native>>
-  function __construct(mixed $doc): void;
+  public function __construct(mixed $doc): void;
 
   /**
    * Executes the given XPath expression and returns a typed result if
@@ -1401,7 +1401,7 @@ class DOMXPath {
    *
    */
   <<__Native>>
-  function evaluate(string $expr,
+  public function evaluate(string $expr,
                     ?DOMNode $context = null,
                     bool $registerNodeNS = true): mixed;
 
@@ -1421,7 +1421,7 @@ class DOMXPath {
    *
    */
   <<__Native>>
-  function query(string $expr,
+  public function query(string $expr,
                  ?DOMNode $context = null,
                  bool $registerNodeNS = true): mixed;
 
@@ -1435,7 +1435,7 @@ class DOMXPath {
    *
    */
   <<__Native>>
-  function registerNamespace(string $prefix, string $uri): bool;
+  public function registerNamespace(string $prefix, string $uri): bool;
 
   /**
    * This method enables the ability to use PHP functions within XPath
@@ -1449,10 +1449,10 @@ class DOMXPath {
    *
    */
   <<__Native>>
-  function registerPHPFunctions(mixed $funcs = null): mixed;
+  public function registerPHPFunctions(mixed $funcs = null): mixed;
 
   <<__Native>>
-  function __debuginfo(): array;
+  public function __debuginfo(): array;
 }
 
 function dom_document_create_element(DOMDocument $obj,

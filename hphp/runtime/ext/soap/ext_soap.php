@@ -4,7 +4,7 @@
 class SoapServer {
 
   <<__Native>>
-  function __construct(
+  public function __construct(
     mixed $wsdl,
     darray<string, mixed> $options = darray[],
   ): void;
@@ -18,7 +18,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function setclass(string $name, ...$argv): void;
+  public function setclass(string $name, ...$argv): void;
 
   /**
    * This sets a specific object as the handler for SOAP requests, rather than
@@ -28,7 +28,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function setobject(mixed $obj): void;
+  public function setobject(mixed $obj): void;
 
   /**
    * Exports one or more functions for remote clients
@@ -43,7 +43,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function addfunction(mixed $func): void;
+  public function addfunction(mixed $func): void;
 
   /**
    * Returns a list of the defined functions in the SoapServer object. This
@@ -54,7 +54,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function getfunctions(): mixed;
+  public function getfunctions(): mixed;
 
   /**
    * Processes a SOAP request, calls necessary functions, and sends a response
@@ -65,7 +65,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function handle(?string $request = null): void;
+  public function handle(?string $request = null): void;
 
   /**
    * This function allows saving data between requests in a PHP session. It
@@ -82,7 +82,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function setpersistence(int $mode): void;
+  public function setpersistence(int $mode): void;
 
   /**
    * Sends a response to the client of the current request indicating an
@@ -98,7 +98,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function fault(mixed $code,
+  public function fault(mixed $code,
                  string $fault,
                  ?string $actor = null,
                  mixed $detail = null,
@@ -112,7 +112,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  function addsoapheader(mixed $fault): void;
+  public function addsoapheader(mixed $fault): void;
 }
 
 <<__NativeData("SoapClient")>>
@@ -152,7 +152,7 @@ class SoapClient {
   }
 
   <<__Native>>
-  function __construct(
+  public function __construct(
     mixed $wsdl,
     darray<string, mixed> $options = darray[],
   ): void;
@@ -166,11 +166,11 @@ class SoapClient {
     mixed &$output_headers = null
   ): mixed;
 
-  function __call(mixed $name, mixed $args): mixed {
+  public function __call(mixed $name, mixed $args): mixed {
     return $this->__soapcall($name, $args);
   }
 
-  function __soapcall(
+  public function __soapcall(
     string $name,
     varray<mixed> $args,
     darray $options = darray[],
@@ -189,38 +189,38 @@ class SoapClient {
   }
 
   <<__Native>>
-  function __getlastrequest(): mixed;
+  public function __getlastrequest(): mixed;
 
   <<__Native>>
-  function __getlastresponse(): mixed;
+  public function __getlastresponse(): mixed;
 
   <<__Native>>
-  function __getlastrequestheaders(): mixed;
+  public function __getlastrequestheaders(): mixed;
 
   <<__Native>>
-  function __getlastresponseheaders(): mixed;
+  public function __getlastresponseheaders(): mixed;
 
   <<__Native>>
-  function __getfunctions(): mixed;
+  public function __getfunctions(): mixed;
 
   <<__Native>>
-  function __gettypes(): mixed;
+  public function __gettypes(): mixed;
 
   <<__Native>>
-  function __dorequest(string $buf,
+  public function __dorequest(string $buf,
                        string $location,
                        string $action,
                        int $version,
                        bool $oneway = false): mixed;
 
   <<__Native>>
-  function __setcookie(string $name, ?string $value = null): mixed;
+  public function __setcookie(string $name, ?string $value = null): mixed;
 
   <<__Native>>
-  function __setlocation(?string $new_location = null): mixed;
+  public function __setlocation(?string $new_location = null): mixed;
 
   <<__Native>>
-  function __setsoapheaders(mixed $headers = null): bool;
+  public function __setsoapheaders(mixed $headers = null): bool;
 }
 
 /**
@@ -230,7 +230,7 @@ class SoapClient {
 class SoapVar {
 
   <<__Native>>
-  function __construct(mixed $data,
+  public function __construct(mixed $data,
                        mixed $type,
                        string $type_name = "",
                        string $type_namespace = "",
@@ -246,7 +246,7 @@ class SoapVar {
 class SoapParam {
 
   <<__Native>>
-  function __construct(mixed $data, string $name): void;
+  public function __construct(mixed $data, string $name): void;
 }
 
 /**
@@ -257,7 +257,7 @@ class SoapParam {
 class SoapHeader {
 
   <<__Native>>
-  function __construct(string $ns,
+  public function __construct(string $ns,
                        string $name,
                        mixed $data = null,
                        bool $mustunderstand = false,

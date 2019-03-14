@@ -6,20 +6,20 @@
  */
 <<__NativeData("XMLWriterData")>>
 class XMLWriter {
-  function __construct() {}
+  public function __construct() {}
 
   /* Create new xmlwriter using memory for string output.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function openMemory(): bool;
+  public function openMemory(): bool;
 
   /* Creates a new XMLWriter using uri for the output.
    * @param string $uri - The URI of the resource for the output.
    * @return mixed - Returns TRUE on success or FALSE on
    */
   <<__Native>>
-  function openURI(string $uri): bool;
+  public function openURI(string $uri): bool;
 
   /* Sets the string which will be used to indent each element/attribute of the
    * resulting xml.
@@ -27,14 +27,14 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setIndentString(string $indentstring): bool;
+  public function setIndentString(string $indentstring): bool;
 
   /* Toggles indentation on or off.
    * @param bool $indent - Whether indentation is enabled.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setIndent(bool $indent): bool;
+  public function setIndent(bool $indent): bool;
 
   /* Starts a document.
    * @param string $version - The version number of the document as part of the
@@ -45,7 +45,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startDocument(?string $version = "1.0",
+  public function startDocument(?string $version = "1.0",
                          ?string $encoding = "",
                          ?string $standalone = ""): bool;
 
@@ -54,7 +54,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startElement(string $name): bool;
+  public function startElement(string $name): bool;
 
   /* Starts a namespaced element.
    * @param mixed $prefix - The namespace prefix.
@@ -63,7 +63,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startElementNS(mixed $prefix,
+  public function startElementNS(mixed $prefix,
                           string $name,
                           mixed $uri): bool;
 
@@ -75,7 +75,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeElementNS(?string $prefix,
+  public function writeElementNS(?string $prefix,
                           string $name,
                           ?string $uri,
                           ?string $content = null): bool;
@@ -86,21 +86,21 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeElement(string $name,
+  public function writeElement(string $name,
                         ?string $content = null): bool;
 
   /* Ends the current element.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endElement(): bool;
+  public function endElement(): bool;
 
   /* End the current xml element. Writes an end tag even if the element is
    * empty.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function fullEndElement(): bool;
+  public function fullEndElement(): bool;
 
   /* Starts a namespaced attribute.
    * @param string $prefix - The namespace prefix.
@@ -109,7 +109,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startAttributeNS(string $prefix,
+  public function startAttributeNS(string $prefix,
                             string $name,
                             string $uri): bool;
 
@@ -118,7 +118,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startAttribute(string $name): bool;
+  public function startAttribute(string $name): bool;
 
   /* Writes a full namespaced attribute.
    * @param string $prefix - The namespace prefix.
@@ -128,7 +128,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeAttributeNS(string $prefix,
+  public function writeAttributeNS(string $prefix,
                             string $name,
                             string $uri,
                             string $content): bool;
@@ -139,65 +139,65 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeAttribute(string $name,
+  public function writeAttribute(string $name,
                           string $value): bool;
 
   /* Ends the current attribute.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endAttribute(): bool;
+  public function endAttribute(): bool;
 
   /* Starts a CDATA.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startCData(): bool;
+  public function startCData(): bool;
 
   /* Writes a full CDATA.
    * @param string $content - The contents of the CDATA.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeCData(string $content): bool;
+  public function writeCData(string $content): bool;
 
   /* Ends the current CDATA section.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endCData(): bool;
+  public function endCData(): bool;
 
   /* Starts a comment.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startComment(): bool;
+  public function startComment(): bool;
 
   /* Writes a full comment.
    * @param string $content - The contents of the comment.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeComment(string $content): bool;
+  public function writeComment(string $content): bool;
 
   /* Ends the current comment.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endComment(): bool;
+  public function endComment(): bool;
 
   /* Ends the current document.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endDocument(): bool;
+  public function endDocument(): bool;
 
   /* Starts a processing instruction tag.
    * @param string $target - The target of the processing instruction.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startPI(string $target): bool;
+  public function startPI(string $target): bool;
 
   /* Writes a processing instruction.
    * @param string $target - The target of the processing instruction.
@@ -205,28 +205,28 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writePI(string $target,
+  public function writePI(string $target,
                    string $content): bool;
 
   /* Ends the current processing instruction.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endPI(): bool;
+  public function endPI(): bool;
 
   /* Writes a text.
    * @param string $content - The contents of the text.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function text(string $content): bool;
+  public function text(string $content): bool;
 
   /* Writes a raw xml text.
    * @param string $content - The text string to write.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeRaw(string $content): bool;
+  public function writeRaw(string $content): bool;
 
   /* Starts a DTD.
    * @param string $qualifiedname - The qualified name of the document type to
@@ -236,7 +236,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startDTD(string $qualifiedname,
+  public function startDTD(string $qualifiedname,
                     ?string $publicid = "",
                     ?string $systemid = ""): bool;
 
@@ -248,7 +248,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeDTD(string $name,
+  public function writeDTD(string $name,
                     ?string $publicid = "",
                     ?string $systemid = "",
                     ?string $subset = ""): bool;
@@ -259,7 +259,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startDTDElement(string $qualifiedname): bool;
+  public function startDTDElement(string $qualifiedname): bool;
 
   /* Writes a full DTD element.
    * @param string $name - The name of the DTD element.
@@ -267,21 +267,21 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeDTDElement(string $name,
+  public function writeDTDElement(string $name,
                            string $content): bool;
 
   /* Ends the current DTD element.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endDTDElement(): bool;
+  public function endDTDElement(): bool;
 
   /* Starts a DTD attribute list.
    * @param string $name - The attribute list name.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startDTDAttlist(string $name): bool;
+  public function startDTDAttlist(string $name): bool;
 
   /* Writes a DTD attribute list.
    * @param string $name - The name of the DTD attribute list.
@@ -289,14 +289,14 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeDTDAttlist(string $name,
+  public function writeDTDAttlist(string $name,
                            string $content): bool;
 
   /* Ends the current DTD attribute list.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endDTDAttlist(): bool;
+  public function endDTDAttlist(): bool;
 
   /* Starts a DTD entity.
    * @param string $name - The name of the entity.
@@ -304,7 +304,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function startDTDEntity(string $name,
+  public function startDTDEntity(string $name,
                           bool $isparam): bool;
 
   /* Writes a full DTD entity.
@@ -317,7 +317,7 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function writeDTDEntity(string $name,
+  public function writeDTDEntity(string $name,
                           string $content,
                           bool $pe = false,
                           string $publicid = "",
@@ -328,13 +328,13 @@ class XMLWriter {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endDTDEntity(): bool;
+  public function endDTDEntity(): bool;
 
   /* Ends the DTD of the document.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function endDTD(): bool;
+  public function endDTD(): bool;
 
   /* Flushes the current buffer.
    * @param bool $empty - Whether to empty the buffer or no. Default is TRUE.
@@ -343,7 +343,7 @@ class XMLWriter {
    * buffer and return the number of written bytes.
    */
   <<__Native>>
-  function flush(?bool $empty = true): mixed;
+  public function flush(?bool $empty = true): mixed;
 
   /* Returns the current buffer.
    * @param bool $flush - Whether to flush the output buffer or no. Default is
@@ -351,7 +351,7 @@ class XMLWriter {
    * @return string - Returns the current buffer as a string.
    */
   <<__Native>>
-  function outputMemory(?bool $flush = true): string;
+  public function outputMemory(?bool $flush = true): string;
 }
 
 /* Creates a new XMLWriter using memory for string output.

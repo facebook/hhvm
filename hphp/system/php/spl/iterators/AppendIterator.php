@@ -18,7 +18,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  function __construct() {
+  public function __construct() {
     $this->iterators = new ArrayIterator(array());
   }
 
@@ -32,7 +32,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  function append(\Iterator $it) {
+  public function append(\Iterator $it) {
     $it->rewind();
     $this->iterators->append($it);
 
@@ -53,7 +53,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    * @return     mixed   Returns an ArrayIterator containing the appended
    *                     iterators.
    */
-  function getArrayIterator() {
+  public function getArrayIterator() {
     return $this->iterators;
   }
 
@@ -67,7 +67,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    * @return     mixed   Returns an integer, which is the zero-based index of
    *                     the current inner iterator.
    */
-  function getIteratorIndex() {
+  public function getIteratorIndex() {
     return $this->iterators->key();
   }
 
@@ -81,7 +81,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    * @return     mixed   The current inner iterator, or NULL if there is not
    *                     one.
    */
-  function getInnerIterator() {
+  public function getInnerIterator() {
     return $this->iterators->current();
   }
 
@@ -93,7 +93,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  function rewind() {
+  public function rewind() {
     $this->iterators->rewind();
 
     /**
@@ -117,7 +117,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    * @return     mixed   Returns TRUE if the current iteration is valid,
    *                     FALSE otherwise.
    */
-  function valid() {
+  public function valid() {
     return $this->iterators->valid() && $this->getInnerIterator()->valid();
   }
 
@@ -129,7 +129,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   The current value if it is valid or NULL otherwise.
    */
-  function current() {
+  public function current() {
     /* Using $this->valid() would be exactly the same; it would omit
      * the access to a non valid element in the inner iterator. Since
      * the user didn't respect the valid() return value false this
@@ -146,7 +146,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   The current key if it is valid or NULL otherwise.
    */
-  function key() {
+  public function key() {
     return $this->iterators->valid() ? $this->getInnerIterator()->key() : NULL;
   }
 
@@ -159,7 +159,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  function next() {
+  public function next() {
     if (!$this->iterators->valid()){
       return; /* done all */
     }
@@ -177,7 +177,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
     }
   }
 
-  function __call($func, $params) {
+  public function __call($func, $params) {
     return call_user_func_array(array($this->getInnerIterator(), $func),
                                 $params);
   }

@@ -12,7 +12,7 @@ class PDO {
    * @param array $options
    */
   <<__Native>>
-  function __construct(string $dsn,
+  public function __construct(string $dsn,
                        string $username = "",
                        string $password = "",
                        ?darray<string, mixed> $options = NULL): void;
@@ -53,7 +53,7 @@ class PDO {
    * check the statement.
    */
   <<__Native>>
-  function prepare(string $statement,
+  public function prepare(string $statement,
                    darray<arraykey, mixed> $options = darray[]): mixed;
 
   /* Turns off autocommit mode. While autocommit mode is turned off, changes
@@ -68,14 +68,14 @@ class PDO {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function beginTransaction(): bool;
+  public function beginTransaction(): bool;
 
   /* Commits a transaction, returning the database connection to autocommit mode
    * until the next call to PDO::beginTransaction() starts a new transaction.
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function commit(): bool;
+  public function commit(): bool;
 
   /* Checks if a transaction is currently active within the driver. This method
    * only works for database drivers that support transactions.
@@ -83,7 +83,7 @@ class PDO {
    * if not.
    */
   <<__Native>>
-  function inTransaction(): bool;
+  public function inTransaction(): bool;
 
   /* Rolls back the current transaction, as initiated by
    * PDO::beginTransaction(). It is an error to call this method if no
@@ -97,7 +97,7 @@ class PDO {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function rollBack(): bool;
+  public function rollBack(): bool;
 
   /* Sets an attribute on the database handle. Some of the available generic
    * attributes are listed below; some drivers may make use of additional driver
@@ -128,7 +128,7 @@ class PDO {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setAttribute(int $attribute,
+  public function setAttribute(int $attribute,
                         mixed $value): bool;
 
   /* This function returns the value of a database connection attribute. To
@@ -145,7 +145,7 @@ class PDO {
    * attribute. An unsuccessful call returns null.
    */
   <<__Native>>
-  function getAttribute(int $attribute): mixed;
+  public function getAttribute(int $attribute): mixed;
 
   /* PDO::exec() executes an SQL statement in a single function call, returning
    * the number of rows affected by the statement.  PDO::exec() does not return
@@ -166,7 +166,7 @@ class PDO {
    * statement that affected 0 rows results in a call to die():
    */
   <<__Native>>
-  function exec(string $query): mixed;
+  public function exec(string $query): mixed;
 
   /* Returns the ID of the last inserted row, or the last value from a sequence
    * object, depending on the underlying driver. For example, PDO_PGSQL()
@@ -185,7 +185,7 @@ class PDO {
    * triggers an IM001 SQLSTATE.
    */
   <<__Native>>
-  function lastInsertId(string $seqname = ""): mixed;
+  public function lastInsertId(string $seqname = ""): mixed;
 
   /* @return mixed - Returns an SQLSTATE, a five characters alphanumeric
    * identifier defined in the ANSI SQL-92 standard. Briefly, an SQLSTATE
@@ -205,7 +205,7 @@ class PDO {
    * has been run on the database handle.
    */
   <<__Native>>
-  function errorCode(): mixed;
+  public function errorCode(): mixed;
 
   /* @return array - PDO::errorInfo() returns an array of error information
    * about the last operation performed by this database handle. The array
@@ -222,7 +222,7 @@ class PDO {
    * operation performed on a particular statement handle.
    */
   <<__Native>>
-  function errorInfo(): varray<mixed>;
+  public function errorInfo(): varray<mixed>;
 
   /* PDO::query() executes an SQL statement in a single function call, returning
    * the result set (if any) returned by the statement as a PDOStatement object.
@@ -242,7 +242,7 @@ class PDO {
    * failure.
    */
   <<__Native>>
-  function query(string $sql,
+  public function query(string $sql,
                  ...$argv): mixed;
 
   /* PDO::quote() places quotes around the input string (if required) and
@@ -264,7 +264,7 @@ class PDO {
    * in this way.
    */
   <<__Native>>
-  function quote(string $str,
+  public function quote(string $str,
                  int $paramtype = PDO::PARAM_STR): mixed;
 
   /* Registers a User Defined Function for use in SQL statements.
@@ -278,7 +278,7 @@ class PDO {
    * on failure.
    */
   <<__Native>>
-  function sqliteCreateFunction(string $name,
+  public function sqliteCreateFunction(string $name,
                                 mixed $callback,
                                 int $argcount = -1): bool;
 
@@ -295,7 +295,7 @@ class PDO {
    * FALSE on failure.
    */
   <<__Native>>
-  function sqliteCreateAggregate(string $name,
+  public function sqliteCreateAggregate(string $name,
                                  mixed $step,
                                  mixed $final,
                                  int $argcount = -1): bool;
@@ -303,12 +303,12 @@ class PDO {
   /* @return mixed
    */
   <<__Native>>
-  function __wakeup(): mixed;
+  public function __wakeup(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function __sleep(): mixed;
+  public function __sleep(): mixed;
 
   /* This function returns all currently available PDO drivers which can be used
    * in DSN parameter of PDO::__construct(). This is a static method.
@@ -316,7 +316,7 @@ class PDO {
    * names. If no drivers are available, it returns an empty array.
    */
   <<__Native>>
-  static function getAvailableDrivers(): vec<string>;
+  public static function getAvailableDrivers(): vec<string>;
 }
 
 /* Represents a prepared statement and, after the statement is executed, an
@@ -340,7 +340,7 @@ class PDOStatement implements Iterator {
    * @return mixed - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function execute(?arraylike $params = NULL): mixed;
+  public function execute(?arraylike $params = NULL): mixed;
 
   /* Fetches a row from a result set associated with a PDOStatement object. The
    * fetch_style parameter determines how PDO returns the row.
@@ -380,7 +380,7 @@ class PDOStatement implements Iterator {
    * fetch type. In all cases, FALSE is returned on failure.
    */
   <<__Native>>
-  function fetch(int $how = 0,
+  public function fetch(int $how = 0,
                  int $orientation = PDO::FETCH_ORI_NEXT,
                  int $offset = 0): mixed;
 
@@ -394,7 +394,7 @@ class PDOStatement implements Iterator {
    * names that correspond to the column names or FALSE on failure.
    */
   <<__Native>>
-  function fetchObject(string $class_name = "",
+  public function fetchObject(string $class_name = "",
                        mixed $ctor_args = null): mixed;
 
   /* Returns a single column from the next row of a result set or FALSE if there
@@ -407,7 +407,7 @@ class PDOStatement implements Iterator {
    * from the same row if you use PDOStatement::fetchColumn() to retrieve data.
    */
   <<__Native>>
-  function fetchColumn(int $column_numner = 0): mixed;
+  public function fetchColumn(int $column_numner = 0): mixed;
 
   /* @param int $how - Controls the contents of the returned array as documented
    * in PDOStatement::fetch().  To return an array consisting of all values of a
@@ -431,7 +431,7 @@ class PDOStatement implements Iterator {
    * processing them with PHP.
    */
   <<__Native>>
-  function fetchAll(int $how = 0,
+  public function fetchAll(int $how = 0,
                     mixed $class_name = null,
                     mixed $ctor_args = null): mixed;
 
@@ -447,7 +447,7 @@ class PDOStatement implements Iterator {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function bindValue(mixed $paramno,
+  public function bindValue(mixed $paramno,
                      mixed $param,
                      int $type = PDO::PARAM_STR): bool;
 
@@ -477,7 +477,7 @@ class PDOStatement implements Iterator {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function bindParam(mixed $paramno,
+  public function bindParam(mixed $paramno,
                      mixed &$param,
                      int $type = PDO::PARAM_STR,
                      int $max_value_len = 0,
@@ -505,7 +505,7 @@ class PDOStatement implements Iterator {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function bindColumn(mixed $paramno,
+  public function bindColumn(mixed $paramno,
                       mixed &$param,
                       int $type = PDO::PARAM_STR,
                       int $max_value_len = 0,
@@ -521,14 +521,14 @@ class PDOStatement implements Iterator {
    * @return int - Returns the number of rows.
    */
   <<__Native>>
-  function rowCount(): int;
+  public function rowCount(): int;
 
   /* @return mixed - Identical to PDO::errorCode(), except that
    * PDOStatement::errorCode() only retrieves error codes for operations
    * performed with PDOStatement objects.
    */
   <<__Native>>
-  function errorCode(): mixed;
+  public function errorCode(): mixed;
 
   /* @return array - PDOStatement::errorInfo() returns an array of error
    * information about the last operation performed by this statement handle.
@@ -538,7 +538,7 @@ class PDOStatement implements Iterator {
    * message.
    */
   <<__Native>>
-  function errorInfo(): varray<mixed>;
+  public function errorInfo(): varray<mixed>;
 
   /* Sets an attribute on the statement. Currently, no generic attributes are
    * set but only driver specific: PDO::ATTR_CURSOR_NAME (Firebird and ODBC
@@ -548,7 +548,7 @@ class PDOStatement implements Iterator {
    * @return mixed - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function setAttribute(int $attribute,
+  public function setAttribute(int $attribute,
                         mixed $value): mixed;
 
   /* Gets an attribute of the statement. Currently, no generic attributes exist
@@ -558,7 +558,7 @@ class PDOStatement implements Iterator {
    * @return mixed - Returns the attribute value.
    */
   <<__Native>>
-  function getAttribute(int $attribute): mixed;
+  public function getAttribute(int $attribute): mixed;
 
   /* Use PDOStatement::columnCount() to return the number of columns in the
    * result set represented by the PDOStatement object.  If the PDOStatement
@@ -571,7 +571,7 @@ class PDOStatement implements Iterator {
    * PDOStatement::columnCount() returns 0.
    */
   <<__Native>>
-  function columnCount(): int;
+  public function columnCount(): int;
 
   /* @param int $column - The 0-indexed column in the result set.
    * @return mixed - Returns an associative array containing the following
@@ -590,14 +590,14 @@ class PDOStatement implements Iterator {
    * exists.
    */
   <<__Native>>
-  function getColumnMeta(int $column): mixed;
+  public function getColumnMeta(int $column): mixed;
 
   /* @param int $mode - The fetch mode must be one of the PDO::FETCH_*
    * constants.
    * @return bool - Returns 1 on success or FALSE on failure.
    */
   <<__Native>>
-  function setFetchMode(int $mode,
+  public function setFetchMode(int $mode,
                         ...$argv): bool;
 
   /* Some database servers support stored procedures that return more than one
@@ -608,7 +608,7 @@ class PDOStatement implements Iterator {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function nextRowset(): bool;
+  public function nextRowset(): bool;
 
   /* PDOStatement::closeCursor() frees up the connection to the server so that
    * other SQL statements may be issued, but leaves the statement in a state
@@ -624,7 +624,7 @@ class PDOStatement implements Iterator {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  function closeCursor(): bool;
+  public function closeCursor(): bool;
 
   /* Dumps the information contained by a prepared statement directly on the
    * output. It will provide the SQL query in use, the number of parameters used
@@ -640,42 +640,42 @@ class PDOStatement implements Iterator {
    * @return mixed - No value is returned.
    */
   <<__Native>>
-  function debugDumpParams(): mixed;
+  public function debugDumpParams(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function current(): mixed;
+  public function current(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function key(): mixed;
+  public function key(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function next(): mixed;
+  public function next(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function rewind(): mixed;
+  public function rewind(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function valid(): mixed;
+  public function valid(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function __wakeup(): mixed;
+  public function __wakeup(): mixed;
 
   /* @return mixed
    */
   <<__Native>>
-  function __sleep(): mixed;
+  public function __sleep(): mixed;
 }
 
 /* @return vec<string>

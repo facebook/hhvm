@@ -212,13 +212,13 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
    * @param mixed $result - A result to be set
    */
   <<__Native>>
-  function succeed(mixed $result): void;
+  public function succeed(mixed $result): void;
 
   /* Notify the condition variable and mark the ConditionWaitHandle as failed
    * @param mixed $exception - An exception to be set
    */
   <<__Native>>
-  function fail(\Exception $exception): void;
+  public function fail(\Exception $exception): void;
 }
 
 /* A wait handle that succeeds with null once desired scheduling priority is

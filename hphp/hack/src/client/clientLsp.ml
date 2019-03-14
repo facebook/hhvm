@@ -2135,6 +2135,11 @@ let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
                 | None -> failwith "we should have root by now"
                 | Some root -> root
               in
+              (* Belt-and-braces kill the server. This is in case the server was *)
+              (* stuck in some weird state. It's also what 'hh restart' does. *)
+              if MonitorConnection.server_exists (Path.to_string root) then
+                ClientStop.kill_server root !ref_from;
+              (* After that it's safe to try to reconnect! *)
               start_server root;
               let%lwt state =
                 reconnect_from_lost_if_necessary state `Force_regain

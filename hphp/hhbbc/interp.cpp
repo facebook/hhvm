@@ -1625,10 +1625,16 @@ void in(ISS& env, const bc::CGetL& op) {
       BareThisOp::Notice : BareThisOp::NoNotice;
     return reduce(env, bc::BareThis { subop });
   }
-  if (!locCouldBeUninit(env, op.loc1)) {
+  if (!peekLocCouldBeUninit(env, op.loc1)) {
+    auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
+    if (minLocEquiv != NoLocalId) {
+      return reduce(env, bc::CGetL { minLocEquiv });
+    }
+
     nothrow(env);
     constprop(env);
   }
+  mayReadLocal(env, op.loc1);
   push(env, locAsCell(env, op.loc1), op.loc1);
 }
 
@@ -1636,8 +1642,14 @@ void in(ISS& env, const bc::CGetQuietL& op) {
   if (locIsThis(env, op.loc1)) {
     return reduce(env, bc::BareThis { BareThisOp::NoNotice });
   }
+  auto const minLocEquiv = findMinLocEquiv(env, op.loc1, true);
+  if (minLocEquiv != NoLocalId) {
+    return reduce(env, bc::CGetQuietL { minLocEquiv });
+  }
+
   nothrow(env);
   constprop(env);
+  mayReadLocal(env, op.loc1);
   push(env, locAsCell(env, op.loc1), op.loc1);
 }
 
@@ -1653,15 +1665,28 @@ void in(ISS& env, const bc::CUGetL& op) {
 }
 
 void in(ISS& env, const bc::PushL& op) {
-  if (auto val = tv(locRaw(env, op.loc1))) {
+  if (auto val = tv(peekLocRaw(env, op.loc1))) {
     return reduce(env, gen_constant(*val), bc::UnsetL { op.loc1 });
   }
+
+  auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
+  if (minLocEquiv != NoLocalId) {
+    return reduce(env, bc::CGetL { minLocEquiv }, bc::UnsetL { op.loc1 });
+  }
+
   impl(env, bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
 }
 
 void in(ISS& env, const bc::CGetL2& op) {
   // Can't constprop yet because of no INS_1 support in bc.h
-  if (!locCouldBeUninit(env, op.loc1)) effect_free(env);
+  if (!peekLocCouldBeUninit(env, op.loc1)) {
+    auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
+    if (minLocEquiv != NoLocalId) {
+      return reduce(env, bc::CGetL2 { minLocEquiv });
+    }
+    effect_free(env);
+  }
+  mayReadLocal(env, op.loc1);
   auto loc = locAsCell(env, op.loc1);
   auto topEquiv = topStkLocal(env);
   auto top = popT(env);

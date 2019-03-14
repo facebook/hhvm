@@ -104,6 +104,7 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range);
 namespace {
 
 Type peekLocRaw(ISS& env, LocalId l);
+bool peekLocCouldBeUninit(ISS& env, LocalId l);
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -581,6 +582,24 @@ LocalId findLocEquiv(ISS& env, LocalId l) {
   return env.state.equivLocals[l];
 }
 
+// Find an equivalent local with minimum id
+LocalId findMinLocEquiv(ISS& env, LocalId l, bool allowUninit) {
+  if (l >= env.state.equivLocals.size() ||
+      env.state.equivLocals[l] == NoLocalId) {
+    return NoLocalId;
+  }
+
+  auto min = l;
+  auto cur = env.state.equivLocals[l];
+  while (cur != l) {
+    if (cur < min && (allowUninit || !peekLocCouldBeUninit(env, cur))) {
+      min = cur;
+    }
+    cur = env.state.equivLocals[cur];
+  }
+  return min != l ? min : NoLocalId;
+}
+
 // Determine whether two locals are equivalent
 bool locsAreEquiv(ISS& env, LocalId l1, LocalId l2) {
   if (l1 >= env.state.equivLocals.size() ||
@@ -808,6 +827,10 @@ Type derefLoc(ISS& env, LocalId l) {
   auto v = locRaw(env, l);
   if (v.subtypeOf(BCell)) return v;
   return v.couldBe(BUninit) ? TCell : TInitCell;
+}
+
+bool peekLocCouldBeUninit(ISS& env, LocalId l) {
+  return peekLocRaw(env, l).couldBe(BUninit);
 }
 
 bool locCouldBeUninit(ISS& env, LocalId l) {

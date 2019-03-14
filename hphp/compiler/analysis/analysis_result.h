@@ -17,20 +17,18 @@
 #ifndef incl_HPHP_ANALYSIS_RESULT_H_
 #define incl_HPHP_ANALYSIS_RESULT_H_
 
-#include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
-#include "hphp/compiler/hphp.h"
 
 #include "hphp/runtime/vm/as.h"
 
 #include "hphp/util/compact-vector.h"
-#include "hphp/util/string-bag.h"
 #include "hphp/util/thread-local.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <atomic>
 #include <map>
+#include <memory>
 #include <set>
 #include <utility>
 #include <vector>
@@ -39,12 +37,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(AnalysisResult);
-DECLARE_BOOST_TYPES(ClosureExpression);
-DECLARE_BOOST_TYPES(FunctionScope);
-DECLARE_BOOST_TYPES(ScalarExpression);
-DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
-DECLARE_EXTENDED_BOOST_TYPES(FileScope);
+struct AnalysisResult;
+using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
+using AnalysisResultConstRawPtr = const AnalysisResult*;
 
 struct UnitEmitter;
 
@@ -66,29 +61,9 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
     CodeGen,
   };
 
-  enum GlobalSymbolType {
-    KindOfStaticGlobalVariable,
-    KindOfDynamicGlobalVariable,
-    KindOfMethodStaticVariable,
-    KindOfClassStaticVariable,
-    KindOfDynamicConstant,
-    KindOfPseudoMain,
-    KindOfRedeclaredFunction,
-    KindOfRedeclaredClass,
-    KindOfRedeclaredClassId,
-    KindOfLazyStaticInitializer,
-
-    GlobalSymbolTypeCount
-  };
-
   struct Locker {
     explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),
-        m_mutex(m_ar->getMutex()) {
-      m_mutex.lock();
-    }
-    explicit Locker(AnalysisResultConstRawPtr ar) :
-        m_ar(const_cast<AnalysisResult*>(ar.get())),
         m_mutex(m_ar->getMutex()) {
       m_mutex.lock();
     }
@@ -97,9 +72,6 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
     }
     ~Locker() {
       if (m_ar) m_mutex.unlock();
-    }
-    AnalysisResultRawPtr get() const {
-      return AnalysisResultRawPtr{m_ar};
     }
     AnalysisResult *operator->() const {
       return m_ar;
@@ -147,14 +119,6 @@ public:
 
   Mutex &getMutex() { return m_mutex; }
 
-  Phase getPhase() const { return m_phase;}
-  void setPhase(Phase phase) { m_phase = phase;}
-
-  void addEntryPoint(const std::string &name);
-  void addEntryPoints(const std::vector<std::string> &names);
-
-  void dump();
-
   /**
    * Parser creates a FileScope upon parsing a new file.
    */
@@ -199,16 +163,7 @@ private:
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
-  std::set<std::pair<ConstructPtr, FileScopePtr> > m_nsFallbackFuncs;
-  Phase m_phase;
   std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
-
-  StringBag m_extraCodeFileNames;
-  std::map<std::string, std::string> m_extraCodes;
-
-  StringToClassScopePtrMap m_systemClasses;
-
-  StatementPtr m_stmt;
 
   std::string m_outputPath;
 
@@ -220,8 +175,6 @@ private:
    * Checks whether the file is in one of the on-demand parsing directories.
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
-
-  int getFileSize(FileScopePtr fs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

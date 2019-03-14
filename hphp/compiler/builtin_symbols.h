@@ -17,19 +17,17 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-
-#include "hphp/compiler/hphp.h"
 #include "hphp/util/hash-set.h"
+
+#include <memory>
 #include <set>
 #include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_EXTENDED_BOOST_TYPES(Type);
-DECLARE_BOOST_TYPES(AnalysisResult);
-DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
-DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
+struct AnalysisResult;
+using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 
 struct BuiltinSymbols {
   static AnalysisResultPtr s_systemAr;

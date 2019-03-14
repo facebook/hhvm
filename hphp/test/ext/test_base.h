@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_TEST_BASE_H_
 #define incl_HPHP_TEST_BASE_H_
 
-#include "hphp/compiler/hphp.h"
-
 #include "hphp/test/ext/test.h"
 #include "hphp/util/text-util.h"
 

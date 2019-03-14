@@ -109,7 +109,6 @@ struct CompilerOptions {
   bool force;
   int optimizeLevel;
   std::string filecache;
-  bool dump;
   bool coredump;
   bool nofork;
 };
@@ -302,9 +301,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("file-cache",
      value<std::string>(&po.filecache),
      "if specified, generate a static file cache with this file name")
-    ("dump",
-     value<bool>(&po.dump)->default_value(false),
-     "dump the program graph")
     ("coredump",
      value<bool>(&po.coredump)->default_value(false),
      "turn on coredump")
@@ -457,8 +453,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   // we need to initialize pcre cache table very early
   pcre_init();
-
-  if (po.dump) Option::DumpAst = true;
 
   if (po.inputDir.empty()) {
     po.inputDir = '.';
@@ -626,15 +620,7 @@ int process(const CompilerOptions &po) {
     fileCacheThread.start();
   }
 
-  if (Option::DumpAst) {
-    ar->dump();
-  }
-
   ar->setFinish([&po,&timer,&package](AnalysisResultPtr res) {
-      if (Option::DumpAst) {
-        res->dump();
-      }
-
       // saving stats
       if (po.genStats) {
         int seconds = timer.getMicroSeconds() / 1000000;

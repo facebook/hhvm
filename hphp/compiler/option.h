@@ -138,7 +138,6 @@ struct Option {
   /**
    * Output options
    */
-  static bool DumpAst;
   static bool WholeProgram;
   static bool RecordErrors;
 

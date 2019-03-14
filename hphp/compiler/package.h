@@ -17,20 +17,19 @@
 #ifndef incl_HPHP_PACKAGE_H_
 #define incl_HPHP_PACKAGE_H_
 
-#include "hphp/compiler/hphp.h"
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include "hphp/util/string-bag.h"
+
 #include "hphp/util/file-cache.h"
 #include "hphp/util/mutex.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(ServerData);
-DECLARE_BOOST_TYPES(AnalysisResult);
+struct AnalysisResult;
+using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 
 /**
  * A package contains a list of directories and files that will be parsed

@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 
-#include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
@@ -46,8 +45,9 @@ using namespace HPHP;
 // initialization
 
 AnalysisResult::AnalysisResult()
-  : m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles),
-    m_asmCallbacks(AnalysisResultConstRawPtr{this}) {
+  : m_package(nullptr),
+    m_parseOnDemand(false),
+    m_asmCallbacks(this) {
 }
 
 AnalysisResult::~AnalysisResult() {
@@ -115,13 +115,6 @@ template void AnalysisResult::parseOnDemandBy(
 template void AnalysisResult::parseOnDemandBy(
   const std::string &name,
   const std::map<std::string,std::string,stdltistr> &amap) const;
-
-///////////////////////////////////////////////////////////////////////////////
-// Program
-
-void AnalysisResult::dump() {
-  fflush(0);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

@@ -92,7 +92,6 @@ int Option::GetScannerType() {
   return type;
 }
 
-bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
 bool Option::RecordErrors = true;
 
@@ -305,7 +304,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
-  Config::Bind(DumpAst, ini, config, "DumpAst", false);
   Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);

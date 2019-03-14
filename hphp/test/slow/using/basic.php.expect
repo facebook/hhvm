@@ -7,7 +7,7 @@ Constructing id 1
 Disposing id 1
 Constructing id 2
 In second using
-object(Logger)#1 (1) {
+object(Logger) (1) {
   ["id":"Logger":private]=>
   int(2)
 }
@@ -61,7 +61,7 @@ Async create, sync dispose
 Disposing id 17
 Constructing id 18
 Async create, sync dispose, variable
-object(Logger)#6 (1) {
+object(Logger) (1) {
   ["id":"Logger":private]=>
   int(18)
 }

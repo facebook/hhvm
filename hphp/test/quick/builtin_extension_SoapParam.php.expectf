@@ -1,5 +1,5 @@
 SoapParam
-object(SoapParam)#1 (0) {
+object(SoapParam) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SoapParam in %s/test/quick/builtin_extensions.inc on line 8
@@ -11,7 +11,7 @@ array(1) {
 }
 ================
 A_SoapParam
-object(A_SoapParam)#2 (1) {
+object(A_SoapParam) (1) {
   ["___x"]=>
   NULL
 }

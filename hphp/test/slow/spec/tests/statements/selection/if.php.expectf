@@ -21,7 +21,7 @@ Notice: Array to string conversion in %s/statements/selection/if.php on line 41
   [2]=>
   string(4) "blue"
 }
-object(Name)#1 (2) {
+object(Name) (2) {
   ["firstName"]=>
   NULL
   ["lastName"]=>

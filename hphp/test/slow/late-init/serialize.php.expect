@@ -8,13 +8,13 @@ Accessing <<__LateInit>> property 'A::y' before initialization
 string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__LateInit>> property 'A::y' before initialization
 =============== var_dump_test ================
-object(A)#1 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(A)#1 (3) {
+object(A) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -22,7 +22,7 @@ object(A)#1 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(A)#1 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
@@ -69,13 +69,13 @@ Accessing <<__LateInit>> property 'B::y' before initialization
 string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__LateInit>> property 'B::y' before initialization
 =============== var_dump_test ================
-object(B)#4 (2) {
+object(B) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(B)#4 (3) {
+object(B) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -83,7 +83,7 @@ object(B)#4 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(B)#4 (2) {
+object(B) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
@@ -130,13 +130,13 @@ Accessing <<__LateInit>> property 'C::y' before initialization
 string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__LateInit>> property 'C::y' before initialization
 =============== var_dump_test ================
-object(C)#7 (2) {
+object(C) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(C)#7 (3) {
+object(C) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -144,7 +144,7 @@ object(C)#7 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(C)#7 (2) {
+object(C) (2) {
   ["x"]=>
   int(123)
   ["z"]=>

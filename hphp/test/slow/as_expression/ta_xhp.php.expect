@@ -8,6 +8,6 @@ Expected :my-xhp, got null
 Expected :my-xhp, got HH\vec
 Expected :my-xhp, got HH\dict
 Expected :my-xhp, got HH\keyset
-object(xhp_my_xhp)#1 (0) {
+object(xhp_my_xhp) (0) {
 }
 Expected :my-xhp, got xhp_other_xhp

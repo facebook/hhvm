@@ -40,11 +40,11 @@ array(2) {
   [1]=>
   string(3) "DEF"
 }
-object(MyShadyObject)#10 (1) {
+object(MyShadyObject) (1) {
   ["bar"]=>
   string(3) "ABC"
 }
-object(MyShadyObject)#11 (1) {
+object(MyShadyObject) (1) {
   ["bar"]=>
   string(3) "DEF"
 }

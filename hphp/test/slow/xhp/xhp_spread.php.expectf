@@ -8,7 +8,7 @@ array(2) {
 string(7) "xhp_foo"
 array(1) {
   ["...$0"]=>
-  object(xhp_bar)#1 (0) {
+  object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_foo"
@@ -16,7 +16,7 @@ array(2) {
   ["name"]=>
   string(4) "foo2"
   ["...$0"]=>
-  object(xhp_bar)#1 (0) {
+  object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_foo"
@@ -24,10 +24,10 @@ array(3) {
   ["name"]=>
   string(4) "foo2"
   ["...$0"]=>
-  object(xhp_bar)#1 (0) {
+  object(xhp_bar) (0) {
   }
   ["...$1"]=>
-  object(xhp_bar)#1 (0) {
+  object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_bar"
@@ -40,7 +40,7 @@ array(2) {
 string(7) "xhp_foo"
 array(1) {
   ["...$0"]=>
-  object(xhp_bar)#3 (0) {
+  object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_bar"
@@ -48,7 +48,7 @@ array(3) {
   ["name"]=>
   string(4) "test"
   ["...$0"]=>
-  object(xhp_bar)#1 (0) {
+  object(xhp_bar) (0) {
   }
   ["age"]=>
   int(21)
@@ -56,7 +56,7 @@ array(3) {
 string(7) "xhp_foo"
 array(1) {
   ["...$0"]=>
-  object(xhp_bar)#3 (0) {
+  object(xhp_bar) (0) {
   }
 }
 string(7) "xhp_bar"
@@ -65,6 +65,6 @@ array(0) {
 string(7) "xhp_foo"
 array(1) {
   ["...$0"]=>
-  object(xhp_bar)#3 (0) {
+  object(xhp_bar) (0) {
   }
 }

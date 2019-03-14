@@ -4,12 +4,12 @@ Warning: %s
 Warning: %s
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(1) "0"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(1) "0"
   }
@@ -22,12 +22,12 @@ Warning: %s
 bool(false)
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(1) "0"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(5) "12653"
   }
@@ -37,84 +37,84 @@ Warning: %s
 bool(false)
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "-113"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "-113"
   }
 }
 array(2) {
   [0]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
   [1]=>
-  object(GMP)#%d (1) {
+  object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }

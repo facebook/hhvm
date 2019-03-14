@@ -1,4 +1,4 @@
-object(ext_heap)#%d (4) {
+object(ext_heap) (4) {
   [%u|b%"fail"]=>
   bool(true)
   [%u|b%"flags":%u|b%"SplHeap":private]=>

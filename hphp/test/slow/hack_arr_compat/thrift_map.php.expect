@@ -1,14 +1,14 @@
-object(Mappish)#3 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
-  object(HH\Map)#4 (1) {
+  object(HH\Map) (1) {
     ["1"]=>
     int(2)
   }
 }
 string(32) "d1fc008b81d8074505914973cbab7120"
-object(Mappish)#5 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
-  object(HH\Map)#6 (1) {
+  object(HH\Map) (1) {
     ["1"]=>
     string(1) "2"
   }

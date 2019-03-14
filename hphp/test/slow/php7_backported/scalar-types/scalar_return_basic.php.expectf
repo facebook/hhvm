@@ -26,10 +26,10 @@ int(0)
 *** Trying array(0) {
 }
 *** Caught %s
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 *** Trying resource(%d) of type (stream)
@@ -63,10 +63,10 @@ float(0)
 *** Trying array(0) {
 }
 *** Caught %s
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 *** Trying resource(%d) of type (stream)
@@ -100,10 +100,10 @@ string(0) ""
 *** Trying array(0) {
 }
 *** Caught %s
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 string(6) "foobar"
 *** Trying resource(%d) of type (stream)
@@ -137,10 +137,10 @@ bool(false)
 *** Trying array(0) {
 }
 *** Caught %s
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 *** Trying resource(%d) of type (stream)

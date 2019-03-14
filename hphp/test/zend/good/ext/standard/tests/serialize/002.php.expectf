@@ -23,6 +23,6 @@ array(3) {
   [2]=>
   string(3) "baz"
 }
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 ===DONE===

@@ -1,5 +1,5 @@
 DOMComment
-object(DOMComment)#1 (18) {
+object(DOMComment) (18) {
   ["nodeName"]=>
   string(8) "#comment"
   ["nodeValue"]=>
@@ -93,7 +93,7 @@ array(24) {
 }
 ================
 A_DOMComment
-object(A_DOMComment)#2 (19) {
+object(A_DOMComment) (19) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

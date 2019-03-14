@@ -46,14 +46,14 @@ Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object
 == var_dump ==
 
 Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
-object(C)#1 (1) {
+object(C) (1) {
   ["dynprop"]=>
   %r&?%rint(3)
 }
 == debug_zval_dump ==
 
 Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
-object(C)#1 (1) refcount(%d){
+object(C) (1) refcount(%d){
   ["dynprop"]=>
   %r&?%rlong(3) refcount(%d)
 }
@@ -120,7 +120,7 @@ Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object
 == var_dump ==
 
 Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
-object(D)#5 (2) {
+object(D) (2) {
   ["x"]=>
   %r&?%rint(1)
   ["dynprop"]=>
@@ -129,7 +129,7 @@ object(D)#5 (2) {
 == debug_zval_dump ==
 
 Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
-object(D)#5 (2) refcount(%d){
+object(D) (2) refcount(%d){
   ["x"]=>
   %r&?%rlong(1) refcount(%d)
   ["dynprop"]=>
@@ -198,7 +198,7 @@ Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/obje
 == var_dump ==
 
 Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
-object(GMP)#10 (2) {
+object(GMP) (2) {
   ["dynprop"]=>
   %r&?%rint(3)
   ["num"]=>
@@ -207,7 +207,7 @@ object(GMP)#10 (2) {
 == debug_zval_dump ==
 
 Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
-object(GMP)#10 (1) refcount(%d){
+object(GMP) (1) refcount(%d){
   ["dynprop"]=>
   %r&?%rlong(3) refcount(%d)
 }
@@ -242,12 +242,12 @@ Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/obje
 == print_r ==
 == var_export ==
 == var_dump ==
-object(stdClass)#14 (1) {
+object(stdClass) (1) {
   ["dynprop"]=>
   %r&?%rint(3)
 }
 == debug_zval_dump ==
-object(stdClass)#14 (1) refcount(%d){
+object(stdClass) (1) refcount(%d){
   ["dynprop"]=>
   %r&?%rlong(3) refcount(%d)
 }
@@ -275,14 +275,14 @@ object(stdClass)#14 (1) refcount(%d){
 == print_r ==
 == var_export ==
 == var_dump ==
-object(__PHP_Incomplete_Class)#18 (2) {
+object(__PHP_Incomplete_Class) (2) {
   ["__PHP_Incomplete_Class_Name"]=>
   %r&?%rstring(4) "Nope"
   ["dynprop"]=>
   %r&?%rint(3)
 }
 == debug_zval_dump ==
-object(__PHP_Incomplete_Class)#18 (2) refcount(%d){
+object(__PHP_Incomplete_Class) (2) refcount(%d){
   ["__PHP_Incomplete_Class_Name"]=>
   %r&?%rstring(4) "Nope" refcount(%d)
   ["dynprop"]=>

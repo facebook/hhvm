@@ -2,15 +2,15 @@ array(5) {
   ["hello"]=>
   string(5) "world"
   ["how"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["are"]=>
     string(3) "you"
   }
   ["hi"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["ho"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["test"]=>
   string(4) "best"

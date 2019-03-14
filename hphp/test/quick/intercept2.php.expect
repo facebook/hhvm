@@ -13,7 +13,7 @@ array(0) {
 string(3) "bar"
 string(3) "bar"
 string(9) "C::__call"
-object(C)#1 (0) {
+object(C) (0) {
 }
 array(2) {
   [0]=>

@@ -1,76 +1,76 @@
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(1)
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(1)
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   NULL
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   NULL
 }
 
 Warning: Creating default object from empty value in %s on line 33
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   NULL
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   string(3) "foo"
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-object(HH\ImmVector)#2 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-object(HH\ImmVector)#3 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
-  object(HH\Vector)#1 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(2)
   }
 }
-object(HH\ImmVector)#4 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(3)
   }
 }
-object(HH\ImmVector)#5 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
-  object(HH\Vector)#3 (2) {
+  object(HH\Vector) (2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
 }
-object(HH\ImmVector)#6 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
-  object(HH\Vector)#4 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(2)
   }

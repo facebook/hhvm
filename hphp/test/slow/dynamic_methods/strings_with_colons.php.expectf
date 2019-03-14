@@ -21,45 +21,45 @@ string(1) "Y"
 string(1) "X"
 NULL
 string(1) "X"
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(1) "X"
 NULL
 string(1) "Y"
-object(Y)#1 (0) {
-}
-----
-string(1) "X"
-NULL
-string(1) "X"
-object(X)#1 (0) {
-}
-string(1) "Y"
-NULL
-string(1) "Y"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
 ----
 string(1) "X"
 NULL
 string(1) "X"
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(1) "Y"
 NULL
 string(1) "Y"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
 ----
 string(1) "X"
 NULL
 string(1) "X"
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(1) "Y"
 NULL
 string(1) "Y"
-object(Y)#1 (0) {
+object(Y) (0) {
+}
+----
+string(1) "X"
+NULL
+string(1) "X"
+object(X) (0) {
+}
+string(1) "Y"
+NULL
+string(1) "Y"
+object(Y) (0) {
 }
 ====
 

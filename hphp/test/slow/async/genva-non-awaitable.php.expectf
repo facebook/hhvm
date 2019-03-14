@@ -1,9 +1,9 @@
 NULL
 ok
-object(HH\StaticWaitHandle)#%d (0) {
+object(HH\StaticWaitHandle) (0) {
 }
 ok
-object(HH\RescheduleWaitHandle)#%d (0) {
+object(HH\RescheduleWaitHandle) (0) {
 }
 ok
 int(0)
@@ -15,15 +15,15 @@ Await on a non-Awaitable
 dict(0) {
 }
 Await on a non-Awaitable
-object(Foo)#%d (0) {
+object(Foo) (0) {
 }
 Await on a non-Awaitable
 NULL
 ok
-object(HH\StaticWaitHandle)#%d (0) {
+object(HH\StaticWaitHandle) (0) {
 }
 ok
-object(HH\RescheduleWaitHandle)#%d (0) {
+object(HH\RescheduleWaitHandle) (0) {
 }
 ok
 int(0)
@@ -35,6 +35,6 @@ Await on a non-Awaitable
 dict(0) {
 }
 Await on a non-Awaitable
-object(Foo)#%d (0) {
+object(Foo) (0) {
 }
 Await on a non-Awaitable

@@ -1,10 +1,10 @@
-object(Closure%s)#2 (0) {
+object(Closure%s) (0) {
 }
 string(%d) "Closure%s"
-object(Closure%s)#3 (0) {
+object(Closure%s) (0) {
 }
 string(%d) "Closure%s"
-object(Closure%s)#4 (1) {
+object(Closure%s) (1) {
   ["static"]=>
   array(1) {
     ["ext_var"]=>
@@ -12,7 +12,7 @@ object(Closure%s)#4 (1) {
   }
 }
 string(%d) "Closure%s"
-object(Closure%s)#5 (1) {
+object(Closure%s) (1) {
   ["parameter"]=>
   array(1) {
     ["$param"]=>
@@ -20,13 +20,13 @@ object(Closure%s)#5 (1) {
   }
 }
 string(%d) "Closure%s"
-object(Closure%s)#6 (2) {
+object(Closure%s) (2) {
   ["static"]=>
   array(2) {
     ["ext_var"]=>
     int(1)
     ["another_ext"]=>
-    object(stdClass)#1 (0) {
+    object(stdClass) (0) {
     }
   }
   ["parameter"]=>
@@ -36,7 +36,7 @@ object(Closure%s)#6 (2) {
   }
 }
 string(%d) "Closure%s"
-object(Closure%s)#7 (1) {
+object(Closure%s) (1) {
   ["parameter"]=>
   array(1) {
     ["$param"]=>

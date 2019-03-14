@@ -1,60 +1,60 @@
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
-}
-string(6) "X::bar"
-string(6) "X::bar"
-object(Y)#1 (0) {
-}
-object(Z)#1 (0) {
+object(Z) (0) {
 }
 string(6) "X::bar"
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
-}
-string(6) "X::bar"
-string(6) "X::bar"
-object(Y)#1 (0) {
-}
-object(Z)#1 (0) {
+object(Z) (0) {
 }
 string(6) "X::bar"
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
-}
-string(6) "X::bar"
-string(6) "X::bar"
-object(Y)#1 (0) {
-}
-object(Z)#1 (0) {
+object(Z) (0) {
 }
 string(6) "X::bar"
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
-}
-string(6) "X::bar"
-string(6) "X::bar"
-object(Y)#1 (0) {
-}
-object(Z)#1 (0) {
+object(Z) (0) {
 }
 string(6) "X::bar"
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
+object(Z) (0) {
 }
 string(6) "X::bar"
 string(6) "X::bar"
-object(Y)#1 (0) {
+object(Y) (0) {
 }
-object(Z)#1 (0) {
+object(Z) (0) {
+}
+string(6) "X::bar"
+string(6) "X::bar"
+object(Y) (0) {
+}
+object(Z) (0) {
+}
+string(6) "X::bar"
+string(6) "X::bar"
+object(Y) (0) {
+}
+object(Z) (0) {
+}
+string(6) "X::bar"
+string(6) "X::bar"
+object(Y) (0) {
+}
+object(Z) (0) {
+}
+string(6) "X::bar"
+string(6) "X::bar"
+object(Y) (0) {
+}
+object(Z) (0) {
 }
 string(6) "X::bar"

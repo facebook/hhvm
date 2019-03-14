@@ -1,4 +1,4 @@
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
@@ -6,7 +6,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2005-07-14 22:30:41.123456"
   ["timezone_type"]=>

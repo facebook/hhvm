@@ -1,23 +1,23 @@
 ---> Invoke __call via simple method call.
-object(A)#%d (0) {
+object(A) (0) {
 }
 Exception caught OK; continuing.
 
 
 ---> Invoke __call via scope resolution operator within instance.
-object(A)#%d (0) {
+object(A) (0) {
 }
 Exception caught OK; continuing.
 
 
 ---> Invoke __call via scope resolution operator within child instance.
-object(B)#%d (0) {
+object(B) (0) {
 }
 Exception caught OK; continuing.
 
 
 ---> Invoke __call via callback.
-object(B)#%d (0) {
+object(B) (0) {
 }
 Exception caught OK; continuing.
 ==DONE==

@@ -1,4 +1,4 @@
-object(Object)#%d (1) {
+object(Object) (1) {
   ["x"]=>
   int(2)
 }
@@ -10,7 +10,7 @@ Overloaded::__get(y)
 int(3)
 string(55) "Object of class Object could not be converted to string"
 Overloaded::__set(z,)
-object(Object)#%d (1) {
+object(Object) (1) {
   ["x"]=>
   int(4)
 }

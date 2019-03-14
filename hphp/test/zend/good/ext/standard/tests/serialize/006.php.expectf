@@ -1,5 +1,5 @@
 string(55) "O:11:"ÜberKööliäå":1:{s:11:"åäöÅÄÖüÜber";s:6:"åäöÅÄÖ";}"
-object(ÜberKööliäå)#2 (1) {
+object(ÜberKööliäå) (1) {
   ["åäöÅÄÖüÜber"]=>
   string(6) "åäöÅÄÖ"
 }

@@ -2,7 +2,7 @@
 Notice: Undefined property: __PHP_Incomplete_Class::$prot in %s/test/slow/serialization/1546.php on line 11
 
 Notice: Undefined property: __PHP_Incomplete_Class::$priv in %s/test/slow/serialization/1546.php on line 11
-object(__PHP_Incomplete_Class)#2 (3) {
+object(__PHP_Incomplete_Class) (3) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(1) "Y"
   ["priv":"Y":private]=>

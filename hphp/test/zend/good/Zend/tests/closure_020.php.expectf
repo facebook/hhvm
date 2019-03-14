@@ -1,8 +1,8 @@
-object(foo)#%d (2) {
+object(foo) (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure%s)#%d (2) {
+  object(Closure%s) (2) {
     ["static"]=>
     array(1) {
       ["a"]=>

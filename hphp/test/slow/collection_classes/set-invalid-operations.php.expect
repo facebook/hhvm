@@ -9,7 +9,7 @@
 [] operator cannot be used to modify elements of a Set
 int(123)
 string(1) "a"
-object(HH\Set)#1 (5) {
+object(HH\Set) (5) {
   int(5)
   string(1) "a"
   int(0)
@@ -28,7 +28,7 @@ object(HH\Set)#1 (5) {
 [] operator cannot be used to modify elements of a Set
 Cannot modify immutable object of type HH\ImmSet
 string(1) "a"
-object(HH\ImmSet)#10 (4) {
+object(HH\ImmSet) (4) {
   int(5)
   string(1) "a"
   int(0)

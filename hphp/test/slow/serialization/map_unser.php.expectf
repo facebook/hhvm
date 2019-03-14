@@ -1,22 +1,22 @@
-object(HH\Map)#1 (0) {
+object(HH\Map) (0) {
 }
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   ["bar"]=>
   int(7)
 }
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   ["bar"]=>
   int(0)
 }
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   ["bar"]=>
   int(0)
 }
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   [""]=>
   int(0)
 }
-object(HH\Map)#1 (2) {
+object(HH\Map) (2) {
   ["bar"]=>
   int(3)
   ["bling"]=>
@@ -28,7 +28,7 @@ bool(false)
 
 Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;s:5:"extra";i:456;}]. Expected '}' but got 's'. in %s/test/slow/serialization/map_unser.php on line 23
 bool(false)
-object(HH\Map)#1 (2) {
+object(HH\Map) (2) {
   ["bar"]=>
   int(3)
   ["bling"]=>
@@ -46,7 +46,7 @@ bool(false)
 
 Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:55:"bling";i:123;}]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 23
 bool(false)
-object(HH\Map)#1 (2) {
+object(HH\Map) (2) {
   ["bar"]=>
   int(3)
   ["bling"]=>
@@ -55,13 +55,13 @@ object(HH\Map)#1 (2) {
 
 Notice: Unable to unserialize: [K:7:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;}]. Expected '"' but got ':'. in %s/test/slow/serialization/map_unser.php on line 23
 bool(false)
-object(HH\Map)#1 (2) {
+object(HH\Map) (2) {
   ["foo"]=>
   int(123)
   ["bar"]=>
   int(9876543210)
 }
-object(HH\Map)#1 (3) {
+object(HH\Map) (3) {
   ["foo"]=>
   int(123)
   ["bar"]=>
@@ -69,7 +69,7 @@ object(HH\Map)#1 (3) {
   ["key0"]=>
   int(0)
 }
-object(HH\Map)#1 (102) {
+object(HH\Map) (102) {
   ["foo"]=>
   int(123)
   ["bar"]=>
@@ -275,7 +275,7 @@ object(HH\Map)#1 (102) {
   ["key99"]=>
   int(99)
 }
-object(HH\Map)#1 (1002) {
+object(HH\Map) (1002) {
   ["foo"]=>
   int(123)
   ["bar"]=>

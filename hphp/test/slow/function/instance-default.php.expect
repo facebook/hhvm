@@ -1,4 +1,4 @@
-val = object(stdClass)#1 (2) {
+val = object(stdClass) (2) {
   [1]=>
   int(2)
   [3]=>

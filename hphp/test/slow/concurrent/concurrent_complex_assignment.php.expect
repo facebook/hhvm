@@ -1,4 +1,4 @@
-object(stdClass)#1 (2) {
+object(stdClass) (2) {
   ["prop1"]=>
   int(2)
   ["prop2"]=>

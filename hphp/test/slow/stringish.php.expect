@@ -9,24 +9,24 @@ true, true, string(11) "hello world"
 true, true, string(11) "hello world"
 
 ********** explicit implements **********
-true, true, object(CExplicit)#1 (0) {
+true, true, object(CExplicit) (0) {
 }
 
-true, true, object(CExplicit)#1 (0) {
+true, true, object(CExplicit) (0) {
 }
 
 ********** implicit implements **********
-true, true, object(CImplicit)#2 (0) {
+true, true, object(CImplicit) (0) {
 }
 
-true, true, object(CImplicit)#2 (0) {
+true, true, object(CImplicit) (0) {
 }
 
 ********** via trait implements **********
-true, true, object(CThruTrait)#3 (0) {
+true, true, object(CThruTrait) (0) {
 }
 
-true, true, object(CThruTrait)#3 (0) {
+true, true, object(CThruTrait) (0) {
 }
 
 ********** null **********

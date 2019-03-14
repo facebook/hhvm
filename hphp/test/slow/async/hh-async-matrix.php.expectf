@@ -1,4 +1,4 @@
-HH\Asio\v() => object(HH\Vector)#%d (8) {
+HH\Asio\v() => object(HH\Vector) (8) {
   [0]=>
   NULL
   [1]=>
@@ -17,7 +17,7 @@ HH\Asio\v() => object(HH\Vector)#%d (8) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -32,7 +32,7 @@ HH\Asio\v() => object(HH\Vector)#%d (8) {
     int(42)
   }
 }
-HH\Asio\vw() => object(HH\Vector)#%d (8) {
+HH\Asio\vw() => object(HH\Vector) (8) {
   [0]=>
   NULL
   [1]=>
@@ -51,7 +51,7 @@ HH\Asio\vw() => object(HH\Vector)#%d (8) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -66,7 +66,7 @@ HH\Asio\vw() => object(HH\Vector)#%d (8) {
     int(42)
   }
 }
-HH\Asio\vf() => object(HH\Vector)#%d (6) {
+HH\Asio\vf() => object(HH\Vector) (6) {
   [0]=>
   bool(true)
   [1]=>
@@ -81,7 +81,7 @@ HH\Asio\vf() => object(HH\Vector)#%d (6) {
     float(3.14)
   }
   [5]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -96,7 +96,7 @@ HH\Asio\vf() => object(HH\Vector)#%d (6) {
     int(42)
   }
 }
-HH\Asio\vfw() => object(HH\Vector)#%d (6) {
+HH\Asio\vfw() => object(HH\Vector) (6) {
   [0]=>
   bool(true)
   [1]=>
@@ -111,7 +111,7 @@ HH\Asio\vfw() => object(HH\Vector)#%d (6) {
     float(3.14)
   }
   [5]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -126,7 +126,7 @@ HH\Asio\vfw() => object(HH\Vector)#%d (6) {
     int(42)
   }
 }
-HH\Asio\vm() => object(HH\Vector)#%d (8) {
+HH\Asio\vm() => object(HH\Vector) (8) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -153,7 +153,7 @@ HH\Asio\vm() => object(HH\Vector)#%d (8) {
   5 => 42,
 ))"
 }
-HH\Asio\vmw() => object(HH\Vector)#%d (8) {
+HH\Asio\vmw() => object(HH\Vector) (8) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -180,7 +180,7 @@ HH\Asio\vmw() => object(HH\Vector)#%d (8) {
   5 => 42,
 ))"
 }
-HH\Asio\vfk() => object(HH\Vector)#%d (6) {
+HH\Asio\vfk() => object(HH\Vector) (6) {
   [0]=>
   bool(true)
   [1]=>
@@ -195,7 +195,7 @@ HH\Asio\vfk() => object(HH\Vector)#%d (6) {
     float(3.14)
   }
   [5]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -210,7 +210,7 @@ HH\Asio\vfk() => object(HH\Vector)#%d (6) {
     int(42)
   }
 }
-HH\Asio\vfkw() => object(HH\Vector)#%d (6) {
+HH\Asio\vfkw() => object(HH\Vector) (6) {
   [0]=>
   bool(true)
   [1]=>
@@ -225,7 +225,7 @@ HH\Asio\vfkw() => object(HH\Vector)#%d (6) {
     float(3.14)
   }
   [5]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -240,7 +240,7 @@ HH\Asio\vfkw() => object(HH\Vector)#%d (6) {
     int(42)
   }
 }
-HH\Asio\vmk() => object(HH\Vector)#%d (8) {
+HH\Asio\vmk() => object(HH\Vector) (8) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -285,7 +285,7 @@ HH\Asio\vmk() => object(HH\Vector)#%d (8) {
   )),
 )"
 }
-HH\Asio\vmkw() => object(HH\Vector)#%d (8) {
+HH\Asio\vmkw() => object(HH\Vector) (8) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -330,7 +330,7 @@ HH\Asio\vmkw() => object(HH\Vector)#%d (8) {
   )),
 )"
 }
-HH\Asio\m() => object(HH\Map)#%d (8) {
+HH\Asio\m() => object(HH\Map) (8) {
   [0]=>
   NULL
   [1]=>
@@ -349,7 +349,7 @@ HH\Asio\m() => object(HH\Map)#%d (8) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -364,7 +364,7 @@ HH\Asio\m() => object(HH\Map)#%d (8) {
     int(42)
   }
 }
-HH\Asio\mw() => object(HH\Map)#%d (8) {
+HH\Asio\mw() => object(HH\Map) (8) {
   [0]=>
   NULL
   [1]=>
@@ -383,7 +383,7 @@ HH\Asio\mw() => object(HH\Map)#%d (8) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -398,7 +398,7 @@ HH\Asio\mw() => object(HH\Map)#%d (8) {
     int(42)
   }
 }
-HH\Asio\mf() => object(HH\Map)#%d (6) {
+HH\Asio\mf() => object(HH\Map) (6) {
   [1]=>
   bool(true)
   [3]=>
@@ -413,7 +413,7 @@ HH\Asio\mf() => object(HH\Map)#%d (6) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -428,7 +428,7 @@ HH\Asio\mf() => object(HH\Map)#%d (6) {
     int(42)
   }
 }
-HH\Asio\mfw() => object(HH\Map)#%d (6) {
+HH\Asio\mfw() => object(HH\Map) (6) {
   [1]=>
   bool(true)
   [3]=>
@@ -443,7 +443,7 @@ HH\Asio\mfw() => object(HH\Map)#%d (6) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -458,7 +458,7 @@ HH\Asio\mfw() => object(HH\Map)#%d (6) {
     int(42)
   }
 }
-HH\Asio\mm() => object(HH\Map)#%d (8) {
+HH\Asio\mm() => object(HH\Map) (8) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -485,7 +485,7 @@ HH\Asio\mm() => object(HH\Map)#%d (8) {
   5 => 42,
 ))"
 }
-HH\Asio\mmw() => object(HH\Map)#%d (8) {
+HH\Asio\mmw() => object(HH\Map) (8) {
   [0]=>
   string(4) "NULL"
   [1]=>
@@ -512,7 +512,7 @@ HH\Asio\mmw() => object(HH\Map)#%d (8) {
   5 => 42,
 ))"
 }
-HH\Asio\mfk() => object(HH\Map)#%d (6) {
+HH\Asio\mfk() => object(HH\Map) (6) {
   [1]=>
   bool(true)
   [3]=>
@@ -527,7 +527,7 @@ HH\Asio\mfk() => object(HH\Map)#%d (6) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -542,7 +542,7 @@ HH\Asio\mfk() => object(HH\Map)#%d (6) {
     int(42)
   }
 }
-HH\Asio\mfkw() => object(HH\Map)#%d (6) {
+HH\Asio\mfkw() => object(HH\Map) (6) {
   [1]=>
   bool(true)
   [3]=>
@@ -557,7 +557,7 @@ HH\Asio\mfkw() => object(HH\Map)#%d (6) {
     float(3.14)
   }
   [7]=>
-  object(stdClass)#%d (6) {
+  object(stdClass) (6) {
     [0]=>
     int(4)
     [1]=>
@@ -572,7 +572,7 @@ HH\Asio\mfkw() => object(HH\Map)#%d (6) {
     int(42)
   }
 }
-HH\Asio\mmk() => object(HH\Map)#%d (8) {
+HH\Asio\mmk() => object(HH\Map) (8) {
   [0]=>
   string(22) "array (
   0 => NULL,
@@ -617,7 +617,7 @@ HH\Asio\mmk() => object(HH\Map)#%d (8) {
   )),
 )"
 }
-HH\Asio\mmkw() => object(HH\Map)#%d (8) {
+HH\Asio\mmkw() => object(HH\Map) (8) {
   [0]=>
   string(22) "array (
   0 => NULL,

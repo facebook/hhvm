@@ -1,5 +1,5 @@
 string(62) ""O:6:\"native\":1:{s:14:\"\u0000native\u0000native\";i:1337;}""
-object(native)#1 (1) {
+object(native) (1) {
   ["native":"native":private]=>
   int(1337)
 }

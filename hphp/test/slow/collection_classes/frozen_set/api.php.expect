@@ -13,7 +13,7 @@ int(2)
 int(3)
 
 values...
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -21,7 +21,7 @@ object(HH\ImmVector)#4 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmVector)#4 (0) {
+object(HH\ImmVector) (0) {
 }
 
 lazy...
@@ -65,7 +65,7 @@ array(3) {
 }
 
 toVector...
-object(HH\Vector)#6 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -75,7 +75,7 @@ object(HH\Vector)#6 (3) {
 }
 
 toImmVector...
-object(HH\ImmVector)#6 (3) {
+object(HH\ImmVector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -85,7 +85,7 @@ object(HH\ImmVector)#6 (3) {
 }
 
 toSet...
-object(HH\Set)#6 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)

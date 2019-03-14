@@ -12,7 +12,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  object(ReflectionTypeConstant)#%d (0) {
+  object(ReflectionTypeConstant) (0) {
   }
 }
 array(2) {
@@ -27,7 +27,7 @@ array(1) {
 }
 array(1) {
   ["Foo"]=>
-  object(ReflectionClass)#%d (2) {
+  object(ReflectionClass) (2) {
     ["name"]=>
     string(3) "Foo"
     ["obj":"ReflectionClass":private]=>
@@ -56,14 +56,14 @@ array(1) {
 }
 array(2) {
   [0]=>
-  object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod) (2) {
     ["name"]=>
     string(3) "baz"
     ["class"]=>
     string(1) "A"
   }
   [1]=>
-  object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod) (2) {
     ["name"]=>
     string(3) "bar"
     ["class"]=>
@@ -72,7 +72,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(ReflectionProperty)#%d (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(4) "prop"
     ["class"]=>
@@ -81,7 +81,7 @@ array(2) {
     bool(false)
   }
   [1]=>
-  object(ReflectionProperty)#%d (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(11) "static_prop"
     ["class"]=>
@@ -94,7 +94,7 @@ array(1) {
   ["static_prop"]=>
   NULL
 }
-object(B)#%d (1) {
+object(B) (1) {
   ["prop":protected]=>
   NULL
 }
@@ -106,7 +106,7 @@ array(1) {
 }
 array(1) {
   ["TBing"]=>
-  object(ReflectionClass)#%d (2) {
+  object(ReflectionClass) (2) {
     ["name"]=>
     string(5) "TBing"
     ["obj":"ReflectionClass":private]=>
@@ -119,7 +119,7 @@ array(1) {
 }
 array(1) {
   ["A"]=>
-  object(ReflectionClass)#%d (2) {
+  object(ReflectionClass) (2) {
     ["name"]=>
     string(1) "A"
     ["obj":"ReflectionClass":private]=>

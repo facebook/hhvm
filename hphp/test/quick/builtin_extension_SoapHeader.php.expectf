@@ -1,5 +1,5 @@
 SoapHeader
-object(SoapHeader)#1 (4) {
+object(SoapHeader) (4) {
   ["namespace"]=>
   string(3) "Foo"
   ["name"]=>
@@ -19,7 +19,7 @@ array(1) {
 }
 ================
 A_SoapHeader
-object(A_SoapHeader)#2 (5) {
+object(A_SoapHeader) (5) {
   ["___x"]=>
   NULL
   ["namespace"]=>

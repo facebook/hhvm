@@ -363,7 +363,7 @@ keyset(0) {
 Comparing:
 keyset(0) {
 }
-object(stdClass)#93 (0) {
+object(stdClass) (0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -375,7 +375,7 @@ object(stdClass)#93 (0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
-object(stdClass)#93 (0) {
+object(stdClass) (0) {
 }
 keyset(0) {
 }

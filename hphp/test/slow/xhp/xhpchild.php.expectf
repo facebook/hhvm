@@ -36,10 +36,10 @@
 
 1, float(-4.2)
 
-1, object(xhp_div)#1 (0) {
+1, object(xhp_div) (0) {
 }
 
-1, object(xhp_div)#1 (0) {
+1, object(xhp_div) (0) {
 }
 
 0, NULL

@@ -1,4 +1,4 @@
-object(SoapHeader)#1 (4) {
+object(SoapHeader) (4) {
   ["namespace"]=>
   string(3) "env"
   ["name"]=>
@@ -18,7 +18,7 @@ array(1) {
   string(3) "bar"
 }
 bool(false)
-object(SoapHeader)#1 (4) {
+object(SoapHeader) (4) {
   ["namespace"]=>
   string(9) "namespace"
   ["name"]=>
@@ -31,7 +31,7 @@ object(SoapHeader)#1 (4) {
   ["mustUnderstand"]=>
   bool(true)
 }
-object(SoapHeader)#1 (3) {
+object(SoapHeader) (3) {
   ["namespace"]=>
   string(9) "namespace"
   ["name"]=>

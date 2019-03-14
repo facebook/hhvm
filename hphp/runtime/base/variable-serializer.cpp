@@ -903,9 +903,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else if (!m_objClass.empty()) {
       m_buf->append("object(");
       m_buf->append(m_objClass);
-      m_buf->append(")#");
-      m_buf->append(m_objId);
-      m_buf->append(' ');
+      m_buf->append(") ");
     } else {
       switch (kind) {
       case ArrayKind::Dict:

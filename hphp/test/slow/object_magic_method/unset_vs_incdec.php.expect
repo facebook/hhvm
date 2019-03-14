@@ -1,5 +1,5 @@
 int(2)
-object(C)#1 (2) {
+object(C) (2) {
   ["foo"]=>
   int(3)
   ["bar"]=>

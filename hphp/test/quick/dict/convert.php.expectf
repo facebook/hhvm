@@ -22,7 +22,7 @@ array(8) {
   [6]=>
   float(1.234)
   [7]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -42,7 +42,7 @@ dict(8) {
   [6]=>
   float(1.234)
   [7]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ====================================================
@@ -63,7 +63,7 @@ array(8) {
   ["key3"]=>
   float(1.234)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -83,7 +83,7 @@ dict(8) {
   ["key3"]=>
   float(1.234)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ====================================================
@@ -105,7 +105,7 @@ vec(10) {
   bool(false)
   NULL
   float(5.67)
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -129,7 +129,7 @@ dict(10) {
   [8]=>
   float(5.67)
   [9]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ====================================================
@@ -157,7 +157,7 @@ dict(8) {
   ["key3"]=>
   float(1.234)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -177,7 +177,7 @@ dict(8) {
   ["key3"]=>
   float(1.234)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ====================================================
@@ -249,7 +249,7 @@ string(4) "abcd"
 Exception: "String to dict conversion"
 ====================================================
 ====================================================
-object(IterableObj)#1 (1) {
+object(IterableObj) (1) {
   ["position":"IterableObj":private]=>
   int(0)
 }
@@ -264,7 +264,7 @@ dict(3) {
 }
 ====================================================
 ====================================================
-object(ThrowIterableObj)#1 (1) {
+object(ThrowIterableObj) (1) {
   ["position":"ThrowIterableObj":private]=>
   int(0)
 }
@@ -272,7 +272,7 @@ object(ThrowIterableObj)#1 (1) {
 Exception: "ThrowIterableObj"
 ====================================================
 ====================================================
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 ----------------------------------------------------
 Exception: "Non-iterable object to dict conversion"
@@ -283,7 +283,7 @@ resource(1) of type (stream)
 Exception: "Resource to dict conversion"
 ====================================================
 ====================================================
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -302,7 +302,7 @@ dict(3) {
 }
 ====================================================
 ====================================================
-object(HH\Map)#%d (2) {
+object(HH\Map) (2) {
   ["a"]=>
   int(100)
   [200]=>
@@ -317,7 +317,7 @@ dict(2) {
 }
 ====================================================
 ====================================================
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -332,7 +332,7 @@ dict(2) {
 }
 ====================================================
 ====================================================
-object(HH\Set)#%d (5) {
+object(HH\Set) (5) {
   int(5)
   int(4)
   int(3)
@@ -354,7 +354,7 @@ dict(5) {
 }
 ====================================================
 ====================================================
-object(AggregateObj)#%d (0) {
+object(AggregateObj) (0) {
 }
 ----------------------------------------------------
 dict(3) {
@@ -382,13 +382,13 @@ float(0)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
-object(HH\Vector)#%d (0) {
+object(HH\Vector) (0) {
 }
-object(HH\Map)#%d (0) {
+object(HH\Map) (0) {
 }
-object(HH\Set)#%d (0) {
+object(HH\Set) (0) {
 }
 ====================================================
 ====================================================
@@ -429,7 +429,7 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (4) {
+object(stdClass) (4) {
   [1]=>
   int(1)
   [2]=>
@@ -440,7 +440,7 @@ object(stdClass)#%d (4) {
   array(0) {
   }
 }
-object(HH\Vector)#%d (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -451,7 +451,7 @@ object(HH\Vector)#%d (4) {
   array(0) {
   }
 }
-object(HH\Map)#%d (4) {
+object(HH\Map) (4) {
   [1]=>
   int(1)
   [2]=>
@@ -498,7 +498,7 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (3) {
+object(stdClass) (3) {
   ["key1"]=>
   string(4) "val1"
   ["key2"]=>
@@ -506,7 +506,7 @@ object(stdClass)#%d (3) {
   ["key3"]=>
   string(4) "val3"
 }
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   string(4) "val1"
   [1]=>
@@ -514,7 +514,7 @@ object(HH\Vector)#%d (3) {
   [2]=>
   string(4) "val3"
 }
-object(HH\Map)#%d (3) {
+object(HH\Map) (3) {
   ["key1"]=>
   string(4) "val1"
   ["key2"]=>
@@ -522,7 +522,7 @@ object(HH\Map)#%d (3) {
   ["key3"]=>
   string(4) "val3"
 }
-object(HH\Set)#%d (3) {
+object(HH\Set) (3) {
   string(4) "val1"
   string(4) "val2"
   string(4) "val3"
@@ -568,7 +568,7 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (4) {
+object(stdClass) (4) {
   ["key1"]=>
   int(100)
   ["key2"]=>
@@ -578,7 +578,7 @@ object(stdClass)#%d (4) {
   [400]=>
   string(4) "val2"
 }
-object(HH\Vector)#%d (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(100)
   [1]=>
@@ -588,7 +588,7 @@ object(HH\Vector)#%d (4) {
   [3]=>
   string(4) "val2"
 }
-object(HH\Map)#%d (4) {
+object(HH\Map) (4) {
   ["key1"]=>
   int(100)
   ["key2"]=>
@@ -598,7 +598,7 @@ object(HH\Map)#%d (4) {
   [400]=>
   string(4) "val2"
 }
-object(HH\Set)#%d (4) {
+object(HH\Set) (4) {
   int(100)
   string(4) "val1"
   int(300)
@@ -631,23 +631,23 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   [12345]=>
   int(200)
 }
-object(HH\Vector)#%d (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(100)
   [1]=>
   int(200)
 }
-object(HH\Map)#%d (2) {
+object(HH\Map) (2) {
   ["12345"]=>
   int(100)
   [12345]=>
   int(200)
 }
-object(HH\Set)#%d (2) {
+object(HH\Set) (2) {
   int(100)
   int(200)
 }
@@ -695,7 +695,7 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass)#%d (2) {
+object(stdClass) (2) {
   [1]=>
   dict(1) {
     [5]=>
@@ -707,7 +707,7 @@ object(stdClass)#%d (2) {
     string(1) "c"
   }
 }
-object(HH\Vector)#%d (2) {
+object(HH\Vector) (2) {
   [0]=>
   dict(1) {
     [5]=>
@@ -719,7 +719,7 @@ object(HH\Vector)#%d (2) {
     string(1) "c"
   }
 }
-object(HH\Map)#%d (2) {
+object(HH\Map) (2) {
   [1]=>
   dict(1) {
     [5]=>

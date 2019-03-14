@@ -21,21 +21,21 @@ array(1) {
 }
 
 Instance properties:
-object(X)#%d (1) {
+object(X) (1) {
   ["a_x"]=>
   array(1) {
     ["key"]=>
     string(5) "value"
   }
 }
-object(B)#%d (1) {
+object(B) (1) {
   ["a_b"]=>
   array(1) {
     ["key"]=>
     string(5) "value"
   }
 }
-object(C)#%d (3) {
+object(C) (3) {
   ["a_c_parent"]=>
   array(1) {
     ["key"]=>

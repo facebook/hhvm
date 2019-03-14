@@ -1,4 +1,4 @@
-object(Exception)#%d (8) {
+object(Exception) (8) {
   ["message":protected]=>
   string(3) "foo"
   ["string":"Exception":private]=>

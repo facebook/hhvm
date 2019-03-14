@@ -1,5 +1,5 @@
 SoapServer
-object(SoapServer)#1 (0) {
+object(SoapServer) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SoapServer in %s/test/quick/builtin_extensions.inc on line 8
@@ -27,7 +27,7 @@ array(9) {
 }
 ================
 A_SoapServer
-object(A_SoapServer)#2 (1) {
+object(A_SoapServer) (1) {
   ["___x"]=>
   NULL
 }

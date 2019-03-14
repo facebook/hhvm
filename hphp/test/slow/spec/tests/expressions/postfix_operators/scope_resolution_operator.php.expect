@@ -20,7 +20,7 @@ MYPI   = 3.14
 -----------------------------
 Inside instance P::__construct
 Inside instance P::gi
-object(P)#3 (3) {
+object(P) (3) {
   ["prop":"P":private]=>
   int(1000)
   ["prop2":"P":private]=>
@@ -29,7 +29,7 @@ object(P)#3 (3) {
   int(-222)
 }
 Inside instance P::gi
-object(P)#3 (3) {
+object(P) (3) {
   ["prop":"P":private]=>
   int(1000)
   ["prop2":"P":private]=>
@@ -38,7 +38,7 @@ object(P)#3 (3) {
   int(-222)
 }
 Inside instance P::gi
-object(P)#3 (3) {
+object(P) (3) {
   ["prop":"P":private]=>
   int(1000)
   ["prop2":"P":private]=>
@@ -87,12 +87,12 @@ int(123)
 int(123)
 int(123)
 -----------------------------
-object(W2)#6 (1) {
+object(W2) (1) {
   ["prop1":"W2":private]=>
   int(123)
 }
 inside W2::M
-object(W2)#6 (1) {
+object(W2) (1) {
   ["prop1":"W2":private]=>
   int(123)
 }

@@ -1,6 +1,6 @@
-object(DateTimeImmutable)#%d (1) {
+object(DateTimeImmutable) (1) {
   ["data":"DateTimeImmutable":private]=>
-  object(DateTime)#%d (3) {
+  object(DateTime) (3) {
     ["date"]=>
     string(26) "2014-03-02 16:24:08.000000"
     ["timezone_type"]=>

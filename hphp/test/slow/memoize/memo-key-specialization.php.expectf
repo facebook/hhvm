@@ -9,7 +9,7 @@ float(3.141)
 takes_arrkey
 int(707)
 takes_vector
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -19,28 +19,28 @@ object(HH\Vector)#%d (3) {
 }
 Cls1::getInstanceKey
 takes_cls1
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "xyz"
 }
 Cls2::getInstanceKey
 takes_cls2
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(311)
 }
 Cls3::getInstanceKey
 takes_cls3
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls1 could not be converted to string
 takes_cls3
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -55,7 +55,7 @@ string(3) "abc"
 takes_opt_dbl
 float(3.141)
 takes_opt_vector
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -65,28 +65,28 @@ object(HH\Vector)#%d (3) {
 }
 Cls1::getInstanceKey
 takes_opt_cls1
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "xyz"
 }
 Cls2::getInstanceKey
 takes_opt_cls2
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(311)
 }
 Cls3::getInstanceKey
 takes_opt_cls3
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls1 could not be converted to string
 takes_opt_cls3
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -103,7 +103,7 @@ float(9.871)
 takes_arrkey
 string(3) "bar"
 takes_vector
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(7)
   [1]=>
@@ -113,29 +113,29 @@ object(HH\Vector)#%d (3) {
 }
 Cls1::getInstanceKey
 takes_cls1
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "biz"
 }
 Cls2::getInstanceKey
 takes_cls2
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(1001)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls2 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -202,7 +202,7 @@ keyset(3) {
   string(1) "x"
 }
 takes_anything
-object(HH\Vector)#%d (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -210,43 +210,43 @@ object(HH\Vector)#%d (2) {
 }
 Cls1::getInstanceKey
 takes_anything
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(6) "cls1-1"
 }
 Cls1::getInstanceKey
 takes_anything
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(6) "cls1-2"
 }
 Cls2::getInstanceKey
 takes_anything
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(999)
 }
 Cls2::getInstanceKey
 takes_anything
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(666)
 }
 Cls3::getInstanceKey
 takes_anything
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
 takes_anything
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(false)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls2 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(false)
 }
@@ -257,7 +257,7 @@ bool(true)
 string(3) "abc"
 float(3.141)
 int(707)
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -266,25 +266,25 @@ object(HH\Vector)#%d (3) {
   int(3)
 }
 Cls1::getInstanceKey
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "xyz"
 }
 Cls2::getInstanceKey
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(311)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls1 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -294,7 +294,7 @@ int(123)
 bool(true)
 string(3) "abc"
 float(3.141)
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -303,25 +303,25 @@ object(HH\Vector)#%d (3) {
   int(3)
 }
 Cls1::getInstanceKey
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "xyz"
 }
 Cls2::getInstanceKey
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(311)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls1 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -332,7 +332,7 @@ bool(false)
 string(3) "foo"
 float(9.871)
 string(3) "bar"
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(7)
   [1]=>
@@ -341,28 +341,28 @@ object(HH\Vector)#%d (3) {
   int(9)
 }
 Cls1::getInstanceKey
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(3) "biz"
 }
 Cls2::getInstanceKey
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(1001)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls2 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
-  object(Cls1)#%d (1) {
+  object(Cls1) (1) {
     ["x"]=>
     string(4) "aaaa"
   }
@@ -409,45 +409,45 @@ keyset(3) {
   string(1) "y"
   string(1) "x"
 }
-object(HH\Vector)#%d (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(3) "abc"
   [1]=>
   string(3) "def"
 }
 Cls1::getInstanceKey
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(6) "cls1-1"
 }
 Cls1::getInstanceKey
-object(Cls1)#%d (1) {
+object(Cls1) (1) {
   ["x"]=>
   string(6) "cls1-2"
 }
 Cls2::getInstanceKey
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(999)
 }
 Cls2::getInstanceKey
-object(Cls2)#%d (1) {
+object(Cls2) (1) {
   ["x"]=>
   int(666)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(true)
 }
 Cls3::getInstanceKey
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(false)
 }
 Cls3::getInstanceKey
 ERROR: Object of class Cls2 could not be converted to string
-object(Cls3)#%d (1) {
+object(Cls3) (1) {
   ["x"]=>
   bool(false)
 }

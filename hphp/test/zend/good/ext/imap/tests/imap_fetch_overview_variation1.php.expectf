@@ -85,7 +85,7 @@ Warning: %s
 
 Warning: %s
 
--- Testing with first argument value: object(classA)#%d (0) {
+-- Testing with first argument value: object(classA) (0) {
 }
 
 Warning: %s

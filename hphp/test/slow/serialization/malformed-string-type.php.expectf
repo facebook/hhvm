@@ -17,13 +17,13 @@ array(2) {
 
 Notice: Unable to unserialize: [a:2:{i:0;s:5:"hello"Xi:1;s:5:"world";}]. Array element not terminated properly. in %s/test/slow/serialization/malformed-string-type.php on line 22
 bool(false)
-object(Foo)#1 (2) {
+object(Foo) (2) {
   ["bar"]=>
   string(3) "baz"
   ["bling"]=>
   string(5) "blong"
 }
-object(Foo)#1 (2) {
+object(Foo) (2) {
   ["bar"]=>
   string(3) "baz"
   ["bling"]=>

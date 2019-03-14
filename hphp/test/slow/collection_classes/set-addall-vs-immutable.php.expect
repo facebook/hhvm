@@ -1,18 +1,18 @@
-object(HH\ImmSet)#2 (0) {
+object(HH\ImmSet) (0) {
 }
-object(HH\ImmSet)#2 (2) {
+object(HH\ImmSet) (2) {
   int(1)
   int(2)
 }
-object(HH\ImmSet)#2 (0) {
+object(HH\ImmSet) (0) {
 }
-object(HH\ImmSet)#2 (2) {
+object(HH\ImmSet) (2) {
   int(1)
   int(2)
 }
-object(HH\ImmSet)#3 (0) {
+object(HH\ImmSet) (0) {
 }
-object(HH\ImmSet)#3 (2) {
+object(HH\ImmSet) (2) {
   int(1)
   int(2)
 }

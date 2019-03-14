@@ -76,7 +76,7 @@ array(5) {
 caught magic call 2
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#11 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -86,7 +86,7 @@ bool(true)
 caught non-static call 1
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#11 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -99,7 +99,7 @@ array(5) {
   [0]=>
   string(11) "Blark::frap"
   [1]=>
-  object(Blark)#11 (0) {
+  object(Blark) (0) {
   }
   [2]=>
   array(0) {
@@ -140,7 +140,7 @@ array(5) {
   [0]=>
   string(17) "MagicCall::__call"
   [1]=>
-  object(MagicCall)#7 (0) {
+  object(MagicCall) (0) {
   }
   [2]=>
   array(2) {
@@ -163,7 +163,7 @@ bool(true)
 caught __call 1
 ----HANDLER----
 string(17) "MagicCall::__call"
-object(MagicCall)#7 (0) {
+object(MagicCall) (0) {
 }
 array(2) {
   [0]=>

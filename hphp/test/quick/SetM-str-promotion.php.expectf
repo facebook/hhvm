@@ -10,13 +10,13 @@ string(1) "A"
 string(1) "A"
 
 Warning: Creating default object from empty value in %s on line 23
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["prop"]=>
   string(1) "A"
 }
 
 Warning: Creating default object from empty value in %s on line 23
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["prop"]=>
   string(1) "A"
 }

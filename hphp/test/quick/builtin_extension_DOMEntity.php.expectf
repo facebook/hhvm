@@ -1,5 +1,5 @@
 DOMEntity
-object(DOMEntity)#1 (0) {
+object(DOMEntity) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMEntity in %s/test/quick/builtin_extensions.inc on line 8
@@ -47,7 +47,7 @@ array(19) {
 }
 ================
 A_DOMEntity
-object(A_DOMEntity)#2 (1) {
+object(A_DOMEntity) (1) {
   ["___x"]=>
   NULL
 }

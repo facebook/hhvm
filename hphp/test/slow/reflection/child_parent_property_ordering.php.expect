@@ -1,6 +1,6 @@
 array(4) {
   [0]=>
-  object(ReflectionProperty)#3 (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(3) "foo"
     ["class"]=>
@@ -9,7 +9,7 @@ array(4) {
     bool(false)
   }
   [1]=>
-  object(ReflectionProperty)#4 (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(3) "bar"
     ["class"]=>
@@ -18,7 +18,7 @@ array(4) {
     bool(false)
   }
   [2]=>
-  object(ReflectionProperty)#5 (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(9) "extension"
     ["class"]=>
@@ -27,7 +27,7 @@ array(4) {
     bool(false)
   }
   [3]=>
-  object(ReflectionProperty)#6 (3) {
+  object(ReflectionProperty) (3) {
     ["name"]=>
     string(5) "apple"
     ["class"]=>

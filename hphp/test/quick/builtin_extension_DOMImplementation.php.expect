@@ -1,8 +1,8 @@
 DOMImplementation
-object(DOMImplementation)#1 (0) {
+object(DOMImplementation) (0) {
 }
 string(29) "O:17:"DOMImplementation":0:{}"
-object(DOMImplementation)#2 (0) {
+object(DOMImplementation) (0) {
 }
 array(4) {
   [0]=>
@@ -16,12 +16,12 @@ array(4) {
 }
 ================
 A_DOMImplementation
-object(A_DOMImplementation)#3 (1) {
+object(A_DOMImplementation) (1) {
   ["___x"]=>
   NULL
 }
 string(44) "O:19:"A_DOMImplementation":1:{s:4:"___x";N;}"
-object(A_DOMImplementation)#4 (1) {
+object(A_DOMImplementation) (1) {
   ["___x"]=>
   NULL
 }

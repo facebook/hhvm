@@ -1,28 +1,28 @@
-object(C)#1 (2) {
+object(C) (2) {
   ["a"]=>
   int(1)
   ["b"]=>
   int(2)
 }
-object(C)#1 (2) {
+object(C) (2) {
   ["a"]=>
   NULL
   ["b"]=>
   NULL
 }
-object(C)#1 (2) {
+object(C) (2) {
   ["a"]=>
   NULL
   ["b"]=>
   NULL
 }
-object(C)#1 (2) {
+object(C) (2) {
   ["a"]=>
   NULL
   ["b"]=>
   NULL
 }
-object(C)#1 (2) {
+object(C) (2) {
   ["a"]=>
   NULL
   ["b"]=>

@@ -5,7 +5,7 @@ int(1234)
 logger 0 constructing
 array(2) {
   ["x"]=>
-  object(logger)#1 (1) {
+  object(logger) (1) {
     ["idx":"logger":private]=>
     int(0)
   }
@@ -21,7 +21,7 @@ array(2) {
 }
 array(4) {
   ["x"]=>
-  object(logger)#1 (1) {
+  object(logger) (1) {
     ["idx":"logger":private]=>
     int(0)
   }
@@ -75,7 +75,7 @@ array(12) {
 }
 array(12) {
   ["a"]=>
-  object(stdClass)#6 (0) {
+  object(stdClass) (0) {
   }
   ["b"]=>
   int(3735928559)
@@ -102,12 +102,12 @@ array(12) {
 }
 array(12) {
   ["a"]=>
-  object(stdClass)#6 (0) {
+  object(stdClass) (0) {
   }
   ["b"]=>
   int(3735928559)
   ["c"]=>
-  object(Generator)#5 (0) {
+  object(Generator) (0) {
   }
   ["d"]=>
   int(3126047761)

@@ -1,4 +1,4 @@
-object(MealIterator)#%d (2) {
+object(MealIterator) (2) {
   ["pos":"MealIterator":private]=>
   int(0)
   ["myContent":"MealIterator":private]=>

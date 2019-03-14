@@ -1,5 +1,5 @@
 DOMProcessingInstruction
-object(DOMProcessingInstruction)#1 (18) {
+object(DOMProcessingInstruction) (18) {
   ["nodeName"]=>
   string(3) "Foo"
   ["nodeValue"]=>
@@ -83,7 +83,7 @@ array(19) {
 }
 ================
 A_DOMProcessingInstruction
-object(A_DOMProcessingInstruction)#2 (19) {
+object(A_DOMProcessingInstruction) (19) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

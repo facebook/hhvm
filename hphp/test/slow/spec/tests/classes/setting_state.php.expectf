@@ -18,7 +18,7 @@ array(4) {
   ["pubi"]=>
   NULL
 }
-object(Point)#2 (4) {
+object(Point) (4) {
   ["x":"Point":private]=>
   int(3)
   ["y":"Point":private]=>
@@ -39,12 +39,12 @@ array(1) {
   ["bprop"]=>
   int(10)
 }
-object(B)#%d (1) {
+object(B) (1) {
   ["bprop":"B":private]=>
   int(10)
 }
 about to return from B::__set_state
-object(B)#%d (1) {
+object(B) (1) {
   ["bprop":"B":private]=>
   int(10)
 }
@@ -67,27 +67,27 @@ array(2) {
   ["bprop"]=>
   int(20)
 }
-object(D)#%d (2) {
+object(D) (2) {
   ["dprop":"D":private]=>
   NULL
   ["bprop":"B":private]=>
   int(20)
 }
 about to return from B::__set_state
-object(D)#%d (2) {
+object(D) (2) {
   ["dprop":"D":private]=>
   NULL
   ["bprop":"B":private]=>
   int(20)
 }
-object(D)#%d (2) {
+object(D) (2) {
   ["dprop":"D":private]=>
   int(30)
   ["bprop":"B":private]=>
   int(20)
 }
 about to return from D::__set_state
-object(D)#%d (2) {
+object(D) (2) {
   ["dprop":"D":private]=>
   int(30)
   ["bprop":"B":private]=>

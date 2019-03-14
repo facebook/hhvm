@@ -6,28 +6,28 @@ array(2) {
   int(22)
 }
 int(33)
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(11)
   [1]=>
   int(22)
 }
 int(33)
-object(HH\Map)#2 (2) {
+object(HH\Map) (2) {
   ["a"]=>
   int(11)
   ["b"]=>
   int(22)
 }
 int(33)
-object(HH\Set)#3 (2) {
+object(HH\Set) (2) {
   int(11)
   int(22)
 }
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector) (3) {
   [0]=>
   int(11)
   [1]=>
@@ -38,7 +38,7 @@ object(HH\ImmVector)#4 (3) {
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\ImmMap)#5 (3) {
+object(HH\ImmMap) (3) {
   ["a"]=>
   int(11)
   ["b"]=>
@@ -49,7 +49,7 @@ object(HH\ImmMap)#5 (3) {
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\ImmSet)#6 (3) {
+object(HH\ImmSet) (3) {
   int(11)
   int(22)
   int(33)
@@ -57,7 +57,7 @@ object(HH\ImmSet)#6 (3) {
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\Pair)#7 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(11)
   [1]=>
@@ -67,26 +67,26 @@ NULL
 array(0) {
 }
 NULL
-object(HH\Vector)#8 (0) {
+object(HH\Vector) (0) {
 }
 NULL
-object(HH\Map)#9 (0) {
+object(HH\Map) (0) {
 }
 NULL
-object(HH\Set)#10 (0) {
-}
-
-Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
-NULL
-object(HH\ImmVector)#11 (0) {
+object(HH\Set) (0) {
 }
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\ImmMap)#12 (0) {
+object(HH\ImmVector) (0) {
 }
 
 Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
 NULL
-object(HH\ImmSet)#13 (0) {
+object(HH\ImmMap) (0) {
+}
+
+Warning: array_pop() expects parameter 1 to be an array or mutable collection in %s on line 21
+NULL
+object(HH\ImmSet) (0) {
 }

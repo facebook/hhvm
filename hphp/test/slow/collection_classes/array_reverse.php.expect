@@ -80,7 +80,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\Vector)#1 (3) {
+input: object(HH\Vector) (3) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -107,7 +107,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\Set)#1 (3) {
+input: object(HH\Set) (3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
@@ -131,7 +131,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\Map)#1 (3) {
+input: object(HH\Map) (3) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>
@@ -158,7 +158,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\Map)#1 (3) {
+input: object(HH\Map) (3) {
   [10]=>
   string(3) "foo"
   [20]=>
@@ -185,7 +185,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\ImmVector)#1 (3) {
+input: object(HH\ImmVector) (3) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -212,7 +212,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\ImmSet)#1 (3) {
+input: object(HH\ImmSet) (3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
@@ -236,7 +236,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\ImmMap)#1 (3) {
+input: object(HH\ImmMap) (3) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>
@@ -263,7 +263,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(HH\ImmMap)#1 (3) {
+input: object(HH\ImmMap) (3) {
   [10]=>
   string(3) "foo"
   [20]=>

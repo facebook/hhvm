@@ -17,7 +17,7 @@ array(1) {
   ["person"]=>
   array(3) {
     [0]=>
-    object(SimpleXMLElement)#%d (1) {
+    object(SimpleXMLElement) (1) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>
@@ -25,16 +25,16 @@ array(1) {
       }
     }
     [1]=>
-    object(SimpleXMLElement)#%d (2) {
+    object(SimpleXMLElement) (2) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>
         string(4) "John"
       }
       ["children"]=>
-      object(SimpleXMLElement)#%d (1) {
+      object(SimpleXMLElement) (1) {
         ["person"]=>
-        object(SimpleXMLElement)#%d (1) {
+        object(SimpleXMLElement) (1) {
           ["@attributes"]=>
           array(1) {
             ["name"]=>
@@ -44,7 +44,7 @@ array(1) {
       }
     }
     [2]=>
-    object(SimpleXMLElement)#%d (1) {
+    object(SimpleXMLElement) (1) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>
@@ -53,13 +53,13 @@ array(1) {
     }
   }
 }
-object(SimpleXMLElement)#%d (0) {
+object(SimpleXMLElement) (0) {
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   ["person"]=>
   array(3) {
     [0]=>
-    object(SimpleXMLElement)#%d (1) {
+    object(SimpleXMLElement) (1) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>
@@ -67,16 +67,16 @@ object(SimpleXMLElement)#%d (1) {
       }
     }
     [1]=>
-    object(SimpleXMLElement)#%d (2) {
+    object(SimpleXMLElement) (2) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>
         string(4) "John"
       }
       ["children"]=>
-      object(SimpleXMLElement)#%d (1) {
+      object(SimpleXMLElement) (1) {
         ["person"]=>
-        object(SimpleXMLElement)#%d (1) {
+        object(SimpleXMLElement) (1) {
           ["@attributes"]=>
           array(1) {
             ["name"]=>
@@ -86,7 +86,7 @@ object(SimpleXMLElement)#%d (1) {
       }
     }
     [2]=>
-    object(SimpleXMLElement)#%d (1) {
+    object(SimpleXMLElement) (1) {
       ["@attributes"]=>
       array(1) {
         ["name"]=>

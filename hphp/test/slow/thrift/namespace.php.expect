@@ -1,4 +1,4 @@
-object(A\TestStruct)#3 (10) {
+object(A\TestStruct) (10) {
   ["aBool"]=>
   bool(true)
   ["anInt"]=>
@@ -38,7 +38,7 @@ object(A\TestStruct)#3 (10) {
   int(1234)
 }
 string(32) "6b4fbe9563551f3dee970a74b883f923"
-object(A\TestStruct)#4 (10) {
+object(A\TestStruct) (10) {
   ["aBool"]=>
   bool(true)
   ["anInt"]=>

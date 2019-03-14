@@ -1,4 +1,4 @@
-object(stdClass)#%d (2) {
+object(stdClass) (2) {
   ["accountId"]=>
   int(1234)
   ["parent"]=>

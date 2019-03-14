@@ -245,7 +245,7 @@ array(5) {
 
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#4 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -254,7 +254,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#4 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -263,7 +263,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#4 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -273,7 +273,7 @@ bool(true)
 non-static frap
 ----HANDLER----
 string(11) "Blark::frap"
-object(Blark)#4 (0) {
+object(Blark) (0) {
 }
 array(0) {
 }
@@ -286,7 +286,7 @@ array(5) {
   [0]=>
   string(11) "Blark::frap"
   [1]=>
-  object(Blark)#4 (0) {
+  object(Blark) (0) {
   }
   [2]=>
   array(0) {
@@ -302,7 +302,7 @@ array(5) {
   [0]=>
   string(11) "Blark::frap"
   [1]=>
-  object(Blark)#4 (0) {
+  object(Blark) (0) {
   }
   [2]=>
   array(0) {
@@ -349,7 +349,7 @@ static frap Blark
 non-static frap
 ----HANDLER----
 string(17) "MagicCall::__call"
-object(MagicCall)#3 (0) {
+object(MagicCall) (0) {
 }
 array(2) {
   [0]=>
@@ -365,7 +365,7 @@ bool(true)
 ---------------
 ----HANDLER----
 string(17) "MagicCall::__call"
-object(MagicCall)#3 (0) {
+object(MagicCall) (0) {
 }
 array(2) {
   [0]=>

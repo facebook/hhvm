@@ -1,720 +1,720 @@
 ---- Vector to Vector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(1)
 }
 ---- Vector to empty Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- Vector to ImmVector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 ---- Vector to empty ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- Vector to Map
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(4)
 }
 ---- Vector to empty Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- Vector to ImmMap
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(6)
 }
 ---- Vector to empty ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- Vector to Set
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(7)
 }
 ---- Vector to empty Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- Vector to ImmSet
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(8)
 }
 ---- Vector to empty ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- empty Vector to Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- empty Vector to empty Vector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Vector to ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(2)
 }
 ---- empty Vector to empty ImmVector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Vector to Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- empty Vector to empty Map
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Vector to ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(6)
 }
 ---- empty Vector to empty ImmMap
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Vector to Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- empty Vector to empty Set
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Vector to ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(8)
 }
 ---- empty Vector to empty ImmSet
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- ImmVector to Vector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(1)
 }
 ---- ImmVector to empty Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- ImmVector to ImmVector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(2)
 }
 ---- ImmVector to empty ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- ImmVector to Map
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(4)
 }
 ---- ImmVector to empty Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- ImmVector to ImmMap
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(6)
 }
 ---- ImmVector to empty ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- ImmVector to Set
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(7)
 }
 ---- ImmVector to empty Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- ImmVector to ImmSet
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(2)
   [1]=>
   int(8)
 }
 ---- ImmVector to empty ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- empty ImmVector to Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(1)
 }
 ---- empty ImmVector to empty Vector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmVector to ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- empty ImmVector to empty ImmVector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmVector to Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(4)
 }
 ---- empty ImmVector to empty Map
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmVector to ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- empty ImmVector to empty ImmMap
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmVector to Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(7)
 }
 ---- empty ImmVector to empty Set
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmVector to ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- empty ImmVector to empty ImmSet
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- Map to Vector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(1)
 }
 ---- Map to empty Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- Map to ImmVector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(2)
 }
 ---- Map to empty ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- Map to Map
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(4)
 }
 ---- Map to empty Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- Map to ImmMap
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(6)
 }
 ---- Map to empty ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- Map to Set
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(7)
 }
 ---- Map to empty Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- Map to ImmSet
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(4)
   [1]=>
   int(8)
 }
 ---- Map to empty ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- empty Map to Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- empty Map to empty Vector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Map to ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(2)
 }
 ---- empty Map to empty ImmVector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Map to Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- empty Map to empty Map
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Map to ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(6)
 }
 ---- empty Map to empty ImmMap
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Map to Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- empty Map to empty Set
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Map to ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(8)
 }
 ---- empty Map to empty ImmSet
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- ImmMap to Vector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(1)
 }
 ---- ImmMap to empty Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- ImmMap to ImmVector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(2)
 }
 ---- ImmMap to empty ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- ImmMap to Map
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(4)
 }
 ---- ImmMap to empty Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- ImmMap to ImmMap
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(6)
 }
 ---- ImmMap to empty ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- ImmMap to Set
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(7)
 }
 ---- ImmMap to empty Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- ImmMap to ImmSet
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(6)
   [1]=>
   int(8)
 }
 ---- ImmMap to empty ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- empty ImmMap to Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(1)
 }
 ---- empty ImmMap to empty Vector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmMap to ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- empty ImmMap to empty ImmVector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmMap to Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(4)
 }
 ---- empty ImmMap to empty Map
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmMap to ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- empty ImmMap to empty ImmMap
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmMap to Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(7)
 }
 ---- empty ImmMap to empty Set
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmMap to ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- empty ImmMap to empty ImmSet
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- Set to Vector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(1)
 }
 ---- Set to empty Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- Set to ImmVector
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(2)
 }
 ---- Set to empty ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- Set to Map
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(4)
 }
 ---- Set to empty Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- Set to ImmMap
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(6)
 }
 ---- Set to empty ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- Set to Set
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(7)
 }
 ---- Set to empty Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- Set to ImmSet
-object(HH\Vector)#13 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
   int(8)
 }
 ---- Set to empty ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- empty Set to Vector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(1)
 }
 ---- empty Set to empty Vector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Set to ImmVector
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(2)
 }
 ---- empty Set to empty ImmVector
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Set to Map
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(4)
 }
 ---- empty Set to empty Map
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Set to ImmMap
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(6)
 }
 ---- empty Set to empty ImmMap
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Set to Set
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(7)
 }
 ---- empty Set to empty Set
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- empty Set to ImmSet
-object(HH\Vector)#13 (1) {
+object(HH\Vector) (1) {
   [0]=>
   int(8)
 }
 ---- empty Set to empty ImmSet
-object(HH\Vector)#13 (0) {
+object(HH\Vector) (0) {
 }
 ---- ImmSet to Vector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(1)
 }
 ---- ImmSet to empty Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- ImmSet to ImmVector
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(2)
 }
 ---- ImmSet to empty ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- ImmSet to Map
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(4)
 }
 ---- ImmSet to empty Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- ImmSet to ImmMap
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(6)
 }
 ---- ImmSet to empty ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- ImmSet to Set
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(7)
 }
 ---- ImmSet to empty Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- ImmSet to ImmSet
-object(HH\ImmVector)#13 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(8)
   [1]=>
   int(8)
 }
 ---- ImmSet to empty ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- empty ImmSet to Vector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(1)
 }
 ---- empty ImmSet to empty Vector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmSet to ImmVector
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(2)
 }
 ---- empty ImmSet to empty ImmVector
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmSet to Map
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(4)
 }
 ---- empty ImmSet to empty Map
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmSet to ImmMap
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(6)
 }
 ---- empty ImmSet to empty ImmMap
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmSet to Set
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(7)
 }
 ---- empty ImmSet to empty Set
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }
 ---- empty ImmSet to ImmSet
-object(HH\ImmVector)#13 (1) {
+object(HH\ImmVector) (1) {
   [0]=>
   int(8)
 }
 ---- empty ImmSet to empty ImmSet
-object(HH\ImmVector)#13 (0) {
+object(HH\ImmVector) (0) {
 }

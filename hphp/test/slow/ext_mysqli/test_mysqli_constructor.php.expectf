@@ -1,8 +1,8 @@
-object(mysqli)#%d (%d) {
+object(mysqli) (%d) {
   ["__connection":"mysqli":private]=>
   resource(%d) of type (mysql link)
 }
-object(mysqli_result)#%d (%d) {
+object(mysqli_result) (%d) {
   ["__result":"mysqli_result":private]=>
   resource(%d) of type (mysql link)
   ["__resulttype":"mysqli_result":private]=>

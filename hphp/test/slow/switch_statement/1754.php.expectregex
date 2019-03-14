@@ -11,7 +11,7 @@ int\(0\)
  goes to: 1string\(4\) "1abc"
  goes to: 1string\(1\) "3"
  goes to: defaultstring\(3\) "foo"
- goes to: 0object\(M\)#1 \(0\) \{
+ goes to: 0object\(M\) \(0\) \{
 \}
  goes to:\s*
 Notice: .*

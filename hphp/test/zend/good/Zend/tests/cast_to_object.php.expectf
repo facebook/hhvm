@@ -1,30 +1,30 @@
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   string(6) "string"
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   string(7) "8754456"
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   string(0) ""
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   string(1) "%r\x00%r"
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   int(9876545)
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   float(0.1)
 }
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
-object(stdClass)#%d (3) {
+object(stdClass) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -32,20 +32,20 @@ object(stdClass)#%d (3) {
   [2]=>
   int(3)
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   bool(false)
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   bool(true)
 }
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }
-object(test)#%d (0) {
+object(test) (0) {
 }
 Done

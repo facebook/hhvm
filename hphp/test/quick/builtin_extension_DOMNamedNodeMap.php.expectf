@@ -1,5 +1,5 @@
 DOMNamedNodeMap
-object(DOMNamedNodeMap)#1 (0) {
+object(DOMNamedNodeMap) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMNamedNodeMap in %s/test/quick/builtin_extensions.inc on line 8
@@ -19,7 +19,7 @@ array(5) {
 }
 ================
 A_DOMNamedNodeMap
-object(A_DOMNamedNodeMap)#2 (1) {
+object(A_DOMNamedNodeMap) (1) {
   ["___x"]=>
   NULL
 }

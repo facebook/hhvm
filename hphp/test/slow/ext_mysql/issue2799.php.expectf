@@ -1,5 +1,5 @@
 bool(false)
-object(mysqli_result)#%i (%i) {
+object(mysqli_result) (%i) {
   ["__result":"mysqli_result":private]=>
   resource(%i) of type (mysql result)
   ["__resulttype":"mysqli_result":private]=>

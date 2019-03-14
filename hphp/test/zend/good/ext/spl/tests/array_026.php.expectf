@@ -1,6 +1,6 @@
 
 Notice: %s
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     ["d1"]=>

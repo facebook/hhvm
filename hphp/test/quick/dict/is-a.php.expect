@@ -88,7 +88,7 @@ NO
 Testing for is_dict: string(4) "abcd"
 NO
 ====================================================
-Testing for is_dict: object(stdClass)#1 (0) {
+Testing for is_dict: object(stdClass) (0) {
 }
 NO
 ====================================================
@@ -102,7 +102,7 @@ Testing for is_dict: array(3) {
 }
 NO
 ====================================================
-Testing for is_dict: object(HH\Vector)#1 (3) {
+Testing for is_dict: object(HH\Vector) (3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -112,7 +112,7 @@ Testing for is_dict: object(HH\Vector)#1 (3) {
 }
 NO
 ====================================================
-Testing for is_dict: object(HH\Map)#1 (2) {
+Testing for is_dict: object(HH\Map) (2) {
   [100]=>
   string(1) "a"
   ["b"]=>
@@ -120,7 +120,7 @@ Testing for is_dict: object(HH\Map)#1 (2) {
 }
 NO
 ====================================================
-Testing for is_dict: object(HH\Pair)#1 (2) {
+Testing for is_dict: object(HH\Pair) (2) {
   [0]=>
   int(123)
   [1]=>

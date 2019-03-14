@@ -23,13 +23,13 @@ array(3) {
   [2]=>
   int(30)
 }
-object(C)#1 (1) {
+object(C) (1) {
   ["member"]=>
   string(3) "Red"
 }
 f In:  $p1: 10, $p2: Red
 f Out: $p1: 100, $p2: 200
-object(C)#1 (1) {
+object(C) (1) {
   ["member"]=>
   int(200)
 }

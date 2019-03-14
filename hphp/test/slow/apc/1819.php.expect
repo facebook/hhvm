@@ -1,4 +1,4 @@
-object(A)#2 (1) {
+object(A) (1) {
   ["a"]=>
   int(123)
 }

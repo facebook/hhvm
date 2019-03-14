@@ -37,7 +37,7 @@ string(4) "what"
 bool(false)
 bool(false)
 -----
-object(Foo)#1 (0) {
+object(Foo) (0) {
 }
 bool(false)
 bool(false)

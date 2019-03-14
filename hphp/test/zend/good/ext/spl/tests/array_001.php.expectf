@@ -1,4 +1,4 @@
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
@@ -24,7 +24,7 @@ array(6) {
   int(5)
 }
 string(1) "a"
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(5) {
     [0]=>
@@ -50,7 +50,7 @@ NULL
 Notice: %s
 
 Notice: %s
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
@@ -59,7 +59,7 @@ object(ArrayObject)#%d (1) {
     int(2)
   }
 }
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(4) {
     [0]=>

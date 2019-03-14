@@ -1,13 +1,13 @@
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["foo"]=>
   &int(5)
 }
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["foo"]=>
   &int(15)
 }
 int(15)
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["foo"]=>
   &int(14)
 }

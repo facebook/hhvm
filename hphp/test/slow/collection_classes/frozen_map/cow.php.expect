@@ -1,5 +1,5 @@
 ------ ArraySet -------
-object(HH\Map)#3 (3) {
+object(HH\Map) (3) {
   [0]=>
   int(42)
   [1]=>
@@ -7,7 +7,7 @@ object(HH\Map)#3 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#4 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -16,7 +16,7 @@ object(HH\ImmMap)#4 (3) {
   int(3)
 }
 ------ ArrayAppend -------
-object(HH\Map)#4 (4) {
+object(HH\Map) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -26,7 +26,7 @@ object(HH\Map)#4 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#5 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -35,7 +35,7 @@ object(HH\ImmMap)#5 (3) {
   int(3)
 }
 ------ add -------
-object(HH\Map)#5 (4) {
+object(HH\Map) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -45,7 +45,7 @@ object(HH\Map)#5 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#6 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -54,7 +54,7 @@ object(HH\ImmMap)#6 (3) {
   int(3)
 }
 ------ addAll -------
-object(HH\Map)#6 (4) {
+object(HH\Map) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -64,7 +64,7 @@ object(HH\Map)#6 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmMap)#7 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -73,9 +73,9 @@ object(HH\ImmMap)#7 (3) {
   int(3)
 }
 ------ clear -------
-object(HH\Map)#10 (0) {
+object(HH\Map) (0) {
 }
-object(HH\ImmMap)#11 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -84,7 +84,7 @@ object(HH\ImmMap)#11 (3) {
   int(3)
 }
 ------ set -------
-object(HH\Map)#11 (3) {
+object(HH\Map) (3) {
   [0]=>
   int(42)
   [1]=>
@@ -92,7 +92,7 @@ object(HH\Map)#11 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#12 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -101,7 +101,7 @@ object(HH\ImmMap)#12 (3) {
   int(3)
 }
 ------ setAll -------
-object(HH\Map)#12 (3) {
+object(HH\Map) (3) {
   [0]=>
   int(42)
   [1]=>
@@ -109,7 +109,7 @@ object(HH\Map)#12 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#13 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -118,13 +118,13 @@ object(HH\ImmMap)#13 (3) {
   int(3)
 }
 ------ removeKey -------
-object(HH\Map)#13 (2) {
+object(HH\Map) (2) {
   [1]=>
   int(2)
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#14 (3) {
+object(HH\ImmMap) (3) {
   [0]=>
   int(1)
   [1]=>

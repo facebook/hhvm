@@ -10,7 +10,7 @@ A::__get x
 A::__set x, 1
 A::__get y
 A::__set y, 2
-object(A)#1 (0) {
+object(A) (0) {
 }
 A::__get x
 
@@ -20,11 +20,11 @@ A::__get y
 
 Notice: Increment on string 'y' in %s/test/quick/properties3.php on line %d
 A::__set y, z
-object(A)#1 (0) {
+object(A) (0) {
 }
 B::__get x
 B::__get y
-object(B)#2 (2) {
+object(B) (2) {
   ["x":"B":private]=>
   int(1)
   ["y"]=>
@@ -36,19 +36,19 @@ Notice: Increment on string 'x' in %s/test/quick/properties3.php on line %d
 B::__get y
 
 Notice: Increment on string 'y' in %s/test/quick/properties3.php on line %d
-object(B)#2 (2) {
+object(B) (2) {
   ["x":"B":private]=>
   string(1) "y"
   ["y"]=>
   string(1) "z"
 }
-object(C)#3 (2) {
+object(C) (2) {
   ["x":"C":private]=>
   int(1)
   ["y"]=>
   int(2)
 }
-object(C)#3 (2) {
+object(C) (2) {
   ["x":"C":private]=>
   int(1)
   ["y"]=>
@@ -58,19 +58,19 @@ object(C)#3 (2) {
 Notice: Undefined property: D::$y in %s/test/quick/properties3.php on line %d
 NULL
 NULL
-object(D)#4 (2) {
+object(D) (2) {
   ["x":"D":private]=>
   int(1)
   ["y"]=>
   int(2)
 }
-object(D)#4 (2) {
+object(D) (2) {
   ["x":"D":private]=>
   int(1)
   ["y"]=>
   int(2)
 }
-object(D)#4 (2) {
+object(D) (2) {
   ["x":"D":private]=>
   int(1)
   ["y"]=>

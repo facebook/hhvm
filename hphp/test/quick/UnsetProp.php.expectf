@@ -1,5 +1,5 @@
 Test begin
-object(F)#1 (2) {
+object(F) (2) {
   ["foo"]=>
   int(12)
   ["bart"]=>
@@ -13,16 +13,16 @@ string(5) "snoot"
 
 Notice: Undefined property: F::$bart in %s on line 10
 NULL
-object(F)#1 (0) {
+object(F) (0) {
 }
-object(C)#2 (2) {
+object(C) (2) {
   ["p"]=>
   string(4) "C::p"
   ["q"]=>
   NULL
 }
 In C::__unset("r")
-object(C)#2 (0) {
+object(C) (0) {
 }
 ------------------------
 foo

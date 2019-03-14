@@ -1,4 +1,4 @@
-object(ArrayIterator)#2 (2) {
+object(ArrayIterator) (2) {
   ["storage":"ArrayIterator":private]=>
   array(3) {
     ["a"]=>

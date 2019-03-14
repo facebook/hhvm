@@ -1,4 +1,4 @@
-object(ArrayObject)#1 (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(5) {
     [0]=>
@@ -18,7 +18,7 @@ object(ArrayObject)#1 (1) {
     }
   }
 }
-object(ExtendedArrayObject)#2 (1) {
+object(ExtendedArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
@@ -27,7 +27,7 @@ object(ExtendedArrayObject)#2 (1) {
     string(1) "x"
   }
 }
-object(ExtendedArrayObject)#3 (1) {
+object(ExtendedArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     ["q2"]=>

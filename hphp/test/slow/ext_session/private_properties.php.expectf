@@ -1,4 +1,4 @@
-object(MyClass)#%d (1) {
+object(MyClass) (1) {
   ["id":"MyClass":private]=>
   int(12)
 }

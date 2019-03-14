@@ -5,11 +5,11 @@ Warning: %s
 
 Warning: %s
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(1) "0"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(1) "0"
 }
@@ -19,7 +19,7 @@ bool(false)
 
 Warning: %s
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(5) "31161"
 }

@@ -1,26 +1,26 @@
 array(8) {
   [0]=>
-  object(bool)#1 (0) {
+  object(bool) (0) {
   }
   [1]=>
-  object(boolean)#2 (0) {
+  object(boolean) (0) {
   }
   [2]=>
-  object(int)#3 (0) {
+  object(int) (0) {
   }
   [3]=>
-  object(integer)#4 (0) {
+  object(integer) (0) {
   }
   [4]=>
-  object(double)#5 (0) {
+  object(double) (0) {
   }
   [5]=>
-  object(float)#6 (0) {
+  object(float) (0) {
   }
   [6]=>
-  object(real)#7 (0) {
+  object(real) (0) {
   }
   [7]=>
-  object(string)#8 (0) {
+  object(string) (0) {
   }
 }

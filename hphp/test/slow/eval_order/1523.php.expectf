@@ -21,11 +21,11 @@ NULL
 Notice: Cannot access property on non-object in %s/test/slow/eval_order/1523.php on line 70
 NULL
 string(3) "foo"
-object(stdClass)#2 (1) {
+object(stdClass) (1) {
   ["0"]=>
   int(5)
 }
-object(stdClass)#2 (1) {
+object(stdClass) (1) {
   ["0"]=>
   int(5)
 }

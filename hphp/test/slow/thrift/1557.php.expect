@@ -1,4 +1,4 @@
-object(TestStruct)#4 (8) {
+object(TestStruct) (8) {
   ["aBool"]=>
   bool(false)
   ["anInt"]=>

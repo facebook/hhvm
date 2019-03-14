@@ -58,5 +58,5 @@ bool(false)
 ----------------------
 Point::__set(thing, xx)
 Point::__get(thing)
-object(X)#2 (0) {
+object(X) (0) {
 }

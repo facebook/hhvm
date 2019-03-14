@@ -1,4 +1,4 @@
-object(GMP)#1 (3) {
+object(GMP) (3) {
   ["foo"]=>
   string(3) "lol"
   ["bar"]=>
@@ -6,7 +6,7 @@ object(GMP)#1 (3) {
   ["num"]=>
   string(2) "99"
 }
-object(GMP)#2 (3) {
+object(GMP) (3) {
   ["foo"]=>
   string(3) "lol"
   ["bar"]=>

@@ -8,7 +8,7 @@ vec(11) {
   string(1) "a"
   float(1.23)
   bool(false)
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   NULL
   array(3) {
@@ -155,7 +155,7 @@ vec(15) {
   string(1) "a"
   float(1.23)
   bool(false)
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   NULL
   array(3) {
@@ -370,7 +370,7 @@ vec(22) {
   string(1) "a"
   float(1.23)
   bool(false)
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   NULL
   array(3) {

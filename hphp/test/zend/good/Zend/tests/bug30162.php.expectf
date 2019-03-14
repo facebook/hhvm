@@ -1,7 +1,7 @@
 
 Notice: %s
 NULL
-object(hariCow)#%d (2) {
+object(hariCow) (2) {
   ["x"]=>
   string(1) "x"
   ["y"]=>

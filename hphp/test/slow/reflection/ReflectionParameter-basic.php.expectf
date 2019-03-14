@@ -4,7 +4,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -35,7 +35,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -66,7 +66,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -97,7 +97,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -128,7 +128,7 @@ canBePassedByValue: bool(false)
 isPassedByReference: bool(true)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -159,7 +159,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -190,7 +190,7 @@ canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
 isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>

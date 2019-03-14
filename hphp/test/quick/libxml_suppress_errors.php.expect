@@ -5,7 +5,7 @@ array(0) {
 unsuppressing
 array(1) {
   [0]=>
-  object(LibXMLError)#1 (6) {
+  object(LibXMLError) (6) {
     ["level"]=>
     int(3)
     ["code"]=>

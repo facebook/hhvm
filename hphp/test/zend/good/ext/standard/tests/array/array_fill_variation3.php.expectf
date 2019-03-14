@@ -17,12 +17,12 @@ array(2) {
 -- Iteration 3 --
 array(2) {
   [0]=>
-  object(test)#%d (1) {
+  object(test) (1) {
     ["t"]=>
     int(10)
   }
   [1]=>
-  object(test)#%d (1) {
+  object(test) (1) {
     ["t"]=>
     int(10)
   }

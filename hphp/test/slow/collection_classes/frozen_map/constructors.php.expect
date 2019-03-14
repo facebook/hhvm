@@ -1,18 +1,18 @@
 Vector
 ...
-object(HH\Pair)#3 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#4 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#5 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -21,19 +21,19 @@ object(HH\Pair)#5 (2) {
 ...
 ImmVector
 ...
-object(HH\Pair)#9 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#10 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#11 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -42,19 +42,19 @@ object(HH\Pair)#11 (2) {
 ...
 Map
 ...
-object(HH\Pair)#15 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#16 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(10)
   [1]=>
   int(2)
 }
-object(HH\Pair)#17 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(40)
   [1]=>
@@ -63,19 +63,19 @@ object(HH\Pair)#17 (2) {
 ...
 ImmMap
 ...
-object(HH\Pair)#21 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#22 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(10)
   [1]=>
   int(2)
 }
-object(HH\Pair)#23 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(40)
   [1]=>
@@ -84,19 +84,19 @@ object(HH\Pair)#23 (2) {
 ...
 array
 ...
-object(HH\Pair)#27 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#28 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#29 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>

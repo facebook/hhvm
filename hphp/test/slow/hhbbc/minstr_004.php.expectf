@@ -1,16 +1,16 @@
-object(Foo)#1 (1) {
+object(Foo) (1) {
   ["x":"Foo":private]=>
   NULL
 }
 
 Warning: Creating default object from empty value in %s/slow/hhbbc/minstr_004.php on line %d
-object(stdClass)#2 (1) {
+object(stdClass) (1) {
   ["x"]=>
   int(12)
 }
-object(Foo)#1 (1) {
+object(Foo) (1) {
   ["x":"Foo":private]=>
-  object(stdClass)#2 (1) {
+  object(stdClass) (1) {
     ["x"]=>
     int(12)
   }

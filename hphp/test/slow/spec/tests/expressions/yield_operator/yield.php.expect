@@ -8,7 +8,7 @@ key: 0, value: d
 key: 1, value: e
 key: 2, value: f
 ===========================
-object(Generator)#1 (0) {
+object(Generator) (0) {
 }
 This type is an instance of Generator
 ===========================

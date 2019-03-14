@@ -4,7 +4,7 @@
   goes to:2.0bool(true)
   goes to:foobool(false)
   goes to:0NULL
-  goes to:{empty str}object(stdClass)#1 (0) {
+  goes to:{empty str}object(stdClass) (0) {
 }
   goes to:defaultarray(0) {
 }

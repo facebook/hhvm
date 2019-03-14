@@ -1,5 +1,5 @@
 DOMElement
-object(DOMElement)#1 (18) {
+object(DOMElement) (18) {
   ["nodeName"]=>
   string(3) "Foo"
   ["nodeValue"]=>
@@ -38,7 +38,7 @@ object(DOMElement)#1 (18) {
   NULL
 }
 string(22) "O:10:"DOMElement":0:{}"
-object(DOMElement)#2 (0) {
+object(DOMElement) (0) {
 }
 array(37) {
   [0]=>
@@ -118,7 +118,7 @@ array(37) {
 }
 ================
 A_DOMElement
-object(A_DOMElement)#3 (19) {
+object(A_DOMElement) (19) {
   ["___x"]=>
   NULL
   ["nodeName"]=>
@@ -159,7 +159,7 @@ object(A_DOMElement)#3 (19) {
   NULL
 }
 string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"
-object(A_DOMElement)#4 (1) {
+object(A_DOMElement) (1) {
   ["___x"]=>
   NULL
 }

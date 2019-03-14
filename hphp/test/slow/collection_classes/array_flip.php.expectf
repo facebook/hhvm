@@ -33,7 +33,7 @@ flip: array(3) {
   string(1) "c"
 }
 --------------------
-input: object(HH\Vector)#1 (3) {
+input: object(HH\Vector) (3) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -50,7 +50,7 @@ flip: array(3) {
   int(2)
 }
 --------------------
-input: object(HH\Set)#1 (3) {
+input: object(HH\Set) (3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
@@ -64,7 +64,7 @@ flip: array(3) {
   string(3) "baz"
 }
 --------------------
-input: object(HH\Map)#1 (3) {
+input: object(HH\Map) (3) {
   ["a"]=>
   int(10)
   ["b"]=>
@@ -81,7 +81,7 @@ flip: array(3) {
   string(1) "c"
 }
 --------------------
-input: object(HH\ImmVector)#1 (3) {
+input: object(HH\ImmVector) (3) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -98,7 +98,7 @@ flip: array(3) {
   int(2)
 }
 --------------------
-input: object(HH\ImmSet)#1 (3) {
+input: object(HH\ImmSet) (3) {
   string(3) "foo"
   string(3) "bar"
   string(3) "baz"
@@ -112,7 +112,7 @@ flip: array(3) {
   string(3) "baz"
 }
 --------------------
-input: object(HH\ImmMap)#1 (3) {
+input: object(HH\ImmMap) (3) {
   ["a"]=>
   int(10)
   ["b"]=>
@@ -129,9 +129,9 @@ flip: array(3) {
   string(1) "c"
 }
 --------------------
-input: object(HH\Vector)#2 (4) {
+input: object(HH\Vector) (4) {
   [0]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [1]=>
   int(10)

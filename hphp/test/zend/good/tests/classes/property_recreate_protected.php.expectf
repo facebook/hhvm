@@ -1,11 +1,11 @@
 Unset and recreate a protected property from property's declaring class scope:
-object(D)#%d (1) {
+object(D) (1) {
   [%u|b%"p":protected]=>
   %unicode|string%(7) "changed"
 }
 
 Unset and recreate a protected property from subclass:
-object(D)#%d (1) {
+object(D) (1) {
   [%u|b%"p":protected]=>
   %unicode|string%(12) "changed in D"
 }

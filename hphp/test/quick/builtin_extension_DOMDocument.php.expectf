@@ -1,5 +1,5 @@
 DOMDocument
-object(DOMDocument)#1 (35) {
+object(DOMDocument) (35) {
   ["nodeName"]=>
   string(9) "#document"
   ["nodeValue"]=>
@@ -177,7 +177,7 @@ array(49) {
 }
 ================
 A_DOMDocument
-object(A_DOMDocument)#2 (36) {
+object(A_DOMDocument) (36) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

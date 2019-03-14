@@ -3,7 +3,7 @@ hello
 Warning: Failed to eval default value of JJTest::test()'s $answer argument for reflection, assigning NULL instead in %s/test/slow/reflection_classes/default_value_with_lsb.php on line 11
 array(1) {
   [0]=>
-  object(ReflectionParameter)#3 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(12) {
       ["index"]=>

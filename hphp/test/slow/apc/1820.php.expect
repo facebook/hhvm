@@ -1,4 +1,4 @@
-object(A)#3 (6) {
+object(A) (6) {
   ["a"]=>
   int(12321)
   ["b":protected]=>
@@ -12,7 +12,7 @@ object(A)#3 (6) {
   ["cc":"A":private]=>
   float(1.22)
 }
-object(B)#6 (8) {
+object(B) (8) {
   ["a"]=>
   int(222)
   ["b":protected]=>
@@ -30,7 +30,7 @@ object(B)#6 (8) {
   ["cc":"A":private]=>
   float(1.22)
 }
-object(C)#9 (10) {
+object(C) (10) {
   ["a"]=>
   int(333)
   ["b":protected]=>
@@ -52,7 +52,7 @@ object(C)#9 (10) {
   ["cc":"A":private]=>
   float(1.22)
 }
-object(D)#12 (12) {
+object(D) (12) {
   ["a"]=>
   int(333)
   ["b"]=>

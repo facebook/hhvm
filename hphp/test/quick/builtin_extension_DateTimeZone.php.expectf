@@ -1,5 +1,5 @@
 DateTimeZone
-object(DateTimeZone)#1 (2) {
+object(DateTimeZone) (2) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -29,7 +29,7 @@ array(8) {
 }
 ================
 A_DateTimeZone
-object(A_DateTimeZone)#2 (2) {
+object(A_DateTimeZone) (2) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

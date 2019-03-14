@@ -11,7 +11,7 @@ array(6) {
   array(0) {
   }
   [5]=>
-  object(X)#1 (0) {
+  object(X) (0) {
   }
 }
 array(6) {
@@ -31,6 +31,6 @@ array(6) {
     int(1)
   }
   [5]=>
-  object(X)#1 (0) {
+  object(X) (0) {
   }
 }

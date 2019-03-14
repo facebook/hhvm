@@ -1,5 +1,5 @@
 SimpleXMLElement
-object(SimpleXMLElement)#1 (0) {
+object(SimpleXMLElement) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 8
@@ -55,7 +55,7 @@ array(23) {
 }
 ================
 A_SimpleXMLElement
-object(A_SimpleXMLElement)#2 (0) {
+object(A_SimpleXMLElement) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 26

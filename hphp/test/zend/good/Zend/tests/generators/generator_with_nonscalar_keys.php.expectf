@@ -14,11 +14,11 @@ array(3) {
   [2]=>
   int(6)
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["a"]=>
   string(1) "b"
 }
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["b"]=>
   string(1) "a"
 }

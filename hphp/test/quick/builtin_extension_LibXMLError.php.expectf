@@ -1,5 +1,5 @@
 LibXMLError
-object(LibXMLError)#%d (6) {
+object(LibXMLError) (6) {
   ["level"]=>
   NULL
   ["code"]=>
@@ -14,7 +14,7 @@ object(LibXMLError)#%d (6) {
   NULL
 }
 string(107) "O:11:"LibXMLError":6:{s:5:"level";N;s:4:"code";N;s:6:"column";N;s:7:"message";N;s:4:"file";N;s:4:"line";N;}"
-object(LibXMLError)#%d (6) {
+object(LibXMLError) (6) {
   ["level"]=>
   NULL
   ["code"]=>
@@ -32,7 +32,7 @@ array(0) {
 }
 ================
 A_LibXMLError
-object(A_LibXMLError)#%d (7) {
+object(A_LibXMLError) (7) {
   ["___x"]=>
   NULL
   ["level"]=>
@@ -49,7 +49,7 @@ object(A_LibXMLError)#%d (7) {
   NULL
 }
 string(122) "O:13:"A_LibXMLError":7:{s:4:"___x";N;s:5:"level";N;s:4:"code";N;s:6:"column";N;s:7:"message";N;s:4:"file";N;s:4:"line";N;}"
-object(A_LibXMLError)#%d (7) {
+object(A_LibXMLError) (7) {
   ["___x"]=>
   NULL
   ["level"]=>

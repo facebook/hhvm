@@ -5,7 +5,7 @@ After '$a = array(...)', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -18,7 +18,7 @@ After '$b = $a', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -31,7 +31,7 @@ $b is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -44,7 +44,7 @@ After '++$b[0]', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -57,7 +57,7 @@ $b is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -70,7 +70,7 @@ After '$a[0] = 99', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -83,7 +83,7 @@ $b is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -96,7 +96,7 @@ After '--$x', $a is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -109,7 +109,7 @@ $b is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -122,7 +122,7 @@ After 'unset($a)', $a is undefined, $b is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -137,7 +137,7 @@ After '$a = array(...)', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -150,7 +150,7 @@ After '$c =& $a', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -163,7 +163,7 @@ $c is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -176,7 +176,7 @@ After '++$c[0]', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -189,7 +189,7 @@ $c is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -202,7 +202,7 @@ After '$a[0] = 99', $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -215,7 +215,7 @@ $c is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -228,7 +228,7 @@ After '--$x', $a is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -241,7 +241,7 @@ $c is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -254,7 +254,7 @@ After 'unset($a)', $a is undefined, $c is array(3) {
   [1]=>
   &int(122)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -271,7 +271,7 @@ at start, $x is 123, $a is array(4) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -284,7 +284,7 @@ after unset($a[0]), $x is 123, $a is array(3) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -295,7 +295,7 @@ after unset($a['M']), $x is 123, $a is array(2) {
   [1]=>
   &int(123)
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>
@@ -304,7 +304,7 @@ after unset($a['M']), $x is 123, $a is array(2) {
 }
 after unset($a[1]), $x is 123, $a is array(1) {
   ["B"]=>
-  object(Point)#1 (2) {
+  object(Point) (2) {
     ["x":"Point":private]=>
     int(1)
     ["y":"Point":private]=>

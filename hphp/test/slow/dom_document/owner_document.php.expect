@@ -1,4 +1,4 @@
-object(DOMDocument)#1 (35) {
+object(DOMDocument) (35) {
   ["nodeName"]=>
   string(9) "#document"
   ["nodeValue"]=>
@@ -70,7 +70,7 @@ object(DOMDocument)#1 (35) {
   ["substituteEntities"]=>
   bool(false)
 }
-object(DOMDocument)#1 (35) {
+object(DOMDocument) (35) {
   ["nodeName"]=>
   string(9) "#document"
   ["nodeValue"]=>

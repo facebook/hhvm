@@ -1,4 +1,4 @@
-object(HH\Map)#2 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   [2]=>
@@ -7,7 +7,7 @@ object(HH\Map)#2 (3) {
   array(0) {
   }
 }
-object(HH\Map)#3 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   [2]=>

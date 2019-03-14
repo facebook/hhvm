@@ -1,7 +1,7 @@
 ===elem/@attr2===
 array(3) {
   [0]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -9,7 +9,7 @@ array(3) {
     }
   }
   [1]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -17,7 +17,7 @@ array(3) {
     }
   }
   [2]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -28,7 +28,7 @@ array(3) {
 ===//@attr2===
 array(3) {
   [0]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -36,7 +36,7 @@ array(3) {
     }
   }
   [1]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -44,7 +44,7 @@ array(3) {
     }
   }
   [2]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -55,7 +55,7 @@ array(3) {
 ===//@*===
 array(9) {
   [0]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr1"]=>
@@ -63,7 +63,7 @@ array(9) {
     }
   }
   [1]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -71,7 +71,7 @@ array(9) {
     }
   }
   [2]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr3"]=>
@@ -79,7 +79,7 @@ array(9) {
     }
   }
   [3]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr1"]=>
@@ -87,7 +87,7 @@ array(9) {
     }
   }
   [4]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -95,7 +95,7 @@ array(9) {
     }
   }
   [5]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr3"]=>
@@ -103,7 +103,7 @@ array(9) {
     }
   }
   [6]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr1"]=>
@@ -111,7 +111,7 @@ array(9) {
     }
   }
   [7]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>
@@ -119,7 +119,7 @@ array(9) {
     }
   }
   [8]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr3"]=>
@@ -130,7 +130,7 @@ array(9) {
 ===elem[2]/@attr2===
 array(1) {
   [0]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["attr2"]=>

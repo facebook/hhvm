@@ -1,5 +1,5 @@
 Memcached
-object(Memcached)#1 (0) {
+object(Memcached) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
@@ -109,7 +109,7 @@ array(50) {
 }
 ================
 A_Memcached
-object(A_Memcached)#2 (1) {
+object(A_Memcached) (1) {
   ["___x"]=>
   NULL
 }

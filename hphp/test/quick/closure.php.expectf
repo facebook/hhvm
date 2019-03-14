@@ -9,7 +9,7 @@ Args: 888 500
 #1  Closure$main(888)
 #2  call_user_func(Object of class %s could not be converted to string, 888) called at %s:28]
 #3  main() called at %s:33]
-object(Closure%s)#1 (2) {
+object(Closure%s) (2) {
   ["static"]=>
   array(2) {
     ["use_by_val"]=>

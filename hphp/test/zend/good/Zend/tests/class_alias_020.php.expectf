@@ -1,6 +1,6 @@
-object(foo\foo)#1 (0) {
+object(foo\foo) (0) {
 }
-object(foo\bar\foo)#2 (0) {
+object(foo\bar\foo) (0) {
 }
 
 Fatal error: %s

@@ -2,18 +2,18 @@ array(1) {
   ["soap"]=>
   string(41) "http://schemas.xmlsoap.org/soap/envelope/"
 }
-object(SimpleXMLElement)#%s (0) {
+object(SimpleXMLElement) (0) {
 }
-object(SimpleXMLElement)#%s (1) {
+object(SimpleXMLElement) (1) {
   ["businessList"]=>
-  object(SimpleXMLElement)#%s (2) {
+  object(SimpleXMLElement) (2) {
     ["@attributes"]=>
     array(1) {
       ["foo"]=>
       string(3) "bar"
     }
     ["businessInfo"]=>
-    object(SimpleXMLElement)#%s (1) {
+    object(SimpleXMLElement) (1) {
       ["@attributes"]=>
       array(1) {
         ["businessKey"]=>
@@ -22,14 +22,14 @@ object(SimpleXMLElement)#%s (1) {
     }
   }
 }
-object(SimpleXMLElement)#%s (2) {
+object(SimpleXMLElement) (2) {
   ["@attributes"]=>
   array(1) {
     ["foo"]=>
     string(3) "bar"
   }
   ["businessInfo"]=>
-  object(SimpleXMLElement)#%s (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["businessKey"]=>

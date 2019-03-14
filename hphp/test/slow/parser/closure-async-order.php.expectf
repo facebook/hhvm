@@ -1,6 +1,6 @@
 array(1) {
   [0]=>
-  object(ReflectionParameter)#3 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(12) {
       ["index"]=>
@@ -20,7 +20,7 @@ array(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      object(Closure$;%s)#2 (1) {
+      object(Closure$;%s) (1) {
         ["parameter"]=>
         array(1) {
           ["$x"]=>

@@ -1,5 +1,5 @@
 DOMNodeIterator
-object(DOMNodeIterator)#1 (0) {
+object(DOMNodeIterator) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMNodeIterator in %s/builtin_extensions.inc on line 8
@@ -21,7 +21,7 @@ array(6) {
 }
 ================
 A_DOMNodeIterator
-object(A_DOMNodeIterator)#2 (1) {
+object(A_DOMNodeIterator) (1) {
   ["___x"]=>
   NULL
 }

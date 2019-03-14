@@ -7,7 +7,7 @@ Notice: SimpleXMLElement to array cast in %s/notices.php on line 10
 Notice: SimpleXMLElement to array cast in %s/notices.php on line 10
 array(1) {
   ["prepare"]=>
-  object(SimpleXMLElement)#3 (0) {
+  object(SimpleXMLElement) (0) {
   }
 }
 
@@ -26,7 +26,7 @@ bool(true)
 Notice: SimpleXMLElement used as iterator in %s/notices.php on line 19
 
 Notice: SimpleXMLElement to array cast in %s/notices.php on line 20
-object(SimpleXMLElement)#4 (0) {
+object(SimpleXMLElement) (0) {
 }
 
 Notice: SimpleXMLElement comparison in %s/notices.php on line 24

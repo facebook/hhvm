@@ -6,7 +6,7 @@ run
 C1 oh hai
 C2 oh hai
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -28,7 +28,7 @@ run
 C1 oh hai
 C2 oh hai
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -56,7 +56,7 @@ run
 C1 oh hai
 C2 oh hai
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -84,7 +84,7 @@ run
 C1 oh hai
 C2 oh hai
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -124,7 +124,7 @@ break clear all
 All breakpoints are cleared.
 step 12
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -162,7 +162,7 @@ break clear all
 All breakpoints are cleared.
 step 12
 C2 oh hai
-object(C1)#1 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }

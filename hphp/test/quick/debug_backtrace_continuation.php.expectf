@@ -18,7 +18,7 @@ array(3) {
     ["class"]=>
     string(9) "Generator"
     ["object"]=>
-    object(Generator)#1 (0) {
+    object(Generator) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -65,7 +65,7 @@ array(3) {
     ["class"]=>
     string(9) "Generator"
     ["object"]=>
-    object(Generator)#1 (0) {
+    object(Generator) (0) {
     }
     ["type"]=>
     string(2) "->"

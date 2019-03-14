@@ -1,12 +1,12 @@
 string(17) "I am private in a"
 string(16) "I am public in b"
-object(b)#1 (2) {
+object(b) (2) {
   ["prop"]=>
   string(16) "I am public in b"
   ["prop":"a":private]=>
   string(9) "new value"
 }
-object(b)#1 (2) {
+object(b) (2) {
   ["prop"]=>
   string(11) "newer value"
   ["prop":"a":private]=>

@@ -1,4 +1,4 @@
-object(MyRangeException)#1 (11) {
+object(MyRangeException) (11) {
   ["badValue":"MyRangeException":private]=>
   int(5)
   ["lowerValue":"MyRangeException":private]=>

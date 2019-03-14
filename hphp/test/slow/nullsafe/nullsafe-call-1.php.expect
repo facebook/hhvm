@@ -1,19 +1,19 @@
 test1:
-object(D)#2 (0) {
+object(D) (0) {
 }
 NULL
 test2:
-object(F)#4 (0) {
+object(F) (0) {
 }
 NULL
 test3:
-object(E)#5 (0) {
+object(E) (0) {
 }
 NULL
 test4:
-object(F)#7 (0) {
+object(F) (0) {
 }
-object(F)#8 (0) {
+object(F) (0) {
 }
 NULL
 NULL

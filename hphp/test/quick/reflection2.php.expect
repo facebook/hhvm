@@ -64,7 +64,7 @@ isStatic: bool(false)
 array(0) {
 }
 ReflectionException: Method my_child::my_trait_method does not have a prototype
-object(ReflectionParameter)#18 (3) {
+object(ReflectionParameter) (3) {
   ["info"]=>
   array(10) {
     ["index"]=>

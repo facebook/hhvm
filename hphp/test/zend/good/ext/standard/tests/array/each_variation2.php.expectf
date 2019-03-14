@@ -78,10 +78,10 @@ array(4) {
 -- Iteration 8: object data --
 array(4) {
   [1]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   ["value"]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   [0]=>
   int(0)

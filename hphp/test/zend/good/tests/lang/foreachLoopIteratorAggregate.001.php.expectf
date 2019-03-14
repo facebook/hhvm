@@ -1,6 +1,6 @@
-object(EuropeanMeals)#%d (2) {
+object(EuropeanMeals) (2) {
   ["storedEnglishMealIterator":"EuropeanMeals":private]=>
-  object(EnglishMealIterator)#%d (2) {
+  object(EnglishMealIterator) (2) {
     ["pos":"EnglishMealIterator":private]=>
     int(0)
     ["myContent":"EnglishMealIterator":private]=>
@@ -14,7 +14,7 @@ object(EuropeanMeals)#%d (2) {
     }
   }
   ["storedFrenchMealIterator":"EuropeanMeals":private]=>
-  object(FrenchMealIterator)#%d (2) {
+  object(FrenchMealIterator) (2) {
     ["pos":"FrenchMealIterator":private]=>
     int(0)
     ["myContent":"FrenchMealIterator":private]=>

@@ -17,7 +17,7 @@ array(2) {
 }
 array(1) {
   [0]=>
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["foo"]=>
     string(3) "bar"
   }

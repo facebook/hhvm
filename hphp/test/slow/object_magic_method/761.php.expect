@@ -5,7 +5,7 @@ get:string(3) "bar"
 set:string(3) "bar"
 string(3) "abd"
 string(3) "abc"
-object(X)#1 (1) {
+object(X) (1) {
   ["real"]=>
   int(2)
 }

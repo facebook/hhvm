@@ -1,5 +1,5 @@
 ====================
-object(HH\Vector)#1 (5) {
+object(HH\Vector) (5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -56,7 +56,7 @@ array(3) {
 }
 bool(true)
 ====================
-object(HH\Set)#1 (5) {
+object(HH\Set) (5) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
@@ -108,7 +108,7 @@ array(3) {
 }
 bool(true)
 ====================
-object(HH\Map)#1 (5) {
+object(HH\Map) (5) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -165,7 +165,7 @@ array(3) {
 }
 bool(true)
 ====================
-object(HH\Map)#1 (5) {
+object(HH\Map) (5) {
   ["a"]=>
   string(1) "a"
   ["b"]=>

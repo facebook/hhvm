@@ -1,4 +1,4 @@
-object(NewStruct)#4 (1) {
+object(NewStruct) (1) {
   ["features"]=>
   array(2) {
     [1]=>
@@ -7,7 +7,7 @@ object(NewStruct)#4 (1) {
     float(271.8)
   }
 }
-object(OldStruct)#7 (1) {
+object(OldStruct) (1) {
   ["features"]=>
   array(2) {
     [1]=>
@@ -16,7 +16,7 @@ object(OldStruct)#7 (1) {
     float(271.79998779297)
   }
 }
-object(NewStruct)#4 (1) {
+object(NewStruct) (1) {
   ["features"]=>
   array(2) {
     [1]=>
@@ -25,7 +25,7 @@ object(NewStruct)#4 (1) {
     float(271.8)
   }
 }
-object(OldStruct)#7 (1) {
+object(OldStruct) (1) {
   ["features"]=>
   array(2) {
     [1]=>

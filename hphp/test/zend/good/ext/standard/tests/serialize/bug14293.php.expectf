@@ -2,7 +2,7 @@ __sleep called
 
 Notice: %s
 O:1:"t":2:{s:1:"a";s:5:"hello";s:1:"b";N;}
-object(t)#%d (2) {
+object(t) (2) {
   ["a"]=>
   string(5) "hello"
   ["b"]=>

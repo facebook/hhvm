@@ -1,5 +1,5 @@
 string(25) "2014-09-19T20:30:00-07:00"
-object(DateTime)#2 (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2012-06-26 11:00:00.000000"
   ["timezone_type"]=>

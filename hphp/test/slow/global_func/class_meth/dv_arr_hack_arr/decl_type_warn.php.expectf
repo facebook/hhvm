@@ -162,7 +162,7 @@ Notice: class_meth Compat: Property 'B::vec_a' declared as type HH\vec, clsmeth 
 Notice: class_meth Compat: Property 'B::vec_dict_a' declared as type HH\vec_or_dict, clsmeth assigned in %s/decl_type_warn.php on line 114
 
 Notice: class_meth Compat: Property 'B::container_a' declared as type HH\Container, clsmeth assigned in %s/decl_type_warn.php on line 115
-object(B)#2 (6) {
+object(B) (6) {
   ["a"]=>
 classMeth{
     class(A)

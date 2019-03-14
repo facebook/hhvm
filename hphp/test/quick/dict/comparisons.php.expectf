@@ -367,12 +367,12 @@ dict(1) {
 Comparing:
 dict(1) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 dict(1) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -387,7 +387,7 @@ dict(1) {
 Comparing:
 dict(1) {
   [0]=>
-  object(ToString)#%d (1) {
+  object(ToString) (1) {
     ["str"]=>
     string(6) "foobaz"
   }
@@ -412,7 +412,7 @@ dict(1) {
 }
 dict(1) {
   [0]=>
-  object(ToString)#%d (1) {
+  object(ToString) (1) {
     ["str"]=>
     string(6) "foobaz"
   }
@@ -429,7 +429,7 @@ dict(1) {
 Comparing:
 dict(1) {
   ["key"]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 dict(1) {
@@ -452,7 +452,7 @@ dict(1) {
 }
 dict(1) {
   ["key"]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -467,7 +467,7 @@ dict(1) {
 Comparing:
 dict(1) {
   [0]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 dict(1) {
@@ -490,7 +490,7 @@ dict(1) {
 }
 dict(1) {
   [0]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -507,7 +507,7 @@ dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 dict(2) {
@@ -536,7 +536,7 @@ dict(2) {
   ["a"]=>
   int(1)
   ["b"]=>
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -681,7 +681,7 @@ dict(0) {
 Comparing:
 dict(0) {
 }
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
@@ -693,7 +693,7 @@ object(stdClass)#%d (0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Comparing:
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 dict(0) {
 }

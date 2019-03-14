@@ -1,4 +1,4 @@
-object(SplMaxHeap)#%d (3) {
+object(SplMaxHeap) (3) {
   ["flags":"SplHeap":private]=>
   int(0)
   ["isCorrupted":"SplHeap":private]=>

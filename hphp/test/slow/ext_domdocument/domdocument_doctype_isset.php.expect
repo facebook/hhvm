@@ -1,7 +1,7 @@
 bool(false)
 NULL
 bool(true)
-object(DOMDocumentType)#3 (22) {
+object(DOMDocumentType) (22) {
   ["nodeName"]=>
   string(5) "graph"
   ["nodeValue"]=>

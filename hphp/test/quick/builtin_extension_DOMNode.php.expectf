@@ -1,5 +1,5 @@
 DOMNode
-object(DOMNode)#%d (0) {
+object(DOMNode) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMNode in %s/test/quick/builtin_extensions.inc on line 8
@@ -47,7 +47,7 @@ array(19) {
 }
 ================
 A_DOMNode
-object(A_DOMNode)#%d (1) {
+object(A_DOMNode) (1) {
   ["___x"]=>
   NULL
 }

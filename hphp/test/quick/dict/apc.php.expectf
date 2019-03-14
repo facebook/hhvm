@@ -38,13 +38,13 @@ dict(2) {
 }
 dict(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(3) {
     [50]=>
@@ -64,7 +64,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(1) {
     ["cls"]=>
@@ -74,7 +74,7 @@ object(SomeClass)#%d (1) {
 Wakeup...
 dict(1) {
   [123]=>
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
@@ -82,7 +82,7 @@ dict(1) {
 string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#8 (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }
@@ -116,13 +116,13 @@ dict(2) {
 }
 dict(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(3) {
     [50]=>
@@ -142,7 +142,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(1) {
     ["cls"]=>
@@ -152,7 +152,7 @@ object(SomeClass)#%d (1) {
 Wakeup...
 dict(1) {
   [123]=>
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
@@ -160,7 +160,7 @@ dict(1) {
 string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#5 (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }
@@ -194,13 +194,13 @@ dict(2) {
 }
 dict(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(3) {
     [50]=>
@@ -220,7 +220,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   dict(1) {
     ["cls"]=>
@@ -230,7 +230,7 @@ object(SomeClass)#%d (1) {
 Wakeup...
 dict(1) {
   [123]=>
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
@@ -238,7 +238,7 @@ dict(1) {
 string(16) "Wakeup exception"
 dict(1) {
   ["abc"]=>
-  object(Sleep)#11 (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }

@@ -9,6 +9,6 @@ array(3) {
   int(3)
 }
 string(5) "world"
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 string(6) "foobar"

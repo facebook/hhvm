@@ -25,7 +25,7 @@ float(%s)
 
 Warning: %s
 
---> bad arg: object(stdClass)#%d (0) {
+--> bad arg: object(stdClass) (0) {
 }
 
 Warning: %s

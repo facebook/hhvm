@@ -40,11 +40,11 @@ int(9223372036854775807)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 
@@ -93,11 +93,11 @@ float(NAN)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 
@@ -146,11 +146,11 @@ string(0) ""
 }
 *** Caught %s
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 
@@ -199,11 +199,11 @@ bool(false)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 

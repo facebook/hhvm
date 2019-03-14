@@ -1,11 +1,11 @@
 int(123)
 string(5) "green"
 ------------------------------------
-object(MyList)#1 (0) {
+object(MyList) (0) {
 }
-object(MyQueue)#2 (0) {
+object(MyQueue) (0) {
 }
-object(MyQueue)#3 (0) {
+object(MyQueue) (0) {
 }
 int(1000)
 int(1000)

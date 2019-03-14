@@ -1,5 +1,5 @@
 DOMText
-object(DOMText)#1 (19) {
+object(DOMText) (19) {
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -101,7 +101,7 @@ array(27) {
 }
 ================
 A_DOMText
-object(A_DOMText)#2 (20) {
+object(A_DOMText) (20) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

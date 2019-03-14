@@ -1,7 +1,7 @@
 $p1 is >(0,0)<
 $p1 is >(3,9)<
 $p1 is >(-2,4)<
-object(Point)#1 (4) {
+object(Point) (4) {
   ["x":"Point":private]=>
   int(-2)
   ["y":"Point":private]=>

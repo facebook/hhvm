@@ -1,7 +1,7 @@
 string(4) "blah"
 
 Notice: Increment on string 'asd' in %s/test/quick/incdec-magic4.php on line %d
-object(Whatever)#1 (1) {
+object(Whatever) (1) {
   ["blah"]=>
   string(3) "ase"
 }

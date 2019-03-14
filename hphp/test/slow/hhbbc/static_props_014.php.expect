@@ -2,6 +2,6 @@ array(0) {
 }
 array(1) {
   ["a"]=>
-  object(Foo)#1 (0) {
+  object(Foo) (0) {
   }
 }

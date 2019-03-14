@@ -1,7 +1,7 @@
 string(1) "j"
 int(42)
 bool(false)
-object(stdClass)#1 (0) {
+object(stdClass) (0) {
 }
 NULL
 string(11) "not_reached"

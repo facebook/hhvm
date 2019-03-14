@@ -1,5 +1,5 @@
 SoapClient
-object(SoapClient)#1 (0) {
+object(SoapClient) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SoapClient in %s/test/quick/builtin_extensions.inc on line 8
@@ -35,7 +35,7 @@ array(13) {
 }
 ================
 A_SoapClient
-object(A_SoapClient)#2 (1) {
+object(A_SoapClient) (1) {
   ["___x"]=>
   NULL
 }

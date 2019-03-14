@@ -1,15 +1,15 @@
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-object(HH\Set)#2 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Map)#3 (3) {
+object(HH\Map) (3) {
   [1]=>
   string(3) "foo"
   [2]=>
@@ -17,18 +17,18 @@ object(HH\Map)#3 (3) {
   [3]=>
   string(3) "baz"
 }
-object(HH\Vector)#4 (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-object(HH\Set)#5 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Map)#6 (3) {
+object(HH\Map) (3) {
   [1]=>
   string(3) "foo"
   [2]=>
@@ -36,18 +36,18 @@ object(HH\Map)#6 (3) {
   [3]=>
   string(3) "baz"
 }
-object(HH\Vector)#7 (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-object(HH\Set)#8 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Map)#9 (3) {
+object(HH\Map) (3) {
   [1]=>
   string(3) "foo"
   [2]=>
@@ -55,21 +55,21 @@ object(HH\Map)#9 (3) {
   [3]=>
   string(3) "baz"
 }
-object(HH\Vector)#1 (0) {
+object(HH\Vector) (0) {
 }
-object(HH\Set)#2 (0) {
+object(HH\Set) (0) {
 }
-object(HH\Map)#3 (0) {
+object(HH\Map) (0) {
 }
-object(HH\Vector)#4 (0) {
+object(HH\Vector) (0) {
 }
-object(HH\Set)#5 (0) {
+object(HH\Set) (0) {
 }
-object(HH\Map)#6 (0) {
+object(HH\Map) (0) {
 }
-object(HH\Vector)#7 (0) {
+object(HH\Vector) (0) {
 }
-object(HH\Set)#8 (0) {
+object(HH\Set) (0) {
 }
-object(HH\Map)#9 (0) {
+object(HH\Map) (0) {
 }

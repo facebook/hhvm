@@ -1,8 +1,8 @@
-object(HH\ImmMap)#202 (1) {
+object(HH\ImmMap) (1) {
   ["a"]=>
   int(42)
 }
-object(HH\ImmMap)#203 (1) {
+object(HH\ImmMap) (1) {
   ["a"]=>
   int(24)
 }

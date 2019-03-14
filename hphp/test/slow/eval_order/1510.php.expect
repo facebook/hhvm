@@ -1,6 +1,6 @@
-object(A)#2 (1) {
+object(A) (1) {
   ["v"]=>
-  object(Q)#1 (1) {
+  object(Q) (1) {
     ["val"]=>
     int(0)
   }

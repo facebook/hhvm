@@ -68,7 +68,7 @@ bool(true)
 bool(true)
 test_counter_array() $carr:
 n_dump from line %d:
-object(CounterArray)#1 (2) {
+object(CounterArray) (2) {
   ["container":"CounterArray":private]=>
   array(3) {
     [0]=>
@@ -88,7 +88,7 @@ bool(true)
 bool(true)
 test_object_get() CounterArray $obj:
 n_dump from line %d:
-object(CounterArray)#1 (5) {
+object(CounterArray) (5) {
   ["container":"CounterArray":private]=>
   array(0) {
   }
@@ -97,7 +97,7 @@ object(CounterArray)#1 (5) {
   ["addme"]=>
   string(5) "added"
   ["addmetoo"]=>
-  object(Closure$test_object_get;%d)#2 (0) {
+  object(Closure$test_object_get;%d) (0) {
   }
   ["42"]=>
   string(10) "addmethree"
@@ -108,7 +108,7 @@ bool(true)
 bool(true)
 test_object_get() MagicGetSet $obj:
 n_dump from line %d:
-object(MagicGetSet)#3 (1) {
+object(MagicGetSet) (1) {
   ["data":"MagicGetSet":private]=>
   array(2) {
     ["addme"]=>
@@ -137,18 +137,18 @@ array(1) {
 }
 bool(true)
 n_dump from line %d:
-object(Foo)#3 (1) {
+object(Foo) (1) {
   ["foo2"]=>
-  object(Foo2)#4 (1) {
+  object(Foo2) (1) {
     ["vbar"]=>
     string(8) "Who am I"
   }
 }
 bool(true)
 n_dump from line %d:
-object(Foo)#5 (1) {
+object(Foo) (1) {
   ["foo2"]=>
-  object(Foo2)#6 (2) {
+  object(Foo2) (2) {
     ["vbar"]=>
     string(8) "Who am I"
     ["vbar2"]=>
@@ -157,9 +157,9 @@ object(Foo)#5 (1) {
 }
 bool(true)
 n_dump from line %d:
-object(Foo)#7 (1) {
+object(Foo) (1) {
   ["foo2"]=>
-  object(Foo2)#8 (2) {
+  object(Foo2) (2) {
     ["vbar"]=>
     string(8) "Who am I"
     ["bar2"]=>
@@ -293,9 +293,9 @@ array(2) {
 }
 bool(true)
 n_dump from line %d:
-object(Foo)#7 (1) {
+object(Foo) (1) {
   ["foo2"]=>
-  object(Foo2)#8 (2) {
+  object(Foo2) (2) {
     ["vbar"]=>
     string(8) "Who am I"
     ["vbar2"]=>
@@ -304,9 +304,9 @@ object(Foo)#7 (1) {
 }
 bool(true)
 n_dump from line %d:
-object(Foo)#9 (1) {
+object(Foo) (1) {
   ["foo2"]=>
-  object(Foo2)#10 (2) {
+  object(Foo2) (2) {
     ["vbar"]=>
     string(8) "Who am I"
     ["vbar2"]=>
@@ -321,7 +321,7 @@ bool(true)
 n_dump from line 348:
 array(1) {
   ["a"]=>
-  object(Shoo)#9 (1) {
+  object(Shoo) (1) {
     ["b"]=>
     array(1) {
       ["c"]=>

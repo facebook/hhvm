@@ -16,9 +16,9 @@ Notice: Undefined property: Foo::$foo in %s/hphp/test/slow/null_coalesce_assignm
 
 Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 23
 bool(true)
-object(Foo)#1 (1) {
+object(Foo) (1) {
   ["foo"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass) (1) {
     ["bar"]=>
     int(42)
   }

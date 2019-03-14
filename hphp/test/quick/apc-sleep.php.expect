@@ -1,5 +1,5 @@
 Constructing a Foo
-object(Foo)#1 (2) {
+object(Foo) (2) {
   ["foo"]=>
   int(1)
   ["bar"]=>
@@ -7,7 +7,7 @@ object(Foo)#1 (2) {
 }
 I'm going to sleep
 I'm waking up
-object(Foo)#1 (2) {
+object(Foo) (2) {
   ["foo"]=>
   int(1)
   ["bar"]=>

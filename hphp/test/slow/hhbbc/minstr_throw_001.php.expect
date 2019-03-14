@@ -1,6 +1,6 @@
-object(stdClass)#1 (1) {
+object(stdClass) (1) {
   ["foo"]=>
-  object(stdClass)#2 (1) {
+  object(stdClass) (1) {
     ["bar"]=>
     int(2)
   }

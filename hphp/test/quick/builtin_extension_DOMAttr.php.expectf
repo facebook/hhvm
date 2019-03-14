@@ -1,7 +1,7 @@
 DOMAttr
 
 Warning: Not yet implemented in %s/test/quick/builtin_extensions.inc on line 6
-object(DOMAttr)#1 (21) {
+object(DOMAttr) (21) {
   ["nodeName"]=>
   string(5) "Hello"
   ["nodeValue"]=>
@@ -95,7 +95,7 @@ array(20) {
 A_DOMAttr
 
 Warning: Not yet implemented in %s/test/quick/builtin_extensions.inc on line 24
-object(A_DOMAttr)#2 (22) {
+object(A_DOMAttr) (22) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

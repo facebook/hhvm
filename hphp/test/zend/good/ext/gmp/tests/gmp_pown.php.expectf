@@ -34,7 +34,7 @@ Warning: %s
 
 Warning: %s
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(1) "1"
 }

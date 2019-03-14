@@ -156,7 +156,7 @@ array(3) {
   [2]=>
   array(1) {
     ["exception"]=>
-    object(Exception)#1 (8) {
+    object(Exception) (8) {
       ["message":protected]=>
       string(4) "test"
       ["string":"Exception":private]=>

@@ -1,5 +1,5 @@
 DOMCdataSection
-object(DOMCdataSection)#1 (19) {
+object(DOMCdataSection) (19) {
   ["nodeName"]=>
   string(14) "#cdata-section"
   ["nodeValue"]=>
@@ -101,7 +101,7 @@ array(27) {
 }
 ================
 A_DOMCdataSection
-object(A_DOMCdataSection)#2 (20) {
+object(A_DOMCdataSection) (20) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

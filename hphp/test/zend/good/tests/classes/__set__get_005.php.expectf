@@ -1,7 +1,7 @@
 AutoGen::__get
 Test::__set
 AutoGen::__get
-object(Test)#%d (1) {
+object(Test) (1) {
   ["x":protected]=>
   array(1) {
     ["baz"]=>

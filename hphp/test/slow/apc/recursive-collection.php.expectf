@@ -1,7 +1,7 @@
 vec(1) {
-  object(HH\Map)#%d (2) {
+  object(HH\Map) (2) {
     ["1"]=>
-    object(HH\Map)#%d (2) {
+    object(HH\Map) (2) {
       ["1"]=>
       *RECURSION*
       [1]=>

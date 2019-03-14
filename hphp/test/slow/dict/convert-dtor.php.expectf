@@ -1,31 +1,31 @@
 dict(3) {
   [1]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(1)
   }
   [2]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(2)
   }
   [3]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(3)
   }
 }
 ====================================================
 vec(3) {
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(4)
   }
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(5)
   }
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(6)
   }
@@ -35,17 +35,17 @@ Exception: "Invalid keyset key: expected a key of type int or string, Dtor given
 ====================================================
 array(3) {
   [10]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(10)
   }
   [11]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(11)
   }
   [12]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(12)
   }
@@ -61,55 +61,55 @@ float(1)
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
 ====================================================
-object(stdClass)#%d (3) {
+object(stdClass) (3) {
   [25]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(25)
   }
   [26]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(26)
   }
   [27]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(27)
   }
 }
 ====================================================
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(28)
   }
   [1]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(29)
   }
   [2]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(30)
   }
 }
 ====================================================
-object(HH\Map)#%d (3) {
+object(HH\Map) (3) {
   [31]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(31)
   }
   [32]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(32)
   }
   [33]=>
-  object(Dtor)#%d (1) {
+  object(Dtor) (1) {
     ["id"]=>
     int(33)
   }

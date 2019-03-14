@@ -6,7 +6,7 @@
 --> cowRef:  array(0) {
 }
 
---> ao:  object(ArrayObject)#%d (1) {
+--> ao:  object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     ["a"]=>

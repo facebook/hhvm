@@ -1,5 +1,5 @@
 DOMDocumentFragment
-object(DOMDocumentFragment)#1 (16) {
+object(DOMDocumentFragment) (16) {
   ["nodeName"]=>
   string(18) "#document-fragment"
   ["nodeValue"]=>
@@ -81,7 +81,7 @@ array(20) {
 }
 ================
 A_DOMDocumentFragment
-object(A_DOMDocumentFragment)#2 (17) {
+object(A_DOMDocumentFragment) (17) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

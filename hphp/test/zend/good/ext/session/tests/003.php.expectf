@@ -1,4 +1,4 @@
-object(foo)#%d (2) {
+object(foo) (2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
@@ -6,7 +6,7 @@ object(foo)#%d (2) {
 }
 array(1) {
   [3]=>
-  object(foo)#%d (2) {
+  object(foo) (2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>

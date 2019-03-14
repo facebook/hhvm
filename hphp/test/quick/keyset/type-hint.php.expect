@@ -114,7 +114,7 @@ ERROR: string(70) "Argument 1 to takes_keyset4() must be of type ?HH\keyset, str
 ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, string given"
 string(6) "string"
 ====================================================
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 ERROR: string(85) "Argument 1 passed to takes_keyset1() must be an instance of HH\keyset, stdClass given"
 ERROR: string(86) "Value returned from function takes_keyset1() must be of type HH\keyset, stdClass given"
@@ -124,7 +124,7 @@ ERROR: string(85) "Argument 1 passed to takes_keyset3() must be an instance of H
 ERROR: string(86) "Value returned from function takes_keyset3() must be of type HH\keyset, stdClass given"
 ERROR: string(72) "Argument 1 to takes_keyset4() must be of type ?HH\keyset, stdClass given"
 ERROR: string(87) "Value returned from function takes_keyset4() must be of type ?HH\keyset, stdClass given"
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 ====================================================
 array(0) {
@@ -229,7 +229,7 @@ dict(1) {
   int(1)
 }
 ====================================================
-object(HH\Vector)#2 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -245,7 +245,7 @@ ERROR: string(86) "Argument 1 passed to takes_keyset3() must be an instance of H
 ERROR: string(87) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Vector given"
 ERROR: string(73) "Argument 1 to takes_keyset4() must be of type ?HH\keyset, HH\Vector given"
 ERROR: string(88) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Vector given"
-object(HH\Vector)#2 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -254,7 +254,7 @@ object(HH\Vector)#2 (3) {
   int(3)
 }
 ====================================================
-object(HH\Map)#2 (2) {
+object(HH\Map) (2) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -268,7 +268,7 @@ ERROR: string(83) "Argument 1 passed to takes_keyset3() must be an instance of H
 ERROR: string(84) "Value returned from function takes_keyset3() must be of type HH\keyset, HH\Map given"
 ERROR: string(70) "Argument 1 to takes_keyset4() must be of type ?HH\keyset, HH\Map given"
 ERROR: string(85) "Value returned from function takes_keyset4() must be of type ?HH\keyset, HH\Map given"
-object(HH\Map)#2 (2) {
+object(HH\Map) (2) {
   [1]=>
   string(1) "a"
   [2]=>

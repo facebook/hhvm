@@ -1,4 +1,4 @@
-object(C)#1 (2) {
+object(C) (2) {
   ["i"]=>
   int(0)
   ["v"]=>
@@ -9,7 +9,7 @@ object(C)#1 (2) {
 Cannot modify immutable property i of class C after construction
 Cannot modify immutable property v of class C after construction
 Class C does not allow use of dynamic (non-declared) properties
-object(C)#1 (2) {
+object(C) (2) {
   ["i"]=>
   int(0)
   ["v"]=>

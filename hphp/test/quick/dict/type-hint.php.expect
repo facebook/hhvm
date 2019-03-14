@@ -152,7 +152,7 @@ ERROR: string(93) "Argument 1 passed to takes_vec_or_dict3() must be an instance
 ERROR: string(94) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, string given"
 string(6) "string"
 ====================================================
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 ERROR: string(81) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, stdClass given"
 ERROR: string(82) "Value returned from function takes_dict1() must be of type HH\dict, stdClass given"
@@ -170,7 +170,7 @@ ERROR: string(82) "Argument 1 to takes_vec_or_dict2() must be of type ?HH\vec_or
 ERROR: string(97) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, stdClass given"
 ERROR: string(95) "Argument 1 passed to takes_vec_or_dict3() must be an instance of HH\vec_or_dict, stdClass given"
 ERROR: string(96) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, stdClass given"
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 ====================================================
 array(0) {
@@ -309,7 +309,7 @@ keyset(2) {
   int(1)
 }
 ====================================================
-object(HH\Vector)#2 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -333,7 +333,7 @@ ERROR: string(83) "Argument 1 to takes_vec_or_dict2() must be of type ?HH\vec_or
 ERROR: string(98) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\Vector given"
 ERROR: string(96) "Argument 1 passed to takes_vec_or_dict3() must be an instance of HH\vec_or_dict, HH\Vector given"
 ERROR: string(97) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\Vector given"
-object(HH\Vector)#2 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -342,7 +342,7 @@ object(HH\Vector)#2 (3) {
   int(3)
 }
 ====================================================
-object(HH\Map)#2 (2) {
+object(HH\Map) (2) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -364,7 +364,7 @@ ERROR: string(80) "Argument 1 to takes_vec_or_dict2() must be of type ?HH\vec_or
 ERROR: string(95) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\Map given"
 ERROR: string(93) "Argument 1 passed to takes_vec_or_dict3() must be an instance of HH\vec_or_dict, HH\Map given"
 ERROR: string(94) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\Map given"
-object(HH\Map)#2 (2) {
+object(HH\Map) (2) {
   [1]=>
   string(1) "a"
   [2]=>

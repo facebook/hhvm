@@ -1,8 +1,8 @@
-object(R)#1 (1) {
+object(R) (1) {
   ["recur"]=>
   *RECURSION*
 }
-object(R)#2 (1) {
+object(R) (1) {
   ["recur"]=>
   *RECURSION*
 }

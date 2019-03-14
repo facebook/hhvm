@@ -1,6 +1,6 @@
 
 Warning: Class __PHP_Incomplete_Class has no unserializer in %s
-object(__PHP_Incomplete_Class)#2 (2) {
+object(__PHP_Incomplete_Class) (2) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(3) "Bar"
   ["serialized"]=>
@@ -8,5 +8,5 @@ object(__PHP_Incomplete_Class)#2 (2) {
 }
 
 Warning: Class Baz has no unserializer in %s
-object(Baz)#2 (0) {
+object(Baz) (0) {
 }

@@ -84,7 +84,7 @@ vec(2) {
 }
 ====================================================
 vec(5) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   bool(true)
   bool(false)
@@ -93,7 +93,7 @@ vec(5) {
 }
 string(42) "v:5:{O:8:"stdClass":0:{}b:1;b:0;d:1.23;N;}"
 vec(5) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   bool(true)
   bool(false)
@@ -180,14 +180,14 @@ vec(4) {
 }
 ====================================================
 vec(1) {
-  object(NoisyClass)#%d (0) {
+  object(NoisyClass) (0) {
   }
 }
 NoisyClass::__sleep()
 string(28) "v:1:{O:10:"NoisyClass":0:{}}"
 NoisyClass::__wakeup()
 vec(1) {
-  object(NoisyClass)#%d (1) {
+  object(NoisyClass) (1) {
     ["val"]=>
     vec(1) {
       int(12345)
@@ -247,10 +247,10 @@ vec(2) {
 ====================================================
 string(45) "v:1:{O:8:"stdClass":1:{s:3:"val";v:1:{r:2;}}}"
 vec(1) {
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["val"]=>
     vec(1) {
-      object(stdClass)#%d (1) {
+      object(stdClass) (1) {
         ["val"]=>
         vec(1) {
           *RECURSION*
@@ -260,14 +260,14 @@ vec(1) {
   }
 }
 ====================================================
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["val"]=>
   vec(1) {
     *RECURSION*
   }
 }
 string(39) "O:8:"stdClass":1:{s:3:"val";v:1:{r:1;}}"
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["val"]=>
   vec(1) {
     *RECURSION*
@@ -275,10 +275,10 @@ object(stdClass)#%d (1) {
 }
 ====================================================
 vec(1) {
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["val"]=>
     vec(1) {
-      object(stdClass)#%d (1) {
+      object(stdClass) (1) {
         ["val"]=>
         *RECURSION*
       }
@@ -287,14 +287,14 @@ vec(1) {
 }
 string(37) "v:1:{O:8:"stdClass":1:{s:3:"val";N;}}"
 vec(1) {
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["val"]=>
     NULL
   }
 }
 ====================================================
 vec(1) {
-  object(SleepThrow)#%d (0) {
+  object(SleepThrow) (0) {
   }
 }
 Serialize exception: Sleep exception

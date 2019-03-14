@@ -1,16 +1,16 @@
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(3) "Joe"
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(3) "Joe"
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(3) "Joe"
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(3) "Boe"
 }

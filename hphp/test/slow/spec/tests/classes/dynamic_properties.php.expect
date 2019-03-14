@@ -61,10 +61,10 @@ bool(false)
 ----------------------
 Point::__set(thing, xx)
 Point::__get(thing)
-object(X)#2 (0) {
+object(X) (0) {
 }
 ----------------------
-object(Test)#3 (2) {
+object(Test) (2) {
   ["p1"]=>
   int(23)
   ["p2"]=>
@@ -74,14 +74,14 @@ object(Test)#3 (2) {
 key p1 has a value of 23
 key p2 has a value of Hello
 ----------------------
-object(Test)#4 (1) {
+object(Test) (1) {
   ["p3"]=>
   bool(false)
 }
 ----------------------
 key p3 has a value of 
 ----------------------
-object(Test)#5 (7) {
+object(Test) (7) {
   ["p4"]=>
   int(999)
   ["p5"]=>

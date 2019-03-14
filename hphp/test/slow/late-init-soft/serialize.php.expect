@@ -14,19 +14,19 @@ string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
 string(27) "{"x":123,"y":456,"z":"abc"}"
 =============== var_dump_test ================
-object(A)#3 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(A)#3 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(A)#4 (3) {
+object(A) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -34,7 +34,7 @@ object(A)#4 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(A)#4 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
@@ -96,19 +96,19 @@ string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
 string(27) "{"x":123,"y":456,"z":"abc"}"
 =============== var_dump_test ================
-object(B)#8 (2) {
+object(B) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(B)#8 (2) {
+object(B) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(A)#9 (3) {
+object(A) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -116,7 +116,7 @@ object(A)#9 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(A)#9 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
@@ -177,19 +177,19 @@ string(27) "{"x":123,"y":777,"z":"abc"}"
 Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
 string(27) "{"x":123,"y":456,"z":"abc"}"
 =============== var_dump_test ================
-object(C)#13 (2) {
+object(C) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(C)#13 (2) {
+object(C) (2) {
   ["x"]=>
   int(123)
   ["z"]=>
   string(3) "abc"
 }
-object(A)#14 (3) {
+object(A) (3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -197,7 +197,7 @@ object(A)#14 (3) {
   ["z"]=>
   string(3) "abc"
 }
-object(A)#14 (2) {
+object(A) (2) {
   ["x"]=>
   int(123)
   ["z"]=>

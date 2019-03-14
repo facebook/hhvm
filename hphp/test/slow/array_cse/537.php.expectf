@@ -21,7 +21,7 @@ array(1) {
     int(0)
   }
 }
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
 NULL
 string(32) "8fa14cdd754f91cc6554c9e71929cce7"

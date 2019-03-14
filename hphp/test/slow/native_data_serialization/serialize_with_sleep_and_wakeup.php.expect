@@ -7,7 +7,7 @@ int(1337)
 string(14) "not serialized"
 string(3) "Foo"
 string(3) "Foo"
-object(Bar)#2 (5) {
+object(Bar) (5) {
   ["prop"]=>
   int(1337)
   ["dontSerializeMe"]=>

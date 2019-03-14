@@ -1,7 +1,7 @@
 private a::blah
 public static a::stat
 protected aa::blah
-object(a)#1 (0) {
+object(a) (0) {
 }
 protected aa::blah
 bool(false)

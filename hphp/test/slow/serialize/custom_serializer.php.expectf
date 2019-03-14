@@ -1,6 +1,6 @@
-object(ArrayObject)#3 (2) {
+object(ArrayObject) (2) {
   ["props"]=>
-  object(A)#4 (0) {
+  object(A) (0) {
   }
   ["storage":"ArrayObject":private]=>
   array(0) {
@@ -8,7 +8,7 @@ object(ArrayObject)#3 (2) {
 }
 
 Warning: Class __PHP_Incomplete_Class has no unserializer in %s on line 9
-object(__PHP_Incomplete_Class)#3 (2) {
+object(__PHP_Incomplete_Class) (2) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(11) "ArrayObject"
   ["serialized"]=>

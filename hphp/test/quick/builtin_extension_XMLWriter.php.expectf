@@ -1,5 +1,5 @@
 XMLWriter
-object(XMLWriter)#1 (0) {
+object(XMLWriter) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class XMLWriter in %s/builtin_extensions.inc on line 8
@@ -95,7 +95,7 @@ array(43) {
 }
 ================
 A_XMLWriter
-object(A_XMLWriter)#2 (1) {
+object(A_XMLWriter) (1) {
   ["___x"]=>
   NULL
 }

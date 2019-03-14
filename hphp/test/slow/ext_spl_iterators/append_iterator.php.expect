@@ -1,8 +1,8 @@
-object(ArrayIterator)#2 (2) {
+object(ArrayIterator) (2) {
   ["storage":"ArrayIterator":private]=>
   array(2) {
     [0]=>
-    object(ArrayIterator)#3 (2) {
+    object(ArrayIterator) (2) {
       ["storage":"ArrayIterator":private]=>
       array(1) {
         [0]=>
@@ -12,7 +12,7 @@ object(ArrayIterator)#2 (2) {
       int(0)
     }
     [1]=>
-    object(ArrayIterator)#4 (2) {
+    object(ArrayIterator) (2) {
       ["storage":"ArrayIterator":private]=>
       array(2) {
         [0]=>
@@ -27,11 +27,11 @@ object(ArrayIterator)#2 (2) {
   ["flags":"ArrayIterator":private]=>
   int(0)
 }
-object(ArrayIterator)#2 (2) {
+object(ArrayIterator) (2) {
   ["storage":"ArrayIterator":private]=>
   array(3) {
     [0]=>
-    object(ArrayIterator)#3 (2) {
+    object(ArrayIterator) (2) {
       ["storage":"ArrayIterator":private]=>
       array(1) {
         [0]=>
@@ -41,7 +41,7 @@ object(ArrayIterator)#2 (2) {
       int(0)
     }
     [1]=>
-    object(ArrayIterator)#4 (2) {
+    object(ArrayIterator) (2) {
       ["storage":"ArrayIterator":private]=>
       array(2) {
         [0]=>
@@ -53,7 +53,7 @@ object(ArrayIterator)#2 (2) {
       int(0)
     }
     [2]=>
-    object(ArrayIterator)#5 (2) {
+    object(ArrayIterator) (2) {
       ["storage":"ArrayIterator":private]=>
       array(3) {
         [0]=>

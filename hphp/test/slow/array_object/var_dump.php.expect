@@ -1,4 +1,4 @@
-object(ArrayObject)#1 (2) {
+object(ArrayObject) (2) {
   ["bar"]=>
   string(3) "baz"
   ["storage":"ArrayObject":private]=>
@@ -7,7 +7,7 @@ object(ArrayObject)#1 (2) {
     string(3) "bar"
   }
 }
-object(ArrayObject)#1 (2) {
+object(ArrayObject) (2) {
   ["bar"]=>
   string(3) "baz"
   ["storage":"ArrayObject":private]=>
@@ -16,7 +16,7 @@ object(ArrayObject)#1 (2) {
     string(3) "bar"
   }
 }
-object(ArrayObject)#1 (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     ["foo"]=>

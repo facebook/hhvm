@@ -1,5 +1,5 @@
 SQLite3Result
-object(SQLite3Result)#1 (0) {
+object(SQLite3Result) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SQLite3Result in %s/builtin_extensions.inc on line 8
@@ -23,7 +23,7 @@ array(7) {
 }
 ================
 A_SQLite3Result
-object(A_SQLite3Result)#2 (1) {
+object(A_SQLite3Result) (1) {
   ["___x"]=>
   NULL
 }

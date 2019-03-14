@@ -3,7 +3,7 @@ Inside MyVector::offsetSet with offset >10<
 Inside MyVector::offsetGet with offset >1<
 string(2) "up"
 Inside MyVector::offsetSet with offset ><
-object(MyVector)#1 (1) {
+object(MyVector) (1) {
   ["elements":"MyVector":private]=>
   array(5) {
     [0]=>

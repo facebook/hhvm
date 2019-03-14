@@ -1,6 +1,6 @@
 --> Write existent, non-existent and dynamic:
   Original wrapped object:
-object(UsesMagic)#%d (4) {
+object(UsesMagic) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -11,13 +11,13 @@ object(UsesMagic)#%d (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(ArrayObject)#%d (3) {
+object(ArrayObject) (3) {
   ["a"]=>
   string(7) "changed"
   ["dynamic"]=>
   string(11) "new.changed"
   ["storage":"ArrayObject":private]=>
-  object(UsesMagic)#%d (4) {
+  object(UsesMagic) (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -36,7 +36,7 @@ Notice: %s
 NULL
 string(11) "new.changed"
   Original wrapped object:
-object(UsesMagic)#%d (4) {
+object(UsesMagic) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -47,13 +47,13 @@ object(UsesMagic)#%d (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(ArrayObject)#%d (3) {
+object(ArrayObject) (3) {
   ["a"]=>
   string(7) "changed"
   ["dynamic"]=>
   string(11) "new.changed"
   ["storage":"ArrayObject":private]=>
-  object(UsesMagic)#%d (4) {
+  object(UsesMagic) (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -70,7 +70,7 @@ bool(true)
 bool(false)
 bool(true)
   Original wrapped object:
-object(UsesMagic)#%d (4) {
+object(UsesMagic) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -81,13 +81,13 @@ object(UsesMagic)#%d (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(ArrayObject)#%d (3) {
+object(ArrayObject) (3) {
   ["a"]=>
   string(7) "changed"
   ["dynamic"]=>
   string(11) "new.changed"
   ["storage":"ArrayObject":private]=>
-  object(UsesMagic)#%d (4) {
+  object(UsesMagic) (4) {
     ["a"]=>
     int(1)
     ["b"]=>
@@ -101,7 +101,7 @@ object(ArrayObject)#%d (3) {
 
 --> Unset existent, non-existent and dynamic:
   Original wrapped object:
-object(UsesMagic)#%d (4) {
+object(UsesMagic) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -112,9 +112,9 @@ object(UsesMagic)#%d (4) {
   string(6) "secret"
 }
   Wrapping ArrayObject:
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
-  object(UsesMagic)#%d (4) {
+  object(UsesMagic) (4) {
     ["a"]=>
     int(1)
     ["b"]=>

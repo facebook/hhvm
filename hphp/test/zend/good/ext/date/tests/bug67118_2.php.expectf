@@ -1,6 +1,6 @@
 First try
 Second try
-object(Foo)#%d (3) {
+object(Foo) (3) {
   ["date"]=>
   string(%d) "2007-09-12 15:49:%s"
   ["timezone_type"]=>

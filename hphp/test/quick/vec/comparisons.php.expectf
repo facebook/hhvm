@@ -192,11 +192,11 @@ vec(1) {
 	<=> : int(0)
 Comparing:
 vec(1) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 vec(1) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 	<   : bool(false)
@@ -210,7 +210,7 @@ vec(1) {
 	<=> : int(0)
 Comparing:
 vec(1) {
-  object(ToString)#%d (1) {
+  object(ToString) (1) {
     ["str"]=>
     string(6) "foobaz"
   }
@@ -232,7 +232,7 @@ vec(1) {
   string(6) "foobaz"
 }
 vec(1) {
-  object(ToString)#%d (1) {
+  object(ToString) (1) {
     ["str"]=>
     string(6) "foobaz"
   }
@@ -248,7 +248,7 @@ vec(1) {
 	<=> : int(0)
 Comparing:
 vec(1) {
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 vec(1) {
@@ -268,7 +268,7 @@ vec(1) {
   string(6) "foobaz"
 }
 vec(1) {
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 	<   : Error: Compare exception
@@ -283,7 +283,7 @@ vec(1) {
 Comparing:
 vec(2) {
   int(1)
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 vec(2) {
@@ -306,7 +306,7 @@ vec(2) {
 }
 vec(2) {
   int(1)
-  object(Thrower)#%d (0) {
+  object(Thrower) (0) {
   }
 }
 	<   : bool(false)
@@ -451,7 +451,7 @@ vec(0) {
 Comparing:
 vec(0) {
 }
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
@@ -463,7 +463,7 @@ object(stdClass)#%d (0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 Comparing:
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 vec(0) {
 }

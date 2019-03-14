@@ -1,13 +1,13 @@
 This is Normal
-object(Normal)#1 (0) {
+object(Normal) (0) {
 }
 This is Weird
 %ANULL
 This is Weird2
-object(Weird2)#1 (0) {
+object(Weird2) (0) {
 }
 This is Weird3
-object(Weird3)#1 (0) {
+object(Weird3) (0) {
 }
 closure
 %ANULL

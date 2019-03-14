@@ -1,4 +1,4 @@
-object(DOMElement)#3 (18) {
+object(DOMElement) (18) {
   ["nodeName"]=>
   string(4) "root"
   ["nodeValue"]=>

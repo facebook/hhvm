@@ -1,4 +1,4 @@
-object(obj)#1 (1) {
+object(obj) (1) {
   ["container":"obj":private]=>
   array(3) {
     ["one"]=>
@@ -20,7 +20,7 @@ array(3) {
     string(4) "drei"
   }
 }
-object(SetTest)#2 (1) {
+object(SetTest) (1) {
   ["_vals":"SetTest":private]=>
   array(3) {
     ["one"]=>
@@ -31,7 +31,7 @@ object(SetTest)#2 (1) {
     NULL
   }
 }
-object(SetTest)#2 (1) {
+object(SetTest) (1) {
   ["_vals":"SetTest":private]=>
   array(3) {
     ["one"]=>

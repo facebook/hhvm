@@ -1,4 +1,4 @@
-object(SplFixedArray)#%d (%d) {
+object(SplFixedArray) (%d) {
   ["data":protected]=>
   array(0) {
   }

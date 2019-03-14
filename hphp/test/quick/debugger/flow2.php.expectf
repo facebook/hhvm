@@ -121,7 +121,7 @@ All breakpoints are cleared.
 continue
 int(8)
 int(1)
-object(C1)#2 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -163,7 +163,7 @@ Constructor
 Constructor
 int(9)
 int(1)
-object(C1)#3 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }

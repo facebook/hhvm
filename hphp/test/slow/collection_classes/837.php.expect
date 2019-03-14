@@ -1,8 +1,8 @@
-object(HH\Set)#5 (1) {
+object(HH\Set) (1) {
   int(4)
 }
 int(4)
-object(HH\Set)#10 (1) {
+object(HH\Set) (1) {
   int(10)
 }
 int(10)

@@ -1,6 +1,6 @@
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   ["indexer"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     [0]=>
     string(8) "
 

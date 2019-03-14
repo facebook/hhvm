@@ -1,4 +1,4 @@
-object(HH\Set)#1 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
@@ -9,7 +9,7 @@ HH\Set Object
     2
     3
 )
-object(HH\Set)#1 (3) refcount(%d){
+object(HH\Set) (3) refcount(%d){
   long(1) refcount(1)
   long(2) refcount(1)
   long(3) refcount(1)
@@ -26,7 +26,7 @@ HH\Set {
     3
 ]
 V:6:"HH\Set":3:{i:1;i:2;i:3;}
-object(HH\Set)#2 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)

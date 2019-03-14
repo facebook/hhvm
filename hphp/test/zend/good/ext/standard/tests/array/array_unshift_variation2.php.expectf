@@ -812,7 +812,7 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   ["f"]=>
   string(5) "first"
@@ -826,7 +826,7 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   [1]=>
   string(5) "hello"

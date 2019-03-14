@@ -27,12 +27,12 @@ array(10) {
   array(0) {
   }
   ["instance of classWithoutToString"]=>
-  object(classWithoutToString)#%d (0) {
+  object(classWithoutToString) (0) {
   }
   ["lowercase true"]=>
   bool(true)
   ["instance of classWithToString"]=>
-  object(classWithToString)#%d (0) {
+  object(classWithToString) (0) {
   }
 }
 ===DONE===

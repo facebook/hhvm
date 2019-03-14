@@ -1,13 +1,13 @@
-object(Closure$;%d)#1 (1) {
+object(Closure$;%d) (1) {
   ["parameter"]=>
   array(1) {
     ["$x"]=>
     string(10) "<required>"
   }
 }
-object(stdClass)#2 (0) {
+object(stdClass) (0) {
 }
-object(Closure$#2;%d)#2 (1) {
+object(Closure$#2;%d) (1) {
   ["parameter"]=>
   array(1) {
     ["$x"]=>

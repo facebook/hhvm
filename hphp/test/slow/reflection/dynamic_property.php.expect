@@ -1,4 +1,4 @@
-object(ReflectionProperty)#4 (3) {
+object(ReflectionProperty) (3) {
   ["name"]=>
   string(1) "a"
   ["class"]=>
@@ -15,7 +15,7 @@ int(256)
 bool(false)
 string(0) ""
 NULL
-object(ReflectionProperty)#4 (3) {
+object(ReflectionProperty) (3) {
   ["name"]=>
   string(1) "a"
   ["class"]=>

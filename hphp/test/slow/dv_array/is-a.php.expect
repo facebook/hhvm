@@ -29,7 +29,7 @@ is_varray => FALSE
 is_darray => FALSE
 gettype => double
 ============= direct_test_dv_arrays ================
-value => object(stdClass)#1 (0) {
+value => object(stdClass) (0) {
 }
 is_varray => FALSE
 is_darray => FALSE
@@ -240,7 +240,7 @@ HH\is_varray => FALSE
 HH\is_darray => FALSE
 gettype => double
 ============= indirect_test_dv_arrays ==============
-value => object(stdClass)#1 (0) {
+value => object(stdClass) (0) {
 }
 HH\is_varray => FALSE
 HH\is_darray => FALSE

@@ -6,7 +6,7 @@ array(1) {
   [0]=>
   int(3)
 }
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(2) "57"
 string(3) "6.5"
@@ -18,7 +18,7 @@ array(1) {
   [0]=>
   int(3)
 }
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(2) "57"
 string(3) "6.5"
@@ -30,7 +30,7 @@ array(1) {
   [0]=>
   int(3)
 }
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(2) "57"
 string(3) "6.5"
@@ -42,7 +42,7 @@ array(1) {
   [0]=>
   int(3)
 }
-object(X)#1 (0) {
+object(X) (0) {
 }
 string(2) "57"
 string(3) "6.5"

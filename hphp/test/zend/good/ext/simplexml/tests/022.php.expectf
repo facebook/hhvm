@@ -1,7 +1,7 @@
 ===CONTENT===
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   ["file"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["@attributes"]=>
     array(1) {
       ["glob"]=>
@@ -10,7 +10,7 @@ object(SimpleXMLElement)#%d (1) {
   }
 }
 ===FILE===
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   ["@attributes"]=>
   array(1) {
     ["glob"]=>
@@ -18,14 +18,14 @@ object(SimpleXMLElement)#%d (1) {
   }
 }
 ===FOREACH===
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   ["@attributes"]=>
   array(1) {
     ["glob"]=>
     string(11) "slide_*.xml"
   }
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(11) "slide_*.xml"
 }

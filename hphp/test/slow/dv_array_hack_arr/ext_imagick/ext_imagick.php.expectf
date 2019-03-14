@@ -1,5 +1,5 @@
 vec(2) {
-  object(Imagick)#2 (3) {
+  object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(%d) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
@@ -10,7 +10,7 @@ vec(2) {
   float(0)
 }
 vec(2) {
-  object(Imagick)#2 (3) {
+  object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(%d) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
@@ -151,7 +151,7 @@ dict(2) {
   float(0.60000002384186)
 }
 vec(1) {
-  object(ImagickPixel)#4 (1) {
+  object(ImagickPixel) (1) {
     ["wand":"ImagickPixel":private]=>
     resource(%d) of type (WandResource)
   }

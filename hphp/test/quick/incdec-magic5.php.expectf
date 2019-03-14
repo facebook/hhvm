@@ -1,6 +1,6 @@
 string(4) "blah"
 
 Notice: Increment on string 'asd' in %s/test/quick/incdec-magic5.php on line %d
-object(Whatever)#1 (0) {
+object(Whatever) (0) {
 }
 string(3) "asd"

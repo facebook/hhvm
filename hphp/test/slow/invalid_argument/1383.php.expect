@@ -3,5 +3,5 @@ string(74) "Argument 1 passed to x::__construct() must be an instance of y, null
 int(8)
 string(36) "Cannot access property on non-object"
 NULL
-object(x)#1 (0) {
+object(x) (0) {
 }

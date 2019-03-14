@@ -1,5 +1,5 @@
 values...
-object(HH\ImmVector)#2 (3) {
+object(HH\ImmVector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -39,21 +39,21 @@ array(3) {
 }
 
 toSet...
-object(HH\Set)#2 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
 
 toImmSet...
-object(HH\ImmSet)#2 (3) {
+object(HH\ImmSet) (3) {
   int(1)
   int(2)
   int(3)
 }
 
 toVector...
-object(HH\Vector)#2 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>

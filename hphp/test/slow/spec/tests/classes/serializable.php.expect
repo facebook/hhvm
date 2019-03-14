@@ -11,7 +11,7 @@ string(47) "C:5:"Point":30:{a:2:{s:1:"y";i:5;s:1:"x";i:2;}}"
 
 Inside Point::unserialize, ID:2(2,5)
 
-object(Point)#2 (3) {
+object(Point) (3) {
   ["x":"Point":private]=>
   int(2)
   ["y":"Point":private]=>
@@ -41,7 +41,7 @@ Inside Point::unserialize, ID:4(9,8)2
 
 Inside ColoredPoint::unserialize, ID:4(9,8)2
 
-object(ColoredPoint)#4 (4) {
+object(ColoredPoint) (4) {
   ["color":"ColoredPoint":private]=>
   int(2)
   ["x":"Point":private]=>

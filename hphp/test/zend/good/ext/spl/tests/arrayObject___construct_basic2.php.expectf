@@ -18,12 +18,12 @@ Notice: %s
 NULL
 NULL
   - After:
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#%d (0) {
+  object(C) (0) {
   }
 }
-object(C)#%d (0) {
+object(C) (0) {
 }
 
 --> Access prop on instance of MyArrayObject:
@@ -46,10 +46,10 @@ Notice: %s
 NULL
 NULL
   - After:
-object(MyArrayObject)#%d (1) {
+object(MyArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#%d (0) {
+  object(C) (0) {
   }
 }
-object(C)#%d (0) {
+object(C) (0) {
 }

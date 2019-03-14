@@ -1,4 +1,4 @@
-object(Memcached)#2 (0) {
+object(Memcached) (0) {
 }
 string(13) "callback_test"
 NULL

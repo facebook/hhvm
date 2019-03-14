@@ -109,12 +109,12 @@ resource(1) of type (stream)
 
 Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
 bool(false)
-object(stdClass)#1 (0) {
+object(stdClass) (0) {
 }
 
 Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
 bool(false)
-object(HH\Vector)#1 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>

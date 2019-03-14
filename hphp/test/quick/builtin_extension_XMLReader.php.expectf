@@ -1,5 +1,5 @@
 XMLReader
-object(XMLReader)#1 (0) {
+object(XMLReader) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class XMLReader in %s/builtin_extensions.inc on line 8
@@ -63,7 +63,7 @@ array(27) {
 }
 ================
 A_XMLReader
-object(A_XMLReader)#2 (1) {
+object(A_XMLReader) (1) {
   ["___x"]=>
   NULL
 }

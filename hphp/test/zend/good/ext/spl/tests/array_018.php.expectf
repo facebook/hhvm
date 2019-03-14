@@ -1,11 +1,11 @@
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     ["%r\x00%r"]=>
     string(3) "Foo"
   }
 }
-object(ArrayObject)#%d (1) {
+object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     [""]=>

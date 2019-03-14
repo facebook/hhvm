@@ -53,7 +53,7 @@ array(2) {
 -- Iteration 8 --
 array(3) {
   [11]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   ["unset"]=>
   NULL

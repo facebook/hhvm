@@ -38,7 +38,7 @@ A::__construct
 A::__set_state(array(
 ))
 A::__debugInfo
-object(A)#3 (0) {
+object(A) (0) {
 }
 A::__set_state
 A::__set_state

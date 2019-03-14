@@ -1,4 +1,4 @@
-object(A)#1 (5) {
+object(A) (5) {
   ["foo"]=>
   string(3) "foo"
   ["fooref"]=>
@@ -11,7 +11,7 @@ object(A)#1 (5) {
   &int(9)
 }
 clone
-object(A)#1 (5) {
+object(A) (5) {
   ["foo"]=>
   string(3) "foo"
   ["fooref"]=>
@@ -23,7 +23,7 @@ object(A)#1 (5) {
   ["dynref"]=>
   &int(9)
 }
-object(A)#2 (5) {
+object(A) (5) {
   ["foo"]=>
   string(3) "foo"
   ["fooref"]=>
@@ -35,7 +35,7 @@ object(A)#2 (5) {
   ["dynref"]=>
   &int(9)
 }
-object(A)#1 (5) {
+object(A) (5) {
   ["foo"]=>
   string(3) "foo"
   ["fooref"]=>
@@ -47,7 +47,7 @@ object(A)#1 (5) {
   ["dynref"]=>
   &string(8) "a2dynref"
 }
-object(A)#2 (6) {
+object(A) (6) {
   ["foo"]=>
   string(5) "a2foo"
   ["fooref"]=>

@@ -1,5 +1,5 @@
 DOMEntityReference
-object(DOMEntityReference)#1 (16) {
+object(DOMEntityReference) (16) {
   ["nodeName"]=>
   string(3) "Foo"
   ["nodeValue"]=>
@@ -79,7 +79,7 @@ array(19) {
 }
 ================
 A_DOMEntityReference
-object(A_DOMEntityReference)#2 (17) {
+object(A_DOMEntityReference) (17) {
   ["___x"]=>
   NULL
   ["nodeName"]=>

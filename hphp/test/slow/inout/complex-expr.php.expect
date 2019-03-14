@@ -122,7 +122,7 @@ array(2) {
     }
   }
 }
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
@@ -137,7 +137,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  object(HH\Vector)#2 (2) {
+  object(HH\Vector) (2) {
     [0]=>
     int(1)
     [1]=>
@@ -148,7 +148,7 @@ string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
 string(6) "fuzzed"
-object(HH\Vector)#3 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>

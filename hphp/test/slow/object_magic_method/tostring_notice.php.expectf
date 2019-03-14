@@ -159,6 +159,6 @@ Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tos
 __toString called
 array(1) {
   [1]=>
-  object(C)#%d (0) {
+  object(C) (0) {
   }
 }

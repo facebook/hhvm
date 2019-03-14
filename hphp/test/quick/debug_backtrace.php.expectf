@@ -26,7 +26,7 @@ array(6) {
     ["class"]=>
     string(1) "A"
     ["object"]=>
-    object(A)#1 (0) {
+    object(A) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -118,7 +118,7 @@ array(6) {
     ["class"]=>
     string(1) "A"
     ["object"]=>
-    object(A)#1 (0) {
+    object(A) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -201,7 +201,7 @@ array(6) {
     ["class"]=>
     string(1) "A"
     ["object"]=>
-    object(A)#1 (0) {
+    object(A) (0) {
     }
     ["type"]=>
     string(2) "->"

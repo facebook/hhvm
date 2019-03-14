@@ -1,6 +1,6 @@
 array(2) {
   [0]=>
-  object(Imagick)#2 (3) {
+  object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(%d) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
@@ -13,7 +13,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(Imagick)#2 (3) {
+  object(Imagick) (3) {
     ["wand":"Imagick":private]=>
     resource(%d) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
@@ -156,7 +156,7 @@ array(2) {
 }
 array(1) {
   [0]=>
-  object(ImagickPixel)#4 (1) {
+  object(ImagickPixel) (1) {
     ["wand":"ImagickPixel":private]=>
     resource(%d) of type (WandResource)
   }

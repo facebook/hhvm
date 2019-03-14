@@ -2,7 +2,7 @@ array(3) {
   [0]=>
   &string(5) "awake"
   [1]=>
-  object(obj)#2 (1) {
+  object(obj) (1) {
     ["prop"]=>
     &string(5) "awake"
   }

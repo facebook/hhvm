@@ -1,12 +1,12 @@
-object(C)#3 (2) {
+object(C) (2) {
   ["cv"]=>
-  object(HH\Vector)#4 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(0)
   }
   ["cvv"]=>
   vec(1) {
-    object(HH\Vector)#5 (1) {
+    object(HH\Vector) (1) {
       [0]=>
       int(1)
     }
@@ -14,9 +14,9 @@ object(C)#3 (2) {
 }
 Cannot modify immutable property cv of class C after construction
 Cannot modify immutable property cvv of class C after construction
-object(C)#3 (2) {
+object(C) (2) {
   ["cv"]=>
-  object(HH\Vector)#4 (2) {
+  object(HH\Vector) (2) {
     [0]=>
     int(0)
     [1]=>
@@ -24,7 +24,7 @@ object(C)#3 (2) {
   }
   ["cvv"]=>
   vec(1) {
-    object(HH\Vector)#5 (2) {
+    object(HH\Vector) (2) {
       [0]=>
       int(1)
       [1]=>

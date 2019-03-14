@@ -1,4 +1,4 @@
-object(A)#1 (4) {
+object(A) (4) {
   ["test"]=>
   bool(false)
   ["test2"]=>

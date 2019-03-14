@@ -35,17 +35,17 @@ After 'new Point(5, 7)', $b is (5,7)
 After '$a = f2()', $a is (5,7)
 Done
 ----------------- unsetting properties ----------------------
-at start, $c is object(C)#%d (2) {
+at start, $c is object(C) (2) {
   ["prop1"]=>
   NULL
   ["prop2"]=>
   NULL
 }
-after unset($c->prop1), $c is object(C)#%d (1) {
+after unset($c->prop1), $c is object(C) (1) {
   ["prop2"]=>
   NULL
 }
-after unset($c->prop2), $c is object(C)#%d (0) {
+after unset($c->prop2), $c is object(C) (0) {
 }
 after unset($c), $c is undefined
 Done

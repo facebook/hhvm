@@ -1,5 +1,5 @@
 test_class::__construct(1,2)
-object(test_class)#%d (7) {
+object(test_class) (7) {
   [%u|b%"c1"]=>
   %unicode|string%(1) "0"
   [%u|b%"c2"]=>

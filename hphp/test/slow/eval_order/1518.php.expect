@@ -12,7 +12,7 @@ array(3) {
   [0]=>
   int(3)
 }
-object(A)#1 (2) {
+object(A) (2) {
   ["f"]=>
   int(1)
   ["g"]=>

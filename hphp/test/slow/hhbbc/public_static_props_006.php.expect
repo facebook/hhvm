@@ -1,4 +1,4 @@
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   ["a"]=>
   string(1) "b"
 }

@@ -41,11 +41,11 @@ int(0)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 
@@ -94,11 +94,11 @@ float(0)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 
@@ -147,11 +147,11 @@ string(0) ""
 }
 *** Caught %s
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(Stringable) (0) {
 }
 string(6) "foobar"
 
@@ -200,11 +200,11 @@ bool(false)
 }
 *** Caught %s
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass) (0) {
 }
 *** Caught %s
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(Stringable) (0) {
 }
 *** Caught %s
 

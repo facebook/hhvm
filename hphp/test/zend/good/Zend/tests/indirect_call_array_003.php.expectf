@@ -5,5 +5,5 @@ Notice: %s
 NULL
 From foo::__call:
 string(3) "abc"
-object(foo)#%d (0) {
+object(foo) (0) {
 }

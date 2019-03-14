@@ -1,5 +1,5 @@
 DateInterval
-object(DateInterval)#1 (0) {
+object(DateInterval) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DateInterval in %s/test/quick/builtin_extensions.inc on line 8
@@ -19,7 +19,7 @@ array(5) {
 }
 ================
 A_DateInterval
-object(A_DateInterval)#2 (1) {
+object(A_DateInterval) (1) {
   ["___x"]=>
   NULL
 }

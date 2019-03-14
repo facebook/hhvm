@@ -17,7 +17,7 @@ array(1) {
   ["x"]=>
   array(1) {
     ["y"]=>
-    object(stdClass)#1 (1) {
+    object(stdClass) (1) {
       ["x"]=>
       int(42)
     }

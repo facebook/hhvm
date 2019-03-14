@@ -1,6 +1,6 @@
 string(34) "V:9:"HH\Vector":2:{i:7;s:3:"foo";}"
 ------------------------
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>
@@ -16,7 +16,7 @@ HH\Vector {
   7,
   'foo',
 }
-object(HH\Vector)#2 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(7)
   [1]=>

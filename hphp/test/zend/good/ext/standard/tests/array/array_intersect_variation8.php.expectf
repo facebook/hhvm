@@ -85,14 +85,14 @@ array(2) {
   [6]=>
   resource(%d) of type (stream)
   [9]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
 }
 array(2) {
   [6]=>
   resource(%d) of type (stream)
   [9]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
 }
 -- Iterator 11 --
@@ -104,7 +104,7 @@ array(6) {
   [8]=>
   string(11) "Hello world"
   [9]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   [10]=>
   float(444.432)
@@ -119,7 +119,7 @@ array(6) {
   [8]=>
   string(11) "Hello world"
   [9]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   [10]=>
   float(444.432)

@@ -10,7 +10,7 @@ array(2) {
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -31,7 +31,7 @@ array(2) {
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -54,7 +54,7 @@ array(2) {
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -75,7 +75,7 @@ array(2) {
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"

@@ -1,4 +1,4 @@
-object(Widget)#1 (1) {
+object(Widget) (1) {
   ["count":"Widget":private]=>
   int(120)
 }

@@ -1,6 +1,6 @@
 array(2) {
   ["obj"]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   ["unc"]=>
   string(16) "foobar0123456789"

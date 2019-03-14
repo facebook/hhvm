@@ -8,7 +8,7 @@ Getting [z]
 Nothing!
 Setting [z] to 1
 Not OK!
-object(setter)#%d (2) {
+object(setter) (2) {
   ["n"]=>
   int(1)
   ["x"]=>

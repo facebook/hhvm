@@ -1,5 +1,5 @@
 SQLite3Stmt
-object(SQLite3Stmt)#2 (0) {
+object(SQLite3Stmt) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 8
@@ -25,7 +25,7 @@ array(8) {
 }
 ================
 A_SQLite3Stmt
-object(A_SQLite3Stmt)#3 (1) {
+object(A_SQLite3Stmt) (1) {
   ["___x"]=>
   NULL
 }

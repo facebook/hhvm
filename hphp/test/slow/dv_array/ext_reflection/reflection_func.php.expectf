@@ -30,7 +30,7 @@ array(2) {
 }
 array(3) {
   [0]=>
-  object(ReflectionParameter)#2 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(10) {
       ["index"]=>
@@ -68,7 +68,7 @@ array(3) {
     }
   }
   [1]=>
-  object(ReflectionParameter)#3 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(12) {
       ["index"]=>
@@ -110,7 +110,7 @@ array(3) {
     }
   }
   [2]=>
-  object(ReflectionParameter)#4 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(12) {
       ["index"]=>
@@ -152,7 +152,7 @@ array(3) {
     }
   }
 }
-object(ReflectionType)#5 (1) {
+object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
   array(3) {
     ["name"]=>
@@ -188,7 +188,7 @@ array(2) {
 }
 array(1) {
   [0]=>
-  object(ReflectionParameter)#6 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
     array(11) {
       ["index"]=>

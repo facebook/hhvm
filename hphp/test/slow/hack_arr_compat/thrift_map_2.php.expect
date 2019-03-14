@@ -1,27 +1,27 @@
-object(Mappish)#3 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
-  object(HH\Map)#4 (1) {
+  object(HH\Map) (1) {
     ["1"]=>
     int(2)
   }
 }
 string(32) "d1fc008b81d8074505914973cbab7120"
-object(Mappish)#5 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
   array(1) {
     [1]=>
     string(1) "2"
   }
 }
-object(Mappish)#3 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
-  object(HH\Map)#4 (1) {
+  object(HH\Map) (1) {
     ["1"]=>
     int(2)
   }
 }
 string(32) "b46b33d2d92659e1f93e5a713e33a608"
-object(Mappish)#7 (1) {
+object(Mappish) (1) {
   ["extraData"]=>
   array(1) {
     [1]=>
@@ -30,7 +30,7 @@ object(Mappish)#7 (1) {
 }
 -------
 
-object(Settish)#9 (1) {
+object(Settish) (1) {
   ["extraData"]=>
   dict(1) {
     ["1"]=>
@@ -38,14 +38,14 @@ object(Settish)#9 (1) {
   }
 }
 string(32) "7e4cfa3f5304c10e1c8c835cfb23f931"
-object(Settish)#10 (1) {
+object(Settish) (1) {
   ["extraData"]=>
   array(1) {
     [1]=>
     bool(true)
   }
 }
-object(Settish)#9 (1) {
+object(Settish) (1) {
   ["extraData"]=>
   dict(1) {
     ["1"]=>
@@ -53,7 +53,7 @@ object(Settish)#9 (1) {
   }
 }
 string(32) "106a0509161dd8be306cb0c067c45eab"
-object(Settish)#12 (1) {
+object(Settish) (1) {
   ["extraData"]=>
   array(1) {
     [1]=>

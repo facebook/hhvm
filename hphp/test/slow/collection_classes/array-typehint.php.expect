@@ -158,7 +158,7 @@ f2:
 f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Vector given"
-object(HH\Vector)#10 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -166,7 +166,7 @@ object(HH\Vector)#10 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#10 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -178,7 +178,7 @@ object(HH\Vector)#10 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Vector given"
-object(HH\Vector)#10 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -186,7 +186,7 @@ object(HH\Vector)#10 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#10 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -202,7 +202,7 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Vector given"
-object(HH\Vector)#14 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -210,7 +210,7 @@ object(HH\Vector)#14 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#14 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -222,7 +222,7 @@ object(HH\Vector)#14 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Vector given"
-object(HH\Vector)#14 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -230,7 +230,7 @@ object(HH\Vector)#14 (3) {
   [2]=>
   int(3)
 }
-object(HH\Vector)#14 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -247,7 +247,7 @@ f2:
 f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Map given"
-object(HH\Map)#18 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -255,7 +255,7 @@ object(HH\Map)#18 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#18 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -267,7 +267,7 @@ object(HH\Map)#18 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Map given"
-object(HH\Map)#18 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -275,7 +275,7 @@ object(HH\Map)#18 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#18 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -291,7 +291,7 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Map given"
-object(HH\Map)#22 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -299,7 +299,7 @@ object(HH\Map)#22 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#22 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -311,7 +311,7 @@ object(HH\Map)#22 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Map given"
-object(HH\Map)#22 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -319,7 +319,7 @@ object(HH\Map)#22 (3) {
   ["c"]=>
   int(3)
 }
-object(HH\Map)#22 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -336,12 +336,12 @@ f2:
 f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, HH\Set given"
-object(HH\Set)#26 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#26 (4) {
+object(HH\Set) (4) {
   int(1)
   int(2)
   int(3)
@@ -349,12 +349,12 @@ object(HH\Set)#26 (4) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, HH\Set given"
-object(HH\Set)#26 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#26 (4) {
+object(HH\Set) (4) {
   int(1)
   int(2)
   int(3)
@@ -366,12 +366,12 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, HH\Set given"
-object(HH\Set)#30 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#30 (4) {
+object(HH\Set) (4) {
   int(1)
   int(2)
   int(3)
@@ -379,12 +379,12 @@ object(HH\Set)#30 (4) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, HH\Set given"
-object(HH\Set)#30 (3) {
+object(HH\Set) (3) {
   int(1)
   int(2)
   int(3)
 }
-object(HH\Set)#30 (4) {
+object(HH\Set) (4) {
   int(1)
   int(2)
   int(3)
@@ -397,11 +397,11 @@ f2:
 f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, stdClass given"
-object(stdClass)#4 (0) {
+object(stdClass) (0) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, stdClass given"
-object(stdClass)#4 (0) {
+object(stdClass) (0) {
 }
 f5:
 f5() threw an exception
@@ -409,9 +409,9 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, stdClass given"
-object(stdClass)#4 (0) {
+object(stdClass) (0) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, stdClass given"
-object(stdClass)#4 (0) {
+object(stdClass) (0) {
 }

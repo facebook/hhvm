@@ -32,7 +32,7 @@ array(12) {
   [5]=>
   float(1.23)
   [6]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [7]=>
   resource(4) of type (xml)
@@ -118,7 +118,7 @@ array(12) {
   ["key3"]=>
   float(1.23)
   [40]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [50]=>
   resource(5) of type (xml)

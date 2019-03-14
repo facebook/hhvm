@@ -175,7 +175,7 @@ string(1) "B"
 bool(false)
 bool(false)
 
-object(stdClass)#1 (0) {
+object(stdClass) (0) {
 }
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9

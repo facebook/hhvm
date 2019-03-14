@@ -1,5 +1,5 @@
 DOMXPath
-object(DOMXPath)#2 (1) {
+object(DOMXPath) (1) {
   ["document"]=>
   string(22) "(object value omitted)"
 }
@@ -23,7 +23,7 @@ array(6) {
 }
 ================
 A_DOMXPath
-object(A_DOMXPath)#3 (2) {
+object(A_DOMXPath) (2) {
   ["___x"]=>
   NULL
   ["document"]=>

@@ -11,50 +11,57 @@
         ];
       f_body =
       { fb_ast =
-        [(Expr
-            (([4:3-10], int),
-             (Binop ((Eq (Some Minus)),
-                (([4:3-5], int), (Lvar ([4:3-5], $x))),
-                (([4:9-10], int), (Int "4"))))));
+        [([4:3-11],
           (Expr
-             (([5:3-10], int),
-              (Binop ((Eq (Some Plus)),
-                 (([5:3-5], int), (Lvar ([5:3-5], $x))),
-                 (([5:9-10], int), (Int "4"))))));
-          (Expr
-             (([6:3-10], int),
-              (Binop ((Eq (Some Star)),
-                 (([6:3-5], int), (Lvar ([6:3-5], $x))),
-                 (([6:9-10], int), (Int "4"))))));
-          (Expr
-             (([8:3-22], array<int>),
-              (Binop ((Eq None),
-                 (([8:3-7], array<int>), (Lvar ([8:3-7], $arr))),
-                 (([8:10-22], array<int>),
-                  (Array
-                     [(AFvalue (([8:11-12], int), (Int "1")));
-                       (AFvalue (([8:14-15], int), (Int "2")));
-                       (AFvalue (([8:17-18], int), (Int "3")));
-                       (AFvalue (([8:20-21], int), (Int "4")))]))
-                 ))));
-          (Expr
-             (([8:24-30], int),
-              (Binop ((Eq None), (([8:24-26], int), (Lvar ([8:24-26], $i))),
-                 (([8:29-30], int), (Int "2"))))));
-          (Expr
-             (([9:3-20], int),
-              (Binop ((Eq (Some Plus)),
-                 (([9:3-15], int),
-                  (Array_get (
-                     (([9:3-7], array<int>), (Lvar ([9:3-7], $arr))),
-                     (Some (([9:8-14], int),
-                            (Binop (Minus,
-                               (([9:8-10], int), (Lvar ([9:8-10], $i))),
-                               (([9:13-14], int), (Int "1"))))))
-                     ))),
-                 (([9:19-20], int), (Int "4"))))));
-          (Return ([11:3-13],
-             (Some (([11:10-12], int), (Lvar ([11:10-12], $x))))))
+             (([4:3-10], int),
+              (Binop ((Eq (Some Minus)),
+                 (([4:3-5], int), (Lvar ([4:3-5], $x))),
+                 (([4:9-10], int), (Int "4")))))));
+          ([5:3-11],
+           (Expr
+              (([5:3-10], int),
+               (Binop ((Eq (Some Plus)),
+                  (([5:3-5], int), (Lvar ([5:3-5], $x))),
+                  (([5:9-10], int), (Int "4")))))));
+          ([6:3-11],
+           (Expr
+              (([6:3-10], int),
+               (Binop ((Eq (Some Star)),
+                  (([6:3-5], int), (Lvar ([6:3-5], $x))),
+                  (([6:9-10], int), (Int "4")))))));
+          ([8:3-23],
+           (Expr
+              (([8:3-22], array<int>),
+               (Binop ((Eq None),
+                  (([8:3-7], array<int>), (Lvar ([8:3-7], $arr))),
+                  (([8:10-22], array<int>),
+                   (Array
+                      [(AFvalue (([8:11-12], int), (Int "1")));
+                        (AFvalue (([8:14-15], int), (Int "2")));
+                        (AFvalue (([8:17-18], int), (Int "3")));
+                        (AFvalue (([8:20-21], int), (Int "4")))]))
+                  )))));
+          ([8:24-31],
+           (Expr
+              (([8:24-30], int),
+               (Binop ((Eq None), (([8:24-26], int), (Lvar ([8:24-26], $i))),
+                  (([8:29-30], int), (Int "2")))))));
+          ([9:3-21],
+           (Expr
+              (([9:3-20], int),
+               (Binop ((Eq (Some Plus)),
+                  (([9:3-15], int),
+                   (Array_get (
+                      (([9:3-7], array<int>), (Lvar ([9:3-7], $arr))),
+                      (Some (([9:8-14], int),
+                             (Binop (Minus,
+                                (([9:8-10], int), (Lvar ([9:8-10], $i))),
+                                (([9:13-14], int), (Int "1"))))))
+                      ))),
+                  (([9:19-20], int), (Int "4")))))));
+          ([11:3-13],
+           (Return ([11:3-13],
+              (Some (([11:10-12], int), (Lvar ([11:10-12], $x)))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

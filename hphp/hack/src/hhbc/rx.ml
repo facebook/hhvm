@@ -163,7 +163,7 @@ let halves_of_is_enabled_body namespace ast_body =
 let halves_of_is_enabled_body_tast namespace ast_body =
   let block = ast_body.T.fb_ast in
   match block with
-  | T.If ((_, T.Id const), enabled, disabled) :: [] ->
+  | (_, T.If ((_, T.Id const), enabled, disabled)) :: [] ->
     let fq_const =
       Namespaces.elaborate_id namespace Namespaces.ElaborateConst const in
     if snd fq_const <> Naming_special_names.Rx.is_enabled
@@ -172,7 +172,7 @@ let halves_of_is_enabled_body_tast namespace ast_body =
       begin
         match disabled with
         | []
-        | [ T.Noop ] -> None
+        | [ _, T.Noop ] -> None
         | _ -> Some (enabled, disabled)
       end
   | _ -> None

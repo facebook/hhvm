@@ -36,7 +36,7 @@ class virtual iter = object (self)
 
   method! on_func_body env fb =
     match fb.fb_ast with
-    | [If ((_, Id (_, c) as id), then_stmt, else_stmt)] ->
+    | [_, If ((_, Id (_, c) as id), then_stmt, else_stmt)] ->
       super#on_expr { env with rx_is_enabled_allowed = (c = SN.Rx.is_enabled) } id;
       self#on_block env then_stmt;
       self#on_block env else_stmt

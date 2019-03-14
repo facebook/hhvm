@@ -104,7 +104,7 @@ let handler errorf = object
   inherit Tast_visitor.handler_base
 
   method! at_stmt env x =
-    match x with
+    match snd x with
     | Switch (((scrutinee_pos, scrutinee_ty), _), casel) ->
       check_exhaustiveness env scrutinee_pos scrutinee_ty casel;
       ensure_valid_switch_case_value_types env scrutinee_ty casel errorf

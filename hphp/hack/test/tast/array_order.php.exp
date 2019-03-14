@@ -5,38 +5,40 @@
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
       { fb_ast =
-        [(Expr
-            (([13:3-50], array<string, _>),
-             (Binop ((Eq None),
-                (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
-                (([13:8-50], array<string, _>),
-                 (Array
-                    [(AFkvalue ((([13:14-17], string), (String "k")),
-                        (([13:21-22], int), (Int "0"))));
-                      (AFkvalue ((([13:24-28], string), (String "k2")),
-                         (([13:32-49], _),
-                          (Call (Cnormal,
-                             (([13:32-47], (function(): _)),
-                              (Id ([13:32-47], "\\my_php_function"))),
-                             [], [], [])))
-                         ))
-                      ]))
-                ))));
+        [([13:3-51],
           (Expr
-             (([14:3-35], array<_>),
+             (([13:3-50], array<string, _>),
               (Binop ((Eq None),
-                 (([14:3-5], array<_>), (Lvar ([14:3-5], $y))),
-                 (([14:8-35], array<_>),
+                 (([13:3-5], array<string, _>), (Lvar ([13:3-5], $x))),
+                 (([13:8-50], array<string, _>),
                   (Array
-                     [(AFvalue (([14:14-15], int), (Int "0")));
-                       (AFvalue
-                          (([14:17-34], _),
+                     [(AFkvalue ((([13:14-17], string), (String "k")),
+                         (([13:21-22], int), (Int "0"))));
+                       (AFkvalue ((([13:24-28], string), (String "k2")),
+                          (([13:32-49], _),
                            (Call (Cnormal,
-                              (([14:17-32], (function(): _)),
-                               (Id ([14:17-32], "\\my_php_function"))),
-                              [], [], []))))
+                              (([13:32-47], (function(): _)),
+                               (Id ([13:32-47], "\\my_php_function"))),
+                              [], [], [])))
+                          ))
                        ]))
-                 ))))
+                 )))));
+          ([14:3-36],
+           (Expr
+              (([14:3-35], array<_>),
+               (Binop ((Eq None),
+                  (([14:3-5], array<_>), (Lvar ([14:3-5], $y))),
+                  (([14:8-35], array<_>),
+                   (Array
+                      [(AFvalue (([14:14-15], int), (Int "0")));
+                        (AFvalue
+                           (([14:17-34], _),
+                            (Call (Cnormal,
+                               (([14:17-32], (function(): _)),
+                                (Id ([14:17-32], "\\my_php_function"))),
+                               [], [], []))))
+                        ]))
+                  )))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -49,7 +51,8 @@
        f_ret = None; f_name = ([17:10-25], "\\my_php_function");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params = [];
-       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_body =
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

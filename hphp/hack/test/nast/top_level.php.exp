@@ -1,39 +1,46 @@
 [(Stmt
-    (Expr
-       ([5:1-11],
-        (Call (Cnormal, ([5:1-9], (Id ([5:1-9], "\\func_foo"))), [], [], [])))));
-  (Stmt
+    ([5:1-12],
      (Expr
-        ([9:1-6],
-         (Call (Cnormal, ([9:1-4], (Id ([9:1-4], "\\foo"))), [], [], [])))));
+        ([5:1-11],
+         (Call (Cnormal, ([5:1-9], (Id ([5:1-9], "\\func_foo"))), [], 
+            [], []))))));
   (Stmt
-     (Expr
-        ([11:1-8],
-         (Binop (Plus, ([11:1-2], (Int "1")),
-            ([11:3-8],
-             (Call (Cnormal, ([11:3-6], (Id ([11:3-6], "\\foo"))), [], 
-                [], [])))
-            )))));
+     ([9:1-7],
+      (Expr
+         ([9:1-6],
+          (Call (Cnormal, ([9:1-4], (Id ([9:1-4], "\\foo"))), [], [], []))))));
   (Stmt
-     (Expr
-        ([13:1-22],
-         (Binop ((Eq None), ([13:1-3], (Lvar ([13:1-3], $x))),
-            ([13:6-22],
-             (Call (Cnormal,
-                ([13:6-15], (Id ([13:6-15], "\\HH\\Lib\\Vec\\range"))), 
-                [], [([13:16-17], (Int "1")); ([13:19-21], (Int "99"))], 
-                [])))
-            )))));
+     ([11:1-9],
+      (Expr
+         ([11:1-8],
+          (Binop (Plus, ([11:1-2], (Int "1")),
+             ([11:3-8],
+              (Call (Cnormal, ([11:3-6], (Id ([11:3-6], "\\foo"))), [], 
+                 [], [])))
+             ))))));
   (Stmt
-     (Expr
-        ([15:1-11],
-         (Call (Cnormal, ([15:1-9], (Id ([15:1-9], "\\My\\Full\\func_foo"))),
-            [], [], [])))));
+     ([13:1-23],
+      (Expr
+         ([13:1-22],
+          (Binop ((Eq None), ([13:1-3], (Lvar ([13:1-3], $x))),
+             ([13:6-22],
+              (Call (Cnormal,
+                 ([13:6-15], (Id ([13:6-15], "\\HH\\Lib\\Vec\\range"))), 
+                 [], [([13:16-17], (Int "1")); ([13:19-21], (Int "99"))], 
+                 [])))
+             ))))));
+  (Stmt
+     ([15:1-12],
+      (Expr
+         ([15:1-11],
+          (Call (Cnormal,
+             ([15:1-9], (Id ([15:1-9], "\\My\\Full\\func_foo"))), [], 
+             [], []))))));
   (Fun
      { f_span = [17:1-23]; f_annotation = (); f_mode = <opaque>;
        f_ret = None; f_name = ([17:10-18], "\\func_foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = { fb_ast = [Noop]; fb_annotation = Unnamed };
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Unnamed };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -41,7 +48,7 @@
      { f_span = [18:1-18]; f_annotation = (); f_mode = <opaque>;
        f_ret = None; f_name = ([18:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = { fb_ast = [Noop]; fb_annotation = Unnamed };
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Unnamed };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -49,7 +56,8 @@
      { f_span = [22:3-25]; f_annotation = (); f_mode = <opaque>;
        f_ret = None; f_name = ([22:12-20], "\\My\\Full\\func_foo");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-       f_params = []; f_body = { fb_ast = [Noop]; fb_annotation = Unnamed };
+       f_params = [];
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Unnamed };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -67,7 +75,7 @@
            param_pos = [26:22-24]; param_name = "$_"; param_expr = None;
            param_callconv = None; param_user_attributes = [] }
          ];
-       f_body = { fb_ast = [Noop]; fb_annotation = Unnamed };
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Unnamed };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

@@ -12,18 +12,21 @@
         ];
       f_body =
       { fb_ast =
-        [(Do (
-            [(Throw (true,
-                (([5:11-39], Exception),
-                 (New (
-                    (([5:15-24], Exception), (CI ([5:15-24], "\\Exception"))),
-                    [], [(([5:25-38], string), (String "DoWhileBody"))], 
-                    [],
-                    ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
-                    )))
-                ))
-              ],
-            (([6:12-17], _), Any)))
+        [([4:3-6:19],
+          (Do (
+             [([5:5-40],
+               (Throw (true,
+                  (([5:11-39], Exception),
+                   (New (
+                      (([5:15-24], Exception),
+                       (CI ([5:15-24], "\\Exception"))),
+                      [], [(([5:25-38], string), (String "DoWhileBody"))],
+                      [],
+                      ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
+                      )))
+                  )))
+               ],
+             (([6:12-17], _), Any))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

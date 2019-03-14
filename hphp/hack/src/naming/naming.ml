@@ -1798,8 +1798,8 @@ module Make (GetLocals : GetLocals) = struct
       (* Arbitrary expression. This will be assigned to a temporary *)
     | _ -> []
 
-  and aast_stmt env st =
-    match st with
+  and aast_stmt env (pos, st_ as st) =
+    let stmt = match st_ with
     | Aast.Let (x, h, e) -> aast_let_stmt env x h e
     | Aast.Block _ -> failwith "aast_stmt block error"
     | Aast.Unsafe_block _ -> failwith "aast_stmt unsafe_block error"
@@ -1856,13 +1856,15 @@ module Make (GetLocals : GetLocals) = struct
               (fp, "\\"^SN.SpecialFunctions.invariant_violation)), hl, el, uel)) in
             if cond <> Aast.False
             then
-              let b1, b2 = [Aast.Expr violation], [Aast.Noop] in
+              let b1, b2 = [cp, Aast.Expr violation], [Pos.none, Aast.Noop] in
               let cond = (cond_p, Aast.Unop (Ast.Unot, (cond_p, cond))) in
               aast_if_stmt env st cond b1 b2
             else (* a false <condition> means unconditional invariant_violation *)
               N.Expr (aast_expr env violation)
         end
     | Aast.Expr e -> N.Expr (aast_expr env e)
+    in
+    pos, stmt
 
   and aast_let_stmt env (p, lid) h e =
     let name = Local_id.get_name lid in
@@ -2013,11 +2015,11 @@ module Make (GetLocals : GetLocals) = struct
     let aast_stmt_list = aast_stmt_list ?after_unsafe in
     match stl with
     | [] -> []
-    | Aast.Unsafe_block b :: _ ->
+    | (p, Aast.Unsafe_block b) :: _ ->
       Env.set_unsafe env true;
-      let st = Errors.ignore_ (fun () -> N.Unsafe_block (aast_stmt_list b env)) in
+      let st = Errors.ignore_ (fun () -> p, N.Unsafe_block (aast_stmt_list b env)) in
       st :: Option.to_list after_unsafe
-    | Aast.Block b :: rest ->
+    | (_, Aast.Block b) :: rest ->
       (* Add lexical scope for block scoped let variables *)
       let b = Env.scope_lexical env (aast_stmt_list b) in
       let rest = aast_stmt_list rest env in
@@ -2480,7 +2482,7 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = aast_expr env e1 in
       let nsenv = (fst env).namespace in
       let get_lvalues = function e ->
-        snd @@ GetLocals.aast_stmt (nsenv, SMap.empty) (Aast.Expr e) in
+        snd @@ GetLocals.aast_stmt (nsenv, SMap.empty) (fst e, Aast.Expr e) in
       let e2_lvalues =
         Option.value (Option.map e2opt get_lvalues) ~default:SMap.empty
       in
@@ -2705,11 +2707,11 @@ module Make (GetLocals : GetLocals) = struct
   and aast_case env acc c =
     match c with
     | Aast.Default b ->
-      let all_locals, b = aast_branch ~after_unsafe:N.Fallthrough env b in
+      let all_locals, b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
       all_locals :: acc, N.Default b
     | Aast.Case (e, b) ->
       let e = aast_expr env e in
-      let all_locals, b = aast_branch ~after_unsafe:N.Fallthrough env b in
+      let all_locals, b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
       all_locals :: acc, N.Case (e, b)
 
   and aast_catchl env l = List.map_env [] l (aast_catch env)
@@ -2926,8 +2928,8 @@ module Make (GetLocals : GetLocals) = struct
       match def with
       | Aast.Fun f -> (N.Fun (aast_fun_ f)) :: acc
       | Aast.Class c -> (N.Class (aast_class_ c)) :: acc
-      | Aast.Stmt Aast.Noop
-      | Aast.Stmt (Aast.Markup _) -> acc
+      | Aast.Stmt (_, Aast.Noop)
+      | Aast.Stmt (_, Aast.Markup _) -> acc
       | Aast.Stmt s -> (N.Stmt (aast_stmt !top_level_env s)) :: acc
       | Aast.Typedef t -> (N.Typedef (aast_typedef t)) :: acc
       | Aast.Constant cst -> (N.Constant (aast_global_const cst)) :: acc

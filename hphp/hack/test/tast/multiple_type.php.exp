@@ -15,7 +15,8 @@
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
          { fb_ast =
-           [(Return ([6:5-14], (Some (([6:12-13], int), (Int "5")))))];
+           [([6:5-14],
+             (Return ([6:5-14], (Some (([6:12-13], int), (Int "5"))))))];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([5:26-29], (Hprim Tint))); m_external = false;
@@ -42,8 +43,9 @@
           m_params = [];
           m_body =
           { fb_ast =
-            [(Return ([12:5-16], (Some (([12:12-15], string), (String "s")))
-                ))
+            [([12:5-16],
+              (Return ([12:5-16], (Some (([12:12-15], string), (String "s")))
+                 )))
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
@@ -80,26 +82,29 @@
          ];
        f_body =
        { fb_ast =
-         [(Expr
-             (([17:3-25], (C1 | C2)),
-              (Binop ((Eq None),
-                 (([17:3-5], (C1 | C2)), (Lvar ([17:3-5], $x))),
-                 (([17:8-25], (C1 | C2)),
-                  (Eif ((([17:8-13], bool), (Lvar ([17:8-13], $cond))),
-                     (Some (([17:16-19], C1), (Lvar ([17:16-19], $c1)))),
-                     (([17:22-25], C2), (Lvar ([17:22-25], $c2))))))
-                 ))));
-           (Return ([18:3-20],
-              (Some (([18:10-19], (int | string)),
-                     (Call (Cnormal,
-                        (([18:10-17], (function(): (int | string))),
-                         (Obj_get (
-                            (([18:10-12], (C1 | C2)), (Lvar ([18:10-12], $x))),
-                            (([18:14-17], (function(): (int | string))),
-                             (Id ([18:14-17], "foo"))),
-                            OG_nullthrows))),
-                        [], [], []))))
-              ))
+         [([17:3-26],
+           (Expr
+              (([17:3-25], (C1 | C2)),
+               (Binop ((Eq None),
+                  (([17:3-5], (C1 | C2)), (Lvar ([17:3-5], $x))),
+                  (([17:8-25], (C1 | C2)),
+                   (Eif ((([17:8-13], bool), (Lvar ([17:8-13], $cond))),
+                      (Some (([17:16-19], C1), (Lvar ([17:16-19], $c1)))),
+                      (([17:22-25], C2), (Lvar ([17:22-25], $c2))))))
+                  )))));
+           ([18:3-20],
+            (Return ([18:3-20],
+               (Some (([18:10-19], (int | string)),
+                      (Call (Cnormal,
+                         (([18:10-17], (function(): (int | string))),
+                          (Obj_get (
+                             (([18:10-12], (C1 | C2)),
+                              (Lvar ([18:10-12], $x))),
+                             (([18:14-17], (function(): (int | string))),
+                              (Id ([18:14-17], "foo"))),
+                             OG_nullthrows))),
+                         [], [], []))))
+               )))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

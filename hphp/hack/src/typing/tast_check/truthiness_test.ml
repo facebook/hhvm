@@ -61,7 +61,7 @@ let handler = object
 
   method! at_stmt env x =
     if Env.is_strict env then
-    match x with
+    match snd x with
     | If (e, _, _)
     | Do (_, e)
     | While (e, _)

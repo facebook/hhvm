@@ -330,7 +330,10 @@ and on_catch (id1, id2, b) : Aast.catch =
   let lid = Local_id.make_unscoped (snd id2) in
   (id1, ((fst id2), lid), on_block b)
 
-and on_stmt (p, st) :  Aast.stmt =
+and on_stmt (p, st) : Aast.stmt =
+  p, on_stmt_ p st
+
+and on_stmt_ p st :  Aast.stmt_ =
   match st with
   | Let (id, h, e) ->
     let lid = Local_id.make_unscoped (snd id) in
@@ -372,7 +375,7 @@ and on_stmt (p, st) :  Aast.stmt =
 and on_block stmt_list : Aast.stmt list =
   match stmt_list with
   | [] -> []
-  | (_, Unsafe) :: rest -> [Aast.Unsafe_block (on_block rest)]
+  | (p, Unsafe) :: rest -> [p, Aast.Unsafe_block (on_block rest)]
   | x :: rest -> (on_stmt x) :: (on_block rest)
 
 and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =
@@ -742,7 +745,7 @@ and on_def : def -> Aast.def = function
   | Namespace (id, p) -> Aast.Namespace (id, on_program p)
   | NamespaceUse usel -> Aast.NamespaceUse (on_list on_ns_use usel)
   | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
-  | FileAttributes _ -> Aast.Stmt Aast.Noop
+  | FileAttributes _ -> Aast.Stmt (Pos.none, Aast.Noop)
 
 and on_program ast = on_list on_def ast
 

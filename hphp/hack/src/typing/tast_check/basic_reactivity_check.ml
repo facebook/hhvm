@@ -450,7 +450,7 @@ let check = object(self)
     then List.iter b.fb_ast (check_non_rx#on_stmt env)
     else
       match b.fb_ast with
-      | [If ((_, Id (_, c)), then_stmt, else_stmt ) ]
+      | [_, If ((_, Id (_, c)), then_stmt, else_stmt ) ]
         when c = SN.Rx.is_enabled ->
           List.iter then_stmt (self#on_stmt (env, ctx));
           List.iter else_stmt ~f:(check_non_rx#on_stmt env)

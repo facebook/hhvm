@@ -79,7 +79,7 @@ let visitor = object(this)
         check_valid_rvalue p env ty;
       this#disallow_non_returning (fun () -> super#on_expr env te)
 
-  method! on_stmt env stmt = match stmt with
+  method! on_stmt env stmt = match snd stmt with
     | Expr e ->
       this#allow_non_returning (fun () -> this#on_expr env e)
     | Return (_, Some e) ->

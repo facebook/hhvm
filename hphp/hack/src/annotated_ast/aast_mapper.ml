@@ -216,7 +216,9 @@ struct
     us_block = map_block menv us.S.us_block;
   }
 
-  and map_stmt menv s =
+  and map_stmt menv (pos, stmt) = pos, map_stmt_ menv stmt
+
+  and map_stmt_ menv s =
     let map_as_expr ae =
       match ae with
       | S.As_v e -> T.As_v (map_expr menv e)

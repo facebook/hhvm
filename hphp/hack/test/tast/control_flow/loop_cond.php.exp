@@ -20,11 +20,12 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [(Return ([6:3-18],
-             (Some (([6:10-17], A),
-                    (New ((([6:14-15], A), (CI ([6:14-15], "\\A"))), 
-                       [], [], [], ([6:14-15], _)))))
-             ))
+         [([6:3-18],
+           (Return ([6:3-18],
+              (Some (([6:10-17], A),
+                     (New ((([6:14-15], A), (CI ([6:14-15], "\\A"))), 
+                        [], [], [], ([6:14-15], _)))))
+              )))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -37,26 +38,29 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [(Expr
-             (([10:3-15], A),
-              (Binop ((Eq None), (([10:3-5], A), (Lvar ([10:3-5], $x))),
-                 (([10:8-15], A),
-                  (New ((([10:12-13], A), (CI ([10:12-13], "\\A"))), 
-                     [], [], [], ([10:12-13], _))))
-                 ))));
-           (While ((([11:10-12], ?A), (Lvar ([11:10-12], $x))),
-              [(Expr
-                  (([12:5-21], ?A),
-                   (Binop ((Eq None),
-                      (([12:5-7], ?A), (Lvar ([12:5-7], $x))),
-                      (([12:10-21], ?A),
-                       (Call (Cnormal,
-                          (([12:10-19], (function(): ?A)),
-                           (Id ([12:10-19], "\\get_A_opt"))),
-                          [], [], [])))
-                      ))))
-                ]
-              ))
+         [([10:3-16],
+           (Expr
+              (([10:3-15], A),
+               (Binop ((Eq None), (([10:3-5], A), (Lvar ([10:3-5], $x))),
+                  (([10:8-15], A),
+                   (New ((([10:12-13], A), (CI ([10:12-13], "\\A"))), 
+                      [], [], [], ([10:12-13], _))))
+                  )))));
+           ([11:3-13:4],
+            (While ((([11:10-12], ?A), (Lvar ([11:10-12], $x))),
+               [([12:5-22],
+                 (Expr
+                    (([12:5-21], ?A),
+                     (Binop ((Eq None),
+                        (([12:5-7], ?A), (Lvar ([12:5-7], $x))),
+                        (([12:10-21], ?A),
+                         (Call (Cnormal,
+                            (([12:10-19], (function(): ?A)),
+                             (Id ([12:10-19], "\\get_A_opt"))),
+                            [], [], [])))
+                        )))))
+                 ]
+               )))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -69,32 +73,33 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [(For (
-             (([17:8-20], (A)),
-              (Expr_list
-                 [(([17:8-20], A),
-                   (Binop ((Eq None),
-                      (([17:8-10], A), (Lvar ([17:8-10], $x))),
-                      (([17:13-20], A),
-                       (New ((([17:17-18], A), (CI ([17:17-18], "\\A"))), 
-                          [], [], [], ([17:17-18], _))))
-                      )))
-                   ])),
-             (([17:22-24], (?A)),
-              (Expr_list [(([17:22-24], ?A), (Lvar ([17:22-24], $x)))])),
-             (([17:26-42], (?A)),
-              (Expr_list
-                 [(([17:26-42], ?A),
-                   (Binop ((Eq None),
-                      (([17:26-28], ?A), (Lvar ([17:26-28], $x))),
-                      (([17:31-42], ?A),
-                       (Call (Cnormal,
-                          (([17:31-40], (function(): ?A)),
-                           (Id ([17:31-40], "\\get_A_opt"))),
-                          [], [], [])))
-                      )))
-                   ])),
-             []))
+         [([17:3-18:4],
+           (For (
+              (([17:8-20], (A)),
+               (Expr_list
+                  [(([17:8-20], A),
+                    (Binop ((Eq None),
+                       (([17:8-10], A), (Lvar ([17:8-10], $x))),
+                       (([17:13-20], A),
+                        (New ((([17:17-18], A), (CI ([17:17-18], "\\A"))),
+                           [], [], [], ([17:17-18], _))))
+                       )))
+                    ])),
+              (([17:22-24], (?A)),
+               (Expr_list [(([17:22-24], ?A), (Lvar ([17:22-24], $x)))])),
+              (([17:26-42], (?A)),
+               (Expr_list
+                  [(([17:26-42], ?A),
+                    (Binop ((Eq None),
+                       (([17:26-28], ?A), (Lvar ([17:26-28], $x))),
+                       (([17:31-42], ?A),
+                        (Call (Cnormal,
+                           (([17:31-40], (function(): ?A)),
+                            (Id ([17:31-40], "\\get_A_opt"))),
+                           [], [], [])))
+                       )))
+                    ])),
+              [])))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

@@ -17,67 +17,74 @@
         ];
       f_body =
       { fb_ast =
-        [(Expr
-            (([4:3-25], Vector<(int | string)>),
-             (Binop ((Eq None),
-                (([4:3-9], Vector<(int | string)>), (Lvar ([4:3-9], $items))),
-                (([4:12-25], Vector<(int | string)>),
-                 (ValCollection (<vc_kind>, None,
-                    [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
-                ))));
+        [([4:3-26],
           (Expr
-             (([5:3-12:4], (function(): int)),
+             (([4:3-25], Vector<(int | string)>),
               (Binop ((Eq None),
-                 (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
-                 (([5:8-12:4], (function(): int)),
-                  (Efun (
-                     { f_span = [5:8-12:4]; f_annotation = ();
-                       f_mode = <opaque>;
-                       f_ret = (Some ([5:12-15], (Hprim Tint)));
-                       f_name = ([5:8-12:4], ";anonymous"); f_tparams = [];
-                       f_where_constraints = []; f_variadic = FVnonVariadic;
-                       f_params = [];
-                       f_body =
-                       { fb_ast =
-                         [(Expr
-                             (([10:5-22], (int | string)),
-                              (Binop ((Eq None),
-                                 (([10:5-10], (int | string)),
-                                  (Lvar ([10:5-10], $item))),
-                                 (([10:13-22], (int | string)),
-                                  (Array_get (
-                                     (([10:13-19], Vector<(int | string)>),
-                                      (Lvar ([10:13-19], $items))),
-                                     (Some (([10:20-21], int), (Int "1"))))))
-                                 ))));
-                           (Return ([11:5-18],
-                              (Some (([11:12-17], int),
-                                     (Lvar ([11:12-17], $item))))
-                              ))
-                           ];
-                         fb_annotation = No unsafe blocks };
-                       f_fun_kind = FSync; f_user_attributes = [];
-                       f_file_attributes = []; f_external = false;
-                       f_namespace = <opaque>; f_doc_comment = None;
-                       f_static = false },
-                     [([10:13-19], $items)])))
-                 ))));
-          (Expr
-             (([13:3-16], string),
-              (Binop ((Eq None),
-                 (([13:3-11], string),
-                  (Array_get (
-                     (([13:3-9], Vector<(int | string)>),
-                      (Lvar ([13:3-9], $items))),
-                     None))),
-                 (([13:14-16], string), (Lvar ([13:14-16], $s)))))));
-          (Return ([14:3-15],
-             (Some (([14:10-14], int),
-                    (Call (Cnormal,
-                       (([14:10-12], (function(): int)),
-                        (Lvar ([14:10-12], $f))),
-                       [], [], []))))
-             ))
+                 (([4:3-9], Vector<(int | string)>), (Lvar ([4:3-9], $items))),
+                 (([4:12-25], Vector<(int | string)>),
+                  (ValCollection (<vc_kind>, None,
+                     [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
+                 )))));
+          ([5:3-12:5],
+           (Expr
+              (([5:3-12:4], (function(): int)),
+               (Binop ((Eq None),
+                  (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
+                  (([5:8-12:4], (function(): int)),
+                   (Efun (
+                      { f_span = [5:8-12:4]; f_annotation = ();
+                        f_mode = <opaque>;
+                        f_ret = (Some ([5:12-15], (Hprim Tint)));
+                        f_name = ([5:8-12:4], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params = [];
+                        f_body =
+                        { fb_ast =
+                          [([10:5-23],
+                            (Expr
+                               (([10:5-22], (int | string)),
+                                (Binop ((Eq None),
+                                   (([10:5-10], (int | string)),
+                                    (Lvar ([10:5-10], $item))),
+                                   (([10:13-22], (int | string)),
+                                    (Array_get (
+                                       (([10:13-19], Vector<(int | string)>),
+                                        (Lvar ([10:13-19], $items))),
+                                       (Some (([10:20-21], int), (Int "1")))
+                                       )))
+                                   )))));
+                            ([11:5-18],
+                             (Return ([11:5-18],
+                                (Some (([11:12-17], int),
+                                       (Lvar ([11:12-17], $item))))
+                                )))
+                            ];
+                          fb_annotation = No unsafe blocks };
+                        f_fun_kind = FSync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace = <opaque>; f_doc_comment = None;
+                        f_static = false },
+                      [([10:13-19], $items)])))
+                  )))));
+          ([13:3-17],
+           (Expr
+              (([13:3-16], string),
+               (Binop ((Eq None),
+                  (([13:3-11], string),
+                   (Array_get (
+                      (([13:3-9], Vector<(int | string)>),
+                       (Lvar ([13:3-9], $items))),
+                      None))),
+                  (([13:14-16], string), (Lvar ([13:14-16], $s))))))));
+          ([14:3-15],
+           (Return ([14:3-15],
+              (Some (([14:10-14], int),
+                     (Call (Cnormal,
+                        (([14:10-12], (function(): int)),
+                         (Lvar ([14:10-12], $f))),
+                        [], [], []))))
+              )))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

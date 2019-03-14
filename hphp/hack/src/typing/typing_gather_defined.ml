@@ -184,7 +184,7 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
   method! on_case () c =
     let b = match c with
       | Default b -> b
-      | Case (e, b) -> (Expr e) :: b in
+      | Case ((pos, _ as e), b) -> (pos, Expr e) :: b in
     self#on_branch b
 
   method! on_Switch () e cl =
@@ -199,23 +199,20 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
     L.drop_list [C.Continue; C.Break] delta
 
   method! on_While () (p, _ as e) b =
-    self#on_While_True (
-      If (e, [
-        Break p], []) ::
-      b)
+    self#on_While_True ((p, If (e, [p, Break p], [])) :: b)
 
   method! on_Do () b (p, _ as e) =
     self#on_While_True (
       b @ [
-      If (e, [
-        Break p], [])])
+      p, If (e, [
+        p, Break p], [])])
 
-  method! on_For () e1 e2 e3 b =
+  method! on_For () (p1, _ as e1) e2 (p3, _ as e3) b =
     self#on_block () (
-      Expr e1 :: [
-      While (e2,
+      (p1, Expr e1) :: [
+      Pos.none, While (e2,
         b @ [
-        Expr e3])])
+        (p3, Expr e3)])])
 
   method! on_Foreach () e _ _ =
     (* if the iterable is empty, the block is not executed *)

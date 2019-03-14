@@ -11,26 +11,32 @@
         ];
       f_body =
       { fb_ast =
-        [(If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
-            [(Expr
-                (([15:7-12], _),
-                 (Call (Cnormal,
-                    (([15:7-10], (function(): _)), (Id ([15:7-10], "\\bar"))),
-                    [], [], []))));
-              (Unsafe_block
-                 [(Expr
-                     (([17:7-12], _),
-                      (Call (Cnormal,
-                         (([17:7-10], _), (Id ([17:7-10], "\\baz"))), 
-                         [], [], []))))
-                   ]);
-              (Expr
-                 (([19:5-10], _),
-                  (Call (Cnormal,
-                     (([19:5-8], (function(): _)), (Id ([19:5-8], "\\qux"))),
-                     [], [], []))))
-              ],
-            [Noop]))
+        [([13:3-20:4],
+          (If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
+             [([15:7-13],
+               (Expr
+                  (([15:7-12], _),
+                   (Call (Cnormal,
+                      (([15:7-10], (function(): _)),
+                       (Id ([15:7-10], "\\bar"))),
+                      [], [], [])))));
+               ([Pos.none],
+                (Unsafe_block
+                   [([17:7-13],
+                     (Expr
+                        (([17:7-12], _),
+                         (Call (Cnormal,
+                            (([17:7-10], _), (Id ([17:7-10], "\\baz"))), 
+                            [], [], [])))))
+                     ]));
+               ([19:5-11],
+                (Expr
+                   (([19:5-10], _),
+                    (Call (Cnormal,
+                       (([19:5-8], (function(): _)), (Id ([19:5-8], "\\qux"))),
+                       [], [], [])))))
+               ],
+             [([Pos.none], Noop)])))
           ];
         fb_annotation = Has unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -42,7 +48,8 @@
      { f_span = [23:1-18]; f_annotation = (); f_mode = <opaque>;
        f_ret = None; f_name = ([23:10-13], "\\bar"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_body =
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false });
@@ -50,7 +57,8 @@
      { f_span = [24:1-18]; f_annotation = (); f_mode = <opaque>;
        f_ret = None; f_name = ([24:10-13], "\\qux"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_body =
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
        f_static = false })

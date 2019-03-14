@@ -216,6 +216,7 @@ class type ['a] visitor_type = object
   method on_global_var : 'a -> expr list -> 'a
   method on_awaitall : 'a -> (id option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
+  method on_stmt_ : 'a -> stmt_ -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
@@ -428,7 +429,10 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_catch acc (_, _, b) = this#on_block acc b
 
-  method on_stmt acc = function
+  method on_stmt acc (_, stmt) =
+    this#on_stmt_ acc stmt
+
+  method on_stmt_ acc = function
     | Expr e                  -> this#on_expr acc e
     | Break p                 -> this#on_break acc p
     | Continue p              -> this#on_continue acc p

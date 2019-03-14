@@ -27,10 +27,11 @@ Errors:
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [(Expr
-             (([7:3-13], Tcat),
-              (New ((([7:7-11], Tcat), (CI ([7:7-11], "Tcat"))), [], 
-                 [], [], ([7:7-11], _)))))
+         [([7:3-14],
+           (Expr
+              (([7:3-13], Tcat),
+               (New ((([7:7-11], Tcat), (CI ([7:7-11], "Tcat"))), [], 
+                  [], [], ([7:7-11], _))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
@@ -43,10 +44,11 @@ Errors:
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [(Expr
-             (([11:3-13], Tcat),
-              (New ((([11:7-11], Tcat), (CI ([11:7-11], "\\Tcat"))), 
-                 [], [], [], ([11:7-11], _)))))
+         [([11:3-14],
+           (Expr
+              (([11:3-13], Tcat),
+               (New ((([11:7-11], Tcat), (CI ([11:7-11], "\\Tcat"))), 
+                  [], [], [], ([11:7-11], _))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

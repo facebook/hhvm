@@ -475,7 +475,7 @@ let compute_least_type tcopt fn =
       let types =
         Nast.(List.fold fb_ast ~init:[]
           ~f:begin fun acc stmt ->
-            match stmt with
+            match snd stmt with
             | Expr (_, New ((_, CI (_, "\\least_upper_bound")), tal, _, _, _)) ->
               (List.map tal
                 (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))

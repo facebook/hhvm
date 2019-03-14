@@ -30,15 +30,16 @@
                 ];
               m_body =
               { fb_ast =
-                [(Expr
-                    ([5:47-58],
-                     (Binop ((Eq None),
-                        ([5:47-58],
-                         (Obj_get (([5:47-58], (Lvar ([5:47-58], $this))),
-                            ([5:47-58], (Id ([5:47-58], "attr_value"))),
-                            OG_nullthrows))),
-                        ([5:47-58], (Lvar ([5:47-58], $attr_value)))))));
-                  Noop];
+                [([5:47-58],
+                  (Expr
+                     ([5:47-58],
+                      (Binop ((Eq None),
+                         ([5:47-58],
+                          (Obj_get (([5:47-58], (Lvar ([5:47-58], $this))),
+                             ([5:47-58], (Id ([5:47-58], "attr_value"))),
+                             OG_nullthrows))),
+                         ([5:47-58], (Lvar ([5:47-58], $attr_value))))))));
+                  ([Pos.none], Noop)];
                 fb_annotation = Unnamed };
               m_fun_kind = FSync; m_user_attributes = []; m_ret = None;
               m_external = false; m_doc_comment = None });

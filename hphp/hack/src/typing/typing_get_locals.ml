@@ -321,7 +321,7 @@ let rec aast_terminal nsenv ~in_try stl =
   List.iter stl (aast_terminal_ nsenv ~in_try)
 
 and aast_terminal_ nsenv ~in_try st =
-  match st with
+  match snd st with
   | Aast.Throw _ when not in_try -> raise Exit
   | Aast.Throw _ -> ()
   | Aast.Continue _
@@ -387,10 +387,10 @@ and aast_terminal_cl nsenv ~in_try = function
 
 and aast_blockHasBreak = function
   | [] -> false
-  | Aast.Break _ :: _ -> true
+  | (_, Aast.Break _) :: _ -> true
   | x :: xs ->
     let x' =
-      match x with
+      match snd x with
       | Aast.If (_, [], []) -> false
       | Aast.If (_, b, [])
       | Aast.If (_, [], b) -> aast_blockHasBreak b
@@ -520,7 +520,7 @@ let rec aast_expr acc (_, e) =
 
 let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   let nsenv = fst acc in
-  match st with
+  match snd st with
   | Aast.Expr e -> aast_expr acc e
   | Aast.Fallthrough
   | Aast.Markup _

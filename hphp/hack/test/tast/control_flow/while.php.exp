@@ -16,16 +16,20 @@
         ];
       f_body =
       { fb_ast =
-        [(While ((([4:10-12], bool), (Lvar ([4:10-12], $b))),
-            [(Expr (([5:5-7], (int | string)), (Lvar ([5:5-7], $a))));
-              (Expr
-                 (([6:5-12], string),
-                  (Binop ((Eq None),
-                     (([6:5-7], string), (Lvar ([6:5-7], $a))),
-                     (([6:10-12], string), (String ""))))))
-              ]
-            ));
-          (Expr (([8:3-5], (int | string)), (Lvar ([8:3-5], $a))))];
+        [([4:3-7:4],
+          (While ((([4:10-12], bool), (Lvar ([4:10-12], $b))),
+             [([5:5-8],
+               (Expr (([5:5-7], (int | string)), (Lvar ([5:5-7], $a)))));
+               ([6:5-13],
+                (Expr
+                   (([6:5-12], string),
+                    (Binop ((Eq None),
+                       (([6:5-7], string), (Lvar ([6:5-7], $a))),
+                       (([6:10-12], string), (String "")))))))
+               ]
+             )));
+          ([8:3-6], (Expr (([8:3-5], (int | string)), (Lvar ([8:3-5], $a)))))
+          ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;

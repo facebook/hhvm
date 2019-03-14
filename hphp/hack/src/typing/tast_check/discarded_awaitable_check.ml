@@ -106,7 +106,7 @@ let visitor = object(this)
         enforce_nullable_or_not_awaitable env p ty;
       super#on_expr (env, allow_awaitable) te
 
-  method! on_stmt (env, ctx) stmt = match stmt with
+  method! on_stmt (env, ctx) stmt = match snd stmt with
     | Expr (_, Binop (Ast.Eq _, _, _) as e) ->
       this#on_expr (env, allow_awaitable) e
     | Expr e ->

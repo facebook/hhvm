@@ -71,7 +71,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
     else acc
 
 and collect_valid_target_labels_aux_tast is_hh_file acc s =
-  match s with
+  match snd s with
   | T.Declare (_, _, block)
   | T.Block block ->
     collect_valid_target_labels_for_block_aux_tast is_hh_file acc block

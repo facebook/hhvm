@@ -22,18 +22,22 @@
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
          { fb_ast =
-           [(If (
-               (([16:9-17], ?int),
-                (Class_get ((([16:9-13], TestClass), CIself),
-                   (CGstring ([16:15-17], "$x"))))),
-               [(Return ([17:7-23],
-                   (Some (([17:14-22], int),
-                          (Class_get ((([17:14-18], TestClass), CIself),
-                             (CGstring ([17:20-22], "$x"))))))
-                   ))
-                 ],
-               [(Return ([19:7-16], (Some (([19:14-15], int), (Int "0")))))]
-               ))
+           [([16:5-20:6],
+             (If (
+                (([16:9-17], ?int),
+                 (Class_get ((([16:9-13], TestClass), CIself),
+                    (CGstring ([16:15-17], "$x"))))),
+                [([17:7-23],
+                  (Return ([17:7-23],
+                     (Some (([17:14-22], int),
+                            (Class_get ((([17:14-18], TestClass), CIself),
+                               (CGstring ([17:20-22], "$x"))))))
+                     )))
+                  ],
+                [([19:7-16],
+                  (Return ([19:7-16], (Some (([19:14-15], int), (Int "0"))))))
+                  ]
+                )))
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];

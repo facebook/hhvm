@@ -92,7 +92,7 @@ let handler = object
     | _ -> ()
 
   method! at_stmt env x =
-    match x with
+    match snd x with
     | If (e, _, _)
     | Do (_, e)
     | While (e, _)

@@ -691,7 +691,11 @@ and gather_defined_in_expr env e =
   let locals = Typing_gather_defined.expr env e in
   Env.env_with_locals env locals
 
-and stmt env st =
+and stmt env (pos, st) =
+  let env, st = stmt_ env pos st in
+  env, (pos, st)
+
+and stmt_ env pos st =
   let env = Env.open_tyvars env in
   (fun (env, tb) -> SubType.close_tyvars_and_solve env, tb) @@
   match st with
@@ -791,7 +795,7 @@ and stmt env st =
          * case there is no iteration *)
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
         let alias_depth =
-          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+          if env.Env.in_loop then 1 else Typing_alias.get_depth (pos, st) in
         let env, tb = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
@@ -813,7 +817,7 @@ and stmt env st =
     let env, (te, tb) = LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
       let env = LEnv.save_and_merge_next_in_cont env C.Continue in
       let alias_depth =
-        if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+        if env.Env.in_loop then 1 else Typing_alias.get_depth (pos, st) in
       let env, tb = Env.in_loop env begin
         iter_n_acc alias_depth begin fun env ->
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
@@ -858,7 +862,7 @@ and stmt env st =
         let (env, te1, _) = expr env e1 in      (* initializer *)
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
         let alias_depth =
-          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+          if env.Env.in_loop then 1 else Typing_alias.get_depth (pos, st) in
         let env, (tb, te3) = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
             (* The following is necessary in case there is an assignment in the
@@ -900,7 +904,7 @@ and stmt env st =
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
         let env, tk, tv = as_expr env ty1 (fst e1) e2 in
         let alias_depth =
-          if env.Env.in_loop then 1 else Typing_alias.get_depth st in
+          if env.Env.in_loop then 1 else Typing_alias.get_depth (pos, st) in
         let env, (te2, tb) = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in

@@ -43,7 +43,7 @@ let handler = object
     end;
 
   method! at_stmt env s =
-    begin match s with
+    begin match (snd s) with
     | Using { us_has_await = has_await; us_expr = e;  _ } when has_await ->
       let p = fst e in
       if is_coroutine env then Errors.await_in_coroutine p;

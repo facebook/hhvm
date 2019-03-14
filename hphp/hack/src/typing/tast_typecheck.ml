@@ -141,7 +141,7 @@ let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
 
 let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
   let check_expr = check_expr env in
-  match stmt with
+  match snd stmt with
   | Noop ->
     empty_delta_with_next_cont gamma
   | Expr expr ->

@@ -52,7 +52,7 @@ type env = {
 }
 
 module CheckFunctionBody = struct
-  let rec stmt f_type env st = match f_type, st with
+  let rec stmt f_type env st = match f_type, (snd st) with
     | Ast.FSync, Return (_, None)
     | Ast.FAsync, Return (_, None) -> ()
     | Ast.FSync, Return (_, Some e)
@@ -581,7 +581,9 @@ and fun_param env param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
 
-and stmt env = function
+and stmt env (_, s) = stmt_ env s
+
+and stmt_ env = function
   | Return (_, None)
   | GotoLabel _
   | Goto _

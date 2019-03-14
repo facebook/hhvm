@@ -59,7 +59,9 @@ and expr_annotation = ExprAnnotation.t [@visitors.opaque]
 and env_annotation = EnvAnnotation.t [@visitors.opaque]
 and funcbody_annotation = Annotations.FuncBodyAnnotation.t [@visitors.opaque]
 
-and stmt =
+and stmt = pos * stmt_
+
+and stmt_ =
   | Unsafe_block of block
   | Fallthrough
   | Expr of expr

@@ -526,6 +526,9 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
 
 const IniSettingMap IniSettingMap::operator[](const String& key) const {
   assertx(this->isArray());
+  if (auto const intish = tryIntishCast<IntishCast::CastSilently>(key.get())) {
+    return IniSettingMap(m_map.toCArrRef()[*intish]);
+  }
   return IniSettingMap(m_map.toCArrRef()[key]);
 }
 

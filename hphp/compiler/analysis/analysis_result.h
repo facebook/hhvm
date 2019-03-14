@@ -19,8 +19,6 @@
 
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/hphp.h"
 
@@ -50,7 +48,7 @@ DECLARE_EXTENDED_BOOST_TYPES(FileScope);
 
 struct UnitEmitter;
 
-struct AnalysisResult : BlockScope, FunctionContainer {
+struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
   /**
    * There are multiple passes over our syntax trees. This lists all of them.
    */
@@ -133,7 +131,7 @@ struct AnalysisResult : BlockScope, FunctionContainer {
 
 public:
   AnalysisResult();
-  ~AnalysisResult() override;
+  ~AnalysisResult();
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -149,44 +147,13 @@ public:
 
   Mutex &getMutex() { return m_mutex; }
 
-  /**
-   * create_function() generates extra PHP code that defines the lambda.
-   * Stores the code in a temporary string, so we can parse this as an
-   * extra file appended to parsed code.
-   */
-  void appendExtraCode(const std::string &key, const std::string &code);
-  void appendExtraCode(const std::string &key, const std::string &code) const;
-  void parseExtraCode(const std::string &key);
-
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
-
-  int getFunctionCount() const;
-  int getClassCount() const;
 
   void addEntryPoint(const std::string &name);
   void addEntryPoints(const std::vector<std::string> &names);
 
-  void addNSFallbackFunc(ConstructPtr c, FileScopePtr fs);
-
-  void addSystemFunction(FunctionScopeRawPtr fs);
-  void addSystemClass(ClassScopeRawPtr cs);
-  void analyzeProgram(ConstructPtr) const;
-  void analyzeProgram(Phase);
-  void analyzeProgram();
-  void analyzeProgramFinal();
   void dump();
-
-
-  void addClonedLambda(ClosureExpressionRawPtr c) { m_lambdas.push_back(c); }
-
-  void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
-                  void *data);
-
-  /**
-   * Code generation functions.
-   */
-  bool outputAllPHP(CodeGenerator::Output output);
 
   /**
    * Parser creates a FileScope upon parsing a new file.
@@ -204,11 +171,6 @@ public:
   template <class Map>
   void parseOnDemandBy(const std::string &name,
                        const Map& amap) const;
-  FileScopePtr findFileScope(const std::string &name) const;
-  const StringToFileScopePtrMap &getAllFiles() { return m_files;}
-  const std::vector<FileScopePtr> &getAllFilesVector() {
-    return m_fileScopes;
-  }
   ParseOnDemandCalbacks* getParseOnDemandCallBacks() {
     if (isParseOnDemand()) {
       return &m_asmCallbacks;
@@ -216,8 +178,6 @@ public:
 
     return nullptr;
   }
-
-  void addFileScope(FileScopePtr fileScope);
 
   /**
    * For function declaration parsing.
@@ -241,8 +201,6 @@ private:
   std::vector<std::string> m_parseOnDemandDirs;
   std::set<std::pair<ConstructPtr, FileScopePtr> > m_nsFallbackFuncs;
   Phase m_phase;
-  StringToFileScopePtrMap m_files;
-  std::vector<FileScopePtr> m_fileScopes;
   std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
 
   StringBag m_extraCodeFileNames;
@@ -250,27 +208,13 @@ private:
 
   StringToClassScopePtrMap m_systemClasses;
 
-  std::vector<StatementPtr> m_stmts;
   StatementPtr m_stmt;
 
   std::string m_outputPath;
 
   ParseOnDemandCalbacks m_asmCallbacks;
-public:
-  AnalysisResultPtr shared_from_this() {
-    return static_pointer_cast<AnalysisResult>
-      (BlockScope::shared_from_this());
-  }
 
-  AnalysisResultConstRawPtr shared_from_this() const = delete;
-
-private:
   Mutex m_mutex;
-
-  // Temporary vector of lambda expressions; populated
-  // during analyzeProgram, and then processed at the end
-  // of AnalysisResult::analyzeProgram.
-  CompactVector<ClosureExpressionRawPtr> m_lambdas;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.

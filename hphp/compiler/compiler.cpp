@@ -21,7 +21,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
-#include "hphp/compiler/parser/parser.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/runtime/base/config.h"
@@ -574,14 +573,6 @@ int process(const CompilerOptions &po) {
   processInitRan = true;
   BuiltinSymbols::s_systemAr.reset();
   Option::WholeProgram = wp;
-  if (po.target == "hhbc" && !Option::WholeProgram) {
-    // We're trying to produce the same bytecode as runtime parsing.
-    // There's nothing to do.
-  } else {
-    if (!BuiltinSymbols::Load(ar)) {
-      return false;
-    }
-  }
 
   LitstrTable::init();
   LitstrTable::get().setWriting();
@@ -625,10 +616,6 @@ int process(const CompilerOptions &po) {
     if (po.target != "filecache") {
       if (!package.parse(!po.force)) {
         return 1;
-      }
-      if (Option::WholeProgram) {
-        Timer timer3(Timer::WallTime, "analyzeProgram");
-        ar->analyzeProgram();
       }
     }
   }
@@ -746,10 +733,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   // `compile_systemlib_string` will try to load systemlib from repo, while we
   // are building it.
   RuntimeOption::RepoAuthoritative = true;
-
-  if (po.optimizeLevel > 0) {
-    ar->analyzeProgramFinal();
-  }
 
   Timer timer(Timer::WallTime, type);
   // NOTE: Repo errors are ignored!

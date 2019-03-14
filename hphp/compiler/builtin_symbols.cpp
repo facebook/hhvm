@@ -16,14 +16,7 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/expression/modifier_expression.h"
-#include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/parser/parser.h"
-#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -43,7 +36,6 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool BuiltinSymbols::Loaded = false;
 AnalysisResultPtr BuiltinSymbols::s_systemAr;
 
 const char *const BuiltinSymbols::GlobalNames[] = {
@@ -67,36 +59,6 @@ hphp_string_set BuiltinSymbols::s_superGlobals;
 int BuiltinSymbols::NumGlobalNames() {
   return sizeof(BuiltinSymbols::GlobalNames) /
     sizeof(BuiltinSymbols::GlobalNames[0]);
-}
-
-bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
-  if (Loaded) return true;
-  Loaded = true;
-
-  if (g_context.isNull()) hphp_thread_init();
-
-  // Systemlib files were all parsed by hphp_process_init
-
-  const auto& files = ar->getAllFiles();
-  for (const auto& file : files) {
-    file.second->setSystem();
-
-    const auto& classes = file.second->getClasses();
-    for (const auto& clsVec : classes) {
-      assert(clsVec.second.size() == 1);
-      auto cls = clsVec.second[0];
-      cls->setSystem();
-      ar->addSystemClass(cls);
-    }
-
-    const auto& functions = file.second->getFunctions();
-    for (const auto& func : functions) {
-      func.second->setSystem();
-      ar->addSystemFunction(func.second);
-    }
-  }
-
-  return true;
 }
 
 void BuiltinSymbols::LoadSuperGlobals() {

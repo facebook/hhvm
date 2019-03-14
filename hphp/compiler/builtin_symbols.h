@@ -32,10 +32,7 @@ DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
 
 struct BuiltinSymbols {
-  static bool Loaded;
   static AnalysisResultPtr s_systemAr;
-
-  static bool Load(AnalysisResultPtr ar);
 
   /**
    * Testing whether a variable is a PHP superglobal.

@@ -32,7 +32,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/parser/parser.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/file-util.h"
@@ -429,15 +428,10 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
     ms.add("FileCount", getFileCount())
       .add("LineCount", getLineCount())
       .add("CharCount", getCharCount())
-      .add("FunctionCount", m_ar->getFunctionCount())
-      .add("ClassCount", m_ar->getClassCount())
       .add("TotalTime", totalSeconds);
 
     if (getLineCount()) {
       ms.add("AvgCharPerLine", getCharCount() / getLineCount());
-    }
-    if (m_ar->getFunctionCount()) {
-      ms.add("AvgLinePerFunc", getLineCount()/m_ar->getFunctionCount());
     }
 
     ms.done();

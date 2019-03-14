@@ -53,7 +53,7 @@ SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 object_library_hphp_link(hphp_runtime_static)
-object_library_ld_link_libraries(hphp_runtime_static hphp_util hphp_proxygen vixl ppc64-asm hphp_zend hphp_system jit_sort)
+object_library_ld_link_libraries(hphp_runtime_static hphp_util hphp_proxygen vixl ppc64-asm hphp_zend hphp_system jit_sort hphp_parser)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_static)
 
 SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")

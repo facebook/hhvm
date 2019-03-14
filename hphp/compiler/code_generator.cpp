@@ -15,11 +15,7 @@
 */
 
 #include "hphp/compiler/code_generator.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/text-util.h"

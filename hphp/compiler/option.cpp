@@ -23,8 +23,6 @@
 #include <vector>
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/file_scope.h"
 
 #include "hphp/parser/scanner.h"
 

@@ -1335,10 +1335,11 @@ bool irrelevant_inst(const IRInstruction& inst) {
         return true;
       }
       if (inst.consumesReferences()) return false;
-      if (g.loads <= AEmpty &&
-          g.stores <= AEmpty &&
-          g.moves <= AEmpty &&
-          g.kills <= AEmpty) {
+      // IncRefs/DecRefs can only touch heap locations, so any other instruction
+      // that doesn't affect these locations is irrelevant.
+      if (!g.stores.maybe(AHeapAny) &&
+          !g.moves.maybe(AHeapAny)  &&
+          !g.kills.maybe(AHeapAny)) {
         return true;
       }
       return false;
@@ -3393,6 +3394,58 @@ void pre_incdecs(Env& env, RCAnalysis& rca, bool incDec) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * This pass delays DecRef* instructions to try to expose more opportunities
+ * for eliminating IncRef/DecRef pairs. The idea is to remember the last IncRef
+ * tX that was seen and move DecRefs of other SSATmps later, until after a
+ * DecRef tX is found.  If any other instruction that is not "irrelevant" is
+ * found along the way, the set of DecRefs that are candidates to be moved has
+ * to be cleared.  For now, this pass is only applied locally, within a basic
+ * block.
+ */
+void delay_decrefs(IRUnit& unit) {
+  FTRACE(2, "delay_decrefs: unit before: {}\n", show(unit));
+
+  auto blocks = rpoSortCfg(unit);
+  for (auto block : blocks) {
+    IRInstruction* last_incref = nullptr;
+    jit::vector<IRInstruction*> other_decrefs;
+
+    for (auto& inst : *block) {
+      if (inst.is(IncRef)) {
+        last_incref = &inst;
+        other_decrefs.clear();
+      }
+
+      if (last_incref == nullptr || irrelevant_inst(inst)) continue;
+
+      if (inst.is(DecRef, DecRefNZ)) {
+        if (inst.src(0) != last_incref->src(0)) {
+          other_decrefs.push_back(&inst);
+          continue;
+        }
+        // Move all the DecRefs in other_decrefs after inst
+        auto iter = block->iteratorTo(&inst);
+        iter++;
+        for (auto other : other_decrefs) {
+          auto new_decref = unit.gen(DecRef, other->bcctx(),
+                                     *(other->extra<DecRefData>()),
+                                     other->src(0));
+          FTRACE(2, "delay_decrefs: moving {} after {} as {}\n",
+                 *other, inst, *new_decref);
+          remove_helper(unit, other);
+          block->insert(iter, new_decref);
+        }
+      }
+      // Either we moved other_decrefs or we hit some other relevant
+      // instruction.  In either case, we need to forget the other decrefs.
+      other_decrefs.clear();
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3400,6 +3453,7 @@ void pre_incdecs(Env& env, RCAnalysis& rca, bool incDec) {
 void optimizeRefcounts(IRUnit& unit) {
   Timer timer(Timer::optimize_refcountOpts, unit.logEntry().get_pointer());
   splitCriticalEdges(unit);
+  delay_decrefs(unit);
 
   PassTracer tracer{&unit, Trace::hhir_refcount, "optimizeRefcounts"};
   Env env { unit };

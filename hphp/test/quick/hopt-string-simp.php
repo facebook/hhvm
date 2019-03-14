@@ -59,14 +59,22 @@ function foo11() {
 
 function foo12() {
   $x = Array();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 class A {}
 
 function foo13() {
   $x = new A();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 class B { public function __toString() { return "B"; } }
@@ -80,7 +88,11 @@ class C { public function __call($meth, $args) { return "C"; } }
 
 function foo15() {
   $x = new C();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 var_dump(foo1());

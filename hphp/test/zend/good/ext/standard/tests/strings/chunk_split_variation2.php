@@ -77,7 +77,7 @@ $values = array(
 // loop through each element of the values for 'chunklen'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1)." --\n";
-  var_dump( chunk_split($str, $values[$count], $ending) );
+  try { var_dump( chunk_split($str, $values[$count], $ending) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 //closing resource

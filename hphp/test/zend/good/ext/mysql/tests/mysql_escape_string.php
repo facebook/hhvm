@@ -4,8 +4,7 @@ include "connect.inc";
 $tmp    = NULL;
 $link   = NULL;
 
-if (NULL !== ($tmp = @mysql_escape_string()))
-	printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+try { mysql_escape_string(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 var_dump(@mysql_escape_string("Am I a unicode string in PHP 6?"));
 var_dump(@mysql_escape_string('\\'));

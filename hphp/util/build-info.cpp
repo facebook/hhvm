@@ -33,6 +33,7 @@ std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
 std::string buildid;
+std::string hhjsbabeltransform;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,6 +70,7 @@ void readBuildInfo() {
 
   compiler = get("compiler_id");
   buildid = get("build_id");
+  hhjsbabeltransform = get("hhjs_babel_transform");
 
   inited.store(true, std::memory_order_release);
 }
@@ -90,6 +92,11 @@ folly::StringPiece compilerId() {
 folly::StringPiece buildId() {
   readBuildInfo();
   return buildid;
+}
+
+folly::StringPiece hhjsBabelTransform() {
+  readBuildInfo();
+  return hhjsbabeltransform;
 }
 
 const char* kSchemaPlaceholder = "%{schema}";

@@ -1,1 +1,2 @@
 -vHttp.SlowQueryThreshold=60000
+-vEval.EnablePHP=1

@@ -1,3 +1,3 @@
-<?hh
+<?hh // partial
 
 type Foo = array<int>;

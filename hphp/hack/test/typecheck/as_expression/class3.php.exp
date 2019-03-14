@@ -38,6 +38,8 @@ Invalid argument (Typing[4110])
   Considering that this type argument is invariant with respect to B
   File "class3.php", line 10, characters 21-26:
   It is incompatible with a string
+  File "class3.php", line 10, characters 21-26:
+  Considering that this type argument is invariant with respect to A
 File "class3.php", line 15, characters 28-28:
 The type B expects 1 type parameter(s) (Typing[4101])
 File "class3.php", line 16, characters 28-28:

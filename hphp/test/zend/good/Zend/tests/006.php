@@ -1,6 +1,6 @@
 <?php
 
-var_dump(strncasecmp(""));
+try { var_dump(strncasecmp("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(strncasecmp("", "", -1));
 var_dump(strncasecmp("aef", "dfsgbdf", 0));
 var_dump(strncasecmp("aef", "dfsgbdf", 10));

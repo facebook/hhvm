@@ -1,3 +1,3 @@
-<?php
+<?hh // partial
 
 class InvalidOperationException extends RuntimeException {}

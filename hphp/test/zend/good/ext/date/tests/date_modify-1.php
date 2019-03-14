@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set("Pacific/Kwajalein");
-$ts = date_create("Thu Aug 19 1993 23:59:59");
+$ts = date_create("Fri Aug 20 1993 23:59:59");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";
 $ts->modify("+1 second");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";

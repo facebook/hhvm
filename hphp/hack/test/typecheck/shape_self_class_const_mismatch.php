@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 type MyShape = shape(MyClass::KEY_NAME => int);
 

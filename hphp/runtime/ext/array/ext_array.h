@@ -48,9 +48,8 @@ bool HHVM_FUNCTION(array_key_exists,
 bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
-TypedValue array_keys_helper(TypedValue input,
-                             TypedValue search_value = make_tv<KindOfUninit>(),
-                             bool strict = false);
+TypedValue HHVM_FUNCTION(array_keys,
+                         TypedValue input);
 TypedValue HHVM_FUNCTION(array_map,
                          const Variant& callback,
                          const Variant& arr1,
@@ -262,15 +261,19 @@ inline int64_t countHelper(TypedValue tv) {
 
 #define getCheckedArrayRet(input, fail)                                  \
   auto const cell_##input = static_cast<const Variant&>(input).toCell(); \
-  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {                \
+  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type) &&                 \
+    !isClsMethType(cell_##input->m_type))) {                             \
     throw_expected_array_exception();                                    \
     return fail;                                                         \
   }                                                                      \
-  ArrNR arrNR_##input{cell_##input->m_data.parr};                        \
+  if (isClsMethType(cell_##input->m_type)) raiseClsMethToVecWarningHelper(); \
+  ArrNR arrNR_##input{isClsMethType(cell_##input->m_type) ?              \
+    clsMethToVecHelper(cell_##input->m_data.pclsmeth).detach() :         \
+    cell_##input->m_data.parr};                                          \
   const Array& arr_##input = arrNR_##input.asArray();
 
 #define getCheckedContainer(input)                                       \
-  if (UNLIKELY(!isContainer(input))) {                                   \
+  if (UNLIKELY(!isContainer(input) && !input.isClsMeth())) {             \
     throw_expected_array_or_collection_exception();                      \
     return make_tv<KindOfNull>();                                        \
   }                                                                      \

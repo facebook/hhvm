@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump($HTTP_RAW_POST_DATA);
 var_dump(count($_ENV) > 0);

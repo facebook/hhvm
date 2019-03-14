@@ -4,16 +4,16 @@ namespace test;
 
 class foo {
 	public $e = array();
-	
+
 	public function __construct() {
 		$this->e[] = $this;
 	}
-	
+
 	public function __set($a, $b) {
-		var_dump($a, $b);
+		\var_dump($a, $b);
 	}
 	public function __get($a) {
-		var_dump($a);
+		\var_dump($a);
 		return $this;
 	}
 }

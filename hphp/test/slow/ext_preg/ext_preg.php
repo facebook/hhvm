@@ -15,7 +15,7 @@ function test_preg_rep($a,$b,$c) {
 function test_preg_grep() {
   $array = array("foo 123.1", "fg 24bar", "123.1", "24");
   $fl_array = preg_grep("/^(\\d+)?\\.\\d+$/", $array);
-  VS(count(fl_array), 1);
+  VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
   VS(preg_grep("/a/", array("c", "b")), array());

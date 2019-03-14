@@ -4,19 +4,24 @@ $a = 10;
 
 function Test()
 {
-	static $a=1;
-	global $b;
 	$c = 1;
-	$b = 5;
-	echo "$a $b ";
-	$a++;
+	Lang007::$b = 5;
+	echo TestStatics::$a." ".Lang007::$b." ";
+	TestStatics::$a++;
 	$c++;
-	echo "$a $c ";
+	echo TestStatics::$a." $c ";
 }
 
-Test();	
-echo "$a $b $c ";
-Test();	
-echo "$a $b $c ";
 Test();
-?>
+echo "$a ".Lang007::$b." $c ";
+Test();
+echo "$a ".Lang007::$b." $c ";
+Test();
+
+abstract final class TestStatics {
+  public static $a = 1;
+}
+
+abstract final class Lang007 {
+  public static $b;
+}

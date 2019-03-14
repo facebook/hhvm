@@ -5,9 +5,9 @@ $filename = dirname(__FILE__)."/004.txt.gz";
 $use_include_path = false;
 $extra_arg = 'nothing'; 
 
-var_dump(gzfile( $filename, $use_include_path, $extra_arg ) );
+try { var_dump(gzfile( $filename, $use_include_path, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-var_dump(gzfile(  ) );
+try { var_dump(gzfile(  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 ?>

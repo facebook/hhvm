@@ -40,15 +40,4 @@ array(1) {
 }
 int(30)
 int(30)
-
-Warning: i() expects exactly 1 parameter, 0 given in %s/test/slow/variable_argument/27.php on line 31
-array(0) {
-}
-
-Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 33
-bool(false)
-
-Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 34
-
-Warning: func_get_arg():  Argument 0 not passed to function in %s/test/slow/variable_argument/27.php on line 36
-bool(false)
+string(40) "i() expects exactly 1 parameter, 0 given"

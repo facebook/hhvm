@@ -17,7 +17,7 @@ echo "-- with built-in function 'pow' and two parameters --\n";
 var_dump( array_map('pow', $array1, $array2));
 
 echo "-- with built-in function 'pow' and one parameter --\n";
-var_dump( array_map('pow', $array1));
+try { var_dump( array_map('pow', $array1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "-- with language construct --\n";
 var_dump( array_map('echo', $array1));

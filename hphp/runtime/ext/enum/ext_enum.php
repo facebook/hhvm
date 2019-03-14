@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
 
@@ -49,7 +49,7 @@ abstract class BuiltinEnum<T> {
   final public static function assert(mixed $value): T {
     $new_value = static::coerce($value);
     if (null === $new_value) {
-      $cls = \get_called_class();
+      $cls = static::class;
       throw new \UnexpectedValueException(
         "{$value} is not a valid value for {$cls}",
       );

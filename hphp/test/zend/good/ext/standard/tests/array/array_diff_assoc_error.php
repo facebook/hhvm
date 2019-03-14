@@ -13,12 +13,12 @@ echo "*** Testing array_diff_assoc() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing array_diff_assoc() function with zero arguments --\n";
-var_dump( array_diff_assoc() );
+try { var_dump( array_diff_assoc() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing array_diff_assoc with one less than the expected number of arguments
 echo "\n-- Testing array_diff_assoc() function with less than expected no. of arguments --\n";
 $arr1 = array(1, 2);
-var_dump( array_diff_assoc($arr1) );
+try { var_dump( array_diff_assoc($arr1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "Done";

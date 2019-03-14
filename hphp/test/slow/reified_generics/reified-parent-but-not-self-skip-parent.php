@@ -2,8 +2,8 @@
 
 class E<reify T1, reify T2> {
   public function f() {
-    var_dump(__hhvm_intrinsics\get_reified_type(T1));
-    var_dump(__hhvm_intrinsics\get_reified_type(T2));
+    var_dump(HH\ReifiedGenerics\getType<T1>());
+    var_dump(HH\ReifiedGenerics\getType<T2>());
   }
 }
 

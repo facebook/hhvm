@@ -175,6 +175,7 @@ struct Interp {
   const Index& index;
   Context ctx;
   CollectedInfo& collect;
+  const BlockId bid;
   const php::Block* blk;
   State& state;
 };

@@ -1,1 +1,2 @@
 --count=10 -vEval.JitPGO=false
+-vEval.EnablePHP=1

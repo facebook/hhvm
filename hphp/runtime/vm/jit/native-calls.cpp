@@ -191,7 +191,7 @@ static CallMap s_callMap {
     {ConvObjToKeyset,    convObjToKeysetHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
-    {ConvCellToBool,     cellToBool, DSSA, SNone,
+    {ConvCellToBool,     cellToBool, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,
@@ -315,6 +315,8 @@ static CallMap s_callMap {
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
     {RaiseMissingThis,   raise_missing_this, DNone,
                            SSync, {{SSA, 0}}},
+    {RaiseHasThisNeedStatic, raise_has_this_need_static, DNone,
+                             SSync, {{SSA, 0}}},
     {FatalMissingThis,   raise_missing_this, DNone,
                            SSync, {{SSA, 0}}},
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
@@ -563,9 +565,6 @@ static CallMap s_callMap {
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
     /* is/as expressions */
-    {ResolveTypeStruct, resolveTypeStructHelper, DSSA, SSync,
-                        {{SSA, 0}, {extra(&ResolveTypeStructData::cls)},
-                         {SSA, 1}, {extra(&ResolveTypeStructData::suppress)}}},
     {IsTypeStruct, isTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
     {AsTypeStruct, asTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
 
@@ -611,6 +610,7 @@ static CallMap s_callMap {
                              {{extra(&ParamData::paramId)}, {SSA, 0}}},
     {VerifyReifiedReturnType, VerifyReifiedReturnTypeImpl, DNone, SSync,
                               {{TV, 0}, {SSA, 1}}},
+    {MangleReifiedName, mangleReifiedName, DSSA,  SNone, {{SSA, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

@@ -3,10 +3,8 @@
 -- Testing method_exists() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing method_exists() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

@@ -130,7 +130,7 @@ struct FuncChecker {
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkFpi(State* cur, PC pc);
+  bool checkFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
@@ -476,12 +476,6 @@ bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
       return false;
     }
   }
-  return true;
-}
-
-bool FuncChecker::checkImmBLLA(PC& pc, PC const /*instr*/) {
-  auto const len = decode_iva(pc);
-  pc += (len + 7) / 8;
   return true;
 }
 
@@ -1035,40 +1029,29 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
   return true;
 }
 
-bool FuncChecker::checkFpi(State* cur, PC pc) {
+bool FuncChecker::checkFCall(State* cur, PC pc) {
+  assertx(isFCallStar(peek_op(pc)));
+
   if (cur->fpilen <= 0) {
     error("%s", "cannot access empty FPI stack\n");
     return false;
   }
   bool ok = true;
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  auto const op = peek_op(pc);
-
-  if (isFCallStar(op)) {
-    --cur->fpilen;
-    auto const fca = getImm(pc, 0).u_FCA;
-    int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
-    int push_params = getImmIva(at(fpi.fpush));
-    if (call_params != push_params) {
-      error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
-             call_params, push_params);
-      ok = false;
-    }
-    if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
-      error("wrong # of params were passed; got %d expected %d\n",
-            push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
-            push_params);
-      ok = false;
-    }
-  } else {
-    assertx(op == Op::FThrowOnRefMismatch);
-    int num_checked_params = getImmVector(pc).size();
-    int push_params = getImmIva(at(fpi.fpush));
-    if (num_checked_params > push_params) {
-      error("num_checked_params %d out of range [0:%d]\n", num_checked_params,
-             push_params);
-      return false;
-    }
+  --cur->fpilen;
+  auto const fca = getImm(pc, 0).u_FCA;
+  int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  int push_params = getImmIva(at(fpi.fpush));
+  if (call_params != push_params) {
+    error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
+           call_params, push_params);
+    ok = false;
+  }
+  if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
+    error("wrong # of params were passed; got %d expected %d\n",
+          push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
+          push_params);
+    ok = false;
   }
 
   return ok;
@@ -1147,7 +1130,6 @@ std::set<int> localImmediates(Op op) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
-#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1178,7 +1160,6 @@ std::set<int> localImmediates(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
-#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA
@@ -1319,19 +1300,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
           numBound != preCls->numProperties() - invoke->staticVars.size()) {
         ferror("CreateCl bound Closure {} with {} params instead of {}\n",
                preCls->name(), numBound, preCls->numProperties());
-        return false;
-      }
-      break;
-    }
-    case Op::DefFunc: {
-      auto id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->fevec().size()) {
-        ferror("{} references nonexistent function ({})\n",
-                opcodeToName(op), id);
-        return false;
-      }
-      if (id == 0) {
-        ferror("Cannot DefFunc main\n");
         return false;
       }
       break;
@@ -1775,6 +1743,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Select:
     case Op::PopC:
     case Op::PopU:
+    case Op::PopU2:
     case Op::PopL:
     case Op::CGetL:
     case Op::CGetQuietL:
@@ -1804,7 +1773,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Parent:
     case Op::LateBoundCls:
     case Op::ClsRefGetC:
-    case Op::ClsRefGetL:
     case Op::ClsRefGetTS:
     case Op::DiscardClsRef:
     case Op::ClsRefName:
@@ -1853,13 +1821,11 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
     case Op::FPushCtor:
-    case Op::FThrowOnRefMismatch:
     case Op::FCall:
     case Op::FCallBuiltin:
     case Op::NativeImpl:
     case Op::NewObj:
     case Op::NewObjD:
-    case Op::NewObjI:
     case Op::NewObjS:
     case Op::ResolveFunc:
     case Op::ResolveObjMethod:
@@ -1992,6 +1958,10 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
     }
 
+    // undesirable: func_num_args()
+    case Op::FuncNumArgs:
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
     // unsafe: operations definitely involving boxes
     case Op::PopV:
     case Op::Box:
@@ -2050,7 +2020,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: defines and includes
-    case Op::DefFunc:
     case Op::DefCls:
     case Op::DefClsNop:
     case Op::AliasCls:
@@ -2224,9 +2193,9 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (flags & FF) ok &= checkFpi(&cur, pc);
+    if (op == Op::FCall) ok &= checkFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
-    if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
+    if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);

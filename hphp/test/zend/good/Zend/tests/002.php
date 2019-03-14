@@ -20,11 +20,11 @@ function test3($a, $b) {
 test1();
 test1(10);
 test2(1);
-test2();
+try { test2(); } catch (Exception $e) { var_dump($e->getMessage()); }
 test3(1,2);
 
 call_user_func("test1");
-call_user_func("test3", 1);
+try { call_user_func("test3", 1); } catch (Exception $e) { var_dump($e->getMessage()); }
 call_user_func("test3", 1, 2);
 
 class test {

@@ -2,18 +2,20 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls1 {
+
+  private static $get_res = ['type' => 1];
   <<__NEVER_INLINE>>
   public function get() {
-    static $_ = ['type' => 1];
-    return $_;
+    return self::$get_res;
   }
 }
 
 class Cls2 {
+
+  private static $get_res = ['type' => 2];
   <<__NEVER_INLINE>>
   public function get() {
-    static $_ = ['type' => 2];
-    return $_;
+    return self::$get_res;
   }
 }
 

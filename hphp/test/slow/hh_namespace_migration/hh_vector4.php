@@ -8,7 +8,7 @@ namespace A {
 
 namespace B {
   $y = \HH\Vector {4, 5, 6};
-  for ($i = 0; $i < count($y); $i++) echo $y[$i] . "\n";
+  for ($i = 0; $i < \count($y); $i++) echo $y[$i] . "\n";
   echo "---\n";
 }
 

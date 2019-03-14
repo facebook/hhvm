@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* Set the various assert() control options or just query their current
  * settings.
@@ -61,8 +61,7 @@ function get_cfg_var(string $option): mixed;
 function get_current_user(): string;
 
 /* Returns the names and values of all the constants currently defined. This
- * includes those created by extensions as well as those created with the
- * define() function.
+ * includes those created by extensions.
  */
 <<__Native>>
 function get_defined_constants(bool $categorize = false): array;
@@ -367,15 +366,15 @@ namespace __SystemLib {
       $this->body = $this->element('body');
     }
 
-    private function is_cli() { return php_sapi_name() == 'cli'; }
+    private function is_cli() { return \php_sapi_name() == 'cli'; }
 
     private function appendChildren(\DOMElement $el, ?array $children) {
       if ($children) {
         foreach ($children as $v) {
           if ($v === null) {
-          } else if ($v instanceof \DOMElement) {
+          } else if ($v is \DOMElement) {
             $el->appendChild($v);
-          } else if (is_array($v)) {
+          } else if (\is_array($v)) {
             $this->appendChildren($el, $v);
           } else {
             $el->appendChild($this->xml->createTextNode($v));
@@ -408,13 +407,13 @@ namespace __SystemLib {
         echo $title . "\n";
         echo "\n";
         foreach ($data as $k => $v) {
-          echo $k . " => " . print_r($v, true) . "\n";
+          echo $k . " => " . \print_r($v, true) . "\n";
         }
         echo "\n";
       } else {
         $children = [];
         foreach ($data as $k => $v) {
-          array_push(&$children, $this->tr($k, print_r($v, true)));
+          \array_push(&$children, $this->tr($k, \print_r($v, true)));
         }
         return [
           $this->element('hr'),
@@ -442,10 +441,10 @@ namespace __SystemLib {
 
     private function reportVersionTitle() {
       if ($this->is_cli()) {
-        echo 'HHVM Version => ' . HHVM_VERSION . "\n";
+        echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
         $this->body->appendChild(
-          $this->element('h1', [], 'HHVM Version ' . HHVM_VERSION));
+          $this->element('h1', [], 'HHVM Version ' . \HHVM_VERSION));
       }
     }
 
@@ -455,33 +454,33 @@ namespace __SystemLib {
       }
 
       $data = array(
-        'Version' => HHVM_VERSION,
-        'Version ID' => HHVM_VERSION_ID,
-        'Debug' => HHVM_DEBUG,
-        'Compiler ID' => HHVM_COMPILER_ID,
-        'Repo Schema' => HHVM_REPO_SCHEMA,
-        'PHP Version' => phpversion(),
-        'Zend Version' => zend_version(),
-        'uname' => php_uname());
+        'Version' => \HHVM_VERSION,
+        'Version ID' => \HHVM_VERSION_ID,
+        'Debug' => \HHVM_DEBUG,
+        'Compiler ID' => \HHVM_COMPILER_ID,
+        'Repo Schema' => \HHVM_REPO_SCHEMA,
+        'PHP Version' => \phpversion(),
+        'Zend Version' => \zend_version(),
+        'uname' => \php_uname());
 
       $this->appendChildren($this->body, $this->table('Version', $data));
     }
 
     private function reportIni() {
       $this->appendChildren($this->body,
-                            $this->table('INI', ini_get_all('', false)));
+                            $this->table('INI', \ini_get_all('', false)));
     }
 
     private function reportHeaders() {
-      if (!function_exists('getallheaders')) return;
+      if (!\function_exists('getallheaders')) return;
       $this->appendChildren($this->body,
-                            $this->table('Headers', getallheaders()));
+                            $this->table('Headers', \getallheaders()));
     }
 
     private function reportMap(string $name, array $map) {
       $data = [];
       foreach ($map as $k => $v) {
-        $data[sprintf("%s['%s']", $name, $k)] = $v;
+        $data[\sprintf("%s['%s']", $name, $k)] = $v;
       }
       $this->appendChildren($this->body, $this->table($name, $data));
     }
@@ -511,7 +510,7 @@ namespace __SystemLib {
       if (!$this->is_cli()) {
         $this->body->appendChild($this->element('br'));
         $this->xml->appendChild($html);
-        header('content-type: text/html; charset=UTF-8');
+        \header('content-type: text/html; charset=UTF-8');
         echo $this->xml->saveHTML();
       }
     }

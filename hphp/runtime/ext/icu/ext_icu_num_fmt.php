@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Programs store and operate on numbers using a locale-independent binary

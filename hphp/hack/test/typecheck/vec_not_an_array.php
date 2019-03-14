@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function takes_array(array $arg): void {}
 

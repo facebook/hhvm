@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 <<__Rx, __AtMostRxAsArgs>>
 function varray_map<Tv1, Tv2>(
   <<__AtMostRxAsFunc>>(function(Tv1): Tv2) $value_func,

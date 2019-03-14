@@ -63,7 +63,7 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value $value \n";
-      var_dump( posix_kill($value, $sig) );
+      try { var_dump( posix_kill($value, $sig) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

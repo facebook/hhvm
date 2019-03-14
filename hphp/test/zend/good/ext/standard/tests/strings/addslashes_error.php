@@ -12,14 +12,14 @@ echo "*** Testing addslashes() : error conditions ***\n";
 
 // Zero argument
 echo "\n-- Testing addslashes() function with Zero arguments --\n";
-var_dump( addslashes() );
+try { var_dump( addslashes() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // More than expected number of arguments
 echo "\n-- Testing addslashes() function with more than expected no. of arguments --\n";
 $str = '"hello"\"world"';
 $extra_arg = 10;
 
-var_dump( addslashes($str, $extra_arg) );
+try { var_dump( addslashes($str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( $str );
 
 echo "Done\n";

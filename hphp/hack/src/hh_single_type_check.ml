@@ -176,17 +176,13 @@ let parse_options () =
   let disallow_array_typehint = ref None in
   let disallow_array_literal = ref None in
   let disallow_reified_generics = ref false in
-  let untyped_nonstrict_lambda_parameters = ref None in
   let no_fallback_in_namespaces = ref None in
   let dynamic_view = ref None in
   let allow_array_as_tuple = ref (Some false) in
-  let disallow_assign_by_ref = ref None in
-  let allow_array_cell_pass_by_ref = ref (Some false) in
   let allow_anon_use_capture_by_ref = ref (Some false) in
   let allow_user_attributes = ref None in
   let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
-  let dont_assume_php = ref (Some false) in
   let unsafe_rx = ref (Some false) in
   let enable_concurrent = ref None in
   let enable_await_as_an_expression = ref None in
@@ -198,8 +194,12 @@ let parse_options () =
   let disallow_invalid_arraykey = ref None in
   let enable_stronger_await_binding = ref None in
   let typecheck_xhp_cvars = ref (Some false) in
+  let ignore_collection_expr_type_arguments = ref (Some false) in
+  let allow_ref_param_on_constructor = ref (Some false) in
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
+  let disable_unsafe_block = ref None in
+  let pocket_universes = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -252,9 +252,6 @@ let parse_options () =
     "--no-builtins",
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
-    "--dont-assume-php",
-      Arg.Unit (set_bool dont_assume_php),
-      " Don't assume that undefined names are in PHP files";
     "--dump-deps",
       Arg.Unit (set_mode Dump_deps),
       " Print dependencies";
@@ -322,9 +319,6 @@ let parse_options () =
     "--disallow-ambiguous-lambda",
       Arg.Unit (set_bool disallow_ambiguous_lambda),
       " Disallow definition of lambdas that require use-site checking.";
-    "--untyped-nonstrict-lambda-parameters",
-      Arg.Unit (set_bool untyped_nonstrict_lambda_parameters),
-      " In non-strict files treat lambda parameters without a type hint as untyped.";
     "--disallow-array-typehint",
       Arg.Unit (set_bool disallow_array_typehint),
       " Disallow usage of array typehints.";
@@ -349,12 +343,6 @@ let parse_options () =
     "--allow-array-as-tuple",
         Arg.Unit (set_bool allow_array_as_tuple),
         " Allow tuples to be passed as untyped arrays and vice versa";
-    "--disallow-assign-by-ref",
-        Arg.Unit (set_bool disallow_assign_by_ref),
-        " Disallow assignment by reference";
-    "--allow-array-cell-pass-by-ref",
-        Arg.Unit (set_bool allow_array_cell_pass_by_ref),
-        " Allow binding of array cells by reference as arguments to function calls";
     "--allow-anon-use-capture-by-ref",
         Arg.Unit (set_bool allow_anon_use_capture_by_ref),
         " Allow binding of local variables by reference in anonymous function use clauses";
@@ -406,9 +394,21 @@ let parse_options () =
     "--disable-unsafe-expr",
       Arg.Unit (set_bool disable_unsafe_expr),
       "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
+    "--disable-unsafe-block",
+      Arg.Unit (set_bool disable_unsafe_block),
+      "Treat UNSAFE block comments as just comments, the typecheker will ignore them";
     "--check-xhp-cvar-arity",
       Arg.Unit (set_bool typecheck_xhp_cvars),
       "Typechecks xhp cvar arity";
+    "--ignore-collection-expr-type-arguments",
+      Arg.Unit (set_bool ignore_collection_expr_type_arguments),
+      "Typechecker ignores type arguments to vec<T>[...] style expressions";
+    "--allow-ref-param-on-constructor",
+      Arg.Unit (set_bool allow_ref_param_on_constructor),
+      " Allow class constructors to take reference parameters";
+    "--pocket-universes",
+      Arg.Set pocket_universes,
+      "Enables support for Pocket Universes";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -417,19 +417,15 @@ let parse_options () =
     | x -> x in
   let not_ = Option.map ~f:not in
   let tcopt = GlobalOptions.make
-    ?tco_assume_php:(not_ !dont_assume_php)
     ?tco_unsafe_rx:(!unsafe_rx)
     ?tco_safe_array:(!safe_array)
     ?tco_safe_vector_array:(!safe_vector_array)
     ?po_deregister_php_stdlib:(!deregister_attributes)
     ?tco_disallow_ambiguous_lambda:(!disallow_ambiguous_lambda)
-    ?tco_untyped_nonstrict_lambda_parameters:(!untyped_nonstrict_lambda_parameters)
     ?tco_disallow_array_typehint:(!disallow_array_typehint)
     ?tco_disallow_array_literal:(!disallow_array_literal)
     ?tco_dynamic_view:(!dynamic_view)
     ?tco_disallow_array_as_tuple:(not_ !allow_array_as_tuple)
-    ?tco_disallow_assign_by_ref:(!disallow_assign_by_ref)
-    ?tco_disallow_array_cell_pass_by_ref:(not_ !allow_array_cell_pass_by_ref)
     ?tco_disallow_anon_use_capture_by_ref:(not_ !allow_anon_use_capture_by_ref)
     ?tco_disallow_unset_on_varray:(!disallow_unset_on_varray)
     ?tco_disallow_stringish_magic:(!disallow_stringish_magic)
@@ -442,7 +438,10 @@ let parse_options () =
     ?po_enable_await_as_an_expression:(!enable_await_as_an_expression)
     ?po_enable_stronger_await_binding:(!enable_stronger_await_binding)
     ?po_disable_unsafe_expr:(!disable_unsafe_expr)
+    ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
+    ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
+    ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
     ~log_levels:(!log_levels)
     ()
   in
@@ -458,6 +457,7 @@ let parse_options () =
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in
+  let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
   { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
@@ -477,8 +477,7 @@ let compute_least_type tcopt fn =
           ~f:begin fun acc stmt ->
             match stmt with
             | Expr (_, New ((_, CI (_, "\\least_upper_bound")), tal, _, _, _)) ->
-              let hints = List.map ~f:fst tal in
-              (List.map hints
+              (List.map tal
                 (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
               :: acc
             | _ -> acc
@@ -1136,18 +1135,25 @@ let handle_mode
         let linearization = Decl_linearize.get_linearization classname in
         let linearization = Sequence.map linearization (fun mro ->
           let name = mro.Decl_defs.mro_name in
-          let params = List.map mro.Decl_defs.mro_params (fun ty ->
+          let targs = List.map mro.Decl_defs.mro_type_args (fun ty ->
               let tenv = Typing_env.empty tcopt ~droot:None file in
               Typing_print.full tenv ty
             ) in
-          let params = if params = [] then "" else "<"^(String.concat ~sep:"," params)^">" in
-          Printf.sprintf "%s%s(%s%s)"
+          let targs = if targs = [] then "" else "<"^(String.concat ~sep:"," targs)^">" in
+          let open Decl_defs in
+          let modifiers =
+            [ if mro.mro_synthesized    then Some "synthesized"    else None
+            ; if mro.mro_xhp_attrs_only then Some "xhp_attrs_only" else None
+            ; if mro.mro_consts_only    then Some "consts_only"    else None
+            ; if mro.mro_copy_private_members then Some "copy_private_members" else None
+            ]
+            |> List.filter_map ~f:(fun x -> x)
+            |> String.concat ~sep:", "
+          in
+          Printf.sprintf "%s%s%s"
             name
-            params
-            (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
-            (match mro.Decl_defs.mro_synthesized, mro.Decl_defs.mro_source with
-            | false, _ | _, Decl_defs.(ReqImpl | ReqExtends) -> ""
-            | true, _ -> ", synthesized")
+            targs
+            (if modifiers = "" then "" else Printf.sprintf "(%s)" modifiers)
           )
           |> Sequence.to_list
         in
@@ -1209,11 +1215,12 @@ let main_hack ({files; mode; tcopt; _} as opts) =
 let _ =
   if ! Sys.interactive
   then ()
-  else
+  else (
     (* On windows, setting 'binary mode' avoids to output CRLF on
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
-    Out_channel.set_binary_mode stdout true;
-    let options = parse_options () in
-    Unix.handle_unix_error main_hack options
+    Out_channel.set_binary_mode stdout true
+  );
+  let options = parse_options () in
+  Unix.handle_unix_error main_hack options

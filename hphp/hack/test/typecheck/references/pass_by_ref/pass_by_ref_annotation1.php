@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function id<T>(T $x): T {
   return $x;

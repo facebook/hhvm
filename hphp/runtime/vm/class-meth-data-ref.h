@@ -33,6 +33,10 @@ struct ClsMethDataRef {
     return ClsMethDataRef(cls, func);
   }
 
+  static void Release(ClsMethDataRef clsMeth) noexcept {
+    clsMeth->release();
+  }
+
   ClsMethData& operator*() {
     return *data;
   }
@@ -53,6 +57,10 @@ struct ClsMethDataRef {
     return (data->getCls() == o->getCls()) && (data->getFunc() == o->getFunc());
   }
 
+  const ClsMethData* get() const {
+    return operator->();
+  }
+
 private:
   ClsMethData* data;
 };
@@ -62,6 +70,8 @@ ALWAYS_INLINE void decRefClsMeth(ClsMethDataRef clsMeth) {
 }
 
 void raiseClsMethToVecWarningHelper(const char* fn = nullptr);
+
+void raiseClsMethConvertWarningHelper(const char* toType);
 
 Array clsMethToVecHelper(ClsMethDataRef clsMeth);
 

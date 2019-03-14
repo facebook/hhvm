@@ -30,8 +30,8 @@ namespace test_simple {
   use function baz\bar;
   use function fizz\baz;
 
-  var_dump(bar());
-  var_dump(baz());
+  \var_dump(bar());
+  \var_dump(baz());
 }
 
 namespace test_as {
@@ -39,7 +39,7 @@ namespace test_as {
   use function fizz\baz as fizzbaz;
   use function baz\baz as bazbaz;
 
-  var_dump(foobar());
-  var_dump(fizzbaz());
-  var_dump(bazbaz());
+  \var_dump(foobar());
+  \var_dump(fizzbaz());
+  \var_dump(bazbaz());
 }

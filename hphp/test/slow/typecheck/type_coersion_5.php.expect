@@ -52,11 +52,11 @@ Builtin:
 User:
 WARNING: {closure}() expects parameter 1 to be float, float given
 Builtin:
-WARNING: number_format() expects parameter 1 to be float, string given
+WARNING: number_format() expects parameter 1 to be double, string given
 User:
 WARNING: {closure}() expects parameter 1 to be float, string given
 Builtin:
-WARNING: number_format() expects parameter 1 to be float, array given
+WARNING: number_format() expects parameter 1 to be double, array given
 User:
 WARNING: {closure}() expects parameter 1 to be float, array given
 Builtin:
@@ -94,7 +94,7 @@ WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array
 User:
 WARNING: {closure}() expects parameter 1 to be array, integer given
 Builtin:
-WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, float given
+WARNING: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, double given
 User:
 WARNING: {closure}() expects parameter 1 to be array, float given
 Builtin:
@@ -118,7 +118,7 @@ WARNING: get_object_vars() expects parameter 1 to be object, integer given
 User:
 WARNING: {closure}() expects parameter 1 to be object, integer given
 Builtin:
-WARNING: get_object_vars() expects parameter 1 to be object, float given
+WARNING: get_object_vars() expects parameter 1 to be object, double given
 User:
 WARNING: {closure}() expects parameter 1 to be object, float given
 Builtin:

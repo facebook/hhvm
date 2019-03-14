@@ -133,6 +133,7 @@ SSATmp* lookupObjMethodExactFunc(
   objOrCls = obj;
   implIncStat(env, Stats::ObjMethod_known);
   if (func->isStaticInPrologue()) {
+    gen(env, RaiseHasThisNeedStatic, cns(env, func));
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
@@ -163,6 +164,7 @@ SSATmp* lookupObjMethodInterfaceFunc(
                   cls);
   objOrCls = obj;
   if (ifaceFunc->attrs() & AttrStatic) {
+    gen(env, RaiseHasThisNeedStatic, func);
     decRef(env, obj);
     objOrCls = cls;
   }
@@ -183,6 +185,7 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
   );
   objOrCls = obj;
   if (func->isStaticInPrologue()) {
+    gen(env, RaiseHasThisNeedStatic, funcTmp);
     decRef(env, obj);
     objOrCls = clsTmp;
   }
@@ -535,6 +538,20 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   decRef(env, arr);
 }
 
+void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
+  auto const clsMeth = popC(env);
+  auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
+  auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
+  fpushActRec(
+    env,
+    func,
+    cls,
+    numParams,
+    nullptr,
+    cns(env, true)
+  );
+}
+
 SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
   assertx(ctx->type() <= TCtx);
   assertx(funcTmp->type() <= TFunc);
@@ -602,10 +619,6 @@ void fpushFuncCommon(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_http_response_header("http_response_header"),
-  s_php_errormsg("php_errormsg");
-
 /*
  * Could `inst' read from the locals in the environment of `caller'?
  *
@@ -613,10 +626,6 @@ const StaticString
  */
 bool callReadsLocals(const NormalizedInstruction& inst,
                      const Func* caller) {
-  // We don't handle these two cases, because we don't compile functions
-  // containing them:
-  assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
-  assertx(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto const unit = caller->unit();
 
@@ -717,11 +726,9 @@ void fpushActRec(IRGS& env,
                  uint32_t numArgs,
                  const StringData* invName,
                  SSATmp* dynamicCall) {
+  env.irb->fs().incBCSPDepth(kNumActRecCells);
   ActRecInfo info;
-  info.spOffset = offsetFromIRSP(
-    env,
-    BCSPRelOffset{-int32_t{kNumActRecCells}}
-  );
+  info.spOffset = offsetFromIRSP(env, BCSPRelOffset{0});
   info.numArgs = numArgs;
 
   gen(
@@ -873,37 +880,6 @@ void emitNewObjD(IRGS& env, const StringData* className) {
   push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
 }
 
-void emitNewObjI(IRGS& env, uint32_t clsIx) {
-  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto const cls = [&] () -> Class* {
-    auto const c = preClass->namedEntity()->clsList();
-    if (c && (c->attrs() & AttrUnique)) return c;
-    return nullptr;
-  }();
-  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = canInstantiateClass(cls);
-  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()) {
-    push(env, allocObjFast(env, cls));
-    return;
-  }
-
-  if (persistentCls) {
-    push(env, gen(env, AllocObj, cns(env, cls)));
-    return;
-  }
-
-  auto const cachedCls = cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
-    },
-    [&] (SSATmp* val) { return val; },
-    [&] { return gen(env, DefCls, cns(env, clsIx)); }
-  );
-
-  push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
-}
-
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   auto const cls  = specialClsRefToCls(env, ref);
   auto const slot = specialClsReifiedPropSlot(env, ref);
@@ -972,6 +948,9 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
       cns(env, false)
     );
     return;
+  }
+  if (topC(env)->isA(TClsMeth)) {
+    return fpushFuncClsMeth(env, numParams);
   }
 
   if (!topC(env)->isA(TStr)) {
@@ -1224,15 +1203,15 @@ void emitResolveClsMethod(IRGS& env) {
     funcTmp = loadClsMethodUnknown(env, data, slowExit);
     clsTmp = gen(env, LdClsCached, cns(env, className));
   }
-  auto op = RuntimeOption::EvalHackArrDVArrs ? AllocVecArray : AllocVArray;
-  auto methPair = gen(env, op, PackedArrayData { 2 });
-  gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, clsTmp);
-  gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
+
+  assertx(clsTmp);
+  assertx(funcTmp);
+  auto const clsMeth = gen(env, NewClsMeth, clsTmp, funcTmp);
   decRef(env, name);
   decRef(env, cls);
   popC(env);
   popC(env);
-  push(env, methPair);
+  push(env, clsMeth);
 }
 
 namespace {
@@ -1373,48 +1352,47 @@ void emitFPushClsMethodSD(IRGS& env,
 
 namespace {
 
-SSATmp* ldPreLiveFunc(IRGS& env) {
+SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
   auto const& fpiStack = env.irb->fs().fpiStack();
   if (!fpiStack.empty() && fpiStack.back().func) {
     return cns(env, fpiStack.back().func);
   }
 
-  auto off = instrFpToArDelta(curFunc(env), curSrcKey(env).pc());
-  if (resumeMode(env) != ResumeMode::None) {
-    off -= curFunc(env)->numSlotsInFrame();
-  }
-  auto const actRecOff = offsetFromIRSP(env, FPInvOffset { off });
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
 }
 
 }
 
-void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
-  if (!immVec.size()) return;
+//////////////////////////////////////////////////////////////////////
 
-  auto const func = ldPreLiveFunc(env);
-  auto const byRefs = immVec.vecu8();
-  if (func->hasConstVal(TFunc)) {
-    auto const f = func->funcVal();
-    for (auto i = 0; i < immVec.size(); ++i) {
-      if (f->byRef(i) != ((byRefs[i / 8] >> (i % 8)) & 1)) {
+namespace {
+
+bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
+                               const FCallArgs& fca, IRSPRelOffset actRecOff) {
+  if (!fca.enforceReffiness()) return true;
+
+  if (callee) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (callee->byRef(i) != fca.byRef(i)) {
+        auto const func = cns(env, callee);
         gen(env, RaiseParamRefMismatchForFunc, ParamData { i }, func);
-        return;
+        return false;
       }
     }
-    return;
+    return true;
   }
 
+  auto const func = ldPreLiveFunc(env, actRecOff);
   auto const exitSlow = makeExitSlow(env);
 
   SSATmp* numParams = nullptr;
-  for (uint32_t i = 0; i * 8 < immVec.size(); i += 8) {
+  for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
     uint64_t vals = 0;
-    for (uint32_t j = 0; j < 8 && (i + j) * 8 < immVec.size(); ++j) {
-      vals |= ((uint64_t)byRefs[i + j]) << (8 * j);
+    for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
+      vals |= ((uint64_t)fca.byRefs[i + j]) << (8 * j);
     }
 
-    uint64_t bits = immVec.size() - i * 8;
+    uint64_t bits = fca.numArgs - i * 8;
     uint64_t mask = bits >= 64
       ? std::numeric_limits<uint64_t>::max()
       : (1UL << bits) - 1;
@@ -1430,13 +1408,15 @@ void emitFThrowOnRefMismatch(IRGS& env, const ImmVector& immVec) {
     gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
         numParams);
   }
+
+  return true;
 }
 
-//////////////////////////////////////////////////////////////////////
+}
 
 void emitCallerDynamicCallChecks(IRGS& env,
                                  const Func* callee,
-                                 uint32_t numStackInputs) {
+                                 IRSPRelOffset actRecOff) {
   if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
   if (callee && callee->isDynamicallyCallable()) return;
 
@@ -1444,11 +1424,10 @@ void emitCallerDynamicCallChecks(IRGS& env,
   ifElse(
     env,
     [&] (Block* skip) {
-      auto const calleeAROff = spOffBCFromIRSP(env) + numStackInputs;
       auto const dynamic = gen(
         env,
         LdARIsDynamic,
-        IRSPRelOffsetData { calleeAROff },
+        IRSPRelOffsetData { actRecOff },
         sp(env)
       );
       gen(env, JmpZero, skip, dynamic);
@@ -1460,7 +1439,7 @@ void emitCallerDynamicCallChecks(IRGS& env,
           env,
           LdARFuncPtr,
           TFunc,
-          IRSPRelOffsetData { calleeAROff },
+          IRSPRelOffsetData { actRecOff },
           sp(env)
         );
         auto const dyncallable = gen(env, IsFuncDynCallable, func);
@@ -1497,7 +1476,8 @@ void emitCallerDynamicConstructChecks(IRGS& env, SSATmp* cls) {
   );
 }
 
-void emitCallerRxChecks(IRGS& env, const Func* callee) {
+void emitCallerRxChecks(IRGS& env, const Func* callee,
+                        IRSPRelOffset actRecOff) {
   if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
   if (!rxEnforceCallsInLevel(callerLevel)) return;
@@ -1512,7 +1492,8 @@ void emitCallerRxChecks(IRGS& env, const Func* callee) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const calleeLevel = gen(env, LdFuncRxLevel, ldPreLiveFunc(env));
+      auto const func = ldPreLiveFunc(env, actRecOff);
+      auto const calleeLevel = gen(env, LdFuncRxLevel, func);
       auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
       gen(env, JmpNZero, taken, lt);
     },
@@ -1530,14 +1511,16 @@ void emitFCall(IRGS& env,
                const StringData*,
                const StringData*) {
   auto const callee = env.currentNormalizedInstruction->funcd;
+  auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
   auto const readLocals = callee
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
-  emitCallerDynamicCallChecks(
-    env, callee, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-  emitCallerRxChecks(env, callee);
+  if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
+  emitCallerDynamicCallChecks(env, callee, actRecOff);
+  emitCallerRxChecks(env, callee, actRecOff);
 
   if (fca.hasUnpack()) {
     auto const data = CallUnpackData {
@@ -1618,7 +1601,7 @@ void emitFCall(IRGS& env,
     env,
     [&] (Block* taken) {
       auto const supportsAsyncEagerReturn =
-        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env));
+        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env, actRecOff));
       gen(env, JmpNZero, taken, supportsAsyncEagerReturn);
     },
     [&] {
@@ -1685,10 +1668,7 @@ Type callReturnType(const Func* callee) {
   if (callee->isCPPBuiltin()) {
     // If the function is builtin, use the builtin's return type, then take into
     // account coercion failures.
-    auto type = builtinReturnType(callee);
-    if (callee->attrs() & AttrParamCoerceModeNull) type |= TInitNull;
-    if (callee->attrs() & AttrParamCoerceModeFalse) type |= Type::cns(false);
-    return type;
+    return builtinReturnType(callee);
   }
 
   // Otherwise use HHBBC's analysis if present

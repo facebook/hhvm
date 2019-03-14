@@ -11,7 +11,7 @@ from hh_paths import hh_client
 
 class FreshInitTestDriver(common_tests.CommonTestDriver):
 
-    def write_load_config(self, *changed_files):
+    def write_load_config(self, use_saved_state=False):
         # Fresh init tests don't care about which files changed, so we can
         # just use the default .hhconfig in the template repo
         pass
@@ -63,6 +63,7 @@ class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
                 function foo(?string $s): void {
                   /* HH_FIXME[4010] We can delete this one */
                   /* HH_FIXME[4089] We need to keep this one */
+                  /* HH_FIXME[4110] Keep errors discovered by new_inference */
                   /* HH_FIXME[4099] We can delete this one */
                   if (/* HH_FIXME[4011] We can delete this one */   $s) {
                     print "hello";
@@ -86,6 +87,7 @@ class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
             self.assertEqual(out, """<?hh // strict
                 function foo(?string $s): void {
                   /* HH_FIXME[4089] We need to keep this one */
+                  /* HH_FIXME[4110] Keep errors discovered by new_inference */
                   if ($s) {
                     print "hello";
                   } else {

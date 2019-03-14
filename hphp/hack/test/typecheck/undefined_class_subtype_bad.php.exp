@@ -1,8 +1,0 @@
-File "undefined_class_subtype_bad.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "undefined_class_subtype_bad.php", line 4, characters 29-34:
-This is a string
-File "undefined_class_subtype_bad.php", line 4, characters 29-34:
-Considering that this type argument is invariant with respect to C
-File "undefined_class_subtype_bad.php", line 4, characters 17-19:
-It is incompatible with an int

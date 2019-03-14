@@ -11,14 +11,14 @@ echo "*** Testing str_split() : error conditions ***\n";
 
 // Zero arguments
 echo "-- Testing str_split() function with Zero arguments --\n";
-var_dump( str_split() );
+try { var_dump( str_split() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test str_split with one more than the expected number of arguments
 echo "-- Testing str_split() function with more than expected no. of arguments --\n";
 $str = 'This is error testcase';
 $split_length = 4;
 $extra_arg = 10;
-var_dump( str_split( $str, $split_length, $extra_arg) );
+try { var_dump( str_split( $str, $split_length, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done"
 ?>

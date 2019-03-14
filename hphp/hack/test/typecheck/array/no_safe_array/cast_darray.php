@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function darray<Tk, Tv>(mixed $x): darray<Tk, Tv> {
   return (array)$x;

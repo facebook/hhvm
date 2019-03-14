@@ -1386,6 +1386,10 @@ let variadic_byref_param pos =
   add (NastCheck.err_code NastCheck.VariadicByRefParam) pos
     "Variadic parameters should not be taken by reference"
 
+let byref_on_construct pos =
+  add (NastCheck.err_code NastCheck.ByRefParamOnConstruct) pos
+    "Constructors cannot take parameters by reference"
+
 let classname_const_instanceof class_name pos =
   add (NastCheck.err_code NastCheck.ClassnameConstInstanceOf) pos
     (class_name^"::class is redundant in an instanceof, just write '"^class_name^"'.")
@@ -2481,6 +2485,10 @@ let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) =
     def_pos, def_name ^ " is reified"
   ]
 
+let new_without_newable pos name =
+  add (Typing.err_code Typing.NewWithoutNewable) pos
+    (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")
+
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos
   ("Result of freeze operation is unused. Note that freeze unsets local variable \
@@ -2831,12 +2839,30 @@ let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
     ty_pos, ("The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
   ]
 
-let invalid_enforceable_type_argument (tp_pos, tp_name) targ_pos ty_pos ty_str =
+let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
   add_list (Typing.err_code Typing.InvalidEnforceableTypeArgument) [
-    targ_pos, "Invalid type argument";
-    tp_pos, "Type parameter " ^ tp_name ^ " was declared __Enforceable here";
-    ty_pos, "This type argument is not enforceable because it has " ^ ty_str
+    targ_pos, "Invalid type";
+    tp_pos, "Type " ^ kind_str ^ " " ^ tp_name ^ " was declared __Enforceable here";
+    ty_pos, "This type is not enforceable because it has " ^ ty_str
   ]
+
+let invalid_newable_type_argument (tp_pos, tp_name) ta_pos =
+  add_list (Typing.err_code Typing.InvalidNewableTypeArgument) [
+    ta_pos, "A newable type argument must be a concrete class or a newable type parameter.";
+    tp_pos, "Type parameter " ^ tp_name ^ " was declared __Newable here";
+  ]
+
+let invalid_newable_type_param_constraints (tparam_pos, tparam_name) constraint_list =
+  let partial =
+    if List.is_empty constraint_list
+    then "No constraints"
+    else "The constraints " ^ (String.concat ~sep:", " (List.map ~f:Utils.strip_ns constraint_list)) in
+  let msg = "The type parameter " ^ tparam_name ^ " has the <<__Newable>> attribute. " ^
+    "Newable type parameters must be constrained with `as`, and exactly one of those constraints " ^
+    "must be a valid newable class. The class must either be final or have a constructor that is " ^
+    "consistent. This can be accomplished by making the constructor final or " ^
+    "having <<__ConsistentConstruct>>. " ^ partial ^ " are valid newable classes" in
+  add (Typing.err_code Typing.InvalidNewableTypeParamConstraints) tparam_pos msg
 
 let override_final ~parent ~child =
   add_list (Typing.err_code Typing.OverrideFinal) [child, "You cannot override this method";
@@ -2912,6 +2938,10 @@ let nullsafe_not_needed p nonnull_witness =
 let generic_at_runtime p =
   add (Typing.err_code Typing.ErasedGenericAtRuntime) p
     "Erased generics can only be used in type hints since they are erased at runtime."
+
+let generics_not_allowed p =
+  add (Typing.err_code Typing.GenericsNotAllowed) p
+    "Generics are not allowed in this position."
 
 let trivial_strict_eq p b left right left_trail right_trail =
   let msg = "This expression is always "^b in
@@ -3052,20 +3082,11 @@ let illegal_typeconst_direct_access pos =
 let class_property_only_static_literal pos =
   let msg =
     "Initialization of class property must be a static literal expression." in
-  add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteral) pos msg
+  add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteralDEPRECATED) pos msg
 
-let reference_expr pos allowed_in_partial =
-  let msg =
-    if allowed_in_partial then
-      "References are only permitted in function calls when in strict mode."
-    else
-      "References are only permitted in function calls."
-  in
-  add (Typing.err_code Typing.ReferenceExpr) pos msg
-
-let reference_expr_partial pos =
-  let msg = "References are only permitted in function calls." in
-  add (Typing.err_code Typing.ReferenceExprPartial) pos msg
+let reference_expr pos =
+  let msg = "References are only permitted as function call arguments." in
+  add (Typing.err_code Typing.ReferenceExprNotFunctionArg) pos msg
 
 let pass_by_ref_annotation_missing pos1 pos2 =
   let msg1 = pos1, "This argument should be annotated with &" in
@@ -3351,6 +3372,13 @@ let sketchy_truthiness_test pos ty truthiness =
         The values '' and '0' are both considered falsy, \
         but objects will be truthy even if their __toString returns '' or '0'.\n\
         To check for emptiness, convert to a string and use Str\\is_empty."
+        ty
+    | `XHPChild ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of an %s may not behave as expected.\n\
+        The values '' and '0' are both considered falsy, \
+        but objects (including XHP elements) will be truthy \
+        even if their __toString returns '' or '0'."
         ty
     | `Traversable ->
       (* We have a truthiness test on a value with an interface type which is a

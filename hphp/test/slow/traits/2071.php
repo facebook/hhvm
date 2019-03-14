@@ -5,7 +5,7 @@ function f($x) {
 }
 trait T {
   function f($x) {
- yield get_called_class();
+ yield static::class;
  }
 }
 class X {

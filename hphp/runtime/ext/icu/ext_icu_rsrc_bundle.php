@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Localized software products often require sets of data that are to be

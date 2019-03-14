@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -171,6 +172,9 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
+  if (tvIsClsMeth(val.asTypedValue())) {
+    return !RuntimeOption::EvalHackArrDVArrs;
+  }
   auto const cell = val.asTypedValue();
   if (RuntimeOption::EvalHackArrDVArrs) return is_vec(cell);
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
@@ -195,10 +199,11 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
-  return tvIsArrayLike(val.asTypedValue());
+  return tvIsArrayLike(val.asTypedValue()) || tvIsClsMeth(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
+  if (val.isClsMeth()) return true;
   if (!val.isArray()) return false;
   auto const& arr = val.toCArrRef();
   return arr->isVectorData();
@@ -291,8 +296,8 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
  */
 Variant HHVM_FUNCTION(HH_first, const Variant& v) {
   // 1. array, vec, dict, keyset
-  if (v.isArray()) {
-    auto arr = v.asCArrRef();
+  if (v.isArray() || v.isClsMeth()) {
+    auto arr = v.toArray();
     if (arr->empty()) {
       return init_null();
     }
@@ -324,8 +329,8 @@ Variant HHVM_FUNCTION(HH_first, const Variant& v) {
 
 Variant HHVM_FUNCTION(HH_last, const Variant& v) {
   // 1. array, vec, dict, keyset
-  if (v.isArray()) {
-    auto arr = v.asCArrRef();
+  if (v.isArray() || v.isClsMeth()) {
+    auto arr = v.toArray();
     if (arr->empty()) {
       return init_null();
     }
@@ -357,8 +362,8 @@ Variant HHVM_FUNCTION(HH_last, const Variant& v) {
 
 Variant HHVM_FUNCTION(HH_first_key, const Variant& v) {
   // 1. array, vec, dict, keyset
-  if (v.isArray()) {
-    auto arr = v.asCArrRef();
+  if (v.isArray() || v.isClsMeth()) {
+    auto arr = v.toArray();
     if (arr->empty()) {
       return init_null();
     }
@@ -389,8 +394,8 @@ Variant HHVM_FUNCTION(HH_first_key, const Variant& v) {
 
 Variant HHVM_FUNCTION(HH_last_key, const Variant& v) {
   // 1. array, vec, dict, keyset
-  if (v.isArray()) {
-    auto arr = v.asCArrRef();
+  if (v.isArray() || v.isClsMeth()) {
+    auto arr = v.toArray();
     if (arr->empty()) {
       return init_null();
     }
@@ -549,6 +554,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     }
     case KindOfDouble:
     case KindOfObject:
+    case KindOfClsMeth:
       break;
 
     case KindOfRef:

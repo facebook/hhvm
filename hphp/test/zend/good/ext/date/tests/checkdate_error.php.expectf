@@ -3,16 +3,12 @@
 -- Testing checkdate() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing checkdate() function with less than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 ===DONE===

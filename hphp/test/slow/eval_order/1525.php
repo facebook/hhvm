@@ -1,8 +1,8 @@
 <?php
 
 function f($x) {
-  global $a;
-  var_dump($x, $a);
+
+  var_dump($x, EvalOrder1525Php::$a);
   return $x;
 }
 class X implements ArrayAccess {
@@ -30,24 +30,28 @@ $n}
  return $this->OffsetSet($n, $v);
  }
 }
-$a = new X;
+EvalOrder1525Php::$a = new X;
 function ref(&$a, &$b, &$c) {
 }
 function test() {
-  global $a;
-  $a[f(0)]->{
+
+  EvalOrder1525Php::$a[f(0)]->{
 f(1)}
-[f(2)] = $a[f(3)][f(4)][f(5)]->foo;
-  var_dump($a[f(6)]['fuz'] . f(7));
-  ref(&$a[f(10)][f(11)][f(12)],&$a[f(20)][f(21)][f(22)],      &$a[f(30)][f(31)][f(32)]);
-  $a->{
+[f(2)] = EvalOrder1525Php::$a[f(3)][f(4)][f(5)]->foo;
+  var_dump(EvalOrder1525Php::$a[f(6)]['fuz'] . f(7));
+  ref(&EvalOrder1525Php::$a[f(10)][f(11)][f(12)],&EvalOrder1525Php::$a[f(20)][f(21)][f(22)],      &EvalOrder1525Php::$a[f(30)][f(31)][f(32)]);
+  EvalOrder1525Php::$a->{
 f(0)}
 [f(1)]->{
 f(2)}
- = $a->{
+ = EvalOrder1525Php::$a->{
 f(3)}
 ->{
 f(4)}
 ->bar;
 }
 test();
+
+abstract final class EvalOrder1525Php {
+  public static $a;
+}

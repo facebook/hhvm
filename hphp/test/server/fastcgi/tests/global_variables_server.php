@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require_once(__DIR__ . '/test_base.inc');
 

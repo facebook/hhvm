@@ -29,6 +29,7 @@ val emit_body:
   is_native: bool ->
   is_async: bool ->
   is_rx_body: bool ->
+  debugger_modify_program: bool ->
   deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->
   default_dropthrough: Instruction_sequence.t option ->

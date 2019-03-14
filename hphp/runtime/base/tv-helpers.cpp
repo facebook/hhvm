@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/assertions.h"
 
@@ -149,6 +150,9 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfClass:
         assertPtr(cell.m_data.pclass);
         assertx(cell.m_data.pclass->validate());
+        return;
+      case KindOfClsMeth:
+        assertx(cell.m_data.pclsmeth->validate());
         return;
       case KindOfRef:
         assertx(!"KindOfRef found in a Cell");

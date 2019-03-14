@@ -2,15 +2,18 @@
 
 namespace foo\bar;
 
+abstract final class FStatics {
+  public static $staticX = 4;
+  public static $staticY;
+}
+
 #===============================================================================
 # ReflectionFunction.
 
 function f($a, &$b, $c=null) {
-  static $staticX = 4;
-  static $staticY;
   print "In f()\n";
-  $staticX++;
-  $x = $staticX;
+  FStatics::$staticX++;
+  $x = FStatics::$staticX;
   return $x;
 }
 
@@ -25,25 +28,25 @@ class Test {
 function main_reflection_function_get_short_name() {
 $rf = new \ReflectionFunction('\foo\bar\f');
 print "--- getShortName(\"\\foo\\bar\\f\") ---\n";
-var_dump($rf->getShortName());
+\var_dump($rf->getShortName());
 print "\n";
 print "--- getNamespaceName(\"\\foo\\bar\\f\") ---\n";
-var_dump($rf->getNamespaceName());
+\var_dump($rf->getNamespaceName());
 print "\n";
 
 $rf = new \ReflectionMethod('\foo\bar\Test', 'test');
 print "--- getShortName(\"\\foo\\bar\\Test::test\") ---\n";
-var_dump($rf->getShortName());
+\var_dump($rf->getShortName());
 print "\n";
 print "--- getNamespaceName(\"\\foo\\bar\\Test::test\") ---\n";
-var_dump($rf->getNamespaceName());
+\var_dump($rf->getNamespaceName());
 print "\n";
 
 $rf = new \ReflectionFunction('\strlen');
 print "--- getShortName(\"strlen\") ---\n";
-var_dump($rf->getShortName());
+\var_dump($rf->getShortName());
 print "\n";
 print "--- getNamespaceName(\"strlen\") ---\n";
-var_dump($rf->getNamespaceName());
+\var_dump($rf->getNamespaceName());
 print "\n";
 }

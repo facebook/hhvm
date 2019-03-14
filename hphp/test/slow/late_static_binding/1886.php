@@ -2,7 +2,7 @@
 
 class X {
   function bar() {
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
 }
 class Y extends X {

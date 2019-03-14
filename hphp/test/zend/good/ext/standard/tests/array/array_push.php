@@ -31,7 +31,7 @@ $mixed_array = array(
 echo "\n*** Testing Error Conditions ***\n";
 
 /* Zero argument  */
-var_dump( array_push() );
+try { var_dump( array_push() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar argument */
 var_dump( array_push(&$number, 22) );

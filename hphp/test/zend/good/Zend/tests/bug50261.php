@@ -7,13 +7,14 @@ class testClass {
 }
 
 class testClass2 extends testClass {
+
+  private static $__constructX = 0;
 	function __construct() {
-		static $x = 0;
 		
-		if ($x) {
+		if (self::$__constructX) {
 			print "Infinite loop...\n";
 		} else {
-			$x++;
+			self::$__constructX++;
 			
 			parent::__construct(1);
 			testclass::__construct(2);

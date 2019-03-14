@@ -1086,6 +1086,55 @@ static bool HHVM_METHOD(ZipArchive, renameName, const String& name,
   return true;
 }
 
+static bool HHVM_METHOD(ZipArchive, setEncryptionIndex, int64_t index,
+                        int64_t encryption_method, const String& password) {
+#ifdef ZIP_EM_AES_256
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setEncryptionIndex, zipDir);
+  FAIL_IF_EMPTY_STRING_ZIPARCHIVE(setEncryptionIndex, password);
+
+  struct zip_stat zipStat;
+  if (zip_stat_index(zipDir->getZip(), index, 0, &zipStat) != 0) {
+    return false;
+  }
+
+  if (zip_file_set_encryption(zipDir->getZip(), index, encryption_method,
+      password.c_str()) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+#else
+  throw new Exception("zip encryption unsupported due to libzip version");
+#endif
+}
+
+static bool HHVM_METHOD(ZipArchive, setEncryptionName, const String& name,
+                        int64_t encryption_method, const String& password) {
+#ifdef ZIP_EM_AES_256
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setEncryptionName, zipDir);
+  FAIL_IF_EMPTY_STRING_ZIPARCHIVE(setEncryptionName, name);
+  FAIL_IF_EMPTY_STRING_ZIPARCHIVE(setEncryptionName, password);
+
+  int index = zip_name_locate(zipDir->getZip(), name.c_str(), 0);
+  FAIL_IF_INVALID_INDEX(index);
+
+  if (zip_file_set_encryption(zipDir->getZip(), index, encryption_method,
+      password.c_str()) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+#else
+  throw new Exception("zip encryption unsupported due to libzip version");
+#endif
+}
+
 static bool HHVM_METHOD(ZipArchive, setArchiveComment, const String& comment) {
   auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
 
@@ -1418,6 +1467,8 @@ struct zipExtension final : Extension {
     HHVM_ME(ZipArchive, setCommentName);
     HHVM_ME(ZipArchive, setCompressionIndex);
     HHVM_ME(ZipArchive, setCompressionName);
+    HHVM_ME(ZipArchive, setEncryptionIndex);
+    HHVM_ME(ZipArchive, setEncryptionName);
     HHVM_ME(ZipArchive, statIndex);
     HHVM_ME(ZipArchive, statName);
     HHVM_ME(ZipArchive, unchangeAll);
@@ -1480,6 +1531,17 @@ struct zipExtension final : Extension {
     HHVM_RCC_INT(ZipArchive, CM_LZ77, ZIP_CM_LZ77);
     HHVM_RCC_INT(ZipArchive, CM_WAVPACK, ZIP_CM_WAVPACK);
     HHVM_RCC_INT(ZipArchive, CM_PPMD, ZIP_CM_PPMD);
+#ifdef ZIP_EM_AES_256
+    HHVM_RCC_INT(ZipArchive, EM_NONE, ZIP_EM_NONE);
+    HHVM_RCC_INT(ZipArchive, EM_AES_128, ZIP_EM_AES_128);
+    HHVM_RCC_INT(ZipArchive, EM_AES_192, ZIP_EM_AES_192);
+    HHVM_RCC_INT(ZipArchive, EM_AES_256, ZIP_EM_AES_256);
+#else
+    HHVM_RCC_INT(ZipArchive, EM_NONE, 0);
+    HHVM_RCC_INT(ZipArchive, EM_AES_128, 0);
+    HHVM_RCC_INT(ZipArchive, EM_AES_192, 0);
+    HHVM_RCC_INT(ZipArchive, EM_AES_256, 0);
+#endif
 
     HHVM_FE(zip_close);
     HHVM_FE(zip_entry_close);

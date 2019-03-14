@@ -148,6 +148,12 @@ val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
 val get_reified: env -> string -> bool
 (** Get the reification of the type parameter with the given name. *)
 
+val get_enforceable: env -> string -> bool
+(** Get whether the type parameter supports testing with is/as. *)
+
+val get_newable: env -> string -> bool
+(** Indicates whether the type parameter with the given name is <<__Newable>>. *)
+
 val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being
@@ -165,6 +171,9 @@ val subtype: env -> Tast.ty -> Tast.ty -> env * bool
 val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any). *)
+
+val simplify_unions: env -> Tast.ty -> env * Tast.ty
+(** Simplify unions in a type. *)
 
 val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
 (** Return {true} when the given type can be used in a context where string is
@@ -231,7 +240,7 @@ val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 
 val get_enum : env -> string -> Typing_classes_heap.t option
 val env_reactivity: env -> Typing_defs.reactivity
-val function_is_mutable: env -> Tast.param_mutability option
+val function_is_mutable: env -> Tast.type_param_mutability option
 val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
 val get_env_mutability: env -> Typing_mutability_env.mutability_env
 val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option

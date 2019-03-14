@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Remove this test once we unify the zend ini compat diff (D1797805) with the
 // per dir diff (D2099778)

@@ -62,7 +62,7 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value $value \n";
-      $result = posix_getgrgid($value);
+      try { $result = posix_getgrgid($value); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if ((is_array($result) && (count($result) == 4)) 
           || 
           ($result === false)) {

@@ -2,7 +2,7 @@
 
 var_dump(imap_utf8(""));
 var_dump(imap_utf8(1));
-var_dump(imap_utf8(array(1,2)));
+try { var_dump(imap_utf8(array(1,2))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(imap_utf8("test"));
 
 echo "Done\n";

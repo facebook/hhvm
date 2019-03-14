@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * hphp_get_extension_info() - Internally used for getting extension's

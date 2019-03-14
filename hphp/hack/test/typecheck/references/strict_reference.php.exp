@@ -1,2 +1,2 @@
 File "strict_reference.php", line 4, characters 8-10:
-References are only permitted in function calls when in strict mode. (Typing[4154])
+References are only permitted as function call arguments. (Typing[4299])

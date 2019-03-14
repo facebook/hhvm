@@ -1,11 +1,17 @@
 <?php
-parse_str("a=1&b=2", &$_GET);
-$_REQUEST = array_merge($_REQUEST, $_GET);
-_filter_snapshot_globals();
 
 function myfunc($val) {
 	return $val . '_callback';
 }
+
+<<__EntryPoint>>
+function main() {
+$get = $GLOBALS['_GET'];
+parse_str("a=1&b=2", &$get);
+$GLOBALS['_GET'] = $get;
+$_REQUEST = array_merge($_REQUEST, $_GET);
+_filter_snapshot_globals();
+
 echo filter_input(INPUT_GET, 'a', FILTER_CALLBACK, array("options"=>'myfunc'));
 echo "\n";
 echo filter_input(INPUT_GET, 'b', FILTER_VALIDATE_INT);
@@ -25,4 +31,4 @@ $res = filter_input_array(INPUT_GET, array(
 	);
 
 var_dump($res);
-?>
+}

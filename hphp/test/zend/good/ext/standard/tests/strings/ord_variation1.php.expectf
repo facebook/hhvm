@@ -20,15 +20,12 @@ int(49)
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 int(49)
 -- Iteration 14 --
@@ -46,7 +43,6 @@ int(115)
 -- Iteration 20 --
 
 Warning: %s
-NULL
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --

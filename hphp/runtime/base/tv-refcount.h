@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/assertions.h"
 
@@ -201,6 +202,12 @@ template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T, void> tvDecRefRef(T tv) {
   assertx(isRefType(type(tv)));
   decRefRef(val(tv).pref);
+}
+
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefClsMeth(T tv) {
+  assertx(isClsMethType(type(tv)));
+  decRefClsMeth(val(tv).pclsmeth);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

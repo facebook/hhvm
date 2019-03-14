@@ -8,5 +8,5 @@ namespace Foo {
 }
 
 namespace {
-    var_dump(Foo\add1(123));
+    \var_dump(Foo\add1(123));
 }

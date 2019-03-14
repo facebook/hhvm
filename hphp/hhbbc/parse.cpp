@@ -228,7 +228,7 @@ struct ExnTreeInfo {
    * Map from EHEnt to the ExnNode that will represent exception
    * behavior in that region.
    */
-  hphp_fast_map<const EHEnt*,php::ExnNode*> ehMap;
+  hphp_fast_map<const EHEnt*,ExnNodeId> ehMap;
 
   /*
    * Keep track of the start offsets for all fault funclets.  This is
@@ -255,41 +255,41 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
                            php::Func& func,
                            FindBlock findBlock) {
   ExnTreeInfo ret;
-  auto nextExnNode = uint32_t{0};
-
+  func.exnNodes.reserve(fe.ehtab.size());
   for (auto& eh : fe.ehtab) {
-    auto node = std::make_unique<php::ExnNode>();
-    node->id = nextExnNode++;
-    node->parent = nullptr;
-    node->depth = 1; // 0 depth means no ExnNode
+    auto node = php::ExnNode{};
+    node.idx = func.exnNodes.size();
+    node.parent = NoExnNodeId;
+    node.depth = 1; // 0 depth means no ExnNode
 
     switch (eh.m_type) {
     case EHEnt::Type::Fault:
       {
         auto const fault = findBlock(eh.m_handler);
         ret.faultFuncletStarts.insert(eh.m_handler);
-        node->info = php::FaultRegion { fault->id, eh.m_iterId };
+        node.info = php::FaultRegion { fault, eh.m_iterId };
       }
       break;
     case EHEnt::Type::Catch:
       {
         auto const catchBlk = findBlock(eh.m_handler);
-        node->info = php::CatchRegion { catchBlk->id, eh.m_iterId };
+        node.info = php::CatchRegion { catchBlk, eh.m_iterId };
       }
       break;
     }
 
-    ret.ehMap[&eh] = node.get();
+    ret.ehMap[&eh] = node.idx;
 
     if (eh.m_parentIndex != -1) {
       auto it = ret.ehMap.find(&fe.ehtab[eh.m_parentIndex]);
       assert(it != end(ret.ehMap));
-      node->parent = it->second;
-      node->depth = node->parent->depth + 1;
-      it->second->children.emplace_back(std::move(node));
-    } else {
-      func.exnNodes.emplace_back(std::move(node));
+      assert(it->second < node.idx);
+      node.parent = it->second;
+      auto& parent = func.exnNodes[node.parent];
+      node.depth = parent.depth + 1;
+      parent.children.emplace_back(node.idx);
     }
+    func.exnNodes.emplace_back(std::move(node));
   }
 
   ret.faultFuncletStarts.insert(fe.past);
@@ -302,7 +302,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
  * mark them as such.
  */
 template <class BlockStarts, class FindBlock>
-void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& /*func*/,
+void find_fault_funclets(ExnTreeInfo& tinfo, php::Func& func,
                          const BlockStarts& blockStarts, FindBlock findBlock) {
   auto sectionId = uint32_t{1};
 
@@ -315,8 +315,7 @@ void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& /*func*/,
     assert(offIt != end(blockStarts));
 
     do {
-      auto const blk = findBlock(*offIt);
-      blk->section   = static_cast<php::Block::Section>(sectionId);
+      findBlock(*offIt, php::Block::Section(sectionId));
       ++offIt;
     } while (offIt != end(blockStarts) && *offIt < nextFunclet);
   }
@@ -338,12 +337,14 @@ BlockId node_entry_block(const php::ExnNode& node) {
  * jump to the associated handler (and any throw in the handler will exit the
  * function).
  */
-void build_exceptional_edges_simple(const php::Func& func) {
+void build_exceptional_edges_simple(php::Func& func) {
   for (auto& blk : func.blocks) {
     assert(blk->throwExits.empty());
     assert(blk->unwindExits.empty());
-    if (!blk->exnNode) continue;
-    blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+    if (blk->exnNodeId == NoExnNodeId) continue;
+    blk.mutate()->throwExits.push_back(
+      node_entry_block(func.exnNodes[blk->exnNodeId])
+    );
   }
 }
 
@@ -366,13 +367,13 @@ void build_exceptional_edges_simple(const php::Func& func) {
  * which edges can be traversed by the unwinder. Once we have the unwinder
  * edges, we can then calculate the throw edges.
  */
-void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
+void build_exceptional_edges(const ExnTreeInfo& tinfo, php::Func& func) {
   // Check for the simple and quicker cases
   if (func.exnNodes.empty()) return;
   if (std::all_of(
         func.exnNodes.begin(),
         func.exnNodes.end(),
-        [](auto const& n){ return n->children.empty(); })
+        [](auto const& n){ return n.children.empty(); })
      ) {
     return build_exceptional_edges_simple(func);
   }
@@ -394,18 +395,19 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     folly::sorted_vector_set<const php::ExnNode*>
   > blocksToNodes;
 
-  auto const add = [&] (const php::Block& blk, const php::ExnNode* node) {
+  auto const add = [&] (BlockId bid, const php::ExnNode* node) {
+    auto const& blk = *func.blocks[bid];
     assert(blk.throwExits.empty());
     assert(blk.unwindExits.empty());
-    if (node) blocksToNodes[blk.id].insert(node);
-    if (!blk.exnNode) return;
-    throws[node].insert(blk.exnNode);
+    if (node) blocksToNodes[bid].insert(node);
+    if (blk.exnNodeId == NoExnNodeId) return;
+    throws[node].insert(&func.exnNodes[blk.exnNodeId]);
   };
 
   // There's no easy way to determine which blocks belong to which exceptional
   // regions, except by doing a walk from each region's entry block.
   auto const mainBlocks = rpoSortAddDVs(func);
-  for (auto const& blk : mainBlocks) add(*blk, nullptr);
+  for (auto const bid : mainBlocks) add(bid, nullptr);
 
   uint32_t nodeCount = 0;
   visitExnLeaves(
@@ -413,7 +415,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     [&] (const php::ExnNode& node) {
       ++nodeCount;
       auto const blocks = rpoSortFromBlock(func, node_entry_block(node));
-      for (auto const& blk : blocks) add(*blk, &node);
+      for (auto const bid : blocks) add(bid, &node);
     }
   );
 
@@ -425,10 +427,10 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
         | map([] (auto const& p) {
             return folly::sformat(
               "{} -> {}",
-              p.first ? folly::sformat("E{}", p.first->id) : "*",
+              p.first ? folly::sformat("E{}", p.first->idx) : "*",
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -448,7 +450,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
               p.first,
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -467,7 +469,7 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     using namespace folly::gen;
     return from(state)
     | map([&] (const php::ExnNode* n) {
-        return folly::sformat("E{}", n->id);
+        return folly::sformat("E{}", n->idx);
       })
     | unsplit<std::string>("->");
   };
@@ -556,15 +558,17 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
       // Handle the unwind case. While the top doesn't have a parent, pop. If
       // the stack is now empty, an unwind will exit the function, so there's no
       // new state.
-      while (!state.empty() && !state.back()->parent) state.pop_back();
+      while (!state.empty() && state.back()->parent == NoExnNodeId) {
+        state.pop_back();
+      }
       if (state.empty()) continue;
 
       // The stack is non-empty and the top has a parent. We'll unwind to the
       // top's parent, so record that new state and record the edge.
       auto const oldNode = state.back();
-      state.back() = oldNode->parent;
+      state.back() = &func.exnNodes[oldNode->parent];
       FTRACE(6, "          =>  {} (unwind E{} to E{})\n",
-             showState(state), oldNode->id, state.back()->id);
+             showState(state), oldNode->idx, state.back()->idx);
       newStates.insert(state);
       unwindEdges[current].insert(state.back());
     }
@@ -589,10 +593,10 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
         | map([] (auto const& p) {
             return folly::sformat(
               "E{} -> {}",
-              p.first->id,
+              p.first->idx,
               from(p.second)
                 | map([] (auto const& n) {
-                    return folly::sformat("E{}", n->id);
+                    return folly::sformat("E{}", n->idx);
                   })
                 | unsplit<std::string>(",")
             );
@@ -618,23 +622,26 @@ void build_exceptional_edges(const ExnTreeInfo& tinfo, const php::Func& func) {
     return exits;
   };
 
-  for (auto& blk : func.blocks) {
+  for (auto const bid : func.blockRange()) {
+    auto const blk = func.blocks[bid].mutate();
     assert(blk->throwExits.empty());
     assert(blk->unwindExits.empty());
 
     if (ends_with_unwind(*blk)) {
-      blk->unwindExits = unwindExitsForBlock(blk->id);
+      blk->unwindExits = unwindExitsForBlock(bid);
     }
 
-    if (blk->exnNode) {
-      blk->throwExits.push_back(node_entry_block(*blk->exnNode));
+    if (blk->exnNodeId != NoExnNodeId) {
+      blk->throwExits.push_back(
+        node_entry_block(func.exnNodes[blk->exnNodeId])
+      );
     } else if (blk->section != php::Block::Section::Main) {
-      blk->throwExits = unwindExitsForBlock(blk->id);
+      blk->throwExits = unwindExitsForBlock(bid);
     }
 
     FTRACE(
       8, "    blk:{} (throw:{}) (unwind:{})\n",
-      blk->id,
+      bid,
       [&]{
         using namespace folly::gen;
         return from(blk->throwExits)
@@ -702,7 +709,7 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen; ++i) {
       ret.push_back(findBlock(
         opPC + decode<Offset>(pc) - ue.bc()
-      )->id);
+      ));
     }
     return ret;
   };
@@ -715,14 +722,14 @@ void populate_block(ParseUnitState& puState,
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
       ret.emplace_back(ue.lookupLitstr(id),
-                       findBlock(opPC + offset - ue.bc())->id);
+                       findBlock(opPC + offset - ue.bc()));
     }
 
     // Final case is the default, and must have a litstr id of -1.
     DEBUG_ONLY auto const defId = decode<Id>(pc);
     auto const defOff = decode<Offset>(pc);
     assert(defId == -1);
-    ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc())->id);
+    ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc()));
     return ret;
   };
 
@@ -748,17 +755,6 @@ void populate_block(ParseUnitState& puState,
     auto const vecLen = decode_iva(pc);
     for (uint32_t i = 0; i < vecLen; ++i) {
       ret.emplace_back(decode<uint32_t>(pc));
-    }
-    return ret;
-  };
-
-  auto decode_argvb = [&] {
-    CompactVector<bool> ret;
-    auto const vecLen = decode_iva(pc);
-    uint8_t tmp = 0;
-    for (uint32_t i = 0; i < vecLen; ++i) {
-      if (i % 8 == 0) tmp = decode<uint8_t>(pc);
-      ret.emplace_back((tmp >> (i % 8)) & 1);
     }
     return ret;
   };
@@ -804,7 +800,6 @@ void populate_block(ParseUnitState& puState,
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
 #define IMM_ILA(n)     auto iterTab = decode_itertab();
 #define IMM_I32LA(n)   auto argv = decode_argv32();
-#define IMM_BLLA(n)    auto argv = decode_argvb();
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
@@ -833,7 +828,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
 #define IMM_BA(n)      assert(next == past);     \
                        auto target##n = findBlock(  \
-                         opPC + decode<Offset>(pc) - ue.bc())->id;
+                         opPC + decode<Offset>(pc) - ue.bc());
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
 #define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
@@ -846,13 +841,21 @@ void populate_block(ParseUnitState& puState,
                        }();
 #define IMM_FCA(n)     auto fca = [&] {                                   \
                          auto const fca = decodeFCallArgs(pc);            \
+                         auto const numBytes = (fca.numArgs + 7) / 8;     \
+                         auto byRefs = fca.enforceReffiness()             \
+                           ? std::make_unique<uint8_t[]>(numBytes)        \
+                           : nullptr;                                     \
+                         if (byRefs) {                                    \
+                           memcpy(byRefs.get(), fca.byRefs, numBytes);    \
+                         }                                                \
                          auto const aeOffset = fca.asyncEagerOffset;      \
                          auto const aeTarget = aeOffset != kInvalidOffset \
-                           ? findBlock(opPC + aeOffset - ue.bc())->id     \
+                           ? findBlock(opPC + aeOffset - ue.bc())         \
                            : NoBlockId;                                   \
                          assertx(aeTarget == NoBlockId || next == past);  \
                          return FCallArgs(fca.flags, fca.numArgs,         \
-                                          fca.numRets, aeTarget);         \
+                                          fca.numRets, std::move(byRefs), \
+                                          aeTarget);                      \
                        }();
 
 #define IMM_NA
@@ -954,7 +957,7 @@ void populate_block(ParseUnitState& puState,
 
     if (next == past) {
       if (instrAllowsFallThru(op)) {
-        blk.fallthrough = findBlock(next - ue.bc())->id;
+        blk.fallthrough = findBlock(next - ue.bc());
       }
     }
 
@@ -983,7 +986,6 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
@@ -1043,12 +1045,12 @@ void link_entry_points(php::Func& func,
   func.dvEntries.resize(fe.params.size(), NoBlockId);
   for (size_t i = 0, sz = fe.params.size(); i < sz; ++i) {
     if (fe.params[i].hasDefaultValue()) {
-      auto const dv = findBlock(fe.params[i].funcletOff)->id;
+      auto const dv = findBlock(fe.params[i].funcletOff);
       func.params[i].dvEntryPoint = dv;
       func.dvEntries[i] = dv;
     }
   }
-  func.mainEntry = findBlock(fe.base)->id;
+  func.mainEntry = findBlock(fe.base);
 }
 
 void build_cfg(ParseUnitState& puState,
@@ -1065,18 +1067,25 @@ void build_cfg(ParseUnitState& puState,
     }()
   );
 
-  std::map<Offset,std::unique_ptr<php::Block>> blockMap;
+  std::map<Offset,std::pair<BlockId, copy_ptr<php::Block>>> blockMap;
   auto const bc = fe.ue().bc();
 
-  auto findBlock = [&] (Offset off) {
-    auto& ptr = blockMap[off];
-    if (!ptr) {
-      ptr               = std::make_unique<php::Block>();
-      ptr->id           = blockMap.size() - 1;
-      ptr->section      = php::Block::Section::Main;
-      ptr->exnNode      = nullptr;
+  auto findBlock = [&] (
+    Offset off,
+    php::Block::Section section = php::Block::Section::Main
+  ) {
+    auto& ent = blockMap[off];
+    if (!ent.second) {
+      auto blk         = php::Block{};
+      ent.first        = blockMap.size() - 1;
+      blk.section      = section;
+      blk.exnNodeId    = NoExnNodeId;
+      ent.second.emplace(std::move(blk));
+    } else if (ent.second->section != section) {
+      assertx(ent.second->section == php::Block::Section::Main);
+      ent.second.mutate()->section = section;
     }
-    return ptr.get();
+    return ent.first;
   };
 
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
@@ -1086,20 +1095,21 @@ void build_cfg(ParseUnitState& puState,
   for (auto it = begin(blockStarts);
        std::next(it) != end(blockStarts);
        ++it) {
-    auto const block   = findBlock(*it);
+    auto const bid     = findBlock(*it);
+    auto const block   = blockMap[*it].second.mutate();
     auto const bcStart = bc + *it;
     auto const bcStop  = bc + *std::next(it);
 
     if (auto const eh = Func::findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
-      block->exnNode = it->second;
+      block->exnNodeId = it->second;
     }
 
     populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
     forEachNonThrowSuccessor(*block, [&] (BlockId blkId) {
         predSuccCounts[blkId].first++;
-        predSuccCounts[block->id].second++;
+        predSuccCounts[bid].second++;
     });
   }
 
@@ -1108,10 +1118,11 @@ void build_cfg(ParseUnitState& puState,
 
   func.blocks.resize(blockMap.size());
   for (auto& kv : blockMap) {
-    auto const id = kv.second->id;
-    kv.second->multiSucc = predSuccCounts[id].second > 1;
-    kv.second->multiPred = predSuccCounts[id].first > 1;
-    func.blocks[id] = std::move(kv.second);
+    auto const blk = kv.second.second.mutate();
+    auto const id = kv.second.first;
+    blk->multiSucc = predSuccCounts[id].second > 1;
+    blk->multiPred = predSuccCounts[id].first > 1;
+    func.blocks[id] = std::move(kv.second.second);
   }
 
   build_exceptional_edges(exnTreeInfo, func);
@@ -1204,14 +1215,13 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
       auto const mainEntry = BlockId{0};
 
-      auto blk          = std::make_unique<php::Block>();
-      blk->id           = mainEntry;
-      blk->section      = php::Block::Section::Main;
-      blk->exnNode      = nullptr;
+      auto blk         = php::Block{};
+      blk.section      = php::Block::Section::Main;
+      blk.exnNodeId    = NoExnNodeId;
 
-      blk->hhbcs.push_back(gen_constant(it->second));
-      blk->hhbcs.push_back(bc::RetC {});
-      ret->blocks.push_back(std::move(blk));
+      blk.hhbcs.push_back(gen_constant(it->second));
+      blk.hhbcs.push_back(bc::RetC {});
+      ret->blocks.emplace_back(std::move(blk));
 
       ret->dvEntries.resize(fe.params.size(), NoBlockId);
       ret->mainEntry = mainEntry;
@@ -1487,7 +1497,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
       "bailing because Eval.AbortBuildOnVerifyError is set\n",
       uep->m_filepath->data()
     );
-    std::exit(1);
+    _Exit(1);
   }
 
   auto const& ue = *uep;

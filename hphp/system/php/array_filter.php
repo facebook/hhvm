@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function array_filter(\HH\KeyedTraversable $arr, $func = null, $flag = null) {
   if ($func !== null && !is_callable($func)) {
@@ -9,7 +9,7 @@ function array_filter(\HH\KeyedTraversable $arr, $func = null, $flag = null) {
     return null;
   }
 
-  $res = \HH\asm('NewLikeArrayL $arr 0');
+  $res = \__hhvm_internal_newlikearrayl($arr, 0);
   if ($func === null) {
     foreach ($arr as $k => $v) {
       if ($v) {

@@ -11,19 +11,19 @@ $strings_array = array( NULL, "", 12345, "abcdef", "123abc", "_123abc");
 echo "*** Testing for error conditions ***\n";
 
 /* Zero Argument */
-var_dump( substr() );
+try { var_dump( substr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* NULL as Argument */
-var_dump( substr(NULL) );
+try { var_dump( substr(NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Single Argument */
-var_dump( substr("abcde") );
+try { var_dump( substr("abcde") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar Argument */
-var_dump( substr(12345) );
+try { var_dump( substr(12345) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* more than valid number of arguments ( valid are 2 or 3 ) */
-var_dump( substr("abcde", 2, 3, 4) );
+try { var_dump( substr("abcde", 2, 3, 4) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $counter = 1;
 foreach ($strings_array as $str) {

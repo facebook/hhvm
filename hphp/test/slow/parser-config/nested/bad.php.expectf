@@ -1,0 +1,2 @@
+
+Fatal error: Attempting to load file %s/inner.inc with incompatible parser settings from %s/.hhvmconfig.hdf, this request is using parser settings from %s/nested/.hhvmconfig.hdf in %s/bad.php on line 3

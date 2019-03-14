@@ -7,7 +7,7 @@ $writer = xmlwriter_open_memory();
 xmlwriter_set_indent_string($writer, '#');
 // The second arg is supposedly required. But just keep executing anyway and use
 // the previous value...
-xmlwriter_set_indent_string($writer);
+try { xmlwriter_set_indent_string($writer); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 xmlwriter_set_indent($writer, true);
 xmlwriter_start_document($writer, '1.0');
 xmlwriter_start_element($writer, 'foo');

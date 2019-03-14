@@ -237,6 +237,7 @@ and simplify_subtype
   ~(seen_generic_params : SSet.t option)
   ?(deep : bool = true)
   ~(no_top_bottom : bool)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ?(this_ty : locl ty option = None)
   (ty_sub : locl ty)
   (ty_super : locl ty)
@@ -245,7 +246,11 @@ and simplify_subtype
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
-  let uerror () = TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
+  let uerror = match error with
+    | Some f ->
+      fun () -> f env ety_sub ety_super
+    | None ->
+      fun () -> TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
   let invalid () = invalid_with uerror in
@@ -258,9 +263,9 @@ and simplify_subtype
     if new_inference
     then env, TL.IsSubtype (ety_sub, ety_super)
     else env, TL.IsSubtype (ty_sub, ty_super) in
-  let simplify_subtype = simplify_subtype ~no_top_bottom in
-  let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom in
-  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~no_top_bottom ~error in
+  let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom ~error in
+  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom ~error in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -944,7 +949,22 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.float r) ty_super &&&
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.int r) ty_super
 
-  | _, Tunresolved tyl ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunresolved [] ->
+    if new_inference
+    then simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+    else default ()
+  | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunresolved [] ->
+    if new_inference
+    then simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
+    else default ()
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
+    Tunresolved [] ->
+    if new_inference
+    then invalid ()
+    else default ()
+
+  | _, Tunresolved (_ :: _ as tyl) ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
      * But we deal with unions on the left first (see case above), so this
@@ -1041,6 +1061,7 @@ and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
   ~(deep : bool)
   ~(no_top_bottom : bool)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   (cid : string)
   (variancel : Ast.variance list)
   (children_tyl : locl ty list)
@@ -1048,7 +1069,7 @@ and simplify_subtype_variance
   : Env.env -> Env.env * TL.subtype_prop
   = fun env ->
   let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params
-    ~deep ~this_ty:None in
+    ~deep ~error ~this_ty:None in
   let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom
     ~seen_generic_params ~deep in
   match variancel, children_tyl, super_tyl with
@@ -1070,7 +1091,7 @@ and simplify_subtype_variance
         then
           env |>
           simplify_subtype child super' &&&
-          simplify_subtype super child
+          simplify_subtype super' child
         else
           env, TL.IsEqual (child, super')
       end &&&
@@ -1584,7 +1605,8 @@ and check_subtype_funs_attributes
    ~(seen_generic_params : SSet.t option)
    ~(deep : bool)
    ~(no_top_bottom : bool)
-  ~(check_return : bool)
+   ~(check_return : bool)
+   ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ?(extra_info: reactivity_extra_info option)
   (r_sub : Reason.t)
   (ft_sub : locl fun_type)
@@ -1599,7 +1621,7 @@ and check_subtype_funs_attributes
     | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
     | _ -> None in
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~deep ~error in
   let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
     ~no_top_bottom ~deep in
 
@@ -1634,10 +1656,11 @@ and check_subtype_funs_attributes
 
 (* One of the main entry points to this module *)
 and sub_type
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-    sub_type_inner env ~this_ty:None ty_sub ty_super
+    sub_type_inner env ~error ~this_ty:None ty_sub ty_super
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
@@ -1762,6 +1785,7 @@ and tvenv_to_prop tvenv =
 
 and sub_type_inner
   (env : Env.env)
+  ?(error : (Env.env -> locl ty -> locl ty -> unit) option = None)
   ~(this_ty : locl ty option)
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
@@ -1771,6 +1795,7 @@ and sub_type_inner
     ~seen_generic_params:empty_seen
     ~deep:new_inference
     ~no_top_bottom:false
+    ~error
     ~this_ty ty_sub ty_super env in
   let env, prop = if new_inference then prop_to_env env prop else env, prop in
   let env =
@@ -2000,12 +2025,22 @@ let rec sub_string
                MakeType.float r;
                MakeType.resource r;
                MakeType.dynamic r] in
+    let stringish =
+      (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
     let tyl =
       if stringish_deprecated
       then tyl
-      else (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, []))::tyl in
-    let stringish = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
-    sub_type env ty2 stringish
+      else stringish::tyl in
+    let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
+    let error env ty_sub ty_super = match snd ty_sub with
+      | _ when is_sub_type_alt ~no_top_bottom:true env ty_sub stringish = Some true &&
+               stringish_deprecated ->
+        Errors.object_string_deprecated p
+      | Tclass _ ->
+        Errors.object_string p (Reason.to_pos (fst ty_sub))
+      | _ ->
+        TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+    sub_type ~error:(Some error) env ty2 stringlike
   else
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
@@ -2278,6 +2313,7 @@ and decompose_constraint
   | Ast.Constraint_eq ->
     let env' = decompose_subtype p env ty_sub ty_super in
     decompose_subtype p env' ty_super ty_sub
+  | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -2461,6 +2497,14 @@ let bind env r var ty =
     [Log_head (Printf.sprintf "Typing_subtype.bind #%d" var,
     [Log_type ("ty", ty)])]));
 
+  (* If there has been a use of this type variable that led to an "unknown type"
+   * error (e.g. method invocation), then record this in the reason info. We
+   * can make use of this for linters and code mods that suggest annotations *)
+  let ty =
+    if Env.get_tyvar_eager_solve_fail env var
+    then (Reason.Rsolve_fail (Reason.to_pos (fst ty)), snd ty)
+    else ty in
+
   (* Update the variance *)
   let env = Env.update_variance_after_bind env var ty in
 
@@ -2471,13 +2515,18 @@ let bind env r var ty =
 
 let var_as_ty var = (Reason.Rnone, Tvar var)
 
+(* For the types that are lower bounds on a variable `var`, compute
+ * a union type. Remove `var` itself, as this is redundant. *)
+let lower_bounds_as_union env r var lower_bounds =
+  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
+  env, TUtils.diff ty (var_as_ty var)
+
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
-  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
-  let ty = TUtils.diff ty (var_as_ty var) in
+  let env, ty = lower_bounds_as_union env r var lower_bounds in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
    *   Cov<C>, Contra<D> <: v
@@ -2488,6 +2537,20 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
     if freshen
     then freshen_inside_ty_wrt_variance env ty
     else env, ty in
+  (* If any of the components of the union are type variables, then remove
+  * var from their upper bounds. Why? Because if we construct
+  *   v1 , ... , vn , t <: var
+  * for type variables v1, ..., vn and non-type variable t
+  * then necessarily we must have var as an upper bound on each of vi
+  * so after binding var we end up with redundant bounds
+  *   vi <: v1 | ... | vn | t
+  *)
+  let env =
+    TySet.fold (fun ty env ->
+      match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_upper_bound env v var
+      | env, _ -> env) lower_bounds env in
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env r var ty
 
@@ -2499,6 +2562,19 @@ let bind_to_upper_bound env r var upper_bounds =
   match Typing_set.elements upper_bounds with
   | [] -> bind env r var (MakeType.mixed r)
   | [ty] ->
+    (* If ty is a variable (in future, if any of the types in the list are variables),
+      * then remove var from their lower bounds. Why? Because if we construct
+      *   var <: v1 , ... , vn , t
+      * for type variables v1 , ... , vn and non-type variable t
+      * then necessarily we must have var as a lower bound on each of vi
+      * so after binding var we end up with redundant bounds
+      *   v1 & ... & vn & t <: vi
+      *)
+    let env =
+      (match Env.expand_type env ty with
+      | env, (_, Tvar v) ->
+        Env.remove_tyvar_lower_bound env v var
+      | env, _ -> env) in
     bind env r var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env
@@ -2520,7 +2596,8 @@ let bind_to_upper_bound env r var upper_bounds =
 let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d" force_solve force_solve_to_nothing var, [])]));
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d"
+      force_solve force_solve_to_nothing var, [])]));
 
   (* Don't try and solve twice *)
   if Env.tyvar_is_solved env var
@@ -2581,9 +2658,102 @@ let expand_type_and_solve env ~description_of_expected p ty =
     begin match ety with
     | _, Tvar _ ->
       Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
-      env, (Reason.Rwitness p, TUtils.terr env)
+      let env = Env.set_tyvar_eager_solve_fail env v in
+      env, (Reason.Rsolve_fail p, TUtils.terr env)
     | _ -> env, ety
     end
+  | _ ->
+    env, ety
+
+(* When applied to concrete types (typically classes), the `widen_concrete_type`
+ * function should produce the largest supertype that is valid for an operation.
+ * For example, if we have an expression $x->f for $x:v and exact C <: v, then
+ * we widen `exact C` to `B`, if `B` is the base class from which `C` inherits
+ * field f.
+ *
+ * The `widen` function extends this to unions, nullables, and abstract types.
+ *)
+let rec widen env widen_concrete_type ty =
+  let env, ty = Env.expand_type env ty in
+  match ty with
+  | r, Toption ty ->
+    begin match widen env widen_concrete_type ty with
+    | env, Some ty -> env, Some (r, Toption ty)
+    | env, None -> env, None
+    end
+  (* Don't widen the `this` type, because the field type changes up the hierarchy
+   * so we lose precision
+   *)
+  | _, Tabstract (AKdependent (`this, _), _) ->
+    env, Some ty
+  (* For other abstract types, just widen to the bound, if possible *)
+  | _, Tabstract (_, Some ty) ->
+    widen env widen_concrete_type ty
+  (* For unions, widen pointwise *)
+  | (r, Tunresolved tyl) ->
+    let rec widen_tys env tyl res =
+      match tyl with
+      | [] ->
+        (* We really don't want to just guess `nothing` *)
+        if List.is_empty res then env, None
+        else env, Some (r, Tunresolved res)
+      | ty :: tyl ->
+        match widen env widen_concrete_type ty with
+        | env, None -> widen_tys env tyl res
+        | env, Some ty -> widen_tys env tyl (ty :: res)
+    in widen_tys env tyl []
+  | _ ->
+    widen_concrete_type env ty
+
+let expand_type_and_try_solve env ty =
+  let env, ety = Env.expand_type env ty in
+  match ety with
+  | (r, Tvar var) ->
+    let tyvar_info = Env.get_tyvar_info env var in
+    let lower_bounds = tyvar_info.Env.lower_bounds in
+    let upper_bounds = tyvar_info.Env.upper_bounds in
+    begin match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
+    | Some ty ->
+      let env = bind env r var ty in
+      env, ty
+    | None -> env, ety
+    end
+  | _ ->
+    env, ety
+
+(* Using the `widen_concrete_type` function to compute an upper bound,
+ * narrow the constraints on a type that are valid for an operation.
+ * For example, if we have an expression $x->f for $x:#1 and exact C <: #1, then
+ * we can add #1 <: B if C inherits the property f from base class B.
+ * Likewise, if we have an expression $x[3] for $x:#2 and vec<string> <: #2, then
+ * we can add #2 <: KeyedCollection<int,#3> because that is the largest type
+ * consistent with vec for which indexing is valid.
+ *
+ * Note that if further information arises on the type variable, then
+ * this approach is not complete. For example, we might have an unrelated
+ * exact A <: #1, for which A does not inherit from base class B.
+ *
+ * But in general, narrowing is a useful technique for delaying the complete
+ * solving of a constraint whilst supporting checking of operations such as
+ * member access and array indexing.
+ *)
+let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
+  (* First see if we already have an equality in the constraints *)
+  let env, ety = expand_type_and_try_solve env ty in
+  match ety with
+  | (r, Tvar var) ->
+    let tyvar_info = Env.get_tyvar_info env var in
+    let env, lowerty = lower_bounds_as_union env r var tyvar_info.Env.lower_bounds in
+    let env, new_upper = widen env widen_concrete_type lowerty in
+    begin match new_upper with
+    | None ->
+      (* Default behaviour is currently to force solve *)
+      expand_type_and_solve env ~description_of_expected p ty
+    | Some widety ->
+      let env = sub_type env ty widety in
+      env, widety
+    end
+
   | _ ->
     env, ety
 

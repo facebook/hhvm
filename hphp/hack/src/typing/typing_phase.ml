@@ -113,6 +113,8 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       env, (ety_env, x)
   | r, Tmixed ->
       env, (ety_env, MakeType.mixed r)
+  | r, Tnothing ->
+      env, (ety_env, MakeType.nothing r)
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty
@@ -215,10 +217,12 @@ and localize_tparams ~ety_env env pos tyl tparams =
   let (env, _), tyl = List.map2_env (env, ety_env) tyl tparams (localize_tparam pos) in
   env, tyl
 
-and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints = cstrl; tp_reified; _ } =
+and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints = cstrl; tp_reified = reified; tp_user_attributes; _ } =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
-      let env, new_name = Env.add_fresh_generic_parameter env name tp_reified in
+      let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
+      let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
+      let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in
       let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
       let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let env, ty = localize ~ety_env env ty in
@@ -321,7 +325,8 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
       | Ast.Constraint_super ->
         Env.add_lower_bound env name_str ty
       | Ast.Constraint_eq ->
-        Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty in
+        Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty
+      | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes" in
       env, (ck, ty)
     end in
     env, { t with tp_constraints = cstrl }
@@ -479,6 +484,17 @@ let localize_generic_parameters_with_bounds
       env, (tparam_ty, ck, ty)) in
   let env, cstrss = List.map_env env tparams localize_bound in
   env, List.concat cstrss
+
+let localize_where_constraints
+    ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
+  let add_constraint env (h1, ck, h2) =
+    let env, ty1 =
+      localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
+    let env, ty2 =
+      localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
+    TUtils.add_constraint (fst h1) env ck ty1 ty2
+  in
+  List.fold_left where_constraints ~f:add_constraint ~init:env
 
 (* Helper functions *)
 

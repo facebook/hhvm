@@ -142,198 +142,197 @@
 (76,9)-(76,9) An expression is expected here.
 (77,5)-(77,9) Unexpected node on right hand side of new or instanceof: token
 (77,10)-(77,10) An expression is expected here.
-(78,12)-(78,12) A left brace ('{') is expected here.
-(79,5)-(79,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new clone()()'?
-(79,5)-(79,11) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
-(79,12)-(79,12) An expression is expected here.
-(80,5)-(80,9) Unexpected node on right hand side of new or instanceof: token
-(80,10)-(80,10) An expression is expected here.
-(81,5)-(81,12) Unexpected node on right hand side of new or instanceof: token
-(81,13)-(81,13) An expression is expected here.
+(78,5)-(78,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new clone()()'?
+(78,5)-(78,11) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
+(78,12)-(78,12) An expression is expected here.
+(79,5)-(79,9) Unexpected node on right hand side of new or instanceof: token
+(79,10)-(79,10) An expression is expected here.
+(80,5)-(80,12) Unexpected node on right hand side of new or instanceof: token
+(80,13)-(80,13) An expression is expected here.
+(81,5)-(81,11) Unexpected node on right hand side of new or instanceof: token
+(81,12)-(81,12) An expression is expected here.
 (82,5)-(82,11) Unexpected node on right hand side of new or instanceof: token
 (82,12)-(82,12) An expression is expected here.
-(83,5)-(83,11) Unexpected node on right hand side of new or instanceof: token
-(83,12)-(83,12) An expression is expected here.
-(84,5)-(84,6) Unexpected node on right hand side of new or instanceof: token
-(84,7)-(84,7) An expression is expected here.
+(83,5)-(83,6) Unexpected node on right hand side of new or instanceof: token
+(83,7)-(83,7) An expression is expected here.
+(84,5)-(84,8) Unexpected node on right hand side of new or instanceof: token
+(84,9)-(84,9) An expression is expected here.
 (85,5)-(85,8) Unexpected node on right hand side of new or instanceof: token
 (85,9)-(85,9) An expression is expected here.
-(86,5)-(86,8) Unexpected node on right hand side of new or instanceof: token
-(86,9)-(86,9) An expression is expected here.
-(87,5)-(87,10) Unexpected node on right hand side of new or instanceof: token
-(87,11)-(87,11) An expression is expected here.
-(88,5)-(88,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new empty()()'?
-(88,5)-(88,11) Unexpected node on right hand side of new or instanceof: empty_expression
-(88,12)-(88,12) An expression is expected here.
-(89,5)-(89,10) Unexpected node on right hand side of new or instanceof: token
-(89,11)-(89,11) An expression is expected here.
+(86,5)-(86,10) Unexpected node on right hand side of new or instanceof: token
+(86,11)-(86,11) An expression is expected here.
+(87,5)-(87,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new empty()()'?
+(87,5)-(87,11) Unexpected node on right hand side of new or instanceof: empty_expression
+(87,12)-(87,12) An expression is expected here.
+(88,5)-(88,10) Unexpected node on right hand side of new or instanceof: token
+(88,11)-(88,11) An expression is expected here.
+(89,5)-(89,14) Unexpected node on right hand side of new or instanceof: token
+(89,15)-(89,15) An expression is expected here.
 (90,5)-(90,14) Unexpected node on right hand side of new or instanceof: token
 (90,15)-(90,15) An expression is expected here.
-(91,5)-(91,14) Unexpected node on right hand side of new or instanceof: token
-(91,15)-(91,15) An expression is expected here.
-(92,5)-(92,9) Unexpected node on right hand side of new or instanceof: token
-(92,10)-(92,10) An expression is expected here.
-(93,5)-(93,13) Unexpected node on right hand side of new or instanceof: token
-(93,14)-(93,14) An expression is expected here.
-(94,5)-(94,12) Unexpected node on right hand side of new or instanceof: token
-(94,13)-(94,13) An expression is expected here.
-(95,5)-(95,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new eval()()'?
-(95,5)-(95,10) Unexpected node on right hand side of new or instanceof: eval_expression
-(95,11)-(95,11) An expression is expected here.
-(96,5)-(96,11) Unexpected node on right hand side of new or instanceof: token
-(96,12)-(96,12) An expression is expected here.
-(97,5)-(97,9) Unexpected node on right hand side of new or instanceof: token
-(97,10)-(97,10) An expression is expected here.
-(98,5)-(98,11) Unexpected node on right hand side of new or instanceof: token
-(98,12)-(98,12) An expression is expected here.
-(99,5)-(99,7) Unexpected node on right hand side of new or instanceof: token
-(99,8)-(99,8) An expression is expected here.
-(100,5)-(100,11) Unexpected node on right hand side of new or instanceof: token
-(100,12)-(100,12) An expression is expected here.
-(101,5)-(101,15) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
-(101,5)-(101,15) Unexpected node on right hand side of new or instanceof: anonymous_function
-(101,16)-(102,1) A semicolon (';') is expected here.
-(102,5)-(102,10) Unexpected node on right hand side of new or instanceof: token
-(102,11)-(102,11) An expression is expected here.
-(103,5)-(103,8) Unexpected node on right hand side of new or instanceof: token
-(103,9)-(103,9) An expression is expected here.
-(104,5)-(104,6) Unexpected node on right hand side of new or instanceof: token
-(104,7)-(104,7) An expression is expected here.
-(105,5)-(105,14) Unexpected node on right hand side of new or instanceof: token
-(105,15)-(105,15) An expression is expected here.
-(106,5)-(106,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include()()'?
-(106,5)-(106,13) Unexpected node on right hand side of new or instanceof: inclusion_expression
-(106,14)-(106,14) An expression is expected here.
-(107,5)-(107,18) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include_once()()'?
-(107,5)-(107,18) Unexpected node on right hand side of new or instanceof: inclusion_expression
-(107,19)-(107,19) An expression is expected here.
-(108,5)-(108,9) Unexpected node on right hand side of new or instanceof: token
-(108,10)-(108,10) An expression is expected here.
-(109,5)-(109,14) Unexpected node on right hand side of new or instanceof: token
-(109,15)-(109,15) An expression is expected here.
-(110,5)-(110,13) Unexpected node on right hand side of new or instanceof: token
-(110,14)-(110,14) An expression is expected here.
-(111,5)-(111,5) An expression is expected here.
-(111,5)-(111,5) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()'?
-(111,5)-(111,5) Unexpected node on right hand side of new or instanceof: missing
-(111,5)-(128,3) Access type for interface method must be omitted
-(111,14)-(111,14) A name is expected here.
-(111,15)-(111,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(111,16)-(111,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(111,17)-(112,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(91,5)-(91,9) Unexpected node on right hand side of new or instanceof: token
+(91,10)-(91,10) An expression is expected here.
+(92,5)-(92,13) Unexpected node on right hand side of new or instanceof: token
+(92,14)-(92,14) An expression is expected here.
+(93,5)-(93,12) Unexpected node on right hand side of new or instanceof: token
+(93,13)-(93,13) An expression is expected here.
+(94,5)-(94,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new eval()()'?
+(94,5)-(94,10) Unexpected node on right hand side of new or instanceof: eval_expression
+(94,11)-(94,11) An expression is expected here.
+(95,5)-(95,11) Unexpected node on right hand side of new or instanceof: token
+(95,12)-(95,12) An expression is expected here.
+(96,5)-(96,9) Unexpected node on right hand side of new or instanceof: token
+(96,10)-(96,10) An expression is expected here.
+(97,5)-(97,11) Unexpected node on right hand side of new or instanceof: token
+(97,12)-(97,12) An expression is expected here.
+(98,5)-(98,7) Unexpected node on right hand side of new or instanceof: token
+(98,8)-(98,8) An expression is expected here.
+(99,5)-(99,11) Unexpected node on right hand side of new or instanceof: token
+(99,12)-(99,12) An expression is expected here.
+(100,5)-(100,15) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
+(100,5)-(100,15) Unexpected node on right hand side of new or instanceof: anonymous_function
+(100,16)-(101,1) A semicolon (';') is expected here.
+(101,5)-(101,10) Unexpected node on right hand side of new or instanceof: token
+(101,11)-(101,11) An expression is expected here.
+(102,5)-(102,8) Unexpected node on right hand side of new or instanceof: token
+(102,9)-(102,9) An expression is expected here.
+(103,5)-(103,6) Unexpected node on right hand side of new or instanceof: token
+(103,7)-(103,7) An expression is expected here.
+(104,5)-(104,14) Unexpected node on right hand side of new or instanceof: token
+(104,15)-(104,15) An expression is expected here.
+(105,5)-(105,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include()()'?
+(105,5)-(105,13) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(105,14)-(105,14) An expression is expected here.
+(106,5)-(106,18) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include_once()()'?
+(106,5)-(106,18) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(106,19)-(106,19) An expression is expected here.
+(107,5)-(107,9) Unexpected node on right hand side of new or instanceof: token
+(107,10)-(107,10) An expression is expected here.
+(108,5)-(108,14) Unexpected node on right hand side of new or instanceof: token
+(108,15)-(108,15) An expression is expected here.
+(109,5)-(109,13) Unexpected node on right hand side of new or instanceof: token
+(109,14)-(109,14) An expression is expected here.
+(110,5)-(110,5) An expression is expected here.
+(110,5)-(110,5) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()'?
+(110,5)-(110,5) Unexpected node on right hand side of new or instanceof: missing
+(110,5)-(127,3) Access type for interface method must be omitted
+(110,14)-(110,14) A name is expected here.
+(110,15)-(110,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(110,16)-(110,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(110,17)-(111,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(111,5)-(111,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(111,10)-(111,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(111,11)-(111,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(111,12)-(111,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(111,13)-(112,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (112,5)-(112,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(112,9)-(112,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (112,10)-(112,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (112,11)-(112,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(112,12)-(112,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(112,13)-(113,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(112,12)-(113,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (113,5)-(113,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,9)-(113,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,10)-(113,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,11)-(113,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(113,12)-(114,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(113,14)-(113,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(113,15)-(113,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(113,16)-(113,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(113,17)-(114,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (114,5)-(114,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,14)-(114,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,15)-(114,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,16)-(114,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(114,17)-(115,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(114,8)-(114,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(114,9)-(114,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(114,10)-(114,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(114,11)-(115,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (115,5)-(115,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(115,7)-(115,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (115,8)-(115,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (115,9)-(115,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,10)-(115,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(115,11)-(116,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(115,10)-(116,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (116,5)-(116,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,7)-(116,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,8)-(116,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,9)-(116,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(116,10)-(117,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(116,10)-(116,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(116,11)-(116,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(116,12)-(116,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(116,13)-(117,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (117,5)-(117,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(117,10)-(117,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(117,11)-(117,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(117,12)-(117,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(117,13)-(118,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(117,13)-(117,13) A type specifier is expected here.
+(117,14)-(117,14) A variable name is expected here.
 (118,5)-(118,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(118,13)-(118,13) A type specifier is expected here.
-(118,14)-(118,14) A variable name is expected here.
+(118,15)-(118,15) A type specifier is expected here.
+(118,16)-(118,16) A variable name is expected here.
 (119,5)-(119,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(119,15)-(119,15) A type specifier is expected here.
-(119,16)-(119,16) A variable name is expected here.
+(119,12)-(119,12) A type specifier is expected here.
+(119,13)-(119,13) A variable name is expected here.
 (120,5)-(120,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(120,12)-(120,12) A type specifier is expected here.
-(120,13)-(120,13) A variable name is expected here.
+(120,5)-(120,11) Conflicting requirements for ''
+(120,12)-(120,12) An 'extends' or 'implements' keyword is expected here.
+(120,13)-(120,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(120,14)-(120,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(120,15)-(121,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (121,5)-(121,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,5)-(121,11) Conflicting requirements for ''
-(121,12)-(121,12) An 'extends' or 'implements' keyword is expected here.
-(121,13)-(121,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,14)-(121,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(121,15)-(122,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(121,17)-(121,17) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(121,18)-(121,18) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(121,19)-(121,19) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(121,20)-(122,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (122,5)-(122,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,17)-(122,17) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,18)-(122,18) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,19)-(122,19) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(122,20)-(123,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(122,11)-(122,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(122,12)-(122,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(122,13)-(122,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(122,14)-(123,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (123,5)-(123,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(123,10)-(123,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (123,11)-(123,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (123,12)-(123,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,13)-(123,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(123,14)-(124,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(123,13)-(124,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (124,5)-(124,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(124,10)-(124,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(124,11)-(124,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(124,12)-(124,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(124,13)-(125,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(124,12)-(124,12) A type specifier is expected here.
+(124,13)-(124,13) A variable name is expected here.
 (125,5)-(125,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(125,12)-(125,12) A type specifier is expected here.
-(125,13)-(125,13) A variable name is expected here.
+(125,11)-(125,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(125,12)-(125,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(125,13)-(125,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(125,14)-(126,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (126,5)-(126,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(126,10)-(126,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (126,11)-(126,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (126,12)-(126,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,13)-(126,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(126,14)-(127,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(126,13)-(127,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (127,5)-(127,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(127,10)-(127,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(127,10)-(127,10) A name is expected here.
 (127,11)-(127,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (127,12)-(127,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (127,13)-(128,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (128,5)-(128,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(128,10)-(128,10) A name is expected here.
-(128,11)-(128,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(128,12)-(128,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(128,13)-(129,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(128,8)-(128,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(128,9)-(128,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(128,10)-(128,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(128,11)-(129,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (129,5)-(129,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(129,8)-(129,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(129,9)-(129,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (129,10)-(129,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(129,11)-(130,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(129,11)-(129,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(129,12)-(129,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(129,13)-(130,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (130,5)-(130,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(130,8)-(130,8) A name is expected here.
+(130,9)-(130,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (130,10)-(130,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(130,11)-(130,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(130,12)-(130,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(130,13)-(131,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(130,11)-(131,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (131,5)-(131,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(131,8)-(131,8) A name is expected here.
-(131,9)-(131,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (131,10)-(131,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(131,11)-(132,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(131,11)-(131,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(131,12)-(131,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(131,13)-(132,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (132,5)-(132,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(132,10)-(132,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(132,11)-(132,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(132,12)-(132,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(132,13)-(133,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(132,9)-(132,9) A type specifier is expected here.
+(132,10)-(132,10) A variable name is expected here.
 (133,5)-(133,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(133,9)-(133,9) A type specifier is expected here.
-(133,10)-(133,10) A variable name is expected here.
+(133,10)-(133,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(133,11)-(133,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(133,12)-(133,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(133,13)-(134,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (134,5)-(134,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(134,8)-(134,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(134,9)-(134,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (134,10)-(134,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(134,11)-(134,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(134,12)-(134,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(134,13)-(135,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(134,11)-(135,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (135,5)-(135,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(135,8)-(135,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(135,9)-(135,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (135,10)-(135,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(135,11)-(136,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(136,5)-(136,5) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(136,10)-(136,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(136,11)-(136,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(136,12)-(136,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(136,13)-(137,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(135,11)-(135,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(135,12)-(135,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(135,13)-(136,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.

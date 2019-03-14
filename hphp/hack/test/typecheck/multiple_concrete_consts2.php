@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 interface I1 {
   abstract const int X;
 }

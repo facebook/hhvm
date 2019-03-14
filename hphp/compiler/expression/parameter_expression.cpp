@@ -297,6 +297,20 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   ));
         return;
 
+      case KindOfClsMeth:
+        compat = (
+          acceptAny ||
+          !strcasecmp(hint, "HH\\varray") ||
+          !strcasecmp(hint, "HH\\arraylike") ||
+          !strcasecmp(hint, "HH\\varray_or_darray") ||
+          (RuntimeOption::EvalHackArrDVArrs ?
+            (!strcasecmp(hint, "HH\\vec") ||
+             !strcasecmp(hint, "HH\\vec_or_dict")) :
+            (!strcasecmp(hint, "array") ||
+             !strcasecmp(hint, "HH\\darray"))
+          ));
+        return;
+
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:

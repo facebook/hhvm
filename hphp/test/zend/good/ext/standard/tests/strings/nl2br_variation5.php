@@ -75,7 +75,7 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "-- Iteration $count --\n";
-  var_dump( nl2br($value) );
+  try { var_dump( nl2br($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++ ;
 };
 

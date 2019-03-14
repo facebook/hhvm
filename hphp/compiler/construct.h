@@ -133,7 +133,6 @@ struct IParseHandler {
   x(ConstantExpression,         Const) \
   x(EncapsListExpression,        None) \
   x(ClosureExpression,           None) \
-  x(ClassExpression,             None) \
   x(YieldExpression,             None) \
   x(YieldFromExpression,         None) \
   x(AwaitExpression,             None) \

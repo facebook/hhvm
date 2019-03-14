@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace __SystemLib {
   use Phar;
@@ -35,22 +35,22 @@ namespace __SystemLib {
 
     // Default implementation, used by Phar- and Tar-based archives
     public function getStream(string $path): resource {
-      if (!array_key_exists($path, $this->fileOffsets)) {
+      if (!\array_key_exists($path, $this->fileOffsets)) {
         throw new PharException("No $path in phar");
       }
       list($offset, $size) = $this->fileOffsets[$path];
       if ($size == 0) {
-        return fopen('php://temp', 'w+b');
+        return \fopen('php://temp', 'w+b');
       }
-      $stream = fopen('php://temp', 'w+b');
+      $stream = \fopen('php://temp', 'w+b');
       //TODO stream slice needed here
       while ($size) {
-        $data = $this->stream_get_contents(min(1024, $size), $offset);
-        fwrite($stream, $data);
-        $size -= strlen($data);
-        $offset += strlen($data);
+        $data = $this->stream_get_contents(\min(1024, $size), $offset);
+        \fwrite($stream, $data);
+        $size -= \strlen($data);
+        $offset += \strlen($data);
       }
-      rewind($stream);
+      \rewind($stream);
       return $stream;
     }
 
@@ -116,7 +116,7 @@ namespace __SystemLib {
           return null;
       }
       return [
-        'hash' => bin2hex($this->signature),
+        'hash' => \bin2hex($this->signature),
         'hash_type' => $hash_type
       ];
     }
@@ -141,18 +141,18 @@ namespace __SystemLib {
     protected function open(string $path) {
       $this->path = $path;
 
-      $fp = fopen($path, 'rb');
-      $data = fread($fp, 2);
-      fclose($fp);
+      $fp = \fopen($path, 'rb');
+      $data = \fread($fp, 2);
+      \fclose($fp);
 
       if ($data === 'BZ') {
         $this->compressed = Phar::BZ2;
-        $this->stream = bzopen($path, 'r');
+        $this->stream = \bzopen($path, 'r');
       } else if ($data === "\x1F\x8B") {
-        $this->stream = gzopen($path, 'rb');
+        $this->stream = \gzopen($path, 'rb');
         $this->compressed = Phar::GZ;
       } else  {
-        $this->stream = fopen($path, 'rb');
+        $this->stream = \fopen($path, 'rb');
       }
     }
 
@@ -163,8 +163,8 @@ namespace __SystemLib {
       if ($offset >= 0) {
         $this->seek($offset);
       }
-      $ret = stream_get_contents($this->stream, $maxlength);
-      $this->pos += strlen($ret);
+      $ret = \stream_get_contents($this->stream, $maxlength);
+      $this->pos += \strlen($ret);
       return $ret;
     }
 
@@ -174,21 +174,21 @@ namespace __SystemLib {
 
     protected function seek(int $position) {
       if ($position < $this->pos && $this->compressed == Phar::BZ2) {
-        fclose($this->stream);
-        $this->stream = bzopen($this->path, 'r');
+        \fclose($this->stream);
+        $this->stream = \bzopen($this->path, 'r');
         $this->pos = 0;
       }
-      fseek($this->stream, $position - $this->pos, \SEEK_CUR);
+      \fseek($this->stream, $position - $this->pos, \SEEK_CUR);
       $this->pos = $position;
     }
 
     protected function eof(): bool {
-      return feof($this->stream);
+      return \feof($this->stream);
     }
 
     public function close(): void {
       if ($this->stream) {
-        fclose($this->stream);
+        \fclose($this->stream);
         $this->stream = null;
       }
     }

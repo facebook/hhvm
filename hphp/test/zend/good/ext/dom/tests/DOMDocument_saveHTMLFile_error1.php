@@ -8,5 +8,5 @@ $title = $doc->createElement('title');
 $title = $head->appendChild($title);
 $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
-$doc->saveHTMLFile();
+try { $doc->saveHTMLFile(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>

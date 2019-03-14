@@ -1,11 +1,12 @@
 <?php
 
 class X {
+
+  private static $genX;
   public static function gen() {
-    static $x;
-    yield ++$x;
+    yield ++self::$genX;
     yield 2;
-    yield ++$x;
+    yield ++self::$genX;
   }
 }
 class Y extends X {

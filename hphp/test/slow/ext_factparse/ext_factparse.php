@@ -11,9 +11,7 @@
 
 function f1() {}
 
-if (rand()) {
-  function f2() {}
-}
+function f2() {}
 
 class CL0 {
   # negative test
@@ -41,9 +39,9 @@ trait TR1<T> {
 
 const CO0 = 1;
 const CO1 = "abc";
-define('CO2', 1);
-define('CO3', 'abc');
-@define('CO4', 2);
+const CO2 = 1;
+const CO3 = 'abc';
+const CO4 = 2;
 
 type TA0 = int;
 newtype TA1 = int;
@@ -95,20 +93,8 @@ if (rand()) {
   }
 }
 
-# Need to be careful when writing an autoloader to handle these cases properly.
-# The output facts will show f8() is defined in this file. However, it won't
-# actually be callable unless f7() is called first (e.g. via the pesudo-main
-# in this source module which will be executed when the file is require'd).
-# As such an autoloader must be careful to call function_exists('f8') after
-# require'ing this file and return failure if f8() did not actually materialize.
-
-function f7() {
-  function f8() {
-  }
-}
-
+const CO5 = 1;
 function f6() {
-  define('CO5', 1);
 
   nEw stdclass; // make sure the parser can handle "weird" keywords
   NeW stdclass;
@@ -254,7 +240,7 @@ if ((int)HH\ext_factparse_version()) {
 
 try {
   HH\facts_parse(null, null, null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }
 try {

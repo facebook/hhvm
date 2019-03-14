@@ -75,34 +75,26 @@ bool(false)
 --empty array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --int indexed array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --associative array--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --nested arrays--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --uppercase NULL--
 
@@ -179,10 +171,8 @@ bool(false)
 --instance of classWithoutToString--
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 --undefined var--
 

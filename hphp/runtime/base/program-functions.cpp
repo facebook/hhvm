@@ -2567,15 +2567,55 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
                    richErrorMsg);
 }
 
+void invoke_prelude_script(
+  const char* currentDir,
+  const std::string& document,
+  const std::string& prelude,
+  const char* root
+) {
+  // If $SOURCE_ROOT is found in prelude path
+  // Execute the script from PHP root folder
+  // or from current folder
+  static const std::string s_phpRootVar("${SOURCE_ROOT}");
+  std::string preludeScript(prelude);
+  auto posPhpRoot = preludeScript.find(s_phpRootVar);
+  if (std::string::npos != posPhpRoot){
+    preludeScript.replace(posPhpRoot, s_phpRootVar.length(),
+      root ? root : SourceRootInfo::GetCurrentSourceRoot().c_str());
+  }
+  FileUtil::runRelative(
+    preludeScript,
+    String(document, CopyString),
+    currentDir,
+    [currentDir] (const String& f) {
+      auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+      if (w->access(f, R_OK) == 0) {
+        require(f, true, currentDir, true);
+        return true;
+      }
+      return false;
+    }
+  );
+}
+
 static bool hphp_warmup(ExecutionContext *context,
+                        const std::string& cmd,
                         const std::string &reqInitFunc,
-                        const std::string &reqInitDoc, bool &error) {
+                        const std::string &reqInitDoc,
+                        const std::string &prelude,
+                        bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
 
   ServerStatsHelper ssh("reqinit");
   try {
+    if (!prelude.empty() && (!cmd.empty() || !reqInitDoc.empty())) {
+      auto const currentDir = context->getCwd();
+      auto const& document = !reqInitDoc.empty() ? reqInitDoc : cmd;
+      invoke_prelude_script(currentDir.data(), document, prelude);
+    }
+
     if (!reqInitDoc.empty()) {
       include_impl_invoke(reqInitDoc, true);
     }
@@ -2663,7 +2703,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (isServer) {
     oldCwd = context->getCwd();
   }
-  if (!hphp_warmup(context, reqInitFunc, reqInitDoc, error)) {
+  if (!hphp_warmup(context, cmd, reqInitFunc, reqInitDoc, prelude, error)) {
     if (isServer) context->setCwd(oldCwd);
     return false;
   }
@@ -2676,35 +2716,9 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     try {
       ServerStatsHelper ssh("invoke");
       if (!RuntimeOption::AutoPrependFile.empty() &&
-          RuntimeOption::AutoPrependFile != "none") {
+          RuntimeOption::AutoPrependFile.compare("none") ) {
         require(RuntimeOption::AutoPrependFile, false,
                 context->getCwd().data(), true);
-      }
-      if (!prelude.empty()) {
-        auto const currentDir = context->getCwd().data();
-        // If $SOURCE_ROOT is found in prelude path
-        // Execute the script from PHP root folder
-        // or from current folder
-        static const std::string s_phpRootVar("${SOURCE_ROOT}");
-        std::string preludeScript(prelude);
-        auto posPhpRoot = preludeScript.find(s_phpRootVar);
-        if (std::string::npos != posPhpRoot){
-          preludeScript.replace(posPhpRoot, s_phpRootVar.length(),
-            SourceRootInfo::GetCurrentSourceRoot());
-        }
-        FileUtil::runRelative(
-          preludeScript,
-          String(cmd, CopyString),
-          currentDir,
-          [&] (const String& f) {
-            auto const w = Stream::getWrapperFromURI(f, nullptr, false);
-            if (w->access(f, R_OK) == 0) {
-              require(f.data(), false, currentDir, true);
-              return true;
-            }
-            return false;
-          }
-        );
       }
       if (func) {
         funcRet.assignIfRef(invoke(cmd.c_str(), funcParams));
@@ -2713,7 +2727,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         include_impl_invoke(cmd.c_str(), once, "", true);
       }
       if (!RuntimeOption::AutoAppendFile.empty() &&
-          RuntimeOption::AutoAppendFile != "none") {
+          RuntimeOption::AutoAppendFile.compare("none")) {
         require(RuntimeOption::AutoAppendFile, false,
                 context->getCwd().data(), true);
       }

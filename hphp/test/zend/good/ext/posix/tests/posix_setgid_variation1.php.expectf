@@ -1,14 +1,10 @@
 *** Test substituting argument 1 with array values ***
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 ===DONE===

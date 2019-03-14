@@ -2,14 +2,14 @@
 
 namespace foo\bar {
   function baz() {
-    var_dump(__LINE__);
+    \var_dump(__LINE__);
   }
 }
 
 namespace foo {
   class bar {
     public function __construct() {
-      var_dump(__LINE__);
+      \var_dump(__LINE__);
     }
   }
 }

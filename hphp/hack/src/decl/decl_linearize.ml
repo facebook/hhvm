@@ -30,6 +30,16 @@ type state =
       an element of the current linearization (with the appropriate source and
       type parameters substituted) unless it was already emitted earlier in the
       current linearization sequence. *)
+  | Synthesized_elts of mro_element list
+  (** A list of synthesized ancestor MRO elements which were accumulated while
+      we iterated over ancestor linearizations. We want to de-prioritize
+      synthesized ancestors (i.e., ancestors arising from a require-extends or
+      require-implements relationship) by placing them at the end of the
+      linearization, so that non-synthesized members (if they are present) are
+      inherited instead of synthesized ones. For each MRO element in the list,
+      that element should be emitted as an element of the current linearization
+      (with the appropriate source and type parameters substituted) unless it
+      was already emitted earlier in the current linearization sequence. *)
 
 module Cache = SharedMem.LocalCache (StringKey) (struct
   type t = linearization
@@ -39,11 +49,11 @@ module Cache = SharedMem.LocalCache (StringKey) (struct
 end)
 
 let ancestor_from_ty
-    (new_source : source_type)
+    (source : source_type)
     (ty : decl ty)
   : string * decl ty list * source_type =
-  let _, (_, class_name), type_params = Decl_utils.unwrap_class_type ty in
-  class_name, type_params, new_source
+  let _, (_, class_name), type_args = Decl_utils.unwrap_class_type ty in
+  class_name, type_args, source
 
 let from_parent (c : shallow_class) : decl ty list =
   (* In an abstract class or a trait, we assume the interfaces
@@ -57,10 +67,9 @@ let from_parent (c : shallow_class) : decl ty list =
 
 let rec ancestor_linearization
     (env : env)
-    (class_name : string)
-    (type_params : decl ty list)
-    (new_source : source_type)
+    (ancestor : string * decl ty list * source_type)
   : linearization =
+  let class_name, type_args, source = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin = Sequence.map lin ~f:begin fun c ->
@@ -68,26 +77,35 @@ let rec ancestor_linearization
       | ReqImpl | ReqExtends -> true
       | Child | Parent | Trait | XHPAttr | Interface -> false
     in
-    let mro_synthesized = c.mro_synthesized || is_synthesized new_source in
+    let is_interface = function
+      | Interface | ReqImpl -> true
+      | Child | Parent | Trait | XHPAttr | ReqExtends -> false
+    in
+    let mro_synthesized = c.mro_synthesized || is_synthesized source in
+    let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
+    let mro_consts_only = c.mro_consts_only || is_interface source in
+    let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
     { c with
-      mro_source = new_source;
       mro_synthesized;
+      mro_xhp_attrs_only;
+      mro_consts_only;
+      mro_copy_private_members;
     }
   end in
   match Sequence.next lin with
   | None -> Sequence.empty
   | Some (c, rest) ->
     (* Fill in the type parameterization of the starting class *)
-    let c = { c with mro_params = type_params } in
+    let c = { c with mro_type_args = type_args } in
     (* Instantiate its linearization with those type parameters *)
     let tparams =
       Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
-    let subst = Decl_subst.make tparams type_params in
+    let subst = Decl_subst.make tparams type_args in
     let rest = Sequence.map rest ~f:begin fun c ->
-      { c with mro_params =
-        List.map c.mro_params ~f:(Decl_instantiate.instantiate subst)
+      { c with mro_type_args =
+        List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst)
       }
     end in
     Sequence.append (Sequence.singleton c) rest
@@ -98,42 +116,66 @@ and linearize (env : env) (c : shallow_class) : linearization =
   (* The first class doesn't have its type parameters filled in *)
   let child = {
     mro_name;
-    mro_params = [];
-    mro_source = Child;
+    mro_type_args = [];
     mro_synthesized = false;
+    mro_xhp_attrs_only = false;
+    mro_consts_only = false;
+    mro_copy_private_members = c.sc_kind = Ast.Ctrait;
   } in
-  let ancestors = List.concat [
-    (* Add traits in backwards order *)
-    List.map (List.rev c.sc_uses) (ancestor_from_ty Trait);
-    (* Add interfaces(interfaces can define constants)
-    TODO(jjwu): implemented interfaces are *only* important for constants and
-    otherwise don't need to take up so much space in the linearization.
-    Can we get rid of this somehow? *)
-    List.map c.sc_implements (ancestor_from_ty Interface);
-    (* Same with req_implements *)
-    List.map c.sc_req_implements (ancestor_from_ty ReqImpl);
-    (* Add requirements *)
-    List.map c.sc_req_extends (ancestor_from_ty ReqExtends);
-    List.map c.sc_xhp_attr_uses (ancestor_from_ty XHPAttr);
-    List.map (from_parent c) (ancestor_from_ty Parent);
-  ] in
-  Sequence.unfold_step ~init:(Child child, ancestors, []) ~f:(next_state env)
+  let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
+  let interfaces     = get_ancestors Interface c.sc_implements in
+  let req_implements = get_ancestors ReqImpl c.sc_req_implements in
+  let xhp_attr_uses  = get_ancestors XHPAttr (List.rev c.sc_xhp_attr_uses) in
+  let traits         = get_ancestors Trait (List.rev c.sc_uses) in
+  let req_extends    = get_ancestors ReqExtends c.sc_req_extends in
+  let parents        = get_ancestors Parent (from_parent c) in
+  let ancestors =
+    List.concat [
+      interfaces;
+      req_implements;
+      xhp_attr_uses;
+      traits;
+      req_extends;
+      parents;
+    ]
+  in
+  Sequence.unfold_step
+    ~init:(Child child, ancestors, [], [])
+    ~f:(next_state env)
   |> Sequence.memoize
 
-and next_state (env : env) (state, ancestors, acc) =
+and next_state (env : env) (state, ancestors, acc, synths) =
   let open Sequence.Step in
   match state, ancestors with
-  | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc))
-  | Next_ancestor, [] -> Done
-  | Next_ancestor, (cid, params, src)::ancestors ->
-    Skip (Ancestor (ancestor_linearization env cid params src), ancestors, acc)
+  | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
+  | Next_ancestor, ancestor::ancestors ->
+    Skip (Ancestor (ancestor_linearization env ancestor), ancestors, acc, synths)
   | Ancestor lin, ancestors ->
-    match Sequence.next lin with
-    | None -> Skip (Next_ancestor, ancestors, acc)
+    begin match Sequence.next lin with
+    | None -> Skip (Next_ancestor, ancestors, acc, synths)
+    (* Lazy.Undefined occurs if we attempt to include a linearization within
+       itself. This will only happen when we have a class dependency cycle (and
+       only in some particular circumstances), so it will not arise in legal
+       programs. *)
+    | exception Lazy.Undefined -> Skip (Next_ancestor, ancestors, acc, synths)
     | Some (next, rest) ->
-      if List.mem acc next ~equal:(=)
-      then Skip (Ancestor rest, ancestors, acc)
-      else Yield (next, (Ancestor rest, ancestors, next::acc))
+      let should_skip, synths =
+        if next.mro_synthesized
+        then true, next::synths
+        else List.mem acc next ~equal:(=), synths
+      in
+      if should_skip
+      then Skip (Ancestor rest, ancestors, acc, synths)
+      else Yield (next, (Ancestor rest, ancestors, next::acc, synths))
+    end
+  | Next_ancestor, [] ->
+    let synths = List.rev synths in
+    Skip (Synthesized_elts synths, ancestors, acc, synths)
+  | Synthesized_elts (next::synths), ancestors ->
+    if List.mem acc next ~equal:(=)
+    then Skip (Synthesized_elts synths, ancestors, next::acc, synths)
+    else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
+  | Synthesized_elts [], _ -> Done
 
 and get_linearization (env : env) (class_name : string) : linearization =
   let { class_stack; _ } = env in

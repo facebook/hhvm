@@ -84,7 +84,7 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump(bin2hex(quoted_printable_decode($value)));
+  try { var_dump(bin2hex(quoted_printable_decode($value))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 };
 

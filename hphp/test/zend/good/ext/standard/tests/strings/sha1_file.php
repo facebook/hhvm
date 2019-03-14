@@ -44,10 +44,10 @@ echo "\n-- NULL as filename --\n";
 var_dump( sha1_file(NULL) );
 
 echo "\n-- Zero arguments --\n";
- var_dump ( sha1_file() );
+ try { var_dump ( sha1_file() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- More than valid number of arguments ( valid is 2) --\n";
-var_dump ( sha1_file("sha1_EmptyFile.txt", true, NULL) );
+try { var_dump ( sha1_file("sha1_EmptyFile.txt", true, NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
 var_dump( sha1_file("sha1_EmptyFile.txt") );

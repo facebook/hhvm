@@ -18,11 +18,11 @@ $extra_arg = 10;
 
 //Test strval with one more than the expected number of arguments
 echo "\n-- Testing strval() function with more than expected no. of arguments --\n";
-var_dump( strval($string, $extra_arg) );
+try { var_dump( strval($string, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing strval with one less than the expected number of arguments
 echo "\n-- Testing strval() function with less than expected no. of arguments --\n";
-var_dump( strval() );
+try { var_dump( strval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing strval with a object which has no toString() method
 echo "\n-- Testing strval() function with object which has not toString() method  --\n";

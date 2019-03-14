@@ -1,9 +1,0 @@
-comparing .main
-Semdiff failed
-pc=;2, pc'=;5, i=Int 0 i'=Int 1 asn={}{}
-
-Edits = 
-
-for .main:
-- JmpZ L1
-+ JmpNZ L1

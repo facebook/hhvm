@@ -19,9 +19,25 @@ function main($f) {
   var_dump(sqrt(false));
   var_dump(sqrt(null));
   var_dump(sqrt("15"));
-  var_dump(sqrt("hello"));
-  var_dump(sqrt(new stdClass));
-  var_dump(sqrt(array()));
-  var_dump(sqrt(array(2,3,4)));
+  try {
+    var_dump(sqrt("hello"));
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    var_dump(sqrt(new stdClass));
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    var_dump(sqrt(array()));
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    var_dump(sqrt(array(2,3,4)));
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
 }
 main(2.241987);

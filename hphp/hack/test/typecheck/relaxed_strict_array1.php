@@ -1,5 +1,5 @@
 //// FileA.php
-<?hh
+<?hh // partial
 
 class Foo {
   public static function bar(): array {

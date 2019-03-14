@@ -97,10 +97,10 @@ foreach ($varient_arrays as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_array() );
+try { var_dump( is_array() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_array ($fp, $fp) );
+try { var_dump( is_array ($fp, $fp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 /* close resources */

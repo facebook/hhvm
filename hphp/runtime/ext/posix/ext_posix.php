@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * posix_access() checks the user's permission of a file.
@@ -14,7 +14,7 @@
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_access(string $file, int $mode = 0): bool;
 
 /**
@@ -111,7 +111,7 @@ function posix_getgid(): int;
  *   the members in the group.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_getgrgid(int $gid): mixed;
 
 /**
@@ -130,7 +130,7 @@ function posix_getgrgid(int $gid): mixed;
  *   consists of an array of string's for all the members in the group.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_getgrnam(string $name): mixed;
 
 /**
@@ -216,7 +216,7 @@ function posix_getppid(): int;
  *   the absolute path to the executable of the user's default shell.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_getpwnam(string $username): mixed;
 
 /**
@@ -244,7 +244,7 @@ function posix_getpwnam(string $username): mixed;
  *   the absolute path to the executable of the user's default shell.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_getpwuid(int $uid): mixed;
 
 /**
@@ -286,7 +286,7 @@ function posix_getrlimit(): mixed;
  * @return mixed - Returns the identifier, as an integer.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_getsid(int $pid): mixed;
 
 /**
@@ -308,7 +308,7 @@ function posix_getuid(): int;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_initgroups(string $name, int $base_group_id): bool;
 
 /**
@@ -321,7 +321,7 @@ function posix_initgroups(string $name, int $base_group_id): bool;
  *   terminal and FALSE otherwise.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_isatty(mixed $fd): bool;
 
 /**
@@ -333,7 +333,7 @@ function posix_isatty(mixed $fd): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_kill(int $pid, int $sig): bool;
 
 /**
@@ -350,7 +350,7 @@ function posix_kill(int $pid, int $sig): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_mkfifo(string $pathname, int $mode): bool;
 
 /**
@@ -370,7 +370,7 @@ function posix_mkfifo(string $pathname, int $mode): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_mknod(string $pathname,
                      int $mode,
                      int $major = 0,
@@ -386,7 +386,7 @@ function posix_mknod(string $pathname,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_setegid(int $gid): bool;
 
 /**
@@ -399,7 +399,7 @@ function posix_setegid(int $gid): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_seteuid(int $uid): bool;
 
 /**
@@ -414,7 +414,7 @@ function posix_seteuid(int $uid): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_setgid(int $gid): bool;
 
 /**
@@ -426,7 +426,7 @@ function posix_setgid(int $gid): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_setpgid(int $pid, int $pgid): bool;
 
 /**
@@ -448,7 +448,7 @@ function posix_setsid(): int;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_setuid(int $uid): bool;
 
 /**
@@ -461,7 +461,7 @@ function posix_setuid(int $uid): bool;
  * @return string - Returns the error message, as a string.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_strerror(int $errnum): string;
 
 /**
@@ -488,7 +488,7 @@ function posix_times(): mixed;
  *   fd. On failure, returns FALSE
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function posix_ttyname(mixed $fd): mixed;
 
 /**

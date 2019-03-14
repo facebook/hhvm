@@ -9,12 +9,9 @@ function VERIFY($x) { VS($x != false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-// TODO(#2512714): set this to true and you'll SEGV :)
-$want_to_segv = false;
-if ($want_to_segv != true) {
-  function hello() {
-    return 'Hello World';
-  }
+// TODO(#2512714): if you comment out the function hello and you'll SEGV :)
+function hello() {
+  return 'Hello World';
 }
 
 function add($a, $b) {
@@ -37,10 +34,10 @@ function fault() {
 //////////////////////////////////////////////////////////////////////
 
 function verify_response($req, $expected) {
-  global $server;
+
 
   ob_start();
-  $server->handle($req);
+  ExtSoapExtSoapPhp::$server->handle($req);
   $res = ob_get_contents();
   ob_end_clean();
   VS($res, $expected);
@@ -91,21 +88,21 @@ function VSOAP($request, $expected) {
 for ($n = 1; $n <= 2; $n++) {
   switch ($n) {
     case 1:
-      $server = new SoapServer(null, array("uri" => "http://testuri.org"));
+      ExtSoapExtSoapPhp::$server = new SoapServer(null, array("uri" => "http://testuri.org"));
       break;
     case 2:
-      $server = new SoapServer(null, array("uri" => "http://testuri.org",
+      ExtSoapExtSoapPhp::$server = new SoapServer(null, array("uri" => "http://testuri.org",
                     "ssl_method" => SOAP_SSL_METHOD_TLS));
       break;
   }
 
- $server->addfunction("hello");
+ ExtSoapExtSoapPhp::$server->addfunction("hello");
 
   VSOAP("<ns1:hello xmlns:ns1=\"http://testuri.org\" />",
 	"<ns1:helloResponse><return xsi:type=\"xsd:string\">Hello World".
 	"</return></ns1:helloResponse>");
 
-  $server->addfunction(SOAP_FUNCTIONS_ALL);
+  ExtSoapExtSoapPhp::$server->addfunction(SOAP_FUNCTIONS_ALL);
 
   VSOAP("<ns1:strlen xmlns:ns1=\"http://testuri.org\">".
 	"<x xsi:type=\"xsd:string\">Hello World</x>".
@@ -114,7 +111,7 @@ for ($n = 1; $n <= 2; $n++) {
 	"</return></ns1:strlenResponse>");
 
   $funcs = array("Sub", "Add");
-  $server->addfunction($funcs);
+  ExtSoapExtSoapPhp::$server->addfunction($funcs);
 
   VSOAP("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
 	"<x xsi:type=\"xsd:int\">22</x>".
@@ -123,7 +120,7 @@ for ($n = 1; $n <= 2; $n++) {
 	"<ns1:AddResponse><return xsi:type=\"xsd:int\">55".
 	"</return></ns1:AddResponse>");
 
-  $server->addfunction("Sum");
+  ExtSoapExtSoapPhp::$server->addfunction("Sum");
 
   VSOAP("<ns1:sum xmlns:ns1=\"http://testuri.org\">".
 	"<param0 SOAP-ENC:arrayType=\"xsd:int[2]\"".
@@ -137,10 +134,10 @@ for ($n = 1; $n <= 2; $n++) {
 	"<ns1:sumResponse><return xsi:type=\"xsd:int\">8".
 	"</return></ns1:sumResponse>");
 
-  $server = new SoapServer(__DIR__."/1809.wsdl",
+  ExtSoapExtSoapPhp::$server = new SoapServer(__DIR__."/1809.wsdl",
 			  array("uri" => "http://testuri.org"));
 
-  $server->addfunction("Fault");
+  ExtSoapExtSoapPhp::$server->addfunction("Fault");
 
   // TODO(#2512715): this doesn't work.
   if (false) {
@@ -152,4 +149,8 @@ for ($n = 1; $n <= 2; $n++) {
 	    "<faultstring>My fault string</faultstring></SOAP-ENV:Fault>".
 	    "</SOAP-ENV:Body></SOAP-ENV:Envelope>\n");
   }
+}
+
+abstract final class ExtSoapExtSoapPhp {
+  public static $server;
 }

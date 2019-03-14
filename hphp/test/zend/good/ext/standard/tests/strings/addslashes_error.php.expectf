@@ -3,11 +3,9 @@
 -- Testing addslashes() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing addslashes() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 string(15) ""hello"\"world""
 Done

@@ -5,6 +5,6 @@ namespace foo;
 class bar {
 }
 
-class_alias('bar', 'baz');
+\class_alias('bar', 'baz');
 
 ?>

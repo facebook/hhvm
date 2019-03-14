@@ -1,5 +1,6 @@
-<?hh
+<?hh // partial
 
+namespace {
 /**
  * Call a user method given with an array of parameters [deprecated]
  *
@@ -58,15 +59,6 @@ function class_alias(string $original,
 <<__Native>>
 function class_exists(string $class_name,
                       bool $autoload = true): bool;
-
-/**
- * the "Late Static Binding" class name
- *
- * @return string - Returns the class name. Returns FALSE if called from
- *   outside a class.
- */
-<<__Native, __Rx>>
-function get_called_class(): mixed;
 
 /**
  * Get the constants of the given class.
@@ -272,3 +264,25 @@ function trait_exists(string $traitname,
 <<__Native>>
 function enum_exists(string $enumname,
                       bool $autoload = true): bool;
+
+}
+
+namespace HH {
+
+/**
+ * Get class name from class_meth
+ * @param mixed $class_meth
+ * @return class name
+ */
+<<__Native, __Rx>>
+function class_meth_get_class(mixed $class_meth): string;
+
+/**
+ * Get method name from class_meth
+ * @param mixed $class_meth
+ * @return method name
+ */
+<<__Native,  __Rx>>
+function class_meth_get_method(mixed $class_meth): string;
+
+}

@@ -3,10 +3,8 @@
 -- Testing var_export() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing var_export() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

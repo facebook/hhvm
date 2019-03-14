@@ -8,9 +8,9 @@ var_dump(gmp_sign("-34535345345"));
 var_dump(gmp_sign("+34534573457345"));
 $n = gmp_init("098909878976786545");
 var_dump(gmp_sign($n));
-var_dump(gmp_sign($n, $n));
+try { var_dump(gmp_sign($n, $n)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_sign(array()));
-var_dump(gmp_sign());
+try { var_dump(gmp_sign()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

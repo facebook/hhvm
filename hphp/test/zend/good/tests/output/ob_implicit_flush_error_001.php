@@ -12,7 +12,7 @@ echo "*** Testing ob_implicit_flush() : error conditions ***\n";
 echo "\n-- Testing ob_implicit_flush() function with more than expected no. of arguments --\n";
 $flag = 10;
 $extra_arg = 10;
-var_dump( ob_implicit_flush($flag, $extra_arg) );
+try { var_dump( ob_implicit_flush($flag, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

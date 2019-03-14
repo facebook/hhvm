@@ -16,23 +16,18 @@ int(0)
 -- Iteration 8 --
 
 Warning: %s
-NULL
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 int(0)
 -- Iteration 14 --
@@ -48,11 +43,9 @@ int(0)
 -- Iteration 19 --
 
 Warning: %s
-NULL
 -- Iteration 20 --
 
 Warning: %s
-NULL
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --
@@ -60,9 +53,7 @@ int(0)
 -- Iteration 23 --
 
 Warning: %s
-NULL
 -- Iteration 24 --
 
 Warning: %s
-NULL
 *** Done ***

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
@@ -252,16 +253,8 @@ void debuggerPreventReturnsToTC();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
-  return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
-}
-
 inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
   return (ActRec*)(intptr_t(ar) + intptr_t(offset * sizeof(TypedValue)));
-}
-
-inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
-  return arAtOffset(sp, offset);
 }
 
 void frame_free_locals_no_hook(ActRec* fp);
@@ -717,6 +710,12 @@ public:
   void pushFunc(Func* f) {
     m_top--;
     *m_top = make_tv<KindOfFunc>(f);
+  }
+
+  ALWAYS_INLINE
+  void pushClsMethNoRc(ClsMethDataRef clsMeth) {
+    m_top--;
+    *m_top = make_tv<KindOfClsMeth>(clsMeth);
   }
 
   ALWAYS_INLINE

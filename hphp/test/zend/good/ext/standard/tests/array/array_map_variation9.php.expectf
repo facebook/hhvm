@@ -11,42 +11,5 @@ array(4) {
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-array(4) {
-  [0]=>
-  array(1) {
-    ["hello"]=>
-    NULL
-  }
-  [1]=>
-  array(1) {
-    ["world"]=>
-    NULL
-  }
-  [2]=>
-  array(1) {
-    [1]=>
-    NULL
-  }
-  [3]=>
-  array(1) {
-    ["22.22"]=>
-    NULL
-  }
-}
+string(49) "callback2() expects exactly 2 parameters, 1 given"
 Done

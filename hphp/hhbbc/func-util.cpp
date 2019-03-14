@@ -24,8 +24,6 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_http_response_header("http_response_header");
-const StaticString s_php_errormsg("php_errormsg");
 const StaticString s_86metadata("86metadata");
 
 //////////////////////////////////////////////////////////////////////
@@ -47,9 +45,7 @@ bool is_volatile_local(const php::Func* func,
   // changed through $GLOBALS), but for now we don't bother.
   auto const& l = func->locals[lid];
   if (!l.name) return false;
-  return l.name->same(s_http_response_header.get()) ||
-         l.name->same(s_php_errormsg.get()) ||
-         l.name->same(s_86metadata.get());
+  return l.name->same(s_86metadata.get());
 }
 
 SString memoize_impl_name(const php::Func* func) {
@@ -70,51 +66,27 @@ namespace {
 
 using ExnNode = php::ExnNode;
 
-std::unique_ptr<ExnNode> cloneExnTree(
-  ExnNode* in,
-  BlockId delta,
-  hphp_fast_map<ExnNode*, ExnNode*>& processed) {
-
-  auto clone = std::make_unique<ExnNode>();
-  always_assert(!processed.count(in));
-  processed[in] = clone.get();
-
-  clone->id = in->id;
-  clone->depth = in->depth;
-  clone->parent = in->parent ? processed[in->parent] : nullptr;
-  clone->info = in->info;
-  for (auto& child : in->children) {
-    clone->children.push_back(cloneExnTree(child.get(), delta, processed));
-  }
-  if (delta) {
-    match<void>(clone->info,
-                [&](php::FaultRegion& fr) {
-                  fr.faultEntry += delta;
-                },
-                [&](php::CatchRegion& cr) {
-                  cr.catchEntry += delta;
-                });
-  }
-  return clone;
-}
-
 void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
   hphp_fast_map<ExnNode*, ExnNode*> processed;
 
   BlockId delta = dst->blocks.size();
-  for (auto& theirs : other.exnNodes) {
-    auto ours = cloneExnTree(theirs.get(), delta, processed);
-    dst->exnNodes.push_back(std::move(ours));
-  }
-
-  for (auto& theirs : other.blocks) {
-    auto ours = std::make_unique<php::Block>(*theirs);
-    if (theirs->exnNode) {
-      ours->exnNode = processed[theirs->exnNode];
-      assertx(ours->exnNode);
-    }
+  always_assert(!dst->exnNodes.size() || !other.exnNodes.size());
+  dst->exnNodes.reserve(dst->exnNodes.size() + other.exnNodes.size());
+  for (auto en : other.exnNodes) {
     if (delta) {
-      ours->id += delta;
+      match<void>(en.info,
+                  [&](php::FaultRegion& fr) {
+                    fr.faultEntry += delta;
+                  },
+                  [&](php::CatchRegion& cr) {
+                    cr.catchEntry += delta;
+                  });
+    }
+    dst->exnNodes.push_back(std::move(en));
+  }
+  for (auto theirs : other.blocks) {
+    if (delta) {
+      auto const ours = theirs.mutate();
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
       for (auto &id : ours->throwExits) id += delta;
       for (auto &id : ours->unwindExits) id += delta;
@@ -127,7 +99,7 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
         bc.forEachTarget([&] (BlockId& b) { b += delta; });
       }
     }
-    dst->blocks.push_back(std::move(ours));
+    dst->blocks.push_back(std::move(theirs));
   }
 }
 
@@ -144,8 +116,9 @@ bool append_func(php::Func* dst, const php::Func& src) {
   bool ok = false;
   for (auto& b : dst->blocks) {
     if (b->hhbcs.back().op != Op::RetC) continue;
-    b->hhbcs.back() = bc::PopC {};
-    b->fallthrough = dst->blocks.size();
+    auto const blk = b.mutate();
+    blk->hhbcs.back() = bc::PopC {};
+    blk->fallthrough = dst->blocks.size();
     ok = true;
   }
   if (!ok) return false;

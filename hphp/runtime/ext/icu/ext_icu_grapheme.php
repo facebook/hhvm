@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Function to extract a sequence of default grapheme clusters from a text
@@ -26,7 +26,7 @@
  *   default grapheme cluster boundary that conforms to the $size and
  *   $extract_type specified.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function grapheme_extract(string $haystack,
                           int $size,
                           int $extract_type = GRAPHEME_EXTR_COUNT,

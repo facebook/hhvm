@@ -201,7 +201,6 @@ void StandardExtension::initMisc() {
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);
     HHVM_FE(constant);
-    HHVM_FE(define);
     HHVM_FE(defined);
     HHVM_FE(ignore_user_abort);
     HHVM_FE(pack);
@@ -412,21 +411,6 @@ Variant HHVM_FUNCTION(constant, const String& name) {
 
   raise_warning("constant(): Couldn't find constant %s", data);
   return init_null();
-}
-
-bool HHVM_FUNCTION(define, const String& name, const Variant& value,
-              bool case_insensitive /* = false */) {
-  auto const warning =
-    "define() is deprecated and subject to removal from the Hack language";
-  switch (RuntimeOption::DisableDefine) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-  if (case_insensitive) {
-    raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
-  }
-  return Unit::defCns(name.get(), value.toCell());
 }
 
 bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {

@@ -53,7 +53,8 @@ $insert_stmt->execute();
 echo "Closing statement: " . var_export($insert_stmt->close(), true) . "\n";
 
 echo "Open BLOB with wrong parameter count\n";
-$stream = $db->openBlob();
+$stream = null;
+try { $stream = $db->openBlob(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($stream);
 echo "Done\n";
 ?>

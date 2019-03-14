@@ -1,35 +1,35 @@
-<?hh
+<?hh // partial
 
 namespace {
 /* Finds whether the given variable is a boolean.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_bool(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the type of the given variable is integer.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_int(<<__MaybeMutable>> mixed $var): bool;
 
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_integer(<<__MaybeMutable>> mixed $var): bool;
 
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_long(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the type of the given variable is float.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_float(<<__MaybeMutable>> mixed $var): bool;
 
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_double(<<__MaybeMutable>> mixed $var): bool;
 
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_real(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is numeric. Numeric strings consist of
@@ -43,7 +43,7 @@ function is_numeric(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the type given variable is string.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_string(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is a scalar.  Scalar variables are those
@@ -58,22 +58,22 @@ function is_scalar(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is an array.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_array(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is an object.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_object(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is a resource.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_resource(<<__MaybeMutable>> mixed $var): bool;
 
 /* Finds whether the given variable is NULL.
  */
-<<__IsFoldable, __Native, __ParamCoerceModeFalse, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function is_null(<<__MaybeMutable>> mixed $var): bool;
 
 /* Returns the type of the PHP variable var. Warning Never use gettype() to
@@ -157,7 +157,7 @@ function debug_zval_dump(mixed $variable): void;
 <<__IsFoldable, __Native>>
 function serialize(mixed $value): string;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function unserialize(string $str,
                      darray $options = darray[]): mixed;
 
@@ -196,33 +196,33 @@ namespace HH {
 
   /* Finds whether the given variable is a vec.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_vec(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a dict.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_dict(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a keyset.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_keyset(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_varray(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_darray(<<__MaybeMutable>> mixed $var): bool;
 
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_any_array(<<__MaybeMutable>> mixed $var): bool;
 
   /*
    * Check if the input is an array-like containing only integer keys running
    * from 0 to N-1, in that order.
    */
-  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  <<__Native, __IsFoldable, __Rx>>
   function is_list_like(<<__MaybeMutable>> arraylike $var): bool;
 
  /*

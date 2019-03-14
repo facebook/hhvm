@@ -70,7 +70,7 @@ $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
   // only list characters with a frequency > 0
-  var_dump(count_chars($input, 1));
+  try { var_dump(count_chars($input, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

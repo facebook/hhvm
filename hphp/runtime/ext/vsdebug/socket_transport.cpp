@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/vsdebug/socket_transport.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/socket_transport.h"
 
 #include <pwd.h>
 
@@ -47,6 +47,7 @@ SocketTransport::SocketTransport(
   // Create a set of pipe file descriptors to use to inform the thread
   // polling for socket connections that it's time to exit.
   createAbortPipe();
+  m_connectThread.setNoInitFini();
   m_connectThread.start();
 }
 

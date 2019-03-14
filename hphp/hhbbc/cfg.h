@@ -32,8 +32,8 @@ namespace HPHP { namespace HHBBC {
 namespace detail {
 
 template<class Fun>
-void visitExnLeaves(const php::ExnNode& n, Fun f) {
-  for (auto& c : n.children) visitExnLeaves(*c, f);
+void visitExnLeaves(const php::Func& func, const php::ExnNode& n, Fun f) {
+  for (auto& c : n.children) visitExnLeaves(func, func.exnNodes[c], f);
   f(n);
 }
 
@@ -63,20 +63,12 @@ inline bool is_single_nop(const php::Block& b) {
 BlockId next_real_block(const php::Func& func, BlockId id);
 
 /*
- * Call a function for every jump target of a given bytecode.  If the
- * bytecode has no targets, the function is not called.
+ * Call a function for every jump target of a given bytecode, or Op.
+ * If the bytecode has no targets, the function is not called.
  */
-template<class Fun>
-void forEachTakenEdge(const Bytecode& b, Fun f) {
+template<typename Bc, class Fun>
+void forEachTakenEdge(Bc& b, Fun f) {
   b.forEachTarget(f);
-}
-
-/*
- * Opcode version of the above, for use in other visitors.
- */
-template<class Fun, class T>
-void forEachTakenEdge(const T& op, Fun f) {
-  op.forEachTarget(f);
 }
 
 /*
@@ -108,8 +100,8 @@ void forEachSuccessor(const php::Block& block, Fun f) {
  * Call a function for every successor of `block' that is reachable
  * through a fallthrough or taken edge.
  */
-template<class Fun>
-void forEachNormalSuccessor(const php::Block& block, Fun f) {
+template<class Block, class Fun>
+void forEachNormalSuccessor(Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
@@ -129,8 +121,10 @@ void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
  * Obtain the blocks for a function in a reverse post order, starting
  * with the specified block.  The exact order is not specified.
  */
-std::vector<php::Block*>
-rpoSortFromBlock(const php::Func&, BlockId);
+std::vector<BlockId> rpoSortFromBlock(
+    const php::Func&,
+    BlockId,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* = nullptr);
 
 /*
  * Obtain the blocks for a function in a reverse post order, starting
@@ -138,7 +132,9 @@ rpoSortFromBlock(const php::Func&, BlockId);
  *
  * DV initializer blocks will not appear in this list.
  */
-std::vector<php::Block*> rpoSortFromMain(const php::Func&);
+std::vector<BlockId> rpoSortFromMain(
+    const php::Func&,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* = nullptr);
 
 /*
  * Obtain the blocks for a function in a reverse post order, taking
@@ -148,16 +144,16 @@ std::vector<php::Block*> rpoSortFromMain(const php::Func&);
  * virtual empty "entry" block, with edges to each DV entry point and
  * an edge to the main entry point.
  */
-std::vector<php::Block*> rpoSortAddDVs(const php::Func&);
+std::vector<BlockId> rpoSortAddDVs(const php::Func&);
 
 /*
  * Mappings from blocks to sets of blocks.
  *
- * The first level is indexed by block->id.  The second is a set of
+ * The first level is indexed by block id.  The second is a set of
  * block pointers.
  */
 using BlockToBlocks = std::vector<
-  boost::container::flat_set<php::Block*>
+  boost::container::flat_set<BlockId>
 >;
 
 /*
@@ -169,7 +165,7 @@ using BlockToBlocks = std::vector<
  * in the list.
  */
 BlockToBlocks
-computeNonThrowPreds(const std::vector<php::Block*>&);
+computeNonThrowPreds(const php::Func&, const std::vector<BlockId>&);
 
 /*
  * Find the immediate throw predecessors for each block in an
@@ -180,7 +176,7 @@ computeNonThrowPreds(const std::vector<php::Block*>&);
  * in the list.
  */
 BlockToBlocks
-computeThrowPreds(const std::vector<php::Block*>&);
+computeThrowPreds(const php::Func&, const std::vector<BlockId>&);
 
 /*
  * Visit each leaf in the ExnNode tree.
@@ -188,7 +184,7 @@ computeThrowPreds(const std::vector<php::Block*>&);
 template<class Fun>
 void visitExnLeaves(const php::Func& func, Fun f) {
   for (auto& n : func.exnNodes) {
-    detail::visitExnLeaves(*n, f);
+    detail::visitExnLeaves(func, n, f);
   }
 }
 

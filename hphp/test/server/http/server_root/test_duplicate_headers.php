@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 show(getallheaders());
 show(HH\get_headers_secure());

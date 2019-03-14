@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -81,6 +82,7 @@ public:
   bool isResource()  const { return isResourceType(getType()); }
   bool isFunc()      const { return isFuncType(getType()); }
   bool isClass()     const { return isClassType(getType()); }
+  bool isClsMeth()   const { return isClsMethType(getType()); }
 
   bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
   bool isReferenced() const {
@@ -125,6 +127,12 @@ public:
     assertx(isClass());
     return isRefType(type(m_val)) ? val(m_val).pref->cell()->m_data.pclass
       : val(m_val).pclass;
+  }
+
+  ClsMethDataRef toClsMethVal() const {
+    assertx(isClsMeth());
+    return isRefType(type(m_val)) ? val(m_val).pref->cell()->m_data.pclsmeth
+      : val(m_val).pclsmeth;
   }
 
   int getRefCount() const noexcept {
@@ -355,6 +363,13 @@ struct Variant : private TypedValue {
     m_type = KindOfClass;
     m_data.pclass = v;
   }
+
+  /* implicit */ Variant(const ClsMethDataRef v) {
+    m_type = KindOfClsMeth;
+    m_data.pclsmeth = v;
+    v->incRefCount();
+  }
+
   /*
    * Explicit conversion constructors. These all manipulate ref-counts of bare
    * pointers as a side-effect, so we want to be explicit when its happening.
@@ -881,6 +896,9 @@ struct Variant : private TypedValue {
   bool isClass() const {
     return isClassType(getType());
   }
+  bool isClsMeth() const {
+    return isClsMethType(getType());
+  }
 
   bool isNumeric(bool checkString = false) const noexcept;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
@@ -910,6 +928,7 @@ struct Variant : private TypedValue {
       case KindOfArray:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
@@ -1189,6 +1208,10 @@ struct Variant : private TypedValue {
   auto toClassVal() const {
     return const_variant_ref{*this}.toClassVal();
   }
+  ClsMethDataRef toClsMethVal() const {
+    return const_variant_ref{*this}.toClsMethVal();
+  }
+
   /*
    * Low level access that should be restricted to internal use.
    */
@@ -1595,6 +1618,7 @@ struct VRefParamValue {
   bool isArray() const { return m_var.isArray(); }
   bool isHackArray() const { return m_var.isHackArray(); }
   bool isPHPArray() const { return m_var.isPHPArray(); }
+  bool isClsMeth() const { return m_var.isClsMeth(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
 
   RefData* getRefData() const {
@@ -1709,6 +1733,9 @@ private:
       case KindOfShape:
       case KindOfArray:
         assertx(m_data.parr->checkCount());
+        return;
+      case KindOfClsMeth:
+        assertx(m_data.pclsmeth->checkCount());
         return;
       case KindOfObject:
         assertx(m_data.pobj->checkCount());

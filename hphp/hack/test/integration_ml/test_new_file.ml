@@ -13,7 +13,7 @@ open ServerEnv
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh
+let foo_contents = "<?hh // partial
 
 {
 "

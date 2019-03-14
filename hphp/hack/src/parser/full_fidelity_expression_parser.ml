@@ -193,8 +193,6 @@ module WithStatementAndDeclAndTypeParser
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in
     match (Token.kind token) with
-    (* TODO: Make these an error in Hack *)
-    | ExecutionStringLiteral
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -216,9 +214,6 @@ module WithStatementAndDeclAndTypeParser
     | DoubleQuotedStringLiteralHead ->
       parse_double_quoted_like_string
         parser1 token Lexer.Literal_double_quoted
-    | ExecutionStringLiteralHead ->
-      parse_double_quoted_like_string
-        parser1 token Lexer.Literal_execution_string
     | Variable -> parse_variable_or_lambda parser
     | XHPClassName ->
       let (parser, token) = Make.token parser1 token in
@@ -230,7 +225,6 @@ module WithStatementAndDeclAndTypeParser
       in
       let (parser1, str_maybe) = next_token_no_trailing parser in
       begin match Token.kind str_maybe with
-      | ExecutionStringLiteral | ExecutionStringLiteralHead
       | SingleQuotedStringLiteral | NowdocStringLiteral
       | HeredocStringLiteral | HeredocStringLiteralHead ->
         (* Treat as an attempt to prefix a non-double-quoted string *)
@@ -309,6 +303,7 @@ module WithStatementAndDeclAndTypeParser
     | Define -> parse_define_expression parser
     | HaltCompiler -> parse_halt_compiler_expression parser
     | Eval -> parse_eval_expression parser
+    | PUAtom -> parse_pocket_atom parser
     | kind when Parser.expects parser kind ->
       (* ERROR RECOVERY: if we've prematurely found a token we're expecting
        * later, mark the expression missing, throw an error, and do not advance
@@ -650,22 +645,16 @@ module WithStatementAndDeclAndTypeParser
       let k = match (Token.kind head, Token.kind token) with
       | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteral
-      | (ExecutionStringLiteralHead, ExecutionStringLiteralTail) ->
-        ExecutionStringLiteral
       | (HeredocStringLiteralHead, HeredocStringLiteralTail) ->
         HeredocStringLiteral
       | (DoubleQuotedStringLiteralHead, _) ->
         DoubleQuotedStringLiteralHead
-      | (ExecutionStringLiteralHead, _) ->
-        ExecutionStringLiteralHead
       | (HeredocStringLiteralHead, _) ->
         HeredocStringLiteralHead
       | (_, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteralTail
       | (_, HeredocStringLiteralTail) ->
         HeredocStringLiteralTail
-      | (_, ExecutionStringLiteralTail) ->
-        ExecutionStringLiteralTail
       | _ ->
         StringLiteralBody
       in
@@ -680,8 +669,7 @@ module WithStatementAndDeclAndTypeParser
       let token = match Token.kind token with
       | StringLiteralBody
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail
-      | ExecutionStringLiteralTail ->
+      | DoubleQuotedStringLiteralTail ->
         token
       | _ ->
         Token.with_kind token StringLiteralBody
@@ -810,8 +798,7 @@ module WithStatementAndDeclAndTypeParser
       let (parser1, token) = next_token_in_string parser literal_kind in
       match Token.kind token with
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail
-      | ExecutionStringLiteralTail ->
+      | DoubleQuotedStringLiteralTail ->
         put_opt parser1 (merge token head) acc
       | LeftBrace ->
         handle_left_brace parser head acc
@@ -1299,56 +1286,8 @@ module WithStatementAndDeclAndTypeParser
         new object-creation-what
     *)
     let (parser, new_token) = assert_token parser New in
-    let (parser, new_what) =
-      let (parser1, token) = next_token parser in
-      begin match Token.kind token with
-      | Class -> parse_anonymous_class token parser1
-      | _ -> parse_constructor_call parser
-      end
-    in
+    let (parser, new_what) = parse_constructor_call parser in
     Make.object_creation_expression parser new_token new_what
-
-  and parse_anonymous_class class_token parser =
-    let (parser, class_token) = Make.token parser class_token in
-    let (parser, left, args, right) =
-      if peek_token_kind parser = LeftParen
-      then parse_expression_list_opt parser
-      else
-        let (parser, missing1) = Make.missing parser (pos parser) in
-        let (parser, missing2) = Make.missing parser (pos parser) in
-        let (parser, missing3) = Make.missing parser (pos parser) in
-        (parser, missing1, missing2, missing3)
-    in
-    let parser
-        , ( classish_extends
-          , classish_extends_list
-          , classish_implements
-          , classish_implements_list
-          , body
-          )
-    = with_decl_parser parser
-      (fun decl_parser ->
-        let (decl_parser, classish_extends, classish_extends_list) =
-          DeclParser.parse_classish_extends_opt decl_parser in
-        let (decl_parser, classish_implements, classish_implements_list) =
-          DeclParser.parse_classish_implements_opt decl_parser in
-        let (decl_parser, body) = DeclParser.parse_classish_body decl_parser in
-        decl_parser
-        , ( classish_extends
-          , classish_extends_list
-          , classish_implements
-          , classish_implements_list
-          , body
-          )
-      )
-    in
-    Make.anonymous_class
-      parser
-      class_token
-      left args right
-      classish_extends classish_extends_list
-      classish_implements classish_implements_list
-      body
 
   and parse_constructor_call parser =
     (* SPEC
@@ -2685,6 +2624,10 @@ module WithStatementAndDeclAndTypeParser
         require_name_or_variable_or_error parser SyntaxError.error1048
     in
     Make.scope_resolution_expression parser qualifier op name
+
+  and parse_pocket_atom parser =
+    let (parser1, atom) = assert_token parser PUAtom in
+    Make.pocket_atom_expression parser1 atom
 end
 end (* WithSmartConstructors *)
 end (* WithSyntax *)

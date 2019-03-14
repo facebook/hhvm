@@ -1,9 +1,7 @@
 //// file1.php
-<?hh
+<?hh // partial
 
-function foo(): X {
-  return new X();
-}
+function foo() {}
 
 //// file2.php
 <?hh // strict

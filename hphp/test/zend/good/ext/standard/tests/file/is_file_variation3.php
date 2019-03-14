@@ -27,7 +27,7 @@ $filenames = array(
    
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
-  var_dump( is_file($filename) );
+  try { var_dump( is_file($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   clearstatcache();
 }
 fclose($file_handle);

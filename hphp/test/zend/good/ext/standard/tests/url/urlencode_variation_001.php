@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto string urlencode(string str)
- * Description: URL-encodes string 
+ * Description: URL-encodes string
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt
@@ -70,8 +70,8 @@ $values = array(
 // loop through each element of the array for str
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( urlencode($value) );
+      echo "\nArg value $value\n";
+      try { var_dump( urlencode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

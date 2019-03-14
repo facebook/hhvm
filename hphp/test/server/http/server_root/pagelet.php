@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 ob_start();
 echo "one";

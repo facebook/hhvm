@@ -183,12 +183,12 @@ echo "===================== function statics =========================\n";
 
 trait T6
 {
+
+    private static $fV = 0;
     public function f()
     {
         echo "Inside " . __METHOD__ . "\n";
-
-        static $v = 0;          // static is class-specific
-        echo "\$v = " . $v++ . "\n";
+        echo "\$v = " . self::$fV++ . "\n";
     }
 }
 

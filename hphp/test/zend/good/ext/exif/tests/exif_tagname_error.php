@@ -8,11 +8,11 @@
 echo "*** Testing exif_tagname() : error conditions ***\n";
 
 echo "\n-- Testing exif_tagname() function with no arguments --\n";
-var_dump( exif_tagname() );
+try { var_dump( exif_tagname() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing exif_tagname() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( exif_tagname(0x10E, $extra_arg) );
+try { var_dump( exif_tagname(0x10E, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===Done===

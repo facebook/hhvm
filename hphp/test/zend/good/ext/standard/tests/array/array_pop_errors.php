@@ -26,7 +26,7 @@ $mixed_array = array(
 echo "\n*** Testing Error Conditions ***\n";
 
 /* Zero argument  */
-var_dump( array_pop() );
+try { var_dump( array_pop() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar argument */
 var_dump( array_pop(&$number) );
@@ -35,7 +35,7 @@ var_dump( array_pop(&$number) );
 var_dump( array_pop(&$str) );
 
 /* Invalid Number of arguments */
-var_dump( array_pop(&$mixed_array[1],$mixed_array[2]) );
+try { var_dump( array_pop(&$mixed_array[1],$mixed_array[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Empty Array as argument */
 var_dump( array_pop(&$empty_array) );

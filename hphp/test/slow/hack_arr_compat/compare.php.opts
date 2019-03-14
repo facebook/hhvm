@@ -1,3 +1,4 @@
 -vEval.HackArrCompatNotices=1
 -vEval.HackArrCompatCheckCompare=1
 -vEval.JitMaxTranslations=500000
+-vEval.EnablePHP=1

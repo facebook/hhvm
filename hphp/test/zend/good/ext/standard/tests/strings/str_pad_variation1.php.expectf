@@ -18,15 +18,12 @@ string(20) "101234567000        "
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 string(20) "1                   "
 -- Iteration 13 --
@@ -44,7 +41,6 @@ string(20) "sample object       "
 -- Iteration 19 --
 
 Warning: %s
-NULL
 -- Iteration 20 --
 string(20) "                    "
 -- Iteration 21 --

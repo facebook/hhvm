@@ -1,0 +1,4 @@
+EROOR: Creating default object from empty value
+
+Warning: str_repeat() expects parameter 2 to be integer, string given in %s/hphp/test/zend/good/Zend/tests/bug54265_modified.php on line 19
+int(0)

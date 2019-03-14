@@ -1,8 +1,11 @@
 <?php
 
+abstract final class ErrStatics {
+  public static $x = 0;
+}
+
 function err() {
-  static $x = 0;
-  if (++$x == 2) throw new Exception('asd');
+  if (++ErrStatics::$x == 2) throw new Exception('asd');
 }
 
 function main() {

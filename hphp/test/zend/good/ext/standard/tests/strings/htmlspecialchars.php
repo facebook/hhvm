@@ -34,7 +34,7 @@ var_dump( htmlspecialchars($str, ENT_COMPAT) );
 
 echo "\n*** Testing error conditions ***\n";
 /* zero argument */
-var_dump( htmlspecialchars() );
+try { var_dump( htmlspecialchars() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* giving arguments more than expected */
 var_dump( htmlspecialchars("<br>",ENT_QUOTES,'iso-8859-1', "test2") );

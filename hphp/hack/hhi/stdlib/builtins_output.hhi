@@ -38,10 +38,7 @@ function ob_gzhandler($buffer, $mode) { }
 function ob_implicit_flush(bool $flag = true) { }
 <<__PHPStdLib>>
 function ob_list_handlers() { }
-<<__PHPStdLib>>
-function output_add_rewrite_var(string $name, string $value) { }
-<<__PHPStdLib>>
-function output_reset_rewrite_vars() { }
+
 <<__PHPStdLib>>
 function hphp_crash_log(string $name, string $value);
 <<__PHPStdLib>>

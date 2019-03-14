@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@
 newtype fbid = int;
 
 //// file2.php
-<?hh
+<?hh // partial
 
 function test(fbid $x): int {
   return $x;

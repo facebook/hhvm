@@ -1648,6 +1648,27 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Unreachable code kills every memory location.
     return may_load_store_kill(AEmpty, AEmpty, AUnknown);
 
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList: {
+    auto const extra = inst.extra<StackRangeData>();
+    auto const stack_in = AStack {
+      inst.src(0),
+      extra->offset + static_cast<int32_t>(extra->size) - 1,
+      static_cast<int32_t>(extra->size)
+    };
+    return may_load_store(stack_in, AEmpty);
+  }
+
+  case ResolveTypeStruct: {
+    auto const extra = inst.extra<ResolveTypeStructData>();
+    auto const stack_in = AStack {
+      inst.src(0),
+      extra->offset + static_cast<int32_t>(extra->size) - 1,
+      static_cast<int32_t>(extra->size)
+    };
+    return may_load_store(AliasClass(stack_in)|AHeapAny, AHeapAny);
+  }
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1783,6 +1804,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Select:
   case LookupSPropSlot:
   case ConvPtrToLval:
+  case MangleReifiedName:
     return IrrelevantEffects {};
 
   case StClosureArg:
@@ -2034,6 +2056,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseNotice:
   case RaiseWarning:
   case RaiseMissingThis:
+  case RaiseHasThisNeedStatic:
   case FatalMissingThis:
   case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
@@ -2154,7 +2177,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpCell:
   case SetOpCellVerify:
   case AsTypeStruct:
-  case ResolveTypeStruct:
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:
     return may_load_store(AHeapAny, AHeapAny);
@@ -2348,26 +2370,11 @@ MemEffects memory_effects(const IRInstruction& inst) {
       return may_load_store(AUnknown, AUnknown);
     };
 
-    // Modify a GeneralEffects for instructions that could call the user error
-    // handler for the current frame (ie something that can raise a
-    // warning/notice/error, or a builtin call), because the error handler gets
-    // a context array which contains all the locals.
-    auto may_raise = [&] (GeneralEffects x) {
-      return may_reenter(
-        inst,
-        GeneralEffects {
-          x.loads |
-            (RuntimeOption::EnableContextInErrorHandler ? AFrameAny : AEmpty),
-          x.stores, x.moves, x.kills
-        }
-      );
-    };
-
     // Calls are implicitly MayRaise, all other instructions must use the
     // GeneralEffects or UnknownEffects class of memory effects
     return match<MemEffects>(
       inner,
-      [&] (GeneralEffects x)   { return may_raise(x); },
+      [&] (GeneralEffects x)   { return may_reenter(inst, x); },
       [&] (CallEffects x)      { return x; },
       [&] (UnknownEffects x)   { return x; },
       [&] (PureLoad)           { return fail(); },

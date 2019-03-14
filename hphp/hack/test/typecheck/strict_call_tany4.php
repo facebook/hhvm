@@ -1,5 +1,5 @@
 //// partial.php
-<?hh
+<?hh // partial
 
 async function any() {
   return new D();

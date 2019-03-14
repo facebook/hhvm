@@ -1,0 +1,6 @@
+File "explicit_type_collection_generic_mismatch1.php", line 4, characters 10-37:
+Some elements in this Vector are incompatible (Typing[4110])
+File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
+This is a value of generic type T
+File "explicit_type_collection_generic_mismatch1.php", line 4, characters 33-36:
+It is incompatible with null

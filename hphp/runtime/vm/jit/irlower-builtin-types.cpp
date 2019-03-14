@@ -43,7 +43,7 @@ TRACE_SET_MOD(irlower);
 
 /*
  * Attempt to convert `tv' to a given type, raising a warning and throwing a
- * TVCoercionException on failure.
+ * Exception on failure.
  */
 #define XX(kind, expkind)                                             \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
@@ -67,10 +67,13 @@ void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
     }                                                                 \
     return;                                                           \
   }                                                                   \
-  raise_param_type_warning(callee->displayName()->data(),             \
-                           arg_num, KindOf##expkind, tv->m_type);     \
-  throw TVCoercionException(callee, arg_num, tv->m_type,              \
-                            KindOf##expkind);                         \
+  auto msg = param_type_error_message(callee->displayName()->data(),  \
+                                      arg_num, KindOf##expkind,       \
+                                      tv->m_type);                    \
+  if (RuntimeOption::PHP7_EngineExceptions) {                         \
+    SystemLib::throwTypeErrorObject(msg);                             \
+  }                                                                   \
+  SystemLib::throwRuntimeExceptionObject(msg);                        \
 }
 #define X(kind) XX(kind, kind)
 X(Boolean)

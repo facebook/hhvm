@@ -28,19 +28,23 @@ string(12) "737472696e67"
 string(12) "737472696e67"
 
 --empty array--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --int indexed array--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --associative array--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --nested arrays--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --uppercase NULL--
@@ -80,11 +84,13 @@ string(12) "737472696e67"
 string(12) "737472696e67"
 
 --instance of classWithToString--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 
 --undefined var--
@@ -94,6 +100,7 @@ string(8) "5f76616c"
 string(8) "5f76616c"
 
 --resource--
-Error: 2 - mb_strstr() expects parameter 3 to be boolean, resource given, %s(%d)
+
+Warning: mb_strstr() expects parameter 3 to be boolean, resource given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strstr_variation3.php on line 113
 bool(false)
 ===DONE===

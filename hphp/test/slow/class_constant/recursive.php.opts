@@ -1,1 +1,2 @@
 --count=24
+-vEval.EnablePHP=1

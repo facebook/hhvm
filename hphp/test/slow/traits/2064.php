@@ -2,7 +2,7 @@
 
 trait T {
   public function goo() {
-    return get_called_class();
+    return static::class;
   }
   public function foo() {
      return self::goo();

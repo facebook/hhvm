@@ -1,12 +1,12 @@
 module Test = Integration_test_base
 
-let foo_contents = Printf.sprintf {|<?hh
+let foo_contents = Printf.sprintf {|<?hh // partial
 
 function woot() {}
 %s
 |}
 
-let baz_contents = {|<?hh
+let baz_contents = {|<?hh // partial
 class Baz {
   public function f() { woot(); }
 }

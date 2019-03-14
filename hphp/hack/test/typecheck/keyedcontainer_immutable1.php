@@ -1,5 +1,5 @@
 <?hh // strict
 
-function test(KeyedContainer<mixed, mixed> $kc): void {
+function test(KeyedContainer<arraykey, mixed> $kc): void {
   $kc[] = 1;
 }

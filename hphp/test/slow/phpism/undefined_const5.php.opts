@@ -1,2 +1,3 @@
 -vHack.Lang.Phpism.UndefinedConstAsString=false
 -vHack.Lang.Phpism.UndefinedConstFallback=2
+-vEval.EnablePHP=1

@@ -19,9 +19,9 @@ class E {
   const type T = D;
 }
 
-var_dump(type_structure(\C::class, 'T'));
-var_dump(type_structure(\C::class, 'U'));
-var_dump(type_structure(D::class, 'T'));
-var_dump(type_structure(D::class, 'U'));
-var_dump(type_structure(E::class, 'T'));
+\var_dump(type_structure(\C::class, 'T'));
+\var_dump(type_structure(\C::class, 'U'));
+\var_dump(type_structure(D::class, 'T'));
+\var_dump(type_structure(D::class, 'U'));
+\var_dump(type_structure(E::class, 'T'));
 }

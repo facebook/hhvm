@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,4 +11,10 @@
 
 async function foo(): Awaitable<void> {
   $bar = await SomePreparable::gen();
+}
+
+class SomePreparable {
+  public static async function gen(): Awaitable<int> {
+    return 0;
+  }
 }

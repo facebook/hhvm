@@ -1,9 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+abstract final class FStatics {
+  public static $counter = 0;
+}
+
 function f() {
-  static $counter = 0;
-  return $counter++;
+  return FStatics::$counter++;
 }
 
 function big_keyset() {

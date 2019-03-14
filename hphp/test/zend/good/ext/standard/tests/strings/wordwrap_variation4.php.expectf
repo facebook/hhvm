@@ -22,23 +22,18 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 16 --
@@ -46,7 +41,6 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 17 --
 
 Warning: %s
-NULL
 -- Iteration 18 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 19 --

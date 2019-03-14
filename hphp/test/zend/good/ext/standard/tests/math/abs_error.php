@@ -14,10 +14,10 @@ $arg_0 = 1.0;
 $extra_arg = 1;
 
 echo "\nToo many arguments\n";
-var_dump(abs($arg_0, $extra_arg));
+try { var_dump(abs($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nToo few arguments\n";
-var_dump(abs());
+try { var_dump(abs()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===Done===

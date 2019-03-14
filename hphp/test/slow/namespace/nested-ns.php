@@ -3,7 +3,7 @@ namespace Foo {
 
 class Biz {
   function wat() {
-    var_dump(get_class());
+    \var_dump(\get_class());
   }
 }
 
@@ -11,7 +11,7 @@ namespace Bar {
 
 class Baz {
   function wat() {
-    var_dump(get_class());
+    \var_dump(\get_class());
   }
 }
 
@@ -19,7 +19,7 @@ class Baz {
 
 class Fiz {
   function wat() {
-    var_dump(get_class());
+    \var_dump(\get_class());
   }
 }
 

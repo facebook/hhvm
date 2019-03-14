@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,3 +13,5 @@ function test($x): array<int, A> {
   $v = (array)0;
   return $v;
 }
+
+class A {}

@@ -231,6 +231,7 @@ module NastCheck                            = struct
   | NonstaticMethodInAbstractFinalClass
   | MutableOnStaticDEPRECATED
   | ClassnameConstInstanceOf
+  | ByRefParamOnConstruct
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -389,9 +390,9 @@ module Typing                               = struct
   | InvalidMemoizedParam
   | IllegalTypeStructure
   | NotNullableCompareNullTrivial
-  | ClassPropertyOnlyStaticLiteral
+  | ClassPropertyOnlyStaticLiteralDEPRECATED
   | AttributeTooFewArguments
-  | ReferenceExpr
+  | ReferenceExprDEPRECATED
   | UnificationCycle
   | KeysetSet
   | EqIncompatibleTypes
@@ -536,13 +537,17 @@ module Typing                               = struct
   | UnknownObjectMember
   | UnknownType
   | InvalidArrayKey
-  | ReferenceExprPartial
+  | ReferenceExprNotFunctionArg
   | RedundantRxCondition
   | RedeclaringMissingMethod
   | InvalidEnforceableTypeArgument
   | RequireArgsReify
   | TypecheckerTimeout
   | ErasedGenericPassedToReified
+  | GenericsNotAllowed
+  | InvalidNewableTypeArgument
+  | InvalidNewableTypeParamConstraints
+  | NewWithoutNewable
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

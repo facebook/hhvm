@@ -92,32 +92,6 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                            /* check ref */ true);
 }
 
-Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
-                      const Array& params) {
-  auto const warning = "forward_static_call_array() is deprecated and subject"
-  " to removal from the Hack language";
-  switch (RuntimeOption::DisableForwardStaticCallArray) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-  return HHVM_FN(forward_static_call)(function, params);
-}
-
-Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
-                              const Array& params /* = null_array */) {
-  auto const warning = "forward_static_call() is deprecated and subject"
-  " to removal from the Hack language";
-  switch (RuntimeOption::DisableForwardStaticCall) {
-    case 0:  break;
-    case 1:  raise_warning(warning); break;
-    default: raise_error(warning);
-  }
-  // Setting the bound parameter to true tells vm_call_user_func()
-  // propogate the current late bound class
-  return vm_call_user_func(function, params, true, /* check ref */ true);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
@@ -236,21 +210,6 @@ Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset) {
   FUNC_GET_ARGS_IMPL(offset);
 }
 
-int64_t HHVM_FUNCTION(func_num_args) {
-  EagerCallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
-  if (ar == nullptr) {
-    return -1;
-  }
-  if (ar->func()->isPseudoMain()) {
-    raise_warning(
-      "func_num_args():  Called from the global scope - no function context"
-    );
-    return -1;
-  }
-  return ar->numArgs();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(register_postsend_function, const Variant& function,
@@ -271,12 +230,9 @@ void StandardExtension::initFunction() {
   HHVM_FE(is_callable);
   HHVM_FE(call_user_func);
   HHVM_FE(call_user_func_array);
-  HHVM_FE(forward_static_call_array);
-  HHVM_FE(forward_static_call);
   HHVM_FE(func_get_arg);
   HHVM_FE(func_get_args);
   HHVM_FALIAS(__SystemLib\\func_slice_args, SystemLib_func_slice_args);
-  HHVM_FE(func_num_args);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
 

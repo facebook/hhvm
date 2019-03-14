@@ -5,12 +5,12 @@
  */
 
 echo "*** Testing is_dir() error conditions ***";
-var_dump( is_dir() );  // Zero No. of args
+try { var_dump( is_dir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero No. of args
 
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/is_dir_error";
 mkdir($dir_name);
-var_dump( is_dir($dir_name, "is_dir_error1") ); // args > expected no.of args
+try { var_dump( is_dir($dir_name, "is_dir_error1") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected no.of args
 
 /* Non-existing dir */
 var_dump( is_dir("/no/such/dir") );

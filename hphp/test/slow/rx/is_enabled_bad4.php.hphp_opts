@@ -1,1 +1,2 @@
 -vRuntime.Eval.RxIsEnabled=true
+-vEval.EnablePHP=1

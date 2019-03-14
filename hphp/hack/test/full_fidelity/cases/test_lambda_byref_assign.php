@@ -1,6 +1,6 @@
 <?hh // strict
 
-$f = &() ==> { static $x; return $x; }; // error
+$f = &() ==> { $x = 5; return $x; }; // error
 $x = &$foo->bar?->baz; // error
 
 $f = &$x; // legal

@@ -3,6 +3,5 @@
 -- Wrong nmumber of arguments --
 
 Warning: %s
-NULL
 float(500)
 ===Done===

@@ -37,20 +37,20 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 
 --int indexed array--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 
 --associative array--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 
 --nested arrays--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 
 --uppercase NULL--
 Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
@@ -89,8 +89,8 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, object given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, object given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 
 --undefined var--
 Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
@@ -101,6 +101,6 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, resource given, %s(%d)
-NULL
+
+Warning: mcrypt_encrypt() expects parameter 4 to be string, resource given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 107
 ===DONE===

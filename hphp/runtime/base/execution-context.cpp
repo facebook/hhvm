@@ -120,8 +120,10 @@ ExecutionContext::ExecutionContext()
     RuntimeOption::SerializationSizeLimit;
   tvWriteUninit(m_headerCallback);
 
-  m_shutdowns = Array::CreateDArray();
-  m_shutdownsBackup = Array::CreateDArray();
+  m_shutdowns[ShutdownType::ShutDown] = empty_vec_array();
+  m_shutdowns[ShutdownType::PostSend] = empty_vec_array();
+  m_shutdownsBackup[ShutdownType::ShutDown] = empty_vec_array();
+  m_shutdownsBackup[ShutdownType::PostSend] = empty_vec_array();
 }
 
 namespace rds { namespace local {
@@ -534,28 +536,35 @@ void ExecutionContext::resetCurrentBuffer() {
 void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                 Array arguments,
                                                 ShutdownType type) {
-  Array callback = make_map_array(s_name, function, s_args, arguments);
-  if (!m_shutdowns.exists(type)) {
-    m_shutdowns.set(type, Array::CreateVArray());
-  }
-  auto const funcs = m_shutdowns.lvalAt(type);
-  forceToDArray(funcs).append(callback);
+  auto& funcs = m_shutdowns[type];
+  assertx(funcs.isVecArray());
+  funcs.append(make_dict_array(
+    s_name, function,
+    s_args, arguments
+  ));
 }
+
 
 bool ExecutionContext::removeShutdownFunction(const Variant& function,
                                               ShutdownType type) {
   bool ret = false;
-  auto& funcs = forceToDArray(m_shutdowns.lvalAt(type));
-  VArrayInit newFuncs(funcs.size());
+  auto const& funcs = m_shutdowns[type];
+  assertx(funcs.isVecArray());
+  VecArrayInit newFuncs(funcs.size());
 
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    if (!same(iter.second().toArray()[s_name], function)) {
-      newFuncs.appendWithRef(iter.secondVal());
-    } else {
-      ret = true;
+  IterateV(
+    funcs.get(),
+    [&] (TypedValue v) {
+      auto const& arr = asCArrRef(&v);
+      assertx(arr->isDict());
+      if (!same(arr[s_name], function)) {
+        newFuncs.append(v);
+      } else {
+        ret = true;
+      }
     }
-  }
-  funcs = newFuncs.toArray();
+  );
+  m_shutdowns[type] = newFuncs.toArray();
   return ret;
 }
 
@@ -650,24 +659,23 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
   RID().resetTimer(RuntimeOption::PspTimeoutSeconds);
   RID().resetCPUTimer(RuntimeOption::PspCpuTimeoutSeconds);
 
-  if (m_shutdowns.exists(type)) {
-    SCOPE_EXIT {
-      try { m_shutdowns.remove(type); } catch (...) {}
-    };
-    // We mustn't destroy any callbacks until we're done with all
-    // of them. So hold them in tmp.
-    Array tmp;
-    while (true) {
-      auto const lval = m_shutdowns.lvalAt(type);
-      if (!isArrayLikeType(lval.unboxed().type())) break;
-      auto funcs = tvCastToArrayLike(lval.tv());
-      tvUnset(lval);
-      for (int pos = 0; pos < funcs.size(); ++pos) {
-        Array callback = funcs[pos].toArray();
-        vm_call_user_func(callback[s_name], callback[s_args].toArray());
+  // We mustn't destroy any callbacks until we're done with all
+  // of them. So hold them in tmp.
+  // XXX still true in a world without destructors?
+  auto tmp = empty_vec_array();
+  while (true) {
+    Array funcs = m_shutdowns[type];
+    if (funcs.empty()) break;
+    m_shutdowns[type] = empty_vec_array();
+    IterateV(
+      funcs.get(),
+      [](TypedValue v) {
+        auto const& cb = asCArrRef(&v);
+        assertx(cb->isDict());
+        vm_call_user_func(cb[s_name], cb[s_args].toArray());
       }
-      tmp.append(funcs);
-    }
+    );
+    tmp.append(funcs);
   }
 }
 
@@ -743,8 +751,7 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
   if (UNLIKELY(m_throwAllErrors)) {
     throw Exception(folly::sformat("throwAllErrors: {}", errnum));
   }
-  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum) ||
-      RID().hasTrackErrors()) {
+  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum)) {
     return true;
   }
   if (callUserHandler) {
@@ -783,7 +790,6 @@ const StaticString
   s_file("file"),
   s_function("function"),
   s_line("line"),
-  s_php_errormsg("php_errormsg"),
   s_error_num("error-num"),
   s_error_string("error-string"),
   s_error_file("error-file"),
@@ -849,26 +855,8 @@ void ExecutionContext::handleError(const std::string& msg,
     not_reached();
   }
   if (!handled) {
-    VMRegAnchor _;
-    auto fp = vmfp();
 
-    if (RID().hasTrackErrors() && fp) {
-      // Set $php_errormsg in the parent scope
-      Variant msg(ee.getMessage());
-      if (fp->func()->isBuiltin()) {
-        fp = getPrevVMState(fp);
-      }
-      assertx(fp);
-      auto id = fp->func()->lookupVarId(s_php_errormsg.get());
-      if (!RuntimeOption::DisableReservedVariables) {
-        if (id != kInvalidId) {
-          auto local = frame_local(fp, id);
-          tvSet(*msg.asTypedValue(), *tvToCell(local));
-        } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-          fp->getVarEnv()->set(s_php_errormsg.get(), msg.asTypedValue());
-        }
-      }
-    }
+
 
     // If we're inside an error handler already, queue it up on the deferred
     // list.
@@ -921,16 +909,12 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
-      auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = RuntimeOption::EnableContextInErrorHandler
-        ? getDefinedVariables(ar)
-        : empty_array();
       m_deferredErrors = Array::CreateVec();
       SCOPE_EXIT { m_deferredErrors = Array::CreateVec(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
-                     fileAndLine.first, fileAndLine.second, context,
+                     fileAndLine.first, fileAndLine.second, empty_darray(),
                      backtrace)),
                 false)) {
         return true;
@@ -1215,10 +1199,12 @@ void ExecutionContext::onLoadWithOptions(
     return;
   }
   if (m_requestOptions != opts) {
+    auto const path =
+      opts.path().empty() ? "{default options}" : opts.path().data();
     raise_error(
       "Attempting to load file %s with incompatible parser settings from %s, "
       "this request is using parser settings from %s",
-      f, opts.path().data(), m_requestOptions->path().data()
+      f, path, m_requestOptions->path().data()
     );
   }
 }

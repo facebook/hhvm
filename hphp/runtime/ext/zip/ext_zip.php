@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A file archive, compressed with Zip.
@@ -373,6 +373,42 @@ class ZipArchive {
   <<__Native>>
   function setCompressionNAme(string $name, int $comp_method,
                               int $comp_flags = 0): bool;
+
+  /**
+   *
+   * Set the encryption method of an entry defined by its index.
+   * NOTE: Zip encryption is not secure. Do not use this method unless forced
+   * to by external requirments.
+   *
+   * @param int $index - Index of the entry.
+   * @param int $encryption_method - The encryption method. Either
+   *   ZipArchive::EM_NONE, ZipArchive::EM_AES_128, ZipArchive::EM_AES_192, or
+   *   ZipArchive::EM_AES_256
+   * @param string $password - Password to derive a key for the archive from
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  function setEncryptionIndex(int $index, int $encryption_method,
+                              string $password): bool;
+
+  /**
+   *
+   * Set the encryption method of an entry defined by its name.
+   * NOTE: Zip encryption is not secure. Do not use this method unless forced
+   * to by external requirments.
+   *
+   * @param int $name - Name of the entry.
+   * @param int $encryption_method - The encryption method. Either
+   *   ZipArchive::EM_NONE, ZipArchive::EM_AES_128, ZipArchive::EM_AES_192, or
+   *   ZipArchive::EM_AES_256
+   * @param string $password - Password to derive a key for the archive from
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  function setEncryptionName(string $name, int $encryption_method,
+                             string $password): bool;
 
   /**
    * Get the details of an entry defined by its index.

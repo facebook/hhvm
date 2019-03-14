@@ -3,12 +3,10 @@
 -- Testing gzencode() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing gzencode() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing with incorrect compression level --
 
@@ -23,17 +21,13 @@ bool(false)
 -- Testing with incorrect parameters --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
 bool(false)
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 ===Done===

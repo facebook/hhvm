@@ -5,7 +5,7 @@ File "mixed.php", line 25, characters 3-13:
 File "mixed.php", line 34, characters 3-13:
   mixed
 File "mixed.php", line 43, characters 3-13:
-  exact A
+  (exact A | exact Object)
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
@@ -42,6 +42,12 @@ Invalid argument (Typing[4110])
   This is an object of type Object
   File "mixed.php", line 41, characters 14-14:
   It is incompatible with an object of exactly the class A
+File "mixed.php", line 45, characters 12-13:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 102, characters 19-19:
+  This is an object of type A
+  File "mixed.php", line 39, characters 14-19:
+  It is incompatible with an object of exactly the class Object
 File "mixed.php", line 56, characters 18-19:
 Invalid argument (Typing[4110])
   File "mixed.php", line 96, characters 52-54:

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /* Create a MIME mail resource.
  * @return resource - Returns a handle that can be used to parse a message.
  */

@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 /**
  * CURLFile can be used to upload a file with CURLOPT_POSTFIELDS.

@@ -1,8 +1,8 @@
 Errors:
-  [8:24-26] Invalid argument
-  [8:16-22] This is a string
+  [8:18-20] Invalid argument
+  [8:10-16] This is a string
   [3:25-27]   via this generic Tu
-  [8:24-26] It is incompatible with an int
+  [8:18-20] It is incompatible with an int
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:33-35], (Habstr "Tu"))); f_name = ([3:10-11], "\\f");
@@ -37,13 +37,12 @@ Errors:
        f_body =
        { fb_ast =
          [(Expr
-             (([8:3-27], string),
+             (([8:3-21], string),
               (Call (Cnormal,
                  (([8:3-4], (function<reify T, Tu>(string $f): string)),
                   (Id ([8:3-4], "\\f"))),
-                 [(([8:11-14], (Hprim Tint)), true);
-                   (([8:16-22], (Hprim Tstring)), false)],
-                 [(([8:24-26], int), (Int "42"))], []))))
+                 [([8:5-8], (Hprim Tint)); ([8:10-16], (Hprim Tstring))],
+                 [(([8:18-20], int), (Int "42"))], []))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

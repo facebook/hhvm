@@ -3,5 +3,4 @@
 -- Testing posix_times() function with one argument --
 
 Warning: %s
-NULL
 Done

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A "Locale" is an identifier used to get language, culture, or
@@ -243,7 +243,7 @@ class Locale {
    * @return string - The closest matching language tag or default
    *   value.
    */
-  <<__Native, __ParamCoerceModeFalse>>
+  <<__Native>>
   public static function lookup(array $langtag,
                                 string $locale,
                                 bool $canonicalize = false,

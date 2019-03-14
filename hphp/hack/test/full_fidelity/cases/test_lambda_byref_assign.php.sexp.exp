@@ -1,33 +1,31 @@
-((script 566
-  ((list 566
+((script 563
+  ((list 563
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
-     (expression_statement 39
-      ((binary_expression 38
+     (expression_statement 36
+      ((binary_expression 35
         ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
          (() = 1 ((whitespace 1)))
-         (prefix_unary_expression 33
+         (prefix_unary_expression 30
           ((() & 1 ())
-           (lambda_expression 32
+           (lambda_expression 29
             ((missing 0 ()) (missing 0 ()) (missing 0 ())
              (lambda_signature 2
               ((() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
                (missing 0 ()) (missing 0 ())))
              (() ==> 3 ((whitespace 1)))
-             (compound_statement 25
+             (compound_statement 22
               ((() { 1 ((whitespace 1)))
-               (list 21
-                ((function_static_statement 10
-                  ((() static 6 ((whitespace 1)))
-                   (list 2
-                    ((list_item 2
-                      ((static_declarator 2
-                        ((() variable 2 ()) (missing 0 ())))
-                       (missing 0 ())))))
+               (list 18
+                ((expression_statement 7
+                  ((binary_expression 6
+                    ((variable 2 ((() variable 2 ((whitespace 1)))))
+                     (() = 1 ((whitespace 1)))
+                     (literal 1 ((() decimal_literal 1 ())))))
                    (() ";" 1 ((whitespace 1)))))
                  (return_statement 10
                   ((() return 6 ((whitespace 1)))

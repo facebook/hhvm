@@ -74,7 +74,9 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` containing the values from the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): varray;
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toValuesArray<Tu>(): varray<Tu>
+    where Tv1 as Tu, Tv2 as Tu;
 
   /**
    * Returns an `array` whose values are the keys from the current `Pair`.
@@ -82,7 +84,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `array` with the integer keys from the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toKeysArray(): varray;
+  public function toKeysArray(): varray<int>;
 
  /**
    * Returns a `Vector` containing the elements of the current `Pair`.
@@ -130,7 +132,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - a `Set` with the current values of the current `Pair`.
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
-  public function toSet(): Set<mixed>;
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toSet(): Set<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) with the values of the current `Pair`.
@@ -138,7 +141,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `ImmSet` with the current values of the current `Pair`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toImmSet(): ImmSet<mixed>;
+  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  public function toImmSet(): ImmSet<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns a lazy, access elements only when needed view of the current

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if ($argc > 1) {
   echo "---- " . ini_get('variables_order') . " ----\n";

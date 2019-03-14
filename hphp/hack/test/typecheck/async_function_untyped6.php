@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C {
   public async function f() {

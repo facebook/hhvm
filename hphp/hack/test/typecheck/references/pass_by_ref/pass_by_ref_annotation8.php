@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 final class C {
   public function __call(string $name, $args): void {}

@@ -7,11 +7,11 @@
 echo "*** Testing str_shuffle() : error conditions ***\n";
 
 echo "\n-- Testing str_shuffle() function with no arguments --\n";
-var_dump( str_shuffle() );
+try { var_dump( str_shuffle() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing str_shuffle() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( str_shuffle("Hello World", $extra_arg) );
+try { var_dump( str_shuffle("Hello World", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

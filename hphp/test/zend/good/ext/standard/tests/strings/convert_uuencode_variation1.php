@@ -69,7 +69,7 @@ $inputs =  array (
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  var_dump( bin2hex(convert_uuencode($input)) );
+  try { var_dump( bin2hex(convert_uuencode($input)) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

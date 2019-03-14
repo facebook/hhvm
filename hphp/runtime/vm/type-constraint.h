@@ -40,7 +40,7 @@ namespace HPHP {
  * function or method parameter typehint at runtime.
  */
 struct TypeConstraint {
-  enum Flags : uint8_t {
+  enum Flags : uint16_t {
     NoFlags = 0x0,
 
     /*
@@ -99,7 +99,14 @@ struct TypeConstraint {
      * Indicates that no mock object can satisfy this constraint.  This is
      * resolved by HHBBC.
      */
-    NoMockObjects = 0x80
+    NoMockObjects = 0x80,
+
+    /*
+     * Indicates that a type-constraint should be displayed as nullable (even if
+     * isNullable()) is false. This is used to maintain proper display of
+     * type-constraints even when resolved.
+     */
+    DisplayNullable = 0x100,
   };
 
   /*
@@ -126,7 +133,6 @@ struct TypeConstraint {
     , m_typeName(typeName)
     , m_namedEntity(nullptr)
   {
-    assertx(!(flags & Flags::Resolved));
     init();
   }
 
@@ -148,7 +154,6 @@ struct TypeConstraint {
 
   void resolveType(AnnotType t, bool nullable) {
     assertx(m_type == AnnotType::Object);
-    assertx(t != AnnotType::Object);
     auto flags = m_flags | Flags::Resolved;
     if (nullable) flags |= Flags::Nullable;
     m_flags = static_cast<Flags>(flags);
@@ -277,6 +282,16 @@ struct TypeConstraint {
     return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr;
   }
 
+  bool isClsMethCompactVec() const {
+    return isVec() || isVecOrDict() || isArrayLike() ||
+           interface_supports_vec(m_typeName);
+  }
+
+  bool isClsMethCompactVArr() const {
+    return isVArray() || isVArrayOrDArray() || isArray() || isArrayLike() ||
+           interface_supports_array(m_typeName);
+  }
+
   AnnotType type()  const { return m_type; }
 
   bool validForProp() const {
@@ -291,11 +306,11 @@ struct TypeConstraint {
     if (isSoft()) {
       name += '@';
     }
-    if (isNullable() && isExtended()) {
+    if ((m_flags & Flags::DisplayNullable) && isExtended()) {
       name += '?';
     }
     name += m_typeName->data();
-    if (isNullable() && !isExtended()) {
+    if ((m_flags & Flags::DisplayNullable) && !isExtended()) {
       name += " (defaulted to null)";
     }
     return name;

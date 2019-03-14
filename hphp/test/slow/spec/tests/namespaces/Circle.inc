@@ -8,24 +8,24 @@
 
 namespace Graphics\D2
 {
-error_reporting(-1);
+\error_reporting(-1);
 include_once 'Point.inc';
 
-class Circle 
+class Circle
 {
 	private $center;
 	private $radius;
 
-	public function __construct($x = 0, $y = 0, $radius = 0) 
+	public function __construct($x = 0, $y = 0, $radius = 0)
 	{
 		$this->center = new Point($x, $y);
 		$this->radius = $radius;
 	}
 
-	public function __toString() 
+	public function __toString()
 	{
 		return '[' . $this->center . ':' . $this->radius . ']';
-	}	
+	}
 }
 
 }

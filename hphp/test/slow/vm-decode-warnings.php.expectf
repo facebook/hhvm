@@ -1,0 +1,28 @@
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 6
+i()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 6
+g()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 6
+i()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 6
+g()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 4
+
+Warning: vm_decode_function() used to decode a method on $this, an instance of Foo, from the caller, Foo::f in %s/vm-decode-warnings.php on line 4
+g()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 4
+i()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 4
+i()
+
+Warning: vm_decode_function() used to decode a LSB class method on Foo in %s/vm-decode-warnings.php on line 4
+
+Warning: vm_decode_function() used to decode a method on $this, an instance of Foo, from the caller, Foo::f in %s/vm-decode-warnings.php on line 4
+g()

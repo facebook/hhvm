@@ -8,15 +8,7 @@ float(1)
 float(0)
 float(0)
 float(3.8729833462074)
-
-Warning: sqrt() expects parameter 1 to be double, string given in %s/test/quick/sqrt.php on line 22
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, object given in %s/test/quick/sqrt.php on line 23
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, array given in %s/test/quick/sqrt.php on line 24
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, array given in %s/test/quick/sqrt.php on line 25
-NULL
+string(53) "sqrt() expects parameter 1 to be double, string given"
+string(53) "sqrt() expects parameter 1 to be double, object given"
+string(52) "sqrt() expects parameter 1 to be double, array given"
+string(52) "sqrt() expects parameter 1 to be double, array given"

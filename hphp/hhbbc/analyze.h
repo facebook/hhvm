@@ -150,8 +150,8 @@ struct FuncAnalysis : FuncAnalysisResult {
   FuncAnalysis(FuncAnalysis&&) = default;
   FuncAnalysis& operator=(FuncAnalysis&&) = default;
 
-  // Blocks in a reverse post order, with DV initializers.
-  std::vector<php::Block*> rpoBlocks;
+  // Block ids in a reverse post order, with DV initializers.
+  std::vector<BlockId> rpoBlocks;
 
   // Block data is indexed by Block::id.
   std::vector<BlockData> bdata;
@@ -244,7 +244,7 @@ std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
                           const FuncAnalysis&,
                           CollectedInfo& collect,
-                          const php::Block*,
+                          BlockId bid,
                           State stateIn);
 
 //////////////////////////////////////////////////////////////////////

@@ -13,6 +13,6 @@ function basic(): ImmSet<int> {
   return ImmSet { 1 };
 }
 
-function covariance(): ImmSet<mixed> {
+function covariance(): ImmSet<arraykey> {
   return basic();
 }

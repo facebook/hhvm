@@ -3,10 +3,8 @@
 -- Testing gethostbynamel() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing gethostbynamel() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

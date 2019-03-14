@@ -29,10 +29,6 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
   bool autoload = true);
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
   const Array& params = null_array);
-Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
-  const Array& params);
-Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
-  const Array& params = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,8 +43,6 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset);
  * Exposed as __SystemLib\func_slice_args.
  */
 Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset);
-
-int64_t HHVM_FUNCTION(func_num_args);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -138,10 +138,10 @@ foreach ($not_scalars as $value ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( strval() );
+try { var_dump( strval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( strval( $scalars[0], $scalars[1]) );
+try { var_dump( strval( $scalars[0], $scalars[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 

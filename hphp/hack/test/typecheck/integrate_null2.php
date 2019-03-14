@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -15,4 +15,8 @@ function foo(array<int> $arr): ?array<int> {
     $x = $arr;
   }
   return $x;
+}
+
+function coin_flip(): bool {
+  return true;
 }

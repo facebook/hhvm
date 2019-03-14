@@ -115,7 +115,7 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * @guide /hack/collections/read-write
  */
 <<__Sealed(ConstVector::class, ConstMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
-interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
+interface KeyedContainer<+Tk as arraykey, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides
@@ -297,7 +297,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `array` containing the values from the current `Iterable`.
    */
-  public function toValuesArray(): varray;
+  public function toValuesArray(): varray<Tv>;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -330,7 +330,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - a `Set` converted from the current `Iterable`.
    */
-  public function toSet(): Set<Tv>;
+  public function toSet(): Set<Tv> where Tv as arraykey;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
    *
@@ -338,7 +338,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
-  public function toImmSet(): ImmSet<Tv>;
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `Iterable`.
@@ -560,16 +560,15 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - a `Map` that has the keys and associated values of the current
    *           `KeyedIterable`.
    */
-  /* HH_FIXME[4110] T40426954 */
-  public function toMap(): Map<Tk, Tv>;
+  public function toMap(): Map<Tk, Tv> where Tk as arraykey;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
    *
    * @return - an `ImmMap` that has the keys and associated values of the
    *           current `KeyedIterable`.
-   */ /* HH_FIXME[4110] T40426954 */
-  public function toImmMap(): ImmMap<Tk, Tv>;
+   */
+  public function toImmMap(): ImmMap<Tk, Tv> where Tk as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `KeyedIterable`.

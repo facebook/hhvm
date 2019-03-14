@@ -13,12 +13,12 @@
 echo "*** Testing serialize()/unserialize() : error conditions ***\n";
 
 // Zero arguments
-var_dump( serialize() );
-var_dump( unserialize() );
+try { var_dump( serialize() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( unserialize() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test serialize with one more than the expected number of arguments
-var_dump( serialize(1,2) );
-var_dump( unserialize(1,2) );
+try { var_dump( serialize(1,2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( unserialize(1,2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

@@ -1,0 +1,39 @@
+classMeth{
+    class(A)
+    function(func1)
+}
+classMeth{
+    class('A')
+    fun('func1')
+}
+classMeth{
+    class(A)
+    function(func1)
+}
+classMeth{
+    class(A)
+    function(func1)
+}
+* serialize result:
+string(26) "v:2:{s:1:"A";s:5:"func1";}"
+* unserialize result:
+vec(2) {
+  string(1) "A"
+  string(5) "func1"
+}
+* fb_serialize result:
+string(14) "Afunc1"
+* fb_unserialize result:
+vec(2) {
+  string(1) "A"
+  string(5) "func1"
+}
+* json_encode result:
+string(13) "["A","func1"]"
+* json_decode result:
+array(2) {
+  [0]=>
+  string(1) "A"
+  [1]=>
+  string(5) "func1"
+}

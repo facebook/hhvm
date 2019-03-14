@@ -1,0 +1,49 @@
+Warning: fclose() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 9
+string(6) "pclose"
+bool(false)
+
+Warning: fseek() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 11
+
+Warning: rewind() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 12
+
+Warning: ftell() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 13
+
+Warning: feof() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 14
+
+Warning: fstat() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 15
+
+Warning: fread() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 16
+
+Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 17
+
+Warning: fgets() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 18
+
+Warning: fgetss() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 19
+string(6) "fscanf"
+bool(false)
+
+Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 21
+
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 22
+
+Warning: fputs() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 23
+string(7) "fprintf"
+bool(false)
+string(8) "vfprintf"
+bool(false)
+
+Warning: fflush() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 26
+
+Warning: ftruncate() expects exactly 2 parameters, 1 given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 27
+
+Warning: fputcsv() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 30
+
+Warning: fgetcsv() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 31
+
+Warning: flock() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 32
+
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 33
+
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 34
+
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 35

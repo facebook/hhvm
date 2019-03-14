@@ -1,8 +1,0 @@
-# issetl + branch
-# this one should fail
-.main {
-  Int 0
-  SetL _0
-  Int 1
-  RetC
-}

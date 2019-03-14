@@ -168,27 +168,4 @@ array(1) {
 -- Iteration 16 --
 
 Warning: %s
-NULL
-
--- Iteration 17 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
-
--- Iteration 18 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
 Done

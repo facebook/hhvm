@@ -1,8 +1,8 @@
 <?php
 function Test($param) {
-	global $g1, $g2;
-	$g1 = $param->boolA;
-	$g2	= $param->boolB;
+
+	ZendGoodExtSoapTestsBugsBug38055::$g1 = $param->boolA;
+	ZendGoodExtSoapTestsBugsBug38055::$g2	= $param->boolB;
 	return 1;
 }
 
@@ -26,6 +26,10 @@ $client = new TestSoapClient(dirname(__FILE__).'/bug38055.wsdl');
 $boolA = 1;
 $boolB = '1';
 $res = $client->Test(array('boolA'=>$boolA, 'boolB'=>$boolB));
-var_dump($g1);
-var_dump($g2);
-?>
+var_dump(ZendGoodExtSoapTestsBugsBug38055::$g1);
+var_dump(ZendGoodExtSoapTestsBugsBug38055::$g2);
+
+abstract final class ZendGoodExtSoapTestsBugsBug38055 {
+  public static $g1;
+  public static $g2;
+}

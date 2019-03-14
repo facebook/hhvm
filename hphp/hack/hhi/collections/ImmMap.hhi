@@ -127,7 +127,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
-  public function toSet(): Set<Tv>;
+  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) based on the values of the current
@@ -136,7 +136,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
    * @return - an `ImmSet` with the current values of the current `ImmMap`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toImmSet(): ImmSet<Tv>;
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable copy (`ImmMap`) of the current `ImmMap`.

@@ -1,1 +1,2 @@
 -vEval.VMStackElms=8192
+-vEval.EnablePHP=1

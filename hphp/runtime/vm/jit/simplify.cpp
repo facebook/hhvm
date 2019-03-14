@@ -374,6 +374,16 @@ SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyRaiseHasThisNeedStatic(State& env, const IRInstruction* inst) {
+  if (!RuntimeOption::EvalNoticeOnBadMethodStaticness) return gen(env, Nop);
+
+  auto const funcTmp = inst->src(0);
+  if (funcTmp->hasConstVal() && !funcTmp->funcVal()->isStatic()) {
+    return gen(env, Nop);
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
 
@@ -2287,7 +2297,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
         }
       }
     }
-    return gen(env, ConvObjToBool, src);
+    return gen(env, ConvObjToBool, inst->taken(), src);
   }
   if (srcType <= TRes)  return cns(env, true);
 
@@ -2417,6 +2427,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   if (ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
+    if (RuntimeOption::EvalNoticeOnCollectionToBool) return nullptr;
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -2463,7 +2474,7 @@ SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
   if (isSimplifyOkay(inst) &&
       srcType.subtypeOfAny(TNull, TDbl, TInt, TStr)) {
     if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToBool, src);
+    return gen(env, ConvCellToBool, inst->taken(), src);
   }
 
   // We actually know that any other type will fail causing us to side exit
@@ -3921,6 +3932,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsClsDynConstructible)
   X(LdFuncRxLevel)
   X(RaiseMissingThis)
+  X(RaiseHasThisNeedStatic)
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)

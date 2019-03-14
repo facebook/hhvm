@@ -2,7 +2,19 @@
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
 
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
-array(12) {
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+
+Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
+array(10) {
   [0]=>
   bool(true)
   [1]=>
@@ -20,11 +32,7 @@ array(12) {
   [7]=>
   bool(false)
   [8]=>
-  NULL
-  [9]=>
-  NULL
-  [10]=>
   bool(false)
-  [11]=>
+  [9]=>
   bool(false)
 }

@@ -8,7 +8,6 @@
  *)
 
 type t = {
-  tco_assume_php : bool;
   tco_safe_array : bool;
   tco_safe_vector_array : bool;
   tco_experimental_features : SSet.t;
@@ -19,20 +18,16 @@ type t = {
   po_enable_hh_syntax_for_hhvm : bool;
   po_deregister_php_stdlib : bool;
   po_disallow_execution_operator : bool;
-  po_disable_define : bool;
   po_disable_nontoplevel_declarations : bool;
+  po_disable_static_closures : bool;
   po_disable_static_local_variables : bool;
   po_allow_goto: bool;
   po_enable_concurrent : bool;
   po_enable_await_as_an_expression : bool;
-  po_default_mode: string;
   tco_log_inference_constraints : bool;
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
-  tco_untyped_nonstrict_lambda_parameters: bool;
-  tco_disallow_assign_by_ref: bool;
-  tco_disallow_array_cell_pass_by_ref: bool;
   tco_language_feature_logging : bool;
   tco_unsafe_rx : bool;
   tco_disallow_implicit_returns_in_non_void_functions : bool;
@@ -44,12 +39,18 @@ type t = {
   tco_new_inference_no_eager_solve : bool;
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
+  tco_disable_instanceof_refinement : bool;
+  tco_disallow_ref_param_on_constructor : bool;
   ignored_fixme_codes : ISet.t;
+  ignored_fixme_regex : string option;
   log_levels : int SMap.t;
   po_enable_stronger_await_binding : bool;
   po_disable_lval_as_an_expression : bool;
   po_disable_unsafe_expr : bool;
+  po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
+  tco_ignore_collection_expr_type_arguments : bool;
+  tco_disallow_unsafe_construct : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -130,11 +131,6 @@ let tco_experimental_disable_optional_and_unknown_shape_fields =
 let tco_experimental_no_trait_reuse = "no_trait_reuse"
 
 (**
- * Enable the null coalescence assignment (`??=`) operator.
- *)
-let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
-
-(**
  * Enable reified generics
  *)
 let tco_experimental_reified_generics = "reified_generics"
@@ -165,11 +161,6 @@ let tco_experimental_decl_linearization = "decl_linearization"
 let tco_experimental_track_subtype_prop = "track_subtype_prop"
 
 (**
- * Enable the `null` typehint.
- *)
-let tco_experimental_null_type = "null_type"
-
-(**
  * Enable support for the Pocket Universes
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
@@ -190,14 +181,12 @@ let tco_experimental_all =
      tco_experimental_disallow_static_memoized;
      tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
-     tco_experimental_null_coalesce_assignment;
      tco_experimental_reified_generics;
      tco_experimental_type_param_shadowing;
      tco_experimental_trait_method_redeclarations;
      tco_experimental_type_const_attributes;
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
-     tco_experimental_null_type;
    ]
 
 let tco_migration_flags_all =
@@ -207,7 +196,6 @@ let tco_migration_flags_all =
     ]
 
 let default = {
- tco_assume_php = false;
  tco_safe_array = true;
  tco_safe_vector_array = true;
  (** Default all features for testing. Actual options are set by reading
@@ -220,20 +208,16 @@ let default = {
  po_enable_hh_syntax_for_hhvm = false;
  po_disallow_execution_operator = false;
  po_deregister_php_stdlib = false;
- po_disable_define = false;
  po_disable_nontoplevel_declarations = false;
+ po_disable_static_closures = false;
  po_disable_static_local_variables = false;
  po_allow_goto = true;
  po_enable_concurrent = false;
  po_enable_await_as_an_expression = false;
- po_default_mode = "partial";
  tco_log_inference_constraints = false;
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
- tco_untyped_nonstrict_lambda_parameters = false;
- tco_disallow_assign_by_ref = false;
- tco_disallow_array_cell_pass_by_ref = false;
  tco_language_feature_logging = false;
  tco_unsafe_rx = true;
  tco_disallow_implicit_returns_in_non_void_functions = true;
@@ -245,27 +229,31 @@ let default = {
  tco_new_inference_no_eager_solve = false;
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
+ tco_disable_instanceof_refinement = false;
+ tco_disallow_ref_param_on_constructor = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
+ ignored_fixme_regex = None;
  log_levels = SMap.empty;
  po_enable_stronger_await_binding = false;
  po_disable_lval_as_an_expression = false;
  po_disable_unsafe_expr = false;
+ po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
+ tco_ignore_collection_expr_type_arguments = false;
+ tco_disallow_unsafe_construct = false;
 }
 
 let make
-  ?(tco_assume_php = default.tco_assume_php)
   ?(tco_safe_array = default.tco_safe_array)
   ?(tco_safe_vector_array = default.tco_safe_vector_array)
   ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
   ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
-  ?(po_disable_define = default.po_disable_define)
   ?(po_disable_nontoplevel_declarations = default.po_disable_nontoplevel_declarations)
+  ?(po_disable_static_closures = default.po_disable_static_closures)
   ?(po_disable_static_local_variables = default.po_disable_static_local_variables)
   ?(po_allow_goto = default.po_allow_goto)
   ?(po_enable_concurrent = default.po_enable_concurrent)
   ?(po_enable_await_as_an_expression = default.po_enable_await_as_an_expression)
-  ?(po_default_mode = default.po_default_mode)
   ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
   ?(tco_experimental_features = default.tco_experimental_features)
   ?(tco_migration_flags = default.tco_migration_flags)
@@ -275,9 +263,6 @@ let make
   ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
   ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
   ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
-  ?(tco_untyped_nonstrict_lambda_parameters = default.tco_untyped_nonstrict_lambda_parameters)
-  ?(tco_disallow_assign_by_ref = default.tco_disallow_assign_by_ref)
-  ?(tco_disallow_array_cell_pass_by_ref = default.tco_disallow_array_cell_pass_by_ref)
   ?(tco_language_feature_logging = default.tco_language_feature_logging)
   ?(tco_unsafe_rx = default.tco_unsafe_rx)
   ?(tco_disallow_implicit_returns_in_non_void_functions = default.tco_disallow_implicit_returns_in_non_void_functions)
@@ -289,15 +274,20 @@ let make
   ?(tco_new_inference_no_eager_solve = default.tco_new_inference_no_eager_solve)
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
+  ?(tco_disable_instanceof_refinement = default.tco_disable_instanceof_refinement)
+  ?(tco_disallow_ref_param_on_constructor = default.tco_disallow_ref_param_on_constructor)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
+  ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
   ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
   ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
+  ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
+  ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
+  ?(tco_disallow_unsafe_construct = default.tco_disallow_unsafe_construct)
   ()
 = {
-  tco_assume_php;
   tco_safe_array;
   tco_safe_vector_array;
   tco_experimental_features;
@@ -307,22 +297,19 @@ let make
   po_auto_namespace_map;
   po_enable_hh_syntax_for_hhvm = false;
   ignored_fixme_codes;
+  ignored_fixme_regex;
   po_deregister_php_stdlib;
   po_disallow_execution_operator;
-  po_disable_define;
   po_disable_nontoplevel_declarations;
+  po_disable_static_closures;
   po_disable_static_local_variables;
   po_allow_goto;
   po_enable_concurrent;
   po_enable_await_as_an_expression;
-  po_default_mode;
   tco_log_inference_constraints;
   tco_disallow_ambiguous_lambda;
   tco_disallow_array_typehint;
   tco_disallow_array_literal;
-  tco_untyped_nonstrict_lambda_parameters;
-  tco_disallow_assign_by_ref;
-  tco_disallow_array_cell_pass_by_ref;
   tco_language_feature_logging;
   tco_unsafe_rx;
   tco_disallow_implicit_returns_in_non_void_functions;
@@ -334,13 +321,17 @@ let make
   tco_new_inference_no_eager_solve;
   tco_timeout;
   tco_disallow_invalid_arraykey;
+  tco_disable_instanceof_refinement;
+  tco_disallow_ref_param_on_constructor;
   log_levels;
   po_enable_stronger_await_binding;
   po_disable_lval_as_an_expression;
   po_disable_unsafe_expr;
+  po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
+  tco_ignore_collection_expr_type_arguments;
+  tco_disallow_unsafe_construct;
 }
-let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
 let tco_experimental_feature_enabled t s =
@@ -353,22 +344,18 @@ let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
-let po_disable_define t = t.po_disable_define
 let po_disable_nontoplevel_declarations t = t.po_disable_nontoplevel_declarations
+let po_disable_static_closures t = t.po_disable_static_closures
 let po_disable_static_local_variables t = t.po_disable_static_local_variables
 let po_allow_goto t = t.po_allow_goto
 let po_enable_concurrent t = t.po_enable_concurrent
 let po_enable_await_as_an_expression t = t.po_enable_await_as_an_expression
-let po_default_mode t = t.po_default_mode
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let po_disallow_execution_operator t = t.po_disallow_execution_operator
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
-let tco_untyped_nonstrict_lambda_parameters t = t.tco_untyped_nonstrict_lambda_parameters
-let tco_disallow_assign_by_ref t = t.tco_disallow_assign_by_ref
-let tco_disallow_array_cell_pass_by_ref t = t.tco_disallow_array_cell_pass_by_ref
 let tco_language_feature_logging t = t.tco_language_feature_logging
 let tco_unsafe_rx t = t.tco_unsafe_rx
 let tco_disallow_implicit_returns_in_non_void_functions t =
@@ -382,13 +369,19 @@ let tco_new_inference t = t.tco_new_inference > 0.0
 let tco_new_inference_no_eager_solve t = t.tco_new_inference_no_eager_solve
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
+let tco_disable_instanceof_refinement t = t.tco_disable_instanceof_refinement
+let tco_disallow_ref_param_on_constructor t = t.tco_disallow_ref_param_on_constructor
 let ignored_fixme_codes t = t.ignored_fixme_codes
+let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels
 let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
+let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 
+let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
+let tco_disallow_unsafe_construct t = t.tco_disallow_unsafe_construct
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in
   let exp_features = if enabled then

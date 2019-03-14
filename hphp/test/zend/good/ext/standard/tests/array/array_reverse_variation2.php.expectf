@@ -137,23 +137,18 @@ array(6) {
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 array(6) {
   [0]=>
@@ -277,7 +272,6 @@ array(6) {
 -- Iteration 23 --
 
 Warning: %s
-NULL
 -- Iteration 24 --
 array(6) {
   [0]=>
@@ -311,5 +305,4 @@ array(6) {
 -- Iteration 26 --
 
 Warning: %s
-NULL
 Done

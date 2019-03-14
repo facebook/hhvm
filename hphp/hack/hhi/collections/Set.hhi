@@ -46,7 +46,7 @@
  * @guide /hack/collections/classes
  */
 
-final class Set<Tv> implements MutableSet<Tv> {
+final class Set<Tv as arraykey> implements MutableSet<Tv> {
   /**
    * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`
    * is passed.
@@ -66,7 +66,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           each key of the `array` are the same as each value.
    */
   <<__Rx, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tv, Tv>;
+  public function toArray(): array<arraykey, Tv>;
 
   /**
    * Returns an `array` containing the values from the current `Set`.
@@ -218,7 +218,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Set<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -238,7 +238,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           on the current `Set`'s values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -335,7 +335,10 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           exception is thrown.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
+  public function zip<Tu>(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+  /* HH_FIXME[4110] need bottom type as generic */
+  ): Set<Pair<Tv, Tu>>;
 
   /**
    * Returns a `Set` containing the first `n` values of the current `Set`.
@@ -648,7 +651,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           if the `Traversable` is `null`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems<Tv2>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv2> $items): Set<Tv2>;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Set<Tv>;
 
   /**
    * Creates a `Set` from the keys of the specified container.
@@ -660,7 +663,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` built from the keys of the specified container.
    */
   <<__Rx, __MutableReturn>>
-  public static function fromKeysOf<Tk, Tv2>(
+  public static function fromKeysOf<Tk as arraykey, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container,
   ): Set<Tk>;
 

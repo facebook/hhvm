@@ -245,7 +245,7 @@ void PropertiesInfo::setBadPropInitialValues() {
 
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
                                  php::Class* clo,
-                                 std::vector<Type> types) {
+                                 CompactVector<Type> types) {
   auto& current = dst[clo];
   if (current.empty()) {
     current = std::move(types);

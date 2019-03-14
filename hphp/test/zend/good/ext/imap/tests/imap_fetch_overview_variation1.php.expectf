@@ -3,122 +3,98 @@
 -- Testing with first argument value: int(0)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: int(1)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: int(12345)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: int(-2345)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: float(10.5)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: float(-10.5)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: float(123456789000)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: float(1.23456789E-9)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: float(0.5)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: NULL
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: NULL
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: bool(true)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: bool(false)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: bool(true)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: bool(false)
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: %string|unicode%(0) ""
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: %string|unicode%(0) ""
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: array(0) {
 }
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: %string|unicode%(6) "string"
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: %string|unicode%(6) "string"
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: %string|unicode%(11) "hello world"
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: object(classA)#%d (0) {
 }
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: NULL
 
 Warning: %s
-NULL
 
 -- Testing with first argument value: NULL
 
 Warning: %s
-NULL
 ===DONE===

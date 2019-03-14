@@ -3,10 +3,8 @@
 -- Testing scandir() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing scandir() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

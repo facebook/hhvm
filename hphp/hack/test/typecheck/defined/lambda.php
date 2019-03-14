@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 # taken from an issue in GitHub
 #

@@ -7,8 +7,8 @@
 .main {
   FPushFuncD 1 "var_dump"
     FPushFuncD 0 "main"
-    FCall <> 0 1 - "" ""
-  FCall <> 1 1 - "" ""
+    FCall <> 0 1 "" - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   Int 1
   RetC
@@ -35,7 +35,7 @@ dv_init2:
       NewObjD "Exception"
       Dup
       FPushCtor 0
-      FCall <> 0 1 - "" ""
+      FCall <> 0 1 "" - "" ""
       PopC
       Throw
     } .catch {

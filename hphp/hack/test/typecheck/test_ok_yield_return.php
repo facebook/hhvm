@@ -15,3 +15,7 @@ function foo() {
     return 0;
   };
 }
+
+function result(int $x) {
+  return $x;
+}

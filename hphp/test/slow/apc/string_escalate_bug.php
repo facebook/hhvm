@@ -1,8 +1,11 @@
 <?php
 
+abstract final class BarStatics {
+  public static $x = 1;
+}
+
 function bar($n) {
-  static $x = 1;
-  return str_repeat("x", $n) . $x++;
+  return str_repeat("x", $n) . BarStatics::$x++;
 }
 
 function foo() {

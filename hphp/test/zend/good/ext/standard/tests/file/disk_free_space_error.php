@@ -1,18 +1,18 @@
 <?php
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function will 
- *               return the number of bytes available on the corresponding 
+ *  Description: Given a string containing a directory, this function will
+ *               return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
 
 echo "*** Testing error conditions ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-var_dump( disk_free_space() ); // Zero Arguments
-var_dump( diskfreespace() );
+try { var_dump( disk_free_space() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero Arguments
+try { var_dump( diskfreespace() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-var_dump( disk_free_space( $file_path, "extra argument") ); // More than valid number of arguments
-var_dump( diskfreespace( $file_path, "extra argument") );
+try { var_dump( disk_free_space( $file_path, "extra argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // More than valid number of arguments
+try { var_dump( diskfreespace( $file_path, "extra argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 var_dump( disk_free_space( $file_path."/dir1" )); // Invalid directory

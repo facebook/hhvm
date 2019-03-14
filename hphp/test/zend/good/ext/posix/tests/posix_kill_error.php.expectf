@@ -3,12 +3,10 @@
 -- Testing posix_kill() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_kill() function with less than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing posix_kill() function with invalid signal --
 bool(false)

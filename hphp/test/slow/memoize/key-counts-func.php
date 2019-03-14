@@ -1,76 +1,76 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-$do_echo = true;
+MemoizeKeyCountsFuncPhp::$do_echo = true;
 
 <<__Memoize>> function func0() {
-  global $do_echo;
-  if ($do_echo) echo "func0()\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func0()\n";
   return json_encode([]);
 }
 <<__Memoize>> function func1($p1) {
-  global $do_echo;
-  if ($do_echo) echo "func1($p1)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func1($p1)\n";
   return json_encode([$p1]);
 }
 <<__Memoize>> function func2($p1, $p2) {
-  global $do_echo;
-  if ($do_echo) echo "func2($p1, $p2)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func2($p1, $p2)\n";
   return json_encode([$p1, $p2]);
 }
 <<__Memoize>> function func3($p1, $p2, $p3) {
-  global $do_echo;
-  if ($do_echo) echo "func3($p1, $p2, $p3)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func3($p1, $p2, $p3)\n";
   return json_encode([$p1, $p2, $p3]);
 }
 <<__Memoize>> function func4($p1, $p2, $p3, $p4) {
-  global $do_echo;
-  if ($do_echo) echo "func4($p1, $p2, $p3, $p4)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func4($p1, $p2, $p3, $p4)\n";
   return json_encode([$p1, $p2, $p3, $p4]);
 }
 <<__Memoize>> function func5($p1, $p2, $p3, $p4, $p5) {
-  global $do_echo;
-  if ($do_echo) echo "func5($p1, $p2, $p3, $p4, $p5)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func5($p1, $p2, $p3, $p4, $p5)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5]);
 }
 <<__Memoize>> function func6($p1, $p2, $p3, $p4, $p5, $p6) {
-  global $do_echo;
-  if ($do_echo) echo "func6($p1, $p2, $p3, $p4, $p5, $p6)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func6($p1, $p2, $p3, $p4, $p5, $p6)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6]);
 }
 <<__Memoize>> function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
-  global $do_echo;
-  if ($do_echo) echo "func7($p1, $p2, $p3, $p4, $p5, $p6, $p7)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func7($p1, $p2, $p3, $p4, $p5, $p6, $p7)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
 }
 <<__Memoize>> function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
-  global $do_echo;
-  if ($do_echo) echo "func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
 }
 <<__Memoize>> function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
-  global $do_echo;
-  if ($do_echo) echo "func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
 }
 <<__Memoize>> function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
-  global $do_echo;
-  if ($do_echo) echo "func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10]);
 }
 <<__Memoize>> function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) {
-  global $do_echo;
-  if ($do_echo) echo "func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11]);
 }
 <<__Memoize>> function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) {
-  global $do_echo;
-  if ($do_echo) echo "func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12)\n";
+
+  if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12)\n";
   return json_encode([$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12]);
 }
 
 function test() {
-  global $do_echo;
+
 
   var_dump(func0());
   var_dump(func1(1.1));
@@ -128,7 +128,7 @@ function test() {
   var_dump(func11(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.115));
   var_dump(func12(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.125));
 
-  $do_echo = false;
+  MemoizeKeyCountsFuncPhp::$do_echo = false;
   for ($i = 0; $i < 30000; $i++) {
     func1(1.15+$i);
     func2(1.1, 2.25+$i);
@@ -144,7 +144,7 @@ function test() {
     func12(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.125+$i);
   }
 
-  $do_echo = true;
+  MemoizeKeyCountsFuncPhp::$do_echo = true;
   var_dump(func0());
   var_dump(func1(1.19));
   var_dump(func2(1.19, 2.2));
@@ -161,3 +161,7 @@ function test() {
 
 }
 test();
+
+abstract final class MemoizeKeyCountsFuncPhp {
+  public static $do_echo;
+}

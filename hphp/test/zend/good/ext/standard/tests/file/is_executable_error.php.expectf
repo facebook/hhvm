@@ -1,10 +1,8 @@
 *** Testing is_executable(): error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing is_exceutable() on non-existent directory ***
 bool(false)

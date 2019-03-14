@@ -10,10 +10,8 @@
 }
 
 
-
 <<__EntryPoint>>
 function main_1274() {
 $global = B::CLASS_CONSTANT;
  $another = test2($global);
- define('CONSTANT', test2('defining'));
 }

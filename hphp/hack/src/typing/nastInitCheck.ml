@@ -284,11 +284,8 @@ and stmt env acc st =
     | Global_var el
        -> List.fold_left ~f:expr ~init:acc el
     | Awaitall (_, el) ->
-      List.fold_left el ~init:acc ~f:(fun acc (e1, e2) ->
-        let acc = expr acc e2 in
-        match e1 with
-        | Some e -> assign_expr env acc e
-        | None -> acc
+      List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
+        expr acc e2
       )
     | If (e1, b1, b2) ->
       let acc = expr acc e1 in
@@ -371,16 +368,17 @@ and expr_ env acc p e =
   match e with
   | Any -> acc
   | Array fdl -> List.fold_left ~f:afield ~init:acc fdl
-  | Darray fdl -> List.fold_left ~f:field ~init:acc fdl
-  | Varray fdl -> List.fold_left ~f:expr ~init:acc fdl
-  | ValCollection (_, el) -> exprl acc el
-  | KeyValCollection (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
+  | Darray (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
+  | Varray (_, fdl) -> List.fold_left ~f:expr ~init:acc fdl
+  | ValCollection (_, _, el) -> exprl acc el
+  | KeyValCollection (_, _, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | This -> check_all_init p env acc; acc
   | Fun_id _
   | Method_id _
   | Smethod_id _
   | Method_caller _
   | Typename _
+  | PU_atom _
   | Id _ -> acc
   | Lvar _
   | ImmutableVar _
@@ -436,7 +434,6 @@ and expr_ env acc p e =
   | String _
   | String2 _
   | PrefixedString _
-  | Execution_operator _
   | Unsafe_expr _ -> acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
@@ -500,12 +497,12 @@ and expr_ env acc p e =
         ~init:acc
         fdm
   | Omitted -> acc
-  | NewAnonClass _ -> acc
   | Lfun _ -> acc
   | Import _ -> acc
   | Collection _ -> acc
   | BracedExpr _ -> acc
   | ParenthesizedExpr _ -> acc
+  | PU_identifier _ -> acc
 
 and case env acc = function
   | Default b

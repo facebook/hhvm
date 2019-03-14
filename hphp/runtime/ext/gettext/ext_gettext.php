@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* With bind_textdomain_codeset(), you can set in which encoding will be
  * messages from domain returned by gettext() and similar functions.
@@ -24,7 +24,7 @@ function dcgettext(string $domain,
 /* This function allows you to override the current domain for a single plural
  * message lookup.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function dcngettext(string $domain,
                     string $msgid1,
                     string $msgid2,

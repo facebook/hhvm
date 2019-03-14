@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A "break iterator" is an ICU object that exposes methods for locating

@@ -214,7 +214,7 @@ checkObjEqualRecursively($msg, array(
       "variables" => [
         array(
           "type" => "A",
-          "name" => "\$aObj",
+          "name" => "aObj",
           "value" => "A",
           "namedVariables" => 2,
           "variablesReference" => 16,
@@ -224,7 +224,7 @@ checkObjEqualRecursively($msg, array(
         ),
         array(
           "type" => "int",
-          "name" => "\$b",
+          "name" => "b",
           "value" => "2",
           "presentationHint" => array(
             "visibility" => "protected"
@@ -232,7 +232,7 @@ checkObjEqualRecursively($msg, array(
         ),
         array(
           "type" => "int",
-          "name" => "\$c",
+          "name" => "c",
           "value" => "3",
           "presentationHint" => array(
             "visibility" => "public"
@@ -290,7 +290,7 @@ checkObjEqualRecursively($msg, array(
       "variables" => [
         array(
           "type" => "int",
-          "name" => "\$a",
+          "name" => "a",
           "value" => "0",
           "presentationHint" => array(
             "visibility" => "private"
@@ -298,7 +298,7 @@ checkObjEqualRecursively($msg, array(
         ),
         array(
           "type" => "int",
-          "name" => "\$b",
+          "name" => "b",
           "value" => "1",
           "presentationHint" => array(
             "visibility" => "protected"
@@ -343,7 +343,7 @@ checkObjEqualRecursively($msg, array(
       "variables" => [
         array(
           "type" => "int",
-          "name" => "\$a",
+          "name" => "a",
           "value" => "0",
           "presentationHint" => array(
             "visibility" => "private"
@@ -601,7 +601,7 @@ checkObjEqualRecursively($msg, array(
     "variables" => [
       array(
         "type" => "A",
-        "name" => "\$aObj",
+        "name" => "aObj",
         "value" => "A",
         "namedVariables" => 2,
         "variablesReference" => 16,
@@ -611,7 +611,7 @@ checkObjEqualRecursively($msg, array(
       ),
       array(
         "type" => "int",
-        "name" => "\$b",
+        "name" => "b",
         "value" => "2",
         "presentationHint" => array(
           "visibility" => "protected"
@@ -619,7 +619,7 @@ checkObjEqualRecursively($msg, array(
       ),
       array(
         "type" => "int",
-        "name" => "\$c",
+        "name" => "c",
         "value" => "3",
         "presentationHint" => array(
           "visibility" => "public"

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace {
 
@@ -105,8 +105,11 @@ function func_get_args(): mixed;
  * @return int - Returns the number of arguments passed into the current
  *   user-defined function.
  */
-<<__Native("ReadsCallerFrame")>>
-function func_num_args(): int;
+function func_num_args(): int {
+  throw new InvalidArgumentException(
+    "Unsupported dynamic call of func_num_args()",
+  );
+}
 
 /**
  * Return TRUE if the given function has been defined

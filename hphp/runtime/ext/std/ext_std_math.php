@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * @return float - The value of pi as float.
@@ -535,7 +535,7 @@ function fmod(float $x, float $y): float;
  *   negative numbers.
  *
  */
-<<__IsFoldable, __ParamCoerceModeNull, __Native, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function sqrt(float $arg): float;
 
 /**

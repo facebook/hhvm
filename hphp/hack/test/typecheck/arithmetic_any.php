@@ -1,5 +1,5 @@
 ////file1.php
-<?hh
+<?hh // partial
 
   function returnsAny() { return 5; }
 

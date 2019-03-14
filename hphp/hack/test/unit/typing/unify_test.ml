@@ -7,7 +7,6 @@ module Typing_subtype = Typing_subtype
 
 let global_options =
   GlobalOptions.make
-    ~tco_assume_php:true
     ~po_allow_goto:false
     ~tco_unsafe_rx:false
     ()

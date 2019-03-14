@@ -3,7 +3,6 @@
 -- Testing uniqid() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing uniqid() function with invalid values for $prefix --
 

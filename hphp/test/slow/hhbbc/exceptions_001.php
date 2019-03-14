@@ -1,9 +1,13 @@
 <?php
 
+abstract final class HehStatics {
+  public static $x = 0;
+}
+
 function heh() {
-  static $x = 0;
+  $x = HehStatics::$x;
   echo "ok $x\n";
-  if ($x++ == 0) {
+  if (HehStatics::$x++ == 0) {
     throw new Exception('a');
   }
 }

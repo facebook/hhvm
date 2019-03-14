@@ -28,20 +28,20 @@ bool(false)
 bool(false)
 
 --empty array--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 
 --int indexed array--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 
 --associative array--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 
 --nested arrays--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 
 --uppercase NULL--
 bool(false)
@@ -71,8 +71,8 @@ bool(false)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, object given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 
 --undefined var--
 bool(false)
@@ -81,6 +81,6 @@ bool(false)
 bool(false)
 
 --resource--
-Error: 2 - mb_strrichr() expects parameter 1 to be string, resource given, %s(%d)
-bool(false)
+
+Warning: mb_strrichr() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_strrichr_variation1.php on line 106
 ===DONE===

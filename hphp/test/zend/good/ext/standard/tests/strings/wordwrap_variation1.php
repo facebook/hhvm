@@ -79,17 +79,17 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( wordwrap($str) );
-  var_dump( wordwrap($str, $width) );
-  var_dump( wordwrap($str, $width, $break) );
+  try { var_dump( wordwrap($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( wordwrap($str, $width) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( wordwrap($str, $width, $break) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   // $cut as false
   $cut = false;
-  var_dump( wordwrap($str, $width, $break, $cut) );
+  try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   // $cut as true
   $cut = true;
-  var_dump( wordwrap($str, $width, $break, $cut) );
+  try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }

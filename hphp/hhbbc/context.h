@@ -61,17 +61,18 @@ inline bool operator<(Context a, Context b) {
 }
 
 /*
- * Context for a call to a function.  This means the types and number
- * of arguments, and where it is being called from.
+ * Context for a call to a function.  This is the function itself,
+ * plus the types and number of arguments, and the type of
+ * $this/get_called_context().
  */
 struct CallContext {
-  Context caller;
+  const php::Func* callee;
   CompactVector<Type> args;
   Type context;
 };
 
 inline bool operator==(const CallContext& a, const CallContext& b) {
-  return a.caller == b.caller &&
+  return a.callee == b.callee &&
          equivalently_refined(a.args, b.args) &&
          equivalently_refined(a.context, b.context);
 }

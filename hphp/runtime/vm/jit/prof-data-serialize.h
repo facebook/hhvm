@@ -20,6 +20,7 @@
 #include <string>
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -161,6 +162,8 @@ void write_class(ProfDataSerializer& ser, const Class* cls);
 Class* read_class(ProfDataDeserializer& ser);
 void write_func(ProfDataSerializer& ser, const Func* func);
 Func* read_func(ProfDataDeserializer& ser);
+void write_clsmeth(ProfDataSerializer& ser, ClsMethDataRef clsMeth);
+ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser);
 
 // Return an empty string upon success, and a string that describes the reason
 // of failure otherwise.

@@ -7,10 +7,7 @@ array(1) {
 }
 
 -- comparison function taking too many parameters --
-
-Warning: %s
-array(0) {
-}
+string(59) "too_many_parameters() expects exactly 3 parameters, 2 given"
 
 -- comparison function taking too few parameters --
 array(0) {

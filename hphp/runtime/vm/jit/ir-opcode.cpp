@@ -317,7 +317,8 @@ bool opcodeMayRaise(Opcode opc) {
   // and EvalIsExprEnableUnresolvedWarning.
   case IsTypeStruct:
     return RuntimeOption::EvalHackArrCompatIsArrayNotices
-      || RuntimeOption::EvalIsExprEnableUnresolvedWarning;
+      || RuntimeOption::EvalIsExprEnableUnresolvedWarning
+      || RuntimeOption::EvalIsVecNotices;
 
   case AddElemIntKey:
   case AddElemStrKey:
@@ -373,6 +374,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrToVec:
   case ConvShapeToDict:
   case ConvCellToArr:
+  case ConvCellToBool:
   case ConvCellToDbl:
   case ConvCellToInt:
   case ConvCellToObj:
@@ -386,6 +388,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvKeysetToArr:
   case ConvKeysetToDArr:
   case ConvObjToArr:
+  case ConvObjToBool:
   case ConvObjToDArr:
   case ConvObjToDbl:
   case ConvObjToDict:
@@ -505,6 +508,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
+  case RaiseHasThisNeedStatic:
   case RaiseMissingArg:
   case RaiseMissingThis:
   case RaiseNotice:
@@ -515,6 +519,8 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseUninitLoc:
   case RaiseVarEnvDynCall:
   case RaiseWarning:
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case ReturnHook:
   case SetElem:
@@ -643,7 +649,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvBoolToArr:
   case ConvBoolToDbl:
   case ConvBoolToInt:
-  case ConvCellToBool:
   case ConvClsToCctx:
   case ConvDblToArr:
   case ConvDblToBool:
@@ -660,7 +665,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvKeysetToDict:
   case ConvKeysetToVArr:
   case ConvKeysetToVec:
-  case ConvObjToBool:
   case ConvResToDbl:
   case ConvResToInt:
   case ConvStrToArr:
@@ -911,6 +915,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LtRes:
   case LtStr:
   case LtStrInt:
+  case MangleReifiedName:
   case MapIsset:
   case MarkRDSInitialized:
   case MemoGetInstanceCache:

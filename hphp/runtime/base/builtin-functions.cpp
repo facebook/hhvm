@@ -223,6 +223,14 @@ vm_decode_function(const_variant_ref function,
     return function.toFuncVal();
   }
 
+  if (function.isClsMeth()) {
+    dynamic = true;
+    this_ = nullptr;
+    auto const clsmeth = function.toClsMethVal();
+    cls = clsmeth->getCls();
+    return clsmeth->getFunc();
+  }
+
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);
@@ -298,6 +306,15 @@ vm_decode_function(const_variant_ref function,
             } else {
               cls = ar->getClass();
             }
+            if (flags != DecodeFlags::NoWarn && cls) {
+              if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+                raise_warning(
+                  "vm_decode_function() used to decode a LSB class "
+                  "method on %s",
+                  cls->name()->data()
+                );
+              }
+            }
           }
         } else {
           if (flags == DecodeFlags::Warn && nameContainsClass) {
@@ -353,6 +370,15 @@ vm_decode_function(const_variant_ref function,
             cc = ar->getThis()->getVMClass();
           } else {
             cc = ar->getClass();
+          }
+        }
+        if (flags != DecodeFlags::NoWarn && cc) {
+          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+            raise_warning(
+              "vm_decode_function() used to decode a LSB class "
+              "method on %s",
+              cc->name()->data()
+            );
           }
         }
       } else {
@@ -418,6 +444,16 @@ vm_decode_function(const_variant_ref function,
           this_ = obj;
           cls = obj->getVMClass();
         }
+        if (flags != DecodeFlags::NoWarn && this_) {
+          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+            raise_warning(
+              "vm_decode_function() used to decode a method on $this, an "
+              "instance of %s, from the caller, %s",
+              cls->name()->data(),
+              ar->func()->fullName()->data()
+            );
+          }
+        }
       }
       if (!f) {
         if (this_) {
@@ -468,6 +504,15 @@ vm_decode_function(const_variant_ref function,
       // a descendent of cls
       if (fwdCls->classof(cls)) {
         cls = fwdCls;
+      }
+
+      if (flags != DecodeFlags::NoWarn && fwdCls) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() forwarded the calling context, %s",
+            fwdCls->name()->data()
+          );
+        }
       }
     }
 
@@ -612,9 +657,21 @@ void missing_this_check_helper(const Func* f, EF ef, NF nf) {
     return;
   }
 
-  if (RuntimeOption::EvalRaiseMissingThis && !f->isStatic()) {
+  auto const notices =
+    RuntimeOption::EvalNoticeOnBadMethodStaticness ||
+    RuntimeOption::EvalRaiseMissingThis;
+
+  if (notices && !f->isStatic()) {
     nf();
     return;
+  }
+}
+
+void raise_has_this_need_static(const Func* f) {
+  auto constexpr msg =
+    "Static method %s should not be called on instance";
+  if (RuntimeOption::EvalNoticeOnBadMethodStaticness && f->isStatic()) {
+    raise_notice(msg, f->fullName()->data());
   }
 }
 
@@ -631,6 +688,8 @@ void raise_missing_this(const Func* f) {
 
       if (RuntimeOption::PHP7_DeprecationWarnings) {
         raise_deprecated(msg, f->fullName()->data());
+      } else if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+        raise_notice(msg, f->fullName()->data());
       } else {
         raise_strict_warning(msg, f->fullName()->data());
       }
@@ -842,13 +901,7 @@ bool is_constructor_name(const char* fn) {
 }
 
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc,
-                                   int level /* = 0 */,
-                                   TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
+                                   const char *expectDesc) {
   auto const msg = folly::sformat("{}() expects {} {} parameter{}, {} given",
                                   fn,
                                   expectDesc,
@@ -856,50 +909,29 @@ void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
                                   expected == 1 ? "" : "s",
                                   got);
 
-  if (level == 2) {
-    raise_error(msg);
-  } else {
-    if (is_constructor_name(fn)) {
-      SystemLib::throwExceptionObject(msg);
-    }
-    raise_warning(msg);
-  }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
-void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
+void throw_missing_arguments_nr(const char *fn, int expected, int got) {
+  throw_wrong_argument_count_nr(fn, expected, got, "exactly");
 }
 
-void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
-}
-
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */,
-                              TypedValue *rv /* = nullptr */) {
+void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax) {
   if (cmin >= 0 && count < cmin) {
     if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmin, count, "at least", level, rv);
+      throw_wrong_argument_count_nr(fn, cmin, count, "at least");
     } else {
-      throw_wrong_argument_count_nr(fn, cmin, count, "exactly", level, rv);
+      throw_wrong_argument_count_nr(fn, cmin, count, "exactly");
     }
     return;
   }
   if (cmax >= 0 && count > cmax) {
     if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmax, count, "at most", level, rv);
+      throw_wrong_argument_count_nr(fn, cmax, count, "at most");
     } else {
-      throw_wrong_argument_count_nr(fn, cmax, count, "exactly", level, rv);
+      throw_wrong_argument_count_nr(fn, cmax, count, "exactly");
     }
     return;
-  }
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
   }
   assertx(false);
 }

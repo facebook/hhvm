@@ -1,1 +1,2 @@
 -vEval.DisableSomeRepoAuthNotices=0
+-vEval.EnablePHP=1

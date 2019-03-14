@@ -1,4 +1,4 @@
-#Checks that arguments to DefCls/DefFunc/DefTypeAlias exist
+#Checks that arguments to DefCls/DefTypeAlias exist
 
 .main {
   DefCls 0
@@ -7,9 +7,6 @@
   DefCls 3
   DefClsNop 4
   CreateCl 0 5
-  DefFunc 0
-  DefFunc 1
-  DefFunc 2
   DefTypeAlias 0
   DefTypeAlias 1
   PopC

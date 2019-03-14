@@ -12,7 +12,7 @@ echo "*** Testing mb_substitute_character() : error conditions ***\n";
 echo "\n-- Testing mb_substitute_character() function with more than expected no. of arguments --\n";
 $substchar = 1;
 $extra_arg = 10;
-var_dump( mb_substitute_character($substchar, $extra_arg) );
+try { var_dump( mb_substitute_character($substchar, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

@@ -18,15 +18,12 @@ string(12) "%s"
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 string(1) "1"
 -- Iteration 13 --
@@ -44,7 +41,6 @@ string(13) "%s"
 -- Iteration 19 --
 
 Warning: %s
-NULL
 -- Iteration 20 --
 string(0) ""
 -- Iteration 21 --

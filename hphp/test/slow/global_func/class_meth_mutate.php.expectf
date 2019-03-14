@@ -1,7 +1,0 @@
-bool(true)
-int(1)
-bool(true)
-int(10)
-int(1)
-
-Fatal error: calling an ill-formed array without resolved object/class pointer in %s/class_meth_mutate.php on line 34

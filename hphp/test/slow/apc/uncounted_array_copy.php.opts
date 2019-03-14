@@ -1,1 +1,1 @@
---count=2 -vServer.APC.MemModelTreadmill=true
+--count=2 -vServer.APC.MemModelTreadmill=true -vEval.EnablePHP=1

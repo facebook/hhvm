@@ -35,7 +35,7 @@ var_dump(checkdnsrr('127.0.0.1', 'INVALID_TYPE'));
 var_dump(assert_options(-1));
 var_dump(simplexml_load_string('', 'INVALID_CLASS'));
 var_dump(simplexml_load_string('', 'stdClass'));
-var_dump(stream_get_contents('', -1));
+try { var_dump(stream_get_contents('', -1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $fp = fopen(__DIR__.'/../../sample_dir/file', 'r');
 var_dump(fgets($fp, -1));
 fclose($fp);

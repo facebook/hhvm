@@ -23,7 +23,7 @@
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_doc_comment = None });
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [10:1-14:2]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -52,7 +52,8 @@
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_doc_comment = None });
+       c_file_attributes = []; c_enum = None; c_pu_enums = [];
+       c_doc_comment = None });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = <opaque>;
        f_ret = (Some ([16:44-52], (Hprim Tarraykey)));
@@ -91,10 +92,10 @@
            (Return ([18:3-20],
               (Some (([18:10-19], (int | string)),
                      (Call (Cnormal,
-                        (([18:10-17], ((function(): int) | (function(): string))),
+                        (([18:10-17], (function(): (int | string))),
                          (Obj_get (
                             (([18:10-12], (C1 | C2)), (Lvar ([18:10-12], $x))),
-                            (([18:14-17], ((function(): int) | (function(): string))),
+                            (([18:14-17], (function(): (int | string))),
                              (Id ([18:14-17], "foo"))),
                             OG_nullthrows))),
                         [], [], []))))

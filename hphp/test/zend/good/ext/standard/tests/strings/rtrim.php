@@ -5,8 +5,8 @@
 /*  Invalid Number of Arguments */
 
  echo "\n *** Output for Error Conditions ***\n";
- rtrim();
- rtrim("", " ", 1);
+ try { rtrim(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+ try { rtrim("", " ", 1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Testing the Normal behaviour of rtrim() function */
 

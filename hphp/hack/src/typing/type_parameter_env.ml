@@ -18,6 +18,8 @@ type tparam_info = {
   lower_bounds : tparam_bounds;
   upper_bounds : tparam_bounds;
   reified      : bool;
+  enforceable  : bool;
+  newable      : bool;
 }
 
 type tpenv = tparam_info SMap.t
@@ -36,9 +38,20 @@ let pp_tparam_info fmt tpi =
   Format.fprintf fmt "@[%s =@ " "upper_bounds";
   TySet.pp fmt tpi.upper_bounds;
   Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "reified";
   Format.pp_print_bool fmt tpi.reified;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "enforceable";
+  Format.pp_print_bool fmt tpi.enforceable;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "newable";
+  Format.pp_print_bool fmt tpi.newable;
   Format.fprintf fmt "@]";
 
   Format.fprintf fmt " }@]"

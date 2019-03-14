@@ -2,8 +2,8 @@
 
 class X {
   function getP() {
-    global $g;
-    return $g;
+
+    return HhbbcThisType003::$g;
   }
   function getY() : Y {
     $n = $this;
@@ -20,6 +20,10 @@ class Z extends X {
   }
 }
 
-$g = new Y;
+HhbbcThisType003::$g = new Y;
 (new Z)->f();
 echo "OK!\n";
+
+abstract final class HhbbcThisType003 {
+  public static $g;
+}

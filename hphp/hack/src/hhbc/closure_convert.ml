@@ -51,19 +51,15 @@ type env = {
   defined_function_count : int;
   (* if we are immediately in using statement *)
   in_using: bool;
-  (* how many nested anonymous classes we are in *)
-  anonclass_depth: int;
 }
 
 type per_function_state = {
-  inline_hhas_blocks: string list;
   has_finally: bool;
   has_goto: bool;
   labels: bool SMap.t
 }
 
 let empty_per_function_state = {
-  inline_hhas_blocks = [];
   has_finally = false;
   has_goto = false;
   labels = SMap.empty;
@@ -78,8 +74,6 @@ let empty_per_function_state = {
 type state = {
   (* Number of closures created in the current function *)
   closure_cnt_per_fun : int;
-  (* Number of anonymous classes created in the current function *)
-  anon_cls_cnt_per_fun : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
@@ -117,8 +111,6 @@ type state = {
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: (bool SMap.t) SMap.t;
   seen_strict_types: bool option;
-  (* map  functions -> list of inline hhas blocks *)
-  functions_with_hhas_blocks: (string list) SMap.t;
   (* most recent definition of lexical-scoped `let` variables *)
   let_vars: int SMap.t;
   (* maps unique name of lambda to Rx level of the declaring scope *)
@@ -129,11 +121,6 @@ let set_has_finally st =
   if st.current_function_state.has_finally then st
   else { st with current_function_state =
        { st.current_function_state with has_finally = true } }
-
-let set_inline_hhas st hhas =
-  { st with current_function_state =
-  { st.current_function_state with inline_hhas_blocks =
-    hhas :: st.current_function_state.inline_hhas_blocks }}
 
 let set_label st l v =
   { st with current_function_state =
@@ -148,7 +135,6 @@ let set_has_goto st =
 let initial_state popt =
 {
   closure_cnt_per_fun = 0;
-  anon_cls_cnt_per_fun = 0;
   captured_vars = ULS.empty;
   captured_this = false;
   captured_generics = ULS.empty;
@@ -165,13 +151,12 @@ let initial_state popt =
   functions_with_finally = SSet.empty;
   function_to_labels_map = SMap.empty;
   seen_strict_types = None;
-  functions_with_hhas_blocks = SMap.empty;
   let_vars = SMap.empty;
   lambda_rx_of_scope = SMap.empty;
 }
 
 let total_class_count env st =
-  List.length st.hoisted_classes + env.defined_class_count + env.anonclass_depth
+  List.length st.hoisted_classes + env.defined_class_count
 
 let set_in_using env =
   if env.in_using then env else { env with in_using = true }
@@ -345,8 +330,7 @@ let rec make_scope_name ns scope =
       (if String_utils.string_ends_with scope_name "::" then "" else "::") in
     scope_name ^ strip_id md.m_name
   | ScopeItem.Class cd :: _ ->
-    let n = make_class_name cd in
-    if Hhbc_string_utils.Classes.is_anonymous_class_name n then n ^ "::" else n
+    make_class_name cd
   | _ :: scope ->
     make_scope_name ns scope
 
@@ -366,7 +350,6 @@ let env_toplevel class_count function_count defs =
   ; defined_class_count = class_count
   ; defined_function_count = function_count
   ; in_using = false
-  ; anonclass_depth = 0
   }
 
 let env_with_method env md =
@@ -399,13 +382,10 @@ let set_namespace st ns =
   { st with namespace = ns }
 
 let reset_function_counts st =
-  { st with
-    closure_cnt_per_fun = 0;
-    anon_cls_cnt_per_fun = 0 }
+  { st with closure_cnt_per_fun = 0 }
 
-let record_function_state key { inline_hhas_blocks; has_finally; has_goto; labels } rx_of_scope st =
-  if List.is_empty inline_hhas_blocks &&
-     not has_finally &&
+let record_function_state key {has_finally; has_goto; labels } rx_of_scope st =
+  if not has_finally &&
      not has_goto &&
      SMap.is_empty labels &&
      rx_of_scope = Rx.NonRx
@@ -419,26 +399,11 @@ let record_function_state key { inline_hhas_blocks; has_finally; has_goto; label
     if not @@ SMap.is_empty labels
     then SMap.add key labels st.function_to_labels_map
     else st.function_to_labels_map in
-  let functions_with_hhas_blocks =
-    if not @@ List.is_empty inline_hhas_blocks
-    then SMap.add key (List.rev inline_hhas_blocks) st.functions_with_hhas_blocks
-    else st.functions_with_hhas_blocks in
   let lambda_rx_of_scope =
     if rx_of_scope <> Rx.NonRx
     then SMap.add key rx_of_scope st.lambda_rx_of_scope
     else st.lambda_rx_of_scope in
-  { st with functions_with_finally; function_to_labels_map;
-    functions_with_hhas_blocks; lambda_rx_of_scope }
-
-let add_function ~has_inout_params env st fd =
-  let n = env.defined_function_count
-        + List.length st.hoisted_functions
-        + List.length st.inout_wrappers in
-  let inout_wrappers =
-    if has_inout_params then fd :: st.inout_wrappers else st.inout_wrappers in
-  let hoisted_functions = fd :: st.hoisted_functions in
-  { st with hoisted_functions; inout_wrappers},
-  { fd with f_body = []; f_name = (fst fd.f_name, string_of_int n) }
+  { st with functions_with_finally; function_to_labels_map; lambda_rx_of_scope }
 
 (* Make a stub class purely for the purpose of emitting the DefCls instruction
  *)
@@ -455,11 +420,6 @@ let add_class env st cd =
 let make_closure_name env st =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
-    (make_scope_name st.namespace env.scope) per_fun_idx
-
-let make_anonymous_class_name env st =
-  let per_fun_idx = st.anon_cls_cnt_per_fun + 1 in
-  SU.Classes.mangle_anonymous_class
     (make_scope_name st.namespace env.scope) per_fun_idx
 
 let make_closure ~class_num
@@ -516,40 +476,26 @@ let make_closure ~class_num
               f_name = (p, string_of_int class_num) } in
   inline_fundef, cd, md
 
-let inline_class_name_if_possible env ~trait ~fallback_to_empty_string p pe =
-  let get_class_call =
-    p, Call ((pe, Id (pe, "get_class")), [], [], [])
-  in
-  let name c = p, String (SU.Xhp.mangle @@ strip_id c.c_name) in
-  let empty_str = p, String ("") in
-  match Scope.get_class env.scope with
-  | Some c when trait ->
-    if c.c_kind = Ctrait then name c else empty_str
-  | Some c ->
-    if c.c_kind = Ctrait then get_class_call else name c
-  | None ->
-    if fallback_to_empty_string then p, String ("")
-    else get_class_call
-
 (* Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
  * literal strings. It's necessary to do this before closure conversion
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let str = String.uppercase str in
   let return newstr = (p, String newstr) in
+  let name c = p, String (SU.Xhp.mangle @@ strip_id c.c_name) in
   match str with
-  | "__CLASS__" | "__TRAIT__"->
-    inline_class_name_if_possible
-      ~trait:(str = "__TRAIT__")
-      ~fallback_to_empty_string:true
-      env p pid
+  | "__TRAIT__" ->
+    begin match Scope.get_class env.scope with
+    | Some c when c.c_kind = Ctrait -> name c
+    | _ -> return ""
+    end
+  | "__CLASS__" ->
+    begin match Scope.get_class env.scope with
+    | Some c when c.c_kind <> Ctrait -> name c
+    | Some _ -> p, Id (pid, (snd id))
+    | None -> return ""
+    end
   | "__METHOD__" ->
-    begin match env.scope with
-    | ScopeItem.Method _ :: ScopeItem.Class { c_name = (_, n); _ } :: _
-      when SU.Classes.is_anonymous_class_name n ->
-      (* HHVM does not inline method name in anonymous classes *)
-      p, Id (pid, (snd id))
-    | _ ->
     let prefix, is_trait =
       match Scope.get_class env.scope with
       | None -> "", false
@@ -572,7 +518,6 @@ let convert_id (env:env) p (pid, str as id) =
        * returns class name *)
       | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
-    end
     end
   | "__FUNCTION__" ->
     begin match env.scope with
@@ -640,7 +585,7 @@ let convert_meth_caller_to_func_ptr env st p pc cls pf func =
     let obj_var = p, "$o" in
     let obj_lvar = p, Lvar obj_var in
     let assert_invariant = p, Call ((p, Id (p, "invariant")), [],
-      [(p, Call((p, Id (p, "is_a")), [], [obj_lvar; (pc, String cls)], []));
+      [(p, Call((p, Id (p, "\\is_a")), [], [obj_lvar; (pc, String cls)], []));
        (p, String ("object must be an instance of (" ^ cls ^ ")"))], []) in
 
     (* return $o-><func>(...$args); *)
@@ -675,17 +620,33 @@ let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
   | Null | True | False | Omitted | Yield_break
   | Int _ | Float _ | String _ -> st, expr
-  | Varray es ->
+  | Varray (targ, es) ->
     let st, es = List.map_env st es (convert_expr env) in
-    st, (p, Varray es)
-  | Darray es ->
+    let st, targ = begin match targ with
+      | None -> st, None
+      | Some targ ->
+        let st, targ = convert_hint env st targ in
+        st, Some targ
+    end in
+    st, (p, Varray (targ, es))
+  | Darray (tarp, es) ->
     let convert_pair st (e1, e2) = begin
       let st, e1 = convert_expr env st e1 in
       let st, e2 = convert_expr env st e2 in
       st, (e1, e2)
     end in
+    let convert_tarp st (t1, t2) = begin
+      let st, t1 = convert_hint env st t1 in
+      let st, t2 = convert_hint env st t2 in
+      st, (t1, t2)
+    end in
     let st, es =  List.map_env st es convert_pair in
-    st, (p, Darray es)
+    begin match tarp with
+    | Some typepair ->
+      let st, tp = convert_tarp st typepair in
+      st, (p, Darray (Some tp, es))
+    | None -> st, (p, Darray (None, es))
+    end
   | Array afl ->
     let st, afl = List.map_env st afl (convert_afield env) in
     st, (p, Array afl)
@@ -694,9 +655,19 @@ let rec convert_expr env st (p, expr_ as expr) =
       let st, e = convert_expr env st e in
       st, (n, e)) in
     st, (p, Shape pairs)
-  | Collection (id, afl) ->
+  | Collection (id, targs, afl) ->
     let st, afl = List.map_env st afl (convert_afield env) in
-    st, (p, Collection (id, afl))
+    let st, ta = begin match targs with
+    | Some CollectionTV tv ->
+      let st, ta = convert_hint env st tv in
+      st, Some (CollectionTV ta)
+    | Some CollectionTKV (tk, tv) ->
+      let st, tk = convert_hint env st tk in
+      let st, tv = convert_hint env st tv in
+      st, Some (CollectionTKV (tk, tv))
+    | None -> st, None
+    end in
+    st, (p, Collection (id, ta, afl))
   | Lvar id ->
     let st = add_var env st (snd id) in
     st, (p, Lvar id)
@@ -712,8 +683,9 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
   | Call ((_, Id (_, meth_caller)), _, [(pc, cls); (pf, func)], [])
-    when (String.lowercase @@ SU.strip_global_ns meth_caller = "hh\\meth_caller") &&
-         (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
+    when let name = String.lowercase @@ SU.strip_global_ns meth_caller in
+      (name = "hh\\meth_caller" || name = "meth_caller") &&
+      (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
     let cls = match cls with
       | Class_const (cid, (_, cs)) when SU.is_class cs ->
         let _, (_, ex) = convert_expr env st cid in
@@ -735,36 +707,23 @@ let rec convert_expr env st (p, expr_ as expr) =
       | _ -> Emit_fatal.raise_fatal_parse pf "Func must be a string type"
       in
     convert_meth_caller_to_func_ptr env st p pc cls pf func
-  | Call ((_, Id (pe, "get_class")), _, [], [])
-    when st.namespace.Namespace_env.ns_name = None ->
-    st, inline_class_name_if_possible
-      ~trait:false
-      ~fallback_to_empty_string:false
-      env p pe
   | Call ((_, (Class_const ((_, Id (_, cid)), _)
              | Class_get ((_, Id (_, cid)), _))) as e,
     targs, el2, el3)
     when SU.is_parent cid ->
     let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, targs, el2, el3))
   | Call ((_, Id (_, id)), _, es, _)
     when String.lowercase id = "tuple" &&
       Emit_env.is_hh_syntax_enabled () ->
-    convert_expr env st (p, Varray es)
+    convert_expr env st (p, Varray (None, es))
   | Call (e, targs, el2, el3) ->
-    let st =
-      begin match snd e, el2 with
-      | Id (_, s), [_, String arg] when
-        String.lowercase @@ SU.strip_global_ns s = "hh\\asm"->
-        set_inline_hhas st arg
-      | _ -> st
-      end in
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
     st, (p, Call(e, targs, el2, el3))
@@ -817,52 +776,10 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, As (e, h, b))
   | New (e, targs, el1, el2) ->
     let st, e = convert_expr env st e in
-    let st, targs = convert_targs env st targs in
+    let st, targs = convert_hints env st targs in
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (e, targs, el1, el2))
-  | NewAnonClass (args, varargs, cls) ->
-    let cls = { cls with
-      c_name = (fst cls.c_name, make_anonymous_class_name env st) } in
-    let class_idx = total_class_count env st in
-    let cls_condensed = { cls with
-      c_name = (fst cls.c_name, string_of_int class_idx);
-      c_body = [] } in
-    let add_ns_to_hint = function
-      | p, Happly (id, args) ->
-        let classname, _ = Hhbc_id.Class.elaborate_id st.namespace id in
-        p, Happly ((p, Hhbc_id.Class.to_raw_string classname), args)
-      | other -> other in
-    let elaborate_fun_param param = { param with
-      param_hint = Option.map param.param_hint add_ns_to_hint } in
-    let elaborate_method meth = { meth with
-      m_params = List.map meth.m_params elaborate_fun_param;
-      m_ret = Option.map meth.m_ret add_ns_to_hint } in
-    let elaborate_class_elt = function
-      | Method meth -> Method (elaborate_method meth)
-      | other -> other in
-    let cls = { cls with
-      c_extends = List.map cls.c_extends add_ns_to_hint;
-      c_implements = List.map cls.c_implements add_ns_to_hint;
-      c_body = List.map cls.c_body elaborate_class_elt } in
-    let prev_anonclass_depth = env.anonclass_depth in
-    let env = { env with anonclass_depth = prev_anonclass_depth + 1 } in
-    let num_hoisted_classes = List.length st.hoisted_classes in
-    let st, cls = convert_class env st cls in
-    let env = { env with anonclass_depth = prev_anonclass_depth } in
-    let re_ordered_hoisted_classes =
-      let new_classes, old_classes =
-        List.split_n st.hoisted_classes
-          (List.length st.hoisted_classes - num_hoisted_classes) in
-      new_classes @ (cls :: old_classes)
-    in
-    let st = { st with
-      anon_cls_cnt_per_fun = st.anon_cls_cnt_per_fun + 1;
-      hoisted_classes = re_ordered_hoisted_classes } in
-    let env = env_with_class env cls in
-    let st, args = convert_exprs env st args in
-    let st, varargs = convert_exprs env st varargs in
-    st, (p, NewAnonClass (args, varargs, cls_condensed))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)
   | Lfun fd ->
@@ -921,9 +838,7 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Callconv (k, e) ->
     let st, e = convert_expr env st e in
     st, (p, Callconv (k, e))
-  | Execution_operator el ->
-    let st, el = convert_exprs env st el in
-    st, (p, Execution_operator el)
+  | PU_atom id -> st, (p, PU_atom id)
 
 and convert_prop_expr env st (_, expr_ as expr) =
   match expr_ with
@@ -963,13 +878,6 @@ and convert_hint env st (p, h as hint) =
     st, (p, Hshape info)
   | Haccess _
   | Hfun _ -> st, hint
-
-and convert_targs env st targs =
-  List.fold_right ~init:(st, []) targs
-    ~f:(fun (h, is_reified) (st, acc) ->
-        let st, h = convert_hint env st h in
-        st, (h, is_reified) :: acc
-     )
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.
@@ -1186,15 +1094,6 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
         let st, cd = convert_class env st cd in
         let st, stub_cd = add_class env st cd in
         st, (p, Def_inline (Class stub_cd))
-      | Fun fd :: _defs ->
-        let st, fd = convert_fun env st fd in
-        let has_inout_params =
-          let wrapper, _ =
-            Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
-          Option.is_some wrapper in
-        let st, stub_fd =
-          add_function ~has_inout_params:has_inout_params env st fd in
-        st, (p, Def_inline (Fun stub_fd))
       | _ ->
         failwith "expected single class or function declaration" in
     process_inline_defs st defs
@@ -1516,7 +1415,6 @@ let convert_toplevel_prog ~popt defs =
       ; global_closure_enclosing_classes = st.closure_enclosing_classes
       ; global_functions_with_finally = st.functions_with_finally
       ; global_function_to_labels_map = st.function_to_labels_map
-      ; global_functions_with_hhas_blocks = st.functions_with_hhas_blocks
       ; global_lambda_rx_of_scope = st.lambda_rx_of_scope }) in
   {
     ast_defs;

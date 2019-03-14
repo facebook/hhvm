@@ -5,7 +5,7 @@
 
 function main() {
   $m = Map {1 => 1, 2 => 2, 3 => 3};
-  var_dump($m->isEmpty());
+  \var_dump($m->isEmpty());
 }
 
 

@@ -4,7 +4,7 @@
   NewObjD "Foo"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $object
   PopC
@@ -14,15 +14,15 @@
    NewObjD "Foo"
    Dup
    FPushCtor 0
-   FCall <> 0 1 - "" ""
+   FCall <> 0 1 "" - "" ""
    PopC
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
 
   CGetL $object
   FPushObjMethodD 1 "main" NullThrows
    Null
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
 
   Int 1

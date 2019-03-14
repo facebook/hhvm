@@ -1,11 +1,14 @@
 <?php
 
+abstract final class GetRandomPortStatics {
+  public static $base = -1;
+}
+
 function get_random_port() {
-  static $base = -1;
-  if ($base == -1) {
-    $base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
+  if (GetRandomPortStatics::$base == -1) {
+    GetRandomPortStatics::$base = 12345 + (int)((int)(microtime(false) * 100) % 30000);
   }
-  return ++$base;
+  return ++GetRandomPortStatics::$base;
 }
 
 function retry_bind_server() {

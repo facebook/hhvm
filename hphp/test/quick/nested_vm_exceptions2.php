@@ -12,19 +12,19 @@ set_error_handler('error_handler');
 function unary_function($x) {
   // Raise a warning and throw from
   // the user error handler.
-  return UNDEFINED === $x;
+  trigger_error("raise a notice", E_USER_NOTICE);
 }
 
-function binary_function($x, $y) {}
+function binary_function(string $x, $y) {}
 
 fb_intercept('binary_function', 'unary_function', 'unary_function');
 
 try {
-  call_user_func_array('binary_function', array(12));
+  call_user_func_array('binary_function', array(12, 12));
 } catch (Exception $x) {
   echo "We hit our handler.\n";
   throw new Exception("Sup");
 }
 
 // Try it with no catch also.
-call_user_func_array('binary_function', array(12));
+call_user_func_array('binary_function', array(12, 12));

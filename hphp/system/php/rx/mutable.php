@@ -8,7 +8,7 @@ namespace HH\Rx {
  */
 <<__Rx>>
 function freeze<T>(T $obj): T {
-  invariant(is_object($obj), 'HH\\Rx\\freeze() operates only on objects');
+  invariant(\is_object($obj), 'HH\\Rx\\freeze() operates only on objects');
   return $obj;
 }
 
@@ -18,7 +18,7 @@ function freeze<T>(T $obj): T {
  */
 <<__Rx>>
 function mutable<T>(T $obj): T {
-  invariant(is_object($obj), 'HH\\Rx\\mutable() operates only on objects');
+  invariant(\is_object($obj), 'HH\\Rx\\mutable() operates only on objects');
   return $obj;
 }
 
@@ -29,7 +29,7 @@ function mutable<T>(T $obj): T {
  */
 <<__Rx, __MutableReturn>>
 function move<T>(<<__OwnedMutable>> T $obj): T {
-  invariant(is_object($obj), 'HH\\Rx\\move() operates only on objects');
+  invariant(\is_object($obj), 'HH\\Rx\\move() operates only on objects');
   return $obj;
 }
 

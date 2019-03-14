@@ -15,14 +15,14 @@ $extra_arg = 10;
 echo "*** Testing money_format() : error conditions ***\n";
 
 echo "\n-- Testing money_format() function with no arguments --\n";
-var_dump( money_format() );
+try { var_dump( money_format() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing money_format() function with insufficient arguments --\n";
-var_dump( money_format($string) );
+try { var_dump( money_format($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing money_format() function with more than expected no. of arguments --\n";
 
-var_dump( money_format($string, $value, $extra_arg) );
+try { var_dump( money_format($string, $value, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

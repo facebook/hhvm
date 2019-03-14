@@ -16,19 +16,19 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --empty array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --int indexed array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --associative array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --nested arrays--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --uppercase NULL--
@@ -50,35 +50,35 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --empty string DQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --empty string SQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --string DQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --string SQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --mixed case string--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --heredoc--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --instance of classWithToString--
-Error: 2 - gzopen() expects parameter 3 to be integer, object given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, object given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - gzopen() expects parameter 3 to be integer, object given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, object given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 
 --undefined var--
@@ -88,6 +88,6 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --resource--
-Error: 2 - gzopen() expects parameter 3 to be integer, resource given, %s(%d)
+Warning: gzopen() expects parameter 3 to be integer, resource given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
 NULL
 ===DONE===

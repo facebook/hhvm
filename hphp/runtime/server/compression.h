@@ -67,6 +67,13 @@ struct ResponseCompressor {
   virtual bool isAccepted();
 
   /**
+   * To support experimentation and safe roll-out, compressors can indicate
+   * that they would like to receive shadowed traffic, even if they aren't
+   * selected to be used.
+   */
+  virtual bool shouldShadow() const { return false; }
+
+  /**
    * Only callable after the first `compressResponse` call.
    *
    * Returns whether the response is compressed.
@@ -100,9 +107,9 @@ struct GzipResponseCompressor : ResponseCompressor {
   explicit GzipResponseCompressor(ITransportHeaders *headers);
   void enable() override;
   void disable() override;
-  bool isEnabled() const override { return m_enabled; };
-  bool isCompressed() const override { return m_compressor != nullptr; };
-  const char* encodingName() const override { return "gzip"; };
+  bool isEnabled() const override { return m_enabled; }
+  bool isCompressed() const override { return m_compressor != nullptr; }
+  const char* encodingName() const override { return "gzip"; }
   StringHolder compressResponse(const char *data, int len, bool last) override;
 
  private:
@@ -116,9 +123,9 @@ struct BrotliResponseCompressor : ResponseCompressor {
   explicit BrotliResponseCompressor(ITransportHeaders *headers);
   void enable() override;
   void disable() override;
-  bool isEnabled() const override { return m_enabled || m_chunkedEnabled; };
-  bool isCompressed() const override { return m_compressor != nullptr; };
-  const char* encodingName() const override { return "br"; };
+  bool isEnabled() const override { return m_enabled || m_chunkedEnabled; }
+  bool isCompressed() const override { return m_compressor != nullptr; }
+  const char* encodingName() const override { return "br"; }
   StringHolder compressResponse(const char *data, int len, bool last) override;
 
  private:
@@ -133,9 +140,9 @@ struct ZstdResponseCompressor : ResponseCompressor {
   explicit ZstdResponseCompressor(ITransportHeaders *headers);
   void enable() override;
   void disable() override;
-  bool isEnabled() const override { return m_enabled; };
-  bool isCompressed() const override { return m_compressor != nullptr; };
-  const char* encodingName() const override { return "zstd"; };
+  bool isEnabled() const override { return m_enabled; }
+  bool isCompressed() const override { return m_compressor != nullptr; }
+  const char* encodingName() const override { return "zstd"; }
   StringHolder compressResponse(const char *data, int len, bool last) override;
 
  private:
@@ -191,6 +198,7 @@ struct ResponseCompressorManager {
   // stored in preference order, more preferred first.
   std::vector<std::unique_ptr<ResponseCompressor>> m_impls;
   ResponseCompressor* m_selectedImpl;
+  std::vector<ResponseCompressor*> m_shadowImpls;
   bool m_chunkedEncoding;
 
   static std::vector<std::unique_ptr<ResponseCompressor>> makeImpls(

@@ -7,7 +7,7 @@
 echo "*** Testing quoted_printable_decode() : error conditions ***\n";
 
 echo "\n-- Testing quoted_printable_decode() function with no arguments --\n";
-var_dump( quoted_printable_decode() );
+try { var_dump( quoted_printable_decode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing quoted_printable_decode() function with more than expected no. of arguments --\n";
 $str = b"=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A= 	 
@@ -16,7 +16,7 @@ $str = b"=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A=
 =D0=
 =D2=CF=C5=CB=D4=D9"; 
 $extra_arg = 10;
-var_dump( quoted_printable_decode($str, $extra_arg) );
+try { var_dump( quoted_printable_decode($str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

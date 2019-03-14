@@ -69,8 +69,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:
-  case ConvObjToBool:
-  case ConvCellToBool:
   case ConvArrToDbl:
   case ConvBoolToDbl:
   case ConvIntToDbl:
@@ -285,6 +283,7 @@ bool canDCE(IRInstruction* inst) {
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
+  case MangleReifiedName:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -344,6 +343,8 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToInt:
   case ConvCellToInt:
   case ConvCellToObj:
+  case ConvCellToBool:
+  case ConvObjToBool:
   case ConvObjToStr:
   case ConvResToStr:
   case ConvCellToStr:
@@ -532,6 +533,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyPropFailHard:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
+  case RaiseHasThisNeedStatic:
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:
@@ -749,6 +751,8 @@ bool canDCE(IRInstruction* inst) {
   case KillClsRefTS:
   case BoxPtr:
   case AsTypeStruct:
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case CheckRDSInitialized:
   case MarkRDSInitialized:

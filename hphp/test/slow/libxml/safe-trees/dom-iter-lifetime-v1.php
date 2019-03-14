@@ -2,11 +2,11 @@
 // c.f. http://3v4l.org/qa6EP
 
 function foo() {
-  global $d;
-  $d = new DOMDocument;
-  $c = $d->createDocumentFragment();
-  $g = $d->createElement('fiz', 'buz');
-  $h = $d->createElement('red', 'xen');
+
+  LibxmlSafeTreesDomIterLifetimeV1::$d = new DOMDocument;
+  $c = LibxmlSafeTreesDomIterLifetimeV1::$d->createDocumentFragment();
+  $g = LibxmlSafeTreesDomIterLifetimeV1::$d->createElement('fiz', 'buz');
+  $h = LibxmlSafeTreesDomIterLifetimeV1::$d->createElement('red', 'xen');
 
   $c->appendChild($g);
   $c->appendChild($h);
@@ -18,4 +18,8 @@ foreach (foo() as $x) {
   var_dump($x->nodeValue);
 }
 var_dump($x->nodeValue);
-var_dump(get_class($d));
+var_dump(get_class(LibxmlSafeTreesDomIterLifetimeV1::$d));
+
+abstract final class LibxmlSafeTreesDomIterLifetimeV1 {
+  public static $d;
+}

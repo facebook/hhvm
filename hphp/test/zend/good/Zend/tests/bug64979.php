@@ -1,10 +1,14 @@
 <?php
 
+class Ref {
+  public function __construct(public $val) {}
+}
+
 function new_closure_gen() {
-    return function() {
-        static $foo = 0;
-        yield ++$foo;
-    };
+  $ref = new Ref(0);
+  return function() use ($ref) {
+    yield ++$ref->val;
+  };
 }
 
 $closure1 = new_closure_gen();

@@ -69,7 +69,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    var_dump(date_sun_info(strtotime("2006-12-12"), $input, 35.2333));
+    try { var_dump(date_sun_info(strtotime("2006-12-12"), $input, 35.2333)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     $iterator++;
 };
 

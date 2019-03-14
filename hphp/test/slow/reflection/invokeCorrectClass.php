@@ -2,11 +2,11 @@
 
 class Foo {
   public static function bar() {
-    echo get_called_class()."\n";
+    echo static::class."\n";
   }
   public function boo($var) {
     var_dump($var);
-    echo get_called_class()."\n";
+    echo static::class."\n";
  }
 }
 class Baz extends Foo { }

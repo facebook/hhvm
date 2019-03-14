@@ -3,16 +3,12 @@
 -- Testing date_sunset() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_sunset() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 ===DONE===

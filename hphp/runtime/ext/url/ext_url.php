@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Decodes data encoded with MIME base64

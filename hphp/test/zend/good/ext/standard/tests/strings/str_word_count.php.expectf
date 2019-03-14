@@ -41,10 +41,8 @@ Warning: %s
 bool(false)
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 string(55) "Hello friend, you're  
     looking          good today!"
 int(5)
@@ -52,10 +50,8 @@ int(6)
 int(5)
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 int(7)
 array(5) {
   [0]=>
@@ -97,10 +93,8 @@ array(5) {
 }
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 array(7) {
   [0]=>
   string(1) "F"
@@ -157,10 +151,8 @@ array(5) {
 }
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 array(7) {
   [0]=>
   string(1) "F"

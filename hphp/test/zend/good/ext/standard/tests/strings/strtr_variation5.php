@@ -77,7 +77,7 @@ $count = 1;
 for($index = 0; $index < count($strings); $index++) {
   echo "-- Iteration $count --\n";
   $str = $strings[$index];
-  var_dump( strtr($str, $from, $to) );
+  try { var_dump( strtr($str, $from, $to) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

@@ -85,7 +85,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( mb_ereg_replace($pattern, $replacement, $input, $option) );
+      try { var_dump( mb_ereg_replace($pattern, $replacement, $input, $option) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       $iterator++;
 };
 

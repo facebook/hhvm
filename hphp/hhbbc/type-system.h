@@ -1608,9 +1608,10 @@ IterTypes iter_types(const Type&);
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
 
 /*
- * Returns true iff an IsType testing for testTy on valTy might raise.
+ * Returns true iff an IsType testing for testTy/testOp on valTy might raise.
  */
 bool is_type_might_raise(const Type& testTy, const Type& valTy);
+bool is_type_might_raise(IsTypeOp testOp, const Type& valTy);
 
 /*
  * Returns true iff a compare of two types might raise a HAC notice

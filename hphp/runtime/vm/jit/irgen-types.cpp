@@ -155,6 +155,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - PredInner: When the value is a BoxedInitCell, return the predicted inner
  *              type of the value.
  * - FuncToStr: Emit code to deal with any func to string conversions.
+ * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
  * - Fail:      Emit code to deal with the type check failing.
  * - HackArr:   Emit code to deal with a d/varray mismatch.
  * - Callable:  Emit code to verify that the given value is callable.
@@ -170,6 +171,7 @@ template <typename GetVal,
           typename PredInner,
           typename FuncToStr,
           typename ClassToStr,
+          typename ClsMethToVec,
           typename Fail,
           typename HackArr,
           typename Callable,
@@ -183,13 +185,14 @@ void verifyTypeImpl(IRGS& env,
                     PredInner predInner,
                     FuncToStr funcToStr,
                     ClassToStr classToStr,
+                    ClsMethToVec clsMethToVec,
                     Fail fail,
                     HackArr hackArr,
                     Callable callable,
                     VerifyCls verifyCls,
                     Giveup giveup) {
-  if (tc.isMixed() || (RuntimeOption::EvalThisTypeHintLevel == 0
-                       && !propCls && tc.isThis())) {
+  if (!tc.isCheckable() || (RuntimeOption::EvalThisTypeHintLevel == 0
+                            && !propCls && tc.isThis())) {
     return;
   }
 
@@ -320,6 +323,10 @@ void verifyTypeImpl(IRGS& env,
       assertx(valType <= TCls);
       if (!classToStr(val)) return genFail();
       return;
+    case AnnotAction::ClsMethCheck:
+      assertx(valType <= TClsMeth);
+      if (!clsMethToVec(val)) return genFail();
+      return;
   }
   assertx(result == AnnotAction::ObjectCheck);
   if (onlyCheckNullability) return;
@@ -439,6 +446,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Res:     return TRes;
+  case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
   case IsTypeOp::VArray:
@@ -505,6 +513,27 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
           }
         );
       }
+
+      // check if type is TClsMeth and raise notice
+      if (op == IsTypeOp::VArray) {
+        return cond(
+          env,
+          [&] (Block* taken) {
+            return gen(env, CheckType, TClsMeth, taken, val);
+          },
+          [&] (SSATmp*) {
+            if (!RuntimeOption::EvalHackArrDVArrs) {
+              if (RuntimeOption::EvalIsVecNotices) {
+                gen(env, RaiseNotice, cns(env,
+                  makeStaticString(Strings::CLSMETH_COMPAT_IS_VARR)));
+              }
+              return cns(env, true);
+            }
+            return cns(env, false);
+          },
+          [&] { return cns(env, false); }
+        );
+      }
       return cns(env, false);
     }
   );
@@ -512,7 +541,23 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
   if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
-    return gen(env, IsType, TVec, src);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        return gen(env, CheckType, TClsMeth, taken, src);
+      },
+      [&] (SSATmp*) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            gen(env, RaiseNotice, cns(env,
+              makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+          }
+          return cns(env, true);
+        }
+        return cns(env, false);
+      },
+      [&] { return gen(env, IsType, TVec, src); }
+    );
   }
 
   auto const varrCheck = [&]{
@@ -541,7 +586,26 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     env,
     [&](Block* taken) { gen(env, CheckType, TVec, taken, src); },
     [&]{ return cns(env, true); },
-    [&]{ varrCheck(); return cns(env, false); }
+    [&]{
+      varrCheck();
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, CheckType, TClsMeth, taken, src);
+        },
+        [&] (SSATmp*) {
+          if (RuntimeOption::EvalHackArrDVArrs) {
+            if (RuntimeOption::EvalIsVecNotices) {
+              gen(env, RaiseNotice, cns(env,
+                makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+            }
+            return cns(env, true);
+          }
+          return cns(env, false);
+        },
+        [&] { return cns(env, false); }
+      );
+    }
   );
 }
 
@@ -643,16 +707,36 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
   if (!RuntimeOption::EvalHackArrCompatIsArrayNotices ||
       curFunc(env)->isBuiltin()) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      return gen(env, IsType, TArr, src);
-    } else {
-      return cond(
-        env,
-        [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
-        [&]{ return cns(env, true); },
-        [&]{ return gen(env, IsType, TShape, src); }
-      );
-    }
+    return cond(
+      env,
+      [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
+      [&]{ return cns(env, true); },
+      [&]{
+        return cond(
+          env,
+          [&] (Block* taken) {
+            return gen(env, CheckType, TClsMeth, taken, src);
+          },
+          [&] (SSATmp*) {
+            if (!RuntimeOption::EvalHackArrDVArrs) {
+              if (RuntimeOption::EvalIsVecNotices) {
+                gen(env, RaiseNotice, cns(env,
+                  makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
+              }
+              return cns(env, true);
+            }
+            return cns(env, false);
+          },
+          [&] {
+            if (RuntimeOption::EvalHackArrDVArrs) {
+              return cns(env, false);
+            } else {
+              return gen(env, IsType, TShape, src);
+            }
+          }
+        );
+      }
+    );
   }
 
 #define X(name, type, msg, next)                                        \
@@ -682,16 +766,41 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     [&](Block* taken) { gen(env, CheckType, TArr, taken, src); },
     [&]{ return cns(env, true); },
     [&]{
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        vecCheck(); return cns(env, false);
-      } else {
-        return cond(
-          env,
-          [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
-          [&]{ return cns(env, true); },
-          [&]{ vecCheck(); return cns(env, false); }
-        );
-      }
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, CheckType, TClsMeth, taken, src);
+        },
+        [&] (SSATmp*) {
+          if (!RuntimeOption::EvalHackArrDVArrs) {
+            if (RuntimeOption::EvalIsVecNotices) {
+              gen(env, RaiseNotice, cns(env,
+                makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
+            }
+            return cns(env, true);
+          }
+          return cns(env, false);
+        },
+        [&] {
+          if (RuntimeOption::EvalHackArrDVArrs) {
+            vecCheck();
+            return cns(env, false);
+          } else {
+            return cond(
+              env,
+              [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
+              [&]{ return cns(env, true); },
+              [&]{
+                vecCheck();
+                if (!RuntimeOption::EvalHackArrDVArrs) {
+                  return gen(env, IsType, TClsMeth, src);
+                }
+                return cns(env, false);
+              }
+            );
+          }
+        }
+      );
     }
   );
 }
@@ -718,7 +827,10 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
       (src->isA(TKeyset) && interface_supports_keyset(className)) ||
       (src->isA(TStr) && interface_supports_string(className)) ||
       (src->isA(TInt) && interface_supports_int(className)) ||
-      (src->isA(TDbl) && interface_supports_double(className));
+      (src->isA(TDbl) && interface_supports_double(className)) ||
+      (src->isA(TClsMeth) && (RuntimeOption::EvalHackArrDVArrs ?
+        interface_supports_vec(className) :
+        interface_supports_array(className)));
     return cns(env, res);
   }
 
@@ -786,22 +898,32 @@ namespace {
 
 SSATmp* resolveTypeStructImpl(
   IRGS& env,
-  SSATmp* ts,
   bool typeStructureCouldBeNonStatic,
-  bool suppress
+  bool suppress,
+  uint32_t n,
+  bool isOrAsOp
 ) {
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
     declaringCls && typeStructureCouldBeNonStatic
       ? gen(env, LdClsCtx, ldCtx(env))
       : cns(env, nullptr);
-  return gen(
+  auto const result = gen(
     env,
     ResolveTypeStruct,
-    ResolveTypeStructData(declaringCls, suppress),
-    ts,
+    ResolveTypeStructData {
+      declaringCls,
+      suppress,
+      spOffBCFromIRSP(env),
+      static_cast<uint32_t>(n),
+      isOrAsOp
+    },
+    sp(env),
     calledCls
   );
+  popC(env);
+  discard(env, n - 1);
+  return result;
 }
 
 const ArrayData* staticallyResolveTypeStructure(
@@ -859,18 +981,30 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
   );
 };
 
+/*
+ * This function tries to emit is/as type struct operations without resolving
+ * the type structure when that's possible.
+ * When it returns true, it has popped two values from the stack, namely the
+ * type structure and the cell, and pushed one value back to stack, namely
+ * true/false if it is an is-operation or the cell if it is an as operation.
+ * This function does not modify the reference counts of these stack values,
+ * leaving that responsibility to the caller.
+ * When it returns false, it does not modify anything.
+ */
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
   bool asExpr
 ) {
-  auto const t = topC(env);
+  // Top of the stack is the type structure, so the thing we are checking is
+  // the next element
+  auto const t = topC(env, BCSPRelOffset { 1 });
   auto const is_nullable_ts = is_ts_nullable(ts);
 
   auto const cnsResult = [&] (bool value) {
-    auto const c = popC(env);
+    popC(env); // pop the ts that's on the stack
+    popC(env); // pop the cell
     push(env, cns(env, value));
-    decRef(env, c);
     return true;
   };
 
@@ -884,10 +1018,10 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     if (t->isA(nty)) return should_negate ? fail() : success();
     if (!t->type().maybe(nty)) return should_negate ? success() : fail();
     if (asExpr) return false;
+    popC(env); // pop the ts that's on the stack
     auto const c = popC(env);
     auto const res = gen(env, should_negate ? IsNType : IsType, ty, c);
     push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-    decRef(env, c);
     return true;
   };
 
@@ -901,10 +1035,9 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     if (!t->type().maybe(ty)) return fail();
     if (asExpr) return false;
 
+    popC(env); // pop the ts that's on the stack
     auto const c = popC(env);
     chain_is_type(env, c, is_nullable_ts, ty1, ty2, rest...);
-    decRef(env, c);
-
     return true;
   };
 
@@ -931,18 +1064,45 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_mixed:       return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
-    case TypeStructure::Kind::T_vec_or_dict: return unionOf(TVec, TDict);
+    case TypeStructure::Kind::T_vec_or_dict:
+      if (t->type().maybe(TClsMeth)) {
+        if (t->isA(TClsMeth)) {
+          if (RuntimeOption::EvalHackArrDVArrs) {
+            if (RuntimeOption::EvalIsVecNotices) {
+              gen(env, RaiseNotice,
+                cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+            }
+            return success();
+          } else {
+            return fail();
+          }
+        } else {
+          PUNT(TypeStructC-MaybeClsMeth);
+        }
+      }
+      return unionOf(TVec, TDict);
     case TypeStructure::Kind::T_arraylike:
+      if (t->type().maybe(TClsMeth)) {
+        if (t->isA(TClsMeth)) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            gen(env, RaiseNotice,
+              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
+          }
+          return success();
+        } else {
+          PUNT(TypeStructC-MaybeClsMeth);
+        }
+      }
       return unionOf(TArr, TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec: {
       if (asExpr) return false;
+      popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = kind == TypeStructure::Kind::T_dict
         ? isDictImpl(env, c)
         : isVecImpl(env, c);
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-      decRef(env, c);
       return true;
     }
     case TypeStructure::Kind::T_class:
@@ -959,10 +1119,10 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
         // we need to bail
         return false;
       }
+      popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = implInstanceOfD(env, c, clsname);
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
-      decRef(env, c);
       return true;
     }
     case TypeStructure::Kind::T_noreturn:
@@ -989,19 +1149,28 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
   not_reached();
 }
 
+/*
+ * shouldDefRef is set iff the resulting SSATmp is a newly allocated type
+ * structure
+ * This function does not modify the reference count of its inputs, leaving that
+ * to the caller
+ */
 SSATmp* handleIsAsResolutionAndCommonOpts(
   IRGS& env,
-  SSATmp* a,
   TypeStructResolveOp op,
   bool asExpr,
-  bool& done
+  bool& done,
+  bool& shouldDecRef
 ) {
+  auto const a = topC(env);
   auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
   if (!a->isA(required_ts_type)) PUNT(TypeStructC-NotArrayTypeStruct);
   if (!a->hasConstVal(required_ts_type)) {
-    return op == TypeStructResolveOp::Resolve
-           ? resolveTypeStructImpl(env, a, true, !asExpr)
-           : a;
+    if (op == TypeStructResolveOp::Resolve) {
+      return resolveTypeStructImpl(env, true, !asExpr, 1, true);
+    }
+    shouldDecRef = false;
+    return popC(env);
   }
   auto const ts =
     RuntimeOption::EvalHackArrDVArrs ? a->dictVal() : a->arrVal();
@@ -1011,6 +1180,7 @@ SSATmp* handleIsAsResolutionAndCommonOpts(
   if (op == TypeStructResolveOp::Resolve) {
     maybe_resolved =
       staticallyResolveTypeStructure(env, ts, partial, invalidType);
+    shouldDecRef = maybe_resolved != ts;
   }
   if (emitIsAsTypeStructWithoutResolvingIfPossible(env, maybe_resolved,
                                                    asExpr)) {
@@ -1018,25 +1188,29 @@ SSATmp* handleIsAsResolutionAndCommonOpts(
     return nullptr;
   }
   if (op == TypeStructResolveOp::Resolve && (partial || invalidType)) {
+    shouldDecRef = true;
     return resolveTypeStructImpl(
-      env, cns(env, ts), typeStructureCouldBeNonStatic(ArrNR(ts)), !asExpr);
+      env, typeStructureCouldBeNonStatic(ArrNR(ts)), !asExpr, 1, true);
   }
-
+  popC(env);
   return cns(env, maybe_resolved);
 }
 
 } // namespace
 
 void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
-  auto const a = popC(env);
-  bool done = false;
-  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, false, done);
+  auto const a = topC(env);
+  auto const c = topC(env, BCSPRelOffset { 1 });
+  bool done = false, shouldDecRef = true;
+  SSATmp* tc =
+    handleIsAsResolutionAndCommonOpts(env, op, false, done, shouldDecRef);
   if (done) {
+    decRef(env, c);
     decRef(env, a);
     return;
   }
-  auto const c = popC(env);
-  auto block = opcodeMayRaise(IsTypeStruct)
+  popC(env);
+  auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
     ? create_catch_block(env, [&]{ decRef(env, tc); })
     : nullptr;
   push(env, gen(env, IsTypeStruct, block, tc, c));
@@ -1050,33 +1224,76 @@ void emitAsTypeStructC(IRGS& env, TypeStructResolveOp op) {
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
-  auto const a = popC(env);
-  bool done = false;
-  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, true, done);
-  if (done) {
-    push(env, popC(env));
-    decRef(env, a);
-    return;
-  }
+  auto const a = topC(env);
+  bool done = false, shouldDecRef = true;
+  SSATmp* tc =
+    handleIsAsResolutionAndCommonOpts(env, op, true, done, shouldDecRef);
+  if (done) return decRef(env, a);
   auto const c = topC(env);
   ifThen(
     env,
     [&](Block* taken) {
-      auto block = opcodeMayRaise(IsTypeStruct)
+      auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
         ? create_catch_block(env, [&]{ decRef(env, tc); })
         : nullptr;
       auto const res = gen(env, IsTypeStruct, block, tc, c);
       gen(env, JmpZero, taken, res);
     },
     [&]{
-      auto block = create_catch_block(env, [&]{ decRef(env, tc); });
+      auto block = shouldDecRef
+        ? create_catch_block(env, [&]{ decRef(env, tc); }) : nullptr;
       gen(env, AsTypeStruct, block, tc, c);
     }
   );
   decRef(env, a);
 }
 
+void emitRecordReifiedGeneric(IRGS& env, uint32_t n) {
+  assertx(n != 0);
+  auto const result = gen(
+    env,
+    RecordReifiedGenericsAndGetTSList,
+    StackRangeData { spOffBCFromIRSP(env), static_cast<uint32_t>(n) },
+    sp(env)
+  );
+  discard(env, n);
+  push(env, result);
+}
+
+void emitReifiedName(IRGS& env, uint32_t n, const StringData* name) {
+  assertx(n != 0);
+  auto const result = gen(
+    env,
+    RecordReifiedGenericsAndGetName,
+    StackRangeData { spOffBCFromIRSP(env), static_cast<uint32_t>(n) },
+    sp(env)
+  );
+  auto const mangledName = gen(env, MangleReifiedName, cns(env, name), result);
+  discard(env, n);
+  push(env, mangledName);
+}
+
+void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t n) {
+  push(env, resolveTypeStructImpl(env, true, false, n, false));
+}
+
 namespace {
+
+void raiseClsmethCompatTypeHint(
+  IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc) {
+  auto name = tc.displayName(func->cls());
+  if (id == TypeConstraint::ReturnId) {
+    gen(env, RaiseNotice, cns(env, makeStaticString(
+      folly::sformat("class_meth Compat: Value returned from function {}() "
+      "must be of type {}, clsmeth given",
+        func->fullDisplayName(), name))));
+  } else {
+    gen(env, RaiseNotice, cns(env, makeStaticString(
+      folly::sformat("class_meth Compat: Argument {} passed to {}() "
+      "must be of type {}, clsmeth given",
+        id + 1, func->fullDisplayName(), name))));
+  }
+}
 
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
@@ -1109,6 +1326,16 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       auto const str = gen(env, LdClsName, val);
       discard(env, 1);
       push(env, str);
+      return true;
+    },
+    [&] (SSATmp* val) { // clsmeth to varray/vec conversions
+      if (RuntimeOption::EvalVecHintNotices) {
+        raiseClsmethCompatTypeHint(env, id, func, tc);
+      }
+      auto clsMethArr = convertClsMethToVec(env, val);
+      discard(env, 1);
+      push(env, clsMethArr);
+      decRef(env, val);
       return true;
     },
     [&] (Type, bool hard) { // Check failure
@@ -1181,6 +1408,15 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
     [&] (SSATmp* val) { // class to string conversions
       auto const str = gen(env, LdClsName, val);
       stLocRaw(env, id, fp(env), str);
+      return true;
+    },
+    [&] (SSATmp* val) { // clsmeth to varray/vec conversions
+      if (RuntimeOption::EvalVecHintNotices) {
+        raiseClsmethCompatTypeHint(env, id, func, tc);
+      }
+      auto clsMethArr = convertClsMethToVec(env, val);
+      stLocRaw(env, id, fp(env), clsMethArr);
+      decRef(env, val);
       return true;
     },
     [&] (Type valType, bool hard) { // Check failure
@@ -1258,6 +1494,7 @@ void verifyPropType(IRGS& env,
     },
     [&] (SSATmp*) { return false; }, // No func to string automatic conversions
     [&] (SSATmp*) { return false; }, // No class to string automatic conversions
+    [&] (SSATmp*) { return false; }, // No clsmeth to vec automatic conversions
     [&] (Type, bool hard) { // Check failure
       auto const failHard =
         hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
@@ -1368,6 +1605,9 @@ void emitIssetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  if (ld->isA(TClsMeth)) {
+    PUNT(IssetL_is_ClsMeth);
+  }
   push(env, gen(env, IsNType, TNull, ld));
 }
 
@@ -1375,6 +1615,9 @@ void emitEmptyL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  if (ld->isA(TClsMeth)) {
+    PUNT(EmptyL_is_ClsMeth);
+  }
   push(
     env,
     gen(env, XorBool, gen(env, ConvCellToBool, ld), cns(env, true))
@@ -1397,11 +1640,20 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   } else if (subop == IsTypeOp::Str) {
     push(env, isStrImpl(env, src));
   } else {
-    auto const t = typeOpToType(subop);
-    if (t <= TObj) {
-      push(env, optimizedCallIsObject(env, src));
+    if (subop == IsTypeOp::ArrLike && src->isA(TClsMeth)) {
+      // To make ClsMeth compatiable with arraylike tentitively
+      if (RuntimeOption::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
+      }
+      push(env, cns(env, true));
     } else {
-      push(env, gen(env, IsType, t, src));
+      auto const t = typeOpToType(subop);
+      if (t <= TObj) {
+        push(env, optimizedCallIsObject(env, src));
+      } else {
+        push(env, gen(env, IsType, t, src));
+      }
     }
   }
   decRef(env, src);
@@ -1426,11 +1678,20 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   } else if (subop == IsTypeOp::Str) {
     push(env, isStrImpl(env, val));
   } else {
-    auto const t = typeOpToType(subop);
-    if (t <= TObj) {
-      push(env, optimizedCallIsObject(env, val));
+    if (subop == IsTypeOp::ArrLike && val->isA(TClsMeth)) {
+      // To make ClsMeth compatiable with arraylike tentitively
+      if (RuntimeOption::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
+      }
+      push(env, cns(env, true));
     } else {
-      push(env, gen(env, IsType, t, val));
+      auto const t = typeOpToType(subop);
+      if (t <= TObj) {
+        push(env, optimizedCallIsObject(env, val));
+      } else {
+        push(env, gen(env, IsType, t, val));
+      }
     }
   }
 }

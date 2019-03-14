@@ -3,7 +3,6 @@
 Arg value is: this is a string
 
 Warning: %s
-NULL
 
 Arg value is: Array
 array(2) {
@@ -14,5 +13,4 @@ array(2) {
 }
 
 Warning: %s
-NULL
 Done

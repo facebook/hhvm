@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function expect_string(string $x): dynamic {
   return $x;

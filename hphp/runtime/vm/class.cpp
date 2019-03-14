@@ -2812,6 +2812,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return false;
   }
   not_reached();

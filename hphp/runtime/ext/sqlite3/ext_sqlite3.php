@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A class that interfaces SQLite 3 databases.
@@ -181,7 +181,7 @@ class SQLite3 {
    *   failure.
    *
    */
-  <<__ParamCoerceModeNull, __Native>>
+  <<__Native>>
   function query(string $sql): mixed;
 
   /**
@@ -197,7 +197,7 @@ class SQLite3 {
    *   failure.
    *
    */
-  <<__ParamCoerceModeNull, __Native>>
+  <<__Native>>
   function querysingle(string $sql, bool $entire_row = false): mixed;
 
   /**

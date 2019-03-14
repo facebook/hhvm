@@ -1,2 +1,3 @@
 -vEval.JitPGOThreshold=3
 -vEval.JitPGOArrayGetStress=true
+-vEval.EnablePHP=1

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * We pretend that the only thing single-argument array_filter does is

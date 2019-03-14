@@ -52,7 +52,7 @@ class CommonTestDriver(object):
         shutil.rmtree(cls.bin_dir)
         shutil.rmtree(cls.hh_tmp_dir)
 
-    def write_load_config(self, *changed_files):
+    def write_load_config(self, use_saved_state=False):
         """
         Writes out a script that will print the list of changed files,
         and adds the path to that script to .hhconfig
@@ -324,7 +324,7 @@ class BarebonesTests(object):
         Add a new file which contains a naming collisions with an old file
         """
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             class FOO {}
             function H () {}
@@ -786,14 +786,14 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         redeclaring Bar with the remaining parent class.
         """
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             class Foo { // also declared in foo_3.php in setUpClass
                 public static $x;
             }
             """)
         with open(os.path.join(self.repo_dir, 'foo_5.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             class Bar extends Foo {}
 
@@ -816,7 +816,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             ])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             class Foo {
                 public static $y;
@@ -827,7 +827,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_methods(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             class Bar extends Foo {
                 public function f() {}
@@ -844,34 +844,34 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":74,"char_end":75,"line":4,"col_start":33,'
+                '"char_start":84,"char_end":85,"line":4,"col_start":33,'
                 '"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":236,"char_end":237,"line":10,"col_start":28,'
+                '{{"char_start":246,"char_end":247,"line":10,"col_start":28,'
                 '"col_end":28,"patch_type":"replace","replacement":"wat"}}]}}]'],
                 options=['--refactor', 'Method', 'Bar::f', 'Bar::wat'])
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":115,"char_end":116,"line":5,"col_start":33,'
+                '"char_start":125,"char_end":126,"line":5,"col_start":33,'
                 '"col_end":33,"patch_type":"replace",'
-                '"replacement":"overrideMe"}},{{"char_start":205,'
-                '"char_end":206,"line":9,"col_start":33,"col_end":33,'
+                '"replacement":"overrideMe"}},{{"char_start":215,'
+                '"char_end":216,"line":9,"col_start":33,"col_end":33,'
                 '"patch_type":"replace","replacement":"overrideMe"}}]}}]'],
                 options=['--refactor', 'Method', 'Bar::g', 'Bar::overrideMe'])
         self.check_cmd_and_json_cmd(['Rewrote 2 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":36,"char_end":39,"line":3,"col_start":31,'
+                '"char_start":46,"char_end":49,"line":3,"col_start":31,'
                 '"col_end":33,"patch_type":"replace","replacement":"Qux"}}]}},'
                 '{{"filename":"{root}foo_3.php","patches":[{{'
-                '"char_start":86,"char_end":89,"line":7,"col_start":15,'
+                '"char_start":96,"char_end":99,"line":7,"col_start":15,'
                 '"col_end":17,"patch_type":"replace","replacement":"Qux"}},'
-                '{{"char_start":155,"char_end":158,"line":10,"col_start":17,'
+                '{{"char_start":165,"char_end":168,"line":10,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"Qux"}}]'
                 '}}]'],
                 options=['--refactor', 'Class', 'Foo', 'Qux'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """<?hh
+            self.assertEqual(out, """<?hh //partial
 
             class Bar extends Qux {
                 public function wat() {}
@@ -887,7 +887,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         with open(os.path.join(self.repo_dir, 'foo_3.php')) as f:
             out = f.read()
-            self.assertEqual(out, """<?hh
+            self.assertEqual(out, """<?hh //partial
 
         function h(): string {
             return "a";
@@ -903,7 +903,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_functions(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             function wow() {
                 wat();
@@ -916,25 +916,25 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":122,"char_end":125,"line":8,"col_start":22,'
+                '"char_start":132,"char_end":135,"line":8,"col_start":22,'
                 '"col_end":24,"patch_type":"replace","replacement":"woah"}},'
-                '{{"char_start":51,"char_end":54,"line":4,"col_start":17,'
+                '{{"char_start":61,"char_end":64,"line":4,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"woah"}}]'
                 '}}]'],
                 options=['--refactor', 'Function', 'wat', 'woah'])
         self.check_cmd_and_json_cmd(['Rewrote 2 files.'],
                 ['[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":82,"char_end":83,"line":5,"col_start":24,'
+                '"char_start":92,"char_end":93,"line":5,"col_start":24,'
                 '"col_end":24,"patch_type":"replace","replacement":"fff"}}]}},'
                 '{{"filename":"{root}foo_1.php","patches":[{{'
-                '"char_start":23,"char_end":24,"line":3,"col_start":18,'
+                '"char_start":33,"char_end":34,"line":3,"col_start":18,'
                 '"col_end":18,"patch_type":"replace","replacement":"fff"}}]'
                 '}}]'],
                 options=['--refactor', 'Function', 'f', 'fff'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """<?hh
+            self.assertEqual(out, """<?hh //partial
 
             function wow() {
                 woah();
@@ -946,7 +946,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         with open(os.path.join(self.repo_dir, 'foo_1.php')) as f:
             out = f.read()
-            self.assertEqual(out, """<?hh
+            self.assertEqual(out, """<?hh //partial
 
         function fff() {
             return g() + 1;
@@ -955,7 +955,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
     def test_refactor_typedefs(self):
         with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             newtype NewType = int;
             type Type = int;
@@ -970,25 +970,25 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'
-        '"char_start":26,"char_end":33,"line":3,"col_start":21,'
+        '"char_start":36,"char_end":43,"line":3,"col_start":21,'
         '"col_end":27,"patch_type":"replace","replacement":"NewTypeX"}},'
-        '{{"char_start":148,"char_end":155,"line":7,"col_start":50,'
+        '{{"char_start":158,"char_end":165,"line":7,"col_start":50,'
         '"col_end":56,"patch_type":"replace","replacement":"NewTypeX"}}]'
         '}}]'],
         options=['--refactor', 'Class', 'NewType', 'NewTypeX'])
 
         self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
         ['[{{"filename":"{root}foo_4.php","patches":[{{'
-        '"char_start":59,"char_end":63,"line":4,"col_start":18,'
+        '"char_start":69,"char_end":73,"line":4,"col_start":18,'
         '"col_end":21,"patch_type":"replace","replacement":"TypeX"}},'
-        '{{"char_start":139,"char_end":143,"line":7,"col_start":40,'
+        '{{"char_start":149,"char_end":153,"line":7,"col_start":40,'
         '"col_end":43,"patch_type":"replace","replacement":"TypeX"}}]'
         '}}]'],
         options=['--refactor', 'Class', 'Type', 'TypeX'])
 
         with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
             out = f.read()
-            self.assertEqual(out, """<?hh
+            self.assertEqual(out, """<?hh //partial
 
             newtype NewTypeX = int;
             type TypeX = int;
@@ -1009,7 +1009,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd(['No errors!'])
 
         with open(os.path.join(self.repo_dir, 'auto_ns_2.php'), 'w') as f:
-            f.write("""<?hh
+            f.write("""<?hh //partial
 
             function haha() {
                 Herp\\f();
@@ -1085,3 +1085,38 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         ],
             options=['--lint-xcontroller', '{root}in_list.txt'],
         )
+
+    def test_incremental_typecheck_same_file(self):
+        self.maxDiff = None
+        self.start_hh_server()
+
+        # Important: typecheck the file after creation but before adding contents
+        # to test forward naming table updating.
+        open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ).close()
+        self.check_cmd(["No errors!"])
+
+        with open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ) as f:
+            f.write(
+                """<?hh // strict
+
+                // test_incremental_typecheck_same_file
+                class TestIncrementalTypecheckSameFile {}
+            """
+            )
+        self.check_cmd(["No errors!"])
+
+        # Notice how the only change is the removed doc block.
+        with open(
+            os.path.join(self.repo_dir, "test_incremental_typecheck_same_file.php"), "w"
+        ) as f:
+            f.write(
+                """<?hh // strict
+
+                class TestIncrementalTypecheckSameFile {}
+            """
+            )
+        self.check_cmd(["No errors!"])

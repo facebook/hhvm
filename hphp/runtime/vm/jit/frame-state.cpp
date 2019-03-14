@@ -703,8 +703,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case SpillFrame:
-    spillFrameStack(inst->extra<SpillFrame>()->spOffset,
-                    cur().bcSPOff, inst);
+    spillFrameStack(inst);
     break;
 
   case AssertARFunc: {
@@ -1867,13 +1866,13 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
   return funcTmp->funcVal();
 }
 
-void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
-                                    FPInvOffset retOffset,
-                                    const IRInstruction* inst) {
+void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
   assertx(inst->is(SpillFrame));
+  auto const extra = inst->extra<SpillFrame>();
+  auto const retOffset = extra->spOffset + kNumActRecCells;
 
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
-    setValue(stk(offset + i), nullptr);
+    setValue(stk(extra->spOffset + i), nullptr);
   }
   auto const ctx = inst->src(2);
   auto const dynamicCall = inst->src(4);
@@ -1883,11 +1882,10 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
     *m_fpushOverride : inst->marker().sk().op();
   m_fpushOverride.clear();
 
-  cur().bcSPOff += kNumActRecCells;
   cur().fpiStack.push_back(FPIInfo {
     cur().spValue,
-    retOffset,
-    offset,
+    retOffset.to<FPInvOffset>(irSPOff()),
+    extra->spOffset,
     ctx ? ctx->type() : TCtx,
     ctx,
     opc,

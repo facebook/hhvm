@@ -60,15 +60,14 @@ let visitor = object(this)
          * we check whether the abstract type constant is enforceable. In the case
          * where Taccess is concrete, the locl ty will have resolved to a
          * Tclass/Tprim/etc, so it won't be checked by this method *)
-        let cls_opt = Env.get_class acc.env class_id in
-        let tconst_opt = Option.map cls_opt ~f:(fun cls -> Cls.get_typeconst cls tconst_id) in
+        let open Option in
+        let tconst_opt = Env.get_class acc.env class_id >>=
+          (fun cls -> Cls.get_typeconst cls tconst_id) in
         Option.value_map ~default:acc tconst_opt ~f:(fun tconst ->
-          let _ = tconst in
-          let enforceable = false in
-          if not enforceable
+          if not (snd tconst.ttc_enforceable)
           then update acc @@
             Invalid (r, "the abstract type constant " ^
-              tconst_id ^ " because it is not enforceable")
+              tconst_id ^ " because it is not marked <<__Enforceable>>")
           else acc
         )
       | _ ->
@@ -77,8 +76,14 @@ let visitor = object(this)
 
       let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
       List.fold_left bounds ~f:this#on_type ~init:acc
-    | AKgeneric _ -> update acc @@
-      Invalid (r, "a generic type parameter, because generics are erased at runtime")
+    | AKgeneric name ->
+      begin match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
+      | false, _ -> update acc @@
+        Invalid (r, "an erased generic type parameter")
+      | true, false -> update acc @@
+        Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
+      | true, true ->
+        acc end
     | AKnewtype _ -> update acc @@ Invalid (r, "a newtype")
     | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
   method! on_tanon acc r _arity _id =

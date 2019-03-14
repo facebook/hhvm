@@ -47,7 +47,6 @@
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/closure_expression.h"
-#include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/yield_from_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
@@ -1595,33 +1594,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
   registerClassAlias(name);
 
   return result;
-}
-
-void Parser::onClassExpressionStart() {
-  pushClass(false);
-  pushComment();
-  newScope();
-  auto name = newAnonClassName("class@anonymous",
-                               m_namespace,
-                               clsName(),
-                               realFuncName());
-  m_clsContexts.push(ClassContext(T_CLASS, name));
-}
-
-void Parser::onClassExpression(Token &out, Token& args, Token &base,
-                               Token &baseInterface, Token &stmt) {
-  auto name = clsName();
-  auto cls_stmt = dynamic_pointer_cast<ClassStatement>(
-    onClassHelper(T_CLASS, name, base, baseInterface, stmt,
-      nullptr, nullptr));
-  m_file->addAnonClass(cls_stmt);
-  auto cls = NEW_EXP(
-    ClassExpression,
-    cls_stmt,
-    dynamic_pointer_cast<ExpressionList>(args->exp)
-  );
-  out->exp = cls;
-  popClass();
 }
 
 void Parser::onEnum(Token &out, Token &name, Token &baseTy,

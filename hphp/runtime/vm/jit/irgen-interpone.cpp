@@ -43,6 +43,7 @@ Type arithOpResult(Type t1, Type t2) {
   if (both.maybe(TVec)) return TVec;
   if (both.maybe(TDict)) return TDict;
   if (both.maybe(TKeyset)) return TKeyset;
+  if (both.maybe(TClsMeth)) return TClsMeth;
   if (both.maybe(TStr)) return TCell;
   return TInt;
 }
@@ -186,6 +187,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     }
     case OutFunc: return TFunc;
     case OutClass: return TCls;
+    case OutClsMeth: return TClsMeth;
   }
   not_reached();
 }
@@ -448,7 +450,6 @@ void emitDefCls(IRGS& env, uint32_t)          { INTERP }
 void emitAliasCls(IRGS& env,
                   const StringData*,
                   const StringData*)          { INTERP }
-void emitDefFunc(IRGS& env, uint32_t)         { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
 void emitChainFaults(IRGS& env)               { INTERP }
 void emitContGetReturn(IRGS& env)             { INTERP }
@@ -459,13 +460,6 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
-void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t)
-                                              { INTERP }
-void emitRecordReifiedGeneric(IRGS& env, uint32_t)
-                                              { INTERP }
-void emitReifiedName(IRGS& env, uint32_t, ReifiedGenericOp)
-                                              { INTERP }
-void emitClsRefGetTS(IRGS& env, uint32_t)     { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

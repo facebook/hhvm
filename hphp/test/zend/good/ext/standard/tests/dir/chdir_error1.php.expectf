@@ -3,10 +3,8 @@
 -- Testing chdir() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing chdir() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 ===DONE===

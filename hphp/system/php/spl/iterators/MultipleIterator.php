@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class MultipleIterator implements Iterator {
   /** Inner Iterators */

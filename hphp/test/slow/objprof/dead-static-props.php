@@ -1,10 +1,10 @@
 <?hh
 
 function gen() {
-  global $filename;
+
   sleep(1);
   $sprop = '$sprop_'.time() % 60;
-  $f = fopen($filename, "w");
+  $f = fopen($GLOBALS['filename'], "w");
   fwrite($f, <<<"EOD"
 <?php
 class C {

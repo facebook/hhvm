@@ -71,7 +71,7 @@ $values = array(
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( utf8_decode($value) );
+      try { var_dump( utf8_decode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

@@ -3,12 +3,10 @@
 -- Testing exif_imagetype() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing exif_imagetype() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing exif_imagetype() function with an unknown file  --
 

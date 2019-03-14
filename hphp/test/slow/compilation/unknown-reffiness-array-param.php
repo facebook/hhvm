@@ -9,9 +9,9 @@ function main(?array $a) {
 <<__EntryPoint>>
 function main_unknown_reffiness_array_param() {
 if (__hhvm_intrinsics\launder_value(false)) {
-  function foo(&$a) { return $a; }
+  include 'unknown-reffiness-array-param1.inc';
 } else {
-  function foo($a) { return $a; }
+  include 'unknown-reffiness-array-param2.inc';
 }
 
 $a = [100 => [200 => 'abc']];

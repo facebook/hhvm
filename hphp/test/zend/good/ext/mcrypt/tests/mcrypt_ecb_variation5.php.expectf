@@ -28,20 +28,20 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --empty array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 
 --int indexed array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 
 --associative array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 
 --nested arrays--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 
 --uppercase NULL--
 string(32) "6438db90653c4d300909aa02fd6163c2"
@@ -71,8 +71,8 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, object given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, object given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 
 --undefined var--
 string(32) "6438db90653c4d300909aa02fd6163c2"
@@ -81,6 +81,6 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --resource--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, resource given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, resource given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 109
 ===DONE===

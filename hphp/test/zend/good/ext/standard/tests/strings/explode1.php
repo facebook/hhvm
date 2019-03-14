@@ -73,8 +73,8 @@ var_dump( explode("b", $obj) );
 
 echo "\n*** Testing error conditions ***\n";
 /* checking for arguments <2 and >3 */
-var_dump( explode(":", "array1:array2:array3", -1, -33) );
-var_dump( explode(":") );
+try { var_dump( explode(":", "array1:array2:array3", -1, -33) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( explode(":") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

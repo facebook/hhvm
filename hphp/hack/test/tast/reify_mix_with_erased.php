@@ -5,5 +5,5 @@ function f<reify T, Tu>(Tu $f): Tu {
 }
 
 function g(): void {
-  f<reify int, string>(42);
+  f<int, string>(42);
 }

@@ -28,20 +28,20 @@ string(32) "caa892cb5d28b53c2b75b1e0799427c3"
 string(16) "99880c86884385d9"
 
 --empty array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 
 --int indexed array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 
 --associative array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 
 --nested arrays--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, array given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 
 --uppercase NULL--
 string(16) "d27689f6fd9700f4"
@@ -71,8 +71,8 @@ string(16) "d27689f6fd9700f4"
 string(32) "46677e368bc07ef375bd580e0c4b2594"
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, object given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, object given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 
 --undefined var--
 string(16) "d27689f6fd9700f4"
@@ -81,6 +81,6 @@ string(16) "d27689f6fd9700f4"
 string(16) "d27689f6fd9700f4"
 
 --resource--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, resource given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, resource given in %s/hphp/test/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 107
 ===DONE===

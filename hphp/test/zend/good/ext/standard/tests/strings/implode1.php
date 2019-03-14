@@ -95,7 +95,7 @@ var_dump( implode("::", $resources) );
 
 echo "\n*** Testing error conditions ***\n";
 /* zero argument */
-var_dump( implode() );
+try { var_dump( implode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* only glue */
 var_dump( implode("glue") );
@@ -116,7 +116,7 @@ var_dump( implode(12, "pieces") );
 var_dump( implode(NULL, "abcd") );
 
 /* args > than expected */
-var_dump( implode("glue", "pieces", "extra") );
+try { var_dump( implode("glue", "pieces", "extra") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* closing resource handles */
 fclose($file_handle);

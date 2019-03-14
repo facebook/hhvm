@@ -58,27 +58,27 @@ function import_request_variables(string $types, string $prefix = "");
 }
 
 namespace HH\Lib\_Private\Native {
-  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
-  function first(
+  <<__Rx, __AtMostRxAsArgs>>
+  function first<Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
-    mixed $iterable
-  ): mixed;
+    Container<Tv> $container,
+  ): ?Tv;
 
-  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
-  function first_key(
+  <<__Rx, __AtMostRxAsArgs>>
+  function first_key<Tk as arraykey, Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
-    mixed $iterable
-  ): mixed;
+    KeyedContainer<Tk, Tv> $container,
+  ): ?Tk;
 
-  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
-  function last(
+  <<__Rx, __AtMostRxAsArgs>>
+  function last<Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
-    mixed $iterable
-  ): mixed;
+    Container<Tv> $container,
+  ): ?Tv;
 
-  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
-  function last_key(
+  <<__Rx, __AtMostRxAsArgs>>
+  function last_key<Tk as arraykey, Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
-    mixed $iterable
-  ): mixed;
+    KeyedContainer<Tk, Tv> $container,
+  ): ?Tk;
 }

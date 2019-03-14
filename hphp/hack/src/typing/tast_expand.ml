@@ -31,25 +31,26 @@ module ETast = ExpandedTypeAnnotatedAST
 let expand_ty env ty =
   let rec exp_ty ty =
     let _, ety = Tast_env.expand_type env ty in
-    match ety with
-    | (_, (Tany | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
-    | (p, Tclass(n, e, tyl)) -> (p, Tclass(n, e, exp_tys tyl))
-    | (_, Tunresolved [ty]) -> exp_ty ty
-    | (p, Tunresolved tyl) -> (p, Tunresolved (exp_tys tyl))
-    | (p, Toption ty) -> (p, Toption (exp_ty ty))
-    | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
-    | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
-    | (p, Tabstract (ak, tyopt)) ->
-      (p, Tabstract (exp_abstract_kind ak, Option.map tyopt exp_ty))
-    | (p, Tshape (fk, fields)) ->
-      (p, Tshape (fk, Nast.ShapeMap.map exp_sft fields))
-    | (p, Tarraykind ak) ->
-      (p, Tarraykind (exp_array_kind ak))
-      (* TODO TAST: replace with a user error *)
-    | (p, Tvar v) -> (p, Tvar v)
-      (* TODO TAST: replace with Tfun type *)
-    | (p, Tanon(x, y)) -> (p, Tanon(x,y))
-    | (p, Terr) -> (p, Terr)
+    let ety = match ety with
+      | (_, (Tany | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
+      | (p, Tclass(n, e, tyl)) -> (p, Tclass(n, e, exp_tys tyl))
+      | (p, Tunresolved tyl) -> (p, Tunresolved (exp_tys tyl))
+      | (p, Toption ty) -> (p, Toption (exp_ty ty))
+      | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
+      | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
+      | (p, Tabstract (ak, tyopt)) ->
+        (p, Tabstract (exp_abstract_kind ak, Option.map tyopt exp_ty))
+      | (p, Tshape (fk, fields)) ->
+        (p, Tshape (fk, Nast.ShapeMap.map exp_sft fields))
+      | (p, Tarraykind ak) ->
+        (p, Tarraykind (exp_array_kind ak))
+        (* TODO TAST: replace with a user error *)
+      | (p, Tvar v) -> (p, Tvar v)
+        (* TODO TAST: replace with Tfun type *)
+      | (p, Tanon(x, y)) -> (p, Tanon(x,y))
+      | (p, Terr) -> (p, Terr) in
+    let _env, ety = Tast_env.simplify_unions env ety in
+    ety
 
   and exp_tys tyl = List.map ~f:exp_ty tyl
 

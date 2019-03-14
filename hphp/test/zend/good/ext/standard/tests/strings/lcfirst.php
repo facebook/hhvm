@@ -12,7 +12,6 @@ $str_array = array(
                     "\x000",
                     "abcd",		// double quoted string
                     'xyz',		// single quoted string
-                    string,		// without quotes
                     "-3",
                     -3,
                     '-3.344',
@@ -47,7 +46,7 @@ echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
 $str_arr = array("Hello", "?world", "!$%**()%**[][[[&@#~!", array());
-var_dump( lcfirst($str_arr) );
+try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing lowercamelcase action call example ---\n";
 class Setter {
@@ -149,10 +148,10 @@ var_dump(lcfirst(lcfirst("hello")));
 
 echo "\n#### error conditions ####";
 /* Zero arguments */
-lcfirst();
+try { lcfirst(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 /* More than expected no. of args */
-lcfirst($str_array[0], $str_array[1]);
-lcfirst((int)10, (int)20);
+try { lcfirst($str_array[0], $str_array[1]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { lcfirst((int)10, (int)20); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

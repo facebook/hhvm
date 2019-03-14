@@ -19,7 +19,7 @@ mkdir($path);
 $dir_handle = opendir($path);
 $extra_arg = 10;
 
-var_dump( readdir($dir_handle, $extra_arg) );
+try { var_dump( readdir($dir_handle, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // close the handle so can remove dir in CLEAN section
 closedir($dir_handle);

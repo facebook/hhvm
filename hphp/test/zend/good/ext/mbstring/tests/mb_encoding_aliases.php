@@ -1,5 +1,5 @@
 <?php
-mb_encoding_aliases();
+try { mb_encoding_aliases(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $list = mb_encoding_aliases("ASCII");
 sort(&$list);
 var_dump($list);

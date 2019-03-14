@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -22,3 +22,5 @@ function f() {
 
   yield wait_forvar($arr);
 }
+
+function wait_forvar(array<int, int> $arr) {}

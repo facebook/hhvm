@@ -33,8 +33,8 @@ function immutableMapTest(ImmMap<string, I> $map, StringSubtype $key): void {
 }
 
 function keyedContainerTest(
-  KeyedContainer<I, string> $container,
-  IDerived $key,
+  KeyedContainer<string, string> $container,
+  StringSubtype $key,
 ): void {
   echo $container[$key];
 }

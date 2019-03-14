@@ -3,15 +3,12 @@
 -- Testing is_a() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing is_a() function with non-boolean in last position --
 
 Warning: %s
-NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

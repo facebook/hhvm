@@ -88,12 +88,6 @@ FunctionScope::FunctionScope(AnalysisResultConstRawPtr ar, bool method,
       break;
     }
   }
-
-  if (isNative()) {
-    m_coerceMode |= hasUserAttr("__ParamCoerceModeFalse")
-      ? AttrParamCoerceModeFalse
-      : AttrParamCoerceModeNull;
-  }
 }
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,
@@ -214,10 +208,6 @@ bool FunctionScope::hasMemoize() const {
 
 bool FunctionScope::hasMemoizeLSB() const {
   return hasUserAttr("__MemoizeLSB");
-}
-
-bool FunctionScope::isParamCoerceMode() const {
-  return m_coerceMode & (AttrParamCoerceModeNull | AttrParamCoerceModeFalse);
 }
 
 bool FunctionScope::isPublic() const {

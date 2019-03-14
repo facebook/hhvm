@@ -1,0 +1,6 @@
+File "explicit_type_collection_mismatch5.php", line 4, characters 8-38:
+Incompatible field values (Typing[4110])
+File "explicit_type_collection_mismatch5.php", line 4, characters 15-17:
+This is an int
+File "explicit_type_collection_mismatch5.php", line 4, characters 20-24:
+It is incompatible with a bool

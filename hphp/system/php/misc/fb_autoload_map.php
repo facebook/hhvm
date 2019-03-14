@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 function fb_autoload_map(mixed $map, string $root): bool {
   trigger_error(

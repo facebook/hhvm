@@ -39,7 +39,7 @@ $count = 0;
 /* loop through to check possible variations */
 foreach ($strings as $string) {
   echo "\n-- Iteration $count --\n";
-  var_dump( strtolower($string) );
+  try { var_dump( strtolower($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 
@@ -50,8 +50,8 @@ else
   echo "strings are not same\n";
 
 echo "\n*** Testing error conditions ***";
-var_dump( strtolower() ); /* Zero arguments */
-var_dump( strtolower("a", "b") ); /* Arguments > Expected */
+try { var_dump( strtolower() ); /* Zero arguments */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( strtolower("a", "b") ); /* Arguments > Expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "*** Done ***";
 ?>

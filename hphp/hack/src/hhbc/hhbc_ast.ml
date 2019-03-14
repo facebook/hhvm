@@ -23,7 +23,6 @@ type param_num = int
 type stack_index = int
 type class_id = Hhbc_id.Class.t
 type class_num = int
-type function_num = int
 type typedef_num = int
 type function_id = Hhbc_id.Function.t
 type method_id = Hhbc_id.Method.t
@@ -34,7 +33,9 @@ type fcall_flags = {
   has_unpack : bool;
   supports_async_eager_return : bool;
 }
-type fcall_args = fcall_flags * num_params * num_params * (Label.t option)
+type by_refs = bool list
+type fcall_args =
+  fcall_flags * num_params * num_params * by_refs * (Label.t option)
 type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
@@ -166,10 +167,6 @@ type instruct_basic =
 type typestruct_resolve_op =
   | Resolve
   | DontResolve
-
-type reified_generic_op =
-  | ClsGeneric
-  | FunGeneric
 
 type has_generics_op =
   | NoGenerics
@@ -313,7 +310,6 @@ type instruct_get =
   | VGetL of local_id
   | VGetG
   | VGetS of classref_id
-  | ClsRefGetL of local_id * classref_id
   | ClsRefGetC of classref_id
   | ClsRefGetTS of classref_id
 
@@ -333,6 +329,7 @@ type istype_op =
   | OpArrLike (* Arr or Vec or Dict or Keyset *)
   | OpVArray
   | OpDArray
+  | OpClsMeth
 
 type instruct_isset =
   | IssetC
@@ -412,10 +409,8 @@ type instruct_call =
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
   | NewObj of classref_id * has_generics_op
   | NewObjD of class_id
-  | NewObjI of classref_id
   | NewObjS of SpecialClsRef.t
   | FPushCtor of num_params
-  | FThrowOnRefMismatch of bool list
   | FCall of fcall_args * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 
@@ -463,7 +458,6 @@ type instruct_include_eval_define =
   | ReqDoc
   | Eval
   | AliasCls of string * string
-  | DefFunc of function_num
   | DefCls of class_num
   | DefClsNop of class_num
   | DefCns of const_id
@@ -488,6 +482,7 @@ type instruct_misc =
   | BareThis of bare_this_op
   | CheckThis
   | InitThisLoc of local_id
+  | FuncNumArgs
   | StaticLocCheck of local_id * string
   | StaticLocDef of local_id * string
   | StaticLocInit of local_id * string
@@ -503,7 +498,7 @@ type instruct_misc =
   | Parent of classref_id
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
-  | ReifiedName of int * reified_generic_op
+  | ReifiedName of int * string
   | RecordReifiedGeneric of int
   | CheckReifiedGenericMismatch
   | NativeImpl

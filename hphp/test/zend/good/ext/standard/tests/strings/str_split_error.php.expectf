@@ -2,9 +2,7 @@
 -- Testing str_split() function with Zero arguments --
 
 Warning: %s
-NULL
 -- Testing str_split() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

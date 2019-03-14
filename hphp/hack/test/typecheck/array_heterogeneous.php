@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -19,3 +19,5 @@ function test(): void {
 
   $y[0][0] = 0;
 }
+
+function my_php_function() {}

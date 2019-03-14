@@ -25,7 +25,9 @@ main();
 
 function __autoload($cls) {
   echo "looking up $cls\n";
-  if ($cls == 'F') { class F { const FOO = 1; } }
+  if ($cls == 'F') {
+    include 'propeties4.inc';
+  }
 }
 
 class G {

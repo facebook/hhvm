@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class F {
   <<__Deprecated('use bar() instead')>>

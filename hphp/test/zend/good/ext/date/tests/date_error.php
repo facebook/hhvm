@@ -13,11 +13,11 @@ $format = "m.d.y";
 $timestamp = mktime(10, 44, 30, 2, 27, 2009);
 
 echo "\n-- Testing date function with no arguments --\n";
-var_dump (date());
+try { var_dump (date()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing date function with more than expected no. of arguments --\n";
 $extra_arg = true;
-var_dump (checkdate($format, $timestamp, $extra_arg));
+try { var_dump (checkdate($format, $timestamp, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE=== 

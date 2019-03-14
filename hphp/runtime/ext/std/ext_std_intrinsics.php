@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace __hhvm_intrinsics {
 
@@ -46,7 +46,7 @@ function create_class_pointer(string $name): mixed;
 <<__IsFoldable, __Native>>
 function serialize_keep_dvarrays(mixed $value): string;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function deserialize_keep_dvarrays(string $str): mixed;
 
 /* dummy builtin written in hack for testing param coercion */

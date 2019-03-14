@@ -15,12 +15,12 @@ $needle = b'string_val';
 $part = true;
 $encoding = 'string_val';
 $extra_arg = 10;
-var_dump( mb_strstr($haystack, $needle, $part, $encoding, $extra_arg) );
+try { var_dump( mb_strstr($haystack, $needle, $part, $encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing mb_strstr with one less than the expected number of arguments
 echo "\n-- Testing mb_strstr() function with less than expected no. of arguments --\n";
 $haystack = b'string_val';
-var_dump( mb_strstr($haystack) );
+try { var_dump( mb_strstr($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

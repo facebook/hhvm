@@ -1,7 +1,7 @@
 <?php
 class A {
     public static function test() {
-        echo get_called_class()."\n";
+        echo static::class."\n";
     }
 }
 

@@ -9,7 +9,7 @@
   DefCls 3
   DefCls 4
   FPushFuncD 0 "main"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   True
   RetC
@@ -63,7 +63,7 @@
   .method [public] some_junk {
     This
     FPushObjMethodD 0 "prot_method" NullThrows
-    FCall <> 0 1 - "" ""
+    FCall <> 0 1 "" - "" ""
     PopC
 
     Null
@@ -132,7 +132,7 @@
   NewObjD "WithProps"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
@@ -145,12 +145,12 @@
 
   CGetL $obj
   FPushObjMethodD 0 "print_funk" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "print_defaulted" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   True
@@ -163,7 +163,7 @@
   NewObjD "Base"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $base
   PopC
@@ -173,39 +173,39 @@
   ClsRefGetC 0
   FPushClsMethod 1 0
   String "printing this string"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
 
   NewObjD "Derived"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $derived
   PopC
 
   CGetL $derived
   FPushObjMethodD 0 "some_junk" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $base
   FPushObjMethodD 0 "overriden" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $derived
   FPushObjMethodD 0 "overriden" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $derived
   FPushObjMethodD 0 "abs_method" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   FPushFuncD 0 "prop_test"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   Int 1

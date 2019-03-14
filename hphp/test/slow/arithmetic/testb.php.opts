@@ -1,1 +1,2 @@
 -vEval.HHIRGenerateAsserts=false -vEval.JitPGOThreshold=3
+-vEval.EnablePHP=1

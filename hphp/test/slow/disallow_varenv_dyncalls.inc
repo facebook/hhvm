@@ -41,8 +41,8 @@ function test_getargs_map() {
 
 function test_getargs_errors() {
   $f = 'func_get_args';
-  $f('abc', 100, false);
-  array_map($f, [1]);
+  try { $f('abc', 100, false); } catch (Exception $e) { echo $e->getMessage().' in '.basename(__FILE__).' at line '.__LINE__."\n"; }
+  try { array_map($f, [1]); } catch (Exception $e) { echo $e->getMessage().' in '.basename(__FILE__).' at line '.__LINE__."\n"; }
 }
 
 function get_current_test($all) {

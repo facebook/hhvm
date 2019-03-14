@@ -9,8 +9,6 @@ bool(true)
 bool(false)
 --------- undefined parameter -------------
 
-Warning: %s
-
 Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_unset.php on line 36
 NULL
 bool(false)

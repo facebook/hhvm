@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function array_reduce(\HH\KeyedTraversable $input, $func, $res = null) {
   if (!is_callable($func)) {

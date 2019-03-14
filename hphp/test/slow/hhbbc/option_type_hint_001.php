@@ -9,5 +9,5 @@ class Foo {
 
 <<__EntryPoint>>
 function main_option_type_hint_001() {
-new Foo();
+new Foo(1);
 }

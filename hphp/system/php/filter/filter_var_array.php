@@ -1,17 +1,20 @@
-<?php
+<?hh // partial
 
 abstract final class _FilterVarArrayFilterValidator {
   private static $ids = null;
 
+  <<__Rx, __Memoize>>
+  private static function getIDs() {
+    return array_fill_keys(array_map('filter_id', filter_list()), null);
+  }
+
+  <<__Rx>>
   public static function isValid($filter) {
-    if (self::$ids === null) {
-      // A bit painful in php, exposing the IDs might be better if this is hot
-      self::$ids = array_fill_keys(array_map('filter_id', filter_list()), null);
-    }
-    return array_key_exists($filter, self::$ids);
+    return array_key_exists($filter, self::getIDs());
   }
 }
 
+  <<__Rx>>
 function _filter_var_array_single($value, $filter, $options = array()) {
   if (!_FilterVarArrayFilterValidator::isValid($filter)) {
     $filter = FILTER_DEFAULT;
@@ -61,6 +64,7 @@ function _filter_var_array_single($value, $filter, $options = array()) {
    *                     value will be FALSE if the filter fails, or NULL if
    *                     the variable is not set.
    */
+  <<__Rx>>
 function filter_var_array($data, $definition = null, $add_empty = true) {
   if (!is_array($data)) {
     trigger_error('filter_var_array() expects parameter 1 to be array, '.

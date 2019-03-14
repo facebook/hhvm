@@ -49,16 +49,16 @@ foreach($arr_test as $var){
 /* Error conditions */
 echo "\n*** Testing chr() error conditions ***\n";
 //zero arguments
-var_dump( chr() ); 
+try { var_dump( chr() );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 // more than expected no. of args
-var_dump( chr($arr_test[0], $arr_test[1]) ); 
+try { var_dump( chr($arr_test[0], $arr_test[1]) );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "\n*** Testing ord() error conditions ***\n";
 // zero arguments
-var_dump( ord() ); 
+try { var_dump( ord() );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 // more than expected no. of args
-var_dump( ord($arr_test[0], $arr_test[1]) ); 
+try { var_dump( ord($arr_test[0], $arr_test[1]) );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

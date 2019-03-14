@@ -9,13 +9,13 @@ echo "*** Testing long2ip() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing long2ip() function with Zero arguments --\n";
-var_dump( long2ip() );
+try { var_dump( long2ip() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test long2ip with one more than the expected number of arguments
 echo "\n-- Testing long2ip() function with more than expected no. of arguments --\n";
 $proper_address = 10;
 $extra_arg = 10;
-var_dump( long2ip($proper_address, $extra_arg) );
+try { var_dump( long2ip($proper_address, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

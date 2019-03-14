@@ -6,9 +6,9 @@
 
 $extra_arg = 10;
 echo "\n-- Testing similar_text() function with more than expected no. of arguments --\n";
-similar_text("abc", "def", &$percent, $extra_arg);
+try { similar_text("abc", "def", &$percent, $extra_arg); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing similar_text() function with less than expected no. of arguments --\n";
-similar_text("abc");
+try { similar_text("abc"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

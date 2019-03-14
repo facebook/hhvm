@@ -1,10 +1,13 @@
 <?hh
 
+abstract final class GetValueStatics {
+  public static $x = 0;
+}
+
 <<__NEVER_INLINE>>
 function get_value() {
-  static $x = 0;
-  $x++;
-  if (($x % 2) == 0) return 1;
+  GetValueStatics::$x++;
+  if ((GetValueStatics::$x % 2) == 0) return 1;
   return new stdclass;
 }
 

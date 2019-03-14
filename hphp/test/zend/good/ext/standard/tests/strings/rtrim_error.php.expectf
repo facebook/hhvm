@@ -3,12 +3,10 @@
 -- Testing rtrim() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing rtrim() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Test rtrim function with various invalid charlists
 

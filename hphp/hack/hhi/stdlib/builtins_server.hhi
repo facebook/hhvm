@@ -17,7 +17,7 @@ function dangling_server_proxy_old_request();
 <<__PHPStdLib>>
 function pagelet_server_is_enabled();
 <<__PHPStdLib>>
-function pagelet_server_task_start(string $url, $headers = null, string $post_data = "", $files = null, int $timeout_seconds = 0);
+function pagelet_server_task_start(string $url, darray $headers = darray[], string $post_data = "", darray $files = darray[], int $timeout_seconds = 0);
 <<__PHPStdLib>>
 function pagelet_server_task_status(resource $task);
 <<__PHPStdLib>>

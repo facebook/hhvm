@@ -216,14 +216,21 @@ bool methodExistsHelper(Class*, StringData*);
 
 /* Is/As Helpers */
 ArrayData* resolveTypeStructHelper(
-  const ArrayData*,
+  uint32_t n,
+  const TypedValue* values,
   const Class* declaringCls,
   const Class* calledCls,
-  bool suppress
+  bool suppress,
+  bool isOrAsOp
 );
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);
 
+/* Reified generics helpers */
+StringData*
+recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values);
+ArrayData*
+recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values);
 /*
  * Throw a VMSwitchMode exception.
  */
@@ -268,18 +275,6 @@ uintptr_t tlsBaseNoInline();
  * nothing.
  */
 void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
-
-/*
- * Exception thrown to indicate that a parameter could not be coerced when
- * calling an HNI builtin function.
- */
-struct TVCoercionException : std::runtime_error {
-  TVCoercionException(const Func* func, int arg_num,
-                      DataType actual, DataType expected);
-  TypedValue tv() const { return m_tv; }
-private:
-  req::root<TypedValue> m_tv;
-};
 
 //////////////////////////////////////////////////////////////////////
 

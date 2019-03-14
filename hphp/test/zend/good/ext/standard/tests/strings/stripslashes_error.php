@@ -12,14 +12,14 @@ echo "*** Testing stripslashes() : error conditions ***\n";
 
 // Zero argument
 echo "\n-- Testing stripslashes() function with Zero arguments --\n";
-var_dump( stripslashes() );
+try { var_dump( stripslashes() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // More than expected number of arguments
 echo "\n-- Testing stripslashes() function with more than expected no. of arguments --\n";
 $str = '\"hello\"\"world\"';
 $extra_arg = 10;
 
-var_dump( stripslashes($str, $extra_arg) );
+try { var_dump( stripslashes($str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( $str );
 
 echo "Done\n";

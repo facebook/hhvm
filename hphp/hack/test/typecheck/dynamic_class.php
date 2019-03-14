@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class Foo {
   public static function bar(): void {}

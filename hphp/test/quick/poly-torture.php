@@ -42,17 +42,23 @@ class C {
   }
 }
 
+abstract final class PrandobjStatics {
+  public static $state = 0;
+  public static $names = array('A', 'B', 'C');
+}
+
 function pRandObj() {
-  static $state = 0;
-  static $names = array('A', 'B', 'C');
-  $name = $names[($state++ * 17) % 3];
+  $name = PrandobjStatics::$names[(PrandobjStatics::$state++ * 17) % 3];
   echo "    randObj: $name\n";
   return new $name();
 }
 
+abstract final class RandarrStatics {
+  public static $state = 0;
+}
+
 function randArr() {
-  static $state = 0;
-  return range(0, ($state++ * 17) % 128);
+  return range(0, (RandarrStatics::$state++ * 17) % 128);
 }
 
 class MagicBox {

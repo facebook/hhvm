@@ -12,10 +12,10 @@ var_dump( filesize("/no/such/file") );
 var_dump( filesize("/no/such/dir") );
 
 /* No.of arguments less than expected */
-var_dump( filesize() );
+try { var_dump( filesize() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of arguments greater than expected */
-var_dump( filesize(__FILE__, 2000) );
+try { var_dump( filesize(__FILE__, 2000) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "\n";
 
 echo "*** Done ***\n";

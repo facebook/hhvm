@@ -39,6 +39,7 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/exception.h"
 
@@ -1508,6 +1509,51 @@ void VariableSerializer::serializeClass(const Class* cls) {
   }
 }
 
+void VariableSerializer::serializeClsMeth(
+  ClsMethDataRef clsMeth, bool skipNestCheck /* = false */) {
+  auto const clsName = clsMeth->getCls()->name();
+  auto const funcName = clsMeth->getFunc()->name();
+  switch (getType()) {
+    case Type::DebuggerDump:
+    case Type::PrintR:
+      m_buf->append("classMeth{\n    class(");
+      m_buf->append(clsName->data());
+      m_buf->append(")\n    function(");
+      m_buf->append(funcName->data());
+      m_buf->append(")\n}");
+      break;
+
+    case Type::VarExport:
+    case Type::PHPOutput:
+      m_buf->append("classMeth{\n    class(");
+      write(clsName->data(), clsName->size());
+      m_buf->append(")\n    fun(");
+      write(funcName->data(), funcName->size());
+      m_buf->append(")\n}");
+      break;
+
+    case Type::VarDump:
+    case Type::DebugDump:
+      m_buf->append("classMeth{\n    class(");
+      m_buf->append(clsName->data());
+      m_buf->append(")\n    function(");
+      m_buf->append(funcName->data());
+      m_buf->append(")\n}\n");
+      break;
+
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+      serializeArray(clsMethToVecHelper(clsMeth), skipNestCheck);
+      break;
+
+    case Type::JSON:
+      serializeArray(clsMethToVecHelper(clsMeth), skipNestCheck);
+      break;
+  }
+}
+
 NEVER_INLINE
 void VariableSerializer::serializeVariant(tv_rval tv,
                                           bool isArrayKey /* = false */,
@@ -1596,6 +1642,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfClass:
       assertx(!isArrayKey);
       serializeClass(val(tv).pclass);
+      return;
+
+    case KindOfClsMeth:
+      assertx(!isArrayKey);
+      serializeClsMeth(val(tv).pclsmeth, skipNestCheck);
       return;
   }
   not_reached();
@@ -1880,6 +1931,10 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     if (obj->isCppBuiltin() && !obj->getVMClass()->isCppSerializable()) {
       write(obj->getClassName());
       return;
+    }
+    if (obj->hasNativeData() &&
+        obj->getVMClass()->getNativeDataInfo()->isSerializable()) {
+      serializableNativeData = Native::nativeDataSleep(obj);
     }
   }
 

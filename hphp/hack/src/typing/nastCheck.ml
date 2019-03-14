@@ -42,20 +42,14 @@ type control_context =
   | SwitchContext
 
 type env = {
-  t_is_finally: bool;
   function_name: string option;
   class_name: string option;
   class_kind: Ast.class_kind option;
-  imm_ctrl_ctx: control_context;
   typedef_tparams : Nast.tparam list;
   is_array_append_allowed: bool;
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
-  file_mode: FileInfo.mode;
 }
-
-let is_strict mode =
-  mode = FileInfo.Mstrict || mode = FileInfo.Mexperimental
 
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, st with
@@ -65,11 +59,7 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Return (_, Some e) ->
         expr_allow_await f_type env e;
         ()
-    | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
-        (match e with
-        None -> ()
-        | Some _ -> Errors.return_in_gen p);
-        ()
+    | (Ast.FGenerator | Ast.FAsyncGenerator), Return _ -> ()
     | Ast.FCoroutine, Return (_, e) ->
         Option.iter e ~f:(expr f_type env)
     | _, Throw (_, e) ->
@@ -80,10 +70,7 @@ module CheckFunctionBody = struct
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
          | Static_var _ | Global_var _ | Unsafe_block _ ) -> ()
     | _, Awaitall (_, el) ->
-        List.iter el (fun (x, y) ->
-          (match x with
-          | Some x -> expr f_type env x;
-          | None -> ());
+        List.iter el (fun (_, y) ->
           expr f_type env y;
         );
         ()
@@ -125,7 +112,7 @@ module CheckFunctionBody = struct
     | _, Try (b, cl, fb) ->
         block f_type env b;
         List.iter cl (catch f_type env);
-        block f_type { env with t_is_finally = true } fb;
+        block f_type env fb;
         ()
     | _, Def_inline _ -> ()
     | _, Let ((p, x), _, e) ->
@@ -141,7 +128,7 @@ module CheckFunctionBody = struct
 
   and found_await ftype p =
     match ftype with
-    | Ast.FCoroutine -> Errors.await_in_coroutine p
+    | Ast.FCoroutine -> ()
     | Ast.FSync | Ast.FGenerator -> Errors.await_in_sync_function p
     | _ -> ()
 
@@ -149,21 +136,7 @@ module CheckFunctionBody = struct
     List.iter stl (stmt f_type env)
 
   and start f_type env stl =
-    match stl with
-    | [If ((_, Id (_, c)), then_stmt, else_stmt ) ]
-      (*
-        (* this is the only case when HH\Rx\IS_ENABLED can appear in
-           function body, other occurences are considered errors *)
-        {
-          if (HH\Rx\IS_ENABLED) {}
-          else {}
-        }
-      *)
-      when c = SN.Rx.is_enabled ->
-      block f_type env then_stmt;
-      block f_type env else_stmt;
-    | _ ->
-      block f_type env stl
+    block f_type env stl
 
   and case f_type env = function
     | Default b -> block f_type env b
@@ -230,7 +203,6 @@ module CheckFunctionBody = struct
     | _, Collection _
     | _, Import _
     | _, Lfun _
-    | _, NewAnonClass _
     | _, Omitted
     | _, BracedExpr _
     | _, ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
@@ -245,8 +217,6 @@ module CheckFunctionBody = struct
     | _, Typename _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()
-    | _, Id (pos, const) when const = SN.Rx.is_enabled ->
-        Errors.rx_is_enabled_invalid_location pos
     | _, Id _ -> ()
 
     | _, ImmutableVar _
@@ -258,16 +228,16 @@ module CheckFunctionBody = struct
     | _, Array afl ->
         List.iter afl (afield f_type env);
         ()
-    | _, Darray afl ->
+    | _, Darray (_, afl) ->
         List.iter afl (expr2 f_type env);
         ()
-    | _, Varray afl ->
+    | _, Varray (_, afl) ->
         List.iter afl (expr f_type env);
         ()
-    | _, ValCollection (_, el) ->
+    | _, ValCollection (_, _, el) ->
         List.iter el (expr f_type env);
         ()
-    | _, KeyValCollection (_, fdl) ->
+    | _, KeyValCollection (_, _, fdl) ->
         List.iter fdl (expr2 f_type env);
         ()
     | _, Clone e -> expr f_type env e; ()
@@ -328,6 +298,9 @@ module CheckFunctionBody = struct
         ()
     | _, Efun _ -> ()
 
+    | _, PU_atom _ -> ()
+    | _, PU_identifier _ -> ()
+
     | Ast.FGenerator, Yield_break
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
@@ -344,13 +317,8 @@ module CheckFunctionBody = struct
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
 
-    | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _) ->
-      Errors.yield_in_coroutine p
-    | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ ->
-      Errors.suspend_outside_of_coroutine p
-    | Ast.FCoroutine, Suspend _ ->
-      if env.t_is_finally
-      then Errors.suspend_in_finally p
+    | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _ | Suspend _)
+    | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ -> ()
     | _, Special_func func ->
         (match func with
           | Gena e
@@ -365,7 +333,6 @@ module CheckFunctionBody = struct
     | _, Callconv (_, e) ->
         expr f_type env e;
         ()
-    | _, Execution_operator _ -> ()
     | _, Assert (AE_assert e) ->
         expr f_type env e;
         ()
@@ -374,36 +341,6 @@ module CheckFunctionBody = struct
         ()
 
 end
-
-let is_magic =
-  let h = Caml.Hashtbl.create 23 in
-  let a x = Caml.Hashtbl.add h x true in
-  let _ = SSet.iter (fun m -> if m <> SN.Members.__toString then a m) SN.Members.as_set in
-  fun (_, s) ->
-    Caml.Hashtbl.mem h s
-
-let is_parent e =
-  snd e = CIparent
-
-let check_conditionally_reactive_annotation_params p params ~is_method =
-  match params with
-  | [_, Class_const (_, (_, prop))] when prop = "class" -> ()
-  | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
-
-let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
-  let rec check l seen =
-    match l with
-    | [] -> ()
-    | { ua_name = (_, name); ua_params } :: xs when name = SN.UserAttributes.uaOnlyRxIfImpl ->
-      begin
-        if seen
-          then Errors.multiple_conditionally_reactive_annotations p method_name
-        else if is_reactive
-          then check_conditionally_reactive_annotation_params ~is_method:true p ua_params;
-        check xs true
-      end
-    | _ :: xs -> check xs seen in
-  check user_attributes false
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   name = SN.UserAttributes.uaReactive ||
@@ -415,64 +352,34 @@ let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let rec fun_ tenv f named_body =
-  let env = { t_is_finally = false;
-              is_array_append_allowed = false;
+  let env = { is_array_append_allowed = false;
               class_name = None; class_kind = None;
-              imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               tenv = tenv;
               function_name = None;
               is_reactive = fun_is_reactive f.f_user_attributes;
-              file_mode = f.f_mode;
               } in
   func env f named_body
 
 and func env f named_body =
-  let p, fname = f.f_name in
-  let fname_lower = String.lowercase (strip_ns fname) in
-  if fname_lower = SN.Members.__construct || fname_lower = "using"
-  then Errors.illegal_function_name p fname;
-  (* Add type parameters to typing environment and localize the bounds *)
+  let p, _ = f.f_name in
+  (* Add type parameters to typing environment and localize the bounds
+     and where constraints *)
+  let ety_env = Phase.env_with_self env.tenv in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
-       ~ety_env:(Phase.env_with_self env.tenv) in
+      ~ety_env in
   let tenv = add_constraints p tenv constraints in
+  let tenv =
+    Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints in
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
-    t_is_finally = false;
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
-  (* Functions can't be mutable, only methods can *)
-  if Attributes.mem SN.UserAttributes.uaMutable f.f_user_attributes then
-    Errors.mutable_attribute_on_function p;
-  if Attributes.mem SN.UserAttributes.uaMaybeMutable f.f_user_attributes then
-    Errors.maybe_mutable_attribute_on_function p;
-  if Attributes.mem SN.UserAttributes.uaMutableReturn f.f_user_attributes
-    && not env.is_reactive then
-    Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
-
-  check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
 
   List.iter f.f_tparams (tparam env);
-  let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
-  List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
-  let inout = List.find f.f_params ~f:(
-    fun x -> x.param_callconv = Some Ast.Pinout) in
-  (match inout with
-    | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize f.f_user_attributes ||
-         Attributes.mem SN.UserAttributes.uaMemoizeLSB f.f_user_attributes
-      then Errors.inout_params_memoize p param.param_pos;
-      ()
-    | _ -> ()
-  );
-  (match f.f_variadic with
-    | FVvariadicArg vparam ->
-      if vparam.param_is_reference then
-        Errors.variadic_byref_param vparam.param_pos
-    | _ -> ()
-  );
+  List.iter f.f_params (fun_param env);
   block env named_body.fb_ast;
   CheckFunctionBody.start
     f.f_fun_kind
@@ -486,7 +393,8 @@ and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Hany  | Hmixed | Hnonnull | Hprim _  | Hthis | Haccess _ | Habstr _  | Hdynamic ->
+  | Hany  | Hmixed | Hnonnull | Hprim _  | Hthis | Haccess _ | Habstr _  |
+    Hdynamic | Hnothing ->
      ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
@@ -505,8 +413,6 @@ and hint_ env p = function
       hint env h;
       begin match variadic_hint with
       | Hvariadic (Some h) -> hint env h;
-      | Hvariadic (None) when is_strict env.file_mode ->
-        Errors.ellipsis_strict_mode ~require:`Type p;
       | _ -> ()
       end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
@@ -590,16 +496,13 @@ and check_happly unchecked_tparams env h =
 
 and class_ tenv c =
   let cname = Some (snd c.c_name) in
-  let env = { t_is_finally = false;
-              is_array_append_allowed = false;
+  let env = { is_array_append_allowed = false;
               class_name = cname;
               class_kind = Some c.c_kind;
-              imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               is_reactive = false;
               function_name = None;
               tenv = tenv;
-              file_mode = c.c_mode;
             } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
@@ -608,26 +511,8 @@ and class_ tenv c =
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
-  (* Const handling:
-   * prevent for abstract final classes, traits, and interfaces
-   *)
-  if Attributes.mem SN.UserAttributes.uaConst c.c_user_attributes
-  then begin match c.c_kind, c.c_final with
-  | Ast.Cabstract, true
-  | Ast.Cinterface, _
-  | Ast.Ctrait, _
-  | Ast.Cenum, _ ->
-    Errors.const_attribute_prohibited
-      (fst c.c_name) (Typing_print.class_kind c.c_kind c.c_final);
-  | Ast.Cabstract, false
-  | Ast.Cnormal, _ -> ();
-  end;
-
-  if c.c_kind = Ast.Cinterface then begin
-    interface c;
-  end
-  else begin
-    maybe method_ (env, true) c.c_constructor;
+  if not (c.c_kind = Ast.Cinterface) then begin
+    maybe method_ env c.c_constructor;
   end;
   List.iter c.c_tparams.c_tparam_list (tparam env);
   List.iter c.c_extends (hint env);
@@ -636,161 +521,18 @@ and class_ tenv c =
   List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
   List.iter c.c_static_vars (class_var env);
   List.iter c.c_vars (class_var env);
-  List.iter c.c_static_methods (method_ (env, true));
-  List.iter c.c_methods (method_ (env, false));
-
-(* Class properties can only be initialized with a static literal expression. *)
-and check_class_property_initialization prop =
-  (* Only do the check if property is initialized. *)
-  Option.iter prop.cv_expr ~f:begin fun e ->
-    let rec rec_assert_static_literal e =
-      match (snd e) with
-      | Collection _
-      | Import _
-      | Lfun _
-      | NewAnonClass _
-      | Omitted
-      | BracedExpr _
-      | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
-      | Any | Typename _
-      | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ | PrefixedString _ | Unsafe_expr _
-      | Execution_operator _ ->
-        ()
-      | Array field_list ->
-        List.iter field_list begin function
-          | AFvalue expr -> rec_assert_static_literal expr
-          | AFkvalue (expr1, expr2) ->
-              rec_assert_static_literal expr1;
-              rec_assert_static_literal expr2;
-        end
-      | Darray fl -> List.iter fl assert_static_literal_for_field_list
-      | Varray el -> List.iter el rec_assert_static_literal
-      | Shape fl -> List.iter ~f:(fun (_, e) -> rec_assert_static_literal e) fl
-      | List el
-      | Expr_list el
-      | String2 el
-      | ValCollection (_, el) -> List.iter el rec_assert_static_literal
-      | Pair (expr1, expr2)
-      | Binop (_, expr1, expr2) ->
-        rec_assert_static_literal expr1;
-        rec_assert_static_literal expr2;
-      | KeyValCollection (_, field_list) ->
-        List.iter field_list assert_static_literal_for_field_list
-      | Cast (_, e)
-      | Unop (_, e) ->
-        rec_assert_static_literal e;
-      | Eif (expr1, optional_expr, expr2) ->
-        rec_assert_static_literal expr1;
-        Option.iter optional_expr rec_assert_static_literal;
-        rec_assert_static_literal expr2;
-      | This | Lvar _ | ImmutableVar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
-      | Method_id _
-      | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
-      | Call _ | Special_func _ | Yield_break | Yield _ | Yield_from _ | Suspend _
-      | Await _ | InstanceOf _ | Is _ | New _ | Efun _ | Xml _ | Callconv _
-      | Assert _ | Clone _ | As _ | Pipe _ ->
-        Errors.class_property_only_static_literal (fst e)
-    and assert_static_literal_for_field_list (expr1, expr2) =
-      rec_assert_static_literal expr1;
-      rec_assert_static_literal expr2
-    in
-    rec_assert_static_literal e;
-  end
-
-and interface c =
-  let enforce_no_body = begin fun m ->
-    match m.m_body.fb_ast with
-    | [] ->
-      if m.m_visibility = Private
-      then Errors.not_public_or_protected_interface (fst m.m_name)
-      else ()
-    | _ -> Errors.abstract_body (fst m.m_name)
-  end in
-  (* make sure that interface methods are not async, in line with HHVM *)
-  let enforce_not_async = begin fun m ->
-    match m.m_fun_kind with
-    | Ast.FAsync -> Errors.async_in_interface (fst m.m_name)
-    | Ast.FAsyncGenerator -> Errors.async_in_interface (fst m.m_name)
-    | _ -> ()
-  end in
-  (* make sure that interfaces only have empty public methods *)
-  List.iter (c.c_static_methods @ c.c_methods) enforce_no_body;
-  List.iter (c.c_static_methods @ c.c_methods) enforce_not_async;
-  (* make sure constructor has no body *)
-  Option.iter c.c_constructor enforce_no_body;
-  Option.iter c.c_constructor enforce_not_async;
-  List.iter (c.c_uses) (fun (p, _) ->
-    Errors.interface_use_trait p
-  );
-  (* make sure that interfaces don't have any member variables *)
-  match c.c_vars with
-  | hd::_ ->
-    let pos = fst (hd.cv_id) in
-    Errors.interface_with_member_variable pos
-  | _ -> ();
-  (* make sure that interfaces don't have static variables *)
-  match c.c_static_vars with
-  | hd::_ ->
-    let pos = fst (hd.cv_id) in
-    Errors.interface_with_static_member_variable pos
-  | _ -> ();
-  (* make sure interfaces do not contain partially abstract type constants *)
-  List.iter c.c_typeconsts begin fun tc ->
-    if tc.c_tconst_constraint <> None && tc.c_tconst_type <> None then
-      Errors.interface_with_partial_typeconst (fst tc.c_tconst_name)
-  end
+  List.iter c.c_static_methods (method_ env);
+  List.iter c.c_methods (method_ env);
 
 and class_const env (h, _, e) =
   maybe hint env h;
   maybe expr env e;
   ()
 
-and typeconst (env, class_tparams) tconst =
+and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint;
-  (* need to ensure that tconst.c_tconst_type is not Habstr *)
-  maybe check_no_class_tparams class_tparams tconst.c_tconst_type;
-  maybe check_no_class_tparams class_tparams tconst.c_tconst_constraint
-
-(* Check to make sure we are not using class type params for type const decls *)
-and check_no_class_tparams class_tparams (pos, ty)  =
-  let check_tparams = check_no_class_tparams class_tparams in
-  let maybe_check_tparams = maybe check_no_class_tparams class_tparams in
-  let matches_class_tparam tp_name =
-    List.iter class_tparams begin fun { tp_name = (c_tp_pos, c_tp_name); _ } ->
-      if c_tp_name = tp_name
-      then Errors.typeconst_depends_on_external_tparam pos c_tp_pos c_tp_name
-    end in
-  match ty with
-    | Hany | Hmixed | Hnonnull | Hprim _ | Hthis | Hdynamic -> ()
-    (* We have found a type parameter. Make sure its name does not match
-     * a name in class_tparams *)
-    | Habstr tparam_name ->
-        matches_class_tparam tparam_name
-    | Harray (ty1, ty2) ->
-        maybe_check_tparams ty1;
-        maybe_check_tparams ty2
-    | Hdarray (ty1, ty2) ->
-        check_tparams ty1;
-        check_tparams ty2
-    | Hvarray_or_darray ty
-    | Hvarray ty ->
-        check_tparams ty
-    | Htuple tyl -> List.iter tyl check_tparams
-    | Hoption ty_ -> check_tparams ty_
-    | Hfun (_, _, tyl, _, _, _, ty_, _) ->
-        List.iter tyl check_tparams;
-        check_tparams ty_
-    | Happly (_, tyl) -> List.iter tyl check_tparams
-    | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-        ShapeMap.iter (fun _ v -> check_tparams v.sfi_hint) nsi_field_map
-    | Haccess (root_ty, _) ->
-        check_tparams root_ty
-    | Hsoft ty_ -> check_tparams ty_
-
 and class_var env cv =
-  check_class_property_initialization cv;
   let hint_env =
     (* If this is an XHP attribute and we're in strict mode,
        relax to partial mode to allow the use of generic
@@ -804,93 +546,29 @@ and class_var env cv =
   maybe expr env cv.cv_expr;
   ()
 
-and check__toString m is_static =
-  if snd m.m_name = SN.Members.__toString
-  then begin
-    if m.m_visibility <> Public || is_static
-    then Errors.toString_visibility (fst m.m_name);
-    match m.m_ret with
-      | Some (_, Hprim Tstring) -> ()
-      | Some (p, _) -> Errors.toString_returns_string p
-      | None -> ()
-  end
-
 and add_constraint pos tenv (ty1, ck, ty2) =
   Typing_subtype.add_constraint pos tenv ck ty1 ty2
 
 and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
-and check_static_memoized_function m =
-  if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
-     Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes then
-    Errors.static_memoized_function (fst m.m_name);
-  ()
-
-and method_ (env, is_static) m =
+and method_ env m =
   let env =
     { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   let named_body = assert_named_body m.m_body in
-  check__toString m is_static;
   let env = { env with function_name = Some (snd m.m_name) } in
-  let p, name = m.m_name in
-  (* Add method type parameters to environment and localize the bounds *)
+  (* Add method type parameters to environment and localize the bounds
+     and where constraints *)
+  let ety_env = Phase.env_with_self env.tenv in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
-               ~ety_env:(Phase.env_with_self env.tenv) in
+      ~ety_env in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
+  let tenv =
+    Phase.localize_where_constraints ~ety_env tenv m.m_where_constraints in
   let env = { env with tenv = tenv } in
 
-  (* If this is a destructor make sure it is allowed *)
-  if name = SN.Members.__destruct
-    && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
-  then Errors.illegal_destructor p;
-
-  let is_mutable =
-    Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes in
-
-  let is_maybe_mutable =
-    Attributes.mem SN.UserAttributes.uaMaybeMutable m.m_user_attributes in
-
-  (* Mutable methods must be reactive *)
-  if not env.is_reactive then begin
-    if is_mutable
-    then Errors.mutable_methods_must_be_reactive p name;
-    if is_maybe_mutable
-    then Errors.maybe_mutable_methods_must_be_reactive p name;
-  end;
-  if is_mutable
-  then begin
-    if is_maybe_mutable
-    then Errors.conflicting_mutable_and_maybe_mutable_attributes p;
-  end;
-
-  (*Methods annotated with MutableReturn attribute must be reactive *)
-  if Attributes.mem SN.UserAttributes.uaMutableReturn m.m_user_attributes
-    && not env.is_reactive then
-    Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
-
-  check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
-  check_maybe_rx_attributes_on_params env m.m_user_attributes m.m_params;
-
-  let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
-  List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
-  let inout = List.find m.m_params ~f:(
-    fun x -> x.param_callconv = Some Ast.Pinout) in
-  (match inout with
-    | Some param ->
-      if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes ||
-         Attributes.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
-      then Errors.inout_params_memoize p param.param_pos;
-      ()
-    | _ -> ()
-  );
-  (match m.m_variadic with
-    | FVvariadicArg vparam ->
-      if vparam.param_is_reference then
-        Errors.variadic_byref_param vparam.param_pos
-    | _ -> ()
-  );
+  List.iter m.m_params (fun_param env);
   List.iter m.m_tparams (tparam env);
   block env named_body.fb_ast;
   maybe hint env m.m_ret;
@@ -898,89 +576,20 @@ and method_ (env, is_static) m =
     m.m_fun_kind
     env
     named_body.fb_ast;
-  (match env.class_name with
-  | Some cname ->
-      let p, mname = m.m_name in
-      if String.lowercase (strip_ns cname) = String.lowercase mname
-          && env.class_kind <> Some Ast.Ctrait
-      then Errors.dangerous_method_name p
-      else ()
-  | None -> assert false)
 
-and check_maybe_rx_attributes_on_params env parent_attrs params =
-  let parent_only_rx_if_args =
-    Attributes.find SN.UserAttributes.uaAtMostRxAsArgs parent_attrs in
-  let check_param seen_atmost_rx_as_rxfunc p =
-    let only_rx_if_rxfunc_attr =
-      Attributes.find SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes in
-    let only_rx_if_impl_attr =
-      Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes in
-    match only_rx_if_rxfunc_attr, only_rx_if_impl_attr with
-    | Some { ua_name = (p, _); _ }, _ ->
-      if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.atmost_rx_as_rxfunc_invalid_location p;
-      true
-    | _, Some { ua_name = (p, _); ua_params; _ } ->
-      if parent_only_rx_if_args = None || not env.is_reactive
-      then Errors.atmost_rx_as_rxfunc_invalid_location p
-      else check_conditionally_reactive_annotation_params ~is_method:false p ua_params;
-      true
-    | _ ->  seen_atmost_rx_as_rxfunc in
-  let has_param_with_atmost_rx_as_rxfunc =
-    List.fold_left params ~init:false ~f:check_param in
-  match parent_only_rx_if_args, has_param_with_atmost_rx_as_rxfunc with
-  | Some { ua_name = (p, _); _ }, false ->
-    Errors.no_atmost_rx_as_rxfunc_for_rx_if_args p
-  | _ -> ()
-
-and param_is_mutable p =
-  Attributes.mem SN.UserAttributes.uaMutable p.param_user_attributes
-
-and param_is_maybe_mutable p =
-  Attributes.mem SN.UserAttributes.uaMaybeMutable p.param_user_attributes
-
-and fun_param env (_pos, name) f_type byref param =
+and fun_param env param =
   maybe hint env param.param_hint;
   maybe expr env param.param_expr;
-  let is_mutable = param_is_mutable param in
-  let is_maybe_mutable = param_is_maybe_mutable param in
-  if not env.is_reactive then begin
-    if is_mutable
-    then Errors.mutable_methods_must_be_reactive param.param_pos name;
-    if is_maybe_mutable
-    then Errors.maybe_mutable_methods_must_be_reactive param.param_pos name;
-  end;
-
-  match param.param_callconv with
-  | None -> ()
-  | Some Ast.Pinout ->
-    let pos = param.param_pos in
-    if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
-    if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-    Option.iter byref ~f:(fun param ->
-      Errors.inout_params_mix_byref pos param.param_pos);
-    ()
 
 and stmt env = function
-  | Return (p, _) when env.t_is_finally ->
-    Errors.return_in_finally p; ()
   | Return (_, None)
   | GotoLabel _
   | Goto _
   | Noop
   | Unsafe_block _
-  | Fallthrough -> ()
-  | Break p -> begin
-    match env.imm_ctrl_ctx with
-      | Toplevel -> Errors.toplevel_break p
-      | _ -> ()
-    end
-  | Continue p -> begin
-    match env.imm_ctrl_ctx with
-      | Toplevel -> Errors.toplevel_continue p
-      | SwitchContext -> Errors.continue_in_switch p
-      | LoopContext -> ()
-    end
+  | Fallthrough
+  | Break _
+  | Continue _ -> ()
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
@@ -989,10 +598,7 @@ and stmt env = function
   | Global_var _ ->
     ()
   | Awaitall (_, el) ->
-      List.iter el (fun (x, y) ->
-        (match x with
-        | Some x -> expr env x
-        | None -> ());
+      List.iter el (fun (_, y) ->
         expr env y;
       );
       ()
@@ -1002,12 +608,12 @@ and stmt env = function
     block env b2;
     ()
   | Do (b, e) ->
-    block { env with imm_ctrl_ctx = LoopContext } b;
+    block env b;
     expr env e;
     ()
   | While (e, b) ->
       expr env e;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Using { us_expr = e; us_block = b; _ } ->
       expr env e;
@@ -1017,21 +623,21 @@ and stmt env = function
       expr env e1;
       expr env e2;
       expr env e3;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Switch (e, cl) ->
       expr env e;
-      List.iter cl (case { env with imm_ctrl_ctx = SwitchContext });
+      List.iter cl (case env);
       ()
   | Foreach (e1, ae, b) ->
       expr env e1;
       as_expr env ae;
-      block { env with imm_ctrl_ctx = LoopContext } b;
+      block env b;
       ()
   | Try (b, cl, fb) ->
       block env b;
       List.iter cl (catch env);
-      block { env with t_is_finally = true } fb;
+      block env fb;
       ()
   | Def_inline _ -> ()
   | Let ((p, x), _, e) ->
@@ -1064,11 +670,10 @@ and block env stl =
 and expr env (p, e) =
   expr_ env p e
 
-and expr_ env p = function
+and expr_ env _p = function
   | Collection _
   | Import _
   | Lfun _
-  | NewAnonClass _
   | Omitted
   | BracedExpr _
   | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
@@ -1083,52 +688,33 @@ and expr_ env p = function
   | ImmutableVar _
   | Lplaceholder _
   | Dollardollar _
-  | Unsafe_expr _ -> ()
-  | Class_const (cid, ((_, m_name) as mid)) ->
-    let func_name = env.function_name in
-    if is_magic mid &&
-      (not(is_parent cid) || func_name <> Some m_name)
-    then Errors.magic mid;
+  | PU_identifier _
+  | PU_atom _
+  | Unsafe_expr _
+  | Class_const _ ->
     ()
   | Pipe (_, e1, e2) ->
       expr env e1;
       expr env e2
   | Class_get _  ->
     ()
-  (* Check that __CLASS__ and __TRAIT__ are used appropriately *)
-  | Id (pos, const) ->
-      if SN.PseudoConsts.is_pseudo_const const then
-        if const = SN.PseudoConsts.g__CLASS__ then
-          (match env.class_kind with
-            | Some _ -> ()
-            | _ -> Errors.illegal_CLASS pos)
-        else if const = SN.PseudoConsts.g__TRAIT__ then
-          (match env.class_kind with
-            | Some Ast.Ctrait -> ()
-            | _ -> Errors.illegal_TRAIT pos);
-      ()
+  | Id _ -> ()
   | Array afl ->
       List.iter afl (afield env);
       ()
-  | Darray fdl ->
+  | Darray (_, fdl) ->
       List.iter fdl (field env);
       ()
-  | Varray el ->
+  | Varray (_, el) ->
       List.iter el (expr env);
       ()
-  | ValCollection (_, el) ->
+  | ValCollection (_, _, el) ->
       List.iter el (expr env);
       ()
-  | KeyValCollection (_, fdl) ->
+  | KeyValCollection (_, _, fdl) ->
       List.iter fdl (field env);
       ()
   | Clone e -> expr env e; ()
-  | Obj_get (e, (_, Id s), _) ->
-      if is_magic s
-      then Errors.magic s;
-      let env' = {env with is_array_append_allowed = false} in
-      expr env' e;
-      ()
   | Obj_get (e1, e2, _) ->
       let env' = {env with is_array_append_allowed = false} in
       expr env' e1;
@@ -1154,14 +740,6 @@ and expr_ env p = function
       ()
   | Unop (Ast.Uref, e) ->
     expr env e;
-    begin match snd e with
-      | This ->
-        Errors.illegal_by_ref_expr p SN.SpecialIdents.this
-      | Dollardollar (_, id)
-        when Local_id.to_string id = SN.SpecialIdents.dollardollar ->
-        Errors.illegal_by_ref_expr p SN.SpecialIdents.dollardollar
-      | _ -> ()
-    end
   | Unop (_, e) -> expr env e;
   | Yield_break -> ()
   | Special_func func ->
@@ -1217,11 +795,7 @@ and expr_ env p = function
   | Assert (AE_assert e) ->
       expr env e;
       ()
-  | InstanceOf (e, e2) ->
-      (match e2 with
-      | _, CIexpr (_, Class_const ((_, CI (_, classname)), (p, "class"))) ->
-        Errors.classname_const_instanceof (Utils.strip_ns classname) p;
-      | _ -> ());
+  | InstanceOf (e, _) ->
       expr env e;
       ()
   | Is (e, h)
@@ -1234,7 +808,6 @@ and expr_ env p = function
       List.iter uel (expr env);
       ()
   | Efun (f, _) ->
-      let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()
   | Xml (_, attrl, el) ->
@@ -1250,7 +823,6 @@ and expr_ env p = function
       in
       if not (aux e) then Errors.inout_argument_bad_expr (fst e);
       ()
-  | Execution_operator _ -> ()
   | Shape fdm ->
       List.iter ~f:(fun (_, v) -> expr env v) fdm
 
@@ -1268,10 +840,8 @@ and field env (e1, e2) =
   ()
 
 let typedef tenv t =
-  let env = { t_is_finally = false;
-              is_array_append_allowed = false;
+  let env = { is_array_append_allowed = false;
               class_name = None; class_kind = None;
-              imm_ctrl_ctx = Toplevel;
               function_name = None;
               (* Since typedefs cannot have constraints we shouldn't check
                * if its type params satisfy the constraints of any tapply it
@@ -1280,7 +850,6 @@ let typedef tenv t =
               typedef_tparams = t.t_tparams;
               tenv = tenv;
               is_reactive = false;
-              file_mode = t.t_mode;
               } in
   maybe hint env t.t_constraint;
   hint env t.t_kind

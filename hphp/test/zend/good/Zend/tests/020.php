@@ -1,8 +1,8 @@
 <?php
 
-var_dump(func_get_arg(1,2,3));
+try { var_dump(func_get_arg(1,2,3)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(func_get_arg(1));
-var_dump(func_get_arg());
+try { var_dump(func_get_arg()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 function bar() {
 	var_dump(func_get_arg(1));

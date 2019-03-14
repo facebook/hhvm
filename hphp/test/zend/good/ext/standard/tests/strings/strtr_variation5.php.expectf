@@ -14,15 +14,12 @@ string(12) "tatm34567aaa"
 -- Iteration 7 --
 
 Warning: %s
-NULL
 -- Iteration 8 --
 
 Warning: %s
-NULL
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 string(1) "t"
 -- Iteration 11 --
@@ -40,7 +37,6 @@ string(13) "s02ple objec1"
 -- Iteration 17 --
 
 Warning: %s
-NULL
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --

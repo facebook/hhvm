@@ -21,9 +21,7 @@ function b() {
 }
 
 if (1) {
-  class B {
-    public static $goo = 'bozo';
-  }
+  include 'sp.inc';
 }
 $a = B::$goo;
 print $a . "\n";

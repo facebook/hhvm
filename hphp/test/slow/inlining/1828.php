@@ -14,5 +14,5 @@ function test($a, $b) {
 
 <<__EntryPoint>>
 function main_1828() {
-var_dump(test());
+var_dump(test(false, false));
 }

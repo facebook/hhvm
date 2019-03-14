@@ -24,7 +24,7 @@ function f(): int {
           break;
       }
       break;
-    case 3:
+    default:
       $x = false;
       break;
   }

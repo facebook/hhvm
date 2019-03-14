@@ -1,8 +1,6 @@
 NULL
 NULL
-
-Warning: seek() expects exactly 1 parameter, 0 given in %s/test/slow/array_iterator/443.php on line 10
-NULL
+string(43) "seek() expects exactly 1 parameter, 0 given"
 bool(true)
 bool(true)
 bool(true)

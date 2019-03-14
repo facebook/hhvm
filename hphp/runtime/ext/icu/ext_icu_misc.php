@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Useful to handle errors occurred in static methods when there's no object

@@ -289,13 +289,13 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   constprop(env);
   nothrow(env);
 
-  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset)) {
+  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset, TClsMeth)) {
     popC(env);
     push(env, TFalse);
     return true;
   }
 
-  if (ty.subtypeOfAny(TVec, TVArr)) {
+  if (ty.subtypeOfAny(TVec, TVArr, TClsMeth)) {
     popC(env);
     push(env, TTrue);
     return true;
@@ -394,7 +394,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
           return folly::none;
         }
       }
-      return native_function_return_type(exact, false);
+      return native_function_return_type(exact);
     }();
     if (!precise_ty) return env.index.lookup_return_type(env.ctx, func);
     return *precise_ty;

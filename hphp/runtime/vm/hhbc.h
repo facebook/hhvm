@@ -51,13 +51,14 @@ struct LocalRange {
 
 
 // Arguments to FCall opcodes.
-// hhas format: <flags> <numArgs> <numRets> <asyncEagerOffset>
+// hhas format: <flags> <numArgs> <numRets> <byRefs> <asyncEagerOffset>
 // hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
-//              ?<ba:asyncEagerOffset>
-//   flags            = flags except HasInOut / HasAsyncEagerOffset
+//              ?<boolvec:byRefs> ?<ba:asyncEagerOffset>
+//   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
 //   numRets          = flags & HasInOut ? decode_iva() : 1
+//   byRefs           = flags & EnforceReffiness ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
   enum Flags : uint8_t {
@@ -68,17 +69,19 @@ struct FCallArgsBase {
     SupportsAsyncEagerReturn = (1 << 1),
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 2),
+    // HHBC-only: should this FCall enforce argument reffiness?
+    EnforceReffiness         = (1 << 3),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 3),
+    HasAsyncEagerOffset      = (1 << 4),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 4),
+    NumArgsStart             = (1 << 5),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | SupportsAsyncEagerReturn;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 4;
+  static constexpr uint8_t kFirstNumArgsBit = 5;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs), numRets(numRets), flags(flags) {
@@ -95,19 +98,28 @@ struct FCallArgsBase {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     Offset asyncEagerOffset)
+                     const uint8_t* byRefs, Offset asyncEagerOffset)
     : FCallArgsBase(flags, numArgs, numRets)
-    , asyncEagerOffset(asyncEagerOffset) {
+    , asyncEagerOffset(asyncEagerOffset)
+    , byRefs(byRefs) {
+    assertx(IMPLIES(byRefs != nullptr, numArgs != 0));
     assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
                     !supportsAsyncEagerReturn()));
   }
+  bool enforceReffiness() const { return byRefs != nullptr; }
+  bool byRef(uint32_t i) const {
+    assertx(enforceReffiness());
+    return byRefs[i / 8] & (1 << (i % 8));
+  }
   Offset asyncEagerOffset;
+  const uint8_t* byRefs;
 };
 
 static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 std::string show(const LocalRange&);
-std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
+std::string show(const FCallArgsBase&, const uint8_t* byRefs,
+                 std::string asyncEagerLabel);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size
@@ -116,8 +128,8 @@ std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA, SLA, ILA, I32LA, BLLA and VSA are
- * meaningless since they are never read out of ArgUnion (they use ImmVector).
+ * The types in this macro for BLA, SLA, ILA, I32LA and VSA are meaningless
+ * since they are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -128,7 +140,6 @@ std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
   ARGTYPEVEC(I32LA,uint32_t)     /* Vector of 32-bit uint */                   \
-  ARGTYPEVEC(BLLA,bool)          /* Vector of booleans */                      \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
@@ -192,15 +203,11 @@ enum InstrFlags {
    * not affect what vmpc() is set to after the instruction completes. */
   CF = 0x2,
 
-  /* Instruction uses current FPI. */
-  FF = 0x4,
-
   /* Instruction pushes an FPI */
-  PF = 0x8,
+  PF = 0x4,
 
   /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
-  CF_FF = (CF | FF)
 };
 
 #define INCDEC_OPS    \
@@ -253,7 +260,8 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(ArrLike)                           \
   ISTYPE_OP(Res)                               \
   ISTYPE_OP(VArray)                            \
-  ISTYPE_OP(DArray)
+  ISTYPE_OP(DArray)                            \
+  ISTYPE_OP(ClsMeth)
 
 enum class IsTypeOp : uint8_t {
 #define ISTYPE_OP(op) op,
@@ -413,16 +421,6 @@ enum class TypeStructResolveOp : uint8_t {
 #undef OP
 };
 
-#define REIFIED_GENERIC_OPS \
-  OP(ClsGeneric)            \
-  OP(FunGeneric)
-
-enum class ReifiedGenericOp : uint8_t {
-#define OP(name) name,
-  REIFIED_GENERIC_OPS
-#undef OP
-};
-
 #define HAS_GENERICS_OPS \
   OP(NoGenerics)         \
   OP(HasGenerics)        \
@@ -476,6 +474,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
+  O(PopU2,           NA,               TWO(CV,UV),      ONE(CV),    NF) \
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
@@ -601,7 +600,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           ONE(CAR),         ONE(CV),         ONE(VV),    NF) \
   O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
-  O(ClsRefGetL,      TWO(LA,CAW),      NOV,             NOV,        NF) \
   O(ClsRefGetTS,     ONE(CAW),         ONE(CV),         NOV,        NF) \
   O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -656,12 +654,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                  \
                                        NOV,             ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(NewObjI,         ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                        \
                                        NOV,             ONE(CV),    NF) \
   O(FPushCtor,       ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FThrowOnRefMismatch, ONE(BLLA),    NOV,             NOV,        FF) \
-  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
+  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
@@ -680,7 +676,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ReqOnce,         NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqDoc,          NA,               ONE(CV),         ONE(CV),    CF) \
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
-  O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
   O(AliasCls,        TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
@@ -691,6 +686,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             ONE(CV),    NF) \
   O(CheckThis,       NA,               NOV,             NOV,        NF) \
   O(InitThisLoc,     ONE(LA),          NOV,             NOV,        NF) \
+  O(FuncNumArgs,     NA,               NOV,             ONE(CV),    NF) \
   O(StaticLocCheck,  TWO(LA,SA),       NOV,             ONE(CV),    NF) \
   O(StaticLocDef,    TWO(LA,SA),       ONE(CV),         NOV,        NF) \
   O(StaticLocInit,   TWO(LA,SA),       ONE(CV),         NOV,        NF) \
@@ -709,8 +705,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(LateBoundCls,    ONE(CAW),         NOV,             NOV,        NF) \
   O(RecordReifiedGeneric,                                               \
                      ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(ReifiedName,     TWO(IVA,OA(ReifiedGenericOp)),                     \
-                                       CMANY,           ONE(CV),    NF) \
+  O(ReifiedName,     TWO(IVA,SA),      CMANY,           ONE(CV),    NF) \
   O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
@@ -846,7 +841,6 @@ struct ImmVector {
 
   bool isValid() const { return m_start != 0; }
 
-  const uint8_t* vecu8() const { return m_start; }
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }
@@ -936,7 +930,6 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
-const char* subopToName(ReifiedGenericOp);
 const char* subopToName(HasGenericsOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
@@ -1002,7 +995,6 @@ struct StackTransInfo {
 bool instrIsNonCallControlFlow(Op opcode);
 
 bool instrAllowsFallThru(Op opcode);
-bool instrReadsCurrentFpi(Op opcode);
 
 constexpr InstrFlags instrFlagsData[] = {
 #define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
@@ -1156,11 +1148,6 @@ int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);
 StackTransInfo instrStackTransInfo(PC opcode);
-
-/*
- * Delta from FP to top pre-live ActRec.
- */
-int instrFpToArDelta(const Func* func, PC opcode);
 
 }
 

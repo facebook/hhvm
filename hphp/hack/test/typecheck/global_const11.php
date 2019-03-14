@@ -1,3 +1,3 @@
-<?hh
+<?hh // partial
 
 const X = (int)null;

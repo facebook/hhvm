@@ -20,20 +20,20 @@ class Zebra extends Lion {}
 <<__EntryPoint>>
 function main() {
   $rf = new \ReflectionFunction("Animal\\f");
-  var_dump($rf->getAttributes());
-  var_dump($rf->getAttribute("Dog"));
+  \var_dump($rf->getAttributes());
+  \var_dump($rf->getAttribute("Dog"));
   $rp = $rf->getParameters()[0];
-  var_dump($rp->getAttributes());
-  var_dump($rp->getAttribute("Hippo"));
+  \var_dump($rp->getAttributes());
+  \var_dump($rp->getAttribute("Hippo"));
   $rt = new \ReflectionTypeAlias("Animal\\Bear");
-  var_dump($rt->getAttributes());
-  var_dump($rt->getAttribute("Cat"));
+  \var_dump($rt->getAttributes());
+  \var_dump($rt->getAttribute("Cat"));
   $rc = new \ReflectionClass("Animal\\Lion");
-  var_dump($rc->getAttributes());
-  var_dump($rc->getAttribute("Dolphin"));
+  \var_dump($rc->getAttributes());
+  \var_dump($rc->getAttribute("Dolphin"));
   $rp = $rc->getProperties()[0];
-  var_dump($rp->getAttributes());
-  var_dump($rp->getAttribute("Baboon"));
+  \var_dump($rp->getAttributes());
+  \var_dump($rp->getAttribute("Baboon"));
   $rcc = new \ReflectionClass("Animal\\Zebra");
-  var_dump($rc->getAttributesRecursive());
+  \var_dump($rc->getAttributesRecursive());
 }

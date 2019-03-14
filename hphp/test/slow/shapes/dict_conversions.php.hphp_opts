@@ -1,1 +1,2 @@
 -vRuntime.Eval.HackArrDVArrs=true
+-vEval.EnablePHP=1

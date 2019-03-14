@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 interface Base {}
 interface ILoader<T as Base> {}
 
@@ -17,16 +17,19 @@ interface RxLoader<T as Base> extends ILoader<T> {
 
 abstract class Factory {
   const type TLoader as ILoader<Base> = ILoader<Base>;
+
+  <<__LSB>>
+  private static $getLoader = null;
+
   <<__RxShallow, __OnlyRxIfImpl(IRxFactory::class)>>
   final public static function get(): this::TLoader {
     if (HH\Rx\IS_ENABLED) {
       return static::__getLoader();
     } else {
-      static $loader = null;
-      if ($loader === null) {
-        $loader = static::__getLoader();
+      if (static::$getLoader === null) {
+        static::$getLoader = static::__getLoader();
       }
-      return $loader;
+      return static::$getLoader;
     }
   }
   <<__RxLocal, __OnlyRxIfImpl(IRxFactory::class)>>

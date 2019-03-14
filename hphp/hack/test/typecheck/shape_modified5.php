@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -22,4 +22,8 @@ function foo(bool $cond): my_shape {
   } catch (Exception $e) {
     return $s;
   }
+}
+
+function careful_I_can_throw(): void {
+  throw new Exception('');
 }

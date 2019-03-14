@@ -1,7 +1,7 @@
 <?hh
 
 function derp() {
-  class HerpDerp extends Generator {}
+  include 'continuation_inherit.inc';
 }
 
 $rc = new ReflectionClass('Generator');

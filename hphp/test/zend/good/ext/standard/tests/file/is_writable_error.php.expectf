@@ -1,18 +1,14 @@
 *** Testing is_writable(): error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing is_writeable(): error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing is_writable() on non-existent file ***
 bool(false)

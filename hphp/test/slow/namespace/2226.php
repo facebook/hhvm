@@ -2,7 +2,7 @@
 
 namespace {
   function fiz() {
- var_dump(__METHOD__);
+ \var_dump(__METHOD__);
  }
   const FIZ = 25;
   const FUZ = 1;
@@ -24,11 +24,11 @@ namespace foo {
   }
   $x = new baz();
   $x->fiz();
-  var_dump(true);
-  var_dump(false);
-  var_dump(null);
-  var_dump(INF);
-  var_dump(FIZ);
-  var_dump(FUZ);
-  var_dump(\FUZ);
+  \var_dump(true);
+  \var_dump(false);
+  \var_dump(null);
+  \var_dump(INF);
+  \var_dump(FIZ);
+  \var_dump(FUZ);
+  \var_dump(\FUZ);
 }

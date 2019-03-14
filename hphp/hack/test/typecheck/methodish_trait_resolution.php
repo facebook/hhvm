@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 trait T1 {
   public function animal(): void {

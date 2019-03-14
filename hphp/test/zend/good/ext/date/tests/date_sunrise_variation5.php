@@ -89,9 +89,9 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $value, $gmt_offset) );
-      var_dump( date_sunrise($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $value, $gmt_offset) );
-      var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $value, $gmt_offset) );
+      try { var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $value, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+      try { var_dump( date_sunrise($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $value, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+      try { var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $value, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 ?>

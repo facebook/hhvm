@@ -18,27 +18,22 @@ int(0)
 -- Iteration with len value as "Array" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "Array" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "Array" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "Array" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "Array" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "" --
 int(0)
@@ -61,27 +56,22 @@ int(0)
 -- Iteration with len value as "" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "string" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "string" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "object" --
 
 Warning: %s
-NULL
 
 -- Iteration with len value as "" --
 int(0)
@@ -92,5 +82,4 @@ int(0)
 -- Iteration with len value as "Resource id #%d" --
 
 Warning: %s
-NULL
 Done

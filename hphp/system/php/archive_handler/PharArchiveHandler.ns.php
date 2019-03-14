@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace __SystemLib {
   use Phar;
@@ -15,7 +15,7 @@ namespace __SystemLib {
       $pos = $this->haltTokenPosition();
       if ($pos) {
         $this->stub = $this->stream_get_contents($pos, 0);
-        $pos += strlen(Phar::HALT_TOKEN);
+        $pos += \strlen(Phar::HALT_TOKEN);
         // *sigh*. We have to allow whitespace then ending the file
         // before we start the manifest
         while ($this->stream_get_contents(1, $pos) == ' ') {
@@ -45,10 +45,10 @@ namespace __SystemLib {
       $prev_data = '';
       $next_data = '';
       do {
-        $offset += strlen($prev_data);
+        $offset += \strlen($prev_data);
         $prev_data = $next_data;
         $next_data = $this->stream_get_contents(1024);
-        $pos = strpos($prev_data.$next_data, Phar::HALT_TOKEN);
+        $pos = \strpos($prev_data.$next_data, Phar::HALT_TOKEN);
         if ($pos !== false) {
           return $offset + $pos;
         }
@@ -67,7 +67,7 @@ namespace __SystemLib {
       $this->alias = $this->substr(&$pos, $alias_len);
       $metadata_len = $this->bytesToInt(&$pos, 4);
       if ($metadata_len > 0) {
-        $this->metadata = unserialize(
+        $this->metadata = \unserialize(
           $this->substr(&$pos, $metadata_len)
         );
       }
@@ -92,11 +92,11 @@ namespace __SystemLib {
 
       $signatureStart = $pos;
       $signature = $this->stream_get_contents(-1, $pos);
-      $signatureSize = strlen($signature);
+      $signatureSize = \strlen($signature);
 
       // Try to see if there is a signature
       if ($this->archiveFlags & Phar::SIGNATURE) {
-        if (substr($signature, -4) !== 'GBMB') {
+        if (\substr($signature, -4) !== 'GBMB') {
           // Not even the GBMB and the flags?
           throw new PharException('phar has a broken signature');
         }
@@ -130,13 +130,13 @@ namespace __SystemLib {
           throw new PharException('phar has a broken signature');
         }
 
-        $this->signature = substr($signature, 0, $digestSize);
+        $this->signature = \substr($signature, 0, $digestSize);
         $computedSignature = $this->computeSignature(
           $digestName,
           $signatureSize
         );
 
-        if (strcmp($computedSignature, $this->signature) !== 0) {
+        if (\strcmp($computedSignature, $this->signature) !== 0) {
           throw new PharException('phar has a broken signature');
         }
       }
@@ -169,28 +169,28 @@ namespace __SystemLib {
       int $signatureSize
     ): string {
       $this->rewind();
-      $context = hash_init($algorithm);
+      $context = \hash_init($algorithm);
       $data = '';
 
       while (!$this->eof()) {
         $data .= $this->stream_get_contents(1024 * 1024);
-        hash_update($context, substr($data, 0, -$signatureSize));
-        $data = substr($data, -$signatureSize);
+        \hash_update($context, \substr($data, 0, -$signatureSize));
+        $data = \substr($data, -$signatureSize);
       }
 
-      return hash_final($context, true);
+      return \hash_final($context, true);
     }
 
     private function bytesToInt(&$pos, int $len): int {
       $str = $this->stream_get_contents($len, $pos);
-      if (strlen($str) < $len) {
+      if (\strlen($str) < $len) {
         throw new PharException(
           "Corrupt phar, can't read $len bytes starting at offset $pos"
         );
       }
       $int = 0;
       for ($i = 0; $i < $len; ++$i) {
-        $int |= ord($str[$i]) << (8*$i);
+        $int |= \ord($str[$i]) << (8*$i);
       }
       $pos += $len;
       return $int;

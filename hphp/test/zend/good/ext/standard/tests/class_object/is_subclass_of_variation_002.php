@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function __autoload($className) {
@@ -73,8 +73,8 @@ $values = array(
 // loop through each element of the array for class_name
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( is_subclass_of($object, $value) );
+      echo "\nArg value $value\n";
+      try { var_dump( is_subclass_of($object, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

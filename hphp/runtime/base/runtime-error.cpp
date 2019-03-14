@@ -201,10 +201,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
                name.c_str());
 }
 
-void raise_hack_arr_compat_collection_coerce_notice(const std::string& name) {
-  raise_notice("Hack Array Compat: Coercing %s to array", name.c_str());
-}
-
 void raise_undefined_const_fallback_notice(const StringData* name,
                                            const StringData* fallback) {
   // If the option is set to 2, we won't emit CnsU or CnsUE, meaning this
@@ -213,6 +209,20 @@ void raise_undefined_const_fallback_notice(const StringData* name,
   if (RuntimeOption::UndefinedConstFallback == 1) {
     raise_notice(
       "Undefined constant '%s', falling back to '%s'",
+      name->data(),
+      fallback->data()
+    );
+  }
+}
+
+void raise_undefined_function_fallback_notice(const StringData* name,
+                                              const StringData* fallback) {
+  // If the option is set to 2, we won't emit FPushFuncU, meaning this
+  // function should never get called.
+  assertx(RuntimeOption::UndefinedFunctionFallback < 2);
+  if (RuntimeOption::UndefinedFunctionFallback == 1) {
+    raise_notice(
+      "Undefined function '%s', falling back to '%s'",
       name->data(),
       fallback->data()
     );
@@ -564,6 +574,27 @@ void raise_deprecated(const char *fmt, ...) {
   raise_notice_helper(ErrorMode::PHP_DEPRECATED, false, msg);
 }
 
+std::string param_type_error_message(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type) {
+
+  // slice off fg1_
+  if (strncmp(func_name, "fg1_", 4) == 0) {
+    func_name += 4;
+  } else if (strncmp(func_name, "tg1_", 4) == 0) {
+    func_name += 4;
+  }
+  assertx(param_num > 0);
+  return folly::sformat(
+    "{}() expects parameter {} to be {}, {} given",
+    func_name,
+    param_num,
+    getDataTypeString(expected_type).data(),
+    getDataTypeString(actual_type).data());
+}
+
 void raise_param_type_warning(
     const char* func_name,
     int param_num,
@@ -574,19 +605,11 @@ void raise_param_type_warning(
   // end of the string
   auto is_constructor = is_constructor_name(func_name);
   if (!is_constructor && !warning_freq_check()) return;
-  // slice off fg1_
-  if (strncmp(func_name, "fg1_", 4) == 0) {
-    func_name += 4;
-  } else if (strncmp(func_name, "tg1_", 4) == 0) {
-    func_name += 4;
-  }
-  assertx(param_num > 0);
-  auto msg = folly::sformat(
-    "{}() expects parameter {} to be {}, {} given",
-    func_name,
-    param_num,
-    getDataTypeString(expected_type).data(),
-    getDataTypeString(actual_type).data());
+
+  auto msg = param_type_error_message(func_name,
+                                      param_num,
+                                      expected_type,
+                                      actual_type);
 
   if (is_constructor) {
     SystemLib::throwExceptionObject(msg);
@@ -654,6 +677,39 @@ void raise_str_to_class_notice(const StringData* name) {
     raise_notice("Implicit string to Class conversion for classname %s",
                  name->data());
   }
+}
+
+void raise_clsmeth_compat_type_hint(
+  const Func* func, const std::string& displayName,
+  folly::Optional<int> param) {
+  if (param) {
+    raise_notice(
+      "class_meth Compat: Argument %d passed to %s()"
+      " must be of type %s, clsmeth given",
+      *param + 1, func->fullDisplayName()->data(), displayName.c_str());
+  } else {
+    raise_notice(
+      "class_meth Compat: Value returned from function %s()"
+      " must be of type %s, clsmeth given",
+      func->fullDisplayName()->data(), displayName.c_str());
+  }
+}
+
+void raise_clsmeth_compat_type_hint_outparam_notice(
+  const Func* func, const std::string& displayName, int paramNum) {
+  raise_notice(
+    "class_meth Compat: Argument %d returned from %s()"
+    " must be of type %s, clsmeth given",
+    paramNum + 1, func->fullDisplayName()->data(), displayName.c_str());
+}
+
+void raise_clsmeth_compat_type_hint_property_notice(
+  const Class* declCls, const StringData* propName,
+  const std::string& displayName, bool isStatic) {
+  raise_notice(
+    "class_meth Compat: %s '%s::%s' declared as type %s, clsmeth assigned",
+    isStatic ? "Static property" : "Property",
+    declCls->name()->data(), propName->data(), displayName.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

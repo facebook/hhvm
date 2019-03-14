@@ -85,7 +85,7 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( stripcslashes($str) );
+  try { var_dump( stripcslashes($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }

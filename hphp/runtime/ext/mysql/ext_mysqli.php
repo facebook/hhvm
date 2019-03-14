@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Represents a connection between PHP and a MySQL database.
@@ -45,10 +45,6 @@ class mysqli {
                               ?string $socket = null): void {
     $this->hh_init();
 
-    if (func_num_args() == 0) {
-      return;
-    }
-
     // If any of the necessary mysqli properties come in as null, then we can
     // use our default ini options.
     $host = $this->get_ini_default_if_null($host, "host");
@@ -85,10 +81,6 @@ class mysqli {
                           mixed $port = null,
                           ?string $socket = null): void {
     $this->hh_init();
-
-    if (func_num_args() == 0) {
-      return;
-    }
 
     // Connect
     $this->real_connect($host, $username, $passwd, $dbname, $port, $socket);
@@ -898,12 +890,12 @@ class mysqli_result {
 
   public function __construct(mixed $result,
                               int $resulttype = MYSQLI_STORE_RESULT) {
-    if (!is_resource($result) && !($result instanceof mysqli)) {
+    if (!is_resource($result) && !($result is mysqli)) {
       $msg = "Argument to mysqli_result::__construct must be of type "
            . "resource or mysqli";
       throw new Exception($msg);
     }
-   if ($result instanceof mysqli) {
+   if ($result is mysqli) {
       $this->__result = $this->get_mysqli_conn_resource($result);
     } else {
       $this->__result = is_resource($result) ? $result : null;
@@ -1114,13 +1106,9 @@ class mysqli_result {
    *   corresponds to the fetched row or NULL if there are no more rows in
    *   resultset.
    */
-  public function fetch_object(?string $class_name = null,
+  public function fetch_object(?string $class_name = "stdClass",
                                array $params = array()): mixed {
-    if (func_num_args() == 0) {
-      $obj = mysql_fetch_object($this->__result);
-    } else {
-      $obj = mysql_fetch_object($this->__result, $class_name, $params);
-    }
+    $obj = mysql_fetch_object($this->__result, $class_name, $params);
     return $this->__checkRow($obj);
   }
 
@@ -2539,12 +2527,8 @@ function mysqli_fetch_fields(mysqli_result $result): array {
  *   resultset.
  */
 function mysqli_fetch_object(mysqli_result $result,
-                             ?string $class_name = null,
+                             ?string $class_name = "stdClass",
                              ?array $params = array()): mixed {
-  if (func_num_args() < 2) {
-    return $result->fetch_object();
-  }
-
   return $result->fetch_object($class_name, $params);
 }
 

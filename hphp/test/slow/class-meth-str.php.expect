@@ -1,7 +1,0 @@
-array(2) {
-  [0]=>
-  string(3) "Bar"
-  [1]=>
-function(Bar::g)
-}
-string(6) "Bar::g"

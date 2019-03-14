@@ -1,7 +1,7 @@
 <?hh
 class B {
   public function f1() {
-    var_dump(get_called_class());
+    var_dump(static::class);
     if ($this !== null) {
       var_dump(get_class($this));
     } else {

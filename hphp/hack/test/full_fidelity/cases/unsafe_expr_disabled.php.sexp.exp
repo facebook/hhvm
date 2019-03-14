@@ -21,7 +21,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 33
           ((return_statement 33
-            ((((whitespace 2)) return 6 ((whitespace 1)))
+            ((((whitespace 2)) return 6
+              ((whitespace 1) (delimited_comment 17) (whitespace 1)))
              (literal 7 ((() double_quoted_string_literal 7 ())))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))

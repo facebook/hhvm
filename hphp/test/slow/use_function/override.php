@@ -11,9 +11,9 @@ namespace {
     return __FUNCTION__;
   }
 
-  var_dump(bar());
+  \var_dump(bar());
 
   use function foo\bar as bar;
 
-  var_dump(bar());
+  \var_dump(bar());
 }

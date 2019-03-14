@@ -4,12 +4,15 @@ function bar() {
   return SleepWaitHandle::create(1000);
 }
 
+abstract final class FooStatics {
+  public static $result_cache = array();
+}
+
 async function foo($uid) {
-  static $result_cache = array();
-  if (!isset($result_cache[$uid])) {
-    $result_cache[$uid] = bar();
+  if (!isset(FooStatics::$result_cache[$uid])) {
+    FooStatics::$result_cache[$uid] = bar();
   }
-  return await $result_cache[$uid];
+  return await FooStatics::$result_cache[$uid];
 }
 
 

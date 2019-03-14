@@ -9,7 +9,7 @@ namespace {
 namespace x {
     use foo as bar;
     use function foo as bar;
-    var_dump(bar());
+    \var_dump(bar());
 }
 
 ?>

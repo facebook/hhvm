@@ -1,12 +1,9 @@
 *** Testing is_file() error conditions ***
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 bool(false)
 
 Warning: %s
-NULL
 
 *** Done ***

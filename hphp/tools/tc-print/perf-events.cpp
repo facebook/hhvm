@@ -16,6 +16,7 @@
 #include "hphp/tools/tc-print/perf-events.h"
 
 #include <unordered_map>
+#include <vector>
 
 #include "hphp/tools/tc-print/tc-print.h"
 
@@ -23,80 +24,75 @@ namespace HPHP { namespace jit {
 
 using std::string;
 
-// PerfEvent
-
-PerfEventType perfScriptOutputToEventType(const char* eventId) {
-
-  // Events are duplicated so we can use the non-generic perf events.
-  std::pair<const char*, PerfEventType> idToType[] = {
-    std::make_pair("cycles",                    EVENT_CYCLES),
-    std::make_pair("cpu-clock",                 EVENT_CYCLES),
-
-    std::make_pair("branch-misses",             EVENT_BRANCH_MISSES),
-    std::make_pair("0x5300c5",                  EVENT_BRANCH_MISSES),
-
-    // fake event grouping all icache misses
-    std::make_pair("L1-icache-misses",          EVENT_ICACHE_MISSES),
-    // real icache miss events
-    std::make_pair("L1-icache-load-misses",     EVENT_ICACHE_MISSES),
-    std::make_pair("L1-icache-prefetch-misses", EVENT_ICACHE_MISSES),
-
-    // fake event grouping all dcache misses
-    std::make_pair("L1-dcache-misses",          EVENT_DCACHE_MISSES),
-    // real dcache miss events
-    std::make_pair("L1-dcache-load-misses",     EVENT_DCACHE_MISSES),
-    std::make_pair("L1-dcache-store-misses",    EVENT_DCACHE_MISSES),
-    std::make_pair("L1-dcache-prefetch-misses", EVENT_DCACHE_MISSES),
-
-    std::make_pair("cache-misses",              EVENT_LLC_MISSES),
-    std::make_pair("LLC-store-misses",          EVENT_LLC_STORE_MISSES),
-
-    // fake event grouping all iTLB misses
-    std::make_pair("iTLB-misses",               EVENT_ITLB_MISSES),
-    // real iTLB miss events
-    std::make_pair("iTLB-load-misses",          EVENT_ITLB_MISSES),
-
-    // fake event grouping all dTLB misses
-    std::make_pair("dTLB-misses",               EVENT_DTLB_MISSES),
-    // real dTLB miss events
-    std::make_pair("dTLB-load-misses",          EVENT_DTLB_MISSES),
-    std::make_pair("dTLB-store-misses",         EVENT_DTLB_MISSES),
-    std::make_pair("dTLB-prefetch-misses",      EVENT_DTLB_MISSES),
-  };
-
-  size_t numEle = sizeof idToType / sizeof (*idToType);
-  for (size_t i = 0; i < numEle; i++) {
-    if (!strcmp(idToType[i].first, eventId)) return idToType[i].second;
-  }
-
-  return NUM_EVENT_TYPES;
-}
-
-const char* validArguments[] = {
-  "cycles",
-  "branch-misses",
-  "L1-icache-misses",
-  "L1-dcache-misses",
-  "cache-misses",
-  "LLC-store-misses",
-  "iTLB-misses",
-  "dTLB-misses",
+// Predefined PerfEvent mappings.
+std::unordered_map<std::string, PerfEventType> idToType = {
+  {"cycles", EVENT_CYCLES},
+  {"branch-misses", EVENT_BRANCH_MISSES},
+  {"L1-icache-misses", EVENT_ICACHE_MISSES},
+  {"L1-dcache-misses", EVENT_DCACHE_MISSES},
+  {"cache-misses", EVENT_LLC_MISSES},
+  {"LLC-store-misses", EVENT_LLC_STORE_MISSES},
+  {"iTLB-misses", EVENT_ITLB_MISSES},
+  {"dTLB-misses", EVENT_DTLB_MISSES}
 };
 
-PerfEventType commandLineArgumentToEventType(const char* argument) {
-  constexpr size_t numEle = sizeof validArguments / sizeof (*validArguments);
-  static_assert(numEle == NUM_EVENT_TYPES, "need to update validArguments[]");
+std::vector<std::string> smallCaptions = {
+  "cy", "bm", "ic", "dc", "lc", "sm", "it", "dt"
+};
 
-  for (size_t i = 0; i < numEle; i++) {
-    if (!strcmp(validArguments[i], argument)) return (PerfEventType)i;
+bool usePredefinedTypes = true;
+size_t numEventTypes = NUM_PREDEFINED_EVENT_TYPES;
+
+size_t getFirstEventType() {
+  return usePredefinedTypes ? 0 : NUM_PREDEFINED_EVENT_TYPES;
+}
+
+size_t getNumEventTypes() {
+  return usePredefinedTypes ? NUM_PREDEFINED_EVENT_TYPES : numEventTypes;
+}
+
+void addEventType(std::string  eventId) {
+  usePredefinedTypes = false;
+
+  auto it = idToType.find(eventId);
+  if (it == idToType.end()) {
+    idToType.insert({eventId, static_cast<PerfEventType>(numEventTypes)});
+  } else {
+    it->second = static_cast<PerfEventType>(numEventTypes);
   }
 
-  return NUM_EVENT_TYPES;
+  char caption[] = "xx";
+  sprintf(caption, "u%c",
+          static_cast<char>(numEventTypes - getFirstEventType()) + 'A');
+  smallCaptions.push_back(std::string(caption));
+
+  numEventTypes++;
+}
+
+PerfEventType perfScriptOutputToEventType(std::string eventId) {
+  auto it = idToType.find(eventId);
+  if (it == idToType.end()) {
+    return EVENT_NULL;
+  }
+  return it->second;
+}
+
+PerfEventType commandLineArgumentToEventType(const char* argument) {
+  return perfScriptOutputToEventType(std::string(argument));
 }
 
 const char* eventTypeToCommandLineArgument(PerfEventType eventType) {
-  always_assert(eventType != NUM_EVENT_TYPES);
-  return validArguments[eventType];
+  for (auto it = idToType.begin(); it != idToType.end(); ++it) {
+    if (it->second == eventType) {
+      return it->first.c_str();
+    }
+  }
+  always_assert(false);
+  return "Error: Event Type not supported.";
+}
+
+const char* eventTypeToSmallCaption(PerfEventType eventType) {
+  return smallCaptions[eventType].c_str();
 }
 
 // StackTraceTree

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
   function test () {
     //Ttuples
@@ -19,3 +19,8 @@
     new least_upper_bound<int, ?float>();
     new least_upper_bound<?int, ?float, num>();
 }
+
+class least_upper_bound<Ta, Tb> {}
+class classid<T> {}
+class classid1<T> {}
+class classid2<T> {}

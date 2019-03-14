@@ -188,7 +188,7 @@ set_error_handler(
    string $errstr,
    string $errfile,
    int $errline,
-   array $errcontext
+   mixed $_errcontext,
   ) ==> {
     throw new Exception($errstr);
   }

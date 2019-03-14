@@ -57,110 +57,84 @@
 
 	}
 
-	if (!function_exists('sys_get_temp_dir')) {
-		function sys_get_temp_dir() {
+  /**
+   * Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+   *
+   * @param enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
+   */
+  function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+    global $connect_flags;
 
-			if (!empty($_ENV['TMP']))
-				return realpath( $_ENV['TMP'] );
-			if (!empty($_ENV['TMPDIR']))
-				return realpath( $_ENV['TMPDIR'] );
-			if (!empty($_ENV['TEMP']))
-				return realpath( $_ENV['TEMP'] );
+    $flags = ($enable_env_flags) ? $connect_flags : false;
 
-			$temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
-			if ($temp_file) {
-				$temp_dir = realpath(dirname($temp_file));
-				unlink($temp_file);
-				return $temp_dir;
-			}
-			return FALSE;
-		}
-	}
+    if ($flags !== false) {
+      $link = mysqli_init();
+      if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
+        $link = false;
+    } else {
+      $link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+    }
 
-	if (!function_exists('my_mysqli_connect')) {
+    return $link;
+  }
 
-		/**
-		* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-		*
-		* @param enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
-		*/
-		function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-			global $connect_flags;
+  /**
+   * Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+   *
+   * @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
+   */
+  function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
+    global $connect_flags;
 
-			$flags = ($enable_env_flags) ? $connect_flags : false;
+    if ($enable_env_flags)
+      $flags & $connect_flags;
 
-			if ($flags !== false) {
-				$link = mysqli_init();
-				if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
-					$link = false;
-			} else {
-				$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-			}
+    return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
+  }
 
-			return $link;
-		}
+  class my_mysqli extends mysqli {
+    public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+      global $connect_flags;
 
-		/**
-		* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-		*
-		* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
-		*/
-		function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
-			global $connect_flags;
+      $flags = ($enable_env_flags) ? $connect_flags : false;
 
-			if ($enable_env_flags)
-				$flags & $connect_flags;
+      if ($flags !== false) {
+        parent::init();
+        $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
+      } else {
+        parent::__construct($host, $user, $passwd, $db, $port, $socket);
+      }
+    }
+  }
 
-			return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
-		}
+  function have_innodb($link) {
+    if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'")) &&
+      ($row = $res->fetch_row()) &&
+      !empty($row)) {
+      if ($row[1] == "DISABLED" || $row[1] == "NO") {
+        return false;
+      }
+      return true;
+    } else {
+      /* MySQL 5.6.1+ */
+      if ($res = $link->query("SHOW ENGINES")) {
+        while ($row = $res->fetch_assoc()) {
+          if (!isset($row['Engine']) || !isset($row['Support']))
+            return false;
 
-		class my_mysqli extends mysqli {
-			public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-				global $connect_flags;
-
-				$flags = ($enable_env_flags) ? $connect_flags : false;
-
-				if ($flags !== false) {
-					parent::init();
-					$this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
-				} else {
-					parent::__construct($host, $user, $passwd, $db, $port, $socket);
-				}
-			}
-		}
-
-		function have_innodb($link) {
-		  if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'")) &&
-				($row = $res->fetch_row()) &&
-				!empty($row)) {
-				if ($row[1] == "DISABLED" || $row[1] == "NO") {
-					return false;
-				}
-				return true;
-		  } else {
-				/* MySQL 5.6.1+ */
-				if ($res = $link->query("SHOW ENGINES")) {
-					while ($row = $res->fetch_assoc()) {
-						if (!isset($row['Engine']) || !isset($row['Support']))
-							return false;
-
-						if (('InnoDB' == $row['Engine']) &&
-							(('YES' == $row['Support']) || ('DEFAULT' == $row['Support']))
-							) {
-							return true;
-						}
-					}
-					return false;
-				} else {
-					return false;
-				}
-		  }
-		  return false;
-		}
-
-	} else {
-		printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
-	}
+          if (('InnoDB' == $row['Engine']) &&
+            (('YES' == $row['Support']) || ('DEFAULT' == $row['Support']))
+          ) {
+            return true;
+          }
+        }
+        return false;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
 
 	function handle_catchable_fatal($errno, $error, $file, $line) {
 		static $errcodes = array();

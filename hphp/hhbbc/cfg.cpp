@@ -27,22 +27,10 @@ namespace {
 
 /*
  * Note: Our style is generally to use lambdas, rather than helper
- * classes. postOrderWalk was originall written as:
- *
- * void postorderWalk(const php::Func& func,
- *                    std::vector<php::Block*>& out,
- *                    boost::dynamic_bitset<>& visited,
- *                    php::Block& blk) {
- *   if (visited[blk.id]) return;
- *   visited[blk.id] = true;
- *   forEachSuccessor(blk, [&] (BlockId next) {
- *     postorderWalk(func, out, visited, *func.blocks[next]);
- *   });
- *   out.push_back(&blk);
- * }
- *
- * but that ends up taking nearly 1k per recursive call, which means
- * it only takes about 10000 blocks to overflow the stack.
+ * classes. postOrderWalk was originally written using a lambda,
+ * rather than a helper class, but that ended up taking nearly 1k per
+ * recursive call, which means it only takes about 10000 blocks to
+ * overflow the stack.
  *
  * By putting everything in a helper class, we get that down to ~128
  * bytes per recursive call, which is a lot less likely to hit issues.
@@ -50,51 +38,66 @@ namespace {
  */
 struct PostOrderWalker {
   const php::Func& func;
-  std::vector<php::Block*>& out;
+  std::vector<BlockId>& out;
   boost::dynamic_bitset<>& visited;
+  const hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds;
 
   void walk(BlockId blk) {
     if (visited[blk]) return;
     visited[blk] = true;
-    auto const blkPtr = func.blocks[blk].get();
-    forEachSuccessor(*blkPtr, [this] (BlockId next) {
+    forEachSuccessor(
+      *func.blocks[blk],
+      [this] (BlockId next) {
         walk(next);
-      });
-    out.push_back(blkPtr);
+      }
+    );
+    if (extraIds) {
+      auto const it = extraIds->find(blk);
+      if (it != extraIds->end()) {
+        for (auto next : it->second) walk(next);
+      }
+    }
+    out.push_back(blk);
   }
 };
 
-void postorderWalk(const php::Func& func,
-                   std::vector<php::Block*>& out,
-                   boost::dynamic_bitset<>& visited,
-                   php::Block& blk) {
-  auto walker = PostOrderWalker { func, out, visited };
-  walker.walk(blk.id);
+void postorderWalk(
+    const php::Func& func,
+    std::vector<BlockId>& out,
+    boost::dynamic_bitset<>& visited,
+    BlockId blk,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds = nullptr) {
+  auto walker = PostOrderWalker { func, out, visited, extraIds };
+  walker.walk(blk);
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<php::Block*> rpoSortFromBlock(const php::Func& func,
-                                                       BlockId start) {
+std::vector<BlockId> rpoSortFromBlock(
+    const php::Func& func,
+    BlockId start,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<php::Block*> ret;
+  std::vector<BlockId> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, *func.blocks[start]);
+  postorderWalk(func, ret, visited, start, extraIds);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<php::Block*> rpoSortFromMain(const php::Func& func) {
-  return rpoSortFromBlock(func, func.mainEntry);
+std::vector<BlockId> rpoSortFromMain(
+    const php::Func& func,
+    hphp_fast_map<BlockId, std::vector<BlockId>>* extraIds) {
+  return rpoSortFromBlock(func, func.mainEntry, extraIds);
 }
 
-std::vector<php::Block*> rpoSortAddDVs(const php::Func& func) {
+std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {
   boost::dynamic_bitset<> visited(func.blocks.size());
-  std::vector<php::Block*> ret;
+  std::vector<BlockId> ret;
   ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
+  postorderWalk(func, ret, visited, func.mainEntry);
 
   /*
    * We've already marked the blocks reachable from the main entry
@@ -105,43 +108,47 @@ std::vector<php::Block*> rpoSortAddDVs(const php::Func& func) {
   for (auto it = func.params.end(); it != func.params.begin(); ) {
     --it;
     if (it->dvEntryPoint == NoBlockId) continue;
-    postorderWalk(func, ret, visited, *func.blocks[it->dvEntryPoint]);
+    postorderWalk(func, ret, visited, it->dvEntryPoint);
   }
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
 BlockToBlocks
-computeNonThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
+computeNonThrowPreds(const php::Func& func,
+                     const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
-  for (auto& b : rpoBlocks) {
-    if (preds.size() < b->id + 1) {
-      preds.resize(b->id + 1);
+  for (auto const bid : rpoBlocks) {
+    if (preds.size() < bid + 1) {
+      preds.resize(bid + 1);
     }
+    auto const b = func.blocks[bid].get();
     forEachNonThrowSuccessor(*b, [&] (BlockId blkId) {
       if (preds.size() < blkId + 1) {
         preds.resize(blkId + 1);
       }
-      preds[blkId].insert(b);
+      preds[blkId].insert(bid);
     });
   }
   return preds;
 }
 
 BlockToBlocks
-computeThrowPreds(const std::vector<php::Block*>& rpoBlocks) {
+computeThrowPreds(const php::Func& func,
+                  const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
-  for (auto& b : rpoBlocks) {
-    if (preds.size() < b->id + 1) {
-      preds.resize(b->id + 1);
+  for (auto const bid : rpoBlocks) {
+    if (preds.size() < bid + 1) {
+      preds.resize(bid + 1);
     }
+    auto const b = func.blocks[bid].get();
     for (auto& ex : b->throwExits) {
       if (preds.size() < ex + 1) {
         preds.resize(ex + 1);
       }
-      preds[ex].insert(b);
+      preds[ex].insert(bid);
     }
   }
   return preds;

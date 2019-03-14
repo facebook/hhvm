@@ -16,7 +16,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
 
   val make :
     ?env:Full_fidelity_parser_env.t ->
-    ?default_mode:string ->
     Full_fidelity_source_text.t ->
     t
 

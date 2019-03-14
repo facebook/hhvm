@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -104,6 +105,15 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfObject:
       cls = Unit::lookupClass(ne);
       return cls && tv->m_data.pobj->instanceof(cls);
+
+    case KindOfClsMeth:
+      cls = Unit::lookupClass(ne);
+      if (cls && (RuntimeOption::EvalHackArrDVArrs ?
+        interface_supports_vec(cls->name()) :
+        interface_supports_array(cls->name()))) {
+        return true;
+      }
+      return false;
 
     case KindOfRef:
       break;
@@ -375,10 +385,7 @@ bool checkReifiedGenericsMatch(
     if (!strict) return true;
     // Before returning false, lets check if all the generics are wildcards
     // If not all wildcard, since this is not a reified class, then it is false
-    // TODO(T31677864): `!RuntimeOption::EnableReifiedGenerics ||` needs to be
-    // removed but because by using abstract type constants, you can trick the
-    // typechecker, it will be removed after codebase is fixed.
-    return !RuntimeOption::EnableReifiedGenerics || isTSAllWildcards(ts.get());
+    return isTSAllWildcards(ts.get());
   }
   auto const obj_generics = getClsReifiedGenericsProp(cls, obj);
   auto const generics = ts[s_generic_types].getArrayData();
@@ -567,15 +574,44 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
         }
       }
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+          }
+          result = true;
+        } else {
+          result = false;
+        }
+        break;
+      }
       result = isVecType(type);
       break;
     case TypeStructure::Kind::T_keyset:
       result = isKeysetType(type);
       break;
     case TypeStructure::Kind::T_vec_or_dict:
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+          }
+          result = true;
+        } else {
+          result = false;
+        }
+        break;
+      }
       result = isVecType(type) || isDictOrShapeType(type);
       break;
     case TypeStructure::Kind::T_arraylike:
+      if (isClsMethType(type)) {
+        if (RuntimeOption::EvalIsVecNotices) {
+          raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+        }
+        result = true;
+        break;
+      }
       result = isArrayType(type) || isVecType(type) ||
                isDictType(type) || isShapeType(type) || isKeysetType(type);
       break;

@@ -3,11 +3,9 @@
 -- Testing chop() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing chop() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 string(11) "string_val "
 Done

@@ -19,6 +19,7 @@ type t = {
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
   disable_unsafe_expr: bool;
+  disable_unsafe_block: bool;
 } [@@deriving show]
 
 let default = {
@@ -31,6 +32,7 @@ let default = {
   disable_lval_as_an_expression = false;
   disable_nontoplevel_declarations = false;
   disable_unsafe_expr = false;
+  disable_unsafe_block = false;
 
   mode = None;
   stats = None;
@@ -48,6 +50,7 @@ let make
   ?mode
   ?stats
   ?(disable_unsafe_expr = default.disable_unsafe_expr)
+  ?(disable_unsafe_block = default.disable_unsafe_block)
   () = {
     hhvm_compat_mode;
     php5_compat_mode;
@@ -60,6 +63,7 @@ let make
     mode;
     stats;
     disable_unsafe_expr;
+    disable_unsafe_block;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -77,3 +81,4 @@ let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
 let is_typechecker e = is_hack e && not (codegen e)
 let disable_unsafe_expr e = e.disable_unsafe_expr
+let disable_unsafe_block e = e.disable_unsafe_block

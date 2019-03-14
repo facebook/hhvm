@@ -7,7 +7,6 @@
  *
  *)
 
-open Aast
 open Tast
 
 let visitor = object(this)

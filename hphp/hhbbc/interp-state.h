@@ -371,9 +371,9 @@ private:
  * Map from closure classes to types for each of their used vars.
  * Shows up in a few different interpreter structures.
  */
-using ClosureUseVarMap = hphp_hash_map<
+using ClosureUseVarMap = hphp_fast_map<
   php::Class*,
-  std::vector<Type>
+  CompactVector<Type>
 >;
 
 /*
@@ -382,7 +382,7 @@ using ClosureUseVarMap = hphp_hash_map<
  */
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
                                  php::Class* clo,
-                                 std::vector<Type>);
+                                 CompactVector<Type>);
 
 //////////////////////////////////////////////////////////////////////
 

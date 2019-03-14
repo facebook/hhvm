@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -413,10 +414,12 @@ StringData* convResToStrHelper(ResourceHdr* r) {
 
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
-  raise_param_type_warning(func->displayName()->data(),
-                           argNum, expected, actual);
-
-  throw TVCoercionException(func, argNum, actual, expected);
+  auto msg = param_type_error_message(func->displayName()->data(),
+                                      argNum, expected, actual);
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    SystemLib::throwTypeErrorObject(msg);
+  }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
 void builtinCoercionWarningHelper(DataType ty, DataType expKind,
@@ -505,6 +508,7 @@ double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
       coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
@@ -573,6 +577,7 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
       coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
@@ -898,6 +903,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         break;
     }
     not_reached();
@@ -992,8 +998,7 @@ void raiseArgumentImpl(const Func* func, int got, bool missing) {
                                   value == 1 ? "" : "s",
                                   got);
 
-  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 ||
-      (missing && RuntimeOption::EvalThrowOnMissingArgument)) {
+  if (missing || RuntimeOption::EvalWarnOnTooManyArguments > 1) {
     SystemLib::throwRuntimeExceptionObject(Variant(msg));
   } else {
     raise_warning(msg);
@@ -1027,15 +1032,31 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
 }
 
 ArrayData* resolveTypeStructHelper(
-  const ArrayData* a,
+  uint32_t n,
+  const TypedValue* values,
   const Class* declaringCls,
   const Class* calledCls,
-  bool suppress
+  bool suppress,
+  bool isOrAsOp
 ) {
+  assertx(n != 0);
+  auto const v = *values;
+  isValidTSType(v, true);
+  auto const ts = v.m_data.parr;
   req::vector<Array> tsList;
-  auto const ts = ArrNR(a);
-  auto resolved = resolveAndVerifyTypeStructure<true>(
-                    ts, declaringCls, calledCls, tsList, suppress);
+  for (int i = 0; i < n - 1; ++i) {
+    auto const a = values[n - i - 1];
+    isValidTSType(a, true);
+    tsList.emplace_back(Array::attach(a.m_data.parr));
+  }
+  auto resolved = [&] {
+    if (isOrAsOp) {
+      return resolveAndVerifyTypeStructure<true>(
+               ArrNR(ts), declaringCls, calledCls, tsList, suppress);
+    }
+    return resolveAndVerifyTypeStructure<false>(
+             ArrNR(ts), declaringCls, calledCls, tsList, suppress);
+  }();
   return resolved.detach();
 }
 
@@ -1052,6 +1073,38 @@ void asTypeStructHelper(ArrayData* a, Cell c) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
+}
+
+namespace {
+
+// Creates a list of reified generics from the stack and adds them to the
+// reified generics table
+std::pair<StringData*, ArrayData*>
+recordReifiedGenericsAndGetInfo(uint32_t n, const TypedValue* values) {
+  assertx(n != 0);
+  auto tsList = ArrayData::CreateVArray();
+  for (int i = 0; i < n; ++i) {
+    auto a = values[n - i - 1];
+    isValidTSType(a, true);
+    tsList = tsList->appendInPlace(a);
+  }
+  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
+  addToReifiedGenericsTable(mangledName, tsList);
+  return std::make_pair(mangledName, tsList);
+}
+
+} // namespace
+
+StringData*
+recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values) {
+  return recordReifiedGenericsAndGetInfo(n, values).first;
+}
+
+ArrayData*
+recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values) {
+  auto tsList = recordReifiedGenericsAndGetInfo(n, values).second;
+  ArrayData::GetScalarArray(&tsList);
+  return tsList;
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {
@@ -1218,25 +1271,6 @@ void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
 
   auto const& tc = func->params()[argNum - 1].typeConstraint;
   tc.verifyParam(&tv, func, argNum - 1);
-}
-
-TVCoercionException::TVCoercionException(const Func* func,
-                                         int arg_num,
-                                         DataType actual,
-                                         DataType expected)
-    : std::runtime_error(
-        folly::format("Unable to coerce param {} to {}() "
-                      "from {} to {}",
-                      arg_num,
-                      func->name(),
-                      actual,
-                      expected).str())
-{
-  if (func->attrs() & AttrParamCoerceModeFalse) {
-    m_tv = make_tv<KindOfBoolean>(false);
-  } else {
-    m_tv = make_tv<KindOfNull>();
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

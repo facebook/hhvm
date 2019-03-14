@@ -100,7 +100,7 @@ mergedriver = python:scripts/mergedriver.py
         self.check_call(cmd)
 
     foo_1_start = """\
-<?hh
+<?hh // partial
 function f() {
     return 1;
 }

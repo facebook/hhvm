@@ -71,7 +71,7 @@ $delimiter = " ";
 $limit = 5;
 foreach($strings as $string) {
   echo "-- Iteration $count --\n";
-  var_dump( explode($delimiter, $string, $limit) );
+  try { var_dump( explode($delimiter, $string, $limit) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 

@@ -49,9 +49,9 @@ function f2($p1 = 100, $p2 = 1.23, $p3)
         ", \$p3: ".($p3 == NULL ? "NULL" : $p3)."\n";
 }
 
-f2();
-f2(10);
-f2(10, 20);
+try { f2(); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { f2(10); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { f2(10, 20); } catch (Exception $e) { var_dump($e->getMessage()); }
 f2(10, 20, 30);
 //*/
 ///*
@@ -71,8 +71,8 @@ function f3($p1 = 100, $p2, $p3 = "abc")
         ", \$p3: ".($p3 == NULL ? "NULL" : $p3)."\n";
 }
 
-f3();
-f3(10);
+try { f3(); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { f3(10); } catch (Exception $e) { var_dump($e->getMessage()); }
 f3(10, 20);
 f3(10, 20, 30);
 //*/
@@ -93,8 +93,8 @@ function f4($p1, $p2 = 1.23, $p3 = "abc")
         ", \$p3: ".($p3 == NULL ? "NULL" : $p3)."\n";
 }
 
-f4();
-f4(10);
+try { f4(); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { f4(10); } catch (Exception $e) { var_dump($e->getMessage()); }
 f4(10, 20);
 f4(10, 20, 30);
 //*/

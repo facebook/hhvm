@@ -1,15 +1,12 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 44
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 45
 dict(3) {
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(4383056505853746297)
     ["md5sum1"]=>
-    int(%i)
+    int(-2974079675222806495)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "394475b1e5c57740f3fde1b4cc1e10efc49265ba"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -202,21 +199,16 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(1) {
       string(2) "f1"
-      string(2) "f2"
-      string(2) "f7"
-      string(2) "f8"
-      string(2) "f6"
     }
     ["constants"]=>
-    vec(6) {
+    vec(5) {
       string(3) "CO0"
       string(3) "CO1"
       string(3) "CO2"
       string(3) "CO3"
       string(3) "CO4"
-      string(3) "CO5"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -225,14 +217,14 @@ dict(3) {
       string(3) "TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(-766628480674557984)
     ["md5sum1"]=>
-    int(%i)
+    int(4132325208887423240)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "50e891dd1b93031067bca08fb2adcd3bc9a4d0e4"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -425,17 +417,16 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(1) {
       string(5) "NS\f1"
-      string(5) "NS\f2"
-      string(5) "NS\f7"
-      string(5) "NS\f8"
-      string(5) "NS\f6"
     }
     ["constants"]=>
-    vec(2) {
+    vec(5) {
       string(6) "NS\CO0"
       string(6) "NS\CO1"
+      string(6) "NS\CO2"
+      string(6) "NS\CO3"
+      string(6) "NS\CO4"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -444,14 +435,14 @@ dict(3) {
       string(6) "NS\TA2"
     }
   }
-  [%s]=>
+  ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(%i)
+    int(177695044982738465)
     ["md5sum1"]=>
-    int(%i)
+    int(321704508444983991)
     ["sha1sum"]=>
-    string(40) "%s"
+    string(40) "9d0fa69dd74b7da21b9fa8b3c56ef5456feffd51"
     ["types"]=>
     vec(13) {
       dict(4) {
@@ -644,17 +635,16 @@ dict(3) {
       }
     }
     ["functions"]=>
-    vec(5) {
+    vec(1) {
       string(8) "NS\NS\f1"
-      string(8) "NS\NS\f2"
-      string(8) "NS\NS\f7"
-      string(8) "NS\NS\f8"
-      string(8) "NS\NS\f6"
     }
     ["constants"]=>
-    vec(2) {
+    vec(5) {
       string(9) "NS\NS\CO0"
       string(9) "NS\NS\CO1"
+      string(9) "NS\NS\CO2"
+      string(9) "NS\NS\CO3"
+      string(9) "NS\NS\CO4"
     }
     ["typeAliases"]=>
     vec(3) {
@@ -666,7 +656,7 @@ dict(3) {
 }
 PASSED md5sum
 dict(3) {
-  [%s]=>
+  ["%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL
@@ -677,7 +667,6 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-
-Warning: HH\facts_parse() expects parameter 2 to be vec, null given in %s on line %d
+string(58) "HH\facts_parse() expects parameter 2 to be vec, null given"
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."
 string(87) "HH\facts_parse expects a varray<string> but was given an array with a non-string value."

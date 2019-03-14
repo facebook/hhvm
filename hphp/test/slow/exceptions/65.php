@@ -36,5 +36,7 @@ set_error_handler('handle');
 test('test1');
 test('test2');
 test('test3');
+set_error_handler(null);
+test('test3');
 var_dump('not reached');
 }

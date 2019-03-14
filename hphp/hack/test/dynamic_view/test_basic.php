@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 function foo()  {
   $x = " hello ";
   return 5;
@@ -8,6 +8,6 @@ function foo()  {
 function test() : int {
   // partial class
   $x = foo();
-  hh_show($x);
+  /* HH_IGNORE_ERROR[2049] */ hh_show($x);
   return $x;
 }

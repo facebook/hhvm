@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 final class :x {
   public function foo(): string {
     return "";

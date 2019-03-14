@@ -2,17 +2,17 @@
 
 class X {
   static function foo() {
-    var_dump(__METHOD__, get_called_class());
+    var_dump(__METHOD__, static::class);
   }
   function bar() {
-    var_dump(__METHOD__, get_called_class());
+    var_dump(__METHOD__, static::class);
   }
 }
 class Y extends X {
 }
 class Z extends X {
   static function foo() {
-    var_dump(__METHOD__, get_called_class());
+    var_dump(__METHOD__, static::class);
   }
 }
 function test($x, $o) {

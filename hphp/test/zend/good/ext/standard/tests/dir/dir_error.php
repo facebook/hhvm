@@ -9,12 +9,12 @@ echo "*** Testing dir() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing dir() function with zero arguments --";
-var_dump( dir() );
+try { var_dump( dir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // With one more than expected number of arguments
 echo "\n-- Testing dir() function with one more than expected number of arguments --";
 $extra_arg = 10;
-var_dump( dir(getcwd(), "stream", $extra_arg) );
+try { var_dump( dir(getcwd(), "stream", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

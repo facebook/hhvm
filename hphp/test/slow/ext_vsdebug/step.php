@@ -1,10 +1,10 @@
 <?hh
 require(__DIR__ . '/common.inc');
 
-$path = __FILE__ . ".test";
+ExtVsdebugStep::$path = __FILE__ . ".test";
 
 function verifyStopLine($frames, $line) {
-  global $path;
+
 
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
@@ -31,7 +31,7 @@ function verifyStopLine($frames, $line) {
         "totalFrames" => $frames,
         "stackFrames" => [
           array(
-            "source" => array("path" => $path, "name" => str_replace(".test", "", basename($path))),
+            "source" => array("path" => ExtVsdebugStep::$path, "name" => str_replace(".test", "", basename(ExtVsdebugStep::$path))),
             "line" => $line,
           )
         ]
@@ -70,7 +70,7 @@ $breakpoints = [
      ])
    ];
 
-$testProcess = vsDebugLaunch($path, true, $breakpoints);
+$testProcess = vsDebugLaunch(ExtVsdebugStep::$path, true, $breakpoints);
 
 // Verify we hit breakpoint 1.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
@@ -104,7 +104,7 @@ $seq = sendVsCommand(array(
   "arguments" =>
     array(
       "threadId" => 1,
-      "source" => array("path" => $path),
+      "source" => array("path" => ExtVsdebugStep::$path),
       "line" => 15
     )));
 $msg = json_decode(getNextVsDebugMessage(), true);
@@ -139,3 +139,7 @@ checkForOutput($testProcess, "hello world 5\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
+
+abstract final class ExtVsdebugStep {
+  public static $path;
+}

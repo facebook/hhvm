@@ -2532,6 +2532,7 @@ safe:
               case KindOfRef:
               case KindOfFunc:
               case KindOfClass:
+              case KindOfClsMeth:
                 if (!stmt->dbh->conn()->quoter(
                       param->parameter.toString(),
                       plc->quoted,

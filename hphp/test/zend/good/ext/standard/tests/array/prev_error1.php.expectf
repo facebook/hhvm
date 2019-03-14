@@ -3,10 +3,8 @@
 -- Testing prev() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing prev() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

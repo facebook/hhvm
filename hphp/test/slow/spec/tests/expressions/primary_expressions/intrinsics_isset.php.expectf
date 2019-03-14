@@ -6,8 +6,6 @@ bool(false)
 bool(false)
 --------- undefined parameter -------------
 
-Warning: %s
-
 Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_isset.php on line 30
 NULL
 bool(false)

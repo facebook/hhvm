@@ -26,14 +26,8 @@ int(1)
 int(2)
 int(1)
 =========
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 89
-
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 90
-string(4) "blah"
 string(2) "yo"
-int(2)
-string(4) "blah"
+int(1)
 string(2) "yo"
 =========
 bool(true)

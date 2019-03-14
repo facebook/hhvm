@@ -1,9 +1,10 @@
 <?hh
 
 class blah {
+
+  private static $breakerX = 0;
   private function breaker() {
-    static $x = 0;
-    return $x++ == 0 ? array() : null;
+    return self::$breakerX++ == 0 ? array() : null;
   }
 
   public function foo() {

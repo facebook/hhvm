@@ -1,1 +1,2 @@
 -v 'watchman.enable=true'
+-vEval.EnablePHP=1

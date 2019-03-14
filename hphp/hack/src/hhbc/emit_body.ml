@@ -62,29 +62,7 @@ let rec emit_def env def =
   | Ast.Stmt s -> Emit_statement.emit_stmt env s
   | Ast.Constant c ->
     let cns_name = snd c.Ast.cst_name in
-    if c.Ast.cst_kind = Ast.Cst_define &&
-       (not (Namespace_env.is_global_namespace c.Ast.cst_namespace) ||
-        Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options)
-    then
-      (* replace 'define' in namespace with call to 'define' function *)
-      let env =
-        Emit_env.with_namespace c.Ast.cst_namespace env in
-      let define_call =
-        let p0 = Pos.none in
-        let p_name = fst c.Ast.cst_name in
-        let args = [
-          p_name, Ast.String (SU.strip_global_ns cns_name);
-          c.Ast.cst_value] in
-        p0, Ast.Expr(p0, Ast.Call ((p0, Ast.Id (p0, "define")), [], args, [])) in
-      Emit_statement.emit_stmt env define_call
-    else
-      let cns_id =
-        if c.Ast.cst_kind = Ast.Cst_define
-        then
-          (* names of constants declared using 'define function' are always
-            prefixed with '\\', see 'def' function in 'namespaces.ml' *)
-          Hhbc_id.Const.from_raw_string (SU.strip_global_ns cns_name)
-        else Hhbc_id.Const.from_ast_name cns_name in
+    let cns_id = Hhbc_id.Const.from_ast_name cns_name in
       gather [
         Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
         Emit_pos.emit_pos_then c.Ast.cst_span
@@ -154,19 +132,7 @@ and emit_defs env defs =
   in
   emit_markup env defs
 
-let check_redefinition v1 v2 text =
-  if v1 > 0 && v2 > 0
-  then Emit_fatal.raise_fatal_runtime Pos.none ("Multiple " ^ text ^ " directives")
-  else max v1 v2
-
-let check_num_iters n1 n2 = check_redefinition n1 n2 ".numiters"
-let check_num_cls_ref_slots n1 n2 = check_redefinition n1 n2 ".numclsrefslots"
-let deduplicate l =
-  l
-  |> List.fold_left ~init:Unique_list_string.empty ~f:Unique_list_string.add
-  |> Unique_list_string.items
-
-let make_body_ function_directives_opt body_instrs decl_vars
+let make_body body_instrs decl_vars
               is_memoize_wrapper is_memoize_wrapper_lsb
               params return_type_info static_inits doc_comment
               env =
@@ -179,14 +145,6 @@ let make_body_ function_directives_opt body_instrs decl_vars
   let num_iters =
     if is_memoize_wrapper then 0 else !Iterator.num_iterators in
   let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
-  let num_iters, num_cls_ref_slots, is_memoize_wrapper, static_inits =
-    match function_directives_opt with
-    | Some (iters_hhas, cls_ref_slots_hhas, is_memoize_wrapper_hhas, static_inits_hhas) ->
-      check_num_iters num_iters iters_hhas,
-      check_num_cls_ref_slots num_cls_ref_slots cls_ref_slots_hhas,
-      is_memoize_wrapper || is_memoize_wrapper_hhas,
-      deduplicate @@ List.append static_inits static_inits_hhas
-    | None -> num_iters, num_cls_ref_slots, is_memoize_wrapper, static_inits in
   Hhas_body.make
     body_instrs
     decl_vars
@@ -200,51 +158,9 @@ let make_body_ function_directives_opt body_instrs decl_vars
     doc_comment
     env
 
-let make_body body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
-              return_type_info static_inits doc_comment env =
-  make_body_ None body_instrs decl_vars is_memoize_wrapper is_memoize_wrapper_lsb params
-             return_type_info static_inits doc_comment env
-
-let prepare_inline_hhas_blocks decl_vars params hhas_blocks =
-  assert (not @@ List.is_empty hhas_blocks);
-  let param_names =
-    List.fold params
-      ~init:SSet.empty
-      ~f:(fun acc v -> SSet.add (Hhas_param.name v) acc) in
-  let is_param v = SSet.mem v param_names in
-  let parse_hhas s =
-    let lexer = Lexing.from_string (s ^ "\n") in
-    try s, Hhas_parser.functionbodywithdirectives Hhas_lexer.read lexer
-    with Parsing.Parse_error ->
-      Emit_fatal.raise_fatal_parse Pos.none @@
-        "Error parsing inline hhas:\n" ^ s in
-  let hhas_blocks = List.map hhas_blocks ~f:parse_hhas in
-  let text_to_block =
-    List.fold_left hhas_blocks
-      ~init:SMap.empty
-        ~f:(fun acc (k, v) -> SMap.add k v acc) in
-  let combine (used_vars, num_iters, num_cls_ref_slots, is_memoize, static_init) (_, b) =
-    let can_use v = not @@ is_param v in
-    let locals =
-      Instruction_sequence.collect_locals can_use (Hhas_asm.instrs b) in
-    List.append used_vars (Unique_list_string.items locals),
-    check_num_iters num_iters (Hhas_asm.num_iters b),
-    check_num_cls_ref_slots num_cls_ref_slots (Hhas_asm.num_cls_ref_slots b),
-    is_memoize || (Hhas_asm.is_memoize_wrapper b),
-    List.append static_init (Hhas_asm.static_inits b) in
-  let decl_vars, num_iters, num_cls_ref_slots, is_memoize, static_init =
-    List.fold_left hhas_blocks ~init:(decl_vars, 0, 0, false, []) ~f:combine in
-  deduplicate decl_vars,
-  text_to_block,
-  Some (num_iters, num_cls_ref_slots, is_memoize, deduplicate static_init)
-
 let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name) in
-
-
-
-
   match ret with
   | None ->
     Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
@@ -324,6 +240,17 @@ let emit_verify_out params =
   let len = List.length param_instrs in
   if len = 0 then (0, empty) else (len, gather param_instrs)
 
+let modify_prog_for_debugger_eval instr_seq =
+  let instr_list = Instruction_sequence.instr_seq_to_list instr_seq in
+  let instr_length = List.length instr_list in
+  if instr_length < 4 then instr_seq else
+  let (h, t) = List.split_n instr_list (instr_length - 3) in
+  match t with
+    | [ Hhbc_ast.IBasic Hhbc_ast.PopC;
+        Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
+        Hhbc_ast.IContFlow Hhbc_ast.RetC ] -> gather [ instrs h; instr_retc ]
+    | _ -> instr_seq
+
 let emit_body
   ~pos
   ~scope
@@ -332,6 +259,7 @@ let emit_body
   ~is_native
   ~is_async
   ~is_rx_body
+  ~debugger_modify_program
   ~deprecation_info
   ~skipawaitable
   ~default_dropthrough
@@ -469,15 +397,6 @@ let emit_body
       "'ScopeItem.Function fd' for function or " ^
       "empty scope for top level" in
 
-  let inline_hhas_blocks =
-    Emit_env.get_inline_hhas_blocks function_state_key in
-
-  let decl_vars, inline_hhas_blocks, function_directives_opt =
-    if List.is_empty inline_hhas_blocks
-    then decl_vars, SMap.empty, None
-    else prepare_inline_hhas_blocks decl_vars params inline_hhas_blocks in
-  Emit_expression.set_inline_hhas_blocks inline_hhas_blocks;
-
   let should_reserve_locals =
     SSet.mem function_state_key @@ Emit_env.get_functions_with_finally () in
 
@@ -551,9 +470,11 @@ let emit_body
     default_value_setters;
   ] in
   let fault_instrs = extract_fault_funclets body_instrs in
+  let body_instrs = if debugger_modify_program
+    then modify_prog_for_debugger_eval body_instrs
+    else body_instrs in
   let body_instrs = gather [body_instrs; fault_instrs] in
-  make_body_
-    function_directives_opt
+  make_body
     body_instrs
     decl_vars
     false (*is_memoize_wrapper*)

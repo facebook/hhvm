@@ -18,7 +18,7 @@
   FPushFuncD 2 "main"
     PushL $a
     PushL $b
-  FCall <> 2 1 - "" ""
+  FCall <> 2 1 "" - "" ""
   RetC
 }
 

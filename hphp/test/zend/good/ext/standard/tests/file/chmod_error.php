@@ -13,12 +13,12 @@ echo "\n-- Testing chmod() function with more than expected no. of arguments --\
 $filename = 'string_val';
 $mode = 10;
 $extra_arg = 10;
-var_dump( chmod($filename, $mode, $extra_arg) );
+try { var_dump( chmod($filename, $mode, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing chmod with one less than the expected number of arguments
 echo "\n-- Testing chmod() function with less than expected no. of arguments --\n";
 $filename = 'string_val';
-var_dump( chmod($filename) );
+try { var_dump( chmod($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // testing chmod with a non-existing file
 $filename = "___nonExisitingFile___";

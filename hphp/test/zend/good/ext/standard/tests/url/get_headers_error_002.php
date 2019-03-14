@@ -10,11 +10,11 @@ $url = 'http://php.net';
 
 // Format argument as type String
 echo "\n-- Testing get_headers() function with format argument as type string --\n";
-var_dump( get_headers($url, "#PHPTestFest2009 Norway") );
+try { var_dump( get_headers($url, "#PHPTestFest2009 Norway") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Format argument as type Array
 echo "\n-- Testing get_headers() function with format argument as type array --\n";
-var_dump( get_headers($url, array()) );
+try { var_dump( get_headers($url, array()) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Format argument as type Object
 class testObject
@@ -23,7 +23,7 @@ class testObject
 
 $object = new testObject();
 echo "\n-- Testing get_headers() function with format argument as type object --\n";
-var_dump( get_headers($url, $object) );
+try { var_dump( get_headers($url, $object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 echo "Done"

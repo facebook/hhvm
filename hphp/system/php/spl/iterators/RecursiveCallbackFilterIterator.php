@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class RecursiveCallbackFilterIterator extends CallbackFilterIterator
   implements OuterIterator, RecursiveIterator {

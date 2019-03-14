@@ -1,0 +1,26 @@
+(library
+  (name logging_common_stubs)
+  (wrapped false)
+  (modules 
+    eventLogger
+    scuba))
+
+(library
+  (name logging_stubs)
+  (wrapped false)
+  (modules
+    featureLogging
+    hackEventLogger
+    hackcEventLogger
+    hackfmtEventLogger
+    typingLogger)
+  (flags (:standard -w @a-27)))
+
+(library
+  (name bad_files_stubs)
+  (wrapped false)
+  (modules
+    bad_files)
+  (libraries
+    logging_stubs)
+  (flags (:standard -w @a-27)))

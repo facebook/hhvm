@@ -537,16 +537,18 @@ struct Index {
   folly::Optional<res::Class> selfCls(const Context& ctx) const;
   folly::Optional<res::Class> parentCls(const Context& ctx) const;
 
+  template <typename T>
   struct ResolvedInfo {
     AnnotType                               type;
     bool                                    nullable;
-    Either<SString,ClassInfo*> value;
+    T value;
   };
 
   /*
    * Try to resolve name, looking through TypeAliases and enums.
    */
-  ResolvedInfo resolve_type_name(SString name) const;
+  ResolvedInfo<folly::Optional<res::Class>>
+  resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -585,7 +587,7 @@ struct Index {
    * program point (it could require a function autoload that might
    * fail).
    */
-  std::pair<res::Func, folly::Optional<res::Func>>
+  std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
     resolve_func_fallback(Context,
                           SString name,
                           SString fallback) const;
@@ -702,7 +704,10 @@ struct Index {
    * During analyze phases, this function may re-enter analyze in
    * order to interpret the callee with these argument types.
    */
-  Type lookup_return_type(CallContext, res::Func) const;
+  Type lookup_return_type(Context caller,
+                          const CompactVector<Type>& args,
+                          const Type& context,
+                          res::Func) const;
 
   /*
    * Look up the return type for an unresolved function.  The
@@ -727,7 +732,7 @@ struct Index {
    * If move is true, the value will be moved out of the index. This
    * should only be done at emit time.
    */
-  std::vector<Type>
+  CompactVector<Type>
     lookup_closure_use_vars(const php::Func*,
                             bool move = false) const;
 
@@ -908,7 +913,7 @@ struct Index {
    * Returns: true if the types have changed.
    */
   bool refine_closure_use_vars(const php::Class*,
-                               const std::vector<Type>&);
+                               const CompactVector<Type>&);
 
   /*
    * Refine the private property types for a class, based on a round
@@ -1050,6 +1055,9 @@ private:
     SString name, const Type& candidate) const;
 
   void init_return_type(const php::Func* func);
+
+  ResolvedInfo<Either<SString,ClassInfo*>>
+  resolve_type_name_internal(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

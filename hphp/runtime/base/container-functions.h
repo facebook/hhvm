@@ -88,6 +88,41 @@ const Cell container_as_cell(const Variant& container) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * clsmeth compact container helpers.
+ */
+inline bool isClsMethCompactContainer(const Cell c) {
+ return isContainer(c) || isClsMethType(c.m_type);
+}
+
+inline bool isClsMethCompactContainer(const Variant& v) {
+ return isClsMethCompactContainer(*v.toCell());
+}
+
+inline size_t getClsMethCompactContainerSize(const Cell c) {
+ return isClsMethType(c.m_type) ? 2 : getContainerSize(c);
+}
+
+inline size_t getClsMethCompactContainerSize(const Variant& v) {
+ return getClsMethCompactContainerSize(*v.toCell());
+}
+
+inline Cell* castClsmethToContainerInplace(Cell* c) {
+  if (isClsMethType(c->m_type)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      tvCastToVecInPlace(c);
+    } else {
+      tvCastToVArrayInPlace(c);
+    }
+  }
+  return c;
+}
+
+inline Cell* castClsmethToContainerInplace(VRefParam ref) {
+  return castClsmethToContainerInplace(const_cast<Cell*>(ref->toCell()));
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 #endif

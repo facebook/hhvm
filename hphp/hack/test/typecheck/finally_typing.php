@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -45,3 +45,5 @@ function finally_typing2(): string {
 //   }
 //   return $a;
 // }
+
+function do_something(): void {}

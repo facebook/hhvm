@@ -45,17 +45,6 @@ let emit_return env =
     env
 
 let emit_def_inline = function
-  | A.Fun fd ->
-    let has_inout_params =
-      let r, _ =
-        Emit_inout_helpers.extract_function_inout_or_ref_param_locations fd in
-      Option.is_some r in
-    Emit_pos.emit_pos_then (fd.Ast.f_span) @@
-    let n = int_of_string (snd fd.Ast.f_name) in
-    gather [
-      instr_deffunc n;
-      (if not has_inout_params then empty else instr_deffunc (n + 1))
-    ]
   | A.Class cd ->
     let defcls_fn =
       if Emit_env.is_systemlib () then instr_defclsnop else instr_defcls in
@@ -246,7 +235,7 @@ let rec emit_stmt env (pos, st_) =
     ]
   | A.Return (Some expr) ->
     gather [
-      emit_expr ~last_pos:pos ~need_ref:false env expr;
+      emit_expr ~need_ref:false env expr;
       Emit_pos.emit_pos pos;
       emit_return env;
     ]

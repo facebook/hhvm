@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace __SystemLib {
   // systemlib can't have closures, so we get this...
@@ -11,7 +11,7 @@ namespace __SystemLib {
     }
     public function __invoke($x, ...$args) {
       invariant(
-        $x instanceof $this->class,
+        \is_a($x, $this->class),
         'object must be an instance of ('.$this->class.'), instead it is ('.
         (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );
@@ -39,7 +39,7 @@ namespace HH {
  * For example:
  *
  * ```
- * <?hh
+ * <?hh // partial
  * $v = Vector {
  *   Vector {1, 2, 3},
  *   Vector {1, 2}

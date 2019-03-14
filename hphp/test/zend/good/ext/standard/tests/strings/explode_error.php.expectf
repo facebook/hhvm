@@ -3,10 +3,8 @@
 -- Testing explode() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing explode() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===Done===

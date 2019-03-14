@@ -7,7 +7,6 @@ SELECTING results
 paramCount with wrong number of arguments
 
 Warning: %s
-NULL
 Closing database
 bool(true)
 Done

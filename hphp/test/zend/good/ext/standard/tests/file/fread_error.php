@@ -13,11 +13,11 @@ $file_handle = fopen($filename, "r");
 
 // zero argument
 echo "-- Testing fread() with zero argument --\n";
-var_dump( fread() );
+try { var_dump( fread() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // more than expected no. of args
 echo "-- Testing fread() with more than expected number of arguments --\n";
-var_dump( fread($file_handle, 10, $file_handle) );
+try { var_dump( fread($file_handle, 10, $file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // invalid length argument 
 echo "-- Testing fread() with invalid length arguments --\n";
@@ -39,7 +39,7 @@ $invalid_args = array (
 /* loop to test fread() with different invalid type of args */
 for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";
-  var_dump( fread($invalid_args[$loop_counter - 1], 10) );
+  try { var_dump( fread($invalid_args[$loop_counter - 1], 10) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 // fwrite() on a file handle which is already closed
@@ -50,7 +50,7 @@ var_dump( fread($file_handle,$file_content_type) );
 // fwrite on a file handle which is unset
 $fp = fopen($filename, "r");
 unset($fp); //unset file handle
-var_dump( fread(@$fp,10) );
-var_dump( fclose(@$fp) );
+try { var_dump( fread(@$fp,10) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fclose(@$fp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";

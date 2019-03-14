@@ -6,9 +6,9 @@ class e extends d {
 }
 
 
+const INIT1 = 1000;
 <<__EntryPoint>>
 function main_699() {
-define('INIT1', 1000);
 var_dump(d::$x++);
 var_dump(e::$x++);
 }

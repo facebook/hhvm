@@ -1,2 +1,0 @@
-Notice: Use of undefined constant bar - assumed 'bar' in %s/hphp/test/slow/let_statement/undefined_let_var.php on line 3
-string(3) "bar"

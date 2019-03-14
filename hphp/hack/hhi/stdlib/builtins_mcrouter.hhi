@@ -84,7 +84,7 @@ class MCRouter {
   const int mc_op_gets = 0;
   const int mc_op_get_service_info = 0;
 
-  // From mcrouter/lib/mc/msg.h enum mc_res_e:
+  // From mcrouter/lib/carbon/Result.h enum carbon::Result:
   const int mc_res_unknown = 0;
   const int mc_res_deleted = 0;
   const int mc_res_found = 0;

@@ -560,14 +560,17 @@ let rec push_option_out pos env ty =
   let is_option = function
     | _, Toption _ -> true
     | _ -> false in
-  let env, ty = expand_type_and_solve env
-    ~description_of_expected:"a value of known type" pos ty in
+  let env, ty = Env.expand_type env ty in
   match ty with
   | r, Toption ty ->
     let env, ty = push_option_out pos env ty in
     env, if is_option ty then ty else (r, Toption ty)
   | r, Tprim N.Tnull ->
-    env, (r, Toption (r, Tany))
+    let ty =
+      if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
+      then (r, Tunresolved [])
+      else (r, Tany) in
+    env, (r, Toption ty)
   | r, Tunresolved tyl ->
     let env, tyl = List.map_env env tyl (push_option_out pos) in
     if List.exists tyl is_option then
@@ -593,7 +596,23 @@ let rec push_option_out pos env ty =
       | _ -> env, ty)
     | env, _ -> env, ty
     end
-  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
+  (* Solve type variable to lower bound if it's manifestly nullable *)
+  | _, Tvar var ->
+    let rec has_null env ty =
+      match snd (Env.expand_type env ty) with
+      | _, Tprim Nast.Tnull -> true
+      | _, Toption _ -> true
+      | _, Tabstract (_, Some ty) -> has_null env ty
+      | _ -> false in
+    let lower_bounds = Typing_set.elements (Typing_env.get_tyvar_lower_bounds env var) in
+    if List.exists lower_bounds (has_null env)
+    then begin
+      let env, ty = expand_type_and_solve env
+        ~description_of_expected:"a value of known type" pos ty in
+      push_option_out pos env ty
+    end
+    else env, ty
+  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _
     | Tclass _ | Ttuple _ | Tanon _ | Tfun _
     | Tobject | Tshape _ | Tdynamic) -> env, ty
 
@@ -689,6 +708,7 @@ let unwrap_class_type = function
       | Tany
       | Tmixed
       | Tnonnull
+      | Tnothing
       | Tarray (_, _)
       | Tdarray (_, _)
       | Tvarray _

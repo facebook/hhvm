@@ -119,6 +119,20 @@ template<class T> using ISStringToOneT =
 
 /*
  * One-to-one case insensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
+ */
+template<class T> using ISStringToOneFastT =
+  hphp_fast_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_isame
+  >;
+
+/*
+ * One-to-one case insensitive map, where the keys are static strings
  * and the values are some kind of pointer.
  */
 template<class T> using ISStringToOne = ISStringToOneT<T*>;
@@ -244,7 +258,7 @@ struct CallContextHashCompare {
 
   size_t hash(const CallContext& c) const {
     auto ret = folly::hash::hash_combine(
-      c.caller.func,
+      c.callee,
       c.args.size(),
       c.context.hash()
     );
@@ -255,9 +269,6 @@ struct CallContextHashCompare {
   }
 };
 
-// Note: CallContext contains the caller Context primarily to reduce
-// the contention in this tbb.  (And because everywhere you need a
-// CallContext you also need that caller Context.)
 using ContextRetTyMap = tbb::concurrent_hash_map<
   CallContext,
   Type,
@@ -314,20 +325,6 @@ struct res::Func::FuncInfo {
   bool effectFree{false};
 
   /*
-   * Call-context sensitive return types are cached here.  This is not
-   * an optimization.
-   *
-   * The reason we need to retain this information about the
-   * calling-context-sensitive return types is that once the Index is
-   * frozen (during the final optimization pass), calls to
-   * lookup_return_type with a CallContext can't look at the bytecode
-   * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
-   * that so we can return it again.
-   */
-  ContextRetTyMap contextualReturnTypes{};
-
-  /*
    * Type info for local statics.
    */
   CompactVector<Type> localStaticTypes;
@@ -382,11 +379,53 @@ using MethTabEntryPair = res::Func::MethTabEntryPair;
  * class with all unique derived classes, we will resolve the function
  * to a FuncFamily that contains references to all the possible
  * overriding-functions.
+ *
+ * Carefully pack it into 8 bytes, so that hphp_fast_map will use
+ * F14VectorMap.
  */
 struct res::Func::FuncFamily {
-  bool containsInterceptables = false;
-  bool isCtor = false;
-  std::vector<const MethTabEntryPair*> possibleFuncs;
+  using PFuncVec = CompactVector<const MethTabEntryPair*>;
+  static_assert(sizeof(PFuncVec) == sizeof(uintptr_t),
+                "CompactVector must be layout compatible with a pointer");
+
+  struct Holder {
+    Holder(const Holder& o) : bits{o.bits} {}
+    explicit Holder(PFuncVec&& o) : v{std::move(o)} {}
+    explicit Holder(uintptr_t b) : bits{b & ~3} {}
+    Holder& operator=(const Holder&) = delete;
+    ~Holder() {}
+    const PFuncVec* operator->() const { return &v; }
+    uintptr_t val() const { return bits; }
+    friend auto begin(const Holder& h) { return h->begin(); }
+    friend auto end(const Holder& h) { return h->end(); }
+  private:
+    union {
+      uintptr_t bits;
+      PFuncVec  v;
+    };
+  };
+
+  FuncFamily(PFuncVec&& v,
+             bool containsInterceptables,
+             bool isCtor) : m_raw{Holder{std::move(v)}.val()} {
+    if (containsInterceptables) m_raw |= 1;
+    if (isCtor) m_raw |= 2;
+  }
+  FuncFamily(FuncFamily&& o) noexcept : m_raw(o.m_raw) {
+    o.m_raw = 0;
+  }
+  ~FuncFamily() {
+    Holder{m_raw & ~3}->~PFuncVec();
+  }
+  FuncFamily& operator=(const FuncFamily&) = delete;
+
+  bool containsInterceptables() const { return m_raw & 1; };
+  bool isCtor() const { return m_raw & 2; }
+  const Holder possibleFuncs() const {
+    return Holder{m_raw & ~3};
+  };
+private:
+  uintptr_t m_raw;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -413,7 +452,7 @@ struct ClassInfo {
    * declaration order mirroring the php::Class interfaceNames vector, and does
    * not include inherited interfaces.
    */
-  std::vector<const ClassInfo*> declInterfaces;
+  CompactVector<const ClassInfo*> declInterfaces;
 
   /*
    * A (case-insensitive) map from interface names supported by this class to
@@ -457,7 +496,7 @@ struct ClassInfo {
    * Invariant: methods on this class with AttrNoOverride or
    * AttrPrivate will not have an entry in this map.
    */
-  ISStringToOne<FuncFamily> methodFamilies;
+  ISStringToOneFastT<FuncFamily> methodFamilies;
 
   /*
    * The constructor for this class, if we know what it is.
@@ -475,7 +514,7 @@ struct ClassInfo {
    * Note, unlike baseList, the order of the elements in this vector
    * is unspecified.
    */
-  std::vector<ClassInfo*> subclassList;
+  CompactVector<ClassInfo*> subclassList;
 
   /*
    * A vector of ClassInfo that encodes the inheritance hierarchy,
@@ -484,7 +523,7 @@ struct ClassInfo {
    * This is the list of base classes for this class in inheritance
    * order.
    */
-  std::vector<ClassInfo*> baseList;
+  CompactVector<ClassInfo*> baseList;
 
   /*
    * Property types for public static properties, declared on this exact class
@@ -768,10 +807,10 @@ SString Func::name() const {
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (const MethTabEntryPair* mte) { return mte->first; },
     [&] (FuncFamily* fa) -> SString {
-      if (fa->isCtor) return s_construct.get();
-      auto const name = fa->possibleFuncs.front()->first;
+      if (fa->isCtor()) return s_construct.get();
+      auto const name = fa->possibleFuncs()->front()->first;
       if (debug) {
-        for (DEBUG_ONLY auto const f : fa->possibleFuncs) {
+        for (DEBUG_ONLY auto const f : fa->possibleFuncs()) {
           assert(f->first->isame(name));
         }
       }
@@ -816,7 +855,7 @@ bool Func::mightReadCallerFrame() const {
     },
     [&](const MethTabEntryPair*) { return false; },
     [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs) {
+      for (auto const pf : fa->possibleFuncs()) {
         if (pf->second.func->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
@@ -850,7 +889,7 @@ bool Func::mightBeSkipFrame() const {
       return mte->second.func->attrs & AttrSkipFrame;
     },
     [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs) {
+      for (auto const pf : fa->possibleFuncs()) {
         if (pf->second.func->attrs & AttrSkipFrame) return true;
       }
       return false;
@@ -867,7 +906,7 @@ bool Func::couldHaveReifiedGenerics() const {
       return mte->second.func->isReified;
     },
     [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs) {
+      for (auto const pf : fa->possibleFuncs()) {
         if (pf->second.func->isReified) return true;
       }
       return false;
@@ -891,7 +930,7 @@ bool Func::mightCareAboutDynCalls() const {
         return !(mte->second.func->attrs & AttrDynamicallyCallable);
       },
       [&](FuncFamily* fa) {
-        for (auto const pf : fa->possibleFuncs) {
+        for (auto const pf : fa->possibleFuncs()) {
           if (!(pf->second.func->attrs & AttrDynamicallyCallable)) return true;
         }
         return false;
@@ -914,7 +953,7 @@ bool Func::mightBeBuiltin() const {
       return mte->second.func->attrs & AttrBuiltin;
     },
     [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs) {
+      for (auto const pf : fa->possibleFuncs()) {
         if (pf->second.func->attrs & AttrBuiltin) return true;
       }
       return false;
@@ -1001,7 +1040,6 @@ struct Index::IndexData {
    * all the ClassInfos that were created for X's dependencies.
    */
   std::vector<std::unique_ptr<ClassInfo>> allClassInfos;
-  std::vector<std::unique_ptr<FuncFamily>> funcFamilies;
 
   std::vector<FuncInfo> funcInfo;
 
@@ -1046,9 +1084,9 @@ struct Index::IndexData {
    */
   IfaceSlotMap ifaceSlotMap;
 
-  hphp_hash_map<
+  hphp_fast_map<
     const php::Class*,
-    std::vector<Type>
+    CompactVector<Type>
   > closureUseVars;
 
   bool useClassDependencies;
@@ -1064,6 +1102,20 @@ struct Index::IndexData {
    * bytecode could be modified while we do so.
    */
   ContextRetTyMap foldableReturnTypeMap;
+
+  /*
+   * Call-context sensitive return types are cached here.  This is not
+   * an optimization.
+   *
+   * The reason we need to retain this information about the
+   * calling-context-sensitive return types is that once the Index is
+   * frozen (during the final optimization pass), calls to
+   * lookup_return_type with a CallContext can't look at the bytecode
+   * bodies of functions other than the calling function.  So we need
+   * to know what we determined the last time we were alloewd to do
+   * that so we can return it again.
+   */
+  ContextRetTyMap contextualReturnTypes{};
 
   /*
    * Vector of class aliases that need to be added to the index when
@@ -1452,11 +1504,10 @@ bool build_class_properties(BuildClsInfo& info,
   return true;
 }
 
-auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
+void build_methods_for_iface(IndexData& data, ClassInfo* iface) {
   std::vector<SString> names;
-  CompactVector<std::unique_ptr<res::Func::FuncFamily>> ret;
   auto const impls = data.ifaceImplementerMap.find(iface->cls);
-  if (impls == data.ifaceImplementerMap.end()) return ret;
+  if (impls == data.ifaceImplementerMap.end()) return;
 
   // We start by collecting the list of methods shared across all classes which
   // implement iface (including indirectly). And then add the public methods
@@ -1479,9 +1530,11 @@ auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
   hphp_fast_set<SString> added;
 
   auto add_method = [&] (SString name) {
-    res::Func::FuncFamily ff;
+    res::Func::FuncFamily::PFuncVec funcs;
+    bool containsInterceptables = false;
+
     hphp_hash_set<const php::Func*> seen;
-    auto& funcs = ff.possibleFuncs;
+
     for (auto cinfo : impls->second) {
       assertx(!(cinfo->cls->attrs & AttrInterface));
 
@@ -1503,7 +1556,7 @@ auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
       if (mte->second.hasPrivateAncestor) return;
 
       if (mte->second.attrs & AttrInterceptable) {
-        ff.containsInterceptables = true;
+        containsInterceptables = true;
       }
 
       // Avoid adding duplicate entries to the list
@@ -1511,10 +1564,15 @@ auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
     }
 
     if (!funcs.empty()) {
-      auto ffp = std::make_unique<FuncFamily>(std::move(ff));
-      iface->methodFamilies.emplace(name, ffp.get());
+      funcs.shrink_to_fit();
+      iface->methodFamilies.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(name),
+        std::forward_as_tuple(std::move(funcs),
+                              containsInterceptables,
+                              false)
+      );
       added.emplace(name);
-      ret.push_back(std::move(ffp));
     }
   };
 
@@ -1530,26 +1588,19 @@ auto build_methods_for_iface(IndexData& data, ClassInfo* iface) {
       );
     }
   }
-  return ret;
+  return;
 }
 
 void build_iface_methods(IndexData& data) {
   trace_time tracer("build interface methods");
-  auto families = parallel::map(
+  parallel::for_each(
     data.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& info) ->
-      CompactVector<std::unique_ptr<res::Func::FuncFamily>> {
+    [&] (const std::unique_ptr<ClassInfo>& info) {
       if (info->cls->attrs & AttrInterface) {
-        return build_methods_for_iface(data, info.get());
+        build_methods_for_iface(data, info.get());
       }
-      return {};
     }
   );
-  for (auto &fams : families) {
-    for (auto &ff : fams) {
-      data.funcFamilies.push_back(std::move(ff));
-    }
-  }
 }
 
 /*
@@ -2115,20 +2166,32 @@ std::unique_ptr<php::Func> clone_meth_helper(
     return true;
   };
 
-  for (auto& b : cloneMeth->blocks) {
-    for (auto& bc : b->hhbcs) {
+  hphp_fast_map<size_t, hphp_fast_map<size_t, uint32_t>> updates;
+  for (size_t bid = 0; bid < cloneMeth->blocks.size(); bid++) {
+    auto const b = cloneMeth->blocks[bid].get();
+    for (size_t ix = 0; ix < b->hhbcs.size(); ix++) {
+      auto const& bc = b->hhbcs[ix];
       switch (bc.op) {
-        case Op::CreateCl:
-          if (!recordClosure(&bc.CreateCl.arg2)) return nullptr;
+        case Op::CreateCl: {
+          auto clsId = bc.CreateCl.arg2;
+          if (!recordClosure(&clsId)) return nullptr;
+          updates[bid][ix] = clsId;
           break;
+        }
         case Op::DefCls:
         case Op::DefClsNop:
-        case Op::NewObjI:
-        case Op::DefFunc:
           return nullptr;
         default:
           break;
       }
+    }
+  }
+
+  for (auto elm : updates) {
+    auto& cblk = cloneMeth->blocks[elm.first];
+    auto const blk = cblk.mutate();
+    for (auto const& ix : elm.second) {
+      blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
     }
   }
 
@@ -2479,6 +2542,7 @@ void resolve_combinations(NamingEnv& env,
       ITRACE(3, "          uses: {}\n", trait->cls->name);
     }
   }
+  cinfo->baseList.shrink_to_fit();
   env.index.classInfo.emplace(cls->name, cinfo.get());
   env.index.allClassInfos.push_back(std::move(cinfo));
 }
@@ -2563,38 +2627,37 @@ void compute_subclass_list(IndexData& index) {
       compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
     }
   }
-  if (fixupTraits) {
-    // traits can be reached by multiple paths, so we need to uniquify
-    // their subclassLists.
-    for (auto& cinfo : index.allClassInfos) {
-      if (cinfo->cls->attrs & AttrTrait) {
-        auto& sub = cinfo->subclassList;
-        std::sort(begin(sub), end(sub));
-        sub.erase(
-          std::unique(begin(sub), end(sub)),
-          end(sub)
-        );
-      }
+
+  for (auto& cinfo : index.allClassInfos) {
+    auto& sub = cinfo->subclassList;
+    if (fixupTraits && cinfo->cls->attrs & AttrTrait) {
+      // traits can be reached by multiple paths, so we need to uniquify
+      // their subclassLists.
+      std::sort(begin(sub), end(sub));
+      sub.erase(
+        std::unique(begin(sub), end(sub)),
+        end(sub)
+      );
     }
+    sub.shrink_to_fit();
   }
 }
 
 void define_func_family(IndexData& index, ClassInfo* cinfo,
                         SString name, const MethTabEntryPair* mte) {
-  index.funcFamilies.push_back(std::make_unique<FuncFamily>());
-  auto const family = index.funcFamilies.back().get();
-  family->isCtor = mte == cinfo->ctor;
-  auto& funcs = family->possibleFuncs;
+  FuncFamily::PFuncVec funcs{};
+  auto containsInterceptables = false;
+  auto const isCtor = mte == cinfo->ctor;
   for (auto& cleaf : cinfo->subclassList) {
     auto const leafFn = [&] () -> const MethTabEntryPair* {
-      if (family->isCtor) return cleaf->ctor;
+      if (isCtor) return cleaf->ctor;
       auto const leafFnIt = cleaf->methods.find(name);
       if (leafFnIt == end(cleaf->methods)) return nullptr;
       return mteFromIt(leafFnIt);
     }();
     if (!leafFn) continue;
     if (leafFn->second.func->attrs & AttrInterceptable) {
-      family->containsInterceptables = true;
+      containsInterceptables = true;
     }
     funcs.push_back(leafFn);
   }
@@ -2639,8 +2702,15 @@ void define_func_family(IndexData& index, ClassInfo* cinfo,
    * every FuncFamily we create here is non-empty.
    */
   always_assert(!funcs.empty());
+  funcs.shrink_to_fit();
 
-  cinfo->methodFamilies.emplace(name, family);
+  cinfo->methodFamilies.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(name),
+    std::forward_as_tuple(std::move(funcs),
+                          containsInterceptables,
+                          isCtor)
+  );
 }
 
 void define_func_families(IndexData& index) {
@@ -3117,6 +3187,17 @@ void check_invariants(const ClassInfo* cinfo) {
     // ones.
     always_assert(!info.thisHas || info.derivedHas);
   }
+
+  // Every FuncFamily is non-empty and contain functions with the same
+  // name (unless its a family of ctors).
+  for (auto const& mfam: cinfo->methodFamilies) {
+    always_assert(!mfam.second.possibleFuncs()->empty());
+    if (mfam.second.isCtor()) continue;
+    auto const name = mfam.second.possibleFuncs()->front()->first;
+    for (auto const pf : mfam.second.possibleFuncs()) {
+      always_assert(pf->first->isame(name));
+    }
+  }
 }
 
 void check_invariants(IndexData& data) {
@@ -3136,17 +3217,6 @@ void check_invariants(IndexData& data) {
     }
   }
 
-  // Every FuncFamily is non-empty and contain functions with the same
-  // name.
-  for (auto& ffam : data.funcFamilies) {
-    always_assert(!ffam->possibleFuncs.empty());
-    if (ffam->isCtor) continue;
-    auto const name = ffam->possibleFuncs.front()->first;
-    for (auto const pf : ffam->possibleFuncs) {
-      always_assert(pf->first->isame(name));
-    }
-  }
-
   for (auto& cinfo : data.allClassInfos) {
     check_invariants(cinfo.get());
   }
@@ -3154,12 +3224,11 @@ void check_invariants(IndexData& data) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type context_sensitive_return_type(const Index& index,
-                                   FuncInfo* finfo,
+Type context_sensitive_return_type(IndexData& data,
                                    CallContext callCtx) {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
-
+  auto const finfo = func_info(data, callCtx.callee);
   auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
 
   auto checkParam = [&] (int i) {
@@ -3173,7 +3242,8 @@ Type context_sensitive_return_type(const Index& index,
           const_cast<php::Func*>(finfo->func),
           finfo->func->cls
         };
-        auto t = loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
+        auto t = loosen_dvarrayness(
+          data.m_index->lookup_constraint(ctx, constraint));
         if (!callCtx.args[i].moreRefined(t)) return true;
         if (!callCtx.args[i].equivalentlyRefined(t)) return true;
         return false;
@@ -3213,19 +3283,17 @@ Type context_sensitive_return_type(const Index& index,
     return returnType.subtypeOf(BUnc) ? ty : loosen_staticness(ty);
   };
 
-  if (index.frozen()) {
+  {
     ContextRetTyMap::const_accessor acc;
-    if (finfo->contextualReturnTypes.find(acc, callCtx)) {
-      return maybe_loosen_staticness(acc->second);
+    if (data.contextualReturnTypes.find(acc, callCtx)) {
+      if (data.frozen || acc->second == TBottom || is_scalar(acc->second)) {
+        return maybe_loosen_staticness(acc->second);
+      }
     }
-    return returnType;
   }
 
-  ContextRetTyMap::accessor acc;
-  if (finfo->contextualReturnTypes.insert(acc, callCtx)) {
-    acc->second = TTop;
-  } else if (acc->second == TBottom || is_scalar(acc->second)) {
-    return maybe_loosen_staticness(acc->second);
+  if (data.frozen) {
+    return returnType;
   }
 
   auto contextType = [&] {
@@ -3238,7 +3306,7 @@ Type context_sensitive_return_type(const Index& index,
       finfo->func->cls
     };
     auto const ty =
-      analyze_func_inline(index, calleeCtx,
+      analyze_func_inline(*data.m_index, calleeCtx,
                           callCtx.context, callCtx.args).inferredReturn;
     return return_with_context(ty, callCtx.context);
   }();
@@ -3253,7 +3321,9 @@ Type context_sensitive_return_type(const Index& index,
   auto ret = intersection_of(std::move(returnType),
                              std::move(contextType));
 
-  if (ret.strictSubtypeOf(acc->second)) {
+  ContextRetTyMap::accessor acc;
+  if (data.contextualReturnTypes.insert(acc, callCtx) ||
+      ret.strictSubtypeOf(acc->second)) {
     acc->second = ret;
   }
 
@@ -3382,9 +3452,7 @@ PublicSPropEntry lookup_public_static_impl(
     return PublicSPropEntry {
       union_of(
         knownClsPart->inferredType,
-        adjust_type_for_prop(
-          *data.m_index, *knownCInfo->cls, knownClsPart->tc, *unkPart
-        )
+        *unkPart
       ),
       knownClsPart->initializerType,
       nullptr,
@@ -4017,7 +4085,20 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
   return resolve_class(ctx, ctx.cls->parentName);
 }
 
-Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
+Index::ResolvedInfo<folly::Optional<res::Class>>
+Index::resolve_type_name(SString inName) const {
+  auto const res = resolve_type_name_internal(inName);
+  return {
+    res.type,
+    res.nullable,
+    res.value.isNull()
+      ? folly::none
+      : folly::make_optional(res::Class{this, res.value})
+  };
+}
+
+Index::ResolvedInfo<Either<SString,ClassInfo*>>
+Index::resolve_type_name_internal(SString inName) const {
   folly::Optional<hphp_fast_set<const void*>> seen;
 
   auto nullable = false;
@@ -4092,7 +4173,7 @@ struct Index::ConstraintResolution {
 Index::ConstraintResolution Index::resolve_class_or_type_alias(
   const Context& ctx, SString name, const Type& candidate) const {
 
-  auto const res = resolve_type_name(name);
+  auto const res = resolve_type_name_internal(name);
 
   if (res.nullable && candidate.subtypeOf(BInitNull)) return TInitNull;
 
@@ -4187,12 +4268,12 @@ res::Func Index::resolve_method(Context ctx,
   if (cinfo->cls->attrs & AttrInterface) {
     auto methIt = cinfo->methodFamilies.find(name);
     if (methIt == end(cinfo->methodFamilies)) return name_only();
-    if (methIt->second->possibleFuncs.size() == 1) {
-      return res::Func { this, methIt->second->possibleFuncs[0] };
+    if (methIt->second.possibleFuncs()->size() == 1) {
+      return res::Func { this, methIt->second.possibleFuncs()->front() };
     }
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
-    return res::Func { this, methIt->second };
+    return res::Func { this, &methIt->second };
   }
 
   /*
@@ -4359,10 +4440,10 @@ res::Func Index::resolve_method(Context ctx,
       if (famIt == end(cinfo->methodFamilies)) {
         return name_only();
       }
-      if (famIt->second->containsInterceptables) {
+      if (famIt->second.containsInterceptables()) {
         return name_only();
       }
-      return res::Func { this, famIt->second };
+      return res::Func { this, &famIt->second };
     }
   }
   not_reached();
@@ -4382,8 +4463,8 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
 
   auto const famIt = cinfo->methodFamilies.find(s_construct.get());
   if (famIt == end(cinfo->methodFamilies)) return folly::none;
-  if (famIt->second->containsInterceptables) return folly::none;
-  return res::Func { this, famIt->second };
+  if (famIt->second.containsInterceptables()) return folly::none;
+  return res::Func { this, &famIt->second };
 }
 
 template<class FuncRange>
@@ -4432,7 +4513,7 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   return resolve_func_helper(funcs, name);
 }
 
-std::pair<res::Func, folly::Optional<res::Func>>
+std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
 Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
                              SString fallbackName) const {
   assert(!needsNSNormalization(nsName));
@@ -4455,9 +4536,11 @@ Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
   }
 
   assert(RuntimeOption::RepoAuthoritative);
-  return begin(r2) == end(r2)
-    ? std::make_pair(resolve_func_helper(r1, nsName), folly::none)
-    : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);
+  if (begin(r2) == end(r2)) {
+    return std::make_pair(resolve_func_helper(r1, nsName), folly::none);
+  } else {
+    return std::make_pair(folly::none, resolve_func_helper(r2, fallbackName));
+  }
 }
 
 /*
@@ -4546,6 +4629,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfPersistentArray:
       case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
+      case KindOfClsMeth:      return TClsMeth;
       case KindOfObject:
         return resolve_class_or_type_alias(ctx, name, candidate);
       case KindOfUninit:
@@ -4644,7 +4728,7 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
 bool Index::could_have_reified_type(const TypeConstraint& tc) const {
   if (!tc.isObject()) return false;
   auto const name = tc.typeName();
-  auto const resolved = resolve_type_name(name);
+  auto const resolved = resolve_type_name_internal(name);
   if (resolved.type != AnnotType::Object) return false;
   res::Class rcls{this, resolved.value};
   return rcls.couldHaveReifiedGenerics();
@@ -4668,7 +4752,7 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     [&](const MethTabEntryPair* mte) { return supportsAER(mte->second.func); },
     [&](FuncFamily* fam) -> folly::Optional<bool> {
       auto ret = folly::Optional<bool>{};
-      for (auto const pf : fam->possibleFuncs) {
+      for (auto const pf : fam->possibleFuncs()) {
         // Abstract functions are never called.
         if (pf->second.attrs & AttrAbstract) continue;
         auto const val = supportsAER(pf->second.func);
@@ -4773,6 +4857,10 @@ Type Index::lookup_foldable_return_type(Context ctx,
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
 
+  // Don't fold functions when staticness mismatches
+  if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TTop;
+  if (!(func->attrs & AttrStatic) && ctxType.couldBe(TCls)) return TTop;
+
   auto const& finfo = *func_info(*m_data, func);
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
     return finfo.returnTy;
@@ -4780,7 +4868,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
   add_dependency(*m_data, func, ctx, Dep::ReturnTy);
 
   auto const calleeCtx = CallContext {
-    { func->unit, const_cast<php::Func*>(func), func->cls },
+    func,
     std::move(args),
     std::move(ctxType)
   };
@@ -4828,12 +4916,14 @@ Type Index::lookup_foldable_return_type(Context ctx,
     ++interp_nesting_level;
     SCOPE_EXIT { --interp_nesting_level; };
 
-    auto const fa = analyze_func_inline(*this,
-                                        calleeCtx.caller,
-                                        calleeCtx.context,
-                                        calleeCtx.args,
-                                        CollectionOpts::TrackConstantArrays |
-                                        CollectionOpts::EffectFreeOnly);
+    auto const fa = analyze_func_inline(
+      *this,
+      Context { func->unit, const_cast<php::Func*>(func), func->cls },
+      calleeCtx.context,
+      calleeCtx.args,
+      CollectionOpts::TrackConstantArrays |
+      CollectionOpts::EffectFreeOnly
+    );
     return fa.effectFree ? fa.inferredReturn : TTop;
   }();
 
@@ -4868,7 +4958,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     },
     [&](FuncFamily* fam) {
       auto ret = TBottom;
-      for (auto const pf : fam->possibleFuncs) {
+      for (auto const pf : fam->possibleFuncs()) {
         add_dependency(*m_data, pf->second.func, ctx, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) return TInitCell;
@@ -4878,39 +4968,44 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
     });
 }
 
-Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
+Type Index::lookup_return_type(Context caller,
+                               const CompactVector<Type>& args,
+                               const Type& context,
+                               res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
     [&](res::Func::FuncName) {
-      return lookup_return_type(callCtx.caller, rfunc);
+      return lookup_return_type(caller, rfunc);
     },
     [&](res::Func::MethodName) {
-      return lookup_return_type(callCtx.caller, rfunc);
+      return lookup_return_type(caller, rfunc);
     },
     [&](FuncInfo* finfo) {
-      add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
-      return context_sensitive_return_type(*this, finfo, callCtx);
+      add_dependency(*m_data, finfo->func, caller, Dep::ReturnTy);
+      return context_sensitive_return_type(*m_data,
+                                           { finfo->func, args, context });
     },
     [&](const MethTabEntryPair* mte) {
-      add_dependency(*m_data, mte->second.func, callCtx.caller, Dep::ReturnTy);
+      add_dependency(*m_data, mte->second.func, caller, Dep::ReturnTy);
       auto const finfo = func_info(*m_data, mte->second.func);
       if (!finfo->func) return TInitCell;
-      return context_sensitive_return_type(*this, finfo, callCtx);
+      return context_sensitive_return_type(*m_data,
+                                           { finfo->func, args, context });
     },
     [&] (FuncFamily* fam) {
       auto ret = TBottom;
-      for (auto& pf : fam->possibleFuncs) {
-        add_dependency(*m_data, pf->second.func, callCtx.caller, Dep::ReturnTy);
+      for (auto& pf : fam->possibleFuncs()) {
+        add_dependency(*m_data, pf->second.func, caller, Dep::ReturnTy);
         auto const finfo = func_info(*m_data, pf->second.func);
         if (!finfo->func) ret |= TInitCell;
-        else ret |= return_with_context(finfo->returnTy, callCtx.context);
+        else ret |= return_with_context(finfo->returnTy, context);
       }
       return ret;
     }
   );
 }
 
-std::vector<Type>
+CompactVector<Type>
 Index::lookup_closure_use_vars(const php::Func* func,
                                bool move) const {
   assert(func->isClosureBody);
@@ -4919,7 +5014,7 @@ Index::lookup_closure_use_vars(const php::Func* func,
   if (!numUseVars) return {};
   auto const it = m_data->closureUseVars.find(func->cls);
   if (it == end(m_data->closureUseVars)) {
-    return std::vector<Type>(numUseVars, TGen);
+    return CompactVector<Type>(numUseVars, TGen);
   }
   if (move) return std::move(it->second);
   return it->second;
@@ -4938,7 +5033,6 @@ Type Index::lookup_return_type_and_clear(
   const php::Func* f) const {
   auto it = func_info(*m_data, f);
 
-  it->contextualReturnTypes = ContextRetTyMap{};
   it->localStaticTypes.clear();
 
   return std::move(it->returnTy);
@@ -4998,7 +5092,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     },
     [&] (FuncFamily* fam) {
       assert(RuntimeOption::RepoAuthoritative);
-      return prep_kind_from_set(fam->possibleFuncs, paramId);
+      return prep_kind_from_set(fam->possibleFuncs(), paramId);
     }
   );
 }
@@ -5505,7 +5599,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,
-                                    const std::vector<Type>& vars) {
+                                    const CompactVector<Type>& vars) {
   assert(is_closure(*cls));
 
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
@@ -5819,8 +5913,6 @@ void Index::cleanup_for_emit(folly::Baton<>* done) {
    * classInfos from lookup_public_static, so we can't clear either
    * member here.
    */
-
-  CLEAR(m_data->funcFamilies);
 
   CLEAR(m_data->dependencyMap);
   CLEAR(m_data->foldableReturnTypeMap);

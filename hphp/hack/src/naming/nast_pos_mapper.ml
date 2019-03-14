@@ -16,8 +16,8 @@ let rec expr f (p, e) =
 and expr_ f = function
   | Any -> Any
   | Array afl -> Array (List.map afl (afield f))
-  | Darray fl -> Darray (List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
-  | Varray el -> Varray (List.map el (expr f))
+  | Darray (tap, fl) -> Darray (tap, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | Varray (ta, el) -> Varray (ta, List.map el (expr f))
   | Shape sh -> Shape (shape f sh)
   | True -> True
   | False -> False
@@ -75,12 +75,10 @@ and expr_ f = function
     Xml (pstring f sid, attr_list f attrl, List.map el (expr f))
   | Unsafe_expr e -> Unsafe_expr (expr f e)
   | Callconv (kind, e) -> Callconv (kind, expr f e)
-  | Execution_operator (e) -> Execution_operator (List.map e (expr f))
-  | ValCollection (s, el) -> ValCollection (s, List.map el (expr f))
-  | KeyValCollection (s, fl) ->
-    KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | ValCollection (s, ta, el) -> ValCollection (s, ta, List.map el (expr f))
+  | KeyValCollection (s, tap, fl) ->
+    KeyValCollection (s, tap, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Omitted -> Omitted
-  | NewAnonClass (el1, el2, c) -> NewAnonClass (el1, el2, c)
   | Lfun f ->
     Errors.internal_error (fst f.f_name)
       "Nast_pos_mapper cannot handle lambdas";
@@ -89,6 +87,9 @@ and expr_ f = function
   | BracedExpr _
   | ParenthesizedExpr _
   | Import _ -> failwith "NAST should not contain these nodes"
+  | PU_atom s -> PU_atom s
+  | PU_identifier (cid, s1, s2) ->
+    PU_identifier (class_id f cid, s1, s2)
 
 and class_get_expr f = function
   | CGstring s -> CGstring (pstring f s)
@@ -137,6 +138,7 @@ and class_id_ f = function
 and hint f (p, h) = f p, hint_ f h
 
 and hint_ f = function
+  | Hnothing -> Hnothing
   | Hdynamic -> Hdynamic
   | Hany -> Hany
   | Hmixed -> Hmixed

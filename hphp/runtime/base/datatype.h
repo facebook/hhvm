@@ -76,6 +76,7 @@ namespace HPHP {
   DT(Int64,              6) \
   DT(Ref,                7) \
   DT(Double,             8) \
+  DT(ClsMeth,            9) \
   DT(Func,              10) \
   DT(Class,             12) \
 
@@ -118,7 +119,7 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
 auto constexpr kMaxDataType = dt_t(KindOfClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
-auto constexpr kMaxRefCountedDataType = dt_t(KindOfRef);
+auto constexpr kMaxRefCountedDataType = dt_t(KindOfClsMeth);
 
 /*
  * A DataType is a refcounted type if and only if it has this bit set.
@@ -350,6 +351,7 @@ constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }
 constexpr bool isClassType(DataType t) { return t == KindOfClass; }
+constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }
 
 constexpr int kHasPersistentMask = -128;
 

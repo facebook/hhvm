@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto string posix_strerror(int errno)
- * Description: Retrieve the system error message associated with the given errno. 
+ * Description: Retrieve the system error message associated with the given errno.
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_strerror() : usage variations ***\n";
@@ -53,7 +53,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -61,8 +61,8 @@ $values = array(
 // loop through each element of the array for errno
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      echo gettype( posix_strerror($value) )."\n";
+      echo "\nArg value $value\n";
+      try { echo gettype( posix_strerror($value) )."\n"; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

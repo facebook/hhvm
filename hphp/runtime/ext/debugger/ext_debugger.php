@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace __SystemLib {
 
@@ -52,4 +52,19 @@ namespace {
    */
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphp_debug_break(bool $condition = true): bool;
+
+  /* Customizes the behavior of the debugger by setting an option flag on or off
+   * @param string option - Name of the option to set, not case sensitive
+   * @param bool value - Value to set for the debugger option
+   * @return bool - New value of the debugger option
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debugger_set_option(string $option, bool $value): bool;
+
+  /* Queries the value of a debugger option
+   * @param string option - Name of the option to set, not case sensitive
+   * @return bool - Value of the debugger option
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debugger_get_option(string $option): bool;
 }

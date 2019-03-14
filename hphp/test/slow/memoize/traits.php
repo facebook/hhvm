@@ -14,30 +14,41 @@ function basic_test(string $class, string $fn): void {
 }
 
 echo "basic trait use\n";
-trait T {<<__Memoize>>public function test() {static $i = 0; return $i++;}}
+trait T {
+  private static $testIT = 0;
+  <<__Memoize>>public function test() {return self::$testIT++;}
+}
 class C {use T;}
 
 basic_test(C::class, 'test');
 
 echo "override method\n";
-trait TO {<<__Memoize>>public function test() {static $i = 1000; return $i++;}}
+trait TO {
+  private static $testITO = 1000;
+  <<__Memoize>>public function test() {return self::$testITO++;}
+}
 class CO {
   use TO;
-  <<__Memoize>>public function test() {static $i = 10; return $i++;}
+
+  private static $testICO = 10;
+  <<__Memoize>>public function test() {return self::$testICO++;}
 }
 
 basic_test(CO::class, 'test');
 
 echo "override meth with different sig\n";
 trait TDS {
+
+  private static $testITDS = 1000;
   <<__Memoize>>
-  public function test() {static $i = 1000; return $i++;}
+  public function test() {return self::$testITDS++;}
 }
 class CDS{
   use TDS;
+
+  private static $testICDS = 20;
   <<__Memoize>>public function test($a = 0) {
-    static $i = 20;
-    return $a + $i++;
+    return $a + self::$testICDS++;
   }
 }
 
@@ -61,7 +72,11 @@ echo $c->test(3).' ';
 echo $c->test(3)."\n";
 
 echo "static trait method\n";
-function inc() { static $i = 50; return $i++; }
+
+abstract final class IncStatics {
+  public static $i = 50;
+}
+function inc() { return IncStatics::$i++; }
 trait TS {
   <<__Memoize>> public static function testTraitStatic() { return inc(); }
 }

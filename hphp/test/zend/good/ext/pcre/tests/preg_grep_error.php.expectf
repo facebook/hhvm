@@ -3,15 +3,12 @@
 -- Testing preg_grep() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing preg_grep() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing preg_grep() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

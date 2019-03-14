@@ -23,7 +23,8 @@ let validate_classname (pos, hint) =
     | Aast.Habstr _
     | Aast.Haccess _
     | Aast.Hdynamic
-    | Aast.Hsoft _ ->
+    | Aast.Hsoft _
+    | Aast.Hnothing ->
       ()
     | Aast.Htuple _
     | Aast.Harray _
@@ -76,7 +77,8 @@ let rec check_hint env (pos, hint) =
   | Aast.Hdynamic
   | Aast.Hnonnull
   | Aast.Hmixed
-  | Aast.Hthis ->
+  | Aast.Hthis
+  | Aast.Hnothing ->
     ()
   | Aast.Hfun (_, _, hl, _, _, _, h, _) ->
     List.iter hl (check_hint env);

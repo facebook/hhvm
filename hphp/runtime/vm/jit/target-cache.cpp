@@ -268,6 +268,13 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
     auto const obj = ar->getThis();
     ar->setClass(cls);
     decRefObj(obj);
+
+    if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+      raise_notice(
+        "Static method %s should not be called on instance",
+        ar->func()->fullName()->data()
+      );
+    }
   }
 }
 
@@ -298,6 +305,13 @@ void readMagicOrStatic(Entry* mce,
   auto const obj = ar->getThis();
   ar->setClass(cls);
   decRefObj(obj);
+
+  if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+    raise_notice(
+      "Static method %s should not be called on instance",
+      ar->func()->fullName()->data()
+    );
+  }
 }
 
 template <bool fatal>
@@ -307,6 +321,13 @@ readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   auto const obj = ar->getThis();
   ar->setClass(cls);
   decRefObj(obj);
+
+  if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+    raise_notice(
+      "Static method %s should not be called on instance",
+      ar->func()->fullName()->data()
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

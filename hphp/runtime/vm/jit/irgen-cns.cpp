@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -56,6 +57,7 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     // TODO (T29639296)
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       break;
   }
   always_assert(false);

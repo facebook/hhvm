@@ -12,7 +12,7 @@ echo "*** Testing scandir() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing scandir() function with Zero arguments --\n";
-var_dump( scandir() );
+try { var_dump( scandir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test scandir with one more than the expected number of arguments
 echo "\n-- Testing scandir() function with more than expected no. of arguments --\n";
@@ -21,7 +21,7 @@ mkdir($dir);
 $sorting_order = 10;
 $context = stream_context_create();
 $extra_arg = 10;
-var_dump( scandir($dir, $sorting_order, $context, $extra_arg) );
+try { var_dump( scandir($dir, $sorting_order, $context, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===
 <?php error_reporting(0); ?>

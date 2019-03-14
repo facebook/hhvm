@@ -23,42 +23,32 @@ int(2)
 -- Iteration with start value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "" --
 int(2)
@@ -87,42 +77,32 @@ int(2)
 -- Iteration with start value as "" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "string" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "string" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "object" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with start value as "" --
 int(2)
@@ -135,8 +115,6 @@ int(2)
 -- Iteration with start value as "Resource id #%d" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

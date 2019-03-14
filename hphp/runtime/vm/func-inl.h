@@ -616,7 +616,7 @@ inline bool Func::isFoldable() const {
 }
 
 inline bool Func::isParamCoerceMode() const {
-  return attrs() & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull);
+  return nativeFuncPtr() != nullptr;
 }
 
 inline bool Func::supportsAsyncEagerReturn() const {

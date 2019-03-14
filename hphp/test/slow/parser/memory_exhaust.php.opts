@@ -1,1 +1,2 @@
 -vEval.HackCompilerVerboseErrors=0
+-vEval.EnablePHP=1

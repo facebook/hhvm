@@ -112,6 +112,8 @@ and _ ty_ =
    *)
   | Tmixed : decl ty_
 
+  | Tnothing : decl ty_
+
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany
   | Tnonnull
@@ -514,6 +516,7 @@ and class_type = {
   tc_sprops              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
+  (* the bool represents final constructor or __ConsistentConstruct *)
   tc_construct           : class_elt option * bool;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
@@ -530,6 +533,7 @@ and typeconst_type = {
   ttc_constraint  : decl ty option;
   ttc_type        : decl ty option;
   ttc_origin      : string;
+  ttc_enforceable : Pos.t * bool;
 }
 
 and enum_type = {

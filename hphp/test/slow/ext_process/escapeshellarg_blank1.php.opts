@@ -1,1 +1,2 @@
 -vEval.QuoteEmptyShellArg=true
+-vEval.EnablePHP=1

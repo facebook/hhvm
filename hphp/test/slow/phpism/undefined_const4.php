@@ -6,5 +6,5 @@ namespace {
 
 namespace Foo {
   use const Bar\SOME_CONST;
-  var_dump(SOME_CONST);
+  \var_dump(SOME_CONST);
 }

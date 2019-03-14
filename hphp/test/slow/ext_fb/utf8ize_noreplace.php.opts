@@ -1,2 +1,3 @@
 -vServer.Utf8izeReplace=0
 
+-vEval.EnablePHP=1

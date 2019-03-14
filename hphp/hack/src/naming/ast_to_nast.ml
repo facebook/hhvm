@@ -28,6 +28,7 @@ type class_body =
   c_attributes     : Aast.class_attr list                 ;
   c_xhp_children   : (pos * Aast.xhp_child) list          ;
   c_xhp_attrs      : Aast.xhp_attr list                   ;
+  c_pu_enums       : Aast.pu_enum list                    ;
 }
 
 let make_empty_class_body = {
@@ -47,6 +48,7 @@ let make_empty_class_body = {
   c_attributes = [];
   c_xhp_children = [];
   c_xhp_attrs = [];
+  c_pu_enums = [];
 }
 
 let on_list f l = List.map f l
@@ -59,6 +61,8 @@ let on_list_append_acc acc f l =
 let optional f = function
   | None -> None
   | Some x -> Some (f x)
+
+let both f (p1, p2) = (f p1, f p2)
 
 let rec on_variadic_hint h =
   match h with
@@ -190,6 +194,10 @@ and on_class_elt trait_or_interface body elt : class_body =
   | TypeConst tc ->
     let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
     { body with c_typeconsts = typeconsts; }
+  | ClassEnum (pu_is_final, pu_name, fields) ->
+    let pu_enum = on_pu pu_name pu_is_final fields in
+    let pu_enums = pu_enum :: body.c_pu_enums in
+    { body with c_pu_enums = pu_enums }
 
 and on_as_expr aw e : Aast.as_expr =
   match aw, e with
@@ -213,9 +221,9 @@ and on_awaitall_expr (e1, e2) =
   let e2 = on_expr e2 in
   let e1 =
     match e1 with
-    | Some e ->
-      let e = Pos.none, Local_id.make_unscoped (snd e) in
-      Some (Pos.none, Aast.Lvar e)
+    | Some (pos, name) ->
+      let e = pos, Local_id.make_unscoped name in
+      Some e
     | None -> None
   in
   (e1, e2)
@@ -225,15 +233,20 @@ and on_xhp_attribute a : Aast.xhp_attribute =
   | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
   | Xhp_spread e -> Aast.Xhp_spread (on_expr e)
 
-and on_targ (h, r) : Aast.targ = (on_hint h, r)
+and on_targ h : Aast.targ = on_hint h
+
+and on_collection_targ targ = match targ with
+  | Some CollectionTKV (tk, tv) -> Some (Aast.CollectionTKV (on_targ tk, on_targ tv))
+  | Some CollectionTV tv -> Some (Aast.CollectionTV (on_targ tv))
+  | None -> None
 
 and on_expr (p, e) : Aast.expr =
   let node = match e with
   | Array al -> Aast.Array (on_list on_afield al)
-  | Varray el -> Aast.Varray (on_list on_expr el)
-  | Darray d -> Aast.Darray (on_list on_darray_element d)
+  | Varray (ta, el) -> Aast.Varray (optional on_targ ta, on_list on_expr el)
+  | Darray (tap, d) -> Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
   | Shape s -> Aast.Shape (on_list on_shape s)
-  | Collection (id, al) -> Aast.Collection (id, on_list on_afield al)
+  | Collection (id, tal, al) -> Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
   | Null -> Aast.Null
   | True -> Aast.True
   | False -> Aast.False
@@ -281,8 +294,6 @@ and on_expr (p, e) : Aast.expr =
       on_list on_expr el2,
       p
     )
-  | NewAnonClass (el1, el2, c) ->
-    Aast.NewAnonClass (on_list on_expr el1, on_list on_expr el2, on_class c)
   | Efun (f, use_list) ->
     let ids = List.map
       (fun ((p, id), is_ref) ->
@@ -299,7 +310,7 @@ and on_expr (p, e) : Aast.expr =
   | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
-  | Execution_operator el -> Aast.Execution_operator (on_list on_expr el)
+  | PU_atom id -> Aast.PU_atom (snd id)
   in
   (p, node)
 
@@ -473,8 +484,6 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
       Errors.abstract_with_typeconst tc.tconst_name;
       None
     | h, _ -> h in
-  if tc.tconst_tparams <> []
-  then Errors.no_tparams_on_type_consts (fst tc.tconst_name);
   Aast.{
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;
@@ -589,6 +598,34 @@ and on_method ?(trait_or_interface=false) m : Aast.method_ =
     m_doc_comment     = m.m_doc_comment;
   }
 
+and on_pu_mapping pum_atom mappings =
+  let rec aux types exprs = function
+    | (PUMappingType (id, hint)) :: tl ->
+      aux ((id, on_hint hint) :: types) exprs tl
+    | (PUMappingID (id, expr)) :: tl ->
+      aux types ((id, on_expr expr) :: exprs) tl
+    | [] -> (List.rev types, List.rev exprs) in
+  let (pum_types, pum_exprs) = aux [] [] mappings in
+  Aast.{ pum_atom; pum_types; pum_exprs }
+
+and on_pu pu_name pu_is_final fields =
+  let rec aux case_types case_values members = function
+    | (PUCaseType id) :: tl ->
+      aux (id :: case_types) case_values members tl
+    | (PUCaseTypeExpr (h, id)) :: tl ->
+      aux case_types ((id, on_hint h) :: case_values) members tl
+    | (PUAtomDecl (id, maps)) :: tl ->
+      let member = on_pu_mapping id maps in
+      aux case_types case_values (member :: members) tl
+    | [] -> (List.rev case_types, List.rev case_values, List.rev members) in
+  let (pu_case_types, pu_case_values, pu_members) = aux [] [] [] fields in
+  Aast.{ pu_name
+       ; pu_is_final
+       ; pu_case_types
+       ; pu_case_values
+       ; pu_members
+       }
+
 and on_class_body trait_or_interface cb =
   let reversed_body = List.fold_left (on_class_elt trait_or_interface) make_empty_class_body cb in
   { reversed_body with
@@ -607,6 +644,7 @@ and on_class_body trait_or_interface cb =
     c_attributes = List.rev reversed_body.c_attributes;
     c_xhp_children = List.rev reversed_body.c_xhp_children;
     c_xhp_attrs = List.rev reversed_body.c_xhp_attrs;
+    c_pu_enums = List.rev reversed_body.c_pu_enums;
   }
 
 and on_class c : Aast.class_ =
@@ -649,6 +687,7 @@ and on_class c : Aast.class_ =
       c_namespace             = c.c_namespace;
       c_enum                  = optional on_enum c.c_enum;
       c_doc_comment           = c.c_doc_comment;
+      c_pu_enums              = body.c_pu_enums
     }
   in
   named_class
@@ -681,7 +720,6 @@ and on_constant (c : gconst) : Aast.gconst =
     cst_name = c.cst_name;
     cst_type = optional on_hint c.cst_type;
     cst_value = Some (on_expr c.cst_value);
-    cst_is_define = (c.cst_kind = Cst_define);
     cst_namespace = c.cst_namespace;
   }
 

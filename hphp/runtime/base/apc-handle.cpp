@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 namespace HPHP {
 
@@ -137,6 +138,17 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       // Resources to the empty array during various serialization operations,
       // which does not match Zend behavior. We should fix this.
       return APCArray::MakeSharedEmptyArray();
+    case KindOfClsMeth: {
+      raiseClsMethToVecWarningHelper();
+      auto arr = clsMethToVecHelper(val(cell).pclsmeth);
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        assertx(arr->isVecArray());
+        return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
+      } else {
+        assertx(arr->isPHPArray());
+        return APCArray::MakeSharedArray(arr.detach(), level, unserializeObj);
+      }
+    }
 
     case KindOfRef:
       return {nullptr, 0};

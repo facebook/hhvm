@@ -1,6 +1,6 @@
 Linearization for class \C:
-[\C(child)]
+[\C]
 Linearization for class \D:
-[\D(child), \C<int,T3>(parent)]
+[\D, \C<int,T3>]
 Linearization for class \E:
-[\E(child), \D<string>(parent), \C<int,string>(parent)]
+[\E, \D<string>, \C<int,string>]

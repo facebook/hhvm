@@ -55,6 +55,7 @@ module ErrorString = struct
     | Tany               -> "an untyped value"
     | Terr               -> "a type error"
     | Tdynamic           -> "a dynamic value"
+    | Tnothing           -> "a missing value"
     | Tunresolved l      -> unresolved l
     | Tarray (x, y)      -> array (x, y)
     | Tdarray (_, _)     -> darray
@@ -205,6 +206,7 @@ module Suggest = struct
     | Terr                   -> "..."
     | Tmixed                 -> "mixed"
     | Tnonnull               -> "nonnull"
+    | Tnothing               -> "nothing"
     | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
     | Toption (_, Tnonnull)  -> "mixed"
@@ -317,7 +319,11 @@ module Full = struct
     List.map fields f_field
 
   let rec ty: type a. _ -> _ -> _ -> a ty -> Doc.t =
-    fun to_doc st env (_, x) -> ty_ to_doc st env x
+    fun to_doc st env (r, x) ->
+      let d = ty_ to_doc st env x in
+      match r with
+      | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
+      | _ -> d
 
   and ty_: type a. _ -> _ -> _ -> a ty_ -> Doc.t =
     fun to_doc st env x ->
@@ -329,6 +335,7 @@ module Full = struct
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
+    | Tnothing -> text "nothing"
     | Tdarray (x, y) -> list "darray<" k [x; y] ">"
     | Tvarray x -> list "varray<" k [x] ">"
     | Tvarray_or_darray x -> list "varray_or_darray<" k [x] ">"
@@ -440,7 +447,7 @@ module Full = struct
       (* Type is nullable single type *)
       | _, [ty] ->
         if show_verbose env
-          then Concat [text "(null|"; k ty; text ")"]
+          then Concat [text "(null |"; k ty; text ")"]
           else Concat [text "?"; k ty]
       (* Type is nullable unresolved type *)
       | _, _ ->
@@ -575,6 +582,7 @@ module Full = struct
           | Ast.Constraint_as -> "as"
           | Ast.Constraint_super -> "super"
           | Ast.Constraint_eq -> "="
+          | Ast.Constraint_pu_from -> "from"
           );
         Space;
         ty to_doc st env cty
@@ -764,6 +772,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "nonnull"
   | Tdynamic ->
     obj @@ kind "dynamic"
+  | Tnothing ->
+    obj @@ kind "nothing"
   | Tgeneric s ->
     obj @@ kind "generic" @ is_array false @ name s
   | Tabstract (AKgeneric s, opt_ty) ->
@@ -1345,6 +1355,7 @@ module PrintClass = struct
     | (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl tcopt ty)
     | (Ast.Constraint_eq, ty) -> "= " ^ (Full.to_string_decl tcopt ty)
     | (Ast.Constraint_super, ty) -> "super " ^ (Full.to_string_decl tcopt ty)
+    | (Ast.Constraint_pu_from, ty) -> "from " ^ (Full.to_string_decl tcopt ty)
 
   let variance = function
     | Ast.Covariant -> "+"
@@ -1400,6 +1411,7 @@ module PrintClass = struct
     ttc_constraint = tc_constraint;
     ttc_type = tc_type;
     ttc_origin = origin;
+    ttc_enforceable = (_, enforceable);
   } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl tcopt x in
@@ -1413,7 +1425,8 @@ module PrintClass = struct
       | None -> ""
       | Some x -> " = "^ty x
     in
-    name^constraint_^type_^" (origin:"^origin^")"
+    name^constraint_^type_^" (origin:"^origin^")" ^
+      (if enforceable then " (enforceable)" else "")
 
   let typeconsts tcopt m =
     Sequence.fold m ~init:"" ~f:begin fun acc (_, v) ->

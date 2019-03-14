@@ -72,7 +72,7 @@ and stmt =
   | Goto of pstring
   | Static_var of expr list
   | Global_var of expr list
-  | Awaitall of pos * ((expr option * expr) list)
+  | Awaitall of pos * ((lid option * expr) list)
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
@@ -117,11 +117,13 @@ and class_id_ =
 and expr = expr_annotation * expr_
 and expr_ =
   | Array of afield list
-  | Darray of (expr * expr) list
-  | Varray of expr list
+  | Darray of (targ * targ) option * (expr * expr) list
+  | Varray of targ option * expr list
   | Shape of (shape_field_name * expr) list
-  | ValCollection of vc_kind * expr list (* TODO: T38184446 Consolidate collections in AAST *)
-  | KeyValCollection of kvc_kind * field list (* TODO: T38184446 Consolidate collections in AAST *)
+    (* TODO: T38184446 Consolidate collections in AAST *)
+  | ValCollection of vc_kind * targ option * expr list
+    (* TODO: T38184446 Consolidate collections in AAST *)
+  | KeyValCollection of kvc_kind * (targ * targ) option * field list
   | Null
   | This
   | True
@@ -167,12 +169,11 @@ and expr_ =
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
-  | Execution_operator of expr list
-  | NewAnonClass of expr list * expr list * class_
   (* We'll add this for now, but later on we should go straight to an Efun *)
   | Lfun of fun_
   | Import of import_flavor * expr
-  | Collection of sid * afield list (* TODO: T38184446 Consolidate collections in AAST *)
+  (* TODO: T38184446 Consolidate collections in AAST *)
+  | Collection of sid * collection_targ option * afield list
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   (* None of these constructors exist in the AST *)
@@ -186,6 +187,8 @@ and expr_ =
   | Pair of expr * expr
   | Assert of assert_expr
   | Typename of sid
+  | PU_atom of string
+  | PU_identifier of class_id * pstring * pstring
   | Any
 
 and class_get_expr =
@@ -336,6 +339,7 @@ and class_ = {
   c_user_attributes: user_attribute list;
   c_file_attributes: file_attribute list;
   c_enum           : enum_ option     ;
+  c_pu_enums       : pu_enum list     ;
   c_doc_comment    : string option    ;
 }
 
@@ -439,8 +443,21 @@ and gconst = {
   cst_name: sid;
   cst_type: hint option;
   cst_value: expr option;
-  cst_is_define: bool;
   cst_namespace: nsenv;
+}
+
+and pu_enum = {
+  pu_name: sid;
+  pu_is_final: bool;
+  pu_case_types: sid list;
+  pu_case_values: (sid * hint) list;
+  pu_members: pu_member list;
+}
+
+and pu_member = {
+  pum_atom: sid;
+  pum_types: (sid * hint) list;
+  pum_exprs: (sid * expr) list;
 }
 
 and fun_def = fun_
@@ -516,16 +533,16 @@ let expr_to_string expr =
   | Xml _  -> "Xml"
   | Unsafe_expr _ -> "Unsafe_expr"
   | Callconv _ -> "Callconv"
-  | Execution_operator _ -> "Execution_operator"
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
   | Omitted -> "Omitted"
-  | NewAnonClass _ -> "NewAnonClass"
   | Lfun _ -> "Lfun"
   | Import _ -> "Import"
   | Collection _ -> "Collection"
   | BracedExpr _ -> "BracedExpr"
   | ParenthesizedExpr _ -> "ParenthesizedExpr"
+  | PU_atom _ -> "PU_atom"
+  | PU_identifier _ -> "PU_identifier"
 
 end (* of AnnotatedAST functor *)

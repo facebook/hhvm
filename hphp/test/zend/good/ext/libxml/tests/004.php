@@ -13,7 +13,7 @@ $ctxs = array(
 
 
 foreach ($ctxs as $ctx) {
-	var_dump(libxml_set_streams_context($ctx));
+	try { var_dump(libxml_set_streams_context($ctx)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	$dom = new DOMDocument();
 	var_dump($dom->load(dirname(__FILE__).'/test.xml'));
 }

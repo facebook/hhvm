@@ -12,8 +12,8 @@ class classA
 }
 
 echo "\n-- Incorrect number of arguments --\n";
-hexdec();
-hexdec('0x123abc',true);
+try { hexdec(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { hexdec('0x123abc',true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Incorrect input --\n";
 hexdec(new classA());

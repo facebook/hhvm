@@ -79,7 +79,7 @@ echo "\n--- Testing exif_tagname() by supplying different values for 'index' arg
 $counter = 1;
 foreach($values as $index) {
   echo "-- Iteration $counter --\n";
-  var_dump( exif_tagname($index) );
+  try { var_dump( exif_tagname($index) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

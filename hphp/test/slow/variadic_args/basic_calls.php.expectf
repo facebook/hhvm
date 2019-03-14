@@ -167,28 +167,13 @@ array(0) {
 }
 bool(true)
 bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* variadic_some
-bool(false)
-bool(true)
-array(0) {
-}
-bool(true)
-bool(true)
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * variadic_hack_only
 int(0)
 array(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* variadic_hack_some
-int(0)
-array(0) {
-}
+string(57) "variadic_hack_some() expects exactly 1 parameter, 0 given"
 
 ========= static methods ==========
 
@@ -197,24 +182,12 @@ array(0) {
 }
 bool(true)
 bool(true)
-
-Warning: st_variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* C::st_variadic_some
-array(0) {
-}
-bool(true)
-bool(true)
+string(56) "st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
 array(0) {
 }
-
-Warning: st_variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* C::st_variadic_hack_some
-array(0) {
-}
+string(60) "st_variadic_hack_some() expects exactly 1 parameter, 0 given"
 
 ========= instance methods ==========
 
@@ -223,22 +196,9 @@ array(0) {
 }
 bool(true)
 bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* C::variadic_some
-bool(false)
-array(0) {
-}
-bool(true)
-bool(true)
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
 array(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_funcs.inc on line %d
-
-* C::variadic_hack_some
-array(0) {
-}
+string(57) "variadic_hack_some() expects exactly 1 parameter, 0 given"

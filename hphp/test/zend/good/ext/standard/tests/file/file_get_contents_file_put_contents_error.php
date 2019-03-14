@@ -16,14 +16,14 @@ echo "\n-- Testing with  Non-existing file --\n";
 print( file_get_contents("/no/such/file/or/dir") );
 
 echo "\n-- Testing No.of arguments less than expected --\n";
-print( file_get_contents() );
-print( file_put_contents() );
-print( file_put_contents($file_path."/".__FILE__) );
+try { print( file_get_contents() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { print( file_put_contents() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { print( file_put_contents($file_path."/".__FILE__) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $file_handle = fopen($file_path."/file_put_contents.tmp", "w");
 echo "\n-- Testing No.of arguments greater than expected --\n";
-print( file_put_contents("abc.tmp", 12345, 1, $file_handle, "extra_argument") );
-print( file_get_contents("abc.tmp", false, $file_handle, 1, 2, "extra_argument") );
+try { print( file_put_contents("abc.tmp", 12345, 1, $file_handle, "extra_argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { print( file_get_contents("abc.tmp", false, $file_handle, 1, 2, "extra_argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing for invalid negative maxlen values --";
 file_put_contents($file_path."/file_put_contents1.tmp", "Garbage data in the file");

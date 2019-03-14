@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -14,3 +14,5 @@ class Bloo {
     $x = <div>$</div>;
   }
 }
+
+class :div {}

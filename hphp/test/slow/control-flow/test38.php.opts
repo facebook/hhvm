@@ -1,2 +1,3 @@
 -vEval.JitPGORegionSelector=wholecfg
 -vEval.JitPGOThreshold=3
+-vEval.EnablePHP=1

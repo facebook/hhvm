@@ -3,10 +3,8 @@
 -- Testing xml_get_error_code() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing xml_get_error_code() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

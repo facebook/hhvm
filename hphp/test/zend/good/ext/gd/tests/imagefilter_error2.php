@@ -1,5 +1,5 @@
 <?php
 $image = imagecreatetruecolor(180, 30);
 
-var_dump(imagefilter($image, 'wrong parameter'));
+try { var_dump(imagefilter($image, 'wrong parameter')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>

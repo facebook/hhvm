@@ -9,5 +9,5 @@ function test(): void {
 
 <<__EntryPoint>>
 function main_namespace_void() {
-var_dump(test());
+\var_dump(test());
 }

@@ -130,6 +130,9 @@ void parse_options(int argc, char** argv) {
     ("extended-stats",
       po::bool_switch(&options.extendedStats),
       "Spend time to produce extra stats")
+    ("profile-memory",
+     po::value(&options.profileMemory)->default_value(""),
+      "If non-empty, dump jemalloc memory profiles at key points")
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
@@ -225,6 +228,11 @@ void parse_options(int argc, char** argv) {
   options.TraceFunctions = make_method_map(trace_fns);
   options.TraceBytecodes = make_bytecode_map(trace_bcs);
 
+  if (!options.profileMemory.empty()) {
+    mallctlWrite("prof.active", true);
+    mallctlWrite("prof.thread_active_init", true);
+  }
+
   logging = !no_logging;
 }
 
@@ -294,6 +302,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalEnableIntishCast = gd.EnableIntishCast;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedConstFallback = gd.UndefinedConstFallback;
+  RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
+  RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
       [&] (const std::pair<std::string,MD5>& kv) {
@@ -363,6 +373,7 @@ void write_global_data(
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.UndefinedConstFallback      = RuntimeOption::UndefinedConstFallback;
+  gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =
@@ -379,6 +390,7 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

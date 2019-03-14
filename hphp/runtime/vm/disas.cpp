@@ -313,17 +313,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-  auto print_argvb = [&] {
-    out.fmt(" \"");
-    auto const vecLen = decode_iva(pc);
-    uint32_t tmp = 0;
-    for (auto i = uint32_t{0}; i < vecLen; ++i) {
-      if (i % 8 == 0) tmp = decode<uint8_t>(pc);
-      out.fmt("{}", ((tmp >> (i % 8)) & 1) ? '1' : '0');
-    }
-    out.fmt("\"");
-  };
-
   auto print_stringvec = [&] {
     auto const vecLen = decode_iva(pc);
     out.fmt(" <");
@@ -347,14 +336,13 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
       ? rel_label(fca.asyncEagerOffset)
       : "-";
-    return show(fca, aeLabel);
+    return show(fca, fca.byRefs, aeLabel);
   };
 
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
 #define IMM_I32LA  print_argv32();
-#define IMM_BLLA   print_argvb();
 #define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
@@ -404,7 +392,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

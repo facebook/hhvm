@@ -104,6 +104,7 @@ let rec reason = function
   | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
   | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
   | Rtype_variable p -> Rtype_variable (pos p)
+  | Rsolve_fail p -> Rsolve_fail (pos p)
 
 let string_id (p, x) = pos p, x
 
@@ -111,7 +112,7 @@ let rec ty (p, x) =
   reason p, ty_ x
 
   and ty_: decl ty_ -> decl ty_ = function
-    | (Tany | Tthis | Terr | Tmixed | Tnonnull | Tdynamic) as x -> x
+    | (Tany | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tnothing) as x -> x
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tdarray (ty1, ty2)   -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty      -> Tvarray (ty root_ty)
@@ -192,6 +193,7 @@ let rec ty (p, x) =
       ttc_constraint = ty_opt tc.ttc_constraint;
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
+      ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
     }
 
   and user_attribute ua =

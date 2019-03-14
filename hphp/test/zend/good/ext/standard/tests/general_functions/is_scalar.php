@@ -104,11 +104,11 @@ foreach( $variation_array as $value ) {
 
 echo "\n*** Testing error conditions ***\n";
 // Zero arguments
-var_dump( is_scalar() );
+try { var_dump( is_scalar() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Arguments more than expected
-var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) );
-var_dump( is_scalar( new stdclass, new stdclass) );
+try { var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_scalar( new stdclass, new stdclass) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";  
 

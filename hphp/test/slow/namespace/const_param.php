@@ -19,7 +19,7 @@ namespace {
   foreach ($tests as $method) {
     $params = $method->getParameters();
     foreach ($params as $param) {
-      var_dump(
+      \var_dump(
         $param->getDefaultValue(),
         $param->getDefaultValueText(),
         $param->getDefaultValueConstantName()

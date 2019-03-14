@@ -1,4 +1,4 @@
 File "string_expressions6.php", line 14, characters 19-23:
-This is an array key (int/string) (Typing[4110])
+You cannot use this object as a string (Typing[4067])
   File "string_expressions6.php", line 13, characters 37-39:
-  It is incompatible with an object of type Meh
+  This object doesn't implement __toString

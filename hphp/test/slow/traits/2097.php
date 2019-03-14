@@ -13,10 +13,10 @@ class c {
  }
 
 
+const INIT1 = "1";
+const INIT2 = "2";
 <<__EntryPoint>>
 function main_2097() {
-define('INIT1', "1");
-define('INIT2', "2");
 var_dump(c::$x);
 var_dump(c::$y);
 }

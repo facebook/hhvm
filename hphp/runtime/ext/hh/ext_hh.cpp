@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -280,6 +281,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_array(sb, depth, tv.m_data.parr);
       break;
 
+    case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
+      serialize_memoize_array(
+        sb, depth, clsMethToVecHelper(tv.m_data.pclsmeth).get());
+      break;
     case KindOfObject:
       serialize_memoize_obj(sb, depth, tv.m_data.pobj);
       break;
@@ -514,6 +520,18 @@ ArrayData* from_stats_list(T stats) {
   return init.create();
 }
 
+bool HHVM_FUNCTION(is_enabled) {
+  return g_context->getRequestTrace() != nullptr;
+}
+
+void HHVM_FUNCTION(force_enable) {
+  if (g_context->getRequestTrace()) return;
+  if (auto const transport = g_context->getTransport()) {
+    transport->forceInitRequestTrace();
+    g_context->setRequestTrace(transport->getRequestTrace());
+  }
+}
+
 TypedValue HHVM_FUNCTION(all_request_stats) {
   if (auto const trace = g_context->getRequestTrace()) {
     return tvReturn(from_stats_list(trace->stats()));
@@ -564,6 +582,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
 
+    HHVM_NAMED_FE(HH\\rqtrace\\is_enabled, HHVM_FN(is_enabled));
+    HHVM_NAMED_FE(HH\\rqtrace\\force_enable, HHVM_FN(force_enable));
     HHVM_NAMED_FE(HH\\rqtrace\\all_request_stats, HHVM_FN(all_request_stats));
     HHVM_NAMED_FE(HH\\rqtrace\\all_process_stats, HHVM_FN(all_process_stats));
     HHVM_NAMED_FE(HH\\rqtrace\\request_event_stats,

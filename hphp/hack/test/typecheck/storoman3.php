@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -21,7 +21,7 @@ class WebHelp2FrequentQuestionController extends WebHelp2Controller {}
 
 
 function test(string $huri, bool $cmsid): WebHelp2Controller {
-  $controller = Vector();
+  $controller = Vector {};
 
   switch ($huri) {
   case 'hub':

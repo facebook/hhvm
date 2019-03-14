@@ -8,7 +8,7 @@ namespace Positions;
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
+\error_reporting(-1);
 
 const TOP = 1;
 const RIGHT = 2;

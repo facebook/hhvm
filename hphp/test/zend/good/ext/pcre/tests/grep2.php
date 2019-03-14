@@ -1,7 +1,7 @@
 <?php
 
-var_dump(preg_grep(1,array(),3,4));
-var_dump(preg_grep(1, 2));
+try { var_dump(preg_grep(1,array(),3,4)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(preg_grep(1, 2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(preg_grep('/+/', array()));
 
 $array = array(5=>'a', 'x' => '1', 'xyz'=>'q6', 'h20');

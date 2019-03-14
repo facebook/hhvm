@@ -39,8 +39,8 @@ function bar($x, $a, $b) {
     var_dump('caught');
   }
 }
-function n($x) {
- return new $x;
+function n($x, ...$args) {
+ return new $x(...$args);
  }
 function baz($d) {
   $x = new D1;
@@ -48,13 +48,13 @@ function baz($d) {
   $x = new D3;
   $x = new D4;
   $x = new D5;
-  $x = new D6;
+  $x = new D6(false);
   $x = n($d.'1');
   $x = n($d.'2');
   $x = n($d.'3');
   $x = n($d.'4');
   $x = n($d.'5');
-  $x = n($d.'6');
+  $x = n($d.'6', false);
   $x = n('B1');
 }
 

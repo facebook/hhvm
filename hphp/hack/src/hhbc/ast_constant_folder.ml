@@ -128,17 +128,17 @@ let rec expr_to_typed_value
     ->
       TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
-  | A.Varray fields -> varray_to_typed_value ns fields
-  | A.Darray fields -> darray_to_typed_value ns fields
-  | A.Collection ((_, "vec"), fields) ->
+  | A.Varray (_, fields) -> varray_to_typed_value ns fields
+  | A.Darray (_, fields) -> darray_to_typed_value ns fields
+  | A.Collection ((_, "vec"), _, fields) ->
     TV.Vec (List.map fields (value_afield_to_typed_value ns))
-  | A.Collection ((_, "keyset"), fields) ->
+  | A.Collection ((_, "keyset"), _, fields) ->
     let l = List.fold_left fields
       ~f:(fun l x ->
           TVL.add l (keyset_value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
-  | A.Collection ((_, kind), fields)
+  | A.Collection ((_, kind), _, fields)
     when kind = "dict" ||
          (allow_maps &&
            (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map" ||
@@ -148,7 +148,7 @@ let rec expr_to_typed_value
     in
     let d = update_duplicates_in_map values in
     TV.Dict d
-  | A.Collection ((_, kind), fields)
+  | A.Collection ((_, kind), _, fields)
     when allow_maps &&
          (SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Set" ||
           SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmSet") ->
@@ -344,9 +344,9 @@ let rec value_to_expr_ p v =
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.HhasAdata _ -> failwith "value_to_expr: HhasAdata NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
-  | TV.VArray values -> A.Varray (List.map values (value_to_expr p))
+  | TV.VArray values -> A.Varray (None, List.map values (value_to_expr p))
   | TV.DArray pairs ->
-     A.Darray (List.map pairs (fun (v1,v2) -> (value_to_expr p v1, value_to_expr p v2)))
+     A.Darray (None, List.map pairs (fun (v1,v2) -> (value_to_expr p v1, value_to_expr p v2)))
   | TV.Dict _ -> failwith "value_to_expr: dict NYI"
 and value_to_expr p v =
   (p, value_to_expr_ p v)

@@ -7,12 +7,12 @@ echo "*** Testing floatval() and doubleval() : error conditions ***\n";
 
 
 echo "\n-- Testing floatval() and doubleval() function with no arguments --\n";
-var_dump( floatval() );
-var_dump( doubleval() );
+try { var_dump( floatval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( doubleval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing floatval() and doubleval() function with more than expected no. of arguments --\n";
-var_dump( floatval(10.5, FALSE) );
-var_dump( doubleval(10.5, FALSE) );
+try { var_dump( floatval(10.5, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( doubleval(10.5, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

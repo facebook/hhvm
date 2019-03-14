@@ -3,18 +3,14 @@
 -- Testing strcoll() function with no arguments --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Testing strcoll() function with one argument --
 
 Warning: %s
-NULL
 
 -- Testing strcoll() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===Done===

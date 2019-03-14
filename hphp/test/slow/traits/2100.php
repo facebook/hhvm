@@ -9,9 +9,9 @@ class c {
  use t1;
  }
 
+const INIT1 = 123;
 
 <<__EntryPoint>>
 function main_2100() {
-define('INIT1', 123);
 var_dump(c::$x);
 }

@@ -1,8 +1,6 @@
 Warning: preg_replace_callback_array() expects at least 2 parameters, 0 given in %s on line %d
-NULL
 
 Warning: preg_replace_callback_array() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 
 Warning: preg_replace_callback_array() expects parameter 1 to be an array, integer given in %s on line %d
 NULL
@@ -15,10 +13,8 @@ Warning: preg_replace_callback_array() expects parameter 1 to be an array, integ
 NULL
 
 Warning: preg_replace_callback_array() expects parameter 3 to be integer, string given in %s on line %d
-NULL
 
 Warning: preg_replace_callback_array() expects at most 4 parameters, 5 given in %s on line %d
-NULL
 string(0) ""
 
 Warning: Not a valid callback function notValid%d in %s on line %d

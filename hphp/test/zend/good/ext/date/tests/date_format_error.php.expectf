@@ -3,17 +3,14 @@
 -- Testing date_create() function with zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_create() function with less than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_create() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_create() function with an invalid values for $object argument --
 
@@ -21,8 +18,6 @@ Warning: %s
 bool(false)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 ===DONE===

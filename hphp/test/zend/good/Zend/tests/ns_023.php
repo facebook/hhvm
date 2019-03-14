@@ -1,4 +1,4 @@
 <?php
 namespace test\foo;
 
-var_dump(__NAMESPACE__);
+\var_dump(__NAMESPACE__);

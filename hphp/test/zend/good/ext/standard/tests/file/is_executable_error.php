@@ -4,9 +4,9 @@
 */
 
 echo "*** Testing is_executable(): error conditions ***\n";
-var_dump( is_executable() );  // args < expected no of arguments
+try { var_dump( is_executable() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args < expected no of arguments
 
-var_dump( is_executable(1, 2) );  // args > expected no. of arguments
+try { var_dump( is_executable(1, 2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected no. of arguments
 
 echo "\n*** Testing is_exceutable() on non-existent directory ***\n";
 var_dump( is_executable(dirname(__FILE__)."/is_executable") );

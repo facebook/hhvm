@@ -1,4 +1,3 @@
-Warning: define() is deprecated and subject to removal from the Hack language in %s on line 12
 array(3) {
   ["foo"]=>
   int(-1)

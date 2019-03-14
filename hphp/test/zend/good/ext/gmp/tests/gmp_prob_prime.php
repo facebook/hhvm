@@ -23,7 +23,7 @@ var_dump(gmp_prob_prime($n));
 $n = gmp_init(0);
 var_dump(gmp_prob_prime($n));
 
-var_dump(gmp_prob_prime());
+try { var_dump(gmp_prob_prime()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_prob_prime(array()));
 
 echo "Done\n";

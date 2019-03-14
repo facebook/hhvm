@@ -48,57 +48,42 @@ int(9)
 -- Iteration with mask value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with mask value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with mask value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with mask value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with mask value as "Array" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 -- Iteration with mask value as "" --
 int(10)
@@ -158,11 +143,8 @@ int(9)
 -- Iteration with mask value as "Resource id #%d" --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

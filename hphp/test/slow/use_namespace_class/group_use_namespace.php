@@ -2,13 +2,13 @@
 
 namespace MyNS\Herp {
   function do_stuff() {
-    var_dump(__FUNCTION__);
+    \var_dump(__FUNCTION__);
   }
 }
 
 namespace MyNS\Derp {
   function do_stuff() {
-    var_dump(__FUNCTION__);
+    \var_dump(__FUNCTION__);
   }
 }
 

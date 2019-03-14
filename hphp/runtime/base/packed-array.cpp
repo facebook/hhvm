@@ -546,6 +546,23 @@ ArrayData* PackedArray::MakePackedNatural(uint32_t size, const Cell* values) {
   return ad;
 }
 
+ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const Cell* values) {
+  if (RuntimeOption::EvalHackArrDVArrs) return MakeVecNatural(size, values);
+
+  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed,
+                                  ArrayData::kVArray);
+  assertx(ad->isPacked());
+  assertx(ad->isVArray());
+  return ad;
+}
+
+ArrayData* PackedArray::MakeVecNatural(uint32_t size, const Cell* values) {
+  auto ad = MakePackedImpl<false>(size, values, HeaderKind::VecArray,
+                                  ArrayData::kNotDVArray);
+  assertx(ad->isVecArray());
+  return ad;
+}
+
 ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Packed, ArrayData::kNotDVArray);
   ad->m_sizeAndPos = size; // pos = 0

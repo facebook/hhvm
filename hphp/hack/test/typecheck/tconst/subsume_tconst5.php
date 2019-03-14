@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class PartiallyAbstract {
   abstract const type T1;

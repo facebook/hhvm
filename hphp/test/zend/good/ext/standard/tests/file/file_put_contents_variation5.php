@@ -7,8 +7,8 @@ mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp"; 
-$scriptLocFile = dirname(__FILE__)."/".$filename;
+ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename = basename(__FILE__, ".php") . ".tmp"; 
+ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile = dirname(__FILE__)."/".ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename;
 
 $newpath = "rubbish";
 set_include_path($newpath);
@@ -26,16 +26,21 @@ rmdir($thisTestDir);
 
 
 function runtest() {
-   global $scriptLocFile, $filename;
-   file_put_contents($filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
-   if(file_exists($scriptLocFile)) {
+
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
+   if(file_exists(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile)) {
       echo "Fail - this is PHP52 behaviour\n";
-      unlink($scriptLocFile);
+      unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile);
    }else {
-      $line = file_get_contents($filename); 
+      $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename); 
       echo "$line\n";
-      unlink($filename);     
+      unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename);     
    }
+}
+
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation5 {
+  public static $scriptLocFile;
+  public static $filename;
 }
 ?>
 ===DONE===

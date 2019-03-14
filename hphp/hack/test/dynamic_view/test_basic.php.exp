@@ -1,4 +1,4 @@
-File "test_basic.php", line 11, characters 3-13:
+File "test_basic.php", line 11, characters 31-41:
   dynamic
 File "test_basic.php", line 12, characters 10-11:
 Invalid return type (Typing[4110])

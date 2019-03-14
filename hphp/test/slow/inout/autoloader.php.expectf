@@ -6,4 +6,4 @@ autoloading function: hit3
 string(4) "hit3"
 autoloading function: partial
 
-Fatal error: Call to function partial() with incorrectly annotated inout parameter in %s/autoloader.php on line 35
+Fatal error: Call to function partial() with incorrectly annotated inout parameter in %s/autoloader.php on line 27

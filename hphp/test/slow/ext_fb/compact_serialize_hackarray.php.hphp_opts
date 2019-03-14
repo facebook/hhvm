@@ -2,3 +2,4 @@
 -vHackArrDVArrs=1
 -vHackArrCompatNotices=1
 -vHackArrCompatCompactSerializeNotices=1
+-vEval.EnablePHP=1

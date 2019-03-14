@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,7 +12,7 @@
 function test(): int {
   $x = null;
   do {
-    for ($i = 0; i < 10; ++$i) {
+    for ($i = 0; $i < 10; ++$i) {
       continue;
     }
     $i = 0;

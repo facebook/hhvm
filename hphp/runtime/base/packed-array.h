@@ -286,6 +286,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
   static ArrayData* MakePackedNatural(uint32_t size, const Cell* values);
+  static ArrayData* MakeVArrayNatural(uint32_t size, const Cell* values);
+  static ArrayData* MakeVecNatural(uint32_t size, const Cell* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVArray(uint32_t size);

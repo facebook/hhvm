@@ -87,8 +87,9 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(ExtendedHint,    "extended_hint");                      \
   X(TypeVar,         "type_var");                           \
   X(Soft,            "soft");                               \
-  X(TypeConstant,    "type_constant")
-
+  X(TypeConstant,    "type_constant")                       \
+  X(Resolved,        "resolved")                            \
+  X(DisplayNullable, "display_nullable")
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3,5 +3,4 @@
 -- Testing array_merge_recursive() function with Zero arguments --
 
 Warning: %s
-NULL
 Done

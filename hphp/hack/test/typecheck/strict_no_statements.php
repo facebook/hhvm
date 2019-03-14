@@ -9,7 +9,7 @@
  *
  */
 
-define('FOOBARBAZ', 43);
+const int FOOBARBAZ = 43;
 
 function f(): int {
   return FOOBARBAZ;

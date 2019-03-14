@@ -2,13 +2,9 @@ array(0) {
 }
 
 Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 6
-NULL
 
 Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 7
-NULL
 
 Warning: get_object_vars() expects parameter 1 to be object, string given in %s/test/slow/get_object_vars/1538.php on line 8
-NULL
 
 Warning: get_object_vars() expects parameter 1 to be object, integer given in %s/test/slow/get_object_vars/1538.php on line 9
-NULL

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -25,3 +25,5 @@ function naming_finally(): int {
   }
   return $a;
 }
+
+class YourException extends Exception {}

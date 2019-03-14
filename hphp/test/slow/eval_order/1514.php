@@ -1,29 +1,30 @@
 <?php
 function t() {
-  global $t;
-  $t++;
+
+  EvalOrder1514::$t++;
   return true;
 }
 function f() {
-  global $f;
-  $f++;
+
+  EvalOrder1514::$f++;
   return false;
 }
 function i() {
-  global $i;
-  $i++;
+
+  EvalOrder1514::$i++;
   return 1;
 }
 function d() {
-  global $d;
-  $d++;
+
+  EvalOrder1514::$d++;
   return 3.14;
 }
 function v() {
-  global $v;
-  $v++;
-  return $v;
+
+  EvalOrder1514::$v++;
+  return EvalOrder1514::$v;
 }
+<<__EntryPoint>>
 function foo() {
   var_dump(t() + t());
   var_dump(t() + f());
@@ -50,7 +51,7 @@ function foo() {
   var_dump(v() + i());
   var_dump(v() + d());
   var_dump(v() + v());
-  var_dump($GLOBALS['t'], $GLOBALS['f'],           $GLOBALS['i'], $GLOBALS['d'],           $GLOBALS['v']);
+  var_dump(EvalOrder1514::$t, EvalOrder1514::$f,           EvalOrder1514::$i, EvalOrder1514::$d,           EvalOrder1514::$v);
   var_dump(t() - t());
   var_dump(t() - f());
   var_dump(t() - i());
@@ -76,7 +77,7 @@ function foo() {
   var_dump(v() - i());
   var_dump(v() - d());
   var_dump(v() - v());
-  var_dump($GLOBALS['t'], $GLOBALS['f'],           $GLOBALS['i'], $GLOBALS['d'],           $GLOBALS['v']);
+  var_dump(EvalOrder1514::$t, EvalOrder1514::$f,           EvalOrder1514::$i, EvalOrder1514::$d,           EvalOrder1514::$v);
   var_dump(t() * t());
   var_dump(t() * f());
   var_dump(t() * i());
@@ -102,16 +103,13 @@ function foo() {
   var_dump(v() * i());
   var_dump(v() * d());
   var_dump(v() * v());
-  var_dump($GLOBALS['t'], $GLOBALS['f'],           $GLOBALS['i'], $GLOBALS['d'],           $GLOBALS['v']);
+  var_dump(EvalOrder1514::$t, EvalOrder1514::$f,           EvalOrder1514::$i, EvalOrder1514::$d,           EvalOrder1514::$v);
 }
 
-
-<<__EntryPoint>>
-function main_1514() {
-$GLOBALS['t'] = 0;
-$GLOBALS['f'] = 0;
-$GLOBALS['i'] = 0;
-$GLOBALS['d'] = 0;
-$GLOBALS['v'] = 'a';
-foo();
+abstract final class EvalOrder1514 {
+  public static $t = 0;
+  public static $f = 0;
+  public static $i = 0;
+  public static $d = 0;
+  public static $v = 'a';
 }

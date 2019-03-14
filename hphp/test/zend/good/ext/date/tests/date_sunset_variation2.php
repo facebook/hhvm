@@ -91,7 +91,7 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunset($time, $value, $latitude, $longitude, $zenith, $gmt_offset) );
+      try { var_dump( date_sunset($time, $value, $latitude, $longitude, $zenith, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 ?>

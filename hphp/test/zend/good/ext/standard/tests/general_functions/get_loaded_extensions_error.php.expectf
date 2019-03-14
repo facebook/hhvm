@@ -3,5 +3,4 @@
 -- Testing get_loaded_extensions() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

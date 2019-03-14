@@ -17,11 +17,11 @@ $offset = 10;
 $length = 10;
 $preserve_keys = true;
 $extra_arg = 10;
-var_dump( array_slice($input, $offset, $length, $preserve_keys, $extra_arg) );
+try { var_dump( array_slice($input, $offset, $length, $preserve_keys, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing array_slice with one less than the expected number of arguments
 echo "\n-- Testing array_slice() function with less than expected no. of arguments --\n";
-var_dump( array_slice($input) );
+try { var_dump( array_slice($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

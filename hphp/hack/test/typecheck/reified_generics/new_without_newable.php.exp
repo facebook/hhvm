@@ -1,0 +1,2 @@
+File "new_without_newable.php", line 13, characters 5-13:
+Tnn cannot be used with `new` because it does not have the <<__Newable>> attribute (Typing[4309])

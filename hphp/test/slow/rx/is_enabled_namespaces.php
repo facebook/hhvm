@@ -103,17 +103,17 @@ namespace {
 
   <<__EntryPoint>>
   function main() {
-    var_dump(\Unrelated\test_explicit());
-    var_dump(\Unrelated\test_autoimported());
+    \var_dump(\Unrelated\test_explicit());
+    \var_dump(\Unrelated\test_autoimported());
 
-    var_dump(\HH\test_explicit());
-    var_dump(\HH\test_implicit());
+    \var_dump(\HH\test_explicit());
+    \var_dump(\HH\test_implicit());
 
-    var_dump(\HH\Rx\test_explicit());
-    var_dump(\HH\Rx\test_implicit());
-    var_dump(\HH\Rx\test_autoimported());
+    \var_dump(\HH\Rx\test_explicit());
+    \var_dump(\HH\Rx\test_implicit());
+    \var_dump(\HH\Rx\test_autoimported());
 
-    var_dump(\test_explicit());
-    var_dump(\test_autoimported());
+    \var_dump(\test_explicit());
+    \var_dump(\test_autoimported());
   }
 }

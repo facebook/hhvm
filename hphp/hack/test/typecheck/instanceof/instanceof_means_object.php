@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f($x) {
   $name = g();
@@ -8,3 +8,4 @@ function f($x) {
 }
 
 function takes_string(string $arg): void {}
+function g() {}

@@ -13,15 +13,19 @@ $regex_array = array('abcdef', //Regex without delimiters
 '[a-zA-Z]/', //Regex without opening delimiter
 '/[a-zA-Z]/F', array('[a-z]', //Array of Regexes
 '[A-Z]', '[0-9]'), '/[a-zA-Z]/'); //Regex string
-$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine');
+ZendGoodExtPcreTestsPregReplaceCallbackError1::$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine');
 function integer_word($matches) {
-    global $replacement;
-    return $replacement[$matches[0]];
+
+    return ZendGoodExtPcreTestsPregReplaceCallbackError1::$replacement[$matches[0]];
 }
 $subject = 'number 1.';
 foreach($regex_array as $regex_value) {
     print "\nArg value is $regex_value\n";
     var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
+}
+
+abstract final class ZendGoodExtPcreTestsPregReplaceCallbackError1 {
+  public static $replacement;
 }
 ?>
 ===Done===

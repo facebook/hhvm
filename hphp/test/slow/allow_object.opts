@@ -1,1 +1,2 @@
 -vServer.APC.AllowObject=1
+-vEval.EnablePHP=1

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Represents a connection to a set of memcached servers.

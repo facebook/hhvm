@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Returns an array with all keys from input lowercased or uppercased.
@@ -189,12 +189,10 @@ function key_exists(
  * @return mixed - Returns an array of all the keys in input.
  *
  */
-<<__Native("NumArgs"), __IsFoldable, __Rx, __AtMostRxAsArgs>>
+<<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
 function array_keys(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed
     $input,
-  mixed $search_value = null,
-  bool $strict = false,
 ): mixed;
 
 /**
@@ -1542,7 +1540,7 @@ function hphp_array_idx(
  *
  */
 <<__Native("ActRec", "VariadicByRef")>>
-function array_multisort(mixed &$arr1, ...): bool;
+function array_multisort(mixed &$arr1, ...): mixed;
 
 namespace __SystemLib {
   /* array_map() returns an array containing all the elements of arr1 after

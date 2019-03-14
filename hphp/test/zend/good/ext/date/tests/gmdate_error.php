@@ -14,12 +14,12 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 // Zero arguments
 echo "\n-- Testing gmdate() function with Zero arguments --\n";
-var_dump( gmdate() );
+try { var_dump( gmdate() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test gmdate with one more than the expected number of arguments
 echo "\n-- Testing gmdate() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( gmdate($format, $timestamp, $extra_arg) );
+try { var_dump( gmdate($format, $timestamp, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

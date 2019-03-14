@@ -47,13 +47,15 @@ type t = {
   option_enable_hhjs                      : bool;
   option_dump_hhjs                        : bool;
   option_hhjs_unique_filenames            : bool;
+  option_hhjs_babel_transform             : string;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
+  option_phpism_undefined_function_fallback : bool;
   option_phpism_disallow_execution_operator: bool;
-  option_phpism_disable_define            : bool;
   option_phpism_disable_nontoplevel_declarations : bool;
+  option_phpism_disable_static_closures : bool;
   option_phpism_disable_static_local_variables : bool;
   option_emit_func_pointers               : bool;
   option_emit_cls_meth_pointers           : bool;
@@ -62,6 +64,7 @@ type t = {
   option_rx_is_enabled                    : bool;
   option_enable_stronger_await_binding    : bool;
   option_disable_lval_as_an_expression    : bool;
+  option_enable_pocket_universes          : bool;
 }
 
 let default = {
@@ -101,14 +104,16 @@ let default = {
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
   option_dump_hhjs = false;
-  option_hhjs_unique_filenames = false;
+  option_hhjs_unique_filenames = true;
+  option_hhjs_babel_transform = "";
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
+  option_phpism_undefined_function_fallback = true;
   option_phpism_disallow_execution_operator = false;
-  option_phpism_disable_define = true;
   option_phpism_disable_nontoplevel_declarations = false;
+  option_phpism_disable_static_closures = false;
   option_phpism_disable_static_local_variables = false;
   option_emit_func_pointers = true;
   option_emit_cls_meth_pointers = true;
@@ -117,6 +122,7 @@ let default = {
   option_rx_is_enabled = false;
   option_enable_stronger_await_binding = false;
   option_disable_lval_as_an_expression = false;
+  option_enable_pocket_universes = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -153,13 +159,15 @@ let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
+let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
+let phpism_undefined_function_fallback o = o.option_phpism_undefined_function_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
-let phpism_disable_define o = o.option_phpism_disable_define
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
+let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
 let phpism_disable_static_local_variables o = o.option_phpism_disable_static_local_variables
 let emit_func_pointers o = o.option_emit_func_pointers
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
@@ -168,6 +176,7 @@ let emit_meth_caller_func_pointers o = o.option_emit_meth_caller_func_pointers
 let rx_is_enabled o = o.option_rx_is_enabled
 let enable_stronger_await_binding o = o.option_enable_stronger_await_binding
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
+let enable_pocket_universes o = o.option_enable_pocket_universes
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -214,10 +223,12 @@ let to_string o =
     ; Printf.sprintf "enable_await_as_an_expression: %B" @@ enable_await_as_an_expression o
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
+    ; Printf.sprintf "phpism_undefined_function_fallback: %B" @@ phpism_undefined_function_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
-    ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
+    ; Printf.sprintf "phpism_disable_static_closures %B"
+      @@ phpism_disable_static_closures o
     ; Printf.sprintf "phpism_disable_static_local_variables %B"
       @@ phpism_disable_static_local_variables o
     ; Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o
@@ -226,6 +237,7 @@ let to_string o =
     ; Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o
     ; Printf.sprintf "enable_stronger_await_binding: %B" @@ enable_stronger_await_binding o
     ; Printf.sprintf "disable_lval_as_an_expression: %B" @@ disable_lval_as_an_expression o
+    ; Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -302,16 +314,20 @@ let set_option options name value =
     { options with option_dump_hhjs = as_bool value }
   | "eval.hhjsuniquefilenames" ->
     { options with option_hhjs_unique_filenames = as_bool value }
+  | "eval.hhjsbabeltransform" ->
+    { options with option_hhjs_babel_transform = value }
   | "hack.lang.phpism.undefinedconstasstring" ->
     { options with option_phpism_undefined_const_as_string = as_bool value }
   | "hack.lang.phpism.undefinedconstfallback" ->
     { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
+  | "hack.lang.phpism.undefinedfunctionfallback" ->
+    { options with option_phpism_undefined_function_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
-  | "hack.lang.phpism.disabledefine" ->
-    { options with option_phpism_disable_define = int_of_string value > 0 }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
     { options with option_phpism_disable_nontoplevel_declarations = as_bool value }
+  | "hack.lang.phpism.disablestaticclosures" ->
+    { options with option_phpism_disable_static_closures = as_bool value }
   | "hack.lang.phpism.disablestaticlocalvariables" ->
     { options with option_phpism_disable_static_local_variables = as_bool value }
 
@@ -333,6 +349,8 @@ let set_option options name value =
     { options with option_enable_stronger_await_binding = as_bool value }
   | "hack.lang.disable_lval_as_an_expression" ->
     { options with option_disable_lval_as_an_expression = as_bool value }
+  | "hack.lang.enablepocketuniverses" ->
+    { options with option_enable_pocket_universes = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -449,6 +467,8 @@ let value_setters = [
     fun opts v -> { opts with option_enable_stronger_await_binding = (v = 1) });
   (set_value "hhvm.hack.lang.disable_lval_as_an_expression" get_value_from_config_int @@
     fun opts v -> { opts with option_disable_lval_as_an_expression = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_pocket_universes" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_pocket_universes = (v = 1) });
   (set_value "doc_root" get_value_from_config_string @@
     fun opts v -> { opts with option_doc_root = v });
   (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@
@@ -465,16 +485,20 @@ let value_setters = [
      fun opts v -> { opts with option_dump_hhjs = (v = 1) });
   (set_value "hhvm.hhjs_unique_filenames" get_value_from_config_int @@
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
+  (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@
+     fun opts v -> { opts with option_hhjs_babel_transform = v });
   (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
+  (set_value "hhvm.hack.lang.phpism.undefined_function_fallback" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_undefined_function_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
-  (set_value "hhvm.hack.lang.phpism.disable_define" get_value_from_config_int @@
-     fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_nontoplevel_declarations = (v = 1) });
+  (set_value "hhvm.hack.lang.phpism.disable_static_closures" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_disable_static_closures = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_static_local_variables" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_static_local_variables = (v = 1) });
   (set_value "hhvm.emit_func_pointers" get_value_from_config_int @@

@@ -1,10 +1,10 @@
 Linearization for class \I:
-[\I(child)]
+[\I]
 Linearization for class \C:
-[\C(child)]
+[\C]
 Linearization for class \T:
-[\T(child), \I(req impl), \C(req ext), \I(parent)]
+[\T(copy_private_members), \I, \I(synthesized, consts_only), \C(synthesized)]
 Linearization for class \T2:
-[\T2(child)]
+[\T2(copy_private_members)]
 Linearization for class \D:
-[\D(child), \T(trait), \I(trait, synthesized), \C(trait, synthesized), \I(trait), \I(interface), \C(parent)]
+[\D, \I(consts_only), \T(copy_private_members), \I, \C, \I(synthesized, consts_only), \C(synthesized)]

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A {}
 enum B: int {
@@ -101,3 +101,5 @@ function expect_nonnull(nonnull $x): void {}
 function expect_object(Object $x): void {}
 function expect_A(A $a): void {}
 function expect_mixed(mixed $a): void {}
+
+class Object {}

@@ -73,11 +73,14 @@
     compiler_id
     facts
     global_config
+    global_options
     hackc_parse_delegator
     hhbc
     heap_ident
     logging
-    parser_syntax_tree)
+    naming
+    parser_syntax_tree
+    typing)
   (flags (:standard -unsafe-string)))
 
 (executable
@@ -103,3 +106,28 @@
     hackfmt_debug
     utils_config_file
     utils_ocaml_overrides))
+
+(executable
+  (name hh_single_parse)
+  (modules
+    hh_single_parse)
+  (libraries
+    debug
+    global_config
+    hackfmt
+    nast
+    parser_heap
+    parser_syntax
+    parser_syntax_transforms
+    parser_syntax_tree))
+
+(executable
+  (name generate_full_fidelity)
+  (modules
+    generate_full_fidelity)
+  (libraries
+    procs_procs_lwt
+    core_kernel
+    str
+    parser_schema
+    collections))

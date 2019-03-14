@@ -23,9 +23,6 @@ __METHOD__: string(13) "ComputeResult"
 __CLASS__: string(0) ""
 __TRAIT__: string(0) ""
 __NAMESPACE__: string(0) ""
-Inside ComputeResult
-__FUNCTION__: string(5) "Inner"
-__METHOD__: string(5) "Inner"
 -----------------------------------------
 Inside Date::__construct
 __CLASS__: string(4) "Date"
@@ -34,7 +31,7 @@ __TRAIT__: string(0) ""
 __NAMESPACE__: string(0) ""
 Inside Date::setDay
 __FUNCTION__: string(6) "setDay"
-__LINE__: int(90)
+__LINE__: int(81)
 Inside Date::priv1
 __FUNCTION__: string(5) "priv1"
 Inside Date::spf1

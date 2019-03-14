@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "parse_str"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   Int 1
   RetC

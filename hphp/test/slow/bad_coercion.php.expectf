@@ -2,11 +2,8 @@ bool(false)
 bool(false)
 
 Warning: is_nan() expects parameter 1 to be double, string given in %s on line %d
-NULL
 
 Warning: is_nan() expects parameter 1 to be double, string given in %s on line %d
-NULL
 bool(false)
 
 Warning: is_nan() expects parameter 1 to be double, string given in %s on line %d
-NULL

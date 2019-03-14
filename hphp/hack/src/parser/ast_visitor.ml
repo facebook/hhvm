@@ -16,8 +16,31 @@
 
 open Ast
 
+(** A {!reducer} is a AST visitor which is not in control of the iteration
+ * (and thus cannot change the order of the iteration or choose not to visit
+ * some subtrees).
+ *
+ * Intended to be used with {!Ast.reduce} to aggregate many checks into a
+ * single pass over a AST.  The type parameters are as follows:
+ * - 'a result being reduced (accumulated)
+ * - 'b context type, which is updated by a {!Ast.reduce} visitor
+ *)
+class type ['a, 'b] reducer_type = object
+  (* TODO: gradually add methods with signature: 'b -> param1 ... -> 'a *)
+  method at_expr : 'b -> expr -> 'a
+end
+
+class ['a, 'b] reducer
+  (_zero : unit -> 'a)
+  (_plus : 'a -> 'a -> 'a)
+  : ['a, 'b] reducer_type
+= object
+  method at_expr _ctx _e = _zero ()
+end
+
 (*****************************************************************************)
-(* The signature of the visitor. *)
+(* The signature of the hand-rolled visitor. *)
+(* DEPRECATED: use {!Ast.reduce} or {!Ast.iter} auto-generated visitors *)
 (*****************************************************************************)
 
 class type ['a] ast_visitor_type = object
@@ -40,16 +63,15 @@ class type ['a] ast_visitor_type = object
   method on_class_const : 'a -> expr -> pstring -> 'a
   method on_class_get : 'a -> expr -> expr -> 'a
   method on_clone : 'a -> expr -> 'a
-  method on_collection: 'a -> id -> afield list -> 'a
+  method on_collection: 'a -> id -> collection_targ option -> afield list -> 'a
   method on_continue : 'a -> expr option -> 'a
-  method on_darray : 'a -> (expr * expr) list -> 'a
+  method on_darray : 'a -> (targ * targ) option -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
   method on_omitted: 'a -> 'a
-  method on_execution_operator : 'a -> expr list -> 'a
   method on_expr_ : 'a -> expr_ -> 'a
   method on_expr_list : 'a -> expr list -> 'a
   method on_fallthrough : 'a -> 'a
@@ -76,7 +98,6 @@ class type ['a] ast_visitor_type = object
   method on_list : 'a -> expr list -> 'a
   method on_lvar : 'a -> id -> 'a
   method on_new : 'a -> expr -> targ list -> expr list -> expr list -> 'a
-  method on_newanoncls : 'a -> expr list -> expr list -> class_ -> 'a
   method on_noop : 'a -> 'a
   method on_null : 'a -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
@@ -97,14 +118,14 @@ class type ['a] ast_visitor_type = object
   method on_string : 'a -> string -> 'a
   method on_suspend: 'a -> expr -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
-  method on_targ : 'a -> (hint * bool) -> 'a
+  method on_targ : 'a -> hint -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_true : 'a -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_unop : 'a -> uop -> expr -> 'a
   method on_unsafe: 'a -> 'a
   method on_using: 'a -> using_stmt -> 'a
-  method on_varray : 'a -> expr list -> 'a
+  method on_varray : 'a -> targ option -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_declare : 'a -> bool -> expr -> block -> 'a
   method on_xml : 'a -> id -> xhp_attribute list -> expr list -> 'a
@@ -149,10 +170,17 @@ class type ['a] ast_visitor_type = object
   method on_xhpCategory: 'a -> pstring list -> 'a
   method on_xhp_child: 'a -> xhp_child -> 'a
 
+  (* Pocket Universes *)
+  method on_pu_atom : 'a -> id -> 'a
+  method on_pumapping : 'a -> pumapping -> 'a
+  method on_pufield : 'a -> pufield -> 'a
+  method on_class_enum_ : 'a -> id -> pufield list -> 'a
+
 end
 
 (*****************************************************************************)
-(* The generic visitor ('a is the type of the accumulator). *)
+(* The generic but hand-rolled visitor ('a is the type of the accumulator). *)
+(* DEPRECATED: use {!Ast.reduce} or {!Ast.iter} auto-generated visitors *)
 (*****************************************************************************)
 
 class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
@@ -206,7 +234,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       let acc = List.fold_left this#on_id acc idl in
       acc
 
-  method on_targ acc (h, _) =
+  method on_targ acc h =
     let acc = this#on_hint acc h in
     acc
 
@@ -376,12 +404,12 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_expr_ acc e =
     match e with
    | Unsafeexpr e-> this#on_expr acc e
-   | Collection (i, afl) -> this#on_collection acc i afl
+   | Collection (i, tal, afl) -> this#on_collection acc i tal afl
    | Lfun f          -> this#on_lfun acc f
    | Import (ifv, e) -> this#on_import acc ifv e
    | Array afl   -> this#on_array acc afl
-   | Darray fl -> this#on_darray acc fl
-   | Varray el -> this#on_varray acc el
+   | Darray (tap, fl) -> this#on_darray acc tap fl
+   | Varray (ta, el) -> this#on_varray acc ta el
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc
    | False       -> this#on_false acc
@@ -389,7 +417,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Float n     -> this#on_float acc n
    | Null        -> this#on_null acc
    | String s    -> this#on_string acc s
-   | Execution_operator s -> this#on_execution_operator acc s
    | Id id       -> this#on_id acc id
    | Lvar id     -> this#on_lvar acc id
    | Yield_break -> this#on_yield_break acc
@@ -417,23 +444,33 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | BracedExpr e
    | ParenthesizedExpr e -> this#on_expr acc e
    | New         (e, hl, el, uel) -> this#on_new acc e hl el uel
-   | NewAnonClass (el, uel, cl) -> this#on_newanoncls acc el uel cl
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
    | Omitted                     -> this#on_omitted  acc
    | Suspend e  -> this#on_suspend acc e
    | Callconv    (kind, e)   -> this#on_callconv acc kind e
+   | PU_atom id    -> this#on_pu_atom acc id
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
 
-  method on_darray acc fl =
+  method on_darray acc tap fl =
+    let acc = match tap with
+    | Some ta ->
+      let acc = this#on_targ acc (fst ta) in
+      let acc = this#on_targ acc (snd ta) in
+      acc
+    | None -> acc in
+
     let on_field acc (e1, e2) =
       let acc = this#on_expr acc e1 in
       this#on_expr acc e2 in
     List.fold_left on_field acc fl
 
-  method on_varray acc el =
+  method on_varray acc ta el =
+    let acc = match ta with
+    | Some t -> this#on_targ acc t
+    | None -> acc in
     List.fold_left this#on_expr acc el
 
   method on_shape acc sfnel =
@@ -490,10 +527,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_string acc _ = acc
 
   method on_string2 acc el =
-    let acc = List.fold_left this#on_expr acc el in
-    acc
-
-  method on_execution_operator acc el =
     let acc = List.fold_left this#on_expr acc el in
     acc
 
@@ -557,12 +590,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = List.fold_left this#on_expr acc uel in
     acc
 
-  method on_newanoncls acc el uel cl =
-    let acc = List.fold_left this#on_expr acc el in
-    let acc = List.fold_left this#on_expr acc uel in
-    let acc = this#on_class_ acc cl in
-    acc
-
   method on_efun acc f _ = this#on_fun_ acc f
 
   method on_xml acc pstr attrl el =
@@ -602,8 +629,16 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_sfclass_const acc (p, _ as id) c =
     this#on_class_const acc (p, Id id) c
 
-  method on_collection acc i afl =
+  method on_collection acc i ta afl =
     let acc = this#on_id acc i in
+    let acc = match ta with
+    | Some CollectionTV t ->
+      this#on_targ acc t
+    | Some CollectionTKV (tk, tv) ->
+      let acc = this#on_targ acc tk in
+      let acc = this#on_targ acc tv in
+      acc
+    | None -> acc in
     let acc = List.fold_left this#on_afield acc afl in
     acc
 
@@ -740,6 +775,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | ClassVars cv -> this#on_classVars acc cv
     | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n
     | Method m -> this#on_method_ acc m
+    | ClassEnum (_, id, fields) -> this#on_class_enum_ acc id fields
 
   method on_const acc h_opt consts =
     let acc = match h_opt with
@@ -832,5 +868,33 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     acc
 
   method on_pstring acc _ = acc
+
+  method on_pu_atom acc _ = acc
+
+  method on_pumapping acc = function
+    | PUMappingID (id, e) ->
+      let acc = this#on_id acc id in
+      let acc = this#on_expr acc e in
+      acc
+    | PUMappingType (id, h) ->
+      let acc = this#on_id acc id in
+      let acc = this#on_hint acc h in
+      acc
+
+  method on_pufield acc = function
+    | PUAtomDecl (id, mappings) ->
+      let acc = this#on_id acc id in
+      let acc = List.fold_left this#on_pumapping acc mappings in
+      acc
+    | PUCaseType id -> this#on_id acc id
+    | PUCaseTypeExpr (h, id) ->
+      let acc = this#on_hint acc h in
+      let acc = this#on_id acc id in
+      acc
+
+  method on_class_enum_ acc id fields =
+    let acc = this#on_id acc id in
+    let acc = List.fold_left this#on_pufield acc fields in
+    acc
 
 end

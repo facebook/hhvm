@@ -9,7 +9,7 @@ class C {
 
   protected function bar() {
     echo 'in C::bar: ';
-    echo 'get_called_class(): ' . get_called_class() . ', ';
+    echo 'static::class: ' . static::class . ', ';
     echo 'get_class($this): ' . get_class($this) . "\n\n";
     $this->foo();
   }

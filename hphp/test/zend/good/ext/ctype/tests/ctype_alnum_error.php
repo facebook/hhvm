@@ -14,13 +14,13 @@ $orig = setlocale(LC_CTYPE, "C");
 
 // Zero arguments
 echo "\n-- Testing ctype_alnum() function with Zero arguments --\n";
-var_dump( ctype_alnum() );
+try { var_dump( ctype_alnum() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test ctype_alnum with one more than the expected number of arguments
 echo "\n-- Testing ctype_alnum() function with more than expected no. of arguments --\n";
 $c = 1;
 $extra_arg = 10;
-var_dump( ctype_alnum($c, $extra_arg) );
+try { var_dump( ctype_alnum($c, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 setlocale(LC_CTYPE, $orig);
 ?>

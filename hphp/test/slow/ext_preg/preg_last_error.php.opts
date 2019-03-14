@@ -1,1 +1,2 @@
 -vPreg.ErrorLog=false
+-vEval.EnablePHP=1

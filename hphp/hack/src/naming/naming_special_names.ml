@@ -273,7 +273,6 @@ module StdlibFunctions = struct
   let is_null     = "\\is_null"
 
   let get_class = "\\get_class"
-  let get_called_class = "\\get_called_class" (* treated as static::class *)
 
   let array_filter = "\\array_filter"
   let array_map = "\\array_map"
@@ -293,6 +292,7 @@ module Typehints = struct
   let nonnull  = "nonnull"
   let this     = "this"
   let dynamic  = "dynamic"
+  let nothing  = "nothing"
 
   let int     = "int"
   let bool    = "bool"
@@ -322,7 +322,7 @@ module Typehints = struct
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
     x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
-    x = dynamic  || x = wildcard
+    x = dynamic  || x = wildcard || x = nonnull  || x = nothing
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =
@@ -397,6 +397,7 @@ module Rx = struct
   let cTraversable = "\\HH\\Rx\\Traversable"
   let is_enabled = "\\HH\\Rx\\IS_ENABLED"
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
+  let cAsyncIterator = "\\HH\\Rx\\AsyncIterator"
   let move = "\\HH\\Rx\\move"
 end
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A {
   public ?int $a;

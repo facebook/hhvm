@@ -415,8 +415,9 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   add_type(stats.returns, ty);
 
-  for (auto& blk : func.blocks) {
-    if (blk->id == NoBlockId) continue;
+  for (auto const bid : func.blockRange()) {
+    auto const blk = func.blocks[bid].get();
+    if (blk->dead) continue;
     for (auto& bc : blk->hhbcs) {
       collect_simple(stats, bc);
     }
@@ -429,15 +430,15 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
                                 CollectionOpts::TrackConstantArrays);
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
-    for (auto& blk : func.blocks) {
-      if (blk->id == NoBlockId) continue;
-      auto state = fa.bdata[blk->id].stateIn;
+    for (auto const bid : func.blockRange()) {
+      auto const blk = func.blocks[bid].get();
+      auto state = fa.bdata[bid].stateIn;
       if (!state.initialized) continue;
 
       CollectedInfo collect {
         index, ctx, nullptr, CollectionOpts {}, &fa
       };
-      Interp interp { index, ctx, collect, blk.get(), state };
+      Interp interp { index, ctx, collect, bid, blk, state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State*) {};
         auto flags   = StepFlags {};

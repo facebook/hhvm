@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $uptime = HH\server_uptime();
 var_dump($uptime);

@@ -1,1 +1,2 @@
 -vHack.Lang.StrictArrayFillKeys=error
+-vEval.EnablePHP=1

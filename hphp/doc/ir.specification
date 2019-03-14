@@ -910,10 +910,17 @@ To string conversions:
 
   Returns whether t instanceof S0 returns true when t is of the given type.
 
-| ResolveTypeStruct<class,suppress>,   DDArr, SDArr S(Cls|Nullptr),      NF
+| ResolveTypeStruct<class,suppress,offset,size,isOrAsOp>,
+|   DDArr, S(StkPtr) S(Cls|Nullptr), NF
 
-  Applies class/alias resolution on the S0 type structure. Returns a copy.
-  Raises an error if S0 contains traits, functions types or typevars.
+  Applies class/alias resolution on the type structure that is at the stack
+  offset given by S0 and offset. If size > 1, combine the type structures on
+  the stack into the first one's denoted holes. Returns a copy.
+  S1 is the calling class, used to resolve the this typehint.
+  If isOrAsOp is set, raises an error if S0 contains traits, function types or
+  typevars.
+  If there is an error during type structure resolution, this instruction raises
+  an error. If suppress is set, this error is demoted to a warning.
 
 | IsTypeStruct,                        D(Bool), SDArr S(Cell),           NF
 
@@ -1985,6 +1992,20 @@ To string conversions:
   For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.
 
+| RecordReifiedGenericsAndGetName<offset,size>, D(StaticStr), S(StkPtr), NF
+
+  Creates a list of reified generics from the stack, adds them to the reified
+  generics table and returns mangled name used as the key
+
+| RecordReifiedGenericsAndGetTSList<offset,size>, DVArr, S(StkPtr), NF
+
+  Creates a list of reified generics from the stack, adds them to the reified
+  generics table and returns this type structure list
+
+| MangleReifiedName, D(StaticStr), S(StaticStr) S(StaticStr), NF
+
+  Mangles the name from S0 with the mangled type structure string from S1
+
 
 11. Trace exits
 
@@ -2243,6 +2264,11 @@ To string conversions:
   called with null $this. In most cases its a notice, but for
   builtins and special class methods its a fatal.
 
+| RaiseHasThisNeedStatic, ND, S(Func), NF
+
+  Raises a notice to indicate that func was called on an object but is a static
+  method.
+
 | FatalMissingThis, ND, S(Func), T
 
   Similar to RaiseMissingThis, but for cases where we know it will fatal.
@@ -2261,7 +2287,7 @@ To string conversions:
 
   Raises a Hack array compat notice with the text in S0 as its message.
 
-| RaiseParamRefMismatchForFunc<paramIndex>, ND, S(Func), NF
+| RaiseParamRefMismatchForFunc<paramIndex>, ND, S(Func), T
 
   Raise a warning or exception indicating that the reffiness of a parameter was
   incorrectly annotated at the callsite.

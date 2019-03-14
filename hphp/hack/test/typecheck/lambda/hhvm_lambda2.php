@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // lambdas in class bodies
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -29,4 +29,10 @@ async function nullable(): Awaitable<?int> {
     return 123;
   }
   return null;
+}
+
+function something(): void {}
+
+function coin_flip(): bool {
+  return true;
 }

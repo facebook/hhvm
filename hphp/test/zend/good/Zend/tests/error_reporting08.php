@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL);
-	
+
 function foo1($arg) {
 }
 
@@ -15,7 +15,7 @@ function foo3($arg) {
 }
 
 try {
-	@foo1(@foo2(@foo3()));
+	@foo1(@foo2(@foo3(1)));
 } catch (Exception $e) {
 }
 

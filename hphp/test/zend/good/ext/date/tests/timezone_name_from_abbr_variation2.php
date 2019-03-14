@@ -96,7 +96,7 @@ $isdst = 1;
 
 foreach($inputs as $variation =>$gmtOffset) {
       echo "\n-- $variation --\n";
-      var_dump( timezone_name_from_abbr($abbr, $gmtOffset, $isdst) );
+      try { var_dump( timezone_name_from_abbr($abbr, $gmtOffset, $isdst) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 // closing the resource

@@ -1,1 +1,2 @@
 -vEval.EnableGC=1 --count 2
+-vEval.EnablePHP=1

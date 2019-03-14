@@ -3,6 +3,7 @@
   (wrapped false)
   (modules
     pp_type
+    typing_class_member_cache
     typing_defs
     typing_reason)
   (libraries
@@ -24,6 +25,8 @@
     tast_expand
     tast_utils
     tast_visitor
+    nast_visitor
+    nast_check_env
     type_mapper
     type_parameter_env
     type_visitor
@@ -61,6 +64,7 @@
     typing_tdef
     typing_unify
     typing_unify_recursive
+    typing_union
     typing_utils
     typing_visibility
     typing_xhp)
@@ -134,14 +138,14 @@
     typing_shapes
     typing_structure
     typing_try
-    typing_union
     typing_variance)
   (libraries
     logging
     pcre
-    procs_multi_worker
+    procs_procs
     tast
     tast_check
+    nast_check
     typing_naming_body))
 
 (library
@@ -166,6 +170,7 @@
     decl
     errors
     file_info
+    nast
     global_options
     heap_global_storage
     procs_bucket

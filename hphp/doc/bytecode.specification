@@ -354,9 +354,8 @@ The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
 bytecode address of the appropriate entry point. Arguments are pushed on the
 stack either as cells or as refs, but they may be refs only if the parameter
-is passed by ref. The FThrowOnRefMismatch instruction is used to enforce proper
-flavor. The FCall* instructions look at the current FPI to get the bytecode
-address of the function (the callee), transfers the parameters from the
+is passed by ref. The FCall* instructions look at the current FPI to get the
+bytecode address of the function (the callee), transfers the parameters from the
 evaluation stack to the callee, pops the current FPI off of the FPI stack, and
 then invokes the dispatcher to call the function.
 
@@ -782,8 +781,7 @@ must point to a Catch instruction.
 after an FPush* instruction and it must end with an FCall* instruction. Each
 use of the FPush* instruction must be the instruction immediately before
 exactly one FPI region. Likewise, each use of the FCall* instruction must be
-the last instruction in exactly one FPI region. Finally, FThrowOnRefMismatch
-instruction may not be used outside an FPI region.
+the last instruction in exactly one FPI region.
 
 10) Each FPI region may not contain backward jumps, nor may it contain forward
 jumps that jump outside the end of the FPI region. Also, there may not be jumps
@@ -965,6 +963,10 @@ PopV                  [V]  ->  []
 PopU                  [U]  ->  []
 
   Pop. Discards the value on the top of the stack.
+
+PopU2                 [U C:<T>]  ->  [C:<T>]
+
+  Pop two. Discards the uninit underneath the cell on top of the stack.
 
 PopL <local variable id>    [C]  ->  []
 
@@ -1710,7 +1712,6 @@ VGetS <class-ref slot>    [C]  ->  [V]
 
 ClsRefGetC  <class-ref slot>                        [C]  ->  []
 ClsRefGetTS <class-ref slot>                        [C]  ->  []
-ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
 
   Fetch class. This instruction first loads a value into x as shown by the
   following table:
@@ -1719,7 +1720,6 @@ ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
     ---------------+----
       ClsRefGetC   | $1
       ClsRefGetTS  | $1['classname']
-      ClsRefGetL   | %1
 
   If the flavor is TS, then this instruction checks whether $1 is a type
   structure. If not, it throws a fatal error. Loads the classname field onto
@@ -1737,7 +1737,7 @@ ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
   instruction throws a fatal error.
 
   Next, this instruction writes a classref that refers to the class named y to
-  %1 for ClsRefGetC, %2 for ClsRefGetL.
+  %1.
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------
@@ -2126,7 +2126,6 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
 
 NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
 NewObjD <litstr id>                        []  ->  [C:Obj]
-NewObjI <class id>                         []  ->  [C:Obj]
 NewObjS <mode>                             []  ->  [C:Obj]
 
   New object. First, these instructions load a value into x as given
@@ -2136,14 +2135,12 @@ NewObjS <mode>                             []  ->  [C:Obj]
     ------------+----
       NewObj    | %1
       NewObjD   | %1
-      NewObjI   | %1
       NewObjS   | %1
 
   When loading %1 into x, NewObjD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %1 into a classref, and
-  NewObjI will load the class in the current unit with id %1. NewObjS will
-  perform the same work as LateBoundCls/Self/Parent depending on the specified
-  mode.
+  ClsRefGetC instruction to convert the name given by %1 into a classref.
+  NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
+  the specified mode.
 
   This instruction pushes an uninitialized object onto the stack, to be
   initialized during FCall*.
@@ -2162,12 +2159,6 @@ FPushCtor <num params>  [C:Obj]  ->  []
   the number of parameters being passed (given by %1) and a reference to the
   FPI structure for the constructor for class of the object given by $1.
 
-FThrowOnRefMismatch <reffiness bool vector>   []  ->  []
-
-  Check whether reffiness of parameters 0..N-1 of the function associated with
-  the current FPI matches the corresponding reffiness values specified by the
-  vector %1 of size N. Throws an exception if there is a mismatch.
-
 FCall* opcodes
 --------------
 
@@ -2176,24 +2167,31 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <flags> <num args> <num returns> <async eager offset>
+  <flags> <num args> <num returns> <reffiness bool vector> <async eager offset>
   [C|V..C|V]  ->  [C..C]
 
-  FCall* transfers the top %2 values from the stack to the callee as parameters
-  and invokes the function according to the specific opcode. When the callee
-  returns, it will transfer %3 return values onto the caller's evaluation stack
-  using the C flavor. The callee must return the matching number of values using
-  either RetC opcode (if %3 was one) or RetM opcode (otherwise).
+  FCall* first looks up the callee function according to the specific opcode.
 
-  If the optional offset %4 was specified, the callee supports async eager
+  The vector %4 must be either empty or it must contain exactly %2 booleans.
+  If it is non-empty, FCall* checks whether reffiness of parameters 0..(%2-1)
+  of the callee matches the corresponding reffiness values specified by the
+  vector %4. Throws an exception if there is a mismatch.
+
+  Finally, FCall* transfers the top %2 values from the stack to the callee as
+  parameters and invokes the callee. When the callee returns, it will transfer
+  %3 return values onto the caller's evaluation stack using the C flavor. The
+  callee must return the matching number of values using either RetC opcode
+  (if %3 was one) or RetM opcode (otherwise).
+
+  If the optional offset %5 was specified, the callee supports async eager
   return and it would return a finished Awaitable, it may instead return the
   unpacked result of the Awaitable and continue execution of the caller at
-  offset %4.
+  offset %5.
 
-  If %4 was specified and the callee raised an exception, the exception will
+  If %5 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
-  will point after the FCall rather than %4 so it is not advised to have
+  will point after the FCall rather than %5 so it is not advised to have
   different EH entries for these two locations.
 
   Async eager offset feature is used to avoid the cost of construction of short
@@ -2207,7 +2205,7 @@ FCall* opcodes
   %2 parameters.
 
   SupportsAER: hint from static analysis indicating whether the callee is known
-  to support async eager return. Requires specified async eager offset in %4.
+  to support async eager return. Requires specified async eager offset in %5.
 
 FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
 
@@ -3613,13 +3611,6 @@ Eval    [C]  ->  [C]
   The pseudo-main function from (string)$1 inherits the caller's variable
   environment.
 
-DefFunc <function id>    []  ->  []
-
-  Define function. Bind the function specified by %1. If the function specified
-  by %1 is already bound, this instruction does nothing. If another function is
-  already bound to the name associated with %1, this instruction throws a fatal
-  error.
-
 DefCls <class id>    []  ->  []
 
   Define class. Bind the class specified by %1. If the class specified by %1 is
@@ -3686,6 +3677,10 @@ InitThisLoc <local variable id>    []  ->  []
   and if it is not null this instruction stores it to the specified local
   variable. If the current instance is null, or if this bytecode appears in a
   function body that is not a class method, this instruction does nothing.
+
+FuncNumArgs   []   ->   [C:Int]
+
+  Push the number of arguments the current function was called with.
 
 StaticLocCheck  <local variable id> <litstr id> []  ->  [C:Bool]
 
@@ -3802,14 +3797,12 @@ RecordReifiedGeneric <num args> [C..C] -> [C:Arr|Vec]
   to the global reified generics table. Returns the resulting static list
   of type structures.
 
-ReifiedName <num args> <op> [C:Str C..C] -> [C:Str]
+ReifiedName <num args> <name> [C..C] -> [C:Str]
 
-  Takes a name and (%1 - 1) type structures from the stack and
-  mangles the type structures into the name. Returns the mangled name.
+  Takes %1 type structures from the stack and mangles the type structures into
+  the name given by %2. Returns the mangled name.
   This instruction also performs RecordReifiedGeneric instruction's recording
   duty but it can be implemented more efficiently subsumed in this instruction.
-  Op is used to denote whether this name is for a class or a function. This
-  information is used for optimizations only.
 
 CheckReifiedGenericMismatch [C:Arr|Vec] -> []
 

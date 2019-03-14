@@ -1,9 +1,8 @@
 <?php
 
 const X = 1;
-
+const hello = 'hello';
 @var_dump(X);
-@var_dump(x);
 
 use const hello as x;
 

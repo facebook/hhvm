@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Native>>
 function pg_affected_rows(resource $result): int;

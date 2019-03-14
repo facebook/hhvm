@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(string $_): bool {
   return true;
@@ -13,7 +13,7 @@ function test(
   array<string> $vector_array,
   array<X, string> $hashtable_array,
   $untyped,
-  KeyedContainer<X, string> $keyed_container,
+  KeyedContainer<arraykey, string> $keyed_container,
   Container<string> $container,
   Vector<string> $vector,
 ) {
@@ -35,3 +35,5 @@ function take_bool_array(array<bool> $_): void {}
 function take_X_bool_array(array<X, bool> $_): void {}
 function take_arraykey_bool_array(array<arraykey, bool> $_): void {}
 function take_mixed_bool_array(array<mixed, bool> $_): void {}
+
+type X = arraykey;

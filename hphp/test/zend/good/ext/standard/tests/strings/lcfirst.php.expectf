@@ -1,6 +1,4 @@
 #### Basic and Various operations ####
-
-Notice: %s
 string(16) "tesTing lcfirst."
 string(17) "1.testing lcfirst"
 string(11) "hELLO wORLD"
@@ -10,7 +8,6 @@ string(1) "%r\x00%r"
 string(2) "%r\x00%r0"
 string(4) "abcd"
 string(3) "xyz"
-string(6) "string"
 string(2) "-3"
 string(2) "-3"
 string(6) "-3.344"
@@ -37,7 +34,6 @@ string(8) "12twelve"
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
 Warning: %s
-NULL
 
 --- Testing lowercamelcase action call example ---
 string(%d) "partnerName"

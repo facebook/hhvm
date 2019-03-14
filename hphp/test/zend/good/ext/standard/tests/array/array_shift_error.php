@@ -12,13 +12,13 @@ echo "*** Testing array_shift() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing array_shift() function with Zero arguments --\n";
-var_dump( array_shift() );
+try { var_dump( array_shift() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test array_shift with one more than the expected number of arguments
 echo "\n-- Testing array_shift() function with more than expected no. of arguments --\n";
 $stack = array(1, 2);
 $extra_arg = 10;
-var_dump( array_shift(&$stack, $extra_arg) );
+try { var_dump( array_shift(&$stack, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

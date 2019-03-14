@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(int $foo, ...$args): void {}
 
@@ -82,7 +82,11 @@ function test_limitations() {
 
   // fails at runtime, but we don't unpack the container's content type
   // because issuing errors for mixed pretty much destroys the feature
-  f(...make_string_args());
-  $make = fun('make_string_args');
+  f(...make_mixed());
+  $make = fun('make_mixed');
   f(...$make());
+}
+
+function make_mixed(): mixed {
+  throw new Exception('');
 }

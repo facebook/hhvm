@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
 newtype FormatString<T> = string;
@@ -373,7 +373,7 @@ function join(mixed $arg1, mixed $arg2 = null): string;
  *   array element.
  *
  */
-<<__ParamCoerceModeNull, __IsFoldable, __Native, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function str_split(string $str, int $split_length = 1): mixed;
 
 /**
@@ -529,7 +529,7 @@ function substr_replace(mixed $str,
  * @return mixed - Returns the extracted part of string or FALSE on failure.
  *
  */
-<<__IsFoldable, __ParamCoerceModeNull, __Native, __Rx>>
+<<__IsFoldable, __Native, __Rx>>
 function substr(string $str, int $start, int $length = 0x7FFFFFFF): mixed;
 
 /**
@@ -718,7 +718,7 @@ function htmlspecialchars_decode(string $str,
  * @return string - The converted string.
  *
  */
-<<__ParamCoerceModeNull, __Native>>
+<<__Native>>
 function htmlspecialchars(string $str,
                           int $quote_style = ENT_COMPAT,
                           string $charset = "UTF-8",

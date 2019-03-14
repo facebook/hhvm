@@ -17,7 +17,7 @@ class Two<reify T1> {
   }
 }
 
-$t = new Two<reify E>();
+$t = new Two<E>();
 var_dump($t->f<C>(true) is C);
 var_dump($t->f<C>(true) is D);
 var_dump($t->f<C>(true) is E);

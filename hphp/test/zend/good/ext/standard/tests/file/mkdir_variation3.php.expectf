@@ -28,16 +28,20 @@ Directory created
 Directory created
 
 --empty array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int indexed array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --associative array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --nested arrays--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --uppercase NULL--
 Directory created
@@ -76,10 +80,12 @@ Directory created
 Directory created
 
 --instance of classWithToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --instance of classWithoutToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --undefined var--
 Directory created

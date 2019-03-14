@@ -1,7 +1,0 @@
-comparing .main
-Semdiff succeeded
-Edits = 
-
-for .adata A_0 with A_0
-- a:2:{s:1:\"A\";i:2;s:1:\"B\";i:3;}
-+ a:3:{s:1:\"A\";i:1;s:1:\"A\";i:2;s:1:\"B\";i:3;}

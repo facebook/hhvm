@@ -81,14 +81,13 @@ Class EuropeanMeals implements IteratorAggregate {
 		$this->storedEnglishMealIterator = new EnglishMealIterator;
 		$this->storedFrenchMealIterator = new FrenchMealIterator;
 	}
+
+  private static $getIteratorI = 0;
 	
 	public function getIterator() {
 		global $indent;
 		echo "$indent--> " . __METHOD__  . "\n";
-		
-		//Alternate between English and French meals
-		static $i = 0;
-		if ($i++%2 == 0) {
+		if (self::$getIteratorI++%2 == 0) {
 			return $this->storedEnglishMealIterator;
 		} else {
 			return $this->storedFrenchMealIterator;

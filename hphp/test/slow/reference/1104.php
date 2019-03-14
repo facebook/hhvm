@@ -1,8 +1,8 @@
 <?php
 
 function f($x) {
-  global $u;
-  if (isset($u)) return null;
+
+  if (isset(Reference1104::$u)) return null;
   return $x;
 }
 function test($a) {
@@ -26,4 +26,8 @@ $t = f('test');
 $x = 1;
 $t(foo());
 var_dump($x);
+}
+
+abstract final class Reference1104 {
+  public static $u;
 }

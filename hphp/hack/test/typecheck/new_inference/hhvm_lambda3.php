@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function main() {
   $capture1 = "yo";

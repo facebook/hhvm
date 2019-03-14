@@ -2,11 +2,9 @@
   const DEFINED = 1234;
   $def = 456;
   const DEFINED_TO_VAR = 456;
-  define('DEFINED_TO_UNDEF_VAR', $undef);
 
   class C
   {
-      const c0 = UNDEFINED;
 
       const c1 = 1, c2 = 1.5;
       const c3 =  + 1, c4 =  + 1.5;
@@ -20,7 +18,6 @@
 
       const c12 = DEFINED;
       const c13 = DEFINED_TO_VAR;
-      const c14 = DEFINED_TO_UNDEF_VAR;
 
       const c15 = "hello1";
       const c16 = 'hello2';
@@ -29,7 +26,6 @@
   }
 
   echo "\nAttempt to access various kinds of class constants:\n";
-  var_dump(C::c0);
   var_dump(C::c1);
   var_dump(C::c2);
   var_dump(C::c3);
@@ -43,7 +39,6 @@
   var_dump(C::c11);
   var_dump(C::c12);
   var_dump(C::c13);
-  var_dump(C::c14);
   var_dump(C::c15);
   var_dump(C::c16);
   var_dump(C::c17);

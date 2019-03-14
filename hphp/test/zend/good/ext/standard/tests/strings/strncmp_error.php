@@ -12,10 +12,10 @@ $str2 = 'string_val';
 $len = 10;
 $extra_arg = 10;
 
-var_dump( strncmp() );  //Zero argument
-var_dump( strncmp($str1) );  //One argument, less than expected no. of args
-var_dump( strncmp($str1, $str2) );  //Two arguments, less than expected no. of args
-var_dump( strncmp($str1, $str2, $len, $extra_arg) );  //Four arguments, greater than expected no. of args
+try { var_dump( strncmp() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //Zero argument
+try { var_dump( strncmp($str1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //One argument, less than expected no. of args
+try { var_dump( strncmp($str1, $str2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //Two arguments, less than expected no. of args
+try { var_dump( strncmp($str1, $str2, $len, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //Four arguments, greater than expected no. of args
 
 /* Invalid argument for $len */
 $len = -10;

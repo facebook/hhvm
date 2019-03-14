@@ -1,15 +1,12 @@
 
 Warning: %s
-NULL
+
+Warning: %s
 
 Warning: %s
 NULL
 
 Warning: %s
-NULL
-
-Warning: %s
-NULL
 int(1)
 string(4) "test"
 Done

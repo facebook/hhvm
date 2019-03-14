@@ -1,0 +1,8 @@
+File "explicit_type_collection_wildcard_darray4.php", line 6, characters 3-13:
+  darray<string, bool>
+File "explicit_type_collection_wildcard_darray4.php", line 5, characters 8-36:
+Incompatible field values (Typing[4110])
+File "explicit_type_collection_wildcard_darray4.php", line 5, characters 15-20:
+This is a string
+File "explicit_type_collection_wildcard_darray4.php", line 5, characters 26-26:
+It is incompatible with an int

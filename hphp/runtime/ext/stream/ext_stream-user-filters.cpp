@@ -336,7 +336,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
     return empty_array();
   }
   return Array::attach(
-    array_keys_helper(
+    HHVM_FN(array_keys)(
       make_tv<KindOfArray>(filters.filtersAsArray().get())
     ).m_data.parr
   );

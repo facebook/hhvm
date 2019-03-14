@@ -87,7 +87,7 @@ $month = 7;
 
 foreach($inputs as $variation =>$year) {
       echo "\n-- $variation --\n";
-      var_dump( checkdate($month, $day, $year) );
+      try { var_dump( checkdate($month, $day, $year) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 // closing the resource

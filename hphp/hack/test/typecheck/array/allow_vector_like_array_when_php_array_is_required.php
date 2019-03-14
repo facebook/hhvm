@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function consumesUnknownArray(array $array): void {}
 
@@ -7,5 +7,5 @@ function providesArrayOfInt(): array<int> {
 }
 
 function test(): void {
-  consumesUnknownArray(providesArrayOfStringToInt());
+  consumesUnknownArray(providesArrayOfInt());
 }

@@ -300,6 +300,7 @@ val php7_anonymous_function : string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string
+val collection_intrinsic_many_typeargs: string
 val invalid_shape_field_name : string
 val invalid_reference : string
 val invalid_hack_mode : string
@@ -343,6 +344,7 @@ val less_than_two_statements_in_concurrent_block : string
 val invalid_syntax_concurrent_block : string
 val statement_without_await_in_concurrent_block : string
 val concurrent_is_disabled : string
+val static_closures_are_disabled : string
 val static_locals_variables_are_disabled : string
 val invalid_await_position : string
 val misplaced_reactivity_annotation : string
@@ -355,3 +357,7 @@ val expected_user_attribute : string
 val tparams_in_tconst : string
 val reified_attribute : string
 val lval_as_expression : string
+val pocket_universe_final_expected : string
+val pocket_universe_enum_expected : string
+val pocket_universe_invalid_field : int -> string
+val type_keyword : string

@@ -90,10 +90,11 @@ ArrayIter::ArrayIter(const ArrayIter& iter) {
   }
 }
 
+template <bool incRef /* = true */>
 void ArrayIter::arrInit(const ArrayData* arr) {
   setArrayData(arr);
   if (arr) {
-    arr->incRefCount();
+    if (incRef) arr->incRefCount();
     m_pos = arr->iter_begin();
   }
 }
@@ -144,6 +145,9 @@ void ArrayIter::cellInit(const Cell c) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
     objInit<true>(c.m_data.pobj);
+  } else if (isClsMethType(c.m_type)) {
+    raiseClsMethToVecWarningHelper();
+    arrInit<false>(clsMethToVecHelper(c.m_data.pclsmeth).detach());
   } else {
     arrInit(nullptr);
   }
@@ -249,6 +253,13 @@ template <bool Local>
 bool Iter::init(TypedValue* c1) {
   assertx(!isRefType(c1->m_type));
   bool hasElems = true;
+  if (isClsMethType(c1->m_type)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      tvCastToVecInPlace(c1);
+    } else {
+      tvCastToVArrayInPlace(c1);
+    }
+  }
   if (isArrayLikeType(c1->m_type)) {
     if (!c1->m_data.parr->empty()) {
       if (Local) {

@@ -1,2 +1,3 @@
 -vEval.DumpHhas=1
 -vEval.ThisTypeHintLevel=3
+-vEval.EnablePHP=1

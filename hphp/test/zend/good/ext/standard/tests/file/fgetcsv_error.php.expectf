@@ -2,52 +2,38 @@
 -- Testing fgetcsv() with zero argument --
 
 Warning: %s
-NULL
 -- Testing fgetcsv() with more than expected number of arguments --
 
 Warning: %s
-NULL
 -- Testing fgetcsv() with invalid arguments --
 -- Iteration 1 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 2 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 3 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 4 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 5 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 -- Iteration 6 --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 Done

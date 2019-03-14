@@ -173,6 +173,14 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
     return refuse("callee with multiple returns");
   }
 
+  if (fca.enforceReffiness()) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (callee->byRef(i) != fca.byRef(i)) {
+        return refuse("callee called with arguments of mismatched reffiness");
+      }
+    }
+  }
+
   // It's okay if we passed fewer arguments than there are parameters as long
   // as the gap can be filled in by DV funclets.
   for (auto i = fca.numArgs; i < numParams; ++i) {

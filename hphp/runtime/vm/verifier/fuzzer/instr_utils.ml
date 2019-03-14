@@ -72,12 +72,10 @@ let stk_data : instruct -> stack_sig = function
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _
   | ICall FPushFuncU _
-  | IIncludeEvalDefine DefFunc _
   | IIncludeEvalDefine DefClsNop _
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _
-  | IGenerator ContCheck _
-  | IGet ClsRefGetL _                      -> [], []
+  | IGenerator ContCheck _                 -> [], []
   | ICall FPushObjMethod _                 -> ["C"; "C"], []
   | IOp Fatal _
   | IContFlow JmpZ _
@@ -148,7 +146,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator ContGetReturn
   | ICall NewObj _
   | ICall NewObjD _
-  | ICall NewObjI _
   | IGet CGetQuietL _                      -> [], ["C"]
   | IMutator SetG
   | IMutator SetOpG _
@@ -196,7 +193,7 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]
-  | ICall FCall ((f, n, r, _), _, _)       ->
+  | ICall FCall ((f, n, r, _, _), _, _)       ->
     produce "C" (n + (if f.has_unpack then 1 else 0)),
     produce "C" r
   | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["C"]

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__ConsistentConstruct>>
 class A {

@@ -7,7 +7,7 @@ namespace {
 
 function main() {
   $s = ImmSet {};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
 main();

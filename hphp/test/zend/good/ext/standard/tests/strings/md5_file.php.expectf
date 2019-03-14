@@ -13,10 +13,8 @@ Warning: %s
 bool(false)
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Hexadecimal Output for Empty file as Argument ***
 string(32) "d41d8cd98f00b204e9800998ecf8427e"

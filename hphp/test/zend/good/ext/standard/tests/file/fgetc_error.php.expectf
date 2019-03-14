@@ -2,34 +2,26 @@
 -- Testing fgetc() with zero argument --
 
 Warning: %s
-bool(false)
 -- Testing fgetc() with more than expected number of arguments --
 
 Warning: %s
-bool(false)
 -- Testing fgetc() with invalid arguments --
 -- Iteration 1 --
 
 Warning: %s
-bool(false)
 -- Iteration 2 --
 
 Warning: %s
-bool(false)
 -- Iteration 3 --
 
 Warning: %s
-bool(false)
 -- Iteration 4 --
 
 Warning: %s
-bool(false)
 -- Iteration 5 --
 
 Warning: %s
-bool(false)
 -- Iteration 6 --
 
 Warning: %s
-bool(false)
 Done

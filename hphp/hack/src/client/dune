@@ -3,8 +3,7 @@
   (wrapped false)
   (modules
     (:standard
-      \ clientLogCommand
-      \ clientTraceAi))
+      \ clientLogCommand))
   (libraries
     hh_server_monitor
     logging
@@ -21,3 +20,10 @@
     sys_utils)
   (preprocess
     (pps lwt_ppx)))
+
+(library
+  (name client_log_command)
+  (modules
+    clientLogCommand)
+  (libraries
+    sys_utils))

@@ -28,11 +28,11 @@ var_dump(gmp_strval($n));
 
 $b = "";
 gmp_setbit(&$b, 23);
-gmp_setbit(&$b);
-gmp_setbit(&$b, 23,1,1);
-gmp_setbit(&$b,array());
+try { gmp_setbit(&$b); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { gmp_setbit(&$b, 23,1,1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { gmp_setbit(&$b,array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $a = array();
-gmp_setbit(&$a,array());
+try { gmp_setbit(&$a,array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 ?>

@@ -77,6 +77,8 @@ struct RepoAuthType {
     TAG(OptFunc)                                  \
     TAG(Cls)                                      \
     TAG(OptCls)                                   \
+    TAG(ClsMeth)                                  \
+    TAG(OptClsMeth)                               \
     TAG(InitUnc)                                  \
     TAG(Unc)                                      \
     TAG(UncArrKey)                                \

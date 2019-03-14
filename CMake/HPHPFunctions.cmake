@@ -135,6 +135,7 @@ function(embed_sections TARGET DEST)
     # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-hhjs-babel-transform.txt"
     COMMAND "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"
@@ -144,7 +145,8 @@ function(embed_sections TARGET DEST)
     set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
     set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${HPHP_HOME}/hphp/util/generated-build-id.txt")
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID})
+    set(HHJS_BABEL_TRANSFORM -Wl,-sectcreate,__text,"hhjs_babel_transform","${HPHP_HOME}/hphp/util/generated-hhjs-babel-transform.txt")
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID} ${HHJS_BABEL_TRANSFORM})
   elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
@@ -154,6 +156,7 @@ function(embed_sections TARGET DEST)
     set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${HPHP_HOME}/hphp/util/generated-compiler-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}build_id RCDATA \"${HPHP_HOME}/hphp/util/generated-build-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}hhjs_babel_transform RCDATA \"${HPHP_HOME}/hphp/util/generated-hhjs-babel-transform.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
     set(i 0)
     foreach (nm ${${TARGET}_SLIBS_NAMES})
@@ -168,11 +171,13 @@ function(embed_sections TARGET DEST)
       ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
            "--add-section" "repo_schema_id=${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
            "--add-section" "build_id=${HPHP_HOME}/hphp/util/generated-build-id.txt"
+           "--add-section" "hhjs_babel_transform=${HPHP_HOME}/hphp/util/generated-hhjs-babel-transform.txt"
            ${${TARGET}_SLIBS}
            ${DEST}
       DEPENDS "${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
               "${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
               "${HPHP_HOME}/hphp/util/generated-build-id.txt"
+              "${HPHP_HOME}/hphp/util/generated-hhjs-babel-transform.txt"
       COMMENT "Embedding php in ${TARGET}")
   endif()
 endfunction(embed_sections)

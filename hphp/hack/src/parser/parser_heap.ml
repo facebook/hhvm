@@ -47,8 +47,7 @@ let get_from_local_cache ~full file_name =
       | Some ast -> ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
-        let default_mode = ParserOptions.default_mode popt in
-        match Full_fidelity_parser.parse_mode ~default:default_mode source with
+        match Full_fidelity_parser.parse_mode source with
         | None
         | Some FileInfo.Mphp -> []
         | Some _ ->

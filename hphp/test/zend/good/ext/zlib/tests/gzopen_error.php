@@ -14,12 +14,12 @@ $filename = 'string_val';
 $mode = 'string_val';
 $use_include_path = 10;
 $extra_arg = 10;
-var_dump( gzopen($filename, $mode, $use_include_path, $extra_arg) );
+try { var_dump( gzopen($filename, $mode, $use_include_path, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing gzopen with one less than the expected number of arguments
 echo "\n-- Testing gzopen() function with less than expected no. of arguments --\n";
 $filename = 'string_val';
-var_dump( gzopen($filename) );
+try { var_dump( gzopen($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

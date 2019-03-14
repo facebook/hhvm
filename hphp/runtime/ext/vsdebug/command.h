@@ -387,7 +387,6 @@ private:
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant

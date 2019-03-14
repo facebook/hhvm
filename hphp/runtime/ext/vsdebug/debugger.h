@@ -484,23 +484,9 @@ struct Debugger final {
     VSCommand* command
   );
 
-  void setDebuggerOptions(DebuggerOptions options) {
-    Lock lock(m_lock);
-    m_debuggerOptions = options;
-
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelInfo,
-      "Client options set:\n"
-        "showDummyOnAsyncPause: %s\n"
-        "warnOnInterceptedFunctions: %s\n"
-        "notifyOnBpCalibration: %s\n"
-        "disableUniqueVarRef: %s\n",
-      options.showDummyOnAsyncPause ? "YES" : "NO",
-      options.warnOnInterceptedFunctions ? "YES" : "NO",
-      options.notifyOnBpCalibration ? "YES" : "NO",
-      options.disableUniqueVarRef ? "YES" : "NO"
-    );
-  }
+  bool getDebuggerOption(const HPHP::String& option);
+  void setDebuggerOption(const HPHP::String& option, bool value);
+  void setDebuggerOptions(DebuggerOptions options);
 
   DebuggerOptions getDebuggerOptions() {
     Lock lock(m_lock);

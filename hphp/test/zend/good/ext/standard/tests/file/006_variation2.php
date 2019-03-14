@@ -14,7 +14,7 @@ echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
 $file_name = dirname(__FILE__)."/006_variation2.tmp";
 $file_handle = fopen($file_name, "w");
-fclose($file_handle);
+try { fclose($file_handle); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $dir_name = dirname(__FILE__)."/006_variation2";
 mkdir($dir_name);
 
@@ -48,12 +48,12 @@ $perms_array = array(
 $count = 1;
 foreach($perms_array as $permission) {
   echo "-- Iteration $count --\n";
-  var_dump( chmod($file_name, $permission) );
+  try { var_dump( chmod($file_name, $permission) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   printf("%o", fileperms($file_name) );
   echo "\n";
   clearstatcache();
 
-  var_dump( chmod($dir_name, $permission) );
+  try { var_dump( chmod($dir_name, $permission) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   printf("%o", fileperms($dir_name) );
   echo "\n";
   clearstatcache();

@@ -6,17 +6,17 @@
 echo "*** Testing preg_grep() : error conditions ***\n";
 // Zero arguments
 echo "\n-- Testing preg_grep() function with Zero arguments --\n";
-var_dump(preg_grep());
+try { var_dump(preg_grep()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 //Test preg_grep with one more than the expected number of arguments
 echo "\n-- Testing preg_grep() function with more than expected no. of arguments --\n";
 $regex = '/\d/';
 $input = array(1, 2);
 $flags = 0;
 $extra_arg = 10;
-var_dump(preg_grep($regex, $input, $flags, $extra_arg));
+try { var_dump(preg_grep($regex, $input, $flags, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 // Testing preg_grep withone less than the expected number of arguments
 echo "\n-- Testing preg_grep() function with less than expected no. of arguments --\n";
 $regex = 'string_val';
-var_dump(preg_grep($regex));
+try { var_dump(preg_grep($regex)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done"
 ?>

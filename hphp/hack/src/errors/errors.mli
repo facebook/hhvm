@@ -262,7 +262,9 @@ val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : SSet.t -> Pos.t -> unit
 val trait_reuse : Pos.t -> string -> Pos.t * string -> string -> unit
 val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
-val invalid_enforceable_type_argument : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
+val invalid_enforceable_type : string -> Pos.t * string -> Pos.t -> Pos.t -> string -> unit
+val invalid_newable_type_argument : Pos.t * string -> Pos.t -> unit
+val invalid_newable_type_param_constraints: (Pos.t * string) -> string list -> unit
 val override_final : parent:Pos.t -> child:Pos.t -> unit
 val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
 val override_lsb : member_name:string -> parent:Pos.t -> child:Pos.t -> unit
@@ -342,6 +344,7 @@ val trivial_strict_not_nullable_compare_null : Pos.t -> string -> (Pos.t * strin
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val noreturn_usage : Pos.t -> (Pos.t * string) list -> unit
 val generic_at_runtime : Pos.t -> unit
+val generics_not_allowed : Pos.t -> unit
 val interface_with_partial_typeconst : Pos.t -> unit
 val multiple_xhp_category : Pos.t -> unit
 val not_abstract_without_typeconst : Pos.t * string -> unit
@@ -369,8 +372,7 @@ val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
 val class_property_only_static_literal : Pos.t -> unit
-val reference_expr : Pos.t -> bool -> unit
-val reference_expr_partial : Pos.t -> unit
+val reference_expr : Pos.t -> unit
 val unification_cycle : Pos.t -> string -> unit
 val eq_incompatible_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val comparison_invalid_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
@@ -521,6 +523,7 @@ val coroutine_in_constructor : Pos.t -> unit
 val illegal_by_ref_expr : Pos.t -> string -> unit
 val variadic_byref_param : Pos.t -> unit
 val classname_const_instanceof : string -> Pos.t -> unit
+val byref_on_construct : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit
 val anon_use_capture_by_ref : Pos.t -> unit
 val no_tparams_on_type_consts : Pos.t -> unit
@@ -538,7 +541,7 @@ val shapes_idx_with_non_existent_field :
 val ambiguous_object_access :
   Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
 val invalid_truthiness_test : Pos.t -> string -> unit
-val sketchy_truthiness_test : Pos.t -> string -> [< `String | `Arraykey | `Stringish | `Traversable ] -> unit
+val sketchy_truthiness_test : Pos.t -> string -> [< `String | `Arraykey | `Stringish | `XHPChild | `Traversable ] -> unit
 val unserializable_type : Pos.t -> string -> unit
 val invalid_arraykey : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 val invalid_argument_type_for_condition_in_rx :
@@ -575,6 +578,7 @@ val invalid_move_target : Pos.t -> Pos.t -> string -> unit
 val invalid_move_use : Pos.t -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
 val erased_generic_passed_to_reified : Pos.t * string -> Pos.t * string -> unit
+val new_without_newable: Pos.t -> string -> unit
 val ignored_result_of_freeze : Pos.t -> unit
 val ignored_result_of_move : Pos.t -> unit
 val mutably_owned_argument_mismatch : arg_is_owned_local:bool -> Pos.t -> Pos.t -> unit

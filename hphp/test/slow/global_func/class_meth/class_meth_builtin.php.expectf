@@ -1,0 +1,10 @@
+test on varray:
+string(1) "A"
+string(5) "func1"
+test on clsmeth:
+class(A)
+function(A::func1)
+string(1) "A"
+string(5) "func1"
+
+Fatal error: Argument 1 passed to class_meth_get_class must be a class_meth in %s/class_meth_builtin.php on line 32

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Removing optional field allows omitting it even when fields are only

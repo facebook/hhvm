@@ -65,7 +65,7 @@ $values = array(
 $iterator = 1;
 foreach($values as $value) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( image_type_to_mime_type($value) );
+      try { var_dump( image_type_to_mime_type($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       $iterator++;
 };
 ?>

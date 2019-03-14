@@ -10,5 +10,5 @@ $gaussian = array(
     array(1.0, 2.0, 1.0)
 );
 
-var_dump(imageconvolution($image, $gaussian, 16));
+try { var_dump(imageconvolution($image, $gaussian, 16)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>

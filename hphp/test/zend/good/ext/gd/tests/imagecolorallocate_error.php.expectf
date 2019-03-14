@@ -3,13 +3,10 @@
 -- Testing imagecolorallocate() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing imagecolorallocate() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 ===DONE===

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // Testing lambda
 async function foo() {

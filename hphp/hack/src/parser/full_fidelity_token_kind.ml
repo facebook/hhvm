@@ -217,9 +217,6 @@ type t =
   | HexadecimalLiteral
   | BinaryLiteral
   | FloatingLiteral
-  | ExecutionStringLiteral
-  | ExecutionStringLiteralHead
-  | ExecutionStringLiteralTail
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
   | DoubleQuotedStringLiteralHead
@@ -635,9 +632,6 @@ let to_string kind =
   | HexadecimalLiteral            -> "hexadecimal_literal"
   | BinaryLiteral                 -> "binary_literal"
   | FloatingLiteral               -> "floating_literal"
-  | ExecutionStringLiteral        -> "execution_string_literal"
-  | ExecutionStringLiteralHead    -> "execution_string_literal_head"
-  | ExecutionStringLiteralTail    -> "execution_string_literal_tail"
   | SingleQuotedStringLiteral     -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral     -> "double_quoted_string_literal"
   | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"
@@ -668,9 +662,6 @@ let is_variable_text kind =
   | HexadecimalLiteral -> true
   | BinaryLiteral -> true
   | FloatingLiteral -> true
-  | ExecutionStringLiteral -> true
-  | ExecutionStringLiteralHead -> true
-  | ExecutionStringLiteralTail -> true
   | SingleQuotedStringLiteral -> true
   | DoubleQuotedStringLiteral -> true
   | DoubleQuotedStringLiteralHead -> true

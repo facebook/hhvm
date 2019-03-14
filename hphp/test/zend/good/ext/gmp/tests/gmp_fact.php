@@ -16,8 +16,8 @@ var_dump(gmp_strval(gmp_fact($n)));
 $n = gmp_init(-10);
 var_dump(gmp_strval(gmp_fact($n)));
 
-var_dump(gmp_fact());
-var_dump(gmp_fact(1,1));
+try { var_dump(gmp_fact()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_fact(1,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_fact(array()));
 var_dump(gmp_strval(gmp_fact(array())));
 

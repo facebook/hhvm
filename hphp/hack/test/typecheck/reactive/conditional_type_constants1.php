@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface IValue {
 }
@@ -37,4 +37,9 @@ abstract class ValueFactory {
     $r = null ?? static::unwrap($result);
     return $r;
   }
+}
+
+class TLoader {
+  <<__Rx>>
+  public function gen() {}
 }

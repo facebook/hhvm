@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 class A {
   <<__Rx, __Mutable>>
   public function f(): A {

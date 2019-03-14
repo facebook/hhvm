@@ -2,11 +2,9 @@
 
 <<__Rx>>
 function test() {
-  function bar () {}     // DefFunc
   class C {}             // DefCls
   // we don't emit DefClsNop outside of systemlib
   class_alias('C', 'D'); // AliasCls
-  define('lol', 'whut'); // DefCns
   // we don't emit DefTypeAlias outside of pseudo-mains
 
   include_once 'defines-includes.inc';

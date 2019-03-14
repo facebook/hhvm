@@ -7,28 +7,28 @@
 echo "*** Testing ezmlm_hash() : error conditions ***\n";
 
 echo "\n-- Testing ezmlm_hash() function with fewer than expected no. of arguments --\n";
-var_dump( ezmlm_hash() );
+try { var_dump( ezmlm_hash() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing ezmlm_hash() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( ezmlm_hash("webmaster@example.com", $extra_arg) );
+try { var_dump( ezmlm_hash("webmaster@example.com", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing ezmlm_hash() function with invalid input - ARRAY --\n";
 $array_arg = array(1,2,3,4);
 $extra_arg = 10;
-var_dump( ezmlm_hash($array_arg) );
+try { var_dump( ezmlm_hash($array_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --\n";
 class sample  {
 }
 
 $obj_arg = new sample();
-var_dump( ezmlm_hash($obj_arg) );
+try { var_dump( ezmlm_hash($obj_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing ezmlm_hash() function with invalid input - RESOURCE --\n";
 $file_handle = fopen(__FILE__, "r");
 $extra_arg = 10;
-var_dump( ezmlm_hash($file_handle) );
+try { var_dump( ezmlm_hash($file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 fclose($file_handle); 
 
 ?>

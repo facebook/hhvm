@@ -1,8 +1,8 @@
 <?php
 
-define ("PHP_CURL_SERVER_HOSTNAME", "localhost");
-define ("PHP_CURL_SERVER_PORT", 8964);
-define ("PHP_CURL_SERVER_ADDRESS", PHP_CURL_SERVER_HOSTNAME.":".PHP_CURL_SERVER_PORT);
+const PHP_CURL_SERVER_HOSTNAME = "localhost";
+const PHP_CURL_SERVER_PORT = 8964;
+const PHP_CURL_SERVER_ADDRESS =PHP_CURL_SERVER_HOSTNAME.":".PHP_CURL_SERVER_PORT;
 
 function curl_cli_server_start() {
     if(getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {

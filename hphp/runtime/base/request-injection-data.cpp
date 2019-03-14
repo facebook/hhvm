@@ -429,9 +429,6 @@ void RequestInjectionData::threadInit() {
                    std::to_string(RuntimeOption::RuntimeErrorReportingLevel)
                     .c_str(),
                    &m_errorReportingLevel);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "track_errors", "0",
-                   &m_trackErrors);
   IniSetting::Bind(
     IniSetting::CORE,
     IniSetting::PHP_INI_ALL,
@@ -664,7 +661,7 @@ void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
-    !isForcedToInterpret() &&
+    (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
     !getDebuggerForceIntr();
 }
 

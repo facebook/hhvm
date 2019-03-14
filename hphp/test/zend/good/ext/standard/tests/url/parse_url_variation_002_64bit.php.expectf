@@ -2,11 +2,11 @@
 Error: 8 - Undefined variable: undefined_var, %s(61)
 Error: 8 - Undefined variable: unset_var, %s(64)
 
-Arg value 10.5 
+Arg value 10.5
 Error: 2 - parse_url(): Invalid URL component identifier 10, %s(71)
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 array(8) {
   ["scheme"]=>
   string(4) "http"
@@ -26,83 +26,83 @@ array(8) {
   string(16) "some_page_ref123"
 }
 
-Arg value 101234567000 
+Arg value 101234567000
 Error: 2 - parse_url(): Invalid URL component identifier %d, %s(71)
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string(4) "http"
 
-Arg value 0.5 
+Arg value 0.5
 string(4) "http"
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
-Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
-NULL
+Arg value Array
+
+Warning: parse_url() expects parameter 2 to be integer, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
-Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
-NULL
+Arg value Array
+
+Warning: parse_url() expects parameter 2 to be integer, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
-Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
-NULL
+Arg value Array
+
+Warning: parse_url() expects parameter 2 to be integer, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
-Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
-NULL
+Arg value Array
+
+Warning: parse_url() expects parameter 2 to be integer, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
-Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(71)
-NULL
+Arg value Array
 
-Arg value  
+Warning: parse_url() expects parameter 2 to be integer, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+
+Arg value 
 string(4) "http"
 
-Arg value  
+Arg value 
 string(4) "http"
 
-Arg value 1 
+Arg value 1
 string(11) "www.php.net"
 
-Arg value  
+Arg value 
 string(4) "http"
 
-Arg value 1 
+Arg value 1
 string(11) "www.php.net"
 
-Arg value  
+Arg value 
 string(4) "http"
 
-Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
-NULL
+Arg value 
 
-Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
-NULL
+Warning: parse_url() expects parameter 2 to be integer, string given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 
-Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
-NULL
+Arg value 
 
-Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
-NULL
+Warning: parse_url() expects parameter 2 to be integer, string given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+
+Arg value string
+
+Warning: parse_url() expects parameter 2 to be integer, string given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+
+Arg value string
+
+Warning: parse_url() expects parameter 2 to be integer, string given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 
-Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(71)
-NULL
+Arg value 
 
-Arg value  
+Warning: parse_url() expects parameter 2 to be integer, object given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+
+Arg value 
 string(4) "http"
 
-Arg value  
+Arg value 
 string(4) "http"
 Done

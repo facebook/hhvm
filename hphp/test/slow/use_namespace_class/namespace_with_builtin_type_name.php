@@ -2,7 +2,7 @@
 
 namespace Foo\Dict {
   function herp(dict<int, string> $derp): void {
-    var_dump($derp);
+    \var_dump($derp);
   }
 }
 

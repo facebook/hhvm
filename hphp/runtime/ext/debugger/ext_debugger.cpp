@@ -39,6 +39,8 @@ struct DebuggerExtension final : Extension {
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);
     HHVM_FE(hphp_debug_break);
+    HHVM_FE(hphp_debugger_set_option);
+    HHVM_FE(hphp_debugger_get_option);
     loadSystemlib();
   }
 } s_debugger_extension;
@@ -114,6 +116,29 @@ bool HHVM_FUNCTION(hphp_debugger_attached) {
 
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
   return (debugger != nullptr && debugger->clientConnected());
+}
+
+bool HHVM_FUNCTION(hphp_debugger_set_option, const String& option, bool value) {
+  auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+  if (!debugger) {
+    raise_error("hphp_debugger_set_option: no debugger extension is enabled");
+  } else if (!debugger->clientConnected()) {
+    raise_error("hphp_debugger_set_option: no debugger client is attached");
+  } else {
+    debugger->setDebuggerOption(option, value);
+    return value;
+  }
+}
+
+bool HHVM_FUNCTION(hphp_debugger_get_option, const String& option) {
+  auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
+  if (!debugger) {
+    raise_error("hphp_debugger_get_option: no debugger extension is enabled");
+  } else if (!debugger->clientConnected()) {
+    raise_error("hphp_debugger_get_option: no debugger client is attached");
+  } else {
+    return debugger->getDebuggerOption(option);
+  }
 }
 
 const StaticString

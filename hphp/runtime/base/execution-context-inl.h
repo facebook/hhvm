@@ -206,6 +206,10 @@ inline void ExecutionContext::setSoftLateInitDefault(Variant d) {
   m_softLateInitDefault = std::move(d);
 }
 
+inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
+  return m_requestOptions.get_pointer();
+}
+
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;

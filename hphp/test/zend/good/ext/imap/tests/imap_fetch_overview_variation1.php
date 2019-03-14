@@ -82,7 +82,7 @@ $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Testing with first argument value: ";
   var_dump($input);
-  var_dump( imap_fetch_overview($input, $msg_no) );
+  try { var_dump( imap_fetch_overview($input, $msg_no) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 ?>

@@ -1,5 +1,5 @@
 (library
-  (name ai)
+  (name ai_stubs)
   (wrapped false)
   (modules
     ai
@@ -14,24 +14,11 @@
     buildMain))
 
 (library
-  (name coroutine_check)
+  (name debug_stubs)
   (wrapped false)
   (modules
-    coroutine_check)
-  (libraries
-    tast))
-
-(library
-  (name coroutine_errors)
-  (wrapped false)
-  (modules
-    coroutine_errors))
-
-(library
-  (name debug)
-  (wrapped false)
-  (modules
-    debug)
+    debug
+    sof)
   (libraries
     parser_sigs))
 
@@ -42,19 +29,13 @@
     hackc_parse_delegator))
 
 (library
-  (name ignore)
-  (wrapped false)
-  (modules
-    filesToIgnore))
-
-(library
-  (name linting)
+  (name linting_stubs)
   (wrapped false)
   (modules
     linting_service))
 
 (library
-  (name load_script)
+  (name load_script_stubs)
   (wrapped false)
   (modules
     load_script
@@ -62,35 +43,10 @@
     loadScriptUtils))
 
 (library
-  (name logging)
-  (wrapped false)
-  (modules
-    bad_files
-    featureLogging
-    hackEventLogger
-    hackcEventLogger
-    hackfmtEventLogger
-    typingLogger)
-  (flags (:standard -w @a-27)))
-
-(library
-  (name logging_event)
-  (wrapped false)
-  (modules
-    eventLogger
-    scuba))
-
-(library
-  (name messages)
+  (name messages_stubs)
   (wrapped false)
   (modules
     clientMessages))
-
-(library
-  (name server_hot_classes_description)
-  (wrapped false)
-  (modules
-    serverHotClassesDescription))
 
 (library
   (name state_loader)

@@ -178,6 +178,7 @@ class type handler = object
   method at_fun_def : Env.t -> Tast.fun_def -> unit
   method at_method_ : Env.t -> Tast.method_ -> unit
   method at_static_method : Env.t -> Tast.static_method -> unit
+  method at_constructor : Env.t -> Tast.constructor -> unit
 
   method at_expr : Env.t -> Tast.expr -> unit
   method at_stmt : Env.t -> Tast.stmt -> unit
@@ -191,6 +192,9 @@ class type handler = object
     Tast.expr list ->
     unit
   method at_hint : Env.t -> Aast.hint -> unit
+  method at_tparam : Env.t -> Tast.tparam -> unit
+  method at_user_attribute : Env.t -> Tast.user_attribute -> unit
+  method at_class_typeconst : Env.t -> Tast.class_typeconst -> unit
 end
 
 (** A {!handler} which does not need to make use of every visitation method can
@@ -202,12 +206,16 @@ class virtual handler_base : handler = object
   method at_fun_def _ _ = ()
   method at_method_ _ _ = ()
   method at_static_method _ _ = ()
+  method at_constructor _ _ = ()
 
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
   method at_fun_ _ _ = ()
   method at_Call _ _ _ _ _ _ = ()
   method at_hint _ _ = ()
+  method at_tparam _ _ = ()
+  method at_user_attribute _ _ = ()
+  method at_class_typeconst _ _ = ()
 end
 
 (** Return an {!iter} visitor which invokes all of the given handlers upon
@@ -259,5 +267,21 @@ let iter_with (handlers : handler list) : iter = object
   method! on_hint env h =
     List.iter handlers (fun v -> v#at_hint env h);
     super#on_hint env h;
+
+  method! on_constructor env h =
+    List.iter handlers (fun v -> v#at_constructor env h);
+    super#on_constructor env h;
+
+  method! on_tparam env h =
+    List.iter handlers (fun v -> v#at_tparam env h);
+    super#on_tparam env h;
+
+  method! on_user_attribute env ua =
+    List.iter handlers (fun v -> v#at_user_attribute env ua);
+    super#on_user_attribute env ua;
+
+  method! on_class_typeconst env tc =
+    List.iter handlers (fun v -> v#at_class_typeconst env tc);
+    super#on_class_typeconst env tc;
 
 end

@@ -11,10 +11,10 @@ class c {
  }
 
 
+CONST INIT1 = 123;
+CONST INIT2 = 456;
 <<__EntryPoint>>
 function main_2094() {
-define('INIT1', 123);
-define('INIT2', 456);
 $obj = new c;
 var_dump($obj->x);
 var_dump($obj->y);

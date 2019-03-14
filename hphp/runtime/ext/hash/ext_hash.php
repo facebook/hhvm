@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * hash() - http://php.net/function.hash
@@ -80,22 +80,10 @@ function hash_final(resource $context, bool $raw_output = false): mixed;
  *                  On error, FALSE is returned.
  */
 <<__IsFoldable>>
-function hash_hmac(?string $algo = null,
-                   ?mixed $data = null,
-                   ?string $key = null,
+function hash_hmac(string $algo,
+                   mixed $data,
+                   string $key,
                    ?bool $raw_output = false): mixed {
-  // Behave like a builtin function so that we pass Zend's tests
-  $args = func_num_args();
-  if ($args < 3) {
-    trigger_error("hash_hmac() expects 3 parameters, $args given",
-      E_WARNING);
-    return null;
-  } else if ($args > 4) {
-    trigger_error("hash_hmac() expects at most 4 parameters, $args given",
-      E_WARNING);
-    return null;
-  }
-
   // hash_init() doesn't allow empty keys (for good reason)
   // but hash_hmac() needs to support them.
   // Rely on the fact that HMAC keys are null padded
@@ -125,17 +113,10 @@ function hash_hmac(?string $algo = null,
  *                  returned.
  *                  On error, FALSE is returned.
  */
-function hash_hmac_file(?string $algo = null,
-                        ?string $filename = null,
-                        ?string $key = null,
+function hash_hmac_file(string $algo,
+                        string $filename,
+                        string $key,
                         ?bool $raw_output = false): mixed {
-  $args = func_num_args();
-  if ($args < 3) {
-    trigger_error("hash_hmac_file() expects 3 parameters, $args given",
-      E_WARNING);
-    return null;
-  }
-
   // hash_init() doesn't allow empty keys (for good reason)
   // but hash_hmac_file() needs to support them.
   // Rely on the fact that HMAC keys are null padded

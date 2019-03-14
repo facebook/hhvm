@@ -1,9 +1,15 @@
 <?php
-parse_str("a=qwe&abc=<a>href</a>", &$_GET);
+<<__EntryPoint>>
+function main() {
+$get = $GLOBALS['_GET'];
+parse_str("a=qwe&abc=<a>href</a>", &$get);
+$GLOBALS['_GET'] = $get;
 $_REQUEST = array_merge($_REQUEST, $_GET);
 _filter_snapshot_globals();
 
-parse_str("b=qwe&bbc=<a>href</a>", &$_POST);
+$post = $GLOBALS['_POST'];
+parse_str("b=qwe&bbc=<a>href</a>", &$post);
+$GLOBALS['_POST'] = $post;
 $_REQUEST = array_merge($_REQUEST, $_POST);
 _filter_snapshot_globals();
 
@@ -29,4 +35,4 @@ var_dump(filter_has_var(array(), ""));
 var_dump(filter_has_var("", array()));
 
 echo "Done\n";
-?>
+}

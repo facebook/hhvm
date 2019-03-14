@@ -1,26 +1,23 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-define('FOO1', xml_parser_create());
-define('FOO2', [xml_parser_create(), xml_parser_create()]);
-
-const BAR1 = FOO1;
-const BAR2 = [FOO1, FOO1];
-const BAR3 = vec[FOO1, FOO1];
-const BAR4 = dict[1 => FOO1, 'abc' => FOO1];
+// const BAR1 = FOO1;
+// const BAR2 = [FOO1, FOO1];
+// const BAR3 = vec[FOO1, FOO1];
+// const BAR4 = dict[1 => FOO1, 'abc' => FOO1];
 
 const BAR5 = STDIN;
 const BAR6 = [STDIN, STDIN];
 const BAR7 = vec[STDIN, STDIN];
 const BAR8 = dict[1 => STDIN, 'abc' => STDIN];
 
-var_dump(FOO1);
-var_dump(FOO2);
-
-var_dump(BAR1);
-var_dump(BAR2);
-var_dump(BAR3);
-var_dump(BAR4);
+// var_dump(FOO1);
+// var_dump(FOO2);
+//
+// var_dump(BAR1);
+// var_dump(BAR2);
+// var_dump(BAR3);
+// var_dump(BAR4);
 
 var_dump(BAR5);
 var_dump(BAR6);

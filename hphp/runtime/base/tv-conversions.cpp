@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -117,6 +118,12 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
       case KindOfClass:
         b = classToStringHelper(val(tv).pclass)->toBoolean();
+        continue;
+
+      case KindOfClsMeth:
+        raiseClsMethConvertWarningHelper("bool");
+        b = true;
+        tvDecRefClsMeth(tv);
         continue;
 
       case KindOfRef:
@@ -204,6 +211,12 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         d = classToStringHelper(val(tv).pclass)->toDouble();
         continue;
 
+      case KindOfClsMeth:
+        raiseClsMethConvertWarningHelper("double");
+        d = 1.0;
+        tvDecRefClsMeth(tv);
+        continue;
+
       case KindOfRef:
         break;
     }
@@ -283,6 +296,12 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         i = classToStringHelper(val(tv).pclass)->toInt64();
         continue;
 
+      case KindOfClsMeth:
+        raiseClsMethConvertWarningHelper("int");
+        i = 1;
+        tvDecRefClsMeth(tv);
+        continue;
+
       case KindOfRef:
         break;
     }
@@ -348,6 +367,10 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();
+
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("double");
+      return 1.0;
 
     case KindOfRef:
       break;
@@ -452,6 +475,15 @@ void cellCastToStringInPlace(tv_lval tv) {
       return persistentString(const_cast<StringData*>(s));
     }
 
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("string");
+      tvDecRefClsMeth(tv);
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return persistentString(vec_string.get());
+      } else {
+        return persistentString(array_string.get());
+      }
+
     case KindOfRef:
       break;
   }
@@ -536,6 +568,14 @@ StringData* cellCastToStringData(Cell tv) {
       return const_cast<StringData*>(s);
     }
 
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("string");
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return vec_string.get();
+      } else {
+        return array_string.get();
+      }
+
     case KindOfRef:
       not_reached();
   }
@@ -582,6 +622,10 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
       ad->incRefCount();
       return ad;
     }
+
+    case KindOfClsMeth:
+      raiseClsMethToVecWarningHelper();
+      return clsMethToVecHelper(tv.m_data.pclsmeth).detach();
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<intishCast>();
@@ -787,6 +831,14 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         a = ArrayData::Create(*tv);
         continue;
 
+      case KindOfClsMeth: {
+        raiseClsMethToVecWarningHelper();
+        a = make_packed_array(
+          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
+
       case KindOfRef:
         break;
     }
@@ -901,6 +953,14 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
           "Class to vec conversion"
         );
 
+      case KindOfClsMeth: {
+        raiseClsMethToVecWarningHelper();
+        a = make_vec_array(
+          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
+
       case KindOfRef:
         break;
     }
@@ -1010,6 +1070,15 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
           "Class to dict conversion"
         );
 
+      case KindOfClsMeth: {
+        raiseClsMethToVecWarningHelper();
+        a = make_dict_array(
+          0, val(tv).pclsmeth->getCls(),
+          1, val(tv).pclsmeth->getFunc()).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
+
       case KindOfRef:
         break;
     }
@@ -1117,6 +1186,11 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfClass:
         SystemLib::throwInvalidOperationExceptionObject(
           "Class to keyset conversion"
+        );
+
+      case KindOfClsMeth:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "clsmeth to keyset conversion"
         );
 
       case KindOfRef:
@@ -1238,6 +1312,14 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         SystemLib::throwInvalidOperationExceptionObject(
           "Class to varray conversion"
         );
+
+      case KindOfClsMeth: {
+        raiseClsMethToVecWarningHelper();
+        a = make_varray(
+          val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc()).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
 
       case KindOfRef:
         break;
@@ -1361,6 +1443,15 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
           "Class to darray conversion"
         );
 
+      case KindOfClsMeth: {
+        raiseClsMethToVecWarningHelper();
+        a = make_darray(
+          0, val(tv).pclsmeth->getCls(),
+          1, val(tv).pclsmeth->getFunc()).detach();
+        tvDecRefClsMeth(tv);
+        continue;
+      }
+
       case KindOfRef:
         break;
     }
@@ -1418,6 +1509,13 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfObject:
       tv.m_data.pobj->incRefCount();
       return tv.m_data.pobj;
+
+    case KindOfClsMeth: {
+      raiseClsMethToVecWarningHelper();
+      auto arr = make_packed_array(
+        val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc());
+      return ObjectData::FromArray(arr.get()).detach();
+    }
 
     case KindOfRef:
       break;
@@ -1484,7 +1582,11 @@ enable_if_lval_t<T, void> tvCastToObjectInPlace(T tv) {
         // For arrays, we fall back on the Variant machinery
         assign(tv, ObjectData::FromArray(val(tv).parr));
         return;
-
+      case KindOfClsMeth:
+        raiseClsMethToVecWarningHelper();
+        tvCastToArrayInPlace(tv);
+        assign(tv, ObjectData::FromArray(val(tv).parr));
+        return;
       case KindOfObject:
         return;
 
@@ -1530,6 +1632,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfShape:
       case KindOfArray:
       case KindOfObject:
+      case KindOfClsMeth:
         tvDecRefCountable(tv);
         continue;
       case KindOfResource:
@@ -1578,6 +1681,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToBooleanInPlace(T tv, bool builtin) {
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
       return false;
@@ -1619,6 +1723,7 @@ static enable_if_lval_t<T, bool> tvCanBeCoercedToNumber(T tv, bool builtin) {
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return false;
 
     case KindOfRef:
@@ -1690,6 +1795,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToStringInPlace(T tv, bool builtin) {
     case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfClsMeth:
       return false;
 
     case KindOfObject:
@@ -1760,6 +1866,14 @@ enable_if_lval_t<T, bool> tvCoerceParamToShapeInPlace(T tv, bool builtin) {
     case KindOfResource:
       return false;
 
+    case KindOfClsMeth:
+      if (!RuntimeOption::EvalHackArrDVArrs) {
+        tvCastToArrayInPlace(tv);
+        assign(tv, val(tv).parr->toShape(true));
+        return true;
+      }
+      return false;
+
     case KindOfRef:
       break;
   }
@@ -1808,16 +1922,19 @@ enable_if_lval_t<T, bool> tvCoerceParamToArrayInPlace(T tv, bool /*builtin*/) {
 
     case KindOfObject:
       if (LIKELY(val(tv).pobj->isCollection())) {
-        if (RuntimeOption::EvalHackArrCompatCollectionCoercionNotices) {
-          raise_hack_arr_compat_collection_coerce_notice(
-              val(tv).pobj->getClassName().c_str());
-        }
         ObjectData* obj = val(tv).pobj;
         assign(tv, obj->toArray<intishCast>());
         return true;
       }
       return false;
     case KindOfResource:
+      return false;
+
+    case KindOfClsMeth:
+      if (!RuntimeOption::EvalHackArrDVArrs) {
+        tvCastToArrayInPlace(tv);
+        return true;
+      }
       return false;
 
     case KindOfRef:
@@ -1857,6 +1974,13 @@ enable_if_lval_t<T, bool> tvCoerceParamToVecInPlace(T tv, bool /*builtin*/) {
     case KindOfVec:
       return true;
 
+    case KindOfClsMeth:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        tvCastToVecInPlace(tv);
+        return true;
+      }
+      return false;
+
     case KindOfRef:
       break;
   }
@@ -1886,6 +2010,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToDictInPlace(T tv, bool /*builtin*/) {
     case KindOfArray:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return false;
 
     case KindOfPersistentShape:
@@ -1936,6 +2061,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToKeysetInPlace(T tv, bool /*builtin*/) {
     case KindOfArray:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfClsMeth:
       return false;
 
     case KindOfPersistentKeyset:

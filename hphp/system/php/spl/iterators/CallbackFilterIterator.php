@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 /**
  * FilterIterator which uses a callback for each element
  */

@@ -22,7 +22,7 @@
              (Binop ((Eq None),
                 (([4:3-9], Vector<(int | string)>), (Lvar ([4:3-9], $items))),
                 (([4:12-25], Vector<(int | string)>),
-                 (ValCollection (<vc_kind>,
+                 (ValCollection (<vc_kind>, None,
                     [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
                 ))));
           (Expr

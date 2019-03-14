@@ -10,7 +10,6 @@ string(37) "goodyear1\2345NULL%r\x00%rtruefalse\a%r\x0b\x0c%r\b
 -- Iteration 3 --
 
 Warning: %s
-NULL
 -- Iteration 4 --
 string(39) "goodye\ar12345NULL%r\x00%rtruef\alse\\a%r\x0b\x0c%r\b
 

@@ -13,14 +13,14 @@ date_default_timezone_set("Europe/London");
 echo "*** Testing timezone_name_from_abbr() : error conditions ***\n";
 
 echo "\n-- Testing timezone_name_from_abbr() function with Zero arguments --\n";
-var_dump( timezone_name_from_abbr() );
+try { var_dump( timezone_name_from_abbr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing timezone_name_from_abbr() function with more than expected no. of arguments --\n";
 $abbr = 10;
 $gmtOffset = 30;
 $isdst = 45;
 $extra_arg = 10;
-var_dump( timezone_name_from_abbr($abbr, $gmtOffset, $isdst, $extra_arg) );
+try { var_dump( timezone_name_from_abbr($abbr, $gmtOffset, $isdst, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

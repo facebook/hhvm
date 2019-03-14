@@ -12,9 +12,9 @@ $regex = '/[a-zA-Z]/';
 $input = array('this is a string', array('this is', 'a subarray'),);
 foreach($input as $value) {
     print "\nArg value is: $value\n";
-    var_dump(preg_grep($regex, $value));
+    try { var_dump(preg_grep($regex, $value)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 $value = new stdclass(); //Object
-var_dump(preg_grep($regex, $value));
+try { var_dump(preg_grep($regex, $value)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
 ?>

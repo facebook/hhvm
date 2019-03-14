@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * ( excerpt from
@@ -526,7 +526,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   <<__Rx>>
   public function __construct($name_or_closure) {
-    if ($name_or_closure instanceof Closure) {
+    if ($name_or_closure is Closure) {
       $this->closure = $name_or_closure;
       $this->__initClosure($name_or_closure);
     } else if (is_string($name_or_closure)){
@@ -1064,7 +1064,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
         return null;
       }
       $cls_name = $this->getDeclaringClassname();
-      if (!($object instanceof $cls_name)) {
+      if (!is_a($object, $cls_name)) {
         throw new ReflectionException(
           'Given object is not an instance of the class this method was '.
           'declared in' // mention declaringClassname / originalClass here ?
@@ -1204,7 +1204,7 @@ class ReflectionClass implements Reflector {
     if ($docComment = $this->getDocComment()) {
       $ret .= $docComment . "\n";
     }
-    if ($this instanceof ReflectionObject) {
+    if ($this is ReflectionObject) {
       $ret .= 'Object of class [ ';
     } elseif ($this->isInterface()) {
       $ret .= 'Interface [ ';
@@ -1461,11 +1461,6 @@ class ReflectionClass implements Reflector {
       (!$this->hasMethod('__clone') || $this->getMethod('__clone')->isPublic());
   }
 
-  <<__Rx, __MaybeMutable>>
-  public function isAnonymous(): bool {
-    return strpos($this->getName(), 'class@anonymous') === 0;
-  }
-
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getmethod.php )
    *
@@ -1502,7 +1497,7 @@ class ReflectionClass implements Reflector {
     if (null === $filter) {
       return self::getMethodOrderCache($this->getName());
     }
-    return $this->getMethodOrder($this->getName(), $filter);
+    return self::getMethodOrder($this->getName(), $filter);
   }
 
   <<__Memoize, __Rx>>
@@ -1579,7 +1574,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function getConstants(): darray<string, mixed> {
-    return $this->getConstantsCache($this->getName());
+    return self::getConstantsCache($this->getName());
   }
 
   <<__Memoize, __Rx>>
@@ -1601,7 +1596,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function getAbstractConstantNames(): darray<string, string> {
-    return $this->getAbstractConstantNamesCache($this->getName());
+    return self::getAbstractConstantNamesCache($this->getName());
   }
 
   <<__Memoize, __Rx>>
@@ -1613,7 +1608,7 @@ class ReflectionClass implements Reflector {
 
   <<__Rx, __MaybeMutable>>
   private function getTypeConstantNamesWithCaching(): darray<string, string> {
-    return $this->getTypeConstantNamesCache($this->getName());
+    return self::getTypeConstantNamesCache($this->getName());
   }
 
   <<__Memoize, __Rx>>
@@ -2161,7 +2156,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function implementsInterface($cls): bool {
-    if ($cls instanceof ReflectionClass) { $cls = $cls->getName(); }
+    if ($cls is ReflectionClass) { $cls = $cls->getName(); }
 
     // Normalize to avoid calling __autoload twice for undefined classes
     $normalized_cls = $cls[0] == '\\' ? substr($cls, 1) : $cls;
@@ -2201,7 +2196,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function isSubclassOf($cls): bool {
-    if ($cls instanceof ReflectionClass) {
+    if ($cls is ReflectionClass) {
       $cls = $cls->getName();
     }
     return is_subclass_of($this->getName(), $cls);

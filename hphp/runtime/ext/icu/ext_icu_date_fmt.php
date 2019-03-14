@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Date Formatter is a concrete class that enables locale-dependent

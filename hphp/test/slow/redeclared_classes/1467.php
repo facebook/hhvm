@@ -9,9 +9,6 @@ function f($i) {
     }
     class c extends p {
     }
-    function r() {
- echo "r1\n";
- }
   }
  else {
     class p {
@@ -19,9 +16,6 @@ function f($i) {
     }
     class c extends p {
     }
-    function r() {
- echo "r2\n";
- }
   }
 }
 if ($i == 1) {
@@ -30,13 +24,9 @@ if ($i == 1) {
   }
   class c extends p {
   }
-  function r() {
- echo "r3\n";
- }
 }
 f(1);
 $obj = new p();
 var_dump($obj);
 $obj = new c();
 var_dump($obj);
-r();

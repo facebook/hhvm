@@ -55,6 +55,7 @@ namespace HPHP {
 
 // fb_serialize options
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
+const int64_t k_FB_SERIALIZE_VARRAY_DARRAY = 1<<2;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -105,12 +106,22 @@ enum TType {
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   try {
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
-      size_t len =  HPHP::serialize
+      size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
         ::serializedSize(thing);
       String s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
+      size_t len = HPHP::serialize
+        ::FBSerializer<VariantControllerUsingVarrayDarray>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerUsingVarrayDarray>
         ::serialize(thing, s.mutableData());
       s.setSize(len);
       return s;
@@ -164,6 +175,12 @@ Variant fb_unserialize(const char* str,
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingHackArrays>
+        ::unserialize(folly::StringPiece(str, len));
+      success.assignIfRef(true);
+      return res;
+    } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerUsingVarrayDarray>
         ::unserialize(folly::StringPiece(str, len));
       success.assignIfRef(true);
       return res;
@@ -518,6 +535,21 @@ static int fb_compact_serialize_variant(
           sb, std::move(arr), index_limit, depth);
       } else {
         fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
+      }
+      return 0;
+    }
+
+    case KindOfClsMeth: {
+      Array arr = var.toArray();
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        assertx(arr->isVecArray());
+        fb_compact_serialize_vec(sb, std::move(arr), depth);
+      } else {
+        assertx(arr->isPHPArray());
+        int64_t index_limit;
+        fb_compact_serialize_is_list(arr, index_limit);
+        fb_compact_serialize_array_as_list_map(
+          sb, std::move(arr), index_limit, depth);
       }
       return 0;
     }
@@ -1236,6 +1268,7 @@ struct FBExtension : Extension {
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
 
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS, k_FB_SERIALIZE_HACK_ARRAYS);
+    HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

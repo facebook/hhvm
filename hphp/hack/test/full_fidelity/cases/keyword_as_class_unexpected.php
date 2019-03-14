@@ -75,7 +75,6 @@ new as();
 new break();
 new case();
 new catch();
-new class();
 new clone();
 new const();
 new continue();

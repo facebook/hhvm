@@ -24,41 +24,7 @@ array(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-array(3) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    NULL
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    int(2)
-    [1]=>
-    NULL
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
-    NULL
-  }
-}
+string(48) "__invoke() expects exactly 2 parameters, 1 given"
 -- anonymous function with NULL parameter --
 array(3) {
   [0]=>

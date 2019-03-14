@@ -12,8 +12,8 @@ class classA
 }
 
 echo "\n-- Incorrect number of arguments --\n"; 
-octdec();
-octdec('0123567',true);
+try { octdec(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { octdec('0123567',true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Incorrect input --\n";
 octdec(new classA());

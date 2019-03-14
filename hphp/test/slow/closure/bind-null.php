@@ -2,7 +2,7 @@
 
 class X {
   static function test() {
-    $f = function () { get_called_class(); };
+    $f = function () { };
     $g = $f->bindto(null, null);
     return $g;
   }

@@ -20,23 +20,18 @@ string(3) "0.5"
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 
 Warning: %s
-NULL
 -- Iteration 13 --
 
 Warning: %s
-NULL
 -- Iteration 14 --
 
 Warning: %s
-NULL
 -- Iteration 15 --
 string(0) ""
 -- Iteration 16 --
@@ -52,7 +47,6 @@ string(0) ""
 -- Iteration 21 --
 
 Warning: %s
-NULL
 -- Iteration 22 --
 string(9) "My String"
 -- Iteration 23 --

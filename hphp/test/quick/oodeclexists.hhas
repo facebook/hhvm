@@ -5,7 +5,7 @@
   String "abc"
   String "asdfasdf"
   OODeclExists Interface
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   Int 1
   RetC

@@ -8,11 +8,12 @@ class myArray extends ArrayIterator
         parent::__construct($array);
     }
 
+  private static $offsetGetI = 0;
+
     public function offsetGet($index)
     {
-		static $i = 0;
         echo __METHOD__ . "($index)\n";
-        if (++$i > 3) exit(1);
+        if (++self::$offsetGetI > 3) exit(1);
         return parent::offsetGet($index);
     }
 

@@ -1,2 +1,3 @@
 -vEval.RxVerifyBody=2
 -vEval.FatalOnVerifyError=true
+-vEval.EnablePHP=1

@@ -4,7 +4,7 @@ function g() { echo '3 '; }
 function __autoload($cls) {
   echo '2 ';
   if (strtolower($cls) === 'c') {
-    class C { public static $x; }
+    include 'static_prop_eval_order.inc';
   }
 }
 $cls = 'C';

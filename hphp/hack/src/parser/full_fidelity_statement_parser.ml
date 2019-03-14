@@ -129,11 +129,15 @@ module WithExpressionAndDeclAndTypeParser
     | Interface
     | Trait
     | Class ->
+      let env = env parser in
+      let disable_nontoplevel_declarations =
+        Env.(is_typechecker env && is_strict env) ||
+        Env.disable_nontoplevel_declarations env
+      in
       let parser =
-        if Env.is_strict (env parser) || Env.disable_nontoplevel_declarations (env parser) then
-          with_error parser SyntaxError.decl_outside_global_scope
-        else
-          parser
+        if disable_nontoplevel_declarations
+        then with_error parser SyntaxError.decl_outside_global_scope
+        else parser
       in
       parse_php_class parser
     | Fallthrough -> parse_possible_erroneous_fallthrough parser
@@ -279,13 +283,8 @@ module WithExpressionAndDeclAndTypeParser
         (fun p ->
           DeclParser.parse_function_declaration p missing)
       in
-      let parser = if not toplevel &&
-        (Env.is_typechecker (env parser) || Env.disable_nontoplevel_declarations (env parser))
-      then
-        with_error parser SyntaxError.inline_function_def
-      else
-        parser
-      in
+      let parser = if toplevel then parser else
+        with_error parser SyntaxError.inline_function_def in
       parser, missing
 
   and parse_php_class parser =

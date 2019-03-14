@@ -9,13 +9,10 @@ string(15) "%r\x09%rtesting trim  "
 *** Testing error conditions ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 *** Testing with OBJECTS ***
 string(4) "bjec"

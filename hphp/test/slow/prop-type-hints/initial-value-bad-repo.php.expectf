@@ -48,9 +48,9 @@ Warning: Property 'A::p26' declared as type Alias4, string assigned in %s/initia
 
 Warning: Property 'A::p28' declared as type Alias7, bool assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Property 'A::p29' declared as type ?Alias8, bool assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Property 'A::p29' declared as type Alias8, bool assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Property 'A::p30' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Property 'A::p30' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
 
 Warning: Property 'A::p32' declared as type Alias11, string assigned in %s/initial-value-bad-repo.php on line 227
 
@@ -100,9 +100,9 @@ Warning: Property 'A::p56' declared as type Alias5, HH\vec assigned in %s/initia
 
 Warning: Property 'A::p58' declared as type Alias7, string assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Property 'A::p59' declared as type ?Alias8, string assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Property 'A::p59' declared as type Alias8, string assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Property 'A::p60' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Property 'A::p60' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
 
 Warning: Property 'A::p62' declared as type Alias11, string assigned in %s/initial-value-bad-repo.php on line 227
 
@@ -160,9 +160,9 @@ Warning: Property 'A::p80' declared as type Alias6, HH\Pair assigned in %s/initi
 
 Warning: Property 'A::p81' declared as type Alias7, string assigned in %s/initial-value-bad-repo.php on line 229
 
-Warning: Property 'A::p82' declared as type ?Alias8, string assigned in %s/initial-value-bad-repo.php on line 229
+Warning: Property 'A::p82' declared as type Alias8, string assigned in %s/initial-value-bad-repo.php on line 229
 
-Warning: Property 'A::p83' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 229
+Warning: Property 'A::p83' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 229
 
 Warning: Property 'A::p84' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad-repo.php on line 229
 
@@ -222,9 +222,9 @@ Warning: Static property 'A::s26' declared as type Alias4, string assigned in %s
 
 Warning: Static property 'A::s28' declared as type Alias7, bool assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Static property 'A::s29' declared as type ?Alias8, bool assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Static property 'A::s29' declared as type Alias8, bool assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Static property 'A::s30' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Static property 'A::s30' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
 
 Warning: Static property 'A::s32' declared as type Alias11, string assigned in %s/initial-value-bad-repo.php on line 227
 
@@ -272,9 +272,9 @@ Warning: Static property 'A::s56' declared as type Alias5, HH\vec assigned in %s
 
 Warning: Static property 'A::s58' declared as type Alias7, string assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Static property 'A::s59' declared as type ?Alias8, string assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Static property 'A::s59' declared as type Alias8, string assigned in %s/initial-value-bad-repo.php on line 227
 
-Warning: Static property 'A::s60' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
+Warning: Static property 'A::s60' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 227
 
 Warning: Static property 'A::s62' declared as type Alias11, string assigned in %s/initial-value-bad-repo.php on line 227
 
@@ -332,9 +332,9 @@ Warning: Static property 'A::s80' declared as type Alias6, HH\Pair assigned in %
 
 Warning: Static property 'A::s81' declared as type Alias7, string assigned in %s/initial-value-bad-repo.php on line 229
 
-Warning: Static property 'A::s82' declared as type ?Alias8, string assigned in %s/initial-value-bad-repo.php on line 229
+Warning: Static property 'A::s82' declared as type Alias8, string assigned in %s/initial-value-bad-repo.php on line 229
 
-Warning: Static property 'A::s83' declared as type ?Alias9, int assigned in %s/initial-value-bad-repo.php on line 229
+Warning: Static property 'A::s83' declared as type Alias9, int assigned in %s/initial-value-bad-repo.php on line 229
 
 Warning: Static property 'A::s84' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad-repo.php on line 229
 

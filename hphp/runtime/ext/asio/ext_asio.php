@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
 
@@ -336,10 +336,7 @@ function join<T>(Awaitable<T> $awaitable): mixed;
  * Throws an InvalidOperationException if the Awaitable is not finished.
  */
 function result<T>(Awaitable<T> $awaitable): T {
-  return \hh\asm('
-    CGetL $awaitable
-    WHResult
-  ');
+  return \__hhvm_internal_whresult($awaitable);
 }
 
 /**

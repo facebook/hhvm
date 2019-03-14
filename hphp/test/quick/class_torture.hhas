@@ -8,7 +8,7 @@
   Dup
   FPushCtor 1
   String "foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   PopC
 
@@ -17,7 +17,7 @@
   Dup
   FPushCtor 1
   String "foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   PopC
 
@@ -26,7 +26,7 @@
   Dup
   FPushCtor 1
   String "foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   PopC
 
@@ -35,7 +35,7 @@
   Dup
   FPushCtor 1
   String "foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   PopC
 
@@ -44,7 +44,7 @@
   Dup
   FPushCtor 1
   String "foo"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   PopC
 

@@ -26,20 +26,21 @@ type mode =
   | DAEMON
 
 type options = {
-  filename         : string;
-  fallback         : bool;
-  config_list      : string list;
-  debug_time       : bool;
-  output_file      : string option;
-  config_file      : string option;
-  quiet_mode       : bool;
-  mode             : mode;
-  input_file_list  : string option;
-  dump_symbol_refs : bool;
-  dump_stats       : bool;
-  dump_config      : bool;
-  extract_facts    : bool;
-  log_stats        : bool;
+  filename          : string;
+  fallback          : bool;
+  config_list       : string list;
+  debug_time        : bool;
+  output_file       : string option;
+  config_file       : string option;
+  quiet_mode        : bool;
+  mode              : mode;
+  input_file_list   : string option;
+  dump_symbol_refs  : bool;
+  dump_stats        : bool;
+  dump_config       : bool;
+  extract_facts     : bool;
+  log_stats         : bool;
+  for_debugger_eval : bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -110,6 +111,7 @@ let parse_options () =
   let dump_stats = ref false in
   let dump_config = ref false in
   let log_stats = ref false in
+  let for_debugger_eval = ref false in
   let usage = P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0) in
   let options =
     [ ("--version"
@@ -178,6 +180,10 @@ let parse_options () =
       , Arg.Unit (fun () -> log_stats := false)
       , " Stop logging stats"
       );
+      ("--for-debugger-eval"
+      , Arg.Unit (fun () -> for_debugger_eval := true)
+      , " Mutate the program as if we're in the debugger repl"
+      );
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -206,6 +212,7 @@ let parse_options () =
   ; dump_config        = !dump_config
   ; log_stats          = !log_stats
   ; extract_facts      = !extract_facts
+  ; for_debugger_eval  = !for_debugger_eval
   }
 
 let fail_daemon file error =
@@ -274,7 +281,10 @@ let parse_text compiler_options popt fn text =
     Hhbc_options.hacksperimental !Hhbc_options.compiler_options in
   let lower_coroutines =
     Hhbc_options.enable_coroutines !Hhbc_options.compiler_options in
+  let pocket_universes =
+    Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options in
   let systemlib_compat_mode = Emit_env.is_systemlib () in
+  let popt = ParserOptions.setup_pocket_universes popt pocket_universes in
   let env = Full_fidelity_ast.make_env
     ~parser_options:popt
     ~ignore_pos
@@ -338,41 +348,7 @@ let log_fail compiler_options filename exc ~stack =
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
-let modify_prog_for_debugger_eval ast hhas_prog =
-  (* The AST currently always starts with a Markup statement, so a length of 2
-     means there was 1 user def (statement, function, etc.); we assert that
-     the first thing is a Markup statement, and we only want to modify if
-     there was exactly one user def (both 0 user defs and > 1 user def are
-     valid situations where we pass the program through unmodififed) *)
-  begin match (List.hd ast) with
-    | Some (Ast.Stmt (_, Ast.Markup _)) -> ()
-    | _ -> failwith "Lowered AST did not start with a Markup statement"
-  end;
-  if List.length ast <> 2 then hhas_prog else
-  match List.nth_exn ast 1 with
-    | Ast.Stmt (_, Ast.Expr _) ->
-      let main = Hhas_program.main hhas_prog in
-      let instrs = Instruction_sequence.instr_seq_to_list
-        (Hhas_body.instrs main) in
-      let hhas_length = List.length instrs in
-      if hhas_length < 4 then hhas_prog else
-      let (h, t) = List.split_n instrs (hhas_length - 3) in
-      let replace_prog_end_with instr_list =
-        h @ instr_list
-        |> Instruction_sequence.instrs
-        |> Hhas_body.with_instrs main
-        |> Hhas_program.with_main hhas_prog
-      in
-      begin match t with
-        | [ Hhbc_ast.IBasic Hhbc_ast.PopC;
-            Hhbc_ast.ILitConst (Hhbc_ast.Int 1L);
-            Hhbc_ast.IContFlow Hhbc_ast.RetC ] ->
-          replace_prog_end_with [ Hhbc_ast.IContFlow Hhbc_ast.RetC ]
-        | _ -> hhas_prog
-      end
-    | _ -> hhas_prog
-
-let do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval =
+let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
@@ -389,14 +365,12 @@ let do_compile filename compiler_options popt fail_or_ast debug_time for_debugge
         P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then
-        let hhas_prog = Emit_program.from_ast
-          is_hh_file
-          (is_file_path_for_evaled_code filename)
-          popt
-          ast in
-        if for_debugger_eval
-          then modify_prog_for_debugger_eval ast hhas_prog
-          else hhas_prog
+        Emit_program.from_ast
+          ~is_hh_file
+          ~is_evaled:(is_file_path_for_evaled_code filename)
+          ~for_debugger_eval:(compiler_options.for_debugger_eval)
+          ~popt
+          ast
       else Emit_program.emit_fatal_program ~ignore_message:true
         Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
       in
@@ -443,29 +417,21 @@ let parse_hh_file filename body =
 (*****************************************************************************)
 
 let make_popt () =
+  let open Hhbc_options in
+  let co = !compiler_options in
   ParserOptions.make
-    ~auto_namespace_map:
-      Hhbc_options.(aliased_namespaces !compiler_options)
-    ~disallow_execution_operator:
-      Hhbc_options.(phpism_disallow_execution_operator !compiler_options)
-    ~enable_concurrent:
-      Hhbc_options.(enable_concurrent !compiler_options)
-    ~enable_await_as_an_expression:
-      Hhbc_options.(enable_await_as_an_expression !compiler_options)
-    ~disable_define:
-      Hhbc_options.(phpism_disable_define !compiler_options)
-    ~disable_nontoplevel_declarations:
-      Hhbc_options.(phpism_disable_nontoplevel_declarations !compiler_options)
-    ~disable_static_local_variables:
-      Hhbc_options.(phpism_disable_static_local_variables !compiler_options)
-    ~enable_hh_syntax_for_hhvm:
-      Hhbc_options.(enable_hiphop_syntax !compiler_options)
-    ~enable_stronger_await_binding:
-      Hhbc_options.(enable_stronger_await_binding !compiler_options)
-    ~disable_lval_as_an_expression:
-      Hhbc_options.(disable_lval_as_an_expression !compiler_options)
+    ~auto_namespace_map:(aliased_namespaces co)
+    ~disallow_execution_operator:(phpism_disallow_execution_operator co)
+    ~enable_concurrent:(enable_concurrent co)
+    ~enable_await_as_an_expression:(enable_await_as_an_expression co)
+    ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
+    ~disable_static_closures:(phpism_disable_static_closures co)
+    ~disable_static_local_variables:(phpism_disable_static_local_variables co)
+    ~enable_hh_syntax_for_hhvm:(enable_hiphop_syntax co)
+    ~enable_stronger_await_binding:(enable_stronger_await_binding co)
+    ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
 
-let process_single_source_unit ?(for_debugger_eval = false) compiler_options
+let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text =
   try
     let popt = make_popt () in
@@ -481,7 +447,7 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
           | None -> parse_file compiler_options popt filename source_text
         in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval
+        do_compile filename compiler_options popt fail_or_ast debug_time
       end in
     handle_output filename output debug_time
   with exc ->
@@ -574,8 +540,8 @@ let decl_and_run_mode compiler_options =
             (fun _af -> JSON_Object [])
             header in
           set_compiler_options (Some config_overrides);
+          let compiler_options = { compiler_options with for_debugger_eval } in
           let result = process_single_source_unit
-            ~for_debugger_eval
             compiler_options
             handle_output
             handle_exception

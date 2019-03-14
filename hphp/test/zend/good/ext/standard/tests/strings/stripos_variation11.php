@@ -78,8 +78,8 @@ $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $haystack = $values[$index];
-  var_dump( stripos($values[$index], $values[$index]) );
-  var_dump( stripos($values[$index], $values[$index], 1) );
+  try { var_dump( stripos($values[$index], $values[$index]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( stripos($values[$index], $values[$index], 1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

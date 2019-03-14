@@ -103,6 +103,7 @@ let make (env:Env.t) text =
     ~enable_xhp:(Env.enable_xhp env)
     ~codegen:(Env.codegen env)
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
+    ~disable_unsafe_block:(Env.disable_unsafe_block env)
     text in
   { lexer
   ; errors = []
@@ -154,7 +155,7 @@ module Parser = WithSyntax(Syntax)
 open Syntax
 
 (* Parsing only the header of the file for language and mode information *)
-let parse_mode_from_header default text suffix =
+let parse_mode_from_header text suffix =
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let header = Parser.parse_header_only (Env.make ()) text in
   match syntax header with
@@ -198,12 +199,12 @@ let parse_mode_from_header default text suffix =
           try List.hd (Str.split (Str.regexp " +") mode)
           with _ -> ""
         in
-        FileInfo.parse_mode ~default mode
+        FileInfo.parse_mode mode
       end
   | _ -> Some FileInfo.Mphp
 
-let parse_mode ?(default = ParserOptions.(default_mode default)) text =
+let parse_mode text =
   let suffix = Relative_path.suffix (SourceText.file_path text) in
   let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
   if has_dot_hack_extension then Some FileInfo.Mstrict
-  else parse_mode_from_header default text suffix
+  else parse_mode_from_header text suffix

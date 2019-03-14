@@ -4,7 +4,7 @@ class FifoStream {
   private $data;
   function stream_open($filename, $mode, $options, &$opened_path) {
     echo "Open\n";
-    var_dump($filename, $mode, $options & USE_INCLUDE_PATH);
+    var_dump($filename, $mode, $options);
     return true;
   }
   function stream_write($buf) {

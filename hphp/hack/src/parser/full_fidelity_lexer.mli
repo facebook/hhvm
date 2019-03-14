@@ -8,13 +8,18 @@
  *)
 
 module Env : sig
-  val set : force_hh:bool -> enable_xhp:bool -> codegen:bool -> disable_unsafe_expr:bool -> unit
+  val set :
+    force_hh:bool ->
+    enable_xhp:bool ->
+    codegen:bool ->
+    disable_unsafe_expr:bool ->
+    disable_unsafe_block:bool ->
+    unit
 end
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
   type t [@@deriving show]
   type string_literal_kind =
-    | Literal_execution_string
     | Literal_double_quoted
     | Literal_heredoc of string [@@deriving show]
   val make :
@@ -23,6 +28,7 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     ?enable_xhp:bool ->
     ?codegen:bool ->
     ?disable_unsafe_expr:bool ->
+    ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> Full_fidelity_source_text.t -> int -> t
   val source : t -> Full_fidelity_source_text.t

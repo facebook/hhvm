@@ -28,20 +28,20 @@ string(4) "path"
 string(4) "path"
 
 --empty array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/basename_variation4.php on line 98
 
 --int indexed array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/basename_variation4.php on line 98
 
 --associative array--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/basename_variation4.php on line 98
 
 --nested arrays--
-Error: 2 - basename() expects parameter 2 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 2 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/basename_variation4.php on line 98
 
 --uppercase NULL--
 string(4) "path"
@@ -71,8 +71,8 @@ string(4) "path"
 string(4) "path"
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 2 to be string, object given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 2 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/file/basename_variation4.php on line 98
 
 --undefined var--
 string(4) "path"

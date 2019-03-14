@@ -3,5 +3,4 @@
 -- Testing preg_last_error() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===Done===

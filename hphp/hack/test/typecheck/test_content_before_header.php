@@ -1,6 +1,6 @@
 
 // hello
-<?hh
+<?hh // partial
 class foo {
   // comment inside
   public function bar() {

@@ -2,16 +2,6 @@ NULL
 
 Warning: %s
 NULL
-array(4) {
-  ["type"]=>
-  int(2)
-  ["message"]=>
-  string(54) "error_get_last() expects exactly 0 parameters, 1 given"
-  ["file"]=>
-  string(%i) "%s"
-  ["line"]=>
-  int(4)
-}
 
 Notice: %s
 array(4) {

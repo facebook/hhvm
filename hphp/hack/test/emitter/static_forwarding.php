@@ -2,7 +2,7 @@
 
 class A {
   public static function whoami2(): void {
-    echo "I am: ", get_called_class(), "/", static::class, "\n";
+    echo "I am: ", static::class, "/", static::class, "\n";
   }
   public static function whoami(): void {
     // Should dispatch to A::whoami2 but maintain the current "static" class.

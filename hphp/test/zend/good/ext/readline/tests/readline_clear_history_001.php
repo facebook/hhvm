@@ -1,6 +1,6 @@
 <?php
 
 var_dump(readline_clear_history());
-var_dump(readline_clear_history(1));
+try { var_dump(readline_clear_history(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>

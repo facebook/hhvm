@@ -8,7 +8,7 @@
 echo "*** Testing json_encode() : error conditions ***\n";
 
 echo "\n-- Testing json_encode() function with no arguments --\n";
-var_dump( json_encode() );
+try { var_dump( json_encode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing json_encode() function with more than expected no. of arguments --\n";
 $extra_arg = 10;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class finfo {
 
@@ -93,7 +93,7 @@ class finfo {
  * @return string - Returns a textual description of the string argument,
  *   or FALSE if an error occurred.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function finfo_buffer(resource $finfo,
                       ?string $string = NULL,
                       int $options = FILEINFO_NONE,
@@ -106,7 +106,7 @@ function finfo_buffer(resource $finfo,
  *
  * @return bool -
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function finfo_close(resource $finfo): bool;
 
 /**
@@ -120,7 +120,7 @@ function finfo_close(resource $finfo): bool;
  * @return string - Returns a textual description of the contents of the
  *   filename argument, or FALSE if an error occurred.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function finfo_file(resource $finfo,
                     ?string $file_name = NULL,
                     int $options = FILEINFO_NONE,
@@ -151,7 +151,7 @@ function finfo_open(int $options = FILEINFO_NONE,
  *
  * @return bool -
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function finfo_set_flags(resource $finfo,
                          int $options): bool;
 

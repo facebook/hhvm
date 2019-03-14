@@ -28,8 +28,6 @@ function g(&$q)
    $q = -10;
 }
 
-f();
-
 var_dump($x);
 f(&$x);           // non-existant variable going in
 var_dump($x);
@@ -59,8 +57,6 @@ function h(&$p)
    var_dump($p);
    var_dump($b);
 }
-
-h();
 
 var_dump($x);
 h(&$x);           // non-existant variable going in

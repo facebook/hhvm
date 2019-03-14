@@ -7,8 +7,8 @@
 echo "*** Testing decoct() :  error conditions ***\n";
 
 echo "Incorrect number of arguments\n";
-decoct();
-decoct(23,2,true);
+try { decoct(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { decoct(23,2,true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===Done===

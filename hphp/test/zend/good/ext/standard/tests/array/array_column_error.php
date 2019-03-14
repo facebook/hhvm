@@ -9,10 +9,10 @@
 echo "*** Testing array_column() : error conditions ***\n";
 
 echo "\n-- Testing array_column() function with Zero arguments --\n";
-var_dump(array_column());
+try { var_dump(array_column()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing array_column() function with One argument --\n";
-var_dump(array_column(array()));
+try { var_dump(array_column(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing array_column() function with string as first parameter --\n";
 var_dump(array_column('foo', 0));

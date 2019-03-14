@@ -2,9 +2,7 @@
 
 -- Testing dir() function with zero arguments --
 Warning: %s
-NULL
 
 -- Testing dir() function with one more than expected number of arguments --
 Warning: %s
-NULL
 Done

@@ -238,16 +238,15 @@ and expr acc (_, e) =
     let acc = expr acc rv in
     lvalue acc lv
   | Array fields
-  | Collection (_, fields) ->
+  | Collection (_, _, fields) ->
     List.fold_left fields ~init:acc ~f:field
-  | Varray es
+  | Varray (_, es)
   | List es
   | Expr_list es
-  | Execution_operator es
   | String2 es ->
     exprs acc es
   | PrefixedString (_, e) -> expr acc e
-  | Darray exprexprs ->
+  | Darray (_, exprexprs) ->
     List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Shape fields ->
     List.fold_left fields ~init:acc ~f:(fun acc -> fun (_, e) -> expr acc e)
@@ -286,10 +285,6 @@ and expr acc (_, e) =
     let _, acc2 = Option.value_map oe2 ~default:acc ~f:(expr acc) in
     let _, acc3 = expr acc e3 in
     smap_union acc (smap_inter acc2 acc3)
-  | NewAnonClass (es1, es2, _) ->
-    let acc = exprs acc es1 in
-    let acc = exprs acc es2 in
-    acc
   | Xml (_, attribs, es) ->
     let attrib acc a =
       match a with
@@ -311,6 +306,7 @@ and expr acc (_, e) =
   | Efun _
   | Lfun _
   | Lvar _
+  | PU_atom _
   | Unsafeexpr _ -> acc
 
 let rec aast_lvalue (nsenv, m as acc) (p, e) =
@@ -426,16 +422,15 @@ let rec aast_expr acc (_, e) =
     let acc = aast_expr acc rv in
     aast_lvalue acc lv
   | Aast.Array fields
-  | Aast.Collection (_, fields) ->
+  | Aast.Collection (_, _, fields) ->
     List.fold_left fields ~init:acc ~f:field
-  | Aast.Varray es
+  | Aast.Varray (_, es)
   | Aast.List es
   | Aast.Expr_list es
-  | Aast.Execution_operator es
   | Aast.String2 es ->
     exprs acc es
   | Aast.PrefixedString (_, e) -> aast_expr acc e
-  | Aast.Darray exprexprs ->
+  | Aast.Darray (_, exprexprs) ->
     List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Aast.Shape fields ->
     List.fold_left fields ~init:acc ~f:(fun acc -> fun (_, e) -> aast_expr acc e)
@@ -481,10 +476,6 @@ let rec aast_expr acc (_, e) =
     let _, acc2 = Option.value_map oe2 ~default:acc ~f:(aast_expr acc) in
     let _, acc3 = aast_expr acc e3 in
     smap_union acc (smap_inter acc2 acc3)
-  | Aast.NewAnonClass (es1, es2, _) ->
-    let acc = exprs acc es1 in
-    let acc = exprs acc es2 in
-    acc
   | Aast.Xml (_, attribs, es) ->
     let attrib acc a =
       match a with
@@ -506,6 +497,8 @@ let rec aast_expr acc (_, e) =
   | Aast.Efun _
   | Aast.Lfun _
   | Aast.Lvar _
+  | Aast.PU_atom _
+  | Aast.PU_identifier _
   | Aast.Unsafe_expr _ -> acc
   (* These are not in the original AST *)
   | Aast.This

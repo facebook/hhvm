@@ -2,13 +2,13 @@
 function __autoload($cls) {
   echo "__autoload $cls\n";
   if ($cls === 'C') {
-    class C { public static function foo() { } }
+    include 'autoload1.inc';
   }
 }
 function my_autoload_func($cls) {
   echo "my_autoload_func $cls\n";
   if ($cls === 'D') {
-    class D { public static function foo() { } }
+    include 'autoload2.inc';
   }
 }
 

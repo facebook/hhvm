@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Return thread type. See enum class ThreadType.
@@ -32,9 +32,9 @@ function pagelet_server_is_enabled(): bool;
  */
 <<__HipHopSpecific, __Native>>
 function pagelet_server_task_start(string $url,
-                                   array $headers = [],
+                                   darray $headers = darray[],
                                    string $post_data = "",
-                                   array $files = [],
+                                   darray $files = darray[],
                                    int $timeout_seconds = 0): resource;
 
 /**

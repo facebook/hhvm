@@ -107,7 +107,7 @@ interface Collection<Te> extends ConstCollection<Te>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
-interface ConstSetAccess<+Tm> {
+interface ConstSetAccess<+Tm as arraykey> {
   /**
    * Checks whether a value is in the current `Set`.
    *
@@ -125,7 +125,7 @@ interface ConstSetAccess<+Tm> {
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(MapAccess::class, MutableSet::class)>>
-interface SetAccess<Tm> extends ConstSetAccess<Tm> {
+interface SetAccess<Tm as arraykey> extends ConstSetAccess<Tm> {
   /**
    * Removes the provided value from the current `Set`.
    *
@@ -1400,7 +1400,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(ImmSet::class, MutableSet::class)>>
-interface ConstSet<+Tv> extends ConstCollection<Tv>,
+interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
                                 HH\Rx\KeyedIterable<arraykey, Tv>,
                                 KeyedContainer<Tv, Tv> {
@@ -1443,7 +1443,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
+  /* HH_FIXME[4110] explicitly not compatible with parent */
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1462,7 +1463,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           operation on the current `ConstSet`'s values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
+  /* HH_FIXME[4110] explicitly not compatible with parent */
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to each value.
@@ -1519,7 +1521,10 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *           `ConstSet` with the provided `Traversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
+  public function zip<Tu>(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
+  /* HH_FIXME[4110] need bottom type as generic */
+  ): ConstSet<Pair<Tv, Tu>>;
   /**
    * Returns a `ConstSet` containing the first `n` values of the current
    * `ConstSet`.
@@ -1677,7 +1682,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(Set::class)>>
-interface MutableSet<Tv> extends ConstSet<Tv>,
+interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
                                  Collection<Tv>,
                                  SetAccess<Tv> {
   /**
@@ -1721,7 +1726,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableSet<Tu>;
+  public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1740,7 +1745,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *           operation on the current `MutableSet`'s values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
+  public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to each value.
@@ -1799,7 +1804,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
-    MutableSet<Pair<Tv, Tu>>;
+  /* HH_FIXME[4110] need bottom type as generic */
+  MutableSet<Pair<Tv, Tu>>;
   /**
    * Returns a `MutableSet` containing the first `n` values of the current
    * `MutableSet`.

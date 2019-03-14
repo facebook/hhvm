@@ -7,6 +7,7 @@
 // Do this thing with a non-scalar initializer
 
 class C { const A = "ASD"; }
+const MUST_PREPARE = "temp";
 
 trait TNonScalar { private $nonScalarTraitProperty = C::A; }
 

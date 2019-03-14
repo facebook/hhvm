@@ -18,9 +18,9 @@ var_dump(gmp_powm(array(),$e,$m));
 var_dump(gmp_powm($n,array(),$m));
 var_dump(gmp_powm($n,$e,array()));
 var_dump(gmp_powm(array(),array(),array()));
-var_dump(gmp_powm(array(),array()));
-var_dump(gmp_powm(array()));
-var_dump(gmp_powm());
+try { var_dump(gmp_powm(array(),array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_powm(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_powm()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $n = gmp_init("-5");
 var_dump(gmp_powm(10, $n, 10));

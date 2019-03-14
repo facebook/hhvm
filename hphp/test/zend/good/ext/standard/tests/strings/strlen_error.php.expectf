@@ -2,10 +2,8 @@
 -- Testing strlen() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing strlen() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

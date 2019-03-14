@@ -220,7 +220,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c2(456));
   var_dump($c2('abc'));
   var_dump($c2(456));
-  var_dump($c2());
+  try { var_dump($c2()); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c2(null));
   var_dump($c2(456, 'abc'));
   var_dump($c2('abc', 456));
@@ -231,7 +231,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c3(789, 'def', true));
   var_dump($c3(false, 100, 1.23));
   var_dump($c3(789, 'def', false));
-  var_dump($c3(123, 'abc'));
+  try { var_dump($c3(123, 'abc')); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c3(123, 'abc', null));
   var_dump($c3(456, 123, 'ghi', 789));
   var_dump($c3(456, 123, 'ghi', 987));
@@ -245,7 +245,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c5('abc'));
   var_dump($c5(123));
   var_dump($c5('abc'));
-  var_dump($c5());
+  try { var_dump($c5()); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c5(null));
   var_dump($c5(123, 'abc'));
   var_dump($c5('abc', 123));

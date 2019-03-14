@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 // empty class that's always available
 final class stdClass {

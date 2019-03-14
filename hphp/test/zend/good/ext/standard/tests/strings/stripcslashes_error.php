@@ -10,10 +10,10 @@ echo "*** Testing stripcslashes() : unexpected number of arguments ***";
 
 
 echo "\n-- Testing stripcslashes() function with no arguments --\n";
-var_dump( stripcslashes() );
+try { var_dump( stripcslashes() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing stripcslashes() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( stripcslashes("abc def", $extra_arg) );
+try { var_dump( stripcslashes("abc def", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

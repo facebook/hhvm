@@ -16,13 +16,34 @@
 
 #include "hphp/hhbbc/options.h"
 
+#include "hphp/util/alloc.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 struct Options options;
 
+void profile_memory(const char* what, const char* when,
+                    const std::string& extra) {
+  if (options.profileMemory.empty()) return;
+
+  auto name = folly::sformat(
+    "{}_{}{}_{}",
+    options.profileMemory,
+    what,
+    extra.empty() ? extra : folly::sformat("_{}", extra),
+    when
+  );
+
+  while (true) {
+    auto const pos = name.find_first_of(" :\"'");
+    if (pos == std::string::npos) break;
+    name[pos] = '_';
+  }
+  jemalloc_pprof_dump(name, true);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}
-

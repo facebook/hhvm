@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Accessing fields/passing shapes to functions

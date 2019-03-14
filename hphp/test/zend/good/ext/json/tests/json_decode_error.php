@@ -7,11 +7,11 @@
 echo "*** Testing json_decode() : error conditions ***\n";
 
 echo "\n-- Testing json_decode() function with no arguments --\n";
-var_dump( json_decode() );
+try { var_dump( json_decode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing json_decode() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( json_decode('"abc"', TRUE, 512, 0, $extra_arg) );
+try { var_dump( json_decode('"abc"', TRUE, 512, 0, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===Done===

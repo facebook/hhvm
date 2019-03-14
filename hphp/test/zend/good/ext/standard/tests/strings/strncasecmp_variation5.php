@@ -82,7 +82,7 @@ $counter = 1;
 for($index = 0; $index < count($lengths); $index ++) {
   $len = $lengths[$index];
   echo "-- Iteration $counter --\n";
-  var_dump( strncasecmp($str1, $str2, $len) );
+  try { var_dump( strncasecmp($str1, $str2, $len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 fclose($file_handle);

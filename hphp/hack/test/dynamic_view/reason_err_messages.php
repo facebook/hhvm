@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function fakeClassGet() : int {
   return BogusClass::bogusprop;

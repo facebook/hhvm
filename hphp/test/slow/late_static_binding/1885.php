@@ -2,7 +2,7 @@
 
 class A {
   public static function foo() {
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
   public static function bar() {
     $x = new B;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * MessageFormatter is a concrete class that enables users to produce

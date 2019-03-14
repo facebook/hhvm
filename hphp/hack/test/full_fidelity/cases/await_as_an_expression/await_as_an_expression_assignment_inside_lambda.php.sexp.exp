@@ -1,0 +1,71 @@
+((script 120
+  ((list 120
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 114
+      ((missing 0 ())
+       (function_declaration_header 37
+        ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
+         (() function 8 ((whitespace 1))) (() name 3 ()) (missing 0 ())
+         (() "(" 1 ()) (missing 0 ()) (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (generic_type_specifier 15
+          ((() name 9 ())
+           (type_arguments 6
+            ((() < 1 ())
+             (list 4
+              ((list_item 4
+                ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
+             (() > 1 ((whitespace 1)))))))
+         (missing 0 ())))
+       (compound_statement 76
+        ((() { 1 ((end_of_line 1)))
+         (list 70
+          ((expression_statement 30
+            ((binary_expression 29
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (prefix_unary_expression 24
+                ((() await 5 ((whitespace 1)))
+                 (awaitable_creation_expression 18
+                  ((missing 0 ()) (() async 5 ((whitespace 1)))
+                   (missing 0 ())
+                   (compound_statement 12
+                    ((() { 1 ((whitespace 1)))
+                     (list 8
+                      ((expression_statement 8
+                        ((binary_expression 7
+                          ((variable 2 ((() variable 2 ((whitespace 1)))))
+                           (() = 1 ((whitespace 1)))
+                           (literal 2 ((() decimal_literal 2 ())))))
+                         (() ";" 1 ((whitespace 1)))))))
+                     (() } 1 ())))))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 37
+            ((binary_expression 36
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (prefix_unary_expression 31
+                ((() await 5 ((whitespace 1)))
+                 (awaitable_creation_expression 25
+                  ((missing 0 ()) (() async 5 ((whitespace 1)))
+                   (missing 0 ())
+                   (compound_statement 19
+                    ((() { 1 ((whitespace 1)))
+                     (list 15
+                      ((if_statement 15
+                        ((() if 2 ((whitespace 1))) (() "(" 1 ())
+                         (binary_expression 7
+                          ((variable 2 ((() variable 2 ((whitespace 1)))))
+                           (() = 1 ((whitespace 1)))
+                           (literal 2 ((() decimal_literal 2 ())))))
+                         (() ")" 1 ((whitespace 1)))
+                         (compound_statement 2
+                          ((() { 1 ()) (missing 0 ())
+                           (() } 1 ((whitespace 1)))))
+                         (missing 0 ()) (missing 0 ())))))
+                     (() } 1 ())))))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

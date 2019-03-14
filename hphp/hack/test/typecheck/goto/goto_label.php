@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function gotoLabel(): void {
   L0:

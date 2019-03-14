@@ -277,7 +277,8 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfPersistentShape:
     case KindOfShape:
     case KindOfPersistentArray:
-    case KindOfArray:   return SOAP_ENC_ARRAY_DT;
+    case KindOfArray:
+    case KindOfClsMeth: return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
     case KindOfRef:     return INVALID_TYPE;

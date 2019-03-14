@@ -16,13 +16,13 @@ $message = 'string_val';
 $additional_headers = 'string_val';
 $additional_parameters = 'string_val';
 $extra_arg = 10;
-var_dump( mail($to, $subject, $message, $additional_headers, $additional_parameters, $extra_arg) );
+try { var_dump( mail($to, $subject, $message, $additional_headers, $additional_parameters, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing mail with one less than the expected number of arguments
 echo "\n-- Testing mail() function with less than expected no. of arguments --\n";
 $to = 'string_val';
 $subject = 'string_val';
-var_dump( mail($to, $subject) );
+try { var_dump( mail($to, $subject) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

@@ -95,6 +95,7 @@
 #include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -214,7 +215,6 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(ReifiedGenericOp) { return "ReifiedGenericOp"; }
 inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -242,25 +242,6 @@ inline const StringData* decode_litstr(PC& pc) {
 
 inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
-}
-
-// find the AR for the current FPI region using func metadata
-static inline ActRec* arFromInstr(PC pc) {
-  const ActRec* fp = vmfp();
-  auto const func = fp->m_func;
-  if (fp->resumed()) {
-    fp = reinterpret_cast<const ActRec*>(Stack::resumableStackBase(fp) +
-                                         func->numSlotsInFrame());
-  }
-
-  return arAtOffset(fp, -instrFpToArDelta(func, pc));
-}
-
-// Find the AR for the current FPI region by indexing from sp
-static inline ActRec* arFromSp(int32_t n) {
-  auto ar = reinterpret_cast<ActRec*>(vmStack().top() + n);
-  assertx(ar == arFromInstr(vmpc()));
-  return ar;
 }
 
 namespace {
@@ -310,20 +291,6 @@ template<class T> struct imm_array {
   }
 };
 
-template<> struct imm_array<bool> {
-  uint32_t const size;
-  PC const ptr;
-
-  explicit imm_array(uint32_t size, PC pc)
-    : size{size}
-    , ptr{pc}
-  {}
-
-  bool operator[](uint32_t i) const {
-    return ptr[i / 8] & (1 << (i % 8));
-  }
-};
-
 }
 
 ALWAYS_INLINE local_var decode_local(PC& pc) {
@@ -349,14 +316,6 @@ OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
   auto const arr_pc = pc;
   pc += size * sizeof(T);
   return imm_array<T>{size, arr_pc};
-}
-
-template<>
-OPTBLD_INLINE imm_array<bool> decode_imm_array(PC& pc) {
-  auto const size = decode_iva(pc);
-  auto const arr_pc = pc;
-  pc += (size + 7) / 8;
-  return imm_array<bool>{size, arr_pc};
 }
 
 OPTBLD_INLINE IterTable decode_iter_table(PC& pc) {
@@ -822,6 +781,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfResource:
   case KindOfFunc:
   case KindOfClass:
+  case KindOfClsMeth:
     os << "C:";
     break;
   }
@@ -921,9 +881,18 @@ static std::string toStringElm(const TypedValue* tv) {
          << ")";
       continue;
     case KindOfClass:
-    os << ":Class("
-       << tv->m_data.pclass->name()->data()
+      os << ":Class("
+         << tv->m_data.pclass->name()->data()
+         << ")";
+      continue;
+    case KindOfClsMeth:
+      os << ":ClsMeth("
+       << tv->m_data.pclsmeth->getCls()->name()->data()
+       << ", "
+       << tv->m_data.pclsmeth->getFunc()->fullDisplayName()->data()
        << ")";
+       continue;
+
     case KindOfRef:
       break;
     }
@@ -1970,6 +1939,12 @@ OPTBLD_INLINE void iopPopU() {
   vmStack().popU();
 }
 
+OPTBLD_INLINE void iopPopU2() {
+  assertx(vmStack().indC(1)->m_type == KindOfUninit);
+  *vmStack().indC(1) = *vmStack().topC();
+  vmStack().discard();
+}
+
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
@@ -2654,12 +2629,13 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
 
 namespace {
 
-template <bool isAsOp>
-Array resolveAndVerifyTypeStructureHelper(
-  const Array& ts, const req::vector<Array>& tsList, bool suppress) {
+ArrayData* resolveAndVerifyTypeStructureHelper(
+  uint32_t n, const TypedValue* values, bool suppress, bool isOrAsOp) {
   Class* declaringCls = nullptr;
   Class* calledCls = nullptr;
-  if (typeStructureCouldBeNonStatic(ts)) {
+  auto const v = *values;
+  isValidTSType(v, true);
+  if (typeStructureCouldBeNonStatic(ArrNR(v.m_data.parr))) {
     auto const frame = vmfp();
     if (frame && frame->func()) {
       declaringCls = frame->func()->cls();
@@ -2670,43 +2646,41 @@ Array resolveAndVerifyTypeStructureHelper(
       }
     }
   }
-  return resolveAndVerifyTypeStructure<isAsOp>(
-           ts, declaringCls, calledCls, tsList, suppress);
+  return jit::resolveTypeStructHelper(n, values, declaringCls,
+                                      calledCls, suppress, isOrAsOp);
 }
 
-ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
-  const Cell a, TypeStructResolveOp op, bool suppress
+ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
+  TypeStructResolveOp op,
+  bool suppress
 ) {
-  isValidTSType(a, true);
-  Array ts(a.m_data.parr);
-  assertx(!ts.empty());
+  auto const a = vmStack().topC();
+  isValidTSType(*a, true);
 
   if (op == TypeStructResolveOp::Resolve) {
-    req::vector<Array> tsList;
-    return resolveAndVerifyTypeStructureHelper<true>(ts, tsList, suppress);
+    return resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
+                                               suppress, true);
   }
-  errorOnIsAsExpressionInvalidTypes(ts);
-  return ts;
+  errorOnIsAsExpressionInvalidTypes(ArrNR(a->m_data.parr));
+  return a->m_data.parr;
 }
 
 } // namespace
 
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
-  auto const a = vmStack().topC();
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, true);
-  auto b = checkTypeStructureMatchesCell(ts, *c);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
+  auto b = checkTypeStructureMatchesCell(ArrNR(ts), *c);
   vmStack().popC(); // pop ts
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
 OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
-  auto const a = vmStack().topC();
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, false);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(op, false);
   std::string givenType, expectedType, errorKey;
   if (!checkTypeStructureMatchesCell(
-        ts, *c, givenType, expectedType, errorKey)) {
+        ArrNR(ts), *c, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
@@ -2715,51 +2689,21 @@ OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
 
 OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   assertx(n != 0);
-  auto const a = vmStack().topC();
-  isValidTSType(*a, true);
-  req::vector<Array> tsList;
-
-  for (int i = n - 1; i > 0; --i) {
-    auto const a2 = vmStack().indC(i);
-    isValidTSType(*a2, true);
-    tsList.emplace_back(Array::attach(a2->m_data.parr));
-  }
-  auto resolved = resolveAndVerifyTypeStructureHelper<false>(
-                    Array::attach(a->m_data.parr), tsList, false);
+  auto const resolved =
+    resolveAndVerifyTypeStructureHelper(n, vmStack().topC(), false, false);
   vmStack().popC(); // pop the first TS
   vmStack().ndiscard(n-1);
   if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushDict(resolved.detach());
+    vmStack().pushDict(resolved);
   } else {
-    vmStack().pushArray(resolved.detach());
+    vmStack().pushArray(resolved);
   }
 }
-
-namespace {
-
-// Creates a list of reified generics from the stack and adds them to the
-// reified generics table
-ALWAYS_INLINE std::pair<StringData*, ArrayData*>
-recordReifiedGenericsAndGetInfo(uint32_t first, uint32_t n) {
-  assertx(first < n);
-  auto tsList = ArrayData::CreateVArray();
-  for (int i = 0; i < n - first; ++i) {
-    auto a = vmStack().indC(n - i - 1);
-    isValidTSType(*a, true);
-    tsList = tsList->appendInPlace(*a);
-  }
-  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  addToReifiedGenericsTable(mangledName, tsList);
-  return std::make_pair(mangledName, tsList);
-}
-
-} // namespace
 
 OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   assertx(n != 0);
-  auto const result = recordReifiedGenericsAndGetInfo(0, n);
-  auto tsList = result.second;
-  ArrayData::GetScalarArray(&tsList);
+  auto const tsList =
+    jit::recordReifiedGenericsAndGetTSList(n, vmStack().topC());
   vmStack().ndiscard(n);
   if (RuntimeOption::EvalHackArrDVArrs) {
     vmStack().pushStaticVec(tsList);
@@ -2768,14 +2712,11 @@ OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
   }
 }
 
-OPTBLD_INLINE void iopReifiedName(uint32_t n, ReifiedGenericOp op) {
+OPTBLD_INLINE void iopReifiedName(uint32_t n, const StringData* name) {
   assertx(n != 0);
-  auto const name = vmStack().topC();
-  if (!tvIsString(name)) raise_error("Reified name must be a string");
-  auto const result = recordReifiedGenericsAndGetInfo(1, n);
-  auto const mangledName = mangleReifiedName(name->m_data.pstr, result.first);
-  vmStack().popC();
-  vmStack().ndiscard(n-1);
+  auto const result = jit::recordReifiedGenericsAndGetName(n, vmStack().topC());
+  auto const mangledName = mangleReifiedName(name, result);
+  vmStack().ndiscard(n);
   vmStack().pushStaticString(mangledName);
 }
 
@@ -3018,6 +2959,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfRef:
             case KindOfFunc:
             case KindOfClass:
+            case KindOfClsMeth:
               not_reached();
           }
           if (val->m_type == KindOfString) tvDecRefStr(val);
@@ -3053,6 +2995,11 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfPersistentArray:
           match = SwitchMatch::DEFAULT;
           return;
+
+        case KindOfClsMeth:
+          tvDecRefClsMeth(val);
+          match = SwitchMatch::DEFAULT;
+          break;
 
         case KindOfObject:
           intval = val->m_data.pobj->toInt64();
@@ -3393,14 +3340,6 @@ OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
   ArrayData* reified_types = getReifiedGenericsOpt(*cell);
   slot.put(reified_types, cls);
   vmStack().popC();
-}
-
-OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
-  auto const cell = tvToCell(fr.ptr);
-  if (isStringType(cell->m_type)) {
-    raise_str_to_class_notice(cell->m_data.pstr);
-  }
-  slot.put(nullptr, lookupClsRef(cell));
 }
 
 OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
@@ -4481,7 +4420,14 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Str:    return is_string(val);
   case IsTypeOp::Res:    return val->m_type == KindOfResource;
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
-  case IsTypeOp::ArrLike: return isArrayLikeType(val->m_type);
+  case IsTypeOp::ArrLike:
+    if (isClsMethType(val->m_type)) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+      }
+      return true;
+    }
+    return isArrayLikeType(val->m_type);
   case IsTypeOp::VArray:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
@@ -4500,6 +4446,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
       }
     }
     return is_darray(val);
+  case IsTypeOp::ClsMeth: return is_clsmeth(val);
   }
   not_reached();
 }
@@ -4661,7 +4608,13 @@ OPTBLD_INLINE void iopArrayIdx() {
   TypedValue* def = vmStack().topTV();
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
-
+  if (isClsMethType(type(arr))) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      tvCastToVecInPlace(arr);
+    } else {
+      tvCastToVArrayInPlace(arr);
+    }
+  }
   auto const result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
                                               tvAsCVarRef(key),
                                               tvAsCVarRef(def));
@@ -5094,6 +5047,49 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     return;
   }
 
+  if (isClsMethType(c1->m_type)) {
+    auto const clsMeth = c1->m_data.pclsmeth;
+    assertx(clsMeth->getCls());
+    assertx(clsMeth->getFunc());
+
+    ArrayData* reifiedGenerics = nullptr;
+    const Func* func = clsMeth->getFunc();
+    ObjectData* thiz = nullptr;
+    Class* cls = clsMeth->getCls();
+
+    // Handle inout name mangling
+    if (UNLIKELY(n)) {
+      auto const func_name = func->fullDisplayName();
+      auto const v = Variant::attach(appendSuffix(func_name));
+      bool dynamic = false;
+      StringData* invName = nullptr;
+      func = vm_decode_function(
+        v,
+        vmfp(),
+        /* forwarding */ false,
+        thiz,
+        cls,
+        invName,
+        dynamic,
+        reifiedGenerics,
+        DecodeFlags::NoWarn
+      );
+      if (func == nullptr) raise_call_to_undefined(func_name);
+    }
+    vmStack().popC();
+    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
+    if (thiz) {
+      ar->setThis(thiz);
+    } else if (cls) {
+      ar->setClass(cls);
+    } else {
+      ar->trashThis();
+    }
+
+    ar->setDynamicCall();
+    return;
+  }
+
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
@@ -5114,6 +5110,7 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
   Func* func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) {
     const NamedEntityPair nep2 = unit->lookupNamedEntityPairId(globalFunc);
+    raise_undefined_function_fallback_notice(nep.first, nep2.first);
     func = Unit::loadFunc(nep2.second, nep2.first);
     if (func == nullptr) {
       raise_call_to_undefined(unit->lookupLitstrId(nsFunc));
@@ -5143,6 +5140,13 @@ void fPushObjMethodImpl(StringData* name,
   if (res == LookupResult::MethodFoundNoThis) {
     decRefObj(obj);
     ar->setClass(cls);
+
+    if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
+      raise_notice(
+        "Static method %s should not be called on instance",
+        ar->func()->fullName()->data()
+      );
+    }
   } else {
     assertx(res == LookupResult::MethodFoundWithThis ||
            res == LookupResult::MagicCallFound);
@@ -5257,7 +5261,8 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
 }
 
 namespace {
-void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
+void resolveMethodImpl(
+  Cell* c1, Cell* c2, const char* meth_type, bool emitClsMeth = false) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
@@ -5287,17 +5292,24 @@ void resolveMethodImpl(Cell* c1, Cell* c2, const char* meth_type) {
     );
     SystemLib::throwInvalidOperationExceptionObject(msg.c_str());
   }
-  if (!thiz) {
-    assertx(cls);
-    arr.set(0, Variant{cls});
-  }
-  arr.set(1, Variant{func});
-  vmStack().popC();
-  vmStack().popC();
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushVecNoRc(arr.detach());
+  if (emitClsMeth) {
+    ClsMethDataRef clsMeth(cls, const_cast<Func*>(func));
+    vmStack().popC();
+    vmStack().popC();
+    vmStack().pushClsMethNoRc(clsMeth);
   } else {
-    vmStack().pushArrayNoRc(arr.detach());
+    if (!thiz) {
+      assertx(cls);
+      arr.set(0, Variant{cls});
+    }
+    arr.set(1, Variant{func});
+    vmStack().popC();
+    vmStack().popC();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushVecNoRc(arr.detach());
+    } else {
+      vmStack().pushArrayNoRc(arr.detach());
+    }
   }
 }
 }
@@ -5309,7 +5321,7 @@ OPTBLD_INLINE void iopResolveClsMethod() {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
   if (!isStringType(c2->m_type)) raise_error("class name must be a string.");
-  resolveMethodImpl(c1, c2, "class_meth");
+  resolveMethodImpl(c1, c2, "class_meth", true);
 }
 
 OPTBLD_INLINE void iopResolveObjMethod() {
@@ -5504,13 +5516,6 @@ OPTBLD_INLINE void iopNewObjD(Id id) {
   newObjImpl(cls, nullptr);
 }
 
-OPTBLD_INLINE void iopNewObjI(uint32_t clsIx) {
-  auto const func = vmfp()->m_func;
-  auto const preCls = func->unit()->lookupPreClassId(clsIx);
-  auto const cls = Unit::defClass(preCls, true);
-  newObjImpl(cls, nullptr);
-}
-
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(ref);
   if (ref == SpecialClsRef::Static && cls->hasReifiedGenerics()) {
@@ -5539,18 +5544,6 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   ar->setThis(obj);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
-}
-
-OPTBLD_INLINE void iopFThrowOnRefMismatch(ActRec* ar, imm_array<bool> byRefs) {
-  assertx(byRefs.size <= ar->numArgs());
-  auto const func = ar->func();
-  for (auto i = 0; i < byRefs.size; ++i) {
-    auto const byRef = func->byRef(i);
-    if (byRef != byRefs[i]) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
-    }
-  }
 }
 
 bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
@@ -5594,6 +5587,15 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
   return true;
 }
 
+namespace {
+
+// Find the AR for the current FPI region by indexing from sp
+inline ActRec* arFromSp(int32_t n) {
+  return reinterpret_cast<ActRec*>(vmStack().top() + n);
+}
+
+}
+
 bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
@@ -5608,8 +5610,9 @@ bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
 }
 
 OPTBLD_FLT_INLINE
-void iopFCall(PC origpc, PC& pc, ActRec* ar, FCallArgs fca,
+void iopFCall(PC origpc, PC& pc, FCallArgs fca,
               const StringData* /*clsName*/, const StringData* funcName) {
+  auto const ar = arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   auto const func = ar->func();
   assertx(
     funcName->empty() ||
@@ -5621,6 +5624,7 @@ void iopFCall(PC origpc, PC& pc, ActRec* ar, FCallArgs fca,
     )
   );
   assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
+  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
   if (ar->isDynamicCall()) callerDynamicCallChecks(func);
   if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
     callerRxChecks(vmfp(), func);
@@ -5650,25 +5654,17 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-    if (func->hasVariadicCaptureParam()) {
-      assertx(numArgs > 0);
-      assertx(
-        RuntimeOption::EvalHackArrDVArrs
-          ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-          : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-      );
-    }
-    Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
-  } else {
-    if (func->attrs() & AttrParamCoerceModeNull) {
-      ret.m_type = KindOfNull;
-    } else {
-      assertx(func->attrs() & AttrParamCoerceModeFalse);
-      ret.m_type = KindOfBoolean;
-      ret.m_data.num = 0;
-    }
+  Native::coerceFCallArgs(args, numArgs, numNonDefault, func);
+
+  if (func->hasVariadicCaptureParam()) {
+    assertx(numArgs > 0);
+    assertx(
+      RuntimeOption::EvalHackArrDVArrs
+        ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
+        : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
+    );
   }
+  Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
@@ -5934,11 +5930,6 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
   vm->evalUnit(unit, origpc, pc, EventHook::Eval);
 }
 
-OPTBLD_INLINE void iopDefFunc(uint32_t fid) {
-  Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
-  Unit::defFunc(f, isDebuggerAttached());
-}
-
 OPTBLD_INLINE void iopDefCls(uint32_t cid) {
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
@@ -5995,6 +5986,17 @@ OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
     tvIncRefCountable(*thisLoc.ptr);
   } else {
     tvWriteUninit(*thisLoc.ptr);
+  }
+}
+
+OPTBLD_INLINE void iopFuncNumArgs() {
+  if (vmfp()->func()->isPseudoMain()) {
+    raise_warning(
+      "func_num_args():  Called from the global scope - no function context"
+    );
+    vmStack().pushInt(-1);
+  } else {
+    vmStack().pushInt(vmfp()->numArgs());
   }
 }
 
@@ -6134,10 +6136,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(param.index < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
-  assertx(tc.hasConstraint());
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyParam(param.ptr, func, param.index);
-  }
+  if (tc.isCheckable()) tc.verifyParam(param.ptr, func, param.index);
 }
 
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
@@ -6164,10 +6163,7 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
-  assertx(tc.hasConstraint());
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyOutParam(vmStack().topTV(), func, paramId);
-  }
+  if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
 }
 
 namespace {
@@ -6178,9 +6174,7 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   }
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
-  if (!tc.isTypeVar() && !tc.isTypeConstant()) {
-    tc.verifyReturn(vmStack().indC(ind), func);
-  }
+  if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
 }
 
 } // namespace
@@ -7048,20 +7042,6 @@ OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
 }
 
 /*
- * arFromInstr() is always correct for FPI-using instructions, but many opcodes
- * can use the much faster arFromSp().
- */
-template<Op op, class Imm>
-ALWAYS_INLINE ActRec* ar_for_inst(PC origpc, Imm) {
-  return arFromInstr(origpc);
-}
-
-template<>
-ALWAYS_INLINE ActRec* ar_for_inst<Op::FCall, FCallArgs>(PC, FCallArgs fca) {
-  return arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-}
-
-/*
  * Some bytecodes with SA immediates want the raw Id to look up a NamedEntity
  * quickly, and some want the const StringData*. Support both by decoding to
  * this struct and implicitly converting to what the callee wants.
@@ -7086,10 +7066,8 @@ struct litstr_id {
 #define FLAG_NF
 #define FLAG_TF
 #define FLAG_CF , pc
-#define FLAG_FF , ar_for_inst<op>(origpc, imm1)
 #define FLAG_PF
 #define FLAG_CF_TF FLAG_CF
-#define FLAG_CF_FF FLAG_CF FLAG_FF
 
 #define DECODE_IVA decode_iva(pc)
 #define DECODE_I64A decode<int64_t>(pc)
@@ -7110,7 +7088,6 @@ struct litstr_id {
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)
 #define DECODE_I32LA decode_imm_array<uint32_t>(pc)
-#define DECODE_BLLA decode_imm_array<bool>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 
 #define DECODE_NA
@@ -7141,10 +7118,8 @@ OPCODES
 #undef FLAG_NF
 #undef FLAG_TF
 #undef FLAG_CF
-#undef FLAG_FF
 #undef FLAG_PF
 #undef FLAG_CF_TF
-#undef FLAG_CF_FF
 
 #undef DECODE_IVA
 #undef DECODE_I64A
@@ -7165,7 +7140,6 @@ OPCODES
 #undef DECODE_SLA
 #undef DECODE_ILA
 #undef DECODE_I32LA
-#undef DECODE_BLLA
 #undef DECODE_VSA
 
 #undef DECODE_NA

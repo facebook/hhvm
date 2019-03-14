@@ -40,6 +40,7 @@ let visitor = Tast_visitor.iter_with [
   Abstract_class_check.handler;
   Type_params_arity_check.handler;
   Class_parent_check.handler;
+  Disallow_unsafe_construct.handler;
 ]
 
 let program = visitor#go

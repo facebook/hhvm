@@ -13,20 +13,20 @@ open ServerEnv
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh
+let foo_contents = "<?hh // partial
 class Foo {
   <<__Override>>
   public function f() {}
 }
 "
 
-let baz_contents = "<?hh
+let baz_contents = "<?hh // partial
 class Baz extends Foo {
 
 }
 "
 
-let qux_contents = "<?hh
+let qux_contents = "<?hh // partial
 class Qux {
 
 }

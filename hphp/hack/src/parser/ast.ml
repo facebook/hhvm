@@ -54,12 +54,6 @@ and def =
   | SetNamespaceEnv of nsenv
   | FileAttributes of file_attributes
 
-and cst_kind =
-  (* The constant was introduced with: define('X', ...); *)
-  | Cst_define
-  (* The constant was introduced with: const X = ...; *)
-  | Cst_const
-
 and ns_kind =
   | NSNamespace
   | NSClass
@@ -96,7 +90,6 @@ and file_attributes = {
 
 and gconst = {
   cst_mode: fimode;
-  cst_kind: cst_kind;
   cst_name: id;
   cst_type: hint option;
   cst_value: expr;
@@ -104,7 +97,10 @@ and gconst = {
   cst_span: pos;
 }
 
-and targ = hint * reified
+and targ = hint
+and collection_targ =
+  | CollectionTV of targ
+  | CollectionTKV of targ * targ
 
 and tparam = {
   tp_variance: variance;
@@ -167,6 +163,17 @@ and class_elt =
   | MethodTraitResolution of method_trait_resolution
   | XhpCategory of pos * (pstring list)
   | XhpChild of pos * xhp_child
+  (* Pocket Universes definition embedded in a class *)
+  | ClassEnum of bool * id * pufield list
+
+and pufield =
+  | PUAtomDecl of id * pumapping list
+  | PUCaseType of id
+  | PUCaseTypeExpr of hint * id
+
+and pumapping =
+  | PUMappingID of id * expr
+  | PUMappingType of id * hint
 
 and xhp_child =
   | ChildName of id
@@ -277,7 +284,6 @@ and typeconst = {
   tconst_user_attributes: user_attribute list;
   tconst_abstract: bool;
   tconst_name: id;
-  tconst_tparams: tparam list;
   tconst_constraint: hint option;
   tconst_type: hint option;
   tconst_span: pos;
@@ -407,10 +413,10 @@ and block = stmt list
 and expr = pos * expr_
 and expr_ =
   | Array of afield list
-  | Varray of expr list
-  | Darray of (expr * expr) list
+  | Varray of targ option * expr list
+  | Darray of (targ * targ) option * (expr * expr) list
   | Shape of (shape_field_name * expr) list
-  | Collection of id * afield list
+  | Collection of id * collection_targ option * afield list
   | Null
   | True
   | False
@@ -453,7 +459,6 @@ and expr_ =
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   | New of expr * targ list * expr list * expr list
-  | NewAnonClass of expr list * expr list * class_
   (* Traditional PHP-style closure with a use list. Each use element is
     a name and a bool indicating if its a reference or value *)
   | Efun of fun_ * (id * bool) list
@@ -466,7 +471,8 @@ and expr_ =
   | Unsafeexpr of expr
   | Import of import_flavor * expr
   | Callconv of param_kind * expr
-  | Execution_operator of expr list
+  (* Pocket Universe citizen, :@foo *)
+  | PU_atom of id
 
 and import_flavor =
   | Include

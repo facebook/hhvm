@@ -1,6 +1,6 @@
 <?php
 
-var_dump(gzcompress());
+try { var_dump(gzcompress()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzcompress("", 1000));
 var_dump(gzcompress("", -1));
 
@@ -14,7 +14,7 @@ Desolation, grief and agony";
 var_dump($data1 = gzcompress($string));
 var_dump($data2 = gzcompress($string, 9));
 
-var_dump(gzuncompress());
+try { var_dump(gzuncompress()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzuncompress("", 1000));
 var_dump(gzuncompress("", -1));
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * This file is part of PHP-FastCGI-Client.
  *
@@ -133,7 +133,7 @@ class Client
     {
         $this->_keepAlive = (boolean)$b;
         if (!$this->_keepAlive && $this->_sock) {
-            fclose($this->_sock);
+            \fclose($this->_sock);
         }
     }
 
@@ -158,7 +158,7 @@ class Client
         $was_persistent = ($this->_sock && $this->_persistentSocket);
         $this->_persistentSocket = (boolean)$b;
         if (!$this->_persistentSocket && $was_persistent) {
-            fclose($this->_sock);
+            \fclose($this->_sock);
         }
     }
 
@@ -224,7 +224,7 @@ class Client
         if (!$this->_sock) {
             return false;
         }
-        return stream_set_timeout($this->_sock, floor($timeoutMs / 1000), ($timeoutMs % 1000) * 1000);
+        return \stream_set_timeout($this->_sock, \floor($timeoutMs / 1000), ($timeoutMs % 1000) * 1000);
     }
 
 
@@ -235,9 +235,9 @@ class Client
     {
         if (!$this->_sock) {
             if ($this->_persistentSocket) {
-                $this->_sock = pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
+                $this->_sock = \pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
             } else {
-                $this->_sock = fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
+                $this->_sock = \fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
             }
 
             if (!$this->_sock) {
@@ -259,15 +259,15 @@ class Client
      */
     private function buildPacket($type, $content, $requestId = 1)
     {
-        $clen = strlen($content);
-        return chr(self::VERSION_1)         /* version */
-            . chr($type)                    /* type */
-            . chr(($requestId >> 8) & 0xFF) /* requestIdB1 */
-            . chr($requestId & 0xFF)        /* requestIdB0 */
-            . chr(($clen >> 8 ) & 0xFF)     /* contentLengthB1 */
-            . chr($clen & 0xFF)             /* contentLengthB0 */
-            . chr(0)                        /* paddingLength */
-            . chr(0)                        /* reserved */
+        $clen = \strlen($content);
+        return \chr(self::VERSION_1)         /* version */
+            . \chr($type)                    /* type */
+            . \chr(($requestId >> 8) & 0xFF) /* requestIdB1 */
+            . \chr($requestId & 0xFF)        /* requestIdB0 */
+            . \chr(($clen >> 8 ) & 0xFF)     /* contentLengthB1 */
+            . \chr($clen & 0xFF)             /* contentLengthB0 */
+            . \chr(0)                        /* paddingLength */
+            . \chr(0)                        /* reserved */
             . $content;                     /* content */
     }
 
@@ -280,21 +280,21 @@ class Client
      */
     private function buildNvpair($name, $value)
     {
-        $nlen = strlen($name);
-        $vlen = strlen($value);
+        $nlen = \strlen($name);
+        $vlen = \strlen($value);
         if ($nlen < 128) {
             /* nameLengthB0 */
-            $nvpair = chr($nlen);
+            $nvpair = \chr($nlen);
         } else {
             /* nameLengthB3 & nameLengthB2 & nameLengthB1 & nameLengthB0 */
-            $nvpair = chr(($nlen >> 24) | 0x80) . chr(($nlen >> 16) & 0xFF) . chr(($nlen >> 8) & 0xFF) . chr($nlen & 0xFF);
+            $nvpair = \chr(($nlen >> 24) | 0x80) . \chr(($nlen >> 16) & 0xFF) . \chr(($nlen >> 8) & 0xFF) . \chr($nlen & 0xFF);
         }
         if ($vlen < 128) {
             /* valueLengthB0 */
-            $nvpair .= chr($vlen);
+            $nvpair .= \chr($vlen);
         } else {
             /* valueLengthB3 & valueLengthB2 & valueLengthB1 & valueLengthB0 */
-            $nvpair .= chr(($vlen >> 24) | 0x80) . chr(($vlen >> 16) & 0xFF) . chr(($vlen >> 8) & 0xFF) . chr($vlen & 0xFF);
+            $nvpair .= \chr(($vlen >> 24) | 0x80) . \chr(($vlen >> 16) & 0xFF) . \chr(($vlen >> 8) & 0xFF) . \chr($vlen & 0xFF);
         }
         /* nameData & valueData */
         return $nvpair . $name . $value;
@@ -311,28 +311,28 @@ class Client
         $array = array();
 
         if ($length === null) {
-            $length = strlen($data);
+            $length = \strlen($data);
         }
 
         $p = 0;
 
         while ($p != $length) {
 
-            $nlen = ord($data{$p++});
+            $nlen = \ord($data{$p++});
             if ($nlen >= 128) {
                 $nlen = ($nlen & 0x7F << 24);
-                $nlen |= (ord($data{$p++}) << 16);
-                $nlen |= (ord($data{$p++}) << 8);
-                $nlen |= (ord($data{$p++}));
+                $nlen |= (\ord($data{$p++}) << 16);
+                $nlen |= (\ord($data{$p++}) << 8);
+                $nlen |= (\ord($data{$p++}));
             }
-            $vlen = ord($data{$p++});
+            $vlen = \ord($data{$p++});
             if ($vlen >= 128) {
                 $vlen = ($nlen & 0x7F << 24);
-                $vlen |= (ord($data{$p++}) << 16);
-                $vlen |= (ord($data{$p++}) << 8);
-                $vlen |= (ord($data{$p++}));
+                $vlen |= (\ord($data{$p++}) << 16);
+                $vlen |= (\ord($data{$p++}) << 8);
+                $vlen |= (\ord($data{$p++}));
             }
-            $array[substr($data, $p, $nlen)] = substr($data, $p+$nlen, $vlen);
+            $array[\substr($data, $p, $nlen)] = \substr($data, $p+$nlen, $vlen);
             $p += ($nlen + $vlen);
         }
 
@@ -348,12 +348,12 @@ class Client
     private function decodePacketHeader($data)
     {
         $ret = array();
-        $ret['version']       = ord($data{0});
-        $ret['type']          = ord($data{1});
-        $ret['requestId']     = (ord($data{2}) << 8) + ord($data{3});
-        $ret['contentLength'] = (ord($data{4}) << 8) + ord($data{5});
-        $ret['paddingLength'] = ord($data{6});
-        $ret['reserved']      = ord($data{7});
+        $ret['version']       = \ord($data{0});
+        $ret['type']          = \ord($data{1});
+        $ret['requestId']     = (\ord($data{2}) << 8) + \ord($data{3});
+        $ret['contentLength'] = (\ord($data{4}) << 8) + \ord($data{5});
+        $ret['paddingLength'] = \ord($data{6});
+        $ret['reserved']      = \ord($data{7});
         return $ret;
     }
 
@@ -364,18 +364,18 @@ class Client
      */
     private function readPacket()
     {
-        if ($packet = fread($this->_sock, self::HEADER_LEN)) {
+        if ($packet = \fread($this->_sock, self::HEADER_LEN)) {
             $resp = $this->decodePacketHeader($packet);
             $resp['content'] = '';
             if ($resp['contentLength']) {
                 $len  = $resp['contentLength'];
-                while ($len && $buf=fread($this->_sock, $len)) {
-                    $len -= strlen($buf);
+                while ($len && $buf=\fread($this->_sock, $len)) {
+                    $len -= \strlen($buf);
                     $resp['content'] .= $buf;
                 }
             }
             if ($resp['paddingLength']) {
-                $buf = fread($this->_sock, $resp['paddingLength']);
+                $buf = \fread($this->_sock, $resp['paddingLength']);
             }
             return $resp;
         } else {
@@ -397,7 +397,7 @@ class Client
         foreach ($requestedInfo as $info) {
             $request .= $this->buildNvpair($info, '');
         }
-        fwrite($this->_sock, $this->buildPacket(self::GET_VALUES, $request, 0));
+        \fwrite($this->_sock, $this->buildPacket(self::GET_VALUES, $request, 0));
 
         $resp = $this->readPacket();
         if ($resp['type'] == self::GET_VALUES_RESULT) {
@@ -440,13 +440,13 @@ class Client
         $this->connect();
 
         // Pick random number between 1 and max 16 bit unsigned int 65535
-        $id = mt_rand(1, (1 << 16) - 1);
+        $id = \mt_rand(1, (1 << 16) - 1);
 
         // Using persistent sockets implies you want them keept alive by server!
-        $keepAlive = intval($this->_keepAlive || $this->_persistentSocket);
+        $keepAlive = \intval($this->_keepAlive || $this->_persistentSocket);
 
         $request = $this->buildPacket(self::BEGIN_REQUEST
-                                     ,chr(0) . chr(self::RESPONDER) . chr($keepAlive) . str_repeat(chr(0), 5)
+                                     ,\chr(0) . \chr(self::RESPONDER) . \chr($keepAlive) . \str_repeat(\chr(0), 5)
                                      ,$id
                                      );
 
@@ -464,16 +464,16 @@ class Client
         }
         $request .= $this->buildPacket(self::STDIN, '', $id);
 
-        if (fwrite($this->_sock, $request) === false || fflush($this->_sock) === false) {
+        if (\fwrite($this->_sock, $request) === false || \fflush($this->_sock) === false) {
 
-            $info = stream_get_meta_data($this->_sock);
+            $info = \stream_get_meta_data($this->_sock);
 
             if ($info['timed_out']) {
                 throw new TimedOutException('Write timed out');
             }
 
             // Broken pipe, tear down so future requests might succeed
-            fclose($this->_sock);
+            \fclose($this->_sock);
             throw new \Exception('Failed to write request to socket');
         }
 
@@ -514,7 +514,7 @@ class Client
 
         // Need to manually check since we might do several reads none of which timeout themselves
         // but still not get the response requested
-        $startTime = microtime(true);
+        $startTime = \microtime(true);
 
         do {
             $resp = $this->readPacket();
@@ -531,15 +531,15 @@ class Client
                     break;
                 }
             }
-            if (microtime(true) - $startTime >= ($timeoutMs * 1000)) {
+            if (\microtime(true) - $startTime >= ($timeoutMs * 1000)) {
                 // Reset
                 $this->set_ms_timeout($this->_readWriteTimeout);
                 throw new \Exception('Timed out');
             }
         } while ($resp);
 
-        if (!is_array($resp)) {
-            $info = stream_get_meta_data($this->_sock);
+        if (!\is_array($resp)) {
+            $info = \stream_get_meta_data($this->_sock);
 
             // We must reset timeout but it must be AFTER we get info
             $this->set_ms_timeout($this->_readWriteTimeout);
@@ -560,7 +560,7 @@ class Client
         // Reset timeout
         $this->set_ms_timeout($this->_readWriteTimeout);
 
-        switch (ord($resp['content']{4})) {
+        switch (\ord($resp['content']{4})) {
             case self::CANT_MPX_CONN:
                 throw new \Exception('This app can\'t multiplex [CANT_MPX_CONN]');
                 break;

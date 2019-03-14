@@ -1,6 +1,4 @@
 #### Basic and Various operations ####
-
-Notice: %s
 string(16) "Testing ucfirst."
 string(17) "1.testing ucfirst"
 string(11) "HELLO wORLD"
@@ -10,7 +8,6 @@ string(1) "%r\x00%r"
 string(2) "%r\x00%r0"
 string(4) "Abcd"
 string(3) "Xyz"
-string(6) "String"
 string(2) "-3"
 string(2) "-3"
 string(6) "-3.344"
@@ -37,7 +34,6 @@ string(8) "12twelve"
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
 Warning: %s
-NULL
 
 --- Testing objects ---
 string(12) "Hello, world"

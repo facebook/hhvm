@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/word-mem.h"
@@ -409,6 +410,25 @@ void ConvertTvToUncounted(
     case KindOfUninit: {
       source->m_type = KindOfNull;
       break;
+    }
+    case KindOfClsMeth: {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        tvCastToVecInPlace(source);
+        source->m_type = KindOfPersistentVec;
+        auto& ad = source->m_data.parr;
+        if (handlePersistent(ad)) break;
+        assertx(!ad->empty());
+        ad = PackedArray::MakeUncounted(ad, false, seen);
+        break;
+      } else {
+        tvCastToVArrayInPlace(source);
+        source->m_type = KindOfPersistentArray;
+        auto& ad = source->m_data.parr;
+        if (handlePersistent(ad)) break;
+        assertx(!ad->empty());
+        ad = PackedArray::MakeUncounted(ad, false, seen);
+        break;
+      }
     }
     case KindOfNull:
     case KindOfBoolean:

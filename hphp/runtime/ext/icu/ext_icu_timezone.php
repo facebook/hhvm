@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__NativeData("IntlTimeZone")>>
 class IntlTimeZone {

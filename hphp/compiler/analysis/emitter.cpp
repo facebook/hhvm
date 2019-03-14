@@ -157,6 +157,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.UndefinedConstFallback      = RuntimeOption::UndefinedConstFallback;
+  gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.InitialNamedEntityTableSize =
@@ -174,6 +175,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.EnableIntishCast = RuntimeOption::EvalEnableIntishCast;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
+  gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

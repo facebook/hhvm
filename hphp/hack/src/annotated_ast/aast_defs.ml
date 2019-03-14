@@ -29,7 +29,10 @@ and call_type =
 and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
-and targ = hint * is_reified
+and targ = hint
+and collection_targ =
+  | CollectionTV of targ
+  | CollectionTKV of targ * targ
 
 and param_mutability = PMutable | POwnedMutable | PMaybeMutable
 and import_flavor =
@@ -92,6 +95,7 @@ and hint_ =
   | Hprim of tprim
   | Hthis
   | Hdynamic
+  | Hnothing
 
 (* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =

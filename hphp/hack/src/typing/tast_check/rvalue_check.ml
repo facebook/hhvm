@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Nast
 open Tast
 open Typing_defs
 
@@ -94,6 +93,8 @@ let visitor = object(this)
       this#disallow_non_returning (fun () -> this#on_expr env e1);
       this#allow_non_returning (fun () -> this#on_as_expr env e2);
       this#on_block env b
+    | Awaitall _ ->
+      this#allow_non_returning (fun () -> super#on_stmt env stmt)
     | _ ->
       this#disallow_non_returning (fun () -> super#on_stmt env stmt)
 

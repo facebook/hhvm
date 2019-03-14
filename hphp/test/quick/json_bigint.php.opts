@@ -1,1 +1,2 @@
 -vEval.SimpleJsonMaxLength=2097152
+-vEval.EnablePHP=1

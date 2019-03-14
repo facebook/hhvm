@@ -1,7 +1,0 @@
-.main {
-  Int 1
-  CastString
-  PopC
-  Int 1
-  RetC
-}

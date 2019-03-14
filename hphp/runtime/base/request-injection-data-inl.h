@@ -230,10 +230,6 @@ inline bool RequestInjectionData::hasSafeFileAccess() const {
   return m_safeFileAccess;
 }
 
-inline bool RequestInjectionData::hasTrackErrors() const {
-  return m_trackErrors;
-}
-
 inline bool RequestInjectionData::hasHtmlErrors() const {
   return m_htmlErrors;
 }

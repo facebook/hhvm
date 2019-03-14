@@ -1,1 +1,2 @@
 -vServer.ForbiddenFileExtensions.*=".bat"
+-vEval.EnablePHP=1

@@ -1,0 +1,6 @@
+File "explicit_type_collection_mismatch6.php", line 4, characters 8-39:
+Incompatible field values (Typing[4110])
+File "explicit_type_collection_mismatch6.php", line 4, characters 23-25:
+This is an int
+File "explicit_type_collection_mismatch6.php", line 4, characters 33-38:
+It is incompatible with a string

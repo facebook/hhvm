@@ -14,7 +14,8 @@
         [(If ((([13:7-9], bool), (Lvar ([13:7-9], $b))),
             [(Expr
                 (([15:7-12], _),
-                 (Call (Cnormal, (([15:7-10], _), (Id ([15:7-10], "\\bar"))),
+                 (Call (Cnormal,
+                    (([15:7-10], (function(): _)), (Id ([15:7-10], "\\bar"))),
                     [], [], []))));
               (Unsafe_block
                  [(Expr
@@ -25,7 +26,8 @@
                    ]);
               (Expr
                  (([19:5-10], _),
-                  (Call (Cnormal, (([19:5-8], _), (Id ([19:5-8], "\\qux"))),
+                  (Call (Cnormal,
+                     (([19:5-8], (function(): _)), (Id ([19:5-8], "\\qux"))),
                      [], [], []))))
               ],
             [Noop]))
@@ -35,5 +37,21 @@
       f_external = false; f_namespace = <opaque>;
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
-      f_static = false })
+      f_static = false });
+  (Fun
+     { f_span = [23:1-18]; f_annotation = (); f_mode = <opaque>;
+       f_ret = None; f_name = ([23:10-13], "\\bar"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
+  (Fun
+     { f_span = [24:1-18]; f_annotation = (); f_mode = <opaque>;
+       f_ret = None; f_name = ([24:10-13], "\\qux"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

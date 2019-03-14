@@ -12,8 +12,8 @@ freeFunc2()
 int(456)
 string(3) "abc"
 int(456)
+string(48) "freeFunc2() expects exactly 1 parameter, 0 given"
 freeFunc2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -26,8 +26,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(49) "freeFunc3() expects exactly 3 parameters, 2 given"
 freeFunc3()
-string(8) "123 abc "
 string(8) "123 abc "
 freeFunc3()
 string(11) "456 123 ghi"
@@ -43,8 +43,8 @@ freeFunc5()
 NULL
 NULL
 NULL
+string(48) "freeFunc5() expects exactly 1 parameter, 0 given"
 freeFunc5()
-NULL
 NULL
 NULL
 NULL
@@ -62,8 +62,8 @@ Cls1::staticFunc2()
 int(456)
 string(3) "abc"
 int(456)
+string(50) "staticFunc2() expects exactly 1 parameter, 0 given"
 Cls1::staticFunc2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -76,8 +76,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(51) "staticFunc3() expects exactly 3 parameters, 2 given"
 Cls1::staticFunc3()
-string(8) "123 abc "
 string(8) "123 abc "
 Cls1::staticFunc3()
 string(11) "456 123 ghi"
@@ -93,8 +93,8 @@ Cls1::staticFunc5()
 NULL
 NULL
 NULL
+string(50) "staticFunc5() expects exactly 1 parameter, 0 given"
 Cls1::staticFunc5()
-NULL
 NULL
 NULL
 NULL
@@ -112,8 +112,8 @@ Cls1::func2()
 int(456)
 string(3) "abc"
 int(456)
+string(44) "func2() expects exactly 1 parameter, 0 given"
 Cls1::func2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -126,8 +126,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(45) "func3() expects exactly 3 parameters, 2 given"
 Cls1::func3()
-string(8) "123 abc "
 string(8) "123 abc "
 Cls1::func3()
 string(11) "456 123 ghi"
@@ -143,8 +143,8 @@ Cls1::func5()
 NULL
 NULL
 NULL
+string(44) "func5() expects exactly 1 parameter, 0 given"
 Cls1::func5()
-NULL
 NULL
 NULL
 NULL
@@ -159,8 +159,8 @@ Cls1::func2()
 int(456)
 string(3) "abc"
 int(456)
+string(44) "func2() expects exactly 1 parameter, 0 given"
 Cls1::func2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -173,8 +173,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(45) "func3() expects exactly 3 parameters, 2 given"
 Cls1::func3()
-string(8) "123 abc "
 string(8) "123 abc "
 Cls1::func3()
 string(11) "456 123 ghi"
@@ -190,8 +190,8 @@ Cls1::func5()
 NULL
 NULL
 NULL
+string(44) "func5() expects exactly 1 parameter, 0 given"
 Cls1::func5()
-NULL
 NULL
 NULL
 NULL
@@ -209,8 +209,8 @@ Cls3::func()
 int(456)
 string(3) "abc"
 int(456)
+string(43) "func() expects exactly 1 parameter, 0 given"
 Cls3::func()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -223,8 +223,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(44) "func() expects exactly 3 parameters, 2 given"
 Cls4::func()
-string(8) "123 abc "
 string(8) "123 abc "
 Cls4::func()
 string(11) "456 123 ghi"
@@ -240,8 +240,8 @@ Cls6::func()
 NULL
 NULL
 NULL
+string(43) "func() expects exactly 1 parameter, 0 given"
 Cls6::func()
-NULL
 NULL
 NULL
 NULL
@@ -259,8 +259,8 @@ Trait2::staticFunc2()
 int(456)
 string(3) "abc"
 int(456)
+string(50) "staticFunc2() expects exactly 1 parameter, 0 given"
 Trait2::staticFunc2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -273,8 +273,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(51) "staticFunc3() expects exactly 3 parameters, 2 given"
 Trait3::staticFunc3()
-string(8) "123 abc "
 string(8) "123 abc "
 Trait3::staticFunc3()
 string(11) "456 123 ghi"
@@ -290,8 +290,8 @@ Trait5::staticFunc5()
 NULL
 NULL
 NULL
+string(50) "staticFunc5() expects exactly 1 parameter, 0 given"
 Trait5::staticFunc5()
-NULL
 NULL
 NULL
 NULL
@@ -306,8 +306,8 @@ Trait2::staticFunc2()
 int(456)
 string(3) "abc"
 int(456)
+string(50) "staticFunc2() expects exactly 1 parameter, 0 given"
 Trait2::staticFunc2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -320,8 +320,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(51) "staticFunc3() expects exactly 3 parameters, 2 given"
 Trait3::staticFunc3()
-string(8) "123 abc "
 string(8) "123 abc "
 Trait3::staticFunc3()
 string(11) "456 123 ghi"
@@ -337,8 +337,8 @@ Trait5::staticFunc5()
 NULL
 NULL
 NULL
+string(50) "staticFunc5() expects exactly 1 parameter, 0 given"
 Trait5::staticFunc5()
-NULL
 NULL
 NULL
 NULL
@@ -356,8 +356,8 @@ Trait2::func2()
 int(456)
 string(3) "abc"
 int(456)
+string(44) "func2() expects exactly 1 parameter, 0 given"
 Trait2::func2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -370,8 +370,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(45) "func3() expects exactly 3 parameters, 2 given"
 Trait3::func3()
-string(8) "123 abc "
 string(8) "123 abc "
 Trait3::func3()
 string(11) "456 123 ghi"
@@ -387,8 +387,8 @@ Trait5::func5()
 NULL
 NULL
 NULL
+string(44) "func5() expects exactly 1 parameter, 0 given"
 Trait5::func5()
-NULL
 NULL
 NULL
 NULL
@@ -403,8 +403,8 @@ Trait2::func2()
 int(456)
 string(3) "abc"
 int(456)
+string(44) "func2() expects exactly 1 parameter, 0 given"
 Trait2::func2()
-NULL
 NULL
 int(456)
 string(3) "abc"
@@ -417,8 +417,8 @@ string(8) "789 def "
 string(9) "789 def 1"
 string(9) " 100 1.23"
 string(8) "789 def "
+string(45) "func3() expects exactly 3 parameters, 2 given"
 Trait3::func3()
-string(8) "123 abc "
 string(8) "123 abc "
 Trait3::func3()
 string(11) "456 123 ghi"
@@ -434,8 +434,8 @@ Trait5::func5()
 NULL
 NULL
 NULL
+string(44) "func5() expects exactly 1 parameter, 0 given"
 Trait5::func5()
-NULL
 NULL
 NULL
 NULL

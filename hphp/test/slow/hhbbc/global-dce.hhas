@@ -4,13 +4,13 @@
   String "a"
   String "b"
   String "c"
-  FCall <> 3 1 - "" ""
+  FCall <> 3 1 "" - "" ""
   FPushFuncD 3 "test"
   Null
   String "b"
   String "c"
-  FCall <> 3 1 - "" ""
-  FCall <> 2 1 - "" ""
+  FCall <> 3 1 "" - "" ""
+  FCall <> 2 1 "" - "" ""
   PopC
   Int 1
   RetC

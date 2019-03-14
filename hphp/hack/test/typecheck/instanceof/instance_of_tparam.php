@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,8 @@
  *
  */
 
-function f(mixed $x): KeyedContainer<string, string> {
-  if ($x instanceof KeyedContainer) {
+function f(mixed $x): KeyedTraversable<string, string> {
+  if ($x instanceof KeyedTraversable) {
     return $x;
   }
 

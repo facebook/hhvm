@@ -1,7 +1,5 @@
 <?php
 
-array_pop(&$GLOBALS);
-
 $a = array("foo", "bar", "fubar");
 $b = array("3" => "foo", "4" => "bar", "5" => "fubar");
 $c = array("a" => "foo", "b" => "bar", "c" => "fubar");
@@ -18,5 +16,3 @@ var_dump($b);
 /* assoc indices */
 echo array_pop(&$c), "\n";
 var_dump($c);
-
-?>

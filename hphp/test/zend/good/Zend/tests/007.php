@@ -1,6 +1,6 @@
 <?php
 
-var_dump(each());
+try { var_dump(each()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $var = 1;
 var_dump(each(&$var));
 $var = "string";

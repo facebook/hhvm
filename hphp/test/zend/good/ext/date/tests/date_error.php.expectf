@@ -3,10 +3,8 @@
 -- Testing date function with no arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 ===DONE===

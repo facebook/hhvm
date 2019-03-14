@@ -154,7 +154,7 @@ interface Iterable<+Tv>
    * @return - an `array` containing the values from the current `Iterable`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toValuesArray(): varray;
+  public function toValuesArray(): varray<Tv>;
   /**
    * Returns a `Vector` converted from the current `Iterable`.
    *
@@ -190,7 +190,7 @@ interface Iterable<+Tv>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe.
    * See #6853603. */
-  public function toSet(): Set<Tv>;
+  public function toSet(): Set<Tv> where Tv as arraykey;
   /**
    * Returns an immutable set (`ImmSet`) converted from the current `Iterable`.
    *
@@ -199,7 +199,7 @@ interface Iterable<+Tv>
    * @return - an `ImmSet` converted from the current `Iterable`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toImmSet(): ImmSet<Tv>;
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `Iterable`.
@@ -442,8 +442,7 @@ interface KeyedIterable<Tk, +Tv>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
-  /* HH_FIXME[4110] T40426954 */
-  public function toMap(): \Map<Tk, Tv>;
+  public function toMap(): \Map<Tk, Tv> where Tk as arraykey;
   /**
    * Returns an immutable map (`ImmMap`) based on the keys and values of the
    * current `KeyedIterable`.
@@ -451,8 +450,8 @@ interface KeyedIterable<Tk, +Tv>
    * @return - an `ImmMap` that has the keys and associated values of the
    *           current `KeyedIterable`.
    */
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[4110] T40426954 */
-  public function toImmMap(): \ImmMap<Tk, Tv>;
+  <<__Rx, __MaybeMutable>>
+  public function toImmMap(): \ImmMap<Tk, Tv> where Tk as arraykey;
   /**
    * Returns a lazy, access elements only when needed view of the current
    * `KeyedIterable`.

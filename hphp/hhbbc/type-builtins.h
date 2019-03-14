@@ -33,12 +33,9 @@ bool is_collection_method_returning_this(const php::Class* cls,
                                          const php::Func* func);
 
 /*
- * Given an HNI function, figure out the real return type. Thanks to
- * ParamCoerceMode, this will either be a nullable or falsable version
- * of the declared return type.
+ * Given an HNI function, figure out the real return type.
  */
-Type native_function_return_type(const php::Func* func,
-                                 bool include_coercion_failures = true);
+Type native_function_return_type(const php::Func* func);
 
 //////////////////////////////////////////////////////////////////////
 

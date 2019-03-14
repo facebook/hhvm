@@ -47,8 +47,10 @@ let default_fcall_flags = {
   supports_async_eager_return = false;
 }
 let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
-  ?async_eager_label num_args =
-  flags, num_args, num_rets, async_eager_label
+  ?(by_refs=[]) ?async_eager_label num_args =
+  if by_refs <> [] && (List.length by_refs) <> num_args then
+    failwith "length of by_refs must be either zero or num_args";
+  flags, num_args, num_rets, by_refs, async_eager_label
 
 let instr_lit_const l =
   instr (ILitConst l)
@@ -103,7 +105,7 @@ let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
 let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
-let instr_reified_name i op = instr (IMisc (ReifiedName (i, op)))
+let instr_reified_name i name = instr (IMisc (ReifiedName (i, name)))
 let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
 let instr_check_reified_generic_mismatch =
   instr (IMisc CheckReifiedGenericMismatch)
@@ -146,10 +148,10 @@ let instr_clsrefname =
   instr (IMisc (ClsRefName class_ref_rewrite_sentinel))
 let instr_self =
   instr (IMisc (Self class_ref_rewrite_sentinel))
+let instr_lateboundcls =
+  instr (IMisc (LateBoundCls class_ref_rewrite_sentinel))
 let instr_parent =
   instr (IMisc (Parent class_ref_rewrite_sentinel))
-let instr_fthrow_on_ref_mismatch by_refs =
-  instr (ICall (FThrowOnRefMismatch by_refs))
 
 let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)
@@ -172,7 +174,6 @@ let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
 let instr_newobj id op = instr (ICall (NewObj (id, op)))
 let instr_newobjd id = instr (ICall (NewObjD id))
 let instr_newobjs scref = instr (ICall (NewObjS scref))
-let instr_newobji clsnum = instr (ICall (NewObjI clsnum))
 let instr_fpushctor nargs = instr (ICall (FPushCtor nargs))
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
@@ -192,7 +193,8 @@ let instr_basesc y mode =
   instr (IBase(BaseSC(y, class_ref_rewrite_sentinel, mode)))
 let instr_baseh = instr (IBase BaseH)
 let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
-let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
+let instr_fpushfuncd n id = instr (ICall(FPushFuncD(n, id)))
+let instr_fpushfuncu n id fallback = instr (ICall(FPushFuncU(n, id, fallback)))
 let instr_fcall fcall_args =
   let no_class = Hhbc_id.Class.from_raw_string "" in
   let no_func = Hhbc_id.Function.from_raw_string "" in
@@ -209,6 +211,7 @@ let instr_memoset_eager range =
   instr (IMisc (MemoSetEager range))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_checkthis = instr (IMisc CheckThis)
+let instr_func_num_args = instr (IMisc FuncNumArgs)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
 let instr_verifyRetTypeTS = instr (IMisc VerifyRetTypeTS)
 let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
@@ -268,8 +271,6 @@ let instr_defclsnop n =
   instr (IIncludeEvalDefine (DefClsNop n))
 let instr_deftypealias n =
   instr (IIncludeEvalDefine (DefTypeAlias n))
-let instr_deffunc n =
-  instr (IIncludeEvalDefine (DefFunc n))
 let instr_defcns s =
   instr (IIncludeEvalDefine (DefCns (Hhbc_id.Const.from_raw_string s)))
 let instr_eval = instr (IIncludeEvalDefine Eval)
@@ -450,7 +451,6 @@ let get_num_cls_ref_slots instrseq =
         | IMisc (LateBoundCls id)
         | IMisc (Self id)
         | IMisc (ClsRefName id)
-        | IGet (ClsRefGetL (_, id))
         | IGet (ClsRefGetTS id)
         | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
@@ -514,7 +514,6 @@ let rewrite_user_labels instrseq =
 
 (* TODO: What other instructions manipulate the class ref stack *)
 let rewrite_class_refs_instr num = function
-| IGet (ClsRefGetL (lid, _)) -> (num + 1, IGet (ClsRefGetL (lid, num + 1)))
 | IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
 | IGet (ClsRefGetTS _) -> (num + 1, IGet (ClsRefGetTS (num + 1)))
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
@@ -610,15 +609,15 @@ let rec can_initialize_static_var e =
       | A.AFkvalue (k, v) ->
         can_initialize_static_var k
         && can_initialize_static_var v)
-  | A.Darray es ->
+  | A.Darray (_, es) ->
     List.for_all es ~f:(fun (k, v) ->
       can_initialize_static_var k
       && can_initialize_static_var v)
-  | A.Varray es ->
+  | A.Varray (_, es) ->
     List.for_all es ~f:can_initialize_static_var
   | A.Class_const(_, (_, name)) ->
     String.lowercase name = Naming_special_names.Members.mClass
-  | A.Collection ((_, name), fields) ->
+  | A.Collection ((_, name), _, fields) ->
     let name =
       Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
     begin match name with
@@ -693,321 +692,3 @@ let is_empty instrs =
     | Instr_try_fault (t, f) -> aux t && aux f
   in
   aux instrs
-
-(* returns a pair:
-   1. number of elements instruction pops from the stack
-   2. number of elements instruction will push to the stack  *)
-let get_input_output_count i =
-  match i with
-  | IBasic i ->
-    begin match i with
-    | Nop | EntryNop -> (0, 0)
-    | PopC | PopV | PopU -> (1, 0)
-    | Dup -> (1, 2)
-    | Box | Unbox -> (1, 1)
-    end
-  | ILitConst i ->
-    begin match i with
-    | Null | True | False | NullUninit | Int _ | Double _ | String _
-    | Array _ | Vec _ | Dict _ | Keyset _ | NewArray _ | NewMixedArray _
-    | NewDictArray _ | NewDArray _ | NewLikeArrayL _ | Cns _ | CnsE _
-    | CnsU _ | CnsUE _ | ClsCns _ | ClsCnsD _ | File | Dir | Method | NewCol _ -> (0, 1)
-    | NewVArray c | NewVecArray c | NewKeysetArray c
-    | NewPackedArray c -> (c, 1)
-    | NewStructArray l | NewStructDArray l | NewStructDict l -> (List.length l, 1)
-    | AddElemC | AddElemV -> (3, 1)
-    | NewPair | AddNewElemC | AddNewElemV -> (2, 1)
-    | ColFromArray _ -> (1, 1)
-    | TypedValue _ -> failwith "this pseudo-instruction is internal to HackC"
-    end
-  | IIncludeEvalDefine i ->
-    begin match i with
-    | Incl | InclOnce | Req | ReqOnce | ReqDoc | AliasCls _ | DefCns _
-    | Eval -> (1, 1)
-    | DefFunc _ | DefCls _ | DefClsNop _ | DefTypeAlias _ -> (0, 0)
-    end
-  | IGenDelegation i ->
-    begin match i with
-    | ContAssignDelegate _
-    | ContEnterDelegate -> (1, 0)
-    | YieldFromDelegate _ -> (0, 1)
-    | ContUnsetDelegate _ -> (0, 0)
-    end
-  | IGenerator i ->
-    begin match i with
-    | CreateCont | ContValid | ContKey | ContCurrent
-    | ContGetReturn  -> (0, 1)
-    | ContEnter | ContRaise | Yield -> (1, 1)
-    | YieldK -> (2, 1)
-    | ContCheck _ -> (0, 0)
-    end
-  | IAsync i ->
-    begin match i with
-    | WHResult | Await -> (1, 1)
-    | AwaitAll _ -> (0, 1)
-    end
-  | ISrcLoc _ | IComment _ -> (0, 0)
-  | IOp i ->
-    begin match i with
-    | Concat | Add | Sub | Mul | AddO | SubO | MulO | Div | Mod | Xor | Same
-    | NSame | Eq | Neq | Lt | Lte | Gt | Gte | Cmp | BitAnd | BitOr | BitXor
-    | Shl | Shr | InstanceOf | Pow | ResolveObjMethod | IsTypeStructC _
-    | AsTypeStructC _ | ResolveClsMethod -> (2, 1)
-    | Sqrt | Not | BitNot | Floor | Ceil | CastBool | CastInt | CastDouble
-    | CastString | CastArray | CastObject | CastVec | CastDict | CastKeyset
-    | CastVArray | CastDArray | InstanceOfD _
-    | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
-    | Fatal _ -> (1, 0)
-    | CombineAndResolveTypeStruct n | ConcatN n -> (n, 1)
-    | ResolveFunc _ -> (0, 1)
-    end
-  | ICall i ->
-    begin match i with
-    | FPushObjMethodD _ | FPushClsMethod _ | FPushClsMethodS _
-    | FPushFunc _ | FPushCtor _ -> (1, 0)
-    | FPushFuncU _ | FPushClsMethodD _ | FPushClsMethodSD _
-    | FPushFuncD _ | FThrowOnRefMismatch _ -> (0, 0)
-    | FPushObjMethod _ -> (2, 0)
-    | NewObj _ | NewObjD _ | NewObjI _ | NewObjS _ -> (0, 1)
-    | FCall ((f, n1, n2, _), _, _) -> (n1 + (if f.has_unpack then 1 else 0), n2)
-    | FCallBuiltin (n, _, _) -> (n, 1)
-    end
-  | IMisc i ->
-    begin match i with
-    | This | BareThis _ | StaticLocCheck _ | Catch | ChainFaults | ClsRefName _
-    | GetMemoKeyL _ -> (0, 1)
-    | CheckThis | InitThisLoc _ | VerifyParamType _ | VerifyParamTypeTS _
-    | Self _ | Parent _
-    | LateBoundCls _ | NativeImpl | AssertRATL _ | AssertRATStk _
-    | BreakTraceHint| Silence _ -> (0, 0)
-    | StaticLocDef _ | StaticLocInit _ | CheckReifiedGenericMismatch -> (1, 0)
-    | OODeclExists _ | AKExists -> (2, 1)
-    | VerifyOutType _ | VerifyRetTypeC | CGetCUNop
-    | UGetCUNop -> (1, 1)
-    | VerifyRetTypeTS -> (2, 1)
-    | CreateCl (n, _) -> (n, 1)
-    | MemoGet _ -> (0, 1) | MemoGetEager _ -> (0, 1)
-    | MemoSet _ -> (0, 0) | MemoSetEager _ -> (0, 0)
-    | Idx | ArrayIdx -> (3, 1)
-    | ReifiedName (n, _) | RecordReifiedGeneric n -> (n, 1)
-    end
-  | IGet i ->
-    begin match i with
-    | CGetL _ | CGetQuietL _ | CUGetL _ | PushL _ | VGetL _ -> (0, 1)
-    | CGetL2 _ -> (1, 2)
-    | CGetG | CGetQuietG | CGetS _
-    | VGetG | VGetS _ -> (1, 1)
-    | ClsRefGetL _ -> (0, 0)
-    | ClsRefGetC _ | ClsRefGetTS _ -> (1, 0)
-    end
-  | IMutator i ->
-    begin match i with
-    | SetL _ | PopL _ | SetOpL _ | IncDecG _ | IncDecS _
-    | BindL _ -> (1, 1)
-    | SetG | SetS _ | SetOpG _ | SetOpS _
-    | BindG | BindS _ -> (2, 1)
-    | IncDecL _ | CheckProp _ -> (0, 1)
-    | UnsetL _ -> (0, 0)
-    | UnsetG | InitProp _ -> (1, 0)
-    end
-  | IIsset i ->
-    begin match i with
-    | IssetC | IssetG | IssetS _ | EmptyG | EmptyS _
-    | IsTypeC _ -> (1, 1)
-    | IssetL _ | EmptyL _ | IsTypeL _ -> (0, 1)
-    end
-  | IBase i ->
-    begin match i with
-    | BaseSC _ -> (1, 1)
-    | BaseGC _ | BaseGL _ | BaseL _ | BaseC _ | BaseH
-    | Dim _ -> (0, 0)
-    end
-  | IFinal i ->
-    begin match i with
-    | QueryM (n, _, _) | VGetM (n, _) | IncDecM (n, _, _)
-    | UnsetM (n, _) -> (n, 1)
-    | SetM (n, _) | SetOpM (n, _, _) | BindM (n, _) -> (n + 1, 1)
-    | SetRangeM (n, _, _) -> (n + 3, 0)
-    end
-  | ISpecialFlow _ ->
-    failwith "this pseudo-instruction is internal to HackC"
-  | IIterator i ->
-    begin match i with
-    | IterInit _ | IterInitK _ -> (1, 0)
-    | LIterInit _ | LIterInitK _
-    | IterNext _ | IterNextK _ | LIterNext _ | LIterNextK _
-    | IterFree _ | LIterFree _ | IterBreak _ -> (0, 0)
-    end
-  | IContFlow _
-  | ILabel _
-  | ITry _ ->
-    failwith "should be handled by the get_estimated_stack_depth"
-
-module LabelMap: MyMap.S with type key = Label.t = MyMap.Make(struct
-  type t = Label.t
-  let compare = Pervasives.compare
-end)
-
-type stack_state = {
-  depth: int;
-  labels: int LabelMap.t;
-  catch_block_nesting: int;
-}
-
-let initial_state = {
-  depth = 0;
-  labels = LabelMap.empty;
-  catch_block_nesting = 0
-}
-
-(* records assumed depth of evaluation stack at given label
-   if it does not yet exist. If depth value is not provided it is taken from
-   the state. *)
-let set_depth_at_label ?depth label state =
-  match LabelMap.get label state.labels with
-  | Some _ -> state
-  | None ->
-    let depth = Option.value ~default:state.depth depth in
-    { state with labels = LabelMap.add label depth state.labels }
-
-let get_depth_at_label label state =
-  LabelMap.get label state.labels
-
-(* This functions returns an estimated depth of evaluation stack
-   after executing given instructions.
-   NOTE: in order to simplify the implementation we use the fact that depth
-   of the stack for any point must be the same for every control flow path
-   that reaches the point - for cases like try/catch blocks we follow only one
-   path and ignore another assuming that if we go there stack depth should be
-   the same *)
-let get_estimated_stack_depth instrs =
-  let rec instr_seq_aux init instrs  =
-    match instrs with
-    | Instr_empty -> init
-    | Instr_one i -> instr_aux init i
-    | Instr_try_fault (t, _f) -> instr_seq_aux init t
-    | Instr_list l -> List.fold_left l ~init ~f:instr_aux
-    | Instr_concat is -> List.fold_left is ~init ~f:instr_seq_aux
-  and instr_aux acc i  =
-    (* if we are in catch block of top level try-catch we instructions
-       until we see matching top level TryCatchEnd. This might be a bit tricky
-       since if catch block contains nested try-catches we need to ignore their
-       TryCatchEnd instructions - use counter to detect this situations *)
-    if acc.catch_block_nesting > 0
-    then begin match i with
-    | ITry TryCatchBegin ->
-      { acc with catch_block_nesting = acc.catch_block_nesting + 1 }
-    | ITry TryCatchEnd ->
-      { acc with catch_block_nesting = acc.catch_block_nesting - 1 }
-    | _ -> acc
-    end
-    else begin match i with
-    | IOp (Fatal _) ->
-      (* reset stack after fatal *)
-      { acc with depth = 0 }
-
-    | ILabel l ->
-      (* if we already have some state for label - pick it, otherwise record
-         current stack state for label *)
-      begin match get_depth_at_label l acc with
-      | Some depth -> { acc with depth }
-      | None -> set_depth_at_label l acc
-      end
-    | IContFlow i ->
-      begin match i with
-      | Jmp l | JmpNS l ->
-        (* for unconditional jumps
-         - record assumed stack depth at label
-         - set stack depth to 0, if subsequent instruction is target of some
-          forward jump - it will have previosly recorded stack depth *)
-        { (set_depth_at_label l acc) with depth = 0 }
-      | JmpZ l | JmpNZ l ->
-        (* JmpZ/JmpNZ consumes one value from the stack *)
-        (* for conditional jump just record assumed stack depth at label *)
-        let acc = { acc with depth = acc.depth - 1 } in
-        set_depth_at_label l acc
-      (* bounded, base, offset vector *)
-      | Switch (_, _, ls) ->
-        (* switch consumes one value from the stack *)
-        let acc = { acc with depth = acc.depth - 1 } in
-        let aux s l = set_depth_at_label l s in
-        let acc = List.fold_left ls ~init:acc ~f:aux in
-        (* depth after switch is 0 *)
-        { acc with depth = 0 }
-      | SSwitch ls ->
-        (* sswitch consumes one value from the stack *)
-        let acc = { acc with depth = acc.depth - 1 } in
-        let aux s (_, l) = set_depth_at_label l s in
-        let acc = List.fold_left ls ~init:acc ~f:aux in
-        (* depth after switch is 0 *)
-        { acc with depth = 0 }
-      | RetM _
-      | RetC
-      | RetCSuspended
-      | Unwind
-      | Throw ->
-        (* assume stack depth = 0 after Ret*/Throw/Unwind *)
-        { acc with depth = 0 }
-      end
-    | ITry i ->
-      begin match i with
-      | TryFaultBegin l | TryCatchLegacyBegin l ->
-        (* assume stack depth = 0 at the beginning of fault part/catch block *)
-        set_depth_at_label ~depth:0 l acc
-      | TryCatchBegin | TryFaultEnd | TryCatchLegacyEnd ->
-        acc
-      | TryCatchMiddle ->
-        { acc with catch_block_nesting = acc.catch_block_nesting + 1 }
-      | TryCatchEnd ->
-        failwith "TryCatchEnd, should be handled in instr_aux, when catch_block_nesting > 1"
-      end
-    | _ ->
-      let (i, o) = get_input_output_count i in
-      { acc with depth = acc.depth - i + o }
-    end in
-
-  (instr_seq_aux initial_state instrs).depth
-
-let collect_locals f instrs =
-  let add acc l =
-    match l with
-    | Local.Named s when f s -> Unique_list_string.add acc s
-    | _ -> acc in
-  let add_member_key acc mk =
-    match mk with
-    | MemberKey.EL l | MemberKey.PL l -> add acc l
-    | _ -> acc in
-  let aux acc i =
-    match i with
-    | ILitConst (NewLikeArrayL (l, _))
-    | IGet (
-      CGetL l | CGetQuietL l |CGetL2 l | CUGetL l | PushL l |
-      VGetL l | ClsRefGetL (l, _))
-    | IIsset (IssetL l | EmptyL l | IsTypeL (l, _))
-    | IMutator (SetL l | PopL l | SetOpL (l, _) | IncDecL (l, _) | BindL l |
-                UnsetL l)
-    | IBase (BaseGL (l, _))
-    | IIterator (IterInit (_, _, l) | IterNext (_, _, l) | LIterFree (_, l))
-    | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
-             StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
-             GetMemoKeyL l |
-             MemoGet (_, Some (l, _)) | MemoGetEager (_, _, Some (l, _)) |
-             MemoSet (Some (l, _)) | MemoSetEager (Some (l, _)))
-    | IAsync (AwaitAll (Some (l, _)))
-      -> add acc l
-    | IIterator (
-      IterInitK (_, _, l1, l2) | IterNextK (_, _, l1, l2) |
-      LIterInit (_, l1, _, l2) | LIterNext (_, l1, _, l2)
-      )
-      -> add (add acc l1) l2
-    | IIterator (
-      LIterInitK (_, l1, _, l2, l3) | LIterNextK (_, l1, _, l2, l3)
-      )
-      -> add (add (add acc l1) l2) l3
-    | IBase (Dim (_, mk))
-    | IFinal (QueryM (_, _, mk) | VGetM (_, mk) | SetM (_, mk) |
-              IncDecM (_, _, mk) | BindM (_, mk) | UnsetM (_, mk))
-      -> add_member_key acc mk
-    | _ -> acc
-  in
-  InstrSeq.fold_left instrs ~f:aux ~init:Unique_list_string.empty

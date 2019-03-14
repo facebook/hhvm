@@ -94,18 +94,42 @@ struct EmitUnitState {
   std::vector<Id>      typeAliasInfo;
 };
 
+/*
+ * Some bytecodes need to be mutated before being emitted. Pass those
+ * bytecodes by value to their respective emit_op functions.
+ */
+template<typename T>
+struct OpInfoHelper {
+  static constexpr bool by_value =
+    T::op == Op::DefCls      ||
+    T::op == Op::DefClsNop   ||
+    T::op == Op::CreateCl    ||
+    T::op == Op::DefTypeAlias;
+
+  using type = typename std::conditional<by_value, T, const T&>::type;
+};
+
+template<typename T>
+using OpInfo = typename OpInfoHelper<T>::type;
+
+/*
+ * Helper to conditionally call fun on data provided data is of the
+ * given type.
+ */
+template<Op op, typename F, typename Bc>
+std::enable_if_t<std::remove_reference_t<Bc>::op == op>
+caller(F&& fun, Bc&& data) { fun(std::forward<Bc>(data)); }
+
+template<Op op, typename F, typename Bc>
+std::enable_if_t<std::remove_reference_t<Bc>::op != op>
+caller(F&&, Bc&&) {}
+
 Id recordClass(EmitUnitState& euState, UnitEmitter& ue, Id id) {
   auto cls = euState.unit->classes[id].get();
   euState.pceInfo.push_back(
     { ue.newPreClassEmitter(cls->name->toCppString(), cls->hoistability), id }
   );
   return euState.pceInfo.back().pce->id();
-}
-
-Id recordFunc(EmitUnitState& euState, UnitEmitter& ue, Id id) {
-  auto func = euState.unit->funcs[id - 1].get();
-  euState.feInfo.push_back({ ue.newFuncEmitter(func->name), id });
-  return euState.feInfo.back().fe->id();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -129,7 +153,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * regions, and insert "fake" edges to the block containing the
  * corresponding call.
  */
-std::vector<php::Block*> initial_sort(const php::Func& f) {
+std::vector<BlockId> initial_sort(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
   FTRACE(4, "Initial sort {}\n", f.name);
@@ -138,36 +162,36 @@ std::vector<php::Block*> initial_sort(const php::Func& f) {
   auto nextFpi = 0;
   // Map from fpi region id to the block containing its FCall.
   // Needs value stability because extraEdges holds pointers into this map.
-  hphp_hash_map<int, php::Block*> fpiToCallBlkMap;
+  hphp_hash_map<int, BlockId> fpiToCallBlkMap;
   // Map from the ids of terminal blocks within fpi regions to the
   // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  hphp_fast_map<BlockId, std::vector<php::Block**>> extraEdges;
+  hphp_fast_map<BlockId, std::vector<BlockId*>> extraEdges;
   // The fpi state at the start of each block
   std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
-  for (auto blk : sorted) {
-    auto& fpiState = blkFpiState[blk->id];
+  for (auto const bid : sorted) {
+    auto& fpiState = blkFpiState[bid];
     if (!fpiState) fpiState.emplace();
     auto curState = *fpiState;
-    for (auto const& bc : blk->hhbcs) {
+    for (auto const& bc : f.blocks[bid]->hhbcs) {
       if (isFPush(bc.op)) {
         FTRACE(4, "blk:{} FPush {} (nesting {})\n",
-               blk->id, nextFpi, curState.size());
+               bid, nextFpi, curState.size());
         curState.push_back(nextFpi++);
       } else if (isFCallStar(bc.op)) {
         FTRACE(4, "blk:{} FCall {} (nesting {})\n",
-               blk->id, curState.back(), curState.size() - 1);
-        fpiToCallBlkMap[curState.back()] = blk;
+               bid, curState.back(), curState.size() - 1);
+        fpiToCallBlkMap[curState.back()] = bid;
         curState.pop_back();
       }
     }
     auto hasNormalSucc = false;
     forEachNormalSuccessor(
-      *blk,
+      *f.blocks[bid],
       [&] (BlockId id) {
         hasNormalSucc = true;
         auto &succState = blkFpiState[id];
         FTRACE(4, "blk:{} propagate state to {}\n",
-               blk->id, id);
+               bid, id);
         if (!succState) {
           succState = curState;
         } else {
@@ -186,39 +210,28 @@ std::vector<php::Block*> initial_sort(const php::Func& f) {
         // fpi region) might perturb the order; so we record a pointer
         // to the unordered_map element, in case it gets filled in
         // later.
-        auto curBlkPtr = &fpiToCallBlkMap[fpi];
-        extraEdges[blk->id].push_back(curBlkPtr);
+        auto const res = fpiToCallBlkMap.emplace(fpi, NoBlockId);
+        extraEdges[bid].push_back(&res.first->second);
       }
     }
   }
 
   if (!extraEdges.empty()) {
-    auto changes = false;
+    hphp_fast_map<BlockId, std::vector<BlockId>> extraIds;
     for (auto& elm : extraEdges) {
-      auto const blk = f.blocks[elm.first].get();
-      for (auto const blkPtr : elm.second) {
-        if (!*blkPtr) {
+      for (auto const bidPtr : elm.second) {
+        if (*bidPtr == NoBlockId) {
           // There was no FCall, so no need to do anything
           continue;
         }
-        changes = true;
-        FTRACE(4, "blk:{} add throw edge to {}\n",
-               blk->id, (*blkPtr)->id);
-        blk->throwExits.push_back((*blkPtr)->id);
+        FTRACE(4, "blk:{} add extra edge to {}\n",
+               elm.first, *bidPtr);
+        extraIds[elm.first].push_back(*bidPtr);
       }
     }
-    if (changes) {
+    if (extraIds.size()) {
       // redo the sort with the extra edges in place
-      sorted = rpoSortFromMain(f);
-      // Remove all the extra edges
-      for (auto& elm : extraEdges) {
-        auto const blk = f.blocks[elm.first].get();
-        for (auto const blkPtr : elm.second) {
-          if (*blkPtr) {
-            blk->throwExits.pop_back();
-          }
-        }
-      }
+      sorted = rpoSortFromMain(f, &extraIds);
     }
   }
 
@@ -247,7 +260,7 @@ std::vector<php::Block*> initial_sort(const php::Func& f) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<php::Block*> order_blocks(const php::Func& f) {
+std::vector<BlockId> order_blocks(const php::Func& f) {
   auto sorted = initial_sort(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -267,31 +280,24 @@ std::vector<php::Block*> order_blocks(const php::Func& f) {
   // after all that.
   std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (php::Block* a, php::Block* b) {
+    [&] (BlockId a, BlockId b) {
+      auto const blka = f.blocks[a].get();
+      auto const blkb = f.blocks[b].get();
       using T = std::underlying_type<php::Block::Section>::type;
-      return static_cast<T>(a->section) < static_cast<T>(b->section);
+      return static_cast<T>(blka->section) < static_cast<T>(blkb->section);
     }
   );
-
-  // If the first block is just a Nop, this means that there is a jump to the
-  // second block from somewhere in the function. We don't want this, so we
-  // change this nop to an EntryNop so it doesn't get optimized away
-  if (is_single_nop(*sorted.front())) {
-    sorted.front()->hhbcs.clear();
-    sorted.front()->hhbcs.push_back(bc::EntryNop{});
-    FTRACE(2, "      changing Nop to EntryNop in block {}\n",
-           sorted.front()->id);
-  }
 
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;
-      for (auto& b : sorted) {
+      for (auto const bid : sorted) {
+        auto const b = f.blocks[bid].get();
         ret += " ";
         if (b->section != php::Block::Section::Main) {
           ret += "f";
         }
-        ret += folly::to<std::string>(b->id);
+        ret += folly::to<std::string>(bid);
       }
       return ret;
     }()
@@ -345,7 +351,7 @@ struct EmitBcInfo {
     folly::Optional<uint32_t> expectedFPIDepth;
   };
 
-  std::vector<php::Block*> blockOrder;
+  std::vector<BlockId> blockOrder;
   uint32_t maxStackDepth;
   uint32_t maxFpiDepth;
   bool containsCalls;
@@ -355,34 +361,39 @@ struct EmitBcInfo {
 
 using ExnNodePtr = php::ExnNode*;
 
-bool handleEquivalent (ExnNodePtr eh1, ExnNodePtr eh2) {
-  if (!eh1 && !eh2) return true;
-  if (!eh1 || !eh2 || eh1->depth != eh2->depth) return false;
-
-  auto entry = [](ExnNodePtr eh) {
-    return match<BlockId>(eh->info,
-          [] (const php::CatchRegion& c) { return c.catchEntry; },
-          [] (const php::FaultRegion& f) { return f.faultEntry; });
+bool handleEquivalent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
+  auto entry = [&] (ExnNodeId eid) {
+    return match<BlockId>(
+      func.exnNodes[eid].info,
+      [] (const php::CatchRegion& c) { return c.catchEntry; },
+      [] (const php::FaultRegion& f) { return f.faultEntry; });
   };
 
-  while (entry(eh1) == entry(eh2)) {
-    eh1 = eh1->parent;
-    eh2 = eh2->parent;
-    if (!eh1 && !eh2) return true;
+  while (eh1 != eh2) {
+    assertx(eh1 != NoExnNodeId &&
+            eh2 != NoExnNodeId &&
+            func.exnNodes[eh1].depth == func.exnNodes[eh2].depth);
+    if (entry(eh1) != entry(eh2)) return false;
+    eh1 = func.exnNodes[eh1].parent;
+    eh2 = func.exnNodes[eh2].parent;
   }
 
-  return false;
+  return true;
 };
 
 // The common parent P of eh1 and eh2 is the deepest region such that
 // eh1 and eh2 are both handle-equivalent to P or a child of P
-ExnNodePtr commonParent(ExnNodePtr eh1, ExnNodePtr eh2) {
-  if (!eh1 || !eh2) return nullptr;
-  while (eh1->depth > eh2->depth) eh1 = eh1->parent;
-  while (eh2->depth > eh1->depth) eh2 = eh2->parent;
-  while (!handleEquivalent(eh1, eh2)) {
-    eh1 = eh1->parent;
-    eh2 = eh2->parent;
+ExnNodeId commonParent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
+  if (eh1 == NoExnNodeId || eh2 == NoExnNodeId) return NoExnNodeId;
+  while (func.exnNodes[eh1].depth > func.exnNodes[eh2].depth) {
+    eh1 = func.exnNodes[eh1].parent;
+  }
+  while (func.exnNodes[eh2].depth > func.exnNodes[eh1].depth) {
+    eh2 = func.exnNodes[eh2].parent;
+  }
+  while (!handleEquivalent(func, eh1, eh2)) {
+    eh1 = func.exnNodes[eh1].parent;
+    eh2 = func.exnNodes[eh2].parent;
   }
   return eh1;
 };
@@ -598,20 +609,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     };
 
-    auto emit_argvecb = [&] (const CompactVector<bool>& argv) {
-      ue.emitIVA(argv.size());
-      uint32_t i = 0;
-      uint8_t tmp = 0;
-      while (i < argv.size()) {
-        tmp |= argv[i] << (i % 8);
-        if ((++i % 8) == 0) {
-          ue.emitByte(tmp);
-          tmp = 0;
-        }
-      }
-      if (i % 8) ue.emitByte(tmp);
-    };
-
     auto emit_srcloc = [&] {
       auto const sl = srcLoc(func, inst.srcLoc);
       if (!sl.isValid()) return;
@@ -645,32 +642,26 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
 
-    auto clsid_impl = [&] (const uint32_t& id, bool closure) {
+    auto clsid_impl = [&] (uint32_t& id, bool closure) {
       if (euState.classOffsets[id] != kInvalidOffset) {
         always_assert(closure);
         for (auto const& elm : euState.pceInfo) {
           if (elm.origId == id) {
-            const_cast<uint32_t&>(id) = elm.pce->id();
+            id = elm.pce->id();
             return;
           }
         }
         always_assert(false);
       }
       euState.classOffsets[id] = startOffset;
-      const_cast<uint32_t&>(id) = recordClass(euState, ue, id);
+      id = recordClass(euState, ue, id);
     };
-    auto defcls     = [&] { clsid_impl(inst.DefCls.arg1, false); };
-    auto defclsnop  = [&] { clsid_impl(inst.DefClsNop.arg1, false); };
-    auto createcl   = [&] { clsid_impl(inst.CreateCl.arg2, true); };
-    auto newobji    = [&] { clsid_impl(inst.NewObjI.arg1, false); };
-    auto deffun     = [&] {
-      const_cast<uint32_t&>(inst.DefFunc.arg1) =
-        recordFunc(euState, ue, inst.DefFunc.arg1);
-    };
-    auto deftype   = [&] {
-      euState.typeAliasInfo.push_back(inst.DefTypeAlias.arg1);
-      const_cast<uint32_t&>(inst.DefTypeAlias.arg1) =
-        euState.typeAliasInfo.size() - 1;
+    auto defcls    = [&] (auto& data) { clsid_impl(data.arg1, false); };
+    auto defclsnop = [&] (auto& data) { clsid_impl(data.arg1, false); };
+    auto createcl  = [&] (auto& data) { clsid_impl(data.arg2, true); };
+    auto deftype   = [&] (auto& data) {
+      euState.typeAliasInfo.push_back(data.arg1);
+      data.arg1 = euState.typeAliasInfo.size() - 1;
     };
 
     auto emit_lar  = [&](const LocalRange& range) {
@@ -683,7 +674,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
 #define IMM_I32LA(n)   emit_argvec32(data.argv);
-#define IMM_BLLA(n)    emit_argvecb(data.argv);
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
@@ -702,7 +692,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
 #define IMM_FCA(n)     encodeFCallArgs(                                    \
-                         ue, data.fca,                                     \
+                         ue, data.fca, data.fca.byRefs.get(),              \
                          data.fca.asyncEagerTarget != NoBlockId,           \
                          [&] {                                             \
                            set_expected_depth(data.fca.asyncEagerTarget);  \
@@ -737,55 +727,54 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_INS_1(x)          push(1);
 #define PUSH_FCALL             push(data.fca.numRets);
 
-#define O(opcode, imms, inputs, outputs, flags)         \
-    auto emit_##opcode = [&] (const bc::opcode& data) { \
-      if (RuntimeOption::EnableIntrinsicsExtension) {   \
-        if (Op::opcode == Op::FCallBuiltin &&           \
-            inst.FCallBuiltin.str3->isame(              \
-              s_hhbbc_fail_verification.get())) {       \
-          ue.emitOp(Op::CheckProp);                     \
-          ue.emitInt32(                                 \
-            ue.mergeLitstr(inst.FCallBuiltin.str3));    \
-          ue.emitOp(Op::PopC);                          \
-        }                                               \
-      }                                                 \
-      if (Op::opcode == Op::DefCls)       defcls();     \
-      if (Op::opcode == Op::DefClsNop)    defclsnop();  \
-      if (Op::opcode == Op::CreateCl)     createcl();   \
-      if (Op::opcode == Op::NewObjI)      newobji();    \
-      if (Op::opcode == Op::DefFunc)      deffun();     \
-      if (Op::opcode == Op::DefTypeAlias) deftype();    \
-      if (isRet(Op::opcode))              ret_assert(); \
-      ue.emitOp(Op::opcode);                            \
-      POP_##inputs                                      \
-      if (isFCallStar(Op::opcode)) end_fpi(startOffset);\
-                                                        \
-      size_t numTargets = 0;                            \
-      std::array<BlockId, kMaxHhbcImms> targets;        \
-                                                        \
-      if (Op::opcode == Op::MemoGet) {                  \
-        IMM_##imms                                      \
-        assertx(numTargets == 1);                       \
-        set_expected_depth(targets[0]);                 \
-        PUSH_##outputs                                  \
-      } else if (Op::opcode == Op::MemoGetEager) {      \
-        IMM_##imms                                      \
-        assertx(numTargets == 2);                       \
-        set_expected_depth(targets[0]);                 \
-        PUSH_##outputs                                  \
-        set_expected_depth(targets[1]);                 \
-      } else {                                          \
-        PUSH_##outputs                                  \
-        IMM_##imms                                      \
-        for (size_t i = 0; i < numTargets; ++i) {       \
-          set_expected_depth(targets[i]);               \
-        }                                               \
-      }                                                 \
-                                                        \
-      if (isFPush(Op::opcode))     fpush();             \
-      if (isFCallStar(Op::opcode)) fcall(Op::opcode);   \
-      if (flags & TF) currentStackDepth = 0;            \
-      emit_srcloc();                                    \
+#define O(opcode, imms, inputs, outputs, flags)                 \
+    auto emit_##opcode = [&] (OpInfo<bc::opcode> data) {        \
+      if (RuntimeOption::EnableIntrinsicsExtension) {           \
+        if (Op::opcode == Op::FCallBuiltin &&                   \
+            inst.FCallBuiltin.str3->isame(                      \
+              s_hhbbc_fail_verification.get())) {               \
+          ue.emitOp(Op::CheckProp);                             \
+          ue.emitInt32(                                         \
+            ue.mergeLitstr(inst.FCallBuiltin.str3));            \
+          ue.emitOp(Op::PopC);                                  \
+        }                                                       \
+      }                                                         \
+      caller<Op::DefCls>(defcls, data);                         \
+      caller<Op::DefClsNop>(defclsnop, data);                   \
+      caller<Op::CreateCl>(createcl, data);                     \
+      caller<Op::DefTypeAlias>(deftype, data);                  \
+                                                                \
+      if (isRet(Op::opcode)) ret_assert();                      \
+      ue.emitOp(Op::opcode);                                    \
+      POP_##inputs                                              \
+      if (isFCallStar(Op::opcode)) end_fpi(startOffset);        \
+                                                                \
+      size_t numTargets = 0;                                    \
+      std::array<BlockId, kMaxHhbcImms> targets;                \
+                                                                \
+      if (Op::opcode == Op::MemoGet) {                          \
+        IMM_##imms                                              \
+        assertx(numTargets == 1);                               \
+        set_expected_depth(targets[0]);                         \
+        PUSH_##outputs                                          \
+      } else if (Op::opcode == Op::MemoGetEager) {              \
+        IMM_##imms                                              \
+        assertx(numTargets == 2);                               \
+        set_expected_depth(targets[0]);                         \
+        PUSH_##outputs                                          \
+        set_expected_depth(targets[1]);                         \
+      } else {                                                  \
+        PUSH_##outputs                                          \
+        IMM_##imms                                              \
+        for (size_t i = 0; i < numTargets; ++i) {               \
+          set_expected_depth(targets[i]);                       \
+        }                                                       \
+      }                                                         \
+                                                                \
+      if (isFPush(Op::opcode))     fpush();                     \
+      if (isFCallStar(Op::opcode)) fcall(Op::opcode);           \
+      if (flags & TF) currentStackDepth = 0;                    \
+      emit_srcloc();                                            \
     };
 
     OPCODES
@@ -797,7 +786,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
@@ -855,10 +843,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   auto blockIt          = begin(ret.blockOrder);
   auto const endBlockIt = end(ret.blockOrder);
   for (; blockIt != endBlockIt; ++blockIt) {
-    auto& b = *blockIt;
-    auto& info = blockInfo[b->id];
+    auto bid = *blockIt;
+    auto& info = blockInfo[bid];
+    auto const b = func.blocks[bid].get();
+
     info.offset = ue.bcPos();
-    FTRACE(2, "      block {}: {}\n", b->id, info.offset);
+    FTRACE(2, "      block {}: {}\n", bid, info.offset);
 
     for (auto& fixup : info.forwardJumps) {
       ue.emitInt32(info.offset - fixup.instrOff, fixup.jmpImmedOff);
@@ -880,44 +870,65 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     assert(*info.expectedFPIDepth <= fpiStack.size());
     while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
 
-    // If the block ends with JmpZ or JmpNZ to the next block, flip
-    // the condition to make the fallthrough the next block
-    if (b->hhbcs.back().op == Op::JmpZ ||
-        b->hhbcs.back().op == Op::JmpNZ) {
-      auto& bc = b->hhbcs.back();
-      auto const target =
-        bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
-      if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
-        if (bc.op == Op::JmpNZ) {
-          bc = bc_with_loc(bc.srcLoc, bc::JmpZ { b->fallthrough });
-        } else {
-          bc = bc_with_loc(bc.srcLoc, bc::JmpNZ { b->fallthrough });
+    auto fallthrough = b->fallthrough;
+    auto end = b->hhbcs.end();
+    auto flip = false;
+
+    if (is_single_nop(*b)) {
+      if (blockIt == begin(ret.blockOrder)) {
+        // If the first block is just a Nop, this means that there is
+        // a jump to the second block from somewhere in the
+        // function. We don't want this, so we change this nop to an
+        // EntryNop so it doesn't get optimized away
+        emit_inst(bc_with_loc(b->hhbcs.front().srcLoc, bc::EntryNop {}));
+      }
+    } else {
+      // If the block ends with JmpZ or JmpNZ to the next block, flip
+      // the condition to make the fallthrough the next block
+      if (b->hhbcs.back().op == Op::JmpZ ||
+          b->hhbcs.back().op == Op::JmpNZ) {
+        auto const& bc = b->hhbcs.back();
+        auto const target =
+          bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
+        if (std::next(blockIt) != endBlockIt && blockIt[1] == target) {
+          fallthrough = target;
+          --end;
+          flip = true;
         }
-        b->fallthrough = target;
+      }
+
+      for (auto iit = b->hhbcs.begin(); iit != end; ++iit) emit_inst(*iit);
+      if (flip) {
+        if (end->op == Op::JmpNZ) {
+          emit_inst(bc_with_loc(end->srcLoc, bc::JmpZ { b->fallthrough }));
+        } else {
+          emit_inst(bc_with_loc(end->srcLoc, bc::JmpNZ { b->fallthrough }));
+        }
       }
     }
 
-    for (auto& inst : b->hhbcs) emit_inst(inst);
-
     info.past = ue.bcPos();
 
-    if (b->fallthrough != NoBlockId) {
-      set_expected_depth(b->fallthrough);
+    if (fallthrough != NoBlockId) {
+      set_expected_depth(fallthrough);
       if (std::next(blockIt) == endBlockIt ||
-          blockIt[1]->id != b->fallthrough) {
+          blockIt[1] != fallthrough) {
         if (b->fallthroughNS) {
-          emit_inst(bc::JmpNS { b->fallthrough });
+          emit_inst(bc::JmpNS { fallthrough });
         } else {
-          emit_inst(bc::Jmp { b->fallthrough });
+          emit_inst(bc::Jmp { fallthrough });
         }
 
-        auto parent = commonParent(func.blocks[b->fallthrough]->exnNode,
-                                   b->exnNode);
+        auto const parent = commonParent(func,
+                                         func.blocks[fallthrough]->exnNodeId,
+                                         b->exnNodeId);
+
+        auto depth = [&] (ExnNodeId eid) {
+          return eid == NoExnNodeId ? 0 : func.exnNodes[eid].depth;
+        };
         // If we are in an exn region we pop from the current region to the
         // common parent. If the common parent is null, we pop all regions
-        info.regionsToPop = b->exnNode ?
-                            b->exnNode->depth - (parent ? parent->depth : 0) :
-                            0;
+        info.regionsToPop = depth(b->exnNodeId) - depth(parent);
         assert(info.regionsToPop >= 0);
         FTRACE(4, "      popped fault regions: {}\n", info.regionsToPop);
       }
@@ -933,10 +944,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       for (auto DEBUG_ONLY id : b->unwindExits) FTRACE(4, " {}", id);
       FTRACE(4, "\n");
     }
-    if (b->fallthrough != NoBlockId) {
-      FTRACE(4, "      fallthrough: {}\n", b->fallthrough);
+    if (fallthrough != NoBlockId) {
+      FTRACE(4, "      fallthrough: {}\n", fallthrough);
     }
-    FTRACE(2, "      block {} end: {}\n", b->id, info.past);
+    FTRACE(2, "      block {} end: {}\n", bid, info.past);
   }
 
   while (fpiStack.size()) end_fpi(lastOff);
@@ -1007,7 +1018,7 @@ void emit_eh_region(FuncEmitter& fe,
                     const EHRegion* region,
                     const BlockInfo& blockInfo,
                     ParentIndexMap& parentIndexMap) {
-  FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->id);
+  FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->idx);
 
   auto const unreachable = [&] (const php::ExnNode& node) {
     return match<bool>(
@@ -1070,10 +1081,13 @@ void emit_eh_region(FuncEmitter& fe,
   assert(eh.m_handler != kInvalidOffset);
 }
 
-void exn_path(std::vector<const php::ExnNode*>& ret, const php::ExnNode* n) {
-  if (!n) return;
-  exn_path(ret, n->parent);
-  ret.push_back(n);
+void exn_path(const php::Func& func,
+              std::vector<const php::ExnNode*>& ret,
+              ExnNodeId id) {
+  if (id == NoExnNodeId) return;
+  auto const& n = func.exnNodes[id];
+  exn_path(func, ret, n.parent);
+  ret.push_back(&n);
 }
 
 // Return the count of shared elements in the front of two forward
@@ -1100,7 +1114,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  * reasonably likely to have the same ExnNode.  Try to coalesce the EH
  * regions we create for in those cases.
  */
-void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
+void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
                      const EmitBcInfo& info) {
   hphp_fast_map<
     const php::ExnNode*,
@@ -1139,16 +1153,17 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
    * then modify the active list by popping and then pushing nodes to
    * set it to the new block's path.
    */
-  for (auto& b : info.blockOrder) {
-    auto const offset = info.blockInfo[b->id].offset;
+  for (auto const bid : info.blockOrder) {
+    auto const b = func.blocks[bid].get();
+    auto const offset = info.blockInfo[bid].offset;
 
-    if (!b->exnNode) {
+    if (b->exnNodeId == NoExnNodeId) {
       while (!activeList.empty()) pop_active(offset);
       continue;
     }
 
     std::vector<const php::ExnNode*> current;
-    exn_path(current, b->exnNode);
+    exn_path(func, current, b->exnNodeId);
 
     auto const prefix = shared_prefix(current, activeList);
     for (size_t i = prefix, sz = activeList.size(); i < sz; ++i) {
@@ -1158,21 +1173,21 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& /*func*/,
       push_active(current[i], offset);
     }
 
-    for (int i = 0; i < info.blockInfo[b->id].regionsToPop; i++) {
+    for (int i = 0; i < info.blockInfo[bid].regionsToPop; i++) {
       // If the block ended in a jump out of the fault region, this effectively
       // ends all fault regions deeper than the one we are jumping to
-      pop_active(info.blockInfo[b->id].past);
+      pop_active(info.blockInfo[bid].past);
     }
 
     if (debug && !activeList.empty()) {
       current.clear();
-      exn_path(current, activeList.back());
+      exn_path(func, current, activeList.back()->idx);
       assert(current == activeList);
     }
   }
 
   while (!activeList.empty()) {
-    pop_active(info.blockInfo[info.blockOrder.back()->id].past);
+    pop_active(info.blockInfo[info.blockOrder.back()].past);
   }
 
   /*
@@ -1242,6 +1257,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptObj:
   case T::OptFunc:
   case T::OptCls:
+  case T::OptClsMeth:
   case T::OptUncArrKey:
   case T::OptArrKey:
   case T::OptUncStrLike:
@@ -1269,6 +1285,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Obj:
   case T::Func:
   case T::Cls:
+  case T::ClsMeth:
     return;
 
   case T::OptSArr:
@@ -1504,7 +1521,7 @@ void emit_class(EmitUnitState& state,
     emit_finish_func(state, *m, *fe, info);
   }
 
-  std::vector<Type> useVars;
+  CompactVector<Type> useVars;
   if (is_closure(cls)) {
     auto f = find_method(&cls, s_invoke.get());
     useVars = state.index.lookup_closure_use_vars(f, true);

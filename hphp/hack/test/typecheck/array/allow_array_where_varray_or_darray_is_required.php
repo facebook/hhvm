@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function expect_untyped_varray_or_darray(varray_or_darray $x): void {}

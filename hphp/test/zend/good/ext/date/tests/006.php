@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('UTC');
 
-var_dump(checkdate());
+try { var_dump(checkdate()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(checkdate(1,1,1));
 
 var_dump(checkdate(2,29,2006));

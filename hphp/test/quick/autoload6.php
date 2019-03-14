@@ -6,18 +6,14 @@ function my_autoload_func2($cls) {
   echo "my_autoload_func2 $cls\n";
   $cls = strtolower($cls);
   if ($cls === 'i') {
-    interface I {
-      public function foo();
-    }
+    include 'autoload6-1.inc';
   }
 }
 function my_autoload_func3($cls) {
   echo "my_autoload_func3 $cls\n";
   $cls = strtolower($cls);
   if ($cls === 'i') {
-    interface I {
-      public function bar();
-    }
+    include 'autoload6-2.inc';
   }
 }
 

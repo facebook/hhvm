@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class box {
   public function __construct(private $x) {}

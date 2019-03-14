@@ -196,6 +196,8 @@ class type ['a] visitor_type = object
   method on_case : 'a -> case -> 'a
   method on_catch : 'a -> catch -> 'a
   method on_continue : 'a -> Pos.t -> 'a
+  method on_darray : 'a -> (targ * targ) option -> field list -> 'a
+  method on_varray : 'a -> targ option -> expr list -> 'a
   method on_do : 'a -> block -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
   method on_expr_ : 'a -> expr_ -> 'a
@@ -212,7 +214,7 @@ class type ['a] visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
   method on_global_var : 'a -> expr list -> 'a
-  method on_awaitall : 'a -> (expr option * expr) list -> 'a
+  method on_awaitall : 'a -> (id option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
@@ -224,8 +226,9 @@ class type ['a] visitor_type = object
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
   method on_shape : 'a -> (shape_field_name * expr) list -> 'a
-  method on_valCollection : 'a -> vc_kind -> expr list -> 'a
-  method on_keyValCollection : 'a -> kvc_kind -> field list -> 'a
+  method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
+  method on_keyValCollection : 'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
+  method on_collection : 'a -> collection_targ option -> afield list -> 'a
   method on_this : 'a -> 'a
   method on_id : 'a -> sid -> 'a
   method on_lvar : 'a -> id -> 'a
@@ -256,7 +259,6 @@ class type ['a] visitor_type = object
   method on_list : 'a -> expr list -> 'a
   method on_pair : 'a -> expr -> expr -> 'a
   method on_expr_list : 'a -> expr list -> 'a
-  method on_execution_operator : 'a -> expr list -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
   method on_unop : 'a -> Ast.uop -> expr -> 'a
   method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
@@ -297,6 +299,9 @@ class type ['a] visitor_type = object
 
   method on_markup: 'a -> pstring -> expr option -> 'a
   method on_declare: 'a -> bool -> expr -> block -> 'a
+
+  method on_pu_atom : 'a -> string -> 'a
+  method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
 end
 
 (*****************************************************************************)
@@ -336,7 +341,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
     let acc = match x with
-    | Some x -> this#on_expr acc x
+    | Some x -> this#on_lvar acc x
     | None -> acc in
     let acc = this#on_expr acc y in
     acc
@@ -458,8 +463,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     match e with
    | Any         -> acc
    | Array afl   -> this#on_array acc afl
-   | Darray fieldl -> List.fold_left fieldl ~f:this#on_field ~init:acc
-   | Varray el   -> List.fold_left el ~f:this#on_expr ~init:acc
+   | Darray (tap, fieldl) -> this#on_darray acc tap fieldl
+   | Varray (ta, el)   -> this#on_varray acc ta el
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc
    | False       -> this#on_false acc
@@ -509,23 +514,31 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | Unsafe_expr (e)              -> this#on_unsafe_expr acc e
    | Callconv    (kind, e)        -> this#on_callconv acc kind e
-   | Execution_operator (e)       -> this#on_execution_operator acc e
-   | ValCollection    (s, el)     ->
-       this#on_valCollection acc s el
-   | KeyValCollection (s, fl)     ->
-       this#on_keyValCollection acc s fl
+   | ValCollection    (s, ta, el)     ->
+       this#on_valCollection acc s ta el
+   | KeyValCollection (s, tap, fl)     ->
+       this#on_keyValCollection acc s tap fl
    | Omitted -> acc
-   | NewAnonClass (el1, el2, c) ->
-      let acc = this#on_list acc el1 in
-      let acc = this#on_list acc el2 in
-      this#on_class_ acc c
    | Lfun f -> this#on_fun_ acc f
    | Import (_, e) -> this#on_expr acc e
-   | Collection (_, fl) -> this#on_array acc fl
+   | Collection (_, tal, fl) -> this#on_collection acc tal fl
    | BracedExpr e -> this#on_expr acc e
    | ParenthesizedExpr e -> this#on_expr acc e
+   | PU_atom sid -> this#on_pu_atom acc sid
+   | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
 
   method on_array acc afl =
+    List.fold_left afl ~f:this#on_afield ~init:acc
+
+  method on_collection acc tal afl =
+    let acc = match tal with
+    | Some CollectionTKV (tk, tv) ->
+      let acc = this#on_targ acc tk in
+      let acc = this#on_targ acc tv in
+      acc
+    | Some CollectionTV tv ->
+      this#on_targ acc tv
+    | None -> acc in
     List.fold_left afl ~f:this#on_afield ~init:acc
 
   method on_shape acc sm =
@@ -537,10 +550,34 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       ~init:acc
       sm
 
-  method on_valCollection acc _ el =
+  method on_darray acc tap fieldl =
+    let acc = match tap with
+    | Some (t1, t2) ->
+      let acc = this#on_targ acc t1 in
+      let acc = this#on_targ acc t2 in
+      acc
+    | None -> acc in
+    List.fold_left fieldl ~f:this#on_field ~init:acc
+
+  method on_varray acc ta el =
+    let acc = match ta with
+    | Some t -> this#on_targ acc t
+    | None -> acc in
     List.fold_left el ~f:this#on_expr ~init:acc
 
-  method on_keyValCollection acc _ fieldl =
+  method on_valCollection acc _ ta el =
+    let acc = match ta with
+    | Some t -> this#on_targ acc t
+    | None -> acc in
+    List.fold_left el ~f:this#on_expr ~init:acc
+
+  method on_keyValCollection acc _ tap fieldl =
+    let acc = match tap with
+    | Some (t1, t2) ->
+      let acc = this#on_targ acc t1 in
+      let acc = this#on_targ acc t2 in
+      acc
+    | None -> acc in
     List.fold_left fieldl ~f:this#on_field ~init:acc
 
   method on_this acc = acc
@@ -613,10 +650,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_expr_list acc el =
-    let acc = List.fold_left el ~f:this#on_expr ~init:acc in
-    acc
-
-  method on_execution_operator acc el =
     let acc = List.fold_left el ~f:this#on_expr ~init:acc in
     acc
 
@@ -752,6 +785,12 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       | Some h -> this#on_hint acc h
       | None -> acc in
     acc
+
+  method on_pu_identifier acc cid _ _ =
+    this#on_class_id acc cid
+
+  method on_pu_atom acc s =
+    this#on_string acc s
 
   method on_typedef acc t =
     let acc = this#on_id acc t.t_name in

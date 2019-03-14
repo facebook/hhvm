@@ -16,15 +16,12 @@ string(1012) "Test string                                                       
 -- Iteration 8 --
 
 Warning: %s
-NULL
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 string(11) "Test string"
 -- Iteration 12 --
@@ -40,11 +37,9 @@ string(11) "Test string"
 -- Iteration 17 --
 
 Warning: %s
-NULL
 -- Iteration 18 --
 
 Warning: %s
-NULL
 -- Iteration 19 --
 string(11) "Test string"
 -- Iteration 20 --

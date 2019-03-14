@@ -1,7 +1,7 @@
 <?php
 
-var_dump(gmp_divexact(1, 1, 1));
-var_dump(gmp_divexact());
+try { var_dump(gmp_divexact(1, 1, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_divexact()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $r = gmp_divexact("233", "23345555555555555555555555");
 var_dump(gmp_strval($r));

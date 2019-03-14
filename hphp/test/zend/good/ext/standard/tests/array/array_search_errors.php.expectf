@@ -1,13 +1,10 @@
 *** Testing error conditions of array_search() ***
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 
 Warning: %s
 NULL

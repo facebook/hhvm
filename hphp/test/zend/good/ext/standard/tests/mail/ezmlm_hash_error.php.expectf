@@ -3,25 +3,20 @@
 -- Testing ezmlm_hash() function with fewer than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing ezmlm_hash() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
 
 Warning: %s
-NULL
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
 
 Warning: %s
-NULL
 
 -- Testing ezmlm_hash() function with invalid input - RESOURCE --
 
 Warning: %s
-NULL
 ===DONE===

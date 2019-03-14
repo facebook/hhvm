@@ -359,7 +359,7 @@ let xhp_class_multiple_category_decls =
 let inout_param_in_generator =
   "Parameters may not be marked inout on generators"
 let inout_param_in_async_generator =
-  "Parameters may not be marked inout on an async generators"
+  "Parameters may not be marked inout on async generators"
 let inout_param_in_async =
   "Parameters may not be marked inout on async functions"
 let inout_param_in_construct =
@@ -559,6 +559,9 @@ let non_re_prefix = "Only `re`-prefixed strings allowed."
 let collection_intrinsic_generic =
   "Cannot initialize collection builtins with type parameters"
 
+let collection_intrinsic_many_typeargs =
+  "Collection expression must have less than three type arguments"
+
 let invalid_hack_mode =
   "Incorrect comment; possible values include strict, partial, or empty"
 
@@ -573,7 +576,7 @@ let nested_unary_reference = "References cannot be followed by unary operators"
 let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
 let invalid_reified =
-  "Invalid place to put reified"
+  "Reify keyword can only appear at function or class type parameter position"
 let reified_in_interface =
   "Invalid to use a reified type within an interface's type parameters"
 let shadowing_reified =
@@ -672,6 +675,9 @@ let statement_without_await_in_concurrent_block =
 let concurrent_is_disabled =
   "Concurrent is disabled"
 
+let static_closures_are_disabled =
+  "Static closures are not supported in Hack"
+
 let static_locals_variables_are_disabled =
   "Static local variables are not supported in Hack"
 
@@ -705,3 +711,16 @@ let reified_attribute = "__Reified and __HasReifiedParent attributes may not be 
 
 let lval_as_expression =
   "Lval can no longer be used as an expression. Pull it out into it's own statement."
+
+let pocket_universe_final_expected =
+  "The 'final' keyword is expected here."
+
+let pocket_universe_enum_expected =
+  "The 'enum' keyword is expected here."
+
+(* this one is currently too wide, but will be enough for prototyping *)
+let pocket_universe_invalid_field n =
+  "Invalid pocket universe field syntax: " ^ (string_of_int n) ^"."
+
+let type_keyword =
+    "The 'type' keyword is expected here."

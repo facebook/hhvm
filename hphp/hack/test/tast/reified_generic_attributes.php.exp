@@ -1,6 +1,9 @@
 Errors:
+  [7:17-28] Unbound name: Enforceable (an object type)
   [7:17-28] Unrecognized user attribute: Enforceable does not have a class. Please declare a class for the attribute.
   [10:15-16] This constructor expects no argument
+  [6:48-49] The type parameter T has the <<__Newable>> attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final or have a constructor that is consistent. This can be accomplished by making the constructor final or having <<__ConsistentConstruct>>. No constraints are valid newable classes
+  [7:47-49] The type parameter Tu has the <<__Newable>> attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final or have a constructor that is consistent. This can be accomplished by making the constructor final or having <<__ConsistentConstruct>>. No constraints are valid newable classes
 [(Class
     { c_span = [3:1-48]; c_annotation = (); c_mode = <opaque>;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -16,7 +19,7 @@ Errors:
       c_constructor = None; c_static_methods = []; c_methods = [];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
-      c_enum = None; c_doc_comment = None });
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [4:1-48]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -32,7 +35,8 @@ Errors:
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_doc_comment = None });
+       c_file_attributes = []; c_enum = None; c_pu_enums = [];
+       c_doc_comment = None });
   (Fun
      { f_span = [6:1-57]; f_annotation = (); f_mode = <opaque>; f_ret = None;
        f_name = ([6:10-11], "\\f");

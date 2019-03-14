@@ -1,6 +1,0 @@
-.main {
-  Double -inf
-  PopC
-  Int 1
-  RetC
-}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -16,3 +16,5 @@ class Meh {
     return <div></div>;
   }
 }
+
+class :blah {}

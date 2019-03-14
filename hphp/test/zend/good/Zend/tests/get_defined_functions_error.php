@@ -11,7 +11,7 @@ echo "*** Testing get_defined_functions() : error conditions ***\n";
 
 echo "\n-- Testing get_defined_functions() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( get_defined_functions($extra_arg) );
+try { var_dump( get_defined_functions($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?> 
 ===Done===

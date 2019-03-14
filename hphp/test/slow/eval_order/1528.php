@@ -1,8 +1,8 @@
 <?php
 
 function foo() {
-  global $a;
-  $a = 1;
+
+  $GLOBALS['a'] = 1;
 }
 $a = 'a';
  $r = ++$a . $a;

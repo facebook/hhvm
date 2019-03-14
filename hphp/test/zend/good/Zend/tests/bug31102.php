@@ -1,13 +1,15 @@
 <?php
 
-$test = 0;
+abstract final class ZendGoodZendTestsBug31102 {
+  public static $test = 0;
+}
 
 function __autoload($class)
 {
-	global $test;
 
-	echo __METHOD__ . "($class,$test)\n";
-	switch($test)
+
+	echo __METHOD__ . "($class,".ZendGoodZendTestsBug31102::$test.")\n";
+	switch(ZendGoodZendTestsBug31102::$test)
 	{
 	case 1:
 		eval("class $class { function __construct(){throw new Exception('$class::__construct');}}");
@@ -21,11 +23,11 @@ function __autoload($class)
 	}
 }
 
-while($test++ < 5)
+while(ZendGoodZendTestsBug31102::$test++ < 5)
 {
 	try
 	{
-		eval("\$bug = new Test$test();");
+		eval("\$bug = new Test".ZendGoodZendTestsBug31102::$test."();");
 	}
 	catch (Exception $e)
 	{

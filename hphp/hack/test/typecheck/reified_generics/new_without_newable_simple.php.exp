@@ -1,0 +1,2 @@
+File "new_without_newable_simple.php", line 5, characters 3-9:
+T cannot be used with `new` because it does not have the <<__Newable>> attribute (Typing[4309])

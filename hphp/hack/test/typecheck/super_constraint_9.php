@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // Notice that foo is invariant in T
 class Foo<T> {}

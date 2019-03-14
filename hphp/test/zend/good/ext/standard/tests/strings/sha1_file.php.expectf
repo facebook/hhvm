@@ -25,12 +25,10 @@ bool(false)
 -- Zero arguments --
 
 Warning: %s
-NULL
 
 -- More than valid number of arguments ( valid is 2) --
 
 Warning: %s
-NULL
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

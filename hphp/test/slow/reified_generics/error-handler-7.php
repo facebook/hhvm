@@ -18,5 +18,5 @@ set_error_handler(
   }
 );
 
-f(new C<reify int>());
-f(new C<reify string>());
+f(new C<int>());
+f(new C<string>());

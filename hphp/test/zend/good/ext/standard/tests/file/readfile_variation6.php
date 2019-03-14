@@ -16,8 +16,8 @@ unlink($thisTestDir);
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "readfile_variation6.txt";
-$secondFile = $dir2."/".$filename;
+ZendGoodExtStandardTestsFileReadfileVariation6::$filename = "readfile_variation6.txt";
+ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = $dir2."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -29,14 +29,18 @@ rmdir($thisTestDir);
 
 
 function runtest() {
-   global $secondFile, $filename;
-   $h = fopen($secondFile, "w");
+
+   $h = fopen(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile, "w");
    fwrite($h, "File in include path");
    fclose($h);
-   readfile($filename, true);
+   readfile(ZendGoodExtStandardTestsFileReadfileVariation6::$filename, true);
    echo "\n";
-   unlink($secondFile);  
+   unlink(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile);  
 }
 
+abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
+  public static $secondFile;
+  public static $filename;
+}
 ?>
 ===DONE===

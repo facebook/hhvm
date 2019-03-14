@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function expect_array_bool(array<bool> $a): void {}
 function test(

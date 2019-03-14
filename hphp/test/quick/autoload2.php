@@ -2,7 +2,7 @@
 function __autoload($cls) {
   echo "__autoload $cls\n";
   if ($cls === 'C') {
-    class C { public function foo() { } }
+    include 'autoload1.inc';
   }
 }
 $arr = array("C");

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 trait X {
   public function f(): bool {

@@ -55,13 +55,13 @@ struct
   let e' =
     match e with
     | S.Array afl -> T.Array (List.map afl (map_afield menv))
-    | S.Darray fl -> T.Darray (List.map fl (map_field menv))
-    | S.Varray el -> T.Varray (map_exprl menv el)
+    | S.Darray (tap, fl) -> T.Darray (tap, List.map fl (map_field menv))
+    | S.Varray (ta, el) -> T.Varray (ta, map_exprl menv el)
     | S.Shape sm -> T.Shape
       (List.map ~f:(fun (n, e) -> (n, map_expr menv e)) sm)
-    | S.ValCollection (k, el) -> T.ValCollection (k, map_exprl menv el)
-    | S.KeyValCollection (k, fl) ->
-      T.KeyValCollection (k, List.map fl (map_field menv))
+    | S.ValCollection (k, ta, el) -> T.ValCollection (k, ta, map_exprl menv el)
+    | S.KeyValCollection (k, tap, fl) ->
+      T.KeyValCollection (k, tap, List.map fl (map_field menv))
     | S.This -> T.This
     | S.Any -> T.Any
     | S.Id id -> T.Id id
@@ -118,17 +118,17 @@ struct
       ), map_exprl menv el)
     | S.Unsafe_expr e -> T.Unsafe_expr (map_expr menv e)
     | S.Callconv (k, e) -> T.Callconv (k, map_expr menv e)
-    | S.Execution_operator e -> T.Execution_operator (map_exprl menv e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
     | S.Omitted -> T.Omitted
-    | S.NewAnonClass (el1, el2, c) ->
-      T.NewAnonClass (List.map el1 (map_expr menv), List.map el2 (map_expr menv), map_class menv c)
     | S.Lfun f -> T.Lfun (map_fun menv f)
     | S.Import (f, e) -> T.Import (f, map_expr menv e)
-    | S.Collection (id, fl) -> T.Collection (id, List.map fl (map_afield menv))
+    | S.Collection (id, tal, fl) -> T.Collection (id, tal, List.map fl (map_afield menv))
     | S.BracedExpr e -> T.BracedExpr (map_expr menv e)
     | S.ParenthesizedExpr e -> T.ParenthesizedExpr (map_expr menv e)
+    | S.PU_atom id -> T.PU_atom id
+    | S.PU_identifier (cid, s1, s2) ->
+        T.PU_identifier (map_class_id menv cid, s1, s2)
   in
   let p' = menv.map_expr_annotation p in
     (p', e')
@@ -169,6 +169,23 @@ struct
   {
     T.ua_name = ua.S.ua_name;
     T.ua_params = map_exprl menv ua.S.ua_params;
+  }
+
+  and map_pu_enum menv pue =
+  {
+    T.pu_name = pue.S.pu_name;
+    T.pu_is_final = pue.S.pu_is_final;
+    T.pu_case_types = pue.S.pu_case_types;
+    T.pu_case_values = pue.S.pu_case_values;
+    T.pu_members = List.map pue.S.pu_members ~f:(map_pu_member menv);
+  }
+
+  and map_pu_member menv pum =
+    let pum_expr (id, expr) = (id, map_expr menv expr) in
+  {
+    T.pum_atom = pum.S.pum_atom;
+    T.pum_types = pum.S.pum_types;
+    T.pum_exprs = List.map pum.S.pum_exprs ~f:pum_expr;
   }
 
   and map_tparam menv t =
@@ -223,9 +240,7 @@ struct
     | S.Static_var el -> T.Static_var (map_exprl menv el)
     | S.Global_var el -> T.Global_var (map_exprl menv el)
     | S.Awaitall (pos, el) ->
-      let el = List.map el (fun (e1, e2) ->
-        (Option.map e1 (map_expr menv), map_expr menv e2)
-      ) in
+      let el = List.map el (fun (lid, expr) -> (lid, map_expr menv expr)) in
       T.Awaitall (pos, el)
     | S.If(e, b1, b2) -> T.If (map_expr menv e, map_block menv b1, map_block menv b2)
     | S.Do(b, e) -> T.Do(map_block menv b, map_expr menv e)
@@ -303,6 +318,7 @@ struct
     T.c_attributes = List.map c.S.c_attributes (map_attribute menv);
     T.c_xhp_children = c.S.c_xhp_children;
     T.c_xhp_attrs = List.map c.S.c_xhp_attrs (map_xhp_attr menv);
+    T.c_pu_enums = List.map c.S.c_pu_enums (map_pu_enum menv);
   }
 
   and map_xhp_attr menv (h, var, b, maybe_enum) =
@@ -408,7 +424,6 @@ struct
     T.cst_name = c.S.cst_name;
     T.cst_type = c.S.cst_type;
     T.cst_value = Option.map c.S.cst_value (map_expr menv);
-    T.cst_is_define = c.S.cst_is_define;
     T.cst_namespace = c.S.cst_namespace;
   }
 

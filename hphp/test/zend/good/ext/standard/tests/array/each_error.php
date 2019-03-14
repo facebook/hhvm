@@ -13,13 +13,13 @@ echo "*** Testing each() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing each() function with Zero arguments --\n";
-var_dump( each() );
+try { var_dump( each() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test each with one more than the expected number of arguments
 echo "\n-- Testing each() function with more than expected no. of arguments --\n";
 $arr = array(1, 2);
 $extra_arg = 10;
-var_dump( each(&$arr, $extra_arg) );
+try { var_dump( each(&$arr, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

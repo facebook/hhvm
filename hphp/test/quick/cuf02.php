@@ -1,14 +1,14 @@
 <?hh
-class C {  public function foo() { echo "C::foo\n"; var_dump(get_called_class()); }
-  public static function bar() { echo "C::bar\n"; var_dump(get_called_class()); }
+class C {  public function foo() { echo "C::foo\n"; var_dump(static::class); }
+  public static function bar() { echo "C::bar\n"; var_dump(static::class); }
 }
 class D extends C {
-  public function foo() { echo "D::foo\n"; var_dump(get_called_class()); }
-  public static function bar() { echo "D::bar\n"; var_dump(get_called_class()); }
+  public function foo() { echo "D::foo\n"; var_dump(static::class); }
+  public static function bar() { echo "D::bar\n"; var_dump(static::class); }
 }
 class E {
-  public function foo() { echo "E::foo\n"; var_dump(get_called_class()); }
-  public static function bar() { echo "E::bar\n"; var_dump(get_called_class());
+  public function foo() { echo "E::foo\n"; var_dump(static::class); }
+  public static function bar() { echo "E::bar\n"; var_dump(static::class);
   }
 }
 

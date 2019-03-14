@@ -1,8 +1,0 @@
-.main {
-  String "42"
-  String ""
-  Concat
-  PopC
-  Int 1
-  RetC
-}

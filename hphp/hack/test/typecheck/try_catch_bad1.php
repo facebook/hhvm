@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -23,3 +23,5 @@ function foo(): int {
   }
   return $a;
 }
+
+class MyException extends Exception {}

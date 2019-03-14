@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,3 +13,5 @@ function test(): void {
   $x = array('k' => 0, 'k2' => my_php_function());
   $y = array(0, my_php_function());
 }
+
+function my_php_function() {}

@@ -8,13 +8,11 @@
  *)
 
 type t = GlobalOptions.t
-let assume_php = GlobalOptions.tco_assume_php
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint
 let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
-let untyped_nonstrict_lambda_parameters = GlobalOptions.tco_untyped_nonstrict_lambda_parameters
 let language_feature_logging = GlobalOptions.tco_language_feature_logging
 let unsafe_rx = GlobalOptions.tco_unsafe_rx
 let experimental_feature_enabled =
@@ -45,8 +43,6 @@ let experimental_disallow_static_memoized =
 let experimental_disable_optional_and_unknown_shape_fields =
   GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
 let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
-let experimental_null_coalesce_assignment =
-  GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
 let experimental_type_param_shadowing =
@@ -60,15 +56,10 @@ let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization
 let experimental_track_subtype_prop =
   GlobalOptions.tco_experimental_track_subtype_prop
-let experimental_null_type =
-  GlobalOptions.tco_experimental_null_type
-
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
 let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple
-let disallow_assign_by_ref = GlobalOptions.tco_disallow_assign_by_ref
-let disallow_array_cell_pass_by_ref = GlobalOptions.tco_disallow_array_cell_pass_by_ref
 let disallow_implicit_returns_in_non_void_functions =
   GlobalOptions.tco_disallow_implicit_returns_in_non_void_functions
 let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
@@ -80,5 +71,9 @@ let new_inference = GlobalOptions.tco_new_inference
 let new_inference_no_eager_solve = GlobalOptions.tco_new_inference_no_eager_solve
 let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
+let disable_instanceof_refinement = GlobalOptions.tco_disable_instanceof_refinement
+let disallow_ref_param_on_constructor = GlobalOptions.tco_disallow_ref_param_on_constructor
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
+let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_expr_type_arguments
+let disallow_unsafe_construct = GlobalOptions.tco_disallow_unsafe_construct

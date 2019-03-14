@@ -4,7 +4,7 @@
   NewObjD "C"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
 
   CheckProp "foo"
   InitProp "bar" NonStatic

@@ -1,9 +1,31 @@
 (library
-  (name utils_process)
+  (name process_types)
   (wrapped false)
+  (modules
+    process_types)
   (libraries
     core_kernel
-    sys_utils
+    utils_core
+    sys_utils))
+
+(library
+  (name process)
+  (wrapped false)
+  (modules
+    process)
+  (libraries
+    process_types
     utils_core
     utils_ocaml_overrides
-    utils_stack))
+    stack_utils
+    sys_utils))
+
+(library
+  (name future)
+  (wrapped false)
+  (modules
+    future
+    future_sig)
+  (libraries
+    process
+    process_types))

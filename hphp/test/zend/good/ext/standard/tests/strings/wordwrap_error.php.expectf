@@ -3,12 +3,10 @@
 -- Testing wordwrap() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing wordwrap() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --

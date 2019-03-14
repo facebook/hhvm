@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo<Tk,Tv>(KeyedContainer<Tk,Tv> $x, Tk $k) : Tv {
+function foo<Tk as arraykey,Tv>(KeyedContainer<Tk,Tv> $x, Tk $k) : Tv {
   return $x[$k];
 }
 
@@ -10,7 +10,7 @@ function expectFloat(float $f):void { }
 function expectNum(num $n):void { }
 function expectString(string $s):void { }
 function expectKeysetOfArraykey(keyset<arraykey> $ks):void { }
-function expectSetOfNum(Set<num> $s):void { }
+function expectSetOfInt(Set<int> $s):void { }
 
 // Let's just check that ground subtyping against KeyedContainer works as expected
 function test_KeyedContainer_subtype(
@@ -42,7 +42,7 @@ function test_array_append_on_tvar(
   vec<int> $v,
   Vector<num> $vector,
   keyset<string> $ks,
-  Set<num> $set,
+  Set<int> $set,
   varray<int> $varray,
   Map<int,num> $m,
 ): void {
@@ -67,8 +67,8 @@ function test_array_append_on_tvar(
   $ks[] = 3;
   expectKeysetOfArraykey($ks);
   $set = (new Inv($set))->item;
-  $set[] = 2.3;
-  expectSetOfNum($set);
+  $set[] = 2;
+  expectSetOfInt($set);
   // Now test union
   if ($b) {
     $set = $vector;

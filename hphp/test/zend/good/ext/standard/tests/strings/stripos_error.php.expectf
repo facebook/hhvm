@@ -2,13 +2,10 @@
 
 -- With Zero arguments --
 Warning: %s
-NULL
 
 -- With less than expected number of arguments --
 Warning: %s
-NULL
 
 -- With more than expected number of arguments --
 Warning: %s
-NULL
 *** Done ***

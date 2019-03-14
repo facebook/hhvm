@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C {
-  public static function decryptParams <Tk, Tv>(
+  public static function decryptParams <Tk as arraykey, Tv>(
   ): KeyedContainer<Tk, Tv> {
     return dict[];
   }

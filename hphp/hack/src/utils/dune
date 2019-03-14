@@ -12,7 +12,6 @@
     prim_defs
     random_id
     stats
-    string_utils
     utils)
   (c_names
     get_build_id
@@ -22,6 +21,7 @@
     (:include config/build-id-opt)
     (:include config/build-timestamp-opt)))
   (libraries
+    string
     imported_core
     hh_json
     str
@@ -29,121 +29,7 @@
   (preprocess
     (pps ppx_deriving.std)))
 
-(library
-  (name file_content)
-  (wrapped false)
-  (modules
-    file_content)
-  (libraries
-    utils_core))
-
-(library
-  (name marshal_tools)
-  (wrapped false)
-  (modules
-    marshal_tools
-    marshal_tools_lwt)
-  (libraries
-    lwt
-    lwt.unix
-    lwt_log
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx)))
-
-(library
-  (name opaque_digest)
-  (wrapped false)
-  (modules
-    opaqueDigest))
-
-(library
-  (name pos)
-  (wrapped false)
-  (modules
-    file_pos_large
-    file_pos_small
-    line_break_map
-    pos
-    pos_embedded
-    pos_source)
-  (libraries
-    relative_path))
-
-(library
-  (name relative_path)
-  (wrapped false)
-  (modules
-    relative_path)
-  (libraries
-    collections
-    sys_utils)
-  (preprocess (pps ppx_deriving.std)))
-
-(library
-  (name server_load_flag)
-  (wrapped false)
-  (modules
-    serverLoadFlag))
-
-(library
-  (name file_url)
-  (wrapped false)
-  (modules
-    file_url)
-  (libraries
-    utils_core))
-
-(library
-  (name jsonrpc)
-  (wrapped false)
-  (modules
-    jsonrpc)
-  (libraries
-    buffered_line_reader
-    hh_json
-    http_lite
-    marshal_tools
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx)))
-
-(library
-  (name http_lite)
-  (wrapped false)
-  (modules
-    http_lite)
-  (libraries
-    buffered_line_reader
-    utils_core))
-
-(library
-  (name lsp)
-  (wrapped false)
-  (modules
-    lsp
-    lsp_fmt
-    lsp_helpers)
-  (libraries
-    file_content
-    file_url
-    hh_json
-    jsonrpc
-    utils_core))
-
-(library
-  (name lwt_utils)
-  (wrapped false)
-  (modules
-    lwt_utils)
-  (libraries
-    lwt
-    lwt.unix
-    core_kernel
-    utils_core)
-  (preprocess
-    (pps lwt_ppx)))
-
+; splitted utils:utils
 (library
   (name trie)
   (wrapped false)
@@ -153,36 +39,6 @@
     utils_core))
 
 (library
-  (name symbol)
-  (wrapped false)
-  (modules
-    symbolDefinition
-    symbolOccurrence)
-  (libraries
-    naming_special_names
-    pos))
-
-(library
-  (name buffered_line_reader)
-  (wrapped false)
-  (modules
-    buffered_line_reader
-    buffered_line_reader_sig)
-  (libraries
-    utils_core))
-
-(library
-  (name compiler_id)
-  (wrapped false)
-  (modules
-    compiler_id)
-  (c_names
-    compiler_id_impl)
-  (c_flags (:standard
-    (:include ../dune_config/incl_hphp_parent.sexp)
-    (:include config/compiler-id-opt))))
-
-(library
   (name utils_find)
   (wrapped false)
   (modules
@@ -190,14 +46,6 @@
   (libraries
     ignore
     relative_path))
-
-(library
-  (name utils_ocaml_overrides)
-  (wrapped false)
-  (modules
-    ocaml_overrides)
-  (libraries
-    disk))
 
 (library
   (name utils_php_escape)
@@ -212,12 +60,6 @@
     scheduler)
   (libraries
     utils_core))
-
-(library
-  (name utils_stack)
-  (wrapped false)
-  (modules
-    stack_utils))
 
 (library
   (name utils_www_root)
@@ -240,3 +82,185 @@
   (wrapped false)
   (modules
     mutable_accumulator))
+; end of splitted utils:utils
+
+(library
+  (name relative_path)
+  (wrapped false)
+  (modules
+    relative_path)
+  (libraries
+    collections
+    sys_utils)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name pos)
+  (wrapped false)
+  (modules
+    file_pos_large
+    file_pos_small
+    line_break_map
+    pos
+    pos_embedded
+    pos_source)
+  (libraries
+    relative_path))
+
+(library
+  (name string)
+  (wrapped false)
+  (modules string_utils)
+  (libraries str))
+
+(library
+  (name stack_utils)
+  (wrapped false)
+  (modules
+    stack_utils))
+
+(library
+  (name utils_ocaml_overrides)
+  (wrapped false)
+  (modules
+    ocaml_overrides)
+  (libraries
+    disk))
+
+(library
+  (name symbol)
+  (wrapped false)
+  (modules
+    symbolDefinition
+    symbolOccurrence)
+  (libraries
+    naming_special_names
+    pos))
+
+(library
+  (name file_content)
+  (wrapped false)
+  (modules
+    file_content)
+  (libraries
+    utils_core))
+
+(library
+  (name marshal_tools)
+  (wrapped false)
+  (modules
+    marshal_tools)
+  (libraries
+    sys_utils))
+
+(library
+  (name marshal_tools_lwt)
+  (wrapped false)
+  (modules
+    marshal_tools_lwt)
+  (libraries
+    marshal_tools
+    lwt
+    lwt.unix
+    lwt_log))
+
+(library
+  (name buffered_line_reader)
+  (wrapped false)
+  (modules
+    buffered_line_reader
+    buffered_line_reader_sig)
+  (libraries
+    utils_core))
+
+(library
+  (name buffered_line_reader_lwt)
+  (wrapped false)
+  (modules
+    buffered_line_reader_lwt)
+  (libraries
+    buffered_line_reader
+    lwt
+    lwt.unix))
+
+(library
+  (name jsonrpc)
+  (wrapped false)
+  (modules
+    jsonrpc)
+  (libraries
+    buffered_line_reader
+    hh_json
+    http_lite
+    marshal_tools
+    marshal_tools_lwt
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))
+
+(library
+  (name http_lite)
+  (wrapped false)
+  (modules
+    http_lite)
+  (libraries
+    buffered_line_reader
+    utils_core))
+
+(library
+  (name file_url)
+  (wrapped false)
+  (modules
+    file_url)
+  (libraries
+    utils_core))
+
+(library
+  (name compiler_id)
+  (wrapped false)
+  (modules
+    compiler_id)
+  (c_names
+    compiler_id_impl)
+  (c_flags (:standard
+    (:include ../dune_config/incl_hphp_parent.sexp)
+    (:include config/compiler-id-opt))))
+
+(library
+  (name lsp)
+  (wrapped false)
+  (modules
+    lsp
+    lsp_fmt
+    lsp_helpers)
+  (libraries
+    file_content
+    file_url
+    hh_json
+    jsonrpc
+    utils_core))
+
+(library
+  (name server_load_flag)
+  (wrapped false)
+  (modules
+    serverLoadFlag))
+
+(library
+  (name opaque_digest)
+  (wrapped false)
+  (modules
+    opaqueDigest))
+
+(library
+  (name lwt_utils)
+  (wrapped false)
+  (modules
+    lwt_utils)
+  (libraries
+    lwt
+    lwt.unix
+    core_kernel
+    utils_core)
+  (preprocess
+    (pps lwt_ppx)))

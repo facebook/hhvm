@@ -1,11 +1,11 @@
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'preserve_keys' 
+* Testing array_chunk() function with unexpected values for 'preserve_keys'
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";
@@ -49,12 +49,6 @@ $values = array(
         // object data
 /*16*/  new stdclass(),
 
-        // undefined data
-/*17*/  @undefined_var,
-
-        // unset data
-/*18*/  @unset_var
-
 );
 
 $count = 1;
@@ -62,7 +56,7 @@ $count = 1;
 // loop through each element of the array for preserve_keys
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump( array_chunk($input, $size, $value) );
+  try { var_dump( array_chunk($input, $size, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 

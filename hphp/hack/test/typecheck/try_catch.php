@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -24,3 +24,6 @@ function terminal_catch_can_do_whatever(): int {
   }
   return $a;
 }
+
+class YourException extends Exception {}
+class MyException extends Exception {}

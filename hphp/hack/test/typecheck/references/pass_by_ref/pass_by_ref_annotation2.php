@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function foo(int $a, string& $b, bool $c): void {}
 

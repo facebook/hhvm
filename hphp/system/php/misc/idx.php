@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace HH {
 
@@ -70,11 +70,11 @@ function idx($arr, $idx, $default=null) {
 
   if ($idx !== null) {
     if (\is_object($arr)) {
-      if ($arr instanceof \ConstIndexAccess) {
+      if ($arr is \ConstIndexAccess) {
         if ($arr->containsKey($idx)) {
           return $arr[$idx];
         }
-      } else if ($arr instanceof \ConstSet) {
+      } else if ($arr is \ConstSet) {
         if ($arr->contains($idx)) {
           return $idx;
         }

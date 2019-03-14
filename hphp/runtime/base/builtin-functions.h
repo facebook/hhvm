@@ -49,6 +49,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 ///////////////////////////////////////////////////////////////////////////////
 
 void NEVER_INLINE raise_missing_this(const Func* f);
+void NEVER_INLINE raise_has_this_need_static(const Func* f);
 bool NEVER_INLINE needs_missing_this_check(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_get_object_prop();
@@ -99,11 +100,29 @@ inline bool is_string(const Cell* c) {
 
 inline bool is_array(const Cell* c) {
   assertx(cellIsPlausible(*c));
+  if (tvIsClsMeth(c)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
+      }
+      return true;
+    }
+    return false;
+  }
   return tvIsArrayOrShape(c);
 }
 
 inline bool is_vec(const Cell* c) {
   assertx(cellIsPlausible(*c));
+  if (tvIsClsMeth(c)) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
+      }
+      return true;
+    }
+    return false;
+  }
   return tvIsVec(c);
 }
 
@@ -118,6 +137,15 @@ inline bool is_keyset(const Cell* c) {
 }
 
 inline bool is_varray(const Cell* c) {
+  if (tvIsClsMeth(c)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (RuntimeOption::EvalIsVecNotices) {
+        raise_notice(Strings::CLSMETH_COMPAT_IS_VARR);
+      }
+      return true;
+    }
+    return false;
+  }
   return RuntimeOption::EvalHackArrDVArrs
     ? tvIsVec(c)
     : (tvIsArray(c) && c->m_data.parr->isVArray());
@@ -133,6 +161,11 @@ inline bool is_object(const Cell* c) {
   assertx(cellIsPlausible(*c));
   return tvIsObject(c) &&
     c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
+}
+
+inline bool is_clsmeth(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsClsMeth(c);
 }
 
 inline bool is_empty_string(const Cell* c) {
@@ -248,17 +281,12 @@ void throw_object(const String& s, const Array& params, bool init = true) {
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc, int level = 0,
-                                   TypedValue *rv = nullptr)
+                                   const char *expectDesc)
   __attribute__((__cold__));
-void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr)
+void throw_missing_arguments_nr(const char *fn, int expected, int got)
+
   __attribute__((__cold__));
-void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0, TypedValue *rv = nullptr)
-  __attribute__((__cold__));
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level = 0, TypedValue *rv = nullptr)
+void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax)
   __attribute__((__cold__));
 
 /**

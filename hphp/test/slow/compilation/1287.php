@@ -1,7 +1,7 @@
 <?php
 
 class X {
-  function test($a, $b, $c) {
+  function test($a, $b) {
     return $a != $b;
   }
 }

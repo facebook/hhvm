@@ -38,8 +38,6 @@ let string_of_prop_id id =
   SU.quote_string (Hhbc_id.Prop.to_raw_string id)
 let string_of_class_num id =
   string_of_int id
-let string_of_function_num id =
-  string_of_int id
 let string_of_typedef_num id =
   string_of_int id
 let string_of_pos pos =
@@ -140,10 +138,6 @@ let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
 
-let string_of_reifiedgeneric_op = function
-  | ClsGeneric -> "ClsGeneric"
-  | FunGeneric -> "FunGeneric"
-
 let string_of_has_generics_op = function
   | NoGenerics -> "NoGenerics"
   | HasGenerics -> "HasGenerics"
@@ -223,8 +217,6 @@ let string_of_get x =
   | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
-  | ClsRefGetL (id, cr) ->
-    sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
   | ClsRefGetC cr -> sep ["ClsRefGetC"; string_of_int cr]
   | ClsRefGetTS cr -> sep ["ClsRefGetTS"; string_of_int cr]
 
@@ -291,6 +283,7 @@ let string_of_istype_op op =
   | OpArrLike -> "ArrLike"
   | OpVArray -> "VArray"
   | OpDArray -> "DArray"
+  | OpClsMeth -> "ClsMeth"
 
 let string_of_initprop_op op =
   match op with
@@ -340,12 +333,17 @@ let string_of_fcall_flags fl =
   ] in
   "<" ^ (String.concat ~sep:" " @@ List.filter ~f:(fun f -> f <> "") fl) ^ ">"
 
+let string_of_list_of_bools l =
+  let bool_to_str b = if b then "1" else "0" in
+  "\"" ^ (String.concat ~sep:"" (List.map ~f:bool_to_str l)) ^ "\""
+
 let string_of_fcall_args fcall_args =
-  let flags, num_args, num_rets, async_eager_label = fcall_args in
+  let flags, num_args, num_rets, by_refs, async_eager_label = fcall_args in
   sep [
     string_of_fcall_flags flags;
     string_of_int num_args;
     string_of_int num_rets;
+    string_of_list_of_bools by_refs;
     string_of_optional_label async_eager_label
   ]
 
@@ -462,11 +460,6 @@ let string_of_param_locations pl =
   if List.length pl = 0 then "" else
   "<" ^ (String.concat ~sep:", " (List.map ~f:string_of_int pl)) ^ ">"
 
-let string_of_list_of_bools l =
-  if List.length l = 0 then "" else
-  let bool_to_str b = if b then "1" else "0" in
-  "\"" ^ (String.concat ~sep:"" (List.map ~f:bool_to_str l)) ^ "\""
-
 let string_of_call instruction =
   match instruction with
   | FPushFunc (n, pl) ->
@@ -499,14 +492,10 @@ let string_of_call instruction =
     sep ["NewObj"; string_of_int id; string_of_has_generics_op op]
   | NewObjD cid ->
     sep ["NewObjD"; string_of_class_id cid]
-  | NewObjI id ->
-    sep ["NewObjI"; string_of_classref id]
   | NewObjS r ->
     sep ["NewObjS"; SpecialClsRef.to_string r]
   | FPushCtor n ->
     sep ["FPushCtor"; string_of_int n]
-  | FThrowOnRefMismatch l ->
-    sep ["FThrowOnRefMismatch"; string_of_list_of_bools l]
   | FCall (fcall_args, c, f) ->
     sep ["FCall";
       string_of_fcall_args fcall_args;
@@ -533,8 +522,8 @@ let string_of_misc instruction =
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
-    | ReifiedName (n, op) ->
-      sep ["ReifiedName"; string_of_int n; string_of_reifiedgeneric_op op]
+    | ReifiedName (n, name) ->
+      sep ["ReifiedName"; string_of_int n; SU.quote_string name]
     | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
     | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
@@ -582,6 +571,7 @@ let string_of_misc instruction =
     | Idx -> "Idx"
     | ArrayIdx -> "ArrayIdx"
     | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
+    | FuncNumArgs -> "FuncNumArgs"
     | AKExists -> "AKExists"
     | OODeclExists ck -> sep ["OODeclExists"; string_of_class_kind ck]
     | Silence (local, op) ->
@@ -721,7 +711,6 @@ let string_of_include_eval_define = function
   | Eval -> "Eval"
   | AliasCls (c1, c2) ->
     sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
-  | DefFunc id -> sep ["DefFunc"; string_of_function_num id]
   | DefCls id -> sep ["DefCls"; string_of_class_num id]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]
@@ -1056,9 +1045,9 @@ and string_of_xml ~env (_, id) attributes children =
   let _, attributes =
     List.fold_right ~f:(string_of_xhp_attr p) attributes ~init:(0, [])
   in
-  let attributes = string_of_param_default_value ~env (p, A.Darray attributes) in
+  let attributes = string_of_param_default_value ~env (p, A.Darray (None, attributes)) in
   let children = string_of_param_default_value ~env
-   (p, A.Varray children)
+   (p, A.Varray (None, children))
   in
   "new "
   ^ name
@@ -1144,6 +1133,7 @@ and string_of_param_default_value ~env expr =
       | _ -> id
     in
     Php_escaping.escape id
+  | A.PU_atom (_, litstr)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr
@@ -1157,10 +1147,10 @@ and string_of_param_default_value ~env expr =
    * https://fburl.com/tzom2qoe *)
   | A.Array afl ->
     "array(" ^ string_of_afield_list ~env afl ^ ")"
-  | A.Collection ((_, name), afl) when
+  | A.Collection ((_, name), _, afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
     name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
-  | A.Collection ((_, name), afl) ->
+  | A.Collection ((_, name), _, afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in
     begin match name with
     | "Set" | "Pair" | "Vector" | "Map"
@@ -1179,7 +1169,7 @@ and string_of_param_default_value ~env expr =
           (shape_field_name_to_expr f_name, e))
         fl
     in
-    string_of_param_default_value ~env (fst expr, A.Darray fl)
+    string_of_param_default_value ~env (fst expr, A.Darray (None, fl))
   | A.Binop (bop, e1, e2) ->
     let bop = string_of_bop bop in
     let e1 = string_of_param_default_value ~env e1 in
@@ -1192,12 +1182,6 @@ and string_of_param_default_value ~env expr =
     let prefix = match snd expr with A.New (_, _, _, _) -> "new " | _ -> "" in
     prefix
     ^ e
-    ^ "("
-    ^ String.concat ~sep:", " es
-    ^ ")"
-  | A.NewAnonClass (es, ues, _) ->
-    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
-    "new class"
     ^ "("
     ^ String.concat ~sep:", " es
     ^ ")"
@@ -1252,10 +1236,6 @@ and string_of_param_default_value ~env expr =
     String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es
   | A.PrefixedString (name, e) ->
     String.concat ~sep:" . " @@ [name; string_of_param_default_value ~env e]
-  | A.Execution_operator es ->
-    let s =
-      String.concat ~sep:" . " @@ List.map ~f:(string_of_param_default_value ~env) es in
-    "shell_exec(" ^ s ^ ")"
   | A.Eif (cond, etrue, efalse) ->
     let cond = string_of_param_default_value ~env cond in
     let etrue =
@@ -1281,10 +1261,10 @@ and string_of_param_default_value ~env expr =
     let o = if b then " ?as " else " as " in
     let h = string_of_hint ~ns:true h in
     e ^ o ^ h
-  | A.Varray es ->
+  | A.Varray (_, es) ->
     let es = List.map ~f:(string_of_param_default_value ~env) es in
     "varray[" ^ (String.concat ~sep:", " es) ^ "]"
-  | A.Darray es ->
+  | A.Darray (_, es) ->
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     "darray[" ^ (string_of_afield_list ~env es) ^ "]"
   | A.List l ->

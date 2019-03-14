@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function gotoReferencingLabelInEnclosedScope($condition): void {
   L0:

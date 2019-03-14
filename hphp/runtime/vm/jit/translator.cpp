@@ -92,10 +92,11 @@ static const struct {
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopV,        {Stack1|
-                    DontGuardStack1|
-                    IgnoreInnerType,  None,         OutNone         }},
+                    DontGuardStack1,  None,         OutNone         }},
   { OpPopU,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
+  { OpPopU2,       {StackTop2|
+                    DontGuardAny,     Stack1,       OutSameAsInput1 }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
@@ -222,10 +223,10 @@ static const struct {
    * RetC and RetM consume values from the stack, and these values' types needs
    * to be known at compile-time.
    */
-  { OpRetC,        {AllLocals,        None,         OutNone         }},
-  { OpRetM,        {AllLocals,        None,         OutNone         }},
+  { OpRetC,        {None,             None,         OutNone         }},
+  { OpRetM,        {None,             None,         OutNone         }},
   { OpRetCSuspended,
-                   {AllLocals,        None,         OutNone         }},
+                   {None,             None,         OutNone         }},
   { OpThrow,       {Stack1,           None,         OutNone         }},
   { OpUnwind,      {None,             None,         OutNone         }},
 
@@ -250,7 +251,6 @@ static const struct {
   { OpVGetG,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpVGetS,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpClsRefGetC,  {Stack1,           None,         OutNone         }},
-  { OpClsRefGetL,  {Local,            None,         OutNone         }},
   { OpClsRefGetTS, {Stack1,           None,         OutNone         }},
 
   /*** 6. Isset, Empty, and type querying instructions ***/
@@ -277,8 +277,7 @@ static const struct {
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpBindL,       {Stack1|Local|
-                    IgnoreInnerType,  Stack1|Local, OutSameAsInput1  }},
+  { OpBindL,       {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
   { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
@@ -303,11 +302,8 @@ static const struct {
                    {None,             FStack,       OutFDesc        }},
   { OpNewObj,      {None,             Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjI,     {None,             Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpFPushCtor,   {Stack1,           FStack,       OutFDesc        }},
-  { OpFThrowOnRefMismatch,
-                   {None,             None,         OutNone         }},
   /*
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
@@ -338,7 +334,6 @@ static const struct {
   { OpReqOnce,     {Stack1,           Stack1,       OutUnknown      }},
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown      }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown      }},
-  { OpDefFunc,     {None,             None,         OutNone         }},
   { OpDefTypeAlias,{None,             None,         OutNone         }},
   { OpDefCls,      {None,             None,         OutNone         }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
@@ -351,6 +346,7 @@ static const struct {
   { OpCheckThis,   {This,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
+  { OpFuncNumArgs, {None,             Stack1,       OutInt64        }},
   { OpStaticLocCheck,
                    {None,             Stack1|Local, OutBoolean      }},
   { OpStaticLocDef,
@@ -397,7 +393,7 @@ static const struct {
   { OpResolveObjMethod,
                    {StackTop2,        Stack1,       OutVArray        }},
   { OpResolveClsMethod,
-                   {StackTop2,        Stack1,       OutVArray        }},
+                   {StackTop2,        Stack1,       OutClsMeth       }},
 
   /*** 14. Generator instructions ***/
 
@@ -490,8 +486,8 @@ const InstrInfo& getInstrInfo(Op op) {
 
 namespace {
 int64_t countOperands(uint64_t mask) {
-  const uint64_t ignore = Local | Iter | AllLocals | DontGuardStack1 |
-    IgnoreInnerType | DontGuardAny | This | MBase | StackI | MKey | LocalRange |
+  const uint64_t ignore = Local | Iter | DontGuardStack1 |
+    DontGuardAny | This | MBase | StackI | MKey | LocalRange |
     DontGuardBase;
   mask &= ~ignore;
 
@@ -605,7 +601,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define SLA(n)
 #define ILA(n)
 #define I32LA(n)
-#define BLLA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -667,7 +662,6 @@ size_t memberKeyImmIdx(Op op) {
 #undef SLA
 #undef ILA
 #undef I32LA
-#undef BLLA
 #undef IVA
 #undef I64A
 #undef IA
@@ -688,7 +682,7 @@ size_t memberKeyImmIdx(Op op) {
 /*
  * Get location metadata for the inputs of `ni'.
  */
-InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
+InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   InputInfoVec inputs;
   if (isAlwaysNop(ni)) return inputs;
 
@@ -709,7 +703,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     stackOff -= (ni.imm[0].u_FCA.hasUnpack() ? 1 : 0);  // unpack
     stackOff -= kNumActRecCells;  // ActRec is torn down as well
   }
-  if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
 
   if (flags & Stack1) {
     SKTRACE(1, sk, "getInputs: Stack1 %d\n", stackOff.offset);
@@ -785,7 +778,6 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
     }
   }
-  if (flags & AllLocals) ni.ignoreInnerType = true;
 
   if (flags & MKey) {
     auto mk = ni.imm[memberKeyImmIdx(ni.op())].u_KA;
@@ -844,7 +836,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNS:
   case Op::FCall:
   case Op::ClsCnsD:
-  case Op::FThrowOnRefMismatch:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
   case Op::NewStructDArray:
@@ -892,7 +883,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AddO:
   case Op::ClsRefGetC:
   case Op::ClsRefGetTS:
-  case Op::ClsRefGetL:
   case Op::AKExists:
   case Op::AddElemC:
   case Op::AddNewElemC:
@@ -944,7 +934,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ContGetReturn:
   case Op::CreateCl:
   case Op::DefCns:
-  case Op::DefFunc:
   case Op::Dir:
   case Op::Div:
   case Op::Double:
@@ -960,6 +949,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncD:
   case Op::FPushFuncU:
   case Op::FPushObjMethodD:
+  case Op::FuncNumArgs:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:
@@ -997,7 +987,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewDArray:
   case Op::NewObj:
   case Op::NewObjD:
-  case Op::NewObjI:
   case Op::NewObjS:
   case Op::Not:
   case Op::Null:
@@ -1008,6 +997,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PopC:
   case Op::PopV:
   case Op::PopU:
+  case Op::PopU2:
   case Op::PopL:
   case Op::Print:
   case Op::PushL:
@@ -1127,7 +1117,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_SLA(n)     ni.immVec
 #define IMM_ILA(n)     ni.immIters
 #define IMM_I32LA(n)   ni.immVec
-#define IMM_BLLA(n)   ni.immVec
 #define IMM_VSA(n)     ni.immVec
 #define IMM_IVA(n)     ni.imm[n].u_IVA
 #define IMM_I64A(n)    ni.imm[n].u_I64A
@@ -1171,7 +1160,6 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_SLA
 #undef IMM_ILA
 #undef IMM_I32LA
-#undef IMM_BLLA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

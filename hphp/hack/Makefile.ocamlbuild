@@ -77,22 +77,24 @@ MODULES=\
   server\
   socket\
   stubs\
+  	stubs/logging\
   third-party/avl\
   third-party/core\
   third-party/ppx_deriving\
   typing\
   typing/tast_check\
+  typing/nast_check\
   utils\
-  utils/collections\
-  utils/config_file\
-  utils/hashlib\
-  utils/lint\
-  utils/disk\
-  utils/process\
-  utils/parent\
-  utils/hg\
-  utils/hh_json\
-  utils/sys\
+  	utils/collections\
+  	utils/config_file\
+  	utils/hashlib\
+  	utils/lint\
+  	utils/disk\
+  	utils/process\
+  	utils/parent\
+  	utils/hg\
+  	utils/hh_json\
+  	utils/sys\
   monitor\
   watchman\
   watchman_event_watcher\
@@ -181,6 +183,7 @@ clean:
 	$(OCAMLBUILD) -clean
 	find ./bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f src/utils/get_build_id.gen.c
+	rm -f src/options/buildOptions.ml
 
 build-hack: $(TARGETS)
 

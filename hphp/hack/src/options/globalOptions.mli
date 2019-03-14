@@ -8,10 +8,6 @@
  *)
 
 type t = {
- (* When we encounter an unknown class|function|constant name outside
-  * of strict mode, is that an error? *)
- tco_assume_php : bool;
-
  (**
   * Enforces array subtyping relationships.
   *
@@ -76,11 +72,11 @@ type t = {
  (* Flag to disable the backticks execution operator *)
  po_disallow_execution_operator : bool;
 
- (* Flag to disable PHP's define method *)
- po_disable_define : bool;
-
  (* Flag to disable PHP's non-top-level declarations *)
  po_disable_nontoplevel_declarations : bool;
+
+ (* Flag to disable PHP's static closures *)
+ po_disable_static_closures : bool;
 
  (* Flag to disable PHP's static local variables *)
  po_disable_static_local_variables : bool;
@@ -93,9 +89,6 @@ type t = {
 
  (* Flag to enable await-as-an-expression *)
  po_enable_await_as_an_expression : bool;
-
- (* The default parse mode when no mode is specified. *)
- po_default_mode : string;
 
  (** Print types of size bigger than 1000 after performing a type union. *)
  tco_log_inference_constraints : bool;
@@ -115,21 +108,6 @@ type t = {
   * Flag to disallow array literal expressions
   *)
  tco_disallow_array_literal: bool;
-
- (*
-  * Flag to interpret lambda parameters without hints as untyped, for non-strict files
-  *)
- tco_untyped_nonstrict_lambda_parameters: bool;
-
- (*
-  * Flag to disallow assignment by reference
-  *)
- tco_disallow_assign_by_ref: bool;
-
- (*
-  * Flag to disallow binding array cells by reference as function arguments
-  *)
- tco_disallow_array_cell_pass_by_ref: bool;
 
  (*
   * Flag to enable logging of statistics regarding use of language features.
@@ -198,8 +176,20 @@ type t = {
   *)
  tco_disallow_invalid_arraykey : bool;
 
+ (* Turn off type refinement via the `instanceof` operator. *)
+ tco_disable_instanceof_refinement : bool;
+
+ (* Produces an error if a by-ref parameter is defined on a constructor. *)
+ tco_disallow_ref_param_on_constructor : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
+
+ (*
+  * Regular expression controlling which HH_FIXMEs are to be ignored by the
+  * parser.
+  *)
+ ignored_fixme_regex : string option;
 
  (* Initial hh_log_level settings *)
  log_levels : int SMap.t;
@@ -213,24 +203,30 @@ type t = {
  (* Flag to make UNSAFE_EXPR comments be just comments. *)
  po_disable_unsafe_expr : bool;
 
+(* Flag to make // UNSAFE comments be just comments. *)
+ po_disable_unsafe_block : bool;
+
  (* Flag to typecheck xhp code *)
  tco_typecheck_xhp_cvars : bool;
 
+ (* Flag to ignore the string in vec<string>[...] *)
+ tco_ignore_collection_expr_type_arguments : bool;
+
+ (* Flag to make usage of unsafe construct an error *)
+ tco_disallow_unsafe_construct : bool;
 } [@@deriving show]
 
 val make :
-  ?tco_assume_php: bool ->
   ?tco_safe_array: bool ->
   ?tco_safe_vector_array: bool ->
   ?po_deregister_php_stdlib: bool ->
   ?po_disallow_execution_operator: bool ->
-  ?po_disable_define: bool ->
   ?po_disable_nontoplevel_declarations: bool ->
+  ?po_disable_static_closures: bool ->
   ?po_disable_static_local_variables: bool ->
   ?po_allow_goto: bool ->
   ?po_enable_concurrent: bool ->
   ?po_enable_await_as_an_expression: bool ->
-  ?po_default_mode: string ->
   ?tco_log_inference_constraints : bool ->
   ?tco_experimental_features: SSet.t ->
   ?tco_migration_flags: SSet.t ->
@@ -240,9 +236,6 @@ val make :
   ?tco_disallow_ambiguous_lambda: bool ->
   ?tco_disallow_array_typehint: bool ->
   ?tco_disallow_array_literal: bool ->
-  ?tco_untyped_nonstrict_lambda_parameters: bool ->
-  ?tco_disallow_assign_by_ref: bool ->
-  ?tco_disallow_array_cell_pass_by_ref: bool ->
   ?tco_language_feature_logging: bool ->
   ?tco_unsafe_rx: bool ->
   ?tco_disallow_implicit_returns_in_non_void_functions: bool ->
@@ -254,16 +247,21 @@ val make :
   ?tco_new_inference_no_eager_solve: bool ->
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
+  ?tco_disable_instanceof_refinement: bool ->
+  ?tco_disallow_ref_param_on_constructor: bool ->
   ?ignored_fixme_codes: ISet.t ->
+  ?ignored_fixme_regex: string ->
   ?log_levels: int SMap.t ->
   ?po_enable_stronger_await_binding: bool ->
   ?po_disable_lval_as_an_expression: bool ->
   ?po_disable_unsafe_expr: bool ->
+  ?po_disable_unsafe_block: bool ->
   ?tco_typecheck_xhp_cvars: bool ->
+  ?tco_ignore_collection_expr_type_arguments: bool ->
+  ?tco_disallow_unsafe_construct: bool ->
   unit ->
   t
 
-val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
@@ -273,21 +271,17 @@ val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool
-val po_disable_define : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
+val po_disable_static_closures : t -> bool
 val po_disable_static_local_variables : t -> bool
 val po_allow_goto : t -> bool
 val po_enable_concurrent : t -> bool
 val po_enable_await_as_an_expression : t -> bool
-val po_default_mode : t -> string
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
-val tco_untyped_nonstrict_lambda_parameters : t -> bool
-val tco_disallow_assign_by_ref : t -> bool
-val tco_disallow_array_cell_pass_by_ref : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
 val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
@@ -299,6 +293,8 @@ val tco_new_inference : t -> bool
 val tco_new_inference_no_eager_solve : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
+val tco_disable_instanceof_refinement : t -> bool
+val tco_disallow_ref_param_on_constructor : t -> bool
 val default : t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
@@ -313,21 +309,23 @@ val tco_experimental_coroutines: string
 val tco_experimental_disallow_static_memoized : string
 val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_no_trait_reuse : string
-val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_reified_generics : string
 val tco_experimental_type_param_shadowing : string
 val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_type_const_attributes : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
-val tco_experimental_null_type : string
 val tco_experimental_pocket_universes : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
+val ignored_fixme_regex : t -> string option
 val log_levels : t -> int SMap.t
 val po_enable_stronger_await_binding : t -> bool
 val po_disable_lval_as_an_expression : t -> bool
 val po_disable_unsafe_expr : t -> bool
+val po_disable_unsafe_block : t -> bool
 val setup_pocket_universes : t -> bool -> t
 val tco_typecheck_xhp_cvars : t -> bool
+val tco_ignore_collection_expr_type_arguments : t -> bool
+val tco_disallow_unsafe_construct : t -> bool

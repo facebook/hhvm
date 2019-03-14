@@ -2,7 +2,7 @@
 
 class A {}
 
-function foo($x) {
+function foo() {
   if ($x instanceof A) {
     $y = "asd";
   } else {

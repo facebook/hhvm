@@ -17,9 +17,9 @@ $values = array('abcdef', //Regex without delimiter
 $array = array(123, 'abc', 'test');
 foreach($values as $value) {
     print "\nArg value is $value\n";
-    var_dump(preg_grep($value, $array));
+    try { var_dump(preg_grep($value, $array)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 $value = new stdclass(); //Object
-var_dump(preg_grep($value, $array));
+try { var_dump(preg_grep($value, $array)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done"
 ?>

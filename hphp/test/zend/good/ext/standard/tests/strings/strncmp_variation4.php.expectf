@@ -36,31 +36,26 @@ int(0)
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 16 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 17 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 18 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 19 --
 
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 20 --
 int(0)
 -- Iteration 21 --
@@ -86,7 +81,6 @@ int(0)
 Warning: %s
 
 Warning: %s
-NULL
 -- Iteration 31 --
 int(0)
 *** Done ***

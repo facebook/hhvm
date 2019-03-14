@@ -3,11 +3,9 @@
 -- Testing ucwords() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing ucwords() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 string(10) "string_val"
 Done

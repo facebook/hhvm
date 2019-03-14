@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -25,4 +25,8 @@ async function gen(): Awaitable<A> {
   } else {
     return await gen2();
   }
+}
+
+function coin_flip(): bool {
+  return true;
 }

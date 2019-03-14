@@ -1,12 +1,12 @@
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
               : Chunks an array into size  large chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'size' argument 
+* Testing array_chunk() function with unexpected values for 'size' argument
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";
@@ -56,21 +56,15 @@ $values = array (
         // object data
 /*21*/  new stdclass(),
 
-        // undefined data
-/*22*/  @undefined_var,
-
-        // unset data
-/*23*/  @unset_var
-
 );
 
 // loop through each element of the array for size
 $count = 1;
 foreach($values as $value){
   echo "\n-- Iteration $count --\n";
-  var_dump( array_chunk($input, $value) );
-  var_dump( array_chunk($input, $value, true) );
-  var_dump( array_chunk($input, $value, false) );
+  try { var_dump( array_chunk($input, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( array_chunk($input, $value, true) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( array_chunk($input, $value, false) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 

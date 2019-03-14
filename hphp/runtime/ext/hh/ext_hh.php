@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
 
@@ -66,7 +66,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
@@ -75,7 +75,7 @@ function ffp_parse_string_native(string $program): string;
 function ffp_parse_string(string $program): array {
   $json = ffp_parse_string_native($program);
   // 2048 is MAX_JSON_DEPTH to avoid making a global constant
-  return json_decode($json, true, 2048);
+  return \json_decode($json, true, 2048);
 }
 
 /**
@@ -86,13 +86,13 @@ function ffp_parse_string(string $program): array {
  * Operates on a single class at a time. Clearing the cache for $cls::$func
  * does not clear the cache for $otherClass::$func, for any other class.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
 
 /**
  * Clear memoization data on object instance
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function clear_instance_memoization(object $obj) : bool;
 
 /**
@@ -150,6 +150,18 @@ namespace HH\rqtrace {
 type EventStats = shape('duration' => int, 'count' => int);
 
 /**
+ * Checks wither rqtrace is enabled for the current request.
+ */
+<<__Native>>
+function is_enabled(): bool;
+
+/**
+ * Forcibly enable rqtrace for the current request if it is not already enabled.
+ */
+<<__Native>>
+function force_enable(): void;
+
+/**
  * Return a map of event_name->EventStats for all events which occurred up to
  * the point that this function was called within the current request.
  */
@@ -176,5 +188,29 @@ function request_event_stats(string $event): mixed /* EventStats */;
  */
 <<__Native>>
 function process_event_stats(string $event): mixed /* EventStats */;
+
+}
+
+namespace HH\ReifiedGenerics {
+
+  /**
+   * Returns the type structure representation of the reified type
+   */
+  function getType<reify T>(): mixed {
+    return ${'0ReifiedGenerics'}[0];
+  }
+
+  /**
+   * Returns the name of the class represented by this reified type.
+   * If this type does not represent a class, throws an exception
+   */
+  function getClassname<reify T>(): classname<T> {
+    $clsname = idx(getType<T>(), 'classname', null);
+    if ($clsname is null) {
+      throw new \Exception('Trying to get the classname out of a reified type'.
+                           ' that does not represent a class');
+    }
+    return $clsname;
+  }
 
 }

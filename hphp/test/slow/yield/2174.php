@@ -8,7 +8,7 @@ class X {
     yield $x;
   }
   static function g($x) {
-    yield get_called_class();
+    yield static::class;
   }
 }
 class Y extends X {
@@ -30,7 +30,6 @@ $c = Y::g(32);
 var_dump($c->getOrigFuncName());
 var_dump($c->getCalledClass());
 $fcn = function ($x) {
-  static $q;
   yield $x;
 };
 $c = $fcn(32);

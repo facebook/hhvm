@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 interface IDisposable {
   public function __dispose();

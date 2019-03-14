@@ -13,11 +13,12 @@ class Repro {
     return $this->propStr;
   }
 
+  private static $reproStaticarr = array();
+
   final public function repro($user_id) {
-    static $staticArr = array();
     $key = $this->getPropStr() . (string)$this->propInt;
-    if (!(isset($staticArr[$key]))) {
-      $staticArr[$key] = array();
+    if (!(isset(self::$reproStaticarr[$key]))) {
+      self::$reproStaticarr[$key] = array();
     }
   }
 }

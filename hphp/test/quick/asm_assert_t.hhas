@@ -4,13 +4,13 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "Foo"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $x
   PopC
@@ -18,7 +18,7 @@
   NewObjD "Bar"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $y
   PopC
@@ -26,11 +26,11 @@
   FPushFuncD 2 "obj_type"
   CGetL $x
   CGetL $y
-  FCall <> 2 1 - "" ""
+  FCall <> 2 1 "" - "" ""
   PopC
 
   FPushFuncD 0 "obj_type2"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   Int 1
@@ -69,7 +69,7 @@
   NewObjD "Bar"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   AssertRATStk 0 InitNull
   AssertRATStk 1 Obj
   AssertRATStk 1 Obj=Bar
@@ -80,7 +80,7 @@
 
 .function obj_type2() {
   FPushFuncD 0 "make_bar"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   AssertRATStk 0 Obj
   AssertRATStk 0 Obj=Bar
   AssertRATL $x Uninit
@@ -101,14 +101,14 @@ stuff:
   NewObjD "Foo"
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
   CGetL $obj
   FPushObjMethodD 0 "returns_int" NullThrows
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   AssertRATStk 0 Int
   Int 0
   Add

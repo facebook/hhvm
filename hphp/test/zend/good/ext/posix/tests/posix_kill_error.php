@@ -13,11 +13,11 @@ echo "\n-- Testing posix_kill() function with more than expected no. of argument
 $pid = posix_getpid();
 $sig = 9;
 $extra_arg = 10;
-var_dump( posix_kill($pid, $sig, $extra_arg) );
+try { var_dump( posix_kill($pid, $sig, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing posix_kill() function with less than expected no. of arguments --\n";
 $pid = posix_getpid();
-var_dump( posix_kill($pid) );
+try { var_dump( posix_kill($pid) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing posix_kill() function with invalid signal --\n";
 $pid = posix_getpid();

@@ -163,15 +163,12 @@ string(0) ""
 -- Iteration 9 --
 
 Warning: %s
-NULL
 
 *** Testing strtoupper() with two different case strings ***
 strings are same, with Case Insensitive
 
 *** Testing error conditions ***
 Warning: %s
-NULL
 
 Warning: %s
-NULL
 *** Done ***

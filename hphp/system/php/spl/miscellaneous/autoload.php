@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 /**
  * This function is intended to be used as a default implementation for

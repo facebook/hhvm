@@ -1,9 +1,13 @@
 File "new.php", line 18, characters 3-16:
-  <expr#1> as T
+  T
+  where T as \I
 File "new.php", line 24, characters 3-16:
-  <expr#1> as T
+  T
+  where T as \C
 File "new.php", line 30, characters 3-16:
-  <expr#1> as Td
+  Td
+  where Td as \D<\I>
 File "new.php", line 47, characters 5-18:
-  <expr#1> as T
+  T
+  where T as \C
 No errors

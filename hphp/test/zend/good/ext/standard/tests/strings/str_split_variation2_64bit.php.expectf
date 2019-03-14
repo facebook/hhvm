@@ -28,23 +28,18 @@ bool(false)
 --Iteration 6 --
 
 Warning: %s
-NULL
 --Iteration 7 --
 
 Warning: %s
-NULL
 --Iteration 8 --
 
 Warning: %s
-NULL
 --Iteration 9 --
 
 Warning: %s
-NULL
 --Iteration 10 --
 
 Warning: %s
-NULL
 --Iteration 11 --
 
 Warning: %s
@@ -162,23 +157,18 @@ bool(false)
 --Iteration 17 --
 
 Warning: %s
-NULL
 --Iteration 18 --
 
 Warning: %s
-NULL
 --Iteration 19 --
 
 Warning: %s
-NULL
 --Iteration 20 --
 
 Warning: %s
-NULL
 --Iteration 21 --
 
 Warning: %s
-NULL
 --Iteration 22 --
 
 Warning: %s
@@ -190,5 +180,4 @@ bool(false)
 --Iteration 24 --
 
 Warning: %s
-NULL
 Done

@@ -3,12 +3,10 @@
 -- Testing date_parse() function with zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_parse() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing date_parse() function with unexpected characters in $date argument --
 array(13) {

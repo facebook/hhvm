@@ -1,0 +1,5 @@
+classMeth{
+    class(Bar)
+    function(g)
+}
+string(6) "Bar::g"

@@ -9,7 +9,7 @@ echo "*** Testing array_fill() : error conditions ***\n";
 
 // Zero arguments
 echo "-- Testing array_fill() function with Zero arguments --\n";
-var_dump( array_fill() );
+try { var_dump( array_fill() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // More than  expected number of arguments
 echo "-- Testing array_fill() function with more than expected no. of arguments --\n";
@@ -17,13 +17,13 @@ $start_key = 0;
 $num = 2;
 $val = 1;
 $extra_arg = 10;
-var_dump( array_fill($start_key,$num,$val, $extra_arg) );
+try { var_dump( array_fill($start_key,$num,$val, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Less than the expected number of arguments
 echo "-- Testing array_fill() function with less than expected no. of arguments --\n";
 $start_key = 0;
 $num = 2;
-var_dump( array_fill($start_key,$num) );
+try { var_dump( array_fill($start_key,$num) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //calling array_fill with negative values for 'num' parameter
 $num = -1;

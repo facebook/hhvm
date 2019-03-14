@@ -3,7 +3,7 @@
 namespace A;
 
 function invariant() {
-  var_dump('invariant');
+  \var_dump('invariant');
 }
 
 <<__EntryPoint>>

@@ -64,7 +64,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -91,7 +91,8 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  $res = iconv_mime_decode($header, $mode, $input);
+  $res = false;
+  try { $res = iconv_mime_decode($header, $mode, $input); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   if ($res !== false) {
   	 var_dump(bin2hex($res));
   }

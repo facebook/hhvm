@@ -1,3 +1,0 @@
-pick server: random element %d
-- connection: type: PRIMARY, socket: %d, ping: %d, hash: %s
-connection type: PRIMARY

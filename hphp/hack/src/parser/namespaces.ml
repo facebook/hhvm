@@ -360,21 +360,9 @@ module ElaborateDefs = struct
       })
     | Constant cst -> nsenv, [map_def nsenv @@ Constant {cst with
         cst_name =
-          if cst.cst_kind = Ast.Cst_define
-          then
-            (* names in define are interpreted as-is:
-            prefix it with "\\" to mark it as elaborated. This prefix will be
-            stripped during emit phase.
-            In program this name of the constant can be accessed either
-            via identifier name or through 'constant' PHP function.
-            In the former case in Naming phase reference will be mangled in
-            the same way so name will be successfully resolved.*)
-            let (pos, n) = cst.cst_name in
-            pos, "\\" ^ n
-          else
-            (let name, _, _ =
-              elaborate_defined_id nsenv ElaborateConst cst.cst_name
-            in name);
+          (let name, _, _ =
+            elaborate_defined_id nsenv ElaborateConst cst.cst_name
+          in name);
         cst_namespace = nsenv;
       }]
     | FileAttributes fa ->

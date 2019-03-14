@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
   function test () {
     new least_upper_bound<int, int, int>();
@@ -10,3 +10,5 @@
     new least_upper_bound<float, int, num>();
     new least_upper_bound<float, num, int>();
   }
+
+class least_upper_bound<Ta, Tb> {}

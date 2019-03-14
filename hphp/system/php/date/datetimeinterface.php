@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 /* Type hints are missing as any classes that implements this interface must
  * specify types, meaning that no classes written in PHP can implement this

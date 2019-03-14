@@ -12,5 +12,5 @@ namespace {
   use const foo\bar\baz;
   use const other\baz;
 
-  var_dump(baz);
+  \var_dump(baz);
 }

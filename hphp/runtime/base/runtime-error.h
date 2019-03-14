@@ -110,6 +110,11 @@ void raise_message(ErrorMode mode, const char *fmt, va_list ap);
 void raise_message(ErrorMode mode,
   ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
 void raise_message(ErrorMode mode, bool skipTop, const std::string& msg);
+std::string param_type_error_message(
+    const char* func_name,
+    int param_num,
+    DataType expected_type,
+    DataType actual_type);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,
@@ -179,8 +184,6 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData*);
 
 void raise_hack_arr_compat_array_producing_func_notice(const std::string& name);
 
-void raise_hack_arr_compat_collection_coerce_notice(const std::string& name);
-
 void raise_hackarr_compat_type_hint_param_notice(const Func* func,
                                                  const ArrayData* ad,
                                                  AnnotType at,
@@ -234,9 +237,23 @@ HAC_CHECK_OPTS
 void raise_undefined_const_fallback_notice(const StringData* name,
                                            const StringData* fallback);
 
+void raise_undefined_function_fallback_notice(const StringData* name,
+                                              const StringData* fallback);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void raise_str_to_class_notice(const StringData* name);
+
+/*
+ * class_meth compact notices.
+ */
+void raise_clsmeth_compat_type_hint(
+  const Func* func, const std::string& displayName, folly::Optional<int> param);
+void raise_clsmeth_compat_type_hint_outparam_notice(
+  const Func* func, const std::string& displayName, int paramNum);
+void raise_clsmeth_compat_type_hint_property_notice(
+  const Class* declCls, const StringData* propName,
+  const std::string& displayName, bool isStatic);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -195,7 +195,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` built from the keys of the specified container.
    */
   <<__Rx>>
-  public static function fromKeysOf<Tk>(
+  public static function fromKeysOf<Tk as arraykey>(
     ?KeyedContainer<Tk, mixed> $container,
   ): ImmVector<Tk>;
 
@@ -288,7 +288,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
-  public function toSet(): Set<Tv>;
+  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable Set (`ImmSet`) with the values of the current
@@ -297,7 +297,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmSet` with the current values of the current `ImmVector`.
    */
   <<__Rx, __MaybeMutable>>
-  public function toImmSet(): ImmSet<Tv>;
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
   /**
    * Returns the current `ImmVector`.

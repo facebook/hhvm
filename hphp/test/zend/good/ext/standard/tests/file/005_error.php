@@ -27,29 +27,29 @@ var_dump( filectime("/no/such/file/or/dir") );
 var_dump( touch("/no/such/file/or/dir", 10) );
 
 /* Only one invalid argument */
-var_dump( fileatime(__FILE__, "string") );
-var_dump( filemtime(__FILE__, 100) );
-var_dump( filectime(__FILE__, TRUE) );
-var_dump( touch(__FILE__, 10, 100, 123) );
+try { var_dump( fileatime(__FILE__, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filemtime(__FILE__, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filectime(__FILE__, TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( touch(__FILE__, 10, 100, 123) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing No.of arguments less than expected --";
-var_dump( fileatime() );
-var_dump( filemtime() );
-var_dump( filectime() );
-var_dump( touch() );
+try { var_dump( fileatime() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filemtime() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filectime() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( touch() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing No.of arguments greater than expected --";
 /* Both invalid arguments */
-var_dump( fileatime("/no/such/file/or/dir", "string") );
-var_dump( filemtime("/no/such/file/or/dir", 100) );
-var_dump( filectime("/no/such/file/or/dir", TRUE) );
-var_dump( touch("/no/such/file/or/dir", 10, 100, 123) );
+try { var_dump( fileatime("/no/such/file/or/dir", "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filemtime("/no/such/file/or/dir", 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filectime("/no/such/file/or/dir", TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( touch("/no/such/file/or/dir", 10, 100, 123) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Only one invalid argument */
-var_dump( fileatime(__FILE__, "string") );
-var_dump( filemtime(__FILE__, 100) );
-var_dump( filectime(__FILE__, TRUE) );
-var_dump( touch(__FILE__, 10, 100, 123) );
+try { var_dump( fileatime(__FILE__, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filemtime(__FILE__, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( filectime(__FILE__, TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( touch(__FILE__, 10, 100, 123) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
 ?>

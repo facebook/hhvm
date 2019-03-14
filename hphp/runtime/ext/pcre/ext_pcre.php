@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Perform a regular expression search and replace.
@@ -32,7 +32,7 @@ function preg_filter(mixed $pattern,
  */
 <<__Native>>
 function preg_grep(string $pattern,
-                   array $input,
+                   varray_or_darray $input,
                    int $flags = 0): mixed;
 
 /**

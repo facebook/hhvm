@@ -15,5 +15,5 @@ class TestClass implements TestInterface {
 function main_reflection_class_implements_interface() {
 $reflection = new \ReflectionClass('\Test\TestClass');
 
-var_dump($reflection->implementsInterface('\Test\TestInterface'));
+\var_dump($reflection->implementsInterface('\Test\TestInterface'));
 }

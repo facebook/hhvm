@@ -77,7 +77,7 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump( array_rand($input,$value) );  
+  try { var_dump( array_rand($input,$value) );   } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 };
 

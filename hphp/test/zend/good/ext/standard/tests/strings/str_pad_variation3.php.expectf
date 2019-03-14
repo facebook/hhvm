@@ -18,15 +18,12 @@ string(20) "Test string101234567"
 -- Iteration 9 --
 
 Warning: %s
-NULL
 -- Iteration 10 --
 
 Warning: %s
-NULL
 -- Iteration 11 --
 
 Warning: %s
-NULL
 -- Iteration 12 --
 string(20) "Test string111111111"
 -- Iteration 13 --
@@ -52,7 +49,6 @@ string(20) "Test stringsample ob"
 -- Iteration 19 --
 
 Warning: %s
-NULL
 -- Iteration 20 --
 
 Warning: %s

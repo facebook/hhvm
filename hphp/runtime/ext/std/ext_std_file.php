@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * fopen() binds a named resource, specified by filename, to a stream.
@@ -37,7 +37,7 @@ function popen(string $command, string $mode): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fclose(resource $handle): bool;
 
 /**
@@ -69,7 +69,7 @@ function pclose(mixed $handle): mixed;
  *   seeking past EOF is not considered an error.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
 
 /**
@@ -84,7 +84,7 @@ function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function rewind(resource $handle): bool;
 
 /**
@@ -99,7 +99,7 @@ function rewind(resource $handle): bool;
  *   occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function ftell(resource $handle): mixed;
 
 /**
@@ -113,7 +113,7 @@ function ftell(resource $handle): mixed;
  *   occurs (including socket timeout); otherwise returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function feof(resource $handle): bool;
 
 /**
@@ -127,7 +127,7 @@ function feof(resource $handle): bool;
  *   format of the array is described in detail on the stat() manual page.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fstat(resource $handle): mixed;
 
 /**
@@ -143,7 +143,7 @@ function fstat(resource $handle): mixed;
  * @return mixed - Returns the read string or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fread(resource $handle, int $length): mixed;
 
 /**
@@ -161,7 +161,7 @@ function fread(resource $handle, int $length): mixed;
  *   this function.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgetc(resource $handle): mixed;
 
 /**
@@ -183,7 +183,7 @@ function fgetc(resource $handle): mixed;
  *   file pointed to by handle.  If an error occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgets(resource $handle, int $length = 0): mixed;
 
 /**
@@ -202,7 +202,7 @@ function fgets(resource $handle, int $length = 0): mixed;
  *   error occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgetss(resource $handle,
                 int $length = 0,
                 string $allowable_tags = ""): mixed;
@@ -247,7 +247,7 @@ function fscanf(resource $handle, string $format, ...): mixed;
  *   through to the output.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fpassthru(resource $handle): mixed;
 
 /**
@@ -263,10 +263,10 @@ function fpassthru(resource $handle): mixed;
  *   error.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fwrite(resource $handle, string $data, int $length = 0): mixed;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fputs(resource $handle, string $data, int $length = 0): mixed;
 
 /**
@@ -308,7 +308,7 @@ function vfprintf(mixed $handle, mixed $format, mixed $args): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fflush(resource $handle): bool;
 
 /**
@@ -323,7 +323,7 @@ function fflush(resource $handle): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function ftruncate(resource $handle, int $size): bool;
 
 /**
@@ -1257,7 +1257,7 @@ function realpath(string $path): mixed;
  *   this function will return a string if not all elements are requested.
  *
  */
-<<__ParamCoerceModeNull, __Native>>
+<<__Native>>
 function pathinfo(string $path, int $opt = 15): mixed;
 
 /**
@@ -1368,7 +1368,7 @@ function getcwd(): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function chdir(string $directory): bool;
 
 /**

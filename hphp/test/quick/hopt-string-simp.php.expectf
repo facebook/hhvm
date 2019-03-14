@@ -9,13 +9,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(true)
-
-Warning: strlen() expects parameter 1 to be string, array given in %s on line 62
-NULL
-
-Warning: strlen() expects parameter 1 to be string, object given in %s on line 69
-NULL
+string(54) "strlen() expects parameter 1 to be string, array given"
+string(55) "strlen() expects parameter 1 to be string, object given"
 int(1)
-
-Warning: strlen() expects parameter 1 to be string, object given in %s on line 83
-NULL
+string(55) "strlen() expects parameter 1 to be string, object given"

@@ -15,7 +15,7 @@
  */
 
 <<__PHPStdLib, __Rx>>
-function array_key_exists<Tk, Tv>(mixed $key, <<__MaybeMutable>> ?KeyedContainer<Tk, Tv> $search): bool;
+function array_key_exists<Tk as arraykey, Tv>(mixed $key, <<__MaybeMutable>> ?KeyedContainer<Tk, Tv> $search): bool;
 
 <<__PHPStdLib, __Rx>>
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
@@ -27,22 +27,22 @@ function sort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
 function rsort<Tv>(Container<Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function asort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function asort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function arsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function arsort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function ksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function ksort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function krsort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
+function krsort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, int $sort_flags = SORT_REGULAR): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
 function usort<Tv>(Container<Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function uasort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
+function uasort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
 <<__PHPStdLib>>
-function uksort<Tk,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
+function uksort<Tk as arraykey,Tv>(KeyedContainer<Tk, Tv> &$arg, mixed $c): bool;
 
 /**
  * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.

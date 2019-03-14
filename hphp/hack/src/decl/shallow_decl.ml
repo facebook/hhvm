@@ -39,12 +39,12 @@ let class_const env c (h, name, e) =
           begin match Decl_utils.infer_const e with
             | Some ty -> ty, false
             | None ->
-              if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
+              if FileInfo.is_strict c.c_mode && c.c_kind <> Ast.Cenum
               then Errors.missing_typehint pos;
               (Reason.Rwitness pos, Tany), false
           end
         | None, None ->
-          if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
+          if FileInfo.is_strict c.c_mode then Errors.missing_typehint pos;
           let r = Reason.Rwitness pos in
           (r, Tany), true
     in
@@ -67,10 +67,15 @@ let typeconst env c tc =
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
       let constr = Option.map tc.c_tconst_constraint (Decl_hint.hint env) in
       let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
+      let enforceable =
+        match Attrs.find SN.UserAttributes.uaEnforceable tc.c_tconst_user_attributes with
+        | Some { ua_name = (pos, _); _ } -> pos, true
+        | None -> Pos.none, false in
       Some {
         stc_name = tc.c_tconst_name;
         stc_constraint = constr;
         stc_type = ty;
+        stc_enforceable = enforceable;
       }
 
 let prop env cv =
@@ -86,7 +91,7 @@ let prop env cv =
          hack to support existing code for now. *)
       (* Task #5815945: Get rid of this Hack *)
       let env =
-        if Decl_env.mode env = FileInfo.Mstrict
+        if FileInfo.is_strict (Decl_env.mode env)
         then { env with Decl_env.mode = FileInfo.Mpartial }
         else env
       in
@@ -119,7 +124,7 @@ and static_prop env c cv =
     SN.UserAttributes.uaSoftLateInit
     cv.cv_user_attributes in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
-  if cv.cv_expr = None && FileInfo.(c.c_mode = Mstrict || c.c_mode = Mpartial)
+  if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)
@@ -274,6 +279,22 @@ let enum_type hint e =
     te_base = hint e.e_base;
     te_constraint = Option.map e.e_constraint hint;
   }
+
+let add_condition_type acc ft =
+  match ft.ft_reactive with
+  | Reactive (Some (_, Tapply ((_, cls), [])))
+  | Shallow (Some (_, Tapply ((_, cls), [])))
+  | Local (Some (_, Tapply ((_, cls), [])))  -> SSet.add cls acc
+  | _ -> acc
+
+let add_condition_types sc acc =
+  let acc = List.fold sc.sc_methods ~init:acc
+    ~f:(fun acc sm -> add_condition_type acc sm.sm_type) in
+  let acc = List.fold sc.sc_static_methods ~init:acc
+    ~f:(fun acc sm -> add_condition_type acc sm.sm_type) in
+  let acc = List.fold sc.sc_method_redeclarations ~init:acc
+    ~f:(fun acc smr -> add_condition_type acc smr.smr_type) in
+  acc
 
 let class_ env c =
   let hint = Decl_hint.hint env in

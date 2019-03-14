@@ -3,5 +3,4 @@
 -- Testing get_parent_class() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

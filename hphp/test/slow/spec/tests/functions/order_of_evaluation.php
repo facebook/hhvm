@@ -31,7 +31,7 @@ function h($p1, $p2, $p3, $p4, $p5)
 
 // Create a table of function designators
 
-$funcTable = array(f, g, h);    // list of 3 functions
+$funcTable = array('f', 'g', 'h');    // list of 3 functions
 var_dump($funcTable);           // array of 3 strings
 var_dump($funcTable[0]);        // a string
 

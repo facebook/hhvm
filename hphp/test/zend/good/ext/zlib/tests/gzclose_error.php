@@ -6,8 +6,8 @@ $extra_arg = 'nothing';
 
 
 
-var_dump(gzclose( $h, $extra_arg ) );
-var_dump(gzclose());
+try { var_dump(gzclose( $h, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzclose()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 gzclose($h);
 

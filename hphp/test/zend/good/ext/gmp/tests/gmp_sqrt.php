@@ -13,8 +13,8 @@ var_dump(gmp_strval(gmp_sqrt($n)));
 $n = gmp_init(777);
 var_dump(gmp_strval(gmp_sqrt($n)));
 
-var_dump(gmp_sqrt($n, 1));
-var_dump(gmp_sqrt());
+try { var_dump(gmp_sqrt($n, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_sqrt()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_sqrt(array()));
 
 echo "Done\n";

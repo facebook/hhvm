@@ -16,7 +16,7 @@
                       (AFkvalue ((([13:24-28], string), (String "k2")),
                          (([13:32-49], _),
                           (Call (Cnormal,
-                             (([13:32-47], _),
+                             (([13:32-47], (function(): _)),
                               (Id ([13:32-47], "\\my_php_function"))),
                              [], [], [])))
                          ))
@@ -32,7 +32,7 @@
                        (AFvalue
                           (([14:17-34], _),
                            (Call (Cnormal,
-                              (([14:17-32], _),
+                              (([14:17-32], (function(): _)),
                                (Id ([14:17-32], "\\my_php_function"))),
                               [], [], []))))
                        ]))
@@ -43,5 +43,14 @@
       f_external = false; f_namespace = <opaque>;
       f_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
-      f_static = false })
+      f_static = false });
+  (Fun
+     { f_span = [17:1-30]; f_annotation = (); f_mode = <opaque>;
+       f_ret = None; f_name = ([17:10-25], "\\my_php_function");
+       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params = [];
+       f_body = { fb_ast = [Noop]; fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
   ]

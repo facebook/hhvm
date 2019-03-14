@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -43,3 +43,6 @@ class TestInit {
     }
   }
 }
+
+class NonTerminalException extends Exception {}
+class SomeException extends Exception {}

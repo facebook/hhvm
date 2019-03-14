@@ -109,7 +109,7 @@ VS($decrypted, $CC);
 //////////////////////////////////////////////////////////////////////
 
 VS(mcrypt_get_block_size("tripledes", "ecb"), 8);
-mcrypt_get_block_size("tripledes");
+try { mcrypt_get_block_size("tripledes"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 VS(mcrypt_get_cipher_name(MCRYPT_TRIPLEDES), "3DES");
 VS(mcrypt_get_iv_size(MCRYPT_CAST_256, MCRYPT_MODE_CFB), 16);
 VS(mcrypt_get_iv_size("des", "ecb"), 8);

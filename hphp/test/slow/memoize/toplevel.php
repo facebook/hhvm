@@ -1,6 +1,10 @@
 <?hh
+
+abstract final class TestTopLevelStatics {
+  public static $i = 100;
+}
 <<__Memoize>>
-function test_top_level() { static $i = 100; return $i++; }
+function test_top_level() { return TestTopLevelStatics::$i++; }
 
 
 <<__EntryPoint>>

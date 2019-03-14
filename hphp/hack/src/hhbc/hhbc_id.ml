@@ -135,7 +135,6 @@ module Function = struct
     "die";
     "func_get_args";
     "func_get_arg";
-    "func_num_args"
   ]
 
   let has_hh_prefix s =

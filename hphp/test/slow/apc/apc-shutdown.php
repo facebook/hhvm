@@ -1,9 +1,9 @@
 <?hh
 
 function foo() {
-  global $z;
+
   apc_store('x', array(Vector {1, 2, 3}));
-  $z = apc_fetch('x');
+  ApcApcShutdown::$z = apc_fetch('x');
   apc_store('x', null);
 }
 
@@ -12,4 +12,8 @@ function foo() {
 function main_apc_shutdown() {
 foo();
 echo "ok\n";
+}
+
+abstract final class ApcApcShutdown {
+  public static $z;
 }

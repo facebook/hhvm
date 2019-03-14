@@ -1,6 +1,6 @@
 <?hh
 
-function busy() { return __hhvm_intrinsics\launder_value(42); }
+function busy() { sleep(0); }
 
 
 <<__EntryPoint>>

@@ -28,7 +28,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_http_response_header("http_response_header");
 const StaticString s_http("http");
 const StaticString s_tcp_socket("tcp_socket");
 
@@ -124,25 +123,6 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   m_responseHeaders.reset();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     m_responseHeaders.append(responseHeaders[i]);
-  }
-  VMRegAnchor vra;
-  ActRec* fp = vmfp();
-  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
-  auto id = fp->func()->lookupVarId(s_http_response_header.get());
-
-  if (!RuntimeOption::DisableReservedVariables) {
-    if (id != kInvalidId) {
-      auto tvTo = frame_local(fp, id);
-      Variant varFrom(m_responseHeaders);
-      const auto tvFrom(varFrom.asTypedValue());
-      if (isRefType(tvTo->m_type)) {
-        tvTo = tvTo->m_data.pref->cell();
-      }
-      tvDup(*tvFrom, *tvTo);
-    } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-      fp->getVarEnv()->set(s_http_response_header.get(),
-                           Variant(m_responseHeaders).asTypedValue());
-    }
   }
 
   /*

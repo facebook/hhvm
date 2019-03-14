@@ -78,7 +78,7 @@ $needle = "heredoc 0 1 2 -2 10.5 -10.5 10.5e10 10.6E-10 .5 array true false obje
 $counter = 1;
 for($index = 0; $index < count($haystacks); $index ++) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( stripos($haystacks[$index], $needle) );
+  try { var_dump( stripos($haystacks[$index], $needle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

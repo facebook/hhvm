@@ -9,13 +9,13 @@ open ServerEnv
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh
+let foo_contents = "<?hh // partial
     class Foo {
         public static $x;
     }
 "
 
-let qux_contents = "<?hh
+let qux_contents = "<?hh // partial
 function h(): string {
     return 'a';
 }
@@ -28,7 +28,7 @@ function setUpClass() {
 }
 "
 
-let bar_contents = "<?hh
+let bar_contents = "<?hh // partial
       class Bar extends Foo {}
 
       function main(Bar $a) {

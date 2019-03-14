@@ -1,0 +1,6 @@
+File "explicit_type_collection_mismatch1.php", line 4, characters 8-22:
+Some elements in this Vector are incompatible (Typing[4110])
+File "explicit_type_collection_mismatch1.php", line 4, characters 12-14:
+This is an int
+File "explicit_type_collection_mismatch1.php", line 4, characters 17-21:
+It is incompatible with a string

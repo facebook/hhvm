@@ -10,7 +10,7 @@ Web request /test1.php started.
 next
 Waiting for server response
 Break on line 2 of %s/test1.php
-   1 <?php
+   1 <?hh
    2*include 'break1.php';
    3 
 

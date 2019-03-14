@@ -3,14 +3,14 @@ open ServerEnv
 
 module Test = Integration_test_base
 
-let init_base_content = "<?hh
+let init_base_content = "<?hh // partial
 enum DynamicTemplateField : string {
   BRAND = 'brand';
   DESCRIPTION = 'description';
   // NAME = 'name';
 }"
 
-let err_base_content = "<?hh
+let err_base_content = "<?hh // partial
 enum DynamicTemplateField : string {
   BRAND = 'brand';
   DESCRIPTION = 'description';

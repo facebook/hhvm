@@ -76,7 +76,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(mt_rand(-1 * mt_getrandmax(), $input));
+	try { var_dump(mt_rand(-1 * mt_getrandmax(), $input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	$iterator++;
 };
 fclose($fp);

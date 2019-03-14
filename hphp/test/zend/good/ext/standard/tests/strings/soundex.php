@@ -2,7 +2,7 @@
 
 var_dump(soundex(""));
 var_dump(soundex(-1));
-var_dump(soundex(array()));
+try { var_dump(soundex(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $array = array(
 "From",

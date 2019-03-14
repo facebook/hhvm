@@ -2,14 +2,14 @@
 
 class A {
   public static function sgen() {
-    $class = get_called_class();
+    $class = static::class;
     yield $class;
   }
   public static function sfoo() {
     return self::gen();
   }
   public function gen() {
-    $class = get_called_class();
+    $class = static::class;
     yield $class;
   }
   public function foo() {

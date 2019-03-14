@@ -1,1 +1,2 @@
 -vEval.HackArrCompatNotices=true -vEval.HackArrCompatCheckCompare=true
+-vEval.EnablePHP=1

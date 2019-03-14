@@ -2,8 +2,8 @@
 
 class A {
   function good($arg) {
-    global $method;
-    $method = 'bad';
+
+    ExtPregHackarrdvarrsPregECrazy::$method = 'bad';
     var_dump('good');
   }
   function bad($arg) {
@@ -11,7 +11,11 @@ class A {
   }
 }
 
-$method = 'good';
-preg_replace_callback('/foo/', array('A', $method), 'foo foo');
-$method = 'good';
-preg_replace_callback('/foo/', array('A', &$method), 'foo foo');
+ExtPregHackarrdvarrsPregECrazy::$method = 'good';
+preg_replace_callback('/foo/', array('A', ExtPregHackarrdvarrsPregECrazy::$method), 'foo foo');
+ExtPregHackarrdvarrsPregECrazy::$method = 'good';
+preg_replace_callback('/foo/', array('A', &ExtPregHackarrdvarrsPregECrazy::$method), 'foo foo');
+
+abstract final class ExtPregHackarrdvarrsPregECrazy {
+  public static $method;
+}

@@ -4,9 +4,6 @@
  * my doc comment
  */
 function foo () {
-	static $c;
-	static $a = 1;
-	static $b = "hello";
 	$d = 5;
 }
 

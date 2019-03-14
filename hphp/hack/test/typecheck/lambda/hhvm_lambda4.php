@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function function_scope() {
   // Shouldn't try to capture $k

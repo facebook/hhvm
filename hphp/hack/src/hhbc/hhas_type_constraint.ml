@@ -14,6 +14,7 @@ type type_constraint_flag =
   | TypeVar
   | Soft
   | TypeConstant
+  | DisplayNullable
 
 let string_of_flag f =
   match f with
@@ -23,6 +24,7 @@ let string_of_flag f =
   | TypeVar -> "type_var"
   | Soft -> "soft"
   | TypeConstant -> "type_constant"
+  | DisplayNullable -> "display_nullable"
 
 (* A type constraint is just a name and flags *)
 type t = {

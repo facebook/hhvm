@@ -13,11 +13,11 @@ echo "\n-- Testing xml_parser_get_option() function with more than expected no. 
 
 $option = 10;
 $extra_arg = 10;
-var_dump( xml_parser_get_option(null, $option, $extra_arg) );
+try { var_dump( xml_parser_get_option(null, $option, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing xml_parser_get_option with one less than the expected number of arguments
 echo "\n-- Testing xml_parser_get_option() function with less than expected no. of arguments --\n";
 
-var_dump( xml_parser_get_option(null) );
+try { var_dump( xml_parser_get_option(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
 ?>

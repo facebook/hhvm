@@ -1,7 +1,12 @@
 <?hh
 
+abstract final class FooStatics {
+  public static $x = false;
+}
+
 async function foo() {
-  static $x = false; $x = !$x; return $x;
+  FooStatics::$x = !FooStatics::$x;
+  return FooStatics::$x;
 }
 
 class X {

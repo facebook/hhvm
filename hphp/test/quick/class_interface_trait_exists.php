@@ -2,13 +2,15 @@
 
 function __autoload($n) {
   var_dump($n);
-  class fooo {}
+  include 'class_interface_trait_exists1.inc';
 }
 
 trait tttt {}
 class cccc {}
 interface iiii {}
-if (0) { class zzzz {} interface zzzz {} }
+if (0) {
+  include 'class_interface_trait_exists2.inc';
+}
 function main() {
   var_dump(class_exists('fooo', false));
   var_dump(class_exists('fooo'));

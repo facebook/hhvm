@@ -15,7 +15,7 @@
 
     $msg = "Ping!";
     $len = strlen($msg);
-    $bytes_sent = socket_sendto($socket, $msg, $len, 0); // cause warning
+    try { $bytes_sent = socket_sendto($socket, $msg, $len, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // cause warning
     $bytes_sent = socket_sendto($socket, $msg, $len, 0, $address);
     if ($bytes_sent == -1) {
 		@unlink($address);

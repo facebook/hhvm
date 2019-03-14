@@ -120,6 +120,19 @@ inline bool opcodeBreaksBB(const Op op, bool inlining) {
   return opcodeControlFlowInfo(op, inlining) == ControlFlowInfo::BreaksBB;
 }
 
+inline bool opcodeIgnoresInnerType(const Op op) {
+  switch (op) {
+    case Op::BindL:
+    case Op::PopV:
+    case Op::RetC:
+    case Op::RetCSuspended:
+    case Op::RetM:
+      return true;
+    default:
+      return false;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Input and output information.
 

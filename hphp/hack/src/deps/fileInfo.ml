@@ -32,13 +32,18 @@ type mode =
   | Mexperimental (* Strict mode + experimental features *)
 [@@deriving show]
 
-let rec parse_mode ~default mode =
-  match mode with
-  | "strict" -> Some Mstrict
+let parse_mode = function
+  | "strict" | "" -> Some Mstrict
   | "partial" -> Some Mpartial
   | "experimental" -> Some Mexperimental
-  | "" -> parse_mode ~default:"error" default
   | _ -> None
+
+let is_strict = function
+  | Mstrict
+  | Mexperimental -> true
+  | Mphp
+  | Mdecl
+  | Mpartial -> false
 
 let string_of_mode = function
   | Mphp          -> "php"

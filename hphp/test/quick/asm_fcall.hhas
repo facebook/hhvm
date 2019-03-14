@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   Null
   RetC
@@ -14,14 +14,14 @@
   CGetL $who
   FPushFunc 1
   CGetL $arg
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
 
   SetL $ret
   PopC
 
   CGetL $ret
   FPushFunc 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   True
@@ -58,7 +58,7 @@
   FPushFuncD 2 "caller"
   String "a"
   String "b"
-  FCall <> 2 1 - "" ""
+  FCall <> 2 1 "" - "" ""
   PopC
 
   String "strval"
@@ -66,7 +66,7 @@
   PopC
   FPushFuncD 1 "byref"
   VGetL $funk
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   CGetL $funk
   Print

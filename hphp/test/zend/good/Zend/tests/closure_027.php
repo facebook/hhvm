@@ -10,7 +10,7 @@ test(function() { return new stdclass; });
 test(function() { });
 
 $a = function($x) use ($y) {};
-test($a);
+try { test($a); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 test(new stdclass);
 

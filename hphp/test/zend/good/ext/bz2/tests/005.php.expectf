@@ -1,6 +1,4 @@
-
 Warning: %s
-NULL
 string(%d) "BZ%a"
 int(-2)
 int(-2)
@@ -8,10 +6,8 @@ int(-2)
 int(-2)
 
 Warning: %s
-bool(false)
 
 Warning: %s
-bool(false)
 int(-5)
 int(-5)
 int(-5)

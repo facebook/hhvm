@@ -4,11 +4,11 @@
 
 .main {
   FPushFuncD 0 "init_test"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   FPushFuncD 0 "uninit_test"
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
 
   Int 1
@@ -65,7 +65,8 @@
 .function do_test($who) {
   .numclsrefslots 1;
 
-  ClsRefGetL $who 0
+  CGetL $who
+  ClsRefGetC 0
   ClsCns "BAR" 0
   String "\n"
   Concat
@@ -73,18 +74,20 @@
   PopC
 
   String "foo"
-  ClsRefGetL $who 0
+  CGetL $who
+  ClsRefGetC 0
   CGetS 0
   String "\n"
   Concat
   Print
   PopC
 
-  ClsRefGetL $who 0
+  CGetL $who
+  ClsRefGetC 0
   NewObj 0 NoGenerics
   Dup
   FPushCtor 0
-  FCall <> 0 1 - "" ""
+  FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
@@ -104,13 +107,13 @@
 .function init_test {
   FPushFuncD 1 "do_test"
     String "Init"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   RetC
 }
 
 .function uninit_test {
   FPushFuncD 1 "do_test"
     String "Uninit"
-  FCall <> 1 1 - "" ""
+  FCall <> 1 1 "" - "" ""
   RetC
 }

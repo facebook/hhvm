@@ -6,5 +6,5 @@
     naming
     parser_heap
     parser_options
-    procs_multi_worker
+    procs_procs
     typing_deps))

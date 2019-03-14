@@ -3,5 +3,4 @@
 -- Testing get_declared_traits() function with one argument --
 
 Warning: %s
-NULL
 Done

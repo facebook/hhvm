@@ -17,7 +17,7 @@ $variation_array = array(
 
 
 foreach ( $variation_array as $var ) {
-  var_dump(readgzfile( $filename, $var  ) );
+  try { var_dump(readgzfile( $filename, $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 ?>
 ===DONE===

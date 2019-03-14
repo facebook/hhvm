@@ -51,11 +51,13 @@ print  strlen($utf8) . "\n";
 echo "== WRONG PARAMETERS ==\n";
 // Array
 // Note: PHP Warning, strlen() expects parameter 1 to be string, array given
-$r = strlen($t_ary);
+$r = null;
+try { $r = strlen($t_ary); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo $r."\n";
 // Object
 // Note: PHP Warning, strlen() expects parameter 1 to be string, object given
-$r = strlen($t_obj);
+$r = null;
+try { $r = strlen($t_obj); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo $r."\n";
 // Wrong encoding
 mb_internal_encoding('EUC-JP');

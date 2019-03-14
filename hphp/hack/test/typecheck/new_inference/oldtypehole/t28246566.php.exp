@@ -6,3 +6,5 @@ Invalid return type (Typing[4110])
   Considering that this type argument is invariant with respect to Vector
   File "t28246566.php", line 6, characters 20-27:
   It is incompatible with an array key (int/string)
+  File "t28246566.php", line 6, characters 20-27:
+  Considering that this type argument is invariant with respect to Vector

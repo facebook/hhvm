@@ -3,10 +3,8 @@
 -- Testing mb_decode_mimeheader() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing mb_decode_mimeheader() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

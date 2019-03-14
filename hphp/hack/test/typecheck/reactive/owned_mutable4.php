@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // OK
 <<__Rx>>

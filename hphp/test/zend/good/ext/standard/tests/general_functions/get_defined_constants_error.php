@@ -8,7 +8,7 @@ echo "*** Testing get_defined_constants() : error conditions ***\n";
 
 echo "\n-- Testing get_defined_constants() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( get_defined_constants(true, $extra_arg) );
+try { var_dump( get_defined_constants(true, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===DONE===

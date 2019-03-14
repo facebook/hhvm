@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Rx>>
 async function toasync(int $a): Awaitable<int> {

@@ -1,4 +1,5 @@
 (4,24)-(5,1) A right brace ('}') is expected here.
 (16,24)-(17,1) A right brace ('}') is expected here.
 (23,24)-(24,1) A right brace ('}') is expected here.
+(36,4)-(37,1) Inline function definitions are not supported in Hack
 (37,2)-(38,1) A right brace ('}') is expected here.

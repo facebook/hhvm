@@ -1,11 +1,14 @@
 <?php
 
+abstract final class AlternatorStatics {
+  public static $i = 0;
+}
+
 function alternator() {
-  static $i = 0;
   mt_rand();
   mt_rand();
   mt_rand();
-  return ($i++ % 2) == 0;
+  return (AlternatorStatics::$i++ % 2) == 0;
 }
 function foo($x, $k) {
   foreach ($x as $j) {

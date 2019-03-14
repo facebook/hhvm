@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * bcscale() - http://php.net/function.bcscale

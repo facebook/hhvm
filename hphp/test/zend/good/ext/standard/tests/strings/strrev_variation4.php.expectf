@@ -30,27 +30,22 @@ string(3) "5.0"
 -- Iterator 10 --
 
 Warning: %s
-NULL
 
 -- Iterator 11 --
 
 Warning: %s
-NULL
 
 -- Iterator 12 --
 
 Warning: %s
-NULL
 
 -- Iterator 13 --
 
 Warning: %s
-NULL
 
 -- Iterator 14 --
 
 Warning: %s
-NULL
 
 -- Iterator 15 --
 string(0) ""
@@ -82,7 +77,6 @@ string(6) "tcejbo"
 -- Iterator 24 --
 
 Warning: %s
-NULL
 
 -- Iterator 25 --
 string(0) ""

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * This class represents iterator objects throughout the intl extension

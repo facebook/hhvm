@@ -62,6 +62,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       ~is_native
       ~is_async:function_is_async
       ~is_rx_body
+      ~debugger_modify_program:false
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~default_dropthrough:None

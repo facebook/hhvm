@@ -8,9 +8,9 @@ $uid = '123';
 
 $extra_arg = '12312';
 
-var_dump(posix_setuid( $uid, $extra_arg ) );
+try { var_dump(posix_setuid( $uid, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-var_dump(posix_setuid(  ) );
+try { var_dump(posix_setuid(  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 ?>

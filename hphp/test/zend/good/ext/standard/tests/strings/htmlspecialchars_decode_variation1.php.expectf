@@ -20,23 +20,18 @@ string(3) "0.5"
 -- Iterator 10 --
 
 Warning: %s
-NULL
 -- Iterator 11 --
 
 Warning: %s
-NULL
 -- Iterator 12 --
 
 Warning: %s
-NULL
 -- Iterator 13 --
 
 Warning: %s
-NULL
 -- Iterator 14 --
 
 Warning: %s
-NULL
 -- Iterator 15 --
 string(0) ""
 -- Iterator 16 --
@@ -62,5 +57,4 @@ string(0) ""
 -- Iterator 26 --
 
 Warning: %s
-NULL
 ===DONE===

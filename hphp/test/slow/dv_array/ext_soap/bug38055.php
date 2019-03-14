@@ -1,9 +1,9 @@
 <?hh
 
 function Test($param) {
-  global $g1, $g2;
-  $g1 = $param->boolA;
-  $g2 = $param->boolB;
+
+  DvArrayExtSoapBug38055::$g1 = $param->boolA;
+  DvArrayExtSoapBug38055::$g2 = $param->boolB;
   return 1;
 }
 
@@ -29,5 +29,10 @@ var_dump($client->__gettypes());
 $boolA = 1;
 $boolB = '1';
 $res = $client->Test(darray['boolA'=>$boolA, 'boolB'=>$boolB]);
-var_dump($g1);
-var_dump($g2);
+var_dump(DvArrayExtSoapBug38055::$g1);
+var_dump(DvArrayExtSoapBug38055::$g2);
+
+abstract final class DvArrayExtSoapBug38055 {
+  public static $g1;
+  public static $g2;
+}

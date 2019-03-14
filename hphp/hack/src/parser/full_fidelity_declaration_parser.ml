@@ -650,6 +650,9 @@ module WithExpressionAndStatementAndTypeParser
     // XHP children declaration
     children ... ;
 
+    // Pocket Universe Enumeration
+    final? enum id { ... (pocket-field ') * }
+
   *)
     match peek_token_kind parser with
     | Children -> parse_xhp_children_declaration parser
@@ -688,9 +691,17 @@ module WithExpressionAndStatementAndTypeParser
       else
         let (parser, missing) = Make.missing parser (pos parser) in
         parse_methodish_or_property parser missing
+    | Enum -> parse_class_enum parser
+    | Final -> begin
+        match peek_token_kind ~lookahead:1 parser with
+        | Enum -> parse_class_enum ~final:true parser
+        | _ -> (* Parse class methods, constructors, destructors, properties
+               or type constants. *)
+          let (parser, attr) = parse_attribute_specification_opt parser in
+          parse_methodish_or_property_or_type_constant parser attr
+      end
     | Async
     | Static
-    | Final
     | LessThanLessThan ->
       (* Parse methods, constructors, destructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
@@ -1890,6 +1901,104 @@ module WithExpressionAndStatementAndTypeParser
     in
     let parser1 = Parser.pop_scope parser recovery_tokens in
     (parser1, result)
+
+  and parse_pocket_mapping parser =
+    (* SPEC
+       pocket-mapping ::=
+         | 'type' identifier '=' type-expression
+         | identifier '=' expression
+    *)
+    let puerror = SyntaxError.pocket_universe_invalid_field in
+    match peek_token_kind parser with
+    | Type -> let (parser, typ) = require_token parser Type SyntaxError.type_keyword in
+      let (parser, tyname) = require_name parser in
+      let (parser, equal) = require_equal parser in
+      let (parser, ty) = parse_type_specifier parser
+      in Make.pocket_mapping_type_declaration parser typ tyname equal ty
+    | Name -> let (parser, id) = require_name parser in
+      let (parser, equal) = require_equal parser in
+      let (parser, simple_init) = parse_expression parser in
+      let (parser, sc_init) = Make.simple_initializer parser equal simple_init in
+      Make.pocket_mapping_id_declaration parser id sc_init
+    | _ -> let parser = with_error parser (puerror 0) in
+      Make.missing parser (pos parser)
+
+  and parse_pocket_field parser =
+    (* SPEC
+       pocket-field ::=
+         | enum-member ;
+         | enum-member '(' (pocket-mapping ',')* ')' ;
+         | 'case' type-expression identifier ;
+         | 'case' 'type' identifier ;
+
+       enum-member ::= ':@' name
+    *)
+    let puerror = SyntaxError.pocket_universe_invalid_field in
+    match peek_token_kind parser with
+    | PUAtom -> let (parser, enum_name) = require_token parser PUAtom (puerror 1) in
+      (match peek_token_kind parser with
+       | LeftParen ->
+         let (parser, left_paren, mappings, right_paren) =
+           parse_parenthesized_comma_list parser parse_pocket_mapping in
+         let (parser, semi) = require_semicolon parser in
+         Make.pocket_atom_mapping_declaration parser enum_name left_paren mappings right_paren semi
+       | _ -> let (parser, missing_left) = Make.missing parser (pos parser) in
+         let (parser, missing_mappings) = Make.missing parser (pos parser) in
+         let (parser, missing_right) = Make.missing parser (pos parser) in
+         let (parser, semi) = require_semicolon parser in
+         Make.pocket_atom_mapping_declaration parser enum_name missing_left
+           missing_mappings missing_right semi
+      )
+    | Case -> let (parser, case_tok) = require_token parser Case (puerror 2) in
+      (match peek_token_kind parser with
+       | Type ->
+         let (parser, type_tok) = require_token parser Type (puerror 3) in
+         let (parser, name) = require_name parser in
+         let (parser, semi) = require_semicolon parser in
+         Make.pocket_field_type_declaration parser case_tok type_tok name semi
+       | _ ->
+         let (parser, ty) = parse_type_specifier parser in
+         let (parser, name) = require_name parser in
+         let (parser, semi) = require_semicolon parser in
+         Make.pocket_field_type_expr_declaration parser case_tok ty name semi
+      )
+    | _ -> let parser = with_error parser (puerror 4) in
+      Make.missing parser (pos parser)
+
+  and parse_pocket_fields_opt parser =
+    (* SPEC
+       pocket-field-list:
+          pocket-field
+          pocket-field-list pocket-field
+    *)
+    parse_terminated_list parser parse_pocket_field RightBrace
+
+  and parse_class_enum ?(final=false) parser =
+    (* SPEC
+         'final'? 'enum' identifier '{' pocket-field-list '}'
+    *)
+    (* from parse_classish_declaration.. probably could do better *)
+    (* read Final *)
+    let (parser, final_tok) =
+      if final then
+        require_token parser Final SyntaxError.pocket_universe_final_expected
+      else
+        Make.missing parser (pos parser)
+    in
+    (* read Enum *)
+    let (parser, enum_tok) = require_token parser Enum SyntaxError.pocket_universe_enum_expected in
+    let (parser, name) = require_name parser in
+    let (parser, left_brace, pocket_fields, right_brace) =
+      parse_braced_list parser parse_pocket_fields_opt
+    in Make.pocket_enum_declaration
+      parser
+      final_tok
+      enum_tok
+      name
+      left_brace
+      pocket_fields
+      right_brace
+
 
   let parse_leading_markup_section parser =
     let (parser1, (markup_section, has_suffix)) =

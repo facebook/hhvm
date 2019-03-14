@@ -230,6 +230,7 @@ InterfaceUsesTrait = 3073
 NonstaticMethodInAbstractFinalClass = 3074
 MutableOnStaticDEPRECATED = 3075
 ClassnameConstInstanceOf = 3076
+ByRefParamOnConstruct = 3077
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001
@@ -383,9 +384,9 @@ InvalidClassname = 4148
 InvalidMemoizedParam = 4149
 IllegalTypeStructure = 4150
 NotNullableCompareNullTrivial = 4151
-ClassPropertyOnlyStaticLiteral = 4152
+ClassPropertyOnlyStaticLiteralDEPRECATED = 4152
 AttributeTooFewArguments = 4153
-ReferenceExpr = 4154
+ReferenceExprDEPRECATED = 4154
 UnificationCycle = 4155
 KeysetSet = 4156
 EqIncompatibleTypes = 4157
@@ -530,11 +531,15 @@ OptionNull = 4295
 UnknownObjectMember = 4296
 UnknownType = 4297
 InvalidArrayKey = 4298
-ReferenceExprPartial = 4299
+ReferenceExprNotFunctionArg = 4299
 RedundantRxCondition = 4300
 RedeclaringMissingMethod = 4301
 InvalidEnforceableTypeArgument = 4302
 RequireArgsReify = 4303
 TypecheckerTimeout = 4304
 ErasedGenericPassedToReified = 4305
+GenericsNotAllowed = 4306
+InvalidNewableTypeArgument = 4307
+InvalidNewableTypeParamConstraints = 4308
+NewWithoutNewable = 4309
   |}]

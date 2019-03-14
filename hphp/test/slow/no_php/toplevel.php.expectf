@@ -1,2 +1,2 @@
 
-Fatal error: PHP support is not enabled: %s/test/slow/no_php/toplevel.php
+Fatal error: HHVM 4+ does not support PHP: %s/test/slow/no_php/toplevel.php

@@ -23,25 +23,33 @@ let retval_local = ref None
 
 let next_local = ref 0
 let temp_local_map = ref SMap.empty
+let temp_local_set = ref ISet.empty
 
-let rec get_unnamed_local () =
+let rec get_unnamed_local_id () =
   let current = !next_local in
   next_local := current + 1;
   (* make sure that newly allocated local don't stomp on dedicated locals  *)
   match !label_id_local with
-  | Some (Unnamed v) when current = v -> get_unnamed_local ()
+  | Some (Unnamed v) when current = v -> get_unnamed_local_id ()
   | _ ->
   match !retval_local with
-  | Some (Unnamed v) when current = v -> get_unnamed_local ()
-  | _ -> Unnamed current
+  | Some (Unnamed v) when current = v -> get_unnamed_local_id ()
+  | _ ->
+  if ISet.mem current !temp_local_set
+    then get_unnamed_local_id ()
+    else current
+
+let get_unnamed_local () = Unnamed (get_unnamed_local_id ())
 
 let get_unnamed_local_for_tempname s =
   let temp_local_map_ = !temp_local_map in
   match SMap.get s temp_local_map_ with
   | Some x -> x
   | None ->
-    let new_local = get_unnamed_local () in
+    let new_local_id = get_unnamed_local_id () in
+    let new_local = Unnamed new_local_id in
     temp_local_map := SMap.add s new_local temp_local_map_;
+    temp_local_set := ISet.add new_local_id !temp_local_set;
     new_local
 
 let get_or_allocate_unnamed r =
@@ -64,10 +72,8 @@ let reserve_retval_and_label_id_locals () =
 
 let scope f =
   let current_next_local = !next_local in
-  let current_temp_local_map = !temp_local_map in
   let result = f () in
   next_local := current_next_local;
-  temp_local_map := current_temp_local_map;
   result
 
 let reset_local base =
@@ -75,3 +81,4 @@ let reset_local base =
   label_id_local := None;
   retval_local := None;
   temp_local_map := SMap.empty;
+  temp_local_set := ISet.empty;

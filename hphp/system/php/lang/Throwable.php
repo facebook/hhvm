@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 <<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;

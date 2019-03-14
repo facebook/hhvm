@@ -28,20 +28,20 @@ string(1) "."
 string(1) "."
 
 --empty array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: pathinfo() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --int indexed array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: pathinfo() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --associative array--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: pathinfo() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --nested arrays--
-Error: 2 - pathinfo() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: pathinfo() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --uppercase NULL--
 string(0) ""
@@ -71,8 +71,8 @@ string(0) ""
 string(1) "."
 
 --instance of classWithoutToString--
-Error: 2 - pathinfo() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --undefined var--
 string(0) ""

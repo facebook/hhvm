@@ -3,15 +3,12 @@
 -- Testing preg_replace_callback() function with Zero arguments --
 
 Warning: %s
-NULL
 
 -- Testing preg_replace_callback() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing preg_replace_callback() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

@@ -78,23 +78,25 @@ struct RepoOptions {
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
-  N(StringMap, AliasedNamespaces,              StringMap{})      \
-  P(bool,      UVS,                            s_PHP7_master)    \
-  P(bool,      LTRAssign,                      s_PHP7_master)    \
-  H(bool,      EnableIsExprPrimitiveMigration, true)             \
-  H(bool,      EnableCoroutines,               true)             \
-  H(bool,      Hacksperimental,                false)            \
-  H(bool,      EnableConcurrent,               false)            \
-  H(bool,      EnableAwaitAsAnExpression,      false)            \
-  H(bool,      EnableStrongerAwaitBinding,     false)            \
-  H(bool,      DisableLvalAsAnExpression,      false)            \
-  E(bool,      CreateInOutWrapperFunctions,    true)             \
-  E(bool,      HHJSUniqueFilenames,            false)            \
-  E(bool,      HHJSModules,                    true)             \
-  E(bool,      EmitFuncPointers,               true)             \
-  E(bool,      EmitClsMethPointers,            EmitFuncPointers) \
-  E(bool,      EmitInstMethPointers,           EmitFuncPointers) \
-  E(bool,      EmitMethCallerFuncPointers,     false)            \
+  N(StringMap,      AliasedNamespaces,              StringMap{})      \
+  P(bool,           UVS,                            s_PHP7_master)    \
+  P(bool,           LTRAssign,                      s_PHP7_master)    \
+  H(bool,           EnableIsExprPrimitiveMigration, true)             \
+  H(bool,           EnableCoroutines,               true)             \
+  H(bool,           Hacksperimental,                false)            \
+  H(bool,           EnableConcurrent,               false)            \
+  H(bool,           EnableAwaitAsAnExpression,      false)            \
+  H(bool,           EnableStrongerAwaitBinding,     false)            \
+  H(bool,           EnableReifiedGenerics,          false)            \
+  H(bool,           DisableLvalAsAnExpression,      false)            \
+  E(bool,           CreateInOutWrapperFunctions,    true)             \
+  E(bool,           HHJSUniqueFilenames,            true)             \
+  E(std::string,    HHJSBabelTransform,                               \
+                                         hhjsBabelTransformDefault()) \
+  E(bool,           EmitFuncPointers,               true)             \
+  E(bool,           EmitClsMethPointers,            EmitFuncPointers) \
+  E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
+  E(bool,           EmitMethCallerFuncPointers,     false)            \
   /**/
 
   std::string path() const { return m_path; }
@@ -502,7 +504,6 @@ struct RuntimeOption {
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
-  static bool EnableContextInErrorHandler;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
@@ -521,6 +522,7 @@ struct RuntimeOption {
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
   static bool DumpPreciseProfData;
+  static bool EnablePocketUniverses;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;
@@ -556,6 +558,12 @@ struct RuntimeOption {
   // 1 => raise notice and fall back to root namespace
   // 2 => raise error
   static uint64_t UndefinedConstFallback;
+  // Controls PHP's behavior of falling back to the default namespace for
+  // undefined functions.
+  // 0 => fall back to root namespace (default)
+  // 1 => raise notice and fall back to root namespace
+  // 2 => raise error
+  static uint64_t UndefinedFunctionFallback;
   // Disables PHP's call_user_func function.
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
@@ -586,6 +594,9 @@ struct RuntimeOption {
   // Disables non-top-level declarations
   // true => error, false => default behaviour
   static bool DisableNontoplevelDeclarations;
+  // Disables static closures
+  // true => error, false => default behaviour
+  static bool DisableStaticClosures;
   // Disables static local variables
   // true => error, false => default behaviour
   static bool DisableStaticLocalVariables;
@@ -694,6 +705,8 @@ struct RuntimeOption {
   F(bool, EnableHHJS,                  false)                           \
   F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
+  F(bool, EnablePerRepoOptions,        true)                            \
+  F(bool, CachePerRepoOptionsPath,     true)                            \
   /* Generate warning of side effect of the pseudomain is called by     \
      top-level code.*/                                                  \
   F(bool, WarnOnRealPseudomain, false)                                  \
@@ -759,7 +772,6 @@ struct RuntimeOption {
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \
   F(uint32_t, WarnOnTooManyArguments,  0)                               \
-  F(bool, ThrowOnMissingArgument,      false)                           \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \
@@ -947,6 +959,7 @@ struct RuntimeOption {
   F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
   F(bool, JitAlignUniqueStubs,         true)                            \
   F(uint32_t, SerDesSampleRate,            0)                           \
+  F(bool, JitSerdesModeForceOff,       false)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, TraceServerRequestRate,      0)                           \
@@ -1016,8 +1029,6 @@ struct RuntimeOption {
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
-  /* Raises notice when a Hack Collection is coerced to a PHP array */  \
-  F(bool, HackArrCompatCollectionCoercionNotices, false)                \
   /* Disables intish cast wherever we would have warned for             \
    * HackArrCompatCheckIntishCast--this includes intish key cast in any \
    * PHP code and much of the runtime and extensions */                 \
@@ -1032,6 +1043,11 @@ struct RuntimeOption {
   /* Raise a notice if a Func type is passed to function that expects a
      string */                                                          \
   F(bool, StringHintNotices, false)                                     \
+  /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
+  F(bool, IsVecNotices, false)                                          \
+  /*  Raise a notice if a ClsMeth type is passed to a function that
+   *  expects a vec/varray */                                           \
+  F(bool, VecHintNotices, false)                                        \
   /* Switches on miscellaneous junk. */                                 \
   F(bool, NoticeOnCreateDynamicProp, false)                             \
   F(bool, NoticeOnReadDynamicProp, false)                               \
@@ -1050,6 +1066,9 @@ struct RuntimeOption {
   F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
+  F(bool, NoticeOnCollectionToBool, false)                              \
+  F(bool, NoticeOnSimpleXMLBehavior, false)                             \
+  F(bool, NoticeOnBadMethodStaticness, false)                           \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \

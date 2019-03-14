@@ -695,7 +695,8 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfPersistentShape:
     case KindOfShape:
     case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfArray:
+    case KindOfClsMeth: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {
         auto const value = iter.second().toString();

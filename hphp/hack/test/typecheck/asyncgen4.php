@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 async function foo(): Awaitable<string> {
   return 'hi test';

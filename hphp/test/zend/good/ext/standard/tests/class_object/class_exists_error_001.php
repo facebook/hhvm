@@ -13,14 +13,14 @@ echo "*** Testing class_exists() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing class_exists() function with Zero arguments --\n";
-var_dump( class_exists() );
+try { var_dump( class_exists() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test class_exists with one more than the expected number of arguments
 echo "\n-- Testing class_exists() function with more than expected no. of arguments --\n";
 $classname = 'string_val';
 $autoload = true;
 $extra_arg = 10;
-var_dump( class_exists($classname, $autoload, $extra_arg) );
+try { var_dump( class_exists($classname, $autoload, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

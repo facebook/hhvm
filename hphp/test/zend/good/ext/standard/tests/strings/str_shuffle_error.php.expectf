@@ -3,10 +3,8 @@
 -- Testing str_shuffle() function with no arguments --
 
 Warning: %s
-NULL
 
 -- Testing str_shuffle() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===DONE===

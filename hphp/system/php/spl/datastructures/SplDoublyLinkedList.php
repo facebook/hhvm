@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class _SplDoublyLinkedListNode {
   public $data = null;

@@ -87,7 +87,6 @@ type context =
   (* true if active callable is reactive if it is a function or method, or there is a reactive
    * proper ancestor (including lambdas) but not beyond the enclosing function or method *)
   ; active_is_rx_or_enclosing_for_lambdas : bool
-  ; active_awaitable          : Syntax.t option
   ; active_const              : Syntax.t option
   (* Named (not anonymous) namespaces that the current expression is enclosed within. *)
   ; nested_namespaces         : Syntax.t list
@@ -122,7 +121,6 @@ let make_env
       ; active_callable = None
       ; active_callable_attr_spec = None
       ; active_is_rx_or_enclosing_for_lambdas = false
-      ; active_awaitable = None
       ; active_const = None
       ; nested_namespaces = []
       } in
@@ -148,7 +146,9 @@ let is_typechecker env =
   is_hack env && (not env.codegen)
 
 let is_strict env =
-  SyntaxTree.mode env.syntax_tree = Some FileInfo.Mstrict
+  match SyntaxTree.mode env.syntax_tree with
+  | Some mode -> FileInfo.is_strict mode
+  | None -> false
 
 let global_namespace_name = "\\"
 
@@ -767,9 +767,15 @@ let is_classish_kind_declared_abstract env cd_node =
       list_contains_predicate is_abstract classish_modifiers
   | _ -> false
 
-let is_immediately_in_lambda context = match context.active_callable with
-  | Some { syntax = LambdaExpression _; _} -> true
-  | _ -> false
+let is_immediately_in_lambda context =
+  Option.value_map context.active_callable ~default:false ~f:(fun node ->
+    match syntax node with
+    | AnonymousFunction _
+    | Php7AnonymousFunction _
+    | LambdaExpression _
+    | AwaitableCreationExpression _ -> true
+    | _ -> false
+    )
 
 (* Returns the whether the current context is in an active class scope *)
 let is_in_active_class_scope context = Option.is_some context.active_classish
@@ -906,9 +912,13 @@ let is_inside_async_method context =
           syntax_to_list_no_separators fdh.function_modifiers
       | _ -> false
       end
-    | LambdaExpression { lambda_signature = { syntax = LambdaSignature _; _}
-                       ; lambda_async; _} ->
+    | AnonymousFunction { anonymous_async_keyword; _ } ->
+      not @@ is_missing anonymous_async_keyword
+    | Php7AnonymousFunction { php7_anonymous_async_keyword; _ } ->
+      not @@ is_missing php7_anonymous_async_keyword
+    | LambdaExpression { lambda_async; _ } ->
       not @@ is_missing lambda_async
+    | AwaitableCreationExpression _ -> true
     | _ -> false
     ) ~default:false
 
@@ -1754,10 +1764,11 @@ let parameter_errors env node namespace_name names errors =
       check_type_hint env p.parameter_type names errors in
     let errors = if is_parameter_with_callconv node then
       begin
-        let errors = if is_inside_async_method env.context then
-        make_error_from_node ~error_type:SyntaxError.RuntimeError
-          node SyntaxError.inout_param_in_async :: errors
-        else errors in
+        let errors =
+          if is_inside_async_method env.context then
+          make_error_from_node ~error_type:SyntaxError.RuntimeError
+            node SyntaxError.inout_param_in_async :: errors
+          else errors in
         let errors =
           if is_in_construct_method env.context then
           make_error_from_node ~error_type:SyntaxError.RuntimeError
@@ -1793,6 +1804,7 @@ let parameter_errors env node namespace_name names errors =
     names, errors
   | FunctionDeclarationHeader { function_parameter_list = params; _ }
   | AnonymousFunction { anonymous_parameters = params; _ }
+  | Php7AnonymousFunction { php7_anonymous_parameters = params; _ }
   | ClosureTypeSpecifier { closure_parameter_list = params; _ }
   | LambdaExpression
     { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
@@ -1851,7 +1863,7 @@ let redeclaration_errors env node parents namespace_name names errors =
           t_functions = strmap_add function_name def names.t_functions }, errors
       | _ ->
         (* Only check this in strict mode. *)
-        if not @@ is_strict env then names, errors else
+        if not (is_typechecker env && is_strict env) then names, errors else
         let error = make_error_from_node
           ~error_type:SyntaxError.ParseError
           node
@@ -2215,12 +2227,19 @@ let does_binop_create_write_on_left = function
 let find_invalid_lval_usage errors nodes =
   let get_errors = rec_walk ~f:(fun errors syntax_node parents ->
     let node = syntax syntax_node in
-    let errors = match node_lval_type node parents with
-    | LvalTypeFinal
-    | LvalTypeNone -> errors
-    | LvalTypeNonFinal ->
-      make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
-    errors, true
+    match node with
+    | AnonymousFunction _
+    | Php7AnonymousFunction _
+    | LambdaExpression _
+    | AwaitableCreationExpression _ ->
+      errors, false
+    | _ ->
+      let errors = match node_lval_type node parents with
+      | LvalTypeFinal
+      | LvalTypeNone -> errors
+      | LvalTypeNonFinal ->
+        make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
+      errors, true
   ) in
 
   List.fold_left
@@ -2321,6 +2340,12 @@ let await_as_an_expression_errors await_node parents errors =
       when phys_equal node switch_expression -> errors
     | ForeachStatement { foreach_collection; _ }
       when phys_equal node foreach_collection -> errors
+    | UsingStatementBlockScoped { using_block_expressions; _ }
+      when phys_equal node using_block_expressions -> errors
+    | UsingStatementFunctionScoped { using_function_expression; _ }
+      when phys_equal node using_function_expression -> errors
+    | LambdaExpression { lambda_body; _ }
+      when phys_equal node lambda_body -> errors
 
     (* Unary based expressions have their own custom fanout *)
     | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
@@ -2430,6 +2455,14 @@ let await_as_an_expression_errors await_node parents errors =
   errors
 
 let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
+  let is_new_scope = match syntax node with
+    | AnonymousFunction _
+    | Php7AnonymousFunction _
+    | LambdaExpression _
+    | AwaitableCreationExpression _ ->
+      true
+    | _ -> false in
+  if is_new_scope then false, false else
   let is_await n = match syntax n with
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await -> true
@@ -2439,6 +2472,9 @@ let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
 )
 
 let expression_errors env _is_in_concurrent_block namespace_name node parents errors =
+  let pu_enabled =
+    GlobalOptions.tco_experimental_feature_enabled env.parser_options
+      GlobalOptions.tco_experimental_pocket_universes in
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
     | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
@@ -2583,7 +2619,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       if is_in_unyieldable_magic_method env.context then
       make_error_from_node node SyntaxError.yield_in_magic_methods :: errors
       else errors in
-    let errors = match env.context.active_callable_attr_spec with
+    let errors = match env.context.active_callable with
       | Some _ -> errors
       | None -> make_error_from_node node SyntaxError.yield_outside_function :: errors
     in
@@ -2608,6 +2644,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         | LiteralExpression _, _ ->
           false, false, not (is_typechecker env)
         | QualifiedName _, _ -> false, false, true
+        (* Pocket Universe: we allow the Class::Enum::Field syntax *)
+        | ScopeResolutionExpression _, None when pu_enabled ->
+          false, false, true
         | _, Some TokenKind.Name
         | _, Some TokenKind.XHPClassName
         | _, Some TokenKind.Static -> false, false, true
@@ -2813,11 +2852,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
-    let errors = match env.context.active_callable_attr_spec, env.context.active_awaitable with
-      | None, None ->
-        make_error_from_node node SyntaxError.toplevel_await_use :: errors
-      | _ -> errors
-    in
+    if ParserOptions.enable_await_as_an_expression env.parser_options
+      then await_as_an_expression_errors node parents errors
+      else
     begin match parents with
       | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
         errors
@@ -2843,8 +2880,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | us :: _
          when (is_using_statement_block_scoped us ||
                is_using_statement_function_scoped us) -> errors
-      | _ when ParserOptions.enable_await_as_an_expression env.parser_options ->
-        await_as_an_expression_errors node parents errors
       | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
     end
   | VariableExpression { variable_expression } when
@@ -3706,6 +3741,7 @@ let assignment_errors _env node errors =
       | SubscriptExpression { subscript_receiver = e; _ } ->
         check_lvalue ~allow_reassign_this:true e errors
       | LambdaExpression _ | AnonymousFunction _ | Php7AnonymousFunction _
+      | AwaitableCreationExpression _
       | ArrayIntrinsicExpression _ | ArrayCreationExpression _
       | DarrayIntrinsicExpression _
       | VarrayIntrinsicExpression _
@@ -3727,8 +3763,8 @@ let assignment_errors _env node errors =
         let kind = kind loperand in
         let kind_str = Full_fidelity_syntax_kind.to_string kind in
         err (SyntaxError.not_allowed_in_write kind_str)
-      | (PrefixUnaryExpression { prefix_unary_operator = op; _ }
-      | PostfixUnaryExpression { postfix_unary_operator = op; _ }) ->
+      | PrefixUnaryExpression { prefix_unary_operator = op; _ }
+      | PostfixUnaryExpression { postfix_unary_operator = op; _ } ->
         begin match token_kind op with
           | Some TokenKind.At | Some TokenKind.Dollar -> errors
           | Some TokenKind.Ampersand ->
@@ -3824,33 +3860,6 @@ let declare_errors _env node parents errors =
     errors
   | _ -> errors
 
-let reified_function_call_errors node errors =
-  match syntax node with
-  | FunctionCallWithTypeArgumentsExpression
-    { function_call_with_type_arguments_receiver = receiver
-    ; function_call_with_type_arguments_type_args = targs
-    ; _
-    } ->
-    let targs = match syntax targs with
-      | TypeArguments { type_arguments_types; _ } ->
-        syntax_to_list_no_separators type_arguments_types
-      | _ -> [] in
-    let has_reification =
-      List.exists targs
-        ~f:(function { syntax = ReifiedTypeArgument _; _ } -> true | _ -> false)
-    in
-    if not has_reification then errors else
-    begin
-    let valid = match syntax receiver with
-      | ScopeResolutionExpression { scope_resolution_name = name; _ } ->
-        not @@ is_token_kind name TokenKind.Variable
-      | _ -> true
-    in
-    if valid then errors else
-      (make_error_from_node node SyntaxError.invalid_reified) :: errors
-    end
-  | _ -> errors
-
 let dynamic_method_call_errors node errors =
   match syntax node with
   | FunctionCallWithTypeArgumentsExpression
@@ -3903,31 +3912,26 @@ let find_syntax_errors env =
         match node_syntax with
         | ClassishDeclaration _ ->
           { env.context with active_classish = Some node }
+        | FunctionDeclaration { function_attribute_spec = s; _ }
+        | MethodishDeclaration { methodish_attribute = s; _ } ->
+          (* named functions *)
+          { env.context with
+            (* a _single_ variable suffices as they cannot be nested *)
+            active_methodish = Some node;
+            (* inspect the rx attribute directly. *)
+            active_is_rx_or_enclosing_for_lambdas = has_rx_attr_mutable_hack s;
+            active_callable = Some node;
+            active_callable_attr_spec = Some s;
+          }
         | AnonymousFunction { anonymous_attribute_spec = s; _ }
         | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
         | LambdaExpression { lambda_attribute_spec = s; _ }
-        | FunctionDeclaration { function_attribute_spec = s; _ }
-        | MethodishDeclaration { methodish_attribute = s; _ } ->
-          let active_methodish, active_is_rx_or_enclosing_for_lambdas = match node_syntax with
-            | FunctionDeclaration _ | MethodishDeclaration _ ->  (* named functions *)
-              ( Some node  (* a _single_ variable suffices as they cannot be nested *)
-              , has_rx_attr_mutable_hack s  (* inspect the rx attribute directly. *)
-              )
-            | _ ->
-              (* preserve context when entering lambdas (and anonymous functions) *)
-              env.context.active_methodish, env.context.active_is_rx_or_enclosing_for_lambdas
-            in
+        | AwaitableCreationExpression { awaitable_attribute_spec = s; _ } ->
+          (* preserve context when entering lambdas (and anonymous functions) *)
           { env.context with
-            active_methodish = active_methodish;
-            active_callable = begin match syntax node with
-              | AnonymousFunction _ | Php7AnonymousFunction _ -> env.context.active_callable
-              | _ -> Some node
-              end;
+            active_callable = Some node;
             active_callable_attr_spec = Some s;
-            active_is_rx_or_enclosing_for_lambdas = active_is_rx_or_enclosing_for_lambdas;
           }
-        | AwaitableCreationExpression _ ->
-          { env.context with active_awaitable = Some node }
         | ConstDeclaration _ ->
           { env.context with active_const = Some node }
         | NamespaceDeclaration { namespace_name; _ }
@@ -3958,7 +3962,6 @@ let find_syntax_errors env =
           methodish_errors env node errors in
         trait_require_clauses, names, errors
       | FunctionCallWithTypeArgumentsExpression _ ->
-        let errors = reified_function_call_errors node errors in
         let errors = dynamic_method_call_errors node errors in
         trait_require_clauses, names, errors
       | InstanceofExpression _

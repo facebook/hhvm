@@ -1,3 +1,4 @@
 -vCheckPropTypeHints=3
 
 -vRuntime.Eval.EmitFuncPointers=1
+-vEval.EnablePHP=1

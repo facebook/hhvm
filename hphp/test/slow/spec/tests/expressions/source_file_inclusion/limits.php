@@ -7,7 +7,7 @@
 */
 namespace MyInclude;
 
-error_reporting(-1);
+\error_reporting(-1);
 
 echo "================= xxx =================\n";
 

@@ -44,35 +44,35 @@ interface ITest5 {
 
 class Miss0 {
   public function instanceofMiss0() {
-    $bool = $this instanceof ITest2 ? 1 : 0;
+    $bool = $this is ITest2 ? 1 : 0;
     return ($bool);
   }
 }
 
 class Miss1 implements ITest1 {
   public function instanceofMiss1() {
-    $bool = $this instanceof ITest2 ? 1 : 0;
+    $bool = $this is ITest2 ? 1 : 0;
     return ($bool);
   }
 }
 
 class Hit1 implements ITest2 {
   public function instanceofHit1() {
-    $bool = $this instanceof ITest2 ? 1 : 0;
+    $bool = $this is ITest2 ? 1 : 0;
     return ($bool);
   }
 }
 
 class Miss4 implements ITest1, ITest3, ITest4, ITest5 {
   public function instanceofMiss4() {
-    $bool = $this instanceof ITest2 ? 1 : 0;
+    $bool = $this is ITest2 ? 1 : 0;
     return ($bool);
   }
 }
 
 class Hit5 implements ITest1, ITest2, ITest3, ITest4, ITest5 {
   public function instanceofHit5() {
-    $bool = $this instanceof ITest2 ? 1 : 0;
+    $bool = $this is ITest2 ? 1 : 0;
     return ($bool);
   }
 }

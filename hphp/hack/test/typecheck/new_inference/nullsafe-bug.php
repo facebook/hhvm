@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 interface IFoo {
   public function genFoo(): Awaitable<?IFoo>;
 }

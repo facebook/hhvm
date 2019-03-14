@@ -31,12 +31,12 @@ namespace Fiz\Biz\Buz {
     echo "==== MIXED ====\n";
     new A();
     new B();
-    var_dump(BOZ);
+    \var_dump(BOZ);
     echo "===== CONSTANTS ====\n";
-    var_dump(FOO);
-    var_dump(FOZ);
-    var_dump(BAR);
-    var_dump(defined('B'));
+    \var_dump(FOO);
+    \var_dump(FOZ);
+    \var_dump(BAR);
+    \var_dump(\defined('B'));
     echo "===== FUNCTIONS ====\n";
     buz();
     fiz();

@@ -95,10 +95,6 @@ bool canTranslate() {
     RuntimeOption::EvalJitGlobalTranslationLimit;
 }
 
-const StaticString
-  s_php_errormsg("php_errormsg"),
-  s_http_response_header("http_response_header");
-
 bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) {
@@ -107,13 +103,6 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
 
   // Do not translate functions from units marked as interpret-only.
   if (func->unit()->isInterpretOnly()) {
-    return false;
-  }
-
-  // We don't support JIT compiling functions that use some super-dynamic php
-  // variables.
-  if (func->lookupVarId(s_php_errormsg.get()) != -1 ||
-      func->lookupVarId(s_http_response_header.get()) != -1) {
     return false;
   }
 

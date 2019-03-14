@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A {
   <<__Rx>>
@@ -29,3 +29,5 @@ function f3(<<__MaybeMutable>> A $a): void {
     g($a);
   };
 }
+
+function g($_) {}

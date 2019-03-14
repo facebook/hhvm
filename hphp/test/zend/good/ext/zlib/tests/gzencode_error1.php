@@ -13,7 +13,7 @@ echo "*** Testing gzencode() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing gzencode() function with Zero arguments --\n";
-var_dump( gzencode() );
+try { var_dump( gzencode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test gzencode with one more than the expected number of arguments
 echo "\n-- Testing gzencode() function with more than expected no. of arguments --\n";
@@ -21,7 +21,7 @@ $data = 'string_val';
 $level = 2;
 $encoding_mode = FORCE_DEFLATE;
 $extra_arg = 10;
-var_dump( gzencode($data, $level, $encoding_mode, $extra_arg) );
+try { var_dump( gzencode($data, $level, $encoding_mode, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing with incorrect compression level --\n";
 $bad_level = 99;
@@ -39,11 +39,11 @@ class Tester {
 
 echo "\n-- Testing with incorrect parameters --\n";
 $testclass = new Tester();
-var_dump(gzencode($testclass));
-var_dump(gzencode($data, $testclass));
+try { var_dump(gzencode($testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzencode($data, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzencode($data, -1, 99.99));
-var_dump(gzencode($data, -1, $testclass));
-var_dump(gzencode($data, "a very none numeric string\n"));
+try { var_dump(gzencode($data, -1, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzencode($data, "a very none numeric string\n")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 ?>
 ===Done===

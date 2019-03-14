@@ -15,11 +15,11 @@ echo "\n-- Testing mb_strtoupper() function with more than expected no. of argum
 $sourcestring = 'string_value';
 $encoding = 'UTF-8';
 $extra_arg = 10;
-var_dump( mb_strtoupper($sourcestring, $encoding, $extra_arg) );
+try { var_dump( mb_strtoupper($sourcestring, $encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test mb_strtoupper with zero arguments
 echo "\n-- Testing mb_strtoupper() function with zero arguments --\n";
-var_dump( mb_strtoupper() );
+try { var_dump( mb_strtoupper() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

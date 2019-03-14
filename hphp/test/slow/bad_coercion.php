@@ -1,7 +1,7 @@
 <?php
 
 function test_is_nan($v) {
-  var_dump(is_nan($v));
+  try { var_dump(is_nan($v)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 

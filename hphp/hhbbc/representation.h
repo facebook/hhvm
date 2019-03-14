@@ -28,6 +28,7 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/copy-ptr.h"
 #include "hphp/util/md5.h"
 
 #include "hphp/runtime/base/user-attributes.h"
@@ -79,20 +80,15 @@ struct Block {
   Section section;
 
   /*
-   * Blocks have unique ids within a given function.
+   * The pointer for this block's exception region, or nullptr if
+   * there is none.
    */
-  uint32_t id;
+  ExnNodeId exnNodeId;
 
   /*
    * Instructions in the block.  Never empty guarantee.
    */
   BytecodeVec hhbcs;
-
-  /*
-   * The pointer for this block's exception region, or nullptr if
-   * there is none.
-   */
-  ExnNode* exnNode;
 
   /*
    * Edges coming out of blocks are repesented in three ways:
@@ -116,6 +112,7 @@ struct Block {
   bool fallthroughNS{false};
   bool multiPred{false};
   bool multiSucc{false};
+  bool dead{false};
 
   CompactVector<BlockId> throwExits;
   CompactVector<BlockId> unwindExits;
@@ -159,12 +156,10 @@ struct CatchRegion { BlockId catchEntry;
                      Id iterId; };
 
 struct ExnNode {
-  uint32_t id;
+  ExnNodeId idx;
   uint32_t depth;
-
-  ExnNode* parent;
-  CompactVector<std::unique_ptr<ExnNode>> children;
-
+  CompactVector<ExnNodeId> children;
+  ExnNodeId parent;
   boost::variant<FaultRegion,CatchRegion> info;
 };
 
@@ -236,6 +231,27 @@ struct Param {
   bool isVariadic: 1;
 };
 
+template <typename T>
+struct IntLikeIterator {
+  explicit IntLikeIterator(T v) : val{v} {}
+  T operator *() const { return val; }
+  T operator ++() { return ++val; }
+  bool operator !=(IntLikeIterator other) { return val != other.val; }
+private:
+  T val;
+};
+
+template <typename T>
+struct IntLikeRange {
+  explicit IntLikeRange(T v) : sz{v} {}
+  template<typename C>
+  explicit IntLikeRange(const C& v) : sz(v.size()) {}
+  IntLikeIterator<T> begin() const { return IntLikeIterator<T>{0}; }
+  IntLikeIterator<T> end() const { return IntLikeIterator<T>{sz}; }
+private:
+    T sz;
+};
+
 /*
  * Metadata about a local variable in a function.  Name may be
  * nullptr, for unnamed locals.
@@ -281,17 +297,19 @@ struct FuncBase {
    * to represent control flow arcs. The id of a block is its
    * index in this vector.
    */
-  CompactVector<std::unique_ptr<Block>> blocks;
+  CompactVector<copy_ptr<Block>> blocks;
+
+  auto blockRange() const { return IntLikeRange<BlockId> {blocks}; }
 
   /*
    * Try and fault regions form a tree structure.  The tree is hanging
-   * off the func here, with children pointers.  Each block that is
-   * within a try or fault region has a pointer to the inner-most
-   * ExnNode protecting it.
+   * off the func here, with children ids.  Each block that is
+   * within a try or fault region has the index into this array of the
+   * inner-most ExnNode protecting it.
    *
    * Note that this is updated during the concurrent analyze pass.
    */
-  CompactVector<std::unique_ptr<ExnNode>> exnNodes;
+  CompactVector<ExnNode> exnNodes;
 
   /*
    * For HNI-based extensions, additional information for functions

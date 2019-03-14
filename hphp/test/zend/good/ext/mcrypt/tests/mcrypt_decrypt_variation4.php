@@ -104,7 +104,7 @@ $inputs = array(
 
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
-      var_dump( mcrypt_decrypt($cipher, $key, $data, $value, $iv) );
+      try { var_dump( mcrypt_decrypt($cipher, $key, $data, $value, $iv) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 fclose($fp);

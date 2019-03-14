@@ -30,23 +30,28 @@ bool(false)
 bool(false)
 
 -- Arg value array() --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value array(0) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value array(1) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value array(1, 2) --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
-Error: 2 - base64_decode() expects parameter 1 to be string, array given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value NULL --
@@ -74,7 +79,8 @@ string(0) ""
 string(0) ""
 
 -- Arg value stdClass object --
-Error: 2 - base64_decode() expects parameter 1 to be string, object given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 
 -- Arg value undefined variable --
@@ -84,6 +90,7 @@ string(0) ""
 string(0) ""
 
 -- Arg value resource --
-Error: 2 - base64_decode() expects parameter 1 to be string, resource given, %s(%d)
+
+Warning: base64_decode() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/standard/tests/url/base64_decode_variation_001.php on line 79
 NULL
 ===Done===

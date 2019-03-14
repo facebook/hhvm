@@ -2124,6 +2124,9 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   if (mk.mcode == MW) PUNT(QueryNewElem);
 
   auto const baseType = predictedBaseType(env);
+  if (baseType <= TClsMeth) {
+    PUNT(QueryM_is_ClsMeth);
+  }
   auto key = memberKey(env, mk);
   auto simpleOp = SimpleOp::None;
 
@@ -2212,6 +2215,11 @@ void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 }
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
+  auto const baseType = predictedBaseType(env);
+  if (baseType <= TClsMeth) {
+    PUNT(SetM_is_ClsMeth);
+  }
+
   auto const key = memberKey(env, mk);
   auto const result =
     mk.mcode == MW        ? setNewElemImpl(env) :

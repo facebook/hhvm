@@ -12,12 +12,12 @@ echo "*** Testing key() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing key() function with Zero arguments --\n";
-var_dump( key() );
+try { var_dump( key() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test current with one more than the expected number of arguments
 echo "\n-- Testing key() function with more than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 $extra_arg = 10;
-var_dump( key(&$array_arg, $extra_arg) );
+try { var_dump( key(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ?>
 ===DONE===

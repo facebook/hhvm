@@ -3,10 +3,8 @@
 -- Testing gmdate() function with Zero arguments --
 
 Warning: %s
-bool(false)
 
 -- Testing gmdate() function with more than expected no. of arguments --
 
 Warning: %s
-bool(false)
 ===DONE===

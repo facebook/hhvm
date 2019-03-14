@@ -330,6 +330,7 @@ inline Type Type::cns(const TypedValue& tv) {
       // TODO (T29639296)
       case KindOfFunc:
       case KindOfClass:
+      case KindOfClsMeth:
         always_assert(false && "Invalid KindOf for constant TypedValue");
     }
     not_reached();

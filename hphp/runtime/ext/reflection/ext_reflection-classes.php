@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -106,7 +106,7 @@ class ReflectionParameter implements Reflector {
       return;
     }
 
-    if ($func instanceof Closure) {
+    if ($func is Closure) {
       $params = (new ReflectionFunction($func))->getParameters();
     } else if (is_string($func)) {
       $double_colon = strpos($func, "::");
@@ -446,7 +446,7 @@ class ReflectionParameter implements Reflector {
       return false;
     }
     $defaultValue = $this->info['default'];
-    return (!$defaultValue instanceof stdClass);
+    return (!$defaultValue is stdClass);
   }
 
   /**
@@ -491,7 +491,7 @@ class ReflectionParameter implements Reflector {
       throw new ReflectionException('Parameter is not optional');
     }
     $defaultValue = $this->info['default'];
-    if ($defaultValue instanceof stdclass) {
+    if ($defaultValue is stdclass) {
       throw new ReflectionException($defaultValue->msg);
     }
     return $defaultValue;
@@ -1249,8 +1249,8 @@ class ReflectionType {
     // make it a simple check and throw instead. If we really need that
     // functionality, we can do something like this instead:
     // https://phabricator.fb.com/P20754288
-    if (!($param_or_ret instanceof ReflectionParameter ||
-          $param_or_ret instanceof ReflectionFunctionAbstract)) {
+    if (!($param_or_ret is ReflectionParameter ||
+          $param_or_ret is ReflectionFunctionAbstract)) {
       $msg = 'ReflectionType::__construct(): Internal error: Failed to '
            . 'retrieve the reflection object';
       trigger_error($msg, E_ERROR);
@@ -1342,6 +1342,7 @@ namespace HH {
     OF_DARRAY = 24;
     OF_VARRAY = 25;
     OF_VARRAY_OR_DARRAY = 26;
+    OF_NULL = 28;
     OF_UNRESOLVED = 101; // for type aliases only
   }
 

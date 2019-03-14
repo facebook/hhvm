@@ -13,13 +13,13 @@ echo "*** Testing get_class_methods() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing get_class_methods() function with Zero arguments --\n";
-var_dump( get_class_methods() );
+try { var_dump( get_class_methods() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //Test get_class_methods with one more than the expected number of arguments
 echo "\n-- Testing get_class_methods() function with more than expected no. of arguments --\n";
 $class = 1;
 $extra_arg = 10;
-var_dump( get_class_methods($class, $extra_arg) );
+try { var_dump( get_class_methods($class, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

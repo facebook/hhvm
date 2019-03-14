@@ -101,16 +101,6 @@ let print_output : Hhas_program.t -> unit =
     if (!out_dir <> "") then Caml.close_out out;
     m_no := !m_no + 1
 
-let parse_file program_parser filename =
-  let channel = Caml.open_in filename in
-  let prog =
-    try program_parser (Lexing.from_channel channel)
-    with Parsing.Parse_error -> (
-      Printf.eprintf "Parsing of file failed\n";
-      raise Parsing.Parse_error
-      ) in
-  Caml.close_in channel; prog
-
 let read_input () : Hhas_program.t =
   let filename = ref ""  in
   let purpose = "Hhas fuzzing tool" in
@@ -122,9 +112,10 @@ let read_input () : Hhas_program.t =
               purpose Sys.argv.(0) in
   begin try Arg.parse options (fun file -> filename := file) usage
         with _ -> die usage end;
-  let program_parser = Hhas_parser.program Hhas_lexer.read in
   if !filename = "" then die usage else
-  parse_file program_parser !filename
+  (* PARSE FILE HERE *)
+  Emit_program.emit_fatal_program ~ignore_message:true
+    Hhbc_ast.FatalOp.Runtime Pos.none "Fuzzer is unsupported"
 
 let debug_print str = if !debug then print_endline str
 
@@ -301,8 +292,6 @@ let mut_imms (is : IS.t) : IS.t =
     | VGetL       id     -> VGetL      (mutate_local_id id !mag)
     | VGetS       i      -> VGetS      (mutate_int      i  !mag)
     | ClsRefGetC  i      -> ClsRefGetC (mutate_int      i  !mag)
-    | ClsRefGetL (id, i) ->
-        ClsRefGetL ((mutate_local_id id !mag), (mutate_int i !mag))
     | _ -> s in  (*TODO: in general it might be worthwhile to get rid of wild
                    card cases like this. It would make the code more verbose,
                    but it will make adding new bytecodes easier since this will
@@ -359,7 +348,6 @@ let mut_imms (is : IS.t) : IS.t =
                               then Ast_defs.OG_nullthrows
                               else Ast_defs.OG_nullsafe)
     | NewObj    (id, op) -> NewObj    (mutate_int        id !mag, op)
-    | NewObjI   (id)     -> NewObjI   (mutate_int        id !mag)
     | _ -> s in
   let mutate_base s =
     match s with

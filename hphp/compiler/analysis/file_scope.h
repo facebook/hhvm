@@ -99,8 +99,6 @@ public:
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }
-  void addAnonClass(ClassStatementPtr stmt);
-  const std::vector<ClassStatementPtr>& getAnonClasses() const;
 
   void setSystem();
   bool isSystem() const { return m_system; }
@@ -151,7 +149,6 @@ private:
   StatementListPtr m_tree;
   StringToFunctionScopePtrVecMap *m_redeclaredFunctions;
   StringToClassScopePtrVecMap m_classes;      // name => class
-  std::vector<ClassStatementPtr> m_anonClasses;
   FunctionScopeRawPtr m_pseudoMain;
 
   std::string m_pseudoMainName;

@@ -49,9 +49,8 @@ echo "\r\n";
 
 
 function foo() {
-   global $a;
-   $a = "good";
-   return $a;
+  $GLOBALS['a'] = 'good';
+  return $GLOBALS['a'];
 }
 
 
@@ -166,5 +165,3 @@ echo "\r\n";
 echo "24)";
 echo ($c->val=300) + $c->val;
 echo "\r\n";
- 
-?>

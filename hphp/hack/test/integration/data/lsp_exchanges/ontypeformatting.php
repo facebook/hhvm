@@ -1,4 +1,4 @@
-<?hh
+<?hh //partial
 
 function test_otf(mixed ...$_): void {
 }

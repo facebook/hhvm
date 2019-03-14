@@ -1,1 +1,6 @@
-No errors
+File "fc_enum_case_8.php", line 10, characters 10-16:
+Invalid return type (Typing[4110])
+File "fc_enum_case_8.php", line 10, characters 10-16:
+This is void because this function implicitly returns void
+File "fc_enum_case_8.php", line 10, characters 23-25:
+It is incompatible with an int

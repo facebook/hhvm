@@ -9,9 +9,9 @@ class C<reify Ta, reify Tb> {
     }
   }
   function f<reify T1>() {
-    $this->g<reify T1>();
+    $this->g<T1>();
   }
 }
 
-$c = new C<reify int, reify shape('a' => int, 'b' => string)>();
-$c->f<reify string>();
+$c = new C<int, shape('a' => int, 'b' => string)>();
+$c->f<string>();

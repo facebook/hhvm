@@ -2,7 +2,7 @@
 namespace foo {
   function bar_namespaced() {
     $args = func_get_args();
-    var_dump($args);
+    \var_dump($args);
     yield 42;
   }
 }

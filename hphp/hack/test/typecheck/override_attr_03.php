@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -36,7 +36,7 @@ class CTrait extends UnrelatedParent implements I {
 
 class CParentAndTrait extends CParent implements I {
   use ATrait;
-  use Unrelated;
+  use UnrelatedTrait;
 
   <<__Override>>
   public function foo(): void {}

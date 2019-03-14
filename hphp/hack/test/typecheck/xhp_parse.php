@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -19,5 +19,8 @@ function foo(): void {
   $z = <div><!-- an xhp comment </div>--></div>;
 }
 
-
-
+class :div {
+  attribute string x, string y;
+}
+class :h implements XHPChild {}
+class :p implements XHPChild {}

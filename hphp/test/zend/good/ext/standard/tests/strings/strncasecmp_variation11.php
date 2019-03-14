@@ -86,8 +86,8 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str1 = $values[$index];
   $str2 = $values[$index];
-  $len = strlen($values[$index]) + 1;
-  var_dump( strncasecmp("string", $str2, $len) );
+  try { $len = strlen($values[$index]) + 1; } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( strncasecmp("string", $str2, $len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 

@@ -7,9 +7,9 @@ set_error_handler('my_error_handler');
 
 function do_single_test($header)
 {
-	global $mode;
 
-	$result = iconv_mime_decode($header, $mode, "UTF-8");
+
+	$result = iconv_mime_decode($header, ZendGoodExtIconvTestsIconvMimeDecode::$mode, "UTF-8");
 	printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
 }
 
@@ -49,11 +49,15 @@ HERE
 );
 }
 
-$mode = 0;
+ZendGoodExtIconvTestsIconvMimeDecode::$mode = 0;
 do_regression_test();
-$mode = ICONV_MIME_DECODE_STRICT;
+ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT;
 do_regression_test();
-$mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
+ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 do_regression_test();
-$mode = ICONV_MIME_DECODE_STRICT | ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
+ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT | ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 do_regression_test();
+
+abstract final class ZendGoodExtIconvTestsIconvMimeDecode {
+  public static $mode;
+}

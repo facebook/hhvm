@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface A {
   public function f(&$x);

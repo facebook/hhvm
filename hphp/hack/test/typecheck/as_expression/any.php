@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * TODO(T29281383)

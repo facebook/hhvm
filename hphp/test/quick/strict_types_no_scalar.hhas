@@ -7,8 +7,8 @@
   FPushFuncD 2 "add"
   String "1"
   String "2"
-  FCall <> 2 1 - "" ""
-  FCall <> 1 1 - "" ""
+  FCall <> 2 1 "" - "" ""
+  FCall <> 1 1 "" - "" ""
   PopC
   Int 1
   RetC

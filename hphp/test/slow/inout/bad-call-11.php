@@ -2,9 +2,12 @@
 
 function foo(inout $x) {}
 
+abstract final class MainStatics {
+  public static $x;
+}
+
 function main() {
-  static $x;
-  foo(inout $x[1][2][3]);
+  foo(inout MainStatics::$x[1][2][3]);
 }
 
 

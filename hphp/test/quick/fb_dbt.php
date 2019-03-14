@@ -12,6 +12,10 @@ class C {
   }
 }
 
+abstract final class FbDebugBacktraceStatics {
+  public static $real = null;
+}
+
 /**
  * fb_debug_backtrace - returns the current backtrace minus junk.
  *
@@ -23,10 +27,9 @@ class C {
  * @author epriestley
  */
 function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
-  static $real = null;
 
-  if ($real === null) {
-    $real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
+  if (FbDebugBacktraceStatics::$real === null) {
+    FbDebugBacktraceStatics::$real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
   }
 
   if (!$bt) {  // fb_handle_error defaults to array() in PHP5
@@ -38,7 +41,7 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
   // Remove all lib/core functions at the top of the stack
   if ($skip_top_libcore === true) {
     while (isset($bt[0]['file']) &&
-           substr(realpath($bt[0]['file']), $real, 9) === 'lib/core/') {
+           substr(realpath($bt[0]['file']), FbDebugBacktraceStatics::$real, 9) === 'lib/core/') {
       array_shift(&$bt);
     }
   }
@@ -50,7 +53,7 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
   $last_line = 1;
   for ($k = count($bt) - 1; $k >= 0; $k--) {
     if (isset($bt[$k]['file'])) {
-      $real_file = substr(realpath($bt[$k]['file']), $real);
+      $real_file = substr(realpath($bt[$k]['file']), FbDebugBacktraceStatics::$real);
       $last_file = $real_file;
       $last_line = $bt[$k]['line'];
     } else {

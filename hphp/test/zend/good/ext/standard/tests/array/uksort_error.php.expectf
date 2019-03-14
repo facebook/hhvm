@@ -3,15 +3,12 @@
 -- Testing uksort() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing uksort() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 
 -- Testing uksort() function with zero arguments --
 
 Warning: %s
-NULL
 ===DONE===

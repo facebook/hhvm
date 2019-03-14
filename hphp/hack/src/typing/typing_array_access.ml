@@ -259,7 +259,11 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     )
   | Toption ty -> nullable_container_get env ty
   | Tprim Tnull ->
-      nullable_container_get env (Reason.Rnone, Tany)
+    let ty =
+      if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
+      then (Reason.Rnone, Tunresolved [])
+      else (Reason.Rnone, Tany) in
+    nullable_container_get env ty
   | Tobject ->
       if Env.is_strict env
       then error_array env expr_pos ety1

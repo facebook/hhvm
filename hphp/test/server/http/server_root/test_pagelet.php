@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $r = pagelet_server_task_start("pagelet.php");

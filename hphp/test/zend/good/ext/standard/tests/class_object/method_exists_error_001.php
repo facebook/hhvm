@@ -13,12 +13,12 @@ echo "\n-- Testing method_exists() function with more than expected no. of argum
 $object = new stdclass();
 $method = 'string_val';
 $extra_arg = 10;
-var_dump( method_exists($object, $method, $extra_arg) );
+try { var_dump( method_exists($object, $method, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing method_exists with one less than the expected number of arguments
 echo "\n-- Testing method_exists() function with less than expected no. of arguments --\n";
 $object = new stdclass();
-var_dump( method_exists($object) );
+try { var_dump( method_exists($object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
 ?>

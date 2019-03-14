@@ -2,9 +2,12 @@
 
 class X {
 }
+
+abstract final class ThingStatics {
+  public static $s = 0;
+}
 function thing() {
-  static $s = 0;
-  if (!($s++ % 100)) return new X;
+  if (!(ThingStatics::$s++ % 100)) return new X;
   return 42;
 }
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,4 +12,10 @@
 function foo(): int {
   $p = class_meth('A', 'f1');
   return $p('moo');
+}
+
+class A {
+  public static function f1(string $s): int {
+    return 0;
+  }
 }

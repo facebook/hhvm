@@ -208,6 +208,17 @@ function hh_codegen_binary_routes() {
   );
 }
 
+function hhjs_babel_transform_path() {
+  return hphp_home().
+      '/buck-out/gen/hphp/hack/src/facebook/hhjs/babel_transforms/transform/transform.jsar';
+}
+
+// given a config file, returns true if the file contains hhvm.enable_hhjs = 1
+function is_hhjs_enabled($config) {
+  $contents = file_get_contents($config);
+  return preg_match('/^hhvm\.enable_hhjs\s*=\s*1$/', $contents) === 1;
+}
+
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
@@ -271,7 +282,7 @@ function hhvm_path() {
 
   if (!is_file($file)) {
     if (is_testing_dso_extension()) {
-      exec("which hhvm 2> /dev/null", $output);
+      exec("which hhvm 2> /dev/null", &$output);
       if (isset($output[0]) && $output[0]) {
         return $output[0];
       }
@@ -392,7 +403,7 @@ function verify_hhbc() {
 }
 
 function read_opts_file($file) {
-  if (!file_exists($file)) {
+  if ($file === null || !file_exists($file)) {
     return "";
   }
 
@@ -622,11 +633,6 @@ function find_test_files($file) {
     'zend'       => 'hphp/test/zend/good',
     'facebook'   => 'hphp/facebook/test',
 
-    // hhjs tests
-    'hhjs_unit' => 'hphp/facebook/extensions/hhjs/test/ext_hhjs',
-    'hhjs_functional' =>
-      'hphp/facebook/extensions/hhjs/test/ext_hhjs_functional',
-
     // Subsets of zend tests.
     'zend_ext'    => 'hphp/test/zend/good/ext',
     'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',
@@ -852,6 +858,10 @@ function extra_args($options): string {
 
 function hhvm_cmd_impl($options, $config, ...$extra_args) {
   $modes = (array)mode_cmd($options);
+  $hhjs_babel_transform_arg = is_hhjs_enabled($config)
+    ? '-vEval.HHJSBabelTransform='.hhjs_babel_transform_path()
+    : '';
+
   $cmds = array();
   foreach ($modes as $mode) {
     $args = array(
@@ -872,7 +882,7 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
         .escapeshellarg(bin_root().'/hackc_%{schema}'),
       '-vEval.EmbeddedDataExtractPath='
         .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
-
+      $hhjs_babel_transform_arg,
       extra_args($options),
     );
 
@@ -1003,6 +1013,8 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $cmd .= ' -vDeploymentId="' . $options['jitsample'] . '"';
     $cmd .= ' --instance-id="' . $test . '"';
     $cmd .= ' -vEval.JitSampleRate=1';
+    $cmd .= " -vScribe.Tables.hhvm_jit.include.*=instance_id";
+    $cmd .= " -vScribe.Tables.hhvm_jit.include.*=deployment_id";
   }
 
   // Command line arguments
@@ -2540,11 +2552,11 @@ function msg_loop($num_tests, $queue) {
       $fill = $bar_cols - ($passed_ticks + $skipped_ticks + $failed_ticks);
       if ($fill < 0) $fill = 0;
 
-      $fill = str_repeat('-', $fill);
+      $fill = str_repeat('-', (int)$fill);
 
-      $passed_ticks = str_repeat('#',  $passed_ticks);
-      $skipped_ticks = str_repeat('#', $skipped_ticks);
-      $failed_ticks = str_repeat('#',  $failed_ticks);
+      $passed_ticks = str_repeat('#',  (int)$passed_ticks);
+      $skipped_ticks = str_repeat('#', (int)$skipped_ticks);
+      $failed_ticks = str_repeat('#',  (int)$failed_ticks);
 
       echo
         "\033[2K\033[1G[",

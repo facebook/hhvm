@@ -75,8 +75,7 @@ bool is_collection_method_returning_this(const php::Class* cls,
   return false;
 }
 
-Type native_function_return_type(const php::Func* f,
-                                 bool include_coercion_failures) {
+Type native_function_return_type(const php::Func* f) {
   assert(f->nativeInfo);
 
   // Infer the type from the HNI declaration
@@ -104,17 +103,6 @@ Type native_function_return_type(const php::Func* f,
   } else {
     // Otherwise it should be a simple type or possibly everything.
     assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
-  }
-
-  if (include_coercion_failures) {
-    // If parameter coercion fails, we can also get null or false depending on
-    // the function.
-    if (f->attrs & AttrParamCoerceModeNull) {
-      t |= TInitNull;
-    }
-    if (f->attrs & AttrParamCoerceModeFalse) {
-      t |= TFalse;
-    }
   }
 
   return remove_uninit(t);

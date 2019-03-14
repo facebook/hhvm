@@ -355,9 +355,9 @@ and class_decl c =
     List.partition_tf ~f:(fun x -> x.smr_static) c.sc_method_redeclarations in
   let m = inherited.Decl_inherit.ih_methods in
   let m = List.fold_left ~f:(method_redecl_acc c) ~init:m redecl_methods in
-  let m, condition_types = List.fold_left
+  let m = List.fold_left
       ~f:(method_decl_acc ~is_static:false c )
-      ~init:(m, SSet.empty) c.sc_methods in
+      ~init:m c.sc_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_fold c)
     ~init:consts c.sc_consts in
@@ -370,9 +370,9 @@ and class_decl c =
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm = List.fold_left ~f:(method_redecl_acc c) ~init:sm redecl_smethods in
-  let sm, condition_types = List.fold_left c.sc_static_methods
+  let sm = List.fold_left c.sc_static_methods
       ~f:(method_decl_acc ~is_static:true c )
-      ~init:(sm, condition_types) in
+      ~init:sm in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl parent_cstr c in
   let has_concrete_cstr = match (fst cstr) with
@@ -416,7 +416,7 @@ and class_decl c =
   let ext_strict = List.fold_left c.sc_uses
     ~f:(trait_exists env) ~init:ext_strict in
   if not ext_strict &&
-      (env.Decl_env.mode = FileInfo.Mstrict) then
+     (FileInfo.is_strict env.Decl_env.mode) then
     let p, name = c.sc_name in
     Errors.strict_members_not_known p name
   else ();
@@ -426,6 +426,15 @@ and class_decl c =
   let has_own_cstr = has_concrete_cstr && (None <> c.sc_constructor) in
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
   let sealed_whitelist = get_sealed_whitelist c in
+  let condition_types =
+    SSet.empty
+    |> Shallow_decl.add_condition_types c
+    |> SMap.fold begin fun ancestor _ acc ->
+      match Shallow_classes_heap.get ancestor with
+      | None -> acc
+      | Some cls -> Shallow_decl.add_condition_types cls acc
+    end impl
+  in
   let tc = {
     dc_final = c.sc_final;
     dc_const = const;
@@ -663,14 +672,24 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
   | Ast.Ctrait | Ast.Cenum -> acc
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+    let name = (snd stc.stc_name) in
     let c_name = (snd c.sc_name) in
     let ts = typeconst_structure c stc in
-    let consts = SMap.add (snd stc.stc_name) ts consts in
+    let consts = SMap.add name ts consts in
+    let enforceable =
+      (* Without the positions, this is a simple OR, but this way allows us to
+       * report the position of the <<__Enforceable>> attribute to the user *)
+      if snd stc.stc_enforceable
+      then stc.stc_enforceable
+      else match SMap.get name typeconsts with
+        | Some ptc -> ptc.ttc_enforceable
+        | None -> Pos.none, false in
     let tc = {
       ttc_name = stc.stc_name;
       ttc_constraint = stc.stc_constraint;
       ttc_type = stc.stc_type;
       ttc_origin = c_name;
+      ttc_enforceable = enforceable;
     } in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts
@@ -717,27 +736,11 @@ and method_redecl_acc c acc m =
   add_meth (elt.elt_origin, id) ft;
   SMap.add id elt acc
 
-and method_decl_acc ~is_static c (acc, condition_types) m  =
+and method_decl_acc ~is_static c acc m  =
   let check_override = method_check_override c m acc in
   let has_memoizelsb = m.sm_memoizelsb in
   let ft = m.sm_type in
   let _, id = m.sm_name in
-  let condition_types =
-    match ft.ft_reactive with
-    | Reactive (Some (_, Tapply ((_, cls), []))) ->
-      SSet.add cls condition_types
-    | Reactive None ->
-      condition_types
-    | Shallow (Some (_, Tapply ((_, cls), []))) ->
-      SSet.add cls condition_types
-    | Shallow None ->
-      condition_types
-    | Local (Some (_, Tapply ((_, cls), [])))  ->
-      SSet.add cls condition_types
-    | Local None ->
-      condition_types
-    | _ -> condition_types
-  in
   let vis =
     match SMap.get id acc, m.sm_visibility with
     | Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected ->
@@ -764,7 +767,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m  =
   in
   add_meth (elt.elt_origin, id) ft;
   let acc = SMap.add id elt acc in
-  acc, condition_types
+  acc
 
 and method_check_trait_overrides ~is_static c id meth =
   if meth.elt_override then begin
@@ -873,7 +876,7 @@ let const_decl cst =
   | None ->
     match cst.cst_value >>= Decl_utils.infer_const with
     | Some ty -> ty
-    | None when cst.cst_mode = FileInfo.Mstrict && (not cst.cst_is_define) ->
+    | None when FileInfo.is_strict cst.cst_mode ->
       Errors.missing_typehint cst_pos;
       Reason.Rwitness cst_pos, Tany
     | None ->

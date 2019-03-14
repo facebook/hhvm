@@ -1,6 +1,5 @@
 
 Warning: %s
-NULL
 array(4) {
   ["ONE"]=>
   int(1)
@@ -17,7 +16,6 @@ array(1) {
 }
 
 Warning: %s
-NULL
 array(1) {
   ["ONE"]=>
   int(3)

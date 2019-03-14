@@ -1,6 +1,6 @@
 <?php
 
-function foo($x) {
+function foo() {
   if ($x) {
     $y = "asd";
   } else {

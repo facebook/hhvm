@@ -56,6 +56,7 @@ val is_sub_type_alt :
     sub_type env int string => error
  *)
 val sub_type :
+  ?error:(Env.env -> locl ty -> locl ty -> unit) option ->
   Env.env ->
   locl ty ->
   locl ty ->
@@ -105,6 +106,14 @@ val solve_all_unsolved_tyvars :
 val expand_type_and_solve :
   Env.env ->
   description_of_expected:string ->
+  Pos.t ->
+  locl ty ->
+  Env.env * locl ty
+
+val expand_type_and_narrow :
+  Env.env ->
+  description_of_expected:string ->
+  (Env.env -> locl ty -> Env.env * locl ty option) ->
   Pos.t ->
   locl ty ->
   Env.env * locl ty

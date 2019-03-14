@@ -167,6 +167,7 @@ const Func* lookupFallbackFunc(const StringData* name,
   auto func = Unit::loadFunc(name);
   if (LIKELY(!func)) {
     // Then try to load the fallback function.
+    raise_undefined_function_fallback_notice(name, fallback);
     func = Unit::loadFunc(fallback);
     if (UNLIKELY(!func)) {
       raise_error("Call to undefined function %s()",

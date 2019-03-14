@@ -226,6 +226,7 @@ let dump ?(ignored=false) node =
       print ("SplitWith " ^ match cost with
         | Cost.NoCost -> "Cost.NoCost"
         | Cost.Base -> "Cost.Base"
+        | Cost.Moderate -> "Cost.Moderate"
         | Cost.High -> "Cost.High")
     | Newline ->
       print "Newline"

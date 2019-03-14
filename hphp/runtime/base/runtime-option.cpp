@@ -69,6 +69,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file-util-defs.h"
@@ -125,6 +126,7 @@ std::string mangleForKey(const RepoOptions::StringMap& map) {
   }
   return s;
 }
+std::string mangleForKey(std::string s) { return s; }
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
 }
@@ -138,7 +140,14 @@ void hdfExtract(
   if (config.exists() && !config.isEmpty()) config.configGet(map);
   else map = dv;
 }
-
+void hdfExtract(
+  const Hdf& hdf,
+  const char* name,
+  std::string& val,
+  std::string dv
+) {
+  val = hdf[name].configGetString(dv);
+}
 folly::dynamic toIniValue(bool b) {
   return b ? "1" : "0";
 }
@@ -149,6 +158,10 @@ folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
     obj[kv.first] = kv.second;
   }
   return obj;
+}
+
+folly::dynamic toIniValue(const std::string& str) {
+  return str;
 }
 
 struct CachedRepoOptions {
@@ -207,39 +220,134 @@ using RepoOptionCache = tbb::concurrent_hash_map<
 >;
 RepoOptionCache s_repoOptionCache;
 
-}
-
-const RepoOptions& RepoOptions::forFile(const char* path) {
+template<class F>
+bool walkDirTree(std::string fpath, F func) {
   const char* filename = ".hhvmconfig.hdf";
-  std::string fpath{path};
-  if (boost::starts_with(fpath, "/:")) return defaults();
   do {
     auto const off = fpath.rfind('/');
-    if (off == std::string::npos) return defaults();
+    if (off == std::string::npos) return false;
     fpath.resize(off);
     fpath += '/';
     fpath += filename;
 
-    if (!access(fpath.data(), R_OK)) {
-      struct stat st;
-      lstat(fpath.data(), &st);
-
-      RepoOptionCache::const_accessor rpathAcc;
-      s_repoOptionCache.insert(rpathAcc, fpath);
-
-      if (auto const opts = rpathAcc->second.fetch(st)) {
-        return *opts;
-      }
-
-      RepoOptions newOpts{fpath.data()};
-      newOpts.m_stat = st;
-      return *rpathAcc->second.update(std::move(newOpts));
-    }
+    if (func(fpath)) return true;
 
     fpath.resize(off);
   } while (!fpath.empty() && fpath != "/");
+  return false;
+}
 
-  return defaults();
+RDS_LOCAL(std::string, s_lastSeenRepoConfig);
+
+}
+
+const RepoOptions& RepoOptions::forFile(const char* path) {
+  if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
+
+  std::string fpath{path};
+  if (boost::starts_with(fpath, "/:")) return defaults();
+
+  // Fast path: we have an active request and it has cached a RepoOptions
+  // which has not been modified. This only works when the runtime option
+  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
+  // configs that were added between the current directory and the source file.
+  // (Loading these configs would result in a fatal anyway with this option)
+  if (!g_context.isNull()) {
+    if (auto const opts = g_context->getRepoOptionsForRequest()) {
+      // If path() is empty we have the default() options, which means we have
+      // negatively cached the existance of a .hhvmconfig.hdf for this request.
+      if (opts->path().empty()) return *opts;
+
+      if (boost::starts_with(fpath, opts->path())) {
+        struct stat st;
+        if (lstat(opts->path().data(), &st) == 0) {
+          if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
+        }
+      }
+    }
+  }
+
+  auto const set = [&] (
+    RepoOptionCache::const_accessor& rpathAcc,
+    const std::string& path,
+    const struct stat& st
+  ) -> const RepoOptions* {
+    *s_lastSeenRepoConfig = path;
+    if (auto const opts = rpathAcc->second.fetch(st)) {
+      return opts;
+    }
+    RepoOptions newOpts{path.data()};
+    newOpts.m_stat = st;
+    return rpathAcc->second.update(std::move(newOpts));
+  };
+
+  auto const test = [&] (const std::string& path) -> const RepoOptions* {
+    struct stat st;
+    RepoOptionCache::const_accessor rpathAcc;
+    if (!s_repoOptionCache.find(rpathAcc, path)) return nullptr;
+    if (lstat(path.data(), &st) != 0) {
+      s_repoOptionCache.erase(rpathAcc);
+      return nullptr;
+    }
+    return set(rpathAcc, path, st);
+  };
+
+  const RepoOptions* ret{nullptr};
+
+  // WARNING: when Eval.CachePerRepoOptionsPath we cache the last used path for
+  //          RepoOptions per thread, and while we will detect changes to this
+  //          file, and do a rescan in the event that it is deleted or doesn't
+  //          match the current file being loaded, we will miss out on new
+  //          configs that may be added. Since we expect to see a single config
+  //          per repository we expect that this will be a reasonably safe,
+  //          optimization.
+  if (RuntimeOption::EvalCachePerRepoOptionsPath) {
+    if (!s_lastSeenRepoConfig->empty() &&
+        boost::starts_with(fpath, *s_lastSeenRepoConfig)) {
+      if (auto const r = test(*s_lastSeenRepoConfig)) return *r;
+      s_lastSeenRepoConfig->clear();
+    }
+
+    // If the last seen path isn't set yet or is no longer accurate try checking
+    // other cached paths before falling back to the filesystem.
+    walkDirTree(fpath, [&] (const std::string& path) {
+      return (ret = test(path)) != nullptr;
+    });
+  }
+
+  if (ret) return *ret;
+
+  walkDirTree(fpath, [&] (const std::string& path) {
+    struct stat st;
+    if (lstat(path.data(), &st) != 0) return false;
+    RepoOptionCache::const_accessor rpathAcc;
+    s_repoOptionCache.insert(rpathAcc, path);
+    ret = set(rpathAcc, path, st);
+    return true;
+  });
+
+  return ret ? *ret : defaults();
+}
+
+static inline std::string hhjsBabelTransformDefault() {
+  std::vector<folly::StringPiece> searchPaths;
+  folly::split(":", hhjsBabelTransform(), searchPaths);
+  std::string here = current_executable_directory();
+
+  for (folly::StringPiece searchPath : searchPaths) {
+    std::string transform = searchPath.toString();
+    std::size_t found = transform.find("{}");
+
+    if (found != std::string::npos) {
+      transform.replace(found, 2, here);
+    }
+
+    if (::access(transform.data(), X_OK) == 0) {
+      return transform;
+    }
+  }
+
+  return "";
 }
 
 std::string RepoOptions::cacheKeyRaw() const {
@@ -355,7 +463,7 @@ PARSERFLAGS()
 #undef E
 
   filterNamespaces();
-  m_path = "{default options}";
+  m_path.clear();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -376,12 +484,11 @@ bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnablePHP = true;
+bool RuntimeOption::EnablePHP = false;
 bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
-bool RuntimeOption::EnableContextInErrorHandler = false;
 bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
@@ -390,6 +497,7 @@ bool RuntimeOption::IntsOverflowToInts = false;
 bool RuntimeOption::EnableReifiedGenerics = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
+bool RuntimeOption::EnablePocketUniverses = false;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -693,20 +801,21 @@ int64_t RuntimeOption::HeapResetCountBase = 1;
 int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
-
 uint64_t RuntimeOption::DisableForwardStaticCall = 2;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 2;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
-uint64_t RuntimeOption::DisableDefine = 1;
-bool RuntimeOption::UndefinedConstAsString = true;
+uint64_t RuntimeOption::DisableDefine = 2;
+bool RuntimeOption::UndefinedConstAsString = false;
 uint64_t RuntimeOption::UndefinedConstFallback = 0;
+uint64_t RuntimeOption::UndefinedFunctionFallback = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisallowExecutionOperator = true;
 bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
+bool RuntimeOption::DisableStaticClosures = false;
 bool RuntimeOption::DisableStaticLocalVariables = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -1482,6 +1591,9 @@ void RuntimeOption::Load(
     Config::Bind(UndefinedConstFallback, ini, config,
                  "Hack.Lang.Phpism.UndefinedConstFallback",
                  UndefinedConstFallback);
+    Config::Bind(UndefinedFunctionFallback, ini, config,
+                 "Hack.Lang.Phpism.UndefinedFunctionFallback",
+                 UndefinedFunctionFallback);
     Config::Bind(DisableCallUserFunc, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFunc",
                  DisableCallUserFunc);
@@ -1503,6 +1615,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableNontoplevelDeclarations, ini, config,
                  "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
                  DisableNontoplevelDeclarations);
+    Config::Bind(DisableStaticClosures, ini, config,
+                 "Hack.Lang.Phpism.DisableStaticClosures",
+                 DisableStaticClosures);
     Config::Bind(DisableStaticLocalVariables, ini, config,
                  "Hack.Lang.Phpism.DisableStaticLocalVariables",
                  DisableStaticLocalVariables);
@@ -1647,6 +1762,8 @@ void RuntimeOption::Load(
     EVALFLAGS()
 #undef F
 
+    if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
+
     EvalHackCompilerExtractPath = insertSchema(
       EvalHackCompilerExtractPath.data()
     );
@@ -1712,8 +1829,6 @@ void RuntimeOption::Load(
     // NB: after we know the value of RepoAuthoritative.
     Config::Bind(EnableArgsInBacktraces, ini, config,
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
-    Config::Bind(EnableContextInErrorHandler, ini, config,
-                 "Eval.EnableContextInErrorHandler", false);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
     if (RepoAuthoritative) {
@@ -1818,6 +1933,9 @@ void RuntimeOption::Load(
 
     Config::Bind(EnableReifiedGenerics, ini, config,
                  "Hack.Lang.EnableReifiedGenerics",
+                 false);
+    Config::Bind(EnablePocketUniverses, ini, config,
+                 "Hack.Lang.EnablePocketUniverses",
                  false);
   }
   {

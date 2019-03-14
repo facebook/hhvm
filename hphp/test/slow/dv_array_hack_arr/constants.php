@@ -12,10 +12,10 @@ class A {
 
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+const VCONST1 = varray[1, 2, 3];
+const DCONST1 = darray[100 => 'abc', 'def' => 200];
 <<__EntryPoint>>
 function main_constants() {
-define('VCONST1', varray[1, 2, 3]);
-define('DCONST1', darray[100 => 'abc', 'def' => 200]);
 
 var_dump(VCONST1);
 var_dump(VCONST2);

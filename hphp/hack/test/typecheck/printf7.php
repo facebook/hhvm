@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ interface MyPlainSprintf {
   public function format_s(mixed $s): string;
 }
 
-function my_sprintf(FormatString<MyPlainSprintf> $f, ...): string {
+function my_sprintf(HH\FormatString<MyPlainSprintf> $f, ...): string {
   return 'hi';
 }
 

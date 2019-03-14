@@ -3,5 +3,4 @@
 -- Testing curl_version() function with more than expected no. of arguments --
 
 Warning: %s
-NULL
 ===Done===

@@ -19,7 +19,7 @@ $functions = [
 foreach ($functions as $type => $function) {
     echo "Testing $type:", PHP_EOL;
     try {
-        var_dump($function());
+        var_dump($function(null));
     } catch (TypeError $e) {
         echo "*** Caught " . $e->getMessage() . PHP_EOL;
     }

@@ -112,14 +112,12 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   return VariableSerializer::ArrayKind::PHP;
 }
 
-void VariableSerializer::pushObjectInfo(const String& objClass, int objId,
-                                        char objCode) {
+void VariableSerializer::pushObjectInfo(const String& objClass, char objCode) {
   assertx(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objectInfos.emplace_back(
-    ObjectInfo { m_objClass, m_objId, m_objCode, m_rsrcName, m_rsrcId }
+    ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
   );
   m_objClass = objClass;
-  m_objId = objId;
   m_objCode = objCode;
   m_rsrcName.reset();
   m_rsrcId = 0;
@@ -127,10 +125,9 @@ void VariableSerializer::pushObjectInfo(const String& objClass, int objId,
 
 void VariableSerializer::pushResourceInfo(const String& rsrcName, int rsrcId) {
   m_objectInfos.emplace_back(
-    ObjectInfo { m_objClass, m_objId, m_objCode, m_rsrcName, m_rsrcId }
+    ObjectInfo { m_objClass, m_objCode, m_rsrcName, m_rsrcId }
   );
   m_objClass.reset();
-  m_objId = 0;
   m_objCode = 0;
   m_rsrcName = rsrcName;
   m_rsrcId = rsrcId;
@@ -139,7 +136,6 @@ void VariableSerializer::pushResourceInfo(const String& rsrcName, int rsrcId) {
 void VariableSerializer::popObjectInfo() {
   ObjectInfo &info = m_objectInfos.back();
   m_objClass = info.objClass;
-  m_objId = info.objId;
   m_objCode = info.objCode;
   m_rsrcName = info.rsrcName;
   m_rsrcId = info.rsrcId;
@@ -652,7 +648,7 @@ void VariableSerializer::write(const Object& v) {
         m_buf->append("{}");
       } else {
         auto props = v->toArray(true);
-        pushObjectInfo(v->getClassName(), v->getId(), 'O');
+        pushObjectInfo(v->getClassName(), 'O');
         serializeArray(props, true);
         popObjectInfo();
       }
@@ -1749,7 +1745,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
   auto type = obj->collectionType();
 
   if (isMapCollection(type)) {
-    pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
+    pushObjectInfo(obj->getClassName(),'K');
     writeArrayHeader(sz, false, AK::PHP);
     for (ArrayIter iter(obj); iter; ++iter) {
       writeCollectionKey(iter.first(), AK::PHP);
@@ -1761,7 +1757,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
     assertx(isVectorCollection(type) ||
             isSetCollection(type) ||
             (type == CollectionType::Pair));
-    pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
+    pushObjectInfo(obj->getClassName(), 'V');
     writeArrayHeader(sz, true, AK::PHP);
     auto ser_type = getType();
     if (ser_type == VariableSerializer::Type::Serialize ||
@@ -2009,7 +2005,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
                      "__sleep() but does not exist", propName.data());
         wanted.set(propName, init_null());
       }
-      pushObjectInfo(obj->getClassName(), obj->getId(), 'O');
+      pushObjectInfo(obj->getClassName(), 'O');
       if (!serializableNativeData.isNull()) {
         wanted.set(s_serializedNativeDataKey, serializableNativeData);
       }
@@ -2091,14 +2087,14 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           s_PHP_Incomplete_Class_Name.get()
         ).unboxed();
         if (cname && isStringType(cname.type())) {
-          pushObjectInfo(StrNR(cname.val().pstr), obj->getId(), 'O');
+          pushObjectInfo(StrNR(cname.val().pstr), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           serializeArray(properties, true);
           popObjectInfo();
           return;
         }
       }
-      pushObjectInfo(className, obj->getId(), 'O');
+      pushObjectInfo(className, 'O');
       if (!serializableNativeData.isNull()) {
         properties.set(s_serializedNativeDataKey, serializableNativeData);
       }

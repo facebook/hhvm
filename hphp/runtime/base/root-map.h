@@ -35,17 +35,26 @@ template<class T> struct RootMap {
 
   RootId addRoot(req::ptr<T>&& ptr) {
     assertx(ptr);
-    const RootId tok = ptr->getId();
+    auto const tok = reinterpret_cast<uintptr_t>(ptr.get());
+    assertx(!containsKey(tok));
     getMap().emplace(tok, std::move(ptr));
     return tok;
   }
 
   RootId addRoot(const req::ptr<T>& ptr) {
     assertx(ptr);
-    auto tok = ptr->getId();
+    auto const tok = reinterpret_cast<uintptr_t>(ptr.get());
+    assertx(!containsKey(tok));
     getMap()[tok] = ptr;
     return tok;
     static_assert(sizeof(tok) <= sizeof(RootId), "");
+  }
+
+  bool containsKey(RootId tok) const {
+    if (!m_map) return false;
+    auto& map = *m_map;
+    auto it = map.find(tok);
+    return it != map.end();
   }
 
   req::ptr<T> lookupRoot(const void* vp) const {
@@ -76,11 +85,13 @@ template<class T> struct RootMap {
   }
 
   bool removeRoot(const req::ptr<T>& ptr) {
-    return removeRoot(ptr->getId()) != nullptr;
+    auto const tok = reinterpret_cast<uintptr_t>(ptr.get());
+    return removeRoot(tok) != nullptr;
   }
 
   bool removeRoot(const T* ptr) {
-    return removeRoot(ptr->getId()) != nullptr;
+    auto const tok = reinterpret_cast<uintptr_t>(ptr);
+    return removeRoot(tok) != nullptr;
   }
 
   void reset() {

@@ -57,18 +57,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-// current maximum object identifier
-IMPLEMENT_RDS_LOCAL_HOTVALUE(uint32_t, os_max_id);
-
 TRACE_SET_MOD(runtime);
-
-#ifdef _MSC_VER
-static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 20),
-              "Change this only on purpose");
-#else
-static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
-              "Change this only on purpose");
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -234,9 +223,6 @@ void ObjectData::release() noexcept {
       WeakRefData::invalidateWeakRef((uintptr_t)this);
     }
   }
-
-  auto& pmax = os_max_id;
-  if (o_id && o_id == pmax) --pmax;
 
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
@@ -1215,10 +1201,6 @@ ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.
 ObjectData::~ObjectData() {
-  auto& pmax = os_max_id;
-  if (o_id && o_id == pmax) {
-    --pmax;
-  }
   if (UNLIKELY(slowDestroyCheck())) {
     // The only builtin classes that use ~ObjectData and support memoization
     // are ones with native data, and the memo slot cleanup for them happens

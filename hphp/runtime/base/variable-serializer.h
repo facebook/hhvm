@@ -158,7 +158,7 @@ private:
   void setRefCount(int count) { m_refCount = count;}
   bool incNestedLevel(tv_rval tv);
   void decNestedLevel(tv_rval tv);
-  void pushObjectInfo(const String& objClass, int objId, char objCode);
+  void pushObjectInfo(const String& objClass, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
   void popResourceInfo();
@@ -258,7 +258,6 @@ private:
   bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?
   int m_refCount{1};             // current variable's reference count
   String m_objClass;             // for object serialization
-  int m_objId{0};                // for object serialization
   char m_objCode{0};             // for object serialization
   String m_rsrcName;             // for resource serialization
   int m_rsrcId{0};               // for resource serialization
@@ -280,7 +279,6 @@ private:
 
   struct ObjectInfo {
     String objClass;
-    int    objId;
     char   objCode;
     String rsrcName;
     int    rsrcId;

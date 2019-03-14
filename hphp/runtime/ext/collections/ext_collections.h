@@ -57,7 +57,7 @@ Object materialize(ObjectData* obj) {
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-constexpr ptrdiff_t FAST_SIZE_OFFSET = use_lowptr ? 16 : 24;
+constexpr ptrdiff_t FAST_SIZE_OFFSET = 16;
 inline size_t getSize(const ObjectData* od) {
   assertx(od->isCollection());
   return *reinterpret_cast<const uint32_t*>(

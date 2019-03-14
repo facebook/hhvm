@@ -24,10 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void ObjectData::resetMaxId() {
-  os_max_id = 0;
-}
-
 inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
@@ -35,7 +31,6 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
   assertx(!isCollection()); // collections use NoInit{}
-  o_id = ++os_max_id;
   instanceInit(cls);
 }
 
@@ -46,7 +41,6 @@ inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
   initHeader_16(kind, OneReference, flags);
   assertx(isObjectKind(m_kind));
   assertx(!cls->needInitialization() || cls->initialized());
-  o_id = ++os_max_id;
 }
 
 inline ObjectData::ObjectData(Class* cls, NoInit, uint8_t flags,
@@ -303,10 +297,6 @@ inline bool ObjectData::hasInstanceDtor() const {
 
 inline bool ObjectData::hasNativeData() const {
   return m_kind == HeaderKind::NativeObject;
-}
-
-inline uint32_t ObjectData::getId() const {
-  return o_id;
 }
 
 inline bool ObjectData::toBoolean() const {

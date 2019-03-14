@@ -1594,7 +1594,6 @@ void ExecutionContext::requestInit() {
   initBlackHole();
   VarEnv::createGlobal();
   vmStack().requestInit();
-  ObjectData::resetMaxId();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
 

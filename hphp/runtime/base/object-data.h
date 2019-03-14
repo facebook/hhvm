@@ -146,7 +146,6 @@ struct InvokeResult {
 #pragma pack(push, 1)
 #endif
 
-extern DECLARE_RDS_LOCAL_HOTVALUE(uint32_t, os_max_id);
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint8_t {
     NoAttrs            = 0x00,
@@ -167,8 +166,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   static constexpr size_t sizeofAttrs() {
     return sizeof(m_aux16);
   }
-
-  static void resetMaxId();
 
   explicit ObjectData(Class*, uint8_t flags = 0,
                       HeaderKind = HeaderKind::Object);
@@ -246,7 +243,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Class* getVMClass() const;
   void setVMClass(Class* cls);
   StrNR getClassName() const;
-  uint32_t getId() const;
 
   // instanceof() can be used for both classes and interfaces.
   bool instanceof(const String&) const;
@@ -557,18 +553,23 @@ private:
 
   void verifyPropTypeHintImpl(tv_rval, const Class::Prop&) const;
 
-// offset:  0        8       12   16   20          32
-// 64bit:   header   cls          id   [subclass]  [props...]
-// lowptr:  header   cls     id   [subclass][props...]
+// offset:  0       8       12      16
+// 64bit:   header  cls             [subclass][props...]
+// lowptr:  header  cls     [subclass][props...]
 
 private:
   LowPtr<Class> m_cls;
-  uint32_t o_id; // id of this object (used for var_dump(), and WeakRefs)
 };
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 
+#ifdef _MSC_VER
+static_assert(sizeof(ObjectData) == (use_lowptr ? 12 : 16),
+              "Change this only on purpose");
+#else
+static_assert(sizeof(ObjectData) == 16, "Change this only on purpose");
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void decRefObj(ObjectData* obj) {

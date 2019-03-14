@@ -352,8 +352,11 @@ let connect (env : env) : conn Lwt.t =
     Lwt.return conn
   with
   | e ->
+    (* we'll log this exception, then re-raise the exception, but using the *)
+    (* original backtrace of "e" rather than generating a new backtrace.    *)
+    let backtrace = Caml.Printexc.get_raw_backtrace () in
     HackEventLogger.client_establish_connection_exception e;
-    raise e
+    Caml.Printexc.raise_with_backtrace e backtrace
 
 let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
   = fun {

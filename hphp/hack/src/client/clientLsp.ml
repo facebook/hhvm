@@ -1854,6 +1854,8 @@ let rec connect (state: state) : state Lwt.t =
       | Exit_with Out_of_retries
       | Exit_with Out_of_time ->
         "hh_server is waiting for things to settle"
+      | Exit_with No_server_running_should_retry ->
+        ClientMessages.lsp_explanation_for_no_server_running
       | _ ->
         "hh_server: " ^ message
     in
@@ -2147,7 +2149,8 @@ let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
           request = {
             type_ = MessageType.ErrorMessage;
             message =
-              p.explanation ^ " Language features such as autocomplete are currently unavailable.";
+              p.explanation ^
+                " Language features such as errors and go-to-def are currently unavailable.";
             actions = [{title = "Restart Hack Server"}];
           };
           progress = None;

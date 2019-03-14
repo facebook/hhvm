@@ -18,20 +18,10 @@ function test($c) {
 <<__EntryPoint>>
 function main_1477() {
 if (f()) {
-  interface A {
- }
-  class B {
- }
-  interface C {
- }
+  include '1477-1.inc';
 }
  else {
-  class A {
- }
-  interface B {
- }
-  interface C {
- }
+  include '1477-2.inc';
 }
 test('C');
 }

@@ -1,12 +1,10 @@
 <?php
 
 if (true) {
- class base extends Exception {
+  include '1475-1.inc';
 }
- }
  else {
- class base {
-}
+  include '1475-2.inc';
  }
 class child1 extends base {
 }

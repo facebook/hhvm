@@ -21,10 +21,7 @@ $a = 'failed';
 A::bar(&$a);
 var_dump($a);
 if (false) {
-  class A{
-}
-  class A2{
-}
+  include '1478.inc';
 }
 $a = 'failed';
 A2::bar(&$a);

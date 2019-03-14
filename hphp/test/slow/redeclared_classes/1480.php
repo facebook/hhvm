@@ -6,12 +6,10 @@ class A {
  }
  }
 if (true) {
- class B {
-}
+  include '1480-1.inc';
 }
  else {
- class B {
-}
+  include '1480-2.inc';
  }
 class C extends B {
   public function foo() {

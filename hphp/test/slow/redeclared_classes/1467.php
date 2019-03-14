@@ -4,26 +4,14 @@ function f($i) {
   $j = 1;
   var_dump($j);
   if ($i == 1) {
-    class p {
-      public $data1;
-    }
-    class c extends p {
-    }
+    include '1467-1.inc';
   }
  else {
-    class p {
-      public $data2;
-    }
-    class c extends p {
-    }
-  }
+    include '1467-2.inc';
+ }
 }
 if ($i == 1) {
-  class p {
-    public $data1;
-  }
-  class c extends p {
-  }
+  include '1467-3.inc';
 }
 f(1);
 $obj = new p();

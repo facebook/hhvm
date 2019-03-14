@@ -14,8 +14,7 @@ class b extends a{
 <<__EntryPoint>>
 function main_1466() {
 if (0) {
-  class b {
-  }
+  include '1466-1.inc';
 }
 b::x();
 }

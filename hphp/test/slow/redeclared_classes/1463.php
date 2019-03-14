@@ -1,26 +1,10 @@
 <?php
 
 if (true) {
-  class base {
-    public $baseVal =  'base';
-    static $baseStatic = 'baseStat';
-    function childProp() {
- return $this->childProp;
- }
-    function testChildMeth() {
- return $this->childMeth();
- }
-    static function baseStatMeth() {
-      return 'Base static method';
-    }
-    function childMeth() {
- return 'I am base';
- }
-  }
+  include '1463-1.inc';
 }
  else {
-  class base {
-  }
+  include '1463-2.inc';
 }
 class child1 extends base {
   public $child1Val = 'child1';
@@ -54,24 +38,10 @@ class child2 extends child1 {
  }
 }
 if (true) {
-  class child3 extends child2 {
-    public $child3Val = 'child3';
-    public $childProp = 'IamChild3';
-    static $child3Static = 'child3Stat';
-    function childMeth() {
-      return 'I am child3';
-    }
-    static function child3StatMeth() {
-      return 'Child 3 static method';
-    }
-    function parentChildMeth() {
-      return parent::childMeth();
-    }
-  }
+  include '1463-3.inc';
 }
  else {
-  class child3 {
-}
+  include '1463-4.inc';
 }
 function test($val, $exp, $feature) {
   if ($val !== $exp) {

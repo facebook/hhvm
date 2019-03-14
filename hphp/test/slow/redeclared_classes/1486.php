@@ -1,12 +1,10 @@
 <?php
 
 if (isset($g)) {
- class c{
-}
+  include '1486-1.inc';
  }
  else {
- class c{
-}
+  include '1486-2.inc';
  }
 class d extends c {
   private $b = 'b';

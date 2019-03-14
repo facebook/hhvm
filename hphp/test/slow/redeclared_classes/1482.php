@@ -21,12 +21,7 @@ function test() {
 <<__EntryPoint>>
 function main_1482() {
 if (false) {
-  class A {
-}
-  class B {
-}
-  class C {
-}
+  include '1482.inc';
 }
 test();
 }

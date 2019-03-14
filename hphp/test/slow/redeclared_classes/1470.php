@@ -2,20 +2,16 @@
 
 $a = 1;
 if ($a) {
-interface A {
-}
+  include '1470-1.inc';
 }
  else {
-interface A {
-}
+  include '1470-2.inc';
 }
 if ($a) {
-interface B extends A {
-}
+  include '1470-3.inc';
 }
  else {
-interface B extends A {
-}
+  include '1470-4.inc';
 }
 class Z implements B {
 }

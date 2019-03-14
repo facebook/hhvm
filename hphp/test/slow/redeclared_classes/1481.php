@@ -17,10 +17,7 @@ class c extends b {
 <<__EntryPoint>>
 function main_1481() {
 if (false) {
-  class b{
-}
-  class c{
-}
+  include '1481.inc';
 }
 $x = new c();
 $x->z();

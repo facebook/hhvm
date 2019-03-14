@@ -10,12 +10,10 @@ class X {
   }
 }
 if (1) {
-  class U {
-  }
+  include '1474-1.inc';
 }
  else {
-  class U extends X {
-  }
+  include '1474-2.inc';
 }
 
 class V extends U {

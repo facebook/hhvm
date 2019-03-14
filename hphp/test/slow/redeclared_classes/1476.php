@@ -9,8 +9,7 @@ class PEAR {
  }
 }
 if ($x) {
-  class PEAR {
-}
+  include '1476.inc';
 }
 class D1 extends PEAR {
   public $foo;

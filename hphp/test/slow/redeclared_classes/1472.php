@@ -13,8 +13,7 @@ class A extends B {
 function main_1472() {
 ;
 if (0) {
-  class B {
-}
+  include '1472.inc';
 }
 ;
 $a = new A;

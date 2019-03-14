@@ -1,15 +1,10 @@
 <?php
 
 if (isset($g)) {
-  class X {
-}
+  include '1489-1.inc';
 }
  else {
-  class X {
-    protected $prot_over_prot = 1;
-    public $pub_over_pub = 2;
-    protected $pub_over_prot = 3;
-  }
+  include '1489-2.inc';
 }
 class Y extends X {
   protected $prot_over_prot = 4;

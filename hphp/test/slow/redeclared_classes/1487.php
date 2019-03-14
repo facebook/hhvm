@@ -2,26 +2,18 @@
 
 if (!isset($h)) {
   if (isset($g)) {
-    interface A {
- function foo();
- }
+    include '1487-1.inc';
   }
  else {
-    interface A {
- function foo();
- }
+    include '1487-2.inc';
   }
 }
  else {
   if (isset($g)) {
-    interface X {
- function foo();
- }
+    include '1487-3.inc';
   }
  else {
-    interface X {
- function foo();
- }
+    include '1487-4.inc';
   }
 }
 abstract class B implements A {

@@ -16,9 +16,7 @@ try {
 <<__EntryPoint>>
 function main_1473() {
 if (0) {
-  class A {
- public $a = 2;
- }
+  include '1473.inc';
 }
  test();
 }

@@ -15,9 +15,6 @@ class C extends B {
 <<__EntryPoint>>
 function main_1468() {
 if (false) {
-  class A{
-    protected static function foo() {
-}
-  }
+  include '1468-1.inc';
 }
 }

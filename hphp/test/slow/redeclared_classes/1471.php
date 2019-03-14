@@ -5,15 +5,9 @@
 function main_1471() {
 $ok = 1;
 if ($ok) {
-class A {
-const FOO = 'test';
-public $a = A::FOO;
-}
+  include '1471-1.inc';
 }
  else {
-class A {
-const FOO = 'test';
-public $a = A::FOO;
-}
+  include '1471-2.inc';
 }
 }

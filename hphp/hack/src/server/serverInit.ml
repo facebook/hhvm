@@ -112,6 +112,17 @@ let init
           ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some msg));
           ServerLazyInit.full_init genv env, Load_state_failed msg_verbose
         end else begin
+          let finale_data = { ServerCommandTypes.
+            exit_status = next_step;
+            msg;
+            stack = Utils.Callstack stack;
+          } in
+          let finale_file = ServerFiles.server_finale_file (Unix.getpid ()) in
+          begin try
+            let oc = Pervasives.open_out_bin finale_file in
+            Marshal.to_channel oc finale_data [];
+            Pervasives.close_out oc
+          with _ -> () end;
           Exit_status.exit next_step
         end
       end

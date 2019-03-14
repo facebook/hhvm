@@ -11,6 +11,7 @@
 let test_process_data =
   ServerProcess.{
     pid = 2758734;
+    finale_file = "2758734.fin";
     start_t = 0.0;
     in_fd = Unix.stdin;
     out_fds = ["default", Unix.stdout];

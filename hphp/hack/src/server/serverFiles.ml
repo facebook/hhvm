@@ -35,3 +35,6 @@ let dfind_log root = path_of_root root "dfind"
 let client_lsp_log root = path_of_root root "client_lsp_log"
 
 let monitor_log_link root = path_of_root root "monitor_log"
+
+let server_finale_file (pid: int) : string =
+  Filename.concat GlobalConfig.tmp_dir (spf "%d.fin" pid)

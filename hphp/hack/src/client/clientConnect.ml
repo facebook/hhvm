@@ -10,7 +10,7 @@
 open Core_kernel
 module SMUtils = ServerMonitorUtils
 
-exception Server_hung_up
+exception Server_hung_up of ServerCommandTypes.finale_data option
 
 type env = {
   root : Path.t;
@@ -35,11 +35,22 @@ type env = {
 
 type conn = {
   channels : Timeout.in_channel * Out_channel.t;
+  server_finale_file : string;
   conn_retries : int option;
   conn_progress_callback: string option -> unit;
   conn_start_time: float;
   conn_root: Path.t;
 }
+
+let get_finale_data (server_finale_file: string) : ServerCommandTypes.finale_data option =
+  try
+    let ic = Pervasives.open_in_bin server_finale_file in
+    let contents : ServerCommandTypes.finale_data = Marshal.from_channel ic in
+    Pervasives.close_in ic;
+    Some contents
+  with _ ->
+    None
+
 
 let tty_progress_reporter () =
   let angery_reaccs_only =
@@ -86,6 +97,7 @@ let print_wait_msg (progress_callback: string option -> unit) (root: Path.t) : u
 let rec wait_for_server_message
     ~(expected_message : 'a ServerCommandTypes.message_type option)
     ~(ic : Timeout.in_channel)
+    ~(server_finale_file : string)
     ~(retries : int option)
     ~(progress_callback : string option -> unit)
     ~(start_time : float)
@@ -105,6 +117,7 @@ let rec wait_for_server_message
       wait_for_server_message
         ~expected_message
         ~ic
+        ~server_finale_file
         ~retries
         ~progress_callback
         ~start_time
@@ -122,17 +135,19 @@ let rec wait_for_server_message
             Lwt.return msg
           end else begin
           if not is_ping then print_wait_msg progress_callback root;
-          wait_for_server_message ~expected_message ~ic ~retries
+          wait_for_server_message ~expected_message ~ic ~server_finale_file ~retries
             ~progress_callback ~start_time ~root
         end
       with
       | End_of_file
       | Sys_error _ ->
+        let finale_data = get_finale_data server_finale_file in
         progress_callback None;
-        raise Server_hung_up
+        raise (Server_hung_up finale_data)
 
 let wait_for_server_hello
     (ic : Timeout.in_channel)
+    (server_finale_file : string)
     (retries : int option)
     (progress_callback : string option -> unit)
     (start_time : float)
@@ -142,6 +157,7 @@ let wait_for_server_hello
     wait_for_server_message
       ~expected_message:(Some ServerCommandTypes.Hello)
       ~ic
+      ~server_finale_file
       ~retries
       ~progress_callback
       ~start_time
@@ -151,11 +167,17 @@ let wait_for_server_hello
 
 let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
   try%lwt f () with
-  | Server_hung_up ->
-    (Printf.eprintf
-       ("Hack server disconnected suddenly. Most likely a new one" ^^
-        " is being initialized with a better saved state after a large rebase/update.\n");
-     raise Exit_status.(Exit_with No_server_running))
+  | Server_hung_up (Some finale_data) ->
+    let open ServerCommandTypes in
+    Printf.eprintf "Hack server disconnected suddenly [%s]\n   %s\n"
+      (Exit_status.to_string finale_data.exit_status)
+      finale_data.msg;
+    raise Exit_status.(Exit_with No_server_running)
+  | Server_hung_up None ->
+    Printf.eprintf
+      ("Hack server disconnected suddenly. Most likely a new one" ^^
+       " is being initialized with a better saved state after a large rebase/update.\n");
+    raise Exit_status.(Exit_with No_server_running)
 
 let rec connect
     ?(first_attempt=false)
@@ -202,16 +224,17 @@ let rec connect
     in
     HackEventLogger.client_connect_once connect_once_start_t;
     match conn with
-    | Ok (ic, oc) ->
+    | Ok (ic, oc, server_finale_file) ->
       let%lwt () =
         if env.do_post_handoff_handshake then
           with_server_hung_up @@ fun () ->
-          wait_for_server_hello ic retries env.progress_callback start_time env.root
+          wait_for_server_hello ic server_finale_file retries env.progress_callback start_time env.root
         else
           Lwt.return_unit
       in
       Lwt.return {
         channels = (ic, oc);
+        server_finale_file;
         conn_retries = retries;
         conn_progress_callback = env.progress_callback;
         conn_start_time = start_time;
@@ -332,10 +355,11 @@ let connect (env : env) : conn Lwt.t =
 let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
   = fun {
     channels = (ic, oc);
+    server_finale_file;
     conn_retries = retries;
     conn_progress_callback = progress_callback;
     conn_start_time = start_time;
-    conn_root
+    conn_root;
   } cmd ->
     Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
     Out_channel.flush oc;
@@ -343,6 +367,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
     let%lwt res = wait_for_server_message
         ~expected_message:None
         ~ic
+        ~server_finale_file
         ~retries
         ~progress_callback
         ~start_time

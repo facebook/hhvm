@@ -95,6 +95,7 @@ let make_test test =
 
     let fake_process_data = {
       ServerProcess.pid = 0;
+      finale_file = "";
       start_t = 0.0;
       in_fd = null_fd;
       out_fds = [];

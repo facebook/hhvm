@@ -16,12 +16,6 @@ module SLC = ServerLocalConfig
 
 include ServerInitTypes
 
-let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
-
-let matches_re re s =
-  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
-  pos > -1
-
 let run_search (genv: ServerEnv.genv) (t: float) : unit =
   if SearchServiceRunner.should_run_completely genv
   then begin
@@ -101,19 +95,25 @@ let init
       let result = ServerLazyInit.saved_state_init ~load_state_approach genv env root in
       (* Saved-state init is the only kind of init that might error... *)
       match result with
-      | Ok ((env, t), ({state_distance; _}, _)) -> (env, t), Load_state_succeeded state_distance
+      | Ok ((env, t), ({state_distance; _}, _)) ->
+        (env, t), Load_state_succeeded state_distance
       | Error err ->
-        let (msg, _retry, Utils.Callstack stack) = load_state_error_to_verbose_string err in
-        let err_str = msg ^ "\n" ^ stack in
-        HackEventLogger.load_state_exn err_str;
-        Hh_logger.log "Could not load saved state: %s" err_str;
-        let warning = if matches_re tls_bug_re err_str
-          then ClientMessages.tls_bug_msg
-          else ClientMessages.load_state_not_found_msg
-        in
-        ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some warning));
-        (* Fall back to type-checking everything *)
-        ServerLazyInit.full_init genv env, Load_state_failed err_str
+        let (msg, retry, Utils.Callstack stack) = load_state_error_to_verbose_string err in
+        let next_step_descr, next_step =
+          match genv.local_config.SLC.require_saved_state, retry with
+          | true, true -> "retry", Exit_status.Failed_to_load_should_retry
+          | true, false -> "fatal", Exit_status.Failed_to_load_should_abort
+          | false, _ -> "fallback", Exit_status.No_error in
+        let msg = Printf.sprintf "%s [%s]" msg next_step_descr in
+        let msg_verbose = Printf.sprintf "%s\n%s" msg stack in
+        HackEventLogger.load_state_exn msg_verbose;
+        Hh_logger.log "Could not load saved state: %s" msg_verbose;
+        if next_step = Exit_status.No_error then begin
+          ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some msg));
+          ServerLazyInit.full_init genv env, Load_state_failed msg_verbose
+        end else begin
+          Exit_status.exit next_step
+        end
       end
 
     | Off, Some _

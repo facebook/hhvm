@@ -7,11 +7,6 @@
  *
  *)
 
-let load_state_not_found_msg =
-  "WARNING: Saved state not found."
-
-let tls_bug_msg = ""
-
 let ignore_ide_from _ = false
 
 let waiting_for_server_to_be_started_doc = ""

@@ -1,7 +1,7 @@
 <?php
 namespace HH {
-  if (false) {
-    class Int {}
-  }
-  echo "Done\n";
+
+class Int {}
+
+echo "Done\n";
 }

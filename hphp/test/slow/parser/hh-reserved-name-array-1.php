@@ -1,6 +1,6 @@
 <?hh
 
-if (false) {
-  class Array {}
-}
+
+class Array {}
+
 echo "Done\n";

@@ -1,7 +1,7 @@
 <?php
 namespace HH {
-  if (false) {
-    class Void {}
-  }
-  echo "Done\n";
+
+class Void {}
+
+echo "Done\n";
 }

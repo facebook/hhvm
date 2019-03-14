@@ -1,5 +1,5 @@
 <?hh
-if (false) {
-  class Parent {}
-}
+
+class Parent {}
+
 echo "Done\n";

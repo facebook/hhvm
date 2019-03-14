@@ -1,7 +1,7 @@
 <?hh
 namespace HH {
-  if (false) {
-    class Self {}
-  }
-  echo "Done\n";
+
+class Self {}
+
+echo "Done\n";
 }

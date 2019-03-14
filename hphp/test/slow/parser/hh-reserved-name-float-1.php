@@ -1,5 +1,5 @@
 <?hh
-if (false) {
-  class Float {}
-}
+
+class Float {}
+
 echo "Done\n";

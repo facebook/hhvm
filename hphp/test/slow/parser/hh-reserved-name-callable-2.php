@@ -1,7 +1,7 @@
 <?hh
 namespace HH {
-  if (false) {
-    class Callable {}
-  }
-  echo "Done\n";
+
+class Callable {}
+
+echo "Done\n";
 }

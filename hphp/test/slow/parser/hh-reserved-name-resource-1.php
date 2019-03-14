@@ -1,5 +1,5 @@
 <?hh
-if (false) {
-  class Resource {}
-}
+
+class Resource {}
+
 echo "Done\n";

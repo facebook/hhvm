@@ -1,5 +1,5 @@
 <?hh
-if (false) {
-  class Arraykey {}
-}
+
+class Arraykey {}
+
 echo "Done\n";

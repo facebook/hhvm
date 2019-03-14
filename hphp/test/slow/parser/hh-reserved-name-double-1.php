@@ -1,5 +1,5 @@
 <?hh
-if (false) {
-  class Double {}
-}
+
+class Double {}
+
 echo "Done\n";

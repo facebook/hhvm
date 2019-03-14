@@ -50,7 +50,6 @@ type t = {
   option_hhjs_babel_transform             : string;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
-  option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
   option_phpism_undefined_function_fallback : bool;
   option_phpism_disallow_execution_operator: bool;
@@ -108,7 +107,6 @@ let default = {
   option_hhjs_babel_transform = "";
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
-  option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
   option_phpism_undefined_function_fallback = true;
   option_phpism_disallow_execution_operator = false;
@@ -162,7 +160,6 @@ let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
-let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_undefined_function_fallback o = o.option_phpism_undefined_function_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
@@ -221,7 +218,6 @@ let to_string o =
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
     ; Printf.sprintf "enable_concurrent: %B" @@ enable_concurrent o
     ; Printf.sprintf "enable_await_as_an_expression: %B" @@ enable_await_as_an_expression o
-    ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ; Printf.sprintf "phpism_undefined_function_fallback: %B" @@ phpism_undefined_function_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
@@ -316,8 +312,6 @@ let set_option options name value =
     { options with option_hhjs_unique_filenames = as_bool value }
   | "eval.hhjsbabeltransform" ->
     { options with option_hhjs_babel_transform = value }
-  | "hack.lang.phpism.undefinedconstasstring" ->
-    { options with option_phpism_undefined_const_as_string = as_bool value }
   | "hack.lang.phpism.undefinedconstfallback" ->
     { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.undefinedfunctionfallback" ->
@@ -487,8 +481,6 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
   (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@
      fun opts v -> { opts with option_hhjs_babel_transform = v });
-  (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
-     fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.undefined_function_fallback" get_value_from_config_int @@

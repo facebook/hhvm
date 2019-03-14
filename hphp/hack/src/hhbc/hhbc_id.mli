@@ -64,5 +64,5 @@ module Const : sig
   (* As used in `define('name')` and the assembler *)
   val from_raw_string : string -> t
   val to_raw_string : t -> string
-  val elaborate_id : Namespace_env.env -> Ast.id -> t * string option * bool
+  val elaborate_id : Namespace_env.env -> Ast.id -> t * string option
 end

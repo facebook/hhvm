@@ -1125,7 +1125,7 @@ and string_of_param_default_value ~env expr =
   | A.Id (p, id) ->
     let id = match env.codegen_env with
       | Some env when SU.has_ns id ->
-        let id, _, _ =
+        let id, _ =
           Hhbc_id.Const.elaborate_id
             (Emit_env.get_namespace env) (p, id)
         in

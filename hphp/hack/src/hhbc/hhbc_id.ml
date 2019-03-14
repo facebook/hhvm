@@ -182,6 +182,6 @@ module Const = struct
   let to_raw_string s = s
   let elaborate_id ns id =
     let _was_renamed, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
-    fq_id, backoff_id, String.contains (snd id) '\\'
+    fq_id, backoff_id
 
 end

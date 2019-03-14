@@ -548,10 +548,6 @@ struct RuntimeOption {
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
   static uint64_t DisableForwardStaticCallArray;
-  // Controls PHP's behavior of evaluating undefined constants as string
-  // literals.
-  // true => evaluate as string (default), false => error.
-  static bool UndefinedConstAsString;
   // Controls PHP's behavior of falling back to the default namespace for
   // undefined constants.
   // 0 => fall back to root namespace (default)

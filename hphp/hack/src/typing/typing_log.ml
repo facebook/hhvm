@@ -30,7 +30,8 @@ let lnewline () =
       cprint ~out_channel:!out_channel ~color_mode:Color_Auto
         ((Normal White, String.make (2 * !indentLevel) ' ') ::
            List.rev ((Normal White, "\n") :: !logBuffer));
-       accumulatedLength := 0;
+      Out_channel.flush !out_channel;
+      accumulatedLength := 0;
       logBuffer := []
     end
 

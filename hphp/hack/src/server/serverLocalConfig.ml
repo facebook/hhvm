@@ -16,6 +16,7 @@ type t = {
   watchman_subscribe: bool;
   watchman_synchronous_timeout : int; (* in seconds *)
   use_saved_state: bool; (* should we attempt to load saved-state? (subject to further options) *)
+  require_saved_state: bool; (* if attempting saved-state, should we fail upon failure? *)
   load_state_script_timeout: int; (* in seconds *)
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;
@@ -87,6 +88,7 @@ let default = {
   watchman_subscribe = false;
   watchman_synchronous_timeout = 120;
   use_saved_state = false;
+  require_saved_state = false;
   load_state_script_timeout = 20;
   load_state_natively = false;
   type_decl_bucket_size = 1000;
@@ -167,6 +169,8 @@ let load_ fn ~silent =
       ~default:default.use_watchman config in
   let use_saved_state = bool_if_version "use_mini_state"
       ~default:default.use_saved_state config in
+  let require_saved_state = bool_if_version "require_saved_state"
+      ~default:default.require_saved_state config in
   let enable_on_nfs = bool_if_version "enable_on_nfs"
       ~default:default.enable_on_nfs config in
   let enable_fuzzy_search = bool_if_version "enable_fuzzy_search"
@@ -259,6 +263,7 @@ let load_ fn ~silent =
     watchman_subscribe;
     watchman_synchronous_timeout;
     use_saved_state;
+    require_saved_state;
     load_state_script_timeout;
     load_state_natively;
     max_purgatory_clients;

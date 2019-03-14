@@ -52,7 +52,7 @@ final class Map implements \MutableMap {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Map is empty, false otherwise.
    * @return bool
@@ -123,7 +123,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all key/value pairs from the Map.
    * @return object
@@ -174,7 +174,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Instructs this Map to grow its capacity to accommodate the given number of
    * elements. The caller is expected to make the appropriate
@@ -264,7 +264,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
+  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this Map.
    * @return object
@@ -354,7 +354,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map containing the first n key/value pairs of this Map.
    * @param mixed $n
@@ -415,7 +415,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Map, or null if this Map is empty.
    * @return mixed
@@ -486,7 +486,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map built from the keys and values from the specified array.
    * @param mixed $mp
@@ -505,7 +505,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the ImmMap is empty, false otherwise.
    * @return bool
@@ -656,7 +656,7 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
-  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
+  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this ImmMap.
    * @return object
@@ -730,7 +730,7 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmMap containing the first n key/value pairs of this ImmMap.
    * @param mixed $n
@@ -791,7 +791,7 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
@@ -862,7 +862,7 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 }
 
 } // namespace HH

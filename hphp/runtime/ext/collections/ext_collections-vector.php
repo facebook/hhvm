@@ -53,7 +53,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Vector is empty, false otherwise.
    * @return bool
@@ -134,7 +134,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all values from the Vector.
    * @return object
@@ -202,7 +202,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Adds the keys of the specified KeyedContainer to the end of this Vector
    * using the next available integer keys.
@@ -351,7 +351,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector containing the first n values of this Vector.
    * @param mixed $n
@@ -402,7 +402,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Vector, or null if this Vector is empty.
    * @return mixed
@@ -505,7 +505,7 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector built from the keys of the specified container.
    * @param mixed $container
@@ -532,7 +532,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns an ImmVector built from the values produced by the specified
    * Iterable.
@@ -540,7 +540,7 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector built from the keys of the specified container.
    * @param mixed $container
@@ -646,7 +646,7 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector containing the first n values of this ImmVector.
    * @param mixed $n
@@ -697,7 +697,7 @@ final class ImmVector implements \ConstVector {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmVector, or null if this ImmVector is
    * empty.

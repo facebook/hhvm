@@ -36,7 +36,7 @@ namespace __SystemLib {
     // Default implementation, used by Phar- and Tar-based archives
     public function getStream(string $path): resource {
       if (!\array_key_exists($path, $this->fileOffsets)) {
-        throw new PharException("No $path in phar");
+        throw new \PharException("No $path in phar");
       }
       list($offset, $size) = $this->fileOffsets[$path];
       if ($size == 0) {
@@ -71,7 +71,7 @@ namespace __SystemLib {
     }
 
     public function setAlias(string $alias, int $len) {
-      throw new Exception('Not implemented yet');
+      throw new \Exception('Not implemented yet');
     }
 
     public function getStub(): ?string {
@@ -79,7 +79,7 @@ namespace __SystemLib {
     }
 
     public function setStub(string $stub, int $len = -1) {
-      throw new Exception('Not implemented yet');
+      throw new \Exception('Not implemented yet');
     }
 
     public function count(): int {

@@ -9,7 +9,7 @@ abstract class Awaitable {
 
   final private function __construct() {
     throw new \InvalidOperationException(
-      get_class($this) . "s cannot be constructed directly"
+      \get_class($this) . "s cannot be constructed directly"
     );
   }
 

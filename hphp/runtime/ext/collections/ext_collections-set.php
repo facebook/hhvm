@@ -50,7 +50,7 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Set is empty, false otherwise.
    * @return bool
@@ -126,7 +126,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Adds the keys of the specified KeyedContainer to this Set.
    * @param mixed $container
@@ -274,7 +274,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Set containing the first n values of this Set.
    * @param mixed $n
@@ -323,7 +323,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Set, or null if this Set is empty.
    * @return mixed
@@ -357,7 +357,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* @param mixed $iterable
    * @return object
@@ -411,7 +411,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Set built from the keys of the specified container.
    * @param mixed $container
@@ -452,7 +452,7 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the ImmSet is empty, false otherwise.
    * @return bool
@@ -621,7 +621,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmSet containing the first n values of this ImmSet.
    * @param mixed $n
@@ -671,7 +671,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
@@ -745,7 +745,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs>>
-  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmSet built from the keys of the specified container.
    * @param mixed $container

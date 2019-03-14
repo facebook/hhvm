@@ -90,7 +90,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
     // same exit code as "type error". See above about fixing this.
     return new TypecheckResult(
       TypecheckStatus::OTHER_ERROR,
-      implode(' ', $output_arr)
+      \implode(' ', $output_arr)
     );
   }
 

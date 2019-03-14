@@ -25,7 +25,7 @@ final class AsyncGenerator implements AsyncKeyedIterator {
    * @param Exception $exception - An exception to be thrown by yield expression
    */
   <<__Native("OpCodeImpl")>>
-  public function raise(Exception $exception): mixed;
+  public function raise(\Exception $exception): mixed;
 }
 
 }

@@ -67,6 +67,7 @@ type server_message = {
 type server_conn = {
   ic: Timeout.in_channel;
   oc: Out_channel.t;
+  server_finale_file: string;
   pending_messages: server_message Queue.t; (* ones that arrived during current rpc *)
 }
 
@@ -1678,11 +1679,11 @@ let rec connect_client
       config = [];
     } in
   try%lwt
-    let%lwt ClientConnect.{channels = ic, oc; _} =
+    let%lwt ClientConnect.{channels = ic, oc; server_finale_file; _} =
       ClientConnect.connect env_connect in
     can_autostart_after_mismatch := false;
     let pending_messages = Queue.create () in
-    Lwt.return { ic; oc; pending_messages; }
+    Lwt.return { ic; oc; pending_messages; server_finale_file; }
   with
   | Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
     (* Raised when the server was running an old version. We'll retry once.   *)
@@ -2576,33 +2577,58 @@ let main (type a) (env: env) : a Lwt.t =
     with
     | Server_fatal_connection_exception { Marshal_tools.stack; message } ->
       if !state <> Post_shutdown then begin
-        let stack = stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
-        hack_log_error !ref_event message stack "from_server" !ref_unblocked_time;
-        Lsp_helpers.telemetry_error to_stdout (message ^ ", from_server\n" ^ stack);
         (* The server never tells us why it closed the connection - it simply   *)
         (* closes. We don't have privilege to inspect its exit status.          *)
+        (* But in some cases of a controlled exit, the server does write to a   *)
+        (* "finale file" to explain its reason for exit...                      *)
+        let server_finale_data = match !state with
+          | Main_loop { Main_env.conn; _ }
+          | In_init { In_init_env.conn; _ } -> ClientConnect.get_finale_data conn.server_finale_file
+          | _ -> None
+        in
+        let server_finale_stack = match server_finale_data with
+          | Some { ServerCommandTypes.stack = Utils.Callstack s; _ } -> s
+          | _ -> ""
+        in
+        let stack = Printf.sprintf "%s\n---\n%s\n---\n%s"
+          stack (Printexc.get_backtrace ()) server_finale_stack in
+        (* Log all the things! *)
+        hack_log_error !ref_event message stack "from_server" !ref_unblocked_time;
+        Lsp_helpers.telemetry_error to_stdout (message ^ ", from_server\n" ^ stack);
         (* The monitor is responsible for detecting server closure and exit     *)
         (* status, and restarting the server if necessary (that's not our job). *)
         (* All we'll do is put up a dialog telling the user that the server is  *)
-        (* down and giving them a button to restart. We use a heuristic hint    *)
-        (* for when would be a good time to auto-dismiss the dialog and attempt *)
-        (* a proper re-connection (it's not our job to ascertain with certainty *)
+        (* down and giving them a button to restart.                            *)
+        let explanation = match server_finale_data with
+          | Some { ServerCommandTypes.msg; _ } -> msg
+          | _ -> "hh_server has stopped."
+        in
+        (* When would be a good time to auto-dismiss the dialog and attempt     *)
+        (* a proper re-connection? it's not our job to ascertain with certainty *)
         (* whether that re-connection will succeed - it's impossible to know,   *)
-        (* but also our re-connection attempt is pretty forceful. Our heuristic *)
-        (* is to sleep for 1 second, and then look for the presence of the lock *)
-        (* file. The sleep is because typically if you do "hh stop" then the    *)
-        (* persistent connection shuts down instantly but the monitor takes a   *)
-        (* short time to release its lockfile.                                  *)
+        (* but also our re-connection attempt is pretty forceful.               *)
+        (* First: if the server determined in its finale that there shouldn't   *)
+        (* be automatic retry then we won't. Otherwise, we'll sleep for 1 sec   *)
+        (* and then look for the presence of the lock file. The sleep is        *)
+        (* because typically if you do "hh stop" then the persistent connection *)
+        (* shuts down instantly but the monitor takes a short time to release   *)
+        (* its lockfile.                                                        *)
+        let trigger_on_lock_file = match server_finale_data with
+          | Some { ServerCommandTypes.exit_status = Exit_status.Failed_to_load_should_abort; _} ->
+            false
+          | _ ->
+            true
+        in
         Unix.sleep 1;
         (* We're right now inside an exception handler. We don't want to do     *)
         (* work that might itself throw. So instead we'll leave that to the     *)
         (* next time around the loop.                                           *)
         deferred_action := Some (fun () ->
           let%lwt new_state = do_lost_server !state { Lost_env.
-            explanation = "hh_server has stopped.";
+            explanation;
             new_hh_server_state = Hh_server_stopped;
             start_on_click = true;
-            trigger_on_lock_file = true;
+            trigger_on_lock_file;
             trigger_on_lsp = false;
           } in
           state := new_state;

@@ -240,6 +240,7 @@ void clearTCMaps(TCA start, TCA end) {
       }
     }
     eraseCatchTrace(start);
+    eraseInlineStack(start);
     if (isCall) {
       if (auto call = eraseSmashedCall(start)) {
         clearProfCaller(start, call->isGuard, call->rec);

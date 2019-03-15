@@ -43,6 +43,14 @@ struct IStack {
   IFrameID frame; // leaf frame in this stack
   uint32_t nframes;
   uint32_t callOff;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd
+      (frame)
+      (nframes)
+      (callOff)
+      ;
+  }
 };
 
 /*
@@ -227,6 +235,7 @@ void addVeneer(CGMeta& meta, TCA source, TCA target);
 
 folly::Optional<IStack> inlineStackAt(CTCA addr);
 IFrame getInlineFrame(IFrameID id);
+void eraseInlineStack(CTCA addr);
 
 }}
 

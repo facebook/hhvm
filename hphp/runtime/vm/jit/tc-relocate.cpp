@@ -192,6 +192,8 @@ struct TransRelocInfoHelper {
   std::vector<uint32_t> addressImmediates;
   std::vector<uint64_t> codePointers;
   std::vector<std::pair<uint32_t,std::pair<Alignment,AlignContext>>> alignments;
+  std::vector<std::tuple<FuncId, int32_t, IFrameID>> inlineFrames;
+  std::vector<std::pair<uint32_t, IStack>> inlineStacks;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd
@@ -202,6 +204,8 @@ struct TransRelocInfoHelper {
       (addressImmediates)
       (codePointers)
       (alignments)
+      (inlineFrames)
+      (inlineStacks)
       ;
   }
 
@@ -223,6 +227,18 @@ struct TransRelocInfoHelper {
     }
     for (auto v : alignments) {
       tri.fixups.alignments.emplace(v.first + code.base(), v.second);
+    }
+    for (auto s : inlineFrames) {
+      auto const func = Func::fromFuncId(std::get<0>(s));
+      tri.fixups.inlineFrames.emplace_back(IFrame{
+        func, std::get<1>(s), std::get<2>(s)
+      });
+    }
+    for (auto s : inlineStacks) {
+      tri.fixups.inlineStacks.emplace_back(std::make_pair(
+        s.first + code.base(),
+        s.second
+      ));
     }
     return tri;
   }
@@ -704,6 +720,14 @@ perfRelocMapInfo(TCA start, TCA /*end*/, TCA coldStart, TCA coldEnd, SrcKey sk,
 
   for (auto v : fixups.alignments) {
     trih.alignments.emplace_back(v.first - code().base(), v.second);
+  }
+
+  for (auto f : fixups.inlineFrames) {
+    trih.inlineFrames.emplace_back(f.func->getFuncId(), f.callOff, f.parent);
+  }
+
+  for (auto s : fixups.inlineStacks) {
+    trih.inlineStacks.emplace_back(s.first - code().base(), s.second);
   }
 
   trih.coldRange = std::make_pair(uint32_t(coldStart - code().base()),

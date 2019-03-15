@@ -387,12 +387,16 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     return callDest(env, inst);
   }();
 
+  auto const isInlined = env.unit.context().func != callee;
+  if (isInlined) v << inlinestart{callee, 0};
+  auto const end = [&] (Vout& v) { if (isInlined) v << inlineend{}; };
+
   cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
                dest, SyncOptions::Sync, args);
 
   // For primitive return types (int, bool, double) and returnByValue, the
   // return value is already in dstData/dstType.
-  if (returnType.isSimpleType() || returnByValue) return;
+  if (returnType.isSimpleType() || returnByValue) return end(v);
 
   // For return by reference (String, Object, Array, Variant), the builtin
   // writes the return value into MInstrState::tvBuiltinReturn, from where it
@@ -411,7 +415,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       v << testq{dstData, dstData, sf};
       v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
     }
-    return;
+    return end(v);
   }
 
   if (returnType <= TCell || returnType <= TBoxedCell) {
@@ -433,7 +437,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       v << testb{rtype, rtype, sf};
       v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
     }
-    return;
+    return end(v);
   }
 
   not_reached();

@@ -63,6 +63,30 @@ struct BTContext {
     fakeAR[0].m_numArgsAndFlags = fakeAR[1].m_numArgsAndFlags = flags;
   }
 
+  BTContext(const BTContext&) = delete;
+  BTContext(BTContext&&) = delete;
+  BTContext& operator=(const BTContext&) = delete;
+  BTContext& operator=(BTContext&&) = delete;
+
+  const ActRec* clone(const BTContext& src, const ActRec* fp) {
+    fakeAR[0].m_func = src.fakeAR[0].m_func;
+    fakeAR[0].m_callOff = src.fakeAR[0].m_callOff;
+
+    fakeAR[1].m_func = src.fakeAR[1].m_func;
+    fakeAR[1].m_callOff = src.fakeAR[1].m_callOff;
+
+    stashedAR = src.stashedAR;
+    stashedPC = src.stashedPC;
+    inlineStack = src.inlineStack;
+    hasInlFrames = src.hasInlFrames;
+    assertx(!!stashedAR == (fp == &src.fakeAR[0] || fp == &src.fakeAR[1]));
+
+    return
+      fp == &src.fakeAR[0] ? &fakeAR[0] :
+      fp == &src.fakeAR[1] ? &fakeAR[1] :
+      fp;
+  }
+
   bool hasInlFrames{false};
 
   // fakeAR is used to generate pseudo-frames representing inlined functions
@@ -123,6 +147,20 @@ ActRec* getActRecFromWaitHandle(
 ActRec* initBTContextAt(
   BTContext& ctx, jit::CTCA ip, ActRec* fp, Offset* prevPc
 ) {
+  // The bytecode supports a limited form of inlining via FCallBuiltin. If the
+  // call itself was interpreted there won't be any fixup information, but
+  // we should still be able to extract the target from the bytecode on the
+  // stack and use that directly.
+  auto const getBuiltin = [&] () -> const Func* {
+    if (!fp || !prevPc) {
+      return nullptr;
+    }
+    auto const func = fp->func();
+    auto const pc = func->unit()->entry() + *prevPc;
+    if (peek_op(pc) != OpFCallBuiltin) return nullptr;
+    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 2).u_SA);
+    return Unit::lookupFunc(ne);
+  };
   if (auto stk = jit::inlineStackAt(ip)) {
     assertx(stk->nframes != 0);
     auto prevFp = &ctx.fakeAR[0];
@@ -137,6 +175,16 @@ ActRec* initBTContextAt(
     if (prevPc) {
       ctx.stashedPC = *prevPc;
       *prevPc = stk->callOff + ifr.func->base();
+    }
+    return prevFp;
+  } else if (auto const f = getBuiltin()) {
+    auto prevFp = &ctx.fakeAR[0];
+    prevFp->m_func = f;
+    prevFp->m_callOff = *prevPc - fp->func()->base();
+    ctx.stashedAR = fp;
+    if (prevPc) {
+      ctx.stashedPC = *prevPc;
+      *prevPc = f->base();
     }
     return prevFp;
   }
@@ -300,10 +348,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Handle the top frame.
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number, so find the first user frame
-    auto curFp = fp;
+    BTContext ctxCopy;
+    auto curFp = ctxCopy.clone(ctx, fp);
     auto curPc = pc;
     while (curFp && curFp->func()->isBuiltin()) {
-      curFp = g_context->getPrevVMState(curFp, &curPc);
+      curFp = getPrevActRec(ctxCopy, curFp, &curPc, visitedWHs);
     }
     if (curFp) {
       auto const unit = curFp->func()->unit();

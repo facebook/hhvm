@@ -51,6 +51,7 @@ using InlineFrameVec = AtomicVector<IFrame>;
 InlineFrameVec s_inlineFrames{4096,IFrame{}};
 
 constexpr uint32_t kInvalidCatchTrace = 0x0;
+constexpr uint32_t kInvalidFrameID    = -1;
 
 IFrameID insertFrames(const std::vector<IFrame>& frames) {
   auto const start = s_nextFrameKey.fetch_add(frames.size());
@@ -101,15 +102,22 @@ void processInlineFrames(const CGMeta& cm) {
 }
 
 folly::Optional<IStack> inlineStackAt(CTCA addr) {
+  if (!addr) return folly::none;
   auto off = stackAddrToOffset(addr);
   if (auto pos = s_inlineStacks.find(off)) {
-    return *pos;
+    if (pos->frame != kInvalidFrameID) return *pos;
   }
   return folly::none;
 }
 
 IFrame getInlineFrame(IFrameID id) {
   return s_inlineFrames[id];
+}
+
+void eraseInlineStack(CTCA addr) {
+  if (auto stk = s_inlineStacks.find(tc::addrToOffset(addr))) {
+    stk->frame = kInvalidFrameID;
+  }
 }
 
 const uint64_t* addrForLiteral(uint64_t val) {

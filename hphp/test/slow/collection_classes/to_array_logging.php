@@ -1,7 +1,5 @@
 <?hh
 
-// TODO(T41519835) the reported location is wrong in non-PGO mode
-<<__NEVER_INLINE>>
 function test($input) {
   $_ = $input->toArray();
   $_ = (array)$input;

@@ -17,7 +17,6 @@ module Classes = struct
     type t = class_type
     let prefix = Prefix.make()
     let description = "ClassType"
-    let use_sqlite_fallback () = false
   end)
 
   type key = StringKey.t

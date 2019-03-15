@@ -17,7 +17,6 @@ module Store = SharedMem.WithCache (SharedMem.Immediate) (UnitKey) (struct
   type t = ParserOptions.t
   let prefix = Prefix.make ()
   let description = "GlobalParserOptions"
-  let use_sqlite_fallback () = false
 end)
 
 let get () =

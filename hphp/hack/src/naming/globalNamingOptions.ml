@@ -17,7 +17,6 @@ module Store = SharedMem.WithCache (SharedMem.Immediate) (UnitKey) (struct
   type t = TypecheckerOptions.t
   let prefix = Prefix.make ()
   let description = "GlobalNamingOptions"
-  let use_sqlite_fallback () = false
 end)
 
 let get () =

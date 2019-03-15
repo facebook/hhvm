@@ -14,56 +14,47 @@ module Class : sig
   type t = decl_class_type
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module Fun : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module Typedef :
   sig
     type t = typedef_type
     val prefix : Prefix.t
     val description : string
-    val use_sqlite_fallback : unit -> bool
   end
 module GConst : sig
   type t = decl ty * Errors.t
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module Property : sig
   type t = decl ty
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module StaticProperty : sig
   type t = decl ty
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module Method : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module StaticMethod : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 module Constructor : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
-  val use_sqlite_fallback : unit -> bool
 end
 
 module ClassEltKey : SharedMem.UserKeyType

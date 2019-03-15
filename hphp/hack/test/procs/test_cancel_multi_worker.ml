@@ -8,7 +8,6 @@ module IntVal = struct
   type t = int
   let prefix = Prefix.make()
   let description = "IntVal"
-  let use_sqlite_fallback () = false
 end
 
 module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)

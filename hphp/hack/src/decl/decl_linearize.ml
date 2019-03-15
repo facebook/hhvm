@@ -45,7 +45,6 @@ module Cache = SharedMem.LocalCache (StringKey) (struct
   type t = linearization
   let prefix = Prefix.make()
   let description = "LazyLinearization"
-  let use_sqlite_fallback () = false
 end)
 
 let ancestor_from_ty

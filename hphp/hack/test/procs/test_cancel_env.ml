@@ -15,7 +15,6 @@ module UnitVal = struct
   type t = unit
   let prefix = Prefix.make()
   let description = "UnitVal"
-  let use_sqlite_fallback () = false
 end
 
 module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (UnitVal)

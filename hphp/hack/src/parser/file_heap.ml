@@ -24,7 +24,6 @@ module FileHeap = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_pa
     type t = disk_type
     let prefix = Prefix.make()
     let description = "Disk"
-    let use_sqlite_fallback () = false
   end)
 
 let get_contents fn =

@@ -14,7 +14,6 @@ module IntVal = struct
   type t = int
   let prefix = Prefix.make()
   let description = "IntVal"
-  let use_sqlite_fallback () = false
 end
 
 let expect ~msg bool =

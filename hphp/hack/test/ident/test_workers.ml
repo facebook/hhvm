@@ -11,7 +11,6 @@ module Ids = SharedMem.NoCache (SharedMem.Immediate) (IntKey) (struct
   type t = int array
   let prefix = Prefix.make ()
   let description = ""
-  let use_sqlite_fallback () = false
 end)
 
 let entry = WorkerController.register_entry_point

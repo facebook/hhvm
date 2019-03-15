@@ -14,7 +14,6 @@ module Classes = SharedMem.LocalCache (StringKey) (struct
   type t = shallow_class
   let prefix = Prefix.make ()
   let description = "ShallowClass"
-  let use_sqlite_fallback () = false
 end)
 
 let class_naming_and_decl c =

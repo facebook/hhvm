@@ -22,7 +22,6 @@ module Class = struct
   type t = decl_class_type
   let prefix = Prefix.make()
   let description = "Class"
-  let use_sqlite_fallback () = false
 end
 
 (* a function type *)
@@ -30,21 +29,18 @@ module Fun = struct
   type t = decl Typing_defs.fun_type
   let prefix = Prefix.make()
   let description = "Fun"
-  let use_sqlite_fallback () = false
 end
 
 module Typedef = struct
   type t = Typing_defs.typedef_type
   let prefix = Prefix.make()
   let description = "Typedef"
-  let use_sqlite_fallback () = false
 end
 
 module GConst = struct
   type t = decl ty * Errors.t
   let prefix = Prefix.make()
   let description = "GConst"
-  let use_sqlite_fallback () = false
 end
 
 module Funs = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
@@ -56,35 +52,30 @@ module Property = struct
   type t = decl ty
   let prefix = Prefix.make()
   let description = "Property"
-  let use_sqlite_fallback () = false
 end
 
 module StaticProperty = struct
   type t = decl ty
   let prefix = Prefix.make()
   let description = "StaticProperty"
-  let use_sqlite_fallback () = false
 end
 
 module Method = struct
   type t = decl fun_type
   let prefix = Prefix.make()
   let description = "Method"
-  let use_sqlite_fallback () = false
 end
 
 module StaticMethod = struct
   type t = decl fun_type
   let prefix = Prefix.make()
   let description = "StaticMethod"
-  let use_sqlite_fallback () = false
 end
 
 module Constructor = struct
   type t = decl fun_type
   let prefix = Prefix.make()
   let description = "Constructor"
-  let use_sqlite_fallback () = false
 end
 
 module ClassEltKey = struct

@@ -22,7 +22,6 @@ module Make(S : SearchUtils.Searchable) = struct
     type t = (string * (FileInfo.pos, S.t) term) list
     let prefix = Prefix.make()
     let description = "SearchUpdates"
-    let use_sqlite_fallback () = false
   end)
   (* Maps file name to a list of keys that the file has results for *)
   (* This is only read once per update, so cache gives us no advantage *)
@@ -30,7 +29,6 @@ module Make(S : SearchUtils.Searchable) = struct
     type t = string list
     let prefix = Prefix.make()
     let description = "SearchKeys"
-    let use_sqlite_fallback () = false
   end)
 
   let cut_str_after cut_char str =

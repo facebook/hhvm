@@ -23,14 +23,12 @@ module HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_p
   type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
   let description = "HH_FIXMES"
-  let use_sqlite_fallback () = false
   end)
 
 module DECL_HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
   type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
   let description = "DECL_HH_FIXMES"
-  let use_sqlite_fallback () = false
   end)
 
 let get_fixmes_from_heap filename =

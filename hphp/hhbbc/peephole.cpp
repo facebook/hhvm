@@ -58,18 +58,22 @@ bool poppable(Op op) {
 void BasicPeephole::push_back(const Bytecode& next) {
   FTRACE(1, "BasicPeephole::push_back {}\n", show(next));
   if (next.op == Op::Nop) return;
+  auto drop = [&] {
+    FTRACE(1, " BasicPeephole::drop {}\n", show(m_next.back()));
+    m_next.pop_back();
+  };
   if (m_next.size()) {
     auto& cur = m_next.back();
-    auto update_cur = [&] (Bytecode bc) {
-      auto srcLoc = cur.srcLoc;
-      cur = std::move(bc);
-      cur.srcLoc = srcLoc;
+    auto update_cur = [&] (Bytecode bc, uint32_t srcLoc = -1) {
+      bc.srcLoc = srcLoc == uint32_t(-1) ? cur.srcLoc : srcLoc;
+      drop();
+      push_back(bc);
     };
 
     // Kill <side-effect-free-expr>; PopX
     if ((next.op == Op::PopC && poppable(cur.op)) ||
         (next.op == Op::PopU && cur.op == Op::NullUninit)) {
-      m_next.pop_back();
+      drop();
       return;
     }
 
@@ -82,7 +86,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
         (next.op == Op::Same || next.op == Op::NSame)) {
       update_cur(bc::IsTypeC { IsTypeOp::Null });
       if (next.op == Op::NSame) {
-        m_next.push_back(bc::Not {});
+        push_back(bc_with_loc(next.srcLoc, bc::Not {}));
       }
       return;
     }
@@ -91,15 +95,14 @@ void BasicPeephole::push_back(const Bytecode& next) {
     if (m_next.size() > 1 &&
         (cur.op == Op::CGetL || cur.op == Op::CGetL2) &&
         (next.op == Op::Same || next.op == Op::NSame)) {
-      auto& prev = (&cur)[-1];
-      if (prev.op == Op::Null) {
-        prev = bc::IsTypeL {
-          cur.op == Op::CGetL ? cur.CGetL.loc1 : cur.CGetL2.loc1, IsTypeOp::Null
-        };
+      if ((&cur)[-1].op == Op::Null) {
+        auto const loc = cur.op == Op::CGetL ? cur.CGetL.loc1 : cur.CGetL2.loc1;
+        auto const srcLoc = cur.srcLoc;
+        drop();
+        drop();
+        push_back(bc_with_loc(srcLoc, bc::IsTypeL { loc, IsTypeOp::Null }));
         if (next.op == Op::NSame) {
-          update_cur(bc::Not {});
-        } else {
-          m_next.pop_back();
+          push_back(bc_with_loc(next.srcLoc, bc::Not {}));
         }
         return;
       }
@@ -112,15 +115,15 @@ void BasicPeephole::push_back(const Bytecode& next) {
       auto& prev = (&cur)[-1];
       auto const setLoc = next.op == Op::SetL ? next.SetL.loc1 : next.PopL.loc1;
       if (prev.op == Op::CGetL2 && prev.CGetL2.loc1 == setLoc) {
-        prev = bc::SetOpL {
-          setLoc,
-          SetOpOp::ConcatEqual
-        };
-        prev.srcLoc = next.srcLoc;
+        drop();
+        drop();
+        push_back(bc_with_loc(next.srcLoc,
+                              bc::SetOpL {
+                                setLoc,
+                                SetOpOp::ConcatEqual
+                              }));
         if (next.op == Op::PopL) {
-          update_cur(bc::PopC {});
-        } else {
-          m_next.pop_back();
+          push_back(bc_with_loc(next.srcLoc, bc::PopC {}));
         }
         return;
       }
@@ -146,7 +149,7 @@ void BasicPeephole::push_back(const Bytecode& next) {
 
     // transform SetL; PopC to PopL
     if (cur.op == Op::SetL && next.op == Op::PopC) {
-      cur = bc_with_loc(next.srcLoc, bc::PopL { cur.SetL.loc1 });
+      update_cur(bc::PopL { cur.SetL.loc1 }, next.srcLoc);
       return;
     }
   }

@@ -435,11 +435,12 @@ let handle_existing_file args filename =
     List.iter (print_full_fidelity_error source_text) errors
   end;
   begin
+    let is_hh_file = mode <> Some FileInfo.Mphp in
     match lowered with
     | Some res ->
       let ast = res.Full_fidelity_ast.ast in
       if print_errors then
-        Ast_check.check_program ast
+        Ast_check.check_program ast ~is_hh_file
         |> List.iter (print_full_fidelity_error source_text);
       if dump_needed then
         let str =

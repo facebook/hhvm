@@ -142,6 +142,8 @@ and is_systemlib_compat env = env.hhvm_compat_mode = SystemLibCompat
 
 and is_hack env = env.is_hh_file || env.enable_hh_syntax
 
+let is_hh_file env = env.is_hh_file
+
 let is_typechecker env =
   is_hack env && (not env.codegen)
 
@@ -2882,12 +2884,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
                is_using_statement_function_scoped us) -> errors
       | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
     end
-  | VariableExpression { variable_expression } when
-    env.is_hh_file &&
-    String.lowercase (text variable_expression) = SN.SpecialIdents.this ->
-    if Option.exists env.context.active_methodish ~f:methodish_contains_static
-    then make_error_from_node node SyntaxError.this_in_static :: errors
-    else errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let check_repeated_properties namespace_name class_name (errors, p_names) prop =

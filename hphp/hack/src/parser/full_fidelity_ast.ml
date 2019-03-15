@@ -3578,10 +3578,11 @@ let lower_tree
   let relative_pos = pos_of_error env.file source_text in
   let check_for_syntax_errors ast_opt =
     let find_errors error_env =
+      let is_hh_file = ParserErrors.is_hh_file error_env in
       ParserErrors.parse_errors error_env
       @
       (match ast_opt with
-      | Some ast -> Ast_check.check_program ast
+      | Some ast -> Ast_check.check_program ast ~is_hh_file
       | _ -> []
       )
     in

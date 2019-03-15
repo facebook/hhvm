@@ -1,1 +1,1 @@
-(14,12)-(14,16) Don't use $this in a static method, use static:: instead
+(14,12)-(14,17) Don't use $this in a static method, use static:: instead

@@ -26,8 +26,9 @@ open Ast
  * - 'b context type, which is updated by a {!Ast.reduce} visitor
  *)
 class type ['a, 'b] reducer_type = object
-  (* TODO: gradually add methods with signature: 'b -> param1 ... -> 'a *)
+  method at_Call : 'b -> expr -> targ list -> expr list -> expr list -> 'a
   method at_expr : 'b -> expr -> 'a
+  method at_Lvar : 'b -> id -> 'a
 end
 
 class ['a, 'b] reducer
@@ -35,7 +36,9 @@ class ['a, 'b] reducer
   (_plus : 'a -> 'a -> 'a)
   : ['a, 'b] reducer_type
 = object
+  method at_Call _ctx _ _ _ _ = _zero ()
   method at_expr _ctx _e = _zero ()
+  method at_Lvar _ctx _ = _zero ()
 end
 
 (*****************************************************************************)

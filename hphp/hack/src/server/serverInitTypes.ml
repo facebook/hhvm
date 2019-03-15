@@ -52,7 +52,7 @@ type loaded_info =
   dirty_master_files : Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)
   dirty_local_files : Relative_path.Set.t;
-  old_saved : FileInfo.saved_state_info;
+  old_saved : Naming_table.saved_state_info;
   old_errors : SaveStateService.saved_state_errors;
   state_distance: int option;
 }

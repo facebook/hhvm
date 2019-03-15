@@ -71,7 +71,7 @@ let parsing
     | Some c -> ServerProgress.send_progress_to_monitor "parsing %d files" c
   end;
   let quick = lazy_parse in
-  let files_info, errorl, _=
+  let fast, errorl, _=
     Parsing_service.go
       ~quick
       genv.workers
@@ -79,25 +79,26 @@ let parsing
       ~get_next
       ~trace
       env.popt in
-  let files_info = Relative_path.Map.union files_info env.files_info in
+  let naming_table = Naming_table.create fast in
+  let naming_table = Naming_table.combine naming_table env.naming_table in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   Stats.(stats.init_parsing_heap_size <- hs);
   (* TODO: log a count of the number of files parsed... 0 is a placeholder *)
   HackEventLogger.parsing_end t hs  ~parsed_count:0;
   let env = { env with
-    files_info;
+    naming_table;
     errorl = Errors.merge errorl env.errorl;
   } in
   env, (Hh_logger.log_duration "Parsing" t)
 
 let update_files
     (genv: ServerEnv.genv)
-    (files_info: FileInfo.t Relative_path.Map.t)
+    (naming_table: Naming_table.t)
     (t: float)
   : float =
   if is_check_mode genv.options then t else begin
-    Typing_deps.update_files files_info;
+    Naming_table.iter naming_table Typing_deps.update_file;
     HackEventLogger.updating_deps_end t;
     Hh_logger.log_duration "Updating deps" t
   end
@@ -105,7 +106,7 @@ let update_files
 let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
   ServerProgress.send_progress_to_monitor "resolving symbol references";
   let env =
-    Relative_path.Map.fold env.files_info ~f:begin fun k v env ->
+    Naming_table.fold env.naming_table ~f:begin fun k v env ->
       let errorl, failed_naming = NamingGlobal.ndecl_file k v in
       { env with
         errorl = Errors.merge errorl env.errorl;

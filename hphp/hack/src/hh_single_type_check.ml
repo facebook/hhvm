@@ -916,14 +916,15 @@ let handle_mode
 
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
-    Typing_deps.update_files files_info;
-    Relative_path.Map.iter files_info begin fun fn fileinfo ->
+    let naming_table = Naming_table.create files_info in
+    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table begin fun fn fileinfo ->
       if Relative_path.Map.mem builtins fn then () else begin
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
           let ancestors = MethodJumps.get_inheritance class_
-            ~filter:No_filter ~find_children:false files_info
+            ~filter:No_filter ~find_children:false naming_table
             None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
           Printf.printf "\n";
@@ -933,7 +934,7 @@ let handle_mode
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
           let children = MethodJumps.get_inheritance class_
-            ~filter:No_filter ~find_children:true files_info None in
+            ~filter:No_filter ~find_children:true naming_table None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
         end;
@@ -1025,13 +1026,14 @@ let handle_mode
     )
   | Find_refs (line, column) ->
     let filename = expect_single_file () in
-    Typing_deps.update_files files_info;
+    let naming_table = Naming_table.create files_info in
+    Naming_table.iter naming_table Typing_deps.update_file;
     Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
     Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
     Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
-      ServerEnv.files_info;
+      ServerEnv.naming_table;
       ServerEnv.tcopt = tcopt;
     } in
     let filename = Relative_path.to_absolute filename in

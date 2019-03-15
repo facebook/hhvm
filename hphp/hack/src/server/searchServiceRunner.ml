@@ -88,7 +88,7 @@ module SearchServiceRunner  = struct
    && ServerArgs.ai_mode genv.options = None
 
   let update_fileinfo_map fast =
-    Relative_path.Map.iter fast
+    Naming_table.iter fast
     ~f: begin fun fn info ->
       update_full fn info
     end

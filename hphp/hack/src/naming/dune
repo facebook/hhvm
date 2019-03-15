@@ -60,6 +60,7 @@
   (modules
     globalNamingOptions
     naming
+    naming_table
     namingGlobal)
   (libraries
     ast

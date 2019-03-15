@@ -67,27 +67,20 @@ type names = {
   n_consts  : SSet.t;
 }
 
-type fast = names Relative_path.Map.t
-
 
 (*****************************************************************************)
 (* The record used in our saved state. *)
 (*****************************************************************************)
 type saved
-type saved_state_info = saved Relative_path.Map.t
-
-
 val empty_names: names
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-val saved_to_info : saved_state_info -> t Relative_path.Map.t
-val saved_to_fast: saved_state_info -> fast
-val saved_to_hack_files: saved_state_info -> fast
-val info_to_saved : t Relative_path.Map.t -> saved_state_info
 val simplify: t -> names
 val merge_names: names -> names -> names
-val simplify_fast: t Relative_path.Map.t -> fast
 val print_names : names -> unit
+val to_saved : t -> saved
+val from_saved : Relative_path.t -> saved -> t
+val saved_to_names : saved -> names
 val to_string: t -> string

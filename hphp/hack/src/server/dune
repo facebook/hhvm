@@ -34,6 +34,7 @@
     core_kernel
     errors
     file_info
+    naming
     pos
     relative_path
     utils_core))

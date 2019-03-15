@@ -17,9 +17,8 @@ val path: Relative_path.t
 (** Runs the declaration, naming, and typecheck phases on a single file. *)
 val check_file_input :
   TypecheckerOptions.t ->
-  (* What are the definitions in each file. Most likely coming from
-   * ServerEnv.env.files_info *)
-  FileInfo.t Relative_path.Map.t ->
+  (* What are the definitions in each file. *)
+  Naming_table.t ->
   (* File path or content buffer. When given file path, the mapping in file_info
    * is used to find the declarations and run only the typechecking phase.
    * When given content buffer it will be parsed, named, and declared before

@@ -356,9 +356,9 @@ let () =
 
     let fn = ServerCommandTypes.FileName ("/" ^ file) in
 
-    let ServerEnv.{tcopt; files_info; _} = env in
+    let ServerEnv.{tcopt; naming_table; _} = env in
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic } in
-    let _, tast = ServerIdeUtils.check_file_input tcopt files_info fn in
+    let _, tast = ServerIdeUtils.check_file_input tcopt naming_table fn in
 
     let ty = ServerInferType.type_at_pos tast line col in
     compare_type expected_type ty;

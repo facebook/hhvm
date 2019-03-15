@@ -21,12 +21,12 @@ let symbols_at (file, line, char) tcopt =
   | None -> []
   | Some contents -> ServerIdentifyFunction.go contents line char tcopt
 
-let type_at (file, line, char) tcopt files_info =
+let type_at (file, line, char) tcopt naming_table =
   let tcopt = {
     tcopt with
     GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
   } in
-  let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
+  let _, tast = ServerIdeUtils.check_file_input tcopt naming_table file in
   let env_ty_opt = ServerInferType.type_at_pos tast line char in
   Option.map env_ty_opt ~f:(fun (env, ty) -> env, Tast_expand.expand_ty env ty)
 
@@ -105,9 +105,9 @@ let make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only =
 
 let go env (file, line, char) ~basic_only =
   let position = (file, line, char) in
-  let ServerEnv.{ tcopt; files_info; _ } = env in
+  let ServerEnv.{ tcopt; naming_table; _ } = env in
   let identities = symbols_at position tcopt in
-  let env_and_ty = type_at position tcopt files_info in
+  let env_and_ty = type_at position tcopt naming_table in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)
   match identities with

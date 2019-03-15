@@ -93,12 +93,12 @@ let add_if_extends_class target_class_name class_name acc =
   if check_if_extends_class target_class_name class_name
   then SSet.add acc class_name else acc
 
-let find_child_classes target_class_name files_info files =
+let find_child_classes target_class_name naming_table files =
   SharedMem.invalidate_caches();
   Relative_path.Set.fold files ~init:SSet.empty ~f:begin fun fn acc ->
     (try
       let { FileInfo.classes; _ } =
-        Relative_path.Map.find_unsafe files_info fn in
+        Naming_table.get_file_info_unsafe naming_table fn in
       List.fold_left classes ~init:acc ~f:begin fun acc cid ->
         add_if_extends_class target_class_name (snd cid) acc
       end
@@ -269,9 +269,9 @@ let get_definitions = function
     []
 
 let find_references tcopt workers target include_defs
-      files_info files =
+      naming_table files =
   let fileinfo_l = Relative_path.Set.fold files ~f:begin fun fn acc ->
-    match Relative_path.Map.get files_info fn with
+    match Naming_table.get_file_info naming_table fn with
     | Some fi -> (fn, fi) :: acc
     | None -> acc
   end ~init:[] in

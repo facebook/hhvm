@@ -201,36 +201,34 @@ let get_files deps =
     with Not_found -> acc
   end deps ~init:Relative_path.Set.empty
 
-let update_files fileInfo =
+let update_file filename info =
   (* TODO: Figure out if we need GConstName and FunName as well here *)
-  Relative_path.Map.iter fileInfo begin fun filename info ->
-    let {FileInfo.funs; classes; typedefs;
-         consts;
-         comments = _;
-         file_mode = _;
-         hash = _;
-        } = info in
-    let consts = List.fold_left consts ~f: begin fun acc (_, const_id) ->
-      DepSet.add acc (Dep.make (Dep.GConst const_id))
-    end ~init:DepSet.empty in
-    let funs = List.fold_left funs ~f:begin fun acc (_, fun_id) ->
-      DepSet.add acc (Dep.make (Dep.Fun fun_id))
-    end ~init:DepSet.empty in
-    let classes = List.fold_left classes ~f:begin fun acc (_, class_id) ->
-      DepSet.add acc (Dep.make (Dep.Class class_id))
-    end ~init:DepSet.empty in
-    let classes = List.fold_left typedefs ~f:begin fun acc (_, type_id) ->
-      DepSet.add acc (Dep.make (Dep.Class type_id))
-    end ~init:classes in
-    let defs = DepSet.union funs classes in
-    let defs = DepSet.union defs consts in
-    DepSet.iter ~f:begin fun def ->
-      let previous =
-        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
-      in
-      Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename)
-    end defs
-  end
+  let {FileInfo.funs; classes; typedefs;
+       consts;
+       comments = _;
+       file_mode = _;
+       hash = _;
+      } = info in
+  let consts = List.fold_left consts ~f: begin fun acc (_, const_id) ->
+    DepSet.add acc (Dep.make (Dep.GConst const_id))
+  end ~init:DepSet.empty in
+  let funs = List.fold_left funs ~f:begin fun acc (_, fun_id) ->
+    DepSet.add acc (Dep.make (Dep.Fun fun_id))
+  end ~init:DepSet.empty in
+  let classes = List.fold_left classes ~f:begin fun acc (_, class_id) ->
+    DepSet.add acc (Dep.make (Dep.Class class_id))
+  end ~init:DepSet.empty in
+  let classes = List.fold_left typedefs ~f:begin fun acc (_, type_id) ->
+    DepSet.add acc (Dep.make (Dep.Class type_id))
+  end ~init:classes in
+  let defs = DepSet.union funs classes in
+  let defs = DepSet.union defs consts in
+  DepSet.iter ~f:begin fun def ->
+    let previous =
+      try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
+    in
+    Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename)
+  end defs
 
 let rec get_extend_deps ~visited ~source_class ~acc =
   if DepSet.mem !visited source_class

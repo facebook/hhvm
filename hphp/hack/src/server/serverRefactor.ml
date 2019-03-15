@@ -17,7 +17,7 @@ let maybe_add_dollar s =
 
 let get_fixme_patches codes (env: env) =
   let fixmelist = Errors.get_applied_fixmes env.errorl in
-  let poslist = Fixmes.get_unused_fixmes codes fixmelist env.files_info in
+  let poslist = Fixmes.get_unused_fixmes codes fixmelist Naming_table.fold env.naming_table in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
 let find_def_filename current_filename definition =

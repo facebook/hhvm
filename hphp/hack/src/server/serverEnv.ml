@@ -81,7 +81,7 @@ type full_check_status =
  * The Ast.id are keys to index this shared space.
  *)
 type env = {
-    files_info     : FileInfo.t Relative_path.Map.t;
+    naming_table   : Naming_table.t;
     tcopt          : TypecheckerOptions.t;
     popt           : ParserOptions.t;
     (* Errors are indexed by files that were known to GENERATE errors in

@@ -67,7 +67,7 @@ let go workers file_list env =
   (* Convert 'string list' into 'fileinfo list' *)
   let filetuple_l = List.fold_left file_list ~f:begin fun acc file_path ->
     let fn = Relative_path.create Relative_path.Root file_path in
-    match Relative_path.Map.get env.ServerEnv.files_info fn with
+    match Naming_table.get_file_info env.ServerEnv.naming_table fn with
     | Some fileinfo -> (fn, fileinfo) :: acc
     | None -> acc
   end ~init:[]

@@ -89,7 +89,7 @@ let go:
   ServerEnv.env ->
   string list =
 fun workers pos_list env ->
-  let {ServerEnv.tcopt; files_info; _} = env in
+  let {ServerEnv.tcopt; naming_table; _} = env in
   let pos_info_results =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
@@ -101,7 +101,7 @@ fun workers pos_list env ->
     |> List.map ~f:begin fun (fn, line, char, range_end) ->
       let fn = Relative_path.create_detect_prefix fn in
       let pos = (fn, line, char, range_end) in
-      match Relative_path.Map.get files_info fn with
+      match Naming_table.get_file_info naming_table fn with
       | Some fileinfo -> Ok (pos, fileinfo)
       | None -> Error pos
     end

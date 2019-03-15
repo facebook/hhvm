@@ -38,7 +38,7 @@ let strip_ns results =
 let search target include_defs files genv env =
   (* Get all the references to the provided target in the files *)
   let res = FindRefsService.find_references env.tcopt genv.workers
-    target include_defs env.files_info files in
+    target include_defs env.naming_table files in
   strip_ns res
 
 let handle_prechecked_files genv env dep f =
@@ -66,7 +66,7 @@ let search_member class_name member include_defs genv env =
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files class_name in
   let all_classes = FindRefsService.find_child_classes
-      class_name env.files_info files in
+      class_name env.naming_table files in
   let all_classes = SSet.add all_classes class_name in
   (* Get all the files that reference those classes *)
   let files = FindRefsService.get_dependent_files

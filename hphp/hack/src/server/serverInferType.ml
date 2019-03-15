@@ -116,9 +116,9 @@ let go:
   (ServerCommandTypes.file_input * int * int * bool) ->
   (string * string) option =
 fun env (file, line, char, dynamic_view) ->
-  let ServerEnv.{tcopt; files_info; _} = env in
+  let ServerEnv.{tcopt; naming_table; _} = env in
   let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view; } in
-  let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
+  let _, tast = ServerIdeUtils.check_file_input tcopt naming_table file in
   type_at_pos tast line char
   >>| fun (env, ty) ->
   Tast_env.print_ty env ty,

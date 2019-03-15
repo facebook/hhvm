@@ -700,7 +700,7 @@ let go
   let next_files: (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next =
     let with_file_data path =
       let path = Relative_path.create_detect_prefix path in
-      match Relative_path.Map.get env.ServerEnv.files_info path with
+      match Naming_table.get_file_info env.ServerEnv.naming_table path with
       | Some fileinfo -> Some (path, fileinfo, pattern)
       | None ->
         (* We may not have the file information for a file such as one that we

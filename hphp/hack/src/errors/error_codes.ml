@@ -49,7 +49,7 @@ end
 module Naming                               = struct
   type t =
   | AddATypehint [@value 2001]
-  | TypeparamAlok
+  | TypeparamAlokDEPRECATED
   | AssertArity
   | PrimitiveInvalidAlias
   | CyclicConstraintDEPRECATED

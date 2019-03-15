@@ -53,7 +53,7 @@ CallTimePassByReferenceDEPRECATED = 1006
 
 Naming Errors:
 AddATypehint = 2001
-TypeparamAlok = 2002
+TypeparamAlokDEPRECATED = 2002
 AssertArity = 2003
 PrimitiveInvalidAlias = 2004
 CyclicConstraintDEPRECATED = 2005

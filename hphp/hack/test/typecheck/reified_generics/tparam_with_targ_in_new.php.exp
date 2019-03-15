@@ -1,0 +1,10 @@
+File "tparam_with_targ_in_new.php", line 14, characters 4-6:
+Type arguments are not allowed in this position (Parsing[1002])
+File "tparam_with_targ_in_new.php", line 10, characters 4-4:
+T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])
+File "tparam_with_targ_in_new.php", line 9, characters 3-3:
+T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])
+File "tparam_with_targ_in_new.php", line 11, characters 5-5:
+T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])
+File "tparam_with_targ_in_new.php", line 13, characters 3-12:
+T is a type parameter. Type parameters cannot themselves take type parameters (e.g. T<int> doesn't make sense) (Naming[2047])

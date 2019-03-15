@@ -92,7 +92,9 @@ let handler = object
       begin match ty with
       | (_, Tabstract (AKgeneric ci, None)) when ci = class_id ->
         if not (Env.get_newable env ci) then
-          Errors.new_without_newable pos ci
+          Errors.new_without_newable pos ci;
+        if not (List.is_empty targs) then
+          Errors.tparam_with_tparam pos ci;
       | _ ->
         match Env.get_class env class_id with
         | Some cls ->

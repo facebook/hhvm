@@ -6143,8 +6143,10 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
   auto const cell = vmStack().topC();
   assertx(tvIsDictOrDArray(cell));
+  auto isTypeVar = tcCouldBeReified(vmfp()->m_func, param.index);
   bool warn = false;
-  if (!verifyReifiedLocalType(cell->m_data.parr, param.ptr, warn)) {
+  if ((isTypeVar || tvIsObject(param.ptr)) &&
+      !verifyReifiedLocalType(cell->m_data.parr, param.ptr, isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Argument {} passed to {}() must be an instance of {}, given {}",
@@ -6169,9 +6171,6 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
 namespace {
 
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
-  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
-    return;
-  }
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
@@ -6180,16 +6179,23 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
 } // namespace
 
 OPTBLD_INLINE void iopVerifyRetTypeC() {
+  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) return;
   verifyRetTypeImpl(0); // Cell is on the top of the stack
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
+  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
+    vmStack().popC();
+    return;
+  }
   verifyRetTypeImpl(1); // Cell is the second element on the stack
   auto const ts = vmStack().topC();
   assertx(tvIsDictOrDArray(ts));
   auto const cell = vmStack().indC(1);
+  bool isTypeVar = tcCouldBeReified(vmfp()->m_func, TypeConstraint::ReturnId);
   bool warn = false;
-  if (!verifyReifiedLocalType(ts->m_data.parr, cell, warn)) {
+  if ((isTypeVar || tvIsObject(cell)) &&
+      !verifyReifiedLocalType(ts->m_data.parr, cell, isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",
@@ -6203,9 +6209,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
-  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
-    return;
-  }
+  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) return;
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   tc.verifyReturnNonNull(vmStack().topC(), func);

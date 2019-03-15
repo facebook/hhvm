@@ -1297,8 +1297,6 @@ void raiseClsmethCompatTypeHint(
 
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
-  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
-
   auto const func = curFunc(env);
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
@@ -1543,24 +1541,37 @@ void verifyPropType(IRGS& env,
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
+  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, false);
 }
 
 void emitVerifyRetTypeTS(IRGS& env) {
+  if (!RuntimeOption::EvalCheckReturnTypeHints) {
+    popC(env);
+    return;
+  }
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 1, false);
   auto const ts = popC(env);
   auto const cell = topC(env);
-  gen(env, VerifyReifiedReturnType, cell, ts);
+  auto const reified = tcCouldBeReified(curFunc(env), TypeConstraint::ReturnId);
+  if (reified || cell->isA(TObj)) {
+    gen(env, VerifyReifiedReturnType, cell, ts);
+  } else if (cell->type().maybe(TObj) && !reified) {
+    // Meaning we did not not guard on the stack input correctly
+    PUNT(VerifyRetTypeTS-UnguardedObj);
+  }
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {
   auto const func = curFunc(env);
   auto const& tc = func->returnTypeConstraint();
   always_assert(!tc.isNullable());
+  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 
 void emitVerifyOutType(IRGS& env, uint32_t paramId) {
+  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, paramId, 0, false);
 }
 
@@ -1571,7 +1582,15 @@ void emitVerifyParamType(IRGS& env, int32_t paramId) {
 void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
   verifyParamTypeImpl(env, paramId);
   auto const ts = popC(env);
-  gen(env, VerifyReifiedLocalType, ParamData { paramId }, ts);
+  auto const ldPMExit = makePseudoMainExit(env);
+  auto const cell = ldLoc(env, paramId, ldPMExit, DataTypeSpecific);
+  auto const reified = tcCouldBeReified(curFunc(env), paramId);
+  if (cell->isA(TObj) || reified) {
+    gen(env, VerifyReifiedLocalType, ParamData { paramId }, ts);
+  } else if (cell->type().maybe(TObj)) {
+    // Meaning we did not not guard on the stack input correctly
+    PUNT(VerifyReifiedLocalType-UnguardedObj);
+  }
 }
 
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {

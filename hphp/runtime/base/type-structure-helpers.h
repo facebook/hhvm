@@ -47,11 +47,11 @@ bool isTSAllWildcards(const ArrayData* ts);
  * Sets the warn flag if the type parameter is denoted as soft either through
  * an annotation at the declaration site or by soft type hint at the generic
  * level
- * Currently only checks for classes and interfaces.
  */
 bool verifyReifiedLocalType(
   const ArrayData* type,
   const TypedValue* param,
+  bool isTypeVar,
   bool& warn
 );
 
@@ -91,8 +91,8 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts);
 bool typeStructureCouldBeNonStatic(const Array& ts);
 
 /*
- * Checks whether the type of the given cell matches the type structure
- * Expects a resolved type structure
+ * Checks whether the type of the given cell matches the type structure.
+ * Expects a resolved type structure.
  */
 bool checkTypeStructureMatchesCell(const Array& ts, Cell c1);
 
@@ -107,6 +107,13 @@ bool checkTypeStructureMatchesCell(
   std::string& expectedType,
   std::string& errorKey
 );
+
+/*
+ * In addition to regular checkTypeStructureMatchesCell, also sets the warn flag
+ * if the type parameter is denoted as soft either through an annotation at the
+ * declaration site or by soft type hint at the generic level
+ */
+bool checkTypeStructureMatchesCell(const Array& ts, Cell c1, bool& warn);
 
 /*
  * Throws user catchable exception that tells the user what the given type is,

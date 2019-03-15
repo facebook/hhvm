@@ -1402,4 +1402,14 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+bool tcCouldBeReified(const Func* func, uint32_t paramId) {
+  auto const& tc = paramId == TypeConstraint::ReturnId
+    ? func->returnTypeConstraint() : func->params()[paramId].typeConstraint;
+  return tc.isTypeVar() &&
+         (func->hasReifiedGenerics() ||
+         (func->cls() && func->cls()->hasReifiedGenerics()));
+}
+
+//////////////////////////////////////////////////////////////////////
 }

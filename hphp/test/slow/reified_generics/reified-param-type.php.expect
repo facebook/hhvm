@@ -1,0 +1,16 @@
+done
+done
+ERROR: Argument 1 passed to f() must be an instance of int, given float on line 19
+done
+done
+ERROR: Argument 1 passed to f() must be an instance of int, given bool on line 21
+done
+done
+ERROR: Argument 1 passed to f() must be an instance of bool, given int on line 24
+done
+done
+ERROR: Argument 1 passed to f() must be an instance of shape('x' => int, 'y' => string), given array on line 27
+done
+done
+ERROR: Argument 1 passed to f() must be an instance of (int, string), given array on line 30
+done

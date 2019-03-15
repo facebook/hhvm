@@ -513,6 +513,8 @@ bool call_uses_strict_types(const Func* func);
 
 bool verify_fail_may_coerce(const Func* callee);
 
+bool tcCouldBeReified(const Func*, uint32_t);
+
 /*
  * Check if the result of a SetOp needs to be checked against the property's
  * type-hint. If we do, we'll have to perform the SetOp on a temporary, do the

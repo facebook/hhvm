@@ -440,57 +440,72 @@ bool isTSAllWildcards(const ArrayData* ts) {
   return allWildcard;
 }
 
+// This function will always be called after `VerifyParamType` instruction, so
+// we can make the assumption that if `param` is an object, outermost type in
+// `type_` is correct.
+// This function will only be called when either `param` is an object or `type_`
+// is a primitive reified type parameter
 bool verifyReifiedLocalType(
   const ArrayData* type_,
   const TypedValue* param,
+  bool isTypeVar,
   bool& warn
 ) {
   if (tvIsNull(param) && is_ts_nullable(type_)) return true;
-  // If it is not an object, it can't be reified, type annotation check should
-  // have failed already if we are checking for something reified
-  if (!tvIsObject(param)) return true;
-  auto const obj = param->m_data.pobj;
-  auto const objcls = obj->getVMClass();
-  // Since we already checked from the type annotation that the class matches
-  if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) return true;
-  Array type;
-  try {
-    bool persistent = true;
-    type = TypeStructure::resolve(ArrNR(type_), nullptr, nullptr,
-                                  req::vector<Array>(), persistent);
-  } catch (Exception& e) {
-    return false;
-  } catch (Object& e) {
-    return false;
-  }
-  assertx(type.exists(s_kind));
-  auto const ts_kind =
-    static_cast<TypeStructure::Kind>(type[s_kind].toInt64Val());
-  switch (ts_kind) {
-    case TypeStructure::Kind::T_unresolved:
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp: {
-      assertx(type.exists(s_classname));
-      auto const classname = type[s_classname].asStrRef().get();
-      auto const ne = NamedEntity::get(classname);
-      auto const cls = Unit::lookupClass(ne);
-      if (!cls || !obj->instanceof(cls)) return false;
-      return
-        checkReifiedGenericsMatch(type, *tvToCell(param), ne, warn, false);
+  Array type = ArrNR(type_);
+  auto const isObj = tvIsObject(param);
+  // If it is not coming from a reified type variable and it is an object,
+  // we do not need to run the check if the object in question does not have
+  // reified generics since `VerifyParamType` should have taken care of it
+  if (!isTypeVar && isObj) {
+    auto const obj = param->m_data.pobj;
+    auto const objcls = obj->getVMClass();
+    // Since we already checked that the class matches in VerifyParamType using
+    // the type annotation
+    if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) {
+      return true;
     }
-    default: return true;
   }
-  not_reached();
+  // We only need to resolve the type structure if the param is an object and
+  // outmost type is unresolved, since there is no way for the outmost type to
+  // be resolved but not the inner types due to assumption above.
+  assertx(get_ts_kind(type_) != TypeStructure::Kind::T_unresolved || isObj);
+  if (isObj && get_ts_kind(type_) == TypeStructure::Kind::T_unresolved) {
+    try {
+      bool persistent = true;
+      type = TypeStructure::resolve(type, nullptr, nullptr,
+                                    req::vector<Array>(), persistent);
+    } catch (Exception& e) {
+      return false;
+    } catch (Object& e) {
+      return false;
+    }
+  }
+  return checkTypeStructureMatchesCell(type, *param, warn);
 }
 
+/*
+ * Sets the warn flag if the type parameter is denoted as soft either through
+ * an annotation at the declaration site or by soft type hint at the generic
+ * level
+ * If isOrAsOp flag is set, this means we are running this check for is
+ * type testing or as type assertion operations. For these operations,
+ * we reject comparisons over {v,d,}array since we do want not users to be able
+ * distinguish {v,d,}arrays while HackArrayMigration is in progress.
+ * Being able to tell between them cripples the ability to transparently
+ * switch between them in userland.
+ * When isOrAsOp is not set, we only allow being able to check {v,d,}arrays as
+ * an ArrLike, i.e. we do not allow finer checks.
+ */
 template <bool genErrorMessage>
 bool checkTypeStructureMatchesCellImpl(
   const Array& ts,
   Cell c1,
   std::string& givenType,
   std::string& expectedType,
-  std::string& errorKey
+  std::string& errorKey,
+  bool& warn,
+  bool isOrAsOp
 ) {
   auto errOnLen = [&givenType](auto cell, auto len) {
     if (genErrorMessage) {
@@ -627,8 +642,8 @@ bool checkTypeStructureMatchesCellImpl(
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
       result = cellInstanceOf(&c1, ne);
-      bool warn = false;
-      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne, warn, true);
+      if (result) result &= checkReifiedGenericsMatch(ts, c1, ne, warn,
+                                                      isOrAsOp);
       break;
     }
     case TypeStructure::Kind::T_null:
@@ -677,19 +692,28 @@ bool checkTypeStructureMatchesCellImpl(
             return true;
           }
           auto const& ts2 = asCArrRef(tsElems->rval(k.m_data.num));
+          auto thisElemWarns = false;
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
-              ts2, tvToCell(elem), givenType, expectedType, errorKey)) {
-            elemsDidMatch = false;
+              ts2, tvToCell(elem), givenType, expectedType,
+              errorKey, thisElemWarns, isOrAsOp)) {
             errOnKey(k);
+            if (thisElemWarns) {
+              warn = true;
+              return false;
+            }
+            elemsDidMatch = false;
             return true;
           }
           return false;
         }
       );
+      // If there is an error, ignore warn
+      if (!elemsDidMatch || !keysDidMatch) warn = false;
       if (!keysDidMatch) {
         result = false;
         break;
       }
+      if (elemsDidMatch && warn) elemsDidMatch = false;
       if (UNLIKELY(
         RuntimeOption::EvalHackArrCompatIsArrayNotices &&
         elemsDidMatch &&
@@ -701,7 +725,8 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_is_operator("array", "tuple");
         }
       }
-      return elemsDidMatch;
+      result = elemsDidMatch;
+      break;
     }
     case TypeStructure::Kind::T_shape: {
       if (!isArrayLikeType(type)) {
@@ -759,25 +784,31 @@ bool checkTypeStructureMatchesCellImpl(
           }
           auto const tsField = getShapeFieldElement(v);
           auto const field = fields->at(k);
+          bool thisFieldWarns = false;
+          numExpectedFields++;
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
               ArrNR(tsField), tvToCell(field), givenType,
-              expectedType, errorKey)) {
-            fieldsDidMatch = false;
+              expectedType, errorKey, thisFieldWarns, isOrAsOp)) {
             errOnKey(k);
+            if (thisFieldWarns) {
+              warn = true;
+              return false;
+            }
+            fieldsDidMatch = false;
             return true;
           }
-          numExpectedFields++;
           return false;
         }
       );
-      if (!fieldsDidMatch) {
+      if (!fieldsDidMatch ||
+          !(allowsUnknownFields || numFields == numExpectedFields)) {
+        warn = false;
         result = false;
         break;
       }
-      bool didSucceed = allowsUnknownFields || numFields == numExpectedFields;
       if (UNLIKELY(
         RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-        didSucceed &&
+        !warn &&
         fields->isPHPArray()
       )) {
         if (fields->isVArray()) {
@@ -786,12 +817,15 @@ bool checkTypeStructureMatchesCellImpl(
           raise_hackarr_compat_is_operator("array", "shape");
         }
       }
-      return didSucceed;
+      result = !warn;
+      break;
     }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
+      result = !isOrAsOp && isArrayLikeType(type);
+      break;
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
       result = false;
@@ -815,8 +849,9 @@ bool checkTypeStructureMatchesCellImpl(
 
 bool checkTypeStructureMatchesCell(const Array& ts, Cell c1) {
   std::string givenType, expectedType, errorKey;
+  bool warn = false;
   return checkTypeStructureMatchesCellImpl<false>(
-    ts, c1, givenType, expectedType, errorKey);
+    ts, c1, givenType, expectedType, errorKey, warn, true);
 }
 
 bool checkTypeStructureMatchesCell(
@@ -826,8 +861,19 @@ bool checkTypeStructureMatchesCell(
   std::string& expectedType,
   std::string& errorKey
 ) {
+  bool warn = false;
   return checkTypeStructureMatchesCellImpl<true>(
-    ts, c1, givenType, expectedType, errorKey);
+    ts, c1, givenType, expectedType, errorKey, warn, true);
+}
+
+bool checkTypeStructureMatchesCell(
+  const Array& ts,
+  Cell c1,
+  bool& warn
+) {
+  std::string givenType, expectedType, errorKey;
+  return checkTypeStructureMatchesCellImpl<false>(
+    ts, c1, givenType, expectedType, errorKey, warn, false);
 }
 
 ALWAYS_INLINE

@@ -694,7 +694,9 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
   const Func* func = ar->m_func;
   TypedValue* param = frame_local(ar, id);
   bool warn = false;
-  if (verifyReifiedLocalType(ts, param, warn)) return;
+  if (verifyReifiedLocalType(ts, param, tcCouldBeReified(func, id), warn)) {
+    return;
+  }
   raise_reified_typehint_error(
     folly::sformat(
       "Argument {} passed to {}() must be an instance of {}, given {}",
@@ -711,7 +713,10 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   bool warn = false;
-  if (verifyReifiedLocalType(ts, &cell, warn)) return;
+  if (verifyReifiedLocalType(ts, &cell,
+        tcCouldBeReified(func, TypeConstraint::ReturnId), warn)) {
+    return;
+  }
   raise_reified_typehint_error(
     folly::sformat(
       "Value returned from function {}() must be of type {}, {} given",

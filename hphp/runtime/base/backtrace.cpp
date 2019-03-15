@@ -576,7 +576,7 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
 }
 
 template<class L>
-static void walkStack(L func) {
+static void walkStack(L func, bool skipTop = false) {
   VMRegAnchor _;
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
   ActRec* fp = vmfp();
@@ -593,13 +593,40 @@ static void walkStack(L func) {
     fp = inl;
   }
 
+  if (skipTop) fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs);
+
   for (; fp != nullptr; fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs)) {
-
-    // Do not capture frame for HPHP only functions.
-    if (fp->func()->isNoInjection()) continue;
-
-    func(fp, prevPc);
+    if (ArrayData::call_helper(func, fp, prevPc)) return;
   }
+}
+
+const Func* GetCallerFunc() {
+  const Func* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    ret = fp->func();
+    return true;
+  }, true);
+  return ret;
+}
+
+const Func* GetCallerFuncSkipBuiltins() {
+  const Func* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    if (fp->func()->isBuiltin() || fp->func()->isPseudoMain()) return false;
+    ret = fp->func();
+    return true;
+  }, true);
+  return ret;
+}
+
+Class* GetCallerClass() {
+  if (auto const f = GetCallerFunc()) return f->cls();
+  return nullptr;
+}
+
+Class* GetCallerClassSkipBuiltins() {
+  if (auto const f = GetCallerFuncSkipBuiltins()) return f->cls();
+  return nullptr;
 }
 
 int64_t createBacktraceHash(bool consider_metadata) {
@@ -608,6 +635,9 @@ int64_t createBacktraceHash(bool consider_metadata) {
   Unit* prev_unit = nullptr;
 
   walkStack([&] (ActRec* fp, Offset) {
+    // Do not capture frame for HPHP only functions.
+    if (fp->func()->isNoInjection()) return;
+
     auto const curFunc = fp->func();
     auto const curUnit = curFunc->unit();
 
@@ -664,7 +694,12 @@ int64_t createBacktraceHash(bool consider_metadata) {
 
 req::ptr<CompactTrace> createCompactBacktrace() {
   auto ret = req::make<CompactTrace>();
-  walkStack([&] (ActRec* fp, Offset prevPc) { ret->insert(fp, prevPc); });
+  walkStack([&] (ActRec* fp, Offset prevPc) {
+    // Do not capture frame for HPHP only functions.
+    if (fp->func()->isNoInjection()) return;
+
+    ret->insert(fp, prevPc);
+  });
   return ret;
 }
 

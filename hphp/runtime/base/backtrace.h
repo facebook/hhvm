@@ -219,6 +219,10 @@ Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
 req::ptr<CompactTrace> createCompactBacktrace();
+const Func* GetCallerFunc();
+const Func* GetCallerFuncSkipBuiltins();
+Class* GetCallerClass();
+Class* GetCallerClassSkipBuiltins();
 
 } // HPHP
 

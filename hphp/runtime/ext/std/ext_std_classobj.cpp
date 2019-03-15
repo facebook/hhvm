@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -161,7 +162,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
-  auto ctx = arGetContextClass(GetCallerFrame());
+  auto ctx = GetCallerClass();
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
@@ -193,7 +194,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
   if (object.isNull()) {
     // No arg passed.
-    auto cls = arGetContextClassImpl<true>(GetCallerFrame());
+    auto cls = GetCallerClassSkipBuiltins();
     if (cls) {
       return Variant{cls->name(), Variant::PersistentStrInit{}};
     }
@@ -210,7 +211,7 @@ Variant HHVM_FUNCTION(get_parent_class,
                       const Variant& object /* = uninit_variant */) {
   const Class* cls;
   if (object.isNull()) {
-    cls = arGetContextClass(GetCallerFrame());
+    cls = GetCallerClass();
     if (!cls) return false;
   } else {
     if (object.isObject()) {

@@ -20,6 +20,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/hphp-config.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -645,7 +646,7 @@ bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
   auto const val = obj->getPropIgnoreLateInit(
-    arGetContextClass(GetCallerFrame()),
+    GetCallerClass(),
     name.get()
   );
   if (!val) {
@@ -670,7 +671,7 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
     );
   }
   auto const lookup = cls->getSPropIgnoreLateInit(
-    arGetContextClass(GetCallerFrame()),
+    GetCallerClass(),
     name.get()
   );
   if (!lookup.val || !lookup.accessible) {

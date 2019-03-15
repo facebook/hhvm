@@ -1,22 +1,30 @@
 <?hh
 
-$test_run_id = posix_getpid();
-$next_instance_id = 0;
-$error_log_file = fopen("${LOG_ROOT}_test$test_run_id.log", 'w');
+
+abstract final class ServerUtilServerTests {
+  public static $error_log_file;
+  public static $test_run_id = 0;
+  public static $LOG_ROOT;
+  public static $DOC_ROOT;
+  public static $next_instance_id = 0;
+  public static $repo_builds = dict[];
+}
+
+ServerUtilServerTests::$test_run_id = posix_getpid();
+ServerUtilServerTests::$error_log_file = fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::$test_run_id.".log", 'w');
 
 function tlog($str) {
-  global $error_log_file;
 
-  fwrite($error_log_file, $str);
-  fwrite($error_log_file, "\n");
-  fflush($error_log_file);
+
+  fwrite(ServerUtilServerTests::$error_log_file, $str);
+  fwrite(ServerUtilServerTests::$error_log_file, "\n");
+  fflush(ServerUtilServerTests::$error_log_file);
   // error_log($str);
 }
 
 function dumpLogFilesToStdoutAndDie() {
-  global $error_log_file;
-  global $test_run_id;
-  global $LOG_ROOT;
+  $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
+  $test_run_id = ServerUtilServerTests::$test_run_id;
 
   sleep(1);
   error_log('-------------------------------------------');
@@ -56,14 +64,6 @@ function hphp_home() {
   return realpath(__DIR__.'/../../../..');
 }
 
-function bin_root() {
-  $dir = hphp_home() . '/' . '_bin';
-  return is_dir($dir) ?
-    $dir :      # fbmake
-    hphp_home() # github
-  ;
-}
-
 function get_random_port($exclude1, $exclude2) {
   $BasePort = 20000;
   $PortRange = 3000;
@@ -76,8 +76,11 @@ function get_random_port($exclude1, $exclude2) {
 # Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                       $customArgs = '', $serverId = null, $repoArgs = '') {
-  global $test_run_id, $LOG_ROOT, $next_instance_id, $repo_builds;
-  $instance_id = $next_instance_id++;
+  $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
+  $test_run_id = ServerUtilServerTests::$test_run_id;
+
+  $instance_id = ServerUtilServerTests::$next_instance_id;
+  ++ServerUtilServerTests::$next_instance_id;
 
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
@@ -95,17 +98,15 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   // and user name be 'debugger', so that the server can find the
   // sandbox_conf.hdf in '$root'.
   $sandboxHomeConfig = ' -vSandbox.Home='.$home;
-  if ($serverId === null) $serverId = $test_run_id;
+  $serverId ??= $test_run_id;
 
   $hhvm = PHP_BINARY;
 
   if (ini_get('hhvm.repo.authoritative')) {
-    if (!isset($repo_builds)) {
-       $repo_builds=dict[];
-       register_shutdown_function(
+    if (count(ServerUtilServerTests::$repo_builds) === 0) {
+      register_shutdown_function(
          function() {
-           global $repo_builds;
-           foreach ($repo_builds as $dir) {
+           foreach (ServerUtilServerTests::$repo_builds as $dir) {
              @unlink($dir . "/hhvm.hhbc");
              @rmdir($dir);
            }
@@ -113,17 +114,17 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
        );
     }
     $repoKey = 'x'.$root.':'.$repoArgs;
-    if (!isset($repo_builds[$repoKey])) {
-      $repo_builds[$repoKey] =
+    if (!isset(ServerUtilServerTests::$repo_builds[$repoKey])) {
+      ServerUtilServerTests::$repo_builds[$repoKey] =
         "${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
-      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . $repo_builds[$repoKey] .
+      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
         " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);
       tlog(exec($cmd));
     }
     $repoConfig .=
-      " -vRepo.Local.Path=".$repo_builds[$repoKey]."/hhvm.hhbc".
+      " -vRepo.Local.Path=".ServerUtilServerTests::$repo_builds[$repoKey]."/hhvm.hhbc".
       " -vRepo.Authoritative=true";
   }
 
@@ -144,7 +145,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 
 function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
                      $customArgs = '', $serverId = null, $repoArgs = '') {
-  global $test_run_id, $LOG_ROOT;
+
 
   $chooseServer = $serverPort === null;
   $chooseAdmin = $adminPort === null;
@@ -189,8 +190,8 @@ function checkServerId($serverPort, $expectedIds) {
 }
 
 function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
-  global $test_run_id;
-  if ($serverId === null) $serverId = $test_run_id;
+
+  $serverId ??= ServerUtilServerTests::$test_run_id;
   for ($i = 1; $i <= 20; $i++) {
     $status = proc_get_status($serverProc);
     if ($status === false || !$status['running']) {
@@ -207,13 +208,14 @@ function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
 }
 
 function stopServer($adminPort, $serverProc) {
-  global $test_run_id, $LOG_ROOT, $next_instance_id;
+  $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
+  $test_run_id = ServerUtilServerTests::$test_run_id;
+
 
   $r = "";
   for ($i = 1; $i <= 10; $i++) {
-    $r = request(php_uname('n'), $adminPort,
-                 'stop?instance-id=' . $test_run_id);
-    if ($r == "OK") break;
+    $r = request(php_uname('n'), $adminPort, 'stop?instance-id='.$test_run_id);
+    if ($r === "OK") break;
     usleep(100000);
   }
   if ($r != "OK") {
@@ -231,6 +233,7 @@ function stopServer($adminPort, $serverProc) {
   @unlink("${LOG_ROOT}_curl$test_run_id.log");
   @unlink("${LOG_ROOT}_access_log$test_run_id.log");
 
+  $next_instance_id = ServerUtilServerTests::$next_instance_id;
   for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
     @unlink("${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
   }
@@ -259,8 +262,8 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
 }
 
 function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
-  global $test_run_id, $LOG_ROOT;
 
+ 
   @list($path, $post, $headers) = (array)$path;
   if ($post) {
     $post = http_build_query($post);
@@ -274,6 +277,9 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   }
   $url = "http://$host:$port/$path";
   $host_name = "hphpd.debugger.".php_uname('n');
+
+  $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
+  $test_run_id = ServerUtilServerTests::$test_run_id;
   $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
     "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";

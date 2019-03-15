@@ -1,10 +1,13 @@
 <?hh
 
-$LOG_ROOT = '/tmp/hphpd';
 require __DIR__ . '/../../util/server_tests.inc';
+ServerUtilServerTests::$LOG_ROOT = '/tmp/hphpd';
+
 
 function startDebuggerClient($debugPort, $input_path, &$pipes) {
-  global $test_run_id, $LOG_ROOT;
+  $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
+  $test_run_id = ServerUtilServerTests::$test_run_id;
+
 
   $home = hphp_home().'/hphp/test/server/debugger';
   $hhvm = PHP_BINARY;
@@ -81,7 +84,7 @@ function getClientProcessId($pipe) {
 }
 
 function waitForClientToOutput($pipe, $string1, $retryCount = 20) {
-  global $test_run_id;
+
 
   tlog("reading client output");
   $rc = $retryCount;

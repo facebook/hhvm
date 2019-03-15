@@ -1,19 +1,19 @@
 <?hh
 
-$LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../../util/server_tests.inc';
+ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../Adoy/Client.php';
 
-$DOC_ROOT = dirname(__DIR__).'/server_root';
+ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
 
 function runTest($testController, $customArgs = '') {
-  global $DOC_ROOT;
+
   $pid = posix_getpid();
   try {
     $serverProc = $serverPort = $adminPort = null;
     $debugPort = false;
     $serverProc = startServer(&$serverPort, &$adminPort, &$debugPort,
-                              dirname(__DIR__), $DOC_ROOT, $customArgs);
+                              dirname(__DIR__), ServerUtilServerTests::$DOC_ROOT, $customArgs);
     $testController($serverPort);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
@@ -25,7 +25,7 @@ function runTest($testController, $customArgs = '') {
 }
 
 function request($host, $port, $path, $post = [], $headers = [], $extra_args = []) {
-  global $test_run_id, $LOG_ROOT, $DOC_ROOT;
+
 
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
@@ -46,7 +46,7 @@ function request($host, $port, $path, $post = [], $headers = [], $extra_args = [
       $args['QUERY_STRING'] = substr($path, $pos + 1);
       $path = substr($path, 0, $pos);
     }
-    $doc_root = $DOC_ROOT;
+    $doc_root = ServerUtilServerTests::$DOC_ROOT;
     $pos = strpos($path, '//');
     if ($pos) {
       $doc_root .= '/' . substr($path, 0, $pos);

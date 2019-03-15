@@ -128,9 +128,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> ILitConst (NewDictArray (Random.int 1000)));
     (fun () -> ILitConst (NewLikeArrayL (random_local (), Random.int 1000)));
     (fun () -> ILitConst (NewCol (random_collection_type ())));
-    (fun () -> ILitConst (Cns (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsE (Const.from_raw_string "")));
-    (fun () -> ILitConst (CnsU (Const.from_raw_string "", "")));
     (fun () -> ILitConst (CnsUE (Const.from_raw_string "", "")));
     (fun () -> ILitConst (ClsCnsD (Const.from_raw_string "",
                                    Class.from_raw_string "")));

@@ -71,7 +71,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdContField:
   case LdElem:
   case LdRef:
-  case LookupCns:
   case InitClsCns:
   case CGetProp:
   case VGetProp:

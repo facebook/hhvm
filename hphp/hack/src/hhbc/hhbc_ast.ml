@@ -207,9 +207,7 @@ type instruct_lit_const =
   | AddNewElemV
   | NewCol of CollectionType.t
   | ColFromArray of CollectionType.t
-  | Cns of const_id
   | CnsE of const_id
-  | CnsU of const_id * string
   | CnsUE of const_id * string
   | ClsCns of const_id * classref_id
   | ClsCnsD of const_id * class_id

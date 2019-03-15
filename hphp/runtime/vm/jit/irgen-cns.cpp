@@ -65,8 +65,7 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
 
 void implCns(IRGS& env,
              const StringData* name,
-             const StringData* fallbackName,
-             bool error) {
+             const StringData* fallbackName) {
   auto const cnsNameTmp = cns(env, name);
   auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
@@ -80,11 +79,7 @@ void implCns(IRGS& env,
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
       assertx(!fallbackNameTmp);
-      if (error) {
-        result = gen(env, LookupCnsE, cnsNameTmp);
-      } else {
-        result = gen(env, LookupCns, cnsNameTmp);
-      }
+      result = gen(env, LookupCnsE, cnsNameTmp);
     } else {
       result = staticTVCns(env, tv);
     }
@@ -100,18 +95,9 @@ void implCns(IRGS& env,
       },
       [&] { // Taken: miss in TC, do lookup & init
         hint(env, Block::Hint::Unlikely);
-
-        if (fallbackNameTmp) {
-          if (error) {
-            return gen(env, LookupCnsUE, cnsNameTmp, fallbackNameTmp);
-          } else {
-            return gen(env, LookupCnsU, cnsNameTmp, fallbackNameTmp);
-          }
-        }
-        if (error) {
-          return gen(env, LookupCnsE, cnsNameTmp);
-        }
-        return gen(env, LookupCns, cnsNameTmp);
+        return fallbackNameTmp
+          ? gen(env, LookupCnsUE, cnsNameTmp, fallbackNameTmp)
+          : gen(env, LookupCnsE, cnsNameTmp);
       }
     );
   }
@@ -179,20 +165,12 @@ void clsCnsHelper(IRGS& env, SSATmp* ptv, uint32_t clsRefSlot,
 
 }
 
-void emitCns(IRGS& env, const StringData* name) {
-  implCns(env, name, nullptr, false);
-}
-
 void emitCnsE(IRGS& env, const StringData* name) {
-  implCns(env, name, nullptr, true);
-}
-
-void emitCnsU(IRGS& env, const StringData* name, const StringData* fallback) {
-  implCns(env, name, fallback, false);
+  implCns(env, name, nullptr);
 }
 
 void emitCnsUE(IRGS& env, const StringData* name, const StringData* fallback) {
-  implCns(env, name, fallback, true);
+  implCns(env, name, fallback);
 }
 
 void emitClsCnsD(IRGS& env,

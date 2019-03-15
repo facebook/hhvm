@@ -13,7 +13,7 @@
   # ignore args. If this happens the exception will keep the DtorPrinter objects
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
-    Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
+    CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
   FCall <> 1 1 "" - "" ""
   PopC
 

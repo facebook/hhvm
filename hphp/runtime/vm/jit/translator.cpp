@@ -134,9 +134,7 @@ static const struct {
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
-  { OpCns,         {None,             Stack1,       OutCns          }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
-  { OpCnsU,        {None,             Stack1,       OutCns          }},
   { OpCnsUE,       {None,             Stack1,       OutCns          }},
   { OpClsCns,      {None,             Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
@@ -916,9 +914,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:
-  case Op::Cns:
   case Op::CnsE:
-  case Op::CnsU:
   case Op::CnsUE:
   case Op::ColFromArray:
   case Op::CombineAndResolveTypeStruct:

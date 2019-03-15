@@ -2116,9 +2116,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload
   case LookupClsMethodFCache: // autoload
-  case LookupCns:
   case LookupCnsE:
-  case LookupCnsU:
   case LookupCnsUE:
   case LookupFuncCached: // autoload
   case StringGet:      // raise_notice

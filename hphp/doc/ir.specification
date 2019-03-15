@@ -1276,23 +1276,17 @@ To string conversions:
 
   Load the constant named S0, branching to B if isn't present.
 
-| LookupCns<T,constName>,   DCns, CStr, PRc
-
 | LookupCnsE<T,constName>,  DCns, CStr, PRc
 
-  Load a constant via the RDS. Raises an undefined constant notice if the
-  constant cannot be defined.  The E variant will instead throw a fatal error if
-  it cannot define the constant.  These should only be executed if LdCns on the
-  same constant has failed.
-
-| LookupCnsU<T,constName,fallbackName>,  DCns, CStr CStr, PRc
+  Load a constant via the RDS. Raises a fatal error if it cannot define the
+  constant.  This should only be executed if LdCns on the same constant has
+  failed.
 
 | LookupCnsUE<T,constName,fallbackName>, DCns, CStr CStr, PRc
 
   Load an unqualified constant via the RDS, first by trying constName, then by
-  trying fallbackName.  If neither can be found, LookupCnsUE will throw
-  a fatal error, while LookupCnsU will raise a notice.  These should
-  only be executed if LdCns on the same constant has failed.
+  trying fallbackName.  If neither can be found, raises a fatal error.  This
+  should only be executed if LdCns on the same constant has failed.
 
 | LdClsCns<className,constantName>, D(PtrToGen), NA, B
 

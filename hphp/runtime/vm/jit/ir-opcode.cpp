@@ -469,9 +469,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LookupClsMethod:
   case LookupClsMethodCache:
   case LookupClsMethodFCache:
-  case LookupCns:
   case LookupCnsE:
-  case LookupCnsU:
   case LookupCnsUE:
   case LookupFuncCached:
   case LtArr:

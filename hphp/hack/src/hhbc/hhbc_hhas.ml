@@ -126,10 +126,7 @@ let string_of_lit_const instruction =
     | NewArray n -> sep ["NewArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
-    | Cns cnsid -> sep ["Cns"; string_of_const_id cnsid]
     | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
-    | CnsU (id1, id2) ->
-      sep ["CnsU"; string_of_const_id id1; SU.quote_string id2]
     | CnsUE (id1, id2) ->
       sep ["CnsUE"; string_of_const_id id1; SU.quote_string id2]
 

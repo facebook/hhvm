@@ -33,8 +33,6 @@ auto constexpr MODULO_BY_ZERO = "Modulo by zero";
 auto constexpr DIVISION_BY_ZERO =
   "Division by zero";
 auto constexpr NEGATIVE_SHIFT = "Bit shift by negative number";
-auto constexpr UNDEFINED_CONSTANT =
-  "Use of undefined constant %s - assumed '%s'";
 auto constexpr UNDEFINED_VARIABLE = "Undefined variable: %s";
 auto constexpr UNKNOWN_CLASS = "Class undefined: %s";
 auto constexpr CANT_ACCESS_SELF =

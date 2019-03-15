@@ -2263,31 +2263,10 @@ OPTBLD_INLINE void iopColFromArray(CollectionType cType) {
   vmStack().pushObjectNoRc(obj);
 }
 
-OPTBLD_INLINE void iopCns(const StringData* s) {
-  auto const cns = Unit::loadCns(s);
-  if (cns == nullptr) {
-    raise_notice(Strings::UNDEFINED_CONSTANT, s->data(), s->data());
-    vmStack().pushStaticString(s);
-    return;
-  }
-  auto const c1 = vmStack().allocC();
-  cellDup(*cns, *c1);
-}
-
 OPTBLD_INLINE void iopCnsE(const StringData* s) {
   auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {
     raise_error("Undefined constant '%s'", s->data());
-  }
-  auto const c1 = vmStack().allocC();
-  cellDup(*cns, *c1);
-}
-
-OPTBLD_INLINE void iopCnsU(const StringData* name, const StringData* fallback) {
-  auto cns = Unit::loadCns(name);
-  if (cns == nullptr) {
-    raise_undefined_const_fallback_notice(name, fallback);
-    return iopCns(fallback);
   }
   auto const c1 = vmStack().allocC();
   cellDup(*cns, *c1);

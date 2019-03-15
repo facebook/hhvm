@@ -56,8 +56,7 @@ let get_closest_global_ancestor rev repo =
     "-r";
     rev;
     "-T";
-    (* TODO: update with globalrev *)
-    "{svnrev}\n";
+    "{globalrev}\n";
     "--cwd";
     repo;
   ] in

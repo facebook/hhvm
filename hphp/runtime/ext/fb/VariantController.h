@@ -26,13 +26,8 @@
 namespace HPHP {
 
 enum VariantControllerHackArraysMode {
-  // Do not serialize Hack arrays and unserialize as PHP arrays
   OFF,
-  // Do serialize Hack arrays and unserialize as Hack arrays
   ON,
-  // (Un)serialize varrays / darrays: this will accept / emit Hack arrays if
-  // HackArrDVArrs is set.
-  MIGRATORY,
 };
 
 /**
@@ -61,29 +56,23 @@ struct VariantControllerImpl {
       case KindOfPersistentShape:
       case KindOfShape: { // TODO(T31134050)
         if (RuntimeOption::EvalHackArrDVArrs &&
-            HackArraysMode == VariantControllerHackArraysMode::OFF) {
+            HackArraysMode != VariantControllerHackArraysMode::ON) {
           throw HPHP::serialize::HackArraySerializeError{};
         }
         return HPHP::serialize::Type::MAP;
       }
       case KindOfPersistentArray:
-      case KindOfArray:
-        if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
-          return obj.toCArrRef().isVecOrVArray()
-            ? HPHP::serialize::Type::LIST
-            : HPHP::serialize::Type::MAP;
-        }
-        return HPHP::serialize::Type::MAP;
+      case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
       case KindOfDict: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
         throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
         }
         throw HPHP::serialize::HackArraySerializeError{};
@@ -127,16 +116,8 @@ struct VariantControllerImpl {
 
   // map methods
   static MapType createMap() {
-    switch (HackArraysMode) {
-      case VariantControllerHackArraysMode::ON:
-        return empty_dict_array();
-      case VariantControllerHackArraysMode::OFF:
-        return empty_array();
-      case VariantControllerHackArraysMode::MIGRATORY:
-        return RuntimeOption::EvalHackArrDVArrs
-          ? empty_dict_array()
-          : empty_darray();
-    }
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_dict_array() : empty_array();
   }
   static MapType createMap(ArrayInit&& map) {
     return map.toArray();
@@ -183,16 +164,8 @@ struct VariantControllerImpl {
 
   // vector methods
   static VectorType createVector() {
-    switch (HackArraysMode) {
-      case VariantControllerHackArraysMode::ON:
-        return empty_vec_array();
-      case VariantControllerHackArraysMode::OFF:
-        return empty_array();
-      case VariantControllerHackArraysMode::MIGRATORY:
-        return RuntimeOption::EvalHackArrDVArrs
-          ? empty_vec_array()
-          : empty_varray();
-    }
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_vec_array() : empty_array();
   }
   static int64_t vectorSize(const VectorType& vec) {
     return vec.size();
@@ -246,8 +219,6 @@ using VariantController =
   VariantControllerImpl<VariantControllerHackArraysMode::OFF>;
 using VariantControllerUsingHackArrays =
   VariantControllerImpl<VariantControllerHackArraysMode::ON>;
-using VariantControllerUsingVarrayDarray =
-  VariantControllerImpl<VariantControllerHackArraysMode::MIGRATORY>;
 }
 
 

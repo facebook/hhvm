@@ -16,8 +16,8 @@ unlink($thisTestDir);
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-ZendGoodExtStandardTestsFileReadfileVariation6::$filename = "readfile_variation6.txt";
-ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = $dir2."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
+
+ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -35,12 +35,12 @@ function runtest() {
    fclose($h);
    readfile(ZendGoodExtStandardTestsFileReadfileVariation6::$filename, true);
    echo "\n";
-   unlink(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile);  
+   unlink(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile);
 }
 
 abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
   public static $secondFile;
-  public static $filename;
+  public static $filename = "readfile_variation6.txt";
 }
 ?>
 ===DONE===

@@ -16,8 +16,8 @@ $thisTestDir = "fileGetContentsVar1.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename = "file_get_contents_variation1.txt";
-ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile = $dir2."/".ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename;
+
+ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2."/".ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -40,7 +40,7 @@ function runtest() {
 
 abstract final class ZendGoodExtStandardTestsFileFileGetContentsVariation1 {
   public static $secondFile;
-  public static $filename;
+  public static $filename = "file_get_contents_variation1.txt";
 }
 ?>
 ===DONE===

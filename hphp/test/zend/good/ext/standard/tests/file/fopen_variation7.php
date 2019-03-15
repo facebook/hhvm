@@ -41,19 +41,16 @@ function runtest() {
 	   unlink($tmpfile);
 	}
 	
-	$h = @fopen(ZendGoodExtStandardTestsFileFopenVariation7::$dir1.'/'.$tmpfile, "r");
+	$h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
 	}
 	else {
 	   echo "created in dir1\n";
 	   fclose($h);
-	   unlink(ZendGoodExtStandardTestsFileFopenVariation7::$dir1.'/'.$tmpfile);   
+	   unlink(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile);
 	}
 }
 
-abstract final class ZendGoodExtStandardTestsFileFopenVariation7 {
-  public static $dir1;
-}
 ?>
 ===DONE===

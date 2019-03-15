@@ -68,12 +68,12 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
 }
 
 function usage() {
-  global $argv;
+  $argv = $GLOBALS['argv'];
   return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
 }
 
 function help() {
-  global $argv;
+  $argv = $GLOBALS['argv'];
   $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
   $help = <<<EOT
 

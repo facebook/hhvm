@@ -13,28 +13,28 @@ function say($val) {
 }
 
 // Currently running test, and the results of each test.
-$results = array();
-$current = '';
+ToolsFbmakeTestBinaryWrapperPhp::$results = array();
+ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 
 function finish($status) {
-  global $results;
-  global $current;
+
+
 
   say(array('op' => 'test_done',
-            'test' => $current,
+            'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
             'status' => $status));
-  array_push($results, array('name'   => $current,
+  array_push(ToolsFbmakeTestBinaryWrapperPhp::$results, array('name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
                              'status' => $status));
-  $current = '';
+  ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
 
 function start($test) {
-  global $current;
 
-  $current = $test;
+
+  ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
   say(array('op'    => 'start',
-            'test'  => $current));
+            'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current));
 }
 
 function test_is_running() {
@@ -42,7 +42,7 @@ function test_is_running() {
 }
 
 function loop_tests($cmd, $line_func) {
-  global $results;
+
 
   $ftest = popen($cmd, 'r');
   if (!$ftest) {
@@ -54,8 +54,8 @@ function loop_tests($cmd, $line_func) {
     $line_func($line);
   }
   if (!fclose($ftest)) {
-    global $current;
-    if ($current !== '') {
+
+    if (ToolsFbmakeTestBinaryWrapperPhp::$current !== '') {
       finish('failed');
     }
     start('test-binary');
@@ -64,7 +64,7 @@ function loop_tests($cmd, $line_func) {
   }
 
   say(array('op'      => 'all_done',
-            'results' => $results));
+            'results' => ToolsFbmakeTestBinaryWrapperPhp::$results));
 }
 
 
@@ -82,3 +82,8 @@ loop_tests($cmd, function ($line) {
     finish($m[1] == 'OK' ? 'passed' : 'failed');
   }
 });
+
+abstract final class ToolsFbmakeTestBinaryWrapperPhp {
+  public static $results;
+  public static $current;
+}

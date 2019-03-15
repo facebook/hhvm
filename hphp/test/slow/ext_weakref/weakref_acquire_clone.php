@@ -6,6 +6,7 @@ function main_weakref_acquire_clone() {
 $r = new StdClass;
 $wr1 = new WeakRef($r);
 var_dump($wr1->acquire());
+__hhvm_intrinsics\launder_value($r);
 unset($r);
 $wr2 = clone $wr1;
 var_dump($wr1->release());

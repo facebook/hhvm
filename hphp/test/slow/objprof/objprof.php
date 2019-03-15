@@ -88,6 +88,7 @@ class NestedArrayClass {
 function main_objprof() {
 $myClass2 = new EmptyClass();              // ++
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass2);
 $emptyCount = get_instances("EmptyClass", $objs);
 echo $emptyCount ? "(GOOD) Tracking when enabled\n" :
      "(BAD) Not tracking when enabled: \n".var_export($objs, true)."\n";
@@ -96,6 +97,8 @@ $objs = null;
 $myClass = new EmptyClass2();              // -- ++
 $myClass2 = new EmptyClass2();             // -- ++
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $instances_before = get_instances("EmptyClass2", $objs);
 echo $instances_before == 2
   ? "(GOOD) Tracking works\n"
@@ -112,6 +115,7 @@ echo $instances_after
 $objs = null;
 $myClass = new SimpleProps();              // ++
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
      get_bytesd('SimpleProps', $objs) == 51 + $ObjSize - 3 // String is static
   ? "(GOOD) Bytes (props) works\n"
@@ -119,6 +123,7 @@ echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
 $objs = null;
 $myClass = new SimpleArrays();
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 && // 254
      get_bytesd('SimpleArrays', $objs) == $ObjSize + (16 * 3) // 3 Static Arrays
   ? "(GOOD) Bytes (arrays) works\n"
@@ -130,6 +135,7 @@ $dynamic_field2 = 1234;  // 16 + 4 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16
 $myClass->$dynamic_field2 = 1; // 16
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
      get_bytesd('DynamicClass', $objs) == $ObjSize + 72 - 4 - 4
   ? "(GOOD) Bytes (dynamic) works\n"
@@ -137,6 +143,7 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
 $objs = null;
 $myClass = myAsyncFunc();
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize // handle size
   ? "(GOOD) Bytes (Async) works\n"
   : "(BAD) Bytes (Async) failed: ".var_export($objs, true)."\n";
@@ -145,12 +152,14 @@ $objs = null;
 // TEST: map with int and string keys (Mixed)
 $myClass = Map{};
 $MapSize = get_bytes('HH\Map', objprof_get_data());
+__hhvm_intrinsics\launder_value($myClass);
 $myClass = Map {
   "abc" => 1, // 3 + 16 + 16 = 35
   1 => "22", // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Map', $objs) == $MapSize + 32 + 34 + 35 && // MapSize+101
      get_bytesd('HH\\Map', $objs) == $MapSize+101 - 2 - 3 // Static strings
   ? "(GOOD) Bytes (Mixed Map) works\n"
@@ -163,6 +172,7 @@ $myClass = Vector {
   1, // 16
 };
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 + 3 && // Vec+35
      get_bytesd('HH\\Vector', $objs) == $ObjSize + 32 // Static strings
   ? "(GOOD) Bytes (Vector) works\n"
@@ -172,11 +182,13 @@ $objs = null;
 // TEST: set with int and string keys
 $myClass = Set{};
 $SetSize = get_bytes('HH\Set', objprof_get_data());
+__hhvm_intrinsics\launder_value($myClass);
 $myClass = Set {
   getStr(3), // (3 + 16) * 2 = 38
   getStr(4), // (4 + 16) * 2 = 40
 };
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Set', $objs) == $SetSize + 78 && // SetSize + 38+40
      get_bytesd('HH\\Set', $objs) == $SetSize+78 -3-4 // SetSize+ 38+40
   ? "(GOOD) Bytes (Set) works\n"
@@ -188,6 +200,7 @@ $myClass = Map {
   getStr(19) => getStr(17),
 };
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == $MapSize + 19+17+16+16 // MapSize+35=109
   ? "(GOOD) Bytes (RefCount) works\n"
   : "(BAD) Bytes (RefCount) failed: ".var_export($objs, true)."\n";
@@ -198,6 +211,9 @@ $mystr = getStr(9); // inc 1
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedStringClass', $objs) == 2 * ($ObjSize + 9 + 16)  && // 114
      get_bytesd('SharedStringClass', $objs) == 2  * $ObjSize + 32 + (2 * 3)
   ? "(GOOD) Bytes (SharedString) works\n"
@@ -213,6 +229,8 @@ $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedArrayClass', $objs) == ($ObjSize + 120) * 2  && // 152 * 2
      get_bytesd('SharedArrayClass', $objs) == $ObjSize + 120 + $ObjSize + 16 //
   ? "(GOOD) Bytes (SharedArray) works\n"
@@ -228,6 +246,7 @@ $my_arr = array( // 32 + 76 = 108
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data();
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108)   // 140
   ? "(GOOD) Bytes (NestedArray) works\n"
   : "(BAD) Bytes (NestedArray) failed: ".var_export($objs, true)."\n";
@@ -237,5 +256,6 @@ $myClass = null;
 // LAST TEST: Dont crash on custom types
 //$xml = simplexml_load_string('<root><hello>world</hello></root>');
 //$objs = objprof_get_data();
+//__hhvm_intrinsics\launder_value($xml);
 echo "(GOOD) Got here without crashing\n";
 }

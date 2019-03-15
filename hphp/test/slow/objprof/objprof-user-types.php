@@ -147,6 +147,7 @@ class SimpleClassForExclude {
 function main_objprof_user_types() {
 $myClass2 = new EmptyClass();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass2);
 $emptyCount = get_instances("EmptyClass", $objs);
 echo $emptyCount ?
   "(GOOD) Tracking when enabled\n" :
@@ -157,6 +158,8 @@ $myClass2 = null;
 $myClass = new EmptyClass2();
 $myClass2 = new EmptyClass2();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $instances_before = get_instances("EmptyClass2", $objs);
 echo $instances_before == 2 ?
   "(GOOD) Tracking works\n" :
@@ -174,6 +177,7 @@ $myClass = null;
 $myClass2 = null;
 $myClass = new SimpleProps();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
      get_bytesd('SimpleProps', $objs) == $ObjSize + 48 ?
       "(GOOD) Bytes (props) works\n" :
@@ -182,6 +186,7 @@ $objs = null;
 $myClass = null;
 $myClass = new SimpleArrays();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
      get_bytesd('SimpleArrays', $objs) == $ObjSize + (16 * 3) ?
       "(GOOD) Bytes (arrays) works\n" :
@@ -194,6 +199,7 @@ $dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
      get_bytesd('DynamicClass', $objs) == $ObjSize + (16 * 4) ?
       "(GOOD) Bytes (dynamic) works\n" :
@@ -202,6 +208,7 @@ $objs = null;
 $myClass = null;
 $myClass = myAsyncFunc();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 0 ? // not a user node
   "(GOOD) Bytes (Async) works\n" :
   "(BAD) Bytes (Async) failed: " . var_export($objs, true) . "\n";
@@ -210,6 +217,7 @@ $objs = null;
 
 $myClass = Map{};
 $MapSize = get_bytes('HH\Map', objprof_get_data(OBJPROF_FLAGS_DEFAULT));
+__hhvm_intrinsics\launder_value($myClass);
 
 // TEST: map with int and string keys (Mixed)
 $myClass = Map {
@@ -218,6 +226,7 @@ $myClass = Map {
   1234123 => 3 // 16 + 16 = 32
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == 0 ? // not a user node
   "(GOOD) Bytes (Mixed Map) works\n" :
   "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
@@ -231,6 +240,7 @@ $myClass = Vector {
   1, // 16:16
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Vector', $objs) == 0 ? // not a user node
   "(GOOD) Bytes (Vector) works\n" :
   "(BAD) Bytes (Vector) failed: " . var_export($objs, true) . "\n";
@@ -241,11 +251,13 @@ $myClass = null;
 // TEST: set with int and string keys
 $myClass = Set{};
 $SetSize = get_bytes('HH\Set', objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY));
+__hhvm_intrinsics\launder_value($myClass);
 $myClass = Set {
   getStr(3), // (3 + 16) * 2 = 38
   getStr(4), // (4 + 16) * 2 = 40
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Set', $objs) == 0 ? // not a user node
   "(GOOD) Bytes (Set) works\n" :
   "(BAD) Bytes (Set) failed: " . var_export($objs, true) . "\n";
@@ -258,6 +270,7 @@ $myClass = Map {
   getStr(19) => getStr(17),
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == 0 ? // not a user node
   "(GOOD) Bytes (RefCount) works\n" :
   "(BAD) Bytes (RefCount) failed: " . var_export($objs, true) . "\n";
@@ -270,6 +283,9 @@ $mystr = getStr(9); // inc 1, 25:16
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedStringClass', $objs) == 2*($ObjSize+25)  &&
      get_bytesd('SharedStringClass', $objs) == 2*($ObjSize+16)+(2*(9/3)) ?
       "(GOOD) Bytes (SharedString) works\n" :
@@ -288,6 +304,8 @@ $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SharedArrayClass', $objs) ==
       2 * ($ObjSize + 88 + 16 /*(tv)*/ + 16 /*(ArrayData)*/)  &&
      get_bytesd('SharedArrayClass', $objs) ==
@@ -305,6 +323,7 @@ $my_arr = array( // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108) ?
   "(GOOD) Bytes (NestedArray) works\n" :
   "(BAD) Bytes (NestedArray) failed: " . var_export($objs, true) . "\n";
@@ -313,6 +332,8 @@ $myClass = null;
 $myClass = new SimpleMapClass();
 $myClass2 = new SimpleMapClass();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_bytes('SimpleMapClass', $objs) ==
       2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
      get_bytesd('SimpleMapClass', $objs) ==
@@ -336,6 +357,8 @@ $my_obj1 = new SharedMapClass($shared_map);
 $my_obj2 = new SharedMapClass($shared_map);
 $shared_map = null;
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($my_obj1);
+__hhvm_intrinsics\launder_value($my_obj2);
 echo get_bytes('SharedMapClass', $objs) ==
       2 * ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 43) &&
      get_bytesd('SharedMapClass', $objs) ==
@@ -348,6 +371,7 @@ $my_obj2 = null;
 $my_obj = new SimpleMapClassWithBackEdge();
 $my_obj->map['foo'] = $my_obj; // size = 19+16(tv) = 35, sized = 16+16(tv) = 32
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($my_obj);
 echo get_bytes('SimpleMapClassWithBackEdge', $objs) ==
       ($ObjSize + 16 /*(tv)*/ + $MapSize + 39 + 35) &&
      get_bytesd('SimpleMapClassWithBackEdge', $objs) ==
@@ -360,6 +384,7 @@ $my_obj = null;
 
 $my_obj = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT);
+__hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_before = get_instances('ExlcudeClass', $objs);
 $exclude_class_bytes_before = get_bytes('ExlcudeClass', $objs);
 $exclude_class_bytesd_before = get_bytesd('ExlcudeClass', $objs);
@@ -368,6 +393,7 @@ $parent_class_bytesd_before =get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, array('ExlcudeClass'));
+__hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_after = get_bytesd('SimpleClassForExclude', $objs);
@@ -386,6 +412,7 @@ $my_obj = null;
 
 $my_obj = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_before = get_instances('ExlcudeClass', $objs);
 $exclude_class_bytes_before = get_bytes('ExlcudeClass', $objs);
 $exclude_class_bytesd_before = get_bytesd('ExlcudeClass', $objs);
@@ -394,6 +421,7 @@ $parent_class_bytesd_before = get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, array('ExlcudeClass'));
+__hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
 $parent_class_bytes_after = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_after = get_bytesd('SimpleClassForExclude', $objs);
@@ -414,5 +442,6 @@ $my_obj = null;
 // LAST TEST: Dont crash on custom types
 //$xml = simplexml_load_string('<root><hello>world</hello></root>');
 //$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+//__hhvm_intrinsics\launder_value($xml);
 echo "(GOOD) Got here without crashing\n";
 }

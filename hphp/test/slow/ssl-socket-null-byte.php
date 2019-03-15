@@ -28,4 +28,6 @@ foreach ($opt_choices as $opts) {
   );
   var_dump($sock);
 }
+
+fclose($socket);
 }

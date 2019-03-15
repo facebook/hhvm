@@ -11,8 +11,6 @@ function inline_dump($val) {
 <<__EntryPoint>>
 function main_power_grid() {
 error_reporting(E_ALL | E_NOTICE | E_STRICT);
-// PHP's resource numbers start one ahead of us
-if (defined('HHVM_VERSION')) $dummy = fopen('php://memory', 'w+');
 
 $args = [
   null,

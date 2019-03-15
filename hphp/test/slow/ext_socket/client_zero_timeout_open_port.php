@@ -23,4 +23,5 @@ if ($elapsed > 1) {
 } else {
   print "SUCCESS";
 }
+fclose($socket);
 }

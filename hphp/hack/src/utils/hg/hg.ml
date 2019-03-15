@@ -15,7 +15,7 @@ module Hg_actual = struct
 
   let rev_string rev = match rev with
     | Hg_rev hash -> hash
-    | Svn_rev rev -> Printf.sprintf "r%d" rev
+    | Global_rev rev -> Printf.sprintf "r%d" rev
 
 let exec_hg args =
   (** Disable user aliases or configs. *)
@@ -46,32 +46,33 @@ let get_old_version_of_files ~rev ~files ~out ~repo =
   in
   Future.make process ignore
 
-(** Returns the closest SVN ancestor in master to the given rev.
+(** Returns the closest global ancestor in master to the given rev.
  *
- * hg log -r 'ancestor(master,rev)' -T '{svnrev}\n'
+ * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
  *)
-let get_closest_svn_ancestor rev repo =
-  let svn_rev_query rev = exec_hg [
+let get_closest_global_ancestor rev repo =
+  let global_rev_query rev = exec_hg [
     "log";
     "-r";
     rev;
     "-T";
+    (* TODO: update with globalrev *)
     "{svnrev}\n";
     "--cwd";
     repo;
   ] in
-  let svn_rev_process rev =
-    Future.make (svn_rev_query rev)
+  let global_rev_process rev =
+    Future.make (global_rev_query rev)
     (fun s -> int_of_string (String.trim s))
   in
-  (* If we are on public commit, it should have svn field and we are done *)
-  let q1 = svn_rev_process rev in
+  (* If we are on public commit, it should have global_rev field and we are done *)
+  let q1 = global_rev_process rev in
   (* Otherwise, we want the closest public commit. It returns empty set when
    * we are on a public commit, hence the need to still do q1 too *)
-  let q2 = svn_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev) in
+  let q2 = global_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev) in
   (* q2 can also fail in case of merge conflicts, in which case let's fall back to
    * what we always used to do, closest mergebase with master bookmark *)
-  let q3 = svn_rev_process (Printf.sprintf "ancestor(master,%s)" rev) in
+  let q3 = global_rev_process (Printf.sprintf "ancestor(master,%s)" rev) in
   let take_first r1 r2 = match r1 with
     | Ok _ -> r1 | _ -> r2
   in
@@ -111,31 +112,31 @@ let get_closest_svn_ancestor rev repo =
     | Error _ -> None
 
   (**
-   * Returns the SVN base revision. If the current node is a normal
-   * commit, this is simply the closest_svn_ancestor.
+   * Returns the global base revision. If the current node is a normal
+   * commit, this is simply the closest_global_ancestor.
    *
    * If the current node is a merge commit (for example during a merge-conflict
    * state), then it computes the two merge bases with master (one for each
    * parent) and uses the greater of the two.
    * *)
   let current_working_copy_base_rev repo =
-    let primary_mergebase = get_closest_svn_ancestor "." repo in
-    (** Ok, since (get_closest_svn_ancestor p2) depends on getting p2, we
+    let primary_mergebase = get_closest_global_ancestor "." repo in
+    (** Ok, since (get_closest_global_ancestor p2) depends on getting p2, we
      * actually block on getting p2 first. *)
     match get_p2_node repo with
     | None -> primary_mergebase
     | Some p2 ->
-      let p2_mergebase = get_closest_svn_ancestor p2 repo in
-      let max_svn primary p2 = match primary, p2 with
+      let p2_mergebase = get_closest_global_ancestor p2 repo in
+      let max_global_rev primary p2 = match primary, p2 with
         | Error x, _ -> Error x
         | _, Error y -> Error y
         | Ok x, Ok y -> Ok (max x y)
       in
-      Future.merge primary_mergebase p2_mergebase max_svn
+      Future.merge primary_mergebase p2_mergebase max_global_rev
 
-  (** Returns the files changed since the given svn_rev
+  (** Returns the files changed since the given global_rev
    *
-   * hg status -n --rev r<svn_rev> --cwd <repo> *)
+   * hg status -n --rev r<global_rev> --cwd <repo> *)
   let files_changed_since_rev rev repo =
     let process = exec_hg [
       "status";
@@ -175,7 +176,7 @@ let get_closest_svn_ancestor rev repo =
       ] in
       Future.make process Sys_utils.split_lines
 
-  (** hg update --rev r<svn_rev> --cwd <repo> *)
+  (** hg update --rev r<global_rev> --cwd <repo> *)
   let update_to_rev rev repo =
     let process = exec_hg [
       "update";
@@ -198,7 +199,7 @@ let get_closest_svn_ancestor rev repo =
       let reset_current_working_copy_base_rev_returns _ =
         raise Cannot_set_when_mocks_disabled
 
-      let closest_svn_ancestor_bind_value _ _ =
+      let closest_global_ancestor_bind_value _ _ =
         raise Cannot_set_when_mocks_disabled
 
       let files_changed_since_rev_returns ~rev:_ _ =
@@ -223,7 +224,7 @@ module Hg_mock = struct
   module Mocking = struct
     let current_working_copy_hg_rev = ref @@ Future.of_value ("", false)
     let current_working_copy_base_rev = ref @@ Future.of_value 0
-    let closest_svn_ancestor = Hashtbl.create 10
+    let closest_global_ancestor = Hashtbl.create 10
     let files_changed_since_rev = Hashtbl.create 10
     let files_changed_since_rev_to_rev = Hashtbl.create 10
 
@@ -236,8 +237,8 @@ module Hg_mock = struct
     let reset_current_working_copy_base_rev_returns () =
       current_working_copy_base_rev := Future.of_value 0
 
-    let closest_svn_ancestor_bind_value hg_rev svn_rev =
-      Hashtbl.replace closest_svn_ancestor hg_rev svn_rev
+    let closest_global_ancestor_bind_value hg_rev global_rev =
+      Hashtbl.replace closest_global_ancestor hg_rev global_rev
 
     let files_changed_since_rev_returns ~rev v =
       Hashtbl.replace files_changed_since_rev rev v
@@ -251,8 +252,8 @@ module Hg_mock = struct
 
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
   let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
-  let get_closest_svn_ancestor hg_rev _ =
-    Hashtbl.find Mocking.closest_svn_ancestor hg_rev
+  let get_closest_global_ancestor hg_rev _ =
+    Hashtbl.find Mocking.closest_global_ancestor hg_rev
   let files_changed_since_rev rev _ =
       Hashtbl.find Mocking.files_changed_since_rev rev
   let files_changed_since_rev_to_rev ~start ~finish _ =

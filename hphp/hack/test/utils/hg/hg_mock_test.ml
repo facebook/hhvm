@@ -8,11 +8,11 @@ let test_mock_basic () =
   let result = Hg.current_working_copy_base_rev fake_repo_path |> Future.get_exn ~timeout:30 in
   Asserter.Int_asserter.assert_equals base_rev result
     "current_working_copy_base_rev_returns";
-  Hg.Mocking.closest_svn_ancestor_bind_value hg_rev (Future.of_value base_rev);
-  let result = Hg.get_closest_svn_ancestor hg_rev fake_repo_path
+  Hg.Mocking.closest_global_ancestor_bind_value hg_rev (Future.of_value base_rev);
+  let result = Hg.get_closest_global_ancestor hg_rev fake_repo_path
     |> Future.get_exn ~timeout:30 in
   Asserter.Int_asserter.assert_equals base_rev result
-    "Hg.Mocking.closest_svn_ancestor_bind_value";
+    "Hg.Mocking.closest_global_ancestor_bind_value";
   true
 
 let tests =

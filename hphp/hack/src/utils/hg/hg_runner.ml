@@ -45,17 +45,17 @@ let () =
   let current_hg_rev = Hg.current_working_copy_hg_rev @@ Args.root args in
   let current_hg_rev, _ = Future.get_exn current_hg_rev in
   Printf.eprintf "Current HG rev: %s\n" current_hg_rev;
-  let svn_ancestor = Hg.get_closest_svn_ancestor
+  let ancestor = Hg.get_closest_global_ancestor
     current_hg_rev @@ Args.root args in
-  let svn_ancestor = Future.get_exn svn_ancestor in
-  Printf.eprintf "SVN ancestor: %d\n" svn_ancestor;
+  let ancestor = Future.get_exn ancestor in
+  Printf.eprintf "SVN ancestor: %d\n" ancestor;
   let changes = Hg.files_changed_since_rev
-    (Hg.Svn_rev svn_ancestor) @@ Args.root args in
+    (Hg.Global_rev ancestor) @@ Args.root args in
   let changes = Future.get_exn changes in
   let changes = String.concat "\n" changes in
   Printf.eprintf "Changes: %s\n" changes;
-  let changes_between_current_and_svn = (Hg.files_changed_since_rev_to_rev
-    ~start:(Hg.Svn_rev svn_ancestor) ~finish:(Hg.Hg_rev current_hg_rev) (Args.root args))
+  let changes_between_current_and_ancestor = (Hg.files_changed_since_rev_to_rev
+    ~start:(Hg.Global_rev ancestor) ~finish:(Hg.Hg_rev current_hg_rev) (Args.root args))
     |> Future.get_exn ~timeout:30
     |> String.concat "," in
-  Printf.eprintf "Changes between svn and hg rev: %s\n" changes_between_current_and_svn
+  Printf.eprintf "Changes between global and hg rev: %s\n" changes_between_current_and_ancestor

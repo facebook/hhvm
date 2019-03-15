@@ -18,7 +18,7 @@ open Core_kernel
  **)
 
 (* This will be None after init in case of canaries and Precomputed loads *)
-let current_mergebase : Hg.svn_rev option ref = ref None
+let current_mergebase : Hg.global_rev option ref = ref None
 
 let is_in_hg_update_state = ref false
 let is_in_hg_transaction_state = ref false
@@ -39,7 +39,7 @@ let is_in_hg_transaction_state = ref false
  *)
 let did_change_mergebase = ref false
 
-let mergebase_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Caml.Hashtbl.t = Caml.Hashtbl.create 200
+let mergebase_queries : (Hg.hg_rev, (Hg.global_rev Future.t)) Caml.Hashtbl.t = Caml.Hashtbl.create 200
 (* Keys from mergebase_queries that contain futures that were not resolved yet *)
 let pending_queries : Hg.hg_rev Queue.t = Queue.create ()
 
@@ -52,7 +52,7 @@ let add_query ~hg_rev root =
     ()
   else begin
     Hh_logger.log "ServerRevisionTracker: Seen new HG revision: %s" hg_rev;
-    let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
+    let future = Hg.get_closest_global_ancestor hg_rev (Path.to_string root) in
     Caml.Hashtbl.add mergebase_queries hg_rev future;
     Queue.enqueue pending_queries hg_rev
   end
@@ -92,18 +92,18 @@ let check_query future ~timeout ~current_t =
     let e = Future.error_to_string e in
     HackEventLogger.check_mergebase_failed current_t e;
     Hh_logger.log "ServerRevisionTracker: %s" e;
-  | Ok new_svn_rev ->
+  | Ok new_global_rev ->
     HackEventLogger.check_mergebase_success current_t;
     match !current_mergebase with
-    | Some svn_rev when svn_rev <> new_svn_rev ->
-        current_mergebase := Some new_svn_rev;
+    | Some global_rev when global_rev <> new_global_rev ->
+        current_mergebase := Some new_global_rev;
         did_change_mergebase := true;
         HackEventLogger.set_changed_mergebase true;
         Hh_logger.log "ServerRevisionTracker: Changing mergebase from r%d to r%d"
-          svn_rev new_svn_rev;
+          global_rev new_global_rev;
         ()
     | Some _ -> ()
-    | None -> initialize new_svn_rev
+    | None -> initialize new_global_rev
 
 let check_blocking () =
   if Queue.is_empty pending_queries then

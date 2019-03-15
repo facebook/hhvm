@@ -65,10 +65,10 @@ let download_and_load_state_exn
   let open ServerMonitorUtils in
   let saved_state_handle = match target with
     | None -> None
-    | Some { saved_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
+    | Some { saved_state_everstore_handle; target_global_rev; watchman_mergebase } ->
       Some {
         State_loader.saved_state_everstore_handle = saved_state_everstore_handle;
-        saved_state_for_rev = (Hg.Svn_rev target_svn_rev);
+        saved_state_for_rev = (Hg.Global_rev target_global_rev);
         watchman_mergebase;
       } in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
@@ -136,7 +136,7 @@ let use_precomputed_state_exn
   in
   {
     saved_state_fn;
-    corresponding_rev = (Hg.Svn_rev (int_of_string (corresponding_base_revision)));
+    corresponding_rev = (Hg.Global_rev (int_of_string (corresponding_base_revision)));
     mergebase_rev  = None;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;

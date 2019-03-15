@@ -11,11 +11,11 @@ module Report_comparator : Asserter.Comparator
         let str = begin match state with
           | None -> "None"
           | Some { ServerMonitorUtils.saved_state_everstore_handle;
-              target_svn_rev;
+              target_global_rev;
               watchman_mergebase; _ } ->
             Printf.sprintf "(Some %s %d %s)"
               saved_state_everstore_handle
-              target_svn_rev
+              target_global_rev
               (Option.value_map watchman_mergebase ~default:"None"
                 ~f:ServerMonitorUtils.watchman_mergebase_to_string)
         end in
@@ -48,15 +48,15 @@ end;;
 
 (** Create XDB table entries for rev 5 and 200. Start Informant. *)
 let basic_setup_rev_5_and_200_and_start_informant temp_dir =
-  Tools.set_hg_to_svn_map ();
-  (** In XDB table, add an entry for svn rev 200. *)
-  Tools.set_xdb ~state_svn_rev:200
-    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
-  Tools.set_xdb ~state_svn_rev:5
-    ~for_svn_rev:5 ~everstore_handle:"dummy_handle_for_svn_5";
+  Tools.set_hg_to_global_rev_map ();
+  (** In XDB table, add an entry for global rev 200. *)
+  Tools.set_xdb ~state_global_rev:200
+    ~for_global_rev:200 ~everstore_handle:"dummy_handle_for_global_200";
+  Tools.set_xdb ~state_global_rev:5
+    ~for_global_rev:5 ~everstore_handle:"dummy_handle_for_global_5";
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
@@ -107,13 +107,13 @@ let test_informant_restarts_significant_move temp_dir =
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
   let expected_mergebase = {
-    ServerMonitorUtils.mergebase_svn_rev = 200;
+    ServerMonitorUtils.mergebase_global_rev = 200;
     files_changed = SSet.empty;
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
-    target_svn_rev = 200;
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_global_200";
+    target_global_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in
   Tools.test_transition
@@ -160,13 +160,13 @@ let test_informant_restarts_significant_move temp_dir =
     Informant_sig.Server_alive Informant_sig.Move_along
     "state leave significant distance";
   let expected_mergebase = {
-    ServerMonitorUtils.mergebase_svn_rev = 5;
+    ServerMonitorUtils.mergebase_global_rev = 5;
     files_changed = SSet.empty;
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_5";
-    target_svn_rev = 5;
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_global_5";
+    target_global_rev = 5;
     watchman_mergebase = Some expected_mergebase;
   } in
   Tools.test_transition
@@ -191,13 +191,13 @@ let test_informant_restarts_significant_move_with_local_changes temp_dir =
   (**** Following tests all have a State_enter followed by a State_leave
    * and then a Changed_merge_base. *)
   let expected_mergebase = {
-    ServerMonitorUtils.mergebase_svn_rev = 200;
+    ServerMonitorUtils.mergebase_global_rev = 200;
     files_changed = SSet.singleton "local_file.php";
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
-    target_svn_rev = 200;
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_global_200";
+    target_global_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in
   Tools.test_transition
@@ -218,10 +218,10 @@ let test_informant_restarts_significant_move_delayed temp_dir =
    * Informant.report call. This occurs because Revision_tracker.report
    * calls itself recursively if something arrived on the Watchman
    * subscription. *)
-  Tools.set_hg_to_svn_map ~delay_rev_200:8 ();
+  Tools.set_hg_to_global_rev_map ~delay_rev_200:8 ();
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
@@ -264,18 +264,18 @@ let test_informant_restarts_significant_move_delayed temp_dir =
   Tools.test_transition
     informant Tools.State_enter Tools.hg_rev_200
     Informant_sig.Server_alive (Informant_sig.Restart_server None)
-    "Trigger last delayed value for prior Changed_merge_base svn rev mapping";
+    "Trigger last delayed value for prior Changed_merge_base global rev mapping";
   true
 
 (** This test is similar to the above (but shorter) except the
- * we are going to svn_230 which has no entry in the XDB table,
+ * we are going to global_230 which has no entry in the XDB table,
  * and thus we get no restart report.
  *)
 let test_informant_no_saved_state_no_restart temp_dir =
-  Tools.set_hg_to_svn_map ();
+  Tools.set_hg_to_global_rev_map ();
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
@@ -308,10 +308,10 @@ let test_informant_no_saved_state_no_restart temp_dir =
  * a saved state for rev 1. So we prefer incremental (Move_along) instead
  * of loading a new saved state (Restart_server). *)
 let test_informant_xdb_saved_state_too_far temp_dir =
-  Tools.set_hg_to_svn_map ();
+  Tools.set_hg_to_global_rev_map ();
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_5);
+    (Future.of_value Tools.global_rev_5);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
@@ -330,8 +330,8 @@ let test_informant_xdb_saved_state_too_far temp_dir =
   Report_asserter.assert_equals Informant_sig.Move_along report
     "no distance moved" ;
   (** At rev 200, we will find a saved state made for rev 1. *)
-  Tools.set_xdb ~state_svn_rev:1 ~for_svn_rev:200
-    ~everstore_handle:"Fake everstore handle for svn rev 1";
+  Tools.set_xdb ~state_global_rev:1 ~for_global_rev:200
+    ~everstore_handle:"Fake everstore handle for global rev 1";
   Tools.test_transition
     informant Tools.Changed_merge_base Tools.hg_rev_200
     Informant_sig.Server_alive Informant_sig.Move_along
@@ -341,12 +341,12 @@ let test_informant_xdb_saved_state_too_far temp_dir =
 (** We emulate the repo being in a mid-update state when the informant
  * starts. i.e., the .hg/updatestate file is present. *)
 let test_repo_starts_midupdate temp_dir =
-  Tools.set_hg_to_svn_map ();
+  Tools.set_hg_to_global_rev_map ();
   (** Start by having the mock response Mid_update. *)
   WEWClient.Mocking.get_status_returns (Some WEWConfig.Responses.Mid_update);
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
@@ -376,12 +376,12 @@ let test_repo_starts_midupdate temp_dir =
 (** When Watchman Event Watcher in unknown state, then we should start
  * first server. *)
 let test_watcher_in_unknown_state temp_dir =
-  Tools.set_hg_to_svn_map ();
+  Tools.set_hg_to_global_rev_map ();
   (** WEW status returns Unknown. *)
   WEWClient.Mocking.get_status_returns (Some WEWConfig.Responses.Unknown);
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {

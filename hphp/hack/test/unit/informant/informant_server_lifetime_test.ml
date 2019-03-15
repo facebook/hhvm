@@ -4,11 +4,11 @@ module Target_saved_state_comparator = struct
   type t = ServerMonitorUtils.target_saved_state
   let to_string {
     ServerMonitorUtils.saved_state_everstore_handle;
-    target_svn_rev;
+    target_global_rev;
     watchman_mergebase; } =
-      Printf.sprintf ("(Target saved state. everstore handle: %s. svn_rev: %d." ^^
+      Printf.sprintf ("(Target saved state. everstore handle: %s. global_rev: %d." ^^
         " watchman_mergebase: %s)")
-        saved_state_everstore_handle target_svn_rev
+        saved_state_everstore_handle target_global_rev
         (Option.value_map watchman_mergebase ~default:"None"
           ~f:ServerMonitorUtils.watchman_mergebase_to_string)
 
@@ -134,7 +134,7 @@ let make_test test =
 
   end : Mock_server_config_sig) in
   Xdb.Mocking.reset_find_nearest ();
-  Tools.set_hg_to_svn_map ();
+  Tools.set_hg_to_global_rev_map ();
   fun () ->
     Tempfile.with_tempdir begin fun temp_dir ->
       try test mock_server_config temp_dir with
@@ -172,7 +172,7 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
   Start_server_args_opt_asserter.assert_equals expected last_call
     "Before starting monitor, start_server should not have been called.";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   let monitor = Test_monitor.start_monitor
     ~waiting_client:None
     ~max_purgatory_clients:10
@@ -185,20 +185,20 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
   let expected = Some None in
   Start_server_args_opt_asserter.assert_equals expected last_call
     "First call of start server should have no target saved state";
-  Tools.set_xdb ~state_svn_rev:200
-    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
+  Tools.set_xdb ~state_global_rev:200
+    ~for_global_rev:200 ~everstore_handle:"dummy_handle_for_global_200";
   Tools.set_next_watchman_state_transition Tools.Changed_merge_base Tools.hg_rev_200;
   let monitor = Test_monitor.check_and_run_loop_once monitor in
   ignore monitor;
   let last_call = Mock_server_config.get_last_start_server_call () in
   let expected_mergebase = {
-    ServerMonitorUtils.mergebase_svn_rev = 200;
+    ServerMonitorUtils.mergebase_global_rev = 200;
     files_changed = SSet.empty;
     watchman_clock = "dummy_clock";
   } in
   let state_target = {
-    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
-    target_svn_rev = 200;
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_global_200";
+    target_global_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in
   let expected = Some (Some state_target) in
@@ -219,7 +219,7 @@ let test_server_restart_suppressed_on_hhconfig_version_change mock_server_config
   Start_server_args_opt_asserter.assert_equals expected last_call
     "Before starting monitor, start_server should not have been called.";
   Hg.Mocking.current_working_copy_base_rev_returns
-    (Future.of_value Tools.svn_1);
+    (Future.of_value Tools.global_rev_1);
   let monitor = Test_monitor.start_monitor
     (** ------ Except we want to specify a version ------- *)
     ~current_version:"aaa"
@@ -239,8 +239,8 @@ let test_server_restart_suppressed_on_hhconfig_version_change mock_server_config
   Int_asserter.assert_equals 1 start_server_count
     "Start server called once to start the first server.";
   (** Next we set up next check_and_run_loop to trigger an Informant-directed restart *)
-  Tools.set_xdb ~state_svn_rev:200
-    ~for_svn_rev:200 ~everstore_handle:"dummy_handle_for_svn_200";
+  Tools.set_xdb ~state_global_rev:200
+    ~for_global_rev:200 ~everstore_handle:"dummy_handle_for_global_200";
   Tools.set_next_watchman_state_transition Tools.Changed_merge_base Tools.hg_rev_200;
   (** ...except we want version to mismatch when we look it up *)
   Sys_utils.write_file

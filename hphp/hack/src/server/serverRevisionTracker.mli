@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-val initialize : Hg.svn_rev -> unit
+val initialize : Hg.global_rev -> unit
 
 val on_state_enter :
   string -> (* state name *)

@@ -73,18 +73,18 @@ module State_loader_prefetcher =
 
 
 (** We need to query mercurial to convert an hg revision into a numerical
- * SVN revision. These queries need to be non-blocking, so we keep a cache
+ * global revision. These queries need to be non-blocking, so we keep a cache
  * of the mapping in here, as well as the Futures corresponding to
  * th queries. *)
 module Revision_map = struct
 
     (**
-     * Running and finished queries. A query gets the SVN revision for a
+     * Running and finished queries. A query gets the global_rev for a
      * given HG Revision.
      *)
     type t =
       {
-        svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Caml.Hashtbl.t;
+        global_rev_queries : (Hg.hg_rev, (Hg.global_rev Future.t)) Caml.Hashtbl.t;
         xdb_queries : (int,
           (Xdb.sql_result list Future.t *
           (** Prefetcher *) (unit Future.t) option ref)) Caml.Hashtbl.t;
@@ -96,7 +96,7 @@ module Revision_map = struct
 
     let create ~saved_state_cache_limit ~use_xdb ~ignore_hh_version ~ignore_hhconfig =
       {
-        svn_queries = Caml.Hashtbl.create 200;
+        global_rev_queries = Caml.Hashtbl.create 200;
         xdb_queries = Caml.Hashtbl.create 200;
         use_xdb;
         ignore_hh_version;
@@ -106,20 +106,20 @@ module Revision_map = struct
 
     let add_query ~hg_rev root t =
       (** Don't add if we already have an entry for this. *)
-      try ignore @@ Caml.Hashtbl.find t.svn_queries hg_rev
+      try ignore @@ Caml.Hashtbl.find t.global_rev_queries hg_rev
       with
       | Caml.Not_found ->
-        let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
-        Caml.Hashtbl.add t.svn_queries hg_rev future
+        let future = Hg.get_closest_global_ancestor hg_rev (Path.to_string root) in
+        Caml.Hashtbl.add t.global_rev_queries hg_rev future
 
-    let find_svn_rev hg_rev t =
-      let future = Caml.Hashtbl.find t.svn_queries hg_rev in
+    let find_global_rev hg_rev t =
+      let future = Caml.Hashtbl.find t.global_rev_queries hg_rev in
       match Future.check_status future with
       | Future.In_progress {age} when age > 60.0 ->
-        (** Fail if lookup up SVN rev number takes more than 60 s.
+        (** Fail if lookup up global rev number takes more than 60 s.
          * Delete the query so we can retry again if we encounter this hg_rev
-         * again. Return fake "0" SVN rev number. *)
-        let () = Caml.Hashtbl.remove t.svn_queries hg_rev in
+         * again. Return fake "0" global rev number. *)
+        let () = Caml.Hashtbl.remove t.global_rev_queries hg_rev in
         Some 0
       | Future.In_progress _ ->
         None
@@ -128,11 +128,6 @@ module Revision_map = struct
           |> Result.map_error ~f:Future.error_to_string
           |> Result.map_error ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
         in
-        (* TODO (achow): make it log less often
-        let () = Result.iter result ~f:(fun _ ->
-          HackEventLogger.find_svn_rev_success (Future.start_t future)
-        )
-        in*)
         Some (result
           |> Result.ok
           |> Option.value ~default:0)
@@ -140,8 +135,8 @@ module Revision_map = struct
     (** XDB table changes over time. Prior queries should be cleared out after
      * we'v finished using the result completely (i.e. also allowed the
      * Prefetcher to finish) so that we don't reuse old results. *)
-    let clear_xdb_query ~svn_rev t =
-      Caml.Hashtbl.remove t.xdb_queries svn_rev
+    let clear_xdb_query ~global_rev t =
+      Caml.Hashtbl.remove t.xdb_queries global_rev
 
     (**
      * Does an async query to XDB to find nearest saved state match.
@@ -150,8 +145,8 @@ module Revision_map = struct
      *
      * Non-blocking.
      *)
-    let find_xdb_match svn_rev t =
-      let query = try Some (Caml.Hashtbl.find t.xdb_queries svn_rev) with
+    let find_xdb_match global_rev t =
+      let query = try Some (Caml.Hashtbl.find t.xdb_queries global_rev) with
         | Caml.Not_found ->
           let hhconfig_hash, _config = Config_file.parse
             (Relative_path.to_absolute ServerConfig.filename) in
@@ -167,12 +162,12 @@ module Revision_map = struct
             Xdb.find_nearest
               ~db:Xdb.hack_db_name
               ~db_table:Xdb.saved_states_table
-              ~svn_rev
+              ~global_rev
               ~hh_version
               ~hhconfig_hash
             |> fst
           in
-          let () = Caml.Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
+          let () = Caml.Hashtbl.add t.xdb_queries global_rev (future, ref None) in
           None
       in
       let query_to_result_list future =
@@ -183,7 +178,7 @@ module Revision_map = struct
         |> Option.value ~default:[] in
       let prefetch_package xdb_result =
         let handle = {
-          State_loader.saved_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
+          State_loader.saved_state_for_rev = Hg.Global_rev (xdb_result.Xdb.global_rev);
           saved_state_everstore_handle = xdb_result.Xdb.everstore_handle;
           watchman_mergebase = None;
         } in
@@ -197,11 +192,11 @@ module Revision_map = struct
         None
       in
       let no_good_xdb_result () =
-        let () = clear_xdb_query ~svn_rev t in
+        let () = clear_xdb_query ~global_rev t in
         Some ([])
       in
       let good_xdb_result result =
-        let () = clear_xdb_query ~svn_rev t in
+        let () = clear_xdb_query ~global_rev t in
         Some ([result])
       in
       let open Option in
@@ -245,7 +240,7 @@ module Revision_map = struct
           | Future.Complete_with_result _ ->
             let result = query_to_result_list query in
             if result = [] then
-              let () = Hh_logger.log "Got no XDB results on merge base change to %d" svn_rev in
+              let () = Hh_logger.log "Got no XDB results on merge base change to %d" global_rev in
               let () = HackEventLogger.informant_no_xdb_result () in
               no_good_xdb_result ()
             else
@@ -257,8 +252,8 @@ module Revision_map = struct
           end
 
     (**
-    * Looks up the SVN revision for this hg_rev, and prefetches the Saved State for that SVN
-    * rev. Converting hg_rev to an SVN rev takes on the order of seconds, and prefetching
+    * Looks up the global revision for this hg_rev, and prefetches the Saved State for that global
+    * rev. Converting hg_rev to an global rev takes on the order of seconds, and prefetching
     * 10-20 seconds. This will run those operations asynchronously, stash those operations
     * away for later checking.
     *
@@ -268,49 +263,49 @@ module Revision_map = struct
     * result, you should check again later).
     * *)
     let find_and_prefetch ~start_t hg_rev t =
-      let svn_rev = find_svn_rev hg_rev t in
+      let global_rev = find_global_rev hg_rev t in
       let open Option in
-      svn_rev >>= fun svn_rev ->
+      global_rev >>= fun global_rev ->
         if t.use_xdb then
-          find_xdb_match svn_rev t
+          find_xdb_match global_rev t
           >>= fun (xdb_results) -> begin
             (** We log the mergebase after the XDB lookup and prefetch has
-             * completed to avoid log spam, since the "find_svn_rev" result
+             * completed to avoid log spam, since the "find_global_rev" result
              * is pinged once per second until completion. *)
-            let () = Hh_logger.log "Informant Mergebase: %s -> %d" hg_rev svn_rev in
+            let () = Hh_logger.log "Informant Mergebase: %s -> %d" hg_rev global_rev in
             let () = match xdb_results with
               | [] ->
                 let () = Hh_logger.log
-                  "Informant Saved State not found or prefetcher failed for svn_rev %d"
-                  svn_rev in
+                  "Informant Saved State not found or prefetcher failed for global_rev %d"
+                  global_rev in
                 HackEventLogger.informant_find_saved_state_failed start_t
               | result :: _ ->
-                let distance = abs (svn_rev - result.Xdb.svn_rev) in
+                let distance = abs (global_rev - result.Xdb.global_rev) in
                 let () = Hh_logger.log
-                  "Informant found Saved State and prefetched for svn_rev %d at distance %d"
-                  svn_rev
+                  "Informant found Saved State and prefetched for global_rev %d at distance %d"
+                  global_rev
                   distance in
                 HackEventLogger.informant_find_saved_state_success ~distance start_t
             in
-            Some(svn_rev, xdb_results)
+            Some(global_rev, xdb_results)
           end
         else
-          Some(svn_rev, [])
+          Some(global_rev, [])
 
 end
 
 
 (**
- * The Revision tracker tracks the latest known SVN Revision of the repo,
- * the corresponding SVN revisions of Hg revisions, and the sequence of
+ * The Revision tracker tracks the latest known global revision of the repo,
+ * the corresponding global revisions of Hg revisions, and the sequence of
  * revision changes (from hg update). See record type "env" below.
  *
  * This machinery is necessary because Watchman state change events give
  * us only the HG Revisions of hg updates, but we need to make decisions
- * on their SVN Revision numbers.
+ * on their global Revision numbers.
  *
  * We want to be able to:
- *  1) Determine when the base SVN revision (in trunk) has changed
+ *  1) Determine when the base global revision (in trunk) has changed
  *     "significantly" so we can inform the server monitor to trigger
  *     a server restart (since incremental typechecks can be slower
  *     than a fresh server using a saved state).
@@ -320,7 +315,7 @@ end
  * incremental type checking is compared to a fresh restart.
  *
  * The meaning of "highly responsive" above roughly means using a cache
- * for SVN revisions (because a Mercurial request to get the SVN revision
+ * for global revisions (because a Mercurial request to get the global revision
  * number of an HG Revision is very slow, on the order of seconds).
  * Consider the following scenario:
  *
@@ -337,8 +332,8 @@ end
  * changes. We use State Enter and Leave events (which appear before the
  * slower SCM Aware notification) to kick off asynchronous computation. In
  * particular, we kick off prefetching of a saved state, and shelling out
- * to mercurial for mapping the HG Revision to its corresponding SVN Revision
- * (since our "distance" meausure uses svn revisions which are
+ * to mercurial for mapping the HG Revision to its corresponding global revision
+ * (since our "distance" measure uses global_revs which are
  * monotonically increasing)..
  *)
 module Revision_tracker = struct
@@ -396,8 +391,8 @@ module Revision_tracker = struct
   }
 
   type instance =
-    | Initializing of init_settings * (Hg.svn_rev Future.t)
-    | Reinitializng of env * (Hg.svn_rev Future.t)
+    | Initializing of init_settings * (Hg.global_rev Future.t)
+    | Reinitializng of env * (Hg.global_rev Future.t)
     | Tracking of env
 
   (** Revision_tracker has lots of mutable state anyway, so might as well
@@ -424,17 +419,17 @@ module Revision_tracker = struct
     ref @@ Initializing (init_settings,
       Hg.current_working_copy_base_rev (Path.to_string root))
 
-  let set_base_revision svn_rev env =
-    if svn_rev = !(env.current_base_revision) then
+  let set_base_revision global_rev env =
+    if global_rev = !(env.current_base_revision) then
       ()
     else
-      let () = Hh_logger.log "Revision_tracker setting base rev: %d" svn_rev in
-      env.current_base_revision := svn_rev
+      let () = Hh_logger.log "Revision_tracker setting base rev: %d" global_rev in
+      env.current_base_revision := global_rev
 
-  let active_env init_settings base_svn_rev =
+  let active_env init_settings base_global_rev =
     {
       inits = init_settings;
-      current_base_revision = ref base_svn_rev;
+      current_base_revision = ref base_global_rev;
       rev_map = Revision_map.create
         ~saved_state_cache_limit:init_settings.saved_state_cache_limit
         ~use_xdb:init_settings.use_xdb
@@ -445,13 +440,13 @@ module Revision_tracker = struct
       is_in_hg_transaction_state = ref false;
     }
 
-  let reinitialized_env env base_svn_rev = { env with
-    current_base_revision = ref base_svn_rev;
+  let reinitialized_env env base_global_rev = { env with
+    current_base_revision = ref base_global_rev;
     state_changes = Queue.create();
   }
 
-  let get_jump_distance svn_rev env =
-    abs @@ svn_rev - !(env.current_base_revision)
+  let get_jump_distance global_rev env =
+    abs @@ global_rev - !(env.current_base_revision)
 
   let is_significant ~min_distance_restart ~jump_distance elapsed_t =
     let () = Hh_logger.log "Informant: jump distance %d. elapsed_t: %2f"
@@ -464,11 +459,11 @@ module Revision_tracker = struct
 
   (** Form a decision about whether or not we'd like to start a new server.
    * transition: The state transition for which we are forming a decision
-   * svn_rev: The corresponding SVN rev for this transition's hg rev.
-   * xdb_results: The nearest saved states for this svn_rev provided by the XDB table.
+   * global_rev: The corresponding global rev for this transition's hg rev.
+   * xdb_results: The nearest saved states for this global_rev provided by the XDB table.
    *)
   let form_decision ~start_t ~significant transition
-  server_state xdb_results svn_rev env =
+  server_state xdb_results global_rev env =
     let use_xdb = env.inits.use_xdb in
     let open Informant_sig in
     match significant, transition, server_state, xdb_results with
@@ -495,19 +490,19 @@ module Revision_tracker = struct
       Move_along
     | true, Changed_merge_base (_rev, files_changed, watchman_clock), _,
       (nearest_xdb_result :: _) when use_xdb ->
-      let state_distance = abs @@ nearest_xdb_result.Xdb.svn_rev - svn_rev in
-      let incremental_distance = abs @@ svn_rev - !(env.current_base_revision) in
+      let state_distance = abs @@ nearest_xdb_result.Xdb.global_rev - global_rev in
+      let incremental_distance = abs @@ global_rev - !(env.current_base_revision) in
       let () = HackEventLogger.informant_decision_on_saved_state
         ~start_t ~state_distance ~incremental_distance in
       if incremental_distance > state_distance then
         let watchman_mergebase = {
-          ServerMonitorUtils.mergebase_svn_rev = svn_rev;
+          ServerMonitorUtils.mergebase_global_rev = global_rev;
           files_changed;
           watchman_clock;
         } in
         let target_state = {
           ServerMonitorUtils.saved_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
-          target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
+          target_global_rev = nearest_xdb_result.Xdb.global_rev;
           watchman_mergebase = Some watchman_mergebase;
         } in
         Restart_server (Some target_state)
@@ -519,7 +514,7 @@ module Revision_tracker = struct
       Restart_server None
 
   (**
-   * If we have a cached svn_rev for this hg_rev, make a decision on
+   * If we have a cached global_rev for this hg_rev, make a decision on
    * this transition and returns that decision.  If not, returns None.
    *
    * Nonblocking.
@@ -533,14 +528,14 @@ module Revision_tracker = struct
     match Revision_map.find_and_prefetch ~start_t:timestamp hg_rev env.rev_map with
     | None ->
       None
-    | Some (svn_rev, xdb_results) ->
-      let jump_distance = get_jump_distance svn_rev env in
+    | Some (global_rev, xdb_results) ->
+      let jump_distance = get_jump_distance global_rev env in
       let elapsed_t = (Unix.time () -. timestamp) in
       let significant = is_significant
         ~min_distance_restart:env.inits.min_distance_restart
         ~jump_distance elapsed_t in
       Some (form_decision ~start_t:timestamp ~significant
-        transition server_state xdb_results svn_rev env, svn_rev)
+        transition server_state xdb_results global_rev env, global_rev)
 
   (**
    * Keep popping state_changes queue until we reach a non-ready result.
@@ -551,12 +546,12 @@ module Revision_tracker = struct
    * Non-blocking.
    *)
   let rec churn_ready_changes ~acc env server_state =
-    let maybe_set_base_rev transition svn_rev env = match transition with
+    let maybe_set_base_rev transition global_rev env = match transition with
       | State_enter _
       | State_leave _ ->
         ()
       | Changed_merge_base _ ->
-        set_base_revision svn_rev env
+        set_base_revision global_rev env
     in
     if Queue.is_empty env.state_changes then
       acc
@@ -565,12 +560,12 @@ module Revision_tracker = struct
       match make_decision timestamp transition server_state env with
       | None ->
         acc
-      | Some (decision, svn_rev) ->
+      | Some (decision, global_rev) ->
         (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.dequeue_exn env.state_changes in
         (** Maybe setting the base revision must be done after
          * computing distance. *)
-        maybe_set_base_rev transition svn_rev env;
+        maybe_set_base_rev transition global_rev env;
         churn_ready_changes ~acc:(decision :: acc) env server_state
 
   (**
@@ -659,7 +654,7 @@ module Revision_tracker = struct
    * The steps are:
    *   1) Get state change event from Watchman.
    *   3) Maybe add a needed query
-   *      (if we don't already know the SVN rev for this hg rev)
+   *      (if we don't already know the global rev for this hg rev)
    *   4) Preprocess new incoming change - this might result in an early
    *      decision to restart or kill the server, in which case we can dump
    *      out all the older changes that still need to be handled.
@@ -688,12 +683,12 @@ module Revision_tracker = struct
      *
      * Otherwise, we continue as per usual. *)
     let report = match early_decision with
-      | Some (Restart_server target, svn_rev) ->
+      | Some (Restart_server target, global_rev) ->
         (** Early decision to restart, so the prior state changes don't
          * matter anymore. *)
         Hh_logger.log "Informant early decision: restart server";
         let () = Queue.clear env.state_changes in
-        let () = set_base_revision svn_rev env in
+        let () = set_base_revision global_rev env in
         Restart_server target
       | Some (Move_along, _) | None ->
         handle_change_then_churn server_state change env
@@ -759,21 +754,21 @@ module Revision_tracker = struct
 
   let check_init_future future =
     if not @@ Future.is_ready future then None else
-    let svn_rev = Future.get future
+    let global_rev = Future.get future
       |> Result.map_error ~f:Future.error_to_string
       |> Result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
       |> Result.ok
       |> Option.value ~default:0
     in
-    let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d" svn_rev in
-    Some svn_rev
+    let () = Hh_logger.log "Initialized Revision_tracker to global rev: %d" global_rev in
+    Some global_rev
 
   let make_report server_state t =
     match !t with
     | Initializing (init_settings, future) ->
       begin match check_init_future future with
-        | Some svn_rev ->
-          let env = active_env init_settings svn_rev in
+        | Some global_rev ->
+          let env = active_env init_settings global_rev in
           let () = t := Tracking env in
           process server_state env
         | None ->
@@ -781,8 +776,8 @@ module Revision_tracker = struct
       end
     | Reinitializng  (env, future) ->
       begin match check_init_future future with
-        | Some svn_rev ->
-          let env = reinitialized_env env svn_rev in
+        | Some global_rev ->
+          let env = reinitialized_env env global_rev in
           let () = t := Tracking env in
           process server_state env
         | None ->

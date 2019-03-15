@@ -47,7 +47,7 @@ type loaded_info =
 {
   saved_state_fn : string;
   corresponding_rev : Hg.rev;
-  mergebase_rev : Hg.svn_rev option;
+  mergebase_rev : Hg.global_rev option;
   (* Files changed between saved state revision and current public merge base *)
   dirty_master_files : Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)

@@ -1,6 +1,6 @@
 <?hh // strict
 
-Class X {
+class X {
   public $foo = 12;
 }
 

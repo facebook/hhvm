@@ -17,19 +17,17 @@ module Env = struct
   let force_hh_opt = ref false
   let enable_xhp_opt = ref false
   let is_hh_file = ref true
-  let backend_is_codegen = ref true
   let enable_unsafe_expr = ref true
   let enable_unsafe_block = ref true
   let set_is_hh_file b = is_hh_file := b
-  let set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr ~disable_unsafe_block =
+  let set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block =
     force_hh_opt := force_hh;
     enable_xhp_opt := enable_xhp;
-    backend_is_codegen := codegen;
     enable_unsafe_expr := not disable_unsafe_expr;
     enable_unsafe_block := not disable_unsafe_block
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
-  let force_kw_in_lowercase () = is_hh () && not !backend_is_codegen
+  let force_kw_in_lowercase () = is_hh ()
 
 end
 
@@ -48,7 +46,6 @@ module Lexer : sig
     ?is_experimental_mode:bool ->
     ?force_hh:bool ->
     ?enable_xhp:bool ->
-    ?codegen:bool ->
     ?disable_unsafe_expr:bool ->
     ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
@@ -83,14 +80,13 @@ end = struct
     ?(is_experimental_mode = false)
     ?(force_hh = false)
     ?(enable_xhp = false)
-    ?(codegen = false)
     ?(disable_unsafe_expr = false)
     ?(disable_unsafe_block = false)
     text =
     (* this can be overridden in scan_markup, but we need to explicitly reset *)
     (* it, as `scan_markup` is never called for `.hack` files *)
     if (force_hh) then Env.set_is_hh_file true;
-    Env.set ~force_hh ~enable_xhp ~codegen ~disable_unsafe_expr ~disable_unsafe_block;
+    Env.set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -112,7 +108,6 @@ end = struct
         ?is_experimental_mode
         ~force_hh:!Env.force_hh_opt
         ~enable_xhp:!Env.enable_xhp_opt
-        ~codegen:!Env.backend_is_codegen
         ~disable_unsafe_expr:(not !Env.enable_unsafe_expr)
         ~disable_unsafe_block:(not !Env.enable_unsafe_block)
         text)

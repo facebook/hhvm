@@ -11,7 +11,7 @@ class Bar<T> extends Foo<Bar<Foo<T>>> implements Bonk<T> {
 
 class :bork {
 attribute
-  Bar<String> foo;
+  Bar<string> foo;
 }
 function nest(Foo<B<C<D<E<F<G<H<I<J<B>,C>>,D>>>,E>>>> $bonk) {
   echo "ok 2\n";

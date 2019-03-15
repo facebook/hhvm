@@ -58,7 +58,7 @@ function foo11() {
 }
 
 function foo12() {
-  $x = Array();
+  $x = array();
   try {
     return strlen($x);
   } catch (Exception $e) {

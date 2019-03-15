@@ -1,11 +1,11 @@
 <?hh
 
-newtype Foo = Int;
-newtype Foo2 = Integer;
+newtype Foo = int;
+newtype Foo2 = integer;
 
 function foo(Foo $x, Foo2 $y) {}
 
-newtype Bar = floAt;
+newtype Bar = float;
 
 function bar(Bar $k) {}
 
@@ -14,15 +14,15 @@ newtype Baz = BazCls;
 function baz(Baz $k) {}
 function baz2(Bazcls $k) {}
 
-type A = aRray;
-type B = iNt;
-type C = iNteger;
-type D = bOol;
-type E = bOolean;
-type F = sTring;
-type G = rEal;
-type H = fLoat;
-type I = dOuble;
+type A = array;
+type B = int;
+type C = integer;
+type D = bool;
+type E = boolean;
+type F = string;
+type G = real;
+type H = float;
+type I = double;
 function lots(A $x,
               B $xx,
               C $xxx,

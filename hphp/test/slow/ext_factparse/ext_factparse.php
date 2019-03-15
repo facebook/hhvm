@@ -96,9 +96,9 @@ if (rand()) {
 const CO5 = 1;
 function f6() {
 
-  nEw stdclass; // make sure the parser can handle "weird" keywords
-  NeW stdclass;
-  NEW stdclass;
+  new stdclass;
+  new stdclass;
+  new stdclass;
 }
 
 # Does not compile.

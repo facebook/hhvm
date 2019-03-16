@@ -917,7 +917,8 @@ struct RuntimeOption {
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
-  F(bool, DumpInlRefuse,               false)                           \
+  /* DumpInlDecision 0=none ; 1=refuses ; 2=refuses+accepts */          \
+  F(uint32_t, DumpInlDecision,         0)                               \
   F(uint32_t, DumpRegion,              0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \

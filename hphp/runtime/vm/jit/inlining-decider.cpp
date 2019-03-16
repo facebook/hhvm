@@ -63,7 +63,7 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
   auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
-  if (RuntimeOption::EvalDumpInlRefuse) {
+  if (RuntimeOption::EvalDumpInlDecision > 0) {
     annotations.emplace_back("NoInline",
       nameAndReason(bcOff, caller->fullName()->data(), calleeName, why));
   }
@@ -538,9 +538,17 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
     return traceRefusal(callerSk, callee, why, annotations);
   };
 
-  auto accept = [&, this] (const char* kind) {
+  auto accept = [&, this] (std::string why) {
+    if (RuntimeOption::EvalDumpInlDecision >= 2) {
+      auto str = nameAndReason(callerSk.offset(),
+                               callerSk.func()->fullName()->data(),
+                               callee->fullName()->data(),
+                               why);
+      annotations.emplace_back("DoInline", str);
+    }
+
     FTRACE(2, "InliningDecider: inlining {}() <- {}()\t<reason: {}>\n",
-           m_topFunc->fullName()->data(), callee->fullName()->data(), kind);
+           m_topFunc->fullName()->data(), callee->fullName()->data(), why);
     return true;
   };
 
@@ -637,21 +645,25 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
   const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
                                           annotations);
   if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
-    return accept("within always inline limit");
+    return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
 
   const int maxCost = maxTotalCost - m_cost;
+  const auto baseProfCount = s_baseProfCount.load();
+  const auto callerProfCount = irgen::curProfCount(irgs);
+  const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
   if (cost > maxCost) {
-    const auto baseProfCount = s_baseProfCount.load();
-    const auto callerProfCount = irgen::curProfCount(irgs);
-    const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
     return refuse(folly::sformat(
       "too expensive: cost={} : maxTotalCost={} : maxCost={} : "
       "baseProfCount={} : callerProfCount={} : calleeProfCount={}", cost,
       maxTotalCost, maxCost, baseProfCount, callerProfCount, calleeProfCount));
   }
 
-  return accept("small region with return");
+  return accept(folly::sformat("small region with return: cost={} : "
+                               "maxTotalCost={} : maxCost={} : baseProfCount={}"
+                               " : callerProfCount={} : calleeProfCount={}",
+                               cost, maxTotalCost, maxCost, baseProfCount,
+                               callerProfCount, calleeProfCount));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

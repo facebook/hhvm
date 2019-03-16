@@ -37,7 +37,7 @@ bool enabled() {
   return debug ||
          RuntimeOption::EvalDumpTC ||
          RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpInlRefuse ||
+         RuntimeOption::EvalDumpInlDecision ||
          RuntimeOption::EvalDumpRegion;
 }
 

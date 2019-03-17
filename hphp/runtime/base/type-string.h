@@ -291,7 +291,6 @@ public:
   friend String&& operator+(String&& lhs, const char* rhs);
   friend String&& operator+(String&& lhs, String&& rhs);
   friend String operator+(String&& lhs, const String & rhs);
-  friend String operator+(const String & lhs, String&& rhs);
   friend String operator+(const String& lhs, const char* rhs);
   friend String operator+(const String & lhs, const String & rhs);
   String& operator += (const char* v);

@@ -277,10 +277,6 @@ String operator+(String&& lhs, const String & rhs) {
   return std::move(lhs += rhs);
 }
 
-String operator+(const String & lhs, String&& rhs) {
-  return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
-}
-
 String operator+(const String & lhs, const String & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;

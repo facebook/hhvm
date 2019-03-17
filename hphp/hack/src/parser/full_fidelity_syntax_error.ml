@@ -707,6 +707,8 @@ let expected_user_attribute = "A user attribute is expected here."
 
 let tparams_in_tconst = "Type parameters are not allowed on class type constants"
 
+let targs_not_allowed = "Type arguments are not allowed in this position"
+
 let reified_attribute = "__Reified and __HasReifiedParent attributes may not be provided by the user"
 
 let lval_as_expression =

@@ -395,7 +395,7 @@ typename std::enable_if<
 BaseSet::php_map(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
+  vm_decode_function(callback, nullptr, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
@@ -431,7 +431,7 @@ typename std::enable_if<
 BaseSet::php_filter(const Variant& callback) {
   VMRegGuard _;
   CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
+  vm_decode_function(callback, nullptr, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
@@ -479,7 +479,7 @@ BaseSet::php_zip(const Variant& iterable) {
 template<bool useKey>
 Object BaseSet::php_retain(const Variant& callback) {
   CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
+  vm_decode_function(callback, nullptr, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
@@ -553,7 +553,7 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
-  vm_decode_function(fn, nullptr, false, ctx);
+  vm_decode_function(fn, nullptr, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
@@ -628,7 +628,7 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
-  vm_decode_function(fn, nullptr, false, ctx);
+  vm_decode_function(fn, nullptr, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");

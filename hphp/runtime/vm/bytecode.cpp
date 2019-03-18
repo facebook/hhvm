@@ -4952,7 +4952,6 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     auto const func = vm_decode_function(
       v,
       vmfp(),
-      /* forwarding */ false,
       thiz,
       cls,
       invName,
@@ -5010,7 +5009,6 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       func = vm_decode_function(
         v,
         vmfp(),
-        /* forwarding */ false,
         thiz,
         cls,
         invName,
@@ -5045,7 +5043,6 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       func = vm_decode_function(
         v,
         vmfp(),
-        /* forwarding */ false,
         thiz,
         cls,
         invName,
@@ -5255,7 +5252,6 @@ void resolveMethodImpl(
   auto const func = vm_decode_function(
     Variant{arr},
     vmfp(),
-    /* forwarding */ false,
     thiz,
     cls,
     invName,

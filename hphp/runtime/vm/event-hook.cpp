@@ -266,7 +266,7 @@ static Variant call_intercept_handler(
   StringData* invName = nullptr;
   ArrayData* reifiedGenerics = nullptr;
   bool dynamic = false;
-  auto f = vm_decode_function(function, cf(), false,
+  auto f = vm_decode_function(function, cf(),
                               obj, cls, invName, dynamic, reifiedGenerics);
   if (!f) {
     return uninit_null();

@@ -58,7 +58,7 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
 
   if (!callback.isNull()) {
     CallCtx ctx;
-    vm_decode_function(callback, nullptr, false, ctx);
+    vm_decode_function(callback, nullptr, ctx);
     if (!ctx.func) {
       return false;
     }

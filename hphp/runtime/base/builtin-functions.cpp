@@ -118,7 +118,7 @@ bool is_callable(const Variant& v) {
   StringData* invName = nullptr;
   ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
-  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
+  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), obj, cls,
                                            invName, dynamic, reifiedGenerics,
                                            DecodeFlags::LookupOnly);
   if (invName != nullptr) {
@@ -206,13 +206,13 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
 const HPHP::Func*
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,
-                   bool forwarding,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
                    ArrayData*& reifiedGenerics,
                    DecodeFlags flags /* = DecodeFlags::Warn */) {
+  bool forwarding = false;
   invName = nullptr;
   dynamic = true;
 
@@ -552,7 +552,6 @@ vm_decode_function(const_variant_ref function,
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
-                          bool forwarding /* = false */,
                           bool checkRef /* = false */) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
@@ -560,7 +559,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   StringData* invName = nullptr;
   ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
-  const Func* f = vm_decode_function(function, cf(), forwarding, obj, cls,
+  const Func* f = vm_decode_function(function, cf(), obj, cls,
                                      invName, dynamic, reifiedGenerics);
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();

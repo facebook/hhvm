@@ -190,7 +190,6 @@ enum class DecodeFlags { Warn, NoWarn, LookupOnly };
 const HPHP::Func*
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,
-                   bool forwarding,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
@@ -201,23 +200,22 @@ vm_decode_function(const_variant_ref function,
 inline void
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,
-                   bool forwarding,
                    CallCtx& ctx,
                    DecodeFlags flags = DecodeFlags::Warn) {
   ArrayData* reifiedGenerics = nullptr;
-  ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
+  ctx.func = vm_decode_function(function, ar, ctx.this_, ctx.cls,
                                 ctx.invName, ctx.dynamic, reifiedGenerics,
                                 flags);
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
-                          bool forwarding = false, bool checkRef = false);
+                          bool checkRef = false);
 template<typename T>
 Variant vm_call_user_func(T&& t, const Variant& params,
-                          bool forwarding = false, bool checkRef = false) {
+                          bool checkRef = false) {
   const Variant function{std::forward<T>(t)};
   return vm_call_user_func(
-    const_variant_ref{function}, params, forwarding, checkRef
+    const_variant_ref{function}, params, checkRef
   );
 }
 

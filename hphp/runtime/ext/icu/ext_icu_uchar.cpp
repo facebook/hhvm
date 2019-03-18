@@ -109,7 +109,7 @@ void HHVM_STATIC_METHOD(IntlChar, enumCharTypes, const Variant& callback) {
   CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), false, ctx);
+    vm_decode_function(callback, cf(), ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
@@ -181,7 +181,7 @@ void HHVM_STATIC_METHOD(IntlChar, enumCharNames,
   CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), false, ctx);
+    vm_decode_function(callback, cf(), ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,

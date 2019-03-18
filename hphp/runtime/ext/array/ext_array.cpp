@@ -480,7 +480,7 @@ TypedValue HHVM_FUNCTION(array_map,
   ctx.func = nullptr;
   if (!callback.isNull()) {
     CallerFrame cf;
-    vm_decode_function(callback, cf(), false, ctx);
+    vm_decode_function(callback, cf(), ctx);
   }
   const auto& cell_arr1 = *arr1.toCell();
   if (UNLIKELY(!isClsMethCompactContainer(cell_arr1))) {

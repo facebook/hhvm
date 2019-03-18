@@ -110,7 +110,6 @@ void FuncCache::lookup(rds::Handle handle,
         func = vm_decode_function(
           Variant{sd},
           fp,
-          false /* forward */,
           this_,
           self_,
           inv,

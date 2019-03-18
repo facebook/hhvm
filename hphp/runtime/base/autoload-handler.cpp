@@ -91,7 +91,7 @@ bool vm_decode_handler(const Variant& function, DecodedHandlerPtr& handler) {
   ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
-  auto const func = vm_decode_function(function, GetCallerFrame(), false,
+  auto const func = vm_decode_function(function, GetCallerFrame(),
                                        obj, cls, name, dynamic,
                                        reifiedGenerics,
                                        DecodeFlags::NoWarn);

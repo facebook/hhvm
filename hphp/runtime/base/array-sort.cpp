@@ -295,7 +295,7 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
     if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
     CallerFrame cf;                                             \
-    vm_decode_function(cmp_function, cf(), false, ctx);         \
+    vm_decode_function(cmp_function, cf(), ctx);                \
     if (!ctx.func) {                                            \
       return false;                                             \
     }                                                           \
@@ -367,7 +367,7 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   ElmUCompare<TVAccessor> comp;
   CallCtx ctx;
   CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), false, ctx);
+  vm_decode_function(cmp_function, cf(), ctx);
   if (!ctx.func) {
     return false;
   }

@@ -169,6 +169,12 @@ enum class Dep : uintptr_t {
   /* This dependency should trigger when a public static property with a
    * particular name changes */
   PublicSPropName = (1u << 4),
+  /* This dependency means that we refused to do inline analysis on
+   * this function due to inline analysis depth. The dependency will
+   * trigger if the target function becomes effect-free, or gets a
+   * literal return value.
+   */
+  InlineDepthLimit = (1u << 5),
 };
 
 Dep operator|(Dep a, Dep b) {
@@ -4851,6 +4857,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
                                         CompactVector<Type> args) const {
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
+  static __thread Context base_ctx;
 
   // Don't fold functions when staticness mismatches
   if ((func->attrs & AttrStatic) && ctxType.couldBe(TObj)) return TTop;
@@ -4860,7 +4867,6 @@ Type Index::lookup_foldable_return_type(Context ctx,
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
     return finfo.returnTy;
   }
-  add_dependency(*m_data, func, ctx, Dep::ReturnTy);
 
   auto const calleeCtx = CallContext {
     func,
@@ -4895,17 +4901,23 @@ Type Index::lookup_foldable_return_type(Context ctx,
   }
 
   if (frozen()) {
-      FTRACE_MOD(
-        Trace::hhbbc, 4,
-        "MISSING: foldableReturnType for {}{}{} with args {} (hash: {})\n",
-        func->cls ? func->cls->name : empty_string().get(),
-        func->cls ? "::" : "",
-        func->name,
-        showArgs(calleeCtx.args),
-        CallContextHashCompare{}.hash(calleeCtx));
+    FTRACE_MOD(
+      Trace::hhbbc, 4,
+      "MISSING: foldableReturnType for {}{}{} with args {} (hash: {})\n",
+      func->cls ? func->cls->name : empty_string().get(),
+      func->cls ? "::" : "",
+      func->name,
+      showArgs(calleeCtx.args),
+      CallContextHashCompare{}.hash(calleeCtx));
+    return TTop;
   }
 
-  if (frozen() || interp_nesting_level > max_interp_nexting_level) return TTop;
+  if (!interp_nesting_level) {
+    base_ctx = ctx;
+  } else if (interp_nesting_level > max_interp_nexting_level) {
+    add_dependency(*m_data, func, base_ctx, Dep::InlineDepthLimit);
+    return TTop;
+  }
 
   auto const contextType = [&] {
     ++interp_nesting_level;
@@ -5416,19 +5428,6 @@ void Index::fixup_return_type(const php::Func* func,
   }
 }
 
-void Index::refine_effect_free(const php::Func* func, bool flag) {
-  auto const finfo = create_func_info(*m_data, func);
-  always_assert_flog(
-    !finfo->effectFree || flag,
-    "Index effectFree changed from true to false in {} {}{}.\n",
-    func->unit->filename,
-    func->cls ? folly::to<std::string>(func->cls->name->data(), "::") :
-    std::string{},
-    func->name);
-
-  finfo->effectFree = flag;
-}
-
 void Index::init_return_type(const php::Func* func) {
   if ((func->attrs & AttrBuiltin) || func->isMemoizeWrapper) {
     return;
@@ -5504,12 +5503,35 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     );
   };
 
-  auto changes = false;
+  auto dep = Dep{};
+  if (finfo->retParam != fa.retParam) {
+    dep = Dep::ReturnTy;
+    always_assert_flog(
+        fa.retParam != NoLocalId,
+        "Index retParam went from {} to unset in {}.\n",
+        finfo->retParam,
+        error_loc()
+    );
+    finfo->retParam = fa.retParam;
+  }
+
+  auto unusedParams = ~fa.usedParams;
+  if (finfo->unusedParams != unusedParams) {
+    dep = Dep::ReturnTy;
+    always_assert_flog(
+        (finfo->unusedParams | unusedParams) == unusedParams,
+        "Index unusedParams decreased in {}.\n",
+        error_loc()
+    );
+    finfo->unusedParams = unusedParams;
+  }
+
   if (t.strictlyMoreRefined(finfo->returnTy)) {
     if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
       ++finfo->returnRefinments;
-      changes = true;
+      dep = is_scalar(t) ?
+        Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
     } else {
       FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
     }
@@ -5524,29 +5546,21 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     );
   }
 
-  if (finfo->retParam != fa.retParam) {
-    changes = true;
-    always_assert_flog(
-        fa.retParam != NoLocalId,
-        "Index retParam went from {} to unset in {}.\n",
-        finfo->retParam,
-        error_loc()
-    );
-    finfo->retParam = fa.retParam;
+  always_assert_flog(
+    !finfo->effectFree || fa.effectFree,
+    "Index effectFree changed from true to false in {} {}{}.\n",
+    func->unit->filename,
+    func->cls ? folly::to<std::string>(func->cls->name->data(), "::") :
+    std::string{},
+    func->name);
+
+  if (finfo->effectFree != fa.effectFree) {
+    finfo->effectFree = fa.effectFree;
+    dep = Dep::InlineDepthLimit;
   }
 
-  auto unusedParams = ~fa.usedParams;
-  if (finfo->unusedParams != unusedParams) {
-    changes = true;
-    always_assert_flog(
-        (finfo->unusedParams | unusedParams) == unusedParams,
-        "Index unusedParams decreased in {}.\n",
-        error_loc()
-    );
-    finfo->unusedParams = unusedParams;
-  }
 
-  if (changes) find_deps(*m_data, func, Dep::ReturnTy, deps);
+  if (dep != Dep{}) find_deps(*m_data, func, dep, deps);
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,

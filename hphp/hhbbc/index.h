@@ -877,11 +877,6 @@ struct Index {
                         DependencyContextSet& deps);
 
   /*
-   * Refine the effectFree flag for func.
-   */
-  void refine_effect_free(const php::Func* func, bool flag);
-
-  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *

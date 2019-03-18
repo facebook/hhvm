@@ -186,13 +186,6 @@ extern __thread void* tl_base;
  */
 
 /*
- * Symbol for function static locals.  These are RefData's allocated
- * in RDS.
- */
-struct StaticLocal { FuncId funcId;
-                     LowStringPtr name; };
-
-/*
  * Class constant values are TypedValue's stored in RDS.
  */
 struct ClsConstant { LowStringPtr clsName;
@@ -238,8 +231,7 @@ struct LSBMemoCache {
 };
 
 
-using Symbol = boost::variant< StaticLocal
-                             , ClsConstant
+using Symbol = boost::variant< ClsConstant
                              , StaticMethod
                              , StaticMethodF
                              , Profile<jit::ArrayKindProfile>
@@ -632,7 +624,7 @@ void uninitHandle(Handle handle);
 /*
  * Used to record information about the rds handle h in the
  * perf-data-pid.map (if enabled).
- * The type indicates the type of entry (eg StaticLocal), and the
+ * The type indicates the type of entry (eg ClsConstant), and the
  * msg identifies this particular entry (eg function-name:local-name)
  */
 void recordRds(Handle h, size_t size,

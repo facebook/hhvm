@@ -37,21 +37,6 @@ namespace HPHP { namespace rds {
  */
 
 /*
- * Static locals.
- *
- * For normal functions, static locals are allocated as RefData's that
- * live in RDS.  Note that we don't put closure locals here because
- * they are per-instance.
- */
-
-struct StaticLocalData {
-  RefData ref;
-  static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
-};
-Link<StaticLocalData, rds::Mode::Normal>
-bindStaticLocal(const Func*, const StringData*);
-
-/*
  * Allocate storage for the value of a class constant in RDS.
  */
 Link<TypedValue, rds::Mode::Normal>

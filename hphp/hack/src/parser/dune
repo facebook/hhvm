@@ -40,7 +40,7 @@
   (wrapped false)
   (modules
     stats_container)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_env)
@@ -50,7 +50,7 @@
   (libraries
     file_info
     parser_stats_container)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_sigs)
@@ -66,7 +66,7 @@
   (libraries
     pos
     relative_path)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_syntax)
@@ -93,7 +93,7 @@
     parser_schema_def
     parser_sigs
     parser_stats_container)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_editable_positioned_syntax)
@@ -103,7 +103,7 @@
     full_fidelity_editable_positioned_token)
   (libraries
     parser_syntax)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_syntax_tree)
@@ -157,7 +157,7 @@
     parser_sigs
     parser_syntax
     parser_syntax_tree)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_rewriter)
@@ -196,7 +196,7 @@
     parser_env
     parser_smart_constructor
     parser_options)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
   (name parser_lambda_analyzer)

@@ -27,7 +27,7 @@
     str
     unix)
   (preprocess
-    (pps ppx_deriving.std)))
+    (pps lwt_ppx ppx_deriving.std)))
 
 ; splitted utils:utils
 (library
@@ -92,7 +92,8 @@
   (libraries
     collections
     sys_utils)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name pos)
@@ -196,7 +197,7 @@
     marshal_tools_lwt
     sys_utils)
   (preprocess
-    (pps lwt_ppx)))
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name http_lite)
@@ -263,4 +264,4 @@
     core_kernel
     utils_core)
   (preprocess
-    (pps lwt_ppx)))
+    (pps lwt_ppx ppx_deriving.std)))

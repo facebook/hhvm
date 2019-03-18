@@ -182,10 +182,26 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
   serialize_memoize_tv(sb, depth, *tv);
 }
 
+ALWAYS_INLINE void serialize_memoize_arraykey(StringBuffer& sb,
+                                              const Cell& c) {
+  switch (c.m_type) {
+    case KindOfPersistentString:
+    case KindOfString:
+      serialize_memoize_code(sb, SER_MC_STRING);
+      serialize_memoize_string_data(sb, c.m_data.pstr);
+      break;
+    case KindOfInt64:
+      serialize_memoize_int64(sb, c.m_data.num);
+      break;
+    default:
+      always_assert(false);
+  }
+}
+
 void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_CONTAINER);
   IterateKV(ad, [&] (Cell k, TypedValue v) {
-    serialize_memoize_tv(sb, depth, k);
+    serialize_memoize_arraykey(sb, k);
     serialize_memoize_tv(sb, depth, v);
     return false;
   });

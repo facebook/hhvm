@@ -1947,28 +1947,6 @@ void parse_srcloc(AsmState& as, int /*nestLevel*/) {
 }
 
 /*
- * directive-static : '$' local_name = long-string-literal ';'
- *                  ;
- *
- * Record that the function contains a static named local_name along with an
- * associated initializer.
- */
-void parse_static(AsmState& as) {
-  Func::SVInfo svInfo;
-  std::string name;
-  String init;
-
-  as.in.expectWs('$');
-  if (!as.in.readword(name)) {
-    as.error("Statics must be named");
-  }
-  svInfo.name = makeStaticString(name);
-  as.fe->staticVars.push_back(svInfo);
-
-  as.in.expectWs(';');
-}
-
-/*
  * directive-doccomment : long-string-literal ';'
  *                      ;
  *
@@ -2159,7 +2137,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }
-      if (word == ".static") { parse_static(as); continue; }
       if (word == ".doc") { parse_func_doccomment(as); continue; }
       as.error("unrecognized directive `" + word + "' in function");
     }

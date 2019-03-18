@@ -191,6 +191,7 @@ type t =
   | ErrorSyntax
   | ListItem
   | PocketAtomExpression
+  | PocketIdentifierExpression
   | PocketAtomMappingDeclaration
   | PocketEnumDeclaration
   | PocketFieldTypeExprDeclaration
@@ -375,6 +376,7 @@ let to_string kind =
   | ErrorSyntax                             -> "error"
   | ListItem                                -> "list_item"
   | PocketAtomExpression                    -> "pocket_atom"
+  | PocketIdentifierExpression              -> "pocket_identifier"
   | PocketAtomMappingDeclaration            -> "pocket_atom_mapping"
   | PocketEnumDeclaration                   -> "pocket_enum_declaration"
   | PocketFieldTypeExprDeclaration          -> "pocket_field_type_expr_declaration"

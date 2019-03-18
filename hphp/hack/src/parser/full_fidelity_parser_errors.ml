@@ -2474,9 +2474,6 @@ let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
 )
 
 let expression_errors env _is_in_concurrent_block namespace_name node parents errors =
-  let pu_enabled =
-    GlobalOptions.tco_experimental_feature_enabled env.parser_options
-      GlobalOptions.tco_experimental_pocket_universes in
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
     | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
@@ -2646,9 +2643,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         | LiteralExpression _, _ ->
           false, false, not (is_typechecker env)
         | QualifiedName _, _ -> false, false, true
-        (* Pocket Universe: we allow the Class::Enum::Field syntax *)
-        | ScopeResolutionExpression _, None when pu_enabled ->
-          false, false, true
         | _, Some TokenKind.Name
         | _, Some TokenKind.XHPClassName
         | _, Some TokenKind.Static -> false, false, true

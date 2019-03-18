@@ -1124,7 +1124,6 @@ and string_of_param_default_value ~env expr =
       | _ -> id
     in
     Php_escaping.escape id
-  | A.PU_atom (_, litstr)
   | A.Lvar (_, litstr) -> Php_escaping.escape litstr
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr
@@ -1282,6 +1281,9 @@ and string_of_param_default_value ~env expr =
   | A.Suspend _
   | A.Callconv _
   | A.Expr_list _ -> failwith "illegal default value"
+  | A.PU_atom _
+  | A.PU_identifier _ ->
+    failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
 
 let string_of_param_default_value_option env = function
   | None -> ""

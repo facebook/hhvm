@@ -219,6 +219,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val error : t -> SC.r -> t * SC.r
         val list_item : t -> SC.r -> SC.r -> t * SC.r
         val pocket_atom_expression : t -> SC.r -> SC.r -> t * SC.r
+        val pocket_identifier_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val pocket_atom_mapping_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val pocket_enum_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val pocket_field_type_expr_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

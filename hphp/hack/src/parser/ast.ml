@@ -472,6 +472,8 @@ and expr_ =
   | Callconv of param_kind * expr
   (* Pocket Universe citizen, :@foo *)
   | PU_atom of id
+  (* Pocket Universe invocation, ClassName:@FieldName::PUExpression *)
+  | PU_identifier of expr * id * id
 
 and import_flavor =
   | Include

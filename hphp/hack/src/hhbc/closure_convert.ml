@@ -827,7 +827,9 @@ let rec convert_expr env st (p, expr_ as expr) =
   | Callconv (k, e) ->
     let st, e = convert_expr env st e in
     st, (p, Callconv (k, e))
-  | PU_atom id -> st, (p, PU_atom id)
+  | PU_atom _
+  | PU_identifier _ ->
+    failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
 
 and convert_prop_expr env st (_, expr_ as expr) =
   match expr_ with

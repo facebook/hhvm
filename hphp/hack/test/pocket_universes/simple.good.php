@@ -10,18 +10,18 @@ abstract class Foo
 
   public function get<TF from this::Field>(TF $f): TF::T
   {
-    return static::Field::default_value($f);
+    return static:@Field::default_value($f);
   }
 
   public function getID<TF from this::Field>(TF $f): string
   {
-    return static::Field::ident($f);
+    return static:@Field::ident($f);
   }
 
 
   public static function introspect_fields() : void
   {
-    foreach (static::Field::Members() as $member) {
+    foreach (static:@Field::Members() as $member) {
       \var_dump($member);
     }
   }

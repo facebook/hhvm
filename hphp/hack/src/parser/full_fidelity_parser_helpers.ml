@@ -601,6 +601,9 @@ module WithParser(Parser : Parser_S) = struct
     else
       require_name_or_variable parser
 
+  let require_colonat parser =
+    require_token parser TokenKind.ColonAt SyntaxError.error1061
+
   let optional_token parser kind =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then

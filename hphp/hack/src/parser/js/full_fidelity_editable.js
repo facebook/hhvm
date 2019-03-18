@@ -424,6 +424,8 @@ class EditableSyntax
       return ListItem.from_json(json, position, source);
     case 'pocket_atom':
       return PocketAtomExpression.from_json(json, position, source);
+    case 'pocket_identifier':
+      return PocketIdentifierExpression.from_json(json, position, source);
     case 'pocket_atom_mapping':
       return PocketAtomMappingDeclaration.from_json(json, position, source);
     case 'pocket_enum_declaration':
@@ -21355,6 +21357,133 @@ class PocketAtomExpression extends EditableSyntax
     return PocketAtomExpression._children_keys;
   }
 }
+class PocketIdentifierExpression extends EditableSyntax
+{
+  constructor(
+    qualifier,
+    pu_operator,
+    field,
+    operator,
+    name)
+  {
+    super('pocket_identifier', {
+      qualifier: qualifier,
+      pu_operator: pu_operator,
+      field: field,
+      operator: operator,
+      name: name });
+  }
+  get qualifier() { return this.children.qualifier; }
+  get pu_operator() { return this.children.pu_operator; }
+  get field() { return this.children.field; }
+  get operator() { return this.children.operator; }
+  get name() { return this.children.name; }
+  with_qualifier(qualifier){
+    return new PocketIdentifierExpression(
+      qualifier,
+      this.pu_operator,
+      this.field,
+      this.operator,
+      this.name);
+  }
+  with_pu_operator(pu_operator){
+    return new PocketIdentifierExpression(
+      this.qualifier,
+      pu_operator,
+      this.field,
+      this.operator,
+      this.name);
+  }
+  with_field(field){
+    return new PocketIdentifierExpression(
+      this.qualifier,
+      this.pu_operator,
+      field,
+      this.operator,
+      this.name);
+  }
+  with_operator(operator){
+    return new PocketIdentifierExpression(
+      this.qualifier,
+      this.pu_operator,
+      this.field,
+      operator,
+      this.name);
+  }
+  with_name(name){
+    return new PocketIdentifierExpression(
+      this.qualifier,
+      this.pu_operator,
+      this.field,
+      this.operator,
+      name);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var qualifier = this.qualifier.rewrite(rewriter, new_parents);
+    var pu_operator = this.pu_operator.rewrite(rewriter, new_parents);
+    var field = this.field.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    if (
+      qualifier === this.qualifier &&
+      pu_operator === this.pu_operator &&
+      field === this.field &&
+      operator === this.operator &&
+      name === this.name)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PocketIdentifierExpression(
+        qualifier,
+        pu_operator,
+        field,
+        operator,
+        name), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let qualifier = EditableSyntax.from_json(
+      json.pocket_identifier_qualifier, position, source);
+    position += qualifier.width;
+    let pu_operator = EditableSyntax.from_json(
+      json.pocket_identifier_pu_operator, position, source);
+    position += pu_operator.width;
+    let field = EditableSyntax.from_json(
+      json.pocket_identifier_field, position, source);
+    position += field.width;
+    let operator = EditableSyntax.from_json(
+      json.pocket_identifier_operator, position, source);
+    position += operator.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_identifier_name, position, source);
+    position += name.width;
+    return new PocketIdentifierExpression(
+        qualifier,
+        pu_operator,
+        field,
+        operator,
+        name);
+  }
+  get children_keys()
+  {
+    if (PocketIdentifierExpression._children_keys == null)
+      PocketIdentifierExpression._children_keys = [
+        'qualifier',
+        'pu_operator',
+        'field',
+        'operator',
+        'name'];
+    return PocketIdentifierExpression._children_keys;
+  }
+}
 class PocketAtomMappingDeclaration extends EditableSyntax
 {
   constructor(
@@ -22446,6 +22575,7 @@ exports.TupleTypeSpecifier = TupleTypeSpecifier;
 exports.ErrorSyntax = ErrorSyntax;
 exports.ListItem = ListItem;
 exports.PocketAtomExpression = PocketAtomExpression;
+exports.PocketIdentifierExpression = PocketIdentifierExpression;
 exports.PocketAtomMappingDeclaration = PocketAtomMappingDeclaration;
 exports.PocketEnumDeclaration = PocketEnumDeclaration;
 exports.PocketFieldTypeExprDeclaration = PocketFieldTypeExprDeclaration;

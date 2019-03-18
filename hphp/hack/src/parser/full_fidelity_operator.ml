@@ -282,7 +282,8 @@ let is_trailing_operator_token token =
   | TokenKind.GreaterThanGreaterThanEqual
   | TokenKind.MinusGreaterThan
   | TokenKind.QuestionMinusGreaterThan
-  | TokenKind.ColonColon -> true
+  | TokenKind.ColonColon
+  | TokenKind.ColonAt -> true
   | _ -> false
 
 let trailing_from_token token =
@@ -345,6 +346,7 @@ let trailing_from_token token =
   | TokenKind.LeftParen -> FunctionCallOperator
   | TokenKind.LeftBracket -> IndexingOperator
   | TokenKind.LeftBrace -> IndexingOperator
+  | TokenKind.ColonAt -> ScopeResolutionOperator
   | _ -> failwith (Printf.sprintf "%s is not a trailing operator"
                     (Full_fidelity_token_kind.to_string token))
 

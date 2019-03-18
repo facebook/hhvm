@@ -203,6 +203,7 @@ module type SyntaxKind_S = sig
   val is_error : r -> bool
   val is_list_item : r -> bool
   val is_pocket_atom_expression : r -> bool
+  val is_pocket_identifier_expression : r -> bool
   val is_pocket_atom_mapping_declaration : r -> bool
   val is_pocket_enum_declaration : r -> bool
   val is_pocket_field_type_expr_declaration : r -> bool
@@ -404,6 +405,7 @@ module SyntaxKind(SC : SC_S)
   let make_error arg0 state = compose SK.ErrorSyntax (SC.make_error (snd arg0) state)
   let make_list_item arg0 arg1 state = compose SK.ListItem (SC.make_list_item (snd arg0) (snd arg1) state)
   let make_pocket_atom_expression arg0 arg1 state = compose SK.PocketAtomExpression (SC.make_pocket_atom_expression (snd arg0) (snd arg1) state)
+  let make_pocket_identifier_expression arg0 arg1 arg2 arg3 arg4 state = compose SK.PocketIdentifierExpression (SC.make_pocket_identifier_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_pocket_atom_mapping_declaration arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.PocketAtomMappingDeclaration (SC.make_pocket_atom_mapping_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_pocket_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.PocketEnumDeclaration (SC.make_pocket_enum_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_pocket_field_type_expr_declaration arg0 arg1 arg2 arg3 state = compose SK.PocketFieldTypeExprDeclaration (SC.make_pocket_field_type_expr_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
@@ -587,6 +589,7 @@ module SyntaxKind(SC : SC_S)
   let is_error                                        = has_kind SK.ErrorSyntax
   let is_list_item                                    = has_kind SK.ListItem
   let is_pocket_atom_expression                       = has_kind SK.PocketAtomExpression
+  let is_pocket_identifier_expression                 = has_kind SK.PocketIdentifierExpression
   let is_pocket_atom_mapping_declaration              = has_kind SK.PocketAtomMappingDeclaration
   let is_pocket_enum_declaration                      = has_kind SK.PocketEnumDeclaration
   let is_pocket_field_type_expr_declaration           = has_kind SK.PocketFieldTypeExprDeclaration

@@ -2232,6 +2232,27 @@ let schema : schema_node list =
       ; "expression", Token
       ]
     }
+  (* Syntax for Class:@Field::name where
+     Class is the qualifier
+     pu_operator must be :@
+     Field is the field
+     operator must be ::
+     name is the name
+  *)
+  ; { kind_name   = "PocketIdentifierExpression"
+    ; type_name   = "pocket_identifier_expression"
+    ; func_name   = "pocket_identifier_expression"
+    ; description = "pocket_identifier"
+    ; prefix      = "pocket_identifier"
+    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
+    ; fields =
+      [ "qualifier", Aggregate Expression
+      ; "pu_operator", Token
+      ; "field", Aggregate Expression
+      ; "operator", Token
+      ; "name", Aggregate Expression
+      ]
+    }
 (* PocketUniverse: because of the trailing ';' I didn't want to
    add the aggragte PUField to PocketAtomExpression, so I made the ( .. )
    part optional. It will be up to the parser to only parse the two

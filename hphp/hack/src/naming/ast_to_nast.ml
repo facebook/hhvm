@@ -311,6 +311,8 @@ and on_expr (p, e) : Aast.expr =
   | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
   | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
   | PU_atom id -> Aast.PU_atom (snd id)
+  | PU_identifier (e, id1, id2) ->
+    Aast.PU_identifier ((p, Aast.CIexpr (on_expr e)), id1, id2)
   in
   (p, node)
 

@@ -1158,6 +1158,13 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { pocket_atom_glyph                                  : t
     ; pocket_atom_expression                             : t
     }
+  | PocketIdentifierExpression              of
+    { pocket_identifier_qualifier                        : t
+    ; pocket_identifier_pu_operator                      : t
+    ; pocket_identifier_field                            : t
+    ; pocket_identifier_operator                         : t
+    ; pocket_identifier_name                             : t
+    }
   | PocketAtomMappingDeclaration            of
     { pocket_atom_mapping_glyph                          : t
     ; pocket_atom_mapping_expression                     : t
@@ -1300,6 +1307,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprShape                         of shape_expression
   | ExprTuple                         of tuple_expression
   | ExprPocketAtom                    of pocket_atom_expression
+  | ExprPocketIdentifier              of pocket_identifier_expression
   and specifier =
   | SpecSimple            of simple_type_specifier
   | SpecVariadicParameter of variadic_parameter
@@ -1425,6 +1433,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaXHP                           of xhp_expression
   | LambdaShape                         of shape_expression
   | LambdaTuple                         of tuple_expression
+  | LambdaPocketIdentifier              of pocket_identifier_expression
   and constructor_expression =
   | CExprLiteral                       of literal_expression
   | CExprPrefixedString                of prefixed_string_expression
@@ -1478,6 +1487,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprXHP                           of xhp_expression
   | CExprShape                         of shape_expression
   | CExprTuple                         of tuple_expression
+  | CExprPocketIdentifier              of pocket_identifier_expression
   and namespace_internals =
   | NSINamespaceBody      of namespace_body
   | NSINamespaceEmptyBody of namespace_empty_body
@@ -2504,6 +2514,13 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and pocket_atom_expression =
     { pocket_atom_glyph: Token.t value
     ; pocket_atom_expression: Token.t value
+    }
+  and pocket_identifier_expression =
+    { pocket_identifier_qualifier: expression value
+    ; pocket_identifier_pu_operator: Token.t value
+    ; pocket_identifier_field: expression value
+    ; pocket_identifier_operator: Token.t value
+    ; pocket_identifier_name: expression value
     }
   and pocket_atom_mapping_declaration =
     { pocket_atom_mapping_glyph: Token.t value

@@ -241,6 +241,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> ExprShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> ExprTuple x) x
     | Syntax.PocketAtomExpression _ -> tag validate_pocket_atom_expression (fun x -> ExprPocketAtom x) x
+    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> ExprPocketIdentifier x) x
     | s -> aggregation_fail Def.Expression s
   and invalidate_expression : expression invalidator = fun (value, thing) ->
     match thing with
@@ -296,6 +297,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprShape                         thing -> invalidate_shape_expression               (value, thing)
     | ExprTuple                         thing -> invalidate_tuple_expression               (value, thing)
     | ExprPocketAtom                    thing -> invalidate_pocket_atom_expression         (value, thing)
+    | ExprPocketIdentifier              thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_specifier : specifier validator = fun x ->
     match Syntax.syntax x with
     | Syntax.SimpleTypeSpecifier _ -> tag validate_simple_type_specifier (fun x -> SpecSimple x) x
@@ -509,6 +511,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPExpression _ -> tag validate_xhp_expression (fun x -> LambdaXHP x) x
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> LambdaShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> LambdaTuple x) x
+    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> LambdaPocketIdentifier x) x
     | s -> aggregation_fail Def.LambdaBody s
   and invalidate_lambda_body : lambda_body invalidator = fun (value, thing) ->
     match thing with
@@ -564,6 +567,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaXHP                           thing -> invalidate_xhp_expression                 (value, thing)
     | LambdaShape                         thing -> invalidate_shape_expression               (value, thing)
     | LambdaTuple                         thing -> invalidate_tuple_expression               (value, thing)
+    | LambdaPocketIdentifier              thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_constructor_expression : constructor_expression validator = fun x ->
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> CExprLiteral x) x
@@ -618,6 +622,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.XHPExpression _ -> tag validate_xhp_expression (fun x -> CExprXHP x) x
     | Syntax.ShapeExpression _ -> tag validate_shape_expression (fun x -> CExprShape x) x
     | Syntax.TupleExpression _ -> tag validate_tuple_expression (fun x -> CExprTuple x) x
+    | Syntax.PocketIdentifierExpression _ -> tag validate_pocket_identifier_expression (fun x -> CExprPocketIdentifier x) x
     | s -> aggregation_fail Def.ConstructorExpression s
   and invalidate_constructor_expression : constructor_expression invalidator = fun (value, thing) ->
     match thing with
@@ -673,6 +678,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprXHP                           thing -> invalidate_xhp_expression                 (value, thing)
     | CExprShape                         thing -> invalidate_shape_expression               (value, thing)
     | CExprTuple                         thing -> invalidate_tuple_expression               (value, thing)
+    | CExprPocketIdentifier              thing -> invalidate_pocket_identifier_expression   (value, thing)
   and validate_namespace_internals : namespace_internals validator = fun x ->
     match Syntax.syntax x with
     | Syntax.NamespaceBody _ -> tag validate_namespace_body (fun x -> NSINamespaceBody x) x
@@ -3754,6 +3760,26 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.PocketAtomExpression
       { pocket_atom_glyph = invalidate_token x.pocket_atom_glyph
       ; pocket_atom_expression = invalidate_token x.pocket_atom_expression
+      }
+    ; Syntax.value = v
+    }
+  and validate_pocket_identifier_expression : pocket_identifier_expression validator = function
+  | { Syntax.syntax = Syntax.PocketIdentifierExpression x; value = v } -> v,
+    { pocket_identifier_name = validate_expression x.pocket_identifier_name
+    ; pocket_identifier_operator = validate_token x.pocket_identifier_operator
+    ; pocket_identifier_field = validate_expression x.pocket_identifier_field
+    ; pocket_identifier_pu_operator = validate_token x.pocket_identifier_pu_operator
+    ; pocket_identifier_qualifier = validate_expression x.pocket_identifier_qualifier
+    }
+  | s -> validation_fail (Some SyntaxKind.PocketIdentifierExpression) s
+  and invalidate_pocket_identifier_expression : pocket_identifier_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.PocketIdentifierExpression
+      { pocket_identifier_qualifier = invalidate_expression x.pocket_identifier_qualifier
+      ; pocket_identifier_pu_operator = invalidate_token x.pocket_identifier_pu_operator
+      ; pocket_identifier_field = invalidate_expression x.pocket_identifier_field
+      ; pocket_identifier_operator = invalidate_token x.pocket_identifier_operator
+      ; pocket_identifier_name = invalidate_expression x.pocket_identifier_name
       }
     ; Syntax.value = v
     }

@@ -175,6 +175,7 @@ class type ['a] ast_visitor_type = object
 
   (* Pocket Universes *)
   method on_pu_atom : 'a -> id -> 'a
+  method on_pu_identifier: 'a -> expr -> id -> id -> 'a
   method on_pumapping : 'a -> pumapping -> 'a
   method on_pufield : 'a -> pufield -> 'a
   method on_class_enum_ : 'a -> id -> pufield list -> 'a
@@ -452,6 +453,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Suspend e  -> this#on_suspend acc e
    | Callconv    (kind, e)   -> this#on_callconv acc kind e
    | PU_atom id    -> this#on_pu_atom acc id
+   | PU_identifier (e, id1, id2)   -> this#on_pu_identifier acc e id1 id2
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
@@ -872,6 +874,9 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_pstring acc _ = acc
 
   method on_pu_atom acc _ = acc
+
+  method on_pu_identifier acc e _ _ =
+    this#on_expr acc e
 
   method on_pumapping acc = function
     | PUMappingID (id, e) ->

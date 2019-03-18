@@ -1886,6 +1886,26 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     (* Pocket Universes *)
     | PocketAtomExpression { pocket_atom_expression; _ } ->
       PU_atom (pos_name pocket_atom_expression env)
+    | PocketIdentifierExpression { pocket_identifier_qualifier;
+                                   pocket_identifier_field;
+                                   pocket_identifier_name; _ } ->
+      let qual =
+        match pExpr pocket_identifier_qualifier env with
+        | p, Lvar v when not env.codegen -> p, Id v
+        | qual -> qual in
+      let field =
+        let field = pExpr pocket_identifier_field env in
+        begin match field with
+          | p, String id | _, Id (p, id) -> (p, id)
+          | _ -> missing_syntax "PocketIdentifierExpression field" node env
+        end in
+      let name =
+        let name = pExpr pocket_identifier_name env in
+        begin match name with
+          | p, String id | _, Id (p, id) -> (p, id)
+          | _ -> missing_syntax "PocketIdentifierExpression name" node env
+        end in
+      PU_identifier (qual, field, name)
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax ?fallback:(Some Null) "expression" node env
     in

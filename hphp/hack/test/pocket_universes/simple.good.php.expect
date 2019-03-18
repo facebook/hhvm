@@ -71,9 +71,8 @@
                 ((return_statement 40
                   ((((whitespace 4)) return 6 ((whitespace 1)))
                    (function_call_expression 32
-                    ((scope_resolution_expression 28
-                      ((scope_resolution_expression 13
-                        ((() static 6 ()) (() :: 2 ()) (() name 5 ())))
+                    ((pocket_identifier 28
+                      ((() name 6 ()) (() :@ 2 ()) (() name 5 ())
                        (() :: 2 ()) (() name 13 ())))
                      (() "(" 1 ())
                      (list 2
@@ -120,9 +119,8 @@
                 ((return_statement 32
                   ((((whitespace 4)) return 6 ((whitespace 1)))
                    (function_call_expression 24
-                    ((scope_resolution_expression 20
-                      ((scope_resolution_expression 13
-                        ((() static 6 ()) (() :: 2 ()) (() name 5 ())))
+                    ((pocket_identifier 20
+                      ((() name 6 ()) (() :@ 2 ()) (() name 5 ())
                        (() :: 2 ()) (() name 5 ())))
                      (() "(" 1 ())
                      (list 2
@@ -151,9 +149,8 @@
                   ((((whitespace 4)) foreach 7 ((whitespace 1)))
                    (() "(" 1 ())
                    (function_call_expression 24
-                    ((scope_resolution_expression 22
-                      ((scope_resolution_expression 13
-                        ((() static 6 ()) (() :: 2 ()) (() name 5 ())))
+                    ((pocket_identifier 22
+                      ((() name 6 ()) (() :@ 2 ()) (() name 5 ())
                        (() :: 2 ()) (() name 7 ())))
                      (() "(" 1 ()) (missing 0 ())
                      (() ")" 1 ((whitespace 1)))))

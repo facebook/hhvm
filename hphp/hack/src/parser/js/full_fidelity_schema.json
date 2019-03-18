@@ -2150,6 +2150,17 @@
         { "field_name" : "glyph" },
         { "field_name" : "expression" }
       ] },
+    { "kind_name" : "PocketIdentifierExpression",
+      "type_name" : "pocket_identifier_expression",
+      "description" : "pocket_identifier",
+      "prefix" : "pocket_identifier",
+      "fields" : [
+        { "field_name" : "qualifier" },
+        { "field_name" : "pu_operator" },
+        { "field_name" : "field" },
+        { "field_name" : "operator" },
+        { "field_name" : "name" }
+      ] },
     { "kind_name" : "PocketAtomMappingDeclaration",
       "type_name" : "pocket_atom_mapping_declaration",
       "description" : "pocket_atom_mapping",

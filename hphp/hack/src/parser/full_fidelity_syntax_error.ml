@@ -129,6 +129,7 @@ let error1059 terminator = Printf.sprintf
   (Full_fidelity_token_kind.to_string terminator)
 let error1060 = "Leading markup and `<?hh` are not permitted in `.hack` "^
   "files, which are always strict."
+let error1061 = "A Pocket Universes operator (':@') is expected here."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2003 = "A case statement may only appear directly inside a switch."

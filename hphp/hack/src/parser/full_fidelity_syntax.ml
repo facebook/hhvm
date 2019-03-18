@@ -230,6 +230,7 @@ module WithToken(Token: TokenType) = struct
       | ErrorSyntax                             _ -> SyntaxKind.ErrorSyntax
       | ListItem                                _ -> SyntaxKind.ListItem
       | PocketAtomExpression                    _ -> SyntaxKind.PocketAtomExpression
+      | PocketIdentifierExpression              _ -> SyntaxKind.PocketIdentifierExpression
       | PocketAtomMappingDeclaration            _ -> SyntaxKind.PocketAtomMappingDeclaration
       | PocketEnumDeclaration                   _ -> SyntaxKind.PocketEnumDeclaration
       | PocketFieldTypeExprDeclaration          _ -> SyntaxKind.PocketFieldTypeExprDeclaration
@@ -420,6 +421,7 @@ module WithToken(Token: TokenType) = struct
     let is_error                                        = has_kind SyntaxKind.ErrorSyntax
     let is_list_item                                    = has_kind SyntaxKind.ListItem
     let is_pocket_atom_expression                       = has_kind SyntaxKind.PocketAtomExpression
+    let is_pocket_identifier_expression                 = has_kind SyntaxKind.PocketIdentifierExpression
     let is_pocket_atom_mapping_declaration              = has_kind SyntaxKind.PocketAtomMappingDeclaration
     let is_pocket_enum_declaration                      = has_kind SyntaxKind.PocketEnumDeclaration
     let is_pocket_field_type_expr_declaration           = has_kind SyntaxKind.PocketFieldTypeExprDeclaration
@@ -2362,6 +2364,19 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc pocket_atom_glyph in
          let acc = f acc pocket_atom_expression in
          acc
+      | PocketIdentifierExpression {
+        pocket_identifier_qualifier;
+        pocket_identifier_pu_operator;
+        pocket_identifier_field;
+        pocket_identifier_operator;
+        pocket_identifier_name;
+      } ->
+         let acc = f acc pocket_identifier_qualifier in
+         let acc = f acc pocket_identifier_pu_operator in
+         let acc = f acc pocket_identifier_field in
+         let acc = f acc pocket_identifier_operator in
+         let acc = f acc pocket_identifier_name in
+         acc
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
         pocket_atom_mapping_expression;
@@ -4298,6 +4313,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         pocket_atom_glyph;
         pocket_atom_expression;
+      ]
+      | PocketIdentifierExpression {
+        pocket_identifier_qualifier;
+        pocket_identifier_pu_operator;
+        pocket_identifier_field;
+        pocket_identifier_operator;
+        pocket_identifier_name;
+      } -> [
+        pocket_identifier_qualifier;
+        pocket_identifier_pu_operator;
+        pocket_identifier_field;
+        pocket_identifier_operator;
+        pocket_identifier_name;
       ]
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
@@ -6236,6 +6264,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "pocket_atom_glyph";
         "pocket_atom_expression";
+      ]
+      | PocketIdentifierExpression {
+        pocket_identifier_qualifier;
+        pocket_identifier_pu_operator;
+        pocket_identifier_field;
+        pocket_identifier_operator;
+        pocket_identifier_name;
+      } -> [
+        "pocket_identifier_qualifier";
+        "pocket_identifier_pu_operator";
+        "pocket_identifier_field";
+        "pocket_identifier_operator";
+        "pocket_identifier_name";
       ]
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
@@ -8399,6 +8440,20 @@ module WithToken(Token: TokenType) = struct
         PocketAtomExpression {
           pocket_atom_glyph;
           pocket_atom_expression;
+        }
+      | (SyntaxKind.PocketIdentifierExpression, [
+          pocket_identifier_qualifier;
+          pocket_identifier_pu_operator;
+          pocket_identifier_field;
+          pocket_identifier_operator;
+          pocket_identifier_name;
+        ]) ->
+        PocketIdentifierExpression {
+          pocket_identifier_qualifier;
+          pocket_identifier_pu_operator;
+          pocket_identifier_field;
+          pocket_identifier_operator;
+          pocket_identifier_name;
         }
       | (SyntaxKind.PocketAtomMappingDeclaration, [
           pocket_atom_mapping_glyph;
@@ -11059,6 +11114,23 @@ module WithToken(Token: TokenType) = struct
         let syntax = PocketAtomExpression {
           pocket_atom_glyph;
           pocket_atom_expression;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_pocket_identifier_expression
+        pocket_identifier_qualifier
+        pocket_identifier_pu_operator
+        pocket_identifier_field
+        pocket_identifier_operator
+        pocket_identifier_name
+      =
+        let syntax = PocketIdentifierExpression {
+          pocket_identifier_qualifier;
+          pocket_identifier_pu_operator;
+          pocket_identifier_field;
+          pocket_identifier_operator;
+          pocket_identifier_name;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -261,7 +261,8 @@ and expr acc (_, e) =
   | Callconv (_, e)
   | Import (_, e)
   | Yield_from e
-  | Suspend e -> expr acc e
+  | Suspend e
+  | PU_identifier (e, _, _) -> expr acc e
   | Obj_get (e1, e2, _)
   | Binop (_, e1, e2)
   | Pipe (e1, e2)

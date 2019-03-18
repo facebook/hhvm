@@ -201,6 +201,7 @@ module type SmartConstructors_S = sig
   val make_error : r -> t -> t * r
   val make_list_item : r -> r -> t -> t * r
   val make_pocket_atom_expression : r -> r -> t -> t * r
+  val make_pocket_identifier_expression : r -> r -> r -> r -> r -> t -> t * r
   val make_pocket_atom_mapping_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_pocket_enum_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_pocket_field_type_expr_declaration : r -> r -> r -> r -> t -> t * r
@@ -392,6 +393,7 @@ end) = struct
     let error parser arg0 = call parser (SCI.make_error arg0)
     let list_item parser arg0 arg1 = call parser (SCI.make_list_item arg0 arg1)
     let pocket_atom_expression parser arg0 arg1 = call parser (SCI.make_pocket_atom_expression arg0 arg1)
+    let pocket_identifier_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_pocket_identifier_expression arg0 arg1 arg2 arg3 arg4)
     let pocket_atom_mapping_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_pocket_atom_mapping_declaration arg0 arg1 arg2 arg3 arg4 arg5)
     let pocket_enum_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_pocket_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5)
     let pocket_field_type_expr_declaration parser arg0 arg1 arg2 arg3 = call parser (SCI.make_pocket_field_type_expr_declaration arg0 arg1 arg2 arg3)

@@ -1045,6 +1045,13 @@ module type Syntax_S = sig
     { pocket_atom_glyph                                  : t
     ; pocket_atom_expression                             : t
     }
+  | PocketIdentifierExpression              of
+    { pocket_identifier_qualifier                        : t
+    ; pocket_identifier_pu_operator                      : t
+    ; pocket_identifier_field                            : t
+    ; pocket_identifier_operator                         : t
+    ; pocket_identifier_name                             : t
+    }
   | PocketAtomMappingDeclaration            of
     { pocket_atom_mapping_glyph                          : t
     ; pocket_atom_mapping_expression                     : t
@@ -1276,6 +1283,7 @@ module type Syntax_S = sig
   val make_error : t -> t
   val make_list_item : t -> t -> t
   val make_pocket_atom_expression : t -> t -> t
+  val make_pocket_identifier_expression : t -> t -> t -> t -> t -> t
   val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
@@ -1458,6 +1466,7 @@ module type Syntax_S = sig
   val is_error : t -> bool
   val is_list_item : t -> bool
   val is_pocket_atom_expression : t -> bool
+  val is_pocket_identifier_expression : t -> bool
   val is_pocket_atom_mapping_declaration : t -> bool
   val is_pocket_enum_declaration : t -> bool
   val is_pocket_field_type_expr_declaration : t -> bool

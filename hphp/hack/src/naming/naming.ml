@@ -2226,17 +2226,14 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
           N.Class_const (make_class_id env x1, x2)
       end
-    | Aast.Class_const ((_, c), s2) ->
-      begin
-        let pu_enabled = TypecheckerOptions.experimental_feature_enabled
-            (fst env).tcopt GlobalOptions.tco_experimental_pocket_universes in
+    | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
+    | Aast.PU_identifier ((_, c), s1, s2) -> begin
         match c with
-        | Aast.CIexpr (_, Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), s1))
-            when pu_enabled -> N.PU_identifier (make_class_id env x1, s1, s2)
-        | _ -> (* TODO: report error in strict mode *) N.Any
+        | Aast.CIexpr (_, Aast.Id x1) ->
+          N.PU_identifier (make_class_id env x1, s1, s2)
+        | _ ->
+          failwith "TODO(T35357243): Error during parsing of PU_identifier"
       end
-    | Aast.PU_identifier (_, _, _) ->
-      failwith "Error in Ast_to_nast module. PU_identifier are generated here"
     | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel;

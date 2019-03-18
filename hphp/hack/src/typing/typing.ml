@@ -2517,8 +2517,8 @@ and expr_
       make_result env p (T.Shape (List.map ~f:(fun (k,(te,_)) -> (k, te)) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
 
-  | PU_atom _ -> failwith "TODO PU (typing)"
-  | PU_identifier _ -> failwith "Unexpected pocket universe"
+  | PU_atom _ -> failwith "TODO(T36532263): Pocket Universes"
+  | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"
 
   with Typing_lenv_cont.Continuation_not_found _ ->
     expr_any env p (Reason.Rwitness p)

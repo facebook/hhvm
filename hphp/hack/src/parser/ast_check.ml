@@ -32,7 +32,7 @@ let rec check_lvalue errorf = function
     | Binop _ | Eif _ | InstanceOf _
     | New _ | Efun _ | Lfun _
     | Xml _ | Import _ | Pipe _ | Callconv _ | Is _ | As _
-    | ParenthesizedExpr _) ->
+    | ParenthesizedExpr _ | PU_identifier _) ->
       errorf pos "Invalid lvalue"
 
 (** Syntax errors detected via a pass over AST (see: check_program)

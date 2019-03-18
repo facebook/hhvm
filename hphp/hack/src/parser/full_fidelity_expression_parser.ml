@@ -1058,6 +1058,9 @@ module WithStatementAndDeclAndTypeParser
     | ColonColon ->
       let (parser, result) = parse_scope_resolution_expression parser term in
       parse_remaining_expression parser result
+    | ColonAt ->
+      let (parser, result) = parse_pocket_identifier_expression parser term in
+      parse_remaining_expression parser result
     | PlusPlus
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
@@ -2624,6 +2627,25 @@ module WithStatementAndDeclAndTypeParser
         require_name_or_variable_or_error parser SyntaxError.error1048
     in
     Make.scope_resolution_expression parser qualifier op name
+
+  and parse_pocket_identifier_expression parser qualifier =
+    (* SPEC
+      pocket-identifier-expression:
+        scope-resolution-qualifier  :@ name ::  name
+
+      scope-resolution-qualifier:
+        qualified-name
+        variable-name
+        self
+        parent
+        static
+    *)
+    (* TODO: see TODO in parse_scope_resolution_expression *)
+    let (parser, op_pu) = require_colonat parser in
+    let (parser, field_name) = require_name parser in
+    let (parser, op) = require_coloncolon parser in
+    let (parser, name) = require_name parser in
+    Make.pocket_identifier_expression parser qualifier op_pu field_name op  name
 
   and parse_pocket_atom parser =
     let (parser, glyph) = assert_token parser ColonAt in

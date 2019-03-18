@@ -542,4 +542,5 @@ GenericsNotAllowed = 4306
 InvalidNewableTypeArgument = 4307
 InvalidNewableTypeParamConstraints = 4308
 NewWithoutNewable = 4309
+NewStaticClassReified = 4310
   |}]

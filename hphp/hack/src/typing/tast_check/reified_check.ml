@@ -102,6 +102,15 @@ let handler = object
           let class_pos = Typing_classes_heap.pos cls in
           verify_call_targs env pos class_pos tparams targs
         | None -> () end
+    | (pos, _), New ((_, CIstatic), _, _, _, _) ->
+      let open Option in
+      let t = Tast_env.get_self_id env >>=
+        Tast_env.get_class env >>|
+        Cls.tparams >>|
+        List.exists ~f:(fun tp -> tp.tp_reified) in
+      Option.iter t ~f:(fun has_reified -> if has_reified then
+        Errors.new_static_class_reified pos
+      )
     | _ -> ()
 
   method! at_hint env = function

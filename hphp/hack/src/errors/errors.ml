@@ -2481,6 +2481,10 @@ let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) =
     def_pos, def_name ^ " is reified"
   ]
 
+let new_static_class_reified pos =
+  add (Typing.err_code Typing.NewStaticClassReified) pos
+    "Cannot call new static because the current class has reified generics"
+
 let new_without_newable pos name =
   add (Typing.err_code Typing.NewWithoutNewable) pos
     (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")

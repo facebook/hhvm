@@ -2356,17 +2356,21 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc list_separator in
          acc
       | PocketAtomExpression {
+        pocket_atom_glyph;
         pocket_atom_expression;
       } ->
+         let acc = f acc pocket_atom_glyph in
          let acc = f acc pocket_atom_expression in
          acc
       | PocketAtomMappingDeclaration {
+        pocket_atom_mapping_glyph;
         pocket_atom_mapping_expression;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } ->
+         let acc = f acc pocket_atom_mapping_glyph in
          let acc = f acc pocket_atom_mapping_expression in
          let acc = f acc pocket_atom_mapping_left_paren in
          let acc = f acc pocket_atom_mapping_mappings in
@@ -4289,17 +4293,21 @@ module WithToken(Token: TokenType) = struct
         list_separator;
       ]
       | PocketAtomExpression {
+        pocket_atom_glyph;
         pocket_atom_expression;
       } -> [
+        pocket_atom_glyph;
         pocket_atom_expression;
       ]
       | PocketAtomMappingDeclaration {
+        pocket_atom_mapping_glyph;
         pocket_atom_mapping_expression;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } -> [
+        pocket_atom_mapping_glyph;
         pocket_atom_mapping_expression;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
@@ -6223,17 +6231,21 @@ module WithToken(Token: TokenType) = struct
         "list_separator";
       ]
       | PocketAtomExpression {
+        pocket_atom_glyph;
         pocket_atom_expression;
       } -> [
+        "pocket_atom_glyph";
         "pocket_atom_expression";
       ]
       | PocketAtomMappingDeclaration {
+        pocket_atom_mapping_glyph;
         pocket_atom_mapping_expression;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } -> [
+        "pocket_atom_mapping_glyph";
         "pocket_atom_mapping_expression";
         "pocket_atom_mapping_left_paren";
         "pocket_atom_mapping_mappings";
@@ -8381,12 +8393,15 @@ module WithToken(Token: TokenType) = struct
           list_separator;
         }
       | (SyntaxKind.PocketAtomExpression, [
+          pocket_atom_glyph;
           pocket_atom_expression;
         ]) ->
         PocketAtomExpression {
+          pocket_atom_glyph;
           pocket_atom_expression;
         }
       | (SyntaxKind.PocketAtomMappingDeclaration, [
+          pocket_atom_mapping_glyph;
           pocket_atom_mapping_expression;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;
@@ -8394,6 +8409,7 @@ module WithToken(Token: TokenType) = struct
           pocket_atom_mapping_semicolon;
         ]) ->
         PocketAtomMappingDeclaration {
+          pocket_atom_mapping_glyph;
           pocket_atom_mapping_expression;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;
@@ -11037,15 +11053,18 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_pocket_atom_expression
+        pocket_atom_glyph
         pocket_atom_expression
       =
         let syntax = PocketAtomExpression {
+          pocket_atom_glyph;
           pocket_atom_expression;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
       let make_pocket_atom_mapping_declaration
+        pocket_atom_mapping_glyph
         pocket_atom_mapping_expression
         pocket_atom_mapping_left_paren
         pocket_atom_mapping_mappings
@@ -11053,6 +11072,7 @@ module WithToken(Token: TokenType) = struct
         pocket_atom_mapping_semicolon
       =
         let syntax = PocketAtomMappingDeclaration {
+          pocket_atom_mapping_glyph;
           pocket_atom_mapping_expression;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;

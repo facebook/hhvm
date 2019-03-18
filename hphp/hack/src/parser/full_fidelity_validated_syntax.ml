@@ -3746,12 +3746,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_pocket_atom_expression : pocket_atom_expression validator = function
   | { Syntax.syntax = Syntax.PocketAtomExpression x; value = v } -> v,
     { pocket_atom_expression = validate_token x.pocket_atom_expression
+    ; pocket_atom_glyph = validate_token x.pocket_atom_glyph
     }
   | s -> validation_fail (Some SyntaxKind.PocketAtomExpression) s
   and invalidate_pocket_atom_expression : pocket_atom_expression invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PocketAtomExpression
-      { pocket_atom_expression = invalidate_token x.pocket_atom_expression
+      { pocket_atom_glyph = invalidate_token x.pocket_atom_glyph
+      ; pocket_atom_expression = invalidate_token x.pocket_atom_expression
       }
     ; Syntax.value = v
     }
@@ -3762,12 +3764,14 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_atom_mapping_mappings = validate_list_with (validate_pumapping_aggregate) x.pocket_atom_mapping_mappings
     ; pocket_atom_mapping_left_paren = validate_option_with (validate_token) x.pocket_atom_mapping_left_paren
     ; pocket_atom_mapping_expression = validate_token x.pocket_atom_mapping_expression
+    ; pocket_atom_mapping_glyph = validate_token x.pocket_atom_mapping_glyph
     }
   | s -> validation_fail (Some SyntaxKind.PocketAtomMappingDeclaration) s
   and invalidate_pocket_atom_mapping_declaration : pocket_atom_mapping_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PocketAtomMappingDeclaration
-      { pocket_atom_mapping_expression = invalidate_token x.pocket_atom_mapping_expression
+      { pocket_atom_mapping_glyph = invalidate_token x.pocket_atom_mapping_glyph
+      ; pocket_atom_mapping_expression = invalidate_token x.pocket_atom_mapping_expression
       ; pocket_atom_mapping_left_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_left_paren
       ; pocket_atom_mapping_mappings = invalidate_list_with (invalidate_pumapping_aggregate) x.pocket_atom_mapping_mappings
       ; pocket_atom_mapping_right_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_right_paren

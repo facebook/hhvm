@@ -208,6 +208,7 @@ type t =
   | LessThanSlash
   | LessThanQuestion
   | QuestionGreaterThan
+  | ColonAt
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -234,7 +235,6 @@ type t =
   | XHPBody
   | XHPComment
   | Markup
-  | PUAtom
 
   [@@deriving show]
 
@@ -429,6 +429,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "</"                                                                 -> Some LessThanSlash
   | "<?"                                                                 -> Some LessThanQuestion
   | "?>"                                                                 -> Some QuestionGreaterThan
+  | ":@"              when is_hack                                       -> Some ColonAt
   | _              -> None
 
 let to_string kind =
@@ -623,6 +624,7 @@ let to_string kind =
   | LessThanSlash                 -> "</"
   | LessThanQuestion              -> "<?"
   | QuestionGreaterThan           -> "?>"
+  | ColonAt                       -> ":@"
   (* Variable text tokens *)
   | ErrorToken                    -> "error_token"
   | Name                          -> "name"
@@ -649,7 +651,6 @@ let to_string kind =
   | XHPBody                       -> "XHP_body"
   | XHPComment                    -> "XHP_comment"
   | Markup                        -> "markup"
-  | PUAtom                        -> "atom"
 
 
 let is_variable_text kind =
@@ -679,5 +680,4 @@ let is_variable_text kind =
   | XHPBody -> true
   | XHPComment -> true
   | Markup -> true
-  | PUAtom -> true
   | _ -> false

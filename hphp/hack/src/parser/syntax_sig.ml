@@ -1042,10 +1042,12 @@ module type Syntax_S = sig
     ; list_separator                                     : t
     }
   | PocketAtomExpression                    of
-    { pocket_atom_expression                             : t
+    { pocket_atom_glyph                                  : t
+    ; pocket_atom_expression                             : t
     }
   | PocketAtomMappingDeclaration            of
-    { pocket_atom_mapping_expression                     : t
+    { pocket_atom_mapping_glyph                          : t
+    ; pocket_atom_mapping_expression                     : t
     ; pocket_atom_mapping_left_paren                     : t
     ; pocket_atom_mapping_mappings                       : t
     ; pocket_atom_mapping_right_paren                    : t
@@ -1273,8 +1275,8 @@ module type Syntax_S = sig
   val make_tuple_type_specifier : t -> t -> t -> t
   val make_error : t -> t
   val make_list_item : t -> t -> t
-  val make_pocket_atom_expression : t -> t
-  val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t
+  val make_pocket_atom_expression : t -> t -> t
+  val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
   val make_pocket_field_type_declaration : t -> t -> t -> t -> t

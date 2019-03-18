@@ -1882,7 +1882,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       in
       Xml (name, attrs, exprs)
     (* Pocket Universes *)
-    | PocketAtomExpression { pocket_atom_expression } ->
+    | PocketAtomExpression { pocket_atom_expression; _ } ->
       PU_atom (pos_name pocket_atom_expression env)
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax ?fallback:(Some Null) "expression" node env

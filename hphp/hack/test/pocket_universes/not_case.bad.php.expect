@@ -1,4 +1,4 @@
-(5,15)-(6,1) Invalid pocket universe field syntax: 4.
+(5,15)-(6,1) Invalid pocket universe field syntax.
 (5,15)-(6,1) A right brace ('}') is expected here.
 (6,14)-(6,14) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (6,19)-(6,19) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.

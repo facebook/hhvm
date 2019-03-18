@@ -175,8 +175,7 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "XHPStringLiteral"; "XHP_string_literal"; LF.php_and_hack ];
   [ "XHPBody"; "XHP_body"; LF.php_and_hack ];
   [ "XHPComment"; "XHP_comment"; LF.php_and_hack ];
-  [ "Markup"; "markup"; LF.php_and_hack ];
-  [ "PUAtom"; "atom"; LF.php_and_hack ]]
+  [ "Markup"; "markup"; LF.php_and_hack ]]
 
 let no_text_tokens = List.map token_node_from_list [
   [ "EndOfFile"; "end_of_file"; LF.php_and_hack ]]
@@ -368,7 +367,8 @@ let given_text_tokens = List.map token_node_from_list [
   [ "SlashGreaterThan"; "/>"; LF.php_and_hack ];
   [ "LessThanSlash"; "</"; LF.php_and_hack ];
   [ "LessThanQuestion";"<?"; LF.php_and_hack ];
-  [ "QuestionGreaterThan"; "?>"; LF.php_and_hack ]]
+  [ "QuestionGreaterThan"; "?>"; LF.php_and_hack ];
+  [ "ColonAt"; ":@"; LF.hack_only ]]
 
 let trivia_kinds = List.map trivia_node_from_list [
   [ "WhiteSpace"; "whitespace" ];

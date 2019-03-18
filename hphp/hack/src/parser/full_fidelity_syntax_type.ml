@@ -1155,10 +1155,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; list_separator                                     : t
     }
   | PocketAtomExpression                    of
-    { pocket_atom_expression                             : t
+    { pocket_atom_glyph                                  : t
+    ; pocket_atom_expression                             : t
     }
   | PocketAtomMappingDeclaration            of
-    { pocket_atom_mapping_expression                     : t
+    { pocket_atom_mapping_glyph                          : t
+    ; pocket_atom_mapping_expression                     : t
     ; pocket_atom_mapping_left_paren                     : t
     ; pocket_atom_mapping_mappings                       : t
     ; pocket_atom_mapping_right_paren                    : t
@@ -2500,10 +2502,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; tuple_right_paren: Token.t value
     }
   and pocket_atom_expression =
-    { pocket_atom_expression: Token.t value
+    { pocket_atom_glyph: Token.t value
+    ; pocket_atom_expression: Token.t value
     }
   and pocket_atom_mapping_declaration =
-    { pocket_atom_mapping_expression: Token.t value
+    { pocket_atom_mapping_glyph: Token.t value
+    ; pocket_atom_mapping_expression: Token.t value
     ; pocket_atom_mapping_left_paren: Token.t option value
     ; pocket_atom_mapping_mappings: pumapping_aggregate listesque value
     ; pocket_atom_mapping_right_paren: Token.t option value

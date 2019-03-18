@@ -720,9 +720,8 @@ let pocket_universe_final_expected =
 let pocket_universe_enum_expected =
   "The 'enum' keyword is expected here."
 
-(* this one is currently too wide, but will be enough for prototyping *)
-let pocket_universe_invalid_field n =
-  "Invalid pocket universe field syntax: " ^ (string_of_int n) ^"."
+let pocket_universe_invalid_field =
+  "Invalid pocket universe field syntax."
 
 let type_keyword =
     "The 'type' keyword is expected here."

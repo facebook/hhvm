@@ -2227,7 +2227,10 @@ let schema : schema_node list =
     ; description = "pocket_atom"
     ; prefix      = "pocket_atom"
     ; aggregates  = [ Expression ]
-    ; fields      = [ "expression", Token ]
+    ; fields      =
+      [ "glyph", Token
+      ; "expression", Token
+      ]
     }
 (* PocketUniverse: because of the trailing ';' I didn't want to
    add the aggragte PUField to PocketAtomExpression, so I made the ( .. )
@@ -2243,7 +2246,8 @@ let schema : schema_node list =
     ; prefix      = "pocket_atom_mapping"
     ; aggregates  = [ PUField ]
     ; fields      =
-      [ "expression", Token
+      [ "glyph", Token
+      ; "expression", Token
       ; "left_paren", ZeroOrOne Token
       ; "mappings", ZeroOrMore (Aggregate PUMapping)
       ; "right_paren", ZeroOrOne Token

@@ -1099,6 +1099,8 @@ class EditableToken extends EditableSyntax
        return new LessThanQuestionToken(leading, trailing);
     case '?>':
        return new QuestionGreaterThanToken(leading, trailing);
+    case ':@':
+       return new ColonAtToken(leading, trailing);
 
     case 'error_token':
        return new ErrorTokenToken(leading, trailing, token_text);
@@ -1150,8 +1152,6 @@ class EditableToken extends EditableSyntax
        return new XHPCommentToken(leading, trailing, token_text);
     case 'markup':
        return new MarkupToken(leading, trailing, token_text);
-    case 'atom':
-       return new PUAtomToken(leading, trailing, token_text);
 
       default: throw 'unexpected token kind; ' + token_kind;
       // TODO: Better error
@@ -2525,6 +2525,13 @@ class QuestionGreaterThanToken extends EditableToken
     super('?>', leading, trailing, '?>');
   }
 }
+class ColonAtToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super(':@', leading, trailing, ':@');
+  }
+}
 
 class ErrorTokenToken extends EditableToken
 {
@@ -2823,18 +2830,6 @@ class MarkupToken extends EditableToken
   with_text(text)
   {
     return new MarkupToken(this.leading, this.trailing, text);
-  }
-
-}
-class PUAtomToken extends EditableToken
-{
-  constructor(leading, trailing, text)
-  {
-    super('atom', leading, trailing, text);
-  }
-  with_text(text)
-  {
-    return new PUAtomToken(this.leading, this.trailing, text);
   }
 
 }
@@ -21299,14 +21294,23 @@ class ListItem extends EditableSyntax
 class PocketAtomExpression extends EditableSyntax
 {
   constructor(
+    glyph,
     expression)
   {
     super('pocket_atom', {
+      glyph: glyph,
       expression: expression });
   }
+  get glyph() { return this.children.glyph; }
   get expression() { return this.children.expression; }
+  with_glyph(glyph){
+    return new PocketAtomExpression(
+      glyph,
+      this.expression);
+  }
   with_expression(expression){
     return new PocketAtomExpression(
+      this.glyph,
       expression);
   }
   rewrite(rewriter, parents)
@@ -21315,8 +21319,10 @@ class PocketAtomExpression extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var glyph = this.glyph.rewrite(rewriter, new_parents);
     var expression = this.expression.rewrite(rewriter, new_parents);
     if (
+      glyph === this.glyph &&
       expression === this.expression)
     {
       return rewriter(this, parents);
@@ -21324,21 +21330,27 @@ class PocketAtomExpression extends EditableSyntax
     else
     {
       return rewriter(new PocketAtomExpression(
+        glyph,
         expression), parents);
     }
   }
   static from_json(json, position, source)
   {
+    let glyph = EditableSyntax.from_json(
+      json.pocket_atom_glyph, position, source);
+    position += glyph.width;
     let expression = EditableSyntax.from_json(
       json.pocket_atom_expression, position, source);
     position += expression.width;
     return new PocketAtomExpression(
+        glyph,
         expression);
   }
   get children_keys()
   {
     if (PocketAtomExpression._children_keys == null)
       PocketAtomExpression._children_keys = [
+        'glyph',
         'expression'];
     return PocketAtomExpression._children_keys;
   }
@@ -21346,6 +21358,7 @@ class PocketAtomExpression extends EditableSyntax
 class PocketAtomMappingDeclaration extends EditableSyntax
 {
   constructor(
+    glyph,
     expression,
     left_paren,
     mappings,
@@ -21353,19 +21366,31 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     semicolon)
   {
     super('pocket_atom_mapping', {
+      glyph: glyph,
       expression: expression,
       left_paren: left_paren,
       mappings: mappings,
       right_paren: right_paren,
       semicolon: semicolon });
   }
+  get glyph() { return this.children.glyph; }
   get expression() { return this.children.expression; }
   get left_paren() { return this.children.left_paren; }
   get mappings() { return this.children.mappings; }
   get right_paren() { return this.children.right_paren; }
   get semicolon() { return this.children.semicolon; }
+  with_glyph(glyph){
+    return new PocketAtomMappingDeclaration(
+      glyph,
+      this.expression,
+      this.left_paren,
+      this.mappings,
+      this.right_paren,
+      this.semicolon);
+  }
   with_expression(expression){
     return new PocketAtomMappingDeclaration(
+      this.glyph,
       expression,
       this.left_paren,
       this.mappings,
@@ -21374,6 +21399,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   }
   with_left_paren(left_paren){
     return new PocketAtomMappingDeclaration(
+      this.glyph,
       this.expression,
       left_paren,
       this.mappings,
@@ -21382,6 +21408,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   }
   with_mappings(mappings){
     return new PocketAtomMappingDeclaration(
+      this.glyph,
       this.expression,
       this.left_paren,
       mappings,
@@ -21390,6 +21417,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   }
   with_right_paren(right_paren){
     return new PocketAtomMappingDeclaration(
+      this.glyph,
       this.expression,
       this.left_paren,
       this.mappings,
@@ -21398,6 +21426,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   }
   with_semicolon(semicolon){
     return new PocketAtomMappingDeclaration(
+      this.glyph,
       this.expression,
       this.left_paren,
       this.mappings,
@@ -21410,12 +21439,14 @@ class PocketAtomMappingDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var glyph = this.glyph.rewrite(rewriter, new_parents);
     var expression = this.expression.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var mappings = this.mappings.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
+      glyph === this.glyph &&
       expression === this.expression &&
       left_paren === this.left_paren &&
       mappings === this.mappings &&
@@ -21427,6 +21458,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     else
     {
       return rewriter(new PocketAtomMappingDeclaration(
+        glyph,
         expression,
         left_paren,
         mappings,
@@ -21436,6 +21468,9 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let glyph = EditableSyntax.from_json(
+      json.pocket_atom_mapping_glyph, position, source);
+    position += glyph.width;
     let expression = EditableSyntax.from_json(
       json.pocket_atom_mapping_expression, position, source);
     position += expression.width;
@@ -21452,6 +21487,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
       json.pocket_atom_mapping_semicolon, position, source);
     position += semicolon.width;
     return new PocketAtomMappingDeclaration(
+        glyph,
         expression,
         left_paren,
         mappings,
@@ -21462,6 +21498,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   {
     if (PocketAtomMappingDeclaration._children_keys == null)
       PocketAtomMappingDeclaration._children_keys = [
+        'glyph',
         'expression',
         'left_paren',
         'mappings',
@@ -22198,6 +22235,7 @@ exports.SlashGreaterThanToken = SlashGreaterThanToken;
 exports.LessThanSlashToken = LessThanSlashToken;
 exports.LessThanQuestionToken = LessThanQuestionToken;
 exports.QuestionGreaterThanToken = QuestionGreaterThanToken;
+exports.ColonAtToken = ColonAtToken;
 
 exports.ErrorTokenToken = ErrorTokenToken;
 exports.NameToken = NameToken;
@@ -22224,7 +22262,6 @@ exports.XHPStringLiteralToken = XHPStringLiteralToken;
 exports.XHPBodyToken = XHPBodyToken;
 exports.XHPCommentToken = XHPCommentToken;
 exports.MarkupToken = MarkupToken;
-exports.PUAtomToken = PUAtomToken;
 
 exports.EditableTrivia = EditableTrivia;
 exports.WhiteSpace = WhiteSpace;

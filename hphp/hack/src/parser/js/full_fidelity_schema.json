@@ -399,6 +399,8 @@
       "token_text" : "<?" },
     { "token_kind" : "QuestionGreaterThan",
       "token_text" : "?>" },
+    { "token_kind" : "ColonAt",
+      "token_text" : ":@" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -449,8 +451,6 @@
     { "token_kind" : "XHPComment",
       "token_text" : null },
     { "token_kind" : "Markup",
-      "token_text" : null },
-    { "token_kind" : "PUAtom",
       "token_text" : null },
 
     { "token_kind" : "EndOfFile",
@@ -2147,6 +2147,7 @@
       "description" : "pocket_atom",
       "prefix" : "pocket_atom",
       "fields" : [
+        { "field_name" : "glyph" },
         { "field_name" : "expression" }
       ] },
     { "kind_name" : "PocketAtomMappingDeclaration",
@@ -2154,6 +2155,7 @@
       "description" : "pocket_atom_mapping",
       "prefix" : "pocket_atom_mapping",
       "fields" : [
+        { "field_name" : "glyph" },
         { "field_name" : "expression" },
         { "field_name" : "left_paren" },
         { "field_name" : "mappings" },

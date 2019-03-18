@@ -360,5 +360,5 @@ val reified_attribute : string
 val lval_as_expression : string
 val pocket_universe_final_expected : string
 val pocket_universe_enum_expected : string
-val pocket_universe_invalid_field : int -> string
+val pocket_universe_invalid_field : string
 val type_keyword : string

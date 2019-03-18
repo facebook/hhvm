@@ -1908,7 +1908,6 @@ module WithExpressionAndStatementAndTypeParser
          | 'type' identifier '=' type-expression
          | identifier '=' expression
     *)
-    let puerror = SyntaxError.pocket_universe_invalid_field in
     match peek_token_kind parser with
     | Type -> let (parser, typ) = require_token parser Type SyntaxError.type_keyword in
       let (parser, tyname) = require_name parser in
@@ -1920,7 +1919,8 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, simple_init) = parse_expression parser in
       let (parser, sc_init) = Make.simple_initializer parser equal simple_init in
       Make.pocket_mapping_id_declaration parser id sc_init
-    | _ -> let parser = with_error parser (puerror 0) in
+    | _ -> let parser = with_error parser
+               SyntaxError.pocket_universe_invalid_field in
       Make.missing parser (pos parser)
 
   and parse_pocket_field parser =
@@ -1933,26 +1933,28 @@ module WithExpressionAndStatementAndTypeParser
 
        enum-member ::= ':@' name
     *)
-    let puerror = SyntaxError.pocket_universe_invalid_field in
     match peek_token_kind parser with
-    | PUAtom -> let (parser, enum_name) = require_token parser PUAtom (puerror 1) in
+    | ColonAt ->
+      let (parser, glyph) = assert_token parser ColonAt in
+      let (parser, enum_name) = require_name parser in
       (match peek_token_kind parser with
        | LeftParen ->
          let (parser, left_paren, mappings, right_paren) =
            parse_parenthesized_comma_list parser parse_pocket_mapping in
          let (parser, semi) = require_semicolon parser in
-         Make.pocket_atom_mapping_declaration parser enum_name left_paren mappings right_paren semi
+         Make.pocket_atom_mapping_declaration parser glyph enum_name
+           left_paren mappings right_paren semi
        | _ -> let (parser, missing_left) = Make.missing parser (pos parser) in
          let (parser, missing_mappings) = Make.missing parser (pos parser) in
          let (parser, missing_right) = Make.missing parser (pos parser) in
          let (parser, semi) = require_semicolon parser in
-         Make.pocket_atom_mapping_declaration parser enum_name missing_left
-           missing_mappings missing_right semi
+         Make.pocket_atom_mapping_declaration parser glyph enum_name
+           missing_left missing_mappings missing_right semi
       )
-    | Case -> let (parser, case_tok) = require_token parser Case (puerror 2) in
+    | Case -> let (parser, case_tok) = assert_token parser Case in
       (match peek_token_kind parser with
        | Type ->
-         let (parser, type_tok) = require_token parser Type (puerror 3) in
+         let (parser, type_tok) = assert_token parser Type in
          let (parser, name) = require_name parser in
          let (parser, semi) = require_semicolon parser in
          Make.pocket_field_type_declaration parser case_tok type_tok name semi
@@ -1962,7 +1964,8 @@ module WithExpressionAndStatementAndTypeParser
          let (parser, semi) = require_semicolon parser in
          Make.pocket_field_type_expr_declaration parser case_tok ty name semi
       )
-    | _ -> let parser = with_error parser (puerror 4) in
+    | _ -> let parser = with_error parser
+               SyntaxError.pocket_universe_invalid_field in
       Make.missing parser (pos parser)
 
   and parse_pocket_fields_opt parser =

@@ -311,23 +311,6 @@ let scan_variable lexer =
   let lexer = scan_name_impl (advance lexer 1) in
   (lexer, TokenKind.Variable)
 
-(* Pocket Universe atom: like a variable name but must start with `:@` *)
-let scan_atom lexer =
-  assert(':' = peek_char lexer 0);
-  assert('@' = peek_char lexer 1);
-  let lexer = scan_name_impl (advance lexer 2) in
-  (lexer, TokenKind.PUAtom)
-
-let scan_atom_token lexer =
-  (* Pocket Universe syntax is `:@name` to avoid conflict with existing
-     syntax
-   *)
-  let ch2 = peek_char lexer 2 in
-  if is_name_nondigit ch2 then scan_atom lexer (* :@x *)
-  else
-  let lexer = with_error lexer SyntaxError.error0008 in
-  (advance lexer 2, TokenKind.ErrorToken)
-
 let scan_with_underscores (l : lexer) accepted_char =
   let n = text_len l in
   let peek_def i = if i < n then peek l i else invalid in
@@ -1166,12 +1149,13 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
     | _ -> (advance lexer 1, TokenKind.Question)
     end
   (* In experimental mode only: try to scan for a pocket universes atom
-     of the form `:@name`
+     of the form `:@`
    *)
   | ':' ->
     let ch1 = peek_char lexer 1 in
     if ch1 = ':' then (advance lexer 2, TokenKind.ColonColon)
-    else if Lexer.is_experimental_mode lexer && ch1 = '@' then scan_atom_token lexer
+    else if Lexer.is_experimental_mode lexer && ch1 = '@'
+    then (advance lexer 2, TokenKind.ColonAt)
     else (advance lexer 1, TokenKind.Colon)
   | ';' -> (advance lexer 1, TokenKind.Semicolon)
   | ',' -> (advance lexer 1, TokenKind.Comma)

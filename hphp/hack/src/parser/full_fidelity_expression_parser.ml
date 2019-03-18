@@ -303,7 +303,7 @@ module WithStatementAndDeclAndTypeParser
     | Define -> parse_define_expression parser
     | HaltCompiler -> parse_halt_compiler_expression parser
     | Eval -> parse_eval_expression parser
-    | PUAtom -> parse_pocket_atom parser
+    | ColonAt -> parse_pocket_atom parser
     | kind when Parser.expects parser kind ->
       (* ERROR RECOVERY: if we've prematurely found a token we're expecting
        * later, mark the expression missing, throw an error, and do not advance
@@ -2626,8 +2626,9 @@ module WithStatementAndDeclAndTypeParser
     Make.scope_resolution_expression parser qualifier op name
 
   and parse_pocket_atom parser =
-    let (parser1, atom) = assert_token parser PUAtom in
-    Make.pocket_atom_expression parser1 atom
+    let (parser, glyph) = assert_token parser ColonAt in
+    let (parser, atom_name) = require_name parser in
+    Make.pocket_atom_expression parser glyph atom_name
 end
 end (* WithSmartConstructors *)
 end (* WithSyntax *)

@@ -199,7 +199,7 @@
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
              (list 82
               ((pocket_atom_mapping 82
-                ((((whitespace 4)) atom 6 ((whitespace 1)))
+                ((((whitespace 4)) :@ 2 ()) (() name 4 ((whitespace 1)))
                  (() "(" 1 ((end_of_line 1)))
                  (list 60
                   ((list_item 13
@@ -247,7 +247,8 @@
                      (() "(" 1 ())
                      (list 6
                       ((list_item 6
-                        ((pocket_atom 6 ((() atom 6 ()))) (missing 0 ())))))
+                        ((pocket_atom 6 ((() :@ 2 ()) (() name 4 ())))
+                         (missing 0 ())))))
                      (() ")" 1 ())))
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))

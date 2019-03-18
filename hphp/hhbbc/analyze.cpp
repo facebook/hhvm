@@ -202,10 +202,6 @@ State entry_state(const Index& index, Context const ctx,
         ret.locals[locId] = useVars[afterParamsLocId];
         continue;
       }
-      if (afterParamsLocId < ctx.func->staticLocals.size()) {
-        ret.locals[locId] = TGen;
-        continue;
-      }
     }
 
     // Otherwise the local will start uninitialized, like normal.
@@ -375,15 +371,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * chains in the type lattice.
    */
   auto totalVisits = std::vector<uint32_t>(ctx.func->blocks.size());
-  auto totalLoops = uint32_t{0};
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
-
-  // Used to force blocks that depended on the types of local statics
-  // to be re-analyzed when the local statics change.
-  hphp_fast_map<BlockId, hphp_fast_map<LocalId, Type>>
-    usedLocalStatics;
 
   /*
    * Iterate until a fixed point.
@@ -442,12 +432,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
           !collect.effectFree) {
         break;
       }
-      // We only care about the usedLocalStatics from the last visit
-      if (flags.usedLocalStatics) {
-        usedLocalStatics[bid] = std::move(*flags.usedLocalStatics);
-      } else {
-        usedLocalStatics.erase(bid);
-      }
 
       if (flags.returned) {
         ai.inferredReturn |= std::move(*flags.returned);
@@ -466,26 +450,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
     if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
         !collect.effectFree) {
       break;
-    }
-
-    // maybe some local statics changed type since the last time their
-    // blocks were visited.
-
-    if (totalLoops++ >= options.analyzeFuncWideningLimit) {
-      // If we loop too many times because of static locals, widen them to
-      // ensure termination.
-      for (auto& t : collect.localStaticTypes) {
-        t = widen_type(std::move(t));
-      }
-    }
-
-    for (auto const& elm : usedLocalStatics) {
-      for (auto const& ls : elm.second) {
-        if (collect.localStaticTypes[ls.first] != ls.second) {
-          incompleteQ.push(rpoId(ai, elm.first));
-          break;
-        }
-      }
     }
   } while (!incompleteQ.empty());
 
@@ -536,9 +500,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
     ret += bsep;
     return ret;
   }());
-
-  // Do this after the tracing above
-  ai.localStaticTypes = std::move(collect.localStaticTypes);
   return ai;
 }
 

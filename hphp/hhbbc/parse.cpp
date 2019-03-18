@@ -1156,13 +1156,6 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
 
   func.numIters = fe.numIterators();
   func.numClsRefSlots = fe.numClsRefSlots();
-
-  func.staticLocals.reserve(fe.staticVars.size());
-  for (auto& sv : fe.staticVars) {
-    func.staticLocals.push_back(
-      php::StaticLocalInfo { sv.name }
-    );
-  }
 }
 
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
@@ -1210,7 +1203,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       ret->locals.resize(fe.params.size());
       ret->numIters = 0;
       ret->numClsRefSlots = 0;
-      ret->staticLocals.clear();
       ret->attrs |= AttrIsFoldable;
 
       auto const mainEntry = BlockId{0};

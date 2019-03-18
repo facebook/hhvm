@@ -325,11 +325,6 @@ struct res::Func::FuncInfo {
   bool effectFree{false};
 
   /*
-   * Type info for local statics.
-   */
-  CompactVector<Type> localStaticTypes;
-
-  /*
    * Bitset representing which parameters definitely don't affect the
    * result of the function, assuming it produces one. Note that
    * VerifyParamType does not count as a use in this context.
@@ -5032,20 +5027,7 @@ Type Index::lookup_return_type_raw(const php::Func* f) const {
 Type Index::lookup_return_type_and_clear(
   const php::Func* f) const {
   auto it = func_info(*m_data, f);
-
-  it->localStaticTypes.clear();
-
   return std::move(it->returnTy);
-}
-
-CompactVector<Type>
-Index::lookup_local_static_types(const php::Func* f) const {
-  auto it = func_info(*m_data, f);
-  if (it->func) {
-    assertx(it->func == f);
-    return it->localStaticTypes;
-  }
-  return {};
 }
 
 bool Index::lookup_this_available(const php::Func* f) const {
@@ -5445,37 +5427,6 @@ void Index::refine_effect_free(const php::Func* func, bool flag) {
     func->name);
 
   finfo->effectFree = flag;
-}
-
-void Index::refine_local_static_types(
-  const php::Func* func,
-  const CompactVector<Type>& localStaticTypes) {
-
-  auto const finfo = create_func_info(*m_data, func);
-  if (localStaticTypes.empty()) {
-    finfo->localStaticTypes.clear();
-    return;
-  }
-
-  finfo->localStaticTypes.resize(localStaticTypes.size(), TTop);
-  for (auto i = size_t{0}; i < localStaticTypes.size(); i++) {
-    auto& indexTy = finfo->localStaticTypes[i];
-    auto const& newTy = unctx(localStaticTypes[i]);
-    always_assert_flog(
-      newTy.moreRefined(indexTy),
-      "Index local static type invariant violated in {} {}{}.\n"
-      "   Static Local {}: {} is not a subtype of {}\n",
-      func->unit->filename,
-      func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
-      : std::string{},
-      func->name->data(),
-      local_string(*func, i),
-      show(newTy),
-      show(indexTy)
-    );
-    if (!newTy.strictlyMoreRefined(indexTy)) continue;
-    indexTy = newTy;
-  }
 }
 
 void Index::init_return_type(const php::Func* func) {

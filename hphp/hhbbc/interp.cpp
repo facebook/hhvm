@@ -1218,25 +1218,6 @@ void isTypeHelper(ISS& env,
   refineLocation(env, location, pre, jmp.target1, post);
 }
 
-folly::Optional<Cell> staticLocHelper(ISS& env, LocalId l, Type init) {
-  if (is_volatile_local(env.ctx.func, l)) return folly::none;
-  unbindLocalStatic(env, l);
-  setLocRaw(env, l, TRef);
-  bindLocalStatic(env, l, std::move(init));
-  if (!env.ctx.func->isMemoizeWrapper &&
-      !env.ctx.func->isClosureBody &&
-      env.collect.localStaticTypes.size() > l) {
-    auto t = env.collect.localStaticTypes[l];
-    if (auto v = tv(t)) {
-      useLocalStatic(env, l);
-      setLocRaw(env, l, t);
-      return v;
-    }
-  }
-  useLocalStatic(env, l);
-  return folly::none;
-}
-
 // If the current function is a memoize wrapper, return the inferred return type
 // of the function being wrapped along with if the wrapped function is effect
 // free.
@@ -2871,12 +2852,6 @@ void in(ISS& env, const bc::IncDecS& op) {
 }
 
 void in(ISS& env, const bc::BindL& op) {
-  // If the op.loc1 was bound to a local static, its going to be
-  // unbound from it. If the thing its being bound /to/ is a local
-  // static, we've already marked it as modified via the VGetL, so
-  // there's nothing more to track.
-  // Unbind it before any updates.
-  modifyLocalStatic(env, op.loc1, TUninit);
   nothrow(env);
   auto t1 = popV(env);
   setLocRaw(env, op.loc1, t1);
@@ -4835,11 +4810,6 @@ BlockId speculate(Interp& interp) {
       return NoBlockId;
     }
 
-    if (flags.usedLocalStatics) {
-      FTRACE(3, "  Bailing from speculate because local statics were used\n");
-      return NoBlockId;
-    }
-
     assertx(!flags.returned);
     assertx(!interp.state.unreachable);
 
@@ -4924,16 +4894,6 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {
         FTRACE(2, "  Bailing because not effect free\n");
         return ret;
-      }
-    }
-
-    if (flags.usedLocalStatics) {
-      if (!ret.usedLocalStatics) {
-        ret.usedLocalStatics = std::move(flags.usedLocalStatics);
-      } else {
-        for (auto& elm : *flags.usedLocalStatics) {
-          ret.usedLocalStatics->insert(std::move(elm));
-        }
       }
     }
 

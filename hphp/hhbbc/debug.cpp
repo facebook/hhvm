@@ -142,13 +142,6 @@ void dump_func_state(std::ostream& out,
 
   auto const retTy = index.lookup_return_type_raw(f);
   out << name << " :: " << show(retTy) << '\n';
-
-  auto const localStatics = index.lookup_local_static_types(f);
-  for (auto i = size_t{0}; i < localStatics.size(); ++i) {
-    if (localStatics[i].subtypeOf(BBottom)) continue;
-    out << name << "::" << local_string(*f, i)
-        << " :: " << show(localStatics[i]) << '\n';
-  }
 }
 
 void dump_index(fs::path dir,

@@ -30,13 +30,13 @@ type ObjprofStringStats = shape(
 
 <<__Native>>
 function objprof_get_data(
-  int $flags = OBJPROF_FLAGS_DEFAULT,
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
 function objprof_get_paths(
-  int $flags = OBJPROF_FLAGS_DEFAULT,
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
 ): darray<string, ObjprofObjectStats>;
 

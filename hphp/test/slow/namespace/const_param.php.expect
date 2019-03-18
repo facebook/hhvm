@@ -1,6 +1,6 @@
 string(11) "5.6.99-hhvm"
-string(11) "PHP_VERSION"
-string(11) "PHP_VERSION"
+string(12) "\PHP_VERSION"
+string(12) "\PHP_VERSION"
 string(1) "c"
 string(1) "B"
 NULL
@@ -8,7 +8,7 @@ array(1) {
   [0]=>
   string(11) "5.6.99-hhvm"
 }
-string(18) "array(PHP_VERSION)"
+string(19) "array(\PHP_VERSION)"
 NULL
 array(1) {
   [0]=>
@@ -17,8 +17,8 @@ array(1) {
 string(8) "array(B)"
 NULL
 string(11) "5.6.99-hhvm"
-string(11) "PHP_VERSION"
-string(11) "PHP_VERSION"
+string(12) "\PHP_VERSION"
+string(12) "\PHP_VERSION"
 string(1) "c"
 string(1) "B"
 NULL
@@ -26,7 +26,7 @@ array(1) {
   [0]=>
   string(11) "5.6.99-hhvm"
 }
-string(18) "array(PHP_VERSION)"
+string(19) "array(\PHP_VERSION)"
 NULL
 array(1) {
   [0]=>

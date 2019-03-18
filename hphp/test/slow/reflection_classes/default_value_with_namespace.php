@@ -2,8 +2,6 @@
 namespace A {
   // SORT_REGULAR is a global constant
   const SORT_NUMERIC = 42;
-  function a($k = SORT_REGULAR) { \var_dump($k); }
-  function b($k = SORT_NUMERIC) { \var_dump($k); }
 
   function c($k = \SORT_REGULAR) { \var_dump($k); }
   function d($k = \SORT_NUMERIC) { \var_dump($k); }
@@ -22,7 +20,7 @@ namespace A\B {
 }
 
 namespace {
-  foreach (array('a', 'b', 'c', 'd', 'e', 'f') as $func) {
+  foreach (array('c', 'd', 'e', 'f') as $func) {
     echo "A\\$func reflection:\n";
     $rc = new ReflectionFunction("A\\$func");
     \var_dump($rc->getParameters()[0]->getDefaultValue());

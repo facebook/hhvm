@@ -3,11 +3,11 @@
 namespace A {
   const B = 'c';
   class D {
-    public function e($f = PHP_VERSION, $g = B,
-                      $h = array(PHP_VERSION), $i = array(B)) {
+    public function e($f = \PHP_VERSION, $g = B,
+                      $h = array(\PHP_VERSION), $i = array(B)) {
     }
   }
-  function j($k = PHP_VERSION, $l = B, $m = array(PHP_VERSION), $n = array(B)) {
+  function j($k = \PHP_VERSION, $l = B, $m = array(\PHP_VERSION), $n = array(B)) {
   }
 }
 

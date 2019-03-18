@@ -2,7 +2,7 @@
 
 namespace foo;
 
-\error_reporting(E_ALL);
+\error_reporting(\E_ALL);
 
 interface foo {
     const foo = 2;

@@ -386,7 +386,7 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
  */
 <<__Native>>
 function backtrace<T>(Awaitable<T> $awaitable,
-                      int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
+                      int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
                       int $limit = 0): varray<darray>;
 
 

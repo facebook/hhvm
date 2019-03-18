@@ -105,7 +105,6 @@ struct HotRDSLocals {
   void* rdslocal_base;
   void* g_context;
 
-  uint32_t os_max_id;
   bool t_eager_gc;
   ArrayDataHash s_cachedHash;
 

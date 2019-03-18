@@ -757,7 +757,12 @@ let pShapeFieldName : shape_field_name parser = fun name env ->
   | LiteralExpression {
       literal_expression = { syntax = Token t; _ }
     } when is_valid_shape_literal t ->
-    let p, n = pos_name name env in SFlit_str (p, mkStr env name unesc_dbl n)
+    let p, n = pos_name name env in
+    let str = mkStr env name unesc_dbl n in
+    begin match int_of_string_opt str with
+    | Some _ -> raise_parsing_error env (`Node name) SyntaxError.shape_field_int_like_string
+    | None -> () end;
+    SFlit_str (p, str)
   | _ ->
     raise_parsing_error env (`Node name) SyntaxError.invalid_shape_field_name;
     let p, n = pos_name name env in SFlit_str (p, mkStr env name unesc_dbl n)

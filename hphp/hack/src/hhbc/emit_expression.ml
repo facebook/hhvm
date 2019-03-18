@@ -419,7 +419,6 @@ let is_reified_tparam ~is_fun env name =
 let extract_shape_field_name_pstring env = function
   | A.SFlit_int s -> A.Int (snd s)
   | A.SFlit_str s ->
-    Emit_type_constant.check_shape_key s;
     A.String (snd s)
   | A.SFclass_const ((pn, name) as id, p) ->
     if Option.is_some (is_reified_tparam ~is_fun:true env name) ||

@@ -81,16 +81,9 @@ let add_ns ~namespace id =
   let classname, _ = Hhbc_id.Class.elaborate_id namespace id in
   Hhbc_id.Class.to_raw_string classname
 
-let check_shape_key (pos, name) =
-  if String.length name > 0 && String_utils.is_decimal_digit name.[0]
-  then Emit_fatal.raise_fatal_parse
-    pos "Shape key names may not start with integers"
-
 let shape_field_name ~namespace = function
-  | A.SFlit_int (_, s) ->
-    s, false
-  | A.SFlit_str ((_, s) as id) ->
-    check_shape_key id;
+  | A.SFlit_int (_, s)
+  | A.SFlit_str (_, s) ->
     s, false
   | A.SFclass_const (id, (_, s)) ->
     add_ns ~namespace id ^ "::" ^ s, true

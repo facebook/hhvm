@@ -375,7 +375,7 @@ module Typing                               = struct
   | ThisLvalue
   | UnsetNonidxInStrict
   | InvalidShapeFieldNameEmpty
-  | InvalidShapeFieldNameNumber
+  | InvalidShapeFieldNameNumberDEPRECATED
   | ShapeFieldsUnknown
   | InvalidShapeRemoveKey
   | MissingOptionalFieldDEPRECATED

@@ -1,0 +1,2 @@
+File "shapes_cc_16.php", line 8, characters 3-7:
+Shape field name must not be an int-like string (i.e. "123") (Parsing[1002])

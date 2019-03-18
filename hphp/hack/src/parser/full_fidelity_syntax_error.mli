@@ -150,7 +150,7 @@ val error2055 : string
 val error2056 : string
 val error2057 : string
 val error2058 : string
-val error2060 : string
+val shape_field_int_like_string : string
 val error2061 : string
 val error2062 : string
 val error2063 : string

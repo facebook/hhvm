@@ -327,7 +327,6 @@ val enum_switch_not_const : Pos.t -> unit
 val enum_switch_wrong_class : Pos.t -> string -> string -> unit
 val invalid_shape_field_name : Pos.t -> unit
 val invalid_shape_field_name_empty : Pos.t -> unit
-val invalid_shape_field_name_number : Pos.t -> unit
 val invalid_shape_field_type : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 val invalid_shape_field_literal : Pos.t -> Pos.t -> unit
 val invalid_shape_field_const : Pos.t -> Pos.t -> unit

@@ -1913,10 +1913,6 @@ let statement_errors env node parents errors =
   | Some (error_node, error_message) ->
     make_error_from_node error_node error_message :: errors
 
-let string_starts_with_int s =
-  if String.length s = 0 then false else
-  try let _ = int_of_string (String.make 1 s.[0]) in true with _ -> false
-
 let check_collection_element m error_text errors =
   match syntax m with
   | PrefixUnaryExpression
@@ -1956,12 +1952,8 @@ let invalid_shape_initializer_name env node errors =
       end
     in
     if not is_str
-    then make_error_from_node node SyntaxError.invalid_shape_field_name :: errors else begin
-      let str = text expr in
-      if string_starts_with_int str
-      then make_error_from_node node SyntaxError.error2060 :: errors
-      else errors
-    end
+    then make_error_from_node node SyntaxError.invalid_shape_field_name :: errors
+    else errors
   | ScopeResolutionExpression _ -> errors
   | QualifiedName _ ->
       if is_typechecker env then

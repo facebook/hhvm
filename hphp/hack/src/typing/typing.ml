@@ -3053,9 +3053,7 @@ and check_shape_keys_validity env pos keys =
           env, key_pos, None
         | Ast.SFlit_str (_, key_name) ->
            if (String.length key_name = 0) then
-             (Errors.invalid_shape_field_name_empty key_pos)
-           else if (key_name.[0] >= '0' && key_name.[0] <='9') then
-             (Errors.invalid_shape_field_name_number key_pos);
+             (Errors.invalid_shape_field_name_empty key_pos);
            env, key_pos, None
         | Ast.SFclass_const (p, cls as x, y) ->
           let env, _te, ty = class_const env pos ((p, CI x), y) in

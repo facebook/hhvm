@@ -1514,10 +1514,6 @@ let invalid_shape_field_name_empty p =
   add (Typing.err_code Typing.InvalidShapeFieldNameEmpty) p
     "A shape field name cannot be an empty string"
 
-let invalid_shape_field_name_number p =
-  add (Typing.err_code Typing.InvalidShapeFieldNameNumber) p
-    "A shape field name cannot start with numbers"
-
 let invalid_shape_field_type pos ty_pos ty trail =
   add_with_trail (Typing.err_code Typing.InvalidShapeFieldType)
     [pos, "A shape field name must be an int or string";

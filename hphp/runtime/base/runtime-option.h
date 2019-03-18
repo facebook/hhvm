@@ -593,9 +593,6 @@ struct RuntimeOption {
   // Disables static closures
   // true => error, false => default behaviour
   static bool DisableStaticClosures;
-  // Disables static local variables
-  // true => error, false => default behaviour
-  static bool DisableStaticLocalVariables;
 
   // Disables the setting of reserved variable php_errorsmg
   // true => error, false => php_errormsg can be set

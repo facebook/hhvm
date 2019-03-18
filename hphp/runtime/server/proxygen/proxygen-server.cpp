@@ -484,14 +484,6 @@ void ProxygenServer::stop() {
 void ProxygenServer::stopListening(bool hard) {
   m_shutdownState = ShutdownState::DRAINING_READS;
   HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_READS);
-#define SHUT_FBLISTEN 3
-  /*
-   * Modifications to the Linux kernel to support shutting down a listen
-   * socket for new connections only, but anything which has completed
-   * the TCP handshake will still be accepted.  This allows for un-accepted
-   * connections to be queued and then wait until all queued requests are
-   * actively being processed.
-   */
 
   // triggers acceptStopped/sets acceptor state to Draining
   if (hard) {
@@ -499,10 +491,10 @@ void ProxygenServer::stopListening(bool hard) {
     m_httpsServerSocket.reset();
   } else {
     if (m_httpServerSocket) {
-      m_httpServerSocket->stopAccepting(SHUT_FBLISTEN);
+      m_httpServerSocket->stopAccepting();
     }
     if (m_httpsServerSocket) {
-      m_httpsServerSocket->stopAccepting(SHUT_FBLISTEN);
+      m_httpsServerSocket->stopAccepting();
     }
   }
 

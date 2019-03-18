@@ -120,7 +120,6 @@ let make_wrapper_body env return_type params instrs =
     false (* is_memoize_wrapper_lsb *)
     params
     (Some return_type)
-    [] (* static_inits: this is intentionally empty *)
     None (* doc *)
     (Some env)
 

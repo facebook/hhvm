@@ -1254,7 +1254,6 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
       | GotoStatement _ (* Suspends are invalid in goto statements. *)
       | BreakStatement _ (* Suspends are impossible in break statements. *)
       | ContinueStatement _ (* Suspends are impossible in continue statements. *)
-      | FunctionStaticStatement _ (* Suspends are impossible in these. *)
       | GlobalStatement _ (* Suspends are impossible in global statements. *)
       | _ ->
         acc, Rewriter.Result.Keep

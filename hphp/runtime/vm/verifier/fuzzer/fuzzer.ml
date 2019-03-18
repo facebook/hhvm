@@ -636,7 +636,6 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
-    let mutate_static_init s = s in
     Hhas_body.make
       (body |> Hhas_body.instrs)
       (body |> Hhas_body.decl_vars)
@@ -646,7 +645,6 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.is_memoize_wrapper_lsb |> mutate_bool)
       (body |> Hhas_body.params                 |> delete_map mutate_param)
       (body |> Hhas_body.return_type            |> option_lift mutate_type_info)
-      (body |> Hhas_body.static_inits           |> delete_map mutate_static_init)
       (body |> Hhas_body.doc_comment)
       (body |> Hhas_body.env) in
   let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =

@@ -1815,7 +1815,6 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Return (p, e) -> N.Return (p, Option.map e (aast_expr env))
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
-    | Aast.Static_var el -> N.Static_var (aast_static_varl env el)
     | Aast.Global_var el -> N.Global_var (aast_global_varl env el)
     | Aast.Awaitall (p, el) -> aast_awaitall_stmt env p el
     | Aast.If (e, b1, b2) -> aast_if_stmt env st e b1 b2

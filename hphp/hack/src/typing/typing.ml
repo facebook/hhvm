@@ -923,15 +923,6 @@ and stmt_ env pos st =
   | Def_inline _ ->
      (* Do nothing, this doesn't occur in Hack code. *)
      failwith "Should never typecheck nested definitions"
-  | Static_var el ->
-    let env = List.fold_left el ~f:begin fun env e ->
-      match e with
-        | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
-          Env.add_todo env (TGen.no_generic p x)
-        | _ -> env
-    end ~init:env in
-    let env, tel, _ = exprs env el in
-    env, T.Static_var tel
   | Global_var el ->
     let env = List.fold_left el ~f:begin fun env e ->
       match e with

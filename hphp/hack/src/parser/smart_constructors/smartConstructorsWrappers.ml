@@ -111,8 +111,6 @@ module type SyntaxKind_S = sig
   val is_throw_statement : r -> bool
   val is_break_statement : r -> bool
   val is_continue_statement : r -> bool
-  val is_function_static_statement : r -> bool
-  val is_static_declarator : r -> bool
   val is_echo_statement : r -> bool
   val is_global_statement : r -> bool
   val is_concurrent_statement : r -> bool
@@ -314,8 +312,6 @@ module SyntaxKind(SC : SC_S)
   let make_throw_statement arg0 arg1 arg2 state = compose SK.ThrowStatement (SC.make_throw_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_break_statement arg0 arg1 arg2 state = compose SK.BreakStatement (SC.make_break_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_continue_statement arg0 arg1 arg2 state = compose SK.ContinueStatement (SC.make_continue_statement (snd arg0) (snd arg1) (snd arg2) state)
-  let make_function_static_statement arg0 arg1 arg2 state = compose SK.FunctionStaticStatement (SC.make_function_static_statement (snd arg0) (snd arg1) (snd arg2) state)
-  let make_static_declarator arg0 arg1 state = compose SK.StaticDeclarator (SC.make_static_declarator (snd arg0) (snd arg1) state)
   let make_echo_statement arg0 arg1 arg2 state = compose SK.EchoStatement (SC.make_echo_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_global_statement arg0 arg1 arg2 state = compose SK.GlobalStatement (SC.make_global_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_concurrent_statement arg0 arg1 state = compose SK.ConcurrentStatement (SC.make_concurrent_statement (snd arg0) (snd arg1) state)
@@ -499,8 +495,6 @@ module SyntaxKind(SC : SC_S)
   let is_throw_statement                              = has_kind SK.ThrowStatement
   let is_break_statement                              = has_kind SK.BreakStatement
   let is_continue_statement                           = has_kind SK.ContinueStatement
-  let is_function_static_statement                    = has_kind SK.FunctionStaticStatement
-  let is_static_declarator                            = has_kind SK.StaticDeclarator
   let is_echo_statement                               = has_kind SK.EchoStatement
   let is_global_statement                             = has_kind SK.GlobalStatement
   let is_concurrent_statement                         = has_kind SK.ConcurrentStatement

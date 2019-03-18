@@ -638,34 +638,6 @@ let rec can_initialize_static_var e =
     end
   | _ -> false
 
-let rewrite_static_instrseq static_var_map emit_expr env instrseq =
-  let rewrite_static_instr instruction =
-    match instruction with
-    | IMisc (StaticLocInit (Local.Named name, _)) ->
-      begin match (SMap.get name static_var_map) with
-            | None ->
-              failwith "rewrite_static_instr: No value in static map!"
-            | Some None -> gather [instr_null; instr_static_loc_init name;]
-            | Some (Some e) ->
-              if can_initialize_static_var e then
-                gather [
-                  emit_expr env e;
-                  instr_static_loc_init name;
-                ]
-              else
-                let l = Label.next_regular () in
-                gather [
-                  instr_static_loc_check name;
-                  instr_jmpnz l;
-                  emit_expr env e;
-                  instr_static_loc_def name;
-                  instr_label l;
-                ]
-      end
-    | _ -> instr instruction
-  in
-  InstrSeq.flat_map_seq instrseq rewrite_static_instr
-
 let is_srcloc i =
   match i with
   | ISrcLoc _ -> true

@@ -1247,23 +1247,6 @@
         { "field_name" : "level" },
         { "field_name" : "semicolon" }
       ] },
-    { "kind_name" : "FunctionStaticStatement",
-      "type_name" : "function_static_statement",
-      "description" : "function_static_statement",
-      "prefix" : "static",
-      "fields" : [
-        { "field_name" : "static_keyword" },
-        { "field_name" : "declarations" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "StaticDeclarator",
-      "type_name" : "static_declarator",
-      "description" : "static_declarator",
-      "prefix" : "static",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "initializer" }
-      ] },
     { "kind_name" : "EchoStatement",
       "type_name" : "echo_statement",
       "description" : "echo_statement",

@@ -199,7 +199,6 @@ bool canDCE(IRInstruction* inst) {
   case LdVecElem:
   case LdPackedElem:
   case LdPackedArrayDataElemAddr:
-  case LdClosureStaticLoc:
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
@@ -272,7 +271,6 @@ bool canDCE(IRInstruction* inst) {
   case GetTimeNs:
   case Select:
   case LdARCtx:
-  case LdStaticLoc:
   case LdARNumArgsAndFlags:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
@@ -551,7 +549,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseStrToClassNotice:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
-  case InitStaticLoc:
   case PrintStr:
   case PrintInt:
   case PrintBool:
@@ -727,7 +724,6 @@ bool canDCE(IRInstruction* inst) {
   case SetOpCell:
   case SetOpCellVerify:
   case ConjureUse:
-  case CheckStaticLoc:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case LdReifiedGeneric:

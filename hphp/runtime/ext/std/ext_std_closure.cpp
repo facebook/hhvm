@@ -126,8 +126,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    * Copy the use vars to instance variables, and initialize any
    * instance properties that are for static locals to KindOfUninit.
    */
-  auto const numDeclProperties = cls->numDeclProperties();
-  assertx(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
+  assertx(cls->numDeclProperties() == numArgs);
 
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.
@@ -140,13 +139,9 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto beforeCurUseVar = sp + numArgs;
   auto curProperty = getUseVars();
   int i = 0;
-  assertx(numArgs <= numDeclProperties);
   for (; i < numArgs; i++) {
     // teleport the references in here so we don't incref
     tvCopy(*--beforeCurUseVar, *curProperty++);
-  }
-  for (; i < numDeclProperties; ++i) {
-    tvWriteUninit(*curProperty++);
   }
 }
 

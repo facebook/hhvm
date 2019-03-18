@@ -624,26 +624,6 @@ struct Func final {
   void setHasForeignThis(bool);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Static locals.                                                     [const]
-
-  /*
-   * Const reference to the static variable info table.
-   *
-   * SVInfo objects pulled from the table will also be const.
-   */
-  const SVInfoVec& staticVars() const;
-
-  /*
-   * Whether the function has any static locals.
-   */
-  bool hasStaticLocals() const;
-
-  /*
-   * Number of static locals declared in the function.
-   */
-  int numStaticLocals() const;
-
-  /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
 
   /*
@@ -1250,7 +1230,6 @@ private:
     uint64_t* m_refBitPtr;
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
-    SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
 

@@ -384,21 +384,6 @@ inline void Func::setGenerated(bool isGenerated) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Static locals.
-
-inline const Func::SVInfoVec& Func::staticVars() const {
-  return shared()->m_staticVars;
-}
-
-inline bool Func::hasStaticLocals() const {
-  return !shared()->m_staticVars.empty();
-}
-
-inline int Func::numStaticLocals() const {
-  return shared()->m_staticVars.size();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Definition context.
 
 inline bool Func::isPseudoMain() const {

@@ -254,7 +254,7 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
 
   // Closure object properties are the use vars followed by the static locals
   // (which are per-instance).
-  auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
+  auto const nuse = cls->numDeclProperties();
   ptrdiff_t use_var_off = sizeof(ObjectData);
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
@@ -290,8 +290,7 @@ void init_locals(IRGS& env, const Func* func) {
   auto num_inited = func->numParams();
 
   if (func->isClosureBody()) {
-    auto const nuse = func->implCls()->numDeclProperties() -
-                      func->numStaticLocals();
+    auto const nuse = func->implCls()->numDeclProperties();
     num_inited += 1 + nuse;
   }
 

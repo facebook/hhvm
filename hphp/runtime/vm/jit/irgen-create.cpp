@@ -379,22 +379,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
     );
   }
 
-  assertx(cls->numDeclProperties() == func->numStaticLocals() + numParams);
-
-  // Closure static variables are per instance, and need to start
-  // uninitialized.  After numParams use vars, the remaining instance
-  // properties hold any static locals.
-  for (int32_t numDeclProperties = cls->numDeclProperties();
-      propId < numDeclProperties;
-      ++propId) {
-    gen(
-      env,
-      StClosureArg,
-      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
-      closure,
-      cns(env, TUninit)
-    );
-  }
+  assertx(cls->numDeclProperties() == numParams);
 
   push(env, closure);
 }

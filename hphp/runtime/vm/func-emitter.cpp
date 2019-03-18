@@ -237,7 +237,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = maxStackCells;
-  f->shared()->m_staticVars = staticVars;
   f->shared()->m_ehtab = ehtab;
   f->shared()->m_fpitab = fpitab;
   f->shared()->m_isClosureBody = isClosureBody;
@@ -589,7 +588,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
 
     (params)
     (localNames)
-    (staticVars)
     (ehtab)
     (fpitab,
       [&](const FPIEnt& prev, FPIEnt cur) -> FPIEnt {

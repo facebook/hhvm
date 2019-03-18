@@ -117,8 +117,7 @@ struct c_Closure final : ObjectData {
   }
 
   int32_t getNumUseVars() const {
-    return getVMClass()->numDeclProperties() -
-           getInvokeFunc()->numStaticLocals();
+    return getVMClass()->numDeclProperties();
   }
 
   /*

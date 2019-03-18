@@ -1296,8 +1296,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       auto const numBound = getImm(pc, 0).u_IVA;
       auto const invoke = preCls->lookupMethod(s_invoke.get());
-      if (invoke &&
-          numBound != preCls->numProperties() - invoke->staticVars.size()) {
+      if (invoke && numBound != preCls->numProperties()) {
         ferror("CreateCl bound Closure {} with {} params instead of {}\n",
                preCls->name(), numBound, preCls->numProperties());
         return false;

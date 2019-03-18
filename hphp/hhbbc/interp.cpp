@@ -1297,49 +1297,6 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   return { retTy, effectFree };
 }
 
-// After a StaticLocCheck, we know the local is bound on the true path,
-// and not changed on the false path.
-template<class JmpOp>
-void staticLocCheckJmpImpl(ISS& env,
-                           const bc::StaticLocCheck& slc,
-                           const JmpOp& jmp) {
-  auto const takenOnInit = jmp.op == Op::JmpNZ;
-  auto save = env.state;
-
-  if (auto const v = staticLocHelper(env, slc.loc1, TBottom)) {
-    return impl(env, slc, jmp);
-  }
-
-  if (env.collect.localStaticTypes.size() > slc.loc1 &&
-      env.collect.localStaticTypes[slc.loc1].subtypeOf(BBottom)) {
-    env.state = std::move(save);
-    if (takenOnInit) {
-      jmp_nevertaken(env);
-    } else {
-      jmp_setdest(env, jmp.target1);
-    }
-    return;
-  }
-
-  if (takenOnInit) {
-    env.propagate(jmp.target1, &env.state);
-    env.state = std::move(save);
-  } else {
-    env.propagate(jmp.target1, &save);
-  }
-}
-
-}
-
-template<class JmpOp>
-void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
-  staticLocCheckJmpImpl(env, slc, jmp);
-}
-
-template<class JmpOp>
-void group(ISS& env, const bc::StaticLocCheck& slc,
-           const bc::Not&, const JmpOp& jmp) {
-  staticLocCheckJmpImpl(env, slc, invertJmp(jmp));
 }
 
 template<class JmpOp>
@@ -4025,40 +3982,6 @@ void in(ISS& env, const bc::FuncNumArgs& op) {
   push(env, TInt);
 }
 
-void in(ISS& env, const bc::StaticLocDef& op) {
-  if (staticLocHelper(env, op.loc1, topC(env))) {
-    return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});
-  }
-  popC(env);
-}
-
-void in(ISS& env, const bc::StaticLocCheck& op) {
-  auto const l = op.loc1;
-  if (!env.ctx.func->isMemoizeWrapper &&
-      !env.ctx.func->isClosureBody &&
-      env.collect.localStaticTypes.size() > l) {
-    auto t = env.collect.localStaticTypes[l];
-    if (auto v = tv(t)) {
-      useLocalStatic(env, l);
-      setLocRaw(env, l, t);
-      return reduce(env,
-                    gen_constant(*v),
-                    bc::SetL { op.loc1 }, bc::PopC {},
-                    bc::True {});
-    }
-  }
-  setLocRaw(env, l, TGen);
-  maybeBindLocalStatic(env, l);
-  push(env, TBool);
-}
-
-void in(ISS& env, const bc::StaticLocInit& op) {
-  if (staticLocHelper(env, op.loc1, topC(env))) {
-    return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});
-  }
-  popC(env);
-}
-
 /*
  * Amongst other things, we use this to mark units non-persistent.
  */
@@ -4812,7 +4735,6 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   X(IsTypeStructC)
   X(IsTypeL)
   X(IsTypeC)
-  X(StaticLocCheck)
   X(Same)
   X(NSame)
   default: break;

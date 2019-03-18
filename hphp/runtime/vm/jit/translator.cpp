@@ -345,12 +345,6 @@ static const struct {
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
   { OpFuncNumArgs, {None,             Stack1,       OutInt64        }},
-  { OpStaticLocCheck,
-                   {None,             Stack1|Local, OutBoolean      }},
-  { OpStaticLocDef,
-                   {Stack1,           Local,        OutVUnknown     }},
-  { OpStaticLocInit,
-                   {Stack1,           Local,        OutVUnknown     }},
   { OpCatch,       {None,             Stack1,       OutObject       }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
@@ -1005,9 +999,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Shl:
   case Op::Shr:
   case Op::Silence:
-  case Op::StaticLocDef:
-  case Op::StaticLocCheck:
-  case Op::StaticLocInit:
   case Op::String:
   case Op::This:
   case Op::Throw:

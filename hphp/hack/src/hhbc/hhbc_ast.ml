@@ -481,9 +481,6 @@ type instruct_misc =
   | CheckThis
   | InitThisLoc of local_id
   | FuncNumArgs
-  | StaticLocCheck of local_id * string
-  | StaticLocDef of local_id * string
-  | StaticLocInit of local_id * string
   | Catch
   | ChainFaults
   | OODeclExists of class_kind

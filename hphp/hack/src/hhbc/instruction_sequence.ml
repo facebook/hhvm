@@ -186,7 +186,6 @@ let instr_unbox = instr (IBasic Unbox)
 let instr_box = instr (IBasic Box)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
-let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
 let instr_basec stack_index mode = instr (IBase (BaseC(stack_index, mode)))
 let instr_basesc y mode =
@@ -246,18 +245,6 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 let instr_awaitall range = instr (IAsync (AwaitAll range))
-
-let instr_static_loc_check name =
-  instr (IMisc (StaticLocCheck (Local.Named name,
-    Hhbc_string_utils.Locals.strip_dollar name)))
-
-let instr_static_loc_def name =
-  instr (IMisc (StaticLocDef (Local.Named name,
-    Hhbc_string_utils.Locals.strip_dollar name)))
-
-let instr_static_loc_init name =
-  instr (IMisc (StaticLocInit (Local.Named name,
-    Hhbc_string_utils.Locals.strip_dollar name)))
 
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 let instr_idx = instr (IMisc Idx)

@@ -533,12 +533,6 @@ let string_of_misc instruction =
     | CheckThis -> "CheckThis"
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
-    | StaticLocCheck (local, text) ->
-      sep ["StaticLocCheck"; string_of_local_id local; "\"" ^ text ^ "\""]
-    | StaticLocDef (local, text) ->
-      sep ["StaticLocDef"; string_of_local_id local; "\"" ^ text ^ "\""]
-    | StaticLocInit (local, text) ->
-      sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
     | MemoGet (label, Some (Local.Unnamed first, local_count)) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
                      (string_of_label label) first local_count

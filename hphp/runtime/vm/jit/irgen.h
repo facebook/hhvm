@@ -282,7 +282,6 @@ bool conjureEndInlining(IRGS& env,
  * decisions.
  */
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
-void inlSingletonSLoc(IRGS&, const Func*, PC op);
 
 /*
  * In PGO mode, we use profiling to try to determine the most likely target

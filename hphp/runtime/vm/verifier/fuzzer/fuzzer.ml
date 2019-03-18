@@ -423,9 +423,6 @@ let mut_imms (is : IS.t) : IS.t =
     match s with
     | BareThis        b       -> BareThis        (mutate_bare            b)
     | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
-    | StaticLocCheck (id, str) -> StaticLocCheck (mutate_local_id id  !mag, str)
-    | StaticLocInit  (id, str) -> StaticLocInit  (mutate_local_id id  !mag, str)
-    | StaticLocDef  (id, str)  -> StaticLocDef   (mutate_local_id id  !mag, str)
     | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
     | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
     | VerifyOutType p         -> VerifyOutType   (mutate_param_id p   !mag)

@@ -1826,9 +1826,6 @@ void dce(Env& env, const bc::Shl& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Shr& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Silence& op) { dce_default(env, op); }
 void dce(Env& env, const bc::SSwitch& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocCheck& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocDef& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocInit& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Sub& op) { dce_default(env, op); }
 void dce(Env& env, const bc::SubO& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Switch& op) { dce_default(env, op); }

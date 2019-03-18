@@ -2009,14 +2009,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       ferror("statics are forbidden in Rx functions: {}\n", opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;
 
-    // unsafe: static locals
-    case Op::StaticLocCheck:
-    case Op::StaticLocDef:
-    case Op::StaticLocInit:
-      ferror("static locals are forbidden in Rx functions: {}\n",
-             opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
-
     // unsafe: defines and includes
     case Op::DefCls:
     case Op::DefClsNop:

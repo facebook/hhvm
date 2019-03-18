@@ -3671,33 +3671,6 @@ FuncNumArgs   []   ->   [C:Int]
 
   Push the number of arguments the current function was called with.
 
-StaticLocCheck  <local variable id> <litstr id> []  ->  [C:Bool]
-
-  Static variable. This instruction first checks if the static variable named
-  %2 has been marked as initialized. If the static variable has been marked as
-  initialized, this instruction binds the static variable to the local variable
-  %1 and pushes true. Otherwise, this instruction pushes false.
-
-StaticLocDef <local variable id> <litstr id>        [C]  ->  []
-
-  Initialize static variable. This instruction binds the static variable to
-  the local variable, assigns $1 to the local variable, and marks the static
-  variable as initialized.
-
-  Precondition: Except in memoized functions, the static local named %2 has
-  not been initialized
-
-StaticLocInit <local variable id> <litstr id>    [C]  ->  []
-
-  Static variable with initializer. This instruction first checks if the static
-  variable named %2 has been marked as initialized. If the static variable has
-  been marked as initialized, this instruction binds the static variable to the
-  local variable %1. Otherwise, this instruction binds the static variable to
-  the local variable, assigns $1 to the local variable, and marks the static
-  variable as initialized.
-
-  The cell in $1 must not be a reference counted type.
-
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.

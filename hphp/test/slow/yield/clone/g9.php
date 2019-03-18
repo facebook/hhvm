@@ -1,15 +1,16 @@
 <?php
 
+class It { public $x = 1; }
 <<__EntryPoint>>
 function main_g9() {
-$foo = function() {
-  static $x = 1;
-  $x += 10;
-  yield $x;
-  $x += 100;
-  yield $x;
-  $x += 1000;
-  yield $x;
+$it = new It;
+$foo = function() use($it) {
+  $it->x += 10;
+  yield $it->x;
+  $it->x += 100;
+  yield $it->x;
+  $it->x += 1000;
+  yield $it->x;
 };
 $x = $foo();
 $y1 = clone $x;

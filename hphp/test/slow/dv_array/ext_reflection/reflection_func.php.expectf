@@ -1,7 +1,3 @@
-array(1) {
-  ["foo"]=>
-  NULL
-}
 array(2) {
   ["A"]=>
   array(2) {
@@ -15,7 +11,7 @@ array(2) {
   }
 }
 
-Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 27
+Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 25
 array(2) {
   ["A"]=>
   array(2) {
@@ -167,17 +163,15 @@ array(1) {
   [0]=>
   int(1)
 }
-array(0) {
-}
 array(1) {
   ["Bing"]=>
   array(0) {
   }
 }
 
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
 
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
 array(2) {
   ["Bing"]=>
   array(0) {

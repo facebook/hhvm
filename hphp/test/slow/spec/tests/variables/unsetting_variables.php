@@ -27,14 +27,6 @@ echo "Top1: CON2 = " . CON2 . "\n";
 echo "---\n";
 //*/
 
-static $sVar1 = 11;
-echo "Top1: \$sVar1 = " . $sVar1 . "\n";
-//unset($sVar1);    // unsets this variable
-//echo "Top1: \$sVar1 = " . $sVar1 . "\n";
-
-$tmp =& $sVar1;
-echo "Top1: \$tmp = " . $tmp . "\n";
-
 $gVar1 = 21;
 echo "Top1: \$gVar1 = " . $gVar1 . "\n";
 //unset($gVar1);    // unsets this variable
@@ -62,10 +54,6 @@ function f($p)
         global $sVar1;
         $sVar1 = -1;        // hmm; is setting the top-level static
         echo "f:2 \$sVar1 = " . $sVar1 . "\n";
-        static $sVar1 = 12;
-        echo "f:2 \$sVar1 = " . $sVar1 . "\n";
-        ++$sVar1;
-//      unset($sVar1);  // removes this alias; doesn't unset the inner static itself
 
         global $gVar1;
         echo "f:2 \$gVar1 = " . $gVar1 . "\n";
@@ -97,22 +85,7 @@ echo "Top2: CON4 = " . CON4 . "\n";
 echo "---\n";
 //*/
 echo "Top2: \$sVar1 = " . $sVar1 . "\n";
-echo "Top2: \$tmp = " . $tmp . "\n";
 
 echo "Top2: \$gVar1 = " . $gVar1 . "\n";
 
 echo "-----------------------------------------\n";
-
-function f2($p)
-{
-    static $s2 = 100;
-
-    if ($p)
-    {
-//      global $s2; // with this in, var_dump($s2) is NULL, becuse there is no such global
-        var_dump($s2);
-        var_dump(isset($s2));
-    }
-}
-
-f2(TRUE);

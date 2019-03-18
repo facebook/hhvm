@@ -1,4 +1,2 @@
-File "recursive_type_expansion.php", line 15, characters 15-15:
-Invalid expression in constant initializer (Parsing[1002])
 File "recursive_type_expansion.php", line 13, characters 12-17:
 Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type \Vector<[rec]> (Typing[4155])

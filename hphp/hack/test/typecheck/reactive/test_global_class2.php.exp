@@ -1,2 +1,0 @@
-File "test_global_class2.php", line 5, characters 10-11:
-Static $a cannot be used in a reactive context. (Typing[4229])

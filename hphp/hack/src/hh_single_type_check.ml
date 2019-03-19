@@ -196,6 +196,7 @@ let parse_options () =
   let typecheck_xhp_cvars = ref (Some false) in
   let ignore_collection_expr_type_arguments = ref (Some false) in
   let allow_ref_param_on_constructor = ref (Some false) in
+  let disallow_byref_dynamic_calls = ref (Some false) in
   let set_bool x () = x := Some true in
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
@@ -405,7 +406,11 @@ let parse_options () =
       "Typechecker ignores type arguments to vec<T>[...] style expressions";
     "--allow-ref-param-on-constructor",
       Arg.Unit (set_bool allow_ref_param_on_constructor),
-      " Allow class constructors to take reference parameters";
+      "Allow class constructors to take reference parameters";
+    "--disallow-byref-dynamic-calls",
+      Arg.Unit (set_bool disallow_byref_dynamic_calls),
+      "Disallow passing arguments by reference to dynamically called functions \
+       [e.g. $foo(&$bar)]";
     "--pocket-universes",
       Arg.Set pocket_universes,
       "Enables support for Pocket Universes";
@@ -442,6 +447,7 @@ let parse_options () =
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
+    ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
     ~log_levels:(!log_levels)
     ()
   in

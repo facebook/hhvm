@@ -38,6 +38,27 @@ let check_param env params p user_attributes f_type name =
   | _ -> ()
   end
 
+let is_dynamic_call func_expr =
+  match func_expr with
+  (* regular function call, e.g. func() *)
+  | Id _ -> false
+  (* instance method call, e.g. $x->method() *)
+  | Obj_get (_, (_, Id _), _) -> false
+  (* static method call, e.g. Foo::method() *)
+  | Class_const (_, _) -> false
+  (* everything else *)
+  | _ -> true
+
+let check_call_expr env func_expr func_args =
+  if is_dynamic_call func_expr then begin
+    List.iter func_args begin fun (arg_pos, arg) ->
+      match arg with
+      | Unop (Ast.Uref, _) ->
+        if TypecheckerOptions.disallow_byref_dynamic_calls env.tcopt
+        then Errors.byref_dynamic_call arg_pos
+      | _ -> ()
+      end
+  end
 
 let handler = object
   inherit Nast_visitor.handler_base
@@ -52,4 +73,10 @@ let handler = object
     let f_type = m.m_fun_kind in
     check_param env m.m_params p m.m_user_attributes f_type name
 
+  method! at_expr env (_, e) =
+    begin match e with
+    | Call (_, (_, func_expr), _, func_args, _) ->
+      check_call_expr env func_expr func_args
+    | _ -> ()
+    end
 end

@@ -231,6 +231,7 @@ NonstaticMethodInAbstractFinalClass = 3074
 MutableOnStaticDEPRECATED = 3075
 ClassnameConstInstanceOf = 3076
 ByRefParamOnConstruct = 3077
+ByRefDynamicCall = 3078
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

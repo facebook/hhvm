@@ -1,0 +1,12 @@
+File "byref_dynamic_calls.php", line 24, characters 14-16:
+Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
+File "byref_dynamic_calls.php", line 27, characters 15-17:
+Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
+File "byref_dynamic_calls.php", line 34, characters 13-15:
+Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
+File "byref_dynamic_calls.php", line 37, characters 11-13:
+Arguments can not be passed by reference to dynamic function calls (NastCheck[3078])
+File "byref_dynamic_calls.php", line 34, characters 8-11:
+Could not find class variable $str in type Foo (Typing[4090])
+  File "byref_dynamic_calls.php", line 8, characters 7-9:
+  Declaration of Foo is here

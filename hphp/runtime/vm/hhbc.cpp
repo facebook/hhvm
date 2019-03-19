@@ -411,6 +411,7 @@ int instrNumPops(PC pc) {
 #define C_MFINAL(n) -10 - n
 #define V_MFINAL C_MFINAL(1)
 #define CVUMANY -3
+#define FPUSH(nin, nobj) (nin + nobj)
 #define FCALL -4
 #define CMANY -3
 #define SMANY -1
@@ -426,6 +427,7 @@ int instrNumPops(PC pc) {
 #undef C_MFINAL
 #undef V_MFINAL
 #undef CVUMANY
+#undef FPUSH
 #undef FCALL
 #undef CMANY
 #undef SMANY
@@ -469,6 +471,7 @@ int instrNumPushes(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define INS_1(...) 0
+#define FPUSH 0
 #define FCALL -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -479,6 +482,7 @@ int instrNumPushes(PC pc) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
+#undef FPUSH
 #undef FCALL
 #undef O
   };
@@ -528,6 +532,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define V_MFINAL return idx == 0 ? VV : CV;
 #define CVUMANY return manyFlavor(op, idx, CVUV);
+#define FPUSH(nin, nobj) return CV;
 #define FCALL return fcallFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
@@ -546,6 +551,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef C_MFINAL
 #undef V_MFINAL
 #undef CVUMANY
+#undef FPUSH
 #undef FCALL
 #undef CMANY
 #undef SMANY
@@ -560,6 +566,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
 #define FIVE(...) StackTransInfo::Kind::PushPop
+#define FPUSH StackTransInfo::Kind::PushPop
 #define FCALL StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
@@ -571,6 +578,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
+#undef FPUSH
 #undef FCALL
 #undef O
   };
@@ -581,6 +589,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define THREE(...) -1
 #define FOUR(...) -1
 #define FIVE(...) -1
+#define FPUSH -1
 #define FCALL -1
 #define INS_1(...) 0
 #define O(name, imm, pop, push, flags) push,
@@ -592,6 +601,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef FOUR
 #undef FIVE
 #undef INS_1
+#undef FPUSH
 #undef FCALL
 #undef O
   };

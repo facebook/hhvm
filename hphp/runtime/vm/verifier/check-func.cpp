@@ -789,6 +789,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CVUMANY { },
+  #define FPUSH(nin, nobj) { },
   #define FCALL { },
   #define CMANY { },
   #define SMANY { },
@@ -809,6 +810,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef C_MFINAL
   #undef V_MFINAL
   #undef CVUMANY
+  #undef FPUSH
   #undef FCALL
   #undef CMANY
   #undef SMANY
@@ -836,6 +838,21 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = i == n - 1 ? VV : CV;
     }
     return m_tmp_sig;
+  case Op::FPushFunc:
+  case Op::FPushFuncD:
+  case Op::FPushFuncU:
+  case Op::FPushCtor:
+  case Op::FPushObjMethod:
+  case Op::FPushObjMethodD:
+  case Op::FPushClsMethod:
+  case Op::FPushClsMethodS:
+  case Op::FPushClsMethodSD:
+  case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
+    auto const numPops = instrNumPops(pc);
+    auto idx = 0;
+    while (idx < numPops) m_tmp_sig[idx++] = CV;
+    return m_tmp_sig;
+  }
   case Op::FCall: {      // THREE(FCA,SA,SA), FCALL, FCALL
     auto const fca = getImm(pc, 0).u_FCA;
     assertx(fca.numRets != 0);
@@ -1541,6 +1558,7 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
+  #define FPUSH { },
   #define FCALL { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
@@ -1557,6 +1575,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef THREE
   #undef TWO
   #undef ONE
+  #undef FPUSH
   #undef FCALL
   #undef NOV
   };

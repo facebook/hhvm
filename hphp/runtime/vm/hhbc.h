@@ -630,30 +630,29 @@ constexpr uint32_t kMaxConcatN = 4;
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
-  O(FPushFunc,       TWO(IVA,I32LA),   ONE(CV),         NOV,        PF) \
-  O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        PF) \
-  O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ResolveClsMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(FPushObjMethod,  THREE(IVA,                                         \
-                       OA(ObjMethodOp),                                 \
-                       I32LA),          TWO(CV,CV),      NOV,       PF) \
-  O(FPushObjMethodD, THREE(IVA,SA,                                      \
-                       OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
-  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
-                                       ONE(CV),         NOV,        PF) \
-  O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
-                                       ONE(CV),         NOV,        PF) \
-  O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
-                                       NOV,             NOV,        PF) \
-  O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                  \
+  O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                        \
                                        NOV,             ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(NewObjS,         ONE(OA(SpecialClsRef)),                        \
+  O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
-  O(FPushCtor,       ONE(IVA),         ONE(CV),         NOV,        PF) \
+  O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \
+  O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
+  O(FPushFuncU,      THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
+  O(FPushCtor,       ONE(IVA),         FPUSH(0, 1),     FPUSH,      PF) \
+  O(FPushObjMethod,  THREE(IVA,OA(ObjMethodOp),I32LA),                  \
+                                       FPUSH(1, 1),     FPUSH,      PF) \
+  O(FPushObjMethodD, THREE(IVA,SA,OA(ObjMethodOp)),                     \
+                                       FPUSH(0, 1),     FPUSH,      PF) \
+  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
+                                       FPUSH(1, 0),     FPUSH,      PF) \
+  O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
+                                       FPUSH(1, 0),     FPUSH,      PF) \
+  O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
+                                       FPUSH(0, 0),     FPUSH,      PF) \
+  O(FPushClsMethodD, THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \

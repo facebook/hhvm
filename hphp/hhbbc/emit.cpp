@@ -717,6 +717,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_CVUMANY    pop(data.arg##1);
+#define POP_FPUSH(nin, nobj) \
+                       pop(nin + nobj);
 #define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack() ? 1 : 0) + \
                            data.fca.numRets - 1);
 
@@ -725,6 +727,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
+#define PUSH_FPUSH             push(0);
 #define PUSH_FCALL             push(data.fca.numRets);
 
 #define O(opcode, imms, inputs, outputs, flags)                 \
@@ -819,6 +822,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CVUMANY
+#undef POP_FPUSH
 #undef POP_FCALL
 #undef POP_MFINAL
 #undef POP_C_MFINAL
@@ -829,6 +833,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_INS_1
+#undef PUSH_FPUSH
 #undef PUSH_FCALL
 
 #define O(opcode, ...)                                        \

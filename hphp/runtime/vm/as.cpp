@@ -1500,6 +1500,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
+#define NUM_PUSH_FPUSH 0
 #define NUM_PUSH_FCALL immFCA.numRets
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
@@ -1509,6 +1510,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL(1)
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
+#define NUM_POP_FPUSH(nin, nobj) (nin + nobj)
 #define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack() ? 1 : 0) + \
                        immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
@@ -1638,6 +1640,7 @@ OPCODES
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
 #undef NUM_PUSH_INS_1
+#undef NUM_PUSH_FPUSH
 #undef NUM_PUSH_FCALL
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
@@ -1648,6 +1651,7 @@ OPCODES
 #undef NUM_POP_C_MFINAL
 #undef NUM_POP_V_MFINAL
 #undef NUM_POP_CVUMANY
+#undef NUM_POP_FPUSH
 #undef NUM_POP_FCALL
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY

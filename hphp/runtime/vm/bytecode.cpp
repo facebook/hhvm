@@ -2272,15 +2272,6 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
   cellDup(*cns, *c1);
 }
 
-OPTBLD_INLINE void iopCnsUE(const StringData* name, const StringData* fallback) {
-  auto cns = Unit::loadCns(name);
-  if (cns == nullptr) {
-    return iopCnsE(fallback);
-  }
-  auto const c1 = vmStack().allocC();
-  cellDup(*cns, *c1);
-}
-
 OPTBLD_INLINE void iopDefCns(const StringData* s) {
   bool result = Unit::defCns(s, vmStack().topTV());
   vmStack().replaceTV<KindOfBoolean>(result);

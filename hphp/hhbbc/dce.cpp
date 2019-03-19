@@ -1700,7 +1700,6 @@ void dce(Env& env, const bc::ClsCnsD& op) { dce_default(env, op); }
 void dce(Env& env, const bc::ClsRefGetTS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Cmp& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CnsE& op) { dce_default(env, op); }
-void dce(Env& env, const bc::CnsUE& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Concat& op) { dce_default(env, op); }
 void dce(Env& env, const bc::ConcatN& op) { dce_default(env, op); }
 void dce(Env& env, const bc::ContAssignDelegate& op) { dce_default(env, op); }

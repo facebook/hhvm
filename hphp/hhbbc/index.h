@@ -662,15 +662,10 @@ struct Index {
    * Lookup what the best known Type for a constant would be, using a
    * given Index and Context, if a constant of that name were defined.
    *
-   * If fallbackName is provided, and known to be defined, and cnsName
-   * is known not to be defined, and HardConstProp is set, resolve
-   * fallbackName instead.
-   *
    * Returns folly::none if the constant isn't in the index.
    */
   folly::Optional<Type> lookup_constant(Context ctx,
-                                        SString cnsName,
-                                        SString fallbackName = nullptr) const;
+                                        SString cnsName) const;
 
   /*
    * See if the named constant has a unique scalar definition, and

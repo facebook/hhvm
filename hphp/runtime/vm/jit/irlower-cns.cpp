@@ -201,54 +201,6 @@ Cell lookupCnsEHelperPersistent(rds::Handle tv_handle,
   return lookupCnsEHelper(nm);
 }
 
-Cell lookupCnsUEHelperNormal(rds::Handle tv_handle,
-                            StringData* nm, StringData* fallback) {
-  assertx(rds::isNormalHandle(tv_handle));
-
-  // Lookup qualified name in thread-local constants.
-  auto cns = lookupCnsImpl(nm);
-
-  // Try cache handle for unqualified name.
-  if (UNLIKELY(!cns && rds::isHandleInit(tv_handle, rds::NormalTag{}))) {
-    cns = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
-    assertx(type(cns) != KindOfUninit);
-  }
-
-  if (LIKELY(cns != nullptr)) {
-    Cell c1;
-    cellDup(*cns, c1);
-    return c1;
-  }
-
-  // Lookup unqualified name in thread-local constants.
-  return lookupCnsEHelper(fallback);
-}
-
-Cell lookupCnsUEHelperPersistent(rds::Handle tv_handle,
-                                StringData* nm, StringData* fallback) {
-  assertx(rds::isPersistentHandle(tv_handle));
-
-  // Lookup qualified name in thread-local constants.
-  auto cns = lookupCnsImpl(nm);
-
-  if (UNLIKELY(!cns)) {
-    // Try cache handle for unqualified name.
-    auto const tv =
-      rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
-    if (tv->m_type != KindOfUninit) {
-      cns = tv;
-    }
-  }
-
-  if (LIKELY(cns != nullptr)) {
-    Cell c1;
-    cellDup(*cns, c1);
-    return c1;
-  }
-
-  return lookupCnsEHelper(fallback);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLookupCnsE(IRLS& env, const IRInstruction* inst) {
@@ -265,29 +217,6 @@ void cgLookupCnsE(IRLS& env, const IRInstruction* inst) {
     rds::isNormalHandle(ch)
       ? CallSpec::direct(lookupCnsEHelperNormal)
       : CallSpec::direct(lookupCnsEHelperPersistent),
-    callDestTV(env, inst),
-    SyncOptions::Sync,
-    args
-  );
-}
-
-void cgLookupCnsUE(IRLS& env, const IRInstruction* inst) {
-  auto const cnsName = inst->src(0)->strVal();
-  auto const fallbackName = inst->src(1)->strVal();
-
-  auto const fallbackCh = makeCnsHandle(fallbackName);
-  assertx(rds::isHandleBound(fallbackCh));
-
-  auto const args = argGroup(env, inst)
-    .imm(fallbackCh)
-    .immPtr(cnsName)
-    .immPtr(fallbackName);
-
-  cgCallHelper(
-    vmain(env), env,
-    rds::isNormalHandle(fallbackCh)
-      ? CallSpec::direct(lookupCnsUEHelperNormal)
-      : CallSpec::direct(lookupCnsUEHelperPersistent),
     callDestTV(env, inst),
     SyncOptions::Sync,
     args

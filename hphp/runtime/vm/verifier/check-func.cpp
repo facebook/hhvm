@@ -1661,7 +1661,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
 
     // constants
     case Op::CnsE:
-    case Op::CnsUE:
     case Op::ClsCns:
     case Op::ClsCnsD:
     case Op::File:

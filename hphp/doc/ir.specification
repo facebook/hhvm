@@ -1282,12 +1282,6 @@ To string conversions:
   constant.  This should only be executed if LdCns on the same constant has
   failed.
 
-| LookupCnsUE<T,constName,fallbackName>, DCns, CStr CStr, PRc
-
-  Load an unqualified constant via the RDS, first by trying constName, then by
-  trying fallbackName.  If neither can be found, raises a fatal error.  This
-  should only be executed if LdCns on the same constant has failed.
-
 | LdClsCns<className,constantName>, D(PtrToGen), NA, B
 
   Load the address of the constant 'constantName' for the class 'className' in

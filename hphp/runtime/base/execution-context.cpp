@@ -1366,7 +1366,6 @@ bool sideEffect(Op op) {
     case Op::Array:
     case Op::Dict:
     case Op::CnsE:
-    case Op::CnsUE:
     case Op::ClsCnsD:
     case Op::ClsCns:
     case Op::NewMixedArray:

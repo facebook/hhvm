@@ -63,22 +63,19 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
   always_assert(false);
 }
 
-void implCns(IRGS& env,
-             const StringData* name,
-             const StringData* fallbackName) {
+//////////////////////////////////////////////////////////////////////
+
+} // namespace
+
+void emitCnsE(IRGS& env, const StringData* name) {
   auto const cnsNameTmp = cns(env, name);
   auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
 
-  SSATmp* fallbackNameTmp = nullptr;
-  if (fallbackName != nullptr) {
-    fallbackNameTmp = cns(env, fallbackName);
-  }
   if (tv) {
     if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      assertx(!fallbackNameTmp);
       result = gen(env, LookupCnsE, cnsNameTmp);
     } else {
       result = staticTVCns(env, tv);
@@ -95,14 +92,16 @@ void implCns(IRGS& env,
       },
       [&] { // Taken: miss in TC, do lookup & init
         hint(env, Block::Hint::Unlikely);
-        return fallbackNameTmp
-          ? gen(env, LookupCnsUE, cnsNameTmp, fallbackNameTmp)
-          : gen(env, LookupCnsE, cnsNameTmp);
+        return gen(env, LookupCnsE, cnsNameTmp);
       }
     );
   }
   push(env, result);
 }
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 void implClsCns(IRGS& env,
                 const Class* cls,
@@ -163,15 +162,7 @@ void clsCnsHelper(IRGS& env, SSATmp* ptv, uint32_t clsRefSlot,
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-void emitCnsE(IRGS& env, const StringData* name) {
-  implCns(env, name, nullptr);
-}
-
-void emitCnsUE(IRGS& env, const StringData* name, const StringData* fallback) {
-  implCns(env, name, fallback);
-}
+} // namespace
 
 void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,

@@ -127,8 +127,6 @@ let string_of_lit_const instruction =
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
     | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
-    | CnsUE (id1, id2) ->
-      sep ["CnsUE"; string_of_const_id id1; SU.quote_string id2]
 
 
 let string_of_typestruct_resolve_op = function

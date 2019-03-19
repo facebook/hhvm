@@ -99,16 +99,6 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
     | Ast.Lvar id -> add_local ~barethis:Bare_this acc id
     | _ -> this#on_expr acc prop
 
-  method! on_foreach acc e pos iterator block =
-    let acc =
-      match snd e with
-      | Ast.Lvar(_, "$this") when Iterator.is_mutable_iterator iterator ->
-        with_this Bare_this_as_ref acc
-      | _ ->
-        acc
-    in
-    super#on_foreach acc e pos iterator block
-
   method! on_unop acc unop expr =
     match unop with
     | Ast.Uref -> add_bare_expr this acc expr

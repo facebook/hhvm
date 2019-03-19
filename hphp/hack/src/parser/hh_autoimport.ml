@@ -112,26 +112,6 @@ let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
   *)
 ]
 
-let autoimport_only_for_typechecker = [
-  "is_bool";
-  "is_int";
-  "is_integer";
-  "is_long";
-  "is_float";
-  "is_double";
-  "is_real";
-  "is_numeric";
-  "is_string";
-  "is_object";
-  "is_resource";
-  "is_array";
-  "is_darray";
-  "is_vec";
-  "is_dict";
-  "is_keyset";
-  "is_varray";
-]
-
 let rec normalize ~is_hack ~php7_scalar_types s =
   if not (is_hack || php7_scalar_types)
   then s

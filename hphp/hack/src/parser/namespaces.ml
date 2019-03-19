@@ -74,20 +74,6 @@ let autoimport_funcs = [
   "vec";
   "dict";
   "keyset";
-  (* should be replaced by is/as, but for now, import them so they're internally
-   * consistent - no need for \is_array vs \HH\is_vec *)
-  "is_bool";
-  "is_int";
-  "is_integer";
-  "is_long";
-  "is_float";
-  "is_double";
-  "is_real";
-  "is_numeric";
-  "is_string";
-  "is_object";
-  "is_resource";
-  "is_array";
   "is_darray";
   "is_vec";
   "is_dict";

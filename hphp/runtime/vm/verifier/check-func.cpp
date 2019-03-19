@@ -1430,6 +1430,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;
       }
+      if (cur->fpilen != 0) {
+        ferror("{} may not appear in the middle of an FPI region\n",
+               opcodeToName(op));
+        return false;
+      }
+      if (cur->stklen != instrNumPops(pc)) {
+        ferror("{} may not be used with non-empty stack\n", opcodeToName(op));
+        return false;
+      }
       break;
     }
     case Op::Silence: {

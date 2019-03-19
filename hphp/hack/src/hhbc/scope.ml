@@ -11,10 +11,13 @@ open Core_kernel
 open Instruction_sequence
 open Local
 
-let scope_with_handler f =
+(* Run emit () in a new unnamed local scope. If the emitted code registered any
+ * unnamed locals, it will be wrapped in a try/fault that will unset these
+ * unnamed locals upon exception. *)
+let with_unnamed_locals emit =
   let current_next_local = !next_local in
   let current_temp_local_map = !temp_local_map in
-  let result = f () in
+  let result = emit () in
   if current_next_local = !next_local then result else
   let unsets = gather @@
     List.init (!next_local - current_next_local)

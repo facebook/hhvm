@@ -850,7 +850,7 @@ and emit_new env pos expr targs args uargs =
   | _ ->
     gather [ emit_load_class_ref env pos cexpr; instr_newobj 0 has_generics ]
   in
-  Local_helpers.scope_with_handler @@ fun () ->
+  Scope.with_unnamed_locals @@ fun () ->
   let instr_args, _ = emit_args_and_inout_setters env args in
   let instr_uargs = match uargs with
     | [] -> empty
@@ -3490,7 +3490,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   let nargs = List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
-  let default () = Local_helpers.scope_with_handler @@ fun () ->
+  let default () = Scope.with_unnamed_locals @@ fun () ->
     let instr_lhs, instr_fpush = emit_call_lhs_and_fpush
       env expr targs nargs (uargs <> []) inout_arg_positions in
     let instr_args, instr_inout_setters =

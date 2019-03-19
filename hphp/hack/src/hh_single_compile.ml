@@ -303,6 +303,9 @@ let parse_text compiler_options popt fn text =
   let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
     Full_fidelity_ast.from_text env source_text in
   let () = write_stats_if_enabled ~compiler_options in
+  let ast = if pocket_universes then
+      Pocket_universes.translate ast
+    else ast in
   (ast, is_hh_file)
 
 let parse_file compiler_options popt filename text =

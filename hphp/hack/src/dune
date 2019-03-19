@@ -80,6 +80,7 @@
     logging
     naming
     parser_syntax_tree
+    pocket_universes
     typing)
   (flags (:standard -unsafe-string)))
 

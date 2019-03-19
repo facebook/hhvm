@@ -70,6 +70,7 @@ MODULES=\
 	parser/schema\
 	parser/smart_constructors\
 	parser/ppl\
+  pocket_universes\
   procs\
   recorder\
   search\

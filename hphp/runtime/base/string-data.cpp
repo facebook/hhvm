@@ -252,6 +252,8 @@ StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
 }
 
 StringData* StringData::Make(folly::StringPiece r1, folly::StringPiece r2) {
+  // Undefined behavior if we pass nullptr strings into StringData::Make
+  assertx(r1.data() && r2.data());
   auto const len = r1.size() + r2.size();
   auto const sd = allocFlat(len);
   sd->m_lenAndHash = len; // hash=0

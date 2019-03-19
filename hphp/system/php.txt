@@ -81,16 +81,6 @@ hphp/system/php/sessions/SessionHandlerInterface.php
 
 hphp/system/php/redis/RedisException.php
 
-hphp/system/php/archive_handler/ArchiveHandler.ns.php
-hphp/system/php/archive_handler/TarArchiveHandler.ns.php
-hphp/system/php/archive_handler/PharArchiveHandler.ns.php
-hphp/system/php/archive_handler/ZipArchiveHandler.ns.php
-
-hphp/system/php/phar/PharException.php
-hphp/system/php/phar/Phar.php
-hphp/system/php/phar/PharFileInfo.php
-hphp/system/php/phar/PharData.php
-
 hphp/system/php/date/datetimeinterface.php
 hphp/system/php/date/datetimeimmutable.php
 

@@ -651,7 +651,7 @@ module WithExpressionAndStatementAndTypeParser
     children ... ;
 
     // Pocket Universe Enumeration
-    final? enum id { ... (pocket-field ') * }
+    final? enum id { ... (pocket-field ;) * }
 
   *)
     match peek_token_kind parser with

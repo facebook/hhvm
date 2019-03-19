@@ -201,20 +201,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
                name.c_str());
 }
 
-void raise_undefined_const_fallback_notice(const StringData* name,
-                                           const StringData* fallback) {
-  // If the option is set to 2, we won't emit CnsUE, meaning this
-  // function should never get called.
-  assertx(RuntimeOption::UndefinedConstFallback < 2);
-  if (RuntimeOption::UndefinedConstFallback == 1) {
-    raise_notice(
-      "Undefined constant '%s', falling back to '%s'",
-      name->data(),
-      fallback->data()
-    );
-  }
-}
-
 void raise_undefined_function_fallback_notice(const StringData* name,
                                               const StringData* fallback) {
   // If the option is set to 2, we won't emit FPushFuncU, meaning this

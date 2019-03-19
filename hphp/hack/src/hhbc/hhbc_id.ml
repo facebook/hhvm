@@ -181,7 +181,7 @@ module Const = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
-    let _was_renamed, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateConst id in
-    fq_id, backoff_id
+    let _, fq_id, _ = elaborate_id ns Namespaces.ElaborateConst id in
+    fq_id
 
 end

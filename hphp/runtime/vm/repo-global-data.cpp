@@ -61,7 +61,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(NoticeOnBuiltinDynamicCalls);
   SHOW(ReffinessInvariance);
   SHOW(AbortBuildOnVerifyError);
-  SHOW(UndefinedConstFallback);
   SHOW(UndefinedFunctionFallback);
   SHOW(Signature);
   SHOW(IsVecNotices);

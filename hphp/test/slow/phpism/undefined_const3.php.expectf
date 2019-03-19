@@ -1,2 +1,2 @@
-Notice: Undefined constant 'Bar\SOME_CONST', falling back to 'SOME_CONST' in %s on line %d
-int(1)
+
+Fatal error: Undefined constant 'Bar\SOME_CONST' in %s on line %d

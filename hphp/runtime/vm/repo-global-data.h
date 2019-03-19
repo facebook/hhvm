@@ -196,12 +196,6 @@ struct Repo::GlobalData {
 
   /*
    * Controls PHP's behavior of falling back to the default namespace for
-   * undefined constants.
-   */
-  uint64_t UndefinedConstFallback = 0;
-
-  /*
-   * Controls PHP's behavior of falling back to the default namespace for
    * undefined functions.
    */
   uint64_t UndefinedFunctionFallback = 0;
@@ -254,7 +248,6 @@ struct Repo::GlobalData {
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)
-      (UndefinedConstFallback)
       (UndefinedFunctionFallback)
       (IsVecNotices)
       ;

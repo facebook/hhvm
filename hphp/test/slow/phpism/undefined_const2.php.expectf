@@ -1,3 +1,1 @@
-Notice: Undefined constant 'SomeNamespace\AN_UNDEFINED_CONST', falling back to 'AN_UNDEFINED_CONST' in %s on line %d
-
-Fatal error: Undefined constant 'AN_UNDEFINED_CONST' in %s on line %d
+Fatal error: Undefined constant 'SomeNamespace\AN_UNDEFINED_CONST' in %s on line %d

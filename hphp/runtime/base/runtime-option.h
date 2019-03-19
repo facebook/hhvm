@@ -549,12 +549,6 @@ struct RuntimeOption {
   // 1 => warning, 2 => error.
   static uint64_t DisableForwardStaticCallArray;
   // Controls PHP's behavior of falling back to the default namespace for
-  // undefined constants.
-  // 0 => fall back to root namespace (default)
-  // 1 => raise notice and fall back to root namespace
-  // 2 => raise error
-  static uint64_t UndefinedConstFallback;
-  // Controls PHP's behavior of falling back to the default namespace for
   // undefined functions.
   // 0 => fall back to root namespace (default)
   // 1 => raise notice and fall back to root namespace

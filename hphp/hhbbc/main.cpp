@@ -301,7 +301,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalEnableIntishCast = gd.EnableIntishCast;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
-  RuntimeOption::UndefinedConstFallback = gd.UndefinedConstFallback;
   RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   return {
@@ -372,7 +371,6 @@ void write_global_data(
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
-  gd.UndefinedConstFallback      = RuntimeOption::UndefinedConstFallback;
   gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;

@@ -536,11 +536,6 @@ void in(ISS& env, const bc::ColFromArray& op) {
 
 void doCns(ISS& env, SString str, SString fallback)  {
   if (!options.HardConstProp) return push(env, TInitCell);
-  if (RuntimeOption::UndefinedConstFallback > 0) {
-    // Disable optimization to force the fallback to raise a notice.
-    fallback = nullptr;
-  }
-
   auto t = env.index.lookup_constant(env.ctx, str, fallback);
   if (!t) {
     // There's no entry for this constant in the index. It must be

@@ -261,9 +261,6 @@ let is_global_namespace env =
 let enable_intrinsics_extension () =
   Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
 
-let phpism_undefined_const_fallback () =
-  Hhbc_options.phpism_undefined_const_fallback !Hhbc_options.compiler_options
-
 let phpism_undefined_function_fallback () =
   Hhbc_options.phpism_undefined_function_fallback !Hhbc_options.compiler_options
 
@@ -1152,19 +1149,9 @@ and emit_id env (p, s as id) =
   | ("EXIT" | "DIE") ->
     emit_exit env None
   | _ ->
-    let fq_id, id_opt =
-      Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
-    begin match id_opt with
-    | Some id when phpism_undefined_const_fallback () ->
-      Emit_symbol_refs.add_constant (Hhbc_id.Const.to_raw_string fq_id);
-      Emit_symbol_refs.add_constant id;
-      emit_pos_then p @@
-      instr (ILitConst (CnsUE (fq_id, id)))
-    | Some _
-    | None ->
-      Emit_symbol_refs.add_constant (snd id);
-      emit_pos_then p @@ instr (ILitConst (CnsE fq_id))
-    end
+    let fq_id = Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
+    Emit_symbol_refs.add_constant (snd id);
+    emit_pos_then p @@ instr (ILitConst (CnsE fq_id))
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 

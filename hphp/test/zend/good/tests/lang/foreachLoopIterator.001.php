@@ -1,36 +1,36 @@
 <?php
 
 class MealIterator implements Iterator {
+  public static $indent;
 	private $pos=0;
 	private $myContent=array("breakfast", "lunch", "dinner");
 	
 	public function valid() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->pos<3;
 	}
 	
 	public function next() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+
+		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos++];
 	}
 	
 	public function rewind() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+
+		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos=0;
 	}
 
 	public function current() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+
+		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos];
 	}
 	
 	public function key() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+
+		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
 		return "meal " . $this->pos;
 	}
 	
@@ -46,18 +46,18 @@ foreach ($f as $k=>$v) {
 
 $f->rewind();
 
-$indent = " ";
+MealIterator::$indent = " ";
 
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
 	echo "\nTop level "  .  $count++ . ": \n"; 
 	echo "$k => $v\n";
-	$indent = "     ";
+  MealIterator::$indent = "     ";
 	foreach ($f as $k=>$v) {
 		echo "     $k => $v\n";	
 	}
-	$indent = " ";
+  MealIterator::$indent = " ";
 	
 }
 

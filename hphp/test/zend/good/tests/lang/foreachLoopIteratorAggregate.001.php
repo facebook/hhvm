@@ -1,34 +1,39 @@
 <?php
+
+abstract final class ForeachLoopIteratorAggregate {
+  public static $indent;
+}
+
 class EnglishMealIterator implements Iterator {
 	private $pos=0;
 	private $myContent=array("breakfast", "dinner", "tea");
 	
 	public function valid() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->pos < count($this->myContent);
 	}
 	
 	public function next() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos++;
 	}
 	
 	public function rewind() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos=0;
 	}
 
 	public function current() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos];
 	}
 	
 	public function key() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return "meal " . $this->pos;
 	}
@@ -40,31 +45,31 @@ class FrenchMealIterator implements Iterator {
 	private $myContent=array("petit dejeuner", "dejeuner", "gouter", "dinner");
 	
 	public function valid() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->pos < count($this->myContent);
 	}
 	
 	public function next() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos++;
 	}
 	
 	public function rewind() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos=0;
 	}
 
 	public function current() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos];
 	}
 	
 	public function key() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return "meal " . $this->pos;
 	}
@@ -85,7 +90,7 @@ Class EuropeanMeals implements IteratorAggregate {
   private static $getIteratorI = 0;
 	
 	public function getIterator() {
-		global $indent;
+		$indent = ForeachLoopIteratorAggregate::$indent;
 		echo "$indent--> " . __METHOD__  . "\n";
 		if (self::$getIteratorI++%2 == 0) {
 			return $this->storedEnglishMealIterator;
@@ -109,17 +114,17 @@ foreach ($f as $k=>$v) {
 }
 
 
-$indent = " ";
+ForeachLoopIteratorAggregate::$indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
 	echo "\nTop level "  .  $count++ . ": \n"; 
 	echo "$k => $v\n";
-	$indent = "     ";
+  ForeachLoopIteratorAggregate::$indent = "     ";
 	foreach ($f as $k=>$v) {
 		echo "     $k => $v\n";	
 	}
-	$indent = " ";
+  ForeachLoopIteratorAggregate::$indent = " ";
 }
 
 

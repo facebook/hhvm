@@ -1,7 +1,6 @@
 <?php
 function refVal($x) {
-	global $a;
-	$a = 'changed.a';
+	$GLOBALS['a'] = 'changed.a';
 	var_dump($x);
 	var_dump(func_get_arg(0));
 }
@@ -9,4 +8,3 @@ function refVal($x) {
 $a = "original.a";
 $ref =& $a;
 refVal($a);
-?>

@@ -1,7 +1,7 @@
 <?php
 // TODO: Add more encodings
 
-//$debug=true;
+
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 

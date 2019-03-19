@@ -4,8 +4,13 @@
 	/* class 1 calls parent constructor */
 	class mysql1 extends mysqli {
 		function __construct() {
-			global $host, $user, $passwd, $db, $port, $socket;
-			parent::__construct($host, $user, $passwd, $db, $port, $socket);
+
+			parent::__construct(ZendGoodExtMysqliTestsConnectInc::$host,
+                          ZendGoodExtMysqliTestsConnectInc::$user,
+                          ZendGoodExtMysqliTestsConnectInc::$passwd,
+                          ZendGoodExtMysqliTestsConnectInc::$db,
+                          ZendGoodExtMysqliTestsConnectInc::$port,
+                          ZendGoodExtMysqliTestsConnectInc::$socket);
 		}
 	}
 
@@ -13,8 +18,13 @@
 	class mysql2 extends mysqli {
 
 		function __construct() {
-			global $host, $user, $passwd, $db, $port, $socket;
-			$this->connect($host, $user, $passwd, $db, $port, $socket);
+
+			$this->connect(ZendGoodExtMysqliTestsConnectInc::$host,
+                     ZendGoodExtMysqliTestsConnectInc::$user,
+                     ZendGoodExtMysqliTestsConnectInc::$passwd,
+                     ZendGoodExtMysqliTestsConnectInc::$db,
+                     ZendGoodExtMysqliTestsConnectInc::$port,
+                     ZendGoodExtMysqliTestsConnectInc::$socket);
 		}
 	}
 
@@ -25,7 +35,12 @@
 
 	$foo[0] = new mysql1();
 	$foo[1] = new mysql2();
-	$foo[2] = new mysql3($host, $user, $passwd, $db, $port, $socket);
+	$foo[2] = new mysql3(ZendGoodExtMysqliTestsConnectInc::$host,
+                       ZendGoodExtMysqliTestsConnectInc::$user,
+                       ZendGoodExtMysqliTestsConnectInc::$passwd,
+                       ZendGoodExtMysqliTestsConnectInc::$db,
+                       ZendGoodExtMysqliTestsConnectInc::$port,
+                       ZendGoodExtMysqliTestsConnectInc::$socket);
 
 
 	for ($i=0; $i < 3; $i++) {
@@ -38,4 +53,3 @@
 		$foo[$i]->close();
 	}
 	print "done!";
-?>

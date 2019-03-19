@@ -4,32 +4,27 @@ class EnglishMealIterator implements Iterator {
 	private $myContent=array("breakfast", "dinner", "tea");
 	
 	public function valid() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo "--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->pos<3;
 	}
 	
 	public function next() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo "--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos++];
 	}
 	
 	public function rewind() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo "--> " . __METHOD__ . " ($this->pos)\n";
 		$this->pos=0;
 	}
 
 	public function current() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo "--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos];
 	}
 	
 	public function key() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+		echo "--> " . __METHOD__ . " ($this->pos)\n";
 		return "meal " . $this->pos;
 	}
 	

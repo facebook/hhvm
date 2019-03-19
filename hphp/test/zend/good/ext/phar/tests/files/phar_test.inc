@@ -9,8 +9,6 @@ $gflags = 0;
 
 foreach($files as $name => $cont)
 {
-	global $gflags, $files;
-
 	$comp = NULL;
 	$crc32= NULL;
 	$clen = NULL;

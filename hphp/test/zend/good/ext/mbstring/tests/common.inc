@@ -5,7 +5,7 @@
 
 // Custom Error Hanlder for testing
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	global $debug;
+
 	
 	$err_type = array (
 				1	=> "Error",			// E_ERROR
@@ -23,7 +23,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				4096=> "Catchable fatal error",      // E_RECOVERABLE_ERROR
 				);
 	
-	if (!empty($debug)) {
+	if (ZendGoodExtMbstringTestsCommonInc::$debug) {
 		printf("%s: %s (%d)\n", $err_type[$err_no], $err_msg, $linenum);
 	}
 	else {
@@ -52,4 +52,6 @@ class tc
 
 $t_obj = new tc;
 
-?>
+abstract final class ZendGoodExtMbstringTestsCommonInc {
+  public static $debug;
+}

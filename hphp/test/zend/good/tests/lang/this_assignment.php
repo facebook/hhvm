@@ -1,36 +1,37 @@
 <?php
 class first {
+  public static $a, $b;
 
    function me() { echo "first"; }
 
    function who() { 
-     global $a,$b;
+
      $this->me();
-     $a->me();
-     $b->me();
-     $b = new second();
+     self::$a->me();
+     self::$b->me();
+     self::$b = new second();
      $this->me();
-     $a->me();
-     $b->me();
+     self::$a->me();
+     self::$b->me();
    }
 }
 
 class second {
 
    function who() { 
-      global $a,$b;
+
       $this->me();
-      $a->me();
-      $b->me();
+      first::$a->me();
+      first::$b->me();
    }
    function me() { echo "second"; }
 }
 
-$a = new first();
-$b = &$a;
+first::$a = new first();
+first::$b = &first::$a;
 
-$a->who();
-$b->who();
+first::$a->who();
+first::$b->who();
 
 echo "\n";
 ?>

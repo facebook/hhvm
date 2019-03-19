@@ -5,7 +5,7 @@
  */
 
 
-$test_num = 1;
+ZendGoodExtIntlTestsCollatorSort::$test_num = 1;
 
 /*
  * Sort arrays in the given list using specified locale.
@@ -29,12 +29,11 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 		// Preppend test signature to output string
         $md5 = md5( $res_dump );
 
-        global $test_num;
         
         $res_str .= "\n\n".
-                    "Test $test_num.$md5:" .
+                    "Test ".ZendGoodExtIntlTestsCollatorSort::$test_num.".$md5:" .
                     $res_dump;
-        ++$test_num;
+        ++ZendGoodExtIntlTestsCollatorSort::$test_num;
     }
 
     return $res_str;
@@ -42,8 +41,8 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 
 function ut_main()
 {
-    global $test_num;
-    $test_num = 1;
+
+    ZendGoodExtIntlTestsCollatorSort::$test_num = 1;
     $res_str = '';
 
     // Sort an array in SORT_REGULAR mode using en_US locale.
@@ -94,4 +93,7 @@ function ut_main()
 
 include_once( 'ut_common.inc' );
 ut_run();
-?>
+
+abstract final class ZendGoodExtIntlTestsCollatorSort {
+  public static $test_num;
+}

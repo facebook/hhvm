@@ -12,7 +12,5 @@ class test_class
     }
 }
 
-global $test3;
 $test3 = new test_class();
 $test3->a->b();
-?>

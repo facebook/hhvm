@@ -1,13 +1,13 @@
 <?php
-$val = null;
+
 
 function test($input) {
-	global $val;
-	$val = $input;
+
+	ZendGoodExtSoapTestsSchemaTestSchemaInc::$val = $input;
 }
 
 function test_schema($schema,$type,$param,$style="rpc",$use="encoded", $attributeFormDefault='',$features=0) {
-  global $HTTP_RAW_POST_DATA, $val;
+
 $wsdl  = <<<EOF
 <definitions name="InteropTest"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -69,9 +69,12 @@ EOF;
     $y->handle($HTTP_RAW_POST_DATA);
     ob_end_clean();
     echo $req;
-    var_dump($val);
+    var_dump(ZendGoodExtSoapTestsSchemaTestSchemaInc::$val);
   } else {
     echo $req;
   }
 }
-?>
+
+abstract final class ZendGoodExtSoapTestsSchemaTestSchemaInc {
+  public static $val;
+}

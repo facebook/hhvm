@@ -801,8 +801,6 @@ int64_t RuntimeOption::HeapResetCountBase = 1;
 int64_t RuntimeOption::HeapResetCountMultiple = 2;
 int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
-uint64_t RuntimeOption::DisableForwardStaticCall = 2;
-uint64_t RuntimeOption::DisableForwardStaticCallArray = 2;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
@@ -1576,12 +1574,6 @@ void RuntimeOption::Load(
   }
   {
     // PHPisms
-    Config::Bind(DisableForwardStaticCall, ini, config,
-                 "Hack.Lang.Phpism.DisableForwardStaticCall",
-                 DisableForwardStaticCall);
-    Config::Bind(DisableForwardStaticCallArray, ini, config,
-                 "Hack.Lang.Phpism.DisableForwardStaticCallArray",
-                 DisableForwardStaticCallArray);
     Config::Bind(UndefinedFunctionFallback, ini, config,
                  "Hack.Lang.Phpism.UndefinedFunctionFallback",
                  UndefinedFunctionFallback);

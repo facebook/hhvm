@@ -540,14 +540,6 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
-  // Disables PHP's forward_static_call function.
-  // Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
-  static uint64_t DisableForwardStaticCall;
-  // Disables PHP's forward_static_call_array function.
-  // Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
-  static uint64_t DisableForwardStaticCallArray;
   // Controls PHP's behavior of falling back to the default namespace for
   // undefined functions.
   // 0 => fall back to root namespace (default)

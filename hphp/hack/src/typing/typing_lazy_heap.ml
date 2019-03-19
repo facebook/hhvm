@@ -13,10 +13,10 @@ open Typing_heap
 let check_cache_consistency x expected_kind expected_result =
   if
     expected_result = Relative_path.default &&
-    (not @@ Naming_heap.TypeIdHeap.LocalChanges.has_local_changes ())
+    (not @@ Naming_table.has_local_changes ())
   then begin
     Hh_logger.log "WARNING: found dummy path in shared heap for %s" x;
-    match Naming_heap.TypeIdHeap.get_no_cache x with
+    match Naming_table.Types.get_pos ~bypass_cache:true x with
     | Some (pos, kind) when kind = expected_kind &&
       FileInfo.get_pos_filename pos = expected_result -> ()
     | _ ->
@@ -24,7 +24,7 @@ let check_cache_consistency x expected_kind expected_result =
   end
 
 let get_type_id_filename x expected_kind =
-  match Naming_heap.TypeIdHeap.get x with
+  match Naming_table.Types.get_pos x with
   | Some (pos, kind) when kind = expected_kind ->
     let res = FileInfo.get_pos_filename pos in
     check_cache_consistency x expected_kind res;
@@ -36,7 +36,7 @@ let get_class x =
   | Some c ->
     Some c
   | None ->
-    match get_type_id_filename x `Class with
+    match get_type_id_filename x Naming_table.TClass with
     | Some filename ->
       Errors.run_in_decl_mode filename
         (fun () -> Decl.declare_class_in_file filename x);
@@ -47,7 +47,7 @@ let get_fun x =
   match Funs.get x with
   | Some c -> Some c
   | None ->
-    match Naming_heap.FunPosHeap.get x with
+    match Naming_table.Funs.get_pos x with
     | Some pos ->
       let filename = FileInfo.get_pos_filename pos in
       Errors.run_in_decl_mode filename
@@ -59,7 +59,7 @@ let get_gconst cst_name =
   match GConsts.get cst_name with
   | Some c -> Some c
   | None ->
-    match Naming_heap.ConstPosHeap.get cst_name with
+    match Naming_table.Consts.get_pos cst_name with
     | Some pos ->
         let filename = FileInfo.get_pos_filename pos in
         Errors.run_in_decl_mode filename
@@ -71,7 +71,7 @@ let get_typedef x =
   match Typedefs.get x with
   | Some c -> Some c
   | None ->
-    match get_type_id_filename x `Typedef with
+    match get_type_id_filename x Naming_table.TTypedef with
     | Some filename ->
         Errors.run_in_decl_mode filename
         (fun () -> Decl.declare_typedef_in_file filename x);

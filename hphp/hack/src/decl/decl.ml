@@ -318,8 +318,8 @@ and is_disposable_type env hint =
 and class_type_decl class_env hint =
   match hint with
   | _, Tapply ((_, cid), _) ->
-    begin match Naming_heap.TypeIdHeap.get cid with
-      | Some (pos, `Class) when not (Decl_heap.Classes.mem cid) ->
+    begin match Naming_table.Types.get_pos cid with
+      | Some (pos, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
         let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
         let class_opt = Parser_heap.find_class_in_file fn cid in
@@ -789,8 +789,8 @@ and method_pos ~is_static class_id meth  =
   | Some { ft_pos; _ } -> ft_pos
   | None ->
     try
-      match Naming_heap.TypeIdHeap.get class_id with
-      | Some (pos, `Class) ->
+      match Naming_table.Types.get_pos class_id with
+      | Some (pos, Naming_table.TClass) ->
         let fn = FileInfo.get_pos_filename pos in
         begin match Parser_heap.find_class_in_file fn class_id with
           | None -> raise Caml.Not_found

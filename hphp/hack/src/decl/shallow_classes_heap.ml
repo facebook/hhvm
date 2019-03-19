@@ -40,8 +40,8 @@ let declare_class_in_file file name =
   | None -> err_not_found file name
 
 let get_class_filename x =
-  match Naming_heap.TypeIdHeap.get x with
-  | Some (pos, `Class) -> Some (FileInfo.get_pos_filename pos)
+  match Naming_table.Types.get_pos x with
+  | Some (pos, Naming_table.TClass) -> Some (FileInfo.get_pos_filename pos)
   | _ -> None
 
 let get cid =

@@ -35,7 +35,7 @@ let to_tuple r1 r2 =
 let get_fun_return_ty tcopt fun_name =
   let fun_name = add_ns fun_name in
   let pos =
-    of_option (Naming_heap.FunPosHeap.get fun_name) "Could not find function"
+    of_option (Naming_table.Funs.get_pos fun_name) "Could not find function"
   in
   let file = map pos FileInfo.get_pos_filename in
   let funopt =
@@ -50,8 +50,8 @@ let get_fun_return_ty tcopt fun_name =
 let get_meth_return_ty tcopt class_name meth_name =
   let class_name = add_ns class_name in
   let pos =
-    match Naming_heap.TypeIdHeap.get class_name with
-    | Some (pos, `Class) -> Ok pos
+    match Naming_table.Types.get_pos class_name with
+    | Some (pos, Naming_table.TClass) -> Ok pos
     | _ -> Error "Could not find class"
   in
   let file = map pos FileInfo.get_pos_filename in

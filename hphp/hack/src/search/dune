@@ -5,7 +5,7 @@
     ast
     file_info
     heap_shared_mem
-    naming_heap
+    naming
     parser_heap
     procs_procs
     pos

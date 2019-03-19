@@ -251,9 +251,9 @@ end
 
 module ClassMethods = struct
   let get_class_definition_file class_name =
-    let class_def = Naming_heap.TypeIdHeap.get class_name in
+    let class_def = Naming_table.Types.get_pos class_name in
     match class_def with
-    | Some (pos, `Class) ->
+    | Some (pos, Naming_table.TClass) ->
       let file =
         match pos with
         | FileInfo.Full pos -> Pos.filename pos

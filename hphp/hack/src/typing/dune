@@ -78,7 +78,7 @@
     hackfmt
     logging
     naming_attributes
-    naming_heap
+    naming
     symbol
     typechecker_options
     typing_defs)

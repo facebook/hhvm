@@ -36,22 +36,22 @@ let save_all_file_info_sqlite
         begin
           List.iter funs ~f:(fun (_pos, name) ->
             SharedMem.save_file_info_sqlite ~hash:(
-              Naming_heap.heap_string_of_key `FunPos name
+              Naming_table.Funs.heap_string_of_key name
             ) ~name:name `FuncK path
           );
           List.iter classes ~f:(fun (_pos, name) ->
             SharedMem.save_file_info_sqlite ~hash:(
-              Naming_heap.heap_string_of_key `TypeId name
+              Naming_table.Types.heap_string_of_key name
             ) ~name:name `ClassK path
           );
           List.iter typedefs ~f:(fun (_pos, name) ->
             SharedMem.save_file_info_sqlite ~hash:(
-              Naming_heap.heap_string_of_key `TypeId name
+              Naming_table.Types.heap_string_of_key name
             ) ~name:name `ClassK path
           );
           List.iter consts ~f:(fun (_pos, name) ->
             SharedMem.save_file_info_sqlite ~hash:(
-              Naming_heap.heap_string_of_key `ConstPos name
+              Naming_table.Consts.heap_string_of_key name
             ) ~name:name `ConstantK path
           )
         end

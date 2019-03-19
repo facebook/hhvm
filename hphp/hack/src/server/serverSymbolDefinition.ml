@@ -31,19 +31,19 @@ and class_element_ =
 | Typeconst
 
 let get_class_by_name x =
-  Naming_heap.TypeIdHeap.get x >>= fun (pos, _) ->
+  Naming_table.Types.get_pos x >>= fun (pos, _) ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
     Parser_heap.find_class_in_file fn x
 
 let get_function_by_name x =
-  Naming_heap.FunPosHeap.get x >>= fun pos ->
+  Naming_table.Funs.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
     Parser_heap.find_fun_in_file fn x
 
 let get_gconst_by_name x =
-  Naming_heap.ConstPosHeap.get x >>= fun pos ->
+  Naming_table.Consts.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
     Parser_heap.find_const_in_file fn x
@@ -109,12 +109,12 @@ let get_local_var_def ast name p =
 
 (* summarize a class or typedef carried with SymbolOccurrence.Class *)
 let summarize_class_typedef x =
-  Naming_heap.TypeIdHeap.get x >>= fun (pos, ct) ->
+  Naming_table.Types.get_pos x >>= fun (pos, ct) ->
     let fn = FileInfo.get_pos_filename pos in
     match ct with
-      | `Class -> (Parser_heap.find_class_in_file fn x >>=
+      | Naming_table.TClass -> (Parser_heap.find_class_in_file fn x >>=
                 fun c -> Some (FileOutline.summarize_class c ~no_children:true))
-      | `Typedef -> (Parser_heap.find_typedef_in_file fn x >>=
+      | Naming_table.TTypedef -> (Parser_heap.find_typedef_in_file fn x >>=
                 fun tdef -> Some (FileOutline.summarize_typedef tdef))
 
 let go ast result =

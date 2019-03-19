@@ -77,7 +77,7 @@ type full_check_status =
 
 (* In addition to this environment, many functions are storing and
  * updating ASTs, NASTs, and types in a shared space
- * (see respectively Parser_heap, Naming_heap, Typing_env).
+ * (see respectively Parser_heap, Naming_table, Typing_env).
  * The Ast.id are keys to index this shared space.
  *)
 type env = {

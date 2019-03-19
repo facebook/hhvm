@@ -9,7 +9,7 @@
 
 (*
  * This function works by side effects. It is adding in the
- * Naming_heap the nast produced from the ast passed as a parameter
+ * Naming_table the nast produced from the ast passed as a parameter
  * (the SharedMem must thus have been initialized via SharedMem.init
  * prior to calling this function). It also assumes the Parser_heap
  * has been previously populated. It also adds dependencies

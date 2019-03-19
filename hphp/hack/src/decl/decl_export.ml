@@ -45,9 +45,9 @@ let keys_to_sset smap =
   SMap.fold smap ~init:SSet.empty ~f:(fun k _ s -> SSet.add s k)
 
 let get_class_filename cid =
-  match Naming_heap.TypeIdHeap.get cid with
-  | None | Some (_, `Typedef) -> None
-  | Some (pos, `Class) -> Some (FileInfo.get_pos_filename pos)
+  match Naming_table.Types.get_pos cid with
+  | None | Some (_, Naming_table.TTypedef) -> None
+  | Some (pos, Naming_table.TClass) -> Some (FileInfo.get_pos_filename pos)
 
 let rec collect_class
     ?(fail_if_missing=false)

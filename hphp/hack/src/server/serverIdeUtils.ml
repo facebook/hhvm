@@ -19,11 +19,7 @@ let make_local_changes () =
 
   Ide_parser_cache.activate ();
 
-  Naming_heap.FunPosHeap.LocalChanges.push_stack();
-  Naming_heap.FunCanonHeap.LocalChanges.push_stack();
-  Naming_heap.TypeIdHeap.LocalChanges.push_stack();
-  Naming_heap.TypeCanonHeap.LocalChanges.push_stack();
-  Naming_heap.ConstPosHeap.LocalChanges.push_stack();
+  Naming_table.push_local_changes ();
 
   Decl_heap.Funs.LocalChanges.push_stack();
   Decl_heap.Constructors.LocalChanges.push_stack();
@@ -46,11 +42,7 @@ let revert_local_changes () =
 
   Ide_parser_cache.deactivate ();
 
-  Naming_heap.FunPosHeap.LocalChanges.pop_stack();
-  Naming_heap.FunCanonHeap.LocalChanges.pop_stack();
-  Naming_heap.TypeIdHeap.LocalChanges.pop_stack();
-  Naming_heap.TypeCanonHeap.LocalChanges.pop_stack();
-  Naming_heap.ConstPosHeap.LocalChanges.pop_stack();
+  Naming_table.pop_local_changes ();
 
   Decl_heap.Funs.LocalChanges.pop_stack();
   Decl_heap.Constructors.LocalChanges.pop_stack();

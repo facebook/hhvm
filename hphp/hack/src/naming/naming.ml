@@ -569,7 +569,7 @@ end = struct
 
   let global_const (genv, _env) x =
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
-    get_name genv (Naming_heap.ConstPosHeap.get) fq_x
+    get_name genv (Naming_table.Consts.get_pos) fq_x
 
   let type_name (genv, _) x ~allow_typedef ~allow_generics =
     let (p, name) = x in
@@ -580,19 +580,19 @@ end = struct
       x
     | None ->
       let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
-      match Naming_heap.TypeIdHeap.get name with
-      | Some (_def_pos, `Class) ->
+      match Naming_table.Types.get_pos name with
+      | Some (_def_pos, Naming_table.TClass) ->
         (* Don't let people use strictly internal classes
          * (except when they are being declared in .hhi files) *)
         if name = SN.Classes.cHH_BuiltinEnum &&
           not (string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi")
         then Errors.using_internal_class pos (strip_ns name);
         pos, name
-      | Some (def_pos, `Typedef) when not allow_typedef ->
+      | Some (def_pos, Naming_table.TTypedef) when not allow_typedef ->
         let full_pos, _ = GEnv.get_full_pos (def_pos, name) in
         Errors.unexpected_typedef pos full_pos;
         pos, name
-      | Some (_def_pos, `Typedef) -> pos, name
+      | Some (_def_pos, Naming_table.TTypedef) -> pos, name
       | None ->
         handle_unbound_name genv
           GEnv.type_pos
@@ -601,7 +601,7 @@ end = struct
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
       genv
-      (Naming_heap.FunPosHeap.get)
+      (Naming_table.Funs.get_pos)
       GEnv.fun_pos
       GEnv.fun_canon_name
       x
@@ -1431,7 +1431,7 @@ module Make (GetLocals : GetLocals) = struct
       then
         (* Treat type params as inline class declarations that don't go into the naming heap *)
         let (pos, name) = NS.elaborate_id genv.namespace NS.ElaborateClass t.Aast.tp_name in
-        match Naming_heap.TypeIdHeap.get name with
+        match Naming_table.Types.get_pos name with
         | Some (def_pos, _) ->
           let def_pos, _ = GEnv.get_full_pos (def_pos, name) in
           Errors.error_name_already_bound name name pos def_pos
@@ -2209,8 +2209,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_heap.TypeIdHeap.get name with
-        | Some (_, `Typedef) when (snd x2) = "class" ->
+        match Naming_table.Types.get_pos name with
+        | Some (_, Naming_table.TTypedef) when (snd x2) = "class" ->
           N.Typename (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ ->
           N.Class_const (make_class_id env x1, x2)
@@ -2220,8 +2220,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_heap.TypeIdHeap.get name with
-        | Some (_, `Typedef) when (snd x2) = "class" ->
+        match Naming_table.Types.get_pos name with
+        | Some (_, Naming_table.TTypedef) when (snd x2) = "class" ->
           N.Typename (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ ->
           N.Class_const (make_class_id env x1, x2)

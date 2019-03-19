@@ -15,7 +15,6 @@
  *)
 open Core_kernel
 open Utils
-open Naming_heap
 module SN = Naming_special_names
 
 (*****************************************************************************)
@@ -63,14 +62,14 @@ module GEnv = struct
       Hh_logger.log "Name missing: %s" (name);
       raise File_heap.File_heap_stale
 
-  let type_canon_name name = TypeCanonHeap.get (canon_key name)
+  let type_canon_name name = Naming_table.Types.get_canon_name (canon_key name)
   let type_pos name =
     let name = Option.value (type_canon_name name) ~default:name in
-    match TypeIdHeap.get name with
-      | Some (pos, `Class) ->
+    match Naming_table.Types.get_pos name with
+      | Some (pos, Naming_table.TClass) ->
           let p, _ = get_full_pos (pos, name) in
           Some p
-      | Some (pos, `Typedef) ->
+      | Some (pos, Naming_table.TTypedef) ->
           let p, _ = get_full_pos (pos, name) in
           Some p
       | None -> None
@@ -79,19 +78,19 @@ module GEnv = struct
     let name = Option.value (type_canon_name name) ~default:name in
     type_pos name
 
-  let type_info name = match TypeIdHeap.get name with
-    | Some (pos, `Class) ->
+  let type_info name = match Naming_table.Types.get_pos name with
+    | Some (pos, Naming_table.TClass) ->
         let p, _ = get_full_pos (pos, name) in
-        Some (p, `Class)
-    | Some (pos, `Typedef) ->
+        Some (p, Naming_table.TClass)
+    | Some (pos, Naming_table.TTypedef) ->
         let p, _ = get_full_pos (pos, name) in
-        Some (p, `Typedef)
+        Some (p, Naming_table.TTypedef)
     | None -> None
 
-  let fun_canon_name name = FunCanonHeap.get (canon_key name)
+  let fun_canon_name name = Naming_table.Funs.get_canon_name (canon_key name)
 
   let fun_pos name =
-    match FunPosHeap.get name with
+    match Naming_table.Funs.get_pos name with
     | Some pos ->
         let p, _ = get_full_pos (pos, name) in
         Some p
@@ -101,15 +100,15 @@ module GEnv = struct
     let name = Option.value (fun_canon_name name) ~default:name in
     fun_pos name
 
-  let typedef_pos name = match TypeIdHeap.get name with
-    | Some (pos, `Typedef) ->
+  let typedef_pos name = match Naming_table.Types.get_pos name with
+    | Some (pos, Naming_table.TTypedef) ->
         let p, _ = get_full_pos (pos, name) in
         Some p
-    | Some (_, `Class)
+    | Some (_, Naming_table.TClass)
     | None -> None
 
   let gconst_pos name =
-    match ConstPosHeap.get name with
+    match Naming_table.Consts.get_pos name with
     | Some pos ->
       let p, _ = get_full_pos (pos, name) in
       Some p
@@ -148,45 +147,41 @@ module Env = struct
   (* Dont check for errors, just add to canonical heap *)
   let new_fun_fast fn name =
     let name_key = canon_key name in
-    match FunCanonHeap.get name_key with
+    match Naming_table.Funs.get_canon_name name_key with
       | Some _ -> ()
       | None ->
-        FunCanonHeap.add name_key name;
-        FunPosHeap.add name (FileInfo.File (FileInfo.Fun, fn))
+        Naming_table.Funs.add name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_cid_fast fn name cid_kind =
     let name_key = canon_key name in
     let mode = match cid_kind with
-    | `Class -> FileInfo.Class
-    | `Typedef -> FileInfo.Typedef in
-    match TypeCanonHeap.get name_key with
+    | Naming_table.TClass -> FileInfo.Class
+    | Naming_table.TTypedef -> FileInfo.Typedef in
+    match Naming_table.Types.get_canon_name name_key with
       | Some _ -> ()
       | None ->
-        TypeCanonHeap.add name_key name;
         (* We store redundant info in this case, but if the position is a *)
         (* Full position, we don't store the kind, so this is necessary *)
-        TypeIdHeap.write_around name ((FileInfo.File (mode, fn)), cid_kind)
+        Naming_table.Types.add name ((FileInfo.File (mode, fn)), cid_kind)
 
-  let new_class_fast fn name = new_cid_fast fn name `Class
-  let new_typedef_fast fn name = new_cid_fast fn name `Typedef
+  let new_class_fast fn name = new_cid_fast fn name Naming_table.TClass
+  let new_typedef_fast fn name = new_cid_fast fn name Naming_table.TTypedef
 
   let new_global_const_fast fn name =
-    ConstPosHeap.add name (FileInfo.File (FileInfo.Const, fn))
+    Naming_table.Consts.add name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun (p, name) =
     let name_key = canon_key name in
-    match FunCanonHeap.get name_key with
+    match Naming_table.Funs.get_canon_name name_key with
     | Some canonical ->
-      let p' = FunPosHeap.find_unsafe canonical in
+      let p' = Option.value_exn (Naming_table.Funs.get_pos canonical) in
       if not @@ GEnv.compare_pos p' p
       then
         let p, name = GEnv.get_full_pos (p, name) in
         let p', canonical = GEnv.get_full_pos (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
     | None ->
-      FunPosHeap.add name p;
-      FunCanonHeap.add name_key name;
-      ()
+      Naming_table.Funs.add name p
 
   let attr_prefix, attr_prefix_len =
     let a = "\\__attribute__" in (* lowercase because canon_key call *)
@@ -194,7 +189,7 @@ module Env = struct
 
   let new_cid cid_kind (p, name) =
     let validate canonical error =
-      let (p', _) = unsafe_opt @@ TypeIdHeap.get canonical in
+      let (p', _) = unsafe_opt @@ Naming_table.Types.get_pos canonical in
       if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos (p, name) in
@@ -203,7 +198,7 @@ module Env = struct
     in
     if not (check_not_typehint (p, name)) then () else
     let name_key = canon_key name in
-    match TypeCanonHeap.get name_key with
+    match Naming_table.Types.get_canon_name name_key with
     | Some canonical ->
       validate canonical Errors.error_name_already_bound
     | None ->
@@ -217,20 +212,20 @@ module Env = struct
           "\\" ^ String.sub name_key attr_prefix_len (name_len - attr_prefix_len)
         else
           attr_prefix ^ String.sub name_key 1 (name_len - 1) in
-      begin match TypeCanonHeap.get alt_name_key with
+      begin match Naming_table.Types.get_canon_name alt_name_key with
       | Some alt_canonical ->
         validate alt_canonical Errors.error_class_attribute_already_bound
       | None ->
-        () end;
-      TypeIdHeap.write_around name (p, cid_kind);
-      TypeCanonHeap.add name_key name
+        ()
+      end;
+      Naming_table.Types.add name (p, cid_kind)
 
-  let new_class = new_cid `Class
+  let new_class = new_cid Naming_table.TClass
 
-  let new_typedef = new_cid `Typedef
+  let new_typedef = new_cid Naming_table.TTypedef
 
   let new_global_const (p, x) =
-    match ConstPosHeap.get x with
+    match Naming_table.Consts.get_pos x with
     | Some p' ->
       if not @@ GEnv.compare_pos p' p
       then
@@ -238,24 +233,17 @@ module Env = struct
       let p', x = GEnv.get_full_pos (p', x) in
       Errors.error_name_already_bound x x p p'
     | None ->
-      ConstPosHeap.add x p
+      Naming_table.Consts.add x p
 end
 
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
 let remove_decls ~funs ~classes ~typedefs ~consts =
-  let canonicalize_set = (fun elt acc -> SSet.add (canon_key elt) acc) in
   let types = SSet.union classes typedefs in
-  let canon_types = SSet.fold canonicalize_set types SSet.empty in
-  TypeCanonHeap.remove_batch canon_types;
-  TypeIdHeap.remove_batch types;
-
-  let fun_namekeys = SSet.fold canonicalize_set funs SSet.empty in
-  FunCanonHeap.remove_batch fun_namekeys;
-  FunPosHeap.remove_batch funs;
-
-  ConstPosHeap.remove_batch consts
+  Naming_table.Types.remove_batch types;
+  Naming_table.Funs.remove_batch funs;
+  Naming_table.Consts.remove_batch consts
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)

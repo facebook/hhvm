@@ -17,7 +17,7 @@ module GEnv: sig
   val type_pos: string -> Pos.t option
   val type_canon_name: string -> string option
   val type_info:
-    string -> (Pos.t * [`Class | `Typedef]) option
+    string -> (Pos.t * Naming_table.type_of_type) option
 
   val fun_pos:  string -> Pos.t option
   val fun_canon_name: string -> string option

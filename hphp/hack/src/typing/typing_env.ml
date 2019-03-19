@@ -782,8 +782,8 @@ let get_typedef env x =
   TLazyHeap.get_typedef x
 
 let is_typedef x =
-  match Naming_heap.TypeIdHeap.get x with
-  | Some (_p, `Typedef) -> true
+  match Naming_table.Types.get_pos x with
+  | Some (_p, Naming_table.TTypedef) -> true
   | _ -> false
 
 let get_class env x =

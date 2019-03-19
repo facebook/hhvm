@@ -235,7 +235,7 @@ let go query =
     let results = Index.get index keys in
     List.filter_map results ~f:(fun fun_name ->
       let open Option.Monad_infix in
-      Naming_heap.FunPosHeap.get fun_name
+      Naming_table.Funs.get_pos fun_name
       >>= function
       | FileInfo.File (_, fn) ->
         Parser_heap.find_fun_in_file fn fun_name

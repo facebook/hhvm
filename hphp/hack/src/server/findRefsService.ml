@@ -126,8 +126,8 @@ let get_origin_class_name class_name member =
   Option.value origin ~default:class_name
 
 let get_child_classes_files class_name =
-  match Naming_heap.TypeIdHeap.get class_name with
-  | Some (_, `Class) ->
+  match Naming_table.Types.get_pos class_name with
+  | Some (_, Naming_table.TClass) ->
     (* Find the files that contain classes that extend class_ *)
     let cid_hash =
       Typing_deps.Dep.make (Typing_deps.Dep.Class class_name) in
@@ -141,7 +141,7 @@ let get_child_classes_files class_name =
 
 let get_deps_set classes =
   let get_filename class_name =
-    Naming_heap.TypeIdHeap.get class_name >>= fun (pos, _) ->
+    Naming_table.Types.get_pos class_name >>= fun (pos, _) ->
     Some (FileInfo.get_pos_filename pos)
   in
   SSet.fold classes ~f:begin fun class_name acc ->
@@ -156,7 +156,7 @@ let get_deps_set classes =
   end ~init:Relative_path.Set.empty
 
 let get_deps_set_function f_name =
-  match Naming_heap.FunPosHeap.get f_name with
+  match Naming_table.Funs.get_pos f_name with
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.Fun f_name in
@@ -167,7 +167,7 @@ let get_deps_set_function f_name =
     Relative_path.Set.empty
 
 let get_deps_set_gconst cst_name =
-  match Naming_heap.ConstPosHeap.get cst_name with
+  match Naming_table.Consts.get_pos cst_name with
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.GConst cst_name in
@@ -250,10 +250,10 @@ let get_definitions = function
       | None -> acc
     end
   | IClass class_name ->
-    Option.value ~default:[] begin Naming_heap.TypeIdHeap.get class_name >>=
-    function (_, `Class) -> Typing_lazy_heap.get_class class_name >>=
+    Option.value ~default:[] begin Naming_table.Types.get_pos class_name >>=
+    function (_, Naming_table.TClass) -> Typing_lazy_heap.get_class class_name >>=
       fun class_ -> Some([(class_name, (Cls.pos class_))])
-    | (_, `Typedef) -> Typing_lazy_heap.get_typedef class_name >>=
+    | (_, Naming_table.TTypedef) -> Typing_lazy_heap.get_typedef class_name >>=
       fun type_ -> Some([class_name, type_.td_pos])
     end
   | IFunction fun_name ->

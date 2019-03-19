@@ -8,10 +8,10 @@
  *)
 
 let get_class id =
-  match Naming_heap.TypeIdHeap.get id with
+  match Naming_table.Types.get_pos id with
   | None
-  | Some (_, `Typedef) -> None
-  | Some (pos, `Class) ->
+  | Some (_, Naming_table.TTypedef) -> None
+  | Some (pos, Naming_table.TClass) ->
     let fn = FileInfo.get_pos_filename pos in
     match Parser_heap.find_class_in_file fn id with
     | None -> None
@@ -19,7 +19,7 @@ let get_class id =
       Some (Naming.class_ class_)
 
 let get_fun id =
-  match Naming_heap.FunPosHeap.get id with
+  match Naming_table.Funs.get_pos id with
   | None -> None
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in

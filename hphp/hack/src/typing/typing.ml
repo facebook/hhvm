@@ -5045,49 +5045,52 @@ and call_ ~expected ~method_call_info pos env fty el uel =
         | [] ->
           true, var_param, paraml in
 
+      let check_arg env (pos, _ as e) opt_param ~is_variadic =
+        match opt_param with
+        | Some param ->
+          let env, te, ty =
+            expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
+              ~expected:(pos, Reason.URparam, param.fp_type) env e in
+          let env = call_param env param (e, ty) ~is_variadic in
+          env, Some (te, ty)
+        | None ->
+          let env, te, ty = expr ~expected:(pos, Reason.URparam,
+            (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env e in
+          env, Some (te, ty) in
+
+      let set_tyvar_variance_from_lambda_param env opt_param =
+        match opt_param with
+        | Some param ->
+          let rec set_params_variance env ty =
+            let env, ty = Env.expand_type env ty in
+            match ty with
+            | _, Tunresolved [ty] -> set_params_variance env ty
+            | _, Toption ty -> set_params_variance env ty
+            | _, Tfun { ft_params; _ } ->
+              List.fold ~init:env ~f:(fun env param ->
+                Env.set_tyvar_variance env param.fp_type) ft_params
+            | _ -> env in
+          set_params_variance env param.fp_type
+        | None ->
+          env in
+
       (* Given an expected function type ft, check types for the non-unpacked
        * arguments. Don't check lambda expressions if check_lambdas=false *)
       let rec check_args check_lambdas env el paraml =
         match el with
         (* We've got an argument *)
-        | ((pos, _ as e), opt_result) :: el ->
+        | (e, opt_result) :: el ->
           (* Pick up next parameter type info *)
           let is_variadic, opt_param, paraml = get_next_param_info paraml in
-          let env, one_result =
-            if Option.is_some opt_result
-            then env, opt_result
-            else
-            if is_lambda e && not check_lambdas
-            then
-              begin match opt_param with
-              | Some param ->
-                let rec set_params_variance env ty =
-                  let env, ty = Env.expand_type env ty in
-                  match ty with
-                  | _, Tunresolved [ty] -> set_params_variance env ty
-                  | _, Toption ty -> set_params_variance env ty
-                  | _, Tfun { ft_params; _ } ->
-                    List.fold ~init:env ~f:(fun env param ->
-                      Env.set_tyvar_variance env param.fp_type) ft_params
-                  | _ -> env in
-                let env = set_params_variance env param.fp_type in
-                env, opt_result
-              | None ->
-                env, opt_result
-              end
-            else
-              begin match opt_param with
-              | Some param ->
-                let env, te, ty =
-                  expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
-                    ~expected:(pos, Reason.URparam, param.fp_type) env e in
-                let env = call_param env param (e, ty) ~is_variadic in
-                env, Some (te, ty)
-              | None ->
-                let env, te, ty = expr ~expected:(pos, Reason.URparam,
-                  (Reason.Rnone, Typing_utils.tany env)) ~is_func_arg:true env e in
-                env, Some (te, ty)
-              end in
+          let env, one_result = match check_lambdas, is_lambda e with
+            | false, false
+            | true, true ->
+              check_arg env e opt_param ~is_variadic
+            | false, true ->
+              let env = set_tyvar_variance_from_lambda_param env opt_param in
+              env, opt_result
+            | true, false ->
+              env, opt_result in
           let env, rl, paraml = check_args check_lambdas env el paraml in
           env, (e, one_result)::rl, paraml
 

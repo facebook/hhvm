@@ -10,9 +10,9 @@
 
 <<__PHPStdLib>>
 function get_defined_functions(): array<string, array<string>>;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function function_exists(string $function_name, bool $autoload = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function is_callable($v, bool $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);

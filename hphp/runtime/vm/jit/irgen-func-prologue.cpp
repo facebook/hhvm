@@ -252,8 +252,7 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
 
   assertx(func->isClosureBody());
 
-  // Closure object properties are the use vars followed by the static locals
-  // (which are per-instance).
+  // Closure object properties are the use vars.
   auto const nuse = cls->numDeclProperties();
   ptrdiff_t use_var_off = sizeof(ObjectData);
 

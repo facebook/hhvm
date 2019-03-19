@@ -30,26 +30,9 @@ struct Variant;
  * A Variant or TypedValue can be KindOfRef and point to a RefData,
  * but the value held here must not be KindOfRef.
  *
- * RefData's are also used to implement static locals, but in this
- * case the RefData itself is allocated in RDS rather than on
- * the heap.  Note that generally speaking a RefData should never
- * contain KindOfUninit, *except* uninitialized RefDatas for this
- * RDS case.
+ * Note that a RefData should never contain KindOfUninit.
  */
 struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
-  /*
-   * Some RefData's (static locals) are allocated in RDS, and
-   * live until the end of the request.  In this case, we start with a
-   * reference count to keep it alive.
-   *
-   * Note that the JIT accesses RDS RefDatas directly---if you need to
-   * change how initialization works it keep that up to date.
-   */
-  void initInRDS() {
-    // count=OneReference
-    initHeader_16(HeaderKind::Ref, OneReference, 0);
-  }
-
   /*
    * Create a RefData, allocated in the request local heap.
    */
@@ -86,11 +69,6 @@ struct RefData final : Countable, type_scan::MarkScannableCollectable<RefData> {
     return &m_cell;
   }
 
-  /*
-   * This can never return a pointer to non-Cell when valid, but can
-   * be used to obtain a pointer for writing, after initInRDS() when
-   * m_cell still is uninitialized.
-   */
   Cell* cell() {
     assertx(kindIsValid());
     return &m_cell;

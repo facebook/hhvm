@@ -332,10 +332,6 @@ let emit_body
     then remove_this vars @ ["$this"]
     else vars in
 
-  let starts_with s prefix =
-    String.length s >= String.length prefix &&
-    String.sub s 0 (String.length prefix) = prefix in
-
   let has_this = Ast_scope.Scope.has_this scope in
   let is_toplevel = Ast_scope.Scope.is_toplevel scope in
   (* see comment in decl_vars.ml, method on_efun of declvar_visitor
@@ -364,9 +360,7 @@ let emit_body
         |> List.concat_map ~f:(fun item ->
           match item with
           | Ast.ClassVars { Ast.cv_names = cvl; _ } ->
-            List.filter_map cvl ~f:(fun (_, (_, id), _) ->
-              if not (starts_with id "86static_")
-              then Some ("$" ^ id) else None)
+            List.map cvl ~f:(fun (_, (_, id), _) -> ("$" ^ id))
           | _ -> []) in
       "$0Closure" ::
       captured_vars @

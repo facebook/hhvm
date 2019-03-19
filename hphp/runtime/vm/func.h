@@ -219,9 +219,7 @@ struct Func final {
    * PreClasses.
    *
    * We also clone methods from traits when we transclude the trait in its user
-   * Classes in repo mode.  Finally, we clone inherited methods that define
-   * static locals in order to instantiate new static locals for the child
-   * class's copy of the method.
+   * Classes in repo mode.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
 

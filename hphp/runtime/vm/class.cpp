@@ -68,34 +68,6 @@ const StaticString s___Reified("__Reified");
 Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * We clone methods with static locals into derived classes, but the clone
- * still points to the class the method was defined in (because it needs to
- * have the right context class).  For data profiling, we need to find the
- * actual class that a Func belongs to so we put such Funcs into this map.
- */
-typedef tbb::concurrent_hash_map<uint64_t, const Class*> FuncIdToClassMap;
-static FuncIdToClassMap* s_funcIdToClassMap;
-
-const Class* getOwningClassForFunc(const Func* f) {
-  // We only populate s_funcIdToClassMap when the following conditions
-  // are true.
-  assertx(RuntimeOption::EvalPerfDataMap ||
-          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
-          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit);
-
-  if (s_funcIdToClassMap) {
-    FuncIdToClassMap::const_accessor acc;
-    if (s_funcIdToClassMap->find(acc, f->getFuncId())) {
-      return acc->second;
-    }
-  }
-  return f->cls();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
 Class::PropInitVec::~PropInitVec() {

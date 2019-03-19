@@ -5965,17 +5965,6 @@ OPTBLD_INLINE void iopFuncNumArgs() {
   }
 }
 
-static inline TypedValue* lookupClosureStatic(const StringData* name,
-                                              const ActRec* fp) {
-  auto const func = fp->m_func;
-
-  assertx(func->isClosureBody());
-  assertx(!func->hasVariadicCaptureParam());
-  auto const obj = frame_local(fp, func->numParams())->m_data.pobj;
-
-  return lookupStaticTvFromClosure(obj, name);
-}
-
 OPTBLD_INLINE void iopCatch() {
   auto vm = &*g_context;
   assertx(vm->m_faults.size() > 0);

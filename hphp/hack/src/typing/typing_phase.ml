@@ -245,6 +245,14 @@ and localize ~ety_env env ty =
   let env, (_, ty) = localize_with_env ~ety_env env ty in
   env, ty
 
+and localize_cstr_ty ~ety_env env ty tp_name =
+  let env, (r, ty_ as ty) = localize ~ety_env env ty in
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  let ty = if new_inference
+    then (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_)
+    else ty in
+  env, ty
+
 (* For the majority of cases when we localize a function type we instantiate
  * the function's type parameters to be a Tunresolved wrapped in a Tvar so the
  * type can grow. There are two cases where we do not do this.
@@ -312,7 +320,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env t =
     let env, cstrl = List.map_env env t.tp_constraints begin fun env (ck, ty) ->
-      let env, ty = localize ~ety_env env ty in
+      let env, ty = localize_cstr_ty ~ety_env env ty t.tp_name in
       let name_str = snd t.tp_name in
       (* In order to access type constants on generics on where clauses,
         we need to add the constraints from the type parameters into the
@@ -405,7 +413,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
 and check_tparams_constraints ~use_pos ~ety_env env tparams =
   let check_tparam_constraints env t =
     List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
-      let env, ty = localize ~ety_env env ty in
+      let env, ty = localize_cstr_ty ~ety_env env ty t.tp_name in
       match SMap.get (snd t.tp_name) ety_env.substs with
       | Some x_ty ->
         begin

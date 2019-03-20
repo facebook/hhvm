@@ -1586,6 +1586,12 @@ let unification_cycle pos ty =
     [pos, "Type circularity: in order to type-check this expression it " ^
        "is necessary for a type [rec] to be equal to type " ^ ty]
 
+let violated_constraint p_cstr (p_tparam, tparam) left right =
+  add_list (Typing.err_code Typing.UnifyError)
+    ([(p_cstr, "Some type constraint(s) are violated here");
+    (p_tparam, Printf.sprintf "%s is a constrained type parameter" tparam)]
+    @ left
+    @ right)
 
 let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
   let inst_msg = "Some type constraint(s) here are violated" in

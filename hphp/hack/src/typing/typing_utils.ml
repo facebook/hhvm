@@ -329,9 +329,12 @@ let reactivity_to_string env r =
 let uerror env r1 ty1 r2 ty2 =
   let ty1 = Typing_print.error env (r1,ty1) in
   let ty2 = Typing_print.error env (r2,ty2) in
-  Errors.unify_error
-    (Reason.to_string ("This is " ^ ty1) r1)
-    (Reason.to_string ("It is incompatible with " ^ ty2) r2)
+  let left = Reason.to_string ("This is " ^ ty1) r1 in
+  let right = Reason.to_string ("It is incompatible with " ^ ty2) r2 in
+  match (r1, r2) with
+  | Reason.Rcstr_on_generics (p, tparam), _ | _, Reason.Rcstr_on_generics (p, tparam) ->
+    Errors.violated_constraint p tparam left right
+  | _ -> Errors.unify_error left right
 
 (* We attempt to simplify the unification error to see if it can be
  * explained without referring to dependent types.

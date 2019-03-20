@@ -26,6 +26,8 @@ open Typing_reason
 
 let pos = ImplementPos.pos
 
+let string_id (p, x) = pos p, x
+
 let rec reason = function
   | Rnone                  -> Rnone
   | Rwitness p             -> Rwitness (pos p)
@@ -105,8 +107,7 @@ let rec reason = function
   | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
   | Rtype_variable p -> Rtype_variable (pos p)
   | Rsolve_fail p -> Rsolve_fail (pos p)
-
-let string_id (p, x) = pos p, x
+  | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
 
 let rec ty (p, x) =
   reason p, ty_ x

@@ -92,6 +92,7 @@ type t =
   | Rimplicit_upper_bound of Pos.t * string
   | Rtype_variable   of Pos.t
   | Rsolve_fail      of Pos.t
+  | Rcstr_on_generics of Pos.t * Nast.sid
 
 and arg_position =
   | Aonly
@@ -291,6 +292,7 @@ let rec to_string prefix r =
     [(p, prefix ^ " because the lambda function was used here")]
   | Rimplicit_upper_bound (_, cstr) ->
     [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
+  | Rcstr_on_generics _ -> [(p, prefix)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -371,6 +373,7 @@ and to_pos = function
   | Rincdec_dynamic p -> p
   | Rtype_variable p -> p
   | Rsolve_fail p -> p
+  | Rcstr_on_generics (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -480,6 +483,7 @@ match r with
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"
   | Rsolve_fail _ -> "Rsolve_fail"
+  | Rcstr_on_generics _ -> "Rcstr_on_generics"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

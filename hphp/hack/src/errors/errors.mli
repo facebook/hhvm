@@ -54,6 +54,8 @@ val experimental_feature : Pos.t -> string -> unit
 val fixme_format : Pos.t -> unit
 val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
+val violated_constraint :
+  Pos.t -> (Pos.t * string) -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val explain_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
 val explain_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit

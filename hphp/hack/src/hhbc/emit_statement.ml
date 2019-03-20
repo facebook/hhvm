@@ -928,7 +928,7 @@ and emit_iterator_key_value_storage env iterator =
     | Some key_id, Some value_id ->
       let key_local = Local.Named key_id in
       let value_local = Local.Named value_id in
-      Some key_local, value_local, [], []
+      Some key_local, value_local, empty
     | _ ->
       let key_local = Local.get_unnamed_local () in
       let value_local = Local.get_unnamed_local () in
@@ -946,19 +946,23 @@ and emit_iterator_key_value_storage env iterator =
         | _ -> [], (gather key_preamble) :: value_preamble
       in
       Some key_local, value_local,
-      (gather key_preamble)::key_load,
-      (gather value_preamble)::value_load
+      gather [
+        gather value_preamble;
+        gather value_load;
+        gather key_preamble;
+        gather key_load;
+      ]
     end
   | A.As_v ((_, v) as expr_v) ->
     begin match get_id_of_simple_lvar_opt v with
     | Some value_id ->
       let value_local = Local.Named value_id in
-      None, value_local, [], []
+      None, value_local, empty
     | None ->
       let value_local = Local.get_unnamed_local () in
       let value_preamble, value_load =
         emit_iterator_lvalue_storage env expr_v value_local in
-      None, value_local, [], value_preamble @ value_load
+      None, value_local, gather [ gather value_preamble; gather value_load ]
     end
 
 (* Emit code for either the key or value l-value operation in foreach await.
@@ -1027,15 +1031,6 @@ and emit_iterator_lvalue_storage env v local =
       instr_unsetl local
     ]
 
-and wrap_non_empty_block_in_fault prefix block fault_block =
-  match block with
-  | [] -> prefix
-  | block ->
-    instr_try_fault
-      (Label.next_fault())
-      (gather @@ prefix::block)
-      fault_block
-
 and emit_foreach env pos collection await_pos iterator block =
   Local.scope @@ fun () ->
     match await_pos with
@@ -1082,78 +1077,36 @@ and emit_foreach_await env pos collection iterator block =
   ]
 
 and emit_foreach_ env pos collection iterator block =
-  let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
+  let instr_collection = emit_expr ~need_ref:false env collection in
+  Scope.with_unnamed_locals_and_iterators @@ fun () ->
   let iterator_number = Iterator.get_iterator () in
-  let fault_label = Label.next_fault () in
   let loop_break_label = Label.next_regular () in
   let loop_continue_label = Label.next_regular () in
   let loop_head_label = Label.next_regular () in
-  let key_local_opt, value_local, key_preamble, value_preamble =
+  let key_local_opt, value_local, preamble =
     emit_iterator_key_value_storage env iterator
   in
-  let fault_block_local local = gather [
-    emit_pos enclosing_span;
-    instr_unsetl local;
-    instr_unwind
-  ]
-  in
-  let init, next, preamble = match key_local_opt with
+  let init, next = match key_local_opt with
   | Some (key_local) ->
-    let init =
-      instr_iterinitk iterator_number loop_break_label value_local key_local in
-    let cont =
-      instr_iternextk iterator_number loop_head_label value_local key_local in
-    let preamble =
-      wrap_non_empty_block_in_fault
-        (instr_label loop_head_label)
-        value_preamble
-        (fault_block_local value_local)
-    in
-    let preamble =
-      wrap_non_empty_block_in_fault
-        preamble
-        key_preamble
-        (fault_block_local key_local)
-    in
-    init, cont, preamble
+    instr_iterinitk iterator_number loop_break_label value_local key_local,
+    instr_iternextk iterator_number loop_head_label value_local key_local
   | None ->
-    let init = instr_iterinit iterator_number loop_break_label value_local in
-    let cont = instr_iternext iterator_number loop_head_label value_local in
-    let preamble =
-      wrap_non_empty_block_in_fault
-        (instr_label loop_head_label)
-        value_preamble
-        (fault_block_local value_local)
-    in
-    init, cont, preamble
+    instr_iterinit iterator_number loop_break_label value_local,
+    instr_iternext iterator_number loop_head_label value_local
   in
-
   let body =
     Emit_env.do_in_loop_body loop_break_label loop_continue_label env
       ~iter:iterator_number block emit_stmt in
-  let result = gather [
-    emit_expr ~need_ref:false env collection;
-    emit_pos (fst collection);
-    init;
-    instr_try_fault
-      fault_label
-      (* try body *)
-      (gather [
-        preamble;
-        body;
-        instr_label loop_continue_label;
-        Emit_pos.emit_pos pos;
-        next
-      ])
-      (* fault body *)
-      (gather [
-        Emit_pos.emit_pos enclosing_span;
-        instr_iterfree iterator_number;
-        instr_unwind ]);
-    instr_label loop_break_label
-  ] in
-  Iterator.free_iterator ();
-  result
+  gather [ instr_collection; emit_pos (fst collection); init ],
+  gather [
+    instr_label loop_head_label;
+    preamble;
+    body;
+    instr_label loop_continue_label;
+    emit_pos pos;
+    next
+  ],
+  gather [ instr_label loop_break_label ]
 
 and emit_yield_from_delegates env pos e =
   let iterator_number = Iterator.get_iterator () in

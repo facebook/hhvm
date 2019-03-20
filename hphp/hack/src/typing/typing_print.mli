@@ -26,6 +26,7 @@ val full_with_identity:
   'b SymbolDefinition.t option ->
   string
 val debug: Typing_env.env -> 'a Typing_defs.ty -> string
+val with_blank_tyvars: (unit -> 'a) -> 'a
 val class_: TypecheckerOptions.t -> Typing_classes_heap.t -> string
 val gconst: TypecheckerOptions.t -> Decl_heap.GConst.t -> string
 val fun_: TypecheckerOptions.t -> Decl_heap.Fun.t -> string

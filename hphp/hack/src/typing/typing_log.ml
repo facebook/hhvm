@@ -10,6 +10,7 @@
 open Core_kernel
 open Typing_defs
 module Env = Typing_env
+module Pr = Typing_print
 
 open Tty
 
@@ -263,7 +264,7 @@ let hh_show_env p env =
 
 (* Log the type of an expression *)
 let hh_show p env ty =
-  let s1 = Typing_print.debug env ty in
+  let s1 = Pr.with_blank_tyvars (fun () -> Pr.debug env ty) in
   let s2_opt = Typing_print.constraints_for_type env ty in
   log_position p
     (fun () ->

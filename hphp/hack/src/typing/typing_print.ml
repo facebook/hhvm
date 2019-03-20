@@ -283,6 +283,7 @@ module Full = struct
   let show_verbose env = Env.get_log_level env "show" > 1
   let varmapping = ref IMap.empty
   let normalize_tvars = ref false
+  let blank_tyvars = ref false
 
   let comma_sep = Concat [text ","; Space]
 
@@ -379,6 +380,8 @@ module Full = struct
       | (_, Tvar _) ->
         if ISet.mem n' st
         then text "[rec]"
+        else if !blank_tyvars
+        then text "#_"
         else text ("#" ^ string_of_int normalized_n)
       | _ ->
         let prepend =
@@ -1574,6 +1577,11 @@ let debug env ty =
   let f_str = full_strip_ns env ty in
   Full.debug_mode := false;
   f_str
+let with_blank_tyvars f =
+  Full.blank_tyvars := true;
+  let res = f () in
+  Full.blank_tyvars := false;
+  res
 
 let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)

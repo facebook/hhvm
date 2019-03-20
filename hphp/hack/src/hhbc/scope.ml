@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Instruction_sequence
+open Iterator
 open Local
 
 (* Run emit () in a new unnamed local scope, which produces three instruction
@@ -26,6 +27,34 @@ let with_unnamed_locals emit =
   next_local := current_next_local;
   temp_local_map := current_temp_local_map;
   let fault_block = gather [ local_unsets; instr_unwind ] in
+  let fault_label = Label.next_fault () in
+  gather [
+    before;
+    instr_try_fault fault_label inner fault_block;
+    after
+  ]
+
+(* Run emit () in a new unnamed local and iterator scope, which produces three
+ * instruction blocks -- before, inner, after. If emit () registered any unnamed
+ * locals or iterators, the inner block will be wrapped in a try/fault that will
+ * unset these unnamed locals and free these iterators upon exception. *)
+let with_unnamed_locals_and_iterators emit =
+  let current_next_local = !next_local in
+  let current_temp_local_map = !temp_local_map in
+  let current_next_iterator = !next_iterator in
+  let before, inner, after = emit () in
+  if current_next_local = !next_local && current_next_iterator = !next_iterator
+  then gather [ before; inner; after ] else
+  let local_unsets = gather @@
+    List.init (!next_local - current_next_local)
+      ~f:(fun idx -> instr_unsetl (Unnamed (idx + current_next_local))) in
+  let iter_frees = gather @@
+    List.init (!next_iterator - current_next_iterator)
+      ~f:(fun idx -> instr_iterfree (Id (idx + current_next_iterator))) in
+  next_local := current_next_local;
+  temp_local_map := current_temp_local_map;
+  next_iterator :=  current_next_iterator;
+  let fault_block = gather [ local_unsets; iter_frees; instr_unwind ] in
   let fault_label = Label.next_fault () in
   gather [
     before;

@@ -1388,43 +1388,28 @@ and unset_in_fault temps b =
 
 (* emits iteration over the ~collection where loop body is
    produced by ~f *)
-and emit_iter ~collection f = Local.scope @@ fun () ->
-  let loop_end = Label.next_regular () in
-  let key_local = Local.get_unnamed_local () in
-  let value_local = Local.get_unnamed_local () in
+and emit_iter ~collection f =
+  Scope.with_unnamed_locals_and_iterators @@ fun () ->
   let iter = Iterator.get_iterator () in
+  let value_local = Local.get_unnamed_local () in
+  let key_local = Local.get_unnamed_local () in
+  let loop_end = Label.next_regular () in
+  let loop_next = Label.next_regular () in
   let iter_init = gather [
     collection;
-    instr_iterinitk iter loop_end value_local key_local;
+    instr_iterinitk iter loop_end value_local key_local
   ] in
-  let loop_next = Label.next_regular () in
-  let iterate =
-    (* try-fault to release temp locals *)
-    unset_in_fault [value_local; key_local] @@ begin fun () ->
-      (* try-fault to release iterator *)
-      try_fault
-        begin fun () ->
-          gather [
-            instr_label loop_next;
-            f value_local key_local;
-            instr_iternextk iter loop_next value_local key_local;
-            instr_label loop_end;
-            instr_unsetl value_local;
-            instr_unsetl key_local;
-          ]
-        end
-        begin fun () ->
-          gather [
-            instr_iterfree iter;
-            instr_unwind;
-          ]
-        end
-      end in
-  Iterator.free_iterator ();
-  gather [
-    iter_init;
-    iterate;
-  ]
+  let iterate = gather [
+    instr_label loop_next;
+    f value_local key_local;
+    instr_iternextk iter loop_next value_local key_local
+  ] in
+  let iter_done = gather [
+    instr_unsetl value_local;
+    instr_unsetl key_local;
+    instr_label loop_end
+  ] in
+  iter_init, iterate, iter_done
 
 and inline_gena_call env arg = Local.scope @@ fun () ->
   (* convert input to array *)

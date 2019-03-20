@@ -1,0 +1,4 @@
+File "newable_targ_extends.php", line 13, characters 21-23:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_extends.php", line 7, characters 29-29:
+  Type parameter T was declared __Newable here

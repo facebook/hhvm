@@ -8,8 +8,7 @@ abstract class A {}
 class C {}
 type Ty = C;
 
-// Note the lack of reify, only testing __Newable
-function f<<<__Newable>> T>(): void {}
+function f<<<__Newable>> reify T>(): void {}
 
 function non_happly(): void {
   f<Ty>();

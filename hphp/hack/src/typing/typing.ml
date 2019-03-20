@@ -2899,6 +2899,9 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
   (* Obtain class info from the cid expression. We get multiple
    * results with a CIexpr that has a union type *)
   let env, tcid, classes = instantiable_cid ~exact:Exact p env cid tal in
+  let allow_abstract_bound_generic = match tcid with
+  | (_, (_, Tabstract (AKgeneric tt, _))), T.CI (_, tn) -> tt = tn
+  | _ -> false in
   let finish env tcid tel tuel ty ctor_fty =
     let env, new_ty =
       let (_, cid_ty), _ = tcid in
@@ -2928,7 +2931,8 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
 
     | (cname, class_info, c_ty)::classes ->
       if check_not_abstract && (Cls.abstract class_info)
-        && not (requires_consistent_construct cid) then
+        && not (requires_consistent_construct cid)
+        && not allow_abstract_bound_generic then
         uninstantiable_error env p cid (Cls.pos class_info) (Cls.name class_info) p c_ty;
       let env, obj_ty_, params =
         match cid, tal, snd c_ty with

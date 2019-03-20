@@ -6,7 +6,9 @@ abstract class AFC {
 }
 class FC extends AFC {}
 
-function f<<<__Newable>> T as AFC>(): void {}
+function f<<<__Newable>> reify T as AFC>(): void {
+  new T();
+}
 
 function g(): void {
   f<FC>();

@@ -5,7 +5,9 @@
 abstract class ACC {}
 class CC extends ACC {}
 
-function f<<<__Newable>> T as ACC>(): void {}
+function f<<<__Newable>> reify T as ACC>(): void {
+  new T();
+}
 
 function g(): void {
   f<CC>();

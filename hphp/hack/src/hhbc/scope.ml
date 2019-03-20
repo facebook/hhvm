@@ -62,6 +62,12 @@ let with_unnamed_locals_and_iterators emit =
     after
   ]
 
+(* An equivalent of with_unnamed_locals () that allocates a single local and
+ * passes it to emit (). *)
+let with_unnamed_local emit = with_unnamed_locals @@ fun () ->
+  let tmp = Local.get_unnamed_local () in
+  emit tmp
+
 (* Pop the top of the stack into an unnamed local, run emit (), then push the
  * stashed value to the top of the stack. *)
 let stash_top_in_unnamed_local emit = with_unnamed_locals @@ fun () ->

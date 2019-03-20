@@ -1411,44 +1411,43 @@ and emit_iter ~collection f =
   ] in
   iter_init, iterate, iter_done
 
-and inline_gena_call env arg = Local.scope @@ fun () ->
+and inline_gena_call env arg =
   (* convert input to array *)
   let load_array = emit_expr ~need_ref:false env arg in
-  let arr_local = Local.get_unnamed_local () in
+  Scope.with_unnamed_local @@ fun arr_local ->
+  let async_eager_label = Label.next_regular () in
+  (* before *)
   gather [
     load_array;
     if hack_arr_dv_arrs () then instr_cast_dict else instr_cast_darray;
-    instr_setl arr_local;
+    instr_popl arr_local
+  ],
+  (* inner *)
+  gather [
+    instr_fpushclsmethodd 1
+      (Hhbc_id.Method.from_raw_string
+         (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
+      (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
+    instr_cgetl arr_local;
+    instr_fcall (make_fcall_args ~async_eager_label 1);
+    instr_await;
+    instr_label async_eager_label;
     instr_popc;
-    begin
-      unset_in_fault [arr_local] @@ fun () ->
-        let async_eager_label = Label.next_regular() in
-        gather [
-          instr_fpushclsmethodd 1
-            (Hhbc_id.Method.from_raw_string
-               (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
-            (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
-          instr_cgetl arr_local;
-          instr_fcall (make_fcall_args ~async_eager_label 1);
-          instr_await;
-          instr_label async_eager_label;
-          instr_popc;
-          emit_iter ~collection:(instr_cgetl arr_local) @@
-          begin fun value_local key_local ->
-            gather [
-              (* generate code for
-                 arr_local[key_local] = WHResult (value_local) *)
-              instr_cgetl value_local;
-              instr_whresult;
-              instr_basel arr_local MemberOpMode.Define;
-              instr_setm 0 (MemberKey.EL key_local);
-              instr_popc;
-            ]
-          end;
-        ]
-    end;
-    instr_pushl arr_local;
-  ]
+    emit_iter ~collection:(instr_cgetl arr_local) @@
+    begin fun value_local key_local ->
+      gather [
+        (* generate code for
+           arr_local[key_local] = WHResult (value_local) *)
+        instr_cgetl value_local;
+        instr_whresult;
+        instr_basel arr_local MemberOpMode.Define;
+        instr_setm 0 (MemberKey.EL key_local);
+        instr_popc;
+      ]
+    end
+  ],
+  (* after *)
+  instr_pushl arr_local
 
 and try_inline_genva_call_ env pos args uargs inline_context =
   let args_count = List.length args in

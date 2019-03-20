@@ -2,14 +2,12 @@
 
 function foo($a) {
   if ($a) {
-    interface A {
-}
+    include '1225-1.inc';
   }
 }
 function bar() {
   if (interface_exists('A')) {
-    class C implements A {
- }
+    include '1225-2.inc';
     $obj = new C;
     var_dump($obj);
   }

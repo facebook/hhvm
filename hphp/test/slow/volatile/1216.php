@@ -5,11 +5,7 @@ function bar() {
  $i < 4;
  $i++) {
     if ($i > 1 && !class_exists('goo')) {
-      class goo {
-        function goo() {
-          echo "goo called\n";
-        }
-      }
+      include '1216.inc';
     }
     $goo = 'goo';
     if (class_exists($goo)) {

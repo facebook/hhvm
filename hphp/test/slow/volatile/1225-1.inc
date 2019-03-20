@@ -1,0 +1,3 @@
+<?hh
+
+interface A {}

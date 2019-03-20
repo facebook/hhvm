@@ -2,10 +2,7 @@
 
 function __autoload($name) {
   if ($name == 'CaT') {
-  class CaT {
-    function __construct() {
-}
-  }
+    include '1228.inc';
   }
   var_dump($name);
 }

@@ -2,12 +2,7 @@
 
 function wrapper($a) {
   if ($a) {
-    class C {
-      private static $v;
-      public static function f() {
-        return self::$v;
-      }
-    }
+    include '1227.inc';
   }
 }
 class C2 {

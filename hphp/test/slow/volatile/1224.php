@@ -2,14 +2,12 @@
 
 function foo($a) {
   if ($a) {
-    class A {
-}
+    include '1224-1.inc';
   }
 }
 function bar() {
   if (class_exists('A')) {
-    class C extends A {
- }
+    include '1224-2.inc';
     $obj = new C;
     var_dump($obj);
   }

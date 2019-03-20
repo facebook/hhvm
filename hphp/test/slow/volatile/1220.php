@@ -7,8 +7,7 @@ function foo() {
  else {
     echo "no\n";
   }
-  class bar {
-  }
+  include '1220.inc';
   if (class_exists('bar')) {
     echo "yes\n";
   }

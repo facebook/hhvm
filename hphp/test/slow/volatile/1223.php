@@ -12,8 +12,7 @@ class A extends B {
 <<__EntryPoint>>
 function main_1223() {
 if (false) {
- class A {
-}
+  include '1223.inc';
 ;
 }
 A::make();

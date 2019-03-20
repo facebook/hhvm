@@ -35,10 +35,9 @@ try {
   }
  while($e = $e->getPrevious());
 }
-// hphpc won't call the autoloader unless there exists a 
+// hphpc won't call the autoloader unless there exists a
 // definition for the class somewhere
 if (true) {
-  class A {
-}
+  include '1229.inc';
 }
 }

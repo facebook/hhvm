@@ -2,8 +2,7 @@
 
 function foo() {
   if (!interface_exists('MyInterface')) {
-    interface MyInterface{
-}
+    include '1218.inc';
 ;
     echo 'no';
   }

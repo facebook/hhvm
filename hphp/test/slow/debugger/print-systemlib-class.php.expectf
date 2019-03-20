@@ -4,12 +4,4 @@ stdClass Object
 (
 )
 
-=new __SystemLib\TarArchiveHandler('/dev/null');
-__SystemLib\TarArchiveHandler Object
-(
-    [contents":"__SystemLib\TarArchiveHandler":private] => HH\Map Object
-        (
-        )
-
-    [symlinks":"__SystemLib\TarArchiveHandler":private] => HH\Map O
-There are more characters. Continue? [y/N]quit
+quit

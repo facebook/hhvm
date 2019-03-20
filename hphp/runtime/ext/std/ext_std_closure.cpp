@@ -38,11 +38,11 @@ const StaticString
 static Array HHVM_METHOD(Closure, __debugInfo) {
   auto closure = c_Closure::fromObject(this_);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
 
   // Serialize 'use' parameters.
   if (auto useVars = closure->getUseVars()) {
-    Array use;
+    Array use = Array::CreateDArray();
 
     auto cls = this_->getVMClass();
     auto propsInfo = cls->declProperties();
@@ -61,7 +61,7 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
 
   // Serialize function parameters.
   if (auto nParams = func->numParams()) {
-   Array params;
+   Array params = Array::CreateDArray();
 
    auto lNames = func->localNames();
    for (int i = 0; i < nParams; ++i) {

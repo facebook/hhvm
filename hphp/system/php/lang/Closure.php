@@ -43,7 +43,7 @@ class Closure {
   /* @return array
    */
   <<__Native>>
-  public final function __debuginfo(): array;
+  public final function __debuginfo(): darray;
 
   /* @param Closure $closure
    * @param object $newthis or null

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function funk($alice, $bob) {
   echo "Args: $alice $bob\n";
@@ -28,6 +28,10 @@ function main() {
   call_user_func($c, 888);
   var_dump($c);
   var_dump($use_by_val, $use_by_ref);
+  $debuginfo = $c->__debuginfo();
+  var_dump(is_darray($debuginfo));
+  var_dump(is_darray($debuginfo['static']));
+  var_dump(is_darray($debuginfo['parameter']));
 }
 
 main();

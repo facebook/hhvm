@@ -440,7 +440,6 @@ public:
   ActRec* getFrameAtDepth(int frame = 0);
   VarEnv* hasVarEnv(int frame = 0);
   void setVar(StringData* name, tv_rval v);
-  void bindVar(StringData* name, tv_lval v);
   Array getLocalDefinedVariables(int frame);
   Variant getEvaledArg(const StringData* val,
                        const String& namespacedName,

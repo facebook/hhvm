@@ -1318,14 +1318,6 @@ void ExecutionContext::setVar(StringData* name, tv_rval v) {
   if (fp) fp->getVarEnv()->set(name, v);
 }
 
-void ExecutionContext::bindVar(StringData* name, tv_lval v) {
-  VMRegAnchor _;
-  ActRec *fp = vmfp();
-  if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
-  if (fp) fp->getVarEnv()->bind(name, v);
-}
-
 Array ExecutionContext::getLocalDefinedVariables(int frame) {
   VMRegAnchor _;
   ActRec *fp = vmfp();

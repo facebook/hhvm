@@ -49,35 +49,6 @@ function call_user_func(mixed $callback,
                         ...$parameters): mixed;
 
 /**
- * Call a static method and pass the arguments as array
- *
- * @param callable $function - The function or method to be called. This
- *   parameter may be an , with the name of the class, and the method, or a
- *   , with a function name.
- * @param array $parameters -
- *
- * @return mixed - Returns the function result, or FALSE on error.
- */
-<<__Native>>
-function forward_static_call_array(mixed $function,
-                                   array $parameters): mixed;
-
-/**
- * Call a static method
- *
- * @param callable $function - The function or method to be called. This
- *   parameter may be an array, with the name of the class, and the method,
- *   or a string, with a function name.
- * @param mixed $parameters... - Zero or more parameters to be passed to the
- *   function.
- *
- * @return mixed - Returns the function result, or FALSE on error.
- */
-<<__Native>>
-function forward_static_call(mixed $function,
-                             ...$parameters): mixed;
-
-/**
  * Return an item from the argument list
  *
  * @param int $arg_num - The argument offset. Function arguments are

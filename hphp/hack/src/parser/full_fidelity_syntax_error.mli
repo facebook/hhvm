@@ -355,6 +355,7 @@ val mutable_return_in_memoize_function: string
 val vararg_and_mutable: string
 val expected_user_attribute : string
 val tparams_in_tconst : string
+val targs_not_allowed : string
 val reified_attribute : string
 val lval_as_expression : string
 val pocket_universe_final_expected : string

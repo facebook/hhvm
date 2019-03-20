@@ -856,6 +856,7 @@ and emit_new env pos expr targs args uargs =
     | [] -> empty
     | uargs :: _ -> emit_expr ~need_ref:false env uargs
   in
+  empty,
   gather [
     newobj_instrs;
     instr_dup;
@@ -864,7 +865,8 @@ and emit_new env pos expr targs args uargs =
     instr_uargs;
     emit_fcall pos args uargs None;
     instr_popc
-  ]
+  ],
+  empty
 
 and emit_clone env expr =
   gather [
@@ -986,40 +988,20 @@ and emit_class_expr env cexpr prop =
       emit_expr ~need_ref:false env e
   in
   match cexpr with
-  | Class_expr ((pos, (A.BracedExpr _ |
+  | Class_expr ((_, (A.BracedExpr _ |
                      A.Call _ |
                      A.Lvar (_, "$this") |
                      A.Binop _ |
                      A.Class_get _)) as e) ->
     (* if class is stored as dollar or braced expression (computed dynamically)
-       it needs to be stored in unnamed local and eventually cleaned.
-       Here we don't use stash_in_local because shape of the code generated
-       for class case is different (PushL is the part of try block) *)
-    let cexpr_local =
-      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
+       it needs to be stored in unnamed local and eventually cleaned. *)
+    let cexpr_local = emit_expr ~need_ref:false env e in
     empty,
-    Local.scope @@ fun () ->
-      let temp = Local.get_unnamed_local () in
-      let fault_label = Label.next_fault () in
-      let block =
-        instr_try_fault
-          fault_label
-          (* try block *)
-          (gather [
-            load_prop ();
-            instr_pushl temp;
-            instr_clsrefgetc;
-          ])
-          (* fault block *)
-          (gather [
-            instr_unsetl temp;
-            emit_pos pos;
-            instr_unwind ]) in
-      gather [
-        cexpr_local;
-        instr_popl temp;
-        block
-      ]
+    gather [
+      cexpr_local;
+      Scope.stash_top_in_unnamed_local load_prop;
+      instr_clsrefgetc
+    ]
   | _ ->
     load_prop (),
     emit_load_class_ref env (fst prop) cexpr
@@ -3499,6 +3481,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
       | [] -> empty
       | uargs :: _ -> emit_expr ~need_ref:false env uargs
     in
+    empty,
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       instr_lhs;
@@ -3508,7 +3491,8 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
       instr_uargs;
       emit_fcall pos args uargs async_eager_label;
       instr_inout_setters
-    ] in
+    ],
+    empty in
 
   match expr_, args with
   | A.Id (_, id), _ ->

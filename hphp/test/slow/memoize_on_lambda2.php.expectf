@@ -1,0 +1,1 @@
+Fatal error: <<__Memoize>> attribute is not allowed on lambdas or anonymous functions. in %s/test/slow/memoize_on_lambda2.php on line 5

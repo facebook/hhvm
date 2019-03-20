@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected T_DOUBLE_ARROW, expecting '\]' in [^\r\n]+ on line \d+)|(Fatal error\: A subscript index cannot be a list in [^\r\n]+\/dict\/hh\-only1\.php on line 5))

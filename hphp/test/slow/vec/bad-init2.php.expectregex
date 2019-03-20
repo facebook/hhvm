@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected '&', expecting ']' in [^\r\n]+ on line \d+)|(Fatal error\: Collection element cannot be marked as reference in [^\r\n]+\/vec\/bad\-init2\.php on line 5))

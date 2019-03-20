@@ -1,0 +1,1 @@
+Fatal error: A variadic parameter ('...') may only appear at the end of a parameter list. in %s/test/slow/hack_mode/function_hint_with_params_trailing_variadic_param.php on line 8

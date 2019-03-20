@@ -1,1 +1,0 @@
-((Fatal error: You seem to be trying to use a different language. May I recommend Hack\? http:\/\/hacklang\.org in \S+\/test\/slow\/parser\/use-strict\.php on line 3)|(Fatal error: Strict mode is not supported for non-Hack files. in \S+\/test\/slow\/parser\/use-strict\.php on line 3))

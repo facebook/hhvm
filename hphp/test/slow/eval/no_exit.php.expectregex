@@ -1,4 +1,0 @@
-Before error, there should be an 'After error'
-
-Fatal error: (syntax error, unexpected \$end|A semicolon \(';'\) is expected here\.) in [^\r\n]+\(\d+\)([^\r\n]+) : eval\(\)'d code on line \d+
-After error

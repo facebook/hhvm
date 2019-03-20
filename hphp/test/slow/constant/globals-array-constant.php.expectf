@@ -1,0 +1,1 @@
+Fatal error: Cannot have globals in constant declaration in %s/test/slow/constant/globals-array-constant.php on line 4

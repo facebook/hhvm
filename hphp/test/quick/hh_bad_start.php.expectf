@@ -1,0 +1,1 @@
+Fatal error: A source file must begin with '<?hh'. in %s/hphp/test/quick/hh_bad_start.php on line 2

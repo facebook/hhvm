@@ -1,1 +1,0 @@
-((Fatal error\: Cannot declare class Blah\\string because the name is already in use\: \(Line\: 4, Char\: 17\) in [^\r\n]+ on line 4)|(Fatal error\: Cannot declare class Blah\\string because the name was explicitly used earlier via a `use' statement on line 3 in [^\r\n]+\/parser\/php\-namespace\-conflict\-4\.php on line 4))

@@ -1,1 +1,0 @@
-Fatal error\: (syntax error, unexpected T_SL|<<__Memoize>> attribute is not allowed on lambdas or anonymous functions\.) in .+memoize_on_lambda1.php on line 4

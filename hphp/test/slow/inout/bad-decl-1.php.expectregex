@@ -1,2 +1,0 @@
-
-((Fatal error\: syntax error, unexpected '\&', expecting T_VARIABLE in [^\r\n]+\/bad\-decl\-1\.php on line 3)|(Fatal error\: An 'inout' parameter cannot be passed by reference \('\&'\)\. in [^\r\n]+\/bad\-decl\-1\.php on line 3))

@@ -1,0 +1,1 @@
+Fatal error: You cannot set an inout decorated argument while calling a function in %s/test/slow/inout/bad-call-1.php on line 6

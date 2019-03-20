@@ -1,2 +1,0 @@
-
-Fatal error: (Invalid UTF-8 codepoint escape sequence|Malformed string literal <<Invalid\\u{nope}Chars>>) in [^\r\n]+\/test\/slow\/parser\/unicode-literal-error\.php on line (4|6)

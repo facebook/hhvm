@@ -1,2 +1,0 @@
-((Fatal error\: HH mode\: <\/script> not allowed \(Line\: \d+, Char\: \d+\)
-syntax error, unexpected T_HH_ERROR, expecting \$end in [^\r\n]+\/test\/slow\/hack_mode\/closing\-tag\-script\.php on line 2)|(Fatal error\: An expression is expected here\. in [^\r\n]+\/hack_mode\/closing\-tag\-script\.php on line 3))

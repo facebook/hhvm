@@ -1,0 +1,1 @@
+Fatal error: cannot declare constructors, destructors, and magic methods such as '__call' async in %s/hphp/test/slow/async/call.php on line 4

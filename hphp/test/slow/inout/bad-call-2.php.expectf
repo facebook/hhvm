@@ -1,0 +1,1 @@
+Fatal error: You cannot decorate a constant as inout in %s/test/slow/inout/bad-call-2.php on line 6

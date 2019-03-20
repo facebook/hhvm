@@ -1,0 +1,1 @@
+Fatal error: Method calls are not allowed on XHP attributes in %s/test/slow/xhp/attr-syntax-2.php on line 6

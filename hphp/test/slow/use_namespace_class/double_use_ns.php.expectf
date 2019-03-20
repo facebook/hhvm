@@ -1,0 +1,1 @@
+Fatal error: Cannot use namespace Bar\Herp as Herp because the name is already in use in %s/test/slow/use_namespace_class/double_use_ns.php on line 4

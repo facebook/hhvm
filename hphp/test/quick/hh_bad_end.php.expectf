@@ -1,0 +1,1 @@
+Fatal error: A hack source file cannot contain '?>'. in %s/hphp/test/quick/hh_bad_end.php on line 3

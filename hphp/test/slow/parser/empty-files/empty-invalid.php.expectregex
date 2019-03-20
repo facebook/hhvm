@@ -1,2 +1,0 @@
-
-Fatal error: (<\?php directive must be followed by whitespace, newline, or EOF \(Line: \d+, Char: \d+\)\nsyntax error, unexpected T_HH_ERROR, expecting \$end|A semicolon \(';'\) is expected here\.) in [^\r\n]+\/slow\/parser\/empty-files\/empty-invalid\.php on line 2

@@ -1,0 +1,1 @@
+Fatal error: A variadic parameter ('...') may not be followed by a comma. in %s/test/slow/hack_mode/function_hint_with_type_hinted_variadic_param-trailing-comma.php on line 8

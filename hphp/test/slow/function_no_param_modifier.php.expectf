@@ -1,0 +1,1 @@
+Fatal error: Parameters cannot have visibility modifiers (except in parameter lists of constructors). in %s/test/slow/function_no_param_modifier.php on line 6

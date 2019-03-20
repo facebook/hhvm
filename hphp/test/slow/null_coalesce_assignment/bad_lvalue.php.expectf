@@ -1,0 +1,1 @@
+Fatal error: literal is not allowed in write context in %s/test/slow/null_coalesce_assignment/bad_lvalue.php on line 4

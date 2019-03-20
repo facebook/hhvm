@@ -1,2 +1,0 @@
-
-Fatal error\: (cannot declare constructors, destructors, and magic methods such as '__call' async|'await' is not allowed in constructors, destructors, or magic methods.) in .+call.php on line \d

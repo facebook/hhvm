@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected T_PUBLIC, expecting [^\r\n]+ in [^\r\n]+\/test\/slow\/function_no_param_modifier\.php on line 6)|(Fatal error\: Parameters cannot have visibility modifiers \(except in parameter lists of constructors\)\. in [^\r\n]+\/function_no_param_modifier\.php on line 6))

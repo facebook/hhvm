@@ -1,2 +1,0 @@
-((Fatal error\: HH mode\: content before <\?hh \(Line\: \d+, Char\: \d+\)
-syntax error, unexpected T_HH_ERROR, expecting \$end in [^\r\n]+ on line 1)|(Fatal error\: A source file must begin with '<\?hh'\. in [^\r\n]+\/hh_bad_start\.php on line 2))

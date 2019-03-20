@@ -1,0 +1,1 @@
+Fatal error: A left brace ('{') is expected here. in %s/test/slow/parser/closure_return_types_both_places.php on line 4

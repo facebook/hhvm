@@ -1,0 +1,1 @@
+Fatal error: Using statement in function scoped form may only be used at the top level of a function or a method in %s/test/slow/using/bad-function1.php on line 3

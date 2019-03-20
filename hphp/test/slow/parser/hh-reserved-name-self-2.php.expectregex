@@ -1,1 +1,0 @@
-((Fatal error\: Cannot use 'Self' as class name as it is reserved in [^\r\n]+ on line 4)|(Fatal error\: Cannot use 'HH\\Self' as class name as it is reserved in [^\r\n]+\/parser\/hh\-reserved\-name\-self\-2\.php on line 4))

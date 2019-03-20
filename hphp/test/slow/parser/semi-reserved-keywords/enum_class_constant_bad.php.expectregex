@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected T_CLASS in [^\r\n]+test\/slow\/parser\/semi\-reserved\-keywords\/enum_class_constant_bad\.php on line 5)|(Fatal error\: Enum element cannot be named 'class' in [^\r\n]+\/parser\/semi\-reserved\-keywords\/enum_class_constant_bad\.php on line 5))

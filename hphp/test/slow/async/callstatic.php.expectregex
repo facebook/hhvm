@@ -1,2 +1,0 @@
-
-Fatal error\: ('await' is not allowed in constructors, destructors, or magic methods.|cannot declare constructors, destructors, and magic methods such as '__callStatic' async) in .+callstatic.php on line \d

@@ -1,0 +1,1 @@
+Fatal error: A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'. in %s/test/slow/variadic_args/lambdas_inout_variadic_1.php on line 3

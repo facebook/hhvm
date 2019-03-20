@@ -1,1 +1,0 @@
-Fatal error: (Unexpected character in input: '' \(ASCII=5\) \(Line: 2, Char: 19\)\nsyntax error, unexpected '\('|This character is invalid\.) in [^\r\n]+\/hphp\/test\/slow\/parser\/afl5934248.php on line 2

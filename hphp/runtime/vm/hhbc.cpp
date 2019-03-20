@@ -1172,7 +1172,6 @@ bool instrIsNonCallControlFlow(Op opcode) {
     case OpAwaitAll:
     case OpYield:
     case OpYieldK:
-    case OpYieldFromDelegate:
     case OpFCallBuiltin:
       return false;
 

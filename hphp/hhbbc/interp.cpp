@@ -4294,8 +4294,9 @@ void in(ISS& env, const bc::ContEnterDelegate&) {
   popC(env);
 }
 
-void in(ISS& env, const bc::YieldFromDelegate&) {
+void in(ISS& env, const bc::YieldFromDelegate& op) {
   push(env, TInitCell);
+  env.propagate(op.target2, &env.state);
 }
 
 void in(ISS& /*env*/, const bc::ContUnsetDelegate&) {}

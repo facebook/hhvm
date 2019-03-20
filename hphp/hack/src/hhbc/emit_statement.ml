@@ -1158,27 +1158,25 @@ and emit_foreach_ env pos collection iterator block =
 and emit_yield_from_delegates env pos e =
   let iterator_number = Iterator.get_iterator () in
   let loop_label = Label.next_regular () in
-  let fault_label = Label.next_fault () in
-  let body =
-    gather [
-      instr_null;
-      instr_label loop_label;
-      instr_contEnterDelegate;
-      instr_yieldFromDelegate iterator_number loop_label;
-    ]
-  in
-  let fault_body =
-    gather [
-      emit_pos (Ast_scope.Scope.get_span env.Emit_env.env_scope);
-      instr_contUnsetDelegate_free iterator_number;
-      instr_unwind;
-    ]
-  in
+  let done_label = Label.next_regular () in
   gather [
     emit_expr ~need_ref:false env e;
     emit_pos pos;
     instr_contAssignDelegate iterator_number;
-    instr_try_fault fault_label body fault_body;
+    instr_try_catch_begin;
+    (* try *)
+    instr_null;
+    instr_label loop_label;
+    instr_contEnterDelegate;
+    instr_yieldFromDelegate iterator_number loop_label;
+    instr_jmp done_label;
+    instr_try_catch_middle;
+    (* catch *)
+    instr_contUnsetDelegate_free iterator_number;
+    instr_throw;
+    instr_try_catch_end;
+    (* done *)
+    instr_label done_label;
     instr_contUnsetDelegate_ignore iterator_number;
   ]
 

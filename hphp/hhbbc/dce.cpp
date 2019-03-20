@@ -2686,17 +2686,14 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     auto const isCFPushTaken = [] (const php::Block* blk, BlockId succId) {
       auto const& lastOpc = blk->hhbcs.back();
-      if (!instrIsNonCallControlFlow(lastOpc.op)) return false;
-      if (!lastOpc.numPush()) return false;
-      if (lastOpc.op == Op::MemoGetEager) {
-        return lastOpc.MemoGetEager.target1 == succId;
+      switch (lastOpc.op) {
+        case Op::MemoGet:
+          return lastOpc.MemoGet.target1 == succId;
+        case Op::MemoGetEager:
+          return lastOpc.MemoGetEager.target1 == succId;
+        default:
+          return false;
       }
-      auto isTaken = false;
-      forEachTakenEdge(
-        lastOpc,
-        [&] (BlockId takenId) { if (takenId == succId) isTaken = true; }
-      );
-      return isTaken;
     };
 
     // Merge the liveIn into the liveOut of each normal predecessor.

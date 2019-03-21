@@ -25,7 +25,7 @@ namespace legal2 {
   use \foo;
 }
 
-namespace legal2 {
+namespace illegal4 {
   use \foo as false;
 }
 

@@ -1,5 +1,5 @@
-((script 435
-  ((list 435
+((script 437
+  ((list 437
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -153,26 +153,26 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (namespace_declaration 41
+     (namespace_declaration 43
       ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 6 ((whitespace 1)))
+       (() name 8 ((whitespace 1)))
        (namespace_body 24
         ((() { 1 ((end_of_line 1)))
          (list 18
           ((namespace_use_declaration 18
             ((((whitespace 2)) use 3 ((whitespace 1))) (missing 0 ())
-             (list 13
-              ((list_item 13
-                ((namespace_use_clause 13
+             (list 7
+              ((list_item 7
+                ((namespace_use_clause 7
                   ((missing 0 ())
                    (qualified_name 4
                     ((list 4
                       ((list_item 1 ((missing 0 ()) (() "\\" 1 ())))
                        (list_item 3
                         ((() name 3 ((whitespace 1))) (missing 0 ())))))))
-                   (() as 2 ((whitespace 1))) (() name 5 ())))
+                   (() as 2 ((whitespace 1))) (missing 0 ())))
                  (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))))
+             (((extra_token_error 5)) ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 47
       ((((end_of_line 1)) namespace 9 ((whitespace 1)))

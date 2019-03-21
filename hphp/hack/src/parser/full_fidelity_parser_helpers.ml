@@ -339,16 +339,6 @@ module WithParser(Parser : Parser_S) = struct
       let parser = with_error parser SyntaxError.error1004 in
       Make.missing parser (pos parser)
 
-  let require_name_allow_std_constants parser =
-    let start_offset = Lexer.end_offset @@ lexer parser in
-    let (parser1, token) = require_name_allow_non_reserved parser in
-    let end_offset = Lexer.end_offset @@ lexer parser1 in
-    let source = Lexer.source @@ lexer parser in
-    let text = SourceText.sub source start_offset (end_offset - start_offset) in
-    match String.lowercase text with
-    | "true" | "false" | "null" -> (parser1, token)
-    | _ -> require_name parser
-
   let next_xhp_category_name parser =
     let lexer = lexer parser in
     let (lexer, token) = Lexer.next_xhp_category_name lexer in

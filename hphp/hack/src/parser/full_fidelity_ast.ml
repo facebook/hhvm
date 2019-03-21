@@ -67,7 +67,6 @@ type env =
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
   ; mutable saw_yield        : bool   (* Information flowing back up *)
   ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
-  ; mutable saw_std_constant_redefinition: bool
   ; mutable lifted_awaits    : lifted_awaits option
   (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
     defaults to 0 if HALT_COMPILER isn't called.
@@ -145,7 +144,6 @@ let make_env
     ; max_depth = 42
     ; saw_yield = false
     ; unsafes = ISet.empty
-    ; saw_std_constant_redefinition = false
     ; saw_compiler_halt_offset = ref None
     ; recursion_depth = ref 0
     ; cls_reified_generics = ref SSet.empty
@@ -178,8 +176,6 @@ module TriviaKind = Trivia.TriviaKind
 module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module SourceText = Trivia.SourceText
-
-module NS = Namespaces
 
 let is_hack (env : env) = env.is_hh_file || env.enable_hh_syntax
 let is_typechecker env =
@@ -2952,10 +2948,6 @@ and pNamespaceUseClause ~prefix env kind node =
     let key = drop_pstr x name in
     let kind = if is_missing clause_kind then kind else clause_kind in
     let alias = if is_missing alias then key else pos_name alias env in
-    begin match String.lowercase (snd alias) with
-    | "null" | "true" | "false" -> env.saw_std_constant_redefinition <- true
-    | _ -> ()
-    end;
     let kind =
       match syntax kind with
       | Token token when Token.kind token = TK.Namespace -> NSNamespace
@@ -3400,39 +3392,6 @@ let scour_comments
  * Front-end matter
 )*****************************************************************************)
 
-let elaborate_toplevel_and_std_constants ast (env: env) source_text =
-  let autoimport =
-    env.is_hh_file || ParserOptions.enable_hh_syntax_for_hhvm env.parser_options
-  in
-  match env.elaborate_namespaces, env.saw_std_constant_redefinition with
-  | true, true ->
-    let elaborate_std_constants nsenv def =
-      let visitor = object
-        inherit [_] endo as super
-        method! on_expr env expr =
-          match expr with
-          | p, True | p, False | p, Null when p <> Pos.none ->
-            let s = Pos.start_cnum p in
-            let e = Pos.end_cnum p in
-            let text = SourceText.sub source_text s (e - s) in
-            let was_renamed, _ =
-              NS.elaborate_id_impl
-                ~autoimport:true
-                nsenv
-                NS.ElaborateConst
-                text in
-            if was_renamed then p, Ast.Id (p, text)
-            else expr
-          | _ -> super#on_expr env expr
-      end in
-      visitor#on_def nsenv def in
-    let parser_options = env.parser_options in
-    NS.elaborate_map_toplevel_defs
-      ~autoimport parser_options ast elaborate_std_constants
-  | true, false ->
-    NS.elaborate_toplevel_defs ~autoimport env.parser_options ast
-  | _ -> ast
-
 let elaborate_halt_compiler ast env source_text  =
   match !(env.saw_compiler_halt_offset) with
     | Some x ->
@@ -3458,7 +3417,15 @@ let elaborate_halt_compiler ast env source_text  =
 
 let lower env ~source_text ~script comments : result =
   let ast = runP pScript script env in
-  let ast = elaborate_toplevel_and_std_constants ast env source_text in
+  let ast =
+    let autoimport =
+      env.is_hh_file ||
+      ParserOptions.enable_hh_syntax_for_hhvm env.parser_options
+    in
+    if env.elaborate_namespaces
+    then Namespaces.elaborate_toplevel_defs ~autoimport env.parser_options ast
+    else ast
+  in
   let ast = elaborate_halt_compiler ast env source_text in
   let content = if env.codegen then "" else SourceText.text source_text in
   { fi_mode = env.fi_mode

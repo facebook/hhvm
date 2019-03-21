@@ -338,7 +338,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, as_token, alias) =
       if Token.kind as_token = As then
         let (parser, as_token) = Make.token parser1 as_token in
-        let (parser, alias) = require_name_allow_std_constants parser in
+        let (parser, alias) = require_name parser in
         (parser, as_token, alias)
       else
         let (parser, missing1) = Make.missing parser (pos parser) in

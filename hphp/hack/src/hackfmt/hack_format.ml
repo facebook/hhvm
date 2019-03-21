@@ -3215,7 +3215,20 @@ and transform_node_if_ignored node =
     let node, trailing_trivia = remove_trailing_trivia node in
     Some(Concat[
       transform_leading_trivia leading_before;
-      Newline;
+      (* If we have a non-error-suppression comment here, then we want to ensure
+         that we don't join it up onto the preceding line. Since we only scan
+         leading trivia for hackfmt-ignore comments, and joining the comment
+         onto the preceding line would make it trailing trivia, we would make
+         the ignore comment useless if we joined it with the preceding line
+         (breaking idempotence of hackfmt). Adding [Newline] here ensures a line
+         break.
+
+         Error-suppression comments are different--they are specially handled by
+         the lexer to ensure that they always appear in leading trivia. *)
+      begin match Trivia.kind (List.hd_exn leading_including_and_after) with
+      | TriviaKind.(FixMe | IgnoreError) -> Nothing
+      | _ -> Newline
+      end;
       make_string (Syntax.text node) (Syntax.width node);
       transform_trailing_trivia trailing_trivia;
       if has_newline trailing_trivia then Newline else Nothing;
@@ -3225,12 +3238,20 @@ and transform_node_if_ignored node =
 
 and ignore_re = Str.regexp_string "hackfmt-ignore"
 
+and is_ignore_comment trivia =
+  match Trivia.kind trivia with
+  (* We don't format the node after a comment containing "hackfmt-ignore"... *)
+  | TriviaKind.(DelimitedComment | SingleLineComment) ->
+    begin
+      try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0
+      with Caml.Not_found -> false
+    end
+  (* ...or an error-suppression comment (since they are position-sensitive) *)
+  | TriviaKind.(FixMe | IgnoreError) -> true
+  | _ -> false
+
 and leading_ignore_comment trivia_list =
-  let before = List.take_while
-    trivia_list
-    ~f:(fun trivia ->
-      try (Str.search_forward ignore_re (Trivia.text trivia) 0) < 0
-      with Caml.Not_found -> true) in
+  let before = List.take_while trivia_list ~f:(Fn.non is_ignore_comment) in
   let _, including_and_after = List.split_n trivia_list (List.length before) in
   (before, including_and_after)
 

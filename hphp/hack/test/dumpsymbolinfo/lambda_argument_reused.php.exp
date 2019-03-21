@@ -1,6 +1,28 @@
 {
   "function_calls":[
     {
+      "name":"C::foo",
+      "type":"Method",
+      "pos":{
+        "filename":"lambda_argument_reused.php",
+        "line":13,
+        "char_start":14,
+        "char_end":16
+      },
+      "caller":"test"
+    },
+    {
+      "name":"D::foo",
+      "type":"Method",
+      "pos":{
+        "filename":"lambda_argument_reused.php",
+        "line":13,
+        "char_start":14,
+        "char_end":16
+      },
+      "caller":"test"
+    },
+    {
       "name":"C::__construct",
       "type":"Constructor",
       "pos":{
@@ -26,12 +48,12 @@
   "symbol_types":[
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":3,"char_end":4},
-      "type":"[fun]",
+      "type":"(function({suggest:(C | D)} $x): _)",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":8,"char_end":9},
-      "type":"_",
+      "type":"{suggest:(C | D)}",
       "ident":-187650736
     },
     {
@@ -46,7 +68,7 @@
         "char_start":10,
         "char_end":11
       },
-      "type":"_",
+      "type":"{suggest:(C | D)}",
       "ident":-187650736
     },
     {
@@ -61,12 +83,12 @@
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":16,"char_start":3,"char_end":4},
-      "type":"[fun]",
+      "type":"(function({suggest:(C | D)} $x): _)",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":17,"char_start":3,"char_end":4},
-      "type":"[fun]",
+      "type":"(function({suggest:(C | D)} $x): _)",
       "ident":0
     }
   ]

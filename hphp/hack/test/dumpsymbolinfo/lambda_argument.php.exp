@@ -20,37 +20,37 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":3,"char_end":4},
-      "type":"[fun]",
+      "type":"(function(vec<int> $nums): void)",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":8,"char_end":12},
-      "type":"HackSuggest<vec<int>>",
+      "type":"vec<int>",
       "ident":-602022284
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
-      "type":"vec<nothing>",
+      "type":"vec<int>",
       "ident":0
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":14,"char_end":18},
-      "type":"_",
+      "type":"vec<int>",
       "ident":-602022284
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":21,"char_end":22},
-      "type":"nothing",
+      "type":"int",
       "ident":-336303992
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":28,"char_end":29},
-      "type":"nothing",
+      "type":"int",
       "ident":-336303992
     },
     {
       "pos":{"filename":"lambda_argument.php","line":11,"char_start":3,"char_end":4},
-      "type":"[fun]",
+      "type":"(function(vec<int> $nums): void)",
       "ident":0
     }
   ]

@@ -49,28 +49,6 @@ function call_user_func(mixed $callback,
                         ...$parameters): mixed;
 
 /**
- * Return an item from the argument list
- *
- * @param int $arg_num - The argument offset. Function arguments are
- *   counted starting from zero.
- *
- * @return mixed - Returns the specified argument, or FALSE on error.
- */
-<<__Native("ReadsCallerFrame")>>
-function func_get_arg(int $arg_num): mixed;
-
-/**
- * Returns an array comprising a function's argument list
- *
- * @return mixed - Returns an array in which each element is a copy of
- *   the corresponding member of the current user-defined function's
- *   argument list. Returns false and raises warning when called
- *   from global scope.
- */
-<<__Native("ReadsCallerFrame")>>
-function func_get_args(): mixed;
-
-/**
  * Returns the number of arguments passed to the function
  *
  * @return int - Returns the number of arguments passed into the current
@@ -130,17 +108,5 @@ function register_shutdown_function(mixed $callback,
 <<__Native, __HipHopSpecific>>
 function register_postsend_function(mixed $callback,
                                     ...$parameters): void;
-
-}
-
-namespace __SystemLib {
-
- /**
-  * @param int $offset
-  *
-  * @return mixed
-  */
-  <<__Native("ReadsCallerFrame"), __HipHopSpecific>>
-  function func_slice_args(int $offset): mixed;
 
 }

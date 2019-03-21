@@ -15,8 +15,8 @@ class blarg<X> {
  $this->d = $x;
  }
  }
-function blarg<X>(/*...*/):blarg<X> {
- return new blarg(func_get_args());
+function blarg<X>(...$args):blarg<X> {
+ return new blarg($args);
  }
 
 class Foo<X> implements Face<X> {

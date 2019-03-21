@@ -1,8 +1,8 @@
 <?php
 
 class Foo {
-  public static function bar() {
-    var_dump(func_get_args());
+  public static function bar(...$args) {
+    var_dump($args);
   }
 }
 

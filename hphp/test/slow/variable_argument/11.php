@@ -1,9 +1,8 @@
 <?php
 
-function test() {
-   $n = func_num_args();
-   var_dump($n);
-  $args = func_get_args();
+function test(...$args) {
+  $n = count($args);
+  var_dump($n);
   var_dump($args);
 }
 

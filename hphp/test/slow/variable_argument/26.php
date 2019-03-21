@@ -1,7 +1,7 @@
 <?php
 
-function f() {
-  var_dump(func_get_args());
+function f(...$args) {
+  var_dump($args);
 }
 function g($x) {
   if ($x) $f = 'f';

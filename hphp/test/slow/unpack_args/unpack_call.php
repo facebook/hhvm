@@ -66,7 +66,6 @@ function test_call_array_equivalent($args) {
 
 function variadic_with_func_get_args(...$args) {
   echo '* ', __FUNCTION__, "\n";
-  var_dump(func_get_args());
   var_dump($args);
 }
 

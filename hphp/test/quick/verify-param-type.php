@@ -5,8 +5,8 @@
 // mode, and Option::HardTypeHints, so this test is disabled for repo.
 
 // Make sure we're tolerant of code that swallows typehint failures.
-function error_handler() {
-  var_dump(func_get_args());
+function error_handler(...$args) {
+  var_dump($args);
   return true;
 }
 

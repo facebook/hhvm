@@ -15,9 +15,8 @@ error_reporting(-1);
 
 // function having no declared parameters
 
-function f1()
+function f1(...$argList)
 {
-    $argList = func_get_args();
     echo "f1: # arguments passed is ".count($argList)."\n";
 
     foreach ($argList as $k => $e)

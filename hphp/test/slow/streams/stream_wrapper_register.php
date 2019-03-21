@@ -3,145 +3,145 @@
 class A {
   function __construct() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function dir_closedir() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function dir_opendir($path, $options) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $options));
     return true;
   }
 
   public function dir_readdir() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function dir_rewinddir() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function mkdir($path, $mode, $options) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $mode, $options));
     return true;
   }
 
   public function rename($path_from, $path_to) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path_from, $path_to));
     return true;
   }
 
   public function rmdir($path, $options) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $options));
     return true;
   }
 
   public function stream_cast($cast_as) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($cast_as));
     return false;
   }
 
   public function stream_close() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function stream_eof() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return false;
   }
 
   public function stream_flush() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function stream_lock($operation) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($operation));
     return true;
   }
 
   public function stream_metadata($path, $option, $value) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $option, $value));
     return true;
   }
 
   public function stream_open($path, $mode, $options, &$opened_path) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $mode, $options, $opened_path));
     return true;
   }
 
   public function stream_read($count) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($count));
     return true;
   }
 
   public function stream_seek($offset, $whence = SEEK_SET) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($offset, $whence));
     return true;
   }
 
   public function stream_set_option($option, $arg1, $arg2) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($option, $arg1, $arg2));
     return true;
   }
 
   public function stream_stat() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function stream_tell() {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array());
     return true;
   }
 
   public function stream_truncate($new_size) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($new_size));
     return true;
   }
 
   public function stream_write($data) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($data));
     return true;
   }
 
   public function unlink($path) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path));
     return true;
   }
 
   public function url_stat($path, $flags) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $flags));
     return true;
   }
 

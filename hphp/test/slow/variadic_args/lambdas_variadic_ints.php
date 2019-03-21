@@ -18,8 +18,8 @@ intProvider((int...$x) ==> {
 });
 
 print "Int provider ...\n";
-intProvider((...) ==> {
-  var_dump(func_get_args());
+intProvider((...$args) ==> {
+  var_dump($args);
 });
 
 print "Int provider long closure: int...\$x\n";

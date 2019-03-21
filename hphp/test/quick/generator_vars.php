@@ -36,10 +36,10 @@ function dumpgen($g) {
   }
 }
 
-function getargs($foo) {
+function getargs(...$args) {
   yield 0xdeadbeef;
-  yield func_get_args();
-  yield func_get_arg(3);
+  yield $args;
+  yield $args[3];
 }
 
 function genthrow() {

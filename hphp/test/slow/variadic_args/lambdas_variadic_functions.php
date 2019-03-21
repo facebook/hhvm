@@ -32,7 +32,7 @@ functionProvider(((function (int...):void) ...$fns) ==> {
 
 print "Function provider (function (...):void) ...\$fns\n";
 functionProvider(((function (...):void) ...$fns) ==> {
-  foreach (func_get_args() as $fn) {
+  foreach ($fns as $fn) {
     $fn(1, 2, 3);
   }
 });

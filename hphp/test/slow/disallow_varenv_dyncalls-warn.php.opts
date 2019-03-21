@@ -1,4 +1,0 @@
---count=120
--vHack.Lang.DisallowDynamicVarEnvFuncs=warn
--vEval.JitPGOThreshold=2
--vEval.EnablePHP=1

@@ -17,7 +17,7 @@ class real{
 class string {
 }
 function foo(bool $b1, boolean $b2,             int $i1, integer $i2,             double $d1, float $d2, real $d3,             string $s) {
-  var_dump(func_get_args());
+  var_dump(array($b1, $b2, $i1, $i2, $d1, $d2, $d3, $s));
 }
 
 <<__EntryPoint>>

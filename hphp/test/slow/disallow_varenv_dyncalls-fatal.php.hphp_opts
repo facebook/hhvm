@@ -1,2 +1,0 @@
--vRuntime.Hack.Lang.DisallowDynamicVarEnvFuncs=1 -d hhvm.php7.all=0
--vEval.EnablePHP=1

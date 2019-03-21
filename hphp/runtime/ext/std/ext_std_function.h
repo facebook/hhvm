@@ -32,17 +32,7 @@ Variant HHVM_FUNCTION(call_user_func, const Variant& function,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(func_get_arg, int arg_num);
-
-Variant HHVM_FUNCTION(func_get_args);
-
 Array hhvm_get_frame_args(const ActRec* ar, int offset);
-
-/**
- * HipHop extension that allows requesting only a subset of function arguments.
- * Exposed as __SystemLib\func_slice_args.
- */
-Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset);
 
 ///////////////////////////////////////////////////////////////////////////////
 

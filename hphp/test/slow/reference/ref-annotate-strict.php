@@ -114,7 +114,7 @@ function foo2($x, $y, $z, $t, $q) {
 }
 
 function bar($name, $obj, $params, $data, &$done) {
-  var_dump("bar", func_get_args());
+  var_dump("bar", array($name, $obj, $params, $data, $done));
 }
 
 function intercept() {

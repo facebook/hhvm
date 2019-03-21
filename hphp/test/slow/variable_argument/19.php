@@ -1,10 +1,11 @@
 <?php
 
 class A {
- public function __construct($a) {
-  var_dump(func_num_args());
-  var_dump(func_get_args());
-}
+  public function __construct($a, ...$more_args) {
+    $args = array_merge(array($a), $more_args);
+    var_dump(count($args));
+    var_dump($args);
+  }
 }
 
  <<__EntryPoint>>

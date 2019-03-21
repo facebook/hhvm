@@ -1,10 +1,10 @@
 <?php
 
-function test() {
-   var_dump(func_get_arg(0));
-  var_dump(func_get_arg(1));
-  var_dump(func_get_arg(2));
-  var_dump(func_get_arg(3));
+function test(...$args) {
+  var_dump($args[0]);
+  var_dump($args[1]);
+  var_dump($args[2]);
+  var_dump($args[3]);
 }
 
  <<__EntryPoint>>

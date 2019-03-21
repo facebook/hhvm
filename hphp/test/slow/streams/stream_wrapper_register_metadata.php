@@ -51,7 +51,7 @@ class A {
 
   public function stream_metadata($path, $option, $value) {
     var_dump(__FUNCTION__);
-    var_dump(func_get_args());
+    var_dump(array($path, $option, $value));
     return true;
   }
 

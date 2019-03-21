@@ -1,9 +1,9 @@
 <?php
 
-function test($a) {
-   $n = func_num_args();
-   var_dump($n);
-  $args = func_get_args();
+function test($a, ...$more_args) {
+  $args = array_merge(array($a), $more_args);
+  $n = count($args);
+  var_dump($n);
   var_dump($args);
 }
 

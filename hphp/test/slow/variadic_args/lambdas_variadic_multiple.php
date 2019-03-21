@@ -27,9 +27,9 @@ stringAndIntProvider(($str, ...$x) ==> {
 });
 
 print "String and int provider \$str, ...\n";
-stringAndIntProvider(($str, ...) ==> {
+stringAndIntProvider(($str, ...$args) ==> {
   var_dump($str);
-  var_dump(func_get_args());
+  var_dump(array_merge(array($str), $args));
 });
 
 print "String and tuple provider \$str, ...\$tuples\n";

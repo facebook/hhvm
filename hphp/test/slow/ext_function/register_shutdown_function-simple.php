@@ -27,13 +27,13 @@ function main_register_shutdown_function_simple() {
 });
 
 
-\register_shutdown_function(function () {
-    \var_dump(func_get_args());
+\register_shutdown_function(function (...$args) {
+    \var_dump($args);
 }, 123);
-\register_shutdown_function(function () {
-    \var_dump(func_get_args());
+\register_shutdown_function(function (...$args) {
+    \var_dump($args);
 }, ['foo' => 'bar'], 123);
-\register_shutdown_function(function () {
-    \var_dump(func_get_args());
+\register_shutdown_function(function (...$args) {
+    \var_dump($args);
 }, (object) ['foo' => 'bar']);
 }

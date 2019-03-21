@@ -9,8 +9,8 @@ class A {
 
 class lol {}
 class B {
-  public static function bar() {
-    var_dump(func_get_args());
+  public static function bar(...$args) {
+    var_dump($args);
     $x = new lol();
     return $x;
   }

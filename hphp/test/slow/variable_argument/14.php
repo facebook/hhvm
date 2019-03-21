@@ -1,9 +1,9 @@
 <?php
 
-function test($a) {
-   var_dump(func_get_arg(0));
-  var_dump(func_get_arg(1));
-  var_dump(func_get_arg(2));
+function test($a, ...$more_args) {
+  var_dump($a);
+  var_dump($more_args[0]);
+  var_dump($more_args[1]);
 }
 
  <<__EntryPoint>>

@@ -1,5 +1,5 @@
 <?hh
-function handler() { var_dump(func_get_args()); }
+function handler(...$args) { var_dump($args); }
 set_error_handler('handler');
 class X {
   public static $s = Z::BAR;

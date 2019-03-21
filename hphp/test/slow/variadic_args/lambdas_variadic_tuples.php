@@ -22,8 +22,8 @@ tupleProvider(((int, int) ...$x) ==> {
 });
 
 print "Tuple provider ...\n";
-tupleProvider((...) ==> {
-  var_dump(func_get_args());
+tupleProvider((...$args) ==> {
+  var_dump($args);
 });
 
 print "Tuple provider lambda1\n";

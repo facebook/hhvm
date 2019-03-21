@@ -11,8 +11,7 @@ function g1($a1, $a2=null) {
   return $args;
 }
 
-function g2() {
-  $args = func_get_args();
+function g2(...$args) {
   return $args;
 }
 

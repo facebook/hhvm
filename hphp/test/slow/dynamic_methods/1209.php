@@ -15,12 +15,12 @@ class z {
     var_dump($a11);
     var_dump($a12);
   }
-  function varArgsTest() {
-    $args = func_get_args();
+  function varArgsTest(...$args) {
     var_dump($args);
   }
-  function varArgsTest2($a1, $a2) {
-    $args = func_get_args();
+  function varArgsTest2($a1, $a2, ...$more_args) {
+    $args = array($a1, $a2);
+    $args = array_merge($args, $more_args);
     var_dump($args);
   }
   function refTestHelper(&$x) {

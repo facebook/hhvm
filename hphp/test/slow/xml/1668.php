@@ -1,7 +1,7 @@
 <?php
 
-function parse_callback() {
-  var_dump(func_get_args());
+function parse_callback(...$args) {
+  var_dump($args);
 }
 function main() {
   $p = xml_parser_create();

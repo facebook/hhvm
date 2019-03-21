@@ -129,8 +129,6 @@ module Function = struct
     "echo";
     "exit";
     "die";
-    "func_get_args";
-    "func_get_arg";
   ]
 
   let has_hh_prefix s =

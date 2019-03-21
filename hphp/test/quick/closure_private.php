@@ -54,8 +54,8 @@ class A {
     return $a.$b;
   }
 
-  private function justReturn() {
-    return func_get_args();
+  private function justReturn(...$args) {
+    return $args;
   }
 
   private function double(&$a, &$b) {

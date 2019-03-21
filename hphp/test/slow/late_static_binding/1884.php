@@ -1,8 +1,8 @@
 <?php
 
 class S {
-  public static function t() {
-    echo func_get_arg(0);
+  public static function t($arg) {
+    echo $arg;
   }
 }
 class C {

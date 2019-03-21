@@ -3288,14 +3288,6 @@ and emit_special_function env pos id args uargs default =
          ] end in
     Some instrs
 
-  | "array_slice", [
-    _, A.Call ((_, A.Id (_, s)), _, [], []); (_, A.Int _ as count)
-    ] when not (jit_enable_rename_function ())
-           && String.lowercase @@ SU.strip_ns s = "func_get_args"->
-    let p = Pos.none in
-    Some (emit_call env pos (p,
-        A.Id (p, "\\__SystemLib\\func_slice_args")) [] [count] [] None)
-
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in
     let expr_id = pos, A.Id (pos, "\\hh\\invariant_violation") in

@@ -27,8 +27,6 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_some
 bool(true)
@@ -39,8 +37,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_hack_only
 int(3)
@@ -75,8 +71,6 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_some
 array(2) {
@@ -85,8 +79,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_hack_only
 array(3) {
@@ -119,8 +111,6 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_some
 bool(true)
@@ -130,8 +120,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_hack_only
 array(3) {
@@ -165,40 +153,34 @@ array(0) {
 bool(true)
 array(0) {
 }
-bool(true)
-bool(true)
 string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * variadic_hack_only
 int(0)
 array(0) {
 }
-string(57) "variadic_hack_some() expects exactly 1 parameter, 0 given"
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= static methods ==========
 
 * C::st_variadic_only
 array(0) {
 }
-bool(true)
-bool(true)
 string(56) "st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
 array(0) {
 }
-string(60) "st_variadic_hack_some() expects exactly 1 parameter, 0 given"
+string(61) "st_variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= instance methods ==========
 
 * C::variadic_only
 array(0) {
 }
-bool(true)
-bool(true)
 string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
 array(0) {
 }
-string(57) "variadic_hack_some() expects exactly 1 parameter, 0 given"
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"

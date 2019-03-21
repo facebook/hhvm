@@ -207,10 +207,8 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
  * vmreganchor for all helper calls is a perf regression. */
 bool eagerRecord(const Func* func) {
   const char* list[] = {
-    "func_get_args",
     "array_filter",
     "array_map",
-    "__SystemLib\\func_slice_args",
     "thrift_protocol_read_binary",
     "thrift_protocol_read_binary_struct",
     "thrift_protocol_read_compact",

@@ -10,54 +10,48 @@ class Base
 
 class Derived_1 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array(array($this, 'Base::__construct'), $args);
 	}
 }
 
 class Derived_2 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array(array($this, 'parent::__construct'), $args);
 	}
 }
 
 class Derived_3 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array('Base::__construct', $args);
 	}
 }
 
 class Derived_4 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array('parent::__construct', $args);
 	}
 }
 
 class Derived_5 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array(array('Base', '__construct'), $args);
 	}
 }
 
 class Derived_6 extends Base
 {
-	public function __construct()
+	public function __construct(...$args)
 	{
-		$args = func_get_args();
 		call_user_func_array(array('parent', '__construct'), $args);
 	}
 }

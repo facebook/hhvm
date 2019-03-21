@@ -3,10 +3,8 @@
 class Foo {
   function bar() {
     $abc = 123;
-    $a = function ($x) use ($abc) {
-      $n = func_num_args();
-      $args = func_get_args();
-      var_dump($n, $args);
+    $a = function (...$args) use ($abc) {
+      var_dump(count($args), $args);
     }
 ;
     return $a;

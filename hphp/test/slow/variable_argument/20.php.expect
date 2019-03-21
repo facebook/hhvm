@@ -1,12 +1,14 @@
-int(10)
-array(0) {
+int(1)
+array(1) {
+  [0]=>
+  int(10)
 }
 int(1)
 array(1) {
   [0]=>
   int(1)
 }
-int(1)
+int(2)
 array(2) {
   [0]=>
   int(1)

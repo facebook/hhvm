@@ -369,6 +369,11 @@ void in(ISS& env, const bc::NewDArray& op) {
        effect_free(env), aempty_darray() : some_aempty_darray());
 }
 
+void in(ISS& env, const bc::NewRecord& op) {
+  discard(env, op.keys.size());
+  push(env, TInitCell);
+}
+
 void in(ISS& env, const bc::NewStructArray& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
@@ -527,11 +532,6 @@ void in(ISS& env, const bc::NewPair& /*op*/) {
   popC(env); popC(env);
   auto const name = collections::typeToString(CollectionType::Pair);
   push(env, objExact(env.index.builtin_class(name)));
-}
-
-void in(ISS& env, const bc::NewRecord& /*op*/) {
-  // TODO(arnabde)
-  always_assert(false);
 }
 
 void in(ISS& env, const bc::ColFromArray& op) {

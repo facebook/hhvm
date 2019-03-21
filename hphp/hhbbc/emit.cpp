@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP { namespace HHBBC {
@@ -1464,6 +1465,29 @@ void emit_pseudomain(EmitUnitState& state,
   emit_finish_func(state, pm, *fe, info);
 }
 
+void emit_record(UnitEmitter& ue, const php::Record& rec) {
+  auto const re = ue.newRecordEmitter(rec.name->toCppString());
+  re->init(
+      std::get<0>(rec.srcInfo.loc),
+      std::get<1>(rec.srcInfo.loc),
+      rec.attrs,
+      rec.srcInfo.docComment
+  );
+  re->setUserAttributes(rec.userAttributes);
+  for (auto&& f : rec.fields) {
+    re->addField(
+        f.name,
+        f.attrs,
+        f.userType,
+        f.typeConstraint,
+        f.docComment,
+        &f.val,
+        RepoAuthType{},
+        f.userAttributes
+    );
+  }
+}
+
 void emit_class(EmitUnitState& state,
                 UnitEmitter& ue,
                 PreClassEmitter* pce,
@@ -1672,6 +1696,10 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   for (auto tid : state.typeAliasInfo) {
     emit_typealias(*ue, *unit.typeAliases[tid]);
+  }
+
+  for (size_t id = 0; id < unit.records.size(); ++id) {
+    emit_record(*ue, *unit.records[id]);
   }
 
   // Top level funcs need to go after any non-top level funcs. See

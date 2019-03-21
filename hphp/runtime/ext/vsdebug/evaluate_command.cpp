@@ -119,6 +119,8 @@ request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
   return frame->m_requestId;
 }
 
+static const StaticString s_varName("_");
+
 bool EvaluateCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
@@ -162,6 +164,16 @@ bool EvaluateCommand::executeImpl(
       folly::dynamic& body = (*responseMsg)["body"];
       body["type"] = "";
       return false;
+    }
+  }
+
+  if (evalContext == "repl") {
+    if (g_context->getStackFrame()) {
+      g_context->setVar(
+        s_varName.get(), executor.m_result.result.asTypedValue());
+    } else {
+      g_context->m_globalVarEnv->set(
+        s_varName.get(), executor.m_result.result.asTypedValue());
     }
   }
 

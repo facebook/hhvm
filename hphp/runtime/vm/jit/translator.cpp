@@ -133,6 +133,8 @@ static const struct {
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
+  // TODO (arnabde): Create OutRecord
+  { OpNewRecord,   {StackN,             Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpClsCns,      {None,             Stack1,       OutUnknown      }},
@@ -334,6 +336,7 @@ static const struct {
   { OpEval,        {Stack1,           Stack1,       OutUnknown      }},
   { OpDefTypeAlias,{None,             None,         OutNone         }},
   { OpDefCls,      {None,             None,         OutNone         }},
+  { OpDefRecord,   {None,             None,         OutNone         }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
   { OpAliasCls,    {Stack1,           Stack1,       OutBoolean      }},
 
@@ -852,6 +855,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IsTypeC:
   case Op::IncDecL:
   case Op::DefCls:
+  case Op::DefRecord:
   case Op::AliasCls:
   case Op::Eq:
   case Op::Neq:
@@ -984,6 +988,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewObj:
   case Op::NewObjD:
   case Op::NewObjS:
+  case Op::NewRecord:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:

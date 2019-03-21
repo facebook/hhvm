@@ -527,6 +527,8 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
+    case KindOfRecord:  // TODO(arnabde)
+      break;
   }
   not_reached();
 }

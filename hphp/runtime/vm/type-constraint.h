@@ -298,6 +298,10 @@ struct TypeConstraint {
     return !isSelf() && !isParent() && !isCallable() && !isNoReturn();
   }
 
+  bool validForField() const {
+    return !isSelf() && !isParent() && !isCallable() && !isNoReturn();
+  }
+
   /*
    * A string representation of this type constraint.
    */

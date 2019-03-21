@@ -805,6 +805,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + (RuntimeOption::DisableStaticLocalVariables ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackRecords ? '1' : '0')
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()
     + hackc_version();

@@ -172,6 +172,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
+    case HeaderKind::Record:
       break;
     case HeaderKind::Free:
     case HeaderKind::Hole:

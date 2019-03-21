@@ -18,6 +18,7 @@
 #define incl_HPHP_VARIANT_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -929,6 +930,7 @@ struct Variant : private TypedValue {
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRecord:
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
@@ -1745,6 +1747,9 @@ private:
         return;
       case KindOfRef:
         assertx(m_data.pref->checkCount());
+        return;
+      case KindOfRecord:
+        assertx(m_data.prec->checkCount());
         return;
     }
     not_reached();

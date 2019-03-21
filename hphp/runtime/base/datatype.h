@@ -78,6 +78,7 @@ namespace HPHP {
   DT(Double,             8) \
   DT(ClsMeth,            9) \
   DT(Func,              10) \
+  DT(Record,            11) \
   DT(Class,             12) \
 
 enum class DataType : int8_t {
@@ -119,7 +120,7 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
 auto constexpr kMaxDataType = dt_t(KindOfClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
-auto constexpr kMaxRefCountedDataType = dt_t(KindOfClsMeth);
+auto constexpr kMaxRefCountedDataType = dt_t(KindOfRecord);
 
 /*
  * A DataType is a refcounted type if and only if it has this bit set.
@@ -347,6 +348,7 @@ constexpr bool isIntType(DataType t) { return t == KindOfInt64; }
 constexpr bool isBoolType(DataType t) { return t == KindOfBoolean; }
 constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
+constexpr bool isRecordType(DataType t) { return t == KindOfRecord; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }

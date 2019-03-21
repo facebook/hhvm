@@ -667,6 +667,8 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfClass:
     case KindOfClsMeth:
       return init_null();
+    case KindOfRecord:
+      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
   not_reached();
 }

@@ -44,6 +44,7 @@ bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfResource:
+    case KindOfRecord:
       return false;
 
     case KindOfClass: {

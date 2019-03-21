@@ -41,6 +41,7 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
+  s_record("record"),
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
@@ -192,6 +193,7 @@ struct TypeExistsChecker {
     return m_ne->getCachedTypeAlias() != nullptr;
   }
 };
+// TODO (T41179180:Support records)
 struct ClassOrTypeExistsChecker {
   const String& m_name;
   mutable NamedEntity* m_ne;
@@ -206,6 +208,21 @@ struct ClassOrTypeExistsChecker {
     }
     return m_ne->getCachedClass() != nullptr ||
            m_ne->getCachedTypeAlias() != nullptr;
+  }
+};
+struct RecordExistsChecker {
+  const String& m_name;
+  mutable NamedEntity* m_ne;
+  explicit RecordExistsChecker(const String& name)
+    : m_name(name), m_ne(nullptr) {}
+  bool operator()() const {
+    if (!m_ne) {
+      m_ne = NamedEntity::get(m_name.get(), false);
+      if (!m_ne) {
+        return false;
+      }
+    }
+    return m_ne->getCachedRecord() != nullptr;
   }
 };
 }
@@ -374,6 +391,22 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
     if (res == StopAutoloading) return false;
   }
   return autoloadClassPHP5Impl(className, forceSplStack);
+}
+
+bool AutoloadHandler::autoloadRecord(const String& recName) {
+  if (recName.empty()) return false;
+  return !m_map.isNull() &&
+         loadFromMap(recName, s_record,
+                     true, RecordExistsChecker(recName)) != Failure;
+}
+
+template<>
+bool AutoloadHandler::autoloadType<Class>(const String& name) {
+  return autoloadClass(name);
+}
+template<>
+bool AutoloadHandler::autoloadType<Record>(const String& name) {
+  return autoloadRecord(name);
 }
 
 bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,

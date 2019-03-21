@@ -447,6 +447,7 @@ void emitEval(IRGS& env)                      { INTERP }
 void emitDefTypeAlias(IRGS& env, uint32_t)    { INTERP }
 void emitDefCns(IRGS& env, const StringData*) { INTERP }
 void emitDefCls(IRGS& env, uint32_t)          { INTERP }
+void emitDefRecord(IRGS& env, uint32_t)       { INTERP }
 void emitAliasCls(IRGS& env,
                   const StringData*,
                   const StringData*)          { INTERP }

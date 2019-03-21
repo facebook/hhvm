@@ -618,6 +618,11 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
+void emitNewRecord(IRGS& env, const StringData*, const ImmVector&) {
+  // TODO(arnabde)
+  always_assert(false);
+}
+
 void emitColFromArray(IRGS& env, CollectionType type) {
   assertx(type != CollectionType::Pair);
   auto const arr = popC(env);

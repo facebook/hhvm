@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/unit.h"
@@ -103,6 +104,7 @@ UnitEmitter::~UnitEmitter() {
   if (m_bc) free(m_bc);
 
   for (auto& pce : m_pceVec) delete pce;
+  for (auto& re : m_reVec) delete re;
 }
 
 
@@ -274,6 +276,24 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
   PreClassEmitter* pce = newBarePreClassEmitter(name, hoistable);
   addPreClassEmitter(pce);
   return pce;
+}
+
+void UnitEmitter::addRecordEmitter(RecordEmitter* re) {
+  // NOTE: Records don't have m_hoistable yet. So this does nothing.
+  return;
+}
+
+
+RecordEmitter* UnitEmitter::newBareRecordEmitter(const std::string& name) {
+  auto const re = new RecordEmitter(*this, m_reVec.size(), name);
+  m_reVec.push_back(re);
+  return re;
+}
+
+RecordEmitter* UnitEmitter::newRecordEmitter(const std::string& name) {
+  auto const re = newBareRecordEmitter(name);
+  addRecordEmitter(re);
+  return re;
 }
 
 Id UnitEmitter::pceId(folly::StringPiece clsName) {
@@ -471,6 +491,9 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (auto& pce : m_pceVec) {
       pce->commit(txn);
     }
+    for (auto& re : m_reVec) {
+      re->commit(txn);
+    }
 
     for (int i = 0, n = m_mergeableStmts.size(); i < n; i++) {
       switch (m_mergeableStmts[i].first) {
@@ -607,6 +630,9 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
+  }
+  for (auto const& re : m_reVec) {
+    u->m_records.push_back(RecordPtr(re->create(*u)));
   }
   u->m_typeAliases = m_typeAliases;
   u->m_metaData = m_metaData;
@@ -888,6 +914,7 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
     getUnitArrays[repoId].get(ue);
     getUnitArrayTypeTable[repoId].get(ue);
     m_repo.pcrp().getPreClasses[repoId].get(ue);
+    m_repo.rrp().getRecords[repoId].get(ue);
     getUnitMergeables[repoId].get(ue);
     getUnitLineTable[repoId].get(ue.m_sn, ue.m_lineTable);
     m_repo.frp().getFuncs[repoId].get(ue);

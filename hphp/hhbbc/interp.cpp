@@ -529,6 +529,11 @@ void in(ISS& env, const bc::NewPair& /*op*/) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
+void in(ISS& env, const bc::NewRecord& /*op*/) {
+  // TODO(arnabde)
+  always_assert(false);
+}
+
 void in(ISS& env, const bc::ColFromArray& op) {
   popC(env);
   auto const type = static_cast<CollectionType>(op.subop1);
@@ -3946,6 +3951,7 @@ void in(ISS& env, const bc::ReqDoc&)    { inclOpImpl(env); }
 void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
 void in(ISS& /*env*/, const bc::DefCls&) {}
+void in(ISS& /*env*/, const bc::DefRecord&) {}
 void in(ISS& /*env*/, const bc::DefClsNop&) {}
 void in(ISS& env, const bc::AliasCls&) {
   popC(env);

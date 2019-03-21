@@ -123,8 +123,9 @@ static_assert(typeToDestrIdx(KindOfObject)   == 7, "Object destruct index");
 static_assert(typeToDestrIdx(KindOfResource) == 8, "Resource destruct index");
 static_assert(typeToDestrIdx(KindOfRef)      == 9, "Ref destruct index");
 static_assert(typeToDestrIdx(KindOfClsMeth)  == 10, "ClsMeth destruct index");
+static_assert(typeToDestrIdx(KindOfRecord)   == 11, "Record destruct index");
 
-static_assert(kDestrTableSize == 11,
+static_assert(kDestrTableSize == 12,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -140,6 +141,7 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
   (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
   (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
+  (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
 };
 
 #define IMPLEMENT_SET(argType, setOp)                     \
@@ -302,6 +304,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
+    case KindOfRecord:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
@@ -343,6 +346,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
 
     case KindOfBoolean:
@@ -400,6 +404,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
   }
   not_reached();
@@ -449,7 +454,9 @@ bool Variant::toBooleanHelper() const {
       raiseClsMethConvertWarningHelper("bool");
       return true;
     case KindOfRef:           return m_data.pref->var()->toBoolean();
-      always_assert(false);
+    case KindOfRecord:
+      raise_convert_record_to_type("bool");
+      return false;
   }
   not_reached();
 }
@@ -483,7 +490,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       raiseClsMethConvertWarningHelper("int");
       return 1;
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
-      always_assert(false);
+    case KindOfRecord:
+      raise_convert_record_to_type("int");
+      return 0;
   }
   not_reached();
 }
@@ -517,7 +526,9 @@ double Variant::toDoubleHelper() const {
       raiseClsMethConvertWarningHelper("double");
       return 1.0;
     case KindOfRef:           return m_data.pref->var()->toDouble();
-      always_assert(false);
+    case KindOfRecord:
+      raise_convert_record_to_type("double");
+      return 0.0;
   }
   not_reached();
 }
@@ -556,8 +567,9 @@ Array Variant::toPHPArrayHelper() const {
       return make_packed_array(
         m_data.pclsmeth->getCls(), m_data.pclsmeth->getFunc());
     case KindOfRef:           return m_data.pref->var()->toArray();
-      always_assert(false);
-
+    case KindOfRecord:
+      raise_convert_record_to_type("array");
+      return empty_array();
   }
   not_reached();
 }
@@ -585,6 +597,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
@@ -592,7 +605,6 @@ Resource Variant::toResourceHelper() const {
 
     case KindOfRef:
       return m_data.pref->var()->toResource();
-
   }
   not_reached();
 }
@@ -684,6 +696,9 @@ void Variant::setEvalScalar() {
     case KindOfFunc:
     case KindOfClass:
       break;
+
+    case KindOfRecord:
+      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper();

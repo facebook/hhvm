@@ -880,6 +880,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewVecArray:     // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::NewRecord:       // TWO(SA,VSA),  SMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
   case Op::RecordReifiedGeneric: // ONE(IVA),CMANY,   ONE(CV)
   case Op::ReifiedName:     // ONE(IVA),     CMANY,   ONE(CV)
@@ -1298,6 +1299,14 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
+    case Op::DefRecord: {
+      auto const id = getImm(pc, 0).u_IVA;
+      if (id >= unit()->numRecords()) {
+        ferror("{} references nonexistent record ({})\n", opcodeToName(op), id);
+        return false;
+      }
+      break;
+    }
     case Op::CreateCl: {
       auto const id = getImm(pc, 1).u_IVA;
       if (id >= unit()->numPreClasses()) {
@@ -1674,6 +1683,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewDictArray:
     case Op::NewLikeArrayL:
     case Op::NewPackedArray:
+    case Op::NewRecord:
     case Op::NewStructArray:
     case Op::NewStructDArray:
     case Op::NewStructDict:
@@ -2049,6 +2059,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: defines and includes
     case Op::DefCls:
     case Op::DefClsNop:
+    case Op::DefRecord:
     case Op::AliasCls:
     case Op::DefCns:
     case Op::DefTypeAlias:

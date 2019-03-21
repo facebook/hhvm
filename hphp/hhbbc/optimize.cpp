@@ -1424,6 +1424,7 @@ Bytecode gen_constant(const Cell& cell) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord: // TODO(arnabde)
       always_assert(0 && "invalid constant in propagate_constants");
   }
   not_reached();

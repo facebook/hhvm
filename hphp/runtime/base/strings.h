@@ -35,6 +35,7 @@ auto constexpr DIVISION_BY_ZERO =
 auto constexpr NEGATIVE_SHIFT = "Bit shift by negative number";
 auto constexpr UNDEFINED_VARIABLE = "Undefined variable: %s";
 auto constexpr UNKNOWN_CLASS = "Class undefined: %s";
+auto constexpr UNKNOWN_RECORD = "Record undefined: %s";
 auto constexpr CANT_ACCESS_SELF =
   "Cannot access self:: when no class scope is active";
 auto constexpr CANT_ACCESS_PARENT_WHEN_NO_CLASS =
@@ -120,6 +121,8 @@ auto constexpr REIFIED_GENERICS_NOT_GIVEN =
   "Cannot call a reified function without the reified generics";
 auto constexpr NEW_STATIC_ON_REIFIED_CLASS =
   "Cannot call new static since class %s has reified generics";
+auto constexpr RECORD_NOT_SUPPORTED =
+  "Records are not supported here";
 
 auto constexpr CLSMETH_COMPAT_IS_ARR = "is_array() called on clsmeth";
 auto constexpr CLSMETH_COMPAT_IS_VEC = "is_vec() called on clsmeth";

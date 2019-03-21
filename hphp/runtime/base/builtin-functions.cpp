@@ -87,6 +87,9 @@ const StaticString s_cmpWithKeyset(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "keysets"
 );
+const StaticString s_cmpWithRecord(
+  "Cannot use relational comparison operators to compare records"
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -763,6 +766,10 @@ void throw_vec_compare_exception() {
 
 void throw_dict_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
+}
+
+void throw_record_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRecord);
 }
 
 void throw_keyset_compare_exception() {

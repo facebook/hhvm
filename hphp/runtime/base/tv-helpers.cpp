@@ -138,6 +138,11 @@ bool cellIsPlausible(const Cell cell) {
         assertx(cell.m_data.pobj->kindIsValid());
         assertx(cell.m_data.pobj->checkCountZ());
         return;
+      case KindOfRecord:
+        assertPtr(cell.m_data.prec);
+        assertx(cell.m_data.prec->kindIsValid());
+        assertx(cell.m_data.prec->checkCount());
+        return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
         assertx(cell.m_data.pres->kindIsValid());

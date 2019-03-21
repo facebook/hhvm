@@ -68,6 +68,21 @@ inline const PreClassEmitter* UnitEmitter::pce(Id preClassId) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// RecordEmitters.
+
+inline size_t UnitEmitter::numRecords() const {
+  return m_reVec.size();
+}
+
+inline RecordEmitter* UnitEmitter::re(Id recordId) {
+  return m_reVec[recordId];
+}
+
+inline const RecordEmitter* UnitEmitter::re(Id recordId) const {
+  return m_reVec[recordId];
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
 
 inline const std::vector<TypeAlias>& UnitEmitter::typeAliases() const {

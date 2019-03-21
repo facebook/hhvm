@@ -37,7 +37,8 @@ private:
                      m_persistent_dict, m_dict,
                      m_persistent_shape, m_shape,
                      m_persistent_keyset, m_keyset,
-                     m_object, m_resource, m_ref, m_func, m_class, m_clsmeth;
+                     m_object, m_resource, m_ref, m_func, m_class, m_clsmeth,
+                     m_record;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

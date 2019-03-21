@@ -152,10 +152,6 @@ let expand_type env x =
     else env, ty
   | x -> env, x
 
-let tyvar_is_solved env x =
-  let env, x = get_var env x in
-  IMap.has_key x env.tenv
-
 let make_ft p reactivity is_coroutine params ret_ty =
   let arity = List.length params in
   {

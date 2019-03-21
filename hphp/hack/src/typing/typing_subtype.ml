@@ -2615,7 +2615,7 @@ let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
       force_solve force_solve_to_nothing var, [])]));
 
   (* Don't try and solve twice *)
-  if Env.tyvar_is_solved env var
+  if tyvar_is_solved env var
   then env
   else
   let tyvar_info = Env.get_tyvar_info env var in

@@ -158,10 +158,6 @@ let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)
 let instr_popv = instr (IBasic PopV)
 let instr_popl l = instr (IMutator (PopL l))
-let instr_pop flavor =
-  match flavor with
-  | Flavor.Ref -> instr_popv
-  | Flavor.Cell -> instr_popc
 
 let instr_pushl local = instr (IGet (PushL local))
 let instr_throw = instr (IContFlow Throw)

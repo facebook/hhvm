@@ -2824,19 +2824,18 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        instr (IBase (BaseC (base_offset, base_mode))))
        1
 
-and strip_ref e =
-  match snd e with
-  | A.Unop (A.Uref, e) -> e
-  | _ -> e
-
 and emit_ignored_expr env ?(pop_pos = Pos.none) e =
   match snd e with
   | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
-  | _ ->
-    let instrs, flavor = emit_flavored_expr env e in
+  | A.Binop (A.Eq None, _, rhs) when expr_starts_with_ref rhs ->
     gather [
-      instrs;
-      emit_pos_then pop_pos @@ instr_pop flavor;
+      emit_expr ~need_ref:true env e;
+      emit_pos_then pop_pos @@ instr_popv
+    ]
+  | _ ->
+    gather [
+      emit_expr ~need_ref:false env e;
+      emit_pos_then pop_pos @@ instr_popc
     ]
 
 (*
@@ -3475,17 +3474,6 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
     | None -> default ()
     end
   | _ -> default ()
-
-(* Emit code for an expression that might leave a cell or reference on the
- * stack. Return which flavor it left.
- *)
-and emit_flavored_expr env expr =
-  match snd expr with
-  | A.Binop (A.Eq None, _, e) when expr_starts_with_ref e ->
-    (* binary assignment rhs starts with ref *)
-    emit_expr ~need_ref:true env expr, Flavor.Ref
-  | _ ->
-    emit_expr ~need_ref:false env expr, Flavor.Cell
 
 and emit_final_member_op stack_index op mk =
   match op with

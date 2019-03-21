@@ -41,19 +41,6 @@ type classref_id = int
 type adata_id = string
 type param_locations = int list
 
-(* These are the three flavors of value that can live on the stack:
- *   C = cell
- *   V = ref
- *   R = return value
- *   F = function argument
- *   U = uninit
- * Note: Function argument and uninit are not added to the type
- *       as they are handled separately
- *)
-module Flavor = struct
-  type t = Cell | Ref
-end
-
 module SpecialClsRef = struct
 
   type t =

@@ -332,7 +332,7 @@ void setStackForBase(ISS& env, Type ty) {
 
   auto const& oldTy = env.state.stack[locSlot].type;
   if (oldTy.subtypeOf(BInitCell)) {
-    env.state.stack[locSlot] = StackElem {std::move(ty)};
+    env.state.stack[locSlot] = StackElem { std::move(ty), NoLocalId };
   }
 }
 

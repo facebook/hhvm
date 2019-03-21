@@ -1684,8 +1684,7 @@ and add_tyvar_upper_bound env r var ty =
         sub_type env lower_bound upper_bound)
         lower_bounds env)
       added_upper_bounds env in
-  if not (Typing_set.is_empty added_upper_bounds) then
-    Env.remove_equivalent_tyvars env var else env
+  env
 
 (* Add a new lower bound ty on var.  Apply transitivity of sutyping,
  * so if we already have var <: tyl, then check that for each ty_super
@@ -1709,8 +1708,7 @@ and add_tyvar_lower_bound env r var ty =
         sub_type env lower_bound upper_bound)
         upper_bounds env)
       added_lower_bounds env in
-  if not (Typing_set.is_empty added_lower_bounds) then
-    Env.remove_equivalent_tyvars env var else env
+  env
 
 and props_to_env env remain props =
   match props with
@@ -2579,6 +2577,23 @@ let bind_to_upper_bound env r var upper_bounds =
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env
 
+let bind_to_equal_bound env r var =
+  let expand_all tyset = Typing_set.map
+    (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
+  let tyvar_info = Env.get_tyvar_info env var in
+  let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
+  let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
+  let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
+  let equal_bounds = Typing_set.remove (var_as_ty var) equal_bounds in
+  match Typing_set.choose_opt equal_bounds with
+  | Some ty -> bind env r var ty
+  | None -> env
+
+let tyvar_is_solved env var =
+  match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
+  | Tvar var' when var' = var -> false
+  | _ -> true
+
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only
  *   covariantly or not at all in the expression type then
@@ -2605,31 +2620,29 @@ let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
   else
   let tyvar_info = Env.get_tyvar_info env var in
   let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
+  let lower_bounds = tyvar_info.Env.lower_bounds and upper_bounds = tyvar_info.Env.upper_bounds in
   match tyvar_info.Env.appears_covariantly, tyvar_info.Env.appears_contravariantly with
   | true, false
   | false, false ->
     (* As in Local Type Inference by Pierce & Turner, if type variable does
      * not appear at all, or only appears covariantly, force to lower bound
      *)
-    bind_to_lower_bound ~freshen:false env r var tyvar_info.Env.lower_bounds
+    bind_to_lower_bound ~freshen:false env r var lower_bounds
   | false, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears only contravariantly, force to upper bound
      *)
-    bind_to_upper_bound env r var tyvar_info.Env.upper_bounds
+    bind_to_upper_bound env r var upper_bounds
   | true, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears both covariantly and contravariantly and there is a type that
      * is both a lower and upper bound, force to that type
      *)
-    let lower_bounds = tyvar_info.Env.lower_bounds in
-    let upper_bounds = tyvar_info.Env.upper_bounds in
-    match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
-    | Some ty -> bind env r var ty
-    | None ->
-      if force_solve_to_nothing || (force_solve && not (TySet.is_empty lower_bounds))
-      then bind_to_lower_bound ~freshen env r var lower_bounds
-      else env
+    let env = bind_to_equal_bound env r var in
+    if not (tyvar_is_solved env var) &&
+      (force_solve_to_nothing || (force_solve && not (TySet.is_empty lower_bounds)))
+    then bind_to_lower_bound ~freshen env r var lower_bounds
+    else env
 
 (* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =

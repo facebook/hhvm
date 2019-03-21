@@ -1,3 +1,1 @@
-File "stack_overflow3.php", line 4, characters 10-13:
-  There are remaining unsolved constraints!: (string <: string && nonnull <: nonnull)
 No errors

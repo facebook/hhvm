@@ -185,8 +185,6 @@ val get_tyvar_type_consts :
   env -> int -> (Nast.sid * locl ty) SMap.t
 val remove_tyvar :
   env -> Ident.t -> env
-val remove_equivalent_tyvars :
-  env -> Ident.t -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val add_fresh_generic_parameter : env -> string -> reified:Nast.reify_kind -> enforceable:bool -> newable:bool -> env * string

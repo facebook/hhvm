@@ -505,20 +505,6 @@ let rec is_tvar ~elide_nullable ty var =
   | (_, Toption ty) when elide_nullable -> is_tvar ~elide_nullable ty var
   | _ -> false
 
-let merge_tvar_info tvinfo1 tvinfo2 =
-  { tyvar_pos = tvinfo1.tyvar_pos;
-    eager_solve_fail = tvinfo1.eager_solve_fail || tvinfo2.eager_solve_fail;
-    lower_bounds = TySet.union tvinfo1.lower_bounds tvinfo2.lower_bounds;
-    upper_bounds = TySet.union tvinfo1.upper_bounds tvinfo2.upper_bounds;
-    appears_covariantly = tvinfo1.appears_covariantly || tvinfo2.appears_covariantly;
-    appears_contravariantly = tvinfo1.appears_contravariantly || tvinfo2.appears_contravariantly;
-    type_constants =
-      (* At this point, type constants of equivalent type variables must
-      have been made equivalent too. *)
-      SMap.union tvinfo1.type_constants tvinfo2.type_constants
-        ~combine:(fun _tconstid ty1 _ty2 -> Some ty1);
-  }
-
 let set_tyvar_info env var tvinfo =
   env_with_tvenv env (IMap.add var tvinfo env.tvenv)
 
@@ -532,53 +518,6 @@ let remove_tyvar env var =
 let set_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
   set_tyvar_info env var { tvinfo with eager_solve_fail = true }
-
-let reachable_from source get_adjacent =
-  let rec dfs pending visited = match pending with
-    | [] -> visited
-    | [] :: pending' -> dfs pending' visited
-    | (v :: vs) :: pending' ->
-      if ISet.mem v visited
-      then dfs (vs :: pending') visited
-      else dfs (get_adjacent v :: vs :: pending') (ISet.add v visited) in
-  dfs [get_adjacent source] (ISet.singleton source)
-
-(* Find type variables in [env.tvenv] equivalent to [var], and for
- * each variable reattach its bounds to [var], rename it to [var],
- * and remove it from [env.tenv]
- *)
-let remove_equivalent_tyvars env var =
-  let select_var_bounds f var =
-    f env var
-    |> TySet.elements
-    |> List.concat_map ~f:(function _, Tvar v -> [v] | _ -> []) in
-  let get_vars_above = select_var_bounds get_tyvar_upper_bounds in
-  let get_vars_below = select_var_bounds get_tyvar_lower_bounds in
-  let vars =
-    ISet.inter
-      (reachable_from var get_vars_above)
-      (reachable_from var get_vars_below)
-    |> ISet.elements in
-  let env, tvinfo = List.fold_left vars
-    ~init:(env, get_tyvar_info env var)
-    ~f:begin fun (env, tvinfo) var' ->
-      if var' = var
-      then env, tvinfo
-      else
-        let tvinfo = merge_tvar_info tvinfo (get_tyvar_info env var') in
-        let env = rename env var' var in
-        let env = remove_tyvar env var' in
-        env, tvinfo
-    end in
-  let redundant_bounds =
-    List.map vars ~f:(fun var -> Reason.none, Tvar var)
-    |> TySet.of_list in
-  let tvinfo =
-    { tvinfo with
-      upper_bounds = TySet.diff tvinfo.upper_bounds redundant_bounds;
-      lower_bounds = TySet.diff tvinfo.lower_bounds redundant_bounds;
-    } in
-  set_tyvar_info env var tvinfo
 
 let get_tyvar_appears_covariantly env var =
   let tvinfo = get_tyvar_info env var in

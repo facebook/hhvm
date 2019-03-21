@@ -97,6 +97,14 @@ type union_list = Env.env -> Reason.t -> locl ty list -> (Env.env * locl ty)
 let (union_list_ref : union_list ref) = ref not_implemented
 let union_list x = !union_list_ref x
 
+type simplify_unions =
+  Env.env ->
+  ?on_tyvar:(Env.env -> Reason.t -> Ident.t -> Env.env * locl ty) ->
+  locl ty ->
+  Env.env * locl ty
+let (simplify_unions_ref : simplify_unions ref) = ref not_implemented
+let simplify_unions x = !simplify_unions_ref x
+
 type diff = locl ty -> locl ty -> locl ty
 let (diff_ref : diff ref) = ref not_implemented
 let diff x = !diff_ref x

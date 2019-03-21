@@ -90,7 +90,7 @@ let get_upper_bounds = Typing_env.get_upper_bounds
 
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
-let simplify_unions = Typing_union.simplify_unions
+let simplify_unions env ty = Typing_union.simplify_unions env ty
 
 let is_untyped env ty =
   Typing_utils.is_any env ty || Typing_utils.is_dynamic env ty

@@ -2608,11 +2608,11 @@ let tyvar_is_solved env var =
  *   there exist i, j such that uj <: ti, which implies ti == uj and allows
  *   us to set v := ti.
  *)
-let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
+let solve_tyvar ~freshen ~force_solve env r var =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b to_nothing=%b #%d"
-      force_solve force_solve_to_nothing var, [])]));
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b #%d"
+      force_solve var, [])]));
 
   (* Don't try and solve twice *)
   if tyvar_is_solved env var
@@ -2639,19 +2639,18 @@ let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
      * is both a lower and upper bound, force to that type
      *)
     let env = bind_to_equal_bound env r var in
-    if not (tyvar_is_solved env var) &&
-      (force_solve_to_nothing || (force_solve && not (TySet.is_empty lower_bounds)))
+    if not (tyvar_is_solved env var) && force_solve
     then bind_to_lower_bound ~freshen env r var lower_bounds
     else env
 
-let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
-  let rec solve_until_concrete_ty env v ty =
-    let env = solve_tyvar ~force_solve ~freshen ~force_solve_to_nothing env r v in
-    let env, ety = Env.expand_type env ty in
+let solve_tyvar ~freshen ~force_solve env r var =
+  let rec solve_until_concrete_ty env v =
+    let env = solve_tyvar ~force_solve ~freshen env r v in
+    let env, ety = Env.expand_var env r v in
     match ety with
-    | _, Tvar v' when v <> v' -> solve_until_concrete_ty env v' ety
+    | _, Tvar v' when v <> v' -> solve_until_concrete_ty env v'
     | _ -> env in
-  solve_until_concrete_ty env var (var_as_ty var)
+  solve_until_concrete_ty env var
 
 (* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =
@@ -2659,7 +2658,7 @@ let solve_all_unsolved_tyvars env =
   then
     IMap.fold
     (fun tyvar _ env ->
-      solve_tyvar ~freshen:false ~force_solve:true ~force_solve_to_nothing:true
+      solve_tyvar ~freshen:false ~force_solve:true
         env Reason.Rnone tyvar) env.Env.tvenv env
   else env
 
@@ -2671,21 +2670,20 @@ let solve_all_unsolved_tyvars env =
  *    #1 := vec<#2>  where C <: #2
  *)
 let expand_type_and_solve env ~description_of_expected p ty =
-  let env, ety = Env.expand_type env ty in
-  match ety with
-  | (r, Tvar v) when not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) ->
-    let env = solve_tyvar ~force_solve:true ~freshen:true ~force_solve_to_nothing:false env r v in
-    let env, ety = Env.expand_type env ty in
-    (* If after solving we still have a type variable, then report an error *)
-    begin match ety with
-    | _, Tvar _ ->
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env)
+  and eager_solve = not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) in
+  if new_inference && eager_solve then
+    let env', ety = Typing_utils.simplify_unions env ty
+      ~on_tyvar:(fun env r v ->
+        let env = solve_tyvar ~force_solve:true ~freshen:true env r v in
+        Env.expand_var env r v) in
+    match ty, ety with
+    | (r, Tvar v), (_, Tunresolved []) when Env.get_tyvar_appears_invariantly env v ->
       Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
       let env = Env.set_tyvar_eager_solve_fail env v in
       env, (Reason.Rsolve_fail p, TUtils.terr env)
-    | _ -> env, ety
-    end
-  | _ ->
-    env, ety
+    | _ -> env', ety
+  else Env.expand_type env ty
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
  * function should produce the largest supertype that is valid for an operation.
@@ -2786,7 +2784,7 @@ let close_tyvars_and_solve env =
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env
-    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~force_solve:false ~force_solve_to_nothing:false
+    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~force_solve:false
       env Reason.Rnone tyvar)
 
 let log_prop env =

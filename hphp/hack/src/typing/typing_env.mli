@@ -28,6 +28,7 @@ val rename : env -> int -> int -> env
 val add : env -> int -> locl ty -> env
 val get_type : env -> Reason.t -> int -> env * locl ty
 val get_type_unsafe : env -> int -> env * locl ty
+val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
@@ -171,6 +172,8 @@ val set_tyvar_eager_solve_fail :
 val get_tyvar_appears_covariantly :
   env -> Ident.t -> bool
 val get_tyvar_appears_contravariantly :
+  env -> Ident.t -> bool
+val get_tyvar_appears_invariantly :
   env -> Ident.t -> bool
 val get_tyvar_info :
   env -> Ident.t -> tyvar_info

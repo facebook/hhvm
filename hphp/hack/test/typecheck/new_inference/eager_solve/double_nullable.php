@@ -2,10 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Inv<T> {
-public function __construct(T $_) {}
-public function get(): ?T {
-return null;
-}
+  public function __construct(T $_) {}
+  public function get(): ?T {
+    return null;
+  }
 }
 
 function expect_int(int $_): void {}

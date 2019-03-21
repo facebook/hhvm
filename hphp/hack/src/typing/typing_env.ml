@@ -143,13 +143,15 @@ let get_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
   tvinfo.eager_solve_fail
 
+let expand_var env r v =
+  let env, ty = get_type env r v in
+  if get_tyvar_eager_solve_fail env v
+  then env, (Reason.Rsolve_fail (Reason.to_pos r), snd ty)
+  else env, ty
+
 let expand_type env x =
   match x with
-  | r, Tvar x ->
-    let env, ty = get_type env r x in
-    if get_tyvar_eager_solve_fail env x
-    then env, (Reason.Rsolve_fail (Reason.to_pos r), snd ty)
-    else env, ty
+  | r, Tvar x -> expand_var env r x
   | x -> env, x
 
 let make_ft p reactivity is_coroutine params ret_ty =
@@ -522,6 +524,9 @@ let get_tyvar_appears_covariantly env var =
 let get_tyvar_appears_contravariantly env var =
   let tvinfo = get_tyvar_info env var in
   tvinfo.appears_contravariantly
+
+let get_tyvar_appears_invariantly env var =
+  (get_tyvar_appears_covariantly env var) && (get_tyvar_appears_contravariantly env var)
 
 let get_tyvar_type_consts env var =
   let tvinfo = get_tyvar_info env var in

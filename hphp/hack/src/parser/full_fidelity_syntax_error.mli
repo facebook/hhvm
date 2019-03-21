@@ -97,6 +97,7 @@ val error1058 : string -> string -> string
 val error1059 : Full_fidelity_token_kind.t -> string
 val error1060 : string
 val error1061 : string
+val error1062 : string
 
 val error2001 : string
 val error2003 : string

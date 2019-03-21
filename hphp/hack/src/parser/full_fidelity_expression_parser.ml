@@ -2227,13 +2227,10 @@ module WithStatementAndDeclAndTypeParser
     Make.tuple_expression parser keyword left_paren items right_paren
 
   and parse_use_variable parser =
-    (* TODO: Is it better that this returns the variable as a *token*, or
-    as an *expression* that consists of the token? We do the former. *)
-    let (parser1, token) = next_token parser in
+    let (_, token) = next_token parser in
     if Token.kind token = Ampersand then
-      let (parser, ampersand) = Make.token parser1 token in
-      let (parser, variable) = require_variable parser in
-      make_and_track_prefix_unary_expression parser ampersand Ampersand variable
+      let parser = with_error parser SyntaxError.error1062 in
+      Make.missing parser (pos parser)
     else
       require_variable parser
 
@@ -2279,11 +2276,6 @@ module WithStatementAndDeclAndTypeParser
       use-variable-name-list:
         variable-name
         use-variable-name-list  ,  variable-name
-
-      TODO: Strict mode requires that it be a list of variables; in
-      non-strict mode we allow variables to be decorated with a leading
-      & to indicate they are captured by reference. We need to give an
-      error in a later pass for this.
     *)
     let (parser, use_token) = optional_token parser Use in
     if SC.is_missing use_token then

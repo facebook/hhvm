@@ -139,7 +139,7 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
         ~default:false ~f:(fun s -> SSet.mem fn_name s) in
     if has_use_list
     then List.fold_left use_list ~init:acc
-      ~f:(fun acc (x, _isref) -> add_local ~barethis:Bare_this acc x)
+      ~f:(fun acc x -> add_local ~barethis:Bare_this acc x)
     else acc
   method! on_class_const acc e _ = this#on_expr acc e
   method! on_call acc e _ el1 el2 =

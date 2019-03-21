@@ -130,6 +130,7 @@ let error1059 terminator = Printf.sprintf
 let error1060 = "Leading markup and `<?hh` are not permitted in `.hack` "^
   "files, which are always strict."
 let error1061 = "A Pocket Universes operator (':@') is expected here."
+let error1062 = "References in use lists are not supported in Hack."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2003 = "A case statement may only appear directly inside a switch."

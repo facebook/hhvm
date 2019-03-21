@@ -71,7 +71,7 @@ class type ['a] ast_visitor_type = object
   method on_darray : 'a -> (targ * targ) option -> (expr * expr) list -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
-  method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
+  method on_efun : 'a -> fun_ -> id list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_expr : 'a -> expr -> 'a
   method on_omitted: 'a -> 'a

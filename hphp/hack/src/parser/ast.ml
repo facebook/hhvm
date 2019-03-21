@@ -461,8 +461,8 @@ and expr_ =
   | New of expr * targ list * expr list * expr list
   | Record of expr * (expr * expr) list
   (* Traditional PHP-style closure with a use list. Each use element is
-    a name and a bool indicating if its a reference or value *)
-  | Efun of fun_ * (id * bool) list
+    a variable name. *)
+  | Efun of fun_ * id list
   (*
    * Hack-style lambda expressions (no id list, we'll find the captures
    * during name resolution).

@@ -1766,10 +1766,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         end;
         let pArg node env =
           match syntax node with
-          | PrefixUnaryExpression
-            { prefix_unary_operator = op; prefix_unary_operand = v } ->
-              pos_name v env, token_kind op = Some TK.Ampersand
-          | Token _ -> pos_name node env, false
+          | Token _ -> pos_name node env
           | _ -> missing_syntax "use variable" node env
           in
         let pUse node =

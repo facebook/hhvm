@@ -1,5 +1,5 @@
-((script 563
-  ((list 563
+((script 499
+  ((list 499
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -146,39 +146,6 @@
                   ((() $ 1 ())
                    (prefix_unary_expression 3
                     ((() $ 1 ()) (variable 2 ((() variable 2 ())))))))))))))))))
-       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
-     (expression_statement 54
-      ((binary_expression 53
-        ((variable 2 ((() variable 2 ((whitespace 1)))))
-         (() = 1 ((whitespace 1)))
-         (function_call_expression 48
-          ((member_selection_expression 7
-            ((variable 4 ((() variable 4 ()))) (() -> 2 ()) (() name 1 ())))
-           (() "(" 1 ())
-           (list 39
-            ((list_item 39
-              ((anonymous_function 39
-                ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-                 (() function 8 ()) (() "(" 1 ()) (missing 0 ())
-                 (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-                 (anonymous_function_use_clause 11
-                  ((() use 3 ((whitespace 1))) (() "(" 1 ())
-                   (list 5
-                    ((list_item 5
-                      ((prefix_unary_expression 5
-                        ((() & 1 ()) (() variable 4 ())))
-                       (missing 0 ())))))
-                   (() ")" 1 ((whitespace 1)))))
-                 (compound_statement 16
-                  ((() { 1 ((whitespace 1)))
-                   (list 12
-                    ((return_statement 12
-                      ((() return 6 ((whitespace 1)))
-                       (variable 4 ((() variable 4 ())))
-                       (() ";" 1 ((whitespace 1)))))))
-                   (() } 1 ())))))
-               (missing 0 ())))))
-           (() ")" 1 ())))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 20
       ((binary_expression 19

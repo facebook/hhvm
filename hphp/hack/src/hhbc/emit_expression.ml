@@ -1113,7 +1113,7 @@ and emit_lambda env fundef ids =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   gather [
     gather @@ List.map ids
-      (fun (id, isref) ->
+      (fun id ->
         match SU.Reified.is_captured_generic @@ snd id with
         | Some (is_fun, i) ->
           if is_in_lambda then
@@ -1121,12 +1121,8 @@ and emit_lambda env fundef ids =
               SU.Reified.reified_generic_captured_name is_fun i))
           else emit_reified_generic_instrs Pos.none ~is_fun i
         | None ->
-          instr (IGet (
-            let lid = get_local env id in
-            if explicit_use
-            then
-              if isref then VGetL lid else CGetL lid
-            else CUGetL lid))
+          let lid = get_local env id in
+          if explicit_use then instr_cgetl lid else instr_cugetl lid
       );
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]

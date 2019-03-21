@@ -305,13 +305,8 @@ and on_expr (p, e) : Aast.expr =
       p
     )
   | Efun (f, use_list) ->
-    let ids = List.map
-      (fun ((p, id), is_ref) ->
-        if is_ref then Errors.unsupported_feature p "References in use list";
-        (p, Local_id.make_unscoped id)
-      )
-      use_list
-    in
+    let ids =
+      List.map (fun ((p, id)) -> (p, Local_id.make_unscoped id)) use_list in
     Aast.Efun (on_fun f, ids)
   | Lfun f -> Aast.Lfun (on_fun f)
   | BracedExpr e -> Aast.BracedExpr (on_expr e)

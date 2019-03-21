@@ -13,7 +13,6 @@ $f = &self::$mySelfThing; // legal
 $f = &$$s; // legal
 $f = &new C(); // legal
 $y = &$$$$$$x; // legal
-$y = $foo->x(function() use (&$foo) { return $foo; }); // legal
 $x = &($foo->bar()); // legal
 $x = &(Arrays::slice(self::NORMALIZED_REQUIRED_COLUMN_NAMES, 0)); // legal
 $x = &(PHP\array_slice($app_alerts_array, -1)); // legal

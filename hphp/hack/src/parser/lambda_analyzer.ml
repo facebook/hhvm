@@ -86,8 +86,6 @@ let param_name node =
   | _ -> None
 
 let use_name node =
-  (* TODO: A use clause can contain ref prefixes on the variables.
-  We should disallow this in a coroutine. *)
   match syntax node with
   | ListItem { list_item = ({ syntax = Token _; _ } as list_item); _ } ->
     token_to_string list_item

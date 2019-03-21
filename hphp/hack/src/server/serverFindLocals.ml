@@ -454,7 +454,7 @@ class local_finding_visitor = object(this)
      let localmap = LocalMap.push localmap in
      (* No need to pop; we're going to pop the whole scopechain. *)
      let localmap = List.fold_left use_list ~init:localmap
-       ~f:begin fun l ((p, n), _) -> LocalMap.add_from_use n p l end in
+       ~f:begin fun l ((p, n)) -> LocalMap.add_from_use n p l end in
      let localmap = this#on_fun_ localmap fn in
      LocalMap.pop_scopechain localmap
 

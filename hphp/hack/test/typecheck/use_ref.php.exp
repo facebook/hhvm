@@ -1,2 +1,2 @@
-File "use_ref.php", line 14, characters 25-26:
-References in use list is not supported in Hack. (Naming[2092])
+File "use_ref.php", line 14, characters 24-24:
+References in use lists are not supported in Hack. (Parsing[1002])

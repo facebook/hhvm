@@ -917,7 +917,7 @@ and convert_lambda env st p fd use_vars_opt =
   let st = enter_lambda st in
   let old_env = env in
   Option.iter use_vars_opt
-    ~f:(List.iter ~f:(fun ((p, id), _) ->
+    ~f:(List.iter ~f:(fun ((p, id)) ->
       if id = SN.SpecialIdents.this
       then Emit_fatal.raise_fatal_parse p "Cannot use $this as lexical variable"));
   let env = append_let_vars env st.let_vars in
@@ -937,20 +937,20 @@ and convert_lambda env st p fd use_vars_opt =
   let lambda_vars, use_vars =
     match use_vars_opt with
     | None ->
-      lambda_vars, List.map lambda_vars (fun var -> (p, var), false)
+      lambda_vars, List.map lambda_vars (fun var -> (p, var))
     | Some use_vars ->
       (* Remove duplicates (not efficient, but unlikely to be large),
        * remove variables that are actually just parameters *)
       let use_vars =
          (List.fold_right use_vars ~init:[]
-          ~f:(fun ((_, name), _ as use_var) use_vars ->
-            if List.exists use_vars (fun ((_, name'), _) -> name = name')
+          ~f:(fun ((_, name) as use_var) use_vars ->
+            if List.exists use_vars (fun ((_, name')) -> name = name')
             || List.exists fd.f_params (fun p -> name = snd p.param_id)
             then use_vars else use_var :: use_vars))
       in
       (* We still need to append the generics *)
-      List.map use_vars (fun ((_, var), _ref) -> var) @ current_generics,
-      use_vars @ List.map current_generics (fun var -> (p, var), false)
+      List.map use_vars (fun ((_, var)) -> var) @ current_generics,
+      use_vars @ List.map current_generics (fun var -> (p, var))
   in
   let fun_tparams = Scope.get_fun_tparams env.scope in
   let class_tparams = Scope.get_class_tparams env.scope in

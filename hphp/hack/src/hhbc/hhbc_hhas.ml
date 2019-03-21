@@ -943,12 +943,11 @@ and string_of_fun ~env f use_list =
     Some (param_text ^ default_val)
   in
   let args = String.concat ~sep:", " @@ List.filter_map ~f:string_of_args f.A.f_params in
-  let use_list_helper ((_, id), b) = (if b then "&" else "") ^ id in
   let use_statement = match use_list with
     | [] -> ""
     | _ ->
       "use ("
-      ^ (String.concat ~sep:", " @@ List.map ~f:use_list_helper use_list)
+      ^ (String.concat ~sep:", " @@ List.map ~f:snd use_list)
       ^ ") "
   in
   (if f.A.f_static then "static " else "")

@@ -179,7 +179,7 @@
                   (([33:3-5], MyPhonyVector<X>), (Lvar ([33:3-5], $x))),
                   (([33:8-27], MyPhonyVector<X>),
                    (New (
-                      (([33:12-25], MyPhonyVector<[unresolved]>),
+                      (([33:12-25], MyPhonyVector<nothing>),
                        (CI ([33:12-25], "\\MyPhonyVector"))),
                       [], [], [], ([33:12-25], (function(): _)))))
                   )))));

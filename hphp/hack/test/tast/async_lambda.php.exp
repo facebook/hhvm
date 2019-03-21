@@ -69,9 +69,11 @@
                   )))));
            ([9:3-11:5],
             (Expr
-               (([9:3-11:4], [fun]),
-                (Binop ((Eq None), (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
-                   (([9:9-11:4], [fun]),
+               (([9:3-11:4], (function(nothing $x): Awaitable<void>)),
+                (Binop ((Eq None),
+                   (([9:3-6], (function(nothing $x): Awaitable<void>)),
+                    (Lvar ([9:3-6], $f1))),
+                   (([9:9-11:4], (function(nothing $x): Awaitable<_>)),
                     (Efun (
                        { f_span = [9:9-11:4]; f_annotation = ();
                          f_mode = <opaque>; f_ret = None;
@@ -79,7 +81,7 @@
                          f_where_constraints = [];
                          f_variadic = FVnonVariadic;
                          f_params =
-                         [{ param_annotation = ([9:15-17], _);
+                         [{ param_annotation = ([9:15-17], nothing);
                             param_hint = None; param_is_reference = false;
                             param_is_variadic = false; param_pos = [9:15-17];
                             param_name = "$x"; param_expr = None;
@@ -101,7 +103,7 @@
                                             (([10:18-27], (function(string $s): Awaitable<string>)),
                                              (Id ([10:18-27], "\\genString"))),
                                             [],
-                                            [(([10:28-30], _),
+                                            [(([10:28-30], nothing),
                                               (Lvar ([10:28-30], $x)))],
                                             [])))))
                                     )))))

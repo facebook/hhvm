@@ -1,3 +1,7 @@
+Errors:
+  [13:3-16] Invalid assignment
+  [5:12-15] This is an int
+  [3:23-29] It is incompatible with a string
 [(Fun
     { f_span = [3:1-15:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:35-38], (Hprim Tint)));
@@ -19,10 +23,10 @@
       { fb_ast =
         [([4:3-26],
           (Expr
-             (([4:3-25], Vector<(int | string)>),
+             (([4:3-25], Vector<int>),
               (Binop ((Eq None),
-                 (([4:3-9], Vector<(int | string)>), (Lvar ([4:3-9], $items))),
-                 (([4:12-25], Vector<(int | string)>),
+                 (([4:3-9], Vector<int>), (Lvar ([4:3-9], $items))),
+                 (([4:12-25], Vector<int>),
                   (ValCollection (<vc_kind>, None,
                      [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
                  )))));
@@ -43,13 +47,13 @@
                         { fb_ast =
                           [([10:5-23],
                             (Expr
-                               (([10:5-22], (int | string)),
+                               (([10:5-22], int),
                                 (Binop ((Eq None),
-                                   (([10:5-10], (int | string)),
+                                   (([10:5-10], int),
                                     (Lvar ([10:5-10], $item))),
-                                   (([10:13-22], (int | string)),
+                                   (([10:13-22], int),
                                     (Array_get (
-                                       (([10:13-19], Vector<(int | string)>),
+                                       (([10:13-19], Vector<int>),
                                         (Lvar ([10:13-19], $items))),
                                        (Some (([10:20-21], int), (Int "1")))
                                        )))
@@ -72,8 +76,7 @@
                (Binop ((Eq None),
                   (([13:3-11], string),
                    (Array_get (
-                      (([13:3-9], Vector<(int | string)>),
-                       (Lvar ([13:3-9], $items))),
+                      (([13:3-9], Vector<int>), (Lvar ([13:3-9], $items))),
                       None))),
                   (([13:14-16], string), (Lvar ([13:14-16], $s))))))));
           ([14:3-15],

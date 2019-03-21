@@ -12,16 +12,17 @@
                  (([13:8-9], int), (Int "2")))))));
           ([15:3-23],
            (Expr
-              (([15:3-22], [fun]),
-               (Binop ((Eq None), (([15:3-5], [fun]), (Lvar ([15:3-5], $x))),
-                  (([15:8-22], HackSuggest<(function(int): int)>),
+              (([15:3-22], (function(int $z): int)),
+               (Binop ((Eq None),
+                  (([15:3-5], (function(int $z): int)), (Lvar ([15:3-5], $x))),
+                  (([15:8-22], (function(int $z): _)),
                    (Efun (
                       { f_span = [15:8-22]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
                         f_name = ([15:8-22], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([15:8-10], HackSuggest<int>);
+                        [{ param_annotation = ([15:8-10], int);
                            param_hint = None; param_is_reference = false;
                            param_is_variadic = false; param_pos = [15:8-10];
                            param_name = "$z"; param_expr = None;
@@ -32,11 +33,11 @@
                         { fb_ast =
                           [([15:15-22],
                             (Return
-                               (Some (([15:15-22], _),
+                               (Some (([15:15-22], int),
                                       (Binop (Plus,
                                          (([15:15-17], int),
                                           (Lvar ([15:15-17], $y))),
-                                         (([15:20-22], _),
+                                         (([15:20-22], int),
                                           (Lvar ([15:20-22], $z)))
                                          ))))))
                             ];
@@ -53,21 +54,23 @@
                (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
                   (([16:8-13], int),
                    (Call (Cnormal,
-                      (([16:8-10], [fun]), (Lvar ([16:8-10], $x))), [],
-                      [(([16:11-12], int), (Int "2"))], [])))
+                      (([16:8-10], (function(int $z): int)),
+                       (Lvar ([16:8-10], $x))),
+                      [], [(([16:11-12], int), (Int "2"))], [])))
                   )))));
           ([18:3-20:4],
            (Expr
-              (([18:3-20:4], [fun]),
-               (Binop ((Eq None), (([18:3-5], [fun]), (Lvar ([18:3-5], $x))),
-                  (([18:8-20:4], HackSuggest<(function(int): int)>),
+              (([18:3-20:4], (function(int $z): int)),
+               (Binop ((Eq None),
+                  (([18:3-5], (function(int $z): int)), (Lvar ([18:3-5], $x))),
+                  (([18:8-20:4], (function(int $z): _)),
                    (Efun (
                       { f_span = [18:8-20:4]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
                         f_name = ([18:8-20:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([18:17-19], HackSuggest<int>);
+                        [{ param_annotation = ([18:17-19], int);
                            param_hint = None; param_is_reference = false;
                            param_is_variadic = false; param_pos = [18:17-19];
                            param_name = "$z"; param_expr = None;
@@ -78,11 +81,11 @@
                         { fb_ast =
                           [([19:5-20],
                             (Return
-                               (Some (([19:12-19], _),
+                               (Some (([19:12-19], int),
                                       (Binop (Plus,
                                          (([19:12-14], int),
                                           (Lvar ([19:12-14], $y))),
-                                         (([19:17-19], _),
+                                         (([19:17-19], int),
                                           (Lvar ([19:17-19], $z)))
                                          ))))))
                             ];
@@ -99,27 +102,30 @@
                (Binop ((Eq None), (([21:3-5], int), (Lvar ([21:3-5], $l))),
                   (([21:8-13], int),
                    (Call (Cnormal,
-                      (([21:8-10], [fun]), (Lvar ([21:8-10], $x))), [],
-                      [(([21:11-12], int), (Int "2"))], [])))
+                      (([21:8-10], (function(int $z): int)),
+                       (Lvar ([21:8-10], $x))),
+                      [], [(([21:11-12], int), (Int "2"))], [])))
                   )))));
           ([23:3-29],
            (Expr
-              (([23:3-28], [fun]),
-               (Binop ((Eq None), (([23:3-5], [fun]), (Lvar ([23:3-5], $x))),
-                  (([23:8-28], HackSuggest<(function(int, int): int)>),
+              (([23:3-28], (function(int $a, int $b): int)),
+               (Binop ((Eq None),
+                  (([23:3-5], (function(int $a, int $b): int)),
+                   (Lvar ([23:3-5], $x))),
+                  (([23:8-28], (function(int $a, int $b): _)),
                    (Efun (
                       { f_span = [23:8-28]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
                         f_name = ([23:8-28], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([23:9-11], HackSuggest<int>);
+                        [{ param_annotation = ([23:9-11], int);
                            param_hint = None; param_is_reference = false;
                            param_is_variadic = false; param_pos = [23:9-11];
                            param_name = "$a"; param_expr = None;
                            param_callconv = None; param_user_attributes = []
                            };
-                          { param_annotation = ([23:13-15], HackSuggest<int>);
+                          { param_annotation = ([23:13-15], int);
                             param_hint = None; param_is_reference = false;
                             param_is_variadic = false;
                             param_pos = [23:13-15]; param_name = "$b";
@@ -130,11 +136,11 @@
                         { fb_ast =
                           [([23:21-28],
                             (Return
-                               (Some (([23:21-28], _),
+                               (Some (([23:21-28], int),
                                       (Binop (Plus,
-                                         (([23:21-23], _),
+                                         (([23:21-23], int),
                                           (Lvar ([23:21-23], $a))),
-                                         (([23:26-28], _),
+                                         (([23:26-28], int),
                                           (Lvar ([23:26-28], $b)))
                                          ))))))
                             ];
@@ -151,7 +157,9 @@
                (Binop ((Eq None), (([24:3-5], int), (Lvar ([24:3-5], $l))),
                   (([24:8-17], int),
                    (Call (Cnormal,
-                      (([24:8-10], [fun]), (Lvar ([24:8-10], $x))), [],
+                      (([24:8-10], (function(int $a, int $b): int)),
+                       (Lvar ([24:8-10], $x))),
+                      [],
                       [(([24:11-12], int), (Int "2"));
                         (([24:14-16], int), (Lvar ([24:14-16], $y)))],
                       [])))

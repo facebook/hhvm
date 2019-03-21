@@ -12,16 +12,18 @@
                  (([3:8-13], string), (String "foo")))))));
           ([4:3-42],
            (Expr
-              (([4:3-41], [fun]),
-               (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
-                  (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
+              (([4:3-41], (function((int | string) $n): string)),
+               (Binop ((Eq None),
+                  (([4:3-5], (function((int | string) $n): string)),
+                   (Lvar ([4:3-5], $f))),
+                  (([4:8-41], (function((int | string) $n): _)),
                    (Efun (
                       { f_span = [4:8-41]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
                         f_name = ([4:8-41], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([4:8-10], _);
+                        [{ param_annotation = ([4:8-10], (int | string));
                            param_hint = None; param_is_reference = false;
                            param_is_variadic = false; param_pos = [4:8-10];
                            param_name = "$n"; param_expr = None;
@@ -36,7 +38,7 @@
                                       (Binop (Dot,
                                          (([4:24-31], string),
                                           (Binop (Dot,
-                                             (([4:24-26], _),
+                                             (([4:24-26], (int | string)),
                                               (Lvar ([4:24-26], $n))),
                                              (([4:29-31], string),
                                               (Lvar ([4:29-31], $s)))
@@ -57,8 +59,9 @@
                (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
                   (([5:8-13], string),
                    (Call (Cnormal,
-                      (([5:8-10], [fun]), (Lvar ([5:8-10], $f))), [],
-                      [(([5:11-12], int), (Int "4"))], [])))
+                      (([5:8-10], (function((int | string) $n): string)),
+                       (Lvar ([5:8-10], $f))),
+                      [], [(([5:11-12], int), (Int "4"))], [])))
                   )))));
           ([6:3-18],
            (Expr
@@ -66,8 +69,9 @@
                (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
                   (([6:8-17], string),
                    (Call (Cnormal,
-                      (([6:8-10], [fun]), (Lvar ([6:8-10], $f))), [],
-                      [(([6:11-16], string), (String "bar"))], [])))
+                      (([6:8-10], (function((int | string) $n): string)),
+                       (Lvar ([6:8-10], $f))),
+                      [], [(([6:11-16], string), (String "bar"))], [])))
                   )))))
           ];
         fb_annotation = No unsafe blocks };

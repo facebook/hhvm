@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Returns an array with all keys from input lowercased or uppercased.
  *   Numbered indices are left as is.
@@ -1541,6 +1543,8 @@ function hphp_array_idx(
  */
 <<__Native("ActRec", "VariadicByRef")>>
 function array_multisort(mixed &$arr1, ...): mixed;
+
+} // root namespace
 
 namespace __SystemLib {
   /* array_map() returns an array containing all the elements of arr1 after

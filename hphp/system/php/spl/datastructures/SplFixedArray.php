@@ -252,7 +252,7 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
    *                     array content.
    */
   public static function fromArray($array, $save_indexes = true) {
-    $fixed_array = new self;
+    $fixed_array = new self();
     if (!is_array($array)) {
       trigger_error(
         sprintf("SplFixedArray::fromArray() expects parameter 1 to be array,".

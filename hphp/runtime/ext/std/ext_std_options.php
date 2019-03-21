@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /* Set the various assert() control options or just query their current
  * settings.
  */
@@ -353,6 +355,8 @@ function version_compare(string $version1,
  */
 <<__Native>>
 function zend_version(): string;
+
+} // root namespace
 
 namespace __SystemLib {
 

@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Return thread type. See enum class ThreadType.
  *
@@ -215,6 +217,8 @@ function xbox_schedule_thread_reset(): void;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_get_thread_time(): int;
+
+} // root namespace
 
 namespace HH {
 /**

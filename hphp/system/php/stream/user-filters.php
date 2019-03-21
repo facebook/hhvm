@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 class php_user_filter {
   public function __construct(
     public resource $stream,
@@ -29,6 +31,8 @@ class php_user_filter {
 function stream_bucket_new(resource $stream, string $buffer) {
   return new __SystemLib\StreamFilterBucket($buffer);
 }
+
+} // root namespace
 
 namespace __SystemLib {
   class StreamFilterBucket {

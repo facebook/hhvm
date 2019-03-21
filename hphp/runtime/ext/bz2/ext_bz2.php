@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Close a bzip2 file
  *
@@ -134,6 +136,8 @@ function bzread(resource $bz, int $length = 1024): mixed;
  */
 <<__Native>>
 function bzwrite(resource $bz, string $data, int $length = 0): mixed;
+
+} // root namespace
 
 /*
  * Not a public API

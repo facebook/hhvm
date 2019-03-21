@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -1307,6 +1309,8 @@ class ReflectionType {
   }
 
 }
+
+} // root namespace
 
 namespace HH {
   /* These enum values correspond to the 'kind' field in the

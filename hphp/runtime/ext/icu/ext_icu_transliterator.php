@@ -52,7 +52,7 @@ class Transliterator {
   public static function createFromRules(string $rules,
                                          int $direction = self::FORWARD):
                                                               ?Transliterator {
-    $obj = new Transliterator;
+    $obj = new Transliterator();
     if (!$obj->__init($rules, $direction, true)) {
       return null;
     }
@@ -221,4 +221,3 @@ function transliterator_transliterate(mixed $tOrId,
   }
   return $tOrId->transliterate($subject, $start, $end);
 }
-

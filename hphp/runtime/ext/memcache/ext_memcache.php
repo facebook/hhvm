@@ -758,7 +758,7 @@ class MemcacheSessionModule implements SessionHandlerInterface {
       return false;
     }
 
-    $this->memcache = new Memcache;
+    $this->memcache = new Memcache();
     foreach ($serverList as $serverInfo) {
       $this->memcache->addServer($serverInfo['host'],
                                  $serverInfo['port'],

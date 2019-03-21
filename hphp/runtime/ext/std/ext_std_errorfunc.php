@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Generates a backtrace
  *
@@ -248,6 +250,8 @@ function hphp_debug_caller_info(): darray<string, mixed>;
 
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_debug_backtrace_hash(int $options = 0): int;
+
+} // root namespace
 
 namespace HH {
 

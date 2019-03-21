@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Close an open gz-file pointer
  *
@@ -350,6 +352,8 @@ function nzcompress(string $uncompressed): mixed;
  */
 <<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
 function nzuncompress(string $compressed): mixed;
+
+} // root namespace
 
 /**
  * Implementation detail for zlib.inflate stream filter.

@@ -10,7 +10,7 @@ function main_1462() {
 if (true) {
   include '1462-1.inc';
 } else {
-  include '1462-1.inc';
+  include '1462-2.inc';
 }
 $foo = "foo";
 $y = new a;

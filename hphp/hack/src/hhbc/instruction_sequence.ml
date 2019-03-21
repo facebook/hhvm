@@ -101,6 +101,7 @@ let instr_dup = instr (IBasic Dup)
 let instr_nop = instr (IBasic Nop)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
+let instr_islateboundcls = instr (IOp IsLateBoundCls)
 let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
 let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =

@@ -69,6 +69,8 @@ const StaticString s_Closure("Closure");
 const StaticString s_byRefWarn("Only variables should be passed by reference");
 const StaticString s_byRefError("Only variables can be passed by reference");
 const StaticString s_trigger_error("trigger_error");
+const StaticString s_this("HH\\this");
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2434,13 +2436,18 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     }
     case TypeStructure::Kind::T_unresolved: {
       if (asExpression) return result(TBool);
-      auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
+      auto classname = get_ts_classname(ts);
+      auto const has_generics = ts->exists(s_generic_types);
+      if (!has_generics && classname->isame(s_this.get())) {
+        return reduce(env, bc::PopC {}, bc::IsLateBoundCls {});
+      }
+      auto const rcls = env.index.resolve_class(env.ctx, classname);
       // We can only reduce to instance of if we know for sure that this class
       // can be resolved since instanceof undefined class does not throw
       if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
         return result(TBool);
       }
-      if (ts->exists(s_generic_types) &&
+      if (has_generics &&
          (rcls->cls()->hasReifiedGenerics || !isTSAllWildcards(ts))) {
           // If it is a reified class or has non wildcard generics,
           // we need to bail
@@ -2551,6 +2558,11 @@ bool canReduceToDontResolve(SArray ts) {
 }
 
 } // namespace
+
+void in(ISS& env, const bc::IsLateBoundCls& op) {
+  popC(env);
+  return push(env, TBool);
+}
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;

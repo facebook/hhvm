@@ -1452,6 +1452,11 @@ DblAsBits  [C]  ->   [C]
  If $1 is a double, reinterpret it as an integer (with the same bit-pattern)
  and push it onto the stack. Otherwise, push 0.
 
+IsLateBoundCls [C] -> [C:Bool]
+
+  If $1 is a subtype of the current late-bound class, this instruction pushes
+  true onto the stack, otherwise it pushes false onto the stack.
+
 IsTypeStructC <type struct resolve op>  [C C]  ->  [C:Bool]
 
   If $1 matches the type structure of a defined type and $2 is a subtype of $1,

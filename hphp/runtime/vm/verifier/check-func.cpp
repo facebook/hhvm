@@ -1746,6 +1746,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::IsTypeL:
     case Op::InstanceOf:
     case Op::InstanceOfD:
+    case Op::IsLateBoundCls:
     case Op::IsTypeStructC:
     case Op::AsTypeStructC:
     case Op::CombineAndResolveTypeStruct:

@@ -562,6 +562,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(DblAsBits,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsLateBoundCls,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(AsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \

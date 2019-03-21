@@ -252,6 +252,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CastDArray:
   case Op::DblAsBits:
   case Op::InstanceOfD:
+  case Op::IsLateBoundCls:
   case Op::IsTypeStructC:
   case Op::AsTypeStructC:
   case Op::CombineAndResolveTypeStruct:

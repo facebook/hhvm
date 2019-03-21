@@ -2596,6 +2596,19 @@ OPTBLD_INLINE void iopInstanceOfD(Id id) {
   vmStack().replaceC<KindOfBoolean>(r);
 }
 
+OPTBLD_INLINE void iopIsLateBoundCls() {
+  auto const cls = frameStaticClass(vmfp());
+  if (!cls) {
+    raise_error(HPHP::Strings::THIS_OUTSIDE_CLASS);
+  }
+  if (isTrait(cls)) {
+    raise_error("\"is\" and \"as\" operators cannot be used with a trait");
+  }
+  auto const c1 = vmStack().topC();
+  bool r = cellInstanceOf(c1, cls);
+  vmStack().replaceC<KindOfBoolean>(r);
+}
+
 namespace {
 
 ArrayData* resolveAndVerifyTypeStructureHelper(

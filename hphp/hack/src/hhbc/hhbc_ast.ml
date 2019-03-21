@@ -260,6 +260,7 @@ type instruct_operator =
   | CastDArray
   | InstanceOf
   | InstanceOfD of class_id
+  | IsLateBoundCls
   | IsTypeStructC of typestruct_resolve_op
   | AsTypeStructC of typestruct_resolve_op
   | CombineAndResolveTypeStruct of int

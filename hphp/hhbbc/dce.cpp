@@ -1280,6 +1280,10 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
+void dce(Env& env, const bc::IsLateBoundCls&) {
+  pushRemovableIfNoThrow(env);
+}
+
 void dce(Env& env, const bc::IsTypeStructC&) {
   pushRemovableIfNoThrow(env);
 }

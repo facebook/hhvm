@@ -691,10 +691,15 @@ and emit_as env pos e h is_nullable = Local.scope @@ fun () ->
 and emit_is env pos h =
   let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
   if is_static then
-    gather [
-      get_type_structure_for_hint env ~targ_map:SMap.empty h;
-      instr_istypestructc Resolve;
-    ]
+    begin match snd h with
+    | A.Happly ((_, id), []) when id = SN.Typehints.this ->
+      instr_islateboundcls
+    | _ ->
+      gather [
+        get_type_structure_for_hint env ~targ_map:SMap.empty h;
+        instr_istypestructc Resolve;
+      ]
+    end
   else
     gather [
       ts_instrs;

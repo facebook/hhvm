@@ -34,9 +34,11 @@ namespace HPHP {
 
 const StaticString s_unresolved("[unresolved]");
 
-bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
+namespace {
+
+template<typename F>
+bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
   assertx(!isRefType(tv->m_type));
-  Class* cls = nullptr;
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -44,81 +46,102 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfResource:
       return false;
 
-    case KindOfClass:
-      cls = Unit::lookupClass(ne);
+    case KindOfClass: {
+      auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
         classToStringHelper(tv->m_data.pclass); // maybe raise a warning
         return true;
       }
       return false;
+    }
 
-    case KindOfFunc:
-      cls = Unit::lookupClass(ne);
+    case KindOfFunc: {
+      auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
         funcToStringHelper(tv->m_data.pfunc); // maybe raise a warning
         return true;
       }
       return false;
+    }
 
-    case KindOfInt64:
-      cls = Unit::lookupClass(ne);
+    case KindOfInt64: {
+      auto const cls = lookupClass();
       return cls && interface_supports_int(cls->name());
+    }
 
-    case KindOfDouble:
-      cls = Unit::lookupClass(ne);
+    case KindOfDouble: {
+      auto const cls = lookupClass();
       return cls && interface_supports_double(cls->name());
+    }
 
     case KindOfPersistentString:
-    case KindOfString:
-      cls = Unit::lookupClass(ne);
+    case KindOfString: {
+      auto const cls = lookupClass();
       return cls && interface_supports_string(cls->name());
+    }
 
     case KindOfPersistentVec:
-    case KindOfVec:
-      cls = Unit::lookupClass(ne);
+    case KindOfVec: {
+      auto const cls = lookupClass();
       return cls && interface_supports_vec(cls->name());
+    }
 
     case KindOfPersistentDict:
-    case KindOfDict:
-      cls = Unit::lookupClass(ne);
+    case KindOfDict: {
+      auto const cls = lookupClass();
       return cls && interface_supports_dict(cls->name());
+    }
 
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      cls = Unit::lookupClass(ne);
+    case KindOfKeyset: {
+      auto const cls = lookupClass();
       return cls && interface_supports_keyset(cls->name());
+    }
 
     case KindOfPersistentShape:
-    case KindOfShape:
+    case KindOfShape: {
+      auto const cls = lookupClass();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        cls = Unit::lookupClass(ne);
         return cls && interface_supports_dict(cls->name());
       }
-      cls = Unit::lookupClass(ne);
       return cls && interface_supports_array(cls->name());
+    }
 
     case KindOfPersistentArray:
-    case KindOfArray:
-      cls = Unit::lookupClass(ne);
+    case KindOfArray: {
+      auto const cls = lookupClass();
       return cls && interface_supports_array(cls->name());
+    }
 
-    case KindOfObject:
-      cls = Unit::lookupClass(ne);
+    case KindOfObject: {
+      auto const cls = lookupClass();
       return cls && tv->m_data.pobj->instanceof(cls);
+    }
 
-    case KindOfClsMeth:
-      cls = Unit::lookupClass(ne);
+    case KindOfClsMeth: {
+      auto const cls = lookupClass();
       if (cls && (RuntimeOption::EvalHackArrDVArrs ?
         interface_supports_vec(cls->name()) :
         interface_supports_array(cls->name()))) {
         return true;
       }
       return false;
+    }
 
     case KindOfRef:
       break;
   }
   not_reached();
+}
+
+} // namespace
+
+bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
+  return cellInstanceOfImpl(tv, [ne]() { return Unit::lookupClass(ne); });
+}
+
+bool cellInstanceOf(const Cell* tv, const Class* cls) {
+  return cellInstanceOfImpl(tv, [cls]() { return cls; });
 }
 
 namespace {

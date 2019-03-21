@@ -193,6 +193,7 @@ static const struct {
   { OpDblAsBits,   {Stack1,           Stack1,       OutInt64        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
+  { OpIsLateBoundCls,{Stack1,         Stack1,       OutBoolean      }},
   { OpIsTypeStructC,{StackTop2,       Stack1,       OutBoolean      }},
   { OpAsTypeStructC,{StackTop2,       Stack1,       OutSameAsInput2 }},
   { OpCombineAndResolveTypeStruct,
@@ -948,6 +949,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::InitThisLoc:
   case Op::InstanceOf:
   case Op::InstanceOfD:
+  case Op::IsLateBoundCls:
   case Op::IsTypeStructC:
   case Op::AsTypeStructC:
   case Op::Int:

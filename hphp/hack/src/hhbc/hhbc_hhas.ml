@@ -185,6 +185,7 @@ let string_of_operator instruction =
     | CastDArray -> "CastDArray"
     | InstanceOf -> "InstanceOf"
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
+    | IsLateBoundCls -> "IsLateBoundCls"
     | IsTypeStructC op ->
       sep ["IsTypeStructC"; string_of_typestruct_resolve_op op]
     | AsTypeStructC op ->

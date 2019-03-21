@@ -894,6 +894,23 @@ void emitInstanceOf(IRGS& env) {
   decRef(env, t1);
 }
 
+void emitIsLateBoundCls(IRGS& env) {
+  auto const cls = curClass(env);
+  if (!cls) PUNT(IsLateBoundCls-NoClassContext);
+  if (isTrait(cls)) PUNT(IsLateBoundCls-Trait);
+  auto const obj = popC(env);
+  if (obj->isA(TObj)) {
+    auto const rhs = gen(env, LdClsCtx, ldCtx(env));
+    auto const lhs  = gen(env, LdObjClass, obj);
+    push(env, gen(env, InstanceOf, lhs, rhs));
+  } else if (!obj->type().maybe(TObj)) {
+    push(env, cns(env, false));
+  } else {
+    PUNT(IsLateBoundCls-MaybeObject);
+  }
+  decRef(env, obj);
+}
+
 namespace {
 
 SSATmp* resolveTypeStructImpl(

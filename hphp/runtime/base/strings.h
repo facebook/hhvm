@@ -43,6 +43,8 @@ auto constexpr CANT_ACCESS_PARENT_WHEN_NO_PARENT =
   "Cannot access parent:: when current class scope has no parent";
 auto constexpr CANT_ACCESS_STATIC =
   "Cannot access static:: when no class scope is active";
+auto constexpr THIS_OUTSIDE_CLASS =
+  "Cannot use 'this' outside of a class";
 auto constexpr UNDEFINED_INDEX =
   "Undefined index: %s";
 auto constexpr CANNOT_USE_SCALAR_AS_ARRAY =

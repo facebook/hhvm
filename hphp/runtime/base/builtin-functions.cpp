@@ -206,6 +206,170 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   return false;
 }
 
+namespace {
+Class* vm_decode_class_from_name(
+  const String& clsName,
+  const String& funcName,
+  bool nameContainsClass,
+  ActRec* ar,
+  bool& forwarding,
+  Class* ctx,
+  DecodeFlags flags) {
+  Class* cls = nullptr;
+  if (clsName.get()->isame(s_self.get())) {
+    if (ctx) {
+      cls = ctx;
+    }
+    if (!nameContainsClass) {
+      forwarding = true;
+    }
+  } else if (clsName.get()->isame(s_parent.get())) {
+    if (ctx && ctx->parent()) {
+      cls = ctx->parent();
+    }
+    if (!nameContainsClass) {
+      forwarding = true;
+    }
+  } else if (clsName.get()->isame(s_static.get())) {
+    if (ar && ar->func()->cls()) {
+      if (ar->hasThis()) {
+        cls = ar->getThis()->getVMClass();
+      } else {
+        cls = ar->getClass();
+      }
+      if (flags != DecodeFlags::NoWarn && cls) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() used to decode a LSB class "
+            "method on %s",
+            cls->name()->data()
+          );
+        }
+      }
+    }
+  } else {
+    if (flags == DecodeFlags::Warn && nameContainsClass) {
+      String nameClass = funcName.substr(0, funcName.find("::"));
+      if (nameClass.get()->isame(s_self.get())   ||
+          nameClass.get()->isame(s_static.get())) {
+        raise_warning("behavior of call_user_func(array('%s', '%s')) "
+                      "is undefined", clsName.data(), funcName.data());
+      }
+    }
+    cls = Unit::loadClass(clsName.get());
+  }
+  return cls;
+}
+
+const Func* vm_decode_func_from_name(
+  const String& funcName,
+  ActRec* ar,
+  bool forwarding,
+  ObjectData*& this_,
+  Class*& cls,
+  Class* ctx,
+  Class* cc,
+  StringData*& invName,
+  DecodeFlags flags) {
+  CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
+  auto f = lookupMethodCtx(cc, funcName.get(), ctx, lookupType);
+  if (f && (f->attrs() & AttrStatic)) {
+    // If we found a method and its static, null out this_
+    this_ = nullptr;
+  } else {
+    if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
+      // If we did not find a static method AND this_ is null AND there is a
+      // frame ar, check if the current instance from ar is compatible
+      auto const obj = ar->getThis();
+      if (obj->instanceof(cls)) {
+        this_ = obj;
+        cls = obj->getVMClass();
+      }
+      if (flags != DecodeFlags::NoWarn && this_) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() used to decode a method on $this, an "
+            "instance of %s, from the caller, %s",
+            cls->name()->data(),
+            ar->func()->fullName()->data()
+          );
+        }
+      }
+    }
+    if (!f) {
+      if (this_) {
+        // If this_ is non-null AND we could not find a method, try
+        // looking up __call in cls's method table
+        f = cls->lookupMethod(s___call.get());
+        assertx(!f || !(f->attrs() & AttrStatic));
+      }
+      if (!f && lookupType == CallType::ClsMethod) {
+        f = cls->lookupMethod(s___callStatic.get());
+        assertx(!f || (f->attrs() & AttrStatic));
+        this_ = nullptr;
+      }
+      if (f && (cc == cls || cc->lookupMethod(f->name()))) {
+        // We found __call or __callStatic!
+        // Stash the original name into invName.
+        invName = funcName.get();
+        invName->incRefCount();
+      } else {
+        // Bail out if we couldn't find the method or __call
+        if (flags == DecodeFlags::Warn) {
+          throw_invalid_argument("function: method '%s' not found",
+                                 funcName.data());
+        }
+        return nullptr;
+      }
+    }
+  }
+
+  if (!this_ && !f->isStaticInPrologue()) {
+    if (flags == DecodeFlags::Warn) raise_missing_this(f);
+    if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
+      return nullptr;
+    }
+  }
+
+  assertx(f && f->preClass());
+  // If this_ is non-NULL, then this_ is the current instance and cls is
+  // the class of the current instance.
+  assertx(!this_ || this_->getVMClass() == cls);
+  // If we are doing a forwarding call and this_ is null, set cls
+  // appropriately to propagate the current late bound class.
+  if (!this_ && forwarding && ar && ar->func()->cls()) {
+    auto const fwdCls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    // Only forward the current late bound class if it is the same or
+    // a descendent of cls
+    if (fwdCls->classof(cls)) {
+      cls = fwdCls;
+    }
+
+    if (flags != DecodeFlags::NoWarn && fwdCls) {
+      if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+        raise_warning(
+          "vm_decode_function() forwarded the calling context, %s",
+          fwdCls->name()->data()
+        );
+      }
+    }
+  }
+
+  if (flags != DecodeFlags::NoWarn && !f->isPublic()) {
+    if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+      raise_warning(
+        "vm_decode_function() used to decode a %s method: %s",
+        f->attrs() & AttrPrivate ? "private" : "protected",
+        f->fullDisplayName()->data()
+      );
+    }
+  }
+  return f;
+}
+}
+
 const HPHP::Func*
 vm_decode_function(const_variant_ref function,
                    ActRec* ar,
@@ -287,49 +451,9 @@ vm_decode_function(const_variant_ref function,
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
       if (elem0.isString()) {
-        String sclass = elem0.toString();
-        if (sclass.get()->isame(s_self.get())) {
-          if (ctx) {
-            cls = ctx;
-          }
-          if (!nameContainsClass) {
-            forwarding = true;
-          }
-        } else if (sclass.get()->isame(s_parent.get())) {
-          if (ctx && ctx->parent()) {
-            cls = ctx->parent();
-          }
-          if (!nameContainsClass) {
-            forwarding = true;
-          }
-        } else if (sclass.get()->isame(s_static.get())) {
-          if (ar && ar->func()->cls()) {
-            if (ar->hasThis()) {
-              cls = ar->getThis()->getVMClass();
-            } else {
-              cls = ar->getClass();
-            }
-            if (flags != DecodeFlags::NoWarn && cls) {
-              if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
-                raise_warning(
-                  "vm_decode_function() used to decode a LSB class "
-                  "method on %s",
-                  cls->name()->data()
-                );
-              }
-            }
-          }
-        } else {
-          if (flags == DecodeFlags::Warn && nameContainsClass) {
-            String nameClass = name.substr(0, pos);
-            if (nameClass.get()->isame(s_self.get())   ||
-                nameClass.get()->isame(s_static.get())) {
-              raise_warning("behavior of call_user_func(array('%s', '%s')) "
-                            "is undefined", sclass.data(), name.data());
-            }
-          }
-          cls = Unit::loadClass(sclass.get());
-        }
+        cls = vm_decode_class_from_name(
+          elem0.toString(), name, nameContainsClass, ar, forwarding, ctx,
+          flags);
         if (!cls) {
           if (flags == DecodeFlags::Warn) {
             throw_invalid_argument("function: class not found");
@@ -433,103 +557,8 @@ vm_decode_function(const_variant_ref function,
       return f;
     }
     assertx(cls);
-    CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
-    auto f = lookupMethodCtx(cc, name.get(), ctx, lookupType);
-    if (f && (f->attrs() & AttrStatic)) {
-      // If we found a method and its static, null out this_
-      this_ = nullptr;
-    } else {
-      if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
-        // If we did not find a static method AND this_ is null AND there is a
-        // frame ar, check if the current instance from ar is compatible
-        auto const obj = ar->getThis();
-        if (obj->instanceof(cls)) {
-          this_ = obj;
-          cls = obj->getVMClass();
-        }
-        if (flags != DecodeFlags::NoWarn && this_) {
-          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
-            raise_warning(
-              "vm_decode_function() used to decode a method on $this, an "
-              "instance of %s, from the caller, %s",
-              cls->name()->data(),
-              ar->func()->fullName()->data()
-            );
-          }
-        }
-      }
-      if (!f) {
-        if (this_) {
-          // If this_ is non-null AND we could not find a method, try
-          // looking up __call in cls's method table
-          f = cls->lookupMethod(s___call.get());
-          assertx(!f || !(f->attrs() & AttrStatic));
-        }
-        if (!f && lookupType == CallType::ClsMethod) {
-          f = cls->lookupMethod(s___callStatic.get());
-          assertx(!f || (f->attrs() & AttrStatic));
-          this_ = nullptr;
-        }
-        if (f && (cc == cls || cc->lookupMethod(f->name()))) {
-          // We found __call or __callStatic!
-          // Stash the original name into invName.
-          invName = name.get();
-          invName->incRefCount();
-        } else {
-          // Bail out if we couldn't find the method or __call
-          if (flags == DecodeFlags::Warn) {
-            throw_invalid_argument("function: method '%s' not found",
-                                   name.data());
-          }
-          return nullptr;
-        }
-      }
-    }
-
-    if (!this_ && !f->isStaticInPrologue()) {
-      if (flags == DecodeFlags::Warn) raise_missing_this(f);
-      if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
-        return nullptr;
-      }
-    }
-
-    assertx(f && f->preClass());
-    // If this_ is non-NULL, then this_ is the current instance and cls is
-    // the class of the current instance.
-    assertx(!this_ || this_->getVMClass() == cls);
-    // If we are doing a forwarding call and this_ is null, set cls
-    // appropriately to propagate the current late bound class.
-    if (!this_ && forwarding && ar && ar->func()->cls()) {
-      auto const fwdCls = ar->hasThis() ?
-        ar->getThis()->getVMClass() : ar->getClass();
-
-      // Only forward the current late bound class if it is the same or
-      // a descendent of cls
-      if (fwdCls->classof(cls)) {
-        cls = fwdCls;
-      }
-
-      if (flags != DecodeFlags::NoWarn && fwdCls) {
-        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
-          raise_warning(
-            "vm_decode_function() forwarded the calling context, %s",
-            fwdCls->name()->data()
-          );
-        }
-      }
-    }
-
-    if (flags != DecodeFlags::NoWarn && !f->isPublic()) {
-      if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
-        raise_warning(
-          "vm_decode_function() used to decode a %s method: %s",
-          f->attrs() & AttrPrivate ? "private" : "protected",
-          f->fullDisplayName()->data()
-        );
-      }
-    }
-
-    return f;
+    return vm_decode_func_from_name(
+      name, ar, forwarding, this_, cls, ctx, cc, invName, flags);
   }
   if (function.isObject()) {
     this_ = function.toCObjRef().get();

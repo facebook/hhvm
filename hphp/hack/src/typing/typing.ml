@@ -3467,41 +3467,42 @@ and is_abstract_ft fty = match fty with
     (* TODO: replace the case analysis here with a subtyping check;
      * see T37483866 and the linked diff for discussion.
      *)
-    let rec is_coroutine ty =
-      let _, ety = Env.expand_type env ty in
+    let rec is_coroutine env ty =
+      let env, ety = SubType.expand_type_and_solve env (Reason.to_pos (fst ty)) ty
+        ~description_of_expected:"a function value" in
       match snd ety with
       | Tfun { ft_is_coroutine = true; _ } ->
-        Some true
+        env, Some true
       | Tanon (_, id) ->
-        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b))
-      | Tunresolved ts -> are_coroutines ts
-      | Tvar var ->
-        let lower_bounds =
-          Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-        are_coroutines lower_bounds
+        env, Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b))
+      | Tunresolved ts -> are_coroutines env ts
       | _ ->
-        Some false
-    and are_coroutines ts =
-      match List.map ts ~f:is_coroutine with
-      | None :: _ -> None
-      | Some x :: xs ->
-        (*if rest of the list has the same value as the first element
-          return value of the first element or None otherwise*)
-        if List.for_all xs ~f:(Option.value_map ~default:false ~f:((=)x))
-        then Some x
-        else None
-      | _ -> Some false in
-    match in_suspend, is_coroutine fty with
-    | true, Some true
-    | false, Some false -> ()
-    | true, _ ->
-      (* non-coroutine call in suspend *)
-      Errors.non_coroutine_call_in_suspend
-        fpos
-        (Reason.to_string ("This is " ^ Typing_print.error env fty) (fst fty));
-    | false, _ ->
-      (*coroutine call outside of suspend *)
-      Errors.coroutine_call_outside_of_suspend p; in
+        env, Some false
+    and are_coroutines env ts =
+      let env, ts_are_coroutines = List.map_env env ts ~f:is_coroutine in
+      let ts_are_coroutines = match ts_are_coroutines with
+        | None :: _ -> None
+        | Some x :: xs ->
+          (*if rest of the list has the same value as the first element
+            return value of the first element or None otherwise*)
+          if List.for_all xs ~f:(Option.value_map ~default:false ~f:((=)x))
+          then Some x
+          else None
+        | _ -> Some false in
+      env, ts_are_coroutines in
+    let env, fty_is_coroutine = is_coroutine env fty in
+    let () = match in_suspend, fty_is_coroutine with
+      | true, Some true
+      | false, Some false -> ()
+      | true, _ ->
+        (* non-coroutine call in suspend *)
+        Errors.non_coroutine_call_in_suspend
+          fpos
+          (Reason.to_string ("This is " ^ Typing_print.error env fty) (fst fty));
+      | false, _ ->
+        (*coroutine call outside of suspend *)
+        Errors.coroutine_call_outside_of_suspend p in
+    env in
 
   let check_function_in_suspend name =
     if in_suspend
@@ -3949,7 +3950,7 @@ and is_abstract_ft fty = match fty with
         let env, fty, _ =
           class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
-        check_coroutine_call env fty;
+        let env = check_coroutine_call env fty in
         let env, tel, tuel, ty =
           call ~expected
           ~method_call_info:(TR.make_call_info ~receiver_is_self:false
@@ -3974,7 +3975,7 @@ and is_abstract_ft fty = match fty with
                 ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m
               begin fun (env, fty, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
-                check_coroutine_call env fty;
+                let env = check_coroutine_call env fty in
                 let env, _tel, _tuel, method_ = call ~expected
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m))
@@ -3994,7 +3995,7 @@ and is_abstract_ft fty = match fty with
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
-            check_coroutine_call env fty;
+            let env = check_coroutine_call env fty in
             let env, tel, tuel, ty =
               call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                   ~is_static:true this_ty (snd m))
@@ -4040,7 +4041,7 @@ and is_abstract_ft fty = match fty with
             ()
           end
         | _ -> () in
-      check_coroutine_call env fty;
+      let env = check_coroutine_call env fty in
       let env, tel, tuel, ty =
         call ~expected
         ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
@@ -4086,7 +4087,7 @@ and is_abstract_ft fty = match fty with
         ) in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let k = (fun (env, fty, _) ->
-        check_coroutine_call env fty;
+        let env = check_coroutine_call env fty in
         let env, tel_, tuel_, method_ =
           call ~expected
             ~method_call_info:(TR.make_call_info ~receiver_is_self:false
@@ -4108,13 +4109,13 @@ and is_abstract_ft fty = match fty with
   (* Function invocation *)
   | Fun_id x ->
       let env, fty = fun_type_of_id env x tal in
-      check_coroutine_call env fty;
+      let env = check_coroutine_call env fty in
       let env, tel, tuel, ty =
         call ~expected p env fty el uel in
       make_call  env (T.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
   | Id (_, id as x) ->
       let env, fty = fun_type_of_id env x tal in
-      check_coroutine_call env fty;
+      let env = check_coroutine_call env fty in
       let env, tel, tuel, ty =
         call ~expected p env fty el uel in
       let is_mutable = id = SN.Rx.mutable_ in
@@ -4143,7 +4144,7 @@ and is_abstract_ft fty = match fty with
       let env, te, fty = expr env e in
       let env, fty = SubType.expand_type_and_solve
         ~description_of_expected:"a function value" env fpos fty in
-      check_coroutine_call env fty;
+      let env = check_coroutine_call env fty in
       let env, tel, tuel, ty = call ~expected p env fty el uel in
       make_call env te tal tel tuel ty
 

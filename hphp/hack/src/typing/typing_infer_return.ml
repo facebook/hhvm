@@ -15,7 +15,7 @@ type t =
   Typing_suggest.hint_kind *
   Typing_defs.locl Typing_defs.ty
 
-let print_type_locl tenv ty = Typing_print.full tenv ty
+let print_type_locl tenv ty = Typing_print.(with_blank_tyvars (fun () -> full tenv ty))
 
 let print_type (tenv, _, _, ty) = print_type_locl tenv ty
 

@@ -133,6 +133,7 @@ let handler = object
     check_tparams env m.m_tparams;
     List.iter m.m_params (check_param env);
     check_variadic_param env m.m_variadic;
+    Option.iter m.m_ret (check_hint env)
 
   method! at_hint env (_, h) =
     match h with

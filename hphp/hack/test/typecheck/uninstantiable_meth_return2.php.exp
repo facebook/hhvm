@@ -1,0 +1,4 @@
+File "uninstantiable_meth_return2.php", line 11, characters 26-26:
+T is uninstantiable (Typing[4002])
+File "uninstantiable_meth_return2.php", line 4, characters 7-7:
+Declaration is here

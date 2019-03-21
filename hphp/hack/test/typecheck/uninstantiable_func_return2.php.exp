@@ -1,0 +1,4 @@
+File "uninstantiable_func_return2.php", line 10, characters 17-17:
+T is uninstantiable (Typing[4002])
+File "uninstantiable_func_return2.php", line 4, characters 7-7:
+Declaration is here

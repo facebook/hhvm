@@ -1,0 +1,4 @@
+File "uninstantiable_anon_return1.php", line 7, characters 21-21:
+C is uninstantiable (Typing[4002])
+File "uninstantiable_anon_return1.php", line 4, characters 22-22:
+Declaration is here

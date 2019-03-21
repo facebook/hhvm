@@ -292,7 +292,7 @@ and tparam = {
   tp_variance: Ast.variance;
   tp_name: sid;
   tp_constraints: (Ast.constraint_kind * hint) list;
-  tp_reified: Ast.reified;
+  tp_reified: reify_kind;
   tp_user_attributes: user_attribute list
 }
 
@@ -305,7 +305,7 @@ and class_tparams = {
   (* TODO: remove this and use tp_constraints *)
   (* keeping around the ast version of the constraint only
    * for the purposes of Naming.class_meth_bodies *)
-  c_tparam_constraints: (bool * (Ast.constraint_kind * hint) list) SMap.t [@opaque]
+  c_tparam_constraints: (reify_kind * (Ast.constraint_kind * hint) list) SMap.t [@opaque]
 }
 
 and class_ = {
@@ -479,6 +479,11 @@ and ns_kind =
   | NSClassAndNamespace
   | NSFun
   | NSConst
+
+and reify_kind =
+  | Erased
+  | SoftReified
+  | Reified
 
 let expr_to_string expr =
   match expr with

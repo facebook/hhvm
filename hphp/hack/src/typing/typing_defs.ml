@@ -554,7 +554,7 @@ and 'phase tparam = {
   tp_variance: Ast.variance;
   tp_name: Ast.id;
   tp_constraints: (Ast.constraint_kind * 'phase ty) list;
-  tp_reified: Ast.reified;
+  tp_reified: Nast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;
 }
 

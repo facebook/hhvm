@@ -5963,10 +5963,10 @@ and get_instance_var env = function
 and is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:begin fun env arg_ty ->
     let r = Reason.Rpredicated (p, pred_name) in
-    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" ~reified:false ~enforceable:false ~newable:false in
+    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" ~reified:Nast.Erased ~enforceable:false ~newable:false in
     let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
     let env = SubType.add_constraint p env Ast.Constraint_as tarrkey (MakeType.arraykey r) in
-    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" ~reified:false ~enforceable:false ~newable:false in
+    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" ~reified:Nast.Erased ~enforceable:false ~newable:false in
     let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
     (* This is the refined type of e inside the branch *)
     let refined_ty =
@@ -6520,6 +6520,12 @@ and user_attribute env ua =
     T.ua_params = typed_ua_params;
   }
 
+and reify_kind = function
+  | Nast.Erased -> T.Erased
+  | Nast.SoftReified -> T.SoftReified
+  | Nast.Reified -> T.Reified
+
+
 and type_param env t =
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.typeparam t.tp_user_attributes in
@@ -6527,14 +6533,14 @@ and type_param env t =
     T.tp_variance = t.tp_variance;
     T.tp_name = t.tp_name;
     T.tp_constraints = t.tp_constraints;
-    T.tp_reified = t.tp_reified;
+    T.tp_reified = reify_kind t.tp_reified;
     T.tp_user_attributes = List.map t.tp_user_attributes (user_attribute env);
   }
 
 and class_type_param env ct =
   {
     T.c_tparam_list = List.map ~f:(type_param env) ct.c_tparam_list;
-    T.c_tparam_constraints = ct.c_tparam_constraints;
+    T.c_tparam_constraints = SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
   }
 
 and method_def env m =

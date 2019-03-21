@@ -344,7 +344,7 @@ val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list
 val trivial_strict_not_nullable_compare_null : Pos.t -> string -> (Pos.t * string) list -> unit
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val noreturn_usage : Pos.t -> (Pos.t * string) list -> unit
-val generic_at_runtime : Pos.t -> unit
+val generic_at_runtime : Pos.t -> string -> unit
 val generics_not_allowed : Pos.t -> unit
 val interface_with_partial_typeconst : Pos.t -> unit
 val multiple_xhp_category : Pos.t -> unit
@@ -579,7 +579,7 @@ val move_in_nonreactive_context : Pos.t -> unit
 val invalid_move_target : Pos.t -> Pos.t -> string -> unit
 val invalid_move_use : Pos.t -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
-val erased_generic_passed_to_reified : Pos.t * string -> Pos.t * string -> unit
+val erased_generic_passed_to_reified : Pos.t * string -> Pos.t * string -> string -> unit
 val new_static_class_reified : Pos.t -> unit
 val new_without_newable: Pos.t -> string -> unit
 val ignored_result_of_freeze : Pos.t -> unit

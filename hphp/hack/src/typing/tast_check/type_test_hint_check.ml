@@ -78,11 +78,13 @@ let visitor = object(this)
       List.fold_left bounds ~f:this#on_type ~init:acc
     | AKgeneric name ->
       begin match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
-      | false, _ -> update acc @@
+      | Nast.Erased, _ -> update acc @@
         Invalid (r, "an erased generic type parameter")
-      | true, false -> update acc @@
+      | Nast.SoftReified, _ -> update acc @@
+        Invalid (r, "a soft reified generic type parameter")
+      | Nast.Reified, false -> update acc @@
         Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
-      | true, true ->
+      | Nast.Reified, true ->
         acc end
     | AKnewtype _ -> update acc @@ Invalid (r, "a newtype")
     | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
@@ -106,9 +108,10 @@ let visitor = object(this)
           if this#is_wildcard targ
           then acc
           else
-            if tparam.tp_reified
-            then this#on_type acc targ
-            else update acc @@ Invalid (r, "a type with an erased generic type argument")
+            match tparam.tp_reified with
+            | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
+            | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+            | Nast.Reified -> this#on_type acc targ
         ) with
         | Ok new_acc -> new_acc
         | Unequal_lengths -> acc (* arity error elsewhere *)

@@ -193,14 +193,14 @@ struct
     T.tp_variance = t.S.tp_variance;
     T.tp_name = t.S.tp_name;
     T.tp_constraints = t.S.tp_constraints;
-    T.tp_reified = t.S.tp_reified;
+    T.tp_reified = map_reify_kind t.S.tp_reified;
     T.tp_user_attributes = List.map t.S.tp_user_attributes (map_user_attribute menv);
   }
 
   and map_class_tparams menv ct =
   {
     T.c_tparam_list = List.map ~f:(map_tparam menv) ct.S.c_tparam_list;
-    T.c_tparam_constraints = ct.S.c_tparam_constraints;
+    T.c_tparam_constraints = SMap.map (Tuple.T2.map_fst ~f:map_reify_kind) ct.S.c_tparam_constraints;
   }
 
   and map_func_body menv b =
@@ -437,6 +437,12 @@ struct
     | S.NSConst -> T.NSConst
     in
     (kind, id1, id2)
+
+  and map_reify_kind r =
+    match r with
+    | S.Erased -> T.Erased
+    | S.SoftReified -> T.SoftReified
+    | S.Reified -> T.Reified
 
   and map_def menv d =
     let { map_expr_annotation; map_env_annotation; map_funcbody_annotation } = menv in

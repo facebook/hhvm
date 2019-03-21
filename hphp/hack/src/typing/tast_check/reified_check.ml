@@ -16,7 +16,12 @@ module UA = Naming_special_names.UserAttributes
 module Cls = Typing_classes_heap
 
 let tparams_has_reified tparams =
-  List.exists ~f:(fun t -> t.tp_reified) tparams
+  List.exists tparams ~f:(fun tparam ->
+    match tparam.tp_reified with
+    | Nast.Erased -> false
+    | Nast.SoftReified
+    | Nast.Reified -> true
+  )
 
 let valid_newable_hint env tp (pos, hint) =
   match hint with
@@ -55,12 +60,21 @@ let verify_has_consistent_bound env (tparam: Tast.tparam) =
  * where Tf does not exist at runtime.
  *)
 let verify_targ_valid_for_reified_tparam env tparam targ =
-  begin if tparam.tp_reified then
+  (* There is some subtlety here. If a type *parameter* is declared reified,
+   * even if it is soft, we require that the argument be concrete or reified, not soft
+   * reified or erased *)
+  begin match tparam.tp_reified with
+  | Nast.Reified
+  | Nast.SoftReified ->
     let ty = Env.hint_to_ty env targ in
-    match Typing_generic.IsGeneric.ty (Tast_env.get_tcopt env) ty with
-    | Some resolved_targ when not (Tast_env.get_reified env (snd resolved_targ)) ->
-      Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ
-    | _ -> () end;
+    begin match Typing_generic.IsGeneric.ty (Tast_env.get_tcopt env) ty with
+    | Some resolved_targ ->
+      begin match (Tast_env.get_reified env (snd resolved_targ)) with
+      | Nast.Erased -> Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ "not reified"
+      | Nast.SoftReified -> Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ "soft reified"
+      | Nast.Reified -> () end
+    | _ -> () end
+  | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Type_test_hint_check.validate_hint env targ
@@ -107,7 +121,7 @@ let handler = object
       let t = Tast_env.get_self_id env >>=
         Tast_env.get_class env >>|
         Cls.tparams >>|
-        List.exists ~f:(fun tp -> tp.tp_reified) in
+        tparams_has_reified in
       Option.iter t ~f:(fun has_reified -> if has_reified then
         Errors.new_static_class_reified pos
       )

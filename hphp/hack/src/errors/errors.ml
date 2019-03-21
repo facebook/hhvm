@@ -2485,9 +2485,9 @@ let require_args_reify def_pos arg_pos =
     def_pos, "Definition is here"
   ]
 
-let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) =
+let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) reification =
   add_list (Typing.err_code Typing.ErasedGenericPassedToReified) [
-    arg_pos, arg_name ^ " is not reified, it cannot be used as a reified type argument";
+    arg_pos, arg_name ^ " is " ^ reification ^ ", it cannot be used as a reified type argument";
     def_pos, def_name ^ " is reified"
   ]
 
@@ -2945,9 +2945,10 @@ let nullsafe_not_needed p nonnull_witness =
    "You are using the ?-> operator but this object cannot be null. "
  ] @ nonnull_witness)
 
-let generic_at_runtime p =
+let generic_at_runtime p prefix =
   add (Typing.err_code Typing.ErasedGenericAtRuntime) p
-    "Erased generics can only be used in type hints since they are erased at runtime."
+    (prefix ^ " generics can only be used in type hints because \
+    they do not exist at runtime.")
 
 let generics_not_allowed p =
   add (Typing.err_code Typing.GenericsNotAllowed) p

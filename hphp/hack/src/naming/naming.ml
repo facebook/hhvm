@@ -37,8 +37,8 @@ module GEnv = NamingGlobal.GEnv
 type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = bool * (Ast.constraint_kind * Ast.hint) list
-type aast_type_constraint = bool * (Ast.constraint_kind * Aast.hint) list
+type type_constraint = N.reify_kind * (Ast.constraint_kind * Ast.hint) list
+type aast_type_constraint = N.reify_kind * (Ast.constraint_kind * Aast.hint) list
 
 let convert_type_constraints_to_aast =
   Tuple.T2.map_snd ~f:(List.map ~f:(Tuple.T2.map_snd ~f:Ast_to_nast.on_hint))
@@ -576,7 +576,10 @@ end = struct
     match SMap.find_opt name genv.type_params with
     | Some (reified, _) ->
       if not allow_generics then Errors.generics_not_allowed p;
-      if not reified then Errors.generic_at_runtime p;
+      begin match reified with
+      | N.Erased -> Errors.generic_at_runtime p "Erased"
+      | N.SoftReified -> Errors.generic_at_runtime p "Soft reified"
+      | N.Reified -> () end;
       x
     | None ->
       let (pos, name) as x = NS.elaborate_id genv.namespace NS.ElaborateClass x in
@@ -1418,11 +1421,14 @@ module Make (GetLocals : GetLocals) = struct
 
   and aast_type_param ~forbid_this env t =
     let (genv, _) = env in
-    if t.Aast.tp_reified && not (TypecheckerOptions.experimental_feature_enabled
-        genv.tcopt
-      TypecheckerOptions.experimental_reified_generics)
-    then
-      Errors.experimental_feature (fst t.Aast.tp_name) "reified generics";
+    begin match t.Aast.tp_reified with
+    | Aast.Erased -> ()
+    | Aast.SoftReified
+    | Aast.Reified ->
+      if not (TypecheckerOptions.experimental_feature_enabled genv.tcopt
+        TypecheckerOptions.experimental_reified_generics)
+      then
+        Errors.experimental_feature (fst t.Aast.tp_name) "reified generics" end;
 
     begin
       if (TypecheckerOptions.experimental_feature_enabled
@@ -1731,7 +1737,12 @@ module Make (GetLocals : GetLocals) = struct
 
   and aast_extend_params genv paraml =
     let params = List.fold_right paraml ~init:genv.type_params
-      ~f:begin fun { Aast.tp_name = (_, x); tp_constraints = cstr_list; tp_reified = r; _ } acc ->
+      ~f:begin fun {
+        Aast.tp_name = (_, x);
+        tp_constraints = cstr_list;
+        tp_reified = r;
+        _
+      } acc ->
         SMap.add x (r, cstr_list) acc
       end in
     { genv with type_params = params }

@@ -191,9 +191,10 @@ match SMap.get name tpenv with
 | None -> empty_bounds
 | Some {upper_bounds; _} -> upper_bounds
 
+
 let get_tpenv_reified tpenv name =
 match SMap.get name tpenv with
-| None -> false
+| None -> Erased
 | Some {reified; _} -> reified
 
 let get_tpenv_enforceable tpenv name =
@@ -219,7 +220,10 @@ let get_upper_bounds env name =
 let get_reified env name =
   let local = get_tpenv_reified env.lenv.tpenv name in
   let global = get_tpenv_reified env.global_tpenv name in
-  local || global
+  match local, global with
+  | Reified, _ | _, Reified -> Reified
+  | SoftReified, _ | _, SoftReified -> SoftReified
+  | _ -> Erased
 
 let get_enforceable env name =
   let local = get_tpenv_enforceable env.lenv.tpenv name in
@@ -258,7 +262,7 @@ let add_upper_bound_ tpenv name ty =
     SMap.add name
       { lower_bounds = empty_bounds;
         upper_bounds = singleton_bound ty;
-        reified = false;
+        reified = Erased;
         enforceable = false;
         newable = false } tpenv
   | Some tp ->
@@ -275,7 +279,7 @@ let add_lower_bound_ tpenv name ty =
     SMap.add name
       { lower_bounds = singleton_bound ty;
         upper_bounds = empty_bounds;
-        reified = false;
+        reified = Erased;
         enforceable = false;
         newable = false } tpenv
   | Some tp ->

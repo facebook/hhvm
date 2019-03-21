@@ -570,7 +570,10 @@ module Full = struct
   and tparam: type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
     fun to_doc st env { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } ->
     Concat [
-      if r then text "reify" ^^ Space else Nothing;
+      begin match r with
+      | Nast.Erased -> Nothing
+      | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
+      | Nast.Reified -> text "reify" ^^ Space end;
       text x;
       list_sep ~split:false Space (tparam_constraint to_doc st env) cstrl;
     ]
@@ -1376,8 +1379,11 @@ module PrintClass = struct
     (List.fold_right
       cstrl
       ~f:(fun x acc -> constraint_ty tcopt x^" "^acc)
-      ~init:"")
-    ^ (if reified then " reified" else "")
+      ~init:"")^
+    match reified with
+    | Nast.Erased -> ""
+    | Nast.SoftReified -> " soft reified"
+    | Nast.Reified -> " reified"
 
   let tparam_list tcopt l =
     List.fold_right l ~f:(fun x acc -> tparam tcopt x^", "^acc) ~init:""

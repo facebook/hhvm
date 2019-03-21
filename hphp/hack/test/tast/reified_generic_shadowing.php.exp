@@ -1,7 +1,7 @@
 Errors:
   [6:12-16] Name already bound: Tcat
   [4:7-11] Previous definition is here
-  [7:7-11] Erased generics can only be used in type hints since they are erased at runtime.
+  [7:7-11] Erased generics can only be used in type hints because they do not exist at runtime.
   [7:3-13] Tcat cannot be used with `new` because it does not have the <<__Newable>> attribute
 [(Class
     { c_span = [4:1-14]; c_annotation = (); c_mode = <opaque>;
@@ -22,7 +22,7 @@ Errors:
        f_name = ([6:10-11], "\\f");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat");
-          tp_constraints = []; tp_reified = false; tp_user_attributes = [] }
+          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

@@ -64,6 +64,15 @@ let optional f = function
 
 let both f (p1, p2) = (f p1, f p2)
 
+let reification reified attributes =
+  let soft = List.exists (fun { Aast.ua_name = (_, n); _ } -> n = SN.UserAttributes.uaSoft)
+    attributes in
+  if reified
+  then if soft
+    then Aast.SoftReified
+    else Aast.Reified
+  else Aast.Erased
+
 let rec on_variadic_hint h =
   match h with
   | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
@@ -383,11 +392,12 @@ and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =
   (kind, on_hint hint)
 
 and on_tparam t : Aast.tparam =
+  let attributes = on_list on_user_attribute t.tp_user_attributes in
   { Aast.tp_variance = t.tp_variance;
     tp_name = t.tp_name;
     tp_constraints = on_list on_tparam_constraint t.tp_constraints;
-    tp_reified = t.tp_reified;
-    tp_user_attributes = on_list on_user_attribute t.tp_user_attributes;
+    tp_reified = reification t.tp_reified attributes;
+    tp_user_attributes = attributes;
   }
 
 and on_fun_param ?(trait_or_interface=false) param : Aast.fun_param =

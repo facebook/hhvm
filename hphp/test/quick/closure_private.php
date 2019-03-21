@@ -34,16 +34,6 @@ class A {
     return $c($a);
   }
 
-  public function testByRef() {
-    $a = "foo";
-    $b = "bar";
-    $c = function(&$foo) use (&$b) {
-      $this->double(&$foo, &$b);
-    };
-    $c(&$a);
-    return $a.$b;
-  }
-
   public function testNotByRef() {
     $a = "foo";
     $b = "bar";
@@ -69,5 +59,4 @@ var_dump($a->testPublic());
 var_dump($a->testUse());
 var_dump($a->testParam());
 var_dump($a->testParamAndClosure());
-var_dump($a->testByRef());
 var_dump($a->testNotByRef());

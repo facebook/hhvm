@@ -7,7 +7,7 @@ Function test_array_list() {
 
 function test_closure_use() {
   $i = 0;
-  $f = Function() Use (&$i) {
+  $f = Function() Use ($i) {
     ECHO "CLOSURE $i\n";
     $i++;
   };

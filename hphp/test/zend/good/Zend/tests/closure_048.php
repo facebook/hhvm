@@ -1,14 +1,18 @@
 <?php
 
+class Ref { public function __construct(public $val) {} }
+
 function replace_variables($text, $params) {
+  $text = new Ref($text);
+  $params = new Ref($params);
 
-	$c = function($matches) use (&$params, &$text) {
-		$text = preg_replace( '/(\?)/', array_shift( &$params ), $text, 1 );
-	};
+  $c = function($matches) use ($params, $text) {
+    $text->val = preg_replace( '/(\?)/', array_shift(&$params->val), $text->val, 1);
+  };
 
-	preg_replace_callback( '/(\?)/', $c, $text );
+  preg_replace_callback( '/(\?)/', $c, $text->val );
 
-	return $text;
+  return $text->val;
 }
 
 echo replace_variables('a=?', array('0')) . "\n";

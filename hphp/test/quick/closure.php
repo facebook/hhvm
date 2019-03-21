@@ -8,12 +8,10 @@ function funk($alice, $bob) {
 
 function main() {
   $use_by_val = 123;
-  $use_by_ref = 1000;
 
-  $c = function($arg, $dv = 500) use ($use_by_val, &$use_by_ref) {
+  $c = function($arg, $dv = 500) use ($use_by_val) {
     $use_by_val *= 2;
-    $use_by_ref *= 2;
-    echo "Use: $use_by_val $use_by_ref\n";
+    echo "Use: $use_by_val\n";
     funk($arg, $dv);
   };
 
@@ -27,7 +25,7 @@ function main() {
   $c(777);
   call_user_func($c, 888);
   var_dump($c);
-  var_dump($use_by_val, $use_by_ref);
+  var_dump($use_by_val);
   $debuginfo = $c->__debuginfo();
   var_dump(is_darray($debuginfo));
   var_dump(is_darray($debuginfo['static']));

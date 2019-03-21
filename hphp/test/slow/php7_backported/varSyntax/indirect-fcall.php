@@ -1,7 +1,8 @@
 <?php
 function id($x = 'id') { return $x; }
 class Test {
-    public static function id($x = [__CLASS__, 'id']) { return $x; }
+  public static function id($x = [__CLASS__, 'id']) { return $x; }
+  public static $f;
 }
 
 <<__EntryPoint>>
@@ -16,8 +17,8 @@ id(['udef', 'id'])[1]()('var_dump')(5);
 $id = function($x) { return $x; };
 $id($id)('var_dump')(7);
 (function($x) { return $x; })('id')('var_dump')(8);
-($f = function($x = null) use (&$f) {
-    return $x ?: $f;
+(Test::$f = function($x = null) {
+    return $x ?: Test::$f;
 })()()()('var_dump')(9);
 $obj = new Test;
 [$obj, 'id']()('id')($id)('var_dump')(10);

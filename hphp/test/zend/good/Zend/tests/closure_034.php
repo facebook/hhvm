@@ -1,7 +1,10 @@
 <?php
 
-$a = function () use(&$a) {};
-var_dump($a);
+class C { public $a; }
+
+$c = new C();
+$c->a = function () use($c) {};
+var_dump($c->a);
 
 ?>
 ===DONE===

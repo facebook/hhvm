@@ -5,9 +5,10 @@ class asserter {
 }
 
 $asserter = new asserter();
+$function = 'md5';
 
-$closure = function() use ($asserter, &$function) {
-        $asserter->call($function = 'md5');
+$closure = function() use ($asserter, $function) {
+        $asserter->call($function);
 };
 
 $closure();

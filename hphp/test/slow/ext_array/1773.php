@@ -6,7 +6,7 @@ function xsort(&$a) {
   var_dump(is_object($b));
   $b = false;
   $b[0] =& $a;
-  uksort(&$a, function ($i, $j) use(&$b) {
+  uksort(&$a, function ($i, $j) use($b) {
       if ($b[0][$i] == $b[0][$j]) return 0;
       return $b[0][$i] < $b[0][$j] ? -1 : 1;
     }

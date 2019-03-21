@@ -30,16 +30,8 @@ $env = 3;
 
 $inc = async function () use ($env) { return ++$env; };
 $incB = async function () use ($env) { await block(); return ++$env; };
-$incref = async function () use (&$env) { return ++$env; };
-$increfB = async function () use (&$env) { await block(); return ++$env; };
 
 var_dump(HH\Asio\join($inc()));
 var_dump(HH\Asio\join($incB()));
-var_dump($env);
-
-var_dump(HH\Asio\join($incref()));
-var_dump($env);
-
-var_dump(HH\Asio\join($increfB()));
 var_dump($env);
 }

@@ -1,17 +1,17 @@
 <?php
 
+class Env { public static int $n = 3; }
 
 <<__EntryPoint>>
 function main_2161() {
-$env = 3;
-$f = function ($arg0) use (&$env) {
+$f = function ($arg0) {
   yield $arg0;
-  yield $arg0 + ($env++);
-  yield $arg0 + ($env++) + 1;
+  yield $arg0 + (Env::$n++);
+  yield $arg0 + (Env::$n++) + 1;
 }
 ;
 foreach ($f(32) as $x) {
  var_dump($x);
  }
-var_dump($env);
+var_dump(Env::$n);
 }

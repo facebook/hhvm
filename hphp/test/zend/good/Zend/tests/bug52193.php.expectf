@@ -18,7 +18,7 @@ array(1) {
     ["static"]=>
     array(1) {
       ["h"]=>
-      &array(1) {
+      array(1) {
         [0]=>
         object(Closure%s) (0) {
         }
@@ -30,7 +30,7 @@ object(Closure%s) (1) {
   ["static"]=>
   array(1) {
     ["h"]=>
-    &array(1) {
+    array(1) {
       [0]=>
       object(Closure%s) (0) {
       }

@@ -22,14 +22,14 @@ function main($foo, $cuf, $cufa) {
   $a = array('red' => 4, 'apple' => 12, 'foo' => 1);
 
   echo "Builtin calls:\n";
-  expect_fail(function() use(&$a) { ksort($a); });
+  expect_fail(() ==> { ksort($a); });
   var_dump($a);
   sort(&$a);
   var_dump($a);
 
   echo "Literal calls:\n";
   $b = array('x' => array('y' => 'z'));
-  expect_fail(function() use(&$b) { foo('x', 'y', $b); });
+  expect_fail(() ==> { foo('x', 'y', $b); });
   var_dump($b);
   foo('a', 'b', &$b);
   var_dump($b);
@@ -38,42 +38,42 @@ function main($foo, $cuf, $cufa) {
   $d = 'r';
 
   echo "Plain calls:\n";
-  expect_fail(function() use(&$c, &$d, &$b) { foo($c, $d, $b); });
+  expect_fail(() ==> { foo($c, $d, $b); });
   foo($c, $d, &$b);
-  expect_fail(function() use(&$c, &$d, &$b) { foo($c, &$d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b) { foo($c, &$d, &$b); });
-  expect_fail(function() use(&$c, &$d, &$b) { foo(&$c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b) { foo(&$c, $d, &$b); });
-  expect_fail(function() use(&$c, &$d, &$b) { foo(&$c, &$d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b) { foo(&$c, &$d, &$b); });
+  expect_fail(() ==> { foo($c, &$d, $b); });
+  expect_fail(() ==> { foo($c, &$d, &$b); });
+  expect_fail(() ==> { foo(&$c, $d, $b); });
+  expect_fail(() ==> { foo(&$c, $d, &$b); });
+  expect_fail(() ==> { foo(&$c, &$d, $b); });
+  expect_fail(() ==> { foo(&$c, &$d, &$b); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "Dynamic calls:\n";
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { $foo(&$c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { $foo($c, &$d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { $foo($c, $d, $b); });
+  expect_fail(() ==> { $foo(&$c, $d, $b); });
+  expect_fail(() ==> { $foo($c, &$d, $b); });
+  expect_fail(() ==> { $foo($c, $d, $b); });
   $foo($c, $d, &$b);
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "CUF/dynamic-CUF calls:\n";
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func($foo, $c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf($foo, $c, $d, $b); });
+  expect_fail(() ==> { call_user_func($foo, $c, $d, $b); });
+  expect_fail(() ==> { $cuf($foo, $c, $d, $b); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "CUF + ref calls:\n";
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func($foo, $c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func(&$foo, $c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func($foo, &$c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func($foo, $c, &$d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo) { call_user_func($foo, $c, $d, &$b); });
+  expect_fail(() ==> { call_user_func($foo, $c, $d, $b); });
+  expect_fail(() ==> { call_user_func(&$foo, $c, $d, $b); });
+  expect_fail(() ==> { call_user_func($foo, &$c, $d, $b); });
+  expect_fail(() ==> { call_user_func($foo, $c, &$d, $b); });
+  expect_fail(() ==> { call_user_func($foo, $c, $d, &$b); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "dynamic-CUF + ref calls:\n";
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf($foo, $c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf(&$foo, $c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf($foo, &$c, $d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf($foo, $c, &$d, $b); });
-  expect_fail(function() use(&$c, &$d, &$b, $foo, $cuf) { $cuf($foo, $c, $d, &$b); });
+  expect_fail(() ==> { $cuf($foo, $c, $d, $b); });
+  expect_fail(() ==> { $cuf(&$foo, $c, $d, $b); });
+  expect_fail(() ==> { $cuf($foo, &$c, $d, $b); });
+  expect_fail(() ==> { $cuf($foo, $c, &$d, $b); });
+  expect_fail(() ==> { $cuf($foo, $c, $d, &$b); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   $x = array($c, $d, &$b);
@@ -87,8 +87,8 @@ function main($foo, $cuf, $cufa) {
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "CUFA + ref calls:\n";
-  expect_fail(function() use(&$foo, &$x) { call_user_func_array(&$foo, $x); });
-  expect_fail(function() use(&$foo, &$y) { call_user_func_array($foo, &$y); });
+  expect_fail(() ==> { call_user_func_array(&$foo, $x); });
+  expect_fail(() ==> { call_user_func_array($foo, &$y); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "dynamic-CUFA calls:\n";
@@ -98,8 +98,8 @@ function main($foo, $cuf, $cufa) {
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "dynamic-CUFA + ref calls:\n";
-  expect_fail(function() use(&$foo, &$x, $cufa) { $cufa(&$foo, $x); });
-  expect_fail(function() use(&$foo, &$y, $cufa) { $cufa($foo, &$y); });
+  expect_fail(() ==> { $cufa(&$foo, $x); });
+  expect_fail(() ==> { $cufa($foo, &$y); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
   echo "fb_intercept:\n";

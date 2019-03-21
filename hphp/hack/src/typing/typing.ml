@@ -2316,7 +2316,7 @@ and expr_
       let reactivity =
           Decl_fun_utils.fun_reactivity_opt env.Env.decl_env f.f_user_attributes
           |> Option.value ~default:(TR.strip_conditional_reactivity (Env.env_reactivity env)) in
-      let check_body_under_known_params ?ret_ty ft =
+      let check_body_under_known_params env ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
         let env = Env.set_env_reactive env reactivity in
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
@@ -2379,7 +2379,7 @@ and expr_
           | _, Tprim Tvoid when not is_explicit_ret -> None
           | _ -> Some expected_ft.ft_ret in
         Typing_log.increment_feature_count env FL.Lambda.contextual_params;
-        check_body_under_known_params ?ret_ty expected_ft
+        check_body_under_known_params env ?ret_ty expected_ft
       | _ ->
         let explicit_variadic_param_or_non_variadic =
           begin match f.f_variadic with
@@ -2396,7 +2396,7 @@ and expr_
         then begin
           Typing_log.increment_feature_count env
             (if List.is_empty f.f_params then FL.Lambda.no_params else FL.Lambda.explicit_params);
-          check_body_under_known_params declared_ft
+          check_body_under_known_params env declared_ft
         end
         else begin
           match expected with
@@ -2404,15 +2404,40 @@ and expr_
             (* If the expected type is Tany env then we're passing a lambda to an untyped
              * function and we just assume every parameter has type Tany env *)
             Typing_log.increment_feature_count env FL.Lambda.untyped_context;
-            check_body_under_known_params declared_ft
+            check_body_under_known_params env declared_ft
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway *)
             if Env.is_strict env
             then Errors.untyped_lambda_strict_mode p;
             Typing_log.increment_feature_count env FL.Lambda.non_function_typed_context;
-            check_body_under_known_params declared_ft
+            check_body_under_known_params env declared_ft
           | _ ->
+            (* If we're in partial mode then type-check definition anyway,
+             * so treating parameters without type hints as "untyped"
+            *)
+
+            if TypecheckerOptions.new_inference (Env.get_tcopt env)
+            then
+              if Env.is_strict env
+              then begin
+                Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
+                let freshen_untyped_param env ft_param =
+                  match snd ft_param.fp_type with
+                  | Tany ->
+                    let env, ty = Env.fresh_invariant_type_var env ft_param.fp_pos in
+                    env, { ft_param with fp_type = ty }
+                  | _ ->
+                    env, ft_param in
+                let env, ft_params = List.map_env env declared_ft.ft_params freshen_untyped_param in
+                let declared_ft = { declared_ft with ft_params } in
+                check_body_under_known_params env declared_ft
+              end
+              else begin
+                Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
+                check_body_under_known_params env declared_ft
+              end
+            else
             begin
               Typing_log.increment_feature_count env FL.Lambda.unknown_params;
               (* check for recursive function calls *)
@@ -2769,7 +2794,6 @@ and anon_make tenv p f ft idl =
             iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let env = Env.open_tyvars env in
         let env, hret =
           match f.f_ret with
           | None ->
@@ -2831,7 +2855,6 @@ and anon_make tenv p f ft idl =
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
         let env = Env.set_tyvar_variance env ty in
-        let env = SubType.close_tyvars_and_solve env in
         env, te, hret
       end
     end

@@ -16,4 +16,5 @@
    let untyped_context = ""
    let unknown_params = ""
    let unknown_params_with_uses _ = ""
+   let fresh_tyvar_params = ""
  end

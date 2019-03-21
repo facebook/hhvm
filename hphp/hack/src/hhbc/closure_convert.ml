@@ -88,6 +88,9 @@ type state = {
   inout_wrappers : fun_ list;
   (* The current namespace environment *)
   namespace: Namespace_env.env;
+  (* Static variables in closures have special properties with mangled names
+   * defined for them *)
+  static_vars : ULS.t;
   (* Set of closure names that used to have explicit 'use' language construct
     in original anonymous function *)
   explicit_use_set: SSet.t;
@@ -140,6 +143,7 @@ let initial_state popt =
   named_hoisted_functions = SMap.empty;
   inout_wrappers = [];
   namespace = Namespace_env.empty popt;
+  static_vars = ULS.empty;
   explicit_use_set = SSet.empty;
   closure_namespaces = SMap.empty;
   closure_enclosing_classes = SMap.empty;
@@ -368,7 +372,11 @@ let enter_lambda st =
     captured_vars = ULS.empty;
     captured_this = false;
     captured_generics = ULS.empty;
+    static_vars = ULS.empty;
    }
+
+let add_static_var st var =
+  { st with static_vars = ULS.add st.static_vars var }
 
 let set_namespace st ns =
   { st with namespace = ns }
@@ -433,6 +441,9 @@ let make_closure ~class_num
   let cvl =
     List.map lambda_vars
     (fun name -> (p, (p, Hhbc_string_utils.Locals.strip_dollar name), None)) in
+  let cvl = cvl @ (List.map (ULS.items st.static_vars)
+    (fun name -> (p, (p,
+     "86static_" ^ (Hhbc_string_utils.Locals.strip_dollar name)), None))) in
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];
@@ -878,6 +889,7 @@ and convert_lambda env st p fd use_vars_opt =
   let captured_vars = st.captured_vars in
   let captured_this = st.captured_this in
   let captured_generics = st.captured_generics in
+  let static_vars = st.static_vars in
   let old_function_state = st.current_function_state in
   let st = enter_lambda st in
   let old_env = env in
@@ -970,6 +982,7 @@ and convert_lambda env st p fd use_vars_opt =
   let st = { st with captured_vars;
                      captured_this;
                      captured_generics;
+                     static_vars;
                      explicit_use_set;
                      closure_enclosing_classes;
                      closure_namespaces = SMap.add
@@ -1014,6 +1027,16 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Return opt_e ->
     let st, opt_e = convert_opt_expr env st opt_e in
     st, (p, Return opt_e)
+  | Static_var el ->
+    let visit_static_var st e =
+      begin match snd e with
+      | Lvar (_, name)
+      | Binop (Eq None, (_, Lvar (_, name)), _) -> add_static_var st name
+      | _ -> failwith "Static var - impossible"
+      end in
+    let st = List.fold_left el ~init:st ~f:visit_static_var in
+    let st, el = convert_exprs env st el in
+    st, (p, Static_var el)
   | Awaitall el ->
     let st, el = List.map_env st el (convert_snd_expr env) in
     st, (p, Awaitall el)

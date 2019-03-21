@@ -1523,6 +1523,16 @@ To string conversions:
 
   Load the length of the string in S0.
 
+| LdClosureStaticLoc<func,staticLocalName>, D(PtrToPropGen), S(Obj), NF
+
+  Get pointer to static local named 'staticLocName' for function 'func' whose
+  closure object is S0. func must either be a Closure, or generatorFromClosure
+
+| LdStaticLoc<func,staticLocalName>, D(BoxedInitCell), NA, PRc
+
+  Load the address of the static local variable named 'staticLocalName' for
+  function 'func' in RDS. The variable must be initialized
+
 | FuncSupportsAsyncEagerReturn, D(Bool), S(Func), NF
 
   Tests for Func::m_attrs & AttrSupportsAsyncEagerReturn.
@@ -2295,6 +2305,16 @@ To string conversions:
 
   Raises a runtime error unless whether each generic in S0 is reified or erased
   matches exactly to the expectations of the func.
+
+| CheckStaticLoc<func,staticLocalName>, ND, NA, B
+
+  Check whether the static local variable named 'staticLocalName' for
+  function 'func' is initialized in RDS, and branch if not.
+
+| InitStaticLoc<func,staticLocalName>, ND, S(Cell), NF
+
+  Initialize the static local variable named 'staticLocalName' for
+  function 'func' with S0.
 
 | InitClsCns<className,constName>, DCns, NA, PRc
 

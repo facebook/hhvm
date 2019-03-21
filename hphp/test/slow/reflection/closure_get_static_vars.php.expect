@@ -1,0 +1,10 @@
+array(0) {
+}
+array(2) {
+  ["a"]=>
+  int(4)
+  ["b"]=>
+  string(13) "i am a string"
+}
+array(0) {
+}

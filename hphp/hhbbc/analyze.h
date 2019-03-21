@@ -119,6 +119,11 @@ struct FuncAnalysisResult {
     unfoldableFuncs;
 
   /*
+   * Known types of local statics.
+   */
+  CompactVector<Type> localStaticTypes;
+
+  /*
    * Bitset representing which parameters may affect the result of the
    * function, assuming it produces one. Note that VerifyParamType
    * does not count as a use in this context.

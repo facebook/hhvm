@@ -33,7 +33,24 @@ const StaticString
   s_varprefix("$"),
   s_parameter("parameter"),
   s_required("<required>"),
-  s_optional("<optional>");
+  s_optional("<optional>"),
+  s_staticPrefix("86static_");
+
+Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name) {
+  auto str = String::attach(
+    StringData::Make(s_staticPrefix.slice(), name->slice())
+  );
+  auto const slot = cls->lookupDeclProp(str.get());
+  assertx(slot != kInvalidSlot);
+  return slot;
+}
+
+TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
+                                      const StringData* name) {
+  assertx(closure->instanceof(c_Closure::classof()));
+  auto const slot = lookupStaticSlotFromClosure(closure->getVMClass(), name);
+  return c_Closure::fromObject(closure)->getStaticVar(slot);
+}
 
 static Array HHVM_METHOD(Closure, __debugInfo) {
   auto closure = c_Closure::fromObject(this_);
@@ -106,9 +123,11 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 
   /*
-   * Copy the use vars to instance variables.
+   * Copy the use vars to instance variables, and initialize any
+   * instance properties that are for static locals to KindOfUninit.
    */
-  assertx(cls->numDeclProperties() == numArgs);
+  auto const numDeclProperties = cls->numDeclProperties();
+  assertx(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
 
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.
@@ -121,9 +140,13 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto beforeCurUseVar = sp + numArgs;
   auto curProperty = getUseVars();
   int i = 0;
+  assertx(numArgs <= numDeclProperties);
   for (; i < numArgs; i++) {
     // teleport the references in here so we don't incref
     tvCopy(*--beforeCurUseVar, *curProperty++);
+  }
+  for (; i < numDeclProperties; ++i) {
+    tvWriteUninit(*curProperty++);
   }
 }
 

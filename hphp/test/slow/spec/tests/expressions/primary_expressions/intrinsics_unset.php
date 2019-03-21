@@ -128,14 +128,15 @@ var_dump($v2);
 
 echo "---------- unsetting inside a function (static) ------------\n";
 
-class State { static $count = 0; }
 function g4()
 {
-    ++State::$count;
-    echo "count = ".State::$count."\n";
+    static $count = 0;
+    ++$count;
+    echo "count = $count\n";
 
-    var_dump(isset(State::$count));
-    var_dump(false);
+    var_dump(isset($count));
+    unset($count);          // unsets local "version" in current scope
+    var_dump(isset($count));
 }
 
 g4();

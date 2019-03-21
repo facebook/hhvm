@@ -61,25 +61,12 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
-            "line": 3,
-            "character": 31
-          },
-          "end": {
-            "line": 3,
-            "character": 33
-          }
-        }
-      },
-      {
-        "uri": "file://${root_path}${path_sep}references.php",
-        "range": {
-          "start": {
-            "line": 4,
-            "character": 9
-          },
-          "end": {
-            "line": 4,
+            "line": 5,
             "character": 11
+          },
+          "end": {
+            "line": 5,
+            "character": 13
           }
         }
       },

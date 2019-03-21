@@ -1,3 +1,7 @@
+dict(1) {
+  ["foo"]=>
+  NULL
+}
 dict(2) {
   ["A"]=>
   vec(2) {
@@ -9,7 +13,7 @@ dict(2) {
   }
 }
 
-Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 25
+Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 27
 dict(2) {
   ["A"]=>
   vec(2) {
@@ -155,15 +159,17 @@ object(ReflectionType) (1) {
 vec(1) {
   int(1)
 }
+dict(0) {
+}
 dict(1) {
   ["Bing"]=>
   vec(0) {
   }
 }
 
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
 
-Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 31
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
 dict(2) {
   ["Bing"]=>
   vec(0) {

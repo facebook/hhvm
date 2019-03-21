@@ -63,6 +63,7 @@ std::mutex s_allocMutex;
 //////////////////////////////////////////////////////////////////////
 
 struct SymbolKind : boost::static_visitor<std::string> {
+  std::string operator()(StaticLocal /*k*/) const { return "StaticLocal"; }
   std::string operator()(ClsConstant /*k*/) const { return "ClsConstant"; }
   std::string operator()(StaticMethod /*k*/) const { return "StaticMethod"; }
   std::string operator()(StaticMethodF /*k*/) const { return "StaticMethodF"; }
@@ -76,6 +77,19 @@ struct SymbolKind : boost::static_visitor<std::string> {
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
+  std::string operator()(StaticLocal k) const {
+    const Func* func = Func::fromFuncId(k.funcId);
+    const Class* cls = getOwningClassForFunc(func);
+    std::string name;
+    if (cls != func->cls()) {
+      name = cls->name()->toCppString() + "::" +
+        func->name()->toCppString();
+    } else {
+      name = func->fullName()->toCppString();
+    }
+    return name + "::" + k.name->toCppString();
+  }
+
   std::string operator()(ClsConstant k) const {
     return k.clsName->data() + std::string("::") + k.cnsName->data();
   }
@@ -125,6 +139,11 @@ struct SymbolEq : boost::static_visitor<bool> {
     bool
   >::type operator()(const T&, const U&) const { return false; }
 
+  bool operator()(StaticLocal k1, StaticLocal k2) const {
+    assertx(k1.name->isStatic() && k2.name->isStatic());
+    return k1.funcId == k2.funcId && k1.name == k2.name;
+  }
+
   bool operator()(ClsConstant k1, ClsConstant k2) const {
     assertx(k1.clsName->isStatic() && k1.cnsName->isStatic());
     assertx(k2.clsName->isStatic() && k2.cnsName->isStatic());
@@ -172,6 +191,13 @@ struct SymbolEq : boost::static_visitor<bool> {
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
+  size_t operator()(StaticLocal k) const {
+    return folly::hash::hash_128_to_64(
+      std::hash<FuncId>()(k.funcId),
+      k.name->hash()
+    );
+  }
+
   size_t operator()(ClsConstant k) const {
     return folly::hash::hash_128_to_64(
       k.clsName->hash(),

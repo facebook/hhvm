@@ -162,7 +162,7 @@ module WithExpressionAndDeclAndTypeParser
     | Throw -> parse_throw_statement parser
     | LeftBrace -> parse_compound_statement parser
     | Static ->
-      parse_expression_statement parser
+      parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | Global -> parse_global_statement_or_expression_statement parser
     | Concurrent -> parse_concurrent_statement parser
@@ -1141,10 +1141,60 @@ module WithExpressionAndDeclAndTypeParser
     else
       parse_expression_statement parser
 
+  and parse_function_static_declaration_or_expression_statement parser =
+    (* Determine if the current token is a late-bound static scope to be
+     * resolved by the '::' operator. (E.g., "static::foo".)
+     *)
+    if Token.kind (peek_token ~lookahead:1 parser) == TokenKind.ColonColon then
+      parse_expression_statement parser
+    else
+      parse_function_static_declaration parser
+
   and parse_concurrent_statement parser =
     let (parser1, keyword) = assert_token parser Concurrent in
     let (parser_body, statement) = parse_statement parser1 in
     Make.concurrent_statement parser_body keyword statement
+
+  and parse_function_static_declaration parser =
+    (* SPEC
+
+    function-static-declaration:
+      static static-declarator-list  ;
+
+    static-declarator-list:
+      static-declarator
+      static-declarator-list  ,  static-declarator
+
+    *)
+    let (parser, static) = assert_token parser Static in
+    let (parser, decls) = parse_comma_list
+      parser Semicolon SyntaxError.error1008 parse_static_declarator in
+    let (parser, semicolon) = require_semicolon parser in
+    Make.function_static_statement parser static decls semicolon
+
+  and parse_static_declarator parser =
+    (* SPEC
+        static-declarator:
+          variable-name  function-static-initializer-opt
+    *)
+    (* TODO: ERROR RECOVERY not very sophisticated here *)
+    let (parser, variable_name) = require_variable parser in
+    let (parser, init) = parse_static_initializer_opt parser in
+    Make.static_declarator parser variable_name init
+
+  and parse_static_initializer_opt parser =
+    (* SPEC
+      function-static-initializer:
+        = const-expression
+    *)
+    let (parser1, token) = next_token parser in
+    match (Token.kind token) with
+    | Equal ->
+      (* TODO: Detect if expression is not const *)
+      let (parser, equal) = Make.token parser1 token in
+      let (parser, value) = parse_expression parser in
+      Make.simple_initializer parser equal value
+    | _ -> Make.missing parser (pos parser)
 
   (* SPEC:
     TODO: update the spec to reflect that echo and print must be a statement

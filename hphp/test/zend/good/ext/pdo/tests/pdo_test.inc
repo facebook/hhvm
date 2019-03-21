@@ -40,7 +40,7 @@ class PDOTest {
 
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
-		$test_tables = array(
+		static $test_tables = array(
 			'test',
 			'test2',
 			'classtypes'

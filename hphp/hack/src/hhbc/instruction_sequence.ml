@@ -183,6 +183,7 @@ let instr_unbox = instr (IBasic Unbox)
 let instr_box = instr (IBasic Box)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
+let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
 let instr_basec stack_index mode = instr (IBase (BaseC(stack_index, mode)))
 let instr_basesc y mode =
@@ -242,6 +243,18 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 let instr_awaitall range = instr (IAsync (AwaitAll range))
+
+let instr_static_loc_check name =
+  instr (IMisc (StaticLocCheck (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
+
+let instr_static_loc_def name =
+  instr (IMisc (StaticLocDef (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
+
+let instr_static_loc_init name =
+  instr (IMisc (StaticLocInit (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
 
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 let instr_idx = instr (IMisc Idx)
@@ -621,6 +634,34 @@ let rec can_initialize_static_var e =
     | _ -> false
     end
   | _ -> false
+
+let rewrite_static_instrseq static_var_map emit_expr env instrseq =
+  let rewrite_static_instr instruction =
+    match instruction with
+    | IMisc (StaticLocInit (Local.Named name, _)) ->
+      begin match (SMap.get name static_var_map) with
+            | None ->
+              failwith "rewrite_static_instr: No value in static map!"
+            | Some None -> gather [instr_null; instr_static_loc_init name;]
+            | Some (Some e) ->
+              if can_initialize_static_var e then
+                gather [
+                  emit_expr env e;
+                  instr_static_loc_init name;
+                ]
+              else
+                let l = Label.next_regular () in
+                gather [
+                  instr_static_loc_check name;
+                  instr_jmpnz l;
+                  emit_expr env e;
+                  instr_static_loc_def name;
+                  instr_label l;
+                ]
+      end
+    | _ -> instr instruction
+  in
+  InstrSeq.flat_map_seq instrseq rewrite_static_instr
 
 let is_srcloc i =
   match i with

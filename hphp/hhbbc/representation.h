@@ -263,6 +263,14 @@ struct Local {
 };
 
 /*
+ * Static local information.  For each static local, we need to keep
+ * the php code around for reflection.
+ */
+struct StaticLocalInfo {
+  LSString name;
+};
+
+/*
  * Extra information for function with a HNI native implementation.
  */
 struct NativeInfo {
@@ -338,6 +346,7 @@ struct Func : FuncBase {
   ClsRefSlotId       numClsRefSlots;
   CompactVector<Param> params;
   CompactVector<Local> locals;
+  CompactVector<StaticLocalInfo> staticLocals;
 
   /*
    * Which unit defined this function.  If it is a method, the cls

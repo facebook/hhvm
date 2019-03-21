@@ -1061,6 +1061,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // in AliasClass yet.
     return PureStore { AUnknown, inst.src(1) };
 
+  case LdClosureStaticLoc:
+    return may_load_store(AFrameAny, AFrameAny);
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that manipulate class-ref slots
 
@@ -1763,6 +1766,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdPairBase:
+  case CheckStaticLoc:
+  case LdStaticLoc:
   case LdClsCns:
   case LdSubClsCns:
   case LdTypeCns:
@@ -1958,6 +1963,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
+  case InitStaticLoc:
   case ColIsEmpty:
   case ColIsNEmpty:
   case ConvCellToBool:

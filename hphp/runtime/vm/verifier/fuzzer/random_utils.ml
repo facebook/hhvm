@@ -236,6 +236,9 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (BareThis (random_bare_op())));
     (fun () -> IMisc CheckThis);
     (fun () -> IMisc (InitThisLoc (random_local ())));
+    (fun () -> IMisc (StaticLocCheck (random_local (), "")));
+    (fun () -> IMisc (StaticLocDef (random_local (), "")));
+    (fun () -> IMisc (StaticLocInit (random_local (), "")));
     (fun () -> IMisc Catch);
     (fun () -> IMisc (OODeclExists (random_class_kind ())));
     (fun () -> IMisc (VerifyParamType (random_param_id ())));

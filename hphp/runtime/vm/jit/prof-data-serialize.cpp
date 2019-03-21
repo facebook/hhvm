@@ -1219,7 +1219,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
         if (func->name() == s_86pinit.get()) return k86pinitSlot;
         if (func->name() == s_86sinit.get()) return k86sinitSlot;
         if (func->name() == s_86linit.get()) return k86linitSlot;
-        cls = func->cls();
+        cls = getOwningClassForFunc(func);
         assertx(cls->getMethod(slot) == func);
       }
       return ~slot;

@@ -14,6 +14,7 @@ val make_body:
   bool ->
   Hhas_param.t list ->
   Hhas_type_info.t option ->
+  string list ->
   string option ->
   Emit_env.t option ->
   Hhas_body.t

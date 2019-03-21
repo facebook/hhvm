@@ -850,6 +850,31 @@ struct ProfileSubClsCnsData : IRExtraData {
   rds::Handle handle;
 };
 
+/*
+ * The name of a static local in a function.
+ */
+struct StaticLocName : IRExtraData {
+  StaticLocName(const Func* func, const StringData* name)
+    : func(func)
+    , name(name)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      func->fullName()->data(), "$", name->data()
+    );
+  }
+
+  bool equals(const StaticLocName& o) const {
+    return func == o.func && name == o.name;
+  }
+  size_t hash() const {
+    return hash_int64_pair((intptr_t)func, (intptr_t)name);
+  }
+  const Func* func;
+  const StringData* name;
+};
+
 struct FuncNameData : IRExtraData {
   explicit FuncNameData(const StringData* name)
     : name(name)
@@ -1641,6 +1666,10 @@ X(LdClsMethodCacheCls,          ClsMethodData);
 X(LdClsMethodFCacheFunc,        ClsMethodData);
 X(LookupClsMethodFCache,        ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
+X(LdClosureStaticLoc,           StaticLocName);
+X(LdStaticLoc,                  StaticLocName);
+X(CheckStaticLoc,               StaticLocName);
+X(InitStaticLoc,                StaticLocName);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
 X(LdSubClsCns,                  LdSubClsCnsData);

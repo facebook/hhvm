@@ -43,11 +43,11 @@ $av1 = new Point(0, 1);
 
 echo "---------------- after \$av1 init -------------------\n";
 
-class State { static $sv1 = TRUE; static $sv2 = 0; static $sv3 = NULL; }
+static $sv1 = TRUE;
 
 echo "---------------- after \$sv1 decl -------------------\n";
 
-State::$sv1 = new Point(0, 2);
+$sv1 = new Point(0, 2);
 
 echo "---------------- after \$sv1 init -------------------\n";
 
@@ -59,9 +59,11 @@ function doit($p1)
 
   echo "---------------- after \$av2 init -------------------\n";
 
+  static $sv2 = 0;
+
   echo "---------------- after \$sv2 decl -------------------\n";
 
-  State::$sv2 = new Point(1, 2);
+  $sv2 = new Point(1, 2);
 
   echo "---------------- after \$sv2 init -------------------\n";
 
@@ -73,9 +75,11 @@ function doit($p1)
 
     echo "---------------- after \$av3 init -------------------\n";
 
+    static $sv3 = NULL;
+
     echo "---------------- after \$sv3 decl -------------------\n";
 
-    State::$sv3 = new Point(2, 2);
+    $sv3 = new Point(2, 2);
 
     echo "---------------- after \$sv3 init -------------------\n";
     // ...

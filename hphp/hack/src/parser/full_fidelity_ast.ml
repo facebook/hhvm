@@ -2200,6 +2200,29 @@ and pStmt : stmt parser = fun node env ->
         pBlock finally_body env
       | _ -> []
     )
+  | FunctionStaticStatement { static_declarations; _ } ->
+    if (ParserOptions.disable_static_local_variables env.parser_options) then
+      raise_parsing_error env (`Node node)
+        SyntaxError.static_locals_variables_are_disabled;
+
+    let pStaticDeclarator node env =
+      match syntax node with
+      | StaticDeclarator { static_name; static_initializer } ->
+        let lhs =
+          match pExpr static_name env with
+          | p, Id (p', s) -> p, Lvar (p', s)
+          | x -> x
+        in
+        (match syntax static_initializer with
+        | SimpleInitializer { simple_initializer_value; _ } ->
+          ( pPos static_initializer env
+          , Binop (Eq None, lhs, pExpr simple_initializer_value env)
+          )
+        | _ -> lhs
+        )
+      | _ -> missing_syntax "static declarator" node env
+    in
+    pos, Static_var (couldMap ~f:pStaticDeclarator static_declarations env)
   | ReturnStatement { return_expression; _ } ->
     lift_awaits_in_statement env pos (fun () ->
       let expr = match syntax return_expression with

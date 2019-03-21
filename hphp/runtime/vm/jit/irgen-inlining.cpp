@@ -636,6 +636,28 @@ void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
 
 //////////////////////////////////////////////////////////////////////
 
+void inlSingletonSLoc(IRGS& env, const Func* func, PC op) {
+  assertx(peek_op(op) == Op::StaticLocInit);
+
+  TransFlags trflags;
+  trflags.noinlineSingleton = true;
+
+  auto exit = makeExit(env, trflags);
+  auto const name = func->unit()->lookupLitstrId(getImmPtr(op, 1)->u_SA);
+
+  // Side exit if the static local is uninitialized.
+  gen(env, CheckStaticLoc, StaticLocName { func, name }, exit);
+  auto const box = gen(env, LdStaticLoc, StaticLocName { func, name });
+
+  // Side exit if the static local is null.
+  auto const value  = gen(env, LdRef, TInitCell, box);
+  auto const isnull = gen(env, IsType, TInitNull, value);
+  gen(env, JmpNZero, exit, isnull);
+
+  // Return the singleton.
+  pushIncRef(env, value);
+}
+
 void inlSingletonSProp(IRGS& env,
                        const Func* func,
                        PC clsOp,

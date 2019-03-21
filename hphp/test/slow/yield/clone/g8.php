@@ -1,12 +1,12 @@
 <?php
-class State { static $x = 1; }
 function foo() {
-  State::$x += 10;
-  yield State::$x;
-  State::$x += 100;
-  yield State::$x;
-  State::$x += 1000;
-  yield State::$x;
+  static $x = 1;
+  $x += 10;
+  yield $x;
+  $x += 100;
+  yield $x;
+  $x += 1000;
+  yield $x;
 }
 
 <<__EntryPoint>>

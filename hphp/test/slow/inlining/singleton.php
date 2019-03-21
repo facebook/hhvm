@@ -34,10 +34,10 @@ abstract final class CheckNullSameStatics {
 }
 
 /**
- * Toplevel functions with singleton statics.
+ * Toplevel functions with static local singletons.
  *
  * The *_loop functions are the same as the normal versions; they're duplicated
- * only to get different statics.
+ * only to get fresh the static locals.
  */
 function check_null_same() {
   if (CheckNullSameStatics::$instance === null) {

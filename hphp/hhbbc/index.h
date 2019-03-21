@@ -731,6 +731,9 @@ struct Index {
     lookup_closure_use_vars(const php::Func*,
                             bool move = false) const;
 
+  CompactVector<Type>
+    lookup_local_static_types(const php::Func* f) const;
+
   /*
    * Return the availability of $this on entry to the provided method.
    * If the Func provided is not a method of a class false is
@@ -870,6 +873,12 @@ struct Index {
    */
   void refine_constants(const FuncAnalysisResult& fa,
                         DependencyContextSet& deps);
+
+  /*
+   * Refine the types of the local statics owned by the function.
+   */
+  void refine_local_static_types(const php::Func* func,
+                                 const CompactVector<Type>& localStaticTypes);
 
   /*
    * Refine the return type for a function, based on a round of

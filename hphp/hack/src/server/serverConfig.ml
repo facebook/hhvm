@@ -255,6 +255,7 @@ let load config_filename options =
     ?po_enable_await_as_an_expression:(bool_opt "enable_await_as_an_expression" config)
     ?po_allow_goto:(Option.map ~f:not (bool_opt "disallow_goto" config))
     ?po_disable_static_closures:(bool_opt "disable_static_closures" config)
+    ?po_disable_static_local_variables:(bool_opt "disable_static_local_variables" config)
     ?tco_disallow_array_as_tuple:(bool_opt "disallow_array_as_tuple" config)
     ?tco_disallow_ambiguous_lambda:(bool_opt "disallow_ambiguous_lambda" config)
     ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)

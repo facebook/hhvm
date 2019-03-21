@@ -1313,7 +1313,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       auto const numBound = getImm(pc, 0).u_IVA;
       auto const invoke = preCls->lookupMethod(s_invoke.get());
-      if (invoke && numBound != preCls->numProperties()) {
+      if (invoke &&
+          numBound != preCls->numProperties() - invoke->staticVars.size()) {
         ferror("CreateCl bound Closure {} with {} params instead of {}\n",
                preCls->name(), numBound, preCls->numProperties());
         return false;
@@ -2034,6 +2035,14 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::SetOpS:
     case Op::IncDecS:
       ferror("statics are forbidden in Rx functions: {}\n", opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: static locals
+    case Op::StaticLocCheck:
+    case Op::StaticLocDef:
+    case Op::StaticLocInit:
+      ferror("static locals are forbidden in Rx functions: {}\n",
+             opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: defines and includes

@@ -1,16 +1,15 @@
 <?php
 $a = 1;
-class It { public $n = 0; }
-$it = new It;
-$x = function ($x) use ($a, $it) {
-  $it->n++;
-  $a = $it->n.':'.$a;
+$x = function ($x) use ($a) {
+  static $n = 0;
+  $n++;
+  $a = $n.':'.$a;
   echo $x.':'.$a."\n";
 };
-$it = new It;
-$y = function ($x) use (&$a, $it) {
-  $it->n++;
-  $a = $it->n.':'.$a;
+$y = function ($x) use (&$a) {
+  static $n = 0;
+  $n++;
+  $a = $n.':'.$a;
   echo $x.':'.$a."\n";
 };
 $x(1);

@@ -7,15 +7,15 @@ const SOME_CONSTANT = "some string";
 #===============================================================================
 # ReflectionFunction.
 
-class State { static $staticX = 4; }
-
 /**
  * This is f's doc comment.
  */
 function f($a, &$b, $c=null, $d=array(1, 2, SOME_CONSTANT)) {
+  static $staticX = 4;
+  static $staticY;
   print "In f()\n";
-  State::$staticX++;
-  $x = State::$staticX;
+  $staticX++;
+  $x = $staticX;
   return $x;
 }
 
@@ -53,9 +53,9 @@ print "--- getParameters(\"f\") ---\n";
 var_dump($rf->getParameters());
 print "\n";
 
-
-
-
+print "--- getStaticVariables(\"f\") ---\n";
+var_dump($rf->getStaticVariables());
+print "\n";
 
 print "--- isInternal(\"f\") ---\n";
 var_dump($rf->isInternal());
@@ -77,10 +77,10 @@ var_dump($rf->invokeArgs(array("a", &$b, "c")));
 var_dump($rf->invokeArgs(array("a", &$b, "c")));
 print "\n";
 
-
-
-
-
+print "--- getStaticVariables(\"f\") ---\n";
+$rf = new ReflectionFunction("f");
+var_dump($rf->getStaticVariables());
+print "\n";
 
 /**
  * This is g's doc comment.

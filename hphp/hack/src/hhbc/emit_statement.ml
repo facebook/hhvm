@@ -286,6 +286,8 @@ let rec emit_stmt env (pos, st_) =
     emit_foreach env pos collection await_pos iterator (pos, A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
+  | A.Static_var es ->
+    emit_static_var pos es
   | A.Global_var es ->
     emit_global_vars pos es
   | A.Awaitall el ->
@@ -358,6 +360,19 @@ and emit_global_vars p es =
         seen, (emit_global_var e)::instrs
       end in
   Emit_pos.emit_pos_then p @@ gather (List.rev instrs)
+
+and emit_static_var pos es =
+  let emit_static_var_single e =
+    match snd e with
+    | A.Lvar (_, name)
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), _) ->
+      gather [
+        Emit_pos.emit_pos pos;
+        instr_static_loc_init name
+      ]
+    | _ -> failwith "Static var - impossible"
+  in
+  gather @@ List.map es ~f:emit_static_var_single
 
 and emit_awaitall env pos el =
   match el with

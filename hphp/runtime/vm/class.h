@@ -1672,6 +1672,14 @@ bool classHasPersistentRDS(const Class* cls);
 bool classMayHaveMagicPropMethods(const Class* cls);
 
 /*
+ * Return the class that "owns" f.  This will normally be f->cls(), but for
+ * Funcs with static locals, f may have been cloned into a derived class.
+ *
+ * @requires: RuntimeOption::EvalPerfDataMap
+ */
+const Class* getOwningClassForFunc(const Func* f);
+
+/*
  * Convert a class pointer where a string is needed in some context. A warning
  * will be raised when compiler option Eval.RaiseClassConversionWarning is true.
  */

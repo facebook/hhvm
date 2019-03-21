@@ -648,6 +648,32 @@ static Variant HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   }
 }
 
+ALWAYS_INLINE
+static Array get_function_static_variables(const Func* func) {
+  auto const& staticVars = func->staticVars();
+
+  auto size = staticVars.size();
+  DArrayInit ai(size);
+
+  for (size_t i = 0; i < staticVars.size(); ++i) {
+    const Func::SVInfo &sv = staticVars[i];
+    auto const staticLocalData = rds::bindStaticLocal(func, sv.name);
+    // FIXME: this should not require variant hops
+    ai.setUnknownKey(
+      VarNR(sv.name),
+      staticLocalData.isInit()
+        ? tvAsCVarRef(staticLocalData.get()->ref.cell())
+        : uninit_variant
+    );
+  }
+  return ai.toArray();
+}
+
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getStaticVariables) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return get_function_static_variables(func);
+}
+
 static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto ret = const_cast<StringData*>(func->name());
@@ -1058,6 +1084,31 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
     return Object{clos->getThis()};
   }
   return init_null_variant;
+}
+
+// helper for getStaticVariables
+static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
+                         const Object& closure) {
+  auto const cls = get_cls(closure);
+  assertx(cls);
+  MixedArrayInit ai(cls->numDeclProperties());
+  auto propVal = closure->propVec();
+  for (auto const& prop : cls->declProperties()) {
+    // Closure static locals are represented as special instance properties
+    // with a mangled name.
+    if (prop.name->data()[0] == '8') {
+      static const char prefix[] = "86static_";
+      assertx(0 == strncmp(prop.name->data(), prefix, sizeof prefix - 1));
+      String strippedName(prop.name->data() + sizeof prefix - 1,
+                          prop.name->size() - sizeof prefix + 1,
+                          CopyString);
+      ai.setUnknownKey(VarNR(strippedName), tvAsCVarRef(propVal));
+    } else {
+      ai.setWithRef(StrNR(prop.name), *propVal);
+    }
+    propVal++;
+  }
+  return ai.toArray();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2072,6 +2123,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getStartLine);
     HHVM_ME(ReflectionFunctionAbstract, getEndLine);
     HHVM_ME(ReflectionFunctionAbstract, getDocComment);
+    HHVM_ME(ReflectionFunctionAbstract, getStaticVariables);
     HHVM_ME(ReflectionFunctionAbstract, getReturnTypeHint);
     HHVM_ME(ReflectionFunctionAbstract, getNumberOfParameters);
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);
@@ -2095,6 +2147,7 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionFunction, __initName);
     HHVM_ME(ReflectionFunction, __initClosure);
+    HHVM_ME(ReflectionFunction, getClosureUseVariables);
     HHVM_ME(ReflectionFunction, getClosureScopeClassname);
     HHVM_ME(ReflectionFunction, getClosureThisObject);
 
@@ -2250,6 +2303,9 @@ static void set_debugger_reflection_function_info(Array& ret,
 
   // parameters
   ret.set(s_params, get_function_param_info(func));
+
+  // static variables
+  ret.set(s_static_variables, get_function_static_variables(func));
 
   // user attributes
   ret.set(s_attributes, get_function_user_attributes(func));

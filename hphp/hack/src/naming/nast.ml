@@ -451,6 +451,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Unsafe_block b          -> this#on_unsafe_block acc b
     | Fallthrough             -> this#on_fallthrough acc
+    | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
     | Awaitall el             -> this#on_awaitall acc el
     | Def_inline d            -> this#on_def_inline acc d

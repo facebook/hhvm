@@ -23,7 +23,7 @@ class C {
 }
 
 function g_f1(): void {
-  $x = 1;
+  static $x = 1;
 }
 |}
 
@@ -155,7 +155,11 @@ let tests: ((string * int * int) * string) list = [
     {"position":{"file":"/f1.php","line":3,"character":10},"result":true}
   |};
   (fst f1, 11, 10), {|
-    {"position":{"file":"/f1.php","line":11,"character":10},"result":true}
+    {"position":{"file":"/f1.php","line":11,"character":10},
+    "result":false,"errors":[
+      {"message":[{"descr":"Static $x cannot be used in a reactive context.",
+       "path":"/f1.php","line":12,"start":13,"end":15,"code":4229}]
+    }]}
   |};
   (fst f2, 2, 10), {|
     {"position":{"file":"/f2.php","line":2,"character":10},

@@ -99,6 +99,8 @@ type t =
   | ThrowStatement
   | BreakStatement
   | ContinueStatement
+  | FunctionStaticStatement
+  | StaticDeclarator
   | EchoStatement
   | GlobalStatement
   | ConcurrentStatement
@@ -284,6 +286,8 @@ let to_string kind =
   | ThrowStatement                          -> "throw_statement"
   | BreakStatement                          -> "break_statement"
   | ContinueStatement                       -> "continue_statement"
+  | FunctionStaticStatement                 -> "function_static_statement"
+  | StaticDeclarator                        -> "static_declarator"
   | EchoStatement                           -> "echo_statement"
   | GlobalStatement                         -> "global_statement"
   | ConcurrentStatement                     -> "concurrent_statement"

@@ -219,7 +219,9 @@ struct Func final {
    * PreClasses.
    *
    * We also clone methods from traits when we transclude the trait in its user
-   * Classes in repo mode.
+   * Classes in repo mode.  Finally, we clone inherited methods that define
+   * static locals in order to instantiate new static locals for the child
+   * class's copy of the method.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
 
@@ -620,6 +622,26 @@ struct Func final {
   bool hasForeignThis() const;
 
   void setHasForeignThis(bool);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Static locals.                                                     [const]
+
+  /*
+   * Const reference to the static variable info table.
+   *
+   * SVInfo objects pulled from the table will also be const.
+   */
+  const SVInfoVec& staticVars() const;
+
+  /*
+   * Whether the function has any static locals.
+   */
+  bool hasStaticLocals() const;
+
+  /*
+   * Number of static locals declared in the function.
+   */
+  int numStaticLocals() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
@@ -1228,6 +1250,7 @@ private:
     uint64_t* m_refBitPtr;
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
+    SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
 

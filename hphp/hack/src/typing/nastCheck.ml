@@ -68,7 +68,7 @@ module CheckFunctionBody = struct
         expr_allow_await_or_rx_move f_type env e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break | Continue
-         | Global_var _ | Unsafe_block _ ) -> ()
+         | Static_var _ | Global_var _ | Unsafe_block _ ) -> ()
     | _, Awaitall el ->
         List.iter el (fun (_, y) ->
           expr f_type env y;
@@ -595,6 +595,8 @@ and stmt_ env = function
   | Return (Some e)
   | Expr e | Throw (_, e) ->
     expr env e
+  | Static_var _ ->
+    ()
   | Global_var _ ->
     ()
   | Awaitall el ->

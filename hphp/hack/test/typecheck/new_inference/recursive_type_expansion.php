@@ -12,4 +12,5 @@
 function test(): void {
   $x = new Vector(null); // new tvar v, $x:Vector<v>
   $x[0] = $x; // Vector<v> <: v --> error
+  static $y = $x;
 }

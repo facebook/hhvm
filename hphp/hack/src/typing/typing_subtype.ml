@@ -2644,6 +2644,15 @@ let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
     then bind_to_lower_bound ~freshen env r var lower_bounds
     else env
 
+let solve_tyvar ~freshen ~force_solve ~force_solve_to_nothing env r var =
+  let rec solve_until_concrete_ty env v ty =
+    let env = solve_tyvar ~force_solve ~freshen ~force_solve_to_nothing env r v in
+    let env, ety = Env.expand_type env ty in
+    match ety with
+    | _, Tvar v' when v <> v' -> solve_until_concrete_ty env v' ety
+    | _ -> env in
+  solve_until_concrete_ty env var (var_as_ty var)
+
 (* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)

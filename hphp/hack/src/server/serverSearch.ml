@@ -25,7 +25,8 @@ let desc_string_from_type result_type =
      | Ast.Cnormal -> "class"
      | Ast.Cinterface -> "interface"
      | Ast.Ctrait -> "trait"
-     | Ast.Cenum -> "enum")
+     | Ast.Cenum -> "enum"
+     | Ast.Crecord -> "record")
   (* This should never happen *)
   | SS.Class None ->  assert false
   | SS.Method (static, scope) ->

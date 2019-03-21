@@ -266,6 +266,8 @@ let instr_defcls n =
   instr (IIncludeEvalDefine (DefCls n))
 let instr_defclsnop n =
   instr (IIncludeEvalDefine (DefClsNop n))
+let instr_defrecord n =
+  instr (IIncludeEvalDefine (DefRecord n))
 let instr_deftypealias n =
   instr (IIncludeEvalDefine (DefTypeAlias n))
 let instr_defcns s =

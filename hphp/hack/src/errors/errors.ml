@@ -3013,6 +3013,7 @@ let cannot_declare_constant kind pos (class_pos, class_name) =
     match kind with
     | `enum -> "an enum"
     | `trait -> "a trait"
+    | `record -> "a record"
   in
   add_list (Typing.err_code Typing.CannotDeclareConstant) [
     pos, "Cannot declare a constant in "^kind_str;

@@ -237,6 +237,38 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
+  | Syntax.RecordDeclaration {
+      record_attribute_spec = attr;
+      record_keyword = kw;
+      record_name = name;
+      record_left_brace = left_b;
+      record_fields = fields;
+      record_right_brace = right_b } ->
+    Concat [
+      t env attr;
+      when_present attr newline;
+      t env kw;
+      Space;
+      t env name;
+      Space;
+      braced_block_nest env left_b right_b [
+        handle_possible_list env fields
+      ];
+      Newline;
+    ]
+  | Syntax.RecordField {
+      record_field_name = name;
+      record_field_colon = colon_kw;
+      record_field_type = record_field_type;
+      record_field_comma = comma_kw } ->
+    Concat [
+      t env name;
+      t env colon_kw;
+      Space;
+      t env record_field_type;
+      t env comma_kw;
+      Newline;
+    ]
   | Syntax.AliasDeclaration {
       alias_attribute_spec = attr;
       alias_keyword = kw;

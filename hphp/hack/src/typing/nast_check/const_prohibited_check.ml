@@ -28,7 +28,8 @@ let handler = object
     | Ast.Cabstract, true
     | Ast.Cinterface, _
     | Ast.Ctrait, _
-    | Ast.Cenum, _ ->
+    | Ast.Cenum, _
+    | Ast.Crecord, _ ->
       Errors.const_attribute_prohibited
         pos (Typing_print.class_kind c.c_kind c.c_final);
     | Ast.Cabstract, false

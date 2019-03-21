@@ -71,6 +71,8 @@ module WithToken(Token: TokenType) = struct
       | FileAttributeSpecification              _ -> SyntaxKind.FileAttributeSpecification
       | EnumDeclaration                         _ -> SyntaxKind.EnumDeclaration
       | Enumerator                              _ -> SyntaxKind.Enumerator
+      | RecordDeclaration                       _ -> SyntaxKind.RecordDeclaration
+      | RecordField                             _ -> SyntaxKind.RecordField
       | AliasDeclaration                        _ -> SyntaxKind.AliasDeclaration
       | PropertyDeclaration                     _ -> SyntaxKind.PropertyDeclaration
       | PropertyDeclarator                      _ -> SyntaxKind.PropertyDeclarator
@@ -264,6 +266,8 @@ module WithToken(Token: TokenType) = struct
     let is_file_attribute_specification                 = has_kind SyntaxKind.FileAttributeSpecification
     let is_enum_declaration                             = has_kind SyntaxKind.EnumDeclaration
     let is_enumerator                                   = has_kind SyntaxKind.Enumerator
+    let is_record_declaration                           = has_kind SyntaxKind.RecordDeclaration
+    let is_record_field                                 = has_kind SyntaxKind.RecordField
     let is_alias_declaration                            = has_kind SyntaxKind.AliasDeclaration
     let is_property_declaration                         = has_kind SyntaxKind.PropertyDeclaration
     let is_property_declarator                          = has_kind SyntaxKind.PropertyDeclarator
@@ -596,6 +600,32 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc enumerator_equal in
          let acc = f acc enumerator_value in
          let acc = f acc enumerator_semicolon in
+         acc
+      | RecordDeclaration {
+        record_attribute_spec;
+        record_keyword;
+        record_name;
+        record_left_brace;
+        record_fields;
+        record_right_brace;
+      } ->
+         let acc = f acc record_attribute_spec in
+         let acc = f acc record_keyword in
+         let acc = f acc record_name in
+         let acc = f acc record_left_brace in
+         let acc = f acc record_fields in
+         let acc = f acc record_right_brace in
+         acc
+      | RecordField {
+        record_field_name;
+        record_field_colon;
+        record_field_type;
+        record_field_comma;
+      } ->
+         let acc = f acc record_field_name in
+         let acc = f acc record_field_colon in
+         let acc = f acc record_field_type in
+         let acc = f acc record_field_comma in
          acc
       | AliasDeclaration {
         alias_attribute_spec;
@@ -2563,6 +2593,32 @@ module WithToken(Token: TokenType) = struct
         enumerator_value;
         enumerator_semicolon;
       ]
+      | RecordDeclaration {
+        record_attribute_spec;
+        record_keyword;
+        record_name;
+        record_left_brace;
+        record_fields;
+        record_right_brace;
+      } -> [
+        record_attribute_spec;
+        record_keyword;
+        record_name;
+        record_left_brace;
+        record_fields;
+        record_right_brace;
+      ]
+      | RecordField {
+        record_field_name;
+        record_field_colon;
+        record_field_type;
+        record_field_comma;
+      } -> [
+        record_field_name;
+        record_field_colon;
+        record_field_type;
+        record_field_comma;
+      ]
       | AliasDeclaration {
         alias_attribute_spec;
         alias_keyword;
@@ -4529,6 +4585,32 @@ module WithToken(Token: TokenType) = struct
         "enumerator_equal";
         "enumerator_value";
         "enumerator_semicolon";
+      ]
+      | RecordDeclaration {
+        record_attribute_spec;
+        record_keyword;
+        record_name;
+        record_left_brace;
+        record_fields;
+        record_right_brace;
+      } -> [
+        "record_attribute_spec";
+        "record_keyword";
+        "record_name";
+        "record_left_brace";
+        "record_fields";
+        "record_right_brace";
+      ]
+      | RecordField {
+        record_field_name;
+        record_field_colon;
+        record_field_type;
+        record_field_comma;
+      } -> [
+        "record_field_name";
+        "record_field_colon";
+        "record_field_type";
+        "record_field_comma";
       ]
       | AliasDeclaration {
         alias_attribute_spec;
@@ -6562,6 +6644,34 @@ module WithToken(Token: TokenType) = struct
           enumerator_equal;
           enumerator_value;
           enumerator_semicolon;
+        }
+      | (SyntaxKind.RecordDeclaration, [
+          record_attribute_spec;
+          record_keyword;
+          record_name;
+          record_left_brace;
+          record_fields;
+          record_right_brace;
+        ]) ->
+        RecordDeclaration {
+          record_attribute_spec;
+          record_keyword;
+          record_name;
+          record_left_brace;
+          record_fields;
+          record_right_brace;
+        }
+      | (SyntaxKind.RecordField, [
+          record_field_name;
+          record_field_colon;
+          record_field_type;
+          record_field_comma;
+        ]) ->
+        RecordField {
+          record_field_name;
+          record_field_colon;
+          record_field_type;
+          record_field_comma;
         }
       | (SyntaxKind.AliasDeclaration, [
           alias_attribute_spec;
@@ -8777,6 +8887,40 @@ module WithToken(Token: TokenType) = struct
           enumerator_equal;
           enumerator_value;
           enumerator_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_record_declaration
+        record_attribute_spec
+        record_keyword
+        record_name
+        record_left_brace
+        record_fields
+        record_right_brace
+      =
+        let syntax = RecordDeclaration {
+          record_attribute_spec;
+          record_keyword;
+          record_name;
+          record_left_brace;
+          record_fields;
+          record_right_brace;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_record_field
+        record_field_name
+        record_field_colon
+        record_field_type
+        record_field_comma
+      =
+        let syntax = RecordField {
+          record_field_name;
+          record_field_colon;
+          record_field_type;
+          record_field_comma;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

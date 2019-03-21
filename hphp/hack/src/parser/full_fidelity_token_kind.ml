@@ -64,6 +64,7 @@ type t =
   | Endswitch
   | Endwhile
   | Enum
+  | RecordDec
   | Eval
   | Extends
   | Fallthrough
@@ -285,6 +286,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "endswitch"                                                          -> Some Endswitch
   | "endwhile"                                                           -> Some Endwhile
   | "enum"            when (is_hack || allow_xhp) &&   not only_reserved -> Some Enum
+  | "record"          when (is_hack || allow_xhp)                        -> Some RecordDec
   | "eval"                                                               -> Some Eval
   | "extends"                                                            -> Some Extends
   | "fallthrough"     when is_hack                &&   not only_reserved -> Some Fallthrough
@@ -480,6 +482,7 @@ let to_string kind =
   | Endswitch                     -> "endswitch"
   | Endwhile                      -> "endwhile"
   | Enum                          -> "enum"
+  | RecordDec                     -> "record"
   | Eval                          -> "eval"
   | Extends                       -> "extends"
   | Fallthrough                   -> "fallthrough"

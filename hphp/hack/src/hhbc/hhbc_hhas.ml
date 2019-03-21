@@ -709,6 +709,7 @@ let string_of_include_eval_define = function
     sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
   | DefCls id -> sep ["DefCls"; string_of_class_num id]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
+  | DefRecord id -> sep ["DefRecord"; string_of_class_num id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]
   | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
@@ -1738,7 +1739,8 @@ let add_uses buf c =
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
-  Acc.add buf "\n.class ";
+  Acc.add buf
+    (if Hhas_class.is_record class_def then "\n.record " else "\n.class ");
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options

@@ -106,6 +106,10 @@ class EditableSyntax
       return EnumDeclaration.from_json(json, position, source);
     case 'enumerator':
       return Enumerator.from_json(json, position, source);
+    case 'record_declaration':
+      return RecordDeclaration.from_json(json, position, source);
+    case 'record_field':
+      return RecordField.from_json(json, position, source);
     case 'alias_declaration':
       return AliasDeclaration.from_json(json, position, source);
     case 'property_declaration':
@@ -817,6 +821,8 @@ class EditableToken extends EditableSyntax
        return new EndwhileToken(leading, trailing);
     case 'enum':
        return new EnumToken(leading, trailing);
+    case 'record':
+       return new RecordDecToken(leading, trailing);
     case 'eval':
        return new EvalToken(leading, trailing);
     case 'extends':
@@ -1521,6 +1527,13 @@ class EnumToken extends EditableToken
   constructor(leading, trailing)
   {
     super('enum', leading, trailing, 'enum');
+  }
+}
+class RecordDecToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('record', leading, trailing, 'record');
   }
 }
 class EvalToken extends EditableToken
@@ -3880,6 +3893,262 @@ class Enumerator extends EditableSyntax
         'value',
         'semicolon'];
     return Enumerator._children_keys;
+  }
+}
+class RecordDeclaration extends EditableSyntax
+{
+  constructor(
+    attribute_spec,
+    keyword,
+    name,
+    left_brace,
+    fields,
+    right_brace)
+  {
+    super('record_declaration', {
+      attribute_spec: attribute_spec,
+      keyword: keyword,
+      name: name,
+      left_brace: left_brace,
+      fields: fields,
+      right_brace: right_brace });
+  }
+  get attribute_spec() { return this.children.attribute_spec; }
+  get keyword() { return this.children.keyword; }
+  get name() { return this.children.name; }
+  get left_brace() { return this.children.left_brace; }
+  get fields() { return this.children.fields; }
+  get right_brace() { return this.children.right_brace; }
+  with_attribute_spec(attribute_spec){
+    return new RecordDeclaration(
+      attribute_spec,
+      this.keyword,
+      this.name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_keyword(keyword){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      keyword,
+      this.name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_name(name){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.keyword,
+      name,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_left_brace(left_brace){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.keyword,
+      this.name,
+      left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_fields(fields){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.keyword,
+      this.name,
+      this.left_brace,
+      fields,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.keyword,
+      this.name,
+      this.left_brace,
+      this.fields,
+      right_brace);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var fields = this.fields.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    if (
+      attribute_spec === this.attribute_spec &&
+      keyword === this.keyword &&
+      name === this.name &&
+      left_brace === this.left_brace &&
+      fields === this.fields &&
+      right_brace === this.right_brace)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new RecordDeclaration(
+        attribute_spec,
+        keyword,
+        name,
+        left_brace,
+        fields,
+        right_brace), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let attribute_spec = EditableSyntax.from_json(
+      json.record_attribute_spec, position, source);
+    position += attribute_spec.width;
+    let keyword = EditableSyntax.from_json(
+      json.record_keyword, position, source);
+    position += keyword.width;
+    let name = EditableSyntax.from_json(
+      json.record_name, position, source);
+    position += name.width;
+    let left_brace = EditableSyntax.from_json(
+      json.record_left_brace, position, source);
+    position += left_brace.width;
+    let fields = EditableSyntax.from_json(
+      json.record_fields, position, source);
+    position += fields.width;
+    let right_brace = EditableSyntax.from_json(
+      json.record_right_brace, position, source);
+    position += right_brace.width;
+    return new RecordDeclaration(
+        attribute_spec,
+        keyword,
+        name,
+        left_brace,
+        fields,
+        right_brace);
+  }
+  get children_keys()
+  {
+    if (RecordDeclaration._children_keys == null)
+      RecordDeclaration._children_keys = [
+        'attribute_spec',
+        'keyword',
+        'name',
+        'left_brace',
+        'fields',
+        'right_brace'];
+    return RecordDeclaration._children_keys;
+  }
+}
+class RecordField extends EditableSyntax
+{
+  constructor(
+    name,
+    colon,
+    type,
+    comma)
+  {
+    super('record_field', {
+      name: name,
+      colon: colon,
+      type: type,
+      comma: comma });
+  }
+  get name() { return this.children.name; }
+  get colon() { return this.children.colon; }
+  get type() { return this.children.type; }
+  get comma() { return this.children.comma; }
+  with_name(name){
+    return new RecordField(
+      name,
+      this.colon,
+      this.type,
+      this.comma);
+  }
+  with_colon(colon){
+    return new RecordField(
+      this.name,
+      colon,
+      this.type,
+      this.comma);
+  }
+  with_type(type){
+    return new RecordField(
+      this.name,
+      this.colon,
+      type,
+      this.comma);
+  }
+  with_comma(comma){
+    return new RecordField(
+      this.name,
+      this.colon,
+      this.type,
+      comma);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var comma = this.comma.rewrite(rewriter, new_parents);
+    if (
+      name === this.name &&
+      colon === this.colon &&
+      type === this.type &&
+      comma === this.comma)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new RecordField(
+        name,
+        colon,
+        type,
+        comma), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let name = EditableSyntax.from_json(
+      json.record_field_name, position, source);
+    position += name.width;
+    let colon = EditableSyntax.from_json(
+      json.record_field_colon, position, source);
+    position += colon.width;
+    let type = EditableSyntax.from_json(
+      json.record_field_type, position, source);
+    position += type.width;
+    let comma = EditableSyntax.from_json(
+      json.record_field_comma, position, source);
+    position += comma.width;
+    return new RecordField(
+        name,
+        colon,
+        type,
+        comma);
+  }
+  get children_keys()
+  {
+    if (RecordField._children_keys == null)
+      RecordField._children_keys = [
+        'name',
+        'colon',
+        'type',
+        'comma'];
+    return RecordField._children_keys;
   }
 }
 class AliasDeclaration extends EditableSyntax
@@ -22371,6 +22640,7 @@ exports.EndifToken = EndifToken;
 exports.EndswitchToken = EndswitchToken;
 exports.EndwhileToken = EndwhileToken;
 exports.EnumToken = EnumToken;
+exports.RecordDecToken = RecordDecToken;
 exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
 exports.FallthroughToken = FallthroughToken;
@@ -22567,6 +22837,8 @@ exports.PipeVariableExpression = PipeVariableExpression;
 exports.FileAttributeSpecification = FileAttributeSpecification;
 exports.EnumDeclaration = EnumDeclaration;
 exports.Enumerator = Enumerator;
+exports.RecordDeclaration = RecordDeclaration;
+exports.RecordField = RecordField;
 exports.AliasDeclaration = AliasDeclaration;
 exports.PropertyDeclaration = PropertyDeclaration;
 exports.PropertyDeclarator = PropertyDeclarator;

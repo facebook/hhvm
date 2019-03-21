@@ -32,4 +32,4 @@ let check_class env tc =
   match (Cls.kind tc) with
   | Ast.Cnormal | Ast.Cabstract ->
     Sequence.iter (Cls.all_ancestor_reqs tc) (check_fulfillment env (Cls.get_ancestor tc))
-  | Ast.Ctrait | Ast.Cinterface | Ast.Cenum -> ()
+  | Ast.Ctrait | Ast.Cinterface | Ast.Cenum | Ast.Crecord -> ()

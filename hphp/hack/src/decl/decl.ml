@@ -670,7 +670,7 @@ and typeconst_structure c stc =
 
 and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
-  | Ast.Ctrait | Ast.Cenum -> acc
+  | Ast.Ctrait | Ast.Cenum | Ast.Crecord -> acc
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
     let name = (snd stc.stc_name) in
     let c_name = (snd c.sc_name) in

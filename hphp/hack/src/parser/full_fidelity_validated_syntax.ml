@@ -113,6 +113,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.EndOfFile _ -> tag validate_end_of_file (fun x -> TLDEndOfFile x) x
     | Syntax.FileAttributeSpecification _ -> tag validate_file_attribute_specification (fun x -> TLDFileAttributeSpecification x) x
     | Syntax.EnumDeclaration _ -> tag validate_enum_declaration (fun x -> TLDEnum x) x
+    | Syntax.RecordDeclaration _ -> tag validate_record_declaration (fun x -> TLDRecord x) x
     | Syntax.AliasDeclaration _ -> tag validate_alias_declaration (fun x -> TLDAlias x) x
     | Syntax.NamespaceDeclaration _ -> tag validate_namespace_declaration (fun x -> TLDNamespace x) x
     | Syntax.NamespaceUseDeclaration _ -> tag validate_namespace_use_declaration (fun x -> TLDNamespaceUse x) x
@@ -154,6 +155,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDEndOfFile                    thing -> invalidate_end_of_file                    (value, thing)
     | TLDFileAttributeSpecification   thing -> invalidate_file_attribute_specification   (value, thing)
     | TLDEnum                         thing -> invalidate_enum_declaration               (value, thing)
+    | TLDRecord                       thing -> invalidate_record_declaration             (value, thing)
     | TLDAlias                        thing -> invalidate_alias_declaration              (value, thing)
     | TLDNamespace                    thing -> invalidate_namespace_declaration          (value, thing)
     | TLDNamespaceUse                 thing -> invalidate_namespace_use_declaration      (value, thing)
@@ -906,6 +908,46 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; enumerator_equal = invalidate_token x.enumerator_equal
       ; enumerator_value = invalidate_expression x.enumerator_value
       ; enumerator_semicolon = invalidate_token x.enumerator_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_record_declaration : record_declaration validator = function
+  | { Syntax.syntax = Syntax.RecordDeclaration x; value = v } -> v,
+    { record_right_brace = validate_token x.record_right_brace
+    ; record_fields = validate_list_with (validate_record_field) x.record_fields
+    ; record_left_brace = validate_token x.record_left_brace
+    ; record_name = validate_token x.record_name
+    ; record_keyword = validate_token x.record_keyword
+    ; record_attribute_spec = validate_option_with (validate_attribute_specification) x.record_attribute_spec
+    }
+  | s -> validation_fail (Some SyntaxKind.RecordDeclaration) s
+  and invalidate_record_declaration : record_declaration invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.RecordDeclaration
+      { record_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.record_attribute_spec
+      ; record_keyword = invalidate_token x.record_keyword
+      ; record_name = invalidate_token x.record_name
+      ; record_left_brace = invalidate_token x.record_left_brace
+      ; record_fields = invalidate_list_with (invalidate_record_field) x.record_fields
+      ; record_right_brace = invalidate_token x.record_right_brace
+      }
+    ; Syntax.value = v
+    }
+  and validate_record_field : record_field validator = function
+  | { Syntax.syntax = Syntax.RecordField x; value = v } -> v,
+    { record_field_comma = validate_token x.record_field_comma
+    ; record_field_type = validate_type_constraint x.record_field_type
+    ; record_field_colon = validate_token x.record_field_colon
+    ; record_field_name = validate_token x.record_field_name
+    }
+  | s -> validation_fail (Some SyntaxKind.RecordField) s
+  and invalidate_record_field : record_field invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.RecordField
+      { record_field_name = invalidate_token x.record_field_name
+      ; record_field_colon = invalidate_token x.record_field_colon
+      ; record_field_type = invalidate_type_constraint x.record_field_type
+      ; record_field_comma = invalidate_token x.record_field_comma
       }
     ; Syntax.value = v
     }

@@ -224,6 +224,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Endswitch" ; "endswitch"; LF.php_and_hack ];
   [ "Endwhile"; "endwhile"; LF.php_and_hack ];
   [ "Enum"; "enum"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
+  [ "RecordDec"; "record"; LF.hack_only; OF.xhp ];
   [ "Eval"; "eval"; LF.php_and_hack ];
   [ "Extends"; "extends"; LF.php_and_hack ];
   [ "Fallthrough"; "fallthrough"; LF.hack_only; OF.allowed_as_identifier ];

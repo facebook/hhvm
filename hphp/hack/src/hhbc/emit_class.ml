@@ -338,6 +338,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
   let class_id, _ =
     Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+  let class_is_record = ast_class.A.c_kind = Ast.Crecord in
   let class_is_interface = ast_is_interface ast_class in
   let class_uses =
     List.filter_map
@@ -589,6 +590,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     class_is_abstract
     class_is_interface
     class_is_trait
+    class_is_record
     ast_class.A.c_is_xhp
     hoisted
     class_is_immutable

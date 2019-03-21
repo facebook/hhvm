@@ -1986,6 +1986,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
 
     // undesirable: func_num_args()
     case Op::FuncNumArgs:
+      ferror("func_num_args() is forbidden in Rx functions\n");
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: operations definitely involving boxes

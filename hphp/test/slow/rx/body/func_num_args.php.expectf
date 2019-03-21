@@ -1,0 +1,3 @@
+Verification Error (unit %s/test/slow/rx/body/func_num_args.php func test): func_num_args() is forbidden in Rx functions
+
+Done

@@ -39,12 +39,12 @@ size_t RecordData::heapSize() const {
 }
 
 RecordData* RecordData::newRecord(const Record* rec,
-                                  const req::vector<const StringData*>& keys,
+                                  uint32_t initSize,
+                                  const StringData* const *keys,
                                   const TypedValue* values) {
   auto const size = sizeWithFields(rec);
   auto recdata = new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);
   assertx(recdata->hasExactlyOneRef());
-  auto const initSize = keys.size();
   for (auto i = 0; i < initSize; ++i) {
     auto const tv = recdata->getFieldLval(keys[i]);
     // TODO(arnabde): Type check
@@ -66,7 +66,6 @@ void RecordData::release() noexcept {
   tl_heap->objFree(this, heapSize());
   AARCH64_WALKABLE_FRAME();
 }
-
 
 tv_rval RecordData::getFieldRval(const StringData* fieldName) const {
   auto const idx = m_record->lookupField(fieldName);

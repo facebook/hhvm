@@ -330,7 +330,9 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Func,            bits_t::bit<24>())                                 \
   c(Cls,             bits_t::bit<25>())                                 \
   c(ClsMeth,         bits_t::bit<26>())                                 \
-// Boxed*:           27-53
+  c(Record,          bits_t::bit<27>())                                 \
+  c(RecType,             bits_t::bit<28>())                                 \
+// Boxed*:           29-57
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -349,28 +351,32 @@ constexpr bool operator>(Mem a, Mem b) {
   c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
   c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
   c(PersistentArrLike,   kPersistentArr|kPersistentShape|kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)       \
+  c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)                \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
-  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls) \
+  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType) \
   c(Uncounted,           kUninit|kUncountedInit)                        \
-  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes|kClsMeth) \
+  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes|kClsMeth|kRecord) \
   c(Cell,                kUninit|kInitCell)
 
+/*
+ * Adding a new runtime type needs updating numRuntime variable.
+ */
 #define IRT_RUNTIME                                                     \
-  IRT(VarEnv,      bits_t::bit<54>())                                          \
-  IRT(NamedEntity, bits_t::bit<55>())                                          \
-  IRT(Cctx,        bits_t::bit<56>()) /* Class* with the lowest bit set,  */   \
-                                      /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     bits_t::bit<57>()) /* Return address */                     \
-  IRT(StkPtr,      bits_t::bit<58>()) /* Stack pointer */                      \
-  IRT(FramePtr,    bits_t::bit<59>()) /* Frame pointer */                      \
-  IRT(TCA,         bits_t::bit<60>())                                          \
-  IRT(ABC,         bits_t::bit<61>()) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   bits_t::bit<62>()) /* rds::Handle */                        \
-  IRT(Nullptr,     bits_t::bit<63>())                                          \
-  IRT(MIPropSPtr,  bits_t::bit<64>()) /* Ptr to MInstrPropState */
-  /* bits 65 and above are unused */
+  IRT(VarEnv,      bits_t::bit<kRuntime>())                             \
+  IRT(NamedEntity, bits_t::bit<kRuntime+1>())                           \
+  IRT(Cctx,        bits_t::bit<kRuntime+2>()) /* Class* with */         \
+                                              /* the lowest bit set,*/  \
+                                      /* as stored in ActRec.m_cls field  */ \
+  IRT(RetAddr,     bits_t::bit<kRuntime+3>()) /* Return address */      \
+  IRT(StkPtr,      bits_t::bit<kRuntime+4>()) /* Stack pointer */       \
+  IRT(FramePtr,    bits_t::bit<kRuntime+5>()) /* Frame pointer */       \
+  IRT(TCA,         bits_t::bit<kRuntime+6>())                           \
+  IRT(ABC,         bits_t::bit<kRuntime+7>()) /* AsioBlockableChain */  \
+  IRT(RDSHandle,   bits_t::bit<kRuntime+8>()) /* rds::Handle */         \
+  IRT(Nullptr,     bits_t::bit<kRuntime+9>())                           \
+  IRT(MIPropSPtr,  bits_t::bit<kRuntime+10>()) /* Ptr to MInstrPropState */
+  /* bits above this are unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -389,7 +395,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRTX(AnyDict,      Top,    kAnyDict)                        \
   IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
   IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
-  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kClsMeth) \
+  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kBoxedCell|kClsMeth) \
   IRTP(PtrToCounted,  Ptr,    kCounted)                       \
   IRTL(LvalToCounted, Ptr,    kCounted)                       \
   IRTM(MemToCounted,  Ptr,    kCounted)                       \
@@ -456,8 +462,10 @@ struct ConstCctx {
  */
 struct Type {
 private:
-  using bits_t = BitSet<65>;
-  static constexpr size_t kBoxShift = 27;
+  static constexpr size_t kBoxShift = 29;
+  static constexpr size_t kRuntime = kBoxShift * 2;
+  static constexpr size_t numRuntime = 11;
+  using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:
   static constexpr bits_t kBottom{};
@@ -484,6 +492,7 @@ public:
                                           kAnyKeyset;
   static constexpr bits_t kArrSpecBits  = kAnyArrLike;
   static constexpr bits_t kAnyObj       = kObj | kBoxedObj;
+  static constexpr bits_t kAnyRecord    = kRecord | kBoxedRecord;
   static constexpr bits_t kClsSpecBits  = kAnyObj | kCls;
 
   /////////////////////////////////////////////////////////////////////////////

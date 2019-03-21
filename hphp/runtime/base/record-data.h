@@ -45,7 +45,8 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
    * The initial ref-count will be set to one.
    */
   static RecordData* newRecord(const Record*,
-                               const req::vector<const StringData*>& keys,
+                               uint32_t initSize,
+                               const StringData* const* keys,
                                const TypedValue* values);
   // Decrement ref-counts of all fields of the record and free the memory.
   void release() noexcept;

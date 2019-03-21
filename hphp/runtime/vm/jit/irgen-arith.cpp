@@ -1167,6 +1167,10 @@ void implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   PUNT(ClsMeth-cmp);
 }
 
+void implRecordCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  PUNT(Record-cmp);
+}
+
 /*
  * Responsible for converting the bytecode comparisons (which are type-agnostic)
  * to IR comparisons (which are typed). This generally involves inserting the
@@ -1256,6 +1260,7 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TFunc) implFunCmp(env, op, left, right);
   else if (leftTy <= TCls) implClsCmp(env, op, left, right);
   else if (leftTy <= TClsMeth) implClsMethCmp(env, op, left, right);
+  else if (leftTy <= TRecord) implRecordCmp(env, op, left, right);
   else always_assert(false);
 
   decRef(env, left);

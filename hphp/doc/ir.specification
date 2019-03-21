@@ -1225,6 +1225,11 @@ To string conversions:
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the context in S1, raise an error.
 
+| LdRecCached, D(RecType), CStr, NF
+
+  Loads the record named S0 via the RDS. Invokes autoload and may raise an error
+  if the record is not defined.
+
 | DefCls, D(Cls), S(Int), NF
 
   Define the class corresponding to PreClass S0 in the current unit.
@@ -1685,6 +1690,13 @@ To string conversions:
   array.  Used to initialize an array allocated with AllocPackedArray or
   AllocVecArray that was too big to use a series of InitPackedLayoutArray
   instructions.
+
+| NewRecord<offset,keys...>, D(Record), S(RecType) S(StkPtr), PRc|CRc
+  
+  Allocate a new record, given the type S0 and N immediate keys 
+  and taking N elements off the stack given by S1, at `offset'. 
+  This instruction assumes it can take the values from the stack 
+  without increfing them.
 
 | NewStructArray<offset,keys...>, DArrMixed, S(StkPtr), PRc|CRc
 

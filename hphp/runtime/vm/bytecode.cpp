@@ -2183,7 +2183,8 @@ OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
     auto name = unit->lookupLitstrId(ids[i]);
     names.push_back(name);
   }
-  auto recdata = RecordData::newRecord(rec, names, vmStack().topC());
+  auto recdata =
+    RecordData::newRecord(rec, names.size(), names.data(), vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushRecordNoRc(recdata);
 }

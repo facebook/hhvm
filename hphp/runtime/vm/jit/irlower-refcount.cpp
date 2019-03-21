@@ -302,7 +302,8 @@ CallSpec getDtorCallSpec(DataType type) {
       return CallSpec::method(&RefData::release);
     case KindOfClsMeth:
       return CallSpec::direct(ClsMethDataRef::Release);
-    case KindOfRecord: // TODO (arnabde)
+    case KindOfRecord:
+      return CallSpec::method(&RecordData::release);
     DT_UNCOUNTED_CASE:
       break;
   }

@@ -134,21 +134,33 @@ void cgLdFunc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const Class* lookupKnownClass(rds::Handle cache_handle,
+template<class T>
+constexpr const char* errorString();
+template<>
+constexpr const char* errorString<Class>() {
+  return Strings::UNKNOWN_CLASS;
+}
+template<>
+constexpr const char* errorString<Record>() {
+  return Strings::UNKNOWN_RECORD;
+}
+
+template<class T>
+const T* lookupKnownType(rds::Handle cache_handle,
                               const StringData* name) {
   assertx(rds::isNormalHandle(cache_handle));
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
 
-  AutoloadHandler::s_instance->autoloadClass(
+  AutoloadHandler::s_instance->autoloadType<T>(
     StrNR(const_cast<StringData*>(name))
   );
 
   // Autoloader should have inited it as a side-effect.
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
-    raise_error(Strings::UNKNOWN_CLASS, name->data());
+    raise_error(errorString<T>(), name->data());
   }
-  return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
+  return rds::handleToRef<LowPtr<T>, rds::Mode::Normal>(cache_handle).get();
 }
 
 const Func* loadUnknownFunc(const StringData* name) {
@@ -190,6 +202,10 @@ rds::Handle handleFrom<Func>(const NamedEntity* ne) {
 template<>
 rds::Handle handleFrom<Class>(const NamedEntity* ne) {
   return ne->getClassHandle();
+}
+template<>
+rds::Handle handleFrom<Record>(const NamedEntity* ne) {
+  return ne->getRecordHandle();
 }
 
 template<class T, class SlowPath>
@@ -264,7 +280,19 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
   implLdCached<Class>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
     auto const args = argGroup(env, inst).imm(ch).ssa(0);
-    cgCallHelper(v, env, CallSpec::direct(lookupKnownClass),
+    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<Class>),
+                 callDest(ptr), SyncOptions::Sync, args);
+    return ptr;
+  });
+}
+
+void cgLdRecCached(IRLS& env, const IRInstruction* inst) {
+  auto const name = inst->src(0)->strVal();
+
+  implLdCached<Record>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
+    auto const ptr = v.makeReg();
+    auto const args = argGroup(env, inst).imm(ch).ssa(0);
+    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<Record>),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
   });

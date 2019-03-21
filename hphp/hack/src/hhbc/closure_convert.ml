@@ -794,6 +794,15 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (e, targs, el1, el2))
+  | Record (e, es) ->
+    let st, e = convert_expr env st e in
+    let convert_pair st (e1, e2) = begin
+      let st, e1 = convert_expr env st e1 in
+      let st, e2 = convert_expr env st e2 in
+      st, (e1, e2)
+    end in
+    let st, es = List.map_env st es convert_pair in
+    st, (p, Record (e, es))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)
   | Lfun fd ->

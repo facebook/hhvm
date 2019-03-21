@@ -880,6 +880,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constructor_call_argument_list                     : t
     ; constructor_call_right_paren                       : t
     }
+  | RecordCreationExpression                of
+    { record_creation_type                               : t
+    ; record_creation_left_bracket                       : t
+    ; record_creation_members                            : t
+    ; record_creation_right_bracket                      : t
+    }
   | ArrayCreationExpression                 of
     { array_creation_left_bracket                        : t
     ; array_creation_members                             : t
@@ -1318,6 +1324,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprList                          of list_expression
   | ExprCollectionLiteral             of collection_literal_expression
   | ExprObjectCreation                of object_creation_expression
+  | ExprRecordCreation                of record_creation_expression
   | ExprArrayCreation                 of array_creation_expression
   | ExprArrayIntrinsic                of array_intrinsic_expression
   | ExprDarrayIntrinsic               of darray_intrinsic_expression
@@ -1446,6 +1453,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaList                          of list_expression
   | LambdaCollectionLiteral             of collection_literal_expression
   | LambdaObjectCreation                of object_creation_expression
+  | LambdaRecordCreation                of record_creation_expression
   | LambdaArrayCreation                 of array_creation_expression
   | LambdaArrayIntrinsic                of array_intrinsic_expression
   | LambdaDarrayIntrinsic               of darray_intrinsic_expression
@@ -1499,6 +1507,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprList                          of list_expression
   | CExprCollectionLiteral             of collection_literal_expression
   | CExprObjectCreation                of object_creation_expression
+  | CExprRecordCreation                of record_creation_expression
   | CExprArrayCreation                 of array_creation_expression
   | CExprArrayIntrinsic                of array_intrinsic_expression
   | CExprDarrayIntrinsic               of darray_intrinsic_expression
@@ -2270,6 +2279,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constructor_call_left_paren: Token.t option value
     ; constructor_call_argument_list: expression listesque value
     ; constructor_call_right_paren: Token.t option value
+    }
+  and record_creation_expression =
+    { record_creation_type: todo_aggregate value
+    ; record_creation_left_bracket: Token.t value
+    ; record_creation_members: element_initializer listesque value
+    ; record_creation_right_bracket: Token.t value
     }
   and array_creation_expression =
     { array_creation_left_bracket: Token.t value

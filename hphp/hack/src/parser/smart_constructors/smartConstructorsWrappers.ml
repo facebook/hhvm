@@ -154,6 +154,7 @@ module type SyntaxKind_S = sig
   val is_collection_literal_expression : r -> bool
   val is_object_creation_expression : r -> bool
   val is_constructor_call : r -> bool
+  val is_record_creation_expression : r -> bool
   val is_array_creation_expression : r -> bool
   val is_array_intrinsic_expression : r -> bool
   val is_darray_intrinsic_expression : r -> bool
@@ -360,6 +361,7 @@ module SyntaxKind(SC : SC_S)
   let make_collection_literal_expression arg0 arg1 arg2 arg3 state = compose SK.CollectionLiteralExpression (SC.make_collection_literal_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_object_creation_expression arg0 arg1 state = compose SK.ObjectCreationExpression (SC.make_object_creation_expression (snd arg0) (snd arg1) state)
   let make_constructor_call arg0 arg1 arg2 arg3 state = compose SK.ConstructorCall (SC.make_constructor_call (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
+  let make_record_creation_expression arg0 arg1 arg2 arg3 state = compose SK.RecordCreationExpression (SC.make_record_creation_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_array_creation_expression arg0 arg1 arg2 state = compose SK.ArrayCreationExpression (SC.make_array_creation_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_array_intrinsic_expression arg0 arg1 arg2 arg3 state = compose SK.ArrayIntrinsicExpression (SC.make_array_intrinsic_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state = compose SK.DarrayIntrinsicExpression (SC.make_darray_intrinsic_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
@@ -548,6 +550,7 @@ module SyntaxKind(SC : SC_S)
   let is_collection_literal_expression                = has_kind SK.CollectionLiteralExpression
   let is_object_creation_expression                   = has_kind SK.ObjectCreationExpression
   let is_constructor_call                             = has_kind SK.ConstructorCall
+  let is_record_creation_expression                   = has_kind SK.RecordCreationExpression
   let is_array_creation_expression                    = has_kind SK.ArrayCreationExpression
   let is_array_intrinsic_expression                   = has_kind SK.ArrayIntrinsicExpression
   let is_darray_intrinsic_expression                  = has_kind SK.DarrayIntrinsicExpression

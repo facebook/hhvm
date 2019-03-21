@@ -152,6 +152,7 @@ module type SmartConstructors_S = sig
   val make_collection_literal_expression : r -> r -> r -> r -> t -> t * r
   val make_object_creation_expression : r -> r -> t -> t * r
   val make_constructor_call : r -> r -> r -> r -> t -> t * r
+  val make_record_creation_expression : r -> r -> r -> r -> t -> t * r
   val make_array_creation_expression : r -> r -> r -> t -> t * r
   val make_array_intrinsic_expression : r -> r -> r -> r -> t -> t * r
   val make_darray_intrinsic_expression : r -> r -> r -> r -> r -> t -> t * r
@@ -348,6 +349,7 @@ end) = struct
     let collection_literal_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_collection_literal_expression arg0 arg1 arg2 arg3)
     let object_creation_expression parser arg0 arg1 = call parser (SCI.make_object_creation_expression arg0 arg1)
     let constructor_call parser arg0 arg1 arg2 arg3 = call parser (SCI.make_constructor_call arg0 arg1 arg2 arg3)
+    let record_creation_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_record_creation_expression arg0 arg1 arg2 arg3)
     let array_creation_expression parser arg0 arg1 arg2 = call parser (SCI.make_array_creation_expression arg0 arg1 arg2)
     let array_intrinsic_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_array_intrinsic_expression arg0 arg1 arg2 arg3)
     let darray_intrinsic_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4)

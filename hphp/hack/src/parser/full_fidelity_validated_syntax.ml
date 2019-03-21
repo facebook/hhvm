@@ -230,6 +230,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> ExprList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> ExprCollectionLiteral x) x
     | Syntax.ObjectCreationExpression _ -> tag validate_object_creation_expression (fun x -> ExprObjectCreation x) x
+    | Syntax.RecordCreationExpression _ -> tag validate_record_creation_expression (fun x -> ExprRecordCreation x) x
     | Syntax.ArrayCreationExpression _ -> tag validate_array_creation_expression (fun x -> ExprArrayCreation x) x
     | Syntax.ArrayIntrinsicExpression _ -> tag validate_array_intrinsic_expression (fun x -> ExprArrayIntrinsic x) x
     | Syntax.DarrayIntrinsicExpression _ -> tag validate_darray_intrinsic_expression (fun x -> ExprDarrayIntrinsic x) x
@@ -286,6 +287,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprList                          thing -> invalidate_list_expression                (value, thing)
     | ExprCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
     | ExprObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | ExprRecordCreation                thing -> invalidate_record_creation_expression     (value, thing)
     | ExprArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
     | ExprArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
     | ExprDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
@@ -503,6 +505,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> LambdaList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> LambdaCollectionLiteral x) x
     | Syntax.ObjectCreationExpression _ -> tag validate_object_creation_expression (fun x -> LambdaObjectCreation x) x
+    | Syntax.RecordCreationExpression _ -> tag validate_record_creation_expression (fun x -> LambdaRecordCreation x) x
     | Syntax.ArrayCreationExpression _ -> tag validate_array_creation_expression (fun x -> LambdaArrayCreation x) x
     | Syntax.ArrayIntrinsicExpression _ -> tag validate_array_intrinsic_expression (fun x -> LambdaArrayIntrinsic x) x
     | Syntax.DarrayIntrinsicExpression _ -> tag validate_darray_intrinsic_expression (fun x -> LambdaDarrayIntrinsic x) x
@@ -559,6 +562,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaList                          thing -> invalidate_list_expression                (value, thing)
     | LambdaCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
     | LambdaObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | LambdaRecordCreation                thing -> invalidate_record_creation_expression     (value, thing)
     | LambdaArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
     | LambdaArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
     | LambdaDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
@@ -613,6 +617,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ListExpression _ -> tag validate_list_expression (fun x -> CExprList x) x
     | Syntax.CollectionLiteralExpression _ -> tag validate_collection_literal_expression (fun x -> CExprCollectionLiteral x) x
     | Syntax.ObjectCreationExpression _ -> tag validate_object_creation_expression (fun x -> CExprObjectCreation x) x
+    | Syntax.RecordCreationExpression _ -> tag validate_record_creation_expression (fun x -> CExprRecordCreation x) x
     | Syntax.ArrayCreationExpression _ -> tag validate_array_creation_expression (fun x -> CExprArrayCreation x) x
     | Syntax.ArrayIntrinsicExpression _ -> tag validate_array_intrinsic_expression (fun x -> CExprArrayIntrinsic x) x
     | Syntax.DarrayIntrinsicExpression _ -> tag validate_darray_intrinsic_expression (fun x -> CExprDarrayIntrinsic x) x
@@ -669,6 +674,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprList                          thing -> invalidate_list_expression                (value, thing)
     | CExprCollectionLiteral             thing -> invalidate_collection_literal_expression  (value, thing)
     | CExprObjectCreation                thing -> invalidate_object_creation_expression     (value, thing)
+    | CExprRecordCreation                thing -> invalidate_record_creation_expression     (value, thing)
     | CExprArrayCreation                 thing -> invalidate_array_creation_expression      (value, thing)
     | CExprArrayIntrinsic                thing -> invalidate_array_intrinsic_expression     (value, thing)
     | CExprDarrayIntrinsic               thing -> invalidate_darray_intrinsic_expression    (value, thing)
@@ -2942,6 +2948,24 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; constructor_call_left_paren = invalidate_option_with (invalidate_token) x.constructor_call_left_paren
       ; constructor_call_argument_list = invalidate_list_with (invalidate_expression) x.constructor_call_argument_list
       ; constructor_call_right_paren = invalidate_option_with (invalidate_token) x.constructor_call_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_record_creation_expression : record_creation_expression validator = function
+  | { Syntax.syntax = Syntax.RecordCreationExpression x; value = v } -> v,
+    { record_creation_right_bracket = validate_token x.record_creation_right_bracket
+    ; record_creation_members = validate_list_with (validate_element_initializer) x.record_creation_members
+    ; record_creation_left_bracket = validate_token x.record_creation_left_bracket
+    ; record_creation_type = validate_todo_aggregate x.record_creation_type
+    }
+  | s -> validation_fail (Some SyntaxKind.RecordCreationExpression) s
+  and invalidate_record_creation_expression : record_creation_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.RecordCreationExpression
+      { record_creation_type = invalidate_todo_aggregate x.record_creation_type
+      ; record_creation_left_bracket = invalidate_token x.record_creation_left_bracket
+      ; record_creation_members = invalidate_list_with (invalidate_element_initializer) x.record_creation_members
+      ; record_creation_right_bracket = invalidate_token x.record_creation_right_bracket
       }
     ; Syntax.value = v
     }

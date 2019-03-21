@@ -142,6 +142,7 @@ type t =
   | CollectionLiteralExpression
   | ObjectCreationExpression
   | ConstructorCall
+  | RecordCreationExpression
   | ArrayCreationExpression
   | ArrayIntrinsicExpression
   | DarrayIntrinsicExpression
@@ -331,6 +332,7 @@ let to_string kind =
   | CollectionLiteralExpression             -> "collection_literal_expression"
   | ObjectCreationExpression                -> "object_creation_expression"
   | ConstructorCall                         -> "constructor_call"
+  | RecordCreationExpression                -> "record_creation_expression"
   | ArrayCreationExpression                 -> "array_creation_expression"
   | ArrayIntrinsicExpression                -> "array_intrinsic_expression"
   | DarrayIntrinsicExpression               -> "darray_intrinsic_expression"

@@ -224,7 +224,6 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Endswitch" ; "endswitch"; LF.php_and_hack ];
   [ "Endwhile"; "endwhile"; LF.php_and_hack ];
   [ "Enum"; "enum"; LF.hack_only; OF.xhp; OF.allowed_as_identifier ];
-  [ "RecordDec"; "record"; LF.hack_only; OF.xhp ];
   [ "Eval"; "eval"; LF.php_and_hack ];
   [ "Extends"; "extends"; LF.php_and_hack ];
   [ "Fallthrough"; "fallthrough"; LF.hack_only; OF.allowed_as_identifier ];
@@ -270,6 +269,8 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Public"; "public"; LF.php_and_hack ];
   [ "Real"; "real"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Reify"; "reify"; LF.hack_only; OF.allowed_as_identifier ];
+  [ "Record"; "recordname"; LF.hack_only ];
+  [ "RecordDec"; "record"; LF.hack_only; OF.xhp ];
   [ "Require"; "require"; LF.php_and_hack ];
   [ "Require_once"; "require_once"; LF.php_and_hack ];
   [ "Required"; "required"; LF.hack_only; OF.xhp ];

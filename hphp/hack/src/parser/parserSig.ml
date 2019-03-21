@@ -170,6 +170,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val collection_literal_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val object_creation_expression : t -> SC.r -> SC.r -> t * SC.r
         val constructor_call : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val record_creation_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_creation_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val darray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

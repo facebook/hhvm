@@ -24,7 +24,7 @@ let rec check_lvalue errorf = function
   | pos, Call ((_, Id (_, "tuple")), _, _, _) ->
     errorf pos "Tuple cannot be used as an lvalue. Maybe you meant list?"
   | _, List el -> List.iter (check_lvalue errorf) el
-  | pos, (Array _ | Darray _ | Varray _ | Shape _ | Collection _
+  | pos, (Array _ | Darray _ | Varray _ | Shape _ | Collection _ | Record _
     | Null | True | False | Id _ | Clone _
     | Class_const _ | Call _ | Int _ | Float _ | PrefixedString _
     | String _ | String2 _ | Yield _ | Yield_break | Yield_from _

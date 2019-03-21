@@ -1929,7 +1929,38 @@ module WithStatementAndDeclAndTypeParser
         parse_collection_literal_expression parser name
       else
         (parser, name)
+    | LeftBracket ->
+        if peek_token_kind ~lookahead:2 parser = EqualGreaterThan
+        then
+          parse_record_creation_expression parser name
+        else
+          (parser, name)
     | _ -> (parser, name)
+
+  and parse_record_creation_expression parser name =
+    (* SPEC
+     * record-creation:
+       * record-name [ record-field-initializer-list ]
+     * record-fileld-initilizer-list:
+       * record-field-initilizer
+       * record-field-initializer-list, record-field-initializer
+     * record-field-initializer
+       * field-name => expression
+     *)
+    let (parser1, left_bracket) = assert_token parser LeftBracket in
+    let (parser, members) =
+      parse_comma_list_opt_allow_trailing
+      parser1
+      RightBracket
+      SyntaxError.error1015
+      parse_keyed_element_initializer in
+    let (parser, right_bracket) = require_right_bracket parser in
+    Make.record_creation_expression
+      parser
+      name
+      left_bracket
+      members
+      right_bracket
 
   and parse_collection_literal_expression parser name =
 

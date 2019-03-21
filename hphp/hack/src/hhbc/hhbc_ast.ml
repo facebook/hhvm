@@ -189,6 +189,7 @@ type instruct_lit_const =
   | NewVecArray of int
   | NewKeysetArray of int
   | NewPair
+  | NewRecord of class_id * string list
   | AddElemC
   | AddElemV
   | AddNewElemC

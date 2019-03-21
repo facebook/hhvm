@@ -459,6 +459,7 @@ and expr_ =
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   | New of expr * targ list * expr list * expr list
+  | Record of expr * (expr * expr) list
   (* Traditional PHP-style closure with a use list. Each use element is
     a name and a bool indicating if its a reference or value *)
   | Efun of fun_ * (id * bool) list

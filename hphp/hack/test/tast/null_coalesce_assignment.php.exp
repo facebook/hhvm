@@ -18,8 +18,7 @@
                  (([4:3-5], int), (Lvar ([4:3-5], $x))),
                  (([4:10-11], int), (Int "0")))))));
           ([5:3-13],
-           (Return ([5:3-13],
-              (Some (([5:10-12], int), (Lvar ([5:10-12], $x)))))))
+           (Return (Some (([5:10-12], int), (Lvar ([5:10-12], $x))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

@@ -51,8 +51,8 @@ let handler = object
     | Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
       if is_coroutine env then Errors.await_in_coroutine p;
       if is_sync env then Errors.await_in_sync_function p
-    | Return (p, Some _) when is_generator env ->
-      Errors.return_in_gen p
+    | Return (Some _) when is_generator env ->
+      Errors.return_in_gen (fst s)
     | _ -> ()
     end;
 

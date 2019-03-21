@@ -15,8 +15,7 @@
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
          m_body =
          { fb_ast =
-           [([6:5-14],
-             (Return ([6:5-14], (Some (([6:12-13], int), (Int "5"))))))];
+           [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([5:26-29], (Hprim Tint))); m_external = false;
@@ -43,9 +42,7 @@
           m_params = [];
           m_body =
           { fb_ast =
-            [([12:5-16],
-              (Return ([12:5-16], (Some (([12:12-15], string), (String "s")))
-                 )))
+            [([12:5-16], (Return (Some (([12:12-15], string), (String "s")))))
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
@@ -93,7 +90,7 @@
                       (([17:22-25], C2), (Lvar ([17:22-25], $c2))))))
                   )))));
            ([18:3-20],
-            (Return ([18:3-20],
+            (Return
                (Some (([18:10-19], (int | string)),
                       (Call (Cnormal,
                          (([18:10-17], (function(): (int | string))),
@@ -103,8 +100,7 @@
                              (([18:14-17], (function(): (int | string))),
                               (Id ([18:14-17], "foo"))),
                              OG_nullthrows))),
-                         [], [], []))))
-               )))
+                         [], [], []))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

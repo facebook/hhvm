@@ -1818,16 +1818,16 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Noop -> N.Noop
     | Aast.Markup (_, None) -> N.Noop
     | Aast.Markup (_m, Some e) -> N.Expr (aast_expr env e)
-    | Aast.Break p -> Aast.Break p
-    | Aast.Continue p -> Aast.Continue p
+    | Aast.Break -> Aast.Break
+    | Aast.Continue -> Aast.Continue
     | Aast.Throw (_, e) ->
       let terminal = not (fst env).in_try in
       N.Throw (terminal, aast_expr env e)
-    | Aast.Return (p, e) -> N.Return (p, Option.map e (aast_expr env))
+    | Aast.Return e -> N.Return (Option.map e (aast_expr env))
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
     | Aast.Global_var el -> N.Global_var (aast_global_varl env el)
-    | Aast.Awaitall (p, el) -> aast_awaitall_stmt env p el
+    | Aast.Awaitall el -> aast_awaitall_stmt env el
     | Aast.If (e, b1, b2) -> aast_if_stmt env st e b1 b2
     | Aast.Do (b, e) -> aast_do_stmt env b e
     | Aast.While (e, b) ->
@@ -2089,7 +2089,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and aast_global_varl env l = aast_static_varl env l
 
-  and aast_awaitall_stmt env pos el =
+  and aast_awaitall_stmt env el =
     let el =
       List.map
         ~f:(fun (e1, e2) ->
@@ -2106,7 +2106,7 @@ module Make (GetLocals : GetLocals) = struct
             | None -> None in
           (e1, e2))
       el in
-    N.Awaitall (pos, el)
+    N.Awaitall el
 
   and aast_expr_obj_get_name env expr =
     match expr with

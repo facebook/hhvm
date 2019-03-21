@@ -55,10 +55,9 @@
                                        )))
                                    )))));
                             ([11:5-18],
-                             (Return ([11:5-18],
+                             (Return
                                 (Some (([11:12-17], int),
-                                       (Lvar ([11:12-17], $item))))
-                                )))
+                                       (Lvar ([11:12-17], $item))))))
                             ];
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
@@ -78,13 +77,12 @@
                       None))),
                   (([13:14-16], string), (Lvar ([13:14-16], $s))))))));
           ([14:3-15],
-           (Return ([14:3-15],
+           (Return
               (Some (([14:10-14], int),
                      (Call (Cnormal,
                         (([14:10-12], (function(): int)),
                          (Lvar ([14:10-12], $f))),
-                        [], [], []))))
-              )))
+                        [], [], []))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

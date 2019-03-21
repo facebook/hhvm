@@ -53,23 +53,23 @@ type env = {
 
 module CheckFunctionBody = struct
   let rec stmt f_type env st = match f_type, (snd st) with
-    | Ast.FSync, Return (_, None)
-    | Ast.FAsync, Return (_, None) -> ()
-    | Ast.FSync, Return (_, Some e)
-    | Ast.FAsync, Return (_, Some e) ->
+    | Ast.FSync, Return None
+    | Ast.FAsync, Return None -> ()
+    | Ast.FSync, Return (Some e)
+    | Ast.FAsync, Return (Some e) ->
         expr_allow_await f_type env e;
         ()
     | (Ast.FGenerator | Ast.FAsyncGenerator), Return _ -> ()
-    | Ast.FCoroutine, Return (_, e) ->
+    | Ast.FCoroutine, Return e ->
         Option.iter e ~f:(expr f_type env)
     | _, Throw (_, e) ->
         expr f_type env e
     | _, Expr e ->
         expr_allow_await_or_rx_move f_type env e;
         ()
-    | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
+    | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break | Continue
          | Global_var _ | Unsafe_block _ ) -> ()
-    | _, Awaitall (_, el) ->
+    | _, Awaitall el ->
         List.iter el (fun (_, y) ->
           expr f_type env y;
         );
@@ -584,20 +584,20 @@ and fun_param env param =
 and stmt env (_, s) = stmt_ env s
 
 and stmt_ env = function
-  | Return (_, None)
+  | Return None
   | GotoLabel _
   | Goto _
   | Noop
   | Unsafe_block _
   | Fallthrough
-  | Break _
-  | Continue _ -> ()
-  | Return (_, Some e)
+  | Break
+  | Continue -> ()
+  | Return (Some e)
   | Expr e | Throw (_, e) ->
     expr env e
   | Global_var _ ->
     ()
-  | Awaitall (_, el) ->
+  | Awaitall el ->
       List.iter el (fun (_, y) ->
         expr env y;
       );

@@ -354,16 +354,16 @@ and on_stmt_ p st :  Aast.stmt_ =
   | Fallthrough               -> Aast.Fallthrough
   | Noop                      -> Aast.Noop
   | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
-  | Break (Some _)            -> Errors.break_continue_n_not_supported p; Aast.Break p
-  | Break None                -> Aast.Break p
-  | Continue (Some _)         -> Errors.break_continue_n_not_supported p; Aast.Continue p
-  | Continue None             -> Aast.Continue p
+  | Break (Some _)            -> Errors.break_continue_n_not_supported p; Aast.Break
+  | Break None                -> Aast.Break
+  | Continue (Some _)         -> Errors.break_continue_n_not_supported p; Aast.Continue
+  | Continue None             -> Aast.Continue
   | Throw e                   -> Aast.Throw (false, on_expr e)
-  | Return e                  -> Aast.Return (p, optional on_expr e)
+  | Return e                  -> Aast.Return (optional on_expr e)
   | GotoLabel label           -> Aast.GotoLabel label
   | Goto label                -> Aast.Goto label
   | Global_var el             -> Aast.Global_var (on_list on_expr el)
-  | Awaitall el               -> Aast.Awaitall (p, on_list on_awaitall_expr el)
+  | Awaitall el               -> Aast.Awaitall (on_list on_awaitall_expr el)
   | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
   | While (e, b)              -> Aast.While (on_expr e, on_block b)

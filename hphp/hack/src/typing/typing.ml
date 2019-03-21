@@ -744,22 +744,22 @@ and stmt_ env pos st =
       let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
       (* TODO TAST: annotate with joined types *)
       env, T.If(te, tb1, tb2)
-  | Return (p, None) ->
+  | Return None ->
       let env = check_inout_return env in
-      let rty = Typing_return.wrap_awaitable env p (MakeType.void (Reason.Rwitness p)) in
+      let rty = Typing_return.wrap_awaitable env pos (MakeType.void (Reason.Rwitness pos)) in
       let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
-      let env = Typing_return.implicit_return env p ~expected:expected_return ~actual:rty in
+      let env = Typing_return.implicit_return env pos ~expected:expected_return ~actual:rty in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-      env, T.Return (p, None)
-  | Return (p, Some e) ->
+      env, T.Return None
+  | Return (Some e) ->
       let env = check_inout_return env in
-      let pos = fst e in
+      let expr_pos = fst e in
       let Typing_env_return_info.{
         return_type; return_disposable; return_mutable; return_explicit;
         return_void_to_rx } = Env.get_return env in
       let expected =
         if return_explicit
-        then Some (pos, Reason.URreturn,
+        then Some (expr_pos, Reason.URreturn,
           Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type)
         else None in
       if return_disposable then enforce_return_disposable env e;
@@ -777,11 +777,11 @@ and stmt_ env pos st =
         else env in
       let return_type = TR.strip_condition_type_in_return env return_type in
       let env, rty = Env.unbind env rty in
-      let rty = Typing_return.wrap_awaitable env p rty in
+      let rty = Typing_return.wrap_awaitable env pos rty in
       Typing_suggest.save_return env return_type rty;
-      let env = Type.coerce_type pos Reason.URreturn env rty return_type in
+      let env = Type.coerce_type expr_pos Reason.URreturn env rty return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-      env, T.Return (p, Some te)
+      env, T.Return (Some te)
   | Do (b, e) as st ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
@@ -932,7 +932,7 @@ and stmt_ env pos st =
     end ~init:env in
     let env, tel, _ = exprs env el in
     env, T.Global_var tel
-  | Awaitall (p, el) ->
+  | Awaitall el ->
     let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
       let env, te2, ty2 = expr env e2 in
       let env, ty2 = Async.overload_extract_from_awaitable env (fst e2) ty2 in
@@ -943,19 +943,19 @@ and stmt_ env pos st =
       | None -> (env, (None, te2) :: tel)
       )
     ) in
-    env, T.Awaitall (p, el)
+    env, T.Awaitall el
   | Throw (is_terminal, e) ->
     let p = fst e in
     let env, te, ty = expr env e in
     let env = exception_ty p env ty in
     let env = move_and_merge_next_in_catch env in
     env, T.Throw(is_terminal, te)
-  | Continue p ->
+  | Continue ->
     let env = LEnv.move_and_merge_next_in_cont env C.Continue in
-    env, T.Continue p
-  | Break p ->
+    env, T.Continue
+  | Break ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
-    env, T.Break p
+    env, T.Break
   | Let ((p, x) as id, h, rhs) ->
     let env, hint_ty, expected = match h with
       | Some (p, h) ->

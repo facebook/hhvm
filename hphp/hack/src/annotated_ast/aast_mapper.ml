@@ -233,16 +233,16 @@ struct
     let map_catch (id1, id2, b) = (id1, id2, map_block menv b) in
     match s with
     | S.Expr e -> T.Expr (map_expr menv e)
-    | S.Break p -> T.Break p
-    | S.Continue p -> T.Continue p
+    | S.Break -> T.Break
+    | S.Continue -> T.Continue
     | S.Throw (b, e) -> T.Throw (b, map_expr menv e)
-    | S.Return (p, oe) -> T.Return (p, Option.map oe (map_expr menv))
+    | S.Return oe -> T.Return (Option.map oe (map_expr menv))
     | S.GotoLabel label -> T.GotoLabel label
     | S.Goto label -> T.Goto label
     | S.Global_var el -> T.Global_var (map_exprl menv el)
-    | S.Awaitall (pos, el) ->
+    | S.Awaitall el ->
       let el = List.map el (fun (lid, expr) -> (lid, map_expr menv expr)) in
-      T.Awaitall (pos, el)
+      T.Awaitall el
     | S.If(e, b1, b2) -> T.If (map_expr menv e, map_block menv b1, map_block menv b2)
     | S.Do(b, e) -> T.Do(map_block menv b, map_expr menv e)
     | S.While(e, b) -> T.While(map_expr menv e, map_block menv b)

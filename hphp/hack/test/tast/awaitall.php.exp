@@ -7,9 +7,7 @@
       f_name = ([3:16-22], "\\genInt"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      { fb_ast =
-        [([4:3-12], (Return ([4:3-12], (Some (([4:10-11], int), (Int "1"))))))
-          ];
+      { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
@@ -24,9 +22,7 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [([8:3-16],
-           (Return ([8:3-16], (Some (([8:10-15], string), (String "foo"))))))
-           ];
+         [([8:3-16], (Return (Some (([8:10-15], string), (String "foo")))))];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;
@@ -42,7 +38,7 @@
        f_body =
        { fb_ast =
          [([12:3-16:4],
-           (Awaitall ([12:3-16:4],
+           (Awaitall
               [((Some ([Pos.none], __tmp$2)),
                 (([15:16-27], Awaitable<string>),
                  (Call (Cnormal,
@@ -61,8 +57,7 @@
                      (([13:16-22], (function(): Awaitable<int>)),
                       (Id ([13:16-22], "\\genInt"))),
                      [], [], []))))
-                ]
-              )));
+                ]));
            ([14:5-23], (Expr (([14:5-22], null), Null)));
            ([13:5-25],
             (Expr

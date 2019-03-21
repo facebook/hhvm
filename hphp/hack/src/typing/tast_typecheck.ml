@@ -149,14 +149,14 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
     empty_delta_with_next_cont gamma
   | Fallthrough ->
     empty_delta_with_cont C.Fallthrough gamma
-  | Break _ ->
+  | Break ->
     empty_delta_with_cont C.Break gamma
-  | Continue _ ->
+  | Continue ->
     empty_delta_with_cont C.Continue gamma
   | Throw (_is_terminal, expr) ->
     let gamma = check_expr expr gamma in
     empty_delta_with_cont C.Catch gamma
-  | Return (_, expropt) ->
+  | Return expropt ->
     let gamma = match expropt with
     | None -> gamma
     | Some expr ->

@@ -28,15 +28,12 @@
                  (Class_get ((([16:9-13], TestClass), CIself),
                     (CGstring ([16:15-17], "$x"))))),
                 [([17:7-23],
-                  (Return ([17:7-23],
+                  (Return
                      (Some (([17:14-22], int),
                             (Class_get ((([17:14-18], TestClass), CIself),
-                               (CGstring ([17:20-22], "$x"))))))
-                     )))
+                               (CGstring ([17:20-22], "$x"))))))))
                   ],
-                [([19:7-16],
-                  (Return ([19:7-16], (Some (([19:14-15], int), (Int "0"))))))
-                  ]
+                [([19:7-16], (Return (Some (([19:14-15], int), (Int "0")))))]
                 )))
              ];
            fb_annotation = No unsafe blocks };

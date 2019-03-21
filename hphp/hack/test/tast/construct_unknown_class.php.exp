@@ -22,7 +22,7 @@ Errors:
       f_body =
       { fb_ast =
         [([4:3-45],
-          (Return ([4:3-45],
+          (Return
              (Some (([4:10-44], object),
                     (New ((([4:14-21], _), (CI ([4:14-21], "\\Unknown"))),
                        [],
@@ -33,8 +33,7 @@ Errors:
                              [(([4:34-35], int), (Int "3"))])))
                          ],
                        [(([4:41-43], vec<string>), (Lvar ([4:41-43], $x)))],
-                       ([4:14-21], _)))))
-             )))
+                       ([4:14-21], _)))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

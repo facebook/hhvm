@@ -51,10 +51,9 @@
                          f_body =
                          { fb_ast =
                            [([6:20-22],
-                             (Return ([6:20-22],
+                             (Return
                                 (Some (([6:20-22], int),
-                                       (Lvar ([6:20-22], $x))))
-                                )))
+                                       (Lvar ([6:20-22], $x))))))
                              ];
                            fb_annotation = No unsafe blocks };
                          f_fun_kind = FSync; f_user_attributes = [];

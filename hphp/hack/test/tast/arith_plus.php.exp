@@ -12,11 +12,10 @@
       f_body =
       { fb_ast =
         [([4:3-17],
-          (Return ([4:3-17],
+          (Return
              (Some (([4:10-16], int),
                     (Binop (Plus, (([4:10-12], int), (Lvar ([4:10-12], $x))),
-                       (([4:15-16], int), (Int "3"))))))
-             )))
+                       (([4:15-16], int), (Int "3"))))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

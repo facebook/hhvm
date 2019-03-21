@@ -92,7 +92,7 @@
           m_body =
           { fb_ast =
             [([24:5-24],
-              (Return ([24:5-24],
+              (Return
                  (Some (([24:12-23], T),
                         (Array_get (
                            (([24:12-20], Vector<T>),
@@ -100,8 +100,7 @@
                                (([24:19-20], Vector<T>),
                                 (Id ([24:19-20], "x"))),
                                OG_nullthrows))),
-                           (Some (([24:21-22], int), (Int "0")))))))
-                 )))
+                           (Some (([24:21-22], int), (Int "0")))))))))
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];

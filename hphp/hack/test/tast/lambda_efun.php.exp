@@ -31,15 +31,14 @@
                         f_body =
                         { fb_ast =
                           [([15:15-22],
-                            (Return ([15:15-22],
+                            (Return
                                (Some (([15:15-22], _),
                                       (Binop (Plus,
                                          (([15:15-17], int),
                                           (Lvar ([15:15-17], $y))),
                                          (([15:20-22], _),
                                           (Lvar ([15:20-22], $z)))
-                                         ))))
-                               )))
+                                         ))))))
                             ];
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
@@ -78,15 +77,14 @@
                         f_body =
                         { fb_ast =
                           [([19:5-20],
-                            (Return ([19:5-20],
+                            (Return
                                (Some (([19:12-19], _),
                                       (Binop (Plus,
                                          (([19:12-14], int),
                                           (Lvar ([19:12-14], $y))),
                                          (([19:17-19], _),
                                           (Lvar ([19:17-19], $z)))
-                                         ))))
-                               )))
+                                         ))))))
                             ];
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];
@@ -131,15 +129,14 @@
                         f_body =
                         { fb_ast =
                           [([23:21-28],
-                            (Return ([23:21-28],
+                            (Return
                                (Some (([23:21-28], _),
                                       (Binop (Plus,
                                          (([23:21-23], _),
                                           (Lvar ([23:21-23], $a))),
                                          (([23:26-28], _),
                                           (Lvar ([23:26-28], $b)))
-                                         ))))
-                               )))
+                                         ))))))
                             ];
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];

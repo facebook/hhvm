@@ -24,9 +24,7 @@
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [([7:42-55],
-           (Return ([7:42-55], (Some (([7:49-54], string), (String "foo"))))))
-           ];
+         [([7:42-55], (Return (Some (([7:49-54], string), (String "foo")))))];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false; f_namespace = <opaque>; f_doc_comment = None;

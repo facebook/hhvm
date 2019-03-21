@@ -324,7 +324,7 @@ and aast_terminal_ nsenv ~in_try st =
   match snd st with
   | Aast.Throw _ when not in_try -> raise Exit
   | Aast.Throw _ -> ()
-  | Aast.Continue _
+  | Aast.Continue
   | Aast.Expr (_, ( Aast.Call (_, (_, Aast.Id (_, "assert")), _, [_, Aast.False], [])
              | Aast.Call (_, (_, Aast.Id (_, "invariant")), _, (_, Aast.False) :: _ :: _, [])))
   | Aast.Return _ -> raise Exit
@@ -347,7 +347,7 @@ and aast_terminal_ nsenv ~in_try st =
     (* return is not allowed in finally, so we can ignore fb *)
     (aast_terminal nsenv ~in_try:true b;
      List.iter catch_l (aast_terminal_catch nsenv ~in_try))
-  | Aast.Break _ (* TODO this is terminal sometimes too, except switch, see above. *)
+  | Aast.Break (* TODO this is terminal sometimes too, except switch, see above. *)
   | Aast.Expr _
   | Aast.Markup _
   | Aast.Let _
@@ -386,7 +386,7 @@ and aast_terminal_cl nsenv ~in_try = function
 
 and aast_blockHasBreak = function
   | [] -> false
-  | (_, Aast.Break _) :: _ -> true
+  | (_, Aast.Break) :: _ -> true
   | x :: xs ->
     let x' =
       match snd x with
@@ -523,8 +523,8 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.Expr e -> aast_expr acc e
   | Aast.Fallthrough
   | Aast.Markup _
-  | Aast.Break _
-  | Aast.Continue _
+  | Aast.Break
+  | Aast.Continue
   | Aast.Throw _ -> acc
   | Aast.Do (b, e) ->
     let acc = aast_block acc b in
@@ -554,7 +554,7 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.Global_var _
   | Aast.Def_inline _
   | Aast.Noop -> acc
-  | Aast.Awaitall (_, el) ->
+  | Aast.Awaitall el ->
     List.fold_left ~init:acc ~f:(fun acc (_, e2) -> aast_expr acc e2) el
   | Aast.Let (_x, _h, e) ->
     (* We would like to exclude scoped locals here, but gather the locals in

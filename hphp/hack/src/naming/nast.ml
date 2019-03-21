@@ -192,10 +192,10 @@ module Visitor_DEPRECATED = struct
 
 class type ['a] visitor_type = object
   method on_block : 'a -> block -> 'a
-  method on_break : 'a -> Pos.t -> 'a
+  method on_break : 'a -> 'a
   method on_case : 'a -> case -> 'a
   method on_catch : 'a -> catch -> 'a
-  method on_continue : 'a -> Pos.t -> 'a
+  method on_continue : 'a -> 'a
   method on_darray : 'a -> (targ * targ) option -> field list -> 'a
   method on_varray : 'a -> targ option -> expr list -> 'a
   method on_do : 'a -> block -> expr -> 'a
@@ -209,7 +209,7 @@ class type ['a] visitor_type = object
   method on_noop : 'a -> 'a
   method on_unsafe_block : 'a -> block -> 'a
   method on_fallthrough : 'a -> 'a
-  method on_return : 'a -> Pos.t -> expr option -> 'a
+  method on_return : 'a -> expr option -> 'a
   method on_goto_label : 'a -> pstring -> 'a
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
@@ -311,8 +311,8 @@ end
 
 class virtual ['a] visitor: ['a] visitor_type = object(this)
 
-  method on_break acc _ = acc
-  method on_continue acc _ = acc
+  method on_break acc = acc
+  method on_continue acc = acc
   method on_noop acc = acc
   method on_unsafe_block acc _ = acc
   method on_fallthrough acc = acc
@@ -331,7 +331,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = this#on_expr acc e in
     acc
 
-  method on_return acc _ eopt =
+  method on_return acc eopt =
     match eopt with
     | None -> acc
     | Some e -> this#on_expr acc e
@@ -434,10 +434,10 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_stmt_ acc = function
     | Expr e                  -> this#on_expr acc e
-    | Break p                 -> this#on_break acc p
-    | Continue p              -> this#on_continue acc p
+    | Break                   -> this#on_break acc
+    | Continue                -> this#on_continue acc
     | Throw   (is_term, e)    -> this#on_throw acc is_term e
-    | Return  (p, eopt)       -> this#on_return acc p eopt
+    | Return  eopt            -> this#on_return acc eopt
     | GotoLabel label         -> this#on_goto_label acc label
     | Goto label              -> this#on_goto acc label
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
@@ -452,7 +452,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Unsafe_block b          -> this#on_unsafe_block acc b
     | Fallthrough             -> this#on_fallthrough acc
     | Global_var el           -> this#on_global_var acc el
-    | Awaitall (_, el)        -> this#on_awaitall acc el
+    | Awaitall el             -> this#on_awaitall acc el
     | Def_inline d            -> this#on_def_inline acc d
     | Let     (x, h, e)       -> this#on_let acc x h e
     | Block b                 -> this#on_block acc b
@@ -830,7 +830,7 @@ end = struct
     object
       inherit [bool] visitor
       method! on_expr acc _ = acc
-      method! on_return _ _ _ = true
+      method! on_return _ _ = true
     end
 
   let block b = visitor#on_block false b
@@ -871,7 +871,7 @@ end = struct
   let visitor =
     object
       inherit loop_visitor
-      method! on_continue _ _ = true
+      method! on_continue _ = true
     end
 
   let block b = visitor#on_block false b
@@ -891,7 +891,7 @@ end = struct
   let visitor =
     object
       inherit loop_visitor
-      method! on_break _ _ = true
+      method! on_break _ = true
     end
 
   let block b = visitor#on_block false b

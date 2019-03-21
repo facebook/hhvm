@@ -31,7 +31,7 @@
                         f_body =
                         { fb_ast =
                           [([4:17-39],
-                            (Return ([4:17-39],
+                            (Return
                                (Some (([4:24-38], string),
                                       (Binop (Dot,
                                          (([4:24-31], string),
@@ -42,8 +42,7 @@
                                               (Lvar ([4:29-31], $s)))
                                              ))),
                                          (([4:34-38], string), (String "\\n"))
-                                         ))))
-                               )))
+                                         ))))))
                             ];
                           fb_annotation = No unsafe blocks };
                         f_fun_kind = FSync; f_user_attributes = [];

@@ -65,15 +65,15 @@ and stmt_ =
   | Unsafe_block of block
   | Fallthrough
   | Expr of expr
-  | Break of pos
-  | Continue of pos
+  | Break
+  | Continue
   (* is_terminal is new *)
   | Throw of is_terminal * expr
-  | Return of pos * expr option
+  | Return of expr option
   | GotoLabel of pstring
   | Goto of pstring
   | Global_var of expr list
-  | Awaitall of pos * ((lid option * expr) list)
+  | Awaitall of (lid option * expr) list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block

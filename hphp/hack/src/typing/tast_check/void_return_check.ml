@@ -24,13 +24,14 @@ let visitor = object(this)
     this#with_return_type fun_.f_ret (fun () -> super#on_fun_ env fun_)
   method! on_method_ env method_ =
     this#with_return_type method_.m_ret (fun () -> super#on_method_ env method_)
-  method! on_Return _ pos1 = function
-    | Some _ ->
-      begin match !return_type_ref with
-      | Some (pos2, Hprim Tvoid) -> Errors.return_in_void pos1 pos2
-      | _ -> ()
-      end
-    | None -> ()
+
+  method! on_stmt env st = match st with
+  | pos1, Return (Some _) ->
+    begin match !return_type_ref with
+    | Some (pos2, Hprim Tvoid) -> Errors.return_in_void pos1 pos2
+    | _ -> ()
+    end
+  | _ -> super#on_stmt env st
 end
 
 module Env = Tast_env

@@ -136,10 +136,10 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
   method might_throw delta =
     L.set C.Catch gamma delta
 
-  method! on_Break () _ =
+  method! on_Break () =
     L.set C.Break gamma L.empty
 
-  method! on_Continue () _ =
+  method! on_Continue () =
     L.set C.Continue gamma L.empty
 
   method! on_Throw () x e =
@@ -147,9 +147,9 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
       (parent#on_Throw () x e)
       (L.set C.Catch gamma L.empty)
 
-  method! on_Return () p e =
+  method! on_Return () e =
     self#plus
-      (parent#on_Return () p e)
+      (parent#on_Return () e)
       (L.set C.Exit gamma L.empty)
 
   method! on_Yield () a =
@@ -199,13 +199,13 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
     L.drop_list [C.Continue; C.Break] delta
 
   method! on_While () (p, _ as e) b =
-    self#on_While_True ((p, If (e, [p, Break p], [])) :: b)
+    self#on_While_True ((p, If (e, [p, Break], [])) :: b)
 
   method! on_Do () b (p, _ as e) =
     self#on_While_True (
       b @ [
       p, If (e, [
-        p, Break p], [])])
+        p, Break], [])])
 
   method! on_For () (p1, _ as e1) e2 (p3, _ as e3) b =
     self#on_block () (

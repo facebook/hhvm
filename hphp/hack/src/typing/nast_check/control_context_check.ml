@@ -15,10 +15,11 @@ module SN = Naming_special_names
 let handler = object
   inherit Nast_visitor.handler_base
   method! at_stmt env s =
+    let p = fst s in
     match (snd s), env.control_context with
-    | Break p, Toplevel -> Errors.toplevel_break p
-    | Continue p, Toplevel -> Errors.toplevel_continue p
-    | Continue p, SwitchContext -> Errors.continue_in_switch p
-    | Return (p, _), _ when env.is_finally -> Errors.return_in_finally p
+    | Break, Toplevel -> Errors.toplevel_break p
+    | Continue, Toplevel -> Errors.toplevel_continue p
+    | Continue, SwitchContext -> Errors.continue_in_switch p
+    | Return _, _ when env.is_finally -> Errors.return_in_finally p
     | _ -> ()
 end

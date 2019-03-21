@@ -90,8 +90,8 @@ and collect_valid_target_labels_aux_tast is_hh_file acc s =
   | T.Let _
   | T.Fallthrough
   | T.Expr _
-  | T.Break _
-  | T.Continue _
+  | T.Break
+  | T.Continue
   | T.Throw _
   | T.Return _
   | T.Goto _

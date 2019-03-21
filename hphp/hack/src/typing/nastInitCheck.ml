@@ -268,21 +268,21 @@ and stmt env acc st =
         else expr acc e
     | GotoLabel _
     | Goto _
-    | Break _ -> acc
-    | Continue _ -> acc
+    | Break -> acc
+    | Continue -> acc
     | Throw _ -> S.Top
-    | Return (_, None) ->
+    | Return None ->
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-    | Return (_, Some x) ->
+    | Return (Some x) ->
       let acc = expr acc x in
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
     | Global_var el
        -> List.fold_left ~f:expr ~init:acc el
-    | Awaitall (_, el) ->
+    | Awaitall el ->
       List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
         expr acc e2
       )

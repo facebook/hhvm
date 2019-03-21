@@ -16,9 +16,7 @@
       f_body =
       { fb_ast =
         [([3:58-68],
-          (Return ([3:58-68],
-             (Some (([3:65-67], string), (Lvar ([3:65-67], $s)))))))
-          ];
+          (Return (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
       f_external = false; f_namespace = <opaque>; f_doc_comment = None;

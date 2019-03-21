@@ -188,6 +188,29 @@ add_custom_target(
 )
 add_dependencies(hack_test ocaml opam.stamp)
 
+add_custom_target(
+  hack_dune_test
+  COMMAND
+        export OPAMROOT=${OPAMROOT} &&
+        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
+        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
+        opam config exec --
+        $(MAKE) --makefile=Makefile.dune test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+        EXTRA_LIB_PATHS="${extra_lib_paths}"
+        EXTRA_LINK_OPTS="${extra_link_opts}"
+        EXTRA_CC_FLAGS="${extra_cc_flags}"
+        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
+        BYTECODE="${EMIT_OCAML_BYTECODE}"
+        OCAML="${OCAML_EXECUTABLE}"
+        OCAMLC="${OCAMLC_EXECUTABLE}"
+        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+add_dependencies(hack_dune_test ocaml)
+if (NOT SKIP_OPAM)
+  add_dependencies(hack_dune opam.stamp)
+endif()
+
 if(NOT LZ4_FOUND)
   # if the system does not have lz4, make sure that the one in public_tl
   # gets built

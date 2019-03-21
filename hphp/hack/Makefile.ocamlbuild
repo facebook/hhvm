@@ -273,7 +273,7 @@ copy-hhis: $(COPIED_HHIS)
 
 .PHONY: test do-test
 test: build-hack copy-hack-files
-	${MAKE} do-test
+	$(MAKE) -f Makefile.ocamlbuild do-test
 
 do-test:
 	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/autocomplete

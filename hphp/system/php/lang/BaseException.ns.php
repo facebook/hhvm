@@ -159,10 +159,13 @@ trait BaseException {
     foreach ($this->getTrace() as $frame) {
       if (!\is_array($frame)) continue;
       $s .= "#$i " .
-        (isset($frame['file']) ? $frame['file'] : "") . "(" .
-        (isset($frame['line']) ? $frame['line'] : "") . "): " .
-        (isset($frame['class']) ? $frame['class'] . $frame['type'] : "") .
-        $frame['function'] . "()\n";
+        ($frame['file'] ?? "") . "(" .
+        ($frame['line'] ?? "") . "): " .
+        (isset($frame['class'])
+          ? $frame['class'] . ($frame['type'] ?? "")
+          : ""
+        ) .
+        ($frame['function'] ?? "<unknown>") . "()\n";
       $i++;
     }
     $s .= "#$i {main}";

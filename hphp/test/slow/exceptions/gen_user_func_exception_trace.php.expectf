@@ -1,0 +1,26 @@
+array(3) {
+  [0]=>
+  string(4) "args"
+  [1]=>
+  string(2) "go"
+  [2]=>
+  string(4) "here"
+}
+
+Fatal error: Uncaught exception 'Exception' with message 'thrown from child' in %s/hphp/test/slow/exceptions/gen_user_func_exception_trace.php:5
+Stack trace:
+#0 (): child_main()
+#1 (): xbox_process_call_message()
+#2 {main}
+
+Fatal error: Uncaught exception 'Exception' with message 'exception 'Exception' with message 'thrown from child' in %s/hphp/test/slow/exceptions/gen_user_func_exception_trace.php:5
+Stack trace:
+#0 (): child_main()
+#1 (): xbox_process_call_message()
+#2 {main}' in %s/hphp/test/slow/exceptions/gen_user_func_exception_trace.php:15
+Stack trace:
+#0 %s/hphp/test/slow/exceptions/gen_user_func_exception_trace.php(15): <unknown>()
+#1 (): Closure$main()
+#2 %s/hphp/test/slow/exceptions/gen_user_func_exception_trace.php(16): HH\Asio\join()
+#3 (): main()
+#4 {main}

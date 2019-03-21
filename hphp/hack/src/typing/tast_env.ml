@@ -52,6 +52,9 @@ let get_self env =
   | Not_in_class -> None
 
 let fresh_type = Typing_env.fresh_type
+let open_tyvars = Typing_env.open_tyvars
+let close_tyvars_and_solve = Typing_subtype.close_tyvars_and_solve
+let set_tyvar_variance = Typing_env.set_tyvar_variance
 let get_class = Typing_env.get_class
 let is_static = Typing_env.is_static
 let is_strict = Typing_env.is_strict

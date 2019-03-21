@@ -56,6 +56,10 @@ val get_self : env -> Tast.ty option
 val fresh_type : env -> Pos.t -> env * Tast.ty
 (** Return a type consisting of a fresh type variable *)
 
+val open_tyvars : env -> env
+val close_tyvars_and_solve : env -> env
+val set_tyvar_variance : env -> Tast.ty -> env
+
 val get_class : env -> Typing_heap.Classes.key -> Typing_heap.Classes.t option
 (** Return the info of the given class from the typing heap. *)
 

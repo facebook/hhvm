@@ -1447,9 +1447,10 @@ and update_variance_after_bind env var ty =
       negative env in
   env
 
-let set_tyvar_variance env ty =
+let set_tyvar_variance env ?(flip = false) ty =
   let tyvars = get_current_tyvars env in
   let env, positive, negative = get_tyvars env ty in
+  let (positive, negative) = if flip then (negative, positive) else (positive, negative) in
   List.fold_left tyvars ~init:env ~f:(fun env var ->
     let env = if ISet.mem var positive then set_tyvar_appears_covariantly env var else env in
     let env = if ISet.mem var negative then set_tyvar_appears_contravariantly env var else env in

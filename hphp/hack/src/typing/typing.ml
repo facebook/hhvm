@@ -5094,9 +5094,10 @@ and call_ ~expected ~method_call_info pos env fty el uel =
             match ty with
             | _, Tunresolved [ty] -> set_params_variance env ty
             | _, Toption ty -> set_params_variance env ty
-            | _, Tfun { ft_params; _ } ->
-              List.fold ~init:env ~f:(fun env param ->
-                Env.set_tyvar_variance env param.fp_type) ft_params
+            | _, Tfun { ft_params; ft_ret; _ } ->
+              let env = List.fold ~init:env ~f:(fun env param ->
+                Env.set_tyvar_variance env param.fp_type) ft_params in
+              Env.set_tyvar_variance env ft_ret ~flip:true
             | _ -> env in
           set_params_variance env param.fp_type
         | None ->

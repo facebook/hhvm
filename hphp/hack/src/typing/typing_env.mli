@@ -208,5 +208,5 @@ val save : tpenv -> env -> Tast.saved_env
 val set_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty -> env
 val get_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty option
 val add_subtype_prop: env -> Typing_logic.subtype_prop -> env
-val set_tyvar_variance : env -> Typing_defs.locl Typing_defs.ty -> env
+val set_tyvar_variance : env -> ?flip:bool -> Typing_defs.locl Typing_defs.ty -> env
 val update_variance_after_bind : env -> int -> Typing_defs.locl Typing_defs.ty -> env

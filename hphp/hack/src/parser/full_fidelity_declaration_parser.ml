@@ -261,21 +261,22 @@ module WithExpressionAndStatementAndTypeParser
       enumerators right_brace
 
   and parse_record_field parser =
-    (* TODO: Add this to the specification.*)
     (* SPEC
       record_field:
-        record-constant : type ,
+        record-constant : type field-initializer-opt,
       record-constant:
         name
+      field-initializer:
+        = expression
     *)
     let (parser, name) = require_name_allow_non_reserved parser in
     let (parser, colon) = require_colon parser in
     let (parser, field_type) = parse_type_specifier parser in
+    let (parser, init) = parse_simple_initializer_opt parser in
     let (parser, comma) = require_comma parser in
-    Make.record_field parser name colon field_type comma
+    Make.record_field parser name colon field_type init comma
 
   and parse_record_fields parser =
-    (* TODO: Add this to the specification.*)
     (* SPEC
       record-list:
         record-field
@@ -284,7 +285,6 @@ module WithExpressionAndStatementAndTypeParser
     parse_terminated_list parser parse_record_field RightBrace
 
   and parse_record_declaration parser attrs =
-    (* TODO: Add this to the specification.*)
     (*
     record-declaration:
       record name { record-list }

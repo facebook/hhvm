@@ -205,6 +205,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { record_field_name                                  : t
     ; record_field_colon                                 : t
     ; record_field_type                                  : t
+    ; record_field_init                                  : t
     ; record_field_comma                                 : t
     }
   | AliasDeclaration                        of
@@ -1595,6 +1596,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { record_field_name: Token.t value
     ; record_field_colon: Token.t value
     ; record_field_type: type_constraint value
+    ; record_field_init: simple_initializer option value
     ; record_field_comma: Token.t value
     }
   and alias_declaration =

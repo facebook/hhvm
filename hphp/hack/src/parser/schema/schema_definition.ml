@@ -181,6 +181,7 @@ let schema : schema_node list =
       [ "name", Token
       ; "colon", Token
       ; "type", Just "TypeConstraint"
+      ; "init", ZeroOrOne (Just "SimpleInitializer")
       ; "comma", Token
       ]
     }

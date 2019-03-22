@@ -31,6 +31,7 @@ let visitor = Tast_visitor.iter_with [
   Xhp_check.handler;
   Discarded_awaitable_check.handler;
   Invalid_arraykey_check.handler;
+  Invalid_arraykey_check.index_handler;
   Basic_reactivity_check.handler;
   Pseudofunctions_check.handler;
   Dynamic_method_call_check.handler;

@@ -1,1 +1,6 @@
-No errors
+File "stack_overflow1.php", line 8, characters 8-22:
+Invalid index type for this array (Typing[4110])
+  File "stack_overflow1.php", line 7, characters 16-23:
+  This is an undefined value
+  File "stack_overflow1.php", line 8, characters 19-21:
+  It is incompatible with a string

@@ -1,1 +1,30 @@
-No errors
+File "index_array_bad.php", line 10, characters 8-15:
+Invalid index type for this array (Typing[4110])
+  File "index_array_bad.php", line 5, characters 9-14:
+  This is a string
+  File "index_array_bad.php", line 10, characters 11-14:
+  It is incompatible with a bool
+File "index_array_bad.php", line 11, characters 8-14:
+Invalid index type for this dict (Typing[4110])
+  File "index_array_bad.php", line 6, characters 8-10:
+  This is an int
+  File "index_array_bad.php", line 11, characters 11-13:
+  It is incompatible with a float
+File "index_array_bad.php", line 12, characters 8-17:
+Invalid index type for this array (Typing[4110])
+  File "index_array_bad.php", line 7, characters 10-12:
+  This is an int
+  File "index_array_bad.php", line 12, characters 12-16:
+  It is incompatible with a bool
+File "index_array_bad.php", line 13, characters 9-16:
+Invalid index type for this KeyedContainer (Typing[4110])
+  File "index_array_bad.php", line 8, characters 18-20:
+  This is an int
+  File "index_array_bad.php", line 13, characters 13-15:
+  It is incompatible with a string
+File "index_array_bad.php", line 14, characters 9-16:
+Invalid index type for this ConstMap (Typing[4110])
+  File "index_array_bad.php", line 9, characters 12-14:
+  This is an int
+  File "index_array_bad.php", line 14, characters 13-15:
+  It is incompatible with a string

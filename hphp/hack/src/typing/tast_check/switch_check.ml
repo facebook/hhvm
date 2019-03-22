@@ -14,6 +14,7 @@ open Utils
 
 module Env = Tast_env
 module Cls = Typing_classes_heap
+module MakeType = Typing_make_type
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
@@ -88,9 +89,13 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
   let is_subtype ty_sub ty_super = snd (Env.subtype env ty_sub ty_super) in
   let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
   let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
+  let ty_mixed = MakeType.mixed Reason.Rnone in
+  let ty_traversable = MakeType.traversable Typing_reason.Rnone ty_mixed in
   let compatible_types ty1 ty2 =
     (is_subtype ty1 ty_num && is_subtype ty2 ty_num) ||
     (is_subtype ty1 ty_arraykey && is_subtype ty2 ty_arraykey) ||
+    (is_subtype ty1 ty_traversable && is_subtype ty2 ty_traversable &&
+      (is_subtype ty1 ty2 || is_subtype ty2 ty1)) ||
     (is_subtype ty1 ty2 && is_subtype ty2 ty1) in
   let ensure_valid_switch_case_value_type = function
     | Default _ -> ()

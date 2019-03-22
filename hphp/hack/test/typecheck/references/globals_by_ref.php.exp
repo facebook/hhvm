@@ -1,0 +1,2 @@
+File "globals_by_ref.php", line 5, characters 5-13:
+Superglobal $GLOBALS cannot be passed by reference (NastCheck[3067])

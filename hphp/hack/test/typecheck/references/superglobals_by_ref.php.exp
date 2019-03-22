@@ -1,0 +1,2 @@
+File "superglobals_by_ref.php", line 5, characters 8-16:
+Superglobal $_SERVER cannot be passed by reference (NastCheck[3067])

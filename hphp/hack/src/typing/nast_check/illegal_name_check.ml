@@ -32,6 +32,8 @@ let handler = object
         Errors.illegal_by_ref_expr pos SN.SpecialIdents.this
       | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
         Errors.illegal_by_ref_expr pos SN.SpecialIdents.dollardollar
+      | Lvar (_, x) when Local_id.to_string x |> SN.Superglobals.is_superglobal ->
+        Errors.illegal_by_ref_expr pos @@ "Superglobal " ^ Local_id.to_string x
       | _ -> ()
       end
     | Id (pos, const) ->

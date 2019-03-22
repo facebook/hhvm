@@ -1,5 +1,6 @@
 <?hh
 
+abstract final class GetterMagic { public static $heh; }
 error_reporting(-1);
 
 class Heh {
@@ -12,10 +13,9 @@ class Heh {
 }
 
 function test() {
-  global $heh;
-  var_dump($heh->prop);
+  var_dump(GetterMagic::$heh->prop);
 }
 
-$heh = new Heh;
-var_dump($heh->prop);
-var_dump($heh);
+GetterMagic::$heh = new Heh;
+var_dump(GetterMagic::$heh->prop);
+var_dump(GetterMagic::$heh);

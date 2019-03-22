@@ -22,9 +22,9 @@ if (!function_exists('sys_get_temp_dir')) {
 if (!function_exists('my_mysql_connect')) {
   /* wrapper to simplify test porting */
   function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL, $persistent = false) {
-    global $connect_flags;
 
-    $flags = ($flags === NULL) ? $connect_flags : $flags;
+
+    $flags = ($flags === NULL) ? $GLOBALS['connect_flags'] : $flags;
 
     if ($socket)
       $host = sprintf("%s:%s", $host, $socket);

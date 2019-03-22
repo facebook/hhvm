@@ -3,8 +3,8 @@
 error_reporting(-1);
 
 set_error_handler(function() {
-    global $g;
-    $g->p = '';
+
+    $GLOBALS['g']->p = '';
   });
 
 class X {

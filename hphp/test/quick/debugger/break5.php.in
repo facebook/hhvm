@@ -1,8 +1,8 @@
 b 12 if bad()
 continue
-p $x
+p DebuggerBreak5::$x
 s
-p $x
+p DebuggerBreak5::$x
 s
-p $x
+p DebuggerBreak5::$x
 quit

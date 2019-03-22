@@ -1,16 +1,16 @@
 <?hh
 
 class Blah {
+  public static $z;
   public function __call($x, $y) {
-    global $z;
-    $z->hoho();
+    self::$z->hoho();
   }
 }
 
-$z = new Blah();
+Blah::$z = new Blah();
 function main() {
-  global $z;
-  $z->whatever();
+
+  Blah::$z->whatever();
 }
 
 main();;

@@ -1,12 +1,16 @@
 <?php
 
+abstract final class Switchref {
+  public static $randBits;
+}
+
 /*
  * Check that the translator correctly adapts to callsites with variable
  * argument reffiness.
  */
 
 // 100 pseudo-random bits generated offline.
-$randBits = array(
+Switchref::$randBits = array(
 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0,
 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1,
 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
@@ -27,8 +31,7 @@ function main() {
   $funcs = array("byVal", "byRef");
   $b = 2;
   $c = 3;
-  global $randBits;
-  foreach($randBits as $idx => $bit) {
+  foreach(Switchref::$randBits as $idx => $bit) {
     try {
       $funcs[$bit]($b, $c);
     } catch (InvalidArgumentException $e) {
@@ -39,7 +42,7 @@ function main() {
   }
   $b = 2;
   $c = 3;
-  foreach($randBits as $idx => $bit) {
+  foreach(Switchref::$randBits as $idx => $bit) {
     try {
       $funcs[$bit]($b, &$c);
     } catch (InvalidArgumentException $e) {

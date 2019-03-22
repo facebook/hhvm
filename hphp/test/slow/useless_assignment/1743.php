@@ -1,7 +1,7 @@
 <?php
 
 function foo($p) {
-  global $b;
+
   for ($i = 0;
  $i < 5;
  $i++) {
@@ -9,16 +9,16 @@ function foo($p) {
       $a = 10;
     }
  else {
-      $a = &$b;
+      $a = &UselessAssignment1743::$b;
     }
   }
 }
-function bar() {
-  $a = foo(2);
-  var_dump($GLOBALS['b']);
-}
-
 <<__EntryPoint>>
 function main_1743() {
-bar();
+  $a = foo(2);
+  var_dump(UselessAssignment1743::$b);
+}
+
+abstract final class UselessAssignment1743 {
+  public static $b;
 }

@@ -1,10 +1,13 @@
 <?php
 
+abstract final class strictNested {
+  public static $errored;
+}
 function takes_int(int $x) {
-    global $errored;
-    if ($errored) {
+
+    if (strictNested::$errored) {
         echo "Failure!", PHP_EOL;
-        $errored = FALSE;
+        strictNested::$errored = FALSE;
     } else {
         echo "Success!", PHP_EOL;
     }

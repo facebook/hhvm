@@ -1,13 +1,13 @@
 <?php
 function decide() {
-  global $WHICH;
-  return $WHICH;
+
+  return mt_rand(0, 0);
 }
 
 
 <<__EntryPoint>>
 function main_2192() {
-$WHICH = 0;
+
 if (decide()) {
   class X {
     public function generator() {

@@ -7,8 +7,8 @@ function f() {
       $GLOBALS[$k] = -1;
     }
   }
-  global $a;
-  var_dump($a);
+
+  var_dump($GLOBALS['a']);
   $b = $GLOBALS;
   $b['a'] = 0;
   var_dump($GLOBALS['a']);

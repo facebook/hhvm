@@ -4,28 +4,28 @@ Breakpoint 1 set on line 12 of %s/break5.php if bad()
 But won't break until file %s/break5.php has been loaded.
 continue
 Breakpoint 1 reached on line 12 of %s/break5.php
-  11 $x = 1;
-  12*echo $x."\n";
-  13 echo $x."\n";
+  11 %s$x = 1;
+  12*echo %s$x."\n";
+  13 echo %s$x."\n";
 
-p $x
+p DebuggerBreak5::$x
 11
 s
 11
 Break on line 13 of %s/break5.php
-  12 echo $x."\n";
-  13*echo $x."\n";
-  14 $x = 1;
+  12 echo %s$x."\n";
+  13*echo %s$x."\n";
+  14 DebuggerBreak5::$x = 1;
 
-p $x
+p DebuggerBreak5::$x
 11
 s
 11
 Break on line 14 of %s/break5.php
-  13 echo $x."\n";
-  14*$x = 1;
+  13 echo DebuggerBreak5::$x."\n";
+  14*DebuggerBreak5::$x = 1;
   15 (END)
 
-p $x
+p DebuggerBreak5::$x
 11
 quit

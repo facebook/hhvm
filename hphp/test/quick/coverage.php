@@ -33,9 +33,9 @@ function enable() {
 }
 
 function doenable() {
-  global $y;
+
   enable();
-  $y += 43;
+  Coverage::$y += 43;
 }
 
 function main() {
@@ -46,5 +46,8 @@ function main() {
   $r = fb_disable_code_coverage();
   unset($r['/:systemlib.phpfb']);
   var_dump($r);
+}
+abstract final class Coverage {
+  public static $y;
 }
 main();

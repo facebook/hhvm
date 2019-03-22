@@ -1,9 +1,10 @@
 <?hh
 
-$g = array(1,2,3);
+abstract final class StackOverflow { public static $g; }
+
+StackOverflow::$g = array(1,2,3);
 function cmp($a, $b) {
-  global $g;
-  usort(&$g, 'cmp');
+  usort(&StackOverflow::$g, 'cmp');
   fiz();
 }
 

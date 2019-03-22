@@ -40,15 +40,15 @@ try {
 
 	$ret = performScan(function(&$cursor) use($r){
 		// catch key:two and key:three
-		global $prefix;
-		return $r->scan($cursor, $prefix . 'key:t*');
+
+		return $r->scan($cursor, ExtRedisScan::$prefix . 'key:t*');
 	});
 	var_dump($ret);
 
 	$ret = performScan(function(&$cursor) use($r){
 		// nothing.
-		global $prefix;
-		return $r->scan($cursor, $prefix . 'nokey:t*');
+
+		return $r->scan($cursor, ExtRedisScan::$prefix . 'nokey:t*');
 	});
 	var_dump($ret);
 } finally {

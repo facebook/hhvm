@@ -1,8 +1,8 @@
 <?php
 
 function __autoload($x) {
-  global $y;
-  $y = new stdclass;
+
+  $GLOBALS['y'] = new stdclass;
   if (mt_rand()) {
     class Zoo {
       const Bar = 2;
@@ -15,7 +15,7 @@ function __autoload($x) {
 }
 
 class A {
-  static $foo = Zoo::Bar;
+  public static $foo = Zoo::Bar;
   function k() {
     echo "ok\n";
   }

@@ -1,11 +1,11 @@
 <?hh
 
 function k() {
-  global $x;
-  if (!isset($x)) {
-    $x = fopen(__FILE__, 'r');
+  // a comment!
+  if (!isset(GuardBug::$x)) {
+    GuardBug::$x = fopen(__FILE__, 'r');
   }
-  return $x;
+  return GuardBug::$x;
 }
 
 while ($line = fgets(k())) {
@@ -14,3 +14,4 @@ while ($line = fgets(k())) {
 
     echo "$file -\n";
 }
+abstract final class GuardBug { public static $x; }

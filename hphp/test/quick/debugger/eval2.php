@@ -4,13 +4,12 @@
   }
 
   function throwSomething() {
-    global $_;
-    throw new Exception($_);
+
+    throw new Exception($GLOBALS['_']);
   }
 
   function printSomething() {
-    global $_;
-    echo $_;
+
+    echo $GLOBALS['_'];
     return "also returned something";
   }
-

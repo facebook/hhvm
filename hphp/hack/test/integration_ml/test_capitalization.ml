@@ -45,7 +45,7 @@ let () =
   (* Change a wholly unrelated file. *)
   let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
-      "bar.php", ""
+      "bar.php", "<?hh"
     ]
   }) in
   if not loop_output.did_read_disk_changes then

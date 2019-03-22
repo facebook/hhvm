@@ -61,8 +61,8 @@ let () =
   Test.in_daemon @@ test_parsing_error expected_error bad_contents;
 
   let expected_error =
-    "File \"/foo.php\", line 4, characters 1-2:\n" ^
-    "A hack source file cannot contain '?>'. (Parsing[1002])\n" in
+    "File \"/foo.php\", line 4, characters 1-3:\n" ^
+    "An expression is expected here. (Parsing[1002])\n" in
 
   let bad_contents = "?>" in
 

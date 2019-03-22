@@ -116,7 +116,7 @@ let () =
     bar_107_name bar_107_foo_line_5_diagnostics;
 
   (* Fix one of the errors *)
-  let env, _ = Test.edit_file env bar_107_name "" in
+  let env, _ = Test.edit_file env bar_107_name "<?hh" in
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output bar107_cleared;
@@ -133,7 +133,7 @@ let () =
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   assert_10_diagnostics loop_output;
 
-  let env, _ = Test.edit_file env bar_106_name "" in
+  let env, _ = Test.edit_file env bar_106_name "<?hh" in
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output bar106_cleared;

@@ -64,7 +64,7 @@ let () =
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   assert_no_push_message loop_outputs;
   (* Fix the errors in file *)
-  let env, _ = Test.edit_file env foo_name "" in
+  let env, _ = Test.edit_file env foo_name "<?hh" in
   let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_outputs foo_clear_diagnostics;

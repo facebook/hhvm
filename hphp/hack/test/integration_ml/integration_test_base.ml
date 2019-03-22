@@ -323,7 +323,7 @@ let status ?(ignore_ide=false) env =
 
 let full_check env =
   run_loop_once env { default_loop_input with
-    disk_changes = ["__dummy_file_to_trigger_full_check.php", ""]
+    disk_changes = ["__dummy_file_to_trigger_full_check.php", "<?hh"]
   }
 
 let start_initial_full_check env =

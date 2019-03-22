@@ -99,7 +99,7 @@ let () =
     disk_changes = [
       (* The actual change doesn't matter - saving anything to disk just
        * happens to currently be a trigger for global recheck *)
-      "x.php", ""
+      "x.php", "<?hh"
     ]
   }) in
   (* Global recheck produces full list of errors, including errors in b.php *)

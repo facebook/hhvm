@@ -114,7 +114,7 @@ let () =
   Test.assert_diagnostics loop_output foo_duplicate_diagnostics;
 
   let env = Test.open_file env foo_returns_string_name
-    ~contents:"" in
+    ~contents:"<?hh" in
   let env = Test.wait env in
   let _, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output foo_returns_int_diagnostics

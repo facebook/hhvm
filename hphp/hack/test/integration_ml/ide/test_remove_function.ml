@@ -48,7 +48,7 @@ let () =
   Test.assert_no_diagnostics loop_outputs; (* no diagnostics initially *)
   let env = Test.open_file env foo_name in
   (* Delete foo() *)
-  let env, _ = Test.edit_file env foo_name "" in
+  let env, _ = Test.edit_file env foo_name "<?hh" in
   let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   (* Change introduces an error in bar.php, but this file is not open in IDE

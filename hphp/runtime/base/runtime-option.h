@@ -87,7 +87,7 @@ struct RepoOptions {
   H(bool,           EnableConcurrent,               false)            \
   H(bool,           EnableAwaitAsAnExpression,      false)            \
   H(bool,           EnableStrongerAwaitBinding,     false)            \
-  H(bool,           EnableReifiedGenerics,          false)            \
+  H(bool,           EnableReifiedGenerics,          true)             \
   H(bool,           DisableLvalAsAnExpression,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           HHJSUniqueFilenames,            true)             \
@@ -515,7 +515,6 @@ struct RuntimeOption {
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
-  static bool EnableReifiedGenerics;
   static uint32_t EvalInitialStaticStringTableSize;
   static uint32_t EvalInitialNamedEntityTableSize;
   static JitSerdesMode EvalJitSerdesMode;

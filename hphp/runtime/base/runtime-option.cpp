@@ -494,7 +494,6 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-bool RuntimeOption::EnableReifiedGenerics = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
 bool RuntimeOption::EnablePocketUniverses = false;
@@ -1914,10 +1913,6 @@ void RuntimeOption::Load(
     // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
-
-    Config::Bind(EnableReifiedGenerics, ini, config,
-                 "Hack.Lang.EnableReifiedGenerics",
-                 false);
     Config::Bind(EnablePocketUniverses, ini, config,
                  "Hack.Lang.EnablePocketUniverses",
                  false);

@@ -72,7 +72,7 @@ let error0013 = "This XHP body is not terminated."
 let error0014 = "This XHP comment is not terminated."
 
 (* Syntactic errors *)
-let error1001 = "A source file must begin with '<?hh'."
+let error1001 = "A .php file must begin with '<?hh'."
 let error1003 = "The 'function' keyword is expected here."
 let error1004 = "A name is expected here."
 let error1006 = "A right brace ('}') is expected here."

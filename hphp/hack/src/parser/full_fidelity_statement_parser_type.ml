@@ -31,8 +31,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         -> t * SC.r
       val parse_compound_statement : t -> t * SC.r
       val parse_statement : t -> t * SC.r
-      val parse_markup_section: t
-        -> is_leading_section:bool
+      val parse_header: t
         -> t * SC.r * bool
       val parse_possible_php_function: t
         -> toplevel:bool

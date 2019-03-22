@@ -2050,7 +2050,7 @@ module WithExpressionAndStatementAndTypeParser
       with_statement_parser parser
       (fun p ->
         let (p, s, has_suffix) =
-          StatementParser.parse_markup_section ~is_leading_section:true p
+          StatementParser.parse_header p
         in
         p, (s, has_suffix)
       )
@@ -2058,18 +2058,16 @@ module WithExpressionAndStatementAndTypeParser
       (* proceed successfully if we've consumed <?..., or dont need it *)
       (* We purposefully ignore leading trivia before the <?hh, and handle
       the error on a later pass *)
-      (* TODO: Handle the case where the langauge is not a Name. *)
-    (* Do not attempt to recover in HHVM compatibility mode *)
-    if (has_suffix || Env.hhvm_compat_mode (env parser)) then
-      parser1, markup_section
+    if has_suffix then
+      parser1, Some markup_section
     else
-      (* error recovery *)
-      let parser = with_error parser SyntaxError.error1001 in
-      let (parser, missing1) = Make.missing parser (pos parser) in
-      let (parser, missing2) = Make.missing parser (pos parser) in
-      let (parser, missing3) = Make.missing parser (pos parser) in
-      let (parser, missing4) = Make.missing parser (pos parser) in
-      Make.markup_section parser missing1 missing2 missing3 missing4
+      let suffix = (pos parser) |> fst |> SourceText.file_path |> Relative_path.suffix in
+      let parser =
+        if String_utils.string_ends_with suffix ".php"
+        then with_error parser SyntaxError.error1001
+        else parser
+      in
+      parser, None
 
   let parse_script parser =
     Full_fidelity_parser_profiling.record_parse ();
@@ -2085,20 +2083,13 @@ module WithExpressionAndStatementAndTypeParser
         aux parser (declaration :: acc)
     in
     (* parse leading markup section *)
-    let file = SourceText.file_path (fst (pos parser)) in
-    let suffix = Relative_path.suffix file in
-    let no_markup = String_utils.string_ends_with suffix ".hack" in
-    let (parser, header) =
-      if no_markup
-      then Make.missing parser (pos parser)
-      else parse_leading_markup_section parser
-    in
+    let (parser, header) = parse_leading_markup_section parser in
     let (parser, declarations) = aux parser [] in
     (* include leading markup section as a head of declaration list *)
     let (parser, declarations) =
-      if no_markup
-      then make_list parser (List.rev declarations)
-      else make_list parser (header :: List.rev declarations)
+      match header with
+      | None -> make_list parser (List.rev declarations)
+      | Some header -> make_list parser (header :: List.rev declarations)
     in
     let (parser, result) = Make.script parser declarations in
     (* If we are not at the end of the file, something is wrong. *)

@@ -21,7 +21,7 @@ sig
   val env : t -> Env.t
   val sc_state : t -> SCI.t
   val parse_script : t -> t * SCI.r
-  val parse_header_only : Env.t -> Full_fidelity_source_text.t -> SCI.r
+  val parse_header_only : Env.t -> Full_fidelity_source_text.t -> SCI.r option
 end = struct
 module SCWithToken = SmartConstructorsWrappers.SyntaxKind(SCI)
 
@@ -92,14 +92,9 @@ type t = {
 }
 
 let make (env:Env.t) text =
-  let force_hh = (Env.force_hh env) || text
-    |> SourceText.file_path
-    |> Relative_path.suffix
-    |> fun suffix -> String_utils.string_ends_with suffix ".hack"
-  in
   let lexer = Lexer.make
     ~is_experimental_mode:(Env.is_experimental_mode env)
-    ~force_hh
+    ~force_hh:(Env.force_hh env)
     ~enable_xhp:(Env.enable_xhp env)
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
@@ -122,7 +117,9 @@ let parse_header_only env text =
   let { env; lexer; errors; context; sc_state } = make env text in
   let decl_parser = DeclParser.make env lexer errors context sc_state in
   let _, result = DeclParser.parse_leading_markup_section decl_parser in
-  SCWithToken.extract result
+  match result with
+  | Some result -> Some (SCWithToken.extract result)
+  | None -> None
 
 let parse_script parser =
   let decl_parser =
@@ -153,57 +150,55 @@ module Syntax = Full_fidelity_minimal_syntax
 module Parser = WithSyntax(Syntax)
 open Syntax
 
-(* Parsing only the header of the file for language and mode information *)
-let parse_mode_from_header text suffix =
-  let is_hhi = String_utils.string_ends_with suffix ".hhi" in
-  let header = Parser.parse_header_only (Env.make ()) text in
-  match syntax header with
-  | MarkupSection
-    { markup_prefix = pfx
-    ; markup_text = txt
-    ; markup_suffix =
-      { syntax = MarkupSuffix
-        { markup_suffix_less_than_question = ltq
-        ; markup_suffix_name = name
-        }
-      ; _
-      }
-    ; _
-    } ->
-      begin match syntax name with
-      | Missing -> Some FileInfo.Mphp
-      | Token t when Token.kind t = Full_fidelity_token_kind.Equal -> Some FileInfo.Mphp
-      | _ ->
-        let skip_length =
-          full_width pfx +
-          full_width txt +
-          full_width ltq +
-          leading_width name
-        in
-        let language = width name
-          |> SourceText.sub text skip_length
-          |> String.lowercase_ascii
-        in
-        if language = "php" then Some FileInfo.Mphp else
-        if is_hhi then Some FileInfo.Mdecl else
-        let skip_length = skip_length + width name in
-        let s = SourceText.sub text skip_length (trailing_width name) in
-        let s = String.trim s in
-        let l = String.length s in
-        let mode =
-          if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
-            String.trim (String.sub s 2 (l - 2))
-        in
-        let mode =
-          try List.hd (Str.split (Str.regexp " +") mode)
-          with _ -> ""
-        in
-        FileInfo.parse_mode mode
-      end
-  | _ -> Some FileInfo.Mphp
-
 let parse_mode text =
   let suffix = Relative_path.suffix (SourceText.file_path text) in
-  let has_dot_hack_extension = String_utils.string_ends_with suffix ".hack" in
-  if has_dot_hack_extension then Some FileInfo.Mstrict
-  else parse_mode_from_header text suffix
+  let is_hhi = String_utils.string_ends_with suffix ".hhi" in
+  let header = Parser.parse_header_only (Env.make ()) text in
+  match header with
+  | None -> Some FileInfo.Mstrict (* no header - assume .hack file *)
+  | Some header ->
+    begin match syntax header with
+    | MarkupSection
+      { markup_prefix = pfx
+      ; markup_text = txt
+      ; markup_suffix =
+        { syntax = MarkupSuffix
+          { markup_suffix_less_than_question = ltq
+          ; markup_suffix_name = name
+          }
+        ; _
+        }
+      ; _
+      } ->
+        begin match syntax name with
+        | Missing -> Some FileInfo.Mphp
+        | Token t when Token.kind t = Full_fidelity_token_kind.Equal -> Some FileInfo.Mphp
+        | _ ->
+          let skip_length =
+            full_width pfx +
+            full_width txt +
+            full_width ltq +
+            leading_width name
+          in
+          let language = width name
+            |> SourceText.sub text skip_length
+            |> String.lowercase_ascii
+          in
+          if language = "php" then Some FileInfo.Mphp else
+          if is_hhi then Some FileInfo.Mdecl else
+          let skip_length = skip_length + width name in
+          let s = SourceText.sub text skip_length (trailing_width name) in
+          let s = String.trim s in
+          let l = String.length s in
+          let mode =
+            if l < 2 || s.[0] <> '/' || s.[1] <> '/' then "" else
+              String.trim (String.sub s 2 (l - 2))
+          in
+          let mode =
+            try List.hd (Str.split (Str.regexp " +") mode)
+            with _ -> ""
+          in
+          FileInfo.parse_mode mode
+        end
+    | _ -> Some FileInfo.Mstrict
+  end

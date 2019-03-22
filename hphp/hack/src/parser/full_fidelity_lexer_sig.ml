@@ -22,8 +22,7 @@ module WithToken(Token : Lexable_token_sig.LexableToken_S) = struct
     val next_token_non_reserved_as_name : t -> t * Token.t
     val next_docstring_header : t -> t * Token.t * string
     val next_token_in_string : t -> string_literal_kind -> t * Token.t
-    val scan_markup: t ->
-      is_leading_section:bool ->
+    val scan_header: t ->
       (* lexer *)
       t *
       (* markup text *)

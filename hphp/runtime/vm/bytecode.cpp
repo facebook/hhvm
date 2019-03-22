@@ -5274,18 +5274,14 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
 }
 
 namespace {
-void resolveMethodImpl(
-  Cell* c1, Cell* c2, const char* meth_type, bool emitClsMeth = false) {
+void resolveMethodImpl(Cell* c1, Cell* c2) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
   ArrayData* reifiedGenerics = nullptr;
-  VArrayInit ai{2};
-  ai.append(cellAsVariant(*c2));
-  ai.append(cellAsVariant(*c1));
-  auto arr = ai.toArray();
+  auto arr = make_varray(cellAsVariant(*c2), cellAsVariant(*c1));
   auto const func = vm_decode_function(
     Variant{arr},
     vmfp(),
@@ -5299,41 +5295,60 @@ void resolveMethodImpl(
   assertx(dynamic);
   if (!func) raise_error("Failure to resolve method name \'%s\'", name->data());
   if (invName) {
-    auto const msg = folly::sformat(
-      "Unable to resolve magic call for {}()", meth_type
-    );
-    SystemLib::throwInvalidOperationExceptionObject(msg.c_str());
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Unable to resolve magic call for inst_meth()");
   }
-  if (emitClsMeth) {
-    ClsMethDataRef clsMeth(cls, const_cast<Func*>(func));
-    vmStack().popC();
-    vmStack().popC();
-    vmStack().pushClsMethNoRc(clsMeth);
+  if (thiz) {
+    assertx(isObjectType(type(c2)));
+    assertx(!(func->attrs() & AttrStatic));
+    assertx(val(c2).pobj == thiz);
   } else {
-    if (!thiz) {
-      assertx(cls);
-      arr.set(0, Variant{cls});
-    }
-    arr.set(1, Variant{func});
-    vmStack().popC();
-    vmStack().popC();
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      vmStack().pushVecNoRc(arr.detach());
-    } else {
-      vmStack().pushArrayNoRc(arr.detach());
-    }
+    assertx(cls);
+    assertx(func->attrs() & AttrStatic);
+    arr.set(0, Variant{cls});
+  }
+  arr.set(1, Variant{func});
+  vmStack().popC();
+  vmStack().popC();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushVecNoRc(arr.detach());
+  } else {
+    vmStack().pushArrayNoRc(arr.detach());
   }
 }
 }
 
 OPTBLD_INLINE void iopResolveClsMethod() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  if (!isStringType(c1->m_type)) {
-    raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
+  Cell* func = vmStack().topC();
+  Cell* cls = vmStack().indC(1);
+  if (!isStringType(func->m_type) || !isStringType(cls->m_type)) {
+    raise_error(!isStringType(func->m_type) ?
+      Strings::METHOD_NAME_MUST_BE_STRING : "class name must be a string.");
   }
-  if (!isStringType(c2->m_type)) raise_error("class name must be a string.");
-  resolveMethodImpl(c1, c2, "class_meth", true);
+
+  StringData* invName = nullptr;
+  auto const decoded_func = decode_for_clsmeth(
+    StrNR{val(cls).pstr}, StrNR{val(func).pstr}, vmfp(), invName,
+    DecodeFlags::NoWarn);
+  if (!decoded_func.first || !decoded_func.second) {
+    if (!decoded_func.first) {
+      raise_error("Failure to resolve class name \'%s\'",
+        val(cls).pstr->data());
+    } else {
+      raise_error("Failure to resolve method name \'%s\'",
+        val(func).pstr->data());
+    }
+  }
+  if (invName) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Unable to resolve magic call for class_meth()");
+  }
+
+  ClsMethDataRef clsMeth =
+    ClsMethDataRef::create(decoded_func.first, decoded_func.second);
+  vmStack().popC();
+  vmStack().popC();
+  vmStack().pushClsMethNoRc(clsMeth);
 }
 
 OPTBLD_INLINE void iopResolveObjMethod() {
@@ -5347,7 +5362,7 @@ OPTBLD_INLINE void iopResolveObjMethod() {
     raise_resolve_non_object(name->data(),
                              getDataTypeString(c2->m_type).get()->data());
   }
-  resolveMethodImpl(c1, c2, "inst_meth");
+  resolveMethodImpl(c1, c2);
 }
 
 namespace {

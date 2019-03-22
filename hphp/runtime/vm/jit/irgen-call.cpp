@@ -1188,13 +1188,17 @@ void emitResolveClsMethod(IRGS& env) {
   if (auto const baseClass =
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
     bool magicCall = false;
+    SSATmp* ctx = nullptr;
     funcTmp = lookupClsMethodKnown(env, methodName, cns(env, baseClass),
                                     baseClass, true, true, false, magicCall,
-                                    clsTmp);
+                                    ctx);
     if (magicCall) {
       gen(env, ThrowInvalidOperation, cns(env, s_resolveClsMagicCall.get()));
       return;
     }
+    // For clsmeth, we want to return the class user gave,
+    // not the class where func is associated with.
+    clsTmp = cns(env, baseClass);
   }
   if (!funcTmp) {
     auto const slowExit = makeExitSlow(env);
@@ -1203,7 +1207,6 @@ void emitResolveClsMethod(IRGS& env) {
     funcTmp = loadClsMethodUnknown(env, data, slowExit);
     clsTmp = gen(env, LdClsCached, cns(env, className));
   }
-
   assertx(clsTmp);
   assertx(funcTmp);
   auto const clsMeth = gen(env, NewClsMeth, clsTmp, funcTmp);

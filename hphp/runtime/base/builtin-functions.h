@@ -209,6 +209,13 @@ vm_decode_function(const_variant_ref function,
                                 flags);
 }
 
+std::pair<Class*, Func*> decode_for_clsmeth(
+  const String& clsName,
+  const String& funcName,
+  ActRec* ar,
+  StringData*& invName,
+  DecodeFlags flags = DecodeFlags::Warn);
+
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           bool checkRef = false);
 template<typename T>

@@ -280,34 +280,18 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   }
 }
 
-Class* Class::rescope(Class* ctx, Class::CloneAttr attrs /* = None */) {
+Class* Class::rescope(Class* ctx) {
   assertx(parent() == c_Closure::classof());
   assertx(m_invoke);
-
-  bool const is_dynamic = (attrs != CloneAttr::None);
-  assertx(IMPLIES(is_dynamic, (attrs & CloneAttr::DynamicBind)));
 
   // Look up the generated template class for this particular subclass of
   // Closure.  This class maintains the table of scoped clones of itself, and
   // if we create a new scoped clone, we need to map it there.
-  auto template_cls = is_dynamic ? preClass()->namedEntity()->clsList() : this;
+  auto template_cls = this;
   auto const invoke = template_cls->m_invoke;
-
-  assertx(IMPLIES(is_dynamic, m_scoped));
-  assertx(IMPLIES(is_dynamic, template_cls->m_scoped));
 
   auto const try_template = [&]() -> Class* {
     if (invoke->cls() != ctx) return nullptr;
-    if (attrs != CloneAttr::None) {
-      auto curattrs = CloneAttr::DynamicBind;
-      if (invoke->attrs() & AttrStatic) {
-        curattrs |= CloneAttr::Static;
-      }
-      if (invoke->hasForeignThis()) {
-        curattrs |= CloneAttr::HasForeignThis;
-      }
-      if (attrs != curattrs) return nullptr;
-    }
 
     // The first scoping will never be for `template_cls' (since it's
     // impossible to define a closure in the context of its own Closure
@@ -326,7 +310,7 @@ Class* Class::rescope(Class* ctx, Class::CloneAttr attrs /* = None */) {
   template_cls->allocExtraData();
   auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
 
-  auto const key = CloneScope { ctx, attrs };
+  auto const key = ctx;
 
   auto const try_cache = [&] {
     auto it = scopedClones.find(key);
@@ -373,16 +357,8 @@ Class* Class::rescope(Class* ctx, Class::CloneAttr attrs /* = None */) {
   if (auto cls = try_template()) return cls;
   if (auto cls = try_cache()) return cls;
 
-  auto const invokeAttrs = [&]() {
-    // passing AttrNone to Func::rescope means don't change attrs
-    if (!is_dynamic) return AttrNone;
-    if (attrs & CloneAttr::Static) {
-      return invoke->attrs() | AttrStatic;
-    }
-    return Attr(invoke->attrs() & ~AttrStatic);
-  }();
-  fermeture->m_invoke->rescope(ctx, invokeAttrs);
-  fermeture->m_invoke->setHasForeignThis(attrs & CloneAttr::HasForeignThis);
+  fermeture->m_invoke->rescope(ctx);
+  fermeture->m_invoke->setHasForeignThis(false);
   fermeture->m_scoped = true;
 
   if (ctx != nullptr &&
@@ -392,7 +368,7 @@ Class* Class::rescope(Class* ctx, Class::CloneAttr attrs /* = None */) {
     // so that we can drop all clones scoped to it at the time of destruction.
     ctx->allocExtraData();
     ctx->m_extra.raw()->m_clonesWithThisScope.push_back(
-      ScopedCloneBackref { ClassPtr(template_cls), attrs });
+      ClassPtr(template_cls));
   }
 
   auto updateClones = [&] {
@@ -569,15 +545,12 @@ void Class::releaseRefs() {
 
       // Purge all references to scoped closure clones that are scoped to
       // `this'---there is no way anyone can find them at this point.
-      for (auto const& cloneref : xtra->m_clonesWithThisScope) {
-        auto const template_cls = cloneref.template_cls;
-        auto const attrs = cloneref.ctx_attrs;
-
+      for (auto const template_cls : xtra->m_clonesWithThisScope) {
         auto const invoke = template_cls->m_invoke;
 
-        if (invoke->cls() == this && attrs == CloneAttr::None) {
+        if (invoke->cls() == this) {
           // We only hijack the `template_cls' as a clone for static rescopings
-          // (which are signified by CloneAttr::None).  To undo this, we need
+          // (which were signified by CloneAttr::None).  To undo this, we need
           // to make sure that /no/ scoping will match with that of
           // `template_cls'.  We can accomplish this by using `template_cls'
           // itself as the context.
@@ -588,7 +561,7 @@ void Class::releaseRefs() {
           // this is possible by obtaining the Closure subclass's name, in
           // which case we'll just force a fresh clone via a special-case check
           // in Class::rescope().
-          invoke->rescope(template_cls.get(), AttrNone);
+          invoke->rescope(template_cls.get());
           // We explicitly decline to reset template_cls->m_scoped.  This lets
           // us simplify some assertions in rescope(), gives us a nice sanity
           // check for debugging, and avoids having to play around too much
@@ -600,7 +573,7 @@ void Class::releaseRefs() {
           assertx(template_cls->m_extra);
           auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
 
-          auto const it = scopedClones.find(CloneScope { this, attrs });
+          auto const it = scopedClones.find(this);
           assertx(it != scopedClones.end());
           it->second->m_cachedClass =
             rds::Link<LowPtr<Class>, rds::Mode::NonLocal>{};

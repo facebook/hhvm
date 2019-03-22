@@ -1,5 +1,0 @@
-
-Deprecated: Closure::call: This function is scheduled for removal in %s/test/slow/closure/call-static.php on line 12
-
-Warning: Cannot bind an instance to a static closure in %s on line %d
-NULL

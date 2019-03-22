@@ -230,7 +230,7 @@ struct Func final {
    *
    * Used to change the Class scope of a closure method.
    */
-  void rescope(Class* ctx, Attr attrs);
+  void rescope(Class* ctx);
 
   /*
    * Free up a PreFunc for re-use as a cloned Func.

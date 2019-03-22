@@ -383,11 +383,6 @@ bool thisAvailable(ISS& env) {
 // you have to check thisAvailable() before assuming it can't be
 // null.
 folly::Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
-  // Due to `bindTo`, we can't conclude the type of $this.
-  if (RuntimeOption::EvalAllowScopeBinding && ctx.func->isClosureBody) {
-    return folly::none;
-  }
-
   if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
   return folly::none;
 }

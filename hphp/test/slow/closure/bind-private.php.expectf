@@ -1,4 +1,0 @@
-
-Deprecated: Closure::bindto: This function is scheduled for removal in %s/test/slow/closure/bind-private.php on line 24
-
-Fatal error: Call to private method Bar::instanceDo() from context 'Foo' in %s/test/slow/closure/bind-private.php on line 8

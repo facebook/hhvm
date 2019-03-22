@@ -1,6 +1,0 @@
-
-Deprecated: Closure::bindto: This function is scheduled for removal in %s/test/slow/closure/call-and-bindTo.php on line 16
-int(7)
-
-Deprecated: Closure::call: This function is scheduled for removal in %s/test/slow/closure/call-and-bindTo.php on line 21
-int(7)

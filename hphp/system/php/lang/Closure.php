@@ -44,34 +44,4 @@ class Closure {
    */
   <<__Native>>
   public final function __debuginfo(): darray;
-
-  /* @param Closure $closure
-   * @param object $newthis or null
-   * @param (object | classname | null) $newscope
-   * @return object
-   */
-  <<__Deprecated('This function is scheduled for removal')>>
-  public final static function bind(Closure $closure,
-                                    $newthis,
-                                    $newscope = "static") {
-    return $closure->bindto($newthis, $newscope);
-  }
-
-  /* @param object $newthis or null
-   * @param (object | classname | null) $newscope
-   * @return object
-   */
-  <<__Native, __Deprecated('This function is scheduled for removal')>>
-  public final function bindto(?object $newthis,
-                               mixed $newscope = "static"): ?object;
-
-  /* Binds and calls the closure. Temporarily binds the closure to newthis, and
-   * calls it with any given parameters.
-   * @param mixed $newthis - The object to bind the closure to for the duration
-   * of the call.
-   * @return mixed - Returns the return value of the closure.
-   */
-  <<__Native, __Deprecated('This function is scheduled for removal')>>
-  public final function call(mixed $newthis,
-                             ...$argv): mixed;
 }

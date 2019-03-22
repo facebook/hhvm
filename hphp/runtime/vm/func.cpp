@@ -215,12 +215,8 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   return f;
 }
 
-void Func::rescope(Class* ctx, Attr attrs) {
+void Func::rescope(Class* ctx) {
   m_cls = ctx;
-  if (attrs != AttrNone) {
-    m_attrs = attrs;
-    assertx(IMPLIES(readsCallerFrame(), isBuiltin() && !isMethod()));
-  }
   setFullName(numParams());
 }
 

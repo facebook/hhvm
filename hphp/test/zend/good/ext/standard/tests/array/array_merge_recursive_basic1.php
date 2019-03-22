@@ -21,4 +21,3 @@ var_dump( array_merge_recursive($arr1,$arr2) );
 var_dump( array_merge_recursive($arr1,$arr2,$arr3) );
 
 echo "Done";
-?>

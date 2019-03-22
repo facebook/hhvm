@@ -16,4 +16,3 @@ var_dump( range( 1, 5, TRUE ) );
 var_dump( range( 1, 5, array(1, 2) ) );
 
 echo "Done\n";
-?>

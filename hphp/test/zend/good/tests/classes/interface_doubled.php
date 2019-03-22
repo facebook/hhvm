@@ -148,5 +148,4 @@ echo $t->test('if_c');
 echo $t->test('if_d');
 echo $t->test('if_e');
 
-?>
-===DONE===
+echo "===DONE===\n";

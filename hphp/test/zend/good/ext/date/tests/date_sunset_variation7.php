@@ -29,5 +29,4 @@ foreach($inputs as $timezone => $value) {
 	 $time = mktime(8, 8, 8, 8, 12, 2008); 
 	 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"]) );
 }
-?>
-===DONE===
+echo "===DONE===\n";

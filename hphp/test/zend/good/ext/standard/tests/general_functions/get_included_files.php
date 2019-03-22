@@ -20,5 +20,4 @@ var_dump(get_included_files());
 echo "\n-- Error cases --\n";
 try { var_dump(get_included_files(true)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

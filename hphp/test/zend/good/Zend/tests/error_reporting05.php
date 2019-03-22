@@ -22,4 +22,3 @@ echo @$test->wer;
 var_dump(error_reporting());
 
 echo "Done\n";
-?>

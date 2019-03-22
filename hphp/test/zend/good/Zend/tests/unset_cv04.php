@@ -6,4 +6,3 @@ function f() {
   echo $x;
 }
 f();
-?>

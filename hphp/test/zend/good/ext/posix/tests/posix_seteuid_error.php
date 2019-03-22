@@ -10,4 +10,3 @@ try { var_dump(posix_seteuid( $uid, $extra_arg ) ); } catch (Exception $e) { ech
 try { var_dump(posix_seteuid(  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-?>

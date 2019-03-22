@@ -38,4 +38,3 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
-?>

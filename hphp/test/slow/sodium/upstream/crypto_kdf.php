@@ -36,4 +36,3 @@ var_dump($subkey1 !== $subkey3);
 var_dump($subkey2 !== $subkey3);
 var_dump($subkey1 === $subkey4);
 
-?>

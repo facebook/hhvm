@@ -37,5 +37,3 @@ if ($mb == $greek_upper) {
 }
 
 echo "Done";
-?>
-

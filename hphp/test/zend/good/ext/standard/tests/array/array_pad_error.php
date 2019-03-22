@@ -26,4 +26,3 @@ try { var_dump( array_pad($input, $pad_size) ); } catch (Exception $e) { echo "\
 try { var_dump( array_pad($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

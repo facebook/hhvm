@@ -17,4 +17,3 @@ $_SESSION["baz"] = $baz;
 $_SESSION["arr"] = $arr;
 var_dump(session_encode());
 session_destroy();
-?>

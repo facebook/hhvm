@@ -78,4 +78,3 @@ $TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) 
 	false;
 
 $IS_MYSQLND = stristr(mysql_get_client_info(), "mysqlnd");
-?>

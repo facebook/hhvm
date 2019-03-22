@@ -26,4 +26,3 @@ foreach($c as $k => $v) {
 }
 
 echo "==Done==\n";
-?>

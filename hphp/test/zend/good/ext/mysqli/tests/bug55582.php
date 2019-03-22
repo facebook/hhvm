@@ -14,4 +14,3 @@
 
 	$link->close();
 	echo "done\n";
-?>

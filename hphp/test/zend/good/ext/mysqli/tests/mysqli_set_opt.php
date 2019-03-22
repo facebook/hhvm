@@ -23,4 +23,3 @@
 	var_dump(mysqli_set_opt($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1'));
 
 	print "done!";
-?>

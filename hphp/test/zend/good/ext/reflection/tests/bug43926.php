@@ -41,4 +41,3 @@ print("Is? C ". ($rc->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($
 print("Is? D ". ($rd->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($ce instanceof D) ? 'true' : 'false') ."\n");
 print("Is? E ". ($re->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($ce instanceof E) ? 'true' : 'false') ."\n");
 
-?>

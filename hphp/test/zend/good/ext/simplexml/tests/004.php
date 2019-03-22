@@ -26,5 +26,4 @@ $elem1 = $sxe->elem1;
 $elem2 = $elem1->elem2;
 var_dump(trim((string)$elem2));
 
-?>
-===DONE===
+echo "===DONE===\n";

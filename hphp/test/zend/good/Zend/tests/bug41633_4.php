@@ -4,4 +4,3 @@ class Foo {
 	const B = "ok";
 }
 var_dump(defined("Foo::A"));
-?>

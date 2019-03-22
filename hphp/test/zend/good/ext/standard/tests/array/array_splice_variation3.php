@@ -67,5 +67,3 @@ test_splice (-4,-2);
 echo "relative offset - relative length - cut nothing\n";
 test_splice (-4,-7);
 echo "Done\n";
-?>
-

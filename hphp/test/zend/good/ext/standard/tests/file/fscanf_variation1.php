@@ -28,10 +28,7 @@ var_dump( is_array($return_value), $return_value); // return type is an array
 fclose($file_handle);
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
 unlink($filename); 
-?>

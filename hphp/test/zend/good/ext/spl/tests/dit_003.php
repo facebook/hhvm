@@ -5,5 +5,4 @@ foreach(new FilesystemIterator(__DIR__) as $ent)
 	++$count;
 }
 var_dump($count > 0);
-?>
-===DONE===
+echo "===DONE===\n";

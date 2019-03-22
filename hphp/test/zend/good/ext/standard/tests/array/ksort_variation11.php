@@ -50,4 +50,3 @@ var_dump(ksort(&$temp_array, SORT_STRING) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
-?>

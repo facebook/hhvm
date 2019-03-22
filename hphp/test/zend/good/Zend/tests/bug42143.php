@@ -14,4 +14,3 @@ var_dump(log10(-1) == log(-1));
 var_dump(log10(-1) != log10(-1));
 var_dump(is_finite(log10(-1)) == false);
 var_dump(NAN == NAN);
-?>

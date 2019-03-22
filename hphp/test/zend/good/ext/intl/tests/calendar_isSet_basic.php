@@ -8,5 +8,4 @@ $intlcal->clear(IntlCalendar::FIELD_MINUTE);
 var_dump($intlcal->isSet(IntlCalendar::FIELD_MINUTE));
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 0);
 var_dump(intlcal_is_set($intlcal, IntlCalendar::FIELD_MINUTE));
-?>
-==DONE==
+echo "==DONE==";

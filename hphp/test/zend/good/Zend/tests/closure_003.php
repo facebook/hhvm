@@ -15,4 +15,3 @@ function run () {
 run();
 
 echo "Done\n";
-?>

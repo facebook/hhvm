@@ -37,5 +37,4 @@ foreach ($classes as $class => $flags) {
 		}
 	}
 }
-?>
-===DONE===
+echo "===DONE===\n";

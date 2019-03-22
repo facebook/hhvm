@@ -19,4 +19,3 @@ foreach ($test as $src => $dst) {
 }
 
 echo "Ok\n";
-?>

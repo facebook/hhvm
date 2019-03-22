@@ -43,5 +43,4 @@ $a[4] = "f";
 foreach ($a as $k => $v) {
     echo "$k => $v\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

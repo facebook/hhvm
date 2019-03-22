@@ -14,4 +14,3 @@
 		$result[$file] = getimagesize(dirname(__FILE__)."/$file");
 	}
 	var_dump($result);
-?>

@@ -27,4 +27,3 @@ foreach ($array as $str) {
 }
 
 echo "Done\n";
-?>

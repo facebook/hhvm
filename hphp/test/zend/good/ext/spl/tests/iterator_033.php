@@ -16,6 +16,4 @@ foreach(new RecursiveIteratorIterator($it, 1) as $k=>$v)
 	var_dump($v);
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -43,4 +43,3 @@ $r = new ReflectionClass('derived');
 echo 'Number of properties: '. count($r->getStaticProperties()) . "\n";
 
 echo "Done\n";
-?>

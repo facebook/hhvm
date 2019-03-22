@@ -17,4 +17,3 @@ $variation_array = array(
 foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $var ,  $protocol ) );
 }
-?>

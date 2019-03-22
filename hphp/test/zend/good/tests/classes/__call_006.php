@@ -46,5 +46,4 @@ try {
 } catch (Exception $e) {
 	echo "Exception caught OK; continuing.\n";
 }
-?>
-==DONE==
+echo "==DONE==";

@@ -24,5 +24,4 @@ if ($reader->nodeType != XMLREADER::END_ELEMENT) {
 }
 
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";

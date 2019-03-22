@@ -11,5 +11,4 @@ var_dump(glob("$path/[aoeu]*.none"));
 var_dump(glob("$path/directly_not_exists"));
 
 var_dump($path == ini_get('open_basedir'));
-?>
-==DONE==
+echo "==DONE==";

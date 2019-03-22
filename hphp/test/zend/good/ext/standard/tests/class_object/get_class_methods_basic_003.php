@@ -36,4 +36,3 @@ echo "Accessing C from global scope:\n";
 var_dump(get_class_methods("C"));
 C::testFromC();
 echo "Done";
-?>

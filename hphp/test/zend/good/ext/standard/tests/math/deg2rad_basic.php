@@ -50,4 +50,3 @@ if (allowed_rounding_error($r3 ,6.2831853071796 )) {
 else {
 	echo "Fail\n";
 }
-?>

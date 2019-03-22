@@ -8,4 +8,3 @@
 	var_dump($driver->reconnect);
 	var_dump($driver->report_mode);
 	print "done!";
-?>

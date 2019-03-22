@@ -24,4 +24,3 @@ var_dump(ini_get("session.cookie_domain"));
 
 echo "Done";
 ob_end_flush();
-?>

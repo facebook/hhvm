@@ -82,4 +82,3 @@ foreach( $str_array as $str )  {
 }
 
 echo "Done\n";
-?>

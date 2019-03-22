@@ -18,5 +18,4 @@ var_dump( getdate($timestamp) );
 // Calling getdate() with mandatory arguments
 var_dump( getdate() );
 
-?>
-===DONE===
+echo "===DONE===\n";

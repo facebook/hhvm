@@ -30,4 +30,3 @@ var_dump(substr_count($str, "0"));
 
 echo "Done\n";	
 
-?>

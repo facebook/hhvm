@@ -5,6 +5,4 @@ var_dump($ams->getRawOffset());
 
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump(intltz_get_raw_offset($lsb));
-
-?>
-==DONE==
+echo "==DONE==";

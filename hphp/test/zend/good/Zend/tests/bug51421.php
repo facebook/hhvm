@@ -10,4 +10,3 @@ class Test extends TestInterface {
 	public function __construct() {}
 }
 
-?>

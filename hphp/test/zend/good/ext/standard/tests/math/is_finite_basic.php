@@ -18,4 +18,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = is_finite($values[$i]);
 	var_dump($res);		
 }
-?>

@@ -21,5 +21,4 @@ foreach($values as $value) {
 }
 $value = new stdclass(); //Object
 try { var_dump(preg_grep($value, $array)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-echo "Done"
-?>
+echo "Done";

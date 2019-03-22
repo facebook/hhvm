@@ -7,4 +7,3 @@ $arrays = [
 ];
 var_dump(array_map(null, ...$arrays));
 
-?>

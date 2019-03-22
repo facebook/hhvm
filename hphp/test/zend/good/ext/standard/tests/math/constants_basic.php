@@ -37,4 +37,3 @@ echo "INF= ";
 var_dump(INF);
 echo "NAN= ";
 var_dump(NAN);
-?>

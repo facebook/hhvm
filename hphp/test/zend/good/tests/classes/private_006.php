@@ -28,4 +28,3 @@ class fail extends third {
 }
 
 echo "Done\n";
-?>

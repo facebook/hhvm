@@ -18,4 +18,3 @@ var_dump(mb_regex_encoding());
 
 
 echo "Done";
-?>

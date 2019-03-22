@@ -12,5 +12,4 @@ echo "first 10 characters=".gzread($h, 10)."\n";
 gzrewind($h);
 echo "first 20 characters=".gzread($h, 20)."\n";
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

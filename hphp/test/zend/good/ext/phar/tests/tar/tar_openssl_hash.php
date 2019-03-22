@@ -5,5 +5,4 @@ try {
 	echo $e->getMessage()."\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

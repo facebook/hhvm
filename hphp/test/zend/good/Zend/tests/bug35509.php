@@ -16,4 +16,3 @@ $classtest = new mytest();
 const normalConstant = '01';
 $normalArray = array( normalConstant => 'value' );
 print_r($normalArray);
-?>

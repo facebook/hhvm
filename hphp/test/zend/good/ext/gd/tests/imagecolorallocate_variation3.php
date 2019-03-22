@@ -91,5 +91,4 @@ foreach($values as $key => $value) {
       echo "\n--$key--\n";
       try { var_dump( imagecolorallocate($im, $red, $value, $blue) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
-?>
-===DONE===
+echo "===DONE===\n";

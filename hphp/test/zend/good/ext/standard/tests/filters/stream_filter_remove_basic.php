@@ -22,12 +22,8 @@ rewind( $fp );
 fpassthru( $fp );
 fclose( $fp );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 unlink( $file );
 
-?>

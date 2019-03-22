@@ -15,4 +15,3 @@ curl_close($ch);
 // cleanup
 unlink($log_file);
 
-?>

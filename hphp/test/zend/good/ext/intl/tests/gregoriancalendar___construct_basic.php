@@ -25,5 +25,4 @@ var_dump($intlcal->getTimeZone()->getId());
 var_dump($intlcal->getLocale(1));
 
 var_dump($intlcal->getType());
-?>
-==DONE==
+echo "==DONE==";

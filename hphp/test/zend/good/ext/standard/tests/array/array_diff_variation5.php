@@ -43,4 +43,3 @@ var_dump(array_diff($arr_int_str, $arr_float_str));
 var_dump(array_diff($arr_float_str, $arr_int_str));
 
 echo "Done";
-?>

@@ -9,4 +9,3 @@ function foo( &$state ) {
 foo(&$state);
 reset(&$state);
 var_dump( key(&$state), current(&$state) );
-?>

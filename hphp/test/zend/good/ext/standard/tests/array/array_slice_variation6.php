@@ -24,5 +24,3 @@ echo "\n-- \$length is minimum integer value --\n";
 var_dump(array_slice($input, $offset, -PHP_INT_MAX));
 
 echo "Done";
-?>
-

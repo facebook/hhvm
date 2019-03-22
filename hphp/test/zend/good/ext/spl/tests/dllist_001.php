@@ -42,6 +42,4 @@ $dll->push(2);
 $dll_clone = clone $dll;
 $dll_clone->pop();
 echo count($dll)."\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

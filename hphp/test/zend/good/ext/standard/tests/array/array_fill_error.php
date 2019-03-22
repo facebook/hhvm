@@ -30,4 +30,3 @@ $num = -1;
 var_dump( array_fill($start_key,$num,$val) );
 
 echo "Done";
-?>

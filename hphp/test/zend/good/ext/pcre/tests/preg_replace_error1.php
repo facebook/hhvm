@@ -22,4 +22,3 @@ foreach($regex_array as $regex_value) {
 }
 $regex_value = new stdclass(); //Object
 var_dump(preg_replace($regex_value, $replace, $subject));
-?>

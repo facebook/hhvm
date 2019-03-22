@@ -32,4 +32,3 @@ var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Clean the temporary file
 @unlink($tempname);
-?>

@@ -19,5 +19,4 @@ var_dump( strripos($control_char_str, "\t") );
 var_dump( strripos($control_char_str, "\n", 12) );
 var_dump( strripos($control_char_str, "\t", 15) );
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -8,4 +8,3 @@ imagecolormatch($im, $im2);
 echo "ok\n";
 
 imagedestroy($im);
-?>

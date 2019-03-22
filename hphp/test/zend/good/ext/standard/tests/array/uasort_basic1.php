@@ -50,5 +50,4 @@ echo "-- Associative array with string keys --\n";
 var_dump( uasort(&$string_key_arg, 'cmp') );
 var_dump($string_key_arg);
 
-echo "Done"
-?>
+echo "Done";

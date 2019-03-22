@@ -6,4 +6,3 @@ class testme {
 }
 clone new testme();
 echo "NO LEAK\n";
-?>

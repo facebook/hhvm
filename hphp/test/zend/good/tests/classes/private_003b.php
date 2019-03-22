@@ -25,4 +25,3 @@ $t->ok();
 $t->not_ok(); // calling a private function
 
 echo "Done\n"; // shouldn't be displayed
-?>

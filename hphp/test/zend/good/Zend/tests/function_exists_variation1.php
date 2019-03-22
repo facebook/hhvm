@@ -74,6 +74,4 @@ foreach($inputs as $input) {
 }
 
 fclose($file_handle);  //closing the file handle
-
-?>
-===Done===
+echo "===Done===";

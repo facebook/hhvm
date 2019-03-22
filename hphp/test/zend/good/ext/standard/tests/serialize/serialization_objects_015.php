@@ -64,4 +64,3 @@ $obj->c = $obj;
 check($obj);
 
 echo "Done";
-?>

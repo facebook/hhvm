@@ -12,4 +12,3 @@ function test($options, $queryPart) {
 }
 
 var_dump(test($options, new Foo()));
-?>

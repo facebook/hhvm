@@ -17,6 +17,4 @@ intlcal_set_time_zone($intlcal,
 print_r($intlcal->getTimeZone()->getID());
 echo "\n";
 var_dump($intlcal->get(IntlCalendar::FIELD_ZONE_OFFSET));
-
-?>
-==DONE==
+echo "==DONE==";

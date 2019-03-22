@@ -15,4 +15,3 @@ class fail extends pass {
 }
 
 echo "Done\n"; // Shouldn't be displayed
-?>

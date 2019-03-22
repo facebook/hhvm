@@ -8,6 +8,4 @@ echo "*** Testing ezmlm_hash() : basic functionality ***\n";
 
 var_dump(ezmlm_hash(b"webmaster@somewhere.com"));
 var_dump(ezmlm_hash(b"foo@somewhere.com"));
-
-?>
-===Done===
+echo "===Done===";

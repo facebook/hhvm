@@ -37,4 +37,3 @@ $c = array_reduce($a, "rmul", 10);
 $d = array_reduce($x, "rsum", 1);
 
 var_dump($b, $c, $d);
-?>

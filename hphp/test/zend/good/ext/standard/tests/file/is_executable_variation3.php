@@ -30,4 +30,3 @@ foreach( $invalid_files as $invalid_file ) {
 }
 
 echo "Done\n";
-?>

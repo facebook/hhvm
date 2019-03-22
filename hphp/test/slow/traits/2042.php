@@ -25,4 +25,3 @@ final class e {
 
 var_dump(get_declared_user_traits());
 
-?>

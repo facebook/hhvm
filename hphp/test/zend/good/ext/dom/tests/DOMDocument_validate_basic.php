@@ -16,4 +16,3 @@ $xml = "<?xml version=\"1.0\"?>
 $dom = new DOMDocument('1.0');
 $dom->loadXML($xml);
 var_dump($dom->validate());
-?>

@@ -154,4 +154,3 @@ try { lcfirst($str_array[0], $str_array[1]); } catch (Exception $e) { echo "\n".
 try { lcfirst((int)10, (int)20); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

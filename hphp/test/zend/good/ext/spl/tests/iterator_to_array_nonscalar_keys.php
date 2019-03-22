@@ -11,4 +11,3 @@ function gen() {
 
 var_dump(iterator_to_array(gen()));
 
-?>

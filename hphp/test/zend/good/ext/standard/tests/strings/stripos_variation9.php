@@ -85,4 +85,3 @@ for($index = 0; $index < count($haystacks); $index ++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
-?>

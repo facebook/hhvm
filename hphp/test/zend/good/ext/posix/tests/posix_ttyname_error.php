@@ -11,4 +11,3 @@ try { var_dump(posix_ttyname( $fd, $extra_arg ) ); } catch (Exception $e) { echo
 try { var_dump(posix_ttyname(  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-?>

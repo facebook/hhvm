@@ -40,4 +40,3 @@ mcrypt_generic_init( $td, $key, $iv );
 $guess = bin2hex( mcrypt_generic( $td, $plain ) );
 
 echo "\n", $guess, "\n";
-?>

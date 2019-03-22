@@ -11,4 +11,3 @@ $o=new T();
 $o->f(new P);
 $o->f();
 $o->f(NULL);
-?>

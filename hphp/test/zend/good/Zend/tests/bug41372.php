@@ -4,4 +4,3 @@ end(&$Foo);
 echo key(&$Foo),"\n";
 $MagicInternalPointerResetter = $Foo;
 echo key(&$Foo),"\n";
-?>

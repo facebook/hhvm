@@ -26,5 +26,4 @@ $after = unserialize($ser);
 
 var_dump($before, $after);
 
-?>
-===DONE===
+echo "===DONE===\n";

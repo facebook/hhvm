@@ -3,4 +3,3 @@
    mcrypt_generic_init($td, 'aaaaaaaa', 'aaaaaaaa');
    mcrypt_generic_deinit($td);
    echo mcrypt_generic($td, 'aaaaaaaa');
-?>

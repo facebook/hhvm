@@ -9,4 +9,3 @@ var_dump($count);
 var_dump($foo);
 
 echo "Done\n";
-?>

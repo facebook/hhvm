@@ -16,4 +16,3 @@
     var_dump($foo->contains($a));
     var_dump($foo->contains($b));
 
-?>

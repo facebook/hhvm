@@ -21,4 +21,3 @@ var_dump(gmp_invert(1, array()));
 var_dump(gmp_invert(array(), array()));
 
 echo "Done\n";
-?>

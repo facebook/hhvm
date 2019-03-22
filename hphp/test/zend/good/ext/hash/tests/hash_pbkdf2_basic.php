@@ -18,6 +18,4 @@ echo "sha256(no length): " . hash_pbkdf2('sha256', 'password', 'salt', 1)."\n";
 echo "sha256(raw): " . bin2hex(hash_pbkdf2('sha256', 'password', 'salt', 1, 20, TRUE))."\n";
 echo "sha256(rounds): " . hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40)."\n";
 echo "sha256(rounds)(raw): " . bin2hex(hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40, TRUE))."\n";
-
-?>
-===Done===
+echo "===Done===";

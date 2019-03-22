@@ -29,4 +29,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = number_format($values[$i], 2, '&#183;' , '&thinsp;');
 	var_dump($res);
 }
-?>

@@ -26,4 +26,3 @@ var_dump( stat(22) ); // scalar argument
 try { var_dump( stat($arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // array argument
 
 echo "Done\n";
-?>

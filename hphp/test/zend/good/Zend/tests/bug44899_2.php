@@ -31,4 +31,3 @@ echo "\n";
 echo ($myclass->foo) ? 'not empty' : 'empty';
 echo "\n";
 
-?>

@@ -16,7 +16,4 @@ try { var_dump( exif_imagetype(dirname(__FILE__).'/test2.jpg', $extra_arg) ); } 
 
 echo "\n-- Testing exif_imagetype() function with an unknown file  --\n";
 var_dump( exif_imagetype(dirname(__FILE__).'/foo.jpg') );
-
-
-?>
-===Done===
+echo "===Done===";

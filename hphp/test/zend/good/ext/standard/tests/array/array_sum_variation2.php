@@ -31,5 +31,4 @@ $mixed_int_value = array(2, 5, -1, 054, 0X3E, 0, -014, -0x2A);
 echo "-- Sum of mixed integer values --\n";
 var_dump( array_sum($mixed_int_value) );
 
-echo "Done"
-?>
+echo "Done";

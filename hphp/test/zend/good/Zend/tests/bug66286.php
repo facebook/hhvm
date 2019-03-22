@@ -18,4 +18,3 @@ $objSecond = new second('321');
 
 var_dump ($objFirst == $objSecond);    
 
-?>

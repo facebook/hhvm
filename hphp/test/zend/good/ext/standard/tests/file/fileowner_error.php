@@ -17,4 +17,3 @@ try { var_dump( fileowner() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 try { var_dump( fileowner("/no/such/file", "root") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n*** Done ***\n";
-?>

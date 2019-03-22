@@ -45,4 +45,3 @@ foreach ($offsets AS $offset) {
 	}
 }	
 
-?>

@@ -40,4 +40,3 @@ $client = new TestSoapClient(NULL, $options);
 $ret = $client->dotest2("???");
 var_dump($ret);
 echo "ok\n";
-?>

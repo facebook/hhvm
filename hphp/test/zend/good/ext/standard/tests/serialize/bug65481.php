@@ -29,6 +29,4 @@ class Token implements \Serializable {
 
 $token = new Token;
 $token = serialize($token);
-
-?>
-Done
+echo "Done";

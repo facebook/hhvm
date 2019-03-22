@@ -6,4 +6,3 @@ echo zip_entry_read($entry);
 zip_entry_close($entry);
 zip_close($zip);
 
-?>

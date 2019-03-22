@@ -12,4 +12,3 @@ function RekTest ($nr) {
 }
 
 RekTest(0);
-?>

@@ -33,6 +33,4 @@ var_dump($myArray->offsetGet('one'));
 $myArray['two'] = 'two';
 var_dump($myArray['two']);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

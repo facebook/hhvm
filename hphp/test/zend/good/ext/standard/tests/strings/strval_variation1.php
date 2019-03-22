@@ -87,5 +87,4 @@ foreach($values as $value) {
       var_dump( strval($value) );
       $iterator++;
 };
-?>
-===DONE===
+echo "===DONE===\n";

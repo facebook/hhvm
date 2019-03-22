@@ -20,4 +20,3 @@ var_dump(ini_get("session.cache_limiter"));
 
 echo "Done";
 ob_end_flush();
-?>

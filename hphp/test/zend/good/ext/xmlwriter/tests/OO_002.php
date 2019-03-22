@@ -9,5 +9,4 @@ $xw->endDocument();
 
 // Force to write and empty the buffer
 echo $xw->flush(true);
-?>
-===DONE===
+echo "===DONE===\n";

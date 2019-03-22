@@ -38,4 +38,3 @@ foreach ($paths as $path) {
 
 echo "\ndone\n";
 
-?>

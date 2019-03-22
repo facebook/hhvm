@@ -20,4 +20,3 @@ $arr = Array(1,2,3);
 var_dump($null[$arr]);
 
 echo "Done\n";
-?>

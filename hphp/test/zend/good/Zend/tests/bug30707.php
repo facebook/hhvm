@@ -21,4 +21,3 @@ class C {
 
 $x = new C;
 $x->byePHP($x->plip());
-?>

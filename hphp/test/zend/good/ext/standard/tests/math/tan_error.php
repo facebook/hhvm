@@ -13,4 +13,3 @@ try { var_dump(tan($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'War
 echo "\nToo few arguments\n";
 try { var_dump(tan()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

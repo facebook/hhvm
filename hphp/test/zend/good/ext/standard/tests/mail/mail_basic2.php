@@ -23,5 +23,4 @@ var_dump( mail($to, $subject, $message, $additional_headers, $additional_paramet
 
 echo file_get_contents($outFile);
 unlink($outFile);
-?>
-===DONE===
+echo "===DONE===\n";

@@ -44,4 +44,3 @@ else {
 	echo "Fail\n";
 }
 
-?>

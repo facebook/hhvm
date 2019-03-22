@@ -9,4 +9,3 @@ session_set_save_handler(
 	array(&$arf, 'gc'));
 	
 echo "Done\n";
-?>

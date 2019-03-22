@@ -28,4 +28,3 @@ $args = array(
 
 $myinputs = filter_var_array($data, $args);
 var_dump($myinputs);
-?>

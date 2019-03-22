@@ -13,4 +13,3 @@ var_dump(filter_var("!@#$%^&*()><<>+_\"'<br><p /><li />", FILTER_SANITIZE_STRIPP
 var_dump(filter_var("", FILTER_SANITIZE_STRIPPED, FILTER_FLAG_STRIP_HIGH));
 
 echo "Done\n";
-?>

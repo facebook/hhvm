@@ -36,4 +36,3 @@ foreach($o as $k=>$v) {
 	echo "$k=>$v\n";
 }
 
-?>

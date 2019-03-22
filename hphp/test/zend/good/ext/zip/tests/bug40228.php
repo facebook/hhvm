@@ -12,4 +12,3 @@ if (is_dir($dest . '/test/empty')) {
 	echo "Failed.\n";
 }
 echo "Done\n";
-?>

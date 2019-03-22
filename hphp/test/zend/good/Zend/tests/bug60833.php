@@ -19,4 +19,3 @@ class B extends A {
 $t = new B();
 $t->testit();
 var_dump($t);
-?>

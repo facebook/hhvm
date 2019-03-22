@@ -9,6 +9,4 @@ var_dump(get_class($codepoint_it));
 $codepoint_it->setText($text);
 
 print_r(iterator_to_array($codepoint_it));
-
-?>
-==DONE==
+echo "==DONE==";

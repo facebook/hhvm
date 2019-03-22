@@ -51,4 +51,3 @@ var_dump( file_exists($filename) );  // expected: false
 var_dump( rmdir($dirname) );
 
 echo "Done\n";
-?>

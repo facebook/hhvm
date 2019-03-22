@@ -34,4 +34,3 @@ for( $XX = 0; $XX < 2000; ++$XX )
 
 gc_collect_cycles( );
 echo "ok\n";
-?>

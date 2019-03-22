@@ -52,4 +52,3 @@ try { var_dump( filectime(__FILE__, TRUE) ); } catch (Exception $e) { echo "\n".
 try { var_dump( touch(__FILE__, 10, 100, 123) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
-?>

@@ -10,4 +10,3 @@ var_dump($regex->flags);
 $regex = new MongoRegex('/foo[bar]{3}/i');
 var_dump($regex->regex);
 var_dump($regex->flags);
-?>

@@ -67,4 +67,3 @@ var_dump(bzopen($fp, "w"));
 @unlink("bz_open_002.txt");
 
 echo "Done\n";
-?>

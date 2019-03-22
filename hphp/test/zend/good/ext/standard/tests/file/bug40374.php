@@ -8,4 +8,3 @@ fclose($fp);
 unlink($file);
 
 echo "Done\n";
-?>

@@ -13,5 +13,4 @@ echo "\n-- Testing str_shuffle() function with more than expected no. of argumen
 $extra_arg = 10;
 try { var_dump( str_shuffle("Hello World", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

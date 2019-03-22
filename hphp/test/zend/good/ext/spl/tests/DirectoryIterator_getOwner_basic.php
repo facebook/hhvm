@@ -5,9 +5,6 @@ $dir = new DirectoryIterator($dirname);
 $expected = fileowner($dirname);
 $actual = $dir->getOwner();
 var_dump($expected == $actual);
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $dirname = 'DirectoryIterator_getOwner_basic';
 rmdir($dirname);
-?>

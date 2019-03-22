@@ -6,5 +6,4 @@ $result[] = array_diff_assoc($array1, $array2);
 $result[] = array_diff_assoc($array1, $array3);
 $result[] = array_diff_assoc($array2, $array3);
 $result[] = array_diff_assoc($array1, $array2, $array3);
-print_r($result)
-?>
+print_r($result);

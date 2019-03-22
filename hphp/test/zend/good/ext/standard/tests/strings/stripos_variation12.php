@@ -24,4 +24,3 @@ for($index = 0; $index < count($haystacks); $index++ ) {
   var_dump( stripos($haystacks[$index], "\0", $index) );
 }
 echo "*** Done ***";
-?>

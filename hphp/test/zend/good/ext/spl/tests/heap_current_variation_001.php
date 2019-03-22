@@ -11,4 +11,3 @@ class myHeap extends SplHeap
 $heap = new myHeap();
 var_dump($heap->current());
 
-?>

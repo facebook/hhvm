@@ -32,4 +32,3 @@ var_dump( array_unshift(&$temp_array, 222, "hello", 12.33) );
 var_dump($temp_array);
 
 echo "Done";
-?>

@@ -16,4 +16,3 @@ $obj= new stdclass;
 var_dump (array_splice(&$obj,0,1));
 echo "Done\n";
 
-?>

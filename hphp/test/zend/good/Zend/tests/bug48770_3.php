@@ -38,4 +38,3 @@ class C extends B {
 $c = new C;
 $c->func('This should work!');
 
-?>

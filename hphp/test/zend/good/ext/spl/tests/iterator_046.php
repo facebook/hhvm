@@ -36,6 +36,4 @@ $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 'bar'=>2)), Cac
 $it->fill();
 $it->show();
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

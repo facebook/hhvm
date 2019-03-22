@@ -5,4 +5,3 @@
     if (!stristr(PHP_OS, "Linux")) {
         die('skip - test validates linux error strings only.');
     }
-?>

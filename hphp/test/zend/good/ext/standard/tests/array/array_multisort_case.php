@@ -32,5 +32,4 @@ array_multisort(&$b, &$string, &$a);
 
 var_dump($a, $b);
 
-?>
-===DONE===
+echo "===DONE===\n";

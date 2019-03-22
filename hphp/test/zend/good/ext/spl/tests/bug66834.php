@@ -74,4 +74,3 @@ $object = new ArrayObjectGetSet;
 $object['foo'] = 42;
 var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($object['foo']), isset($object['sbb']), empty($object['sbb']));
 
-?>

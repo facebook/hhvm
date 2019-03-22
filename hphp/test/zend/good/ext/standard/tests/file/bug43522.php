@@ -12,4 +12,3 @@ function DoTest($fp, $delim) {
 	echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
 }
 
-?>

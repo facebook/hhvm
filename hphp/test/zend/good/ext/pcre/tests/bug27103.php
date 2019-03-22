@@ -9,4 +9,3 @@ $teststr = "\xe2\x82\xac hi there";
 iter(preg_split('//u', $teststr, -1, PREG_SPLIT_NO_EMPTY));
 preg_match_all('/./u', $teststr, &$matches);
 iter($matches[0]);
-?>

@@ -24,5 +24,4 @@ foreach ($obj as $v) {
 var_dump($obj);
 
 
-?>
-===DONE===
+echo "===DONE===\n";

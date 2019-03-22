@@ -7,5 +7,4 @@ class bogus {
 $class = new ReflectionClass('bogus');
 
 var_dump($class->getStaticProperties());
-?>
-===DONE===
+echo "===DONE===\n";

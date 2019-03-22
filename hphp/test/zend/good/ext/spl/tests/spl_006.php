@@ -8,5 +8,4 @@ var_dump(iterator_to_array($it));
 var_dump(iterator_to_array($it, false));
 var_dump(iterator_to_array($it, true));
 
-?>
-===DONE===
+echo "===DONE===\n";

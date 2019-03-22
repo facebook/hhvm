@@ -13,4 +13,3 @@ foreach ($data as $callback) {
 	readline_completion_function($callback);
 }
 
-?>

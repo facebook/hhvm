@@ -17,4 +17,3 @@ class test {
 $obj = new test();
 $obj->foo();
 var_dump(http_build_query($obj));
-?>

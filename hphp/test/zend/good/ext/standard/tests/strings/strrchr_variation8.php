@@ -26,4 +26,3 @@ foreach($needles as $needle) {
   var_dump( strrchr($empty_str, $needle) );
 }
 echo "*** Done ***";
-?>

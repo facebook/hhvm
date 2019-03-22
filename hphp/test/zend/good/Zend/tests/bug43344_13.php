@@ -4,4 +4,3 @@ function f($a=array(namespace\bar=>0)) {
 	return key($a);
 }
 echo f()."\n";
-?>

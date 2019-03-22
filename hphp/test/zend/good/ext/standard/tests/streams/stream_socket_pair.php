@@ -5,4 +5,3 @@ var_dump($sockets);
 fwrite($sockets[0], b"foo");
 var_dump(fread($sockets[1], strlen(b"foo")));
 fclose($sockets[0]);
-?>

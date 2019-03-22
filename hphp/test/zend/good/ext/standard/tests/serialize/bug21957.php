@@ -24,4 +24,3 @@ $s =  @serialize($t);
 echo $s . "\n";
 
 var_dump(unserialize($s));
-?>

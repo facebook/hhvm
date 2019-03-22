@@ -20,4 +20,3 @@ class foo {
 
 \var_dump(new \foo\foo, new \foo\bar);
 
-?>

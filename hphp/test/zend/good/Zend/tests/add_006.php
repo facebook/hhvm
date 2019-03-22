@@ -31,4 +31,3 @@ $c = $s4 + $i;
 var_dump($c);
 
 echo "Done\n";
-?>

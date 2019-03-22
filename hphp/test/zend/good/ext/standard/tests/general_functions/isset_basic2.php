@@ -34,5 +34,4 @@ var_dump(isset($var));
 var_dump(isset($var[1])); 
 var_dump(isset($var, $var[1])); 
 
-?>
-===DONE===
+echo "===DONE===\n";

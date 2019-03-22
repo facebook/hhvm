@@ -8,4 +8,3 @@ $s->seek(2);
 
 echo $s->current();
 echo $s->current();
-?>

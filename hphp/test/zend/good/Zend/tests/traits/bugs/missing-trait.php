@@ -7,4 +7,3 @@ class TraitsTest {
 
 $test = new TraitsTest();
 
-?>

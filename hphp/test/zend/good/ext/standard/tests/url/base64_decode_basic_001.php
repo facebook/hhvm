@@ -12,4 +12,3 @@ var_dump(bin2hex(base64_decode($allbase64, false)));
 var_dump(bin2hex(base64_decode($allbase64, true)));
 
 echo "Done";
-?>

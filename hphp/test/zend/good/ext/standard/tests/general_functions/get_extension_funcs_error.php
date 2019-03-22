@@ -17,5 +17,4 @@ try { var_dump(get_extension_funcs("standard", $extra_arg)); } catch (Exception 
 echo "\n-- Invalid extension name --\n";
 var_dump(get_extension_funcs("foo"));
 
-?>
-===DONE===
+echo "===DONE===\n";

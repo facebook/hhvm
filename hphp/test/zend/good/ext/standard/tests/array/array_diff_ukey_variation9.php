@@ -25,5 +25,4 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_diff_ukey($input_array, $value, 'strcasecmp') );
 }      
 
-?>
-===DONE===
+echo "===DONE===\n";

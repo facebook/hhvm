@@ -6,4 +6,3 @@
 	if (!function_exists('imagerotate')) {
 		die("skip imagerotate() not available.");
 	}
-?>

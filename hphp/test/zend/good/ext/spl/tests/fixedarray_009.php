@@ -2,4 +2,3 @@
 
 $a = new SplFixedArray('FOO');
 
-?>

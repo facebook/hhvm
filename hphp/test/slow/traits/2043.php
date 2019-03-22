@@ -20,4 +20,3 @@ var_dump($x->isTrait());
 $x = new ReflectionClass('baz');
 var_dump($x->isTrait());
 
-?>

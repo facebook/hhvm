@@ -28,5 +28,4 @@ echo "\n-- Testing array_diff_uassoc() function when \$array2 is referenced to \
 var_dump( array_diff_uassoc($array1, $array2, "strcasecmp") );
 var_dump( array_diff_uassoc($array2, $array1, "strcasecmp") );
 
-?>
-===DONE===
+echo "===DONE===\n";

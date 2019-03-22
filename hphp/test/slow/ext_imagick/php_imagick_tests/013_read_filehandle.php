@@ -15,4 +15,3 @@ unlink($file);
 
 echo 'success';
 
-?>

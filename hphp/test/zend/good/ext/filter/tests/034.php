@@ -23,4 +23,3 @@ foreach($booleans as $val=>$exp) {
     }
 }
 echo "Ok.";
-?>

@@ -13,4 +13,3 @@ class ArrayProperty {
 }
 
 var_dump( ArrayProperty::$array );
-?>

@@ -6,5 +6,4 @@ try {
 } catch(Exception $e) {
     var_dump($e->getMessage());
 }
-?>
-===DONE===
+echo "===DONE===\n";

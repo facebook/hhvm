@@ -8,5 +8,4 @@ echo "*** Testing getimagesize() : basic functionality ***\n";
 
 var_dump( getimagesize(dirname(__FILE__)."/test13pix.swf", &$info) );
 var_dump( $info );
-?>
-===DONE===
+echo "===DONE===\n";

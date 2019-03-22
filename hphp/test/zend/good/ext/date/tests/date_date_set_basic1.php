@@ -18,5 +18,4 @@ date_date_set($datetime, 2008, 02, 01);
 
 echo date_format($datetime, DATE_RFC2822) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -17,4 +17,3 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 	var_dump($result);
 }
 echo "Done\n";
-?>

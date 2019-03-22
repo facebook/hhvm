@@ -13,7 +13,5 @@ include 'files/phar_test.inc';
 include $fname;
 
 echo file_get_contents('phar://hio/a');
-
-?>
-<?php error_reporting(0); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
+error_reporting(0);
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php');

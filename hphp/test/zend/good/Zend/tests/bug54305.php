@@ -7,4 +7,3 @@ abstract class AbstractClass {
 }
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 echo $methodWithArgs++;
-?>

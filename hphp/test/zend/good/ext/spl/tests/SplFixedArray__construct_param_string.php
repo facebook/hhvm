@@ -2,4 +2,3 @@
 
 $array = new SplFixedArray( "string" );
 
-?>

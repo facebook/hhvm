@@ -18,4 +18,3 @@ $g = gmp_init("12345678");
 var_dump(gmp_intval($g));
 
 echo "Done\n";
-?>

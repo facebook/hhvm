@@ -25,4 +25,3 @@ class derived extends base {
 
 $t = new derived();
 $t->test();
-?>

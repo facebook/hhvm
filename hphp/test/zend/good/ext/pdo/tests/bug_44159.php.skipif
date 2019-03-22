@@ -5,4 +5,3 @@ try {
 } catch (Exception $e) {
 	die("skip PDP_SQLITE not available");
 }
-?>

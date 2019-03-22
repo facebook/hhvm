@@ -35,4 +35,3 @@ echo "\nCurrent Element after POP operation is: ";
 var_dump( current(&$mixed_array[1]) );
 
 echo"\nDone";
-?>

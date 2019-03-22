@@ -25,5 +25,3 @@ echo "\n-- Mandatory arguments --\n";
 var_dump( array_slice($input, $offset) );
 
 echo "Done";
-?>
-

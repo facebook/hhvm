@@ -22,4 +22,3 @@ echo date("Y-m-d H:i:s T\n", $j);
 echo date("Y-m-d H:i:s T\n", $k);
 echo date("Y-m-d H:i:s T\n", $l);
 
-?>

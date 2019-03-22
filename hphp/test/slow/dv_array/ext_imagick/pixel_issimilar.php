@@ -16,5 +16,5 @@ var_dump($pixel->isPixelSimilar('#F02B89', 0.9 / $sqrt3 / 255));
 var_dump($pixel->isPixelSimilar('#F02B89', 1.1 / $sqrt3 / 255));
 var_dump($pixel->isPixelSimilar('#F12A86', 0.9 / 255));
 var_dump($pixel->isPixelSimilar('#F12A88', 1.1 / 255));
-?>
-==DONE==
+
+echo "==DONE==\n";

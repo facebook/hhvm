@@ -4,4 +4,3 @@
   } finally {
     foo:
   }
-?>

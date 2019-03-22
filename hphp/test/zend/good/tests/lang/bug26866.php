@@ -17,4 +17,3 @@ try {
 catch (Exception $E) {
 	echo "Exception raised!\n";
 }
-?>

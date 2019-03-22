@@ -16,4 +16,3 @@ var_dump($id->getPid(), $id->__toString());
 
 $id = new MongoID("4fe342a944415e5284000000");
 var_dump($id->getPid(), $id->__toString());
-?>

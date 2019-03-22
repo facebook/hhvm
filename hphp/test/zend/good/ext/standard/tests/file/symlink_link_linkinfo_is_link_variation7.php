@@ -53,9 +53,7 @@ var_dump( link($linkname, $linkname) );
 unlink($linkname);
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
@@ -63,4 +61,3 @@ unlink($filename);
 rmdir("$dir/home/test");
 rmdir("$dir/home");
 rmdir($dir);
-?>

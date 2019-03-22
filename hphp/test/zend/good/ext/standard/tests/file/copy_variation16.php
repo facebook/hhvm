@@ -71,5 +71,3 @@ rmdir($sub_dir);
 rmdir($base_dir);
 
 echo "*** Done ***\n";
-?>
-

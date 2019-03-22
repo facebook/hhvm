@@ -50,5 +50,4 @@ $w->identify();
 $x->identify();
 $y->identify();
 $z->identify();
-?>
-===DONE===
+echo "===DONE===\n";

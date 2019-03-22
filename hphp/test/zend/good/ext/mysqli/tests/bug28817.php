@@ -22,4 +22,3 @@
 	var_dump($mysql->errno > 0);
 
 	$mysql->close();
-?>

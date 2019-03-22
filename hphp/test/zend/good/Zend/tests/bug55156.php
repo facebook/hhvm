@@ -19,5 +19,3 @@ namespace foo {
 	$x = new \ReflectionClass('foo\foo');
 	\var_dump($x->getDocComment());
 }
-
-?>

@@ -54,5 +54,4 @@ var_dump($reader->getAttribute('bar'));
 var_dump($reader->getAttribute('baz'));
 $reader->close();
 
-?>
-===DONE===
+echo "===DONE===\n";

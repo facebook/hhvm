@@ -52,4 +52,3 @@ for($i=1; $i<=10; $i++) {
 
 rmdir($file_path);
 echo "*** Done ***\n";
-?>

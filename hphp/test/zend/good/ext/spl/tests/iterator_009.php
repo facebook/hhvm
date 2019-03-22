@@ -33,6 +33,4 @@ foreach (new EmptyIteratorEx() as $v) {
 	var_dump($v);
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

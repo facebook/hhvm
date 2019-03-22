@@ -7,4 +7,3 @@
     finally {}
     foo:
   }
-?>

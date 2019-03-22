@@ -14,4 +14,3 @@
 
 	blah (new StdClass);
 	echo "ALIVE!\n";
-?>

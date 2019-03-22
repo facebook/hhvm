@@ -209,8 +209,5 @@ $ini_array = parse_ini_file($file_path."/parse_ini_file.ini", TRUE);
 print_r($ini_array);
 
 echo "*** Done **\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__)."/parse_ini_file.ini");
-?>

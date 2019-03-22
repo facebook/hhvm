@@ -13,4 +13,3 @@
 	echo "\n";
 	echo date(DATE_ISO8601, strtotime('+1 year', $tm));
 	echo "\n";
-?>

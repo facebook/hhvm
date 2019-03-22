@@ -73,6 +73,4 @@ foreach($inputs as $input) {
     try { var_dump(date_sun_info(strtotime("2006-12-12"), 31.7667, $input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     $iterator++;
 };
-
-?>
-===Done===
+echo "===Done===";

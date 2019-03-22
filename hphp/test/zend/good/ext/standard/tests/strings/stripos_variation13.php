@@ -26,4 +26,3 @@ for($index = 0; $index < count($needles); $index++ ) {
   var_dump( stripos($haystack, $needles[$index], $index) );
 }
 echo "*** Done ***";
-?>

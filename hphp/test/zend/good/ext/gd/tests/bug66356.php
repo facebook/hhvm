@@ -19,4 +19,3 @@ var_dump(imagecrop($img, array("x" => 0x7fffff00, "y" => 0, "width" => 10, "heig
 
 // bug 66815
 var_dump(imagecrop($img, array("x" => 0, "y" => 0, "width" => 65535, "height" => 65535)));
-?>

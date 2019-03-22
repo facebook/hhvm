@@ -27,4 +27,3 @@ var_dump( array_fill_keys($nullVal, $simpleStr) );
 
 fclose($fp);
 echo "Done";
-?>

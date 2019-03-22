@@ -11,4 +11,3 @@ if ($nano === true) {
     echo "Interrupted by a signal.\n";
     echo "Time remaining: $seconds seconds, $nanoseconds nanoseconds.";
 }
-?>

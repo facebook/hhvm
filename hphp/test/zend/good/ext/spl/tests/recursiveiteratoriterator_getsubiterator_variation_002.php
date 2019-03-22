@@ -7,4 +7,3 @@ $iterator->next();
 var_dump(is_null($iterator->getSubIterator()));
 $iterator->next();
 var_dump(is_null($iterator->getSubIterator()));
-?>

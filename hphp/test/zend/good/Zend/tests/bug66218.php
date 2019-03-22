@@ -6,5 +6,4 @@ foreach ($fcts as $fct) {
 		echo "$fct Ok\n";
 	}
 }
-?>
-Done
+echo "Done";

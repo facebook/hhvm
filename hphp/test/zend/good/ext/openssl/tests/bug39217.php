@@ -6,4 +6,3 @@ foreach($certs as $cert) {
 	print_r($res['serialNumber']);
 	echo "\n";
 }
-?>

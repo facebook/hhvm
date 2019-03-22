@@ -26,4 +26,3 @@ echo $clone->id . "\n";
 echo $clone->name . "\n";
 echo $clone->address . "\n";
 
-?>

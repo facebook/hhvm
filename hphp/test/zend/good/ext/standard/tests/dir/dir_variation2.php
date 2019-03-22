@@ -95,11 +95,8 @@ foreach( $unexpected_values as $unexpected_value ) {
 }
 
 echo "Done";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $directory = $file_path."/dir_variation2";
 
 rmdir($directory);
-?>

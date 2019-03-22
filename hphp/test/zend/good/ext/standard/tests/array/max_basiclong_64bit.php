@@ -20,5 +20,4 @@ $longVals = array(
    var_dump(max($arrayVals));
    var_dump(max($longVals));   
    
-?>
-===DONE===
+echo "===DONE===\n";

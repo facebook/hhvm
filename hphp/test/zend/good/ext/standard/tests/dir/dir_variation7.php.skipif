@@ -11,4 +11,3 @@ if(fileowner($filename) == 0) {
         die('skip...cannot be run as root\n');
 }
 unlink($filename);
-?>

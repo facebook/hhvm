@@ -14,4 +14,3 @@ $arr[0] = 'Value';
 
 print_r($arr);
 
-?>

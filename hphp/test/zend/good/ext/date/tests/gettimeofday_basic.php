@@ -24,5 +24,4 @@ $get_as_float = false;
 // Calling gettimeofday() with all possible arguments
 var_dump( gettimeofday($get_as_float) );
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -12,5 +12,4 @@ $p = $foo->bar->p;
 echo $p."\n";
 echo $p->__toString()."\n";
 echo $p."\n";
-?>
-==Done==
+echo "==Done==";

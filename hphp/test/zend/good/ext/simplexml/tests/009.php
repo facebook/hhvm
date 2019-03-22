@@ -28,5 +28,4 @@ foreach($sxe->children() as $name=>$val) {
 	var_dump(get_class($val));
 	var_dump(trim($val));
 }
-?>
-===DONE===
+echo "===DONE===\n";

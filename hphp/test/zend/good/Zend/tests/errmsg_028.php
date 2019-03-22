@@ -4,4 +4,3 @@ class self {
 }
 
 echo "Done\n";
-?>

@@ -43,4 +43,3 @@ foreach ($input_arrays as $input_array){
 }
 
 echo "Done";
-?>

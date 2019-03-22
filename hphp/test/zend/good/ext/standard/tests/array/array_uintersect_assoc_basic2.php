@@ -20,5 +20,4 @@ $arr4 = array("one" => "one", '3' => "three", "0.5" => 5);
 var_dump( array_uintersect_assoc($arr1, $arr2, $arr3, $arr4, $data_compare_function) );
 
 
-?>
-===DONE===
+echo "===DONE===\n";

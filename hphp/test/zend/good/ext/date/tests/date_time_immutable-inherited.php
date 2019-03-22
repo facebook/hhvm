@@ -11,4 +11,3 @@ echo "\ngetTimestamp():\n";
 $v = date_create_immutable($current);
 $x = $v->getTimestamp();
 var_dump($x);
-?>

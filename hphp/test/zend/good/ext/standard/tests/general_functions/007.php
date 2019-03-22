@@ -10,4 +10,3 @@ echo test("message digest");
 echo test("abcdefghijklmnopqrstuvwxyz");
 echo test("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 echo test("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-?>

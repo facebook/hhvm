@@ -10,4 +10,3 @@ if (strcmp($original,$unpacked)==0) echo "Strings are equal\n";
 
 $unpacked=gzinflate($packed, 1);
 if ($unpacked === false) echo "Failed (as expected)\n";
-?>

@@ -20,6 +20,4 @@ function test($name)
 test('fileobject_001a.txt');
 test('fileobject_001b.txt');
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

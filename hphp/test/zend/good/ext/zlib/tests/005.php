@@ -27,4 +27,3 @@ $data2{4} = 0;
 var_dump(gzuncompress($data2));
 
 echo "Done\n";
-?>

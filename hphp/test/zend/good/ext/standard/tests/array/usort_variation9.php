@@ -41,5 +41,4 @@ $array_arg = array(
 echo "\n-- Sorting \$array_arg containing different references --\n";
 var_dump( usort(&$array_arg, 'cmp_function') );
 var_dump($array_arg);
-?>
-===DONE===
+echo "===DONE===\n";

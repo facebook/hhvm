@@ -45,4 +45,3 @@ $baz->printFoo();
 echo "---baz2--\n";
 $baz = new baz2();
 $baz->printFoo();
-?>

@@ -19,4 +19,3 @@ imageline($image, 0, 0, 392, 392, $red);
 print_r(imagecolorat($image, 195, 0));
 print_r(imagecolorat($image, 0, 195));
 
-?>

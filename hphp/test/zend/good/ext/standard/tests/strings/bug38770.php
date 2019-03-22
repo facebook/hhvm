@@ -5,4 +5,3 @@ foreach (array('N','l') as $v) {
 }
 
 echo "Done\n";
-?>

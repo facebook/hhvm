@@ -52,10 +52,8 @@ if (is_resource($dir_handle1)) {
 if (is_resource($dir_handle2)) {
 	closedir($dir_handle2);
 }
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $parent_dir_path = dirname(__FILE__) . "/opendir_variation5";
 $sub_dir_path = $parent_dir_path."/sub_dir";
 $child_dir_path = $sub_dir_path."/child_dir";
@@ -68,4 +66,3 @@ chmod($child_dir_path, 0777);
 rmdir($child_dir_path);
 rmdir($sub_dir_path);
 rmdir($parent_dir_path);
-?>

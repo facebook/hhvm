@@ -16,5 +16,4 @@ var_dump( date_create("GMT") );
 var_dump( date_create("2005-07-14 22:30:41") );
 var_dump( date_create("2005-07-14 22:30:41 GMT") );
 
-?>
-===DONE===
+echo "===DONE===\n";

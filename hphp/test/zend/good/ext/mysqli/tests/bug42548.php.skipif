@@ -8,4 +8,3 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 if (mysqli_get_server_version($link) <= 50000) {
 	die(sprintf('skip Needs MySQL 5.0+, found version %d.', mysqli_get_server_version($link)));
 }
-?>

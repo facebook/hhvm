@@ -17,4 +17,3 @@ class C extends B {
 $o = new C();
 $o->foo();
 
-?>

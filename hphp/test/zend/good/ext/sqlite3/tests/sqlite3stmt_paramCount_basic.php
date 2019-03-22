@@ -33,4 +33,3 @@ $stmt = null;
 $result = null;
 var_dump($db->close());
 echo "Done\n";
-?>

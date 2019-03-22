@@ -43,4 +43,3 @@ EOF;
 var_dump($x);
 trigger_error("line", E_USER_ERROR);
 echo "ok\n";
-?>

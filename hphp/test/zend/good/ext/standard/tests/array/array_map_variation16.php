@@ -32,4 +32,3 @@ for($count = 0; $count < count($callback_names); $count++)
 }
 
 echo "Done";
-?>

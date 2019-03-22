@@ -9,5 +9,4 @@ function __autoload($class_name)
 
 var_dump(class_exists('autoload_derived'));
 
-?>
-===DONE===
+echo "===DONE===\n";

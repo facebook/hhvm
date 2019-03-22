@@ -14,5 +14,4 @@ use foo\bar as foo1;
 new foo1;
 new foo;
 }
-?>
-===DONE===
+echo "===DONE===\n";

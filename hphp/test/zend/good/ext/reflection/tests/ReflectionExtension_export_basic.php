@@ -8,5 +8,4 @@ ob_start();
 ReflectionExtension::export("reflection", false);
 $test = ob_get_clean();
 var_dump(empty($test));
-?>
-==DONE==
+echo "==DONE==";

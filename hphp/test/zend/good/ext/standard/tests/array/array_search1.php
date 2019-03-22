@@ -14,4 +14,3 @@ var_dump(array_search("d",$a));
 var_dump(array_search(-1,$a, true));
 
 echo "Done\n";
-?>

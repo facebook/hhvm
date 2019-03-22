@@ -17,4 +17,3 @@ foreach($parameters as $parameter)
 	echo $class->name."\n";
 }
 echo "ok\n";
-?>

@@ -8,4 +8,3 @@ $cdata = $document->createCDATASection('testfest');
 $root->appendChild($cdata);
 print $cdata->substringData(1, 6);
 
-?>

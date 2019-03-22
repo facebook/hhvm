@@ -83,4 +83,3 @@ echo "DECODE AGAIN: AS ARRAY\n";
 $arr = json_decode($arr_enc, true);
 var_dump($arr);
 
-?>

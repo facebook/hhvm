@@ -5,4 +5,3 @@
 	if (!function_exists("imagegd2")) {
 		die("skip GD2 support unavailable");
 	}
-?>

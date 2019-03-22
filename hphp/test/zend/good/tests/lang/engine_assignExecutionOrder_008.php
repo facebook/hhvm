@@ -51,4 +51,3 @@ echo $a[C::$p[0]=f()][++C::$p[0]];
 echo "\n" . 'C::$p->q=f(): ';
 C::$p = new stdclass;
 echo $a[C::$p->q=f()][++C::$p->q];
-?>

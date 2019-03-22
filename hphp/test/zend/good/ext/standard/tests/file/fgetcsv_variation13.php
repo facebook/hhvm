@@ -59,4 +59,3 @@ $loop_counter = 1;
   } //end of mode loop 
 
 echo "Done\n";
-?>

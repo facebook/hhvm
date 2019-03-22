@@ -28,9 +28,5 @@ echo "\n";
 
 
 echo "Done";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink("array_count_file");
-?>

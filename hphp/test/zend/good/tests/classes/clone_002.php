@@ -17,4 +17,3 @@ var_dump($obj);
 echo "Clown\n";
 var_dump($copy);
 echo "Done\n";
-?>

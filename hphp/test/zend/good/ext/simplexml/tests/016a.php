@@ -10,5 +10,4 @@ var_dump($people->person['name']);
 $people->person['name'] .= 'Bar';
 var_dump($people->person['name']);
 
-?>
-===DONE===
+echo "===DONE===\n";

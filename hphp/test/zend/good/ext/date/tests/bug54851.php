@@ -33,4 +33,3 @@ $date2 = new DateTime("Sat 19 November 2011");
 echo $date1->format('r'), "\n";
 echo $date2->format('r'), "\n";
 var_dump($date1->format('Y-m-d') == $date2->format('Y-m-d'));
-?>

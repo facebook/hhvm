@@ -5,4 +5,3 @@ try {
 } catch (OutOfRangeException $e) {
 	echo "Exception: ".$e->getMessage()."\n";
 }
-?>

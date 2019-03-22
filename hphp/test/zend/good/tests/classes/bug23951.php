@@ -22,4 +22,3 @@ print_r($a);
 print_r($b->a_var);
 print_r($b->b_var);
 
-?>

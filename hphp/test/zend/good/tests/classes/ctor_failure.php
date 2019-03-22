@@ -18,5 +18,4 @@ catch (Exception $e)
     echo 'Caught ' . get_class($e) . '(' . $e->getMessage() . ")\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

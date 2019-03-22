@@ -20,4 +20,3 @@ echo "\n-- Testing strtr() function with more than expected no. of arguments --"
 try { var_dump( strtr($str, $from, $to, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

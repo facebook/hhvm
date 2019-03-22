@@ -11,4 +11,3 @@ try { var_dump(openssl_seal($c, &$c, &$c, 1)); } catch (Exception $e) { echo "\n
 try { var_dump(openssl_seal($b, &$b, &$b, "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

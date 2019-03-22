@@ -53,4 +53,3 @@ if (!empty($table)) {
 	var_dump($table);
 }
 
-?>

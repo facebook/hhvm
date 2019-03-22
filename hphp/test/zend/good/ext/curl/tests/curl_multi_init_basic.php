@@ -14,5 +14,4 @@ var_dump($mh);
 
 curl_multi_close($mh);
 var_dump($mh);
-?>
-===DONE===
+echo "===DONE===\n";

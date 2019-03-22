@@ -26,4 +26,3 @@ foreach($function->getParameters() as $parameter)
 var_dump($function->getNumberOfRequiredParameters());
 var_dump($numberOfNotOptionalParameters);
 
-?>

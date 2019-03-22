@@ -23,4 +23,3 @@ namespace testing {
 	\call_user_func(array(new $class, 'prot'), 'foobar');
 }
 
-?>

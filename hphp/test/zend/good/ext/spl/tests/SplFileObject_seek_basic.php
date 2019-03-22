@@ -7,4 +7,3 @@ $s = new SplFileObject(__FILE__);
 
 $s->seek(2);
 echo $s->current();
-?>

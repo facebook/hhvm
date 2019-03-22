@@ -6,4 +6,3 @@
 	if (!function_exists("imagegif") || !function_exists("imagecreatefromgif") || !function_exists('imagecreatefromjpeg')) {
 		die("skip gif support unavailable");
 	}
-?>

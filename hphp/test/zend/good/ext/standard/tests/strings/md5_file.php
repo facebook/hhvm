@@ -68,4 +68,3 @@ unlink("md5_DataFile.txt");
 unlink("md5_EmptyFile.txt");
 
 echo "\nDone";
-?>

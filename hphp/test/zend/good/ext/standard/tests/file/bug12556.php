@@ -5,4 +5,3 @@ while($line = fgetcsv($fp, 24)) {
 	var_dump($line);
 }
 fclose($fp);
-?>

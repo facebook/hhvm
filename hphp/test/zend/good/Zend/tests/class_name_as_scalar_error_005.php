@@ -2,4 +2,3 @@
 
 $x = static::class;
 
-?>

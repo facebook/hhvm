@@ -6,5 +6,4 @@
   
   print_r($groupinfo);
   
-?>
-===DONE===
+echo "===DONE===\n";

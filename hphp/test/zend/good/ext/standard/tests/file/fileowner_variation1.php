@@ -21,11 +21,8 @@ var_dump( fileowner($file_path."/fileowner_variation1_link.tmp") );  // expected
 clearstatcache();
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/fileowner_variation1_symlink.tmp");
 unlink($file_path."/fileowner_variation1_link.tmp");
 unlink($file_path."/fileowner_variation1.tmp");
-?>

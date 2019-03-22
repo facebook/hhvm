@@ -38,5 +38,3 @@ foreach($array as $name => $input) {
 }
 
 echo "Done";
-?>
-

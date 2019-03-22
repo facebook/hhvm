@@ -137,4 +137,3 @@ try { var_dump( is_integer(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'W
 try { var_dump( is_long(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
-?>

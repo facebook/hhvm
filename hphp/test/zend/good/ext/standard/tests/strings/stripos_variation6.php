@@ -21,4 +21,3 @@ var_dump( stripos($quote_char_str, 'things') );
 var_dump( stripos($quote_char_str, 'things', 0) );
 var_dump( stripos($quote_char_str, "things", 20) );
 echo "*** Done ***";
-?>

@@ -7,5 +7,3 @@ global $var, $var, $var;
 var_dump($var);
 
 var_dump($GLOBALS['var']);
-
-?>

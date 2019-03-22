@@ -29,4 +29,3 @@ echo "\n*** Testing realpath() on a non-existent file ***\n";
 var_dump( realpath($file_path."/realpath_error.tmp") );
 
 echo "Done\n";
-?>

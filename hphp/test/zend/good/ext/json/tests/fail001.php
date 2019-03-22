@@ -34,4 +34,3 @@ foreach ($tests as $test)
     var_dump(json_decode($test, true));
 }
 
-?>

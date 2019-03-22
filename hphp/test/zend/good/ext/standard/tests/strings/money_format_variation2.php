@@ -91,6 +91,4 @@ foreach($numbers as $number) {
 
 // close the file handle
 fclose($file_handle);
-
-?>
-===Done===
+echo "===Done===";

@@ -40,4 +40,3 @@ try {
 } catch (Exception $e) {
 	echo "OK\n";
 }
-?>

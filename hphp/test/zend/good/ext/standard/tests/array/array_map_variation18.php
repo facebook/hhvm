@@ -96,4 +96,3 @@ for($count = 0; $count < count($unexpected_inputs); $count++) {
 
 fclose($fp);
 echo "Done";
-?>

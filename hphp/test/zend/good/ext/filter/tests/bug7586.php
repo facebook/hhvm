@@ -26,4 +26,3 @@ $args = array(
 );
 $out = filter_var_array($data, $args);
 var_dump($out);
-?>

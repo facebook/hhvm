@@ -27,5 +27,4 @@ if ($time >= $sleeplow) {
 } else {
 	echo "TEST FAILED\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

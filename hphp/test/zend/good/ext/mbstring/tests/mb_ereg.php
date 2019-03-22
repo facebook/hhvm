@@ -19,5 +19,3 @@
 	foreach( $encs as $enc ) {
 		do_tests( $enc );
 	}
-?>
-

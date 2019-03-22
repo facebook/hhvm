@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(sinh($longVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

@@ -46,4 +46,3 @@ unlink($dir . '/p.png');
 $im = imagecreatefromstring('');
 //random string > 8
 $im = imagecreatefromstring(' asdf jklp');
-?>

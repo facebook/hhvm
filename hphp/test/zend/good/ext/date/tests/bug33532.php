@@ -19,4 +19,3 @@ $tStamp = strtotime($input);
 print "strftime " . strftime("%r %B%e %Y %Z %z", $tStamp) . "\n";
 print "datestr  " . date ("H:i:s A F j Y T", $tStamp) . "\n";
 
-?>

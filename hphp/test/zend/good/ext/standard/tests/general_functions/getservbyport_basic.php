@@ -14,4 +14,3 @@
 	}else{
 		echo "Services file not found in expected location\n";
 	}
-?>

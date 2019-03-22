@@ -28,4 +28,3 @@ stream_filter_append($fp, 'testfilter', STREAM_FILTER_READ, 'testuserfilter');
 var_dump(fgets($fp));
 fclose($fp);
 
-?>

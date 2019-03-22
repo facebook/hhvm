@@ -40,4 +40,3 @@ if($locale_info_before ==  $locale_info_after){
 }
 
 echo "\nDone\n";
-?>

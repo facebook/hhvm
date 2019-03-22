@@ -5,4 +5,3 @@
 			echo "no crash\n";
 			break;
 	}
-?>

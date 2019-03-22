@@ -22,4 +22,3 @@ $o->falaOi();
 $o->falaTchau();
 $o->sayHello();
 $o->sayGoodbye();
-?>

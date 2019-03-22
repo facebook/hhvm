@@ -8,5 +8,4 @@ try {
 	var_dump($e->getMessage());
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

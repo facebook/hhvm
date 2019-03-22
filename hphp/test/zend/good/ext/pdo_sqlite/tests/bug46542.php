@@ -6,9 +6,5 @@ $a = new A('sqlite:' . __DIR__ . '/dummy.db');
 
 $a->truc();
 $a->TRUC();
-
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(__DIR__ . '/dummy.db');
-?>

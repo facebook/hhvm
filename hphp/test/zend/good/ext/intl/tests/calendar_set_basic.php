@@ -7,6 +7,4 @@ var_dump($intlcal->set(IntlCalendar::FIELD_DAY_OF_MONTH, 2));
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 var_dump(intlcal_set($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH, 3));
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
-
-?>
-==DONE==
+echo "==DONE==";

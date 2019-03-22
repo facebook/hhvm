@@ -22,4 +22,3 @@
   $e = fribidi_log2vis("123 456", FRIBIDI_WRTL, FRIBIDI_CHARSET_CAP_RTL);
   var_dump(array($a, $b, $c, $d, $e));
 
-?>

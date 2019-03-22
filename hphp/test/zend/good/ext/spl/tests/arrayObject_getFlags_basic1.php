@@ -13,4 +13,3 @@ var_dump($ao->getFlags());
 
 $cao = clone $ao;
 var_dump($cao->getFlags());
-?>

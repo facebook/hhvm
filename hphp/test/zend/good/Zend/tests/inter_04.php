@@ -13,4 +13,3 @@ interface c extends a, b {
 
 echo "done!\n";
 
-?>

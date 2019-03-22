@@ -6,6 +6,4 @@ var_dump($isSystemId);
 
 var_dump(IntlTimeZone::getCanonicalID('GMT +01:25', $isSystemId));
 var_dump($isSystemId);
-
-?>
-==DONE==
+echo "==DONE==";

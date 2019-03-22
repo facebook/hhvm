@@ -20,5 +20,4 @@ try { var_dump( array_product($input, $extra_arg) ); } catch (Exception $e) { ec
 echo "\n-- Testing array_product() function incorrect argument type --\n";
 var_dump( array_product("bob") );
 
-?>
-===DONE===
+echo "===DONE===\n";

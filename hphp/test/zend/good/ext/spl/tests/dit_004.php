@@ -9,5 +9,4 @@ $a->next();
 $c = clone $a;
 var_dump((string)$c == (string)$a);
 var_dump($a->key(), $c->key());
-?>
-===DONE===
+echo "===DONE===\n";

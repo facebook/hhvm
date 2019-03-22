@@ -34,4 +34,3 @@ var_dump(iconv_get_encoding("all"));
 
 
 echo "Done";
-?>

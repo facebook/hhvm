@@ -18,4 +18,3 @@ $m['data3'] = 300;
 $m['data4'] = 400;
 
 var_dump($r->getStaticProperties());
-?>

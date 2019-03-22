@@ -17,4 +17,3 @@ class D extends C {
 }
 $x = new D();
 $x->foo();
-?>

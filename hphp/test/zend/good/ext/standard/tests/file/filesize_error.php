@@ -19,4 +19,3 @@ try { var_dump( filesize(__FILE__, 2000) ); } catch (Exception $e) { echo "\n".'
 echo "\n";
 
 echo "*** Done ***\n";
-?>

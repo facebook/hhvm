@@ -21,4 +21,3 @@ $envelope = <<<EOF
 EOF;
 $server->handle($envelope);
 echo "ok\n";
-?>

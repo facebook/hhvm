@@ -17,5 +17,4 @@ var_dump(opendir($path));
 echo "\n-- Pass a non-existent relative path: --\n";
 chdir(dirname(__FILE__));
 var_dump(opendir('idonotexist'));
-?>
-===DONE===
+echo "===DONE===\n";

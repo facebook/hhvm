@@ -23,5 +23,4 @@ var_dump(rtrim($hello, "a.."));
 var_dump(rtrim($hello, "z..a"));
 var_dump(rtrim($hello, "a..b..c"));
 
-?>
-===DONE===
+echo "===DONE===\n";

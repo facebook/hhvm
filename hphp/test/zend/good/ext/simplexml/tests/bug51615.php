@@ -10,4 +10,3 @@ foreach ($html->body->span as $obj) {
 	var_dump((string)$obj->title);
 }
 
-?>

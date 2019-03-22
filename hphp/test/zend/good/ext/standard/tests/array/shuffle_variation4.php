@@ -60,4 +60,3 @@ foreach($array_arg as $arr) {
 }
 
 echo "Done";
-?>

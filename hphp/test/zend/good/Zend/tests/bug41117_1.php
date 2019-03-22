@@ -5,4 +5,3 @@ class foo {
   }
 }
 $obj = new foo("Hello world");
-?>

@@ -25,13 +25,9 @@ mkdir($dir_name);
 var_dump( fileowner($dir_name) );
 
 echo "*** Done ***\n";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_name = $file_path."/fileowner_basic.tmp";
 $dir_name = $file_path."/fileowner_basic";
 unlink($file_name);
 rmdir($dir_name);
-?>

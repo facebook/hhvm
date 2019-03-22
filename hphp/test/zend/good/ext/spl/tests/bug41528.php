@@ -14,4 +14,3 @@ $classOne = unserialize(serialize($classOne));
 
 var_dump($classOne);
 var_dump($classOne->a);
-?>

@@ -25,4 +25,3 @@ class Foo {
 $f = new Foo;
 $f->test();
  
-?>

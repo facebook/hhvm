@@ -24,4 +24,3 @@ class D extends B {
 
 new D;
 
-?>

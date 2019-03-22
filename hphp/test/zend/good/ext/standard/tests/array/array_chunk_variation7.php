@@ -30,4 +30,3 @@ var_dump( array_chunk($input_array, $size, true) );
 var_dump( array_chunk($input_array, $size, false) );
 
 echo "Done";
-?>

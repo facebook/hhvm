@@ -7,4 +7,3 @@ class MY_CLASS {
  }
 $r = new ReflectionClass('MY_CLASS');
 var_dump($r->getTraitNames());
-?>

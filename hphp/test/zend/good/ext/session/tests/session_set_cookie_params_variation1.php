@@ -24,4 +24,3 @@ var_dump(ini_get("session.cookie_lifetime"));
 
 echo "Done";
 ob_end_flush();
-?>

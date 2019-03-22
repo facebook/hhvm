@@ -23,4 +23,3 @@ var_dump( array_pad($input, $pad_size, $binary) );  // positive 'pad_size'
 var_dump( array_pad($input, -$pad_size, $binary) );  // negative 'pad_size'
 
 echo "Done";
-?>

@@ -9,9 +9,5 @@ $fo->setFlags(SplFileObject::READ_CSV);
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);
 
 var_dump($fo->getFlags());
-
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink('SplFileObject_getflags_error001.csv');
-?>

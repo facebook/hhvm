@@ -8,4 +8,3 @@ $b[] = 'three';
 
 var_dump($a === $b);
 
-?>

@@ -50,4 +50,3 @@ $n += test_me("bug #16473", 2, "ax", "bcx");
 
 echo ($n==0)?"all passed\n":"$n failed\n";
 
-?>

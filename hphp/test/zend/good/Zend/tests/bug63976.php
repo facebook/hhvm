@@ -12,4 +12,3 @@ if (1) {
 }
 $bar = new Bar();
 var_dump($bar->table);
-?>

@@ -24,4 +24,3 @@ for ($base = 2; $base < 11; $base++) {
     }
     print $count . "\n";
 }
-?>

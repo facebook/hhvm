@@ -20,4 +20,3 @@ $errno = -999;
 echo gettype( posix_strerror($errno) )."\n";
 
 echo "Done";
-?>

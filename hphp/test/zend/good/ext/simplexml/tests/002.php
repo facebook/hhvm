@@ -23,5 +23,4 @@ $copy = clone $sxe;
 
 var_dump($copy);
 
-?>
-===DONE===
+echo "===DONE===\n";

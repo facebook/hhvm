@@ -18,4 +18,3 @@ class bar {
 $x = new bar;
 var_dump($x->test());
 
-?>

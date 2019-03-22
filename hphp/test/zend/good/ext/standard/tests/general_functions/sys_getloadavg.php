@@ -4,4 +4,3 @@ try { var_dump(sys_getloadavg("")); } catch (Exception $e) { echo "\n".'Warning:
 var_dump(sys_getloadavg());
 
 echo "Done\n";
-?>

@@ -12,5 +12,4 @@ foreach ($strVals as $strVal) {
    var_dump($strVal);
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

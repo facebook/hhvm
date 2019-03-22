@@ -30,4 +30,3 @@ class test {
 test::test1(1);
 
 echo "Done\n";
-?>

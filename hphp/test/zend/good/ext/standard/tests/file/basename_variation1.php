@@ -43,4 +43,3 @@ foreach ($prefixes as $prefix) {
 
 echo "\ndone\n";
 
-?>

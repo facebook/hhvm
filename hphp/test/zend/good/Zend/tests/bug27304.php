@@ -12,5 +12,4 @@ $b = new Staticexample();
 Staticexample::test();
 $b->test();
         
-?>
-===DONE===
+echo "===DONE===\n";

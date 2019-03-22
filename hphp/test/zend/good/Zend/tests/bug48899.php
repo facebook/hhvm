@@ -15,4 +15,3 @@ $child = new ChildClass();
 $child->testIsCallable();
 $child->testIsCallable2();
 
-?>

@@ -23,4 +23,3 @@ echo "-- With more arguments --\n";
 var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
-?>

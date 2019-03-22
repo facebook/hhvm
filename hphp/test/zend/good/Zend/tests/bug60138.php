@@ -8,4 +8,3 @@ $iterator = new RecursiveIteratorIterator(
 );
 foreach($iterator as $file);
 echo "ok\n";
-?>

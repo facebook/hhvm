@@ -21,4 +21,3 @@ include 'fixtures/folder4/subfolder1/fixture.php';
 include 'fixtures/folder4/subfolder2/fixture.php';
 include 'fixtures/folder4/subfolder3/fixture.php';
 include 'fixtures/folder4/subfolder4/fixture.php';
-?>

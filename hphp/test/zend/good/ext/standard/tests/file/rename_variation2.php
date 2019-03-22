@@ -36,10 +36,7 @@ var_dump( file_exists($dest_dir."/rename_variation2_soft_link2.tmp") ); // expec
 unlink($dest_dir."/rename_variation2_soft_link2.tmp");
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/rename_variation2.phpt2.tmp");
 rmdir($file_path."/rename_variation2_dir");
-?>

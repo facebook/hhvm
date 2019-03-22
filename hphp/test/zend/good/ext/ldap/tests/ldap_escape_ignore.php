@@ -5,4 +5,3 @@ $ignore = 'ao';
 
 var_dump(ldap_escape($subject, $ignore));
 
-?>

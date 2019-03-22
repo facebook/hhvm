@@ -82,5 +82,4 @@ foreach($inputs as $input) {
   $iterator++;
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

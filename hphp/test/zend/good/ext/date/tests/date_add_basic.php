@@ -26,5 +26,4 @@ foreach($intervals as $interval) {
 	var_dump( $d->format($format) );
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

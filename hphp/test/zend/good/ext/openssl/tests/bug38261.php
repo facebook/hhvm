@@ -14,4 +14,3 @@ try { var_dump(openssl_x509_parse()); } catch (Exception $e) { echo "\n".'Warnin
 var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse(new stdClass));
 
-?>

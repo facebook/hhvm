@@ -23,4 +23,3 @@ $result->finalize();
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
-?>

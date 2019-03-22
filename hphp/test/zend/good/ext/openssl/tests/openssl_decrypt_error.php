@@ -17,4 +17,3 @@ var_dump(openssl_decrypt($wrong, $wrong, $wrong));
 try { var_dump(openssl_decrypt(array(), $method, $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(openssl_decrypt($encrypted, array(), $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(openssl_decrypt($encrypted, $method, array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>

@@ -14,4 +14,3 @@ if ($im) {
         imagedestroy($im);
 }
 
-?>

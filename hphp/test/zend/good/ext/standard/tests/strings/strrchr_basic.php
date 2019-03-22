@@ -33,4 +33,3 @@ var_dump( strrchr("Hello, World", "ooo") );
 
 var_dump( strrchr("Hello, World", "Zzzz") ); //non-existent needle in haystack
 echo "*** Done ***";
-?>

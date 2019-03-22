@@ -17,5 +17,4 @@ var_dump(property_exists("AutoTest", "bob"));
 echo "\ntesting __get magic method\n";
 var_dump(property_exists("AutoTest", "foo"));
 
-?>
-===DONE===
+echo "===DONE===\n";

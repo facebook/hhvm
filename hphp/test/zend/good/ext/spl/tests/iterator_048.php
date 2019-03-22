@@ -22,6 +22,4 @@ $it = new MyRecursiveRegexIterator($ar, '/Bar/');
 
 $it->show();
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

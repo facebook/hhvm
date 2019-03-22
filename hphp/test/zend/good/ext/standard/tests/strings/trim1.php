@@ -55,4 +55,3 @@ echo "\n*** Testing with heredoc string ***\n";
 var_dump( trim($str, "us\ning") );
 
 echo "\nDone";
-?>

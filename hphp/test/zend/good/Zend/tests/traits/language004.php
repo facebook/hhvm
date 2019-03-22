@@ -23,4 +23,3 @@ class MyHelloWorld {
 $o = new MyHelloWorld();
 $o->saySomething();
 $o->sayWorld();
-?>

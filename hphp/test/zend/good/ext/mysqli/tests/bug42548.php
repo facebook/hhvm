@@ -34,9 +34,7 @@ if ($mysqli->multi_query("CALL test_bug42548_procedure_1();"))
 $mysqli->query("DROP PROCEDURE test_bug42548_procedure_1") or die($mysqli->error);
 $mysqli->close();
 print "done!";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 require_once("connect.inc");
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
@@ -44,4 +42,3 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 mysqli_query($link, "DROP PROCEDURE IF EXISTS test_bug42548_procedure_1");
 
 mysqli_close($link);
-?>

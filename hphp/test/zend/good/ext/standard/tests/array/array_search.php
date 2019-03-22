@@ -14,4 +14,3 @@ var_dump(array_search('e', $arr4));
 var_dump(array_search('d', $arr4));
 
 echo "Done\n";
-?>

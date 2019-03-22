@@ -13,5 +13,4 @@ echo "*** Testing chdir() : error conditions ***\n";
 $directory = __FILE__ . '/idonotexist';
 
 var_dump(chdir($directory));
-?>
-===DONE===
+echo "===DONE===\n";

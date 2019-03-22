@@ -39,4 +39,3 @@ if ($data == substr($original, strlen($original) / 2)) {
 
 gzclose($fp);
 unlink($filename);
-?>

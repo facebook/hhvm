@@ -19,5 +19,4 @@ $d = new DateTimeZoneExt("America/Los_Angeles");
 echo "\n-- Invoke __toString --\n";
 echo $d . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

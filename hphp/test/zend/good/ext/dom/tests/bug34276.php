@@ -27,4 +27,3 @@ var_dump($foo->getAttributeNS('http://www.example.com/ns/fubar', 'attrb'));
 var_dump($foo->getAttributeNS('http://www.example.com/ns/foo', 'attrc'));
 
 print $dom->saveXML();
-?>

@@ -12,5 +12,4 @@
   var_dump($myInstance->myConst);
   
   echo "\nClass constant not visible in object var_dump.\n";
-  var_dump($myInstance)
-?>
+  var_dump($myInstance);

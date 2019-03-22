@@ -9,4 +9,3 @@ A;
 
 var_dump(strlen($a) == 12);
 
-?>

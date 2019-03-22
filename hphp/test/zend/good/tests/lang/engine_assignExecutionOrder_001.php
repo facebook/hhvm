@@ -43,4 +43,3 @@ echo "\n\nOrder with static string property assignment:\n";
 C::$string[getOffset()] = newChar();
 var_dump(C::$string);
 
-?>

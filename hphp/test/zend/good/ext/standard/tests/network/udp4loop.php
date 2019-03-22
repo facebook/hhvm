@@ -22,4 +22,3 @@
 
 	fclose($client);
 	fclose($server);
-?>

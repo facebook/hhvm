@@ -8,4 +8,3 @@
   $h->extract();
   echo "Checking after extract: ";
   var_dump($h->isEmpty())."\n";
-?>

@@ -6,5 +6,4 @@ __HALT_COMPILER();
 namespace unprocessed {
 echo "should not echo\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

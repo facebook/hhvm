@@ -8,4 +8,3 @@ var_dump($doc->strictErrorChecking);
 $doc->strictErrorChecking = false;
 var_dump($doc->strictErrorChecking);
 
-?>

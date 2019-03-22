@@ -49,4 +49,3 @@ for ( $i = 0; $i < COUNT; $i++)
 }
 
 echo $ok, "\n";
-?>

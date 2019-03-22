@@ -22,4 +22,3 @@ var_dump($decoded['Subject']);
 var_dump($decoded['X-Foo']);
 var_dump($decoded['X-Bar']);
 var_dump($decoded['To']);
-?>

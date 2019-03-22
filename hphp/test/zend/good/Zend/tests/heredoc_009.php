@@ -22,4 +22,3 @@ ENDOFHEREDOC;
 
 print "{$x}";
 
-?>

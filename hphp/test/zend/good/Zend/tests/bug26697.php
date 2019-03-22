@@ -9,5 +9,4 @@ function __autoload($name)
 
 var_dump(class_exists('NotExistingClass'));
 
-?>
-===DONE===
+echo "===DONE===\n";

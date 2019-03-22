@@ -56,5 +56,4 @@ $defined_functions = array (
  */
 check_iscallable($defined_functions);
 
-?>
-===DONE===
+echo "===DONE===\n";

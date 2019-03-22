@@ -17,4 +17,3 @@ foreach($input as $value) {
 $value = new stdclass(); //Object
 try { var_dump(preg_grep($regex, $value)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
-?>

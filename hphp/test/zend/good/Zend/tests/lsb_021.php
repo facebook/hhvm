@@ -31,4 +31,3 @@ class C extends B {
 C::testForward();
 C::testNoForward();
 
-?>

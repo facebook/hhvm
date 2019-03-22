@@ -31,4 +31,3 @@ if ($c['red']!=0 || $c['green']!=0 || $c['blue']!=0 || $c['alpha']!=100) {
 echo 'copy palette 1 color and alpha: ';
 echo $failed ? 'failed' : 'ok';
 echo "\n";
-?>

@@ -57,4 +57,3 @@ try {
 } catch (SodiumException $ex) {
 	var_dump(true);
 }
-?>

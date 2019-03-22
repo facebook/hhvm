@@ -10,4 +10,3 @@ var_dump($db->lastInsertId());
 
 $db->query('DROP TABLE foo');
 
-?>

@@ -6,4 +6,3 @@ $nodes = $doc->getElementsByTagName('title');
 foreach($nodes as $node) {
 	var_dump($node->getNodePath());
 }
-?>

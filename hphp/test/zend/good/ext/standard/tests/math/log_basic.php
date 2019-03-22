@@ -23,5 +23,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = log($values[$i], 4);
 	var_dump($res);
 }
-?>
-

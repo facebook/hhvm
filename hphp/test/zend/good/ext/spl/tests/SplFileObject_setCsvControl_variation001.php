@@ -13,7 +13,4 @@ foreach ($s as $row) {
     list($fruit, $quantity) = $row;
     echo "$fruit : $quantity\n";
 }
-?>
-<?php
 unlink('SplFileObject_setCsvControl_variation001.csv');
-?>

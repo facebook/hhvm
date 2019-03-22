@@ -29,4 +29,3 @@ $a = new MyClass2;
 $a->sayHello();
 $a = new MyClass3;
 $a->sayHi();
-?>

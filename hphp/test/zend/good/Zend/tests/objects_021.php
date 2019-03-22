@@ -31,4 +31,3 @@ x()
 
 var_dump(test::$i);
 
-?>

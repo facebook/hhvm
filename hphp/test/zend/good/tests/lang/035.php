@@ -28,4 +28,3 @@ try {
 	print "There was an exception: " . $exception->getException();
 	print "\n";
 }
-?>

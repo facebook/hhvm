@@ -11,4 +11,3 @@ var_dump($bar);
 
 $baz = (float)$foo;
 var_dump($baz);
-?>

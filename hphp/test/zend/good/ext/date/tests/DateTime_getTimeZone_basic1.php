@@ -20,5 +20,4 @@ $la_time = new DateTimeZone("America/Los_Angeles");
 $object->setTimeZone($la_time);
 var_dump( $object->getTimeZone()->getName() ); 
 
-?>
-===DONE===
+echo "===DONE===\n";

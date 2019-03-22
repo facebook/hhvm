@@ -9,4 +9,3 @@ $xsd = file_get_contents(dirname(__FILE__)."/book.xsd");
 $result = $doc->schemaValidateSource($xsd);
 var_dump($result);
 
-?>

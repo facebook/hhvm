@@ -30,4 +30,3 @@ list($a, $b, $c) = $a;
 
 var_dump($a, $b, $c);
 
-?>

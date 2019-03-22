@@ -13,4 +13,3 @@ $extra_arg = 10;
 try { var_dump( posix_getpid($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

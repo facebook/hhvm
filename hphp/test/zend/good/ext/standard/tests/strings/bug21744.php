@@ -6,4 +6,3 @@ HERE;
 
 print strip_tags($test, '');
 print strip_tags($test, '<a>');
-?>

@@ -10,4 +10,3 @@ if (is_dir('./a')) {
 }
 chdir($old_dir_path);
 echo "OK";
-?>

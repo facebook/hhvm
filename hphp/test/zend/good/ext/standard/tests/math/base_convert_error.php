@@ -21,4 +21,3 @@ base_convert(1234, 10, 37);
 echo "Incorrect input\n";
 base_convert(new classA(), 8, 10);
 
-?>

@@ -10,4 +10,3 @@ foreach ($root->child as $child) {
 	echo "$child ";
 }
 echo "\n---Done---\n";
-?>

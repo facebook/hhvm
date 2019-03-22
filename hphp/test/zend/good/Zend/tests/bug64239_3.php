@@ -22,4 +22,3 @@ $a->t2method();
 $c = new C();
 $c->Bmethod();
 $c->t2method();
-?>

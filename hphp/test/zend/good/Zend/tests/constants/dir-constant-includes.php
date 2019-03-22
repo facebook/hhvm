@@ -5,4 +5,3 @@ include 'fixtures/folder1/fixture.php';
 include 'fixtures/folder2/fixture.php';
 include 'fixtures/folder3/fixture.php';
 include 'fixtures/folder4/fixture.php';
-?>

@@ -20,4 +20,3 @@ echo "because implicit flushing affects only the top level buffer, not user buff
 ob_end_clean();
 
 echo "Done";
-?>

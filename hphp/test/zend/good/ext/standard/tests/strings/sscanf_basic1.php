@@ -23,5 +23,4 @@ echo "\n-- Try sccanf() WITH optional args --\n";
 $res = sscanf($str, $format, &$part, &$number, &$stock);
 var_dump($res, $part, $number, $stock);
 
-?>
-===DONE===
+echo "===DONE===\n";

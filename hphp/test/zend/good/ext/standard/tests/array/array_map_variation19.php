@@ -21,4 +21,3 @@ var_dump($arr1);
 $ref  =& $arr2[0];
 array_map("callback", $arr2);
 var_dump($arr2);
-?>

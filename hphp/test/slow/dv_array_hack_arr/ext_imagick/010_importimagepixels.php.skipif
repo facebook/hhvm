@@ -4,4 +4,3 @@ if (!method_exists("imagick", "importimagepixels")) {
   die("skip imagick::importImagePixels not available");
 }
 
-?>

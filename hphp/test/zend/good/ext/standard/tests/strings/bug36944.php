@@ -9,4 +9,3 @@ var_dump(strncasecmp("test ", "E", 10));
 var_dump(strncasecmp("test ", "E", 0));
 
 echo "Done\n";
-?>

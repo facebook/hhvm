@@ -69,5 +69,4 @@ $heredoc_values = array(0 => $empty_heredoc,   1 => $simple_heredoc1,
 echo "\n-- Sorting Heredoc String values --\n";
 var_dump( usort(&$heredoc_values, 'cmp_function') );
 var_dump($heredoc_values);
-?>
-===DONE===
+echo "===DONE===\n";

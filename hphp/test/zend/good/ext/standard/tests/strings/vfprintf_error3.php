@@ -27,12 +27,8 @@ rewind( $fp );
 // Close handle
 fclose( $fp );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = 'vfprintf_error3.phpt.txt';
 unlink( $file );
 
-?>

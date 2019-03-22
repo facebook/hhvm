@@ -23,6 +23,4 @@ $rbbi->setText('sdfkjsdf88á.... ,;');;
 do {
 	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
 } while ($rbbi->next() != IntlBreakIterator::DONE);
-
-?>
-==DONE==
+echo "==DONE==";

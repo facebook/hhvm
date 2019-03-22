@@ -17,4 +17,3 @@ to_string(&$x);
 var_dump($x);
 to_bool(&$x);
 var_dump($x);
-?>

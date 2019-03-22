@@ -17,4 +17,3 @@ $encoding = 'unknown-encoding';
 var_dump( iconv_strpos($haystack, $needle, $offset, $encoding) );
 
 echo "Done";
-?>

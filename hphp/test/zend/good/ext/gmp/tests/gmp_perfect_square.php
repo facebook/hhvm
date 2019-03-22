@@ -20,4 +20,3 @@ try { var_dump(gmp_perfect_square()); } catch (Exception $e) { echo "\n".'Warnin
 var_dump(gmp_perfect_square(array()));
 
 echo "Done\n";
-?>

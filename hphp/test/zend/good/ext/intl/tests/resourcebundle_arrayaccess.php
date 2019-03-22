@@ -20,4 +20,3 @@
 
 	$t = $r['nonexisting'];
 	echo debug( $t );
-?>

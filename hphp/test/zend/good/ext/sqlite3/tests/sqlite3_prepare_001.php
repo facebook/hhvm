@@ -9,4 +9,3 @@ test(&$foo);
 
 echo "done\n";
 
-?>

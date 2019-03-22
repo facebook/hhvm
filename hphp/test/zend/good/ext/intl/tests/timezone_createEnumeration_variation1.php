@@ -7,6 +7,4 @@ var_dump($count > 20);
 
 $tz->rewind();
 var_dump(in_array('Europe/Amsterdam', iterator_to_array($tz)));
-
-?>
-==DONE==
+echo "==DONE==";

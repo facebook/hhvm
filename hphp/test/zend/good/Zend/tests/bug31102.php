@@ -34,6 +34,4 @@ while(ZendGoodZendTestsBug31102::$test++ < 5)
 		echo "Caught: " . $e->getMessage() . "\n";
 	}
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

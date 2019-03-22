@@ -41,4 +41,3 @@ print("printf test 30:"); printf("%0\$s", 1); print("x\n");
 vprintf("vprintf test 1:%2\$-2d %1\$2d\n", array(1, 2));
 
 
-?>

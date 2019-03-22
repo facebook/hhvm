@@ -12,4 +12,3 @@ $x = 'foo';
 
 var_dump($foo, $x);
 
-?>

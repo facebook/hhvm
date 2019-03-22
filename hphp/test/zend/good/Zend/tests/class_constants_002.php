@@ -19,4 +19,3 @@ bar(10);
 bar();
 
 echo "Done\n";
-?>

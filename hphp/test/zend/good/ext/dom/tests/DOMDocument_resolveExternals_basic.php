@@ -31,4 +31,3 @@ var_dump( $test );
  */
 
 echo "Done";
-?>

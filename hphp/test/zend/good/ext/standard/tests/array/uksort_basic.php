@@ -14,4 +14,3 @@ uasort(&$a, "cmp");
 foreach($a as $key => $value) {
     echo "$key: $value\n";
 }
-?>

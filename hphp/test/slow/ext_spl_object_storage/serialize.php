@@ -14,4 +14,3 @@ $s2 = new SplObjectStorage();
 $s2->unserialize($serialized);
 
 var_dump($s == $s2);
-?>

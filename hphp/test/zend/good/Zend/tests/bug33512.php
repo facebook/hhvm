@@ -53,4 +53,3 @@ class TheObj {
 	//but, these variables are still available??? eventhough they're "unset"-ed
 	print $SomeObj->Virtual1."\n";
 	print $SomeObj->{'Virtual'.(3)}."\n";
-?>

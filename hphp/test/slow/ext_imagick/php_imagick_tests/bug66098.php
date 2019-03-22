@@ -7,4 +7,3 @@ echo $img->foobar;
 
 echo "OK";
 
-?>

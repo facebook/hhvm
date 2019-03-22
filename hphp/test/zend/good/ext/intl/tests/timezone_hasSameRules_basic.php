@@ -13,6 +13,4 @@ var_dump($lsb->hasSameRules($prt));
 
 echo "\nEurope/Lisbon has same rules as Atlantic/Azores:\n";
 var_dump(intltz_has_same_rules($lsb, $azo));
-
-?>
-==DONE==
+echo "==DONE==";

@@ -24,5 +24,3 @@ echo "Referenced:\n";
 var_dump($new_input);
 
 echo "Done";
-?>
-

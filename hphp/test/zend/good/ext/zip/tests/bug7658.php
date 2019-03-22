@@ -41,4 +41,3 @@ $ar = array_diff($found, $expect);
 var_dump($ar);
 unset($zip);
 unlink($file);
-?>

@@ -7,4 +7,3 @@ function foo() {
 foo() = 1;
 
 echo "Done\n";
-?>

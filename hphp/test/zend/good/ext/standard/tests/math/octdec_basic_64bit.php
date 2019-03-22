@@ -24,5 +24,4 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = octdec($values[$i]);
 	var_dump($res);
 }
-?>
-===Done===
+echo "===Done===";

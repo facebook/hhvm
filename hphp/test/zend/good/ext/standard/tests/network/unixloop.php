@@ -30,4 +30,3 @@
 	fclose($socket);
 	fclose($server);
 	unlink("/tmp/$uniqid.sock");
-?>

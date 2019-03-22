@@ -18,4 +18,3 @@ $merged = array_merge_recursive($array1, $array2);
 
 var_dump($array1, $array2);
 
-?>

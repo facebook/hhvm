@@ -42,4 +42,3 @@ function testAccess($c, $ao) {
 	echo "  - After:\n";
 	var_dump($ao, $c);
 }
-?>

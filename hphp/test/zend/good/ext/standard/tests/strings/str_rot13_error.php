@@ -12,5 +12,4 @@ echo "\n\n-- Testing str_rot13() function with more than expected no. of argumen
 $str = "str_rot13() tests starting";
 $extra_arg = 10;
 try { var_dump( str_rot13( $str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

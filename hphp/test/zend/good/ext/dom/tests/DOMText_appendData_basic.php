@@ -19,5 +19,4 @@ echo "Text Content: " . $textnode->data . "\n";
 
 echo "\n" . $document->saveXML();
 
-?>
-===DONE===
+echo "===DONE===\n";

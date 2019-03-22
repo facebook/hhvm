@@ -30,9 +30,6 @@ print( @date('Y:M:D:H:i:s', filectime(".")) )."\n";
 print( @date('Y:M:D:H:i:s', touch(dirname(__FILE__)."/005_basic")) )."\n";
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__)."/005_basic.tmp");
 unlink(dirname(__FILE__)."/005_basic");
-?>

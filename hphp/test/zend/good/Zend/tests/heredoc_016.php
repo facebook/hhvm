@@ -30,4 +30,3 @@ TEST;
 var_dump(strlen($test) == 2);
 
 
-?>

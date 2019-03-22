@@ -31,4 +31,3 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrpos($string_mb, $needle2));
 
 echo "Done";
-?>

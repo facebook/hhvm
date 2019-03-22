@@ -201,4 +201,3 @@ if (strlen($ui1) == strlen($ui2) && strlen($ui1) == $len && $ui1 != $ui2) {
 	echo("failed!\n");
 }
 
-?>

@@ -28,4 +28,3 @@ else {
 	echo "Fail\n";
 }
 
-?>

@@ -19,4 +19,3 @@ class B extends A
 
 $x = new B;
 $x->go();
-?>

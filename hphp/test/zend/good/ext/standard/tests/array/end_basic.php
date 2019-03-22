@@ -24,5 +24,4 @@ echo key(&$array) . " => " . current(&$array) . "\n";
 echo "\n-- Add a new element to array --\n";
 $array[2] = 'foo';
 var_dump(end(&$array));
-?>
-===DONE===
+echo "===DONE===\n";

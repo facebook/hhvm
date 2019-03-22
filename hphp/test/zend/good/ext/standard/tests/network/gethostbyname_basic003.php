@@ -7,5 +7,4 @@
 echo "*** Testing gethostbyname() : basic functionality ***\n";
 
 echo gethostbyname("localhost")."\n";
-?>
-===DONE===
+echo "===DONE===\n";

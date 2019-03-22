@@ -4,4 +4,3 @@ echo "\n";
 $res = var_export("foo2", TRUE);
 echo "\n";
 echo $res."\n";
-?>

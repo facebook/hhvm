@@ -12,4 +12,3 @@ var_dump(max(1));
 var_dump(max(array()));
 var_dump(max(new stdclass));
 
-?>

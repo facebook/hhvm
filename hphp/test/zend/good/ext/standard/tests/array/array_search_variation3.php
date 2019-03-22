@@ -37,4 +37,3 @@ var_dump( array_search("foo", $array_search_obj) );
 var_dump( array_search("one", $array_search_obj->array_var) ); 
 
 echo "Done\n";
-?>

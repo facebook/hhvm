@@ -34,4 +34,3 @@ $d = dir($non_existent_dir);
 var_dump( $d );
 
 echo "Done";
-?>

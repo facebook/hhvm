@@ -25,5 +25,4 @@ var_dump(prev(&$array_arg));
 
 echo "\n-- Pass a sub-array as \$array_arg --\n";
 var_dump(prev(&$array_arg[0]));
-?>
-===DONE===
+echo "===DONE===\n";

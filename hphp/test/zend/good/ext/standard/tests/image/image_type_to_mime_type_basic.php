@@ -32,4 +32,3 @@ $image_types = array (
 	}
 
 echo "\nDone image_type_to_mime_type() test\n";
-?>

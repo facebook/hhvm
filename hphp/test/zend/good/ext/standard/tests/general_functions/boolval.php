@@ -11,4 +11,3 @@
 	var_dump(boolval(100));
 	var_dump(boolval(new stdClass()));
 	var_dump(boolval(STDIN));
-?>

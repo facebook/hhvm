@@ -12,4 +12,3 @@ $root = $doc->documentElement;
 print $root->lookupNamespaceURI(NULL);
 
 
-?>

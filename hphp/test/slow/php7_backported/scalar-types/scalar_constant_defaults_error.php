@@ -8,4 +8,3 @@ function int_val(int $a = STRING_VAL): int {
 
 var_dump(int_val());
 
-?>

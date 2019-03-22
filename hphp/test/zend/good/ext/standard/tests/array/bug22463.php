@@ -21,4 +21,3 @@ $ary = array(
 );
 
 var_dump(a($ary));
-?>

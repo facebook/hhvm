@@ -70,5 +70,4 @@ $array_arg = array(
 var_dump( usort(&$array_arg, 'cmp_function') );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
-?>
-===DONE===
+echo "===DONE===\n";

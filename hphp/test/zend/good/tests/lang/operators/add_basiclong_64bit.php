@@ -29,5 +29,4 @@ foreach ($otherVals as $otherVal) {
    }
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

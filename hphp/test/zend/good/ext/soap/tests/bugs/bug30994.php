@@ -36,4 +36,3 @@ function bassCall() {
 $x = new SoapServer(NULL, array("uri"=>"http://spock/kunta/kunta"));
 $x->addFunction("bassCall");
 $x->handle($HTTP_RAW_POST_DATA);
-?>

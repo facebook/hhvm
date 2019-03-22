@@ -90,5 +90,4 @@ foreach($values as $value) {
 // closing the resource
 fclose($file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";

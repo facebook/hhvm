@@ -23,5 +23,4 @@ $bar = new Foo();
 $bar->succeed();
 $bar->fail();
 
-?>
-===DONE===
+echo "===DONE===\n";

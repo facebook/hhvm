@@ -47,4 +47,3 @@ foreach($obj as $v => $w) {
 }
 
 print "Done\n";
-?>

@@ -31,4 +31,3 @@ foreach ($inputs as $lang => $input) {
 }
 
 echo "Done";
-?>

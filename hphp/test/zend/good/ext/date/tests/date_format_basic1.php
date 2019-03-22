@@ -21,5 +21,4 @@ var_dump( date_format($date, "D M j G:i:s T Y") );
 var_dump( date_format($date, 'H:m:s \m \i\s\ \m\o\n\t\h') );     
 var_dump( date_format($date, "H:i:s") );                         
 
-?>
-===DONE===
+echo "===DONE===\n";

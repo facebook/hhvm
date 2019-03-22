@@ -62,4 +62,3 @@ for( $index = 0; $index < count($strings); $index++ ) {
 }
 
 echo "*** Done ***";
-?>

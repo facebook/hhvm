@@ -63,5 +63,4 @@ else
 {
 	echo "Can't start external command\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

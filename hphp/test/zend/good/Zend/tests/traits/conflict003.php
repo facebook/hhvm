@@ -23,4 +23,3 @@ class Talker {
    use A, B;
 }
 
-?>

@@ -6,4 +6,3 @@ $copy = $arr;
 unset($copy["foo"][0]);
 print_r($arr);
 print_r($copy);
-?>

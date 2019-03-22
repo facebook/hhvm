@@ -10,4 +10,3 @@ $name = "prop";
 var_dump($t->$name);
 
 echo "Done\n";
-?>

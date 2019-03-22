@@ -37,4 +37,3 @@ $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
 var_dump($x->test(new foo()));
 
 echo "ok\n";
-?>

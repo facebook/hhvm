@@ -18,4 +18,3 @@ fseek($output, 0, SEEK_SET);
 var_dump(stream_get_contents($output));
 
 http_server_kill($pid);
-?>

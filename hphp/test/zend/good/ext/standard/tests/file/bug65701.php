@@ -10,9 +10,7 @@ file_put_contents($src, "Hello World");
 
 copy($src, $dst);
 var_dump(filesize($dst));
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__) . "/bug65701/";
 foreach (scandir($file_path) as $file) {
     if (strpos($file, "bug65701") !== false) {
@@ -20,4 +18,3 @@ foreach (scandir($file_path) as $file) {
     }
 }
 rmdir($file_path);
-?>

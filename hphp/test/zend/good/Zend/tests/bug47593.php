@@ -22,4 +22,3 @@ function bar() {
 \var_dump(\defined('TEST'));
 
 
-?>

@@ -19,5 +19,4 @@ var_dump( $tz2->getName() );
 $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getName() );
 
-?>
-===DONE===
+echo "===DONE===\n";

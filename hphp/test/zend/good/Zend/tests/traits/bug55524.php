@@ -7,4 +7,3 @@ trait Foo extends Base {
 }
 
 echo 'DONE';
-?>

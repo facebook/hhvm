@@ -17,5 +17,4 @@ $format = "%e";
 var_dump( gmstrftime($format) );
 var_dump( gmstrftime($format, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

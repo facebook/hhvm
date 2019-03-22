@@ -11,4 +11,3 @@ Class A {
 
 $a = new A;
 var_dump(get_object_vars($a));
-?>

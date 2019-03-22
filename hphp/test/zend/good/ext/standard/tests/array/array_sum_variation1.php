@@ -77,5 +77,4 @@ for($count = 0; $count < count($input_values); $count++) {
 };
 
 fclose($fp);
-echo "Done"
-?>
+echo "Done";

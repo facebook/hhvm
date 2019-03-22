@@ -78,4 +78,3 @@ function ut_main()
 include_once( 'ut_common.inc' );
 ut_run();
 
-?>

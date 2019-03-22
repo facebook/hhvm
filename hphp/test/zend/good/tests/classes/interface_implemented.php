@@ -55,4 +55,3 @@ $t->test();
 $t = new derived_d();
 $t->test();
 
-?>

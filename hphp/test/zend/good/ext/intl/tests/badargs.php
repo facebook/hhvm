@@ -18,4 +18,3 @@ foreach($funcs as $func) {
         }
 }
 echo "OK!\n";
-?>

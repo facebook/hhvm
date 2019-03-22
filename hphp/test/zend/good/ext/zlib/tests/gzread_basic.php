@@ -11,5 +11,4 @@ foreach ($lengths as $length) {
 }
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -13,4 +13,3 @@ trait TestTrait {
 	$class = "A";
 	echo $class::test();
 
-?>

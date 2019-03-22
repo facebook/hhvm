@@ -11,4 +11,3 @@ var_dump($rc->hasConstant('bar'));
 Class C {
   const foo=1;
 }
-?>

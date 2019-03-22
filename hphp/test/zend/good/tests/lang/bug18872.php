@@ -8,5 +8,4 @@ function foo($biff = FooBar::BIFF) {
 }   
    
 foo();   
-foo();   
-?>   
+foo();

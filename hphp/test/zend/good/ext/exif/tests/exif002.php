@@ -10,4 +10,3 @@ $thumb = exif_thumbnail(dirname(__FILE__).'/test2.jpg');
 echo " == ";
 echo md5($thumb).'_'.strlen($thumb);
 echo "\n";
-?>

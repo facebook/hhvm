@@ -23,5 +23,4 @@ var_dump( strpbrk($text, '     ') );
 var_dump( strpbrk(5, 5) );
 var_dump( strpbrk(5, "5") );
 
-?>
-===DONE===
+echo "===DONE===\n";

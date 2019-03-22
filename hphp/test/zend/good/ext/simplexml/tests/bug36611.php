@@ -17,5 +17,4 @@ var_dump($val);
 $zml->pos["act_idx"] = $val;
 var_dump($val) ;
 
-?>
-===DONE===
+echo "===DONE===\n";

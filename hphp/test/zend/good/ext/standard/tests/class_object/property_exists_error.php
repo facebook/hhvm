@@ -22,5 +22,4 @@ try { var_dump( property_exists($object_or_class) ); } catch (Exception $e) { ec
 echo "\n-- Testing property_exists() function with incorrect arguments --\n";
 var_dump( property_exists(10, $property_name) );
 
-?>
-===DONE===
+echo "===DONE===\n";

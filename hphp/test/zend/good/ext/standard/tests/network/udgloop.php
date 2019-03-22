@@ -23,4 +23,3 @@
 	fclose($client);
 	fclose($server);
 	unlink("/tmp/$uniqid.sock");
-?>

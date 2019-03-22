@@ -20,4 +20,3 @@ $func = function(){ return 'just a test'; };
 array_splice(&$items, 0 , 4, $func);
 var_dump($items);
 
-?>

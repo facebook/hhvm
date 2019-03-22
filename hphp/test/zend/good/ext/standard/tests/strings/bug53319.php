@@ -6,4 +6,3 @@ var_dump(strip_tags($str, '<br><input>') === $str);
 var_dump(strip_tags($str));
 var_dump(strip_tags('<a/b>', '<a>'));
 
-?>

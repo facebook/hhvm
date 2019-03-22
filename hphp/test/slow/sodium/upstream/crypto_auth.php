@@ -33,4 +33,3 @@ var_dump(sodium_crypto_auth_verify($mac, $badmsg, $key));
 $badmac = $mac;
 $badmac[0] = \chr(\ord($badmac[0]) ^ 0x80);
 var_dump(sodium_crypto_auth_verify($badmac, $msg, $key));
-?>

@@ -86,5 +86,4 @@ foreach($values as $value) {
 // close the file resource used
 fclose($file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";

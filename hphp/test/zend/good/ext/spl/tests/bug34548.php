@@ -22,4 +22,3 @@ $foo->add($data2);
 print_r($foo->getArrayCopy());
 
 echo "Done\n";
-?>

@@ -27,4 +27,3 @@ class first_class
 $obj = new first_class();
 $obj->first_function();
 $obj->second_function();
-?>

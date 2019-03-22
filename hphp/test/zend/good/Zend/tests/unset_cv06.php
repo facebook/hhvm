@@ -6,4 +6,3 @@ echo $_SESSION['x'];
 session_unset();
 echo $_SESSION['x'];
 echo "ok\n";
-?>

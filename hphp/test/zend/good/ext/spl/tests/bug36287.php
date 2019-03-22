@@ -15,5 +15,4 @@ foreach($it as $file)
 	}
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

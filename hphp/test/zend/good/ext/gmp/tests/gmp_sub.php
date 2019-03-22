@@ -16,4 +16,3 @@ var_dump($g = gmp_sub(new stdclass, 100));
 var_dump(gmp_strval($g));
 
 echo "Done\n";
-?>

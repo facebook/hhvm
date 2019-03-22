@@ -42,5 +42,5 @@ abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
   public static $secondFile;
   public static $filename = "readfile_variation6.txt";
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

@@ -24,4 +24,3 @@ var_dump( strrpos($special_chars_str, "$*", 10) );
 var_dump( strrpos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
-?>

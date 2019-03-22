@@ -1,5 +1,5 @@
-<?php  ?>
-<?php  ?>
+<?php
+?>
 <?PHP
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
@@ -11,4 +11,3 @@
 
 	if (!have_innodb($link))
 		die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
-?>

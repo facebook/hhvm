@@ -34,5 +34,4 @@ spl_autoload_unregister($al1);
 
 $y = new TestY;
 
-?>
-===DONE===
+echo "===DONE===\n";

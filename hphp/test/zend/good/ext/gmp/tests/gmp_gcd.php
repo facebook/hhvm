@@ -21,4 +21,3 @@ try { var_dump(gmp_gcd($n,array(),1)); } catch (Exception $e) { echo "\n".'Warni
 try { var_dump(gmp_gcd(array(),$n,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

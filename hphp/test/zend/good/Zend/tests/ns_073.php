@@ -9,4 +9,3 @@ $x = function (\stdclass $x = NULL) {
 $x(NULL);
 $x(new \stdclass);
 
-?>

@@ -74,5 +74,4 @@ foreach($rit as $data) {
 	var_dump(trim($data));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

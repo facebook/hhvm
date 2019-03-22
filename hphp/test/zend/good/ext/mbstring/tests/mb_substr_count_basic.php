@@ -25,4 +25,3 @@ var_dump(mb_substr_count($string_mb, $needle_mb1));
 var_dump(mb_substr_count($string_mb, $needle_mb2));
 
 echo "Done";
-?>

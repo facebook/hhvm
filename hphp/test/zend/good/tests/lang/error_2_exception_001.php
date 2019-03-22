@@ -35,4 +35,3 @@ try {
 	echo "There was an exception: " . $exception->getErrno() . ", '" . $exception->getErrmsg() . "'\n";
 }
 
-?>

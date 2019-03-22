@@ -21,4 +21,3 @@ var_dump(in_array('AutoLoaded', get_declared_classes()));
 
 echo "\nDONE\n";
 
-?>

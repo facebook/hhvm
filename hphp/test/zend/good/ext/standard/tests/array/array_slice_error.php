@@ -24,4 +24,3 @@ echo "\n-- Testing array_slice() function with less than expected no. of argumen
 try { var_dump( array_slice($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

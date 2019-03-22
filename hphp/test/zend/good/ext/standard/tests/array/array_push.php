@@ -65,4 +65,3 @@ var_dump( array_push(&$mixed_array[2], 22, 33, "44") );
 var_dump( $mixed_array[2] );
 
 echo"\nDone";
-?>

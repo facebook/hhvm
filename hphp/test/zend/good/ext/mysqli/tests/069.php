@@ -17,4 +17,3 @@
 	} while (@$mysql->next_result());
 	$mysql->close();
 	print "done!";
-?>

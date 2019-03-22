@@ -11,4 +11,3 @@ try { var_dump( strrev() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 echo "\n-- Testing strrev() function with more than expected no. of arguments --";
 try { var_dump( strrev("string", 'extra_arg') ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "*** Done ***";
-?>

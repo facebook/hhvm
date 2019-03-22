@@ -84,6 +84,4 @@ foreach($it as $v)
 	print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

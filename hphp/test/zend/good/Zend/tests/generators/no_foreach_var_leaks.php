@@ -12,4 +12,3 @@ var_dump($gen->current());
 
 // generator is closed here, without running SWITCH_FREE
 
-?>

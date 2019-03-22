@@ -56,4 +56,3 @@ foreach ($arrays as $item) {
 }
 
 echo "end\n";
-?>

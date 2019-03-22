@@ -30,4 +30,3 @@ class D extends C implements Iterator {
 }
 
 foreach (new D as $x) {}
-?>

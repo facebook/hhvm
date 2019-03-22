@@ -48,4 +48,3 @@ foreach($integer_values as $int_value) {
 };
 
 echo "Done";
-?>

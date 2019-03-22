@@ -15,5 +15,4 @@ $encoding = 'unknown-encoding';
 $part = true;
 var_dump( mb_strrchr($haystack, $needle, $part, $encoding) );
 
-?>
-===DONE===
+echo "===DONE===\n";

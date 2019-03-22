@@ -39,5 +39,4 @@ $a = 4;
 var_dump($a);
 $dummy = $sxe->elem1[$a];
 var_dump($a);
-?>
-===Done===
+echo "===Done===";

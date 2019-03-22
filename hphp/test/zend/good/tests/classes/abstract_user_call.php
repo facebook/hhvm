@@ -19,5 +19,4 @@ $o->func();
 
 call_user_func(array($o, 'test_base::func'));
 
-?>
-===DONE===
+echo "===DONE===\n";

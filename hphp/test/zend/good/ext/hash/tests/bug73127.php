@@ -8,4 +8,3 @@ echo hash('gost', $test1),
      "\n",
      hash('gost', '')
     ;
-?>

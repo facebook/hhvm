@@ -9,6 +9,4 @@ class B extends A
 {
         private static function test($a, $b) { }
 }
-
-?>
-==DONE==
+echo "==DONE==";

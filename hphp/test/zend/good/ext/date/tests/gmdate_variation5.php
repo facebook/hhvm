@@ -15,5 +15,4 @@ echo "\n-- Testing gmdate() function with ISO-8601 week number of year format --
 var_dump( gmdate('W') );
 var_dump( gmdate('W', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

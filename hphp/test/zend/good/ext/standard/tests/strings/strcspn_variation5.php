@@ -67,5 +67,4 @@ foreach($heredoc_strings as $str) {
       var_dump( strcspn($str,$mask) ); // with default start and len values
 };
 
-echo "Done"
-?>
+echo "Done";

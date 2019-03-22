@@ -9,4 +9,3 @@ $s->seek(12);
 $s->next();
 var_dump($s->key());
 var_dump($s->valid());
-?>

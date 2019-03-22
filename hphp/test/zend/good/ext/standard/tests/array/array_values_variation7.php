@@ -21,5 +21,3 @@ echo "\n-- Result of array_values() --\n";
 var_dump(array_values($input));
 
 echo "Done";
-?>
-

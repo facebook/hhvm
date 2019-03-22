@@ -19,4 +19,3 @@ class foo {
 
 $a = new foo ();
 
-?>

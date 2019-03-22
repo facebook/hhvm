@@ -12,4 +12,3 @@ $fp = fopen("compress.zlib://". dirname(__FILE__). "/../../../ext/xsl/tests/xslt
 fclose($fp);
 
 echo "ok\n";
-?>

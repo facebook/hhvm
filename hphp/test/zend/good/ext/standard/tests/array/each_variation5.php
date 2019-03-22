@@ -28,5 +28,3 @@ echo "\n-- Pass each() a sub-array --\n";
 var_dump( each(&$arr[2]));
 
 echo "Done";
-?>
-

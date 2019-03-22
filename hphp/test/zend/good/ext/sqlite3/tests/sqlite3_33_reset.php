@@ -13,4 +13,3 @@ $stmt->reset();
 //var_dump($db);
 //var_dump($db->close());
 echo "Done\n";
-?>

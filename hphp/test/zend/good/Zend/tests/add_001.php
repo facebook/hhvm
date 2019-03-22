@@ -25,4 +25,3 @@ $a += $a;
 var_dump($c);
 
 echo "Done\n";
-?>

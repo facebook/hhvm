@@ -39,4 +39,3 @@ foreach($strings as $string_value)
 }
 
 echo "Done";
-?>

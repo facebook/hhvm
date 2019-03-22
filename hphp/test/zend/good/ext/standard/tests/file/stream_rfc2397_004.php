@@ -14,6 +14,4 @@ foreach($streams as $stream)
 	var_dump(@file_get_contents($stream));
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

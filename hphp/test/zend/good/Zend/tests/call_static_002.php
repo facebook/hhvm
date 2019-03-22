@@ -15,4 +15,3 @@ $a = new Foo;
 call_user_func(array($a, 'aAa'));
 call_user_func(array('Foo', 'aAa'));
 
-?>

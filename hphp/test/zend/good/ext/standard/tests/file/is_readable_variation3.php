@@ -30,4 +30,3 @@ foreach( $misc_files as $misc_file ) {
 }
 
 echo "Done\n";
-?>

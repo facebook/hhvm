@@ -6,4 +6,3 @@ test:
     }
 	goto test;
 }
-?>

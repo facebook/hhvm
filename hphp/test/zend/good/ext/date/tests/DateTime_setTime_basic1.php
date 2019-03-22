@@ -30,5 +30,4 @@ echo "After modification4 " . $datetime ->format(DATE_RFC2822) . "\n";
 $datetime->setTime(54, 25);
 echo "After modification5 " . $datetime ->format(DATE_RFC2822) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

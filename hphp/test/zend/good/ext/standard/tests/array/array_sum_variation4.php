@@ -20,5 +20,4 @@ $float_input = array( 2.3, 1.9, -4.1, 0.5, 1.9, -4.1, 3.6, 0.5);
 echo "-- With float array --\n";
 var_dump( array_sum($float_input) );
 
-echo "Done"
-?>
+echo "Done";

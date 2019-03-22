@@ -20,4 +20,3 @@ $variation_array = array(
 foreach ( $variation_array as $var ) {
   try { var_dump(getservbyname( $service, $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
-?>

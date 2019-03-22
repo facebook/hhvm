@@ -16,4 +16,3 @@ class try_class
 try_class::main ();
 
 echo "Done\n";
-?>

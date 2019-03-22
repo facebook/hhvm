@@ -65,5 +65,4 @@ var_dump ( bin2hex(sha1_file("sha1_DataFile.txt", true)));
 unlink("sha1_DataFile.txt");
 unlink("sha1_EmptyFile.txt");
 
-?>
-===DONE===
+echo "===DONE===\n";

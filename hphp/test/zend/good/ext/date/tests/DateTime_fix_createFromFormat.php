@@ -17,5 +17,4 @@ $fromFormat = DateTime::createFromFormat( "D., M# j, Y g:iA", $string );
 echo "Format method: " . $orig->format("D., M. j, Y g:iA") . "\n";
 echo "createFromFormat method: " . $fromFormat->format("D., M. j, Y g:iA") . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

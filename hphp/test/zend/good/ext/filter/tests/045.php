@@ -14,4 +14,3 @@ echo ($ret["test"] === 255 && is_string($a["test"]["flags"]) && $a["test"]["flag
 $a = array("test"=>(string)FILTER_VALIDATE_INT);
 $ret = filter_var_array(array("test"=>"255"), $a);
 echo ($ret["test"] === 255 && is_string($a["test"]) && $a["test"] == FILTER_VALIDATE_INT)?"ok\n":"bug\n";
-?>

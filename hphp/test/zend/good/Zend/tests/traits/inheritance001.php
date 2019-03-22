@@ -16,4 +16,3 @@ class TheWorldIsNotEnough {
 
 $o = new TheWorldIsNotEnough();
 $o->sayHello(); // echos Hello Universe!
-?>

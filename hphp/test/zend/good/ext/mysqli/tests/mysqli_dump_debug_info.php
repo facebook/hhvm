@@ -22,4 +22,3 @@
 			mysqli_errno($link), mysqli_error($link));
 
 	print "done!";
-?>

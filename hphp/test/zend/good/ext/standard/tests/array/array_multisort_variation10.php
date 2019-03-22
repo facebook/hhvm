@@ -10,5 +10,4 @@ echo "*** Testing array_multisort() : Testing with anonymous arguments ***\n";
 $arr = array(1,3,2,4);
 var_dump(array_multisort(&$arr));
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -16,4 +16,3 @@ class English {
 }
 $e = new English();
 $e->sayHello();
-?>

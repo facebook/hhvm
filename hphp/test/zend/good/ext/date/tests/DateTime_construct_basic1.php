@@ -16,5 +16,4 @@ var_dump( new DateTime("GMT") );
 var_dump( new DateTime("2005-07-14 22:30:41") );
 var_dump( new DateTime("2005-07-14 22:30:41 GMT") );
 
-?>
-===DONE===
+echo "===DONE===\n";

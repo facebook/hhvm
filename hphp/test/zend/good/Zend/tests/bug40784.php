@@ -14,4 +14,3 @@ class B extends A {
 $b = new B;
 
 echo "Done\n";
-?>

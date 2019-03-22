@@ -11,6 +11,4 @@ foreach($it as $key=>$value) {
 ksort(&$vals);
 var_dump($vals);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

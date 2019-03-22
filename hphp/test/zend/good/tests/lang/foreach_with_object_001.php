@@ -11,5 +11,4 @@ foreach ($obj->c()->a as $value) {
     print "$value\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

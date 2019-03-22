@@ -26,5 +26,4 @@ gzclose($h);
 
 
 
-?>
-===DONE===
+echo "===DONE===\n";

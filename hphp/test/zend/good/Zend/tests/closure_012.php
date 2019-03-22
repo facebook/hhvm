@@ -5,4 +5,3 @@ $lambda = function () use ($i) {
 $lambda();
 $lambda();
 var_dump($i);
-?>

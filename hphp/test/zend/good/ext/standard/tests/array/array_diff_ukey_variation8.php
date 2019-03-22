@@ -20,5 +20,4 @@ echo "\n-- Testing array_diff_ukey() function with boolean indexed array --\n";
 var_dump( array_diff_ukey($boolean_indx_array, $input_array, 'key_compare_func') );
 var_dump( array_diff_ukey($input_array, $boolean_indx_array, 'key_compare_func') );
 
-?>
-===DONE===
+echo "===DONE===\n";

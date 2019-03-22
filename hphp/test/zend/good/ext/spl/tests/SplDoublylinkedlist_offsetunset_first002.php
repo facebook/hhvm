@@ -6,4 +6,3 @@ $list->push('thar');
 echo $list->bottom() . "\n";
 $list->offsetUnset(0);
 echo $list->bottom() . "\n";
-?>

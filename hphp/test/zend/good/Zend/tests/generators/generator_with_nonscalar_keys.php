@@ -13,4 +13,3 @@ foreach (gen() as $k => $v) {
     var_dump($k, $v);
 }
 
-?>

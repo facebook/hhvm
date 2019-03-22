@@ -28,5 +28,4 @@ foreach($valid_bool as $key => $bool_value) {
 	var_dump( var_export( $bool_value, TRUE) );
 	echo "\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

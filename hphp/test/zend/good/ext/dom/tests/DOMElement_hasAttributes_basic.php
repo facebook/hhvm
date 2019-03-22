@@ -26,4 +26,3 @@ echo "\nElement should have no attributes:\n";
 var_dump($element->hasAttributes());
 
 
-?>

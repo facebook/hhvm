@@ -42,5 +42,3 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done";
-?>
-

@@ -15,4 +15,3 @@ class MyClass {
 $o = new MyClass;
 $o->sayHello();
 
-?>

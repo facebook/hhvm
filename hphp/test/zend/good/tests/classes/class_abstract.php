@@ -16,4 +16,3 @@ $t = new base();
 $t->show();
 
 echo "Done\n"; // shouldn't be displayed
-?>

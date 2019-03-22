@@ -21,5 +21,4 @@ var_dump( date("D M j G:i:s T Y", $timestamp) );
 var_dump( date('H:m:s \m \i\s\ \m\o\n\t\h', $timestamp) );  
 var_dump( date("H:i:s", $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

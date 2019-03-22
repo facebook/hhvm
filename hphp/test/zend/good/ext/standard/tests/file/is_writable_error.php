@@ -18,4 +18,3 @@ var_dump( is_writable(dirname(__FILE__)."/is_writable") );
 var_dump( is_writeable(dirname(__FILE__)."/is_writable") );
 
 echo "Done\n";
-?>

@@ -27,5 +27,4 @@ foreach($regex_array as $regex_value) {
 abstract final class ZendGoodExtPcreTestsPregReplaceCallbackError1 {
   public static $replacement;
 }
-?>
-===Done===
+echo "===Done===";

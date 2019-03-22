@@ -22,4 +22,3 @@ $fooChild = new FooChild();
 unset($foo);
 unset($fooChild);
 
-?>

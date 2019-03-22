@@ -24,5 +24,4 @@ foreach($paths as $path) {
       var_dump( realpath($path) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

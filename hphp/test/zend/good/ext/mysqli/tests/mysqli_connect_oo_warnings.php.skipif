@@ -6,4 +6,3 @@
 		die('skip: get_current_user() not supported');
 	if (stristr(mysqli_get_client_info(), 'mysqlnd'))
 		die("skip: test for libmysql (different error output when using php streams");
-?>

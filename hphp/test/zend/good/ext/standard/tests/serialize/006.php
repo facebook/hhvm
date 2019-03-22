@@ -12,4 +12,3 @@
 	var_dump(unserialize(serialize($foo)));
 	var_dump(serialize($åäöÅÄÖ));
 	var_dump(unserialize(serialize($åäöÅÄÖ)));
-?>

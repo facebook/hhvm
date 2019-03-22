@@ -12,5 +12,4 @@ $xml = simplexml_load_string($string);
 $add = $xml->addChild('Host');
 $add->Host->addAttribute('enable', 'true');
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -15,4 +15,3 @@ var_dump(convert_cyr_string((binary)"[[[[[[", "i", "q"));
 var_dump(convert_cyr_string((binary)"", "d", "i"));
 
 echo "Done\n";
-?>

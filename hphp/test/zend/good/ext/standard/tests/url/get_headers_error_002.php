@@ -26,5 +26,4 @@ echo "\n-- Testing get_headers() function with format argument as type object --
 try { var_dump( get_headers($url, $object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-echo "Done"
-?>
+echo "Done";

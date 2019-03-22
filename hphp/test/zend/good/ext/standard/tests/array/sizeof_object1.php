@@ -31,4 +31,3 @@ echo "-- Testing sizeof() in COUNT_RECURSIVE mode --\n";
 var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
 echo "Done";
-?>

@@ -21,4 +21,3 @@ foreach ($rcs as $childName => $child) {
 		var_dump($child->isSubclassOf($parentName)); 
 	}
 }
-?>

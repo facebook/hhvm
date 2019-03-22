@@ -19,4 +19,3 @@ function test() {
   unlink('/tmp/testfile1');
 }
 @test();
-?>

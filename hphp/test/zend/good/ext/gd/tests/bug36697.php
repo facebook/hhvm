@@ -14,4 +14,3 @@ $c = imagecolorat($im, 191, 35);
 $colors = imagecolorsforindex($im, $c);
 echo $colors['red'] . ' ' . $colors['green'] . ' ' . $colors['blue'];
 @unlink($dest);
-?>

@@ -29,11 +29,8 @@ var_dump(getcwd());
 echo "\n-- Testing chdir() with relative paths: --\n";
 var_dump(chdir($level1_two_dir_name));
 var_dump(getcwd());
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level1_one/level1_two");
 rmdir("$file_path/level1_one");
-?>

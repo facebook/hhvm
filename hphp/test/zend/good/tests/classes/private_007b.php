@@ -19,4 +19,3 @@ $obj->pub();
 $obj->priv();
 
 echo "Done\n";
-?>

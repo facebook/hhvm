@@ -81,4 +81,3 @@ class PDOTest {
 		return $config;
 	}
 }
-?>

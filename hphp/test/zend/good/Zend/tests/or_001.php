@@ -17,4 +17,3 @@ $s |= "test";
 var_dump($s);
 
 echo "Done\n";
-?>

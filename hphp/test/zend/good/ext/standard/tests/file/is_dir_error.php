@@ -16,10 +16,6 @@ try { var_dump( is_dir($dir_name, "is_dir_error1") ); } catch (Exception $e) { e
 var_dump( is_dir("/no/such/dir") );
 
 echo "*** Done ***";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/is_dir_error");
-?>

@@ -24,5 +24,4 @@ var_dump(array_reduce($array, "oneArg", 2));
 echo "\n--- Testing with a callback with too many parameters ---\n";
 try { var_dump(array_reduce($array, "threeArgs", 2)); } catch (Exception $e) { var_dump($e->getMessage()); }
 
-?>
-===DONE===
+echo "===DONE===\n";

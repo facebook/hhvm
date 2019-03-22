@@ -18,5 +18,4 @@ $str = b"=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A=
 $extra_arg = 10;
 try { var_dump( quoted_printable_decode($str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

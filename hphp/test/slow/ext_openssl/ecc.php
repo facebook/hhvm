@@ -75,4 +75,3 @@ foreach ($curve_names as $curve_name) {
     echo "Found secp384r1 in curve names\n";
   }
 }
-?>

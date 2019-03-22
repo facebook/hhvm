@@ -30,6 +30,4 @@ $h->insert($b);
 $b = 5;
 
 echo $h->extract()."\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

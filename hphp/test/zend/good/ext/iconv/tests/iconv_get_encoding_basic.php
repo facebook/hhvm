@@ -24,4 +24,3 @@ var_dump( iconv_get_encoding('all')               );
 var_dump( iconv_get_encoding('foo')               );
 var_dump( iconv_get_encoding()                    );
 
-?>

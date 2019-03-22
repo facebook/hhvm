@@ -24,4 +24,3 @@ foreach ($offsets as $offset) {
 
 @unlink($filename);
 echo "Done\n";
-?>

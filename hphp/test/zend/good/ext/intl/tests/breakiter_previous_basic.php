@@ -7,5 +7,4 @@ $bi->setText('foo bar trans');
 
 var_dump($bi->last());
 var_dump($bi->previous());
-?>
-==DONE==
+echo "==DONE==";

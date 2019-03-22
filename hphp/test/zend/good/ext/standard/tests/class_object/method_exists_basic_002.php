@@ -18,4 +18,3 @@ echo "Does stdclass::nonexistent exist? ";
 var_dump(method_exists(new stdclass, "nonexistent"));
 
 echo "Done";
-?>

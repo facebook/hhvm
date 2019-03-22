@@ -21,7 +21,3 @@ try {
 } catch (Exception $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
-
-?>
-
-<?php exit(0); ?>

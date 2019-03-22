@@ -10,5 +10,4 @@ for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
   echo "\n-- Iteration $imagetype --\n";
   var_dump(image_type_to_mime_type($imagetype));
 }
-?>
-===DONE===
+echo "===DONE===\n";

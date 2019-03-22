@@ -12,4 +12,3 @@ rmdir("./tmp/foo/bar/logs");
 rmdir("./tmp/foo/bar/");
 rmdir("./tmp/foo/");
 rmdir("./tmp/");
-?>

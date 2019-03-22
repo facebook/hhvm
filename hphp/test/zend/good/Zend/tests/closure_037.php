@@ -32,5 +32,4 @@ $closure();
 $b = new B;
 $closure = $b->getClosure();
 $closure();
-?>
-Done.
+echo "Done.";

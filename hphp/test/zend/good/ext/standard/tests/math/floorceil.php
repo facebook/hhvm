@@ -14,4 +14,3 @@
     $a = floor (0);   $b = floor (0.5); $c = floor (1);
     $d = floor (1.5); $e = floor (1.8); $f = floor (2.7);
     var_dump ($a, $b, $c, $d, $e, $f);
-?>  

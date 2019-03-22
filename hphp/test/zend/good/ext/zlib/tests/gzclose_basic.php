@@ -18,5 +18,4 @@ var_dump(fclose($h));
 gzread($h, 20);
 
 
-?>
-===DONE===
+echo "===DONE===\n";

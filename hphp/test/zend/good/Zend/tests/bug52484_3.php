@@ -11,4 +11,3 @@ $prop = null;
 
 var_dump($a->$prop);
 
-?>

@@ -26,4 +26,3 @@ print "-----\n";
 var_dump(str_getcsv(''));
 print "-----\n";
 
-?>

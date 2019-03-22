@@ -28,4 +28,3 @@ var_dump( strrev('Hello, World\n') );
 //heredoc string
 var_dump( strrev($heredoc) );
 echo "*** Done ***";
-?>

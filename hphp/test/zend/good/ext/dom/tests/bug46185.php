@@ -12,4 +12,3 @@ $imported= $aDOM->importNode($ok->firstChild, true);
 $a->appendChild($imported);
 
 echo $aDOM->saveXML();
-?>

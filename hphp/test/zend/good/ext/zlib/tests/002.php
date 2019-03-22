@@ -11,4 +11,3 @@ $packed=gzcompress($original, 9);
 echo strlen($packed)." ".strlen($original)."\n";
 $unpacked=gzuncompress($packed, 40000);
 if (strcmp($original,$unpacked)==0) echo "Strings are equal\n";
-?>

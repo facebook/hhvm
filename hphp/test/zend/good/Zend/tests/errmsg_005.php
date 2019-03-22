@@ -10,4 +10,3 @@ $t = new test;
 $t->foo() = 1;
 
 echo "Done\n";
-?>

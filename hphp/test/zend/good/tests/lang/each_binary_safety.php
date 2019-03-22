@@ -5,4 +5,3 @@ while (list($key, $val) = each(&$arr)) {
 	echo strlen($key), ': ';
 	echo urlencode($key), ' => ', urlencode($val), "\n";
 }
-?>

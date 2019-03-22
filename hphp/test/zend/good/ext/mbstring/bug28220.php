@@ -14,4 +14,3 @@ foreach ($coderange as $r) {
 	}
 	echo "$ng\n";
 }
-?>

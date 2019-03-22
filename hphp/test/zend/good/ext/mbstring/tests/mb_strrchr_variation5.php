@@ -38,5 +38,4 @@ else {
 }
 
 
-?>
-===DONE===
+echo "===DONE===\n";

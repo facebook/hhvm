@@ -18,4 +18,3 @@ try { var_dump(gmp_sqrt()); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 var_dump(gmp_sqrt(array()));
 
 echo "Done\n";
-?>

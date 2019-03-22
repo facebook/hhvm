@@ -4,4 +4,3 @@ class A {
    const BAR = [self::FOO];
 }
 var_dump(A::FOO);
-?>

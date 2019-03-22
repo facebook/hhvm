@@ -70,5 +70,4 @@ $child->test();
 
 echo "\n-- From a child's static context --\n";
 Child::testStatic();
-?>
-===DONE===
+echo "===DONE===\n";

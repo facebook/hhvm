@@ -6,4 +6,3 @@
     if (is_resource($s_c_l)) {
         try { @socket_close($s_c_l); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     }
-?>

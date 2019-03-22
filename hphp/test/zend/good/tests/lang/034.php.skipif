@@ -6,4 +6,3 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (setlocale(LC_NUMERIC, "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1") === FALSE) {
 	print "skip Can't find german locale";
 }
-?>

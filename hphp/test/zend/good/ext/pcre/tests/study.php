@@ -14,4 +14,3 @@ var_dump($dump[0]);
 var_dump(preg_match('/aeiou/S', 'aeiou', &$dump));
 var_dump($dump[0]);
 
-?>

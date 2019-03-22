@@ -18,4 +18,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = dechex($values[$i]);
 	var_dump($res);
 }
-?>

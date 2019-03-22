@@ -5,4 +5,3 @@
       var_dump($name);
   }
   call_user_func("UndefC::test");
-?>

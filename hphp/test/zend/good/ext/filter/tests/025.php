@@ -9,4 +9,3 @@ var_dump(filter_var("`123`", FILTER_SANITIZE_STRING));
 var_dump(filter_var(".", FILTER_SANITIZE_STRING));
 
 echo "Done\n";
-?>

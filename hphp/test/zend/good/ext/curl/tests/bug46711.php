@@ -14,4 +14,3 @@ foreach( $opt as $option => $value ) {
 
 var_dump($opt); // with this bug, $opt[58] becomes NULL
 
-?>

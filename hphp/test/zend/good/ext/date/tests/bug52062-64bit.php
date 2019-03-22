@@ -9,4 +9,3 @@ var_dump($d->getTimestamp());
 
 $i = new DateInterval('PT100000000000S');
 var_dump($i->format('%s'));
-?>

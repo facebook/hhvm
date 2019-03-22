@@ -26,4 +26,3 @@
 	foreach ($r as $onekey => $oneval) {
 	   echo "$onekey => $oneval\n";
 	}
-?>

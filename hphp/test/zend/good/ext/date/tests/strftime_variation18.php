@@ -16,5 +16,4 @@ echo "\n-- Testing strftime() function with Day of the month as decimal single d
 $format = "%e";
 var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
-?>
-===DONE===
+echo "===DONE===\n";

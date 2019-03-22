@@ -12,4 +12,3 @@ class test implements test1, test2 {
 }
 
 echo "Done\n";
-?>

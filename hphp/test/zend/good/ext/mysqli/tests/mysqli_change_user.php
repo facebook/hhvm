@@ -98,4 +98,3 @@
 		printf("[028] Test variable is still set!\n");
 
 	print "done!";
-?>

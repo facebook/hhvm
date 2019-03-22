@@ -77,4 +77,3 @@ var_dump(array_intersect($a,$b));
 
 echo 'array_intersect_assoc($a,$b);'."\n";
 var_dump(array_intersect_assoc($a,$b));
-?>

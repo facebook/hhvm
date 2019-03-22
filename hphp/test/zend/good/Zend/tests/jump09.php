@@ -5,4 +5,3 @@ switch (0) {
 		break;
 }
 goto L1;
-?>

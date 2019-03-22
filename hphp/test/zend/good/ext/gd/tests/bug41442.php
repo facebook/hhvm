@@ -18,4 +18,3 @@ var_dump(imagecreatefromstring($str2));
 @unlink($file);
 
 echo "Done\n";
-?>

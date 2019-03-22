@@ -7,4 +7,3 @@
    the problem, this example being not a problem
 */
 echo dechex(crc32("platform independent")) . "\n";
-?>

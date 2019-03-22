@@ -88,5 +88,3 @@ var_dump(rsort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done";
-?>
-

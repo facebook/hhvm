@@ -9,4 +9,3 @@ session_start();
 session_destroy();
 
 print "I live\n";
-?>

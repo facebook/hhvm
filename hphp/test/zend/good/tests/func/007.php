@@ -13,4 +13,3 @@ else {
         echo "ini_restore_works\n";
 }
 
-?>

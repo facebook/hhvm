@@ -16,4 +16,3 @@ function __autoload($class) {
 new bug39542();
 
 chdir($oldcwd);
-?>

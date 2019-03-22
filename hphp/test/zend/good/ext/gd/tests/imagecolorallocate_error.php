@@ -20,5 +20,4 @@ try { var_dump( imagecolorallocate($im, $red, $green, $blue, $extra_arg) ); } ca
 echo "\n-- Testing imagecolorallocate() function with less than expected no. of arguments --\n";
 try { var_dump( imagecolorallocate() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( imagecolorallocate($im, $red, $green) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

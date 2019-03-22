@@ -12,5 +12,4 @@ $test = new CachingIterator($arrayIterator, 3); // this throws an exception
 }
 
 
-?>
-===DONE===
+echo "===DONE===\n";

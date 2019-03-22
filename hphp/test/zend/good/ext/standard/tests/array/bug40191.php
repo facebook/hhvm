@@ -9,4 +9,3 @@ $arr = array_unique($arrObj);
 var_dump($arr);
 
 echo "Done\n";
-?>

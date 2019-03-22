@@ -17,5 +17,4 @@ var_dump(
 				$intlcal,
 				strtotime('2012-02-29 06:07:08 +0000') * 1000,
 				IntlCalendar::FIELD_MINUTE));
-?>
-==DONE==
+echo "==DONE==";

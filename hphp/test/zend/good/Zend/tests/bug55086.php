@@ -27,4 +27,3 @@ namespace N2 {
     {
     }
 }
-?>

@@ -19,4 +19,3 @@ class B extends A {
 
 echo B::test();
 
-?>

@@ -12,4 +12,3 @@ var_dump($regexIterator->getFlags() === RegexIterator::USE_KEY);
 $regexIterator->setFlags(RegexIterator::USE_KEY);
 var_dump($regexIterator->getFlags() === RegexIterator::USE_KEY);
 
-?>

@@ -16,4 +16,3 @@ echo "\n";
 $y = "zero";
 $o->F(&$y, "0");
 echo $y;
-?>

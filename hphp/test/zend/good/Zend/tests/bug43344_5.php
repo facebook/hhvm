@@ -5,4 +5,3 @@ function f($a=array(Foo::bar=>0)) {
 	return key($a);
 }
 echo f()."\n";
-?>

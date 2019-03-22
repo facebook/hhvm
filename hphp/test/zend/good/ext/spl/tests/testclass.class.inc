@@ -6,4 +6,3 @@ class TestClass
 {
 }
 
-?>

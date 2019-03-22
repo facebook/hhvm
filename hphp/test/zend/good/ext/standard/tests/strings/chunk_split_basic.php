@@ -32,5 +32,4 @@ var_dump( chunk_split($str, $chunklen) );
 echo "-- Testing chunk_split() with default chunklen and ending string --\n";
 var_dump( chunk_split($str) );
 	
-echo "Done"   
-?>
+echo "Done";

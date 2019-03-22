@@ -33,4 +33,3 @@ var_dump(in_array( 'MyClass', get_declared_traits()));
 
 
 echo "Done";
-?>

@@ -14,4 +14,3 @@ echo 0;
 	echo 4;
 	ob_end_flush();
 echo $ob;
-?>

@@ -66,4 +66,3 @@ for($i = 0; $i < count($mode_values); $i++)
 fclose($fp);
 
 echo "Done";
-?>

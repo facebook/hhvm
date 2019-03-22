@@ -18,4 +18,3 @@ var_dump( strrpos($empty_string, FALSE) );
 var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
-?>

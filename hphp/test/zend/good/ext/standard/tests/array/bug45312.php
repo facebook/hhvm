@@ -27,4 +27,3 @@ $result = array_udiff_assoc($a, $b, array("cr", "comp_func_cr2"));
 foreach($result as $val) {
 	$val->dump();
 }
-?>

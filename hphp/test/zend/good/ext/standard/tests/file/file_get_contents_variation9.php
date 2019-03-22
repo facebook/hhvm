@@ -36,4 +36,3 @@ unlink($hardlink);
 unlink($filename);
 
 echo "\n*** Done ***\n";
-?>

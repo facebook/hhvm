@@ -16,4 +16,3 @@ mb_internal_encoding("EUC-JP");
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"))));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), false)));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), true)));
-?>

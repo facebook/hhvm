@@ -23,4 +23,3 @@ function test_encryption($method) {
 test_encryption('aes-128-ccm');
 // 256 bit CCM
 test_encryption('aes-256-ccm');
-?>

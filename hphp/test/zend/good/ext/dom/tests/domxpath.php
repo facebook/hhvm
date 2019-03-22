@@ -45,4 +45,3 @@ $root->appendChild($dom->createElementNS("urn::default", "testnode", 5));
 
 $avg = $xpath->evaluate('number(php:function("MyAverage", //def:testnode))');
 var_dump($avg);
-?>

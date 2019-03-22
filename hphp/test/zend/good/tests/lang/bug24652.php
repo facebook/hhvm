@@ -11,4 +11,3 @@
   var_dump($f);
   var_dump(array_key_exists(7, $f));
   var_dump(array_key_exists('7', $f));
-?>

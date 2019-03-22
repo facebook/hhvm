@@ -11,5 +11,4 @@ try { var_dump(gzwrite()); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 gzclose($h);
 unlink($filename);
 
-?>
-===DONE===
+echo "===DONE===\n";

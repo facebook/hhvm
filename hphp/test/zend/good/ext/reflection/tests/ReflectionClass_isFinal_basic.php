@@ -9,4 +9,3 @@ $finalClass = new ReflectionClass('TestFinalClass');
 var_dump($normalClass->isFinal());
 var_dump($finalClass->isFinal());
 
-?>

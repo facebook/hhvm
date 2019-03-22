@@ -5,4 +5,3 @@ bindtextdomain('dngettextTest', './locale');
 textdomain('dngettextTest');
 var_dump(ngettext('item', 'items', 1));
 var_dump(ngettext('item', 'items', 2));
-?>

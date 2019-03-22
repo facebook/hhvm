@@ -27,4 +27,3 @@ class X {
 */
 
 echo "OK\n";
-?>

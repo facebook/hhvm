@@ -15,4 +15,3 @@ class bar extends foo
 }
 
 var_dump(str_replace("\0", '\0', serialize(new bar())));
-?>

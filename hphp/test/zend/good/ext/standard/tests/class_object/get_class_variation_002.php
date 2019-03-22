@@ -9,4 +9,3 @@ class caseSensitivityTest {}
 var_dump(get_class(new casesensitivitytest));
 
 echo "Done";
-?>

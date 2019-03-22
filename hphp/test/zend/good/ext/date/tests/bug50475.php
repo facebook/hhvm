@@ -9,4 +9,3 @@ var_dump($date->format('Y-m-d H:i:s'));
 
 $date->setTime(8, 0);
 var_dump($date->format('Y-m-d H:i:s'));
-?>

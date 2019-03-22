@@ -16,4 +16,3 @@ fseek($tmp, 0, SEEK_SET);
 var_dump(stream_get_contents($tmp));
 
 
-?>

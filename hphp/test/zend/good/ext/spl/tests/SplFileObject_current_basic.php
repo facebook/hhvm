@@ -6,4 +6,3 @@
 $s = new SplFileObject(__FILE__);
 echo $s->current();
 
-?>

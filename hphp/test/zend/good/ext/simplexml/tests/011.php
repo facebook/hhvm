@@ -26,5 +26,4 @@ echo "\n";
 echo "===BAZ1===\n";
 print $sxe->baz[1];
 echo "\n";
-?>
-===DONE===
+echo "===DONE===\n";

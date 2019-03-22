@@ -20,4 +20,3 @@ $uid = -99;
 var_dump( posix_getpwuid($uid) );
 
 echo "Done";
-?>

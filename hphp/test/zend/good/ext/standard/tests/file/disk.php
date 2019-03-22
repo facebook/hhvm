@@ -13,4 +13,3 @@ var_dump(disk_free_space("/some/path/here"));
 var_dump(disk_total_space("/some/path/here"));
 
 echo "Done\n";
-?>

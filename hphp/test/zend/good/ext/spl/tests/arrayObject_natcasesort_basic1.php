@@ -14,5 +14,4 @@ var_dump($ao1->natcasesort());
 var_dump($ao1);
 var_dump($ao2->natcasesort('blah'));
 var_dump($ao2);
-?>
-===DONE===
+echo "===DONE===\n";

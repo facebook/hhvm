@@ -1,4 +1,3 @@
 <?php
     var_dump(posix_times());
-?>
-===DONE===
+echo "===DONE===\n";

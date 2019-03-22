@@ -20,5 +20,4 @@ var_dump(ldap_sasl_bind($link, null, $passwd, 'DIGEST-MD5', "realm", "Manager", 
 
 // Invalid DN syntax
 var_dump(ldap_sasl_bind($link, "unexistingProperty=weirdValue,$user", $passwd));
-?>
-===DONE===
+echo "===DONE===\n";

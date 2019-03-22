@@ -40,6 +40,4 @@ $sxe = simplexml_load_string($xml);
 var_dump($sxe->getNamespaces());
 var_dump($sxe->getDocNamespaces());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

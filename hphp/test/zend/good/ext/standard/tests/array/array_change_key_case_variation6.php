@@ -21,5 +21,3 @@ echo "\n-- Pass a sub-arry as \$input argument --\n";
 var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
-?>
-

@@ -12,4 +12,3 @@ foreach ($doc->getElementsByTagName('book') as $book) {
     var_dump($book->getAttribute('is-hardback'));
 }
 
-?>

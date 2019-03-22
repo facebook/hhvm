@@ -22,4 +22,3 @@ session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 var_dump(session_module_name());
 
 ob_end_flush();
-?>

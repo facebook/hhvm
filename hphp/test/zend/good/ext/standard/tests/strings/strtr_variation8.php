@@ -81,4 +81,3 @@ for($index = 0; $index < count($replace_pairs_arr); $index++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
-?>

@@ -1,1 +1,1 @@
-<?php echo strlen("abcdef")?>
+<?php echo strlen("abcdef");

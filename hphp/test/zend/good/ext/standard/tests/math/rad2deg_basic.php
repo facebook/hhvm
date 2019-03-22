@@ -48,4 +48,3 @@ if (allowed_rounding_error($r3 ,359.99999998971 )) {
 else {
 	echo "Fail\n";
 }
-?>

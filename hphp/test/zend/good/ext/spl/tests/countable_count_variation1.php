@@ -49,4 +49,3 @@ try {
 	echo $e->getMessage();
 }
 
-?>

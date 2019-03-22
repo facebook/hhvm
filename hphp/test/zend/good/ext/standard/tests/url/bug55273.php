@@ -9,4 +9,3 @@ test('PHP');
 test('PH');
 test('P');
 
-?>

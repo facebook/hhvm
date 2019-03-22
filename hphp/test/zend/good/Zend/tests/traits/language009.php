@@ -28,4 +28,3 @@ class MyClass {
 $t = new MyClass;
 $t->foo();
 
-?>

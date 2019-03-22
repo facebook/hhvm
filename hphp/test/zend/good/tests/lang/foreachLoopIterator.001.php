@@ -61,5 +61,4 @@ foreach ($f as $k=>$v) {
 	
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

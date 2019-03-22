@@ -3,7 +3,5 @@
   	
   $pgrp = posix_getpgrp();
   
-  var_dump($pgrp); 
-  
-?>
-===DONE====
+  var_dump($pgrp);
+echo "===DONE====";

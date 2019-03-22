@@ -8,4 +8,3 @@ EOT;
 
 print "ok!\n";
 
-?>

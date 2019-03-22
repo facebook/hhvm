@@ -32,4 +32,3 @@ $talker = new Talker();
 $talker->smallTalk();
 $talker->bigTalk(1);
 $talker->bTalk(2);
-?>

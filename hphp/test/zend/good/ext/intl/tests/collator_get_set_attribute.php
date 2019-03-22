@@ -30,4 +30,3 @@ function ut_main()
 
 include( 'ut_common.inc' );
 ut_run();
-?>

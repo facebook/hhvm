@@ -8,4 +8,3 @@ echo $date->format(DATE_ISO8601), "\n";
 $date = new DateTime('2007-06-28');
 $date->modify('-2008 years');
 echo $date->format(DATE_ISO8601), "\n";
-?>

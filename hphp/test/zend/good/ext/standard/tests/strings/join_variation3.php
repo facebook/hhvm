@@ -50,4 +50,3 @@ for($index = 0; $index < count($pieces_arrays); $index ++) {
 }
  
 echo "Done\n";
-?>

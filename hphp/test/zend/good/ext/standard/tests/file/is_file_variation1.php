@@ -39,4 +39,3 @@ clearstatcache();
 unlink($file_path."/is_file_variation1.tmp");
 
 echo "\n*** Done ***";
-?>

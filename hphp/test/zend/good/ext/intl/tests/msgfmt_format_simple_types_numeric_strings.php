@@ -28,6 +28,4 @@ var_dump($mf->format(array(
 'i' => $ex,
 'j' => $ex,
 )));
-
-?>
-==DONE==
+echo "==DONE==";

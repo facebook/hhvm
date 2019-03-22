@@ -89,4 +89,3 @@ $obj->c = &$obj->a;
 check($obj);
 
 echo "Done";
-?>

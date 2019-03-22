@@ -20,5 +20,4 @@ foreach($sxe->content->file as $file)
 	var_dump($file['glob']);
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

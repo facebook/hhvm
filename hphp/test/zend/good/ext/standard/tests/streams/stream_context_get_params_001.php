@@ -18,4 +18,3 @@ var_dump(stream_context_get_options($ctx));
 var_dump(stream_context_get_params($ctx));
 var_dump(stream_context_get_options($ctx));
 
-?>

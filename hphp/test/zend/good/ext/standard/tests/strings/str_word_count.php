@@ -40,4 +40,3 @@ var_dump(str_word_count("-foo-", 2));
 var_dump(str_word_count("-foo-", 2, "-"));
 
 echo "Done\n";
-?>

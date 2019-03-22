@@ -9,4 +9,3 @@ imagejpeg($im, '/tmp/foo' . chr(0) . 'bar');
 
 // Free up memory
 imagedestroy($im);
-?>

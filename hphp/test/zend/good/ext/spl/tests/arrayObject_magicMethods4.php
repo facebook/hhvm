@@ -66,4 +66,3 @@ echo "  Original wrapped object:\n";
 var_dump($obj);
 echo "  Wrapping ArrayObject:\n";
 var_dump($ao);
-?>

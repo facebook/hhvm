@@ -32,4 +32,3 @@ var_dump($a, count(foo::$bar), test()->whatever);
 
 print "\n";
 
-?>

@@ -31,5 +31,4 @@ foreach($hex_values as $c) {
 	$iterator++;
 }
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

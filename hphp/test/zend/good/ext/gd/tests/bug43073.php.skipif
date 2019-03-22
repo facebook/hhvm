@@ -4,4 +4,3 @@
 
 	include dirname(__FILE__) . '/func.inc';
 	if(version_compare(get_freetype_version(), '2.4.10') >= 0) die('skip for freetype < 2.4.10');
-?>

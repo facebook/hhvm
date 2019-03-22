@@ -28,4 +28,3 @@ foreach($needles as $needle) {
   var_dump( strrchr($blank_line, $needle) );
 }
 echo "*** Done ***";
-?>

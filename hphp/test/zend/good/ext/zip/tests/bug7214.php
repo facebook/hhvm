@@ -10,4 +10,3 @@ if (strlen($contents) == zip_entry_filesize($entry)) {
 	echo "failed";
 }
 
-?>

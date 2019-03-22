@@ -7,4 +7,3 @@ if (ZendGoodExtMysqliTestsConnectInc::$skip_on_connect_failure) {
 		die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 	mysqli_close($link);
 }
-?>

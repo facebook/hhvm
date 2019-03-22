@@ -11,4 +11,3 @@ class bar {
 new bar(null);
 new bar(new \stdclass);
 
-?>

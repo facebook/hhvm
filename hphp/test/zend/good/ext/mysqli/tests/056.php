@@ -11,4 +11,3 @@
 	$foo->connect($host, $user, $passwd, $db, $port, $socket);
 	$foo->close();
 	printf("%s\n", $foo->test());
-?>

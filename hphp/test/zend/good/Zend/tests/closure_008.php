@@ -11,4 +11,3 @@ echo replace_spaces("1 2 3\n");
 echo replace_spaces("1  2  3\n");
 echo replace_spaces("1   2   3\n");
 echo "Done\n";
-?>

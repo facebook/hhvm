@@ -23,4 +23,3 @@ var_dump($foo->b()[0]);
 var_dump($foo->b()[1]);
 var_dump($foo->b()[2]);
 
-?>

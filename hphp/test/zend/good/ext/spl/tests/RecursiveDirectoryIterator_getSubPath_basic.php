@@ -17,9 +17,7 @@ asort(&$list);
 foreach ($list as $item) {
 	echo $item . "\n";
 }
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 function rrmdir($dir) {
     foreach(glob($dir . '/*') as $file) {
         if(is_dir($file)) {
@@ -34,4 +32,3 @@ function rrmdir($dir) {
 
 $targetDir = __DIR__.DIRECTORY_SEPARATOR . "depth01";
 rrmdir($targetDir);
-?>

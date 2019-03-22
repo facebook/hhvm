@@ -18,10 +18,11 @@ $link = ldap_connect_and_bind($host, $port, ZendGoodExtLdapTestsLdapUnbindVariat
 ldap_set_rebind_proc($link, "rebind_proc");
 
 var_dump(ldap_unbind($link));
+
 abstract final class ZendGoodExtLdapTestsLdapUnbindVariation {
   public static $user;
   public static $passwd;
   public static $protocol_version;
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

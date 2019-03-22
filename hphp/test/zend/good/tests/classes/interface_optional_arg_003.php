@@ -9,4 +9,3 @@ class C implements I {
 
 $c = new C;
 $c->f();
-?>

@@ -1,1 +1,1 @@
-<?php if (!extension_loaded("simplexml")) print "skip SimpleXML extension required"; ?>
+<?php if (!extension_loaded("simplexml")) print "skip SimpleXML extension required";

@@ -5,4 +5,3 @@ class test {
 }
 
 echo "Done\n";
-?>

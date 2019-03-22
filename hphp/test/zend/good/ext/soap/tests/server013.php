@@ -32,4 +32,3 @@ $HTTP_RAW_POST_DATA = <<<EOF
 EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>

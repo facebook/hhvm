@@ -30,4 +30,3 @@ foreach ($floats as $float => $dec) {
 	var_dump($out);
 }
 
-?>

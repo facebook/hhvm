@@ -35,4 +35,3 @@ var_dump( array_intersect($arr_default_keys, $arr_associative, $arr3) );
 var_dump( array_intersect($arr_associative, $arr_default_keys, $arr3, $arr_associative) );
 
 echo "Done";
-?>

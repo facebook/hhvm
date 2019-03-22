@@ -7,4 +7,3 @@ $cdata = $document->createCDATASection('test');
 $root->appendChild($cdata);
 $cdata->deleteData(1, 10);
 var_dump($cdata->data);
-?>

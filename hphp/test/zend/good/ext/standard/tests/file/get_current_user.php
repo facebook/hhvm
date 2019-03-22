@@ -4,4 +4,3 @@ try { var_dump(get_current_user("blah")); } catch (Exception $e) { echo "\n".'Wa
 var_dump(get_current_user());
 
 echo "Done\n";
-?>

@@ -14,5 +14,4 @@ echo "*** Testing getcwd() : error conditions ***\n";
 echo "\n-- Testing getcwd() function with one argument --\n";
 $extra_arg = 10;
 try { var_dump( getcwd($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

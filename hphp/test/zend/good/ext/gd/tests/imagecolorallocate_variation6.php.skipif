@@ -5,4 +5,3 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
-?>

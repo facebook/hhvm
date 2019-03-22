@@ -9,4 +9,3 @@ declare (ticks=1) {
 c:
     print "ok!\n";
     goto b;
-?>

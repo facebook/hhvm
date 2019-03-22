@@ -17,4 +17,3 @@ var_dump(json_encode("руссиш"));
 
 
 echo "Done\n";
-?>

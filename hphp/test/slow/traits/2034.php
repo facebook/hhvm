@@ -31,4 +31,3 @@ echo "\nCalling trait_exists() on existing trait with autoload unspecified:\n";
 var_dump( trait_exists('MyTrait') );
 
 echo "Done";
-?>

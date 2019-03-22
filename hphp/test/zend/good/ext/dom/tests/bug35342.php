@@ -6,4 +6,3 @@ $nodelist = $dom->getElementsByTagName("foo");
 
 var_dump($nodelist->length, isset($nodelist->length), isset($nodelist->foo));
 var_dump(empty($nodelist->length), empty($nodelist->foo));
-?>

@@ -6,4 +6,3 @@
 if (setlocale(LC_MONETARY, 'en_US') === false) {
 	die('skip en_US locale not available');
 }
-?>

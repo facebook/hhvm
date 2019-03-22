@@ -21,4 +21,3 @@ $new_child = $document->getElementsByTagName('spam')->item(0);
 $parent = $document->getElementsByTagName('foo')->item(0);
 $parent->replaceChild($new_child, $parent->firstChild);
 echo "Children are inserted in order:\n" . $document->saveXML();
-?>

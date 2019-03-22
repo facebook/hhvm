@@ -8,4 +8,3 @@ $arg_0 = 9.0;
 
 var_dump(sqrt($arg_0));
 
-?>

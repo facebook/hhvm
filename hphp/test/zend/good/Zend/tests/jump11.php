@@ -16,4 +16,3 @@ class foobar {
 }
 
 new foobar;
-?>

@@ -9,4 +9,3 @@ $regex .= 'fo+bar@';
 var_dump(preg_match($regex, 'foobar'));
 echo "Done!\n";
 
-?>

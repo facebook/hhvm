@@ -14,4 +14,3 @@ $tests = array(
 foreach ($tests as $v) {
 	var_dump(array_product($v));
 }
-?>

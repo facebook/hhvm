@@ -37,4 +37,3 @@ var_dump($a->getSize());
 
 print "ok\n";
 
-?>

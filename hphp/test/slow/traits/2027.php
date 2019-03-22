@@ -10,5 +10,4 @@ trait caseSensitivityTest {
 }
 var_dump(trait_exists('casesensitivitytest'));
 
-echo "Done"
-?>
+echo "Done\n";

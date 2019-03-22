@@ -103,4 +103,3 @@ try { var_dump( doubleval(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Wa
 echo "\nDone\n";
 
 
-?>

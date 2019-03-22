@@ -18,4 +18,3 @@ $t->show();
 $t->error();
 
 echo "Done\n"; // shouldn't be displayed
-?>

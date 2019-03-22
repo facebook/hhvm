@@ -34,4 +34,3 @@ try {
   echo 'Third OK'. PHP_EOL;
 }
 
-?>

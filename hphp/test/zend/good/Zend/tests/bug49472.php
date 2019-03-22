@@ -19,4 +19,3 @@ class FooBar extends Foo implements ia {
 
 new FooBar;
 
-?>

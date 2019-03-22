@@ -6,4 +6,3 @@ var_dump(
 	unpack("A*", "foo\0\rbar\0 \t\r\n"),
 	unpack("A4", "foo\0\rbar\0 \t\r\n")
 );
-?>

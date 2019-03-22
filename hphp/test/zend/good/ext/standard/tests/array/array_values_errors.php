@@ -10,4 +10,3 @@ var_dump( array_values(100) );  // Integer
 var_dump( array_values(new stdclass) );  // object
 
 echo "Done\n";
-?>

@@ -71,5 +71,4 @@ $props = array_keys(get_class_vars('ReflectionClassEx'));
 sort(&$props);
 var_dump($props);
 var_dump($r->name);
-?>
-===DONE===
+echo "===DONE===\n";

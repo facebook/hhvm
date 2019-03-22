@@ -10,4 +10,3 @@ $books = $s->book;
 foreach ($books as $book) {
 	echo "{$book->title} was written by {$book->author}\n";
 }
-?>

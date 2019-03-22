@@ -15,4 +15,3 @@
 
 	var_dump($cs);
 	print "done!";
-?>

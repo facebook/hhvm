@@ -19,4 +19,3 @@ imagesavealpha($img, 1);
 
 $c = imagecolorat($img, 0,0);
 printf("%X", $c);
-?>

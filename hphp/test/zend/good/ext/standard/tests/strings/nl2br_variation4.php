@@ -24,4 +24,3 @@ foreach( $strings as $str ){
   var_dump(nl2br($str) );
 }
 echo "Done";
-?>

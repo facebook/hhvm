@@ -7,4 +7,3 @@ var_dump($ext['extensions']);
 	placeholders to not to duplicate the test. When more diffs come, a duplication would
 	be probably a better solution.
 */
-?>

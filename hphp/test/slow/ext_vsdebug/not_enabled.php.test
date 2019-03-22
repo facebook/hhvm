@@ -1,1 +1,6 @@
-I wait for no one!
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  echo "I wait for no one!\n";
+}

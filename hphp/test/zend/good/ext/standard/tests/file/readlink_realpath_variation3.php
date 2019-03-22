@@ -30,4 +30,3 @@ for($loop_counter = 0; $loop_counter < count($link_string); $loop_counter++) {
 }
 
 echo "Done\n";
-?>

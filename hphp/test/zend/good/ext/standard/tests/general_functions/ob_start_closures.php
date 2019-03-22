@@ -21,5 +21,4 @@ ob_end_flush();
 
 echo $str1, $str2;
 
-?>
-===DONE===
+echo "===DONE===\n";

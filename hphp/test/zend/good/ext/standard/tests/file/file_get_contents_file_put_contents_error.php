@@ -32,11 +32,8 @@ var_dump( file_get_contents($file_path."/file_put_contents1.tmp", FALSE, NULL, 0
 fclose($file_handle);
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents.tmp");
 unlink($file_path."/file_put_contents1.tmp");
 
-?>

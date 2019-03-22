@@ -9,4 +9,3 @@
   echo "\n";
   echo $registers[2];
   echo "\n";
-?>

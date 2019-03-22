@@ -7,4 +7,3 @@ textdomain ("messages");
 echo gettext("Basic test"), "\n";
 echo _("Basic test"), "\n";
 
-?>

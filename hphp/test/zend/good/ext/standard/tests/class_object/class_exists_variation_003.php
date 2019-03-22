@@ -8,5 +8,4 @@
 class caseSensitivityTest {}
 var_dump(class_exists('casesensitivitytest'));
 
-echo "Done"
-?>
+echo "Done";

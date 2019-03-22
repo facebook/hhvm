@@ -12,4 +12,3 @@
 	var_dump($link->query("show variables like 'character_set_connection'")->fetch_row());
 
 	print "done!";
-?>

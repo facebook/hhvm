@@ -44,5 +44,3 @@ echo "\$class2:\n";
 var_dump($class2);
 
 echo "Done";
-?>
-

@@ -13,4 +13,3 @@ var_dump($m);
 
 var_dump(preg_replace_callback('|(?P<1>blub)|', 'callback', 'bla blub blah'));
 
-?>

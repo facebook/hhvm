@@ -33,4 +33,3 @@ echo "\n\$copied_array\n";
 var_dump($copied_array);
 
 echo "Done";
-?>

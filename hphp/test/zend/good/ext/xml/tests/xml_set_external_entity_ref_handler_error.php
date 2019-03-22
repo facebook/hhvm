@@ -21,4 +21,3 @@ echo "\n-- Testing xml_set_external_entity_ref_handler() function with less than
 try { var_dump( xml_set_external_entity_ref_handler(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

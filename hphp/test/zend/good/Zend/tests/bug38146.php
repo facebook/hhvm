@@ -10,4 +10,3 @@ $f = new foo();
 foreach($f->bar as $key => $value) {
     print "$key => $value\n";
 }
-?>

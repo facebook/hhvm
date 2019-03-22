@@ -47,4 +47,3 @@ namespace {
     Foo\Bar\Three::checkCompileTime();
 }
 
-?>

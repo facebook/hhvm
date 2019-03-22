@@ -7,4 +7,3 @@
 if (!extension_loaded("xml")) {
   die('skip xml extension not available');
 }
-?>

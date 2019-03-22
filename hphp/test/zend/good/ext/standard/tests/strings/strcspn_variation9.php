@@ -47,5 +47,4 @@ foreach($strings as $str) {
       var_dump( strcspn($str,$mask) );
 };
 
-echo "Done"
-?>
+echo "Done";

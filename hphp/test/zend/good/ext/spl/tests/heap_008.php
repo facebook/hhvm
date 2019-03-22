@@ -7,6 +7,4 @@ $h->insert(0);
 $h->insert(4);
 
 var_dump($h);
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

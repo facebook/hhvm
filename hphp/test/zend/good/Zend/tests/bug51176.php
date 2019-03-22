@@ -22,4 +22,3 @@ class Foo
 $foo = new Foo();
 $foo->start();
 
-?>

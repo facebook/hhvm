@@ -47,4 +47,3 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
-?>

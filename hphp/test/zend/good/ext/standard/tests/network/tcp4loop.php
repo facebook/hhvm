@@ -32,4 +32,3 @@
 	fclose($client);
 	fclose($socket);
 	fclose($server);
-?>

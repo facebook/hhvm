@@ -19,5 +19,4 @@ foreach ($sxe->children('http://www.example.com/hot') as $element_name => $eleme
     print "$element_name is $element->name\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

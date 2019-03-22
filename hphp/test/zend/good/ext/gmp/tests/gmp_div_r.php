@@ -20,4 +20,3 @@ var_dump(gmp_div_r($fp, $fp));
 var_dump(gmp_div_r(array(), array()));
 
 echo "Done\n";
-?>

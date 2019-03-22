@@ -7,15 +7,11 @@ foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 	echo "$k=>$v\n";
 }
 
-?>
-===KEY===
-<?php
+echo "===KEY===\n";
 
 foreach(new RegexIterator(new ArrayIterator($ar), "/2/", 0, RegexIterator::USE_KEY) as $k => $v)
 {
 	echo "$k=>$v\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

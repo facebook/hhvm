@@ -4,4 +4,3 @@
  */
 $image  = exif_read_data(dirname(__FILE__).'/test5.jpg','',true,false);
 var_dump($image['IFD0']);
-?>

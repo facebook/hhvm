@@ -10,6 +10,3 @@ echo "*** Testing error conditions ***\n";
 try { debug_zval_dump(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-
-?>
-

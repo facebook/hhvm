@@ -17,4 +17,3 @@ foreach ($classes as $class) {
 	}
 }
 
-?>

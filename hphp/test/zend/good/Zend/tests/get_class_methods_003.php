@@ -31,4 +31,3 @@ class B extends C implements A {
 
 new B;
 
-?>

@@ -46,4 +46,3 @@ foreach($valid_ints as $int_value) {
 };
 
 echo "Done";
-?>

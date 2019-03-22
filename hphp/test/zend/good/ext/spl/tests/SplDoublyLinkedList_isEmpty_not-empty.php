@@ -9,4 +9,3 @@
 	//var_dump($dll);
 	
 	var_dump($dll->isEmpty());
-?>

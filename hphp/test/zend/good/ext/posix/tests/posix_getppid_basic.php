@@ -3,7 +3,5 @@
   	
   $ppid = posix_getppid();
   
-  var_dump($ppid); 
-  
-?>
-===DONE====
+  var_dump($ppid);
+echo "===DONE====";

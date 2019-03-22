@@ -6,4 +6,3 @@ var_dump($b);
 var_dump(strspn($a,$b));
 var_dump(strspn($a,$b,2));
 var_dump(strspn($a,$b,2,3));
-?>

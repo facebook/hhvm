@@ -27,5 +27,4 @@ var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $zenit
 var_dump( date_sunrise($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $zenith, $gmt_offset) );
 var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $zenith, $gmt_offset) );
 
-?>
-===DONE===
+echo "===DONE===\n";

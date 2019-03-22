@@ -102,5 +102,4 @@ foreach($inputs as $variation =>$gmtOffset) {
 // closing the resource
 fclose( $file_handle );
 
-?>
-===DONE===
+echo "===DONE===\n";

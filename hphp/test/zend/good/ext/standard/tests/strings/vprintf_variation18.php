@@ -64,5 +64,4 @@ foreach($args_array as $args) {
   $counter++;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -25,4 +25,3 @@ $im->importImagePixels(0, 0, $width, $height, "RGB", Imagick::PIXEL_CHAR, $pixel
 var_dump($width, $height);
 var_dump($im->getImageGeometry());
 
-?>

@@ -203,4 +203,3 @@ $ini_array = parse_ini_string($parse_string, TRUE);
 print_r($ini_array);
 
 echo "*** Done **\n";
-?>

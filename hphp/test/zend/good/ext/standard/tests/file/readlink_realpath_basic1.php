@@ -48,9 +48,7 @@ foreach($linknames as $link) {
 }
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $name_prefix = $file_path."/readlink_realpath_basic1";
 unlink("$name_prefix/home/test/readlink_realpath_basic1.tmp");
@@ -61,4 +59,3 @@ unlink("$name_prefix/home/readlink_realpath_basic1_link.tmp");
 rmdir("$name_prefix/home/test/");
 rmdir("$name_prefix/home/");
 rmdir("$name_prefix/");
-?>

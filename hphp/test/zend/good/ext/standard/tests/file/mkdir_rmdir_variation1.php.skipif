@@ -12,4 +12,3 @@ if(fileowner($filename) == 0) {
 }
 
 unlink($filename);
-?>

@@ -6,5 +6,4 @@ $replace = array('A:$0', 'B:$0', 'C:$0');
 
 var_dump(preg_filter($pattern, $replace, $subject));
 
-?>
-===DONE===
+echo "===DONE===\n";

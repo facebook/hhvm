@@ -9,4 +9,3 @@ $a = $b;
 var_dump(error_get_last());
 
 echo "Done\n";
-?>

@@ -23,4 +23,3 @@ foreach ($filters as $filter) {
 
 filter_test(array($filters[0], $filters[1]));
 
-?>

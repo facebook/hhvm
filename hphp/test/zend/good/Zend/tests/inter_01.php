@@ -10,4 +10,3 @@ class foobar implements foo {
         var_dump($x);
     }    
 }
-?>

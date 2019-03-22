@@ -10,5 +10,4 @@ try {
 } catch (InvalidArgumentException $e) {
 	echo 'InvalidArgumentException thrown';
 }
-echo 'no Exception thrown'
-?>
+echo 'no Exception thrown';

@@ -20,4 +20,3 @@ class overloaded
 $test = new overloaded();
 $test->a++;     // __get(), then __set()
 ++$test->a;
-?>

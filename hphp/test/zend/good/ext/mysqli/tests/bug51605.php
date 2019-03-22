@@ -23,4 +23,3 @@
 	echo "closed for third time\n";
 
 	print "done!";
-?>

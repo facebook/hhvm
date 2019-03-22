@@ -23,4 +23,3 @@
 		printf("[005] Expecting integer/any non-zero, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
-?>

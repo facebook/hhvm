@@ -10,4 +10,3 @@ print "\$string_after looks like: $string_after, with metacharacters and / (set 
 $string1 = 'testing - /this *-has \ metacharacters^ in $ should   work';
 var_dump(preg_match('/^[tT]\w{6} - ' . preg_quote($string_before, '/') . ' [a-z]*\s*work$/', $string1, &$matches1));
 var_dump($matches1);
-?>

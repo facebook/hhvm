@@ -11,5 +11,4 @@ $intlcal = new IntlGregorianCalendar(2012, 1, 29, 16, 7, 8);
 var_dump($intlcal->getTime(), (float)strtotime('2012-02-29 16:07:08') * 1000);
 
 var_dump($intlcal->getType());
-?>
-==DONE==
+echo "==DONE==";

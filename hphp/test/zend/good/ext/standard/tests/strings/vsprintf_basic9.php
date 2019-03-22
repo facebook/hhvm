@@ -30,4 +30,3 @@ var_dump( vsprintf($format3,$arg3) );
 var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
-?>

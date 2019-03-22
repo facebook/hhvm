@@ -71,4 +71,3 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 }
 
 echo "Done\n";
-?>

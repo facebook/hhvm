@@ -11,4 +11,3 @@ echo stream_get_contents($tmp, 2, -1), "--\n";
 
 try { unlink($tmp); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

@@ -20,5 +20,4 @@ echo "\n-- Testing imagecolorstotal() function with a invalid resource\n";
 var_dump( imagecolorstotal($im) );
 
 fclose($im); 
-?>
-===DONE===
+echo "===DONE===\n";

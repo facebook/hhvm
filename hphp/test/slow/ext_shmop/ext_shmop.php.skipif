@@ -2,4 +2,3 @@
 if (!extension_loaded("shmop")) {
   die("skip shmop() extension not available");
 }
-?>

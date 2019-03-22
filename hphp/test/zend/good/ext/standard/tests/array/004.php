@@ -14,4 +14,3 @@ var_dump($data);
 
 natcasesort(&$data);
 var_dump($data);
-?>

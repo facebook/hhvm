@@ -34,5 +34,3 @@ if ($b == $string_all_mb) { // Japanese characters only - should not be any conv
 }
 
 echo "Done";
-?>
-

@@ -47,5 +47,4 @@ foreach($hex_values2 as $c) {
 	var_dump(ctype_xdigit($c));
 }
 setlocale(LC_CTYPE, $orig); 
-?>
-===DONE===
+echo "===DONE===\n";

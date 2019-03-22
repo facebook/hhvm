@@ -78,4 +78,3 @@ for ($x = 0; $x < $mylen; $x++) {
 	$node->setIdAttributeNS('urn::dummyns', 'idatt', FALSE);
 }
 echo 'Element Name: '.(($elem = $dom->getElementByID('n3'))?$elem->nodeName:'Not Found')."\n";
-?>

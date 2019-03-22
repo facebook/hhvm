@@ -54,4 +54,3 @@ echo "\nI1:\n";
 var_dump(class_uses('I1'));
 $ri1 = new ReflectionClass('I1');
 var_dump($ri1->getTraitNames());
-?>

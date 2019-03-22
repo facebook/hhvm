@@ -22,4 +22,3 @@ echo "\n-- Testing mb_strtolower() function with zero arguments --\n";
 try { var_dump( mb_strtolower() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

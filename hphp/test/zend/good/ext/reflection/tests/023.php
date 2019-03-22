@@ -11,4 +11,3 @@ class C2 extends C1 {
 }
 $class = new ReflectionClass("C2");
 var_dump($class->getDefaultProperties());
-?>

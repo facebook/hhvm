@@ -16,4 +16,3 @@ class Foo
 session_start();
 $_SESSION['foo'] = new Foo;
 
-?>

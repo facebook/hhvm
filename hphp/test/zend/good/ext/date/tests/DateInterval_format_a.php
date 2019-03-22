@@ -7,4 +7,3 @@ $interval = $date1->diff($date2);
 
 echo $interval->format('a=%a') . "\n";
 
-?>

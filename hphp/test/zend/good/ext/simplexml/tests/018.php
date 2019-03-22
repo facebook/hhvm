@@ -38,4 +38,3 @@ traverse_xml("",simplexml_load_string($xml));
 echo "----------\n";
 traverse_xml("",simplexml_load_string($xml1));
 echo "---Done---\n";
-?>

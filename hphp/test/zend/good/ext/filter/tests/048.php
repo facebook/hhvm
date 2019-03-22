@@ -28,4 +28,3 @@ var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_
 
 $s = hex_inc($s);
 var_dump(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX)));
-?>

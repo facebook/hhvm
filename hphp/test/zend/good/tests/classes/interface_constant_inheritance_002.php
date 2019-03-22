@@ -8,4 +8,3 @@ class C implements I {
 }
 
 echo "Done\n";
-?>

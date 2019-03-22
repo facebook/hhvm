@@ -29,5 +29,4 @@ foreach($valid_nulls as $key => $null_value) {
 	var_dump( var_export( $null_value, true) );
 	echo "\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

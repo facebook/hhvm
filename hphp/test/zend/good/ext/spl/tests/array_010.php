@@ -57,6 +57,4 @@ unset($obj[7]);
 unset($obj['8th']);
 var_dump($obj->getArrayCopy());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

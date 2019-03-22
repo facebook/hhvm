@@ -39,4 +39,3 @@ $rc = new ReflectionClass('Foo');
 foreach($rc->getMethods() as $m) {
 	var_dump($m->isGenerator());
 }
-?>

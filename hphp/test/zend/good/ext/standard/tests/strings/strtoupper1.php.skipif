@@ -8,4 +8,3 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip need "en_US.UTF-8" locale');
   }
 }
-?>

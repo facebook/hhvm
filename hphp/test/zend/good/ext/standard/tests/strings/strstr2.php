@@ -20,4 +20,3 @@ var_dump(strstr($email, 'E', 1));
 
 var_dump(strstr('', ' ', ''));
 
-?>

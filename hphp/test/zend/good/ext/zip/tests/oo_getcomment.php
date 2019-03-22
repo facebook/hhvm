@@ -17,4 +17,3 @@ try { echo $zip->getCommentName() . "\n"; } catch (Exception $e) { echo "\n".'Wa
 
 $zip->close();
 
-?>

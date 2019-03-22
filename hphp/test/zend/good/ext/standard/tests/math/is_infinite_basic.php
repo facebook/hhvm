@@ -18,4 +18,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = is_infinite($values[$i]);
 	var_dump($res);		
 }
-?>

@@ -38,5 +38,4 @@ catch (Exception $e)
 }
 
 print_R($foo);
-?>
-===DONE===
+echo "===DONE===\n";

@@ -9,4 +9,3 @@
 	imagePng($image, $dest);
 	echo md5_file($dest) . "\n";
 	@unlink($dest);
-?>

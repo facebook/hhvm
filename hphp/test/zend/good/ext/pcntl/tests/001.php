@@ -60,4 +60,3 @@ print "Staring wait.h tests....";
 test_exit_waits();
 test_exit_signal();
 test_stop_signal();
-?>

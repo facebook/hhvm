@@ -20,4 +20,3 @@ class A extends foo {
 	}
 }
 
-?>

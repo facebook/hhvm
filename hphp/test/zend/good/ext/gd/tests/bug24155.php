@@ -15,4 +15,3 @@
 	echo "$col\n";
 
 	@unlink($dest);
-?>

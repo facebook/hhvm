@@ -10,5 +10,4 @@ var_dump(
 		intlcal_set_first_day_of_week($intlcal, IntlCalendar::DOW_WEDNESDAY),
 		$intlcal->getFirstDayOfWeek()
 );
-?>
-==DONE==
+echo "==DONE==";

@@ -12,4 +12,3 @@ if($input === stripslashes(addslashes($input))) {
 	echo "FAILED\n";
 }
 
-?>

@@ -20,4 +20,3 @@ var_dump($class->newInstanceArgs(array('test')));
 
 
 echo "Done\n";
-?>

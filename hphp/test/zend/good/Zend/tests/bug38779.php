@@ -24,4 +24,3 @@ stream_wrapper_register('Loader', 'Loader');
 require 'Loader://qqq.php';
 
 echo "Done\n";
-?>

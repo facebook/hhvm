@@ -20,4 +20,3 @@ class TraitsTest {
 }
 
 $t = new TraitsTest;
-?>

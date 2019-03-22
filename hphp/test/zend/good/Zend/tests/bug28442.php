@@ -40,5 +40,4 @@ var_dump(ClassA::$prop);
 var_dump(ClassB::$prop);
 var_dump(ClassC::$prop);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -44,4 +44,3 @@ echo date( DateTime::ISO8601, $day ), "\n";
 $day = strtotime( "third Friday Nov 2007" );
 echo date( DateTime::ISO8601, $day ), "\n\n";
 
-?>

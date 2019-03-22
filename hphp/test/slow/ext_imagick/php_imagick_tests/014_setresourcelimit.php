@@ -7,4 +7,3 @@ $imagick->setResourceLimit(Imagick::RESOURCETYPE_MEMORY, 64);
 
 echo 'success';
 
-?>

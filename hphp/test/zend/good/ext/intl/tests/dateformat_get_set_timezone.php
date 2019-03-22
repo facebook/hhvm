@@ -32,5 +32,5 @@ d($df);
 abstract final class ZendGoodExtIntlTestsDateformatGetSetTimezone {
   public static $ts;
 }
-?>
-==DONE==
+
+echo "==DONE==";

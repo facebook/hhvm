@@ -14,4 +14,3 @@ register_shutdown_function('shutdown');
 	
 new CompileErrorClass();
 
-?>

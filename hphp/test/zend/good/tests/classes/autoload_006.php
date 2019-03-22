@@ -17,5 +17,4 @@ unset($o);
 var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
-?>
-===DONE===
+echo "===DONE===\n";

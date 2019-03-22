@@ -47,4 +47,3 @@ foreach ($file_modes as $file_mode ) {
 }
 
 echo "Done\n";
-?>

@@ -6,4 +6,3 @@ function foo($str, $charset) {
 
 foo("abc", "ASCII");
 foo("ÆüËÜ¸ì EUC-JP", "EUC-JP");
-?>

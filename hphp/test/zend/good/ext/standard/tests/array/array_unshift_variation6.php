@@ -69,4 +69,3 @@ var_dump( array_unshift(&$temp_array, $var, "hello", 'world') );  // sub array
 var_dump($temp_array);
 
 echo "Done";
-?>

@@ -13,4 +13,3 @@ var_dump($im->getImageLength());
 echo "OK" , PHP_EOL;
 
 
-?>

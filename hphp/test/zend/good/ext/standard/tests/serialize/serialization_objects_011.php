@@ -72,4 +72,3 @@ echo "\n\n-- Test instance of C --\n";
 prettyPrint(new C);
 
 echo "Done";
-?>

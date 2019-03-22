@@ -4,4 +4,3 @@
 	if (gethostbyname($addr) != $addr) {
 		print "skip catch all dns";
 	}
-?>

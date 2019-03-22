@@ -31,4 +31,3 @@ for($class = 'A'; $class <= 'F'; $class ++) {
   }
   print("\n");
 }
-?>

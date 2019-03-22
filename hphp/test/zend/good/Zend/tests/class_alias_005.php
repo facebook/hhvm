@@ -19,4 +19,3 @@ class bar extends baz {
 
 new bar;
 
-?>

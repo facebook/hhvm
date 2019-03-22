@@ -22,4 +22,3 @@ $o = new MyClass();
 $o->hello();
 $o->world();
 
-?>

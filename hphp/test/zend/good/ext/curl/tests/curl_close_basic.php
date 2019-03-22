@@ -2,5 +2,4 @@
 $ch = curl_init();
 curl_close($ch);
 var_dump($ch);
-?>
-===DONE===
+echo "===DONE===\n";

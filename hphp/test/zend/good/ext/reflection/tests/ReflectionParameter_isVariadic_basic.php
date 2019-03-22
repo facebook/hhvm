@@ -13,4 +13,3 @@ var_dump($r2->getParameters()[0]->isVariadic());
 var_dump($r3->getParameters()[0]->isVariadic());
 var_dump($r3->getParameters()[1]->isVariadic());
 
-?>

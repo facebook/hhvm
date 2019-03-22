@@ -16,4 +16,3 @@ class bar implements baz {
 
 new bar;
 
-?>

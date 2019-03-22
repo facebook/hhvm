@@ -16,4 +16,3 @@ var_dump( array_change_key_case( array("ONE" => 1, "one" => 2, "One" => 3), CASE
 var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) ); 
 
 echo "end\n";
-?>

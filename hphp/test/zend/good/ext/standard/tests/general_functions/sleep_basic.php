@@ -28,5 +28,4 @@ if ($time >= $sleeplow) {
 } else {
 	echo "TEST FAILED - time is ${time} secs and sleep was ${sleeptime} secs\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

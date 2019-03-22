@@ -24,4 +24,3 @@ echo "\n-- Testing strncasecmp() function with invalid argument --";
 $len = -10;
 var_dump( strncasecmp($str1, $str2, $len) );
 echo "*** Done ***\n";
-?>

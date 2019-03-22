@@ -6,4 +6,3 @@ $db->exec("INSERT INTO foo (id, bar) VALUES (1, 'This is a test')");
 
 try { $stmt = $db->prepare(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

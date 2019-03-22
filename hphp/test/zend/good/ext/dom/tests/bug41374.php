@@ -19,4 +19,3 @@ var_dump($foo->wholeText == $bar->wholeText);
 $baz = $bar->nextSibling->nextSibling;
 
 var_dump($baz->wholeText === $foo->wholeText);
-?>

@@ -16,14 +16,10 @@ var_dump( symlink( $filename, $symlink ) );
 var_dump( lchown( $filename, $uid ) );
 var_dump( fileowner( $symlink ) === $uid );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
 $symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
 unlink($filename);
 unlink($symlink);
 
-?>

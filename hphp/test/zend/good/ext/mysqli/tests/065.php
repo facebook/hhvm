@@ -35,4 +35,3 @@
 	$mysql->close();
 
 	print "done!";
-?>

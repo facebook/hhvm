@@ -9,4 +9,3 @@ namespace Fiz\Biz\Buz {
         }
     };
 }
-?>

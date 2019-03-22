@@ -29,4 +29,3 @@ $ftruncate_test = "";
 $obj = New SplFileObject("SPLtest://ftruncate_test");
 var_dump($obj->fflush());
 
-?>

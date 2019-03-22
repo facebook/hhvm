@@ -14,4 +14,3 @@ var_dump(proc_get_status($process));
 
 echo "Done!\n";
 
-?>

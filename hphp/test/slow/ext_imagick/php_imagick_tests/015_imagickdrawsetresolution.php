@@ -17,4 +17,3 @@ var_dump($small['textWidth'] < $large['textWidth']);
 
 echo "OK\n";
 
-?>

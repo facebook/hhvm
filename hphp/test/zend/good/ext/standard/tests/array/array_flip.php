@@ -11,4 +11,3 @@ $trans = array("a" => 1,
                2 => "i");
 $trans = array_flip($trans);
 var_dump($trans);
-?>

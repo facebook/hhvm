@@ -48,4 +48,3 @@
 
 	var_dump($test);
 	print "done!";
-?>

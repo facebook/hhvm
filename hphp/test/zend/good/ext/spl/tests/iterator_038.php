@@ -6,5 +6,4 @@ foreach(new NoRewindIterator(new ArrayIterator(array('Hello'=>0, 'World'=>1))) a
 	var_dump($k);
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

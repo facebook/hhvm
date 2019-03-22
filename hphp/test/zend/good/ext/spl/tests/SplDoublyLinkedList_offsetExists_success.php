@@ -19,4 +19,3 @@ if($list->offsetExists(1) === true) {
 if($list->offsetExists(2) === false) {
 	echo "PASS\n";
 }
-?>

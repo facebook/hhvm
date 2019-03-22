@@ -29,4 +29,3 @@ foreach($char_values as $char_value) {
 };
 
 echo "Done";
-?>

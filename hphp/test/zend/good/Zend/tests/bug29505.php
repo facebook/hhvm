@@ -7,5 +7,4 @@ class Test {
 
 var_dump(get_class_vars('Test'));
 
-?>
-===DONE===
+echo "===DONE===\n";

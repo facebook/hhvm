@@ -11,4 +11,3 @@ var_dump(date_default_timezone_set("Zulu"));
 
 echo "done\n";
 
-?>

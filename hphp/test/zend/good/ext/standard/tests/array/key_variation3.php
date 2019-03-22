@@ -26,5 +26,4 @@ echo "\$array1: ";
 var_dump(key(&$array1));
 echo "\$array2: ";
 var_dump(key(&$array2));
-?>
-===DONE===
+echo "===DONE===\n";

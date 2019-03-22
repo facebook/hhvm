@@ -7,4 +7,3 @@
     echo "$k=>$v\n";
     var_dump($k);
   }
-?>

@@ -67,4 +67,3 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 } // end of for - mode_counter
 
 echo "Done\n";
-?>

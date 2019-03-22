@@ -28,5 +28,4 @@ function too_few_parameters ($val1) {
 }
 var_dump(array_udiff_uassoc($arr1, $arr2, 'too_few_parameters', 'too_few_parameters'));
 
-?>
-===DONE===
+echo "===DONE===\n";

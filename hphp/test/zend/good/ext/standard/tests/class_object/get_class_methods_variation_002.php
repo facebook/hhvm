@@ -14,4 +14,3 @@ class caseSensitivityTest {
 var_dump( get_class_methods('CasesensitivitytesT') );
 
 echo "Done";
-?>

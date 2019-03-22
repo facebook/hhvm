@@ -13,4 +13,3 @@ printf("Timestamp(%d, %d)\n", $ts->sec, $ts->inc);
 
 $ts = new MongoTimestamp();
 printf("Timestamp(%d, %d)\n", $ts->sec, $ts->inc);
-?>

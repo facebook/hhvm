@@ -23,4 +23,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = bindec($values[$i]);
 	var_dump($res);
 }
-?>

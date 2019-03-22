@@ -12,5 +12,4 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 var_dump( mail($to, $subject, $message) );
-?>
-===DONE===
+echo "===DONE===\n";

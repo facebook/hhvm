@@ -48,5 +48,4 @@ echo $childClass1->testStaticFunction() . "\n";
 echo $childClass2->testStaticVar() . "\n";
 echo $childClass2->testClassConst() . "\n";
 echo $childClass2->testStaticFunction() . "\n";
-?>
-==DONE==
+echo "==DONE==";

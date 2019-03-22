@@ -28,6 +28,4 @@ function too_few_parameters ($val1) {
 }
 var_dump(array_uintersect_assoc($arr1, $arr2, 'too_few_parameters'));
 
-?>
-
-===DONE===
+echo "===DONE===\n";

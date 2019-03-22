@@ -28,4 +28,3 @@ foreach($needles as $needle) {
   var_dump( strrchr($quote_char_str, $needle) );
 }
 echo "*** Done ***";
-?>

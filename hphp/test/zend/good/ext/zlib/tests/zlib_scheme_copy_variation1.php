@@ -22,5 +22,4 @@ else {
    echo "FAILED: Copy not identical";
 }
 unlink($outputFileName);
-?>
-===DONE===
+echo "===DONE===\n";

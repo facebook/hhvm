@@ -6,4 +6,3 @@ declare(strict_types=0);
 require 'weak_include_strict_2.inc';
 
 // calls within that file should stay strict, despite being included by weak file
-?>

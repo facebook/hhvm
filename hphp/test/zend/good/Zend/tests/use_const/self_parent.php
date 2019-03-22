@@ -5,4 +5,3 @@ namespace {
     use const parent as bar;
 }
 
-?>

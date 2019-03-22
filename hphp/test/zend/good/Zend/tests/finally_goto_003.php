@@ -7,4 +7,3 @@ test:
     }
 }
 echo "okey";
-?>

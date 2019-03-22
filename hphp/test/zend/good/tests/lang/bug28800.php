@@ -3,4 +3,3 @@
 	foreach ($strings as $v) {
 		echo ($v+0)."\n";
 	}
-?>

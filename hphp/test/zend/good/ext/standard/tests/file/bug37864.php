@@ -3,4 +3,3 @@
 	var_dump(file_get_contents($tmpfname));
 	echo "done.\n";
 	unlink($tmpfname);
-?>

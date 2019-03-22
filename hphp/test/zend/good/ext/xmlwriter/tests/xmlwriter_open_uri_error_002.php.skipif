@@ -1,1 +1,1 @@
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if (!extension_loaded("xmlwriter")) print "skip";

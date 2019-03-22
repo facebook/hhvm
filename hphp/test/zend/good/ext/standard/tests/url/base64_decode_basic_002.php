@@ -25,4 +25,3 @@ var_dump(base64_decode($badChars, false));
 var_dump(base64_decode($badChars, true));
 
 echo "Done";
-?>

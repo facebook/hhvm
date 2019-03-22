@@ -55,4 +55,3 @@ echo "Split text: ".$text2->wholeText."\n";
 $text3 = $text2->splitText(1);
 
 echo "Is Whitespace?: ".($text2->isElementContentWhitespace()?'YES':'NO');
-?>

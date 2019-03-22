@@ -58,12 +58,10 @@ $mods = array(
 );
 
 var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
-?>

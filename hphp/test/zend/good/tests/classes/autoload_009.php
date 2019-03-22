@@ -9,4 +9,3 @@
   {
   }
   f(new stdClass);
-?>

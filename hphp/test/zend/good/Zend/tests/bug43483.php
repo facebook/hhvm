@@ -11,4 +11,3 @@ class D extends C {
 	}
 }
 D::test();
-?>

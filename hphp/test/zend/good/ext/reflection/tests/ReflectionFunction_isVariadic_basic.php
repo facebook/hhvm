@@ -8,4 +8,3 @@ var_dump((new ReflectionFunction('test1'))->isVariadic());
 var_dump((new ReflectionFunction('test2'))->isVariadic());
 var_dump((new ReflectionFunction('test3'))->isVariadic());
 
-?>

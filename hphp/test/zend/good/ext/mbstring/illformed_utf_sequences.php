@@ -148,4 +148,3 @@ for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
 var_dump($cnt);
 var_dump(str_replace("0000feff","",$out));
 
-?>

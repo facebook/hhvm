@@ -80,4 +80,3 @@ if( in_array("en_US.utf8",$all_system_locales) ||
 }
 
 echo "Done\n";
-?>

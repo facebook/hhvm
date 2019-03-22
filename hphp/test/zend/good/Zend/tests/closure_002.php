@@ -11,4 +11,3 @@ $x++;
 $lambda1();
 
 echo "Done\n";
-?>

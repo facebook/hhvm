@@ -20,4 +20,3 @@ echo "POST-CLASS-GUARD\n";
 
 $t = new TraitsTest;
 $t->hello = "foo";
-?>

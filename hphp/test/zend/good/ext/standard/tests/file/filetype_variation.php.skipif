@@ -5,4 +5,3 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (!function_exists("posix_mkfifo")) {
     die("skip no posix_mkfifo()");
 }
-?>

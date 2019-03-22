@@ -54,5 +54,4 @@ function callback5($input)
 echo "callback function with array as return value\n";
 var_dump( array_filter($input, 'callback5') );
 
-echo "Done"
-?>
+echo "Done";

@@ -26,5 +26,4 @@ unset ($closure);
 $closure2 ();
 $closure2->__invoke ();
 
-?>
-===DONE===
+echo "===DONE===\n";

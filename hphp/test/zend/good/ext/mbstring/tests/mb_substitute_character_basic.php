@@ -18,5 +18,4 @@ var_dump( mb_substitute_character("none") );
 var_dump( mb_substitute_character() );
 var_dump( mb_substitute_character("b") );
 
-?>
-===DONE===
+echo "===DONE===\n";

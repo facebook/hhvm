@@ -83,5 +83,4 @@ for($index = 0; $index < count($strings); $index++) {
 
 fclose($file_handle);  //closing the file handle
 
-?>
-===DONE===
+echo "===DONE===\n";

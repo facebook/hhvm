@@ -22,5 +22,4 @@ foreach ($octLongStrs as $strVal) {
    var_dump(octdec($strVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

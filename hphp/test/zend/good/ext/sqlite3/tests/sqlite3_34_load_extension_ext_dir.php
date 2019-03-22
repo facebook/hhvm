@@ -8,4 +8,3 @@ try {
   var_dump($ex->getMessage());
 }
 
-?>

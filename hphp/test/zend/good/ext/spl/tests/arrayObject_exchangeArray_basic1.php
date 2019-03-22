@@ -16,4 +16,3 @@ var_dump($cowRef);
 
 echo "\n--> ao:  ";
 var_dump($ao);
-?>

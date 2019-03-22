@@ -35,5 +35,4 @@ echo "\n-- Testing gmdate() function with timezone offset format --\n";
 var_dump( gmdate('T') );
 var_dump( gmdate('T', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

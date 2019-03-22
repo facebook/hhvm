@@ -7,4 +7,3 @@ var_dump(json_decode('[123.13452345]'));
 var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
-?>

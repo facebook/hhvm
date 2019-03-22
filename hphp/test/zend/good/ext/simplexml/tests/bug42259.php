@@ -28,5 +28,4 @@ foreach ($rit as $child) {
   $path = substr($path, 0, strlen($path) - 1);
   echo count($ancestry) . ' steps: ' . $path . PHP_EOL;
 }
-?>
-===DONE===
+echo "===DONE===\n";

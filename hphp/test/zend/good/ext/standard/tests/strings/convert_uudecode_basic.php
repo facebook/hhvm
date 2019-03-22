@@ -42,6 +42,4 @@ foreach($strings as $string) {
 }
 
 echo "TEST PASSED\n";
-
-?>
-===DONE=== 
+echo "===DONE=== ";

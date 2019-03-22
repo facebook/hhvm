@@ -36,5 +36,4 @@ foreach($bases as $base) {
 	}
 	echo "\n\n";
 }
-?>
-===Done===
+echo "===Done===";

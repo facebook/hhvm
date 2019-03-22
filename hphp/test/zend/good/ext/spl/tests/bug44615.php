@@ -13,4 +13,3 @@ $rai = new RecursiveArrayIterator($array);
 foreach (new RecursiveIteratorIterator($rai) as $t) {
     var_dump($t);
 }
-?>

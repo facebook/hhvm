@@ -5,4 +5,3 @@ class Foo {
 $class = new ReflectionClass("Foo");
 $props = $class->getDefaultProperties();
 echo $props["test"];
-?>

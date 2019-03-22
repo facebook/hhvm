@@ -61,4 +61,3 @@ foreach($paths as $path) {
 }
 
 echo "Done\n";
-?>

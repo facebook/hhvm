@@ -14,5 +14,4 @@ foreach ($dirIterator as $key => $file)
 }
 unset($regexpIterator2);
 unset($dirIterator);
-?>
-==DONE==
+echo "==DONE==";

@@ -143,9 +143,7 @@ rename($file_name2, "$file_path/005_variation_touch_new.tmp");
 stat_fn("$file_path/005_variation_touch_new.tmp");
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 if(file_exists($file_path."/005_variation_softlink.tmp")) {
   unlink($file_path."/005_variation_softlink.tmp");
@@ -168,4 +166,3 @@ if(file_exists($file_path."/005_variation_touch_fly.tmp")) {
 if(file_exists($file_path."/005_variation_touch_new.tmp")) {
   unlink($file_path."/005_variation_touch_new.tmp");
 }
-?>

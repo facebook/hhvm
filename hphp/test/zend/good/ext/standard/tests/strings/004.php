@@ -27,4 +27,3 @@ for ($i = 0; $i < $times; $i++) {
 }
 
 stats('str_shuffle', $a);
-?>

@@ -40,5 +40,4 @@ var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 $b = clone $a;
 $a[0] = "valueNew";
 var_dump($b[0]);
-?>
-===DONE===
+echo "===DONE===\n";

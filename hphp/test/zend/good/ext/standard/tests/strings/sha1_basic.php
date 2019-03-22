@@ -33,5 +33,4 @@ var_dump(bin2hex(sha1("abcdefghijklmnopqrstuvwxyz", true)));
 var_dump(bin2hex(sha1("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", true)));
 var_dump(bin2hex(sha1("12345678901234567890123456789012345678901234567890123456789012345678901234567890", true)));
 
-?>
-===DONE===
+echo "===DONE===\n";

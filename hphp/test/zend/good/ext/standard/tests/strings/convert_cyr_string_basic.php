@@ -21,5 +21,4 @@ for ($i = 128; $i < 256; $i++) {
 	echo "$i: " . bin2hex(convert_cyr_string($str, 'w', 'k')) . "\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

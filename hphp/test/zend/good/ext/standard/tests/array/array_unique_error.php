@@ -17,4 +17,3 @@ $extra_arg = 10;
 try { var_dump( array_unique($input, SORT_NUMERIC, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

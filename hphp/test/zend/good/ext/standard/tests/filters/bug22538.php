@@ -33,4 +33,3 @@ var_dump(md5_file($path1));
 var_dump(md5_file($path2));
 unlink($path1);
 unlink($path2);
-?>

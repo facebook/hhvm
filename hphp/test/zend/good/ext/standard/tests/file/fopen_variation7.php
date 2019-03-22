@@ -52,5 +52,4 @@ function runtest() {
 	}
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

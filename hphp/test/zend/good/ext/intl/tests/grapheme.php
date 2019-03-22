@@ -762,4 +762,3 @@ function check_result($result, $expected) {
 	return "";
 }
 
-?>

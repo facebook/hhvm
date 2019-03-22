@@ -23,7 +23,5 @@ $values = array(0x123abc,
 foreach($values as $value) {
 	echo "\n-- hexdec $value --\n";
 	var_dump(hexdec($value));
-};						
-				
-?>
-===Done===
+};
+echo "===Done===";

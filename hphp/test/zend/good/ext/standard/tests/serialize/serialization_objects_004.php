@@ -35,4 +35,3 @@ $ref = &$x;
 var_dump(serialize(array($x, $x)));
 
 echo "Done";
-?>

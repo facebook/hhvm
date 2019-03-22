@@ -11,4 +11,3 @@ var_dump(test::val2);
 var_dump(test::val3);
 
 echo "Done\n";
-?>

@@ -35,4 +35,3 @@ var_dump(file_get_contents($filename));
 
 @unlink($filename);
 echo "Done\n";
-?>

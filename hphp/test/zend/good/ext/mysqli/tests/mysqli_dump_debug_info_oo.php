@@ -19,4 +19,3 @@
 			$mysqli->errno, $mysqli->error);
 
 	print "done!";
-?>

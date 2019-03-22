@@ -16,4 +16,3 @@ var_dump(get_parent_class('CasesensitivitytestCHILD'));
 var_dump(get_parent_class(new CasesensitivitytestCHILD));
 
 echo "Done";
-?>

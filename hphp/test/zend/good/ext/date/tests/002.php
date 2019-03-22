@@ -38,4 +38,3 @@
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
-?>

@@ -31,5 +31,4 @@ echo "\n-- various -ve offsets --\n";
 var_dump( strripos("Hello, World", "O", -1) );
 var_dump( strripos("Hello, World", "O", -5) );
 var_dump( strripos("Hello, World", "O",  -9) );
-?>
-===DONE===
+echo "===DONE===\n";

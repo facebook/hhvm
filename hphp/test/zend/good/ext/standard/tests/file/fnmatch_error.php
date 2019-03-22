@@ -25,4 +25,3 @@ try { var_dump( fnmatch("") ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 try { var_dump( fnmatch("match.txt", "match.txt", TRUE, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>

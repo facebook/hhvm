@@ -16,4 +16,3 @@ var_dump($rm->getParameters()[0]->isCallable());
 $rc = new ReflectionFunction($closure);
 var_dump($rc->getParameters()[0]->isCallable());
 
-?>

@@ -20,5 +20,4 @@ $longVals = array(
    var_dump(min($arrayVals));
    var_dump(min($longVals));
 
-?>
-===DONE===
+echo "===DONE===\n";

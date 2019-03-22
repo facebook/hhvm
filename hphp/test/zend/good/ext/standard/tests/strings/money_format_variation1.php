@@ -90,7 +90,5 @@ foreach($formats as $format) {
 }
 
 // close the file handle
-fclose($file_handle);  
-
-?>
-===Done===
+fclose($file_handle);
+echo "===Done===";

@@ -33,4 +33,3 @@ echo "\n-- Testing array_column() index key parameter should be a string or inte
 var_dump(array_column(array(), 'foo', array()));
 
 echo "Done\n";
-?>

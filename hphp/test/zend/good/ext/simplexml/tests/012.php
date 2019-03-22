@@ -20,5 +20,4 @@ echo $sxe->asXML();
 $sxe[] = "error";
 
 __HALT_COMPILER();
-?>
-===DONE===
+echo "===DONE===\n";

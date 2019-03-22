@@ -22,5 +22,4 @@ foreach ($binLongStrs as $strVal) {
    var_dump(bindec($strVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

@@ -1,5 +1,3 @@
 <?php
 
-unset($x)
-
-?>
+unset($x);

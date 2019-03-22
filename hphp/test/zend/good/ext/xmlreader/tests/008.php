@@ -58,5 +58,4 @@ while($reader->read());
 if ($reader->isValid()) {
 	echo "string DTD: ok\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

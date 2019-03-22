@@ -15,7 +15,3 @@ try {
 } catch (Exception $e) {
 	echo $e->getMessage();
 }
-
-?>
-
-<?php exit(0); ?>

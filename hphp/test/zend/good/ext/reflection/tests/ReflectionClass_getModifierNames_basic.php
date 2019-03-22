@@ -41,6 +41,4 @@ dump_modifierNames('c');
 
 dump_methodModifierNames('x');
 dump_methodModifierNames('y');
-
-?>
-==DONE==
+echo "==DONE==";

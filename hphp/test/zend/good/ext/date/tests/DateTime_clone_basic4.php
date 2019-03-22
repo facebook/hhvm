@@ -19,5 +19,4 @@ $d1_clone = clone $d1;
 //verify clone by calling method on new object
 var_dump( $d1_clone->format( "m.d.y") ); 
 
-?>
-===DONE===
+echo "===DONE===\n";

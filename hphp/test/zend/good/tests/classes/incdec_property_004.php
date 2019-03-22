@@ -21,4 +21,3 @@ var_dump($obj->a);
 $t1 = ++$obj->a;
 var_dump($obj->a);
 echo "---Done---\n";
-?>

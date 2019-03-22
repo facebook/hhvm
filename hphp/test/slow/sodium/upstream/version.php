@@ -4,4 +4,3 @@ echo "\n";
 echo SODIUM_LIBRARY_MAJOR_VERSION >= 4;
 echo "\n";
 echo SODIUM_LIBRARY_MINOR_VERSION >= 0;
-?>

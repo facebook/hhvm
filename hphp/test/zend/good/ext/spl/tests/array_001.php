@@ -29,6 +29,4 @@ $ar[] = '3';
 $ar[] = 4;
 var_dump($ar);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

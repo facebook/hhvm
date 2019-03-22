@@ -33,7 +33,4 @@ foreach($strings as $string) {
   var_dump( convert_uuencode($string) );
   $count ++;
 }
-
-
-?>
-===DONE=== 
+echo "===DONE=== ";

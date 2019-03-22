@@ -51,4 +51,3 @@ try {
 	var_dump($e->getCode(), $e->getMessage());
 }
 
-?>

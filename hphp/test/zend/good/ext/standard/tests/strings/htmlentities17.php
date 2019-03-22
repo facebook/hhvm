@@ -20,4 +20,3 @@ foreach ($tests as $test) {
 	list(,$result) = unpack('H6', html_entity_decode($test[1], ENT_QUOTES, 'UTF-8'));
 	var_dump($result);
 }
-?>

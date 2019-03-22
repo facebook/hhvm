@@ -19,5 +19,4 @@ try
 catch(Exception $e)
 {
 }
-echo "okey"
-?>
+echo "okey";

@@ -22,6 +22,4 @@ hash_hmac_file('crc32', $file, $key, TRUE, $extra_arg);
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
 hash_hmac_file('foo', $file, $key, TRUE);
-
-?>
-===Done===
+echo "===Done===";

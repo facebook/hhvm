@@ -15,4 +15,3 @@ function f() {
 	var_dump($b);
 }
 f();
-?>

@@ -23,5 +23,4 @@ echo key(&$array) . " => " . current(&$array) . "\n";
 
 echo "\n-- Call to reset() --\n";
 var_dump(reset(&$array));
-?>
-===DONE===
+echo "===DONE===\n";

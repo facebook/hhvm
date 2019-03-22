@@ -20,4 +20,3 @@ A::t2method();
 
 C::Bmethod();
 C::t2method();
-?>

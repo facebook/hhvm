@@ -16,4 +16,3 @@ class foo extends bar {
 
 new foo;
 
-?>

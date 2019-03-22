@@ -12,4 +12,3 @@ $func->invoke();
 
 $func = new ReflectionFunction('another_test');
 $func->invoke('testing');
-?>

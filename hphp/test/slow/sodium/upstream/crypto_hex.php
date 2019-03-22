@@ -9,4 +9,3 @@ var_dump($bin2 === $bin);
 
 $bin2 = sodium_hex2bin('[' . $hex .']', '[]');
 var_dump($bin2 === $bin);
-?>

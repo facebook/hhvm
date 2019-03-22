@@ -12,4 +12,3 @@ $expected .= pack('Ca*xC', 8, '1', 1);
 $expected .= pack('x');
 
 var_dump($expected === bson_encode(array('foobar', true)));
-?>

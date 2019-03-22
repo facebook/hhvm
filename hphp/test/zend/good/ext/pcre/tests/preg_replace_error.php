@@ -20,5 +20,4 @@ echo "\n-- Testing preg_replace() function with less than expected no. of argume
 $regex = '/\w/';
 $replace = '1';
 try { var_dump(preg_replace($regex, $replace)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-echo "Done"
-?>
+echo "Done";

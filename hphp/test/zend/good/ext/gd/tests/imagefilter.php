@@ -72,4 +72,3 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_PIXELATE failed\n";
 	}
-?>

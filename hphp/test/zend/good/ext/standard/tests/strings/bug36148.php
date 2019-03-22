@@ -6,4 +6,3 @@ foreach ($values as $value) {
 	echo $value.": ";
 	var_dump($b);
 }
-?>

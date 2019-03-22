@@ -16,5 +16,4 @@ $encoding = 'unknown-encoding';
 
 var_dump(iconv_strlen($string, $encoding));
 
-?>
-===DONE===
+echo "===DONE===\n";

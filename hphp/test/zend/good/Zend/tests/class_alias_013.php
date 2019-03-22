@@ -15,4 +15,3 @@ $alias2 = $alias1 .'\BAR';
 
 \var_dump(new \test\baz\foo, new \test\baz\T\BAR);
 
-?>

@@ -25,5 +25,4 @@ echo "After modification 3: " . $datetime->format("D, d M Y") . "\n";
 $datetime->modify("last Sunday"); 
 echo "After modification 4: " . $datetime->format("D, d M Y") . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

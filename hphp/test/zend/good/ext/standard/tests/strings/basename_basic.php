@@ -68,4 +68,3 @@ echo "*** Testing basic operations ***\n";
 check_basename( $file_paths );
 
 echo "Done\n";
-?>

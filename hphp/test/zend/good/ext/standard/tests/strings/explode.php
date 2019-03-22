@@ -23,4 +23,3 @@ var_dump(explode(":","a lazy dog:jumps:over:",-4));
 var_dump(explode(":","a lazy dog:jumps:over:",-40000000000000));
 var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-1));
 var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-2));
-?>

@@ -1,4 +1,3 @@
-
 <?php
 
 /*
@@ -70,4 +69,3 @@ include_once( 'ut_common.inc' );
 
 // Run the test
 ut_run();
-?>

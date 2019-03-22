@@ -17,4 +17,3 @@ function foo1($e) {
 throw new excEption();
 
 echo "Done\n";
-?>

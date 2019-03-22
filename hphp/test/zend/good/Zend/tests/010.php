@@ -37,4 +37,3 @@ var_dump(get_parent_class(array()));
 var_dump(get_parent_class(1));
 
 echo "Done\n";
-?>

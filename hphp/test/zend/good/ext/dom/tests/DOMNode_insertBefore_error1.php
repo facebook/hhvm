@@ -12,4 +12,3 @@ try {
 	echo $e->getMessage();
 }
 
-?>

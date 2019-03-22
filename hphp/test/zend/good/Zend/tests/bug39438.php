@@ -35,4 +35,3 @@ while($i<1200) {
 }
 $out=serialize($test);
 echo "ok\n";
-?>

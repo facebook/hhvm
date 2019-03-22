@@ -17,5 +17,4 @@ $f = $o->func;
 $f();
 $o->func();
 
-?>
-===DONE===
+echo "===DONE===\n";

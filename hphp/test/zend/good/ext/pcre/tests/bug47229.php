@@ -15,4 +15,3 @@ var_dump($m);
 preg_match("/a\-{1,}/", 'a\----a', &$m);
 var_dump($m);
 
-?>

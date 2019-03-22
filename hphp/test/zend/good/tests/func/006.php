@@ -12,4 +12,3 @@ ob_end_clean();
 
 var_dump( $b ); // 2B
 var_dump( $a ); // 1A
-?>

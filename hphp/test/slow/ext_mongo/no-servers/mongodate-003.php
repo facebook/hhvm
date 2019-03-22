@@ -7,4 +7,3 @@ printf("%d.%06d\n", $date->sec, $date->usec);
 
 $date = new MongoDate(12345);
 printf("%d.%06d\n", $date->sec, $date->usec);
-?>

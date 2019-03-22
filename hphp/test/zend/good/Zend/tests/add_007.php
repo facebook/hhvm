@@ -8,4 +8,3 @@ $c = $a + $s1;
 var_dump($c);
 
 echo "Done\n";
-?>

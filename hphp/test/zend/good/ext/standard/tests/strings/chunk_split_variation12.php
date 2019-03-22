@@ -78,5 +78,4 @@ foreach($heredoc_arr as $value) {
   $count++;
 };
  
-echo "Done"
-?>
+echo "Done";

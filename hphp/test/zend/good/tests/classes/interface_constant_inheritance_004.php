@@ -10,4 +10,3 @@ class C implements IA, IB {
 }
 
 echo "Done\n";
-?>

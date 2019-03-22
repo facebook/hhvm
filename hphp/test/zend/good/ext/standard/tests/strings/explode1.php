@@ -77,4 +77,3 @@ try { var_dump( explode(":", "array1:array2:array3", -1, -33) ); } catch (Except
 try { var_dump( explode(":") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

@@ -30,6 +30,4 @@ class TestBB extends TestB {
 }
 
 TestA::test();
-
-?>
-==DONE==
+echo "==DONE==";

@@ -21,4 +21,3 @@ class ChildClass extends ParentClass {
     echo "Called public " . __METHOD__ . "() on an instance of: " . get_class($this) . "\n";
   } 
 }
-?>

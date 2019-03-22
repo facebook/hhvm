@@ -3,4 +3,3 @@
   {
       const myConst = "$myVar";
   }
-?>

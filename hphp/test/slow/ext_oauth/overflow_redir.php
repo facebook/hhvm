@@ -33,4 +33,3 @@ foreach ($requests as $cur_request) {
 
 http_server_kill($pid);
 
-?>

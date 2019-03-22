@@ -29,4 +29,3 @@ echo "Adding UTF-16 encoding: $ret\n";
 echo "UTF-16 Encoding Read: {$dom->encoding}\n";
 
 
-?>

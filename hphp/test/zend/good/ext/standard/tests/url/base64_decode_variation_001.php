@@ -84,6 +84,4 @@ foreach($values as $key=>$value) {
         var_dump($output);
     }
 };
-
-?>
-===Done===
+echo "===Done===";

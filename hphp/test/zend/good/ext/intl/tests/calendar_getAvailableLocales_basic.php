@@ -7,6 +7,4 @@ var_dump(count($locales) > 100);
 
 $locales = intlcal_get_available_locales();
 var_dump(in_array('pt', $locales));
-
-?>
-==DONE==
+echo "==DONE==";

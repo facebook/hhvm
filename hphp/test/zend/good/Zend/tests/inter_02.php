@@ -13,4 +13,3 @@ function foo($x = \foo\foo::foo) {
 }
 
 foo();
-?>

@@ -28,4 +28,3 @@ var_dump(filter_var("111111", FILTER_VALIDATE_BOOLEAN));
 	
 
 echo "Done\n";
-?>

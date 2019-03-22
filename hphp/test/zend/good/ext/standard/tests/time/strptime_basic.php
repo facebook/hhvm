@@ -22,5 +22,4 @@ $str = strftime("%A %B %e %R", $tstamp);
 var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

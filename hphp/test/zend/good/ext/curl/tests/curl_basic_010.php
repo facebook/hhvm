@@ -11,4 +11,3 @@ var_dump(curl_errno($ch));
 curl_close($ch);
 
 
-?>

@@ -26,4 +26,3 @@ $arr1 = array(
 
 var_dump( array_map('callback', $arr1));
 echo "Done";
-?>

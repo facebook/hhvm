@@ -54,5 +54,4 @@ foreach($sxe->elem1->children() as $name => $data) {
 	var_dump(trim($data));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

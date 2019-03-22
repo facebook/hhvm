@@ -20,4 +20,3 @@ var_dump(chmod($filename, 0777));
 unlink($filename);
 echo "done";
 
-?>

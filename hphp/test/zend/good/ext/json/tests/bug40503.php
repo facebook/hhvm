@@ -8,4 +8,3 @@ show_eq("$value", json_encode($value));
 $value++;
 show_eq("$value", json_encode($value));
 
-?>

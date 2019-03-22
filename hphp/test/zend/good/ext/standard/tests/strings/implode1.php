@@ -123,4 +123,3 @@ fclose($file_handle);
 closedir($dir_handle);
 
 echo "Done\n";
-?>

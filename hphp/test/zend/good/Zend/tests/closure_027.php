@@ -14,4 +14,3 @@ try { test($a); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 test(new stdclass);
 
-?>

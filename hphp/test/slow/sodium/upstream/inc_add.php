@@ -36,4 +36,3 @@ $str2 = $str;
 sodium_add(&$str, $addStr);
 var_dump($str, $str2);
 
-?>

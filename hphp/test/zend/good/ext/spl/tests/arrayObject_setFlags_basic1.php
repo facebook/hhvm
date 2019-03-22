@@ -26,4 +26,3 @@ access_p($ao);
 echo "\n--> Remove the array element and try access again:\n";
 unset($ao->p);
 access_p($ao);
-?>

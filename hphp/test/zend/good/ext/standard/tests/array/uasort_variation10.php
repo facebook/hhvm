@@ -50,5 +50,4 @@ echo "-- Sorting 'array_arg' containing different references --\n";
 var_dump( uasort(&$array_arg, 'cmp_function') );  // expecting: bool(true)
 var_dump($array_arg);
 
-echo "Done"
-?>
+echo "Done";

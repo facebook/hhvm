@@ -18,4 +18,3 @@ Foo::pub();
 Foo::priv();
 
 echo "Done\n";
-?>

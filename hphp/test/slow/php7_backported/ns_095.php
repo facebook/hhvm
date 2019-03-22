@@ -32,4 +32,3 @@ namespace Baz {
 
     echo "\nDone\n";
 }
-?>

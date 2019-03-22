@@ -9,5 +9,4 @@ var_dump(
 		intlcal_set_minimal_days_in_first_week($intlcal, 5),
 		$intlcal->getMinimalDaysInFirstWeek()
 );
-?>
-==DONE==
+echo "==DONE==";

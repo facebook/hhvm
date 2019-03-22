@@ -21,5 +21,4 @@ foreach( $search_arr as $value ) {
   $i++;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

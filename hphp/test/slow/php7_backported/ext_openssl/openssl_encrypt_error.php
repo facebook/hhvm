@@ -18,4 +18,3 @@ try { var_dump(openssl_encrypt($data, $method, $arr)); } catch (Exception $e) { 
 
 // invalid using of an authentication tag
 var_dump(openssl_encrypt($data, $method, $password, 0, $iv, &$wrong));
-?>

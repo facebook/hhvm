@@ -9,4 +9,3 @@ foreach($urls as $url) {
 	echo strtr($url, array("\r" => "\\r", "\n" => "\\n")) . "\n";
 	var_dump(file($url, FILE_IGNORE_NEW_LINES));
 }
-?>

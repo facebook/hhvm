@@ -9,4 +9,3 @@ function test(float $arg = 0)
 
 test();
 
-?>

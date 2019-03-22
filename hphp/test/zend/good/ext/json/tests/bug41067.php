@@ -9,4 +9,3 @@ $json_decoded = json_decode($json, true);
 // print $json_decoded[0] . "\n";
 print bin2hex($json_decoded[0]) . "\n";
 print "END\n";
-?>

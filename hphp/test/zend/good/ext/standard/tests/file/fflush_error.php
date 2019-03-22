@@ -39,10 +39,6 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   try { var_dump( fflush($invalid_args[$loop_counter - 1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 echo "\n*** Done ***";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink("$file_path/fflush_error.tmp");
-?>

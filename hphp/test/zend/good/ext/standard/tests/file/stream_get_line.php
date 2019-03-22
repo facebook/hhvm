@@ -8,4 +8,3 @@ while ($fp && !feof($fp)) {
 }
 fclose($fp);
 @unlink($path);
-?>

@@ -8,4 +8,3 @@ class ArrayObject2 extends ArrayObject {
 }
 $obj = new ArrayObject2(array(1,2));
 var_dump(count($obj));
-?>

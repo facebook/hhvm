@@ -64,4 +64,3 @@ var_dump($baz);
 var_dump($arr);
 
 session_destroy();
-?>

@@ -39,5 +39,4 @@ foreach($valid_ints as $key => $int_value) {
 	var_dump( var_export( $int_value, TRUE) );
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -28,4 +28,3 @@ $o->xyz;
 $o->xyz = 2;
 clone $o;
 
-?>

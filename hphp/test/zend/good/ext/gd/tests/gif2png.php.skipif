@@ -9,4 +9,3 @@
 	if (!function_exists("imagecreatefromgif")) {
 		die("skip gif read support unavailable");
 	}
-?>

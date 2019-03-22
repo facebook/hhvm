@@ -5,4 +5,3 @@ if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
 if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
 	die("skip unable to change TZ enviroment variable\n");
 }
-?>

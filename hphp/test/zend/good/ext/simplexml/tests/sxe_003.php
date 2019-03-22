@@ -48,5 +48,4 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 	}
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

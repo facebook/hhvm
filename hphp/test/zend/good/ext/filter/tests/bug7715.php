@@ -14,4 +14,3 @@ foreach ($data as $val) {
 	var_dump($res);
 }
 echo "\n";
-?>

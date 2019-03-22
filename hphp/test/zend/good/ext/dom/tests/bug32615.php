@@ -65,4 +65,3 @@ $root->replaceChild($frag, $root->firstChild);
 
 echo $dom->saveXML();
 
-?>

@@ -23,5 +23,4 @@ EOF;
 
 var_dump(simplexml_load_string($xml));
 
-?>
-===DONE===
+echo "===DONE===\n";

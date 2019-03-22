@@ -33,4 +33,3 @@ $result = str_ireplace ( $search, $replace, $subject );
 var_dump($result);
 
 echo "Done\n";
-?>

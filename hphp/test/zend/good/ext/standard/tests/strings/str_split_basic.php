@@ -21,5 +21,4 @@ var_dump( str_split($str,$split_length) );
 echo "-- With split_length as default argument --\n";
 var_dump( str_split($str) );
 
-echo "Done"
-?>
+echo "Done";

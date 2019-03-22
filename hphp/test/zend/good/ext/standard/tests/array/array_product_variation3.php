@@ -23,5 +23,4 @@ echo "\n-- Testing array_product() function with negative floats --\n";
 var_dump( array_product(array(-99999999.9, 99999999.1)));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -9,4 +9,3 @@ var_dump($ini_array);
 
 unlink($file);
 
-?>

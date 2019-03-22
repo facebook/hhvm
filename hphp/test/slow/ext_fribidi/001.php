@@ -18,4 +18,3 @@
   $c = "\\x" . substr(chunk_split($c, 2, "\\x"), 0, -2);
 
   var_dump(array($a, $b, $c));
-?>

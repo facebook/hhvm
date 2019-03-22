@@ -20,4 +20,3 @@ foreach ($bbb->attributes as $attr)
 
 echo $attr->parentNode->localName;
 
-?>

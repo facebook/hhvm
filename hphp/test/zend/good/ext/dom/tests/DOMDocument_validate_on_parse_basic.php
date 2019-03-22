@@ -22,4 +22,3 @@ $dom->validateOnParse = FALSE;
 echo "Setting validateOnParse to FALSE: ";
 var_dump($dom->validateOnParse);
 
-?>

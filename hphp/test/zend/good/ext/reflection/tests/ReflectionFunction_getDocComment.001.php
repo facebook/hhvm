@@ -22,4 +22,3 @@ dumpFuncInfo('foo');
 dumpFuncInfo('bar');
 dumpFuncInfo('array_pop');
 
-?>

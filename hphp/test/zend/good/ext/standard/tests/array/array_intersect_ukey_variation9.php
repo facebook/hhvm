@@ -29,5 +29,4 @@ var_dump( array_intersect_ukey($array1, $array2, 'MyClass::static_compare_func')
 echo "\n-- Testing array_intersect_uassoc() function using class with regular method as callback --\n";
 $obj = new MyClass();
 var_dump( array_intersect_ukey($array1, $array2, array($obj,'class_compare_func')) );
-?>
-===DONE===
+echo "===DONE===\n";

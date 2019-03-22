@@ -7,4 +7,3 @@ echo crypt("A", "$5$" . $b)."\n";
 $b = str_repeat("A", 4096);
 echo crypt("A", "$5$" . $b)."\n";
 
-?>

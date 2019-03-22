@@ -21,5 +21,4 @@ for ($c = 1; $c < 256; $c++) {
 }
 
 setlocale(LC_CTYPE, $orig); 
-?>
-===DONE===
+echo "===DONE===\n";

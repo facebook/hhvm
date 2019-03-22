@@ -32,4 +32,3 @@ for ($c = "C1";
     var_dump($r->getTraitAliases());
     echo "\n";
 }
-?>

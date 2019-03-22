@@ -24,4 +24,3 @@ echo"\n-- with default argument --\n";
 var_dump( array_rand($input) );
 
 echo "Done";
-?>

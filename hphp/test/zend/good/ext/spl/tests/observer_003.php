@@ -36,6 +36,4 @@ foreach($storage2 as $object)
 	var_dump($object->test);
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

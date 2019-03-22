@@ -4,4 +4,3 @@
 		strnatcmp('foo', 'foo'),
 		strnatcmp(' foo', ' foo')
 	);
-?>

@@ -19,5 +19,4 @@ echo "\n-- Testing chdir() function with more than expected no. of arguments --\
 $directory = __FILE__;
 $extra_arg = 10;
 try { var_dump( chdir($directory, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

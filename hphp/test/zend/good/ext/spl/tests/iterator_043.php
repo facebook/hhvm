@@ -6,6 +6,4 @@ var_dump($it->getChildren());
 $it->rewind();
 var_dump($it->getChildren());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

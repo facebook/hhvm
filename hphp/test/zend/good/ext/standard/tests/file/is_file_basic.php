@@ -25,10 +25,7 @@ var_dump( is_bool( is_file(__FILE__) ) );
 var_dump( is_bool( is_file("/no/such/file") ) );
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/is_file_basic.tmp";
 unlink($file_name);
-?>

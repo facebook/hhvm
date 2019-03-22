@@ -132,4 +132,3 @@ var_dump(array_column($records, $f));
 var_dump(array_column($records, $f, $b));
 
 echo "Done\n";
-?>

@@ -58,4 +58,3 @@ unlink($filename);
 rmdir($dirname);
 
 echo "Done\n";
-?>

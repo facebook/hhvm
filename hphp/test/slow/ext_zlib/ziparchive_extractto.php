@@ -10,4 +10,3 @@ var_dump($zip->extractTo($tempdir, 'dir/file.txt'));
 var_dump($zip->close());
 
 var_dump(file_get_contents($tempdir.'/dir/file.txt'));
-?>

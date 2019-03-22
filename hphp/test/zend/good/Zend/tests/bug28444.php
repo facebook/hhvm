@@ -50,5 +50,4 @@ $t = $y->z;
 var_dump($t->x = 5);
 var_dump($y->z->x = 6);
 
-?>
-===DONE===
+echo "===DONE===\n";

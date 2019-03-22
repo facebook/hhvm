@@ -6,4 +6,3 @@ bindtextdomain ("messages", "./locale");
 echo textdomain('test'), "\n";
 echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
-?>

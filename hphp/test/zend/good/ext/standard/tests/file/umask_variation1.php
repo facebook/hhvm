@@ -47,4 +47,3 @@ for($mask = 0000; $mask <= 0350; $mask++) {
 }
 
 echo "Done\n";
-?>

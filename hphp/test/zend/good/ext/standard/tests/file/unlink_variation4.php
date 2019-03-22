@@ -23,4 +23,3 @@ var_dump( file_exists($filename) );  // confirm file deleted
 var_dump( unlink($filename) );  // expected: false
 
 echo "Done\n";
-?>

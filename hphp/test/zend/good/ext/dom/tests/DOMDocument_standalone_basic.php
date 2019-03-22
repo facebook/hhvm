@@ -25,4 +25,3 @@ echo "Document is no longer standalone\n";
 var_dump( $test );
 
 echo "Done";
-?>

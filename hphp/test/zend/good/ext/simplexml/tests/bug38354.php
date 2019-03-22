@@ -11,4 +11,3 @@ foreach ($xml->xpath("//*") as $element) {
 }
 
 echo "Done\n";
-?>

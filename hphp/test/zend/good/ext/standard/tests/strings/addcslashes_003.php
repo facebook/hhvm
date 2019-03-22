@@ -21,4 +21,3 @@ var_dump( addcslashes( "string\x00with\x00NULL", "\0") );
 
 echo "Done\n"; 
 
-?>

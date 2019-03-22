@@ -21,4 +21,3 @@ if ($flags&16 && !function_exists("imagecreatefromxpm")) {
 	echo "xom failed\n";
 }
 echo "ok\n";
-?>

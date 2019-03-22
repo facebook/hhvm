@@ -19,4 +19,3 @@ var_dump(interface_exists("AutoInterface", true));
 
 echo "\nDONE\n";
 
-?>

@@ -45,4 +45,3 @@ foreach($formats as $format) {
 }
 
 echo "Done";
-?>

@@ -43,5 +43,4 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = number_format($values[$i], 2, ',' , ' ');
 	var_dump($res);
 }
-?>
-===DONE===
+echo "===DONE===\n";

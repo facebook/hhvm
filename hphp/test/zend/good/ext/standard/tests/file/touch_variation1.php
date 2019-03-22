@@ -17,4 +17,3 @@ var_dump(fileatime($filename));
 @unlink($filename);
 echo "Done\n";
 
-?>

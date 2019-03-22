@@ -4,4 +4,3 @@ if (!is_resource($zip)) die("Failure");
 zip_close($zip);
 echo "OK";
 
-?>

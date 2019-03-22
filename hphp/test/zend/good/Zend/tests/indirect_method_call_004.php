@@ -15,4 +15,3 @@ class bar {
 var_dump(clone (new bar)->z);
 var_dump(clone (new bar)->getZ());
 
-?>

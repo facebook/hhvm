@@ -42,4 +42,3 @@ class SQLite3_Test_Stream
 
 stream_wrapper_register('sqliteBlobTest', "SQLite3_Test_Stream") or die("Unable to register sqliteBlobTest stream");
 
-?>

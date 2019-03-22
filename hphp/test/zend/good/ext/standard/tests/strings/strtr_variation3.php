@@ -61,4 +61,3 @@ for($index = 0; $index < count($str_arr); $index++) {
   $count++;
 }
 echo "*** Done ***";
-?>

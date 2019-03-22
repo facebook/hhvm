@@ -7,4 +7,3 @@ var_dump(getmypid());
 var_dump(getmygid());
 
 echo "Done\n";
-?>

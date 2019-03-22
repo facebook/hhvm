@@ -16,4 +16,3 @@ call_user_func($lambda1);
 call_user_func($lambda2, "Universe");
 
 echo "Done\n";
-?>

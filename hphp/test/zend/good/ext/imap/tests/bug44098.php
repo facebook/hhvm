@@ -6,4 +6,3 @@ if ($res != $exp) {
 } else {
 	echo "ok";
 }
-?>

@@ -22,4 +22,3 @@ class cdt2 extends DateTimeImmutable implements DateTimeInterface {}
 
 class cdt3 implements DateTimeInterface {}
 
-?>

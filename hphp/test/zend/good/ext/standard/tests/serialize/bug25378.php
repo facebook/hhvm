@@ -12,5 +12,4 @@ var_dump(unserialize("s:3000:\"123\";"));
 var_dump(unserialize("s:3000:\"123"));
 var_dump(unserialize("s:3:\"123;"));
 var_dump(unserialize("s:0:\"123\";"));
-?>
-===DONE===
+echo "===DONE===\n";

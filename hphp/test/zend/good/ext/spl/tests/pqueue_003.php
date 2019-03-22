@@ -15,6 +15,4 @@ while ($h->valid()) {
     echo "$k=>$v\n";
     $h->next();
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

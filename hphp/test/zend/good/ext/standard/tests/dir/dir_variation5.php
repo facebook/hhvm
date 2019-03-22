@@ -17,4 +17,3 @@ $d = dir(__FILE__);
 var_dump( $d );
 
 echo "Done";
-?>

@@ -13,4 +13,3 @@ var_dump(escapeshellarg("%FILENAME"));
 var_dump(escapeshellarg(""));
 
 echo "Done\n";
-?>

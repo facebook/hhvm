@@ -12,4 +12,3 @@ class derived extends base {
 }
 
 echo "Done\n"; // shouldn't be displayed
-?>

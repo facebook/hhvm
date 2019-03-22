@@ -36,4 +36,3 @@ foreach($classes  as $class ) {
 	var_dump($reflectionClass->IsInstantiable()); 
 }
 
-?>

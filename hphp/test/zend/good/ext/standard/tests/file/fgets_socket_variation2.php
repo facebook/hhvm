@@ -53,4 +53,3 @@ while(!feof($client)) {
 
 echo "done\n";
 
-?>

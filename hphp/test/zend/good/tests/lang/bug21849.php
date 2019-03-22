@@ -8,4 +8,3 @@ class foo {
 }
 
 new foo();
-?>

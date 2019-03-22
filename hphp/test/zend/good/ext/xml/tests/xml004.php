@@ -33,4 +33,3 @@ function end_element($xp, $elem)
 {
 	print "</$elem>\n";
 }
-?>

@@ -11,4 +11,3 @@
 	if (true !== $tmp)
 		printf("[003] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 	print "done!";
-?>

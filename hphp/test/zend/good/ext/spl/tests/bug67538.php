@@ -9,4 +9,3 @@ $list->push('b');
 $list->offsetUnset(0);
 $list->next();
 echo "okey";
-?>

@@ -15,5 +15,4 @@ foreach ($strVals as $strVal) {
 }
 
    
-?>
-===DONE===
+echo "===DONE===\n";

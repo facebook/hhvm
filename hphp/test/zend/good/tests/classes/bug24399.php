@@ -4,4 +4,3 @@ class dooh {
 }
 $d = new dooh;
 var_dump(is_subclass_of($d, 'dooh'));
-?>

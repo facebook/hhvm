@@ -13,4 +13,3 @@ class Test extends XMLReader
 $t = new test;
 
 echo "Done\n";
-?>

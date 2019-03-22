@@ -62,5 +62,4 @@ echo "-- Sorting empty array --\n";
 var_dump( uasort(&$empty_array, 'cmp_function') );  // expecting: bool(true)
 var_dump($empty_array);
 
-echo "Done"
-?>
+echo "Done";

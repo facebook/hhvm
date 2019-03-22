@@ -13,4 +13,3 @@ var_dump($s->valid());
 $s->rewind();
 var_dump($s->valid());
 echo $s->current();
-?>

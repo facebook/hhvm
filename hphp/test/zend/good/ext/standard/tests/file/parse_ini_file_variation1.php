@@ -24,5 +24,4 @@ $a['section1']['value1'] = 'changed';
 var_dump($a);
 
 unlink($output_file);
-?>
-===DONE===
+echo "===DONE===\n";

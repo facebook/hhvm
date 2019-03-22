@@ -7,4 +7,3 @@ $key =    "{BLURPS}";
 str_replace($key, $replacement, $string);
 
 echo "Alive!\n";
-?>

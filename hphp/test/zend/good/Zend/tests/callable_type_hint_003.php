@@ -9,4 +9,3 @@ function bar(callable $a = null) {
 
 foo("strpos", 123, "strpos");
 bar("substr");
-?>

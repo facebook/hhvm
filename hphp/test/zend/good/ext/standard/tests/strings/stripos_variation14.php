@@ -80,4 +80,3 @@ for($index = 0; $index < count($offsets); $index ++) {
 }
 
 echo "*** Done ***";
-?>

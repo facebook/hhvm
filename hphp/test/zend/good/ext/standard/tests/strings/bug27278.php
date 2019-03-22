@@ -11,4 +11,3 @@ var_dump($x);
 foo($x);
 var_dump($x);
 
-?>

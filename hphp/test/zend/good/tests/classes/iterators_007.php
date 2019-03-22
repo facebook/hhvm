@@ -28,5 +28,4 @@ while($t->x < 5)
 	}
 	$t->x++;
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -28,4 +28,3 @@ foreach ($multi as $key => list(list($a, $b), list($c, $d))) {
 }
 
 
-?>

@@ -38,5 +38,4 @@ foreach($resource_values as $resource_value) {
 fclose($fp);
 closedir($dfp);
 
-?>
-===DONE===
+echo "===DONE===\n";

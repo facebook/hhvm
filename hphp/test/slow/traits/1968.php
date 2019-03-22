@@ -17,4 +17,3 @@ $o = new MY_CLASS;
 $o->printX();
 var_dump(MY_BASE::$x);
 var_dump(MY_CLASS::$x);
-?>

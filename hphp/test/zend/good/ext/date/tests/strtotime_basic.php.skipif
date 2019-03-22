@@ -1,1 +1,1 @@
-<?php if (!function_exists('strtotime')) echo "SKIP"; ?>
+<?php if (!function_exists('strtotime')) echo "SKIP";

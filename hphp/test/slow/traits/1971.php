@@ -14,4 +14,3 @@ class MY_CLASS extends MY_BASE {
 }
 $o = new MY_CLASS;
 $o->printX();
-?>

@@ -16,5 +16,4 @@ echo $reader->name;
 echo " ";
 echo $reader->getAttribute('num');
 echo "\n";
-?>
-===DONE===
+echo "===DONE===\n";

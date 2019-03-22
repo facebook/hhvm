@@ -10,5 +10,4 @@ try { var_dump(gzfile( $filename, $use_include_path, $extra_arg ) ); } catch (Ex
 try { var_dump(gzfile(  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-?>
-===DONE===
+echo "===DONE===\n";

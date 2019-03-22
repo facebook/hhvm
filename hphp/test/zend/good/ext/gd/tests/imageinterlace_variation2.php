@@ -8,4 +8,3 @@ imageinterlace($image, 1);
 //setting de interlace bit to off
 var_dump(imageinterlace($image, 0));
 var_dump(imageinterlace($image));
-?>

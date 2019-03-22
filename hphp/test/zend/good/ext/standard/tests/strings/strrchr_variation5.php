@@ -28,4 +28,3 @@ foreach($needles as $needle) {
 }
 
 echo "*** Done ***";
-?>

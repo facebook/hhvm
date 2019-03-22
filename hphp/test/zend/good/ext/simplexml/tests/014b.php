@@ -22,5 +22,4 @@ var_dump(isset($people->person[1]['age']));
 echo "---Unsupported---\n";
 $people->person[1]['age'] += 5;
 var_dump($people->person[1]['age']);
-?>
-===DONE===
+echo "===DONE===\n";

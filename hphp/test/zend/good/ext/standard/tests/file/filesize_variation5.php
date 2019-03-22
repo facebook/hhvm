@@ -14,4 +14,3 @@ var_dump( filesize('') );
 var_dump( filesize(' ') );
 var_dump( filesize('|') );
 echo "*** Done ***\n";
-?>

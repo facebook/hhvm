@@ -10,4 +10,3 @@ $data = array(
 	'monkey',
 	$tmp=>-1/3
 );
-?>

@@ -78,4 +78,3 @@ rmdir($dir_path);
 rmdir($dir_name);
 
 echo "\n*** Done ***\n";
-?>

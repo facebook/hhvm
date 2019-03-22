@@ -5,4 +5,3 @@ for($i=0; $i<256; $i++) {
 }
 echo bin2hex($s)."\n";
 echo bin2hex("abc")."\n";
-?>

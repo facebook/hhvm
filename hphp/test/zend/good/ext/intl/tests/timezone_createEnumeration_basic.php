@@ -9,5 +9,4 @@ $tz = intltz_create_enumeration();
 var_dump(get_class($tz));
 $count2 = count(iterator_to_array($tz));
 var_dump($count == $count2);
-?>
-==DONE==
+echo "==DONE==";

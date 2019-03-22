@@ -24,4 +24,3 @@
         for ($i = 0; $i < count($test); $i++) {
                 printf("%s\n", gmp_strval($test[$i]));
         }
-?>

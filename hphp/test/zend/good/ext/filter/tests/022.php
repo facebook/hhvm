@@ -7,4 +7,3 @@ var_dump(filter_var("", FILTER_SANITIZE_EMAIL));
 var_dump(filter_var("123456789000000", FILTER_SANITIZE_EMAIL));
 	
 echo "Done\n";
-?>

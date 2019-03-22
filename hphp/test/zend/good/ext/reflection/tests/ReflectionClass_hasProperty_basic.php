@@ -23,4 +23,3 @@ Class C {
   private $privateFoo;
   public static $staticFoo;
 }
-?>

@@ -14,4 +14,3 @@ $abc = new abc();
 foreach (array (1,2,3) as $abc->k => $abc->v) {
 	var_dump($abc->k,$abc->v);
 }
-?>

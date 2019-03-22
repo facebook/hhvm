@@ -49,4 +49,3 @@ echo sprintf("%e\n", 1.234E+18);
 echo sprintf("%e\n", 9843243.12);
 echo sprintf("%e\n", -9843243.12);
 
-?>

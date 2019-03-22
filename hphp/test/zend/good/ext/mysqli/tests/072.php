@@ -15,4 +15,3 @@
 
 	$mysql->close();
 	echo "done!"
-?>

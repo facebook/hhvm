@@ -9,4 +9,3 @@ new MongoClient("mongodb://localhost", array( 'connect' => false ));
 new MongoClient("mongodb://localhost/", array( 'connect' => false ));
 new MongoClient("mongodb://localhost/x", array( 'connect' => false ));
 new MongoClient("mongodb://localhost/?readPreference=PRIMARY", array( 'connect' => false ));
-?>

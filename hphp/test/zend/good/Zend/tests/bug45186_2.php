@@ -26,4 +26,3 @@ call_user_func(array('BAR','x'));
 call_user_func('BAR::www');
 call_user_func('self::y');
 
-?>

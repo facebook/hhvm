@@ -128,4 +128,3 @@ $kp = sodium_hex2bin(
 	'5aecbcf7866e7a4d58a6c1317e2b955f54ecbe2fcbbf7d262c10636ed524480c'
 );
 var_dump(sodium_crypto_box_seal_open($msg, $kp));
-?>

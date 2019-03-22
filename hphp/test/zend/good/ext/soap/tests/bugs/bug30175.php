@@ -28,4 +28,3 @@ EOF;
 
 $client = new LocalSoapClient(dirname(__FILE__)."/bug30175.wsdl");
 var_dump($client->qwebGetHostInfo());
-?>

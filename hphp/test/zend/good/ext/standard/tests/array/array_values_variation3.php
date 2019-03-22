@@ -98,5 +98,3 @@ foreach($inputs as $key => $input) {
   $iterator++;
 };
 echo "Done";
-?>
-

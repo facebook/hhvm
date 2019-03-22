@@ -2,4 +2,3 @@
 if (php_sapi_name() != "cli") {
 	die("skip this test is for CLI");
 }
-?>

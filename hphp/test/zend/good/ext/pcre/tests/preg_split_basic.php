@@ -10,4 +10,3 @@ var_dump(preg_split('/(\(|\))/', $string, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLI
 var_dump(preg_split('/NAME/i', $string)); //tries to find NAME regardless of case in $string (can't split it so just returns how string as first element)
 var_dump(preg_split('/\w/', $string, -1, PREG_SPLIT_NO_EMPTY)); //every character (including whitespace) is put into an array element
 
-?>

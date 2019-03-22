@@ -26,5 +26,4 @@ $input = array(
 
 var_dump( array_sum($input) );
 
-echo "Done"
-?>
+echo "Done";

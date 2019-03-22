@@ -1,4 +1,3 @@
-
 <?php
 
 echo "Simple test for standard compare object handler\n";
@@ -39,5 +38,4 @@ var_dump($obj1 == $obj5);
 var_dump($obj4 == $obj3);
 var_dump($obj5 == $obj3);
 
-?>
-===DONE===
+echo "===DONE===\n";

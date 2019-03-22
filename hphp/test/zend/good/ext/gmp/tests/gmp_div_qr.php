@@ -22,4 +22,3 @@ var_dump(gmp_div_qr($fp, $fp));
 var_dump(gmp_div_qr(array(), array()));
 
 echo "Done\n";
-?>

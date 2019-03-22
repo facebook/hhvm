@@ -20,5 +20,4 @@ var_dump($link);
 // bad hostname (connect should work, not bind)
 $link = ldap_connect("nonexistent" . $host);
 var_dump($link);
-?>
-===DONE===
+echo "===DONE===\n";

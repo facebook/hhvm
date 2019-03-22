@@ -19,4 +19,3 @@ try {
 } catch (Exception $e) {
 	echo "Catched: ".$e->getMessage()."\n";
 }
-?>

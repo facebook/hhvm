@@ -13,4 +13,3 @@
 $v = Imagick::getVersion();
 if ($v['versionNumber'] >= 0x677 && $v['versionNumber] <= 0x685)
   die ('skip too ImageMagick with cacheing bug');
-?>

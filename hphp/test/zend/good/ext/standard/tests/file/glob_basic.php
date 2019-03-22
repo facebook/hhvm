@@ -35,12 +35,9 @@ function sort_var_dump($results) {
    sort(&$results);
    var_dump($results);
 }
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink("$file_path/glob_basic/wonder12345");
 unlink("$file_path/glob_basic/wonder.txt");
 unlink("$file_path/glob_basic/file.text");
 rmdir("$file_path/glob_basic/");
-?>

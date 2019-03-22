@@ -24,5 +24,4 @@ foreach (array(null, '#ns1', '#ns2', '#ns3') as $ns)
 		echo "children($ns): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
 	}
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -9,4 +9,3 @@ var_dump(fstat($fp));
 
 @unlink($filename);
 echo "Done\n";
-?>

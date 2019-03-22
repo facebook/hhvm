@@ -7,4 +7,3 @@ function __autoload($class) {
     require __DIR__ .'/bug46665_autoload.inc';
 }
 
-?>

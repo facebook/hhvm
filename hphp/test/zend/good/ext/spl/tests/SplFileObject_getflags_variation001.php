@@ -14,4 +14,3 @@ var_dump($fo->getFlags());
 $fo->setFlags(SplFileObject::READ_CSV);
 var_dump($fo->getFlags());
 
-?>

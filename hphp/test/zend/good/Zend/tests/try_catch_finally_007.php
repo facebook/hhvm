@@ -28,4 +28,3 @@ label:
 var_dump(foo());
 var_dump(foo(true));
 
-?>

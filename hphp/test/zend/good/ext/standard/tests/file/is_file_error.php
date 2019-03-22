@@ -21,10 +21,7 @@ try { var_dump( is_file($file_handle) ); } catch (Exception $e) { echo "\n".'War
 fclose($file_handle);
 
 echo "\n*** Done ***";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 if(file_exists($file_path."/is_file_error.tmp")) {
   unlink($file_path."/is_file_error.tmp");
@@ -32,4 +29,3 @@ if(file_exists($file_path."/is_file_error.tmp")) {
 if(file_exists($file_path."/is_file_error1.tmp")) {
   unlink($file_path."/is_file_error1.tmp");
 }
-?>

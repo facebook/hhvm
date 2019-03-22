@@ -22,4 +22,3 @@ var_dump( stripos($multi_line_str, "") );
 var_dump( stripos($multi_line_str, " ") );
 
 echo "*** Done ***";
-?>

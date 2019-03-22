@@ -7,4 +7,3 @@ $resource = tmpfile();
 
 $result = imagecolordeallocate($resource, $white);
 
-?>

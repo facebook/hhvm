@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(expm1($longVal));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -20,4 +20,3 @@ try { print( filetype() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 try { print( filetype("file", "file") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>

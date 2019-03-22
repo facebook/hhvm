@@ -30,4 +30,3 @@ $glue = '/';
 var_dump( join($glue, $pieces) );
 
 echo "Done\n";
-?>

@@ -16,4 +16,3 @@ var_dump($foo->getConstant("cons2"));
 var_dump($foo->getConstant("no such const"));
 
 echo "Done\n";
-?>

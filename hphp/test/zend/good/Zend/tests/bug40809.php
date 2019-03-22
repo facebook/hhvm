@@ -25,4 +25,3 @@ for ($i=0;$i<$num_repeats;$i++) {
   unset($evil);
 }
 echo "ok\n";
-?>

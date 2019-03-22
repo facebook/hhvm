@@ -28,4 +28,3 @@ $a = new OverloadedArray;
 $a[1] += 10;
 var_dump($a[1]);
 echo "---Done---\n";
-?>

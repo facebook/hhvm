@@ -21,4 +21,3 @@ $file_handle = fopen(__FILE__, "r");
 
 test_splice ($file_handle);
 echo "Done\n";
-?>

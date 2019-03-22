@@ -12,4 +12,3 @@ function __autoload($name) {
 var_dump(method_exists('UndefC', 'func'));
 
 echo "Done";
-?>

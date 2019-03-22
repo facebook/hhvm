@@ -25,5 +25,4 @@ echo "After modification 3: " . date_format($datetime, "D, d M Y") . "\n";
 date_modify($datetime, "last Sunday"); 
 echo "After modification 4: " . date_format($datetime, "D, d M Y") . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

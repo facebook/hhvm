@@ -32,4 +32,3 @@ class test {
 stream_wrapper_register('test', 'test');
 
 var_dump(scandir('test://example.com/path/to/test'));
-?>

@@ -61,4 +61,3 @@ try { var_dump( ord() );  } catch (Exception $e) { echo "\n".'Warning: '.$e->get
 try { var_dump( ord($arr_test[0], $arr_test[1]) );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

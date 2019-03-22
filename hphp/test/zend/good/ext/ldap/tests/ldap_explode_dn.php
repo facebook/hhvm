@@ -32,4 +32,3 @@ var_dump(ldap_explode_dn("bob,dc=example,dc=com", 1));
 
 echo "Done\n";
 
-?>

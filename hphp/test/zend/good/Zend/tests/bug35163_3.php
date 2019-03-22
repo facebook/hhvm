@@ -7,4 +7,3 @@ $a->b[0] = 2;
 var_dump($a);
 $a->b = null;
 $a = null;
-?>

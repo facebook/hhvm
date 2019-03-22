@@ -9,5 +9,4 @@ echo "*** Testing array_product() : variations ***\n";
 
 echo "\n-- Testing array_product() function with a keyed array array --\n";
 var_dump( array_product(array("bob" => 2, "janet" => 5)) );
-?>
-===DONE===
+echo "===DONE===\n";

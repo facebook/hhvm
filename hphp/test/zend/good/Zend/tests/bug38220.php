@@ -50,4 +50,3 @@ $obj1->func1();
 $obj2 = new A(2);
 unset($obj1);
 $obj2->func1();
-?>

@@ -117,5 +117,3 @@ foreach($inputs as $key => $input) {
 fclose($fp);
 
 echo "Done";
-?>
-

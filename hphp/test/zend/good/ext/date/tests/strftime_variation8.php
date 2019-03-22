@@ -17,5 +17,4 @@ echo "\n-- Testing strftime() function with a literal % character to format --\n
 var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

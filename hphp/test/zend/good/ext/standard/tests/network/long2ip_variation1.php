@@ -103,5 +103,4 @@ foreach($inputs as $key =>$value) {
 
 fclose($res);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -7,4 +7,3 @@ var_dump(strcspn($a,$b));
 var_dump(strcspn($a,$b,9));
 var_dump(strcspn($a,$b,9,6));
 var_dump(strcspn('a', 'B', 1, 2147483647));
-?>

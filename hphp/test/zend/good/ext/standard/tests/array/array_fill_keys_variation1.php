@@ -34,4 +34,3 @@ var_dump( array_fill_keys($mixedArray, $simpleStr) );
 
 fclose($fp);
 echo "Done";
-?>

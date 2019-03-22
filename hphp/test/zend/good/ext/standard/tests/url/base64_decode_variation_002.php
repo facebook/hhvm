@@ -77,6 +77,4 @@ foreach($values as $key=>$value) {
     echo "\n-- Arg value $key --\n";
     try { var_dump(base64_decode($str, $value)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
-
-?>
-===Done===
+echo "===Done===";

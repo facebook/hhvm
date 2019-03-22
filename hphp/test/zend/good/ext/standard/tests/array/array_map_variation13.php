@@ -50,4 +50,3 @@ function callback_without_ret($arr1)
 var_dump( array_map('callback_without_ret', $array1));
 
 echo "Done";
-?>

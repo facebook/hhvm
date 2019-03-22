@@ -10,6 +10,4 @@
   	$errno= posix_get_last_error();
   	var_dump(posix_strerror($errno)); 
   }
-  
-?>
-===DONE====
+echo "===DONE====";

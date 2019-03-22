@@ -37,4 +37,3 @@
   $b = new B;
   $c = new C;
   var_dump($x, $b, $c);
-?>

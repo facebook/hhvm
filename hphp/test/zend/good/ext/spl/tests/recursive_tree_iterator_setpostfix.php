@@ -48,5 +48,4 @@ foreach($it as $k => $v) {
 
 
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -135,4 +135,3 @@ echo \foo\foo::C7 . "\n";
 \print_r(bar5::$a7);
 function oops($a = array(foo\unknown)){}
 oops();
-?>

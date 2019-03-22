@@ -19,5 +19,4 @@ var_dump(in_array("Europe/London", $zones));
 var_dump(in_array("America/New_York", $zones));
 var_dump(in_array("UTC", $zones));
 
-?>
-===DONE===
+echo "===DONE===\n";

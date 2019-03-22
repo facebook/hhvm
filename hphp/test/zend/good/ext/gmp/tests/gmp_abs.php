@@ -15,4 +15,3 @@ try { var_dump(gmp_abs(1,2)); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 var_dump(gmp_abs(array()));
 
 echo "Done\n";
-?>

@@ -10,4 +10,3 @@ function gen() {
 $generator = gen();
 var_dump($generator instanceof Generator);
 
-?>

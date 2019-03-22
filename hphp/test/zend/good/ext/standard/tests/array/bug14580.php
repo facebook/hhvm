@@ -3,4 +3,3 @@
 	$key = key(&$arr);
 	echo strlen($key), ': ';
 	echo urlencode($key), "\n";
-?>

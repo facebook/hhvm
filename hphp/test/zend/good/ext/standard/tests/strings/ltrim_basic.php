@@ -28,5 +28,4 @@ var_dump(ltrim($alpha, "A..Z"));
 echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(ltrim($binary, "\x00..\x1F"));
 
-?>
-===DONE===
+echo "===DONE===\n";

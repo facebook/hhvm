@@ -16,4 +16,3 @@ class D {
 }
 $o = new C;
 $o->printY();
-?>

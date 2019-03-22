@@ -28,4 +28,3 @@ foreach($strings as $value)
 }
 
 echo "Done";
-?>

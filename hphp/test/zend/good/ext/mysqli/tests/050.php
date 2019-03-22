@@ -11,4 +11,3 @@
 
 	mysqli_close($link);
 	printf("Ok\n");
-?>

@@ -21,5 +21,4 @@ try {
   print $e->getMessage() . "\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

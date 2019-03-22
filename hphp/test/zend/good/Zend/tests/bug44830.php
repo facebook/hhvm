@@ -6,4 +6,3 @@ EOT;
 
 var_dump($backslash);
 
-?>

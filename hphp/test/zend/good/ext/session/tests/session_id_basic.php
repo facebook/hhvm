@@ -24,4 +24,3 @@ var_dump(session_id());
 
 echo "Done";
 ob_end_flush();
-?>

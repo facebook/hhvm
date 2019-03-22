@@ -8,5 +8,4 @@ try {
   echo "Exception raised\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

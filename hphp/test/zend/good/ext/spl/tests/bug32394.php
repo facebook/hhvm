@@ -8,5 +8,4 @@ foreach($object as $key => $value)
 	$object->offsetUnset($key);
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

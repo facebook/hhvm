@@ -67,4 +67,3 @@
 	$res .= imagecolorat($base,0,0)==$black?'1':'0';
 
 	echo "$res\n";
-?>

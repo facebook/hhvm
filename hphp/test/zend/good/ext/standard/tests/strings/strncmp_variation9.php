@@ -48,4 +48,3 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
   $count ++;
 }
 echo "*** Done ***\n";
-?>

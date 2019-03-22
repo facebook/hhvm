@@ -21,4 +21,3 @@ try { var_dump( serialize(1,2) ); } catch (Exception $e) { echo "\n".'Warning: '
 try { var_dump( unserialize(1,2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

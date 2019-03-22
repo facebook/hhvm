@@ -9,4 +9,3 @@ var_dump($ref->hasProperty('b'));
 
 var_dump(isset($obj->a));
 
-?>

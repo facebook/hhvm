@@ -8,4 +8,3 @@ class test {
 
 	$test = new test();
 	echo strtoupper($test);
-?>

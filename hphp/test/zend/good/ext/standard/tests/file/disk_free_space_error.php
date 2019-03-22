@@ -25,10 +25,7 @@ var_dump( diskfreespace( $file_path."/disk_free_space.tmp" ));
 fclose($fh);
 
 echo"\n-- Done --";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/disk_free_space.tmp");
 
-?>

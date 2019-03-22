@@ -23,5 +23,4 @@ class B extends A
 }
 $b = new B();
 $b->A();
-?>
-===DONE===
+echo "===DONE===\n";

@@ -31,4 +31,3 @@ var_dump( ftell($fp) );
 fclose($fp);
 unlink($filename);
 echo "Done\n";
-?>

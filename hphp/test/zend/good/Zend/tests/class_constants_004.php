@@ -23,4 +23,3 @@ $const2 = __NAMESPACE__ .'\\Ifoo'; // interface
 			Ifoo::foo,
 			$const2::foo
 			);
-?>

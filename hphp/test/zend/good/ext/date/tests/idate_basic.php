@@ -13,5 +13,4 @@ $format = 'Y';
 // Calling idate() with mandatory arguments
 date_default_timezone_set("Asia/Calcutta");
 var_dump( idate($format) );
-?>
-===DONE===
+echo "===DONE===\n";

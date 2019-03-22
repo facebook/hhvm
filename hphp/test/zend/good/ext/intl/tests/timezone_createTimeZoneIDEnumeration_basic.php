@@ -11,5 +11,4 @@ $enum = intltz_create_time_zone_id_enumeration(
 	'PT',
 	-3600000);
 print_r(iterator_to_array($enum));
-?>
-==DONE==
+echo "==DONE==";

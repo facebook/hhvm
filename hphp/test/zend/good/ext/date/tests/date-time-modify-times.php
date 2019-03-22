@@ -27,4 +27,3 @@ foreach ( $tests as $start => $data )
 	}
 }
 echo "\n";
-?>

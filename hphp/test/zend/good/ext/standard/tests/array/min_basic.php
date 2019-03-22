@@ -17,4 +17,3 @@ var_dump(min(0, true, false, true));
 var_dump(min(0, 1, array(2,3)));
 
 echo "\nDone\n";
-?>

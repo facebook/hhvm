@@ -19,4 +19,3 @@ Cls::{true}();
 Cls::{false}();
 Cls::{null}();
 
-?>

@@ -7,4 +7,3 @@ $strings = array(
 foreach($strings as $string) {
     var_dump(base64_decode($string, true));
 }
-?>

@@ -6,4 +6,3 @@ class_alias('a', 'b');
 
 class b { }
 
-?>

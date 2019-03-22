@@ -16,4 +16,3 @@ class foo implements test {
 $foo = new foo;
 $foo->bar();
 
-?>

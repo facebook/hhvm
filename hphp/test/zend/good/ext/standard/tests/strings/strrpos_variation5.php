@@ -20,4 +20,3 @@ var_dump( strrpos($control_char_str, "\n", 12) );
 var_dump( strrpos($control_char_str, "\t", 15) );
 
 echo "*** Done ***";
-?>

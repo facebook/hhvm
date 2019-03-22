@@ -43,5 +43,5 @@ function runtest() {
 abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
   public static $filename;
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

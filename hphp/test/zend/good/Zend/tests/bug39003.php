@@ -16,4 +16,3 @@ $obj = new ClassName;
 test($obj);
 
 echo "Done\n";
-?>

@@ -17,5 +17,4 @@ $orig->setTime(22, 41, 50);
 echo "Original: " . $orig->format("H:i:s") . "\n";
 echo "Clone: " . $clone->format("H:i:s") . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

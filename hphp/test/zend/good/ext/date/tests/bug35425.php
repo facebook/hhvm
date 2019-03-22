@@ -5,4 +5,3 @@ foreach (array('B','d','h','H','i','I','L','m','s','t','U','w','W','y','Y','z','
 	var_dump(idate($v, $time));
 }
 
-?>

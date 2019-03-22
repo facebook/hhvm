@@ -63,4 +63,3 @@ var_dump(string_add_val());
 //echo "Testing int with null null constant" . PHP_EOL;
 //var_dump(int_val_default_null(null));
 
-?>

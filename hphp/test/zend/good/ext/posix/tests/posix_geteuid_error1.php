@@ -9,4 +9,3 @@ foreach ( $extra_args as $arg )
 	try { var_dump(posix_geteuid( $arg )); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
-?>

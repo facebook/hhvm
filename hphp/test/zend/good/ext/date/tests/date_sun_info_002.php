@@ -6,4 +6,3 @@ foreach ($sun_info as $key => $elem )
 	echo date( 'Y-m-d H:i:s T', $elem ),  " ", $key, "\n";
 }
 echo "Done\n";
-?>

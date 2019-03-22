@@ -9,4 +9,3 @@ var_dump($arr[$k]('foo') == 'FOO');
 var_dump($arr[++$k]('FOO') == 'foo');
 var_dump($arr[++$k]('FOO') == 'foo');
 
-?>

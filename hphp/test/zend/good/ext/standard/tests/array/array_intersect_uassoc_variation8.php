@@ -23,5 +23,4 @@ var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
 $array2 = &$array1;
 echo "\n-- Testing array_intersect_uassoc() function when \$array2 is referencd to \$array1 --\n";
 var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
-?>
-===DONE===
+echo "===DONE===\n";

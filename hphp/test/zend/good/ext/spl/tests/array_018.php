@@ -25,5 +25,4 @@ catch (Exception $e)
 
 var_dump($foo);
 
-?>
-===DONE===
+echo "===DONE===\n";

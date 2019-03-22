@@ -10,4 +10,3 @@ class bar {
 \var_dump(new \foo);
 \var_dump(new foo);
 
-?>

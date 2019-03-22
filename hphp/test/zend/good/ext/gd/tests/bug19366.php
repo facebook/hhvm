@@ -34,4 +34,3 @@ echo "Alive: Send to browser\n";
 echo "Alive: Free resources\n";
 imagedestroy($ImHandle);
 echo "Alive: Done\n";
-?>

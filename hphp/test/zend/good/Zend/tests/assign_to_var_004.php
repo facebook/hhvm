@@ -11,4 +11,3 @@ var_dump($var1);
 var_dump($var2);
 
 echo "Done\n";
-?>

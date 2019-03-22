@@ -12,4 +12,3 @@ class test extends Exception {
 throw new test();
 
 echo "Done\n";
-?>

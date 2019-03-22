@@ -37,4 +37,3 @@ $t = new derived();
 unset($t);
 
 echo "Done\n";
-?>

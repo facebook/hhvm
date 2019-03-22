@@ -25,5 +25,4 @@ echo "Week 30 day 3 of 2009 is \"" . $datetime->format("D M j") . "\"\n";
 $datetime->setISODate(2008, 30, 3);
 echo "..same day last year was \"" . $datetime->format("D M j") . "\"\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

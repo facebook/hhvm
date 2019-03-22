@@ -14,4 +14,3 @@ foreach (fib() as $n) {
     var_dump($n);
 }
 
-?>

@@ -24,5 +24,4 @@ try {
 } catch (OutOfRangeException $e) {
 	echo "OutOfRangeException thrown\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

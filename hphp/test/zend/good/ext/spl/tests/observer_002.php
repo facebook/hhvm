@@ -133,6 +133,4 @@ var_dump($sub->count());
 
 $sub->notify();
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

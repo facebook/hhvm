@@ -35,4 +35,3 @@ $variation_array = array(
 foreach ( $variation_array as $var ) {
   var_dump(posix_ttyname( $var  ) );
 }
-?>

@@ -8,4 +8,3 @@ function abc() {
 register_shutdown_function('timE');
 register_shutdown_function('ABC');
 
-?>

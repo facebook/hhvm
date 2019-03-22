@@ -26,4 +26,3 @@ foreach($classes  as $class ) {
 	echo "Is $class instantiable?  ";
 	var_dump($ro->IsInstantiable()); 
 }
-?>

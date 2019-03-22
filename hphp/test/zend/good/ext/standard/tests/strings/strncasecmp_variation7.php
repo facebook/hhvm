@@ -16,4 +16,3 @@ var_dump( strncasecmp($str1, $str2, 12) );
 var_dump( strncasecmp($str3, "Hello,world", 12) );
 
 echo "*** Done ***\n";
-?>

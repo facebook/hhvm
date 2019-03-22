@@ -10,4 +10,3 @@ var_dump(preg_match('@\@\@@', '@@'));
 var_dump(preg_match('//z', '@@'));
 var_dump(preg_match('{', ''));
 
-?>

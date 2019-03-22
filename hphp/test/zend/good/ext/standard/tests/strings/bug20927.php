@@ -7,4 +7,3 @@ echo "Length of original string:  ".strlen($string)."\n";
 echo "Length of break string:     ".strlen($break)."\n";
 
 var_dump(wordwrap($string, $linelength, $break, 1));
-?>

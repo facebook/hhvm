@@ -24,5 +24,4 @@ var_dump( array_filter($input, () ==> true) );
 echo "Anonymous callback function with regular argument and null statement\n";
 var_dump( array_filter($input, $i ==> {} ) );
 
-echo "Done"
-?>
+echo "Done";

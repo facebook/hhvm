@@ -17,4 +17,3 @@ print $output;
 $xw = xmlwriter_open_memory();
 var_dump(xmlwriter_write_attribute_ns($xw, 'prefix', 'id', 'http://www.php.net/uri', 'elem1'));
 print xmlwriter_output_memory($xw);
-?>

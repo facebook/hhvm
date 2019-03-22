@@ -5,4 +5,3 @@ implode('', array(false));
 implode('', array(""));
 
 echo "Done\n";
-?>

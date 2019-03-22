@@ -65,5 +65,4 @@ foreach ($array as $property => $value) {
 	print "$property: $value\n";    
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

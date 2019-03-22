@@ -15,5 +15,4 @@ var_dump(ctype_graph($c1));
 var_dump(ctype_graph($c2));
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

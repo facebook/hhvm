@@ -31,4 +31,3 @@ echo "Argument is non existent class:\n";
 var_dump( get_class_methods("NonExistent") );
 
 echo "Done";
-?>

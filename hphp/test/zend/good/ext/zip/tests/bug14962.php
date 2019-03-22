@@ -21,4 +21,3 @@ if (is_file($fullpath)) {
 	echo "Ok";
 }
 unlink($dir . '/' . '__14962.zip');
-?>

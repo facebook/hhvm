@@ -18,4 +18,3 @@ var_dump( addcslashes($obj, "b") );
 
 echo "Done\n"; 
 
-?>

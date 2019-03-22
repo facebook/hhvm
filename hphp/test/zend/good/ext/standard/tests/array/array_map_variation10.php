@@ -29,4 +29,3 @@ echo "-- passing NULL as 'arr1' --\n";
 var_dump( array_map( $a ==> array($a), NULL));
 
 echo "Done";
-?>

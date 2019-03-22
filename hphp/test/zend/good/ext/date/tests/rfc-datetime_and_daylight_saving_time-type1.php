@@ -317,4 +317,3 @@ $interval = new DateInterval($interval_spec);
 echo 'bs10 ' . $end->format($date_format) . " - $interval_spec = "
 	. $end->sub($interval)->format($date_format) . "\n";
 
-?>

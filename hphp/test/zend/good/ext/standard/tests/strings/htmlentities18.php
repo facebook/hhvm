@@ -16,4 +16,3 @@ foreach ($tests as $test) {
 	var_dump(htmlentities($test, ENT_QUOTES, NULL, FALSE));
 	var_dump(htmlspecialchars($test, ENT_QUOTES, NULL, FALSE));
 }
-?>

@@ -44,14 +44,10 @@ var_dump( filesize($file_path."/copy_copy_variation7_hardlink.tmp") );
 clearstatcache();
 
 echo "*** Done ***\n";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/copy_copy_variation7_symlink.tmp");
 unlink($file_path."/copy_copy_variation7_hardlink.tmp");
 unlink($file_path."/copy_variation7_symlink.tmp");
 unlink($file_path."/copy_variation7_hardlink.tmp");
 unlink($file_path."/copy_variation7.tmp");
-?>

@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(sin($longVal));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -30,4 +30,3 @@ $soapClient = new TestSoapClient($wsdl,
         array('trace' => 1, 'exceptions' => 0));
 $result = $soapClient->getObject();
 var_dump($result);
-?>

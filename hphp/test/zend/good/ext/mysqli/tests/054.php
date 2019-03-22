@@ -10,4 +10,3 @@
 	mysqli_close($link);
 	mysqli_free_result($result1);
 	printf("Ok\n");
-?>

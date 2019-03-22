@@ -10,4 +10,3 @@ interface b extends a {
 
 var_dump(b::c, a::b);
 
-?>

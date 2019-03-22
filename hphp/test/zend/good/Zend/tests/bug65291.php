@@ -17,4 +17,3 @@ get_defined_constants();
 get_defined_constants(true);
 
 echo $foo;
-?>

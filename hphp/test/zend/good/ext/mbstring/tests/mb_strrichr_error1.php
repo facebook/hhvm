@@ -22,5 +22,4 @@ echo "\n-- Testing mb_strrichr() function with less than expected no. of argumen
 $haystack = b'string_val';
 try { var_dump( mb_strrichr($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -17,4 +17,3 @@ $t = new fail();
 $t->show();
 
 echo "Done\n"; // shouldn't be displayed
-?>

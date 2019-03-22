@@ -11,4 +11,3 @@ $arg = 1;
 $t->$func($arg);
 
 echo "Done\n";
-?>

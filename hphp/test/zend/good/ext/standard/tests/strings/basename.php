@@ -27,4 +27,3 @@
 	// binary safe?
 	var_dump(basename("foo".chr(0)."bar"));
 	var_dump(basename("foo".chr(0)."bar.gz", ".gz"));
-?>

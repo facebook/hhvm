@@ -15,4 +15,3 @@ $R = new ReflectionObject($B);
 $m = $R->getMethods();
 print_r($m);
 
-?>

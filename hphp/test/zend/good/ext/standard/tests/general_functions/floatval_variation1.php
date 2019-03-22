@@ -46,5 +46,4 @@ foreach ($not_float_types as $key => $type ) {
    echo "\n-- Iteration : $key --\n";
    var_dump( doubleval($type) );
 }
-?>
-===DONE===
+echo "===DONE===\n";

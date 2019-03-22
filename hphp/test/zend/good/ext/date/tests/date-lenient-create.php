@@ -23,4 +23,3 @@ print_r( date_create_from_format( '+m/d/y', $date , $tz)->setTime(0, 0) );
 print_r( date_get_last_errors() );
 echo "==\n";
 
-?>

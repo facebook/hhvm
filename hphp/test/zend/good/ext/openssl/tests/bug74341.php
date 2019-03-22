@@ -41,4 +41,3 @@ lOzTF7xAUxmPUnNb2teatMf2Rmj0fs+d
 $parsed_cert = openssl_x509_parse($pem_cert);
 var_dump($parsed_cert['validFrom_time_t']);
 var_dump($parsed_cert['validTo_time_t']);
-?>

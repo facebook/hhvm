@@ -44,4 +44,3 @@
 	mysqli_close($link);
 	/* Make sure that the function alias exists */
 	print "done!";
-?>

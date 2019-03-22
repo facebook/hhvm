@@ -21,5 +21,4 @@ date_timezone_set($datetime, $la_time);
 $tz = date_timezone_get($datetime);
 echo "New timezone: " . timezone_name_get($tz) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

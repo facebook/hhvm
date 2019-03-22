@@ -107,4 +107,3 @@ if (file_exists('test.file')) {
 } else {
     echo "test.file does not exist\n";
 }
-?>

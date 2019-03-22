@@ -5,9 +5,6 @@ $temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
 	fclose($fp);
 $resource = xmlwriter_open_uri($temp_filename);
 var_dump(xmlwriter_set_indent_string($resource, '  '));
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
 unlink($temp_filename);
-?>

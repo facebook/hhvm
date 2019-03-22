@@ -29,6 +29,4 @@ echo "\nNext:\n";
 $rit->next();
 $rit->next();
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

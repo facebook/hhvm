@@ -93,5 +93,4 @@ foreach($inputs as $variation =>$year) {
 // closing the resource
 fclose( $file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";

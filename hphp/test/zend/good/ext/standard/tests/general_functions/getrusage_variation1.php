@@ -64,5 +64,4 @@ foreach($inputs as $input) {
   echo "User time used (microseconds) " . $res["ru_utime.tv_usec"] . "\n";
   $iterator++;
 }
-?>
-===DONE===
+echo "===DONE===\n";

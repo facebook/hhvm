@@ -21,4 +21,3 @@ var_dump( join($glues[0], $pieces) );
 var_dump( join($glues[1], $pieces) );
  
 echo "Done\n";
-?>

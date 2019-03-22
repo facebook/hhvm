@@ -9,4 +9,3 @@ $i2 = getimagesizefromstring($data);
 
 var_dump($i1);
 var_dump($i2);
-?>

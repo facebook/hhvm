@@ -121,6 +121,4 @@ catch(UnexpectedValueException $e)
 	echo $e->getMessage() . "\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -31,4 +31,3 @@ unlink($dir_name."/tempnam_variation5.tmp");
 rmdir($dir_name);
 
 echo "\n*** Done ***\n";
-?>

@@ -18,4 +18,3 @@ fclose($reader);
 @unlink($filename);
 
 echo "Done\n";
-?>

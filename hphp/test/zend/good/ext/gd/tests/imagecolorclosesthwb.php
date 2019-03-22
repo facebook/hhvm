@@ -8,4 +8,3 @@
 	try { var_dump(imagecolorclosesthwb($im, "hello", "from", "gd")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 	imagedestroy($im);
-?>

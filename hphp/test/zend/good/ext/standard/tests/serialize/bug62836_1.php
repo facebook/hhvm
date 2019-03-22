@@ -7,4 +7,3 @@ function __autoload($name) {
 
 print_r(unserialize($serialized_object));
 echo "okey";
-?>

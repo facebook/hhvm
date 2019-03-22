@@ -9,4 +9,3 @@ var_dump($m);
 var_dump(preg_match_all('/^\S+\s$/D', "aeiou\n", &$m));
 var_dump($m);
 
-?>

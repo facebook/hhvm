@@ -10,4 +10,3 @@ if ($skip_on_bind_failure) {
 
 	ldap_unbind($link);
 }
-?>

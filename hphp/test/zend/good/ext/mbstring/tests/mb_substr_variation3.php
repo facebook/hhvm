@@ -95,4 +95,3 @@ foreach($encoding as $enc) {
 }
 
 echo "Done";
-?>

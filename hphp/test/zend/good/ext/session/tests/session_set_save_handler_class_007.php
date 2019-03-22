@@ -49,4 +49,3 @@ $_SESSION['abc'] = 'xyz';
 // implicit close (called by shutdown function)
 echo "done\n";
 ob_end_flush();
-?>

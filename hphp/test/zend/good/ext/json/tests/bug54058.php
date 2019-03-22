@@ -23,4 +23,3 @@ $c = array(
 json_encode($c);
 var_dump(json_last_error(), json_last_error_msg());
 
-?>

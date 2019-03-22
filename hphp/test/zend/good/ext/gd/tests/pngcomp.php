@@ -14,4 +14,3 @@
         }
 
 	@unlink($cwd . "/test_pngcomp.png");
-?>

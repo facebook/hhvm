@@ -32,4 +32,3 @@
 		var_dump(fgetcsv(fopen($file, "r"), 1024));
 	}
 	@unlink($file);
-?>

@@ -10,6 +10,4 @@ class Extension extends Base
 	private function test($arg)
 	{}
 }
-
-?>
-==DONE==
+echo "==DONE==";

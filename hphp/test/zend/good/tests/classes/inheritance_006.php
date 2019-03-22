@@ -11,4 +11,3 @@ Class C extends B {
 }
 
 var_dump(new C);
-?>

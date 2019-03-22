@@ -8,5 +8,4 @@ $bi->setText('foo bar trans zoo bee');
 var_dump($bi->following(5));
 var_dump($bi->following(50));
 var_dump($bi->following(-1));
-?>
-==DONE==
+echo "==DONE==";

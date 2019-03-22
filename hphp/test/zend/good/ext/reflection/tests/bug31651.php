@@ -9,4 +9,3 @@ $ref = new ReflectionClass('Test');
 
 print_r($ref->getDefaultProperties());
 
-?>

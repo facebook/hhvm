@@ -103,4 +103,3 @@ foreach($arrays as $unexpected_value) {
 fclose($fp);
 
 echo "Done";
-?>

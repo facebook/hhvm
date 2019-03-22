@@ -91,5 +91,4 @@ for($index = 0; $index < count($values); $index ++) {
 // closing the file
 fclose($file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";

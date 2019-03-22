@@ -13,8 +13,5 @@ foreach ($s as $row) {
     list($fruit, $quantity) = $row;
     echo "$fruit : $quantity\n";
 }
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink('csv_control_data.csv');
-?>

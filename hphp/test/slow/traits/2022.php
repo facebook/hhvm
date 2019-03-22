@@ -48,4 +48,3 @@ var_dump(in_array( 'MyClass', get_declared_user_traits()));
 
 
 echo "Done\n";
-?>

@@ -5,4 +5,3 @@ error_reporting(E_ALL);
 		echo strlen($key), ': ';
 		echo urlencode($key), ' => ', urlencode($val), "\n";
 	}
-?>

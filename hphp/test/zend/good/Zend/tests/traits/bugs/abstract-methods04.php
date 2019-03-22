@@ -27,4 +27,3 @@ class TraitsTest2 {
 $test = new TraitsTest2();
 $test->hello();
 
-?>

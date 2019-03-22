@@ -62,5 +62,4 @@ function runtest() {
         rmdir($extraDir);	
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

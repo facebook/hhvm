@@ -20,5 +20,4 @@ echo "tell=".gztell($h)."\n";
 //read the next 10
 var_dump(gzread($h, 10));
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

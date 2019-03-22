@@ -11,4 +11,3 @@ foreach ($attrs as $attr) {
 
 @unlink(__DIR__."/foo.db");
 
-?>

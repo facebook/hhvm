@@ -33,5 +33,4 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 
-?>
-===DONE===
+echo "===DONE===\n";

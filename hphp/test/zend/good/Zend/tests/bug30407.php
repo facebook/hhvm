@@ -7,5 +7,4 @@ function haricow($a = 'one') {
 
 haricow();
 haricow();
-?>
-===DONE===
+echo "===DONE===\n";

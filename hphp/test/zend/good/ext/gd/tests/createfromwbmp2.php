@@ -32,4 +32,3 @@ for ($i=0; $i<10000; $i++) {
 fclose($fp);
 $im = imagecreatefromwbmp($filename);
 unlink($filename);
-?>

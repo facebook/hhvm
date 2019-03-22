@@ -18,4 +18,3 @@ class B extends A {
 
 A::test();
 B::test();
-?>

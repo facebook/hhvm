@@ -6,4 +6,3 @@ var_dump($result);
 var_dump(preg_last_error());
 
 echo "Done\n";
-?>

@@ -14,5 +14,4 @@ $sxe = simplexml_load_string($xml);
 
 var_dump($sxe);
 var_dump($sxe['attr']);
-?>
-===DONE===
+echo "===DONE===\n";

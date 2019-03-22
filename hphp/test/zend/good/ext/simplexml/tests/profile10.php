@@ -13,4 +13,3 @@ echo $rsattr['attribute'];
 echo "\n";
 echo $spattr['attribute'];
 echo "\n---Done---\n";
-?>

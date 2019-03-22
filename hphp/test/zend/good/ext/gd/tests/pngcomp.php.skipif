@@ -6,4 +6,3 @@
 	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
 		die("skip png support unavailable");
 	}
-?>

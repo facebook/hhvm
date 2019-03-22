@@ -11,4 +11,3 @@ foreach (gen() as $k => $v) {
     echo $k, ' => ', $v, "\n";
 }
 
-?>

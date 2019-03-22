@@ -15,4 +15,3 @@ unset($items[0]);
 unset($items[0][0]);
 crash();
 echo "Worked!\n";
-?>

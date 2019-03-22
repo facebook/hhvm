@@ -10,4 +10,3 @@ $gaussian = array(
 );
 
 var_dump(imageconvolution($image, $gaussian, 16, 0));
-?>

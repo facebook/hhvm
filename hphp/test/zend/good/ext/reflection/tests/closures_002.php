@@ -15,5 +15,4 @@ var_dump($rp->isOptional());
 $rp = new ReflectionParameter(array(new Test, '__invoke'), 1);
 var_dump($rp->isOptional());
 
-?>
-===DONE===
+echo "===DONE===\n";

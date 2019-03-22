@@ -21,4 +21,3 @@ var_dump(parse_ini_file($file));
 @unlink($file);
 
 echo "Done\n";
-?>

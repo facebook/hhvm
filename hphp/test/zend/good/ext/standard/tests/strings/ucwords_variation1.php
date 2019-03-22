@@ -106,4 +106,3 @@ for($index = 0; $index < count($values); $index ++) {
 // close the file handle
 fclose($fp);
 echo "Done\n";
-?>

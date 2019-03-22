@@ -46,4 +46,3 @@ echo "\n-- resultant array after shuffle() function is applied --\n";
 var_dump( $array_arg_strings );
 
 echo "Done";
-?>

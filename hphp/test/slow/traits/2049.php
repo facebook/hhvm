@@ -33,4 +33,3 @@ var_dump($o->getText());
 $o->setText('bar');
 
 var_dump($o->getText());
-?>

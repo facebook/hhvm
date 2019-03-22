@@ -24,5 +24,4 @@ $bg = imagecolorallocate( $img, 255, 255, 255 );
 var_dump( imagecolorstotal( $img ) );
 imagedestroy( $img );
 
-?>
-===DONE===
+echo "===DONE===\n";

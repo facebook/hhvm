@@ -39,5 +39,4 @@ foreach($valid_strings as $key => $str) {
 	echo "\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

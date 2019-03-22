@@ -36,4 +36,3 @@ var_dump(krsort(&$temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";
-?>

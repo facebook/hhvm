@@ -17,4 +17,3 @@ var_dump($c->x);
 $c->setFlags(0);
 C::go($c);
 var_dump($c->x);
-?>

@@ -57,4 +57,3 @@ foreach (array('A', 'B') as $class) {
         var_dump($rm->getDocComment());
     }
 }
-?>

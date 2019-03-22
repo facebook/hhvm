@@ -22,4 +22,3 @@ $r->setPregFlags(PREG_OFFSET_CAPTURE);
 
 echo is_long($r->getPregFlags());
 
-?>

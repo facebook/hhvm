@@ -7,5 +7,4 @@ try { var_dump(fstat()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getM
 
 fclose($fp);
 
-?>
-===DONE===
+echo "===DONE===\n";

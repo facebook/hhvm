@@ -9,4 +9,3 @@ $abstractClass = new ReflectionClass('TestAbstractClass');
 var_dump($testClass->isAbstract());
 var_dump($abstractClass->isAbstract());
 
-?>

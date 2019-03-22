@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(cos($longVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

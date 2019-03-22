@@ -18,4 +18,3 @@
   catch (Exception $e) {
       echo "In Exception catch block. Autoload should not have been triggered.\n";
   }
-?>

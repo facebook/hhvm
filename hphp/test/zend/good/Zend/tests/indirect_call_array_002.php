@@ -3,4 +3,3 @@
 $arr = array('stdclass', 'b');
 $arr();
 
-?>

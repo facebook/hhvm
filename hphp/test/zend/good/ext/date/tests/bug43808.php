@@ -8,4 +8,3 @@ if ($date instanceof DateTime) {
 var_dump( $date );
 var_dump( DateTime::getLastErrors() );
 var_dump( date_get_last_errors() );
-?>

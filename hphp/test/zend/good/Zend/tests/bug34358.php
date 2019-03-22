@@ -7,4 +7,3 @@ class foo {
 $x = new foo();
 $x->bar();
 echo "ok\n";
-?>

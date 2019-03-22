@@ -20,10 +20,7 @@ var_dump( is_bool( is_dir($file_path) ) );
 var_dump( is_bool( is_dir("/no/such/dir") ) );
 
 echo "*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/is_dir_basic";
 rmdir($dir_name);
-?>

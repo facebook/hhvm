@@ -14,4 +14,3 @@ for ($ix = 0; $ix < $w; $ix++) {
 }
 
 echo "OK\n";
-?>

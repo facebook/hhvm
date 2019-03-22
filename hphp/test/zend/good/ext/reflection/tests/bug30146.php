@@ -11,5 +11,4 @@ var_dump($r->getValue());
 
 $r->setValue(3);
 var_dump($r->getValue());
-?>
-===DONE===
+echo "===DONE===\n";

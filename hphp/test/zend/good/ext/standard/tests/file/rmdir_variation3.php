@@ -55,5 +55,4 @@ foreach($dirs as $dir) {
 
 rmdir($workDir);
 
-?>
-===DONE===
+echo "===DONE===\n";

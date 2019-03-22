@@ -15,12 +15,10 @@ var_dump(
 		ldap_search($link, "o=test,$base", "(Description=Domain description)")
 	)
 );
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 remove_dummy_data($link, $base);
-?>

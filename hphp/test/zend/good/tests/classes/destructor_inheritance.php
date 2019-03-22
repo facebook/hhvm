@@ -13,4 +13,3 @@ $obj = new derived;
 unset($obj);
 
 echo 'Done';
-?>

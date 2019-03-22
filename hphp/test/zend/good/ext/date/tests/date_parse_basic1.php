@@ -13,5 +13,4 @@ var_dump( date_parse("2009-02-27 10:00:00.5") );
 var_dump( date_parse("10:00:00.5") );
 var_dump( date_parse("2009-02-27") );
 
-?>
-===DONE===
+echo "===DONE===\n";

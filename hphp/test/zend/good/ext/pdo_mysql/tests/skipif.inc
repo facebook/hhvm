@@ -4,4 +4,3 @@ if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql'))
 
 if (version_compare(PHP_VERSION, '5.1.0') < 0)
 	die('skip Most tests assume PHP 5.1+');
-?>

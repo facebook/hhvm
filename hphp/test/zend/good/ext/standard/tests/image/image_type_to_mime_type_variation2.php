@@ -34,5 +34,4 @@ foreach($values as $value) {
       var_dump( image_type_to_mime_type($value) );
       $iterator++;
 };
-?>
-===DONE===
+echo "===DONE===\n";

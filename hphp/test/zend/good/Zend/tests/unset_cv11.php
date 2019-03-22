@@ -5,4 +5,3 @@ $cf = $x;
 unset($cf['default']);
 var_dump($x);
 echo "ok\n";
-?>

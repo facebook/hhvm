@@ -55,4 +55,3 @@ echo "Simple test of xml_set_notation_decl_handler(() function\n";
 $p1 = new Xml_Parser();
 $p1->parse($xml);
 echo "Done\n";
-?>

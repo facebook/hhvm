@@ -22,4 +22,3 @@ var_dump( fnmatch(FALSE, FALSE) );
 var_dump( fnmatch(NULL, NULL) );
 
 echo "\n*** Done ***\n";
-?>

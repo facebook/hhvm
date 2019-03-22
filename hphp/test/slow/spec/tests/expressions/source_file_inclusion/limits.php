@@ -16,5 +16,3 @@ echo "Inside file >" . __FILE__ . "< at line >" . __LINE__ .
 
 const MY_MIN = 10;
 const MY_MAX = 50;
-
-// ?>

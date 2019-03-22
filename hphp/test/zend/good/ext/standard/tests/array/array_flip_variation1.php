@@ -77,5 +77,4 @@ for($count = 0; $count < count($values); $count++) {
 //closing resource
 fclose($fp);
 
-echo "Done"
-?>
+echo "Done";

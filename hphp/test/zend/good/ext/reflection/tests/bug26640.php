@@ -17,4 +17,3 @@ if (is_object($a)) {
 	echo "OK\n";
 }
 
-?>

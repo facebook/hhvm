@@ -4,4 +4,3 @@
       const myConst = "hello";
       const myConst = "hello again";
   }
-?>

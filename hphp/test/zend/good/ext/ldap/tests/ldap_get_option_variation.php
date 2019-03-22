@@ -36,5 +36,4 @@ var_dump(
 	ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, &$option),
 	$option
 );
-?>
-===DONE===
+echo "===DONE===\n";

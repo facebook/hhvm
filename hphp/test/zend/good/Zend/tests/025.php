@@ -17,4 +17,3 @@ foo::$a();
 $class::a();
 $class::$a();
 
-?>

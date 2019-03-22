@@ -48,5 +48,5 @@ foreach ($iterators as $iterator) {
     }
   }
 }
-?>
-==DONE==
+
+echo "==DONE==\n";

@@ -5,4 +5,3 @@
 	var_dump($mysql->ping());
 	$mysql->close();
 	print "done!";
-?>

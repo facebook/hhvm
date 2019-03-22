@@ -16,5 +16,4 @@ var_dump(php_uname('r'));
 var_dump(php_uname('v'));
 var_dump(php_uname('m'));
 
-?>
-===DONE===
+echo "===DONE===\n";

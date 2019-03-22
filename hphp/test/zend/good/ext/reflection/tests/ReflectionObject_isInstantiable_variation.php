@@ -64,4 +64,3 @@ foreach($reflectionObjects  as $reflectionObject ) {
 	echo "Is $name instantiable? ";
 	var_dump($reflectionObject->IsInstantiable()); 
 }
-?>

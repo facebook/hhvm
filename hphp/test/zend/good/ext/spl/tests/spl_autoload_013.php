@@ -22,5 +22,4 @@ spl_autoload_register($al2);
 
 var_dump(spl_autoload_functions());
 
-?>
-===DONE===
+echo "===DONE===\n";

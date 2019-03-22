@@ -15,12 +15,10 @@ var_dump(
 	ldap_delete($link, "dc=my-domain,$base"),
 	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 @ldap_delete($link, "dc=my-domain,$base");
-?>

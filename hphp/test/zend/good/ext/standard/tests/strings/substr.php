@@ -76,4 +76,3 @@ var_dump (substr("abcd" , -8) );
  
 echo"\nDone";
 
-?>

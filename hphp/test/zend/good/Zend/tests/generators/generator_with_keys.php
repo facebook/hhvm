@@ -17,4 +17,3 @@ foreach (reverse($array) as $key => $value) {
     echo $key, ' => ', $value, "\n";
 }
 
-?>

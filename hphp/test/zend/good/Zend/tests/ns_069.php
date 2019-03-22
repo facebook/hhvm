@@ -12,5 +12,4 @@ class Test {
 
 Test::f();
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -40,8 +40,5 @@ try { var_dump( fileperms(dirname(__FILE__)."/006_error.tmp", 0777) ); } catch (
 try { var_dump( fileperms("nofile", 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink( dirname(__FILE__)."/006_error.tmp");
-?>

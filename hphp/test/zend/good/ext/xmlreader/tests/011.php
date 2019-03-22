@@ -18,5 +18,4 @@ $reader->read();
 echo $reader->readOuterXml();
 echo "\n";
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";

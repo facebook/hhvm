@@ -21,5 +21,4 @@ $input = array(1, 2.3, 4, 0.6, 10);
 echo "-- array_sum() with integer/float array entries --\n";
 var_dump( array_sum($input) );
 
-echo "Done"
-?>
+echo "Done";

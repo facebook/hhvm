@@ -5,4 +5,3 @@ namespace {
     use const foo\BAR;
 }
 
-?>

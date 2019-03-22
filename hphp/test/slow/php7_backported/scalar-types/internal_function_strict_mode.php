@@ -28,4 +28,3 @@ try {
 //    echo "*** Caught " . $e->getMessage() . PHP_EOL;
 //}
 
-?>

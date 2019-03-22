@@ -102,5 +102,4 @@ foreach($inputs as $variation =>$abbr) {
 // closing the resource
 fclose( $file_handle );
 
-?>
-===DONE===
+echo "===DONE===\n";

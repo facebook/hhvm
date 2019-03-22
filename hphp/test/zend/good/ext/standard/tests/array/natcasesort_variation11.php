@@ -107,5 +107,3 @@ foreach($inputs as $input) {
 };
 
 echo "Done";
-?>
-

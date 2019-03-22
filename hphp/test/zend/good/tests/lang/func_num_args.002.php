@@ -6,4 +6,3 @@ function foo($a)
 }
 foo(1, 2, 3);
 
-?>

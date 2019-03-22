@@ -17,4 +17,3 @@ try { var_dump(gmp_neg()); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 var_dump(gmp_neg(array()));
 
 echo "Done\n";
-?>

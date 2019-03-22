@@ -20,4 +20,3 @@ fpassthru($tmp);
 echo "\n";
 var_dump(stream_get_contents($tmp));
 
-?>

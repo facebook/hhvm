@@ -13,5 +13,4 @@ $autloader2 = new MyAutoloader('dir2');
 spl_autoload_register(array($autloader2, 'autoload'));
 
 print_r(spl_autoload_functions());
-?>
-===DONE===
+echo "===DONE===\n";

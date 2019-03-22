@@ -2,6 +2,4 @@
 
 class Foo implements static {
 }
-
-?>
-==DONE==
+echo "==DONE==";

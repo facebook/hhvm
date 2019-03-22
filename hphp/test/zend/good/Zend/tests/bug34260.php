@@ -25,4 +25,3 @@ $Failure = array_map(array($Faulty,'seg'),$Array);
 
 // This does not.
 $Failure = array_map(array($Faulty,'NormalMethod'),$Array);
-?>

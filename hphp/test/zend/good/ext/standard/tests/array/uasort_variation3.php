@@ -89,5 +89,4 @@ var_dump( uasort(&$array_arg, 'cmp_function') );
 echo "-- Sorted array after uasort() function call --\n";
 var_dump($array_arg);
 
-echo "Done"
-?>
+echo "Done";

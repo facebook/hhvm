@@ -25,5 +25,4 @@ if ($a && $b) {
 // Only go through
 while ($reader->read());
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";

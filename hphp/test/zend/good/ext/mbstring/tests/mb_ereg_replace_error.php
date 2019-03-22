@@ -23,4 +23,3 @@ $replacement = b'string_val';
 try { var_dump( mb_ereg_replace($pattern, $replacement) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

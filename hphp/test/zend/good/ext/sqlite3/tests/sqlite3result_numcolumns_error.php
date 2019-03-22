@@ -12,4 +12,3 @@ try { var_dump($result->numColumns('time')); } catch (Exception $e) { echo "\n".
 
 echo 'Done';
 
-?>

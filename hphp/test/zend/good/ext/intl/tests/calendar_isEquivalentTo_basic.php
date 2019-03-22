@@ -18,6 +18,4 @@ var_dump(
 		"1 - 4",
 		$intlcal1->isEquivalentTo($intlcal4)
 );
-
-?>
-==DONE==
+echo "==DONE==";

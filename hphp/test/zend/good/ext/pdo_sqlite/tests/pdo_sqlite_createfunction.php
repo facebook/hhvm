@@ -17,4 +17,3 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 
 $db->query('DROP TABLE foobar');
 
-?>

@@ -11,4 +11,3 @@ session_write_close();
 
 // Should finish without errors
 echo 'Done'.PHP_EOL;
-?>

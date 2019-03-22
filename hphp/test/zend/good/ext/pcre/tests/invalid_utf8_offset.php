@@ -11,4 +11,3 @@ var_dump($m);
 var_dump(preg_last_error() == PREG_NO_ERROR);
 
 echo "Done\n";
-?>

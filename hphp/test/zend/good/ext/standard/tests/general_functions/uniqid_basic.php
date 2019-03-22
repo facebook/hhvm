@@ -30,5 +30,4 @@ for ($i = 0; $i < count($prefix); $i++) {
 	echo "\n";
 }	
 
-?>
-===DONE===
+echo "===DONE===\n";

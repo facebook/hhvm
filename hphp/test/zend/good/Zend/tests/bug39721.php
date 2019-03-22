@@ -21,4 +21,3 @@ $child = new test2_child();
 
 echo $foo->instance . "\n";
 echo $child->instance . "\n";
-?>

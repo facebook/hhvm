@@ -13,5 +13,4 @@ $float_indx_array = array(0.0 => '0.0', 10.5 => '10.5' , -10.5 => '-10.5', 0.5 =
 echo "\n-- Testing array_intersect_key() function with float indexed array --\n";
 var_dump( array_intersect_key($input_array, $float_indx_array) );
 var_dump( array_intersect_key($float_indx_array,$input_array ) );
-?>
-===DONE===
+echo "===DONE===\n";

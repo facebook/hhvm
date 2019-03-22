@@ -9,4 +9,3 @@ $bar1 = new bar;
 $bar1->a = 100.10;
 $bar1->b = "foo";
 var_dump(json_encode($bar1));
-?>

@@ -69,4 +69,3 @@ function check(myObjC $obj) {
     }
     return 'successful';
 }
-?>

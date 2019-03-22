@@ -44,4 +44,3 @@ try {
     var_dump($e->getMessage());
 }
 
-?>

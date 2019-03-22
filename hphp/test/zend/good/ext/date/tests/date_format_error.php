@@ -31,5 +31,4 @@ try { var_dump( date_format($invalid_obj, $format) ); } catch (Exception $e) { e
 $invalid_obj = null;
 try { var_dump( date_format($invalid_obj, $format) );     } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

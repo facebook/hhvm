@@ -10,4 +10,3 @@ var_dump(filter_var(1, -1, array(123)));
 var_dump(filter_var(1, 0, array()));
 
 echo "Done\n";
-?>

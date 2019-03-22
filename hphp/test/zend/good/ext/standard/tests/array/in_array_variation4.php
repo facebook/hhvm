@@ -54,4 +54,3 @@ var_dump( in_array('123abc', array(123)) );
 var_dump( in_array('123abc', array(123), TRUE) ); // false in strict mode 
 
 echo "Done\n";
-?>

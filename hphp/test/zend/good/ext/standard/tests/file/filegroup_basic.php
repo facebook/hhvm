@@ -31,14 +31,9 @@ var_dump( filegroup("/etc") );
 var_dump( filegroup("/") );
 
 echo "\n*** Done ***\n";
-?>
-
-<?php error_reporting(0); ?>
-<?php
-
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/filegroup_basic.tmp";
 $dir_name  = $file_path."/filegroup_basic";
 unlink($file_name);
 rmdir($dir_name);
-?>

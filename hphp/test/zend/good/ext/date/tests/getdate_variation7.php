@@ -15,5 +15,4 @@ var_dump( getdate($timestamp) );
 echo "\n-- Testing getdate() function by passing float -12.3456789000e10 value to timestamp --\n";
 $timestamp = -12.3456789000e10;
 var_dump( getdate($timestamp) );
-?>
-===DONE===
+echo "===DONE===\n";

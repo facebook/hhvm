@@ -7,4 +7,3 @@
 	echo date('m/d/Y', strtotime('11Oct')), "\n";
 	echo date('m/d/Y', strtotime('11Oct 2005')), "\n";
 	echo date('m/d/Y', strtotime('11Oct2005')), "\n";
-?>

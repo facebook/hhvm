@@ -17,4 +17,3 @@
   var_dump(B::$c);
   var_dump(B::ca);
   var_dump(B::cc);
-?>

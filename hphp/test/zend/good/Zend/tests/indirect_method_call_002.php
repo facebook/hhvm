@@ -19,4 +19,3 @@ var_dump((new foo())->baz()->baz()->bar()); // string(3) "foo"
 var_dump((new foo())->xyz());               // NULL
 (new foo())->www();
 
-?>

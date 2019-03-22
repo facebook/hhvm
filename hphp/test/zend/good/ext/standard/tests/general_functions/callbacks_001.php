@@ -75,5 +75,4 @@ echo "===FOREIGN===\n";
 $o = new P;
 $o->test();
 
-?>
-===DONE===
+echo "===DONE===\n";

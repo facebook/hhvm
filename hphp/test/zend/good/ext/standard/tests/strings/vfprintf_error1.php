@@ -19,12 +19,8 @@ try { var_dump( vfprintf( $fp, "Foo %d", array(6), "bar" ) ); } catch (Exception
 // Close handle
 fclose($fp);
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = 'vfprintf_error1.phpt.txt';
 unlink( $file );
 
-?>

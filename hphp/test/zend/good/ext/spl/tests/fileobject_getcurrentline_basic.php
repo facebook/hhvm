@@ -7,4 +7,3 @@ $s = new SplFileObject(__FILE__);
 $s->seek(1);
 echo $s->getCurrentLine();
 echo $s->getCurrentLine();
-?>

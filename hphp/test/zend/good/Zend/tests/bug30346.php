@@ -14,5 +14,4 @@ $id = 'page';
 echo $post[$id.'_show'];
 echo "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

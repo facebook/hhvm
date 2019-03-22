@@ -6,4 +6,3 @@ echo "$n: ok\n";
 $n++;
 goto L1;
 L2:
-?>

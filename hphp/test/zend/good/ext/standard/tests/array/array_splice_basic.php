@@ -37,4 +37,3 @@ var_dump ($input);
 //          "blue", "purple", "yellow");
 
 
-?>

@@ -8,4 +8,3 @@ if ($pid > 0) {
 } else {
 	var_dump($pid);
 }
-?>

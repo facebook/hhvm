@@ -16,4 +16,3 @@ while ($j++ < 100000) {
 $s3 = array_sum($c);
 $s4 = array_sum($d);
 var_dump($s3, $s4);
-?>

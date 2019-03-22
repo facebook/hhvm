@@ -35,4 +35,3 @@ var_dump((string)$a);
 
 unset($a->a);
 
-?>

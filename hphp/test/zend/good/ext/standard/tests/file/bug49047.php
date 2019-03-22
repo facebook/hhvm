@@ -9,4 +9,3 @@ $t2 = filemtime($testdir);
 if ($t2 != $t) echo "failed (got $t2, expecting $t)\n";
 rmdir($testdir);
 echo "Ok.";
-?>

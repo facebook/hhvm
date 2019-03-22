@@ -17,5 +17,4 @@ $rules = <<<RULES
 RULES;
 $rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump(get_class($rbbi));
-?>
-==DONE==
+echo "==DONE==";

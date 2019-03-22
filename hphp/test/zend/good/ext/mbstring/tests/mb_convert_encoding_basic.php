@@ -49,4 +49,3 @@ var_dump(base64_encode(mb_convert_encoding($jis_string, 'UTF-8', 'JIS')));
 var_dump(base64_encode(mb_convert_encoding($euc_jp_string, 'UTF-8', 'EUC-JP')));
 
 echo "Done";
-?>

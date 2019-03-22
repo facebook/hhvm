@@ -18,4 +18,3 @@ $o->sayClass();
   // echo Cls
 $o->sayParent();
  // echos Base
-?>

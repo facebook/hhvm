@@ -41,6 +41,4 @@ foreach($it as $key=>$val)
 	echo "$key=>$val\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

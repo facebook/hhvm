@@ -17,4 +17,3 @@ var_dump($regexIterator->getRegex());
 
 
 
-?>

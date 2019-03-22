@@ -17,4 +17,3 @@ $packed=gzdeflate($original);
 echo strlen($packed)." ".strlen($original)."\n";
 $unpacked=gzinflate($packed);
 if (strcmp($original,$unpacked)==0) echo "Strings are equal";
-?>

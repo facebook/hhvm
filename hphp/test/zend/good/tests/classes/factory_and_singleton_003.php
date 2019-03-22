@@ -8,4 +8,3 @@ class test {
 $obj = new test;
 
 echo "Done\n";
-?>

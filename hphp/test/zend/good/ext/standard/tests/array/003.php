@@ -21,4 +21,3 @@ var_dump ($data);
 echo "\n -- Testing usort() -- \n";
 usort (&$data, 'cmp');
 var_dump ($data);
-?>

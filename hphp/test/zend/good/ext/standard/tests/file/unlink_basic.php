@@ -28,4 +28,3 @@ var_dump( unlink($filename, $context) );  // using $context in second argument
 var_dump( file_exists($filename) );  // confirm file doesnt exist
 
 echo "Done\n";
-?>

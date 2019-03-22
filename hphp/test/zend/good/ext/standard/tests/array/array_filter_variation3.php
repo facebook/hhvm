@@ -44,5 +44,4 @@ for($count = 0; $count < count($input_values); $count++)
   var_dump( array_filter($input_values[$count], 'always_false') );
 }
 
-echo "Done"
-?>
+echo "Done";

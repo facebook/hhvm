@@ -28,5 +28,4 @@ var_dump( array_intersect_uassoc($arr1_string_float, $arr2_string_float, "key_co
 
 echo "\n-- Result of strings containing integers and strings containing floating points intersection --\n";
 var_dump( array_intersect_uassoc($arr1_string_int, $arr2_string_float, "key_compare_func") );
-?>
-===DONE===
+echo "===DONE===\n";

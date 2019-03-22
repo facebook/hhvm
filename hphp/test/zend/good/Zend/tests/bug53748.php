@@ -26,4 +26,3 @@ $o= myHelloWorld::getInstance(2);
 $o= myHelloWorld::getInstance(array(1=>2));
 $o= myHelloWorld::getInstance(array(1=>2));
 
-?>

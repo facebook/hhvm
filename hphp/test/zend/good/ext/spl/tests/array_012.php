@@ -35,6 +35,4 @@ foreach($it as $key => $val)
 }
 var_dump($it->count());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -18,4 +18,3 @@ $b = array( 'a1' => 2,
 var_dump($a);
 array_merge_recursive( $a, $b );
 var_dump($a);
-?>

@@ -15,5 +15,4 @@ class DateTimeExt extends DateTime
 $d = new DateTimeExt("1967-05-01 22:30:41");
 echo $d->format() . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

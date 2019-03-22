@@ -29,4 +29,3 @@ $t3 = new third();
 $t3->do_show();
 
 echo "Done\n";
-?>

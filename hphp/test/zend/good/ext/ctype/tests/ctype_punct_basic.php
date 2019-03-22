@@ -16,5 +16,4 @@ var_dump(ctype_punct($c1));
 var_dump(ctype_punct($c2));
 
 setlocale(LC_CTYPE, $orig); 
-?>
-===DONE===
+echo "===DONE===\n";

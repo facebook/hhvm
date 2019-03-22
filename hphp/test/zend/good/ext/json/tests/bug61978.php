@@ -31,4 +31,3 @@ echo "==\n";
 $obj2 = new JsonTest2();
 var_dump(json_encode($obj2, JSON_PARTIAL_OUTPUT_ON_ERROR));
 
-?>

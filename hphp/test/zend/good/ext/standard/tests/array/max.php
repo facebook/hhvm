@@ -13,4 +13,3 @@ var_dump(max(1, true, false, true));
 var_dump(max(0, true, false, true));
 
 echo "Done\n";
-?>

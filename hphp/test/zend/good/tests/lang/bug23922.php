@@ -13,4 +13,3 @@
   $foo = new foo();
   $foo->as_expr();
   $foo->as_string();
-?>

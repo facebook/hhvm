@@ -15,4 +15,3 @@ var_dump(idate("[", $t));
 var_dump(idate("'"));
 
 echo "Done\n";
-?>

@@ -11,5 +11,4 @@ try { var_dump(gzread()); } catch (Exception $e) { echo "\n".'Warning: '.$e->get
 
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

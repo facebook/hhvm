@@ -45,4 +45,3 @@
 	$mysqli->close();
 	/* Make sure that the function alias exists */
 	print "done!";
-?>

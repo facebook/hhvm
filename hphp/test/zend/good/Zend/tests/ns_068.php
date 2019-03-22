@@ -4,5 +4,4 @@ namespace foo;
 echo __NAMESPACE__ . "\n";
 namespace bar;
 echo __NAMESPACE__ . "\n";
-?>
-===DONE===
+echo "===DONE===\n";

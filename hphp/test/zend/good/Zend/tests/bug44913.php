@@ -9,4 +9,3 @@ function something() {
 }
 something();
 echo "ok\n";
-?>

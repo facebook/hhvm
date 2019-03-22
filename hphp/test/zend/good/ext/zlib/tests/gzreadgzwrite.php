@@ -23,4 +23,3 @@ if ($data == $original) {
 }
 gzclose($fp);
 unlink($filename);
-?>

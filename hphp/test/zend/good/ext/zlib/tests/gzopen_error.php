@@ -21,5 +21,4 @@ echo "\n-- Testing gzopen() function with less than expected no. of arguments --
 $filename = 'string_val';
 try { var_dump( gzopen($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

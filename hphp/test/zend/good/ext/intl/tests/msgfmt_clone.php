@@ -18,4 +18,3 @@ $res_str .= "Formatting clone result: " . ut_msgfmt_format( $fmt_clone, array(12
 
 echo $res_str;
 
-?>

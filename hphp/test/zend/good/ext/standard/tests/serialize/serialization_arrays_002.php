@@ -96,4 +96,3 @@ $a[2] = &$a[0];
 check($a);
 
 echo "Done";
-?>

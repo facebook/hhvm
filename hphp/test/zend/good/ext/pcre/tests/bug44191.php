@@ -8,4 +8,3 @@ while (list($x) = each(&$array)) {
 	print $x;
 }
 
-?>

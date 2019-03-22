@@ -20,5 +20,4 @@ if (empty($view['bar']) || empty($view->bar)) {
 if (empty($view['baz']) || empty($view->baz)) {
     echo "View::baz empty\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

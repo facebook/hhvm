@@ -23,5 +23,4 @@ $it = new RecursiveTreeIterator(new RecursiveArrayIterator($ary));
 foreach($it as $k => $v) {
 	echo '[' . $it->key() . '] => ' . $it->getPrefix() . $it->getEntry() . $it->getPostfix() . "\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -64,5 +64,4 @@ if (is_resource($res)) {
 }	
 
 
-?>
-===DONE===
+echo "===DONE===\n";

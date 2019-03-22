@@ -18,4 +18,3 @@ foreach ($c as $v) {
 echo !$failed ? 'ok' : 'failed';
 echo "\n";
 unlink($file);
-?>

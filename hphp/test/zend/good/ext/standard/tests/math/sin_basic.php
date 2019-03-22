@@ -71,4 +71,3 @@ if (allowed_rounding_error(sin($threesixty),0.0)) {
 else {
 	echo "Fail\n";
 }
-?>

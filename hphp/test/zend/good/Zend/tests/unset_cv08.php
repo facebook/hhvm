@@ -5,4 +5,3 @@ $b = "ok\n";
 echo $a;
 echo $b;
 echo "ok\n";
-?>

@@ -4,4 +4,3 @@ function foo($unused = null, $unused = null, $arg = array()) {
 }
 foo();
 echo "okey";
-?>

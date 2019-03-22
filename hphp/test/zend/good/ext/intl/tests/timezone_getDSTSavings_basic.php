@@ -5,6 +5,4 @@ $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($lsb->getDSTSavings());
 
 var_dump(intltz_get_dst_savings($lsb));
-
-?>
-==DONE==
+echo "==DONE==";

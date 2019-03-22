@@ -7,4 +7,3 @@
   if (!mb_ereg(".*doesn't exist.*",$a)) {
     echo "ok\n";
   }
-?>

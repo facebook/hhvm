@@ -41,4 +41,3 @@
 	socket_close($client);
 	socket_close($socket);
 	socket_close($server);
-?>

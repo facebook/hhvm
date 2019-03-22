@@ -18,4 +18,3 @@ $result_image = ob_get_contents();
 ob_end_clean();
 echo md5(base64_encode($result_image));
 imagedestroy($im);
-?>

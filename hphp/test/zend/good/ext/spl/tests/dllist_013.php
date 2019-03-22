@@ -26,6 +26,4 @@ echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

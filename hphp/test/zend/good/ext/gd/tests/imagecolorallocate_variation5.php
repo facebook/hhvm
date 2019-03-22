@@ -31,5 +31,4 @@ foreach($values as $key => $value) {
       var_dump( imagecolorallocate($im, $red, $value, $blue) );
       var_dump( imagecolorallocate($im, $red, $green, $value) );
 };
-?>
-===DONE===
+echo "===DONE===\n";

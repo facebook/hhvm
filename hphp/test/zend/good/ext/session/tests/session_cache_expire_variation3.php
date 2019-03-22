@@ -24,4 +24,3 @@ var_dump(ini_get("session.cache_expire"));
 
 echo "Done";
 ob_end_flush();
-?>

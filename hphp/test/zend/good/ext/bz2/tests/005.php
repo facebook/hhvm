@@ -31,4 +31,3 @@ var_dump(bzdecompress($data));
 var_dump(bzdecompress($data2));
 
 echo "Done\n";
-?>

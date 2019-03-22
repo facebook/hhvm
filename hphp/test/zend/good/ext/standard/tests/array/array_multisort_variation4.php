@@ -17,5 +17,4 @@ var_dump($arr1);
 var_dump($arr2);
 var_dump($arr3);
 
-?>
-===DONE===
+echo "===DONE===\n";

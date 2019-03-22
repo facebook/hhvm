@@ -6,4 +6,3 @@ $totalColors = imagecolorstotal($image);
 
 $result = imagecolordeallocate($image, $totalColors + 100);
 var_dump($result);
-?>

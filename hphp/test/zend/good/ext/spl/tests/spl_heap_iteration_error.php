@@ -22,4 +22,3 @@ try {
 }
 
 var_dump($h);
-?>

@@ -26,5 +26,4 @@ foreach($inputs as $key =>$value) {
       var_dump( getdate($value) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

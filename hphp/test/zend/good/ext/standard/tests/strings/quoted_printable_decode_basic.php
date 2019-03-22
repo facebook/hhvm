@@ -14,5 +14,4 @@ $str = "=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A=
 
 var_dump(bin2hex(quoted_printable_decode($str)));
 
-?>
-===DONE===
+echo "===DONE===\n";

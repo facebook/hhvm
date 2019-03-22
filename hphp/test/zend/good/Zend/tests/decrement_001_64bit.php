@@ -24,4 +24,3 @@ foreach ($a as $var) {
 }
 
 echo "Done\n";
-?>

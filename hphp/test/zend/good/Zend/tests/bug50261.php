@@ -27,4 +27,3 @@ class testClass2 extends testClass {
 
 new testClass2;
 
-?>

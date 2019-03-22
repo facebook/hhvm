@@ -19,4 +19,3 @@ $c = $d2 / $d1;
 var_dump($c);
 
 echo "Done\n";
-?>

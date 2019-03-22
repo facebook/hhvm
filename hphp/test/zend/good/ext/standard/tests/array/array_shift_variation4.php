@@ -32,4 +32,3 @@ echo "New array:\n";
 var_dump($stack_last);
 
 echo "Done";
-?>

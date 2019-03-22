@@ -12,5 +12,4 @@ var_dump($root->children('special-ns')->child);
 var_dump((string)$root->children('reserved-ns')->child);
 var_dump((string)$root->children('special-ns')->child);
 var_dump($root->child);
-?>
-===DONE===
+echo "===DONE===\n";

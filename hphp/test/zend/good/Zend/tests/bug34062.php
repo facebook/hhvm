@@ -13,4 +13,3 @@ try {
 	f2(0, 0, 0); // Won't crash if less than 3 zeros here
 	echo ")))\n";
 }
-?>

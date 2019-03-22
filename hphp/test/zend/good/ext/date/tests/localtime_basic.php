@@ -23,5 +23,4 @@ var_dump( localtime($timestamp) );
 // Calling localtime() with mandatory arguments
 var_dump( localtime() );
 
-?>
-===DONE===
+echo "===DONE===\n";

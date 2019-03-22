@@ -8,4 +8,3 @@ imagecolortransparent($rotate,0);
 imagesavealpha($rotate, true);
 $c = imagecolorat($rotate,5,5);
 printf("%X\n", $c);
-?>

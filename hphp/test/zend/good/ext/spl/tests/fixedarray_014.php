@@ -7,4 +7,3 @@ try {
 	echo $e->getMessage();
 }
 
-?>

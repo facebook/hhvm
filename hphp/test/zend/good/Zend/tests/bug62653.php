@@ -16,4 +16,3 @@ $foo /= 2; //Makes $foo = 5 but still gettype($foo) = "double"
 unset($array[$foo]);
 print_r($array);
 
-?>

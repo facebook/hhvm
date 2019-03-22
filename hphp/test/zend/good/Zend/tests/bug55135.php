@@ -19,4 +19,3 @@ $array = array(1 => 2);
 $a = 1;
 unset($array["1"]);
 print_r($array);
-?>

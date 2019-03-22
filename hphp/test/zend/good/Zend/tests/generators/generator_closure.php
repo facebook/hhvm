@@ -10,4 +10,3 @@ foreach ($genFactory() as $value) {
     var_dump($value);
 }
 
-?>

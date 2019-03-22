@@ -12,4 +12,3 @@ call_user_func_array("foo", array(&$a));
 var_dump($a);
 call_user_func_array("bar", array(&$a));
 var_dump($a);
-?>

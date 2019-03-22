@@ -78,4 +78,3 @@ foreach($encoding as $enc) {
 	$iterator++;
 }
 echo "Done";
-?>

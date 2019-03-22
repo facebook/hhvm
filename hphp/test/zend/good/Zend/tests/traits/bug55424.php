@@ -27,4 +27,3 @@
 	/* setAttribute used to disappear for no good reason. */
 	$t->setRequired();
 	echo 'DONE';
-?>

@@ -12,4 +12,3 @@ use \baz as stdClass;
 \var_dump(new stdClass);
 \var_dump(new \baz);
 
-?>

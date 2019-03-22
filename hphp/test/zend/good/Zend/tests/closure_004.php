@@ -23,4 +23,3 @@ $lambda1();
 $lambda2();
 
 echo "Done\n";
-?>

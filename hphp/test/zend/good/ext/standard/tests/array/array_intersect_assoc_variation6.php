@@ -75,4 +75,3 @@ foreach($arrays as $arr2) {
 }
 
 echo "Done";
-?>

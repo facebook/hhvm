@@ -14,4 +14,3 @@ $array2 = array("a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red');
 $result = array_diff_uassoc($array1, $array2, "key_compare_func");
 print_r($result);
 
-?>

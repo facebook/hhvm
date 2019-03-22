@@ -8,4 +8,3 @@ $i = 0; // dummy
 pcntl_signal_dispatch();
 echo "Done!\n";
 
-?>

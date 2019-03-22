@@ -1,1 +1,1 @@
-<?php if (!extension_loaded("spl")) die("skip no SPL extension"); ?>
+<?php if (!extension_loaded("spl")) die("skip no SPL extension");

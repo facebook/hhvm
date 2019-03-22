@@ -40,4 +40,3 @@
 	socket_close($socket);
 	socket_close($server);
 	@unlink($sock_path);
-?>

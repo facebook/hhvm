@@ -25,5 +25,4 @@ var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 $res = sscanf($str, $format2, &$arg1, &$arg2, &$arg3, &$arg4, &$arg5, &$arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
-?>
-===DONE===
+echo "===DONE===\n";

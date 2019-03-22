@@ -26,4 +26,3 @@ echo "\n-- Passed the end of array: --\n";
 var_dump(each(&$arr));
 
 echo "Done";
-?>

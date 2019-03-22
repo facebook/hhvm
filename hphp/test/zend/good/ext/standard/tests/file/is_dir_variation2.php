@@ -44,9 +44,7 @@ var_dump( is_dir($file_path."/is_dir_variation2_link.tmp") );
 clearstatcache();
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 if(file_exists($file_path."/is_dir_variation2_symlink")) {
   unlink($file_path."/is_dir_variation2_symlink");
@@ -66,4 +64,3 @@ if(file_exists($file_path."/is_dir_variation2.tmp")) {
 if(file_exists($file_path."/is_dir_variation2")) {
   rmdir($file_path."/is_dir_variation2");
 }
-?>

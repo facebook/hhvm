@@ -23,4 +23,3 @@ $xw->writeElementNS(null, 'bar', '', '');
 $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
-?>

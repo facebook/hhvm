@@ -7,4 +7,3 @@ function foo(bool $x = true, bool $y = false) {
 
 
 foo();
-?>

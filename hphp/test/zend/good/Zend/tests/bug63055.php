@@ -15,4 +15,3 @@ $matches[2] = $dummy;
 
 str_replace("foo", "bar", "foobar", &$matches);
 echo "okey";
-?>

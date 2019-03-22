@@ -8,9 +8,5 @@ var_dump($arch->getStatusString());
 $arch->deleteIndex(2);
 var_dump($arch->getStatusString());
 $arch->close();
-
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink($dirname.'foo.zip');
-?>

@@ -49,4 +49,3 @@ $server = new SoapServer(NULL,$options);
 $server->setClass("test");
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>

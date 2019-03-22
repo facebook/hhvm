@@ -13,4 +13,3 @@ try {
 } catch (Exception $ex) {
 	echo "ok\n";
 }
-?>

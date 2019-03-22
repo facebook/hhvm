@@ -54,4 +54,3 @@ foreach ($ipv6_test as $ip => $exp) {
 }
 
 echo "Ok\n";
-?>

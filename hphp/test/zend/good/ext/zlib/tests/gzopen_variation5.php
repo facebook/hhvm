@@ -51,5 +51,4 @@ function runtest() {
 	   unlink('dir1/'.$tmpfile);   
 	}
 }
-?>
-===DONE===
+echo "===DONE===\n";

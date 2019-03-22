@@ -84,4 +84,3 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
-?>

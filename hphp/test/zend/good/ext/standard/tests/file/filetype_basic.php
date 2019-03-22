@@ -11,4 +11,3 @@ print( filetype(__FILE__) )."\n";
 print( filetype(".") )."\n";
 
 echo "*** Done ***\n";
-?>

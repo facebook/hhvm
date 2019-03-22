@@ -20,5 +20,4 @@ var_dump( $tz2->getOffset($date) );
 $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getOffset($date) );
 
-?>
-===DONE===
+echo "===DONE===\n";

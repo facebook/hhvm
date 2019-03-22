@@ -6,4 +6,3 @@
 	echo "\n";
 	
 	@unlink($cwd . "/test_xbm.png");
-?>

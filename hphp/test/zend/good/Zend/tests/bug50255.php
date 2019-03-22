@@ -13,4 +13,3 @@ var_dump(empty($arr->bar));
 var_dump(empty($arr['foo']));
 var_dump(empty($arr['bar']));
 
-?>

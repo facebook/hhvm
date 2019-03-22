@@ -20,5 +20,4 @@ class Foo
 
 $foo = new Foo;
 $foo->testBAR();
-?>
-===DONE===
+echo "===DONE===\n";

@@ -12,4 +12,3 @@ var_dump(min(1));
 var_dump(min(array()));
 var_dump(min(new stdclass));
 
-?>

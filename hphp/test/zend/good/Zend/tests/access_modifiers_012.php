@@ -11,4 +11,3 @@ $c = new C;
 call_user_func(array($c, 'none'));
 call_user_func(array($c, 'prot'));
 call_user_func(array($c, 'priv'));
-?>

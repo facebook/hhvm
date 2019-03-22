@@ -8,5 +8,4 @@ var_dump(microtime());
 var_dump(microtime(true));
 var_dump(microtime(false));
 
-?>
-===DONE===
+echo "===DONE===\n";

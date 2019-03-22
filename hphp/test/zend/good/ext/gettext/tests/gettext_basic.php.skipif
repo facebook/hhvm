@@ -5,4 +5,3 @@
 	if (!setlocale(LC_ALL, 'fi_FI')) {
 		die("skip fi_FI locale not supported.");
 	}
-?>

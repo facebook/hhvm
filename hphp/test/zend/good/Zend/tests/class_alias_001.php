@@ -16,4 +16,3 @@ var_dump($a instanceof bar);
 var_dump($b instanceof foo);
 var_dump($b instanceof bar);
 
-?>

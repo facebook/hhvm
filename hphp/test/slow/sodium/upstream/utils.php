@@ -41,4 +41,3 @@ $str = 'stdClass';
 sodium_memzero(&$str);
 $obj = (object)array('foo' => 'bar');
 var_dump($obj);
-?>

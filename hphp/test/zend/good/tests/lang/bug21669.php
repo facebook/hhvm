@@ -15,4 +15,3 @@ class Factory {
 $factory = new Factory;
 $test = $factory->create();
 $test->say_hello();
-?>

@@ -9,5 +9,4 @@ $sxe = simplexml_load_string($xml);
 
 var_dump((string)$sxe);
 
-?>
-===DONE===
+echo "===DONE===\n";

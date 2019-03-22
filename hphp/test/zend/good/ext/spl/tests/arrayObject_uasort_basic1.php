@@ -23,5 +23,4 @@ $ao = new ArrayObject(array(2,3,1));
 
 $ao->uasort('cmp');
 var_dump($ao);
-?>
-===DONE===
+echo "===DONE===\n";

@@ -105,5 +105,4 @@ foreach($inputs as $variation =>$date) {
 // closing the resource
 fclose( $file_handle );
 
-?>
-===DONE===
+echo "===DONE===\n";

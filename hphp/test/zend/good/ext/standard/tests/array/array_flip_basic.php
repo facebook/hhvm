@@ -25,5 +25,4 @@ var_dump( array_flip($input) );
 // combination of associative and non-associative array
 $input = array(1 => 'one','two', 3 => 'three', 4, "five" => 5);
 var_dump( array_flip($input) );
-echo "Done"
-?>
+echo "Done";

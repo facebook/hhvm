@@ -54,4 +54,3 @@ foreach ($file_paths as $file_path) {
 	var_dump(basename($file_path));
 }
 
-?>

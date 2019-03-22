@@ -34,5 +34,4 @@ foreach ($input_arrays as $input_array){
   $count++;
 }
 
-echo "Done"
-?>
+echo "Done";

@@ -12,4 +12,3 @@ var_dump(quoted_printable_encode(NULL));
 var_dump(quoted_printable_encode(false));
 
 echo "Done\n";
-?>

@@ -6,4 +6,3 @@ $test = "
 </table>";
 
 	var_dump(strip_tags($test));
-?>

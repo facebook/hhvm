@@ -107,4 +107,3 @@ if ( count($list_of_locales) > 0 ) {
 }
 
 echo "Done\n";
-?>

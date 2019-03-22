@@ -55,4 +55,3 @@ function comp_func($a, $b) {
         return ($a > $b)? 1:-1;
 
 }
-?>

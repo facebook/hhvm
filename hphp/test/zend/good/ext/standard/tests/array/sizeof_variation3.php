@@ -21,4 +21,3 @@ echo "\n";
 var_dump( sizeof($array4, COUNT_RECURSIVE) );
 
 echo "Done";
-?>

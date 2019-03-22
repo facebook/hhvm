@@ -12,6 +12,4 @@ try { hypot(36); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage()
 
 echo "\n-- Testing hypot() function with more than expected no. of arguments --\n";
 try { hypot(36,25,0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

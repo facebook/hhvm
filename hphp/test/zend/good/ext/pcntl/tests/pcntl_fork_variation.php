@@ -26,4 +26,3 @@ else
     echo "grandson ($pid2)\n";
   }
 }
-?>

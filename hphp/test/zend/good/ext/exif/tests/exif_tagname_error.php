@@ -13,6 +13,4 @@ try { var_dump( exif_tagname() ); } catch (Exception $e) { echo "\n".'Warning: '
 echo "\n-- Testing exif_tagname() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
 try { var_dump( exif_tagname(0x10E, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

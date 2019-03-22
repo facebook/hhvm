@@ -6,5 +6,4 @@ $ci = new CachingIterator($i);
 
 $ci->rewind();
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -23,5 +23,4 @@ try { uniqid($obj, false); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 
 fclose($res);
 
-?>
-===DONE===
+echo "===DONE===\n";

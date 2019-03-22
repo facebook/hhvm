@@ -26,4 +26,3 @@ var_dump( array_combine($arr_normal, $arr_binary) );
 var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
-?>

@@ -6,8 +6,5 @@ $handle = fopen($file, 'r');
 $object = new SplFileObject($file);
 var_dump($object->fgetss());
 var_dump(fgetss($handle));
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__) . '/foo.html');
-?>

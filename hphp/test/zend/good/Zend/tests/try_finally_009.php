@@ -15,4 +15,3 @@ function foo () {
 }
 
 foo();
-?>

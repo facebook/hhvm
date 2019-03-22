@@ -18,4 +18,3 @@ foreach($replace as $value) {
 $value = new stdclass(); //Object
 var_dump(preg_replace($regex, $value, $subject));
 echo "Done";
-?>

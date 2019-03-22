@@ -28,4 +28,3 @@ var_dump($test->width, $test->height);
 echo "OK" , PHP_EOL;
 
 
-?>

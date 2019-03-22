@@ -63,5 +63,4 @@ foreach (new A3 as $k=>$v) {
 	echo "$k => $v\n";	
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

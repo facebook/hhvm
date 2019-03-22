@@ -43,5 +43,4 @@ var_dump($rp->isOptional());
 $rp = new ReflectionParameter($closure, 'b');
 var_dump($rp->isOptional());
 
-?>
-===DONE===
+echo "===DONE===\n";

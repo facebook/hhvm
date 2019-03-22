@@ -1,1 +1,1 @@
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
+<?php if (!extension_loaded("simplexml")) die("skip");

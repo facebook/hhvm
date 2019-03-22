@@ -43,4 +43,3 @@ foreach( $string_array as $string )  {
 		      
 
 echo "Done\n";
-?>

@@ -88,6 +88,4 @@ var_dump($x->doSomethingParentThis(1));
 echo "\n===E===\n";
 var_dump($x->doSomethingStatic(1));
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

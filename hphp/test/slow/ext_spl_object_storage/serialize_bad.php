@@ -19,4 +19,3 @@ try {
 }
 
 var_dump($s->count() == 0);
-?>

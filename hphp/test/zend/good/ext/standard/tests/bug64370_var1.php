@@ -6,5 +6,4 @@ echo "microtime(true): " . microtime(true) . "\n";
 $d = (microtime(true)-$_SERVER['REQUEST_TIME_FLOAT'])*1000;
 echo "created in $d ms\n";
 echo ((bool)($d >= 0)) . "\n";
-?>
-===DONE===
+echo "===DONE===\n";

@@ -5,4 +5,3 @@ class Foo {
 	public $bar = self::BAR | self::BAZ;
 }
 echo (new Foo)->bar;
-?>

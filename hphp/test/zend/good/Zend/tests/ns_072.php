@@ -21,4 +21,3 @@ new bar(new test);
 new bar(null);
 new bar(new \stdclass);
 
-?>

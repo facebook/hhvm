@@ -19,5 +19,4 @@ var_dump($dll->current());
 $dll->prev();
 var_dump($dll->current());
 
-?>
-===DONE===
+echo "===DONE===\n";

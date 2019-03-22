@@ -11,4 +11,3 @@ var_dump(preg_grep('@^http://[^w]{3}.*$@i', $array)); //finds http:// (at the be
 var_dump(preg_grep('@.*?\.co\.uk$@i', $array)); //finds any address ending in .co.uk (matches none)
 var_dump(preg_grep('@^HTTP(.*?)\w{2,}$@i', $array, PREG_GREP_INVERT)); //same as first example but the array created contains everything that is NOT matched but the regex (matches three)
 
-?>

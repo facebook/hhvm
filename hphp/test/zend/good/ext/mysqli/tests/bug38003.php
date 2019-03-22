@@ -10,4 +10,3 @@ class DB extends mysqli {
 $DB = new DB();
 
 echo "Done\n";
-?>

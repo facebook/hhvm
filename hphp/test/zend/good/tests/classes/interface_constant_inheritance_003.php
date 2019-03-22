@@ -11,4 +11,3 @@ class C implements I1,I2 {
 }
 
 echo "Done\n";
-?>

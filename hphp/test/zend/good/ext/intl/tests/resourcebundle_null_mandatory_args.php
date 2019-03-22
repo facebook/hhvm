@@ -9,5 +9,4 @@ ini_set('intl.default_locale', 'pt_PT');
 $r = new ResourceBundle(NULL, NULL);
 $c = $r->get('calendar')->get('gregorian')->get('DateTimePatterns')->get(0);
 var_dump($c);
-?>
-==DONE==
+echo "==DONE==";

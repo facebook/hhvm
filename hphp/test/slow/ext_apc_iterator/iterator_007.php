@@ -16,4 +16,3 @@ var_dump(
   $obj->getTotalCount(),
   apc_delete($obj)
 );
-?>

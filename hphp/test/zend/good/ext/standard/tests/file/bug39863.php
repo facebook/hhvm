@@ -8,6 +8,4 @@ if (file_exists($filename)) {
 else {
     echo "PASS\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

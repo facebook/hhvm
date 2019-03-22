@@ -17,4 +17,3 @@ var_dump($r->getProperty('publicVar')->getDeclaringClass()->getName());
 var_dump($r->getProperty('protectedVar')->getDeclaringClass()->getName());
 
 echo "Done\n";
-?>

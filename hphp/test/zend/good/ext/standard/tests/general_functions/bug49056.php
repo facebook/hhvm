@@ -10,7 +10,5 @@ $filename = dirname(__FILE__) . '/bug49056.tmp';
 file_put_contents( $filename, $string);
 
 var_dump(parse_ini_file($filename));
-
-?>
-<?php error_reporting(0); ?>
-<?php @unlink(dirname(__FILE__) . '/bug49056.tmp'); ?>
+error_reporting(0);
+@unlink(dirname(__FILE__) . '/bug49056.tmp');

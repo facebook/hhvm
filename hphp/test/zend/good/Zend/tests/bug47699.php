@@ -9,4 +9,3 @@ class B extends A {
 B::test();
 spl_autoload_register('B::test');
 new X();
-?>

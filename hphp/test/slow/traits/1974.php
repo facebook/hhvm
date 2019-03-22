@@ -22,4 +22,3 @@ class ABC {
 }
 $abc = new ABC();
 $abc->p();
-?>

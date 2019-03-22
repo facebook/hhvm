@@ -9,4 +9,3 @@
 	echo $test;
 	$test = strtr($test, '0', '.');
 	echo $test;
-?>

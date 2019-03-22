@@ -27,4 +27,3 @@ var_dump(array_diff_assoc($array1, $array2));
 var_dump(array_diff_assoc($array2, $array1));
 
 echo "Done";
-?>

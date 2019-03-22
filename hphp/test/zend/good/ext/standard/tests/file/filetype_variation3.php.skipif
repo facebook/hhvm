@@ -5,4 +5,3 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (!file_exists("/dev/ram0")) {
     die('skip /dev/ram0 not available');
 }
-?>

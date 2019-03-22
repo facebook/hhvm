@@ -26,4 +26,3 @@ var_dump( join(", ", $sub_array[0]) );
 var_dump( join(", ", $sub_array[1]) );
 
 echo "Done\n";
-?>

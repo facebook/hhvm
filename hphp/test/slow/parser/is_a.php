@@ -23,4 +23,3 @@ var_dump(is_subclass_of($a, "A"));
 var_dump(is_subclass_of($a, "BASE"));
 var_dump(is_subclass_of($a, "CHILD"));
 var_dump(is_subclass_of("X1", "X2"));
-?>

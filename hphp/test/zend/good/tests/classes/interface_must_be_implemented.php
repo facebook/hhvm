@@ -7,4 +7,3 @@ interface if_a {
 class derived_a implements if_a {
 }
 
-?>

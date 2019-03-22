@@ -1,4 +1,3 @@
 <?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
-?>

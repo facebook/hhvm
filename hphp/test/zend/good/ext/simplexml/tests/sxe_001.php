@@ -19,5 +19,4 @@ EOF;
 
 var_dump(simplexml_load_string((binary)$xml, 'SimpleXMLIterator'));
 
-?>
-===DONE===
+echo "===DONE===\n";

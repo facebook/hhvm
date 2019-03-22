@@ -7,6 +7,4 @@ class derived extends base {
 	abstract function show();
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

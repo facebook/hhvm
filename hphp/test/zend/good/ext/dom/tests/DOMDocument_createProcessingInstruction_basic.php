@@ -15,4 +15,3 @@ $node->appendChild($test_proc_inst1);
 
 echo $doc->saveXML();
 
-?>

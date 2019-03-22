@@ -17,5 +17,4 @@ var_dump($undef1);
 echo "\nPassing undefined by reference\n";
 passbyRef(&$undef2[0]);
 echo "\nAfter call\n";
-var_dump($undef2)
-?>
+var_dump($undef2);

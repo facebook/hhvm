@@ -83,5 +83,4 @@ for($count = 0; $count < count($values); $count++) {
 //closing resource
 fclose($fp);
 
-?>
-===DONE===
+echo "===DONE===\n";

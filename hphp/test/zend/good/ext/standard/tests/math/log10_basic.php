@@ -40,4 +40,3 @@ if (allowed_rounding_error($r2 ,2.0 )) {
 else {
 	echo "Fail\n";
 }
-?>

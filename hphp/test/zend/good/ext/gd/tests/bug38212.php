@@ -5,4 +5,3 @@ imagefill($im1, 0,0, 0xffffff);
 imagegd2($im1, $file);
 $im = imagecreatefromgd2part($file, 0,0, -25,10);
 unlink($file);
-?>

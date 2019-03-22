@@ -17,6 +17,4 @@ var_dump(
 $intlcal2 = IntlCalendar::createInstance('Europe/Amsterdam');
 intlcal_clear($intlcal2, null);
 var_dump($intlcal2->getTime());
-
-?>
-==DONE==
+echo "==DONE==";

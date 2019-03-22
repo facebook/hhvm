@@ -46,4 +46,3 @@ foreach($float_values as $float_value) {
 };
 
 echo "Done";
-?>

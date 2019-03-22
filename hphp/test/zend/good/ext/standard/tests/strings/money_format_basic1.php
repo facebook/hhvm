@@ -45,5 +45,4 @@ echo "Format again suppress currency symbol\n";
 echo gettype(money_format('%=*!14#8.2n', $value))."\n";
 echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

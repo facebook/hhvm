@@ -10,4 +10,3 @@ try { var_dump( addcslashes('foo[]', "o", "foo") ); } catch (Exception $e) { ech
 
 echo "Done\n"; 
 
-?>

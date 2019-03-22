@@ -12,4 +12,3 @@ for ($iy = 0; $iy < $h; $iy++) {
 }
 
 echo "OK\n";
-?>

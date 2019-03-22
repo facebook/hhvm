@@ -17,4 +17,3 @@ echo $result;
 // cleanup
 unlink($log_file);
 
-?>

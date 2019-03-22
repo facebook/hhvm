@@ -12,5 +12,4 @@ function plop() {
     }
 }
 plop();
-?>
-===DONE===
+echo "===DONE===\n";

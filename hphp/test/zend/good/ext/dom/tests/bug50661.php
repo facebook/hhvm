@@ -5,4 +5,3 @@ $dom = new DOMDocument();
 $dom->loadXML($data);
 echo $dom->saveXML();
 
-?>

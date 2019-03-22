@@ -7,4 +7,3 @@ $dayFromTs->add($int);
 
 echo 'ts: '.$ts->format('Y-m-d H:i:s')."\n";
 echo 'day from ts: '.$dayFromTs->format('Y-m-d H:i:s')."\n";
-?>

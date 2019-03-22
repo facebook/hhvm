@@ -7,4 +7,3 @@ catch (DomainException $e) {
     echo 'DomainException thrown';
 }
 
-?>

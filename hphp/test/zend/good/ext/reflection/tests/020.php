@@ -14,4 +14,3 @@ var_dump($obj->hasProperty("p1"));
 var_dump($obj->hasProperty("p2"));
 var_dump($obj->hasProperty("p3"));
 var_dump($obj->hasProperty("p4"));
-?>

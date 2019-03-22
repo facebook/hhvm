@@ -11,4 +11,3 @@ var_dump($arr);
 $arr[0]->c = $arr[0]->a;
 var_dump($arr);
 
-?>

@@ -52,5 +52,4 @@ var_dump( round( date_sunrise($time, SUNFUNCS_RET_DOUBLE,
 var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP,
   $latitude, $longitude, $zenith, $gmt_offset) );
 
-?>
-===DONE===
+echo "===DONE===\n";

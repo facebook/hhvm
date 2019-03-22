@@ -18,4 +18,3 @@ try {
 
 var_dump($gen->current());
 
-?>

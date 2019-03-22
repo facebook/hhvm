@@ -14,4 +14,3 @@ $function = new \ReflectionClass('A\\B\\Foo');
 \var_dump($function->getName());
 \var_dump($function->getNamespaceName());
 \var_dump($function->getShortName());
-?>

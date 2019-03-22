@@ -5,4 +5,3 @@ function foo(array $a) {
 
 foo(array(1,2,3));
 foo(123);
-?>

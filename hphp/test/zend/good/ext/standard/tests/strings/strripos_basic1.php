@@ -25,5 +25,4 @@ var_dump( strripos($heredoc_str, "Hello, WoRLd") );
 var_dump( strripos($heredoc_str, 'HelLO') );
 var_dump( strripos($heredoc_str, $heredoc_str) );
 
-?>
-===DONE===
+echo "===DONE===\n";

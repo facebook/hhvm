@@ -27,12 +27,10 @@ var_dump(
 	ldap_modify_batch($link, "cn=userA,$base", $mods),
 	ldap_get_entries($link, ldap_search($link, "$base", "(sn=Brown-Smith)"))
 );
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 remove_dummy_data($link, $base);
-?>

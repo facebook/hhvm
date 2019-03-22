@@ -13,4 +13,3 @@ interface Itest3 extends Itest, Itest2 {
 
 echo "done!\n";
 
-?>

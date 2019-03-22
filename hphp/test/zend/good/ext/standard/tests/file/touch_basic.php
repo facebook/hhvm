@@ -62,4 +62,3 @@ echo "atime=".$init_meta['atime']."\n";
 unlink($filename);
 
 echo "Done";
-?>

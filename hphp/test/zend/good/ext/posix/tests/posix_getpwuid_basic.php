@@ -5,6 +5,4 @@
   $pwuid = posix_getpwuid(posix_getuid());
   
   print_r($pwuid);
-  
-?>
-===DONE====
+echo "===DONE====";

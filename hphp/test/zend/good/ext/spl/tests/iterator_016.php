@@ -46,6 +46,4 @@ foreach($rit as $k=>$v)
 {
 	echo str_repeat('  ',$rit->getDepth()+1)."$k=>$v\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

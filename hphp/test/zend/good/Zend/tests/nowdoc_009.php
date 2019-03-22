@@ -22,4 +22,3 @@ ENDOFNOWDOC;
 
 print "{$x}";
 
-?>

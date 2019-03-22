@@ -14,4 +14,3 @@ echo "*** Testing mb_internal_encoding() : error conditions ***\n";
 var_dump(mb_internal_encoding('unknown-encoding'));
 
 echo "Done";
-?>

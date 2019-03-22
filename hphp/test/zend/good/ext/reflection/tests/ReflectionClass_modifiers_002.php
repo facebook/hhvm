@@ -6,4 +6,3 @@ try { var_dump($rc->isInterface(null)); } catch (Exception $e) { echo "\n".'Warn
 try { var_dump($rc->isAbstract(true)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump($rc->getModifiers(array(1,2,3))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

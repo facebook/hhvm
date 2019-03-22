@@ -5,4 +5,3 @@ namespace Foo\Bar {
         const Baz = static::class;
     }
 }
-?>

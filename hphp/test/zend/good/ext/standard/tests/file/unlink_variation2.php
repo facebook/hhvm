@@ -20,4 +20,3 @@ var_dump( file_exists($filename) );  // confirm file is deleted
 fclose($fp);
 
 echo "Done\n";
-?>

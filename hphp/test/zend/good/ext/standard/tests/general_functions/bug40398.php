@@ -63,5 +63,4 @@ new Derived_4('4');
 new Derived_5('5');
 new Derived_6('6');
 
-?>
-===DONE===
+echo "===DONE===\n";

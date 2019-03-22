@@ -53,4 +53,3 @@ echo "- With more arguments -\n";
 var_dump( array_intersect_assoc($arr1[0], $arr2[0], $arr1[0]) );
 
 echo "Done";
-?>

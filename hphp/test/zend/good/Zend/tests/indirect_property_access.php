@@ -16,4 +16,3 @@ var_dump((new bar)->y);     // foo
 var_dump((new $x)->y);      // foo
 var_dump((new $bar->y)->x); // 1
 
-?>

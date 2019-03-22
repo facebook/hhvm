@@ -42,5 +42,4 @@ var_dump(mb_strrchr($string_mb, $needle_mb_upper));
 var_dump(mb_strrchr($string_mb, $needle_mb_mixed));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

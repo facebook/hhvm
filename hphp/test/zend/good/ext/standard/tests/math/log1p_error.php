@@ -11,5 +11,4 @@ echo "\n-- Testing log1p() function with less than expected no. of arguments --\
 try { log1p(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "\n-- Testing log1p() function with more than expected no. of arguments --\n";
 try { log1p(36, true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===Done===
+echo "===Done===";

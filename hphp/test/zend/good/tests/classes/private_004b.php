@@ -23,4 +23,3 @@ $t2 = new fail();
 $t2->do_show();
 
 echo "Done\n"; // shouldn't be displayed
-?>

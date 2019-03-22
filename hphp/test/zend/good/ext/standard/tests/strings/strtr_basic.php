@@ -33,4 +33,3 @@ var_dump( strtr("test strtr", $trans1_arr) );
 var_dump( strtr('test strtr', $trans2_arr) );
 var_dump( strtr($heredoc_str, $trans1_arr) );
 echo "*** Done ***";
-?>

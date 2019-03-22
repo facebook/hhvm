@@ -14,5 +14,4 @@ class Read extends Pointcut
     {
     }
 }
-?>
-DONE
+echo "DONE";

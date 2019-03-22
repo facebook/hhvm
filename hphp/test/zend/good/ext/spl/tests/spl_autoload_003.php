@@ -29,6 +29,4 @@ catch(Exception $e)
 	echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

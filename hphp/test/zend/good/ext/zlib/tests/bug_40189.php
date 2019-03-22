@@ -9,8 +9,5 @@ var_dump(stream_copy_to_stream($fp, $gp, 5));
 fclose($fp);
 fclose($gp);
 var_dump(file_get_contents(dirname(__FILE__) . '/test.other'));
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 @unlink(dirname(__FILE__) . '/test.other');
-?>

@@ -47,6 +47,4 @@ $a = unserialize(serialize(new A()));
 
 print $a->a[0]->b->c . "\n";
 print $a->a[1]->b->c . "\n";
-
-?>
-Done
+echo "Done";

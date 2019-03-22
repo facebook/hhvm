@@ -7,4 +7,3 @@ echo mb_encode_numericentity($str2, $convmap, "UTF-8")."\n";
 
 $convmap = array(0xFF, 0x2FFFF, 0, 0xFFFF);
 echo mb_encode_numericentity('aŒbœcŠdše€fg', $convmap, "UTF-8")."\n";
-?>

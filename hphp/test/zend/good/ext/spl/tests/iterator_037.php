@@ -84,5 +84,4 @@ catch (Exception $e)
 	echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

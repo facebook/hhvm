@@ -27,4 +27,3 @@ foreach($fa as $k=>$v) {
     echo "$k=>";
     var_dump($v);
 }
-?>

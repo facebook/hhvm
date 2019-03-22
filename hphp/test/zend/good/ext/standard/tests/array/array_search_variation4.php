@@ -51,4 +51,3 @@ var_dump( array_search('123abc', array(123)) );
 var_dump( array_search('123abc', array(123), TRUE) ); // false in strict mode 
 
 echo "Done\n";
-?>

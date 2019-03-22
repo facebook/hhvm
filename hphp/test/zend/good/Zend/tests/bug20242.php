@@ -12,4 +12,3 @@ class test {
 		echo "method\n";
 	}
 }
-?>

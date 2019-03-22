@@ -3,4 +3,3 @@
 $arr = array('a', 'b');
 $arr();
 
-?>

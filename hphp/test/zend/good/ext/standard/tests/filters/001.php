@@ -8,4 +8,3 @@ try { var_dump(stream_filter_register(array(), "aa")); } catch (Exception $e) { 
 try { var_dump(stream_filter_register("", array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

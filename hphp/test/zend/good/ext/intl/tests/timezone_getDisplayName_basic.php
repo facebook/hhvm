@@ -8,6 +8,4 @@ var_dump($lsb->getDisplayName());
 
 ini_set('intl.default_locale', 'pt_PT');
 var_dump($lsb->getDisplayName());
-
-?>
-==DONE==
+echo "==DONE==";

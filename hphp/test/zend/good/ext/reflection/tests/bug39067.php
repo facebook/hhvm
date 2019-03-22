@@ -33,4 +33,3 @@ $rc = new ReflectionClass('Test2');
 var_dump($rc->getProperty('x')->getDeclaringClass()->getName());
 
 echo "Done\n";
-?>

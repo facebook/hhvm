@@ -113,5 +113,4 @@ foreach($inputs as $key =>$value) {
 
 unlink($absFile);
 
-?>
-===DONE===
+echo "===DONE===\n";

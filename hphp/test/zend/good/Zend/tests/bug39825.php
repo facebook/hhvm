@@ -4,4 +4,3 @@ $obj = (object)$array;
 foreach ($obj as $name => $value)  {
 	echo "$name -> $value\n";
 }
-?>

@@ -6,4 +6,3 @@ if(!$s) {
 }
 $dom = dom_import_simplexml($s);
 print $dom->ownerDocument->saveXML();
-?>

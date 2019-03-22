@@ -31,4 +31,3 @@ foreach($dirnames as $dirname) {
 closedir($dir_handle);
 
 echo "\n*** Done ***";
-?>

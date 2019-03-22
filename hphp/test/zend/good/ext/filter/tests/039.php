@@ -43,4 +43,3 @@ var_dump(filter_var_array($a, $b));
 var_dump($a, $b);
 
 echo "Done\n";
-?>

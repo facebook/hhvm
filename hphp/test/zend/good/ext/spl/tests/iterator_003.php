@@ -83,6 +83,4 @@ $it = $students->getIterator();
 foreach ($it as $student) {
 	echo $it->__toString(), "\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

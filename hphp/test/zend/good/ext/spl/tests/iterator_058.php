@@ -14,4 +14,3 @@ try {
 	echo 'InvalidArgumentException thrown';
 }
 echo 'no Exception thrown';
-?>

@@ -13,5 +13,4 @@ function test(){
 function errorHandler($errno, $errstr, $errfile, $errline) {
     throw new Exception();
 }
-?>
-ok
+echo "ok";

@@ -13,5 +13,4 @@ gzpassthru($h);
 gzclose($h);
 echo "\n";
 unlink($outputFileName);
-?>
-===DONE===
+echo "===DONE===\n";

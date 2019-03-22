@@ -11,4 +11,3 @@ $class = new ReflectionClass('Foo');
 var_dump($class->getDefaultProperties());
 
 echo "Done\n";
-?>

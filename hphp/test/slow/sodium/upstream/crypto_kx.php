@@ -19,4 +19,3 @@ var_dump(sodium_bin2hex($client_session_keys[0]));
 var_dump(sodium_bin2hex($server_session_keys[1]));
 var_dump(sodium_bin2hex($client_session_keys[1]));
 var_dump(sodium_bin2hex($server_session_keys[0]));
-?>

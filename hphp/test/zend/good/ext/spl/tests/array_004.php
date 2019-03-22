@@ -13,4 +13,3 @@ foreach($obj as $ak=>$av) {
 }
 
 echo "Done\n";
-?>

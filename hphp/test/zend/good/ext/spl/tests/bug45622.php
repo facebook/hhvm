@@ -25,4 +25,3 @@ echo "\n--> Re-add the real property:\n";
 $ao->p = 'object property';
 var_dump(isset($ao->p));
 var_dump($ao->p);
-?>

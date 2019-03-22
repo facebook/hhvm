@@ -52,4 +52,3 @@ if ($black_pixels >= 10) {
   printf("FAIL %d black pixels\n", $black_pixels);
 }
 imagedestroy($im);
-?>

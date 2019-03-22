@@ -10,4 +10,3 @@ foreach ( $array as $value ) {
 	echo $array->key( );
 }
 
-?>

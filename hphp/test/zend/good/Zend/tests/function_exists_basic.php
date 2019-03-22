@@ -24,5 +24,4 @@ Class C {
 	static function f() {}
 }
 var_dump(function_exists('C::f'));
-?>
-===Done===
+echo "===Done===";

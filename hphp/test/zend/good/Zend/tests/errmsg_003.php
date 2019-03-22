@@ -11,4 +11,3 @@ $t = new test;
 $t->foo();
 
 echo "Done\n";
-?>

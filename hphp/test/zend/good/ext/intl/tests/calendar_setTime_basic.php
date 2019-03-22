@@ -14,6 +14,4 @@ var_dump(
 $intlcal = IntlCalendar::createInstance('UTC');
 intlcal_set_time($intlcal,$time * 1000);
 var_dump(intlcal_get_time($intlcal));
-
-?>
-==DONE==
+echo "==DONE==";

@@ -42,5 +42,4 @@ if ($reader->setRelaxNGSchema('')) {
 	echo 'failed';
 }
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";

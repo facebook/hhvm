@@ -18,4 +18,3 @@ $myPwa = new Pwa();
 $myPwa->test();
 
 echo "Done\n";
-?>

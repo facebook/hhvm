@@ -12,4 +12,3 @@
   foreach ($charsets as $code => $name) {
     print_r(fribidi_charset_info($code));
   }
-?>

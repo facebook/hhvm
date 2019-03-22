@@ -22,4 +22,3 @@ foreach ($r->GetProperties() as $p)
 	echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
 }
 
-?>

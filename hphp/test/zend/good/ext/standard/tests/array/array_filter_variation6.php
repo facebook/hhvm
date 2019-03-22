@@ -38,5 +38,4 @@ var_dump( array_filter($input, 'callback') );
 // with default 'callback' argument
 var_dump( array_filter($input) ); 
 
-echo "Done"
-?>
+echo "Done";

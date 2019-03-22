@@ -8,4 +8,3 @@ class foo extends ArrayObject {
 
 var_dump( (new foo( array(1, array(4, 5), 3) ))[1][0] ); // int(4)
 
-?>

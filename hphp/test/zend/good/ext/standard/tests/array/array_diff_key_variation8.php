@@ -28,5 +28,4 @@ $array2 = array (
 echo "\n-- Testing array_diff_key() function with multi dimensional array --\n";
 var_dump( array_diff_key($array1, $array2) );
 var_dump( array_diff_key($array2, $array1) );
-?>
-===DONE===
+echo "===DONE===\n";

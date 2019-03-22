@@ -28,4 +28,3 @@ var_dump( strrpos("Hello, World", "o", 3) );
 var_dump( strrpos("Hello, World", "o", 6) );
 var_dump( strrpos("Hello, World", "o", 10) );
 echo "*** Done ***";
-?>

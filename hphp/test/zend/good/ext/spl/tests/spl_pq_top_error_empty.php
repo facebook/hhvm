@@ -8,4 +8,3 @@ try {
     echo "Exception: ".$e->getMessage().PHP_EOL;
 }
 
-?>

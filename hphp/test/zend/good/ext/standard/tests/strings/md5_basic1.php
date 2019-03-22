@@ -6,5 +6,4 @@
 
 echo "*** Testing md5() : basic functionality ***\n";
 var_dump(md5(b"apple"));
-?>
-===DONE===
+echo "===DONE===\n";

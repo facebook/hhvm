@@ -14,4 +14,3 @@ $fd = fopen('php://memory','w');
 $filter = stream_filter_append($fd, 'user_filter');
 stream_filter_remove($filter);
 var_dump(fclose($fd));
-?>

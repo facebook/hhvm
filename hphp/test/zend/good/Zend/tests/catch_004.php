@@ -28,5 +28,4 @@ class MyObject
 
 MyObject::test();
 
-?>
-===DONE===
+echo "===DONE===\n";

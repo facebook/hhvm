@@ -14,5 +14,4 @@ var_dump(ctype_xdigit($c1));
 var_dump(ctype_xdigit($c2));
 
 setlocale(LC_CTYPE, $orig); 
-?>
-===DONE===
+echo "===DONE===\n";

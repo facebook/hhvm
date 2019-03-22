@@ -11,4 +11,3 @@ var_dump(count($b));
 $b->removeAll($b);
 var_dump(count($b));
 
-?>

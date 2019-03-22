@@ -16,4 +16,3 @@ foreach($reflect->getProperties() as $prop)
 var_dump($array);
 
 echo "Done\n";
-?>

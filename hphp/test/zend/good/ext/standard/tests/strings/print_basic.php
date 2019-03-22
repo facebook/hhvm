@@ -54,5 +54,4 @@ multiple lines with $variable interpolation. Note
 that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!\n
 END;
-?>
-===DONE===
+echo "===DONE===\n";

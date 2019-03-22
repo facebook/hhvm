@@ -22,4 +22,3 @@ echo "o";
 $client = new LocalSoapClient(dirname(__FILE__)."/bug29795.wsdl",array("trace"=>1));
 $ar=$client->GetPrice();
 echo "k\n";
-?>

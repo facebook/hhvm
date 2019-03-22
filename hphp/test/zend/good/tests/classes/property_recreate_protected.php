@@ -31,4 +31,3 @@ echo "\nUnset a protected property, and attempt to recreate it outside of scope 
 $d->unsetProtected();
 $d->p = 'this will fail';
 var_dump($d);
-?>

@@ -23,5 +23,4 @@ $extra_arg = 10;
 echo "-- Testing array_filter() function with incorrect callback --";
 var_dump( array_filter($input, "even") );
 
-echo "Done"
-?>
+echo "Done";

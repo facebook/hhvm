@@ -11,4 +11,3 @@ var_dump($db->close());
 unlink($directory . '/myext.txt');
 
 echo "Done\n";
-?>

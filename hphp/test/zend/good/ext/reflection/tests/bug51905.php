@@ -16,4 +16,3 @@ foreach ($method->getParameters() as $param) {
         echo '$', $param->getName(), ' : ', var_export($param->getDefaultValue(), 1), "\n";
 }
 
-?>

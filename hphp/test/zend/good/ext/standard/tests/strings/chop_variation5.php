@@ -21,4 +21,3 @@ echo "*** Testing chop() : with miscellaneous arguments ***\n";
  var_dump ( chop("chop test$#@", "#@$") );                     /* with some special characters as second Argument */
 
 echo "Done\n";
-?>

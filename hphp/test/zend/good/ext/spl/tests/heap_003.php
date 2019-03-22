@@ -23,6 +23,4 @@ foreach ($in as $i) {
 foreach ($h as $out) {
     echo $out."\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

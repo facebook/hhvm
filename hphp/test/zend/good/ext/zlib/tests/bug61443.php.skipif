@@ -1,3 +1,2 @@
 <?php
 extension_loaded("zlib") or die("skip");
-?>

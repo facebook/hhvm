@@ -9,4 +9,3 @@ $x = json_encode($a);
 
 print_r($a);
 
-?>

@@ -32,4 +32,3 @@ $regex2 = base64_decode('5LiW55WM');
 var_dump(mb_ereg_match($regex2, $string_mb));
 
 echo "Done";
-?>

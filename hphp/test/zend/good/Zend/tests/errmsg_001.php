@@ -8,4 +8,3 @@ class Impl extends Test {
 }
 
 echo "Done\n";
-?>

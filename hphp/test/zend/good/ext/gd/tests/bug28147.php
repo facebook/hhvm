@@ -14,4 +14,3 @@ imageline($im, 299, 299, 0, 299, $red);
 imagedestroy($im);
 
 echo "Alive\n";
-?>

@@ -46,4 +46,3 @@ echo "\n *** Using heredoc string ***\n";
 var_dump( rtrim($str, "ing") );
 
 echo "Done\n";
-?>

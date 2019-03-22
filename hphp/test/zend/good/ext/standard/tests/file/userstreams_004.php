@@ -33,4 +33,3 @@ foreach(array("LOCK_SH","LOCK_EX","LOCK_UN") as $mode) {
 	test("fclock($mode|LOCK_NB)", $fd, constant($mode)|LOCK_NB);
 }
 
-?>

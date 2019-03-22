@@ -23,5 +23,4 @@ $res3_array = array(1,2,3,4);
 var_dump(parse_str($s1, &$res3_array));
 var_dump($res3_array);
 
-?>
-===DONE===
+echo "===DONE===\n";

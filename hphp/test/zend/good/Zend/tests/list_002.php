@@ -8,4 +8,3 @@ $b =& $a;
 list($a, list($b)) = array($a, array($b));
 var_dump($a, $b, $a === $b);
 
-?>

@@ -49,4 +49,3 @@ unlink ($png_file);
 unlink ($jpeg_file);
 
 echo 'done' . PHP_EOL;
-?>

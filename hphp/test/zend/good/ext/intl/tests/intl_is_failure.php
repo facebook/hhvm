@@ -13,4 +13,3 @@ function check( $err_code )
 check( U_ZERO_ERROR );
 check( U_USING_FALLBACK_WARNING );
 check( U_ILLEGAL_ARGUMENT_ERROR );
-?>

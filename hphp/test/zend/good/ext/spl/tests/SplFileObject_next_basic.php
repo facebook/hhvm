@@ -9,4 +9,3 @@ $s->next();
 
 echo $s->current();
 
-?>

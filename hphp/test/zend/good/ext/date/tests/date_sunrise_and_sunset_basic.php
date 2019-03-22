@@ -16,6 +16,4 @@ error_reporting(E_ALL & ~E_STRICT);
 
 echo date("D M d Y") . ', sunrise time : ' . date_sunrise(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1) . "\n";
 echo date("D M d Y") . ', sunset time : ' . date_sunset(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1) . "\n";
-
-?>
-===Done===
+echo "===Done===";

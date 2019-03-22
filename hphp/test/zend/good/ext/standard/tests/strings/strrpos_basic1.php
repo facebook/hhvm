@@ -26,4 +26,3 @@ var_dump( strrpos($heredoc_str, 'Hello') );
 var_dump( strrpos($heredoc_str, $heredoc_str) );
 
 echo "*** Done ***";
-?>

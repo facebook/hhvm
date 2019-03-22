@@ -19,4 +19,3 @@ echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/',array('oauth_signature'=>'he
 echo "-- merging url query and extra params --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/script?arg1=1',array('arg2' => '2')),"\n";
 
-?>

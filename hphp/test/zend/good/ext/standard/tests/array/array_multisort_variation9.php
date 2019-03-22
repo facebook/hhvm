@@ -33,5 +33,4 @@ $numeric = SORT_NUMERIC;
 var_dump(array_multisort(&$inputs, &$numeric));
 var_dump($inputs);
 
-?>
-===DONE===
+echo "===DONE===\n";

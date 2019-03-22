@@ -13,4 +13,3 @@
 	printf("%d\n", $mysql->errno);
 
 	$mysql->close();
-?>

@@ -23,4 +23,3 @@ echo in_array( "US/Eastern", $a ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $b ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $c ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $d ) ? "found" : "notfound", "\n\n";
-?>

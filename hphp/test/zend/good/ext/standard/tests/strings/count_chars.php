@@ -6,4 +6,3 @@ for($i=0; $i<3; $i++) {
 echo $a = count_chars($s, 3), "\n";
 echo (int) strlen(count_chars($s, 4)) == 256-strlen($a),"\n";
 
-?>

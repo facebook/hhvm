@@ -21,4 +21,3 @@ echo "New array:\n";
 var_dump($array);
 
 echo "Done";
-?>

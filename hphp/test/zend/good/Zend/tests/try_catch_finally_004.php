@@ -18,4 +18,3 @@ try {
   dummy("finally2");
 }
 var_dump("end");
-?>

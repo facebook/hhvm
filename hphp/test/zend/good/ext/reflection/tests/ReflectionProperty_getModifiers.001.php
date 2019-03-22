@@ -28,4 +28,3 @@ reflectProperty("TestClass", "stat");
 reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
 
-?>

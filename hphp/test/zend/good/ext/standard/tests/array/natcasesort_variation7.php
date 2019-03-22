@@ -18,4 +18,3 @@ var_dump(@natcasesort(&$array));
 var_dump($array);
 
 echo "Done";
-?>

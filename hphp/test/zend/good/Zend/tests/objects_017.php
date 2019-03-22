@@ -10,4 +10,3 @@ function test() {
 
 test()->test = 2;
 
-?>

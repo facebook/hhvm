@@ -9,4 +9,3 @@ class Properties {
    public $same = true;
 }
 
-?>

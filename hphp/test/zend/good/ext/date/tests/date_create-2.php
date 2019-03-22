@@ -5,4 +5,3 @@ echo $d->format('D, d M Y H:i:s T'), "\n";
 
 $d = date_create("@1121710200 +0912");
 echo $d->format('D, d M Y H:i:s T'), "\n";
-?>

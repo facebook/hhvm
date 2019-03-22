@@ -15,5 +15,4 @@ echo "\n-- Testing array_diff_key() function with float indexed array --\n";
 var_dump( array_diff_uassoc($input_array, $boolean_indx_array, "strcasecmp") );
 var_dump( array_diff_uassoc($boolean_indx_array, $input_array, "strcasecmp") );
     
-?>
-===DONE===
+echo "===DONE===\n";

@@ -19,4 +19,3 @@ switch ($str[0]) {
 		echo 'Default RAN!';
 }
 
-?>

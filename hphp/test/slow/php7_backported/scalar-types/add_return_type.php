@@ -14,5 +14,4 @@ interface Two extends One {
     public function d() : int;
 }
 
-?>
-Done
+echo "Done\n";

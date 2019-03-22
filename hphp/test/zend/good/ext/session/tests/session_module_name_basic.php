@@ -18,4 +18,3 @@ var_dump(session_module_name());
 
 echo "Done";
 ob_end_flush();
-?>

@@ -25,5 +25,4 @@ var_dump( array_intersect_ukey($arr_float, $arr_string, 'key_compare_func') );
 
 echo "\n-- Result of floating points and strings containing floating point intersection --\n";
 var_dump( array_intersect_ukey($arr_float, $arr_string_float, 'key_compare_func') );
-?>
-===DONE===
+echo "===DONE===\n";

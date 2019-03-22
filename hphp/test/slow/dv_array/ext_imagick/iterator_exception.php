@@ -15,5 +15,4 @@ try {
   echo "setIteratorRow\n";
 }
 
-?>
-==DONE==
+echo "==DONE==\n";

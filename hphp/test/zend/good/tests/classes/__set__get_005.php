@@ -44,5 +44,4 @@ $foo->bar->baz = "Check";
 var_dump($foo->bar);
 var_dump($foo->bar->baz);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -5,4 +5,3 @@ var_dump(http_build_query($array));
 var_dump(http_build_query($array, 'foo'));
 var_dump(http_build_query($array, 'foo', ';'));
 
-?>

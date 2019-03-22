@@ -91,6 +91,4 @@ var_dump($people[0]['name']);
 $people[0]['name'] = 'BlaBla';
 var_dump($people[0]['name']);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -47,5 +47,4 @@ echo "---21---\n";
 print_xml2(simplexml_load_string($xml));
 echo "---22---\n";
 print_xml2(simplexml_load_string($xml1));
-?>
-===DONE===
+echo "===DONE===\n";

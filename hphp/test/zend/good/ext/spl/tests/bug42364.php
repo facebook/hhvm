@@ -14,5 +14,4 @@ foreach ($it as $e) {
 if ($count > 0) {
     echo "Found $count entries!\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

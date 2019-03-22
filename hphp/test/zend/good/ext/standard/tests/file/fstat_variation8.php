@@ -23,5 +23,4 @@ if ($failed !== true) {
 }
 
 
-?>
-===DONE===
+echo "===DONE===\n";

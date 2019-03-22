@@ -34,4 +34,3 @@ try {
 	echo "OOPS. Other exception thrown\n";
 }
 
-?>

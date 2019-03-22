@@ -8,4 +8,3 @@ function redirect_on_error($e) {
     ob_end_clean();
     echo "Goodbye Cruel World\n";
 }
-?>

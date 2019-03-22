@@ -19,4 +19,3 @@ $disdef = $doc->isDefaultNamespace("http://ns")."\n";
 $eisdef = $root->isDefaultNamespace("http://ns")."\n";
 
 var_dump($dpref === $epref);
-?>

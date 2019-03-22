@@ -28,4 +28,3 @@ $top_element = $node->cloneNode();
 print $dom->saveXML($top_element);
 
 
-?>

@@ -19,4 +19,3 @@ $obj->sort = 'desc,name';
 
 echo http_build_query($obj) . PHP_EOL;
 echo http_build_query(new UrlBuilder());
-?>

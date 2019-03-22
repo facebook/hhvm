@@ -97,4 +97,3 @@ foreach($vars as $var) {
 }
 
 echo "Done";
-?>

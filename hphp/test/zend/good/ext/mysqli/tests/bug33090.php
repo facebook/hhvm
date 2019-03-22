@@ -10,4 +10,3 @@
 		printf("%s\n", $link->sqlstate);
 	}
 	$link->close();
-?>

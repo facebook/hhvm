@@ -24,5 +24,3 @@ $key = 1;
 try { var_dump( array_key_exists($key) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>
-

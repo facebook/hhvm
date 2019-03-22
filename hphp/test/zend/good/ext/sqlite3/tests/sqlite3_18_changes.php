@@ -19,4 +19,3 @@ var_dump($db->changes());
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
-?>

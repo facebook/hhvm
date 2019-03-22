@@ -29,4 +29,3 @@ var_dump('size of contents 2 = ' . strlen($outsidecontents));
 unlink($file);
 
 echo "Done\n";
-?>

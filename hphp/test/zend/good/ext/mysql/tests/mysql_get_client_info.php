@@ -11,4 +11,3 @@ if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($info)) {
 try { mysql_get_client_info("too many arguments"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 print "done!";
-?>

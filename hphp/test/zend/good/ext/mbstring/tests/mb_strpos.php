@@ -109,7 +109,3 @@ try { $r = mb_strpos($euc_jp, $t_obj, 'EUC-JP'); } catch (Exception $e) { echo "
 $r = false;
 try { $r = mb_strpos($euc_jp, $t_obj, 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
-
-
-?>
-

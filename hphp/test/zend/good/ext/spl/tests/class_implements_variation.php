@@ -21,5 +21,4 @@ function __autoload($classname) {
    echo "attempting to autoload $classname\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

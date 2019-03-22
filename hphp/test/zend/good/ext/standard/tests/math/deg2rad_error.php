@@ -13,4 +13,3 @@ try { var_dump(deg2rad($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".
 echo "\nToo few arguments\n";
 try { var_dump(deg2rad()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

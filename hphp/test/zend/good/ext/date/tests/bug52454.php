@@ -11,4 +11,3 @@ echo $endOfWeek->format('U')."\n";
 echo $endOfWeek->getTimestamp()."\n";
 
 echo $endOfWeek->format('Y-m-d H:i:s')."\n";
-?>

@@ -20,4 +20,3 @@ rmdir($dirname);
 
 echo "done";
 
-?>

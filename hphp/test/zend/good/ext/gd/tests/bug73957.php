@@ -5,5 +5,3 @@ var_dump($im);
 if ($im) { // which is not supposed to happen
     var_dump(imagesx($im));
 }
-?>
-

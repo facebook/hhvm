@@ -29,10 +29,7 @@ usort(&$entries, "mysort");
 foreach($entries as $entry) {
 	var_dump($entry);
 }
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $path = dirname(__FILE__) . '/readdir_variation2';
 rmdir($path);
-?>

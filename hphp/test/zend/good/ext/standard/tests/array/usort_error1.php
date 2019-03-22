@@ -21,5 +21,4 @@ try { var_dump( usort(&$array_arg, $cmp_function, $extra_arg) ); } catch (Except
 echo "\n-- Testing usort() function with less than expected no. of arguments --\n";
 $array_arg = array(1, 2);
 try { var_dump( usort(&$array_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -19,5 +19,4 @@ for ($i = 0; $i < 256; $i++) {
 }
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

@@ -9,4 +9,3 @@ textdomain('dgettextTest');
 var_dump(gettext('item'));
 var_dump(dgettext('dgettextTest_switch', 'item'));
 var_dump(gettext('item'));
-?>

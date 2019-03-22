@@ -19,4 +19,3 @@ $t = new late();
 //unset($t); delay to end of script
 
 echo "Done\n";
-?>

@@ -16,4 +16,3 @@ odbc_exec($conn, 1);
 odbc_exec($conn, NULL, NULL);
 odbc_exec($conn, NULL);
 
-?>

@@ -22,4 +22,3 @@ baz::test();
 
 bar::test();
 
-?>

@@ -10,4 +10,3 @@ foreach ($gen as $value) {
     var_dump($value);
 }
 
-?>

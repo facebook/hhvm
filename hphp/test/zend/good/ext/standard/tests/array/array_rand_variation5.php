@@ -39,4 +39,3 @@ var_dump( array_rand($input, 13) );  // with $num_req=13
  
 
 echo "Done";
-?>

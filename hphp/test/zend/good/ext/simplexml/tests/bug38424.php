@@ -15,4 +15,3 @@ $xml["a3"] = $str ;
 $xml["a4"] = $str ;
 
 echo $xml->asXML();
-?>

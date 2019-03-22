@@ -14,4 +14,3 @@ function custom_callback($traceName, $btInfo)
 }
   
 doit('a','b');
-?>

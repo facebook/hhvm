@@ -9,5 +9,4 @@ unset($data);
 
 var_dump(stream_get_contents($file));
 
-?>
-===DONE===
+echo "===DONE===\n";

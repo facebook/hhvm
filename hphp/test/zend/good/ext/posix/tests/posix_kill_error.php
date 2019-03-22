@@ -30,4 +30,3 @@ $sig = 9;
 var_dump( posix_kill($pid, 999) );
 
 echo "Done";
-?>

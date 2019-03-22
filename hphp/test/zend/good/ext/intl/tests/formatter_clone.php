@@ -18,4 +18,3 @@ $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 $res_str .= "Formatted(clone) number: " . ut_nfmt_format( $fmt_clone, $test_value ) . "\n";
 echo $res_str;
 
-?>

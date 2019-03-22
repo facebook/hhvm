@@ -35,4 +35,3 @@ PHP
     return TRUE;
 }
 echo "okey";
-?>

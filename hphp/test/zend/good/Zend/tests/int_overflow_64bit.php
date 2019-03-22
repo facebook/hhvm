@@ -16,4 +16,3 @@ foreach ($doubles as $d) {
 }
 
 echo "Done\n";
-?>

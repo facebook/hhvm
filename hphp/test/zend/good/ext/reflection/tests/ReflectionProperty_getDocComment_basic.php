@@ -35,4 +35,3 @@ foreach(array('A', 'B') as $class) {
     }
 }
 
-?>

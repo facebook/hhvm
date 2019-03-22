@@ -15,4 +15,3 @@ catch (DOMException $e) {
     echo 'Test failed!', PHP_EOL;
 }
 
-?>

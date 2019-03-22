@@ -6,4 +6,3 @@ try {
 } catch (InvalidArgumentException $e) {
 	echo 'InvalidArgumentException thrown';
 }
-?>

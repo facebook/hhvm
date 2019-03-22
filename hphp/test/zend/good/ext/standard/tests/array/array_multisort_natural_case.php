@@ -32,5 +32,4 @@ array_multisort(&$b, &$natural, &$a);
 
 var_dump($a, $b);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -25,4 +25,3 @@ $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, 'Person');
 $r1 = $stmt->fetch(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE);
 printf("'%s'\n", $r1->test);
 
-?>

@@ -6,4 +6,3 @@ foreach (function(){ return 1; } as $y) {
 
 print "ok\n";
 
-?>

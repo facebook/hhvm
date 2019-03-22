@@ -18,5 +18,3 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = decbin($values[$i]);
 	var_dump($res);
 }
-?>
-

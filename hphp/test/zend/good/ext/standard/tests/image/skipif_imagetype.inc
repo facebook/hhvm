@@ -12,4 +12,3 @@ if (!defined('IMAGETYPE_JPC'))     die('skip images of type JPC not supported');
 //if (!defined('IMAGETYPE_JPX'))     die('skip images of type JPX not supported');
 //if (!defined('IMAGETYPE_JB2'))     die('skip images of type JB2 not supported');
 if (!defined('IMAGETYPE_IFF'))     die('skip images of type IFF not supported');
-?>

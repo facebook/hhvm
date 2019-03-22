@@ -10,4 +10,3 @@ $gen->send(NULL);
 
 echo "DONE";
 
-?>

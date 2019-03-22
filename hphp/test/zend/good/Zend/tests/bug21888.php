@@ -23,4 +23,3 @@ class child extends mom {
 $c = new child();
 $c->callMom();
 $c->viewMom();
-?>

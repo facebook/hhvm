@@ -35,4 +35,3 @@ echo "-- With more arguments --\n";
 var_dump( array_merge_recursive($arr1["array"], $arr2["array"]) );
 
 echo "Done";
-?>

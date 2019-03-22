@@ -46,5 +46,4 @@ foreach ($paths as $path) {
 	var_dump( dirname($path) );
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

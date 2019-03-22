@@ -19,4 +19,3 @@ var_dump(mb_internal_encoding());    //check internal encoding is now set to UTF
 
 
 echo "Done";
-?>

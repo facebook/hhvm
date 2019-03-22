@@ -23,4 +23,3 @@ var_dump($b == 1);
 
 
 echo "Done\n";
-?>

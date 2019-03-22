@@ -12,5 +12,4 @@ $a = new Test;
 
 var_dump(count($a));
 
-?>
-===DONE===
+echo "===DONE===\n";

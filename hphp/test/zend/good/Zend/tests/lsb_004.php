@@ -10,5 +10,4 @@ class ChildClass extends TestClass {}
 
 echo TestClass::getClassName() . "\n";
 echo ChildClass::getClassName() . "\n";
-?>
-==DONE==
+echo "==DONE==";

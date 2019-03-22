@@ -15,5 +15,4 @@ var_dump(class_implements(new bar));
 var_dump(class_implements('bar'));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

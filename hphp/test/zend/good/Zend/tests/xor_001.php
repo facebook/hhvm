@@ -7,4 +7,3 @@ $c = $a ^ $b;
 var_dump($c);
 
 echo "Done\n";
-?>

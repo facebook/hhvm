@@ -62,4 +62,3 @@ echo "*** Testing possible variations in path ***\n";
 check_dirname( $file_path_variations );
 
 echo "Done\n";
-?>

@@ -32,4 +32,3 @@ for ($i = 0; $i < count($valuesy); $i++) {
 		var_dump($res);
 	}	
 }
-?>

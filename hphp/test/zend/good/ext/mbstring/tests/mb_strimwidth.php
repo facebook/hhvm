@@ -19,6 +19,3 @@ $str = mb_strimwidth($euc_jp, 100, -10,'...','EUC-JP');
 
 $str = mb_strimwidth($euc_jp, -100, 10,'...','EUC-JP');
 ($str === FALSE) ? print "6 OK\n" : print "NG: $str\n";
-
-?>
-

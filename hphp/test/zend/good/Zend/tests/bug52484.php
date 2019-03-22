@@ -11,4 +11,3 @@ $prop = null;
 
 unset($a->$prop);
 
-?>

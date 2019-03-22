@@ -25,5 +25,4 @@ $key = 'string_val';
 $data = 'string_val';
 try { var_dump( mcrypt_decrypt($cipher, $key, $data) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

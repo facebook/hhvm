@@ -2,4 +2,3 @@
 
 function test(...$args = 123) {}
 
-?>

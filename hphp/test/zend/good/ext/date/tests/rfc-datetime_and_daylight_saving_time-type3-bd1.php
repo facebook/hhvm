@@ -34,4 +34,3 @@ echo 'bd7 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
 	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
 
 echo "\n";
-?>

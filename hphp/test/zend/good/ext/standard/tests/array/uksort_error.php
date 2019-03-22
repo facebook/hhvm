@@ -20,5 +20,4 @@ try { var_dump( uksort(&$array_arg) ); } catch (Exception $e) { echo "\n".'Warni
 echo "\n-- Testing uksort() function with zero arguments --\n";
 try { var_dump( uksort() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

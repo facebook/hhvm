@@ -15,5 +15,4 @@ echo $reader->name;
 echo " ";
 echo $reader->getAttributeNs('isbn', 'uri');
 echo "\n";
-?>
-===DONE===
+echo "===DONE===\n";

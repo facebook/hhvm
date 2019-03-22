@@ -25,5 +25,3 @@ var_dump( each(&$arr1) );
 var_dump( each(&$arr1) );
 
 echo "Done";
-?>
-

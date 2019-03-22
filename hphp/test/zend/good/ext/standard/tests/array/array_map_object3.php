@@ -57,4 +57,3 @@ echo "-- accessing child method using parent class object --\n";
 var_dump( array_map(array($parentobj, 'staticChild'), $arr1) );
 
 echo "Done";
-?>

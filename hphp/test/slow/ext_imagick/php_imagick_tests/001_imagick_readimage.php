@@ -7,4 +7,3 @@ try {
   echo "got exception";
 }
 
-?>

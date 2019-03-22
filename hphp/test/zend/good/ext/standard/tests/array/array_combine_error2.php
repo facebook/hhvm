@@ -24,4 +24,3 @@ echo "\n-- Testing array_combine() function by passing array with unequal number
 var_dump( array_combine(array(1, 2), array(1, 2, 3)) );
 
 echo "Done";
-?>

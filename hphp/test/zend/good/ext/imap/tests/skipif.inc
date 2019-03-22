@@ -13,4 +13,3 @@ if (!$mbox) {
 	die("skip could not connect to mailbox $mailbox");
 }
 imap_close($mbox);
-?>

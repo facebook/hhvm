@@ -17,4 +17,3 @@ abstract final class AutoloadStatics {
   }
   
   var_dump(class_exists('UndefinedClass0'));
-?>

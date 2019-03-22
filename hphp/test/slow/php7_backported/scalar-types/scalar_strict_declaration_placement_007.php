@@ -6,4 +6,3 @@ namespace Foo;
 
 \var_dump(\strlen("abc"));
 
-?>

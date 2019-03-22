@@ -6,4 +6,3 @@ $data = fgetcsv($h, NULL, ',', '"', '"');
 fclose($h);
 
 var_dump($data);
-?>

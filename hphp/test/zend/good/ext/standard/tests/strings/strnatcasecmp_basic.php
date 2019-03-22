@@ -26,5 +26,4 @@ str_dump('Rfc822.txt', 'rfc822.TXT');
 str_dump('pIc 6', 'pic   7');
 str_dump(0xFFF, 0Xfff);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -13,4 +13,3 @@ try {
 
 print "ok\n";
 
-?>

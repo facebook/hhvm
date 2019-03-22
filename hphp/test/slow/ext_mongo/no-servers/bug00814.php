@@ -12,4 +12,3 @@ try {
 	var_dump($e->getCode());
 	var_dump($e->getMessage());
 }
-?>

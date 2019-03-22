@@ -13,4 +13,3 @@ echo $child->getAttribute("xmlns")."\n";
 echo $child->getAttribute("xmlns:ns2")."\n";
 
 echo "DONE\n";
-?>

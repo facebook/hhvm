@@ -11,4 +11,3 @@ if (mysqli_get_server_version($link) < 50041)
 	die("skip: Due to many MySQL Server differences, the test requires 5.0.41+");
 
 mysqli_close($link);
-?>

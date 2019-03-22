@@ -32,4 +32,3 @@ var_dump($zip->getNameIndex(3));
 
 $zip->close();
 
-?>

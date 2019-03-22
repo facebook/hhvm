@@ -6,5 +6,4 @@
 
 var_dump(time());
 
-?>
-===DONE===
+echo "===DONE===\n";

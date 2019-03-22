@@ -21,5 +21,4 @@ var_dump($people->person[0]['name']);
 $people->person[0]['name'] .= 'Bar';
 var_dump($people->person[0]['name']);
 
-?>
-===DONE===
+echo "===DONE===\n";

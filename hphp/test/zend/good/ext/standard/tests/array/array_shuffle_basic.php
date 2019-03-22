@@ -45,4 +45,3 @@ if (count($diffarray) < 350) {
 } else {
     echo "test passed \n";
 }
-?>

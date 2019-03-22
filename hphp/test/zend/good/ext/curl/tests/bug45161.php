@@ -28,4 +28,3 @@ if ($start < memory_get_usage()) {
 echo "\n";
 fclose($fp);
 unset($fp);
-?>

@@ -24,4 +24,3 @@ foreach (array($gen1, $gen2, $gen3) as $gen) {
     }
 }
 
-?>

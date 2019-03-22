@@ -14,7 +14,7 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(self)))
 root_re = re.escape(root)
 
 for test in sys.argv[1:]:
-    if not test.endswith('.php'):
+    if (not test.endswith('.php')) and (not test.endswith('.hack')):
         print("%s doesn\'t end in .php. Pass the .php file to this script." %
                test)
         sys.exit(1)
@@ -42,7 +42,7 @@ for test in sys.argv[1:]:
 
     # The debugger prints the path given on the command line, which is often
     # relative. All such debugger tests live under something/debugger/foo.php.
-    data = re.sub('[^ ]*/debugger(/[^ ]*.php)', r'%s\1', data)
+    data = re.sub('[^ ]*/debugger(/[^ ]*.(php|hack))', r'%s\1', data)
 
     # Generator method names are, well, generated!
     # See ParserBase::getAnonFuncName.

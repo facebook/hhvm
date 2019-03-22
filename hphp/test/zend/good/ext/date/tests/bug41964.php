@@ -32,4 +32,3 @@ var_dump($res['zone'], $res['tz_abbr']);
 echo "\n";
 
 
-?>

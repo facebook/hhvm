@@ -9,4 +9,3 @@ var_dump(dcngettext("","","",1,1));
 var_dump(dcngettext("","","",0,0));
 
 echo "Done\n";
-?>

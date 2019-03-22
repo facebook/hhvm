@@ -52,5 +52,4 @@ var_dump(
 );
 ldap_get_option($link, LDAP_OPT_MATCHED_DN, &$option);
 var_dump($option);
-?>
-===DONE===
+echo "===DONE===\n";

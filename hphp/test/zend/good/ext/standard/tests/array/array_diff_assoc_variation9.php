@@ -33,4 +33,3 @@ var_dump(array_diff_assoc($array1['sub_array1'], $array2));
 var_dump(array_diff_assoc($array1, $array2['sub_arraya']));
 
 echo "Done";
-?>

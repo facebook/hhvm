@@ -10,4 +10,3 @@ $func = "foo";
 $t->$func();
 
 echo "Done\n";
-?>

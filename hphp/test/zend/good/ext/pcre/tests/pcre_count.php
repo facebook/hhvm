@@ -25,4 +25,3 @@ $count = NULL;
 $string= 'Viagra V14GR4 Vicodin V1C0D1/\/ v1c0d1/|/';
 var_dump(preg_replace($regex, '...', $string, -1));
 var_dump($count);
-?>

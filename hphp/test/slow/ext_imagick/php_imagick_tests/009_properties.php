@@ -7,4 +7,3 @@ $im->setImageFormat("png");
 echo $im->width . "x" . $im->height . "\n";
 echo $im->format;
 
-?>

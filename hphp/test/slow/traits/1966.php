@@ -15,4 +15,3 @@ class MY_CLASS {
 }
 $o = new MY_CLASS;
 $o->printProps();
-?>

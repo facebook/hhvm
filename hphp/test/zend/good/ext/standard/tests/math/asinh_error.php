@@ -13,4 +13,3 @@ try { var_dump(asinh($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'W
 echo "\nToo few arguments\n";
 try { var_dump(asinh()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>

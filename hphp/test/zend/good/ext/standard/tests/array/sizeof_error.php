@@ -20,4 +20,3 @@ echo "-- Testing sizeof() function with more than two arguments under COUNT_RECU
 try { var_dump( sizeof($var, COUNT_RECURSIVE, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

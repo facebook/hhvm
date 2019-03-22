@@ -12,4 +12,3 @@ var_dump(ob_implicit_flush(true));
 var_dump(ob_implicit_flush(false));
 
 echo "Done";
-?>

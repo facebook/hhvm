@@ -21,4 +21,3 @@ try { bindec('01010101111',true); } catch (Exception $e) { echo "\n".'Warning: '
 
 echo "Incorrect input\n";
 bindec(new classA());
-?>

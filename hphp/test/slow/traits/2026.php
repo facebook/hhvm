@@ -19,4 +19,3 @@ var_dump($rbarfoo->isConstructor());
 
 $rbarbar = new ReflectionMethod('Bar::Bar');
 var_dump($rbarbar->isConstructor());
-?>

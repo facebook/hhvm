@@ -1,3 +1,2 @@
 <?php
 DOMDocument::saveHTMLFile('foo');
-?>

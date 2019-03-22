@@ -7,6 +7,4 @@ foreach (new LimitIterator(new ArrayIterator($a), 1, 3) as $k => $v)
 	var_dump(array($k, $v));
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

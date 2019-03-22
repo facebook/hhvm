@@ -45,5 +45,4 @@ catch(Exception $e)
 {
     echo "Caught in " . $e->getMessage() . "()\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

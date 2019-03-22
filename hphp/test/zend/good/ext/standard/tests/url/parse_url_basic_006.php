@@ -16,4 +16,3 @@ foreach ($urls as $url) {
 }
 
 echo "Done";
-?>

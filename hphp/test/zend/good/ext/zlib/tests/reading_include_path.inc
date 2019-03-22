@@ -24,4 +24,3 @@ foreach($newdirs as $newdir) {
 }
 mkdir($workingDir);
 chdir($workingDir);
-?>

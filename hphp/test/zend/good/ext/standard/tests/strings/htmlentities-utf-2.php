@@ -11,4 +11,3 @@ foreach($strings as $string) {
 	$ent_encoded = htmlentities ($string, ENT_QUOTES | ENT_IGNORE, "utf-8");
 	var_dump(bin2hex($ent_encoded));
 }
-?>

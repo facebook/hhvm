@@ -6,4 +6,3 @@ test");
 	for ($i = 0; $i < count($a); $i++) {
           echo $a[$i] . "\n";
         }
-?>

@@ -22,6 +22,4 @@ var_dump("1 after 3",	$intlcal1->after($intlcal3));
 var_dump("3 eq 2",		intlcal_equals($intlcal3, $intlcal2));
 var_dump("3 before 2",	intlcal_before($intlcal3, $intlcal2));
 var_dump("3 after 2",	intlcal_after($intlcal3, $intlcal2));
-
-?>
-==DONE==
+echo "==DONE==";

@@ -10,4 +10,3 @@ class A {
 
 var_dump(((new A)->test())());
 
-?>

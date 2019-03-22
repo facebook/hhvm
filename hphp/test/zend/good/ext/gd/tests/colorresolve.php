@@ -58,4 +58,3 @@ $c = imagecolorresolvealpha($im, 255,10,10,0);
 print_r(imagecolorsforindex($im, $c));
 
 
-?>

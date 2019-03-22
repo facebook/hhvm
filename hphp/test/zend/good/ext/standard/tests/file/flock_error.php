@@ -46,9 +46,6 @@ try { var_dump(flock($fp)); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 try { var_dump(flock($fp, "", &$var, "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
-?>

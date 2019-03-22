@@ -12,4 +12,3 @@ class bar {
 
 new bar;
 
-?>

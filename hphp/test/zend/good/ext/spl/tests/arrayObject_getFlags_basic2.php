@@ -12,4 +12,3 @@ var_dump($ai->getFlags());
 $ao2 = new ArrayObject($ao, 0);
 var_dump($ao2->getFlags());
 
-?>

@@ -32,4 +32,3 @@ foreach ($timezones as $timezone) {
 
 	echo "\n";
 }
-?>

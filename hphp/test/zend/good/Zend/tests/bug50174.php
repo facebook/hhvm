@@ -22,4 +22,3 @@ class TestClass2
 $rp = new ReflectionProperty('TestClass2', 'x');
 var_dump($rp->getDocComment());
 
-?>

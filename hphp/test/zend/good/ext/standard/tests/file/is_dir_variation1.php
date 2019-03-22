@@ -21,11 +21,8 @@ var_dump( is_dir($subdirname) );
 var_dump( is_dir($dirname) );
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/is_dir_variation1";
 rmdir($dir_name."/is_dir_variation1_sub");
 rmdir($dir_name);
-?>

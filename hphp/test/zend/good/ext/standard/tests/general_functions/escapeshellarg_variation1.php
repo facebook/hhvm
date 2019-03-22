@@ -65,5 +65,4 @@ foreach($inputs as $input) {
 	var_dump(escapeshellarg($input));
 	$iterator++;
 };
-?>
-===Done===
+echo "===Done===";

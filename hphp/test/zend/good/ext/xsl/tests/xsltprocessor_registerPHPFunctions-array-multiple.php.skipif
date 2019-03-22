@@ -2,4 +2,3 @@
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }
-?>

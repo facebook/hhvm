@@ -24,5 +24,4 @@ echo "\n-- Result of comparing integers and floating point numbers --\n";
 var_dump( array_diff_uassoc($arr_default_int, $arr_float, "key_compare_func") );
 var_dump( array_diff_uassoc($arr_float, $arr_default_int, "key_compare_func") );
 
-?>
-===DONE===
+echo "===DONE===\n";

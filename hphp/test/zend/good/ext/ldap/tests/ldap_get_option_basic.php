@@ -9,5 +9,4 @@ var_dump(
 	ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, &$option),
 	$option
 );
-?>
-===DONE===
+echo "===DONE===\n";

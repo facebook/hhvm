@@ -15,5 +15,4 @@ var_dump(ctype_upper($c1));
 var_dump(ctype_upper($c2));
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

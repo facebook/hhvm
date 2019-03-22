@@ -8,4 +8,3 @@ class SplFixedArray2 extends SplFixedArray {
 }
 $obj = new SplFixedArray2(2);
 var_dump(count($obj));
-?>

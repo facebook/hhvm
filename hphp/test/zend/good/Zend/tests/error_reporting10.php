@@ -25,4 +25,3 @@ try {
 var_dump(error_reporting());
 
 echo "Done\n";
-?>

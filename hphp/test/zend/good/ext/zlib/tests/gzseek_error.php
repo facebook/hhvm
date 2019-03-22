@@ -9,5 +9,4 @@ try { var_dump(gzseek( $h, $offset, $whence, $extra_arg ) ); } catch (Exception 
 try { var_dump(gzseek($h)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gzseek()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -27,4 +27,3 @@ Subject: [PHP-DEV] [ICONV] test for =?US-ASCII?Q?iconv_mime_decode_headers=28=29
 X-UIDL: @eH!!h2:!!EOS!!A_c"!
 HERE;
 var_dump(iconv_mime_decode_headers($headers));
-?>

@@ -23,5 +23,4 @@ var_dump(trim($hello, "Hdle"));
 echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(trim($binary, "\x00..\x1F"));
 
-?>
-===DONE===
+echo "===DONE===\n";

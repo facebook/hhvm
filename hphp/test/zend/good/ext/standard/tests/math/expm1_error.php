@@ -11,6 +11,4 @@ echo "\n-- Testing expm1() function with less than expected no. of arguments --\
 try { expm1(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "\n-- Testing expm1() function with more than expected no. of arguments --\n";
 try { expm1(23,true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

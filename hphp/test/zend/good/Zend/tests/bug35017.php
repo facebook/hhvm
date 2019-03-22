@@ -13,4 +13,3 @@ try {
 function errorHandler($errno, $errstr, $errfile, $errline, $vars) {
 	throw new Exception('Some Exception');
 }
-?>

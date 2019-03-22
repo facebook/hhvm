@@ -28,5 +28,4 @@ var_dump( strspn($str, $mask, $start) );
 // Calling strspn() with default arguments
 var_dump( strspn($str, $mask) );
 
-echo "Done"
-?>
+echo "Done";

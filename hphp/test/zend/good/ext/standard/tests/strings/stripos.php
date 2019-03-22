@@ -24,4 +24,3 @@
 	var_dump(stripos("\\\\a", "\\a"));
 
 	echo "Done\n";
-?>

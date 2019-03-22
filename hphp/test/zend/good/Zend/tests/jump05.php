@@ -16,4 +16,3 @@ foreach ($ar as $val) {
 echo "bug\n";
 L1:
 echo "3: ok\n";
-?>

@@ -40,4 +40,3 @@ $foo->a++;
 $foo->z++;
 var_dump($foo);
         
-?>

@@ -24,4 +24,3 @@ echo "Document with 2 child nodes\n";
 $dom->loadXML('<root><a/><b/></root>');
 var_dump($dom->documentElement->hasChildNodes());
 
-?>

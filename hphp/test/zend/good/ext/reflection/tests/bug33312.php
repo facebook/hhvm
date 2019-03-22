@@ -12,4 +12,3 @@ foreach ($method->getParameters() as $parameter) {
         print $parameter->getDefaultValue()."\n";
     }
 }
-?>

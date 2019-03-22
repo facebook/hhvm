@@ -25,5 +25,3 @@ var_dump(array_push(&$array_assoc, $var1, $var2));
 var_dump($array_assoc);
 
 echo "Done";
-?>
-

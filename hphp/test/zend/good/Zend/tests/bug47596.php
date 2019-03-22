@@ -55,4 +55,3 @@ echo "ok\n";
 // comment comment comment comment comment comment comment comment comment
 // comment comment comment comment comment comment comment comment comment
 // comment comment comm
-?>

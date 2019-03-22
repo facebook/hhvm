@@ -13,5 +13,4 @@ if ($ok) {
 } else {
          print "Error\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

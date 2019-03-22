@@ -11,5 +11,4 @@ var_dump(gzeof($h));
 gzclose($h);
 var_dump(gzeof($h));
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";

@@ -1,4 +1,3 @@
-
 <?php 
 
 /* pretty nifty object oriented code! */
@@ -44,4 +43,3 @@ $user2->display();
 $tmp = test($user2);
 $tmp->display();
 
-?>

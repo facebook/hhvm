@@ -15,4 +15,3 @@ class foo {
 \var_dump(\class_exists('foo\foo'));
 \var_dump(\class_exists('foo'));
 
-?>

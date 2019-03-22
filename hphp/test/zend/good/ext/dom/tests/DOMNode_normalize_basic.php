@@ -49,4 +49,3 @@ $title->normalize();
 echo "Number of child nodes of title after normalizing title = ";
 var_dump($title->childNodes->length);
 
-?>

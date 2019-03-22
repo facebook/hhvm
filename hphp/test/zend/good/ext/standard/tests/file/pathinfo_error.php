@@ -9,4 +9,3 @@ try { var_dump( pathinfo() );  /* args < expected */ } catch (Exception $e) { ec
 try { var_dump( pathinfo("/home/1.html", 1, 3) );  /* args > expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

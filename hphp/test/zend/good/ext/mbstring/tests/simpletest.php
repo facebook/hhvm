@@ -17,4 +17,3 @@ echo sprintf("sprintf: %s%s\n",$s1, $s2);
 $s3 = $s1.$s2."\n";
 echo "echo: ".$s3;
 
-?>

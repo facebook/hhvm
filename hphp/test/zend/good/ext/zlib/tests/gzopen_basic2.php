@@ -30,5 +30,4 @@ foreach($modes as $mode) {
    }
 }      
       
-?>
-===DONE===
+echo "===DONE===\n";

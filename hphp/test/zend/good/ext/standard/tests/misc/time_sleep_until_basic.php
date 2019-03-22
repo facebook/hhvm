@@ -14,4 +14,3 @@
     $now = round($now, 3);
   }
   var_dump($now >= (int)$time);
-?>

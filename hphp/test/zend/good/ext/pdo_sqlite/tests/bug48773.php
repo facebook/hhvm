@@ -19,4 +19,3 @@ $db = new foo('sqlite::memory:', '', '');
 $stmt = $db->query('SELECT 1');
 var_dump($stmt);
 
-?>

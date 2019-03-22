@@ -60,11 +60,8 @@ foreach($perms_array as $permission) {
   $count++;
 }
 echo "*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 chmod(dirname(__FILE__)."/006_variation2.tmp", 0777);
 chmod(dirname(__FILE__)."/006_variation2", 0777);
 unlink(dirname(__FILE__)."/006_variation2.tmp");
 rmdir(dirname(__FILE__)."/006_variation2");
-?>

@@ -22,6 +22,4 @@ do {
 	echo "pos        : {$rbbi->current()}\n",
 		 "rule status: {$rbbi->getRuleStatus()}\n";
 } while ($rbbi->next() != IntlBreakIterator::DONE);
-
-?>
-==DONE==
+echo "==DONE==";

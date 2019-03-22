@@ -25,4 +25,3 @@
 	var_dump(mysqli_connect_errno());
 
 	print "done!";
-?>

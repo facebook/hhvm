@@ -8,4 +8,3 @@ var_dump($t ^ $t);
 var_dump($f ^ $f);
 
 echo "Done\n";
-?>

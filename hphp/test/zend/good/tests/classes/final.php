@@ -19,4 +19,3 @@ $t2 = new second();
 $t2->show();
 
 echo "Done\n";
-?>

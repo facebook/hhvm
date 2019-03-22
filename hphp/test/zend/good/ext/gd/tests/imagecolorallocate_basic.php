@@ -12,5 +12,4 @@ var_dump( imagecolorallocate($im, 255, 0, 0) );
 var_dump( imagecolorallocate($im, 0, 255, 0) );
 var_dump( imagecolorallocate($im, 0, 0, 255) );
 var_dump( imagecolorallocate($im, 255, 255, 255) );
-?>
-===DONE===
+echo "===DONE===\n";

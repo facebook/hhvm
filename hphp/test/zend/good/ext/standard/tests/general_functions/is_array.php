@@ -106,4 +106,3 @@ echo "Done\n";
 /* close resources */
 fclose($fp);
 closedir($dfp);
-?>

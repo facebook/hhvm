@@ -6,5 +6,3 @@ stream_filter_append($fp, 'convert.base64-decode', STREAM_FILTER_WRITE);
 stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_WRITE);
 fwrite($fp, $text);
 fclose($fp);
-
-?> 

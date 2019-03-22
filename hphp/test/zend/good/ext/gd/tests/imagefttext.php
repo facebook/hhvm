@@ -34,4 +34,3 @@
 	$im = imagecreatetruecolor(256, 256);
 	var_dump(testrun($im, $fontfile_8859));
 	imagedestroy($im);
-?>

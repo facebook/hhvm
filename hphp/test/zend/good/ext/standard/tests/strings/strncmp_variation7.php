@@ -14,4 +14,3 @@ $str2 = "Hello\0";
 var_dump( strncmp($str1, $str2, 12) );  //expected: int(5);
 
 echo "*** Done ***\n";
-?>

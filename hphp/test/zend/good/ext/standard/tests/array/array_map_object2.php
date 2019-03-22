@@ -29,4 +29,3 @@ echo "-- with existent class and non-existent method --\n";
 var_dump( array_map(array('SimpleClass', 'non-existent'), array(1, 2)) );
 
 echo "Done";
-?>

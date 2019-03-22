@@ -31,4 +31,3 @@ var_dump( dir($dir_path."/sub_dir?") );
 var_dump( dir($dir_path."/sub?dir1") );
 
 echo "Done";
-?>

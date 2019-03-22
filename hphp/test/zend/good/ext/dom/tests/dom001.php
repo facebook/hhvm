@@ -91,4 +91,3 @@ print ("Not implemented\n");
 echo "--------- Check various node_name return values\n";
 print ("Not needed\n");
 
-?>

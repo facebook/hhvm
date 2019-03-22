@@ -13,5 +13,4 @@ var_dump(
 	$intlcal->getTime(),
 	strtotime('2012-01-29 05:06:07 +0000') * 1000.
 );
-?>
-==DONE==
+echo "==DONE==";

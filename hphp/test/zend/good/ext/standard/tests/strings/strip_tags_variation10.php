@@ -32,4 +32,3 @@ foreach($single_quote_string as $string_value)
 }
 
 echo "Done";
-?>

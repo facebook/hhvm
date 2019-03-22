@@ -5,4 +5,3 @@
 	$mysqli->init();
 	$mysqli->init();
 	echo "done";
-?>

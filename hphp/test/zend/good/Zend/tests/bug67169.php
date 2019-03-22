@@ -11,4 +11,3 @@ array_shift(&$array);
 $array[] = 'c';
 var_dump($array);
 
-?>

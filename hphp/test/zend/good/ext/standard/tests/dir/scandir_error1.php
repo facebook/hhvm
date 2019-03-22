@@ -22,10 +22,7 @@ $sorting_order = 10;
 $context = stream_context_create();
 $extra_arg = 10;
 try { var_dump( scandir($dir, $sorting_order, $context, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $directory = dirname(__FILE__) . '/scandir_error';
 rmdir($directory);
-?>

@@ -28,4 +28,3 @@ foreach ($weekdays as $days) {
 
 	echo implode('  ', $line), "\n";
 }
-?>

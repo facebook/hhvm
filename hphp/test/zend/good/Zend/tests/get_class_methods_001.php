@@ -22,4 +22,3 @@ var_dump(get_class_methods('B'));
 
 B::test();
 
-?>

@@ -6,4 +6,3 @@ interface if_a {
 	
 $t = new if_a();
 
-?>

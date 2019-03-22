@@ -68,4 +68,3 @@ $c = imagecolorclosestalpha($im, 255,10,10,1);
 print_r(imagecolorsforindex($im, $c));
 
 
-?>

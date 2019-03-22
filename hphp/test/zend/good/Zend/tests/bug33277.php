@@ -20,4 +20,3 @@ class foo2son extends fooson {
  
 $b = new foo2son();
 $b->barson();
-?>

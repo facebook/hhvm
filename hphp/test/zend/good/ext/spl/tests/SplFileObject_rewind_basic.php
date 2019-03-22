@@ -9,4 +9,3 @@ $s->seek(3);
 
 $s->rewind();
 echo $s->current();
-?>

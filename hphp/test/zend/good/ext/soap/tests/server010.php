@@ -49,4 +49,3 @@ EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 ob_end_flush();
 echo "ok\n";
-?>

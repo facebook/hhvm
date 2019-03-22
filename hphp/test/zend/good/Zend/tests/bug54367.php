@@ -15,4 +15,3 @@ class MyObjet implements ArrayAccess
 
 $a = new MyObjet();
 echo $a['p']('foo');
-?>

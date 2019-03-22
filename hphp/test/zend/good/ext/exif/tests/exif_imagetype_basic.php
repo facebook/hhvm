@@ -7,5 +7,4 @@
 echo "*** Testing exif_imagetype() : basic functionality ***\n";
 
 var_dump(exif_imagetype(dirname(__FILE__).'/test2.jpg'));
-?>
-===Done===
+echo "===Done===";

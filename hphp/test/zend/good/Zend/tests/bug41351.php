@@ -6,4 +6,3 @@ foreach($a[] as $b) {
 }
 
 echo "Done\n";
-?>

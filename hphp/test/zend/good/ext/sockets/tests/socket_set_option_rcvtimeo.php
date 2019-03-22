@@ -16,5 +16,3 @@ $retval_3 = socket_get_option( $socket, SOL_SOCKET, SO_RCVTIMEO);
 var_dump($retval_2);
 var_dump($retval_3 === $options);
 socket_close($socket);
-?>
-

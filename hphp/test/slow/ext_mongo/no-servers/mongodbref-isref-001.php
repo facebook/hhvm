@@ -13,4 +13,3 @@ var_dump(MongoDBRef::isRef(array('$id' => 123, '$db' => 'test')));
 var_dump(MongoDBRef::isRef((object) array()));
 var_dump(MongoDBRef::isRef((object) array('$ref' => 'dbref')));
 var_dump(MongoDBRef::isRef((object) array('$id' => 123, '$db' => 'test')));
-?>

@@ -18,5 +18,4 @@ echo "\n-- Testing gmdate() function with float -12.3456789000e10 to timestamp -
 $timestamp = -12.3456789000e10;
 var_dump( gmdate($format, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

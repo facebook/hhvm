@@ -12,4 +12,3 @@ $p = $foo->bar->p;
 echo count($p);
 $p = (array)$foo->bar->p;
 echo count($p);
-?>

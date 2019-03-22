@@ -2,4 +2,3 @@
 
 interface stdClass { }
 
-?>

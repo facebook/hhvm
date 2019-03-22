@@ -15,4 +15,3 @@
 		$result[$file] = image_type_to_mime_type($result[$file][2]);
 	}
 	var_dump($result);
-?>

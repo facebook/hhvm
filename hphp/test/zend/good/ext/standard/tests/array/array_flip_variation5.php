@@ -34,5 +34,4 @@ var_dump( array_flip($input) );
 $input = array('key1' => "value1", "key2" => '2', 'key3' => 'value1');
 var_dump( array_flip($input) );
 
-echo "Done"
-?>
+echo "Done";

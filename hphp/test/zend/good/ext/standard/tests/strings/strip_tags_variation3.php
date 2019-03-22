@@ -83,5 +83,4 @@ foreach($values as $value) {
       $iterator++;
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

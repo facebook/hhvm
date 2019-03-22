@@ -45,4 +45,3 @@ reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
 
 
-?>

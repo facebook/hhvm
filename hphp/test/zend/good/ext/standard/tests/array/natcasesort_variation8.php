@@ -16,4 +16,3 @@ var_dump( natcasesort(&$unsorted_oct_array) );
 var_dump($unsorted_oct_array);
 
 echo "Done";
-?>

@@ -33,6 +33,4 @@ switch ($a):
 		echo 0;
 		break;
 endswitch;
-?>
-
-===DONE===
+echo "\n===DONE===\n";

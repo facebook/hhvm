@@ -17,4 +17,3 @@ if ($gamma){
 }
 
 echo md5(base64_encode($img));
-?>

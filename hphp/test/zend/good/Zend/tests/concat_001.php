@@ -43,4 +43,3 @@ var_dump($d.$i);
 var_dump($d.$d);
 
 echo "Done\n";
-?>

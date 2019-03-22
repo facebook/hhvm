@@ -4,4 +4,3 @@ function testing($source) {
 }
 testing($_GET);
 echo "ok\n";
-?>

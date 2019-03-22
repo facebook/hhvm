@@ -16,4 +16,3 @@ $bar->name = "I'm Bar!\n";
 // In ZE1, we would expect "I'm Foo!"
 echo $foo->name;
 
-?>

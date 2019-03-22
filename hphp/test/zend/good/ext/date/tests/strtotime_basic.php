@@ -31,4 +31,3 @@ var_dump(date('Y-m-d', strtotime('second Monday December 2008')));
  * This is parsed as the "third following Monday after the first Monday in December"
  */ 
 var_dump(date('Y-m-d', strtotime('third Monday December 2008')));
-?>

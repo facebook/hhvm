@@ -90,13 +90,10 @@ unlink($link_arr[0]);
 clearstatcache();
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1";
 unlink("$dirname/symlink_link_linkinfo_is_link_variation1.tmp");
 rmdir("$dirname/test/home");
 rmdir("$dirname/test");
 rmdir($dirname);
-?>

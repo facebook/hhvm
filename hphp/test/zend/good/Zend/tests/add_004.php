@@ -6,4 +6,3 @@ $c = $a + 5;
 var_dump($c);
 
 echo "Done\n";
-?>

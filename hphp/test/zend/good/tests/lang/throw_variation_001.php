@@ -6,4 +6,3 @@ try {
 	echo "caught exception\n";
 }
 
-?>

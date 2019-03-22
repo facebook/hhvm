@@ -204,4 +204,3 @@ $strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:30:00\n\n";
 
-?>

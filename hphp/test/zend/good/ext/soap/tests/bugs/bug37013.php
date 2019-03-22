@@ -43,4 +43,3 @@ class MultiRefTest {
 $server = new SoapServer(dirname(__FILE__)."/bug37013.wsdl");
 $server->setClass( "MultiRefTest");
 $server->handle( $request );
-?>

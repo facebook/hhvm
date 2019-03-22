@@ -25,5 +25,4 @@ echo "\n";
 unlink($filename);
  
 
-?>
-===DONE===
+echo "===DONE===\n";

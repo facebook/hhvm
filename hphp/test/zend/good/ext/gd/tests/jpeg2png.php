@@ -21,4 +21,3 @@
 	@unlink($cwd . "/test_jpng.png");
 	@unlink($cwd . "/test_png.png");
 	@unlink($cwd . "/test_pjpeg.jpeg");
-?>

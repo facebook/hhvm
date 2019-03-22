@@ -14,5 +14,4 @@ echo "\n-- Testing array_diff_key() function with boolean indexed array --\n";
 // loop through each element of the array for arr1
 var_dump( array_diff_key($input_array, $boolean_indx_array) );
 var_dump( array_diff_key($boolean_indx_array, $input_array) );
-?>
-===DONE===
+echo "===DONE===\n";

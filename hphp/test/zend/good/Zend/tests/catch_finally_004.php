@@ -31,4 +31,3 @@ var_dump(foo(&$ex));
 do {
   var_dump($ex->getMessage());
 } while ($ex = $ex->getPrevious());
-?>

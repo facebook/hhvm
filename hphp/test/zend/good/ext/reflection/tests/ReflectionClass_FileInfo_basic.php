@@ -20,4 +20,3 @@ var_dump($rc->getEndLine());
 Class C {
 
 }
-?>

@@ -20,10 +20,7 @@ fclose($file_handle);
 var_dump( filesize($file_name) );
 
 echo "*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/filesize_basic.tmp";
 unlink($file_name);
-?>

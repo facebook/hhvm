@@ -26,4 +26,3 @@
 		printf("[008] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 	*/
 	print "done!\n";
-?>

@@ -64,4 +64,3 @@
 
 	echo($entity->whatever[0]);
 	echo "ok\n";
-?>

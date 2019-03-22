@@ -52,4 +52,3 @@ var_dump(method_exists($baz, 'stat_a'));
 var_dump(method_exists($baz, 'stat_b'));
 var_dump(method_exists($baz, 'stat_c'));
 
-?>

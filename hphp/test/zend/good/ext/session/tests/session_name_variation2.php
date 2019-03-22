@@ -19,4 +19,3 @@ var_dump(session_name());
 
 echo "Done";
 ob_end_flush();
-?>

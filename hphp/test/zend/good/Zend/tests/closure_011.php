@@ -6,4 +6,3 @@ $lambda = function () use ($i) {
 $lambda();
 echo $lambda()."\n";
 //early prototypes gave 3 here because $i was static in $lambda
-?>

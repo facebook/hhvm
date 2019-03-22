@@ -9,4 +9,3 @@ var_dump(iptcembed(-1, $file, -1));
 unlink($file);
 
 echo "Done\n";
-?>

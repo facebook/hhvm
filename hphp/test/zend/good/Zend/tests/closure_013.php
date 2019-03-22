@@ -15,4 +15,3 @@ $test->__invoke();
 $test = foo();
 $test->__invoke();
 $test = foo()->__invoke();
-?>

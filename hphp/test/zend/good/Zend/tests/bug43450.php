@@ -25,4 +25,3 @@ if ($start < $end) {
 	echo 'PASS';
 }
 
-?>

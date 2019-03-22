@@ -19,5 +19,4 @@ foreach ($arr as $key => $value) {
 	echo "$key - length: ". strlen($value) ."; md5: " . md5($value) .  "\n" ;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

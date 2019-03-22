@@ -93,5 +93,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

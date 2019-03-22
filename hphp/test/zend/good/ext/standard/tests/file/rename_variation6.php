@@ -19,4 +19,3 @@ var_dump(file_exists($tmp_file));
 @unlink($tmp_file);
 
 echo "Done\n";
-?>

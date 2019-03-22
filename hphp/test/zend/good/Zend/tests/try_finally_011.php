@@ -7,4 +7,3 @@ function foo () {
 }
 
 foo();
-?>

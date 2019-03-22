@@ -14,4 +14,3 @@ try {
     var_dump($e->getMessage());
   } while ($e = $e->getPrevious());
 }
-?>

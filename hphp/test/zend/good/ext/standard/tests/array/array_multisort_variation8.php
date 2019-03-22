@@ -39,5 +39,4 @@ $string = SORT_STRING;
 var_dump(array_multisort(&$inputs, &$string));
 var_dump($inputs);
 
-?>
-===DONE===
+echo "===DONE===\n";

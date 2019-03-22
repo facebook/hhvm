@@ -21,4 +21,3 @@ class Implementor implements AutoInterface {}
 var_dump(in_array('AutoInterface', get_declared_interfaces()));
 
 echo "\nDONE\n";
-?>

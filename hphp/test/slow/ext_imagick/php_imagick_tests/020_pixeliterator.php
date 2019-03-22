@@ -28,4 +28,3 @@ echo (count_objects ($it1) == count_objects ($it2) ? "match" : "no") . PHP_EOL;
 $it1->newPixelIterator (new Imagick ('magick:rose'));
 
 echo 'done' . PHP_EOL;
-?>

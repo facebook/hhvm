@@ -9,4 +9,3 @@ $x = __NAMESPACE__;
 
 \var_dump($x::$x);
 
-?>

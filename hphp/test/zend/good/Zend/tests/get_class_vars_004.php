@@ -25,4 +25,3 @@ new A;
 
 var_dump(A::test());
 
-?>

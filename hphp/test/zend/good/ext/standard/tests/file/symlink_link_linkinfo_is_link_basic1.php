@@ -73,11 +73,8 @@ foreach($files as $file) {
 }
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = $file_path."/symlink_link_linkinfo_is_link_basic1";
 unlink("$dirname/symlink_link_linkinfo_is_link_basic1.tmp");
 rmdir($dirname);
-?>

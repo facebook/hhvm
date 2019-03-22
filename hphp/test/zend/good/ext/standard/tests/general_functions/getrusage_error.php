@@ -38,5 +38,4 @@ $file_handle=fopen(__FILE__, "r");
 try { $dat = getrusage($file_handle); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 fclose($file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";

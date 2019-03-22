@@ -9,4 +9,3 @@ L1:
 		echo "2: ok\n";
 	}
 } while (0);
-?>

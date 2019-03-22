@@ -15,4 +15,3 @@ $b = gmp_init("353467");
 var_dump(gmp_mod($a, $b));
 
 echo "Done\n";
-?>

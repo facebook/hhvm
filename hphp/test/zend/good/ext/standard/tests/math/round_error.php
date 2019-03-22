@@ -14,6 +14,4 @@ echo "*** Testing round() : error conditions ***\n";
 echo "\n-- Wrong nmumber of arguments --\n";
 try { var_dump(round()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(round(500, 10, true));
-
-?>
-===Done===
+echo "===Done===";

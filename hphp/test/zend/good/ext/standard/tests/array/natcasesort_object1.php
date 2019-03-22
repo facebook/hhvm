@@ -44,5 +44,3 @@ var_dump(natcasesort(&$unsorted_str_obj) );
 var_dump($unsorted_str_obj);
 
 echo "Done";
-?>
-

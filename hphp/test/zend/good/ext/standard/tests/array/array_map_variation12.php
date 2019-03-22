@@ -23,4 +23,3 @@ echo "-- with language construct --\n";
 var_dump( array_map('echo', $array1));
 
 echo "Done";
-?>

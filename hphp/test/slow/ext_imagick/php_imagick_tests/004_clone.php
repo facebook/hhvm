@@ -14,4 +14,3 @@ try {
 } catch (Exception $e) {
   echo "Cloning failed\n";
 }
-?>

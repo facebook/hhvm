@@ -34,4 +34,3 @@ foreach($classes as $class) {
 	echo "  --> Check for doesntExist(): ";
 	var_dump($rc->hasMethod("doesntExist"));
 }
-?>

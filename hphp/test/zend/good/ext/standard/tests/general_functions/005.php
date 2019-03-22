@@ -8,4 +8,3 @@ var_dump (is_scalar (NULL));
 var_dump (is_scalar (array ()));
 var_dump (is_scalar (new foo()));
 var_dump (is_scalar (opendir('.')));
-?>

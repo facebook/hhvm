@@ -51,6 +51,4 @@ echo '$list = ';var_export($res);echo ";\n";
 
 @unlink($file);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

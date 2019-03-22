@@ -81,4 +81,3 @@ var_dump(array_merge($begin_array[0], $begin_array[1], 100));
 var_dump(array_merge($begin_array[0], $begin_array[1], $arr4));
 
 echo "Done\n";
-?> 

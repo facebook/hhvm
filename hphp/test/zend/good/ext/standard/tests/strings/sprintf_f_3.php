@@ -9,4 +9,3 @@ $money2 = 54.35;
 $money = $money1 + $money2;
 var_dump(sprintf("%01.2f", $money));
 var_dump(sprintf("%.3e", $money));
-?>

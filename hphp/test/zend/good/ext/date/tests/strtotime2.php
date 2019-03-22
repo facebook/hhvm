@@ -22,4 +22,3 @@ foreach ($constants as $const) {
 	echo "$const:\t";
 	echo ((strtotime(date(constant($const), $time)) === $time) ? "OK" : "FAIL") . "\n";
 }
-?>

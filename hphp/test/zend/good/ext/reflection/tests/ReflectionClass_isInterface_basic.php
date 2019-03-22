@@ -12,4 +12,3 @@ var_dump($reflectionClass->isInterface());
 var_dump($reflectionClass2->isInterface());
 var_dump($reflectionClass3->isInterface());
 
-?>

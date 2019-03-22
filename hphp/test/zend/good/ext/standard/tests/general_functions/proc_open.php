@@ -15,4 +15,3 @@ proc_close($cat);
 
 echo "I didn't segfault!\n";
 
-?>

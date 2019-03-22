@@ -17,4 +17,3 @@ var_dump(A::$test3);
 var_dump(B::$test1);
 var_dump(B::$test2);
 var_dump(B::$test3);
-?>

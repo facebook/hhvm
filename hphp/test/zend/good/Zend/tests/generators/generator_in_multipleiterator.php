@@ -18,4 +18,3 @@ foreach ($it as $values) {
     var_dump($values);
 }
 
-?>

@@ -95,4 +95,3 @@ foreach($inputs as $input) {
 
 fclose($fp);
 echo "Done";
-?>

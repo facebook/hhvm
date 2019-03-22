@@ -12,4 +12,3 @@ foreach (s() as $k => $function) {
     }
   }
 }
-?>

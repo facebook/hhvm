@@ -22,6 +22,4 @@ foreach ($dll as $k => $v) {
 }
 var_dump($dll->count());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

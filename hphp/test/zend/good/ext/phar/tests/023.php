@@ -14,7 +14,6 @@ var_dump(file_get_contents($pname . '/a.php'));
 var_dump(file_get_contents($pname . '/b.php'));
 var_dump(file_get_contents($pname . '/b/c.php'));
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
+echo "===DONE===\n";
+error_reporting(0);
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php');

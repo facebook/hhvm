@@ -28,5 +28,4 @@ var_dump( checkdate(2, 29, 2009) ); // non-leap year
 var_dump( checkdate(7, 2, 32768) ); // >max year
 var_dump( checkdate(7, 2, 0) ); // <min year  
 
-?>
-===DONE===
+echo "===DONE===\n";

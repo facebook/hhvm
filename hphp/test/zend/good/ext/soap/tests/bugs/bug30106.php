@@ -30,4 +30,3 @@ var_dump($client->__getFunctions());
 var_dump($client->__getTypes());
 $x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
 var_dump($x);
-?>

@@ -29,4 +29,3 @@ foreach ($a as $v) {
 	}
 }
 
-?>

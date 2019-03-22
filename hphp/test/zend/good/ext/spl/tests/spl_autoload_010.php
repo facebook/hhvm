@@ -15,6 +15,4 @@ spl_autoload_register('autoloadB', true, true);
 spl_autoload_register('autoloadC');
 
 new C;
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

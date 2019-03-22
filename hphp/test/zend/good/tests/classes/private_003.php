@@ -24,4 +24,3 @@ fail::ok();
 fail::not_ok(); // calling a private function
 
 echo "Done\n"; // shouldn't be displayed
-?>

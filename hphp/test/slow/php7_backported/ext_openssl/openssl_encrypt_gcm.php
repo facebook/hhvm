@@ -25,4 +25,3 @@ test_encryption('aes-128-gcm');
 test_encryption('aes-192-gcm');
 // 256 bit GCM
 test_encryption('aes-256-gcm');
-?>

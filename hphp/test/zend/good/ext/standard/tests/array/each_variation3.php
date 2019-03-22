@@ -99,5 +99,3 @@ foreach($inputs as $key => $input) {
 };
 
 echo "Done";
-?>
-

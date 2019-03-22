@@ -11,5 +11,4 @@ print $xml_element->node2."\n";
 
 print $xml_element->asXML();
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -68,4 +68,3 @@ function base64_encode_var_dump($regs) {
 
 echo "Done";
 
-?>

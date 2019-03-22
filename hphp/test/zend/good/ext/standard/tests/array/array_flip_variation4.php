@@ -54,5 +54,4 @@ var_dump( array_flip($input) );
 // closing resource
 fclose($fp);
 
-echo "Done"
-?>
+echo "Done";

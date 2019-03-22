@@ -10,4 +10,3 @@
   $g = fribidi_log2vis("",    FRIBIDI_AUTO, FRIBIDI_CHARSET_CAP_RTL);
 
   var_dump(array($a, $b, $c, $d, $e, $f, $g));
-?>

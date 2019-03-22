@@ -30,4 +30,3 @@ var_dump(nl2br($heredoc_str1) );
 var_dump(nl2br($heredoc_str2) );
 
 echo "Done";
-?>

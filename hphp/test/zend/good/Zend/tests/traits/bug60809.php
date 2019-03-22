@@ -27,4 +27,3 @@ trait ExampleTrait {
 $x = new Example();
 $x->foo();
 $x->bar();
-?>

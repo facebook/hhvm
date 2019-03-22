@@ -83,4 +83,3 @@ foreach($values as $value) {
 fclose($resource);  //closing the file handle
 
 echo "*** Done ***";
-?>

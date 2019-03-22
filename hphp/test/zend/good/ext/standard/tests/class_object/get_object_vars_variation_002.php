@@ -19,4 +19,3 @@ $arr['ref'] = 'changed.ref';
 $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj, $a);
-?>

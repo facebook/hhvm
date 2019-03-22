@@ -71,4 +71,3 @@ if (allowed_rounding_error(cos($threesixty),1.0)) {
 else {
 	echo "Fail\n";
 }
-?>

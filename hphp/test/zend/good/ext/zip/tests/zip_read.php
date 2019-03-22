@@ -8,4 +8,3 @@ while ($entry = zip_read($zip)) {
 zip_close($zip);
 echo "$entries entries";
 
-?>

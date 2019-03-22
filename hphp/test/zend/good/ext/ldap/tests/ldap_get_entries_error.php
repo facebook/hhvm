@@ -11,5 +11,4 @@ try { var_dump(ldap_get_entries($link, $link, "Additional data")); } catch (Exce
 
 // Bad parameter
 try { var_dump(ldap_get_entries($link, "string")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

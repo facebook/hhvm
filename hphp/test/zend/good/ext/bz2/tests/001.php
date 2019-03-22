@@ -12,4 +12,3 @@ $fp = fopen(__FILE__,"r");
 var_dump(bzopen($fp, "r"));
 
 echo "Done\n";
-?>

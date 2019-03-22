@@ -19,9 +19,6 @@ print( fileinode(".") )."\n";
 print( fileinode("./..") )."\n";
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink ($file_path."/inode.tmp");
-?>

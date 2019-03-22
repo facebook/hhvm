@@ -52,4 +52,3 @@ for($index = 0; $index < count($str_array); $index++) {
 }
 
 echo "Done\n";
-?>

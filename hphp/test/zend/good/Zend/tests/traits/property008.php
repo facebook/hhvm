@@ -37,4 +37,3 @@ var_dump($a);
 $b = new SubclassB;
 var_dump($b);
 
-?>

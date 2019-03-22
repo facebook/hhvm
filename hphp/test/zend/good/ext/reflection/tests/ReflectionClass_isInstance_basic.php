@@ -24,4 +24,3 @@ foreach ($classes as $class) {
 
 }
 
-?>

@@ -39,4 +39,3 @@
 
     socket_close($socket);
 	@unlink($address);
-?>

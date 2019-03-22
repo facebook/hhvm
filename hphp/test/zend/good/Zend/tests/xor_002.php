@@ -25,4 +25,3 @@ $s ^= "test long";
 var_dump(bin2hex($s));
 
 echo "Done\n";
-?>

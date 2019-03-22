@@ -36,4 +36,3 @@ if ($mb == $greek_lower) {
 }
 
 echo "Done";
-?>

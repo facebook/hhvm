@@ -19,5 +19,4 @@ $atts = $x->xpath("/xml/a:data/@label");
 echo $atts[0] . "\n";
 $atts = $x->xpath("/xml/data/@label");
 echo $atts[0] . "\n";
-?>
-===DONE===
+echo "===DONE===\n";

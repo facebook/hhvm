@@ -6,4 +6,3 @@ touch($file);
 fclose($f);
 @unlink($file);
 echo "ok";
-?>

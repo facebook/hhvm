@@ -12,5 +12,4 @@ try { var_dump(gzclose()); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 gzclose($h);
 
 
-?>
-===DONE===
+echo "===DONE===\n";

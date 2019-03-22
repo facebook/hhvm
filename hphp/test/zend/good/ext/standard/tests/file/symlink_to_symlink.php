@@ -32,4 +32,3 @@ unlink($prefix . "_link2");
 unlink($prefix . "_link1");
 unlink($prefix . "_file");
 
-?>

@@ -22,4 +22,3 @@ $talker = new Talker();
 $talker->say();
 $talker->fala();
 $talker->parla();
-?>

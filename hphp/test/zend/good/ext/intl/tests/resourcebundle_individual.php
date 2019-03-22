@@ -54,4 +54,3 @@ function ut_run2($bundle) {
 			echo $proc_result;
 }
 ut_run2($bundle);
-?>

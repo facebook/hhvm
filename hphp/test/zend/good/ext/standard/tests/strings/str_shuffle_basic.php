@@ -47,5 +47,4 @@ if ($combinations != 24) {
 	echo "TEST PASSED\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

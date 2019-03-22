@@ -42,5 +42,5 @@ abstract final class ZendGoodExtStandardTestsFileFileGetContentsVariation1 {
   public static $secondFile;
   public static $filename = "file_get_contents_variation1.txt";
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

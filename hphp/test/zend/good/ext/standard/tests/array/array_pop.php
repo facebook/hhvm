@@ -36,4 +36,3 @@ foreach( $mixed_array as $sub_array )
 }
 
 echo"\nDone";
-?>

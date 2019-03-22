@@ -13,4 +13,3 @@ $bytes = $doc->saveHTMLFile($filename);
 var_dump($bytes);
 echo file_get_contents($filename);
 unlink($filename);
-?>

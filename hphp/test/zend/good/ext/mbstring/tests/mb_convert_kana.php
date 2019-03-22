@@ -32,4 +32,3 @@ echo "\n";
 echo $hanKakuC . ' => ' . mb_convert_kana($hanKakuC, 'AZKH', 'utf-8');
 echo "\n";
 echo $hanKakuD . ' => ' . mb_convert_kana($hanKakuD, 'AZKH', 'utf-8');
-?>

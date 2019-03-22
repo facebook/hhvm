@@ -19,4 +19,3 @@ class chld extends par {
 
 $obj = new chld();
 $obj->displayHim();
-?>

@@ -6,4 +6,3 @@ var_dump(
     grapheme_substr($haystack, grapheme_stripos($haystack, 'Paris'))
 );
 
-?>

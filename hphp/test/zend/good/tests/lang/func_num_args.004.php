@@ -25,4 +25,3 @@ echo "\n\n-- Ref, Val --\n";
 $b = 'original.b';
 refVal(&$b, $b);
 var_dump($b);
-?>

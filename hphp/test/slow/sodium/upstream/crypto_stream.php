@@ -33,4 +33,3 @@ try {
 	var_dump(true);
 }
 
-?>

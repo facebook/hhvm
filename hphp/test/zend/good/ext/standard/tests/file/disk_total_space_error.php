@@ -21,9 +21,6 @@ var_dump( disk_total_space( $file_path."/disk_total_space.tmp" )); // file input
 fclose($fh);
 
 echo"\n--- Done ---";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/disk_total_space.tmp");
-?>

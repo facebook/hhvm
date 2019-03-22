@@ -12,4 +12,3 @@ echo $cb(),"\n";
 $a = array(1, 2);
 $b = array_map($cb, $a);
 print_r($b);
-?>

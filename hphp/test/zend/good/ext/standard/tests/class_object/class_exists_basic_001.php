@@ -27,4 +27,3 @@ echo "\nCalling class_exists() on existing class with autoload unspecified:\n";
 var_dump( class_exists('stdclass') );
 
 echo "Done";
-?>

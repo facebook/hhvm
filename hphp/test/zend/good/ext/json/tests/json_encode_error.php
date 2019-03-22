@@ -13,6 +13,4 @@ try { var_dump( json_encode() ); } catch (Exception $e) { echo "\n".'Warning: '.
 echo "\n-- Testing json_encode() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
 var_dump( json_encode("abc", 0, $extra_arg) );
-
-?>
-===Done===
+echo "===Done===";

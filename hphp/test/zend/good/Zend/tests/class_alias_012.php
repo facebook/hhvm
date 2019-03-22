@@ -18,4 +18,3 @@ $var = __NAMESPACE__ .'\foo';
 $var = __NAMESPACE__ .'\T';
 \var_dump(new $var);
 
-?>

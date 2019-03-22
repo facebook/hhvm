@@ -26,4 +26,3 @@ class foo {
 $test = new foo;
 $test->bar();
 
-?>

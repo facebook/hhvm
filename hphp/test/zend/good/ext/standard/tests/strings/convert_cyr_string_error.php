@@ -29,6 +29,4 @@ var_dump(bin2hex( convert_cyr_string($str, $from, "?")) );
 
 echo "\n-- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --\n";
 var_dump(bin2hex( convert_cyr_string($str, ">", "?")) );
-
-?> 
-===DONE===
+echo "===DONE===\n";

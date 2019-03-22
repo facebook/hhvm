@@ -13,4 +13,3 @@ class A {
 var_dump(get_class_vars('A'));
 var_dump(A::test());
 
-?>

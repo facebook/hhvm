@@ -12,4 +12,3 @@ THISMUSTNOTERROR;
 
 print e::E . "\n";
 
-?>

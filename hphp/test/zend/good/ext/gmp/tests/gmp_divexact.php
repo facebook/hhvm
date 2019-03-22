@@ -27,4 +27,3 @@ $r = gmp_divexact($n1, $n);
 var_dump(gmp_strval($r));
 
 echo "Done\n";
-?>

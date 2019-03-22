@@ -20,5 +20,4 @@ echo "\n-- Testing strftime() function with float -12.3456789000e10 to timestamp
 $timestamp = -12.3456789000e8;
 var_dump( strftime($format, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

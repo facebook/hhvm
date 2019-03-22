@@ -60,4 +60,3 @@ var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);
 
 session_destroy();
-?>

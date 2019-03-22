@@ -8,4 +8,3 @@ foreach ($regexes as $regex) {
         printf("%s: %d\n", get_class($e), $e->getCode());
     }
 }
-?>

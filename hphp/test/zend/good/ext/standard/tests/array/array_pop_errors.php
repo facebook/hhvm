@@ -41,4 +41,3 @@ try { var_dump( array_pop(&$mixed_array[1],$mixed_array[2]) ); } catch (Exceptio
 var_dump( array_pop(&$empty_array) );
 
 echo"\nDone";
-?>

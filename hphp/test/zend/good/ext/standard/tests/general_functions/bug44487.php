@@ -14,4 +14,3 @@ try {
         call_user_method_array('test', &$bar, array()) ;
 } catch (Exception $e) {
 }
-?>

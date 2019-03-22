@@ -19,4 +19,3 @@ echo "CDATA Content: " . $cdatanode->data . "\n";
 
 echo "\n" . $document->saveXML();
 
-?>

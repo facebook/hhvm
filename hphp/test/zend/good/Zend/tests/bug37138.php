@@ -10,4 +10,3 @@ class stch extends st {
 st::e ();
 st::e2 ();
 stch::g ();
-?>

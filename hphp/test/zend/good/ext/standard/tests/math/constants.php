@@ -21,4 +21,3 @@ $constants = array(
 foreach($constants as $constant) {
     printf("%-10s: %s\n", $constant, constant($constant));
 }
-?>

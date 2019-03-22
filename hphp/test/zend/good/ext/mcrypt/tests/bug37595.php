@@ -39,4 +39,3 @@ foreach ($data as $val) {
 mcrypt_module_close($td);
 
 echo "Done\n";
-?>

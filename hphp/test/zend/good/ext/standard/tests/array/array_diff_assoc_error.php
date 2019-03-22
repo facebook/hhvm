@@ -22,4 +22,3 @@ try { var_dump( array_diff_assoc($arr1) ); } catch (Exception $e) { echo "\n".'W
 
 
 echo "Done";
-?>

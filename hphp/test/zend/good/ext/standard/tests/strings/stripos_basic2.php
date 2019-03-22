@@ -29,4 +29,3 @@ var_dump( stripos("Hello, World", "O", 5) );
 var_dump( stripos("Hello, World", "o", 6) );
 var_dump( stripos("Hello, World", "o", 10) );
 echo "*** Done ***";
-?>

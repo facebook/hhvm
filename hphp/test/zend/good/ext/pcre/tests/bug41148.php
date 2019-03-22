@@ -42,4 +42,3 @@
 
     print $letexte;
 
-?>

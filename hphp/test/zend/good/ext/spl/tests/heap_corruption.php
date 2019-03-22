@@ -50,4 +50,3 @@ catch (Exception $e) {
 	echo "Corruption Exception: " . $e->getMessage() . PHP_EOL;
 }
 
-?>

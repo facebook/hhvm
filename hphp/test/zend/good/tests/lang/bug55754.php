@@ -5,4 +5,3 @@ current(&$arr);
 
 echo "DONE";
 
-?>

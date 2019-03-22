@@ -8,4 +8,3 @@ foreach($foo as $key => $val) {
 	}
 }
 var_dump($foo);
-?>

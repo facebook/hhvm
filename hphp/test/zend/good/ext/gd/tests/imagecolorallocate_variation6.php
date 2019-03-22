@@ -25,5 +25,4 @@ foreach($values as $key => $value) {
       var_dump( imagecolorallocate($im_palette, $value, $value, $value) );
       var_dump( imagecolorallocate($im_true_color, $value, $value, $value) );
 };
-?>
-===DONE===
+echo "===DONE===\n";

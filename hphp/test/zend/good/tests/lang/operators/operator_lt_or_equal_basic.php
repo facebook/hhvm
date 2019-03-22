@@ -54,5 +54,4 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
 if ($failed == false) {
    echo "Test Passed\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

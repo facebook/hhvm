@@ -31,4 +31,3 @@ while (!feof($fp)) {
 var_dump($contents);
 fclose($fp);
 
-?>

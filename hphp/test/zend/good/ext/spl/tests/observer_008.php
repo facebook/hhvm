@@ -22,6 +22,4 @@ var_dump($a->count());
 
 $a->removeAll($b);
 var_dump($a->count());
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

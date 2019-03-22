@@ -24,5 +24,4 @@ var_dump( array_filter($input, 'echo') );
 // using language construct 'exit' as 'callback' 
 var_dump( array_filter($input, 'exit') );
 
-echo "Done"
-?>
+echo "Done";

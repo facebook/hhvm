@@ -20,4 +20,3 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 	echo "failed\n";
 }
 @unlink($file);
-?>

@@ -19,4 +19,3 @@ foreach($classes as $class) {
 	var_dump($rc->getConstants());
 }
 
-?>

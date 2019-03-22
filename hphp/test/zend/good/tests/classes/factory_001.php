@@ -24,4 +24,3 @@ function ShapeFactoryMethod($shape) {
 ShapeFactoryMethod("Circle")->draw();
 ShapeFactoryMethod("Square")->draw();
 
-?>

@@ -20,5 +20,4 @@ echo "\n-- Try sccanf() WITH optional args --\n";
 $res = sscanf($str, $format, &$part, &$length, &$width, &$depth);
 var_dump($res, $part, $length, $width, $depth);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -18,5 +18,4 @@ var_dump( idate($format, $timestamp) );
 echo "\n-- Testing idate() function for 2 digit year having zero as starting number --\n";
 $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
-?>
-===DONE===
+echo "===DONE===\n";

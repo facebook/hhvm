@@ -58,5 +58,4 @@ for( $i = 0; $i < count($search_str); $i++ ) {
   echo "-- search string has found '$count' times\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

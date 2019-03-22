@@ -8,4 +8,3 @@ function __autoload($class)
 $a = new DefClass;
 print_r($a);
 print_r($GLOBALS['include']);
-?>

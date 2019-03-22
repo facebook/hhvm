@@ -41,5 +41,4 @@ var_dump($res["tm_mon"]);
 var_dump($res["tm_year"]);
 
 setlocale(LC_ALL, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

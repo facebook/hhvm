@@ -29,4 +29,3 @@ foreach ($sizes as $size){
   var_dump( array_chunk($input_array, $size, false) );
 }
 echo "Done";
-?>

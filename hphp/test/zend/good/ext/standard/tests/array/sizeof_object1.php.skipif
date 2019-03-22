@@ -4,4 +4,3 @@
   {
      die('skip spl is not installed');
   }
-?>

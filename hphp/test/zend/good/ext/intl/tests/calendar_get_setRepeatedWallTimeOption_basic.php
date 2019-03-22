@@ -1,4 +1,3 @@
-
 <?php
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
@@ -24,6 +23,4 @@ var_dump(
 	strtotime('2012-10-28 02:30:00 +0200'),
 	(int)($intlcal->getTime() /1000)
 );
-
-?>
-==DONE==
+echo "==DONE==";

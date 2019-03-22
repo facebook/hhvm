@@ -8,4 +8,3 @@
 	if (!function_exists("imagecreatefromxbm")) {
 		die("skip xbm read support unavailable");
 	}
-?>

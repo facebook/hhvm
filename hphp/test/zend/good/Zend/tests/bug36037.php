@@ -5,4 +5,3 @@ $x=<<<XXX
 YYY;
 XXX;
 echo __LINE__, "\n";
-?>

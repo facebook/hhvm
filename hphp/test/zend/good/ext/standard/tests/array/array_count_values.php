@@ -18,4 +18,3 @@ foreach ($arrays as $item) {
 	var_dump (@array_count_values ($item));
 	echo "\n";
 }
-?>

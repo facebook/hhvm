@@ -8,4 +8,3 @@ var_dump(addcslashes($str, (binary)"\000z"));
 var_dump(addcslashes( $str, (binary)"z"));
 
 echo "Done\n";
-?>

@@ -24,4 +24,3 @@ try { var_dump(gmp_pow(2,array())); } catch (Exception $e) { echo "\n".'Warning:
 var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
-?>

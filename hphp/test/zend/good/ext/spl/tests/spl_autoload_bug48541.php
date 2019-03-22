@@ -26,5 +26,4 @@ $c2 = $a2;
 spl_autoload_register($c);
 spl_autoload_register($c2);
 $c = new foo;
-?>
-===DONE===
+echo "===DONE===\n";

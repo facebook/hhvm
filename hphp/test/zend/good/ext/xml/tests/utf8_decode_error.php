@@ -18,4 +18,3 @@ $extra_arg = 10;
 try { var_dump( utf8_decode($data, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

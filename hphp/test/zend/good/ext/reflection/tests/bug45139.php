@@ -44,4 +44,3 @@ $rc = new ReflectionClass('C');
 $rp = $rc->getProperty('quux');
 var_dump($rp->getDeclaringClass()->getName()); // C
 
-?>

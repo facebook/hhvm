@@ -19,5 +19,4 @@ echo "\n-- Testing ctype_upper() function with more than expected no. of argumen
 $c = 1;
 $extra_arg = 10;
 try { var_dump( ctype_upper($c, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

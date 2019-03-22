@@ -14,4 +14,3 @@ echo "Add new node A before B\n";
 $e2->parentNode->insertBefore($e1, $e2);
 echo $dom->saveXML();
 
-?>

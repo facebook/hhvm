@@ -17,4 +17,3 @@ for ($i = 0; $i < $period * 3; $i++) {
 }
 
 echo "OK\n";
-?>

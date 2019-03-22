@@ -52,4 +52,3 @@ foreach($arrays as $arr1) {
 }
 
 echo "Done";
-?>

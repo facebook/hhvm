@@ -42,4 +42,3 @@ echo "-- with two arrays --\n";
 var_dump( array_map('callback_cat', $arr1, $arr1) );
 
 echo "Done";
-?>

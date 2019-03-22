@@ -19,4 +19,3 @@ ctype_test_001("ctype_print");
 ctype_test_001("ctype_punct");
 ctype_test_001("ctype_space");
 ctype_test_001("ctype_xdigit");
-?>

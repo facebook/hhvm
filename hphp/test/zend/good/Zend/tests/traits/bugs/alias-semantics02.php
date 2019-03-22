@@ -15,4 +15,3 @@ $test = new TraitsTest();
 $test->a();
 $test->b();
 
-?>

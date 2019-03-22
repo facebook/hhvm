@@ -62,4 +62,3 @@ foreach ($greek_needles as $needle) {
 }
 
 echo "Done";
-?>

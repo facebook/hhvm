@@ -19,4 +19,3 @@ echo "$data\n";
 $t = unserialize($data);
 var_dump($t);
 
-?>

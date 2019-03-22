@@ -12,4 +12,3 @@ function testGenerator() {
 
 foreach (testGenerator() as $i);
 
-?>

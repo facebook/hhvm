@@ -12,4 +12,3 @@ $b->execute(array (5));
 $rez = $a->query ("SELECT * FROM test")->fetchAll(PDO::FETCH_CLASS, 'EEE');
 
 echo "Done\n";
-?>

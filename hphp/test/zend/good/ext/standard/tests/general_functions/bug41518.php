@@ -11,9 +11,6 @@ var_dump(file_exists($tmp_file."nosuchfile")); //doesn't exist
 @unlink($tmp_file);
 @rmdir($tmp_dir);
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $tmp_dir = __DIR__ . "/bug41518/";
 @unlink($tmp_dir);
-?>

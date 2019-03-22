@@ -9,4 +9,3 @@ $gen->next();
 var_dump($gen->key());
 var_dump($gen->current());
 
-?>

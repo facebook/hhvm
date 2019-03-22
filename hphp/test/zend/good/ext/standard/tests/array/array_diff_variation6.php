@@ -25,4 +25,3 @@ var_dump(array_diff($array_index, $array_assoc));
 var_dump(array_diff($array_assoc, $array_index));
 
 echo "Done";
-?>

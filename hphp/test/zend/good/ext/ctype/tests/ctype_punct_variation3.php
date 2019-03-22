@@ -50,5 +50,4 @@ foreach($values as $value) {
       $iterator++;
 };
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";

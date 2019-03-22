@@ -10,4 +10,3 @@ echo 'Testing SQLite3 qeurySingle with empty string parameter' . PHP_EOL;
 var_dump($db->querySingle(''));
 
 echo "Done";
-?>

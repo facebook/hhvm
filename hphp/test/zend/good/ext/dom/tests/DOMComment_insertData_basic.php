@@ -7,4 +7,3 @@ $comment->insertData(4,'-inserted');
 $dom->appendChild($comment);
 echo $dom->saveXML();
 
-?>

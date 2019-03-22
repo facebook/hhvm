@@ -32,6 +32,4 @@ catch(OutOfBoundsException $e)
 $it->next();
 var_dump($it->valid());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

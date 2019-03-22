@@ -1,0 +1,1 @@
+Fatal error: A .php file must begin with '<?hh'. in %s/test/slow/compilation/1247.php on line 1

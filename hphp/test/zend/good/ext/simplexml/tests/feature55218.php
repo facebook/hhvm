@@ -39,5 +39,4 @@ var_dump( $x->getDocNamespaces(false, false) );
 var_dump( $x->person[0]->getDocNamespaces(false, false) );
 var_dump( $x->person[1]->getDocNamespaces(false, false) );
 
-?>
-===DONE===
+echo "===DONE===\n";

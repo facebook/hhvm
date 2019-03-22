@@ -10,4 +10,3 @@ if ($c1 == 0xFFFFFF && $c2 == 0 && $c3 == 0 && $c4 == 0) {
 } else {
 	echo "failed";
 }
-?>

@@ -20,5 +20,4 @@ echo "\n-- Testing array_diff_ukey() function with float indexed array --\n";
 var_dump( array_diff_ukey($float_indx_array, $input_array, 'key_compare_func') );
 var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') );
 
-?>
-===DONE===
+echo "===DONE===\n";

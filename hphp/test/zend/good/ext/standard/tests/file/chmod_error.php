@@ -24,5 +24,4 @@ try { var_dump( chmod($filename) ); } catch (Exception $e) { echo "\n".'Warning:
 $filename = "___nonExisitingFile___";
 var_dump(chmod($filename, 0777));
 
-?>
-===DONE===
+echo "===DONE===\n";

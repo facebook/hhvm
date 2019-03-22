@@ -13,4 +13,3 @@ try { var_dump( fprintf(3) ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 try { var_dump( fprintf(NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

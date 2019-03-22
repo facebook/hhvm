@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(is_finite($longVal));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

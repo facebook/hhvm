@@ -25,5 +25,4 @@ traverse_xml($people);
 $people->person['name'] = 'John';
 traverse_xml($people);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -12,5 +12,4 @@ try { var_dump( is_callable() ); } catch (Exception $e) { echo "\n".'Warning: '.
 echo "\n-- Testing is_callable() function with more than expected no. of arguments --\n";
 try { var_dump( is_callable("string", TRUE, &$callable_name, "EXTRA") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

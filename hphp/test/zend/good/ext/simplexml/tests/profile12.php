@@ -24,5 +24,4 @@ var_dump($sxe->Body);
 var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -19,4 +19,3 @@ class MyClass1 {
 $a = new MyClass1;
 $a->sayHello();
 $a->sayHello2();
-?>

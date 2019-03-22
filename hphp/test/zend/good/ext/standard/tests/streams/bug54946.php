@@ -26,5 +26,4 @@ $retval = stream_get_contents($stream, 1);
 var_dump($retval);
 fclose($stream);
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";

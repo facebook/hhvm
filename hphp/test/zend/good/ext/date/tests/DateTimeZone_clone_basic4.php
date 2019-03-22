@@ -16,5 +16,4 @@ $d1_clone = clone $d1;
 //verify clone by calling method on new object
 var_dump( $d1_clone->getName() ); 
 
-?>
-===DONE===
+echo "===DONE===\n";

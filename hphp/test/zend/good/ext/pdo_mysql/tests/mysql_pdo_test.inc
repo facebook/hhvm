@@ -174,4 +174,3 @@ class MySQLPDOTest extends PDOTest {
 	}
 
 }
-?>

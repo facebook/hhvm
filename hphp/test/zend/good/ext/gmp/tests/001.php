@@ -11,4 +11,3 @@ echo "gmp extension is available";
 	see php5/tests/README for further information on
   writing regression tests
 */
-?>

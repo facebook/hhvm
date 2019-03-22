@@ -14,5 +14,4 @@ var_dump(parse_url($url, -1));
 echo "\n\n--> Above range:";
 var_dump(parse_url($url, 99));
 
-echo "Done"
-?>
+echo "Done";

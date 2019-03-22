@@ -2,4 +2,3 @@
 
 interface a extends Exception { }
 
-?>

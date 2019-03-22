@@ -6,5 +6,4 @@ $c = new C();
 $c->a = function () use($c) {};
 var_dump($c->a);
 
-?>
-===DONE===
+echo "===DONE===\n";

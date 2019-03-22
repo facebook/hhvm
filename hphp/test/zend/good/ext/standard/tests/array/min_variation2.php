@@ -24,4 +24,3 @@ var_dump(min(array(-2147483649, -2147483647)));
 
 echo "\nDone\n";
 
-?>

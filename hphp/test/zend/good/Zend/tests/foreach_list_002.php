@@ -10,4 +10,3 @@ foreach($array as list(list(), $a)) {
    var_dump($a); 
 }
 
-?>

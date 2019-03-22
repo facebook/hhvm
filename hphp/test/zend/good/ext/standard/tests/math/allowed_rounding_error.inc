@@ -15,4 +15,3 @@ function allowed_rounding_error ($number, $expected) {
 		return false;
 	}
 }
-?>

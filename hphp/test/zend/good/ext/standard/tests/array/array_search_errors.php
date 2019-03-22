@@ -20,4 +20,3 @@ var_dump( array_search("test", $var) );
 var_dump( array_search(1, 123) );
 
 echo "Done\n";
-?>

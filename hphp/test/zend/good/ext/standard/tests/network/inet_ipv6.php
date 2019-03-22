@@ -18,4 +18,3 @@ foreach ($a as $address) {
 }
 
 echo "Done\n";
-?>

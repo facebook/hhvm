@@ -12,4 +12,3 @@ for ($c = "C1"; $c <= "C4"; $c++) {
     var_dump($r->getTraitAliases());
     echo "\n";
 }
-?>

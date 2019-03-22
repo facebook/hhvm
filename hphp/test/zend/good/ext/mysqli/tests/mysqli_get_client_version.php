@@ -3,4 +3,3 @@
 		printf("[001] Expecting int/any_non_empty, got %s/%s\n", gettype($info), $info);
 		
 	print "done!";
-?>

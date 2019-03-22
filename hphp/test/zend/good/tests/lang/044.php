@@ -10,5 +10,4 @@ $methodname       =  'foo';
 echo $classname::$methodname()."\n";
 
 echo $wrongClassname::$methodname()."\n";
-?>
-===DONE===
+echo "===DONE===\n";

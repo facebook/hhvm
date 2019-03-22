@@ -4,4 +4,3 @@ class bug39542 {
 		echo "ok\n";
 	}
 }
-?>

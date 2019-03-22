@@ -15,4 +15,3 @@ class MyClass {
 	use A;
 	use B;
 }
-?>

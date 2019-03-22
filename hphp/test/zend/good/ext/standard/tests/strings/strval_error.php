@@ -28,5 +28,4 @@ try { var_dump( strval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 echo "\n-- Testing strval() function with object which has not toString() method  --\n";
 var_dump( strval(new MyClass()) );
 
-?>
-===DONE===
+echo "===DONE===\n";

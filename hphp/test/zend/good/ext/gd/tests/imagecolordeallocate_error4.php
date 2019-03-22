@@ -6,4 +6,3 @@ $totalColors = imagecolorstotal($image);
 
 $result = imagecolordeallocate($image, -1.0);
 var_dump($result);
-?>

@@ -15,4 +15,3 @@ if ($color->isPixelSimilar("pink", 0))
   echo "Similar" . PHP_EOL;
 else
   var_dump ($color->getColorAsString());
-?>

@@ -20,4 +20,3 @@ if ($node) {
 }
 $root = $doc->documentElement;
 print 'Root Node: '.$root->nodeName."\n";
-?>

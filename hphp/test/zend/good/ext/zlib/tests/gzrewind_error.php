@@ -7,5 +7,4 @@ try { var_dump(gzrewind( $h, $extra_arg ) ); } catch (Exception $e) { echo "\n".
 try { var_dump(gzrewind()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

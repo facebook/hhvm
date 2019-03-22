@@ -36,5 +36,4 @@ var_dump( timezone_name_from_abbr("", -14400, 0) );
 echo "-- Tests with invalid offsets --\n"; 
 var_dump( timezone_name_from_abbr("", 5400) ); // offset = 1.5 hrs
 var_dump( timezone_name_from_abbr("", 62400) ); // offset = 24 hrs
-?>
-===DONE===
+echo "===DONE===\n";

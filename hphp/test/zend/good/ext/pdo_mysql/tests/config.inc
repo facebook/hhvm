@@ -49,4 +49,3 @@ if (!function_exists('sys_get_temp_dir')) {
 		return FALSE;
 	}
 }
-?>

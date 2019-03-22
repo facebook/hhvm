@@ -25,6 +25,4 @@ echo "Encode some hexadecimal data\n";
 $hex = b'x00\x01\x02\x03\x04\x05\x06\xFA\xFB\xFC\xFD\xFE\xFF';
 $base64 = imap_binary($hex);
 var_dump(bin2hex($base64));
-
-?>
-===Done===
+echo "===Done===";

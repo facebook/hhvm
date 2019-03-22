@@ -18,4 +18,3 @@ $o = new Foo;
 var_dump(quoted_printable_encode($o));
 
 echo "Done\n";
-?>

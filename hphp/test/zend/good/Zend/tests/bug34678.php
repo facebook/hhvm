@@ -17,4 +17,3 @@ if (is_callable(array('B', 'foo'))) {
 if (is_callable(array('A', 'foo'))) {
 	call_user_func(array('A', 'foo'));
 }
-?>

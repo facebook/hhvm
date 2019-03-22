@@ -28,4 +28,3 @@ foreach($charlist as $char) {
 
 echo "Done\n"; 
 
-?>

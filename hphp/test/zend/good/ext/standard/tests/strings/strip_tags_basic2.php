@@ -32,4 +32,3 @@ foreach($allowed_tags_array as $tags)
 }
 
 echo "Done";
-?>

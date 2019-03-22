@@ -15,4 +15,3 @@ class foo {
 $X = (new foo)->setX(10)->getX();
 var_dump($X); // int(10)
 
-?>

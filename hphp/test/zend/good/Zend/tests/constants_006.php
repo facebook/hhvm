@@ -18,4 +18,3 @@ new foo;
 
 \var_dump(__namespace__);
 
-?>

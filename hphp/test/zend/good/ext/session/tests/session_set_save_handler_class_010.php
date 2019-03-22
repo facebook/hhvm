@@ -41,4 +41,3 @@ $_SESSION['foo'] = 'bar';
 
 echo "done\n";
 ob_end_flush();
-?>

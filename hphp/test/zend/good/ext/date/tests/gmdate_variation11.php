@@ -23,5 +23,4 @@ echo "\n-- Testing gmdate() function with seconds since Unix Epoch format --\n";
 var_dump( gmdate('U') );
 var_dump( gmdate('U', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

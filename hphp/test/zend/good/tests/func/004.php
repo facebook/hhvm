@@ -29,4 +29,3 @@ echo "Returned from function call...\n";
 
 some_other_function();
 
-?>

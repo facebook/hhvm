@@ -25,4 +25,3 @@ $values_array = array(3 => 'c', 4);
 var_dump( array_combine($keys_array, $values_array) );
 
 echo "Done";
-?>

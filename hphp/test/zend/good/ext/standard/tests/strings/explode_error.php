@@ -16,6 +16,4 @@ $string = "piece1 piece2 piece3 piece4 piece5 piece6";
 $limit = 5;
 $extra_arg = 10;
 try { var_dump( explode($delimiter, $string, $limit, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

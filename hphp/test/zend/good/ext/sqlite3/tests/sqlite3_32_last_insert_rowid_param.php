@@ -14,4 +14,3 @@ try { $db->lastInsertRowID(""); } catch (Exception $e) { echo "\n".'Warning: '.$
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done";
-?>

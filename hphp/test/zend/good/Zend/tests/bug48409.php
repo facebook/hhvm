@@ -59,4 +59,3 @@ catch(Exception $e) {
 	die('Exception thrown');
 }
 
-?>

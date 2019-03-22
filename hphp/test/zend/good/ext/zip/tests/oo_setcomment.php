@@ -46,4 +46,3 @@ var_dump($zip->getArchiveComment());
 $zip->close();
 @unlink($file);
 
-?>

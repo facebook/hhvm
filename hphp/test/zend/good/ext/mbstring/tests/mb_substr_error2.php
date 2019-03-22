@@ -18,4 +18,3 @@ $encoding = 'unknown-encoding';
 var_dump( mb_substr($str, $start, $length, $encoding));
 
 echo "Done";
-?>

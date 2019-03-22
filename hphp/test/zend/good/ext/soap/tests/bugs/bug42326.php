@@ -37,4 +37,3 @@ ob_start();
 $soap->handle($request);
 ob_end_clean();
 echo "ok\n";
-?>

@@ -10,4 +10,3 @@ $fixedArray[0] = 'the element';
 $generator = dumpElement();
 $generator->next();
 $generator->send($fixedArray);
-?>

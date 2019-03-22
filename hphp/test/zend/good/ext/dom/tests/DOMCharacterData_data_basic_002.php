@@ -11,4 +11,3 @@ print $document->saveXML()."\n";
 $cdata->data = 100;
 print $document->saveXML()."\n";
 
-?>

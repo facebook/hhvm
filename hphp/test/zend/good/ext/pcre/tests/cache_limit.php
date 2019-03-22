@@ -15,4 +15,3 @@ var_dump(preg_match('/./', $str));   // this one was already deleted from the ca
 var_dump(preg_match("/$re/", $str)); // but not this one
 
 echo "done\n";
-?>

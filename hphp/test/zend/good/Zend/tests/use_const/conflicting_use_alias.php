@@ -10,4 +10,3 @@ namespace x {
     \var_dump(bar);
 }
 
-?>

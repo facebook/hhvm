@@ -19,5 +19,4 @@ var_dump(next(&$array));
 
 echo key(&$array) . " => " . current(&$array) . "\n";
 var_dump(next(&$array));
-?>
-===DONE===
+echo "===DONE===\n";

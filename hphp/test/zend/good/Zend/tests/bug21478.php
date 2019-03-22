@@ -23,4 +23,3 @@ fclose($fp);
 // print "2\n";  
 readfile(dirname(__FILE__)."/test.txt");
 unlink(dirname(__FILE__)."/test.txt");
-?>

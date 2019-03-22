@@ -21,4 +21,3 @@ echo "\nDone";
 
 unlink($data_file);
 
-?>

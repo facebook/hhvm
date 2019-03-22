@@ -30,4 +30,3 @@ echo "\n-- Testing array_chunk() by supplying an array containing different sub 
 var_dump( array_chunk($input_array, $size, false) );
 
 echo "Done";
-?>

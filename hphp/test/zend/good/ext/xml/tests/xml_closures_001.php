@@ -26,4 +26,3 @@ while ($data = fread($fp, 4096)) {
 }
 xml_parser_free($xp);
 
-?>

@@ -12,6 +12,4 @@ var_dump(
 		$intlcal->getMinimum(IntlCalendar::FIELD_DAY_OF_MONTH),
 		intlcal_get_minimum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH)
 );
-
-?>
-==DONE==
+echo "==DONE==";

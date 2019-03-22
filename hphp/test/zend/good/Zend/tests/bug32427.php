@@ -11,4 +11,3 @@ class ExampleImpl implements Example {
 }
 
 ExampleImpl::sillyError();
-?>

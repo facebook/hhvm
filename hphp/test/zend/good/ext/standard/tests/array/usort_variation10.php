@@ -37,5 +37,4 @@ $array_arg = array(0 => "Banana", 1 => "Mango", "Orange", 2 => "Apple", "Pineapp
 echo "\n-- Array with default/assigned keys --\n";
 var_dump( usort(&$array_arg, 'cmp') );
 var_dump($array_arg);
-?>
-===DONE===
+echo "===DONE===\n";

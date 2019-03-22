@@ -70,5 +70,4 @@ foreach ($needles as $needle) {
   var_dump( strripos($haystack, $needle, -1) );
   $count++;
 }
-?>
-===DONE===
+echo "===DONE===\n";

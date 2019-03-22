@@ -7,4 +7,3 @@ var_dump(
 	json_encode("9.4324"),
 	json_encode(array("122321", "3232595.33423"))
 );
-?>

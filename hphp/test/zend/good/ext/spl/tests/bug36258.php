@@ -8,5 +8,4 @@ foreach ($diriter as $key => $file) {
 	break;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

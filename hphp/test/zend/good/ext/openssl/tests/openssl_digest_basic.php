@@ -5,4 +5,3 @@ $method2 = "sha1";
 
 var_dump(openssl_digest($data, $method));
 var_dump(openssl_digest($data, $method2));
-?>

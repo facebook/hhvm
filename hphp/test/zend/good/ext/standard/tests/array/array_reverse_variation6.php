@@ -39,4 +39,3 @@ var_dump( array_reverse($two_dimensional_array[1], true) );
 var_dump( array_reverse($two_dimensional_array[1], false) );
 
 echo "Done";
-?>

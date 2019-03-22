@@ -44,4 +44,3 @@ foreach($array_types as $arr) {
 };
 
 echo "Done";
-?>

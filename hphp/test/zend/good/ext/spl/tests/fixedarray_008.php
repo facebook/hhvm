@@ -19,4 +19,3 @@ foreach ($a as $x) {
 
 var_dump($a->getSize());
 
-?>

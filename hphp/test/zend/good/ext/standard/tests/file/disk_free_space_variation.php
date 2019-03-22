@@ -51,11 +51,6 @@ foreach($dirs_arr as $dir1) {
 }
 
 echo"\n--- Done ---";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/disk_free_space");
-?>
-

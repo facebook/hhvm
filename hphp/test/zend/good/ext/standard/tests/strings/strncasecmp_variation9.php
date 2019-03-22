@@ -69,4 +69,3 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
   var_dump( strncasecmp( $strings[$index1], $strings[$index2], strlen($strings[$index1]) ) );
 }
 echo "*** Done ***\n";
-?>

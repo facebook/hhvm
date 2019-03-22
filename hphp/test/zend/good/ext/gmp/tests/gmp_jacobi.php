@@ -24,4 +24,3 @@ try { var_dump(gmp_jacobi(array())); } catch (Exception $e) { echo "\n".'Warning
 try { var_dump(gmp_jacobi()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

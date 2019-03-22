@@ -15,4 +15,3 @@ var_dump(@$inexistent instanceof stdClass);
 
 var_dump("$a" instanceof stdClass);
 
-?>

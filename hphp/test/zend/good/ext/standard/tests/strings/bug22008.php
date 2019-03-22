@@ -13,4 +13,3 @@ $html = <<< HERE
 HERE;
 
 echo trim(strip_tags($html, '<b>'))."\n";
-?>

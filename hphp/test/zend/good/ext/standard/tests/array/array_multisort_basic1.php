@@ -24,5 +24,4 @@ var_dump( array_multisort(&$ar2) );
 var_dump($ar2);
 
 
-?>
-===DONE===
+echo "===DONE===\n";

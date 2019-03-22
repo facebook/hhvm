@@ -34,12 +34,8 @@ writeAndDump( $fp, "Testing %b %d %f %s %x %X", array( 9, 6, 2.5502, "foobar", 1
 // Close handle
 fclose( $fp );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = 'vfprintf_basic.phpt.txt';
 unlink( $file );
 
-?>

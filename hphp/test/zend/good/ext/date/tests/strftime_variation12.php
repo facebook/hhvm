@@ -17,5 +17,4 @@ $format = "%h";
 var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

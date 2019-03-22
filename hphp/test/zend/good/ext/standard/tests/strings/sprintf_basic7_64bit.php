@@ -29,4 +29,3 @@ var_dump( sprintf($format2, $arg1, $arg2) );
 var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
-?>

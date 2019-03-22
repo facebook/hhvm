@@ -56,5 +56,4 @@ echo "\n";
 echo bin2hex(strval($sf));
 echo "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

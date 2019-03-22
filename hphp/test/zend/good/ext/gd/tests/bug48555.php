@@ -16,4 +16,3 @@ if ($with_line_break==$without_line_break) {
   echo "with line break != without line break".PHP_EOL;	
 }
 
-?>

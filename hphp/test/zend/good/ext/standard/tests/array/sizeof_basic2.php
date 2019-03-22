@@ -63,4 +63,3 @@ echo "COUNT_RECURSIVE mode: ";
 var_dump( sizeof($mixed_array, COUNT_RECURSIVE) );
 
 echo "Done";
-?>

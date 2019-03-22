@@ -20,5 +20,4 @@ $variation = array(
 foreach ( $variation as $var ) {
   var_dump(readgzfile( $var ,  $use_include_path ) );
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -121,4 +121,3 @@ if (check_box(255,255,255, 10)) {
 
 @unlink($cwd . "/test_gif.gif");
 @unlink($cwd . "/test_gif_2.gif");
-?>

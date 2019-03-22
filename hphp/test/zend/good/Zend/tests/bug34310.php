@@ -21,4 +21,3 @@ foreach($arr as $c->d => $x)
 	echo "{$c->d} => {$x}\n";
 }
 
-?>

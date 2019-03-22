@@ -86,4 +86,3 @@ session_start();
 var_dump($baz); var_dump($arr); var_dump($c);
 
 session_destroy();
-?>

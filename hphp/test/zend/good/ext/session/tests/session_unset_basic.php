@@ -20,4 +20,3 @@ var_dump($_SESSION);
 
 echo "Done";
 ob_end_flush();
-?>

@@ -13,4 +13,3 @@ function f2($x = \ArrayObject::STD_PROP_LIST) {
 f1();
 f2();
 
-?>

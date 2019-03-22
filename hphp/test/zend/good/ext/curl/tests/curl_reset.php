@@ -28,6 +28,4 @@ echo file_get_contents($test_file);
 unlink($test_file);
 unlink($log_file);
 
-?>
-
-===DONE===
+echo "\n===DONE===\n";

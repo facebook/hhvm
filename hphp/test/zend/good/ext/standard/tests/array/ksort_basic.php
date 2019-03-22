@@ -69,4 +69,3 @@ var_dump( ksort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
-?>

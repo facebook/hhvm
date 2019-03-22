@@ -30,4 +30,3 @@ $closure = function() use ($asserter, $function) {
 $closure();
 
 var_dump($function);
-?>

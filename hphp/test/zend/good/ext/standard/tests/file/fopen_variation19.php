@@ -83,5 +83,4 @@ function writeFile($file) {
 }
 
 
-?>
-===DONE===
+echo "===DONE===\n";

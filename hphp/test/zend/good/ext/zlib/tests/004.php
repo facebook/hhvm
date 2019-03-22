@@ -8,4 +8,3 @@ var_dump(gzfile(dirname(__FILE__)."/004.txt.gz"));
 var_dump(gzfile(dirname(__FILE__)."/004.txt.gz", 1));
 
 echo "Done\n";
-?>

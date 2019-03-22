@@ -11,4 +11,3 @@
   echo serialize(str_replace("string", "strung", $arr)) . "\n";
   echo serialize(str_replace(" ", "", $arr)) . "\n";
   echo serialize(str_replace(" ", "", $arr)) . "\n";
-?>

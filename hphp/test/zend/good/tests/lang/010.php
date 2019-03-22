@@ -5,4 +5,3 @@ function test ($b) {
 }
 $a = test(1);
 echo $a;
-?>

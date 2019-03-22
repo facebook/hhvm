@@ -25,4 +25,3 @@ $pattern = b'string_val';
 try { var_dump( mb_ereg($pattern) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

@@ -48,5 +48,3 @@ var_dump(natcasesort(&$temp_array) );
 var_dump($temp_array);
 
 echo "Done";
-?>
-

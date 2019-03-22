@@ -16,4 +16,3 @@ $wrong[1] = $wrong[3] = $wrong[5] = '*';
 var_dump($correct);
 var_dump($wrong);
 
-?>

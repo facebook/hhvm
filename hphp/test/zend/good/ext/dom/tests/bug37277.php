@@ -12,4 +12,3 @@ $dom2->appendChild($dom2->importNode($node->cloneNode(true), TRUE));
 print $dom2->saveXML();
 
 
-?>

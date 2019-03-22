@@ -23,4 +23,3 @@ class C extends B {
 
 new C;
 
-?>

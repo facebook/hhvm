@@ -2,4 +2,3 @@
 
 throw new Exception();
 
-?>

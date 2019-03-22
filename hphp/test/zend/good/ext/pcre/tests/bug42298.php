@@ -7,4 +7,3 @@ $str = "A\xe2\x82\xac ";
 preg_match_all('/\W\W/u', $str, &$m);	var_dump($m);
 preg_match_all('/\W{2}/u', $str, &$m);	var_dump($m);
 
-?>

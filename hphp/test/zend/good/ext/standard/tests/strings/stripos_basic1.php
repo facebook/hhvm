@@ -28,4 +28,3 @@ var_dump( stripos($heredoc_str, $heredoc_str) );
 //non-existing needle in haystack
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
-?>

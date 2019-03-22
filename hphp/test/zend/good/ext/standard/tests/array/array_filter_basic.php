@@ -29,5 +29,4 @@ var_dump( array_filter($input,"even") );
 // with default arguments
 var_dump( array_filter($input) );
 
-echo "Done"
-?>
+echo "Done";

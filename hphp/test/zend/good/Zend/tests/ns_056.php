@@ -21,4 +21,3 @@ $foo = new Foo();
 $bar = new Bar();
 $bar->attach($foo);
 $foo->update($bar);
-?>

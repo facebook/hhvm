@@ -13,4 +13,3 @@ var_dump($match);
 
 var_dump(preg_match('/(?P<3>)/', ''));
 
-?>

@@ -6,5 +6,4 @@ try { $db->createAggregate (); } catch (Exception $e) { echo "\n".'Warning: '.$e
 
 $db->close();
 
-echo "Done"
-?>
+echo "Done";

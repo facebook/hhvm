@@ -16,5 +16,4 @@ try { var_dump( array_intersect_key($array1) ); } catch (Exception $e) { echo "\
 // Testing array_intersect_key with one less than the expected number of arguments
 echo "\n-- Testing array_intersect_key() function with no arguments --\n";
 try { var_dump( array_intersect_key() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

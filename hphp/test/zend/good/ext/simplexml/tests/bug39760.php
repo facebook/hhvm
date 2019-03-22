@@ -18,4 +18,3 @@ $test3 = clone $test->level1->level2a;
 var_dump($test3);
 
 echo "Done\n";
-?>

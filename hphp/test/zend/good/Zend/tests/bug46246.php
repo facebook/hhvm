@@ -27,4 +27,3 @@ $b = new B;
 
 $a->call('Test');
 $b->call('Test');
-?>

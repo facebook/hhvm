@@ -19,4 +19,3 @@ class foo extends bar {
 $a = new foo;
 $a->foo();
 
-?>

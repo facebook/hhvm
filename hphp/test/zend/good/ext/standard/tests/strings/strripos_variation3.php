@@ -32,5 +32,4 @@ var_dump( strripos($multi_line_str, "IPlE") );
 var_dump( strripos($multi_line_str, "") );
 var_dump( strripos($multi_line_str, " ") );
 
-?>
-===DONE===
+echo "===DONE===\n";

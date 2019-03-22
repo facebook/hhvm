@@ -18,4 +18,3 @@ try { var_dump( array_reverse($array, true, $extra_arg) ); } catch (Exception $e
 try { var_dump( array_reverse($array, false, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

@@ -10,4 +10,3 @@ var_dump(array_unshift(&$a, $a));
 var_dump($a);
 
 echo "Done\n";
-?>

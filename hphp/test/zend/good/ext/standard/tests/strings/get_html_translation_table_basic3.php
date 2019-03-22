@@ -29,4 +29,3 @@ asort( &$tt );
 var_dump( $tt );
 
 echo "Done\n";
-?>

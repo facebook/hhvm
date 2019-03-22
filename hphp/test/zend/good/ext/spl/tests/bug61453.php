@@ -10,5 +10,4 @@ for($i = 0; $i < $limit; $i++){
 
 	$objects[$object] = 1;
 }
-?>
-==DONE==
+echo "==DONE==";

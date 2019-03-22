@@ -33,4 +33,3 @@ $o2->b = 6;
 $o2->show();
 
 echo "Done\n";
-?>

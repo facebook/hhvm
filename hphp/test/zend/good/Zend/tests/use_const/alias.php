@@ -16,4 +16,3 @@ namespace {
     echo "Done\n";
 }
 
-?>

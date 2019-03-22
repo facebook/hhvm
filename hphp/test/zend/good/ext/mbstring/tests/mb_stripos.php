@@ -105,7 +105,3 @@ try { $r = mb_stripos($euc_jp, $t_obj, 'EUC-JP'); } catch (Exception $e) { echo 
 ($r === FALSE) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
 try { $r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 ($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
-
-
-?>
-

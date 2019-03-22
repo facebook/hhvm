@@ -7,4 +7,3 @@ $dom->appendChild($comment);
 $dom->saveXML();
 echo $dom->saveXML();
 
-?>

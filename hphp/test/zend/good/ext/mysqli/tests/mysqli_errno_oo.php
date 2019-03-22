@@ -27,4 +27,3 @@
 	var_dump($mysqli->errno);
 
 	print "done!";
-?>

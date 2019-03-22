@@ -19,4 +19,3 @@ final class myEnum extends enum {
 $x = new myEnum();
 
 echo "Done\n";
-?>

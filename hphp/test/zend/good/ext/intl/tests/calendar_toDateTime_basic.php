@@ -8,5 +8,4 @@ $cal = new IntlGregorianCalendar(2012,04,17,17,35,36);
 $dt = $cal->toDateTime();
 
 var_dump($dt->format("c"), $dt->getTimeZone()->getName());
-?>
-==DONE==
+echo "==DONE==";

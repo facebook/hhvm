@@ -7,5 +7,4 @@ Description: Returns the type of the file. Possible values are fifo, char,
 
 echo "-- Checking for char --\n";
 print( filetype("/dev/console") )."\n";
-?>
-===DONE===
+echo "===DONE===\n";

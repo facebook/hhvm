@@ -13,4 +13,3 @@ if (!$res) {
 	var_dump($ts2);
 }
 
-?>

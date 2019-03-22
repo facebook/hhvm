@@ -23,4 +23,3 @@ echo $dom->firstChild->getAttribute('type')."\n";
 echo $dom->firstChild->getAttribute('pre:type')."\n";
 echo $dom->firstChild->getAttribute('post:type')."\n";
 echo $dom->firstChild->getAttribute('new:type');
-?>

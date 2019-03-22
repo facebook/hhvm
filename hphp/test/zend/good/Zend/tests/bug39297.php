@@ -35,4 +35,3 @@ $child = new MyTree();
 $root[$id] = $child;
 
 var_dump(compareByRef(&$root[$id], &$child));
-?>

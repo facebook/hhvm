@@ -7,4 +7,3 @@ $pass = "r23498rui324hjbnkj";
 
 openssl_encrypt($data, 'des3', $pass, 0, '1qazxsw2');
 echo "Done";
-?>

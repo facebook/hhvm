@@ -37,4 +37,3 @@ $r = $o->get_class_name_obj();
 var_dump($r);
 
 
-?>

@@ -23,8 +23,5 @@ fclose($handle); // causes glibc memory error
 
 curl_close($ch);
 echo "Closed correctly\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp');
-?>

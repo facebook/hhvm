@@ -21,5 +21,4 @@ $r = new ReflectionMethod('Foo','Test');
 
 $r->invoke($o);
 
-?>
-===DONE===
+echo "===DONE===\n";

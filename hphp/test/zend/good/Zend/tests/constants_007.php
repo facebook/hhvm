@@ -11,4 +11,3 @@ class a {
 
 var_dump(a, A, a::a, a::A);
 
-?>

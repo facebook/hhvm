@@ -18,5 +18,4 @@ var_dump( strftime($format, $timestamp) );
 // Calling strftime() with mandatory arguments
 var_dump( strftime($format) );
 
-?>
-===DONE===
+echo "===DONE===\n";

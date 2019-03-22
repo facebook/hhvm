@@ -36,4 +36,3 @@ foreach ($nonEnglish as $lang => $input) {
 }
 
 echo "Done";
-?>

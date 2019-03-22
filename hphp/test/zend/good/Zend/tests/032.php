@@ -5,4 +5,3 @@ test(&$arr[]);
 
 print "ok!\n";
 
-?>

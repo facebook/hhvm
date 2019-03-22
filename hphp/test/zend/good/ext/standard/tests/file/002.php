@@ -29,4 +29,3 @@ echo file_get_contents($name);
 
 unlink($name);
 
-?>

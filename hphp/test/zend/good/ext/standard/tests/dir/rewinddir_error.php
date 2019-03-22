@@ -22,10 +22,7 @@ $extra_arg = 10;
 
 try { var_dump( rewinddir($dir_handle, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 closedir($dir_handle);
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $dir_path = dirname(__FILE__) . "/rewinddir_error";
 rmdir($dir_path);
-?>

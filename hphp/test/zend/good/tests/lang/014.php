@@ -5,4 +5,3 @@ function F ($a) {
 
 error_reporting(0);
 F("echo \"Hello\";");
-?>

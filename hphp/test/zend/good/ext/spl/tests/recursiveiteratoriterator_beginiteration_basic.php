@@ -17,4 +17,3 @@ $iterator = new SkipsFirstElementRecursiveIteratorIterator($sub_iterator);
 foreach ($iterator as $element) {
   var_dump($element);
 }
-?>

@@ -8,6 +8,4 @@ $a->rewind();
 while ($a->valid()) {
     var_dump($a->current(), $a->next());
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

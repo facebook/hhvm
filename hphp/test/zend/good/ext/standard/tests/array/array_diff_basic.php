@@ -48,4 +48,3 @@ echo "-- Test array_diff with more than 2 arguments --\n";
 var_dump(array_diff($array_int1, $array_int2, $array_string1, $array_string2));
 
 echo "Done";
-?>

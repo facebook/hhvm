@@ -38,5 +38,4 @@ var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_lower, true)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, false)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, true)));
 
-?>
-===DONE===
+echo "===DONE===\n";

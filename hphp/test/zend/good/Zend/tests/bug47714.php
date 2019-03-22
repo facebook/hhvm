@@ -19,4 +19,3 @@ set_exception_handler(function($exception) {
 });
 
 throw new Exception('exception');
-?>

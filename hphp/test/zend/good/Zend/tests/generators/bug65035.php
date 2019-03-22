@@ -13,4 +13,3 @@ $gen = gen();
 $gen->next();
 $gen->current();
 
-?>

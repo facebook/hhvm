@@ -16,4 +16,3 @@ var_dump(interface_exists("AutoInterface"));
 
 echo "\nDONE\n";
 
-?>

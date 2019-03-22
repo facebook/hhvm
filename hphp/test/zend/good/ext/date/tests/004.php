@@ -21,4 +21,3 @@ foreach ($tz as $zone) {
 }
 
 echo "Done\n";
-?>

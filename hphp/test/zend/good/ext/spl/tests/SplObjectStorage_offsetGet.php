@@ -6,4 +6,3 @@ $s[$o1] = 'some_value';
 
 echo $s->offsetGet($o1);
 
-?>

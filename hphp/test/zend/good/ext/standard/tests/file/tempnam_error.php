@@ -18,4 +18,3 @@ try { var_dump( tempnam(NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.
 try { var_dump( tempnam() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //Zero args
 
 echo "*** Done ***\n";
-?>

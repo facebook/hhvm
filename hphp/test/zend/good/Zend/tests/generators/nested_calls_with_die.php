@@ -22,4 +22,3 @@ function outerGen() {
 $outerGen = outerGen();
 $outerGen->rewind();
 
-?>

@@ -12,4 +12,3 @@ foreach ($timezones as $zone) {
     }
 }
 print "[strtotime(timezone) == false - End List]\n";
-?>

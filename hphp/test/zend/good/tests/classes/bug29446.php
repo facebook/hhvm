@@ -11,4 +11,3 @@ class testClass {
 
 $test = new testClass;
 
-?>

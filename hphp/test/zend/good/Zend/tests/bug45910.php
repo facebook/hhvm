@@ -20,4 +20,3 @@ class foo {
 foo::test();
 
 print 1;
-?>

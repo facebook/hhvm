@@ -27,4 +27,3 @@ foreach ($i as $name=>$value) {
 	echo $name . '=>' . $value . "\n";
 }
 
-?>

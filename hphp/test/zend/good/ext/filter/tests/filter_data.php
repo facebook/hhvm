@@ -39,4 +39,3 @@ $data = true;     var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 $data = false;    var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 $data = "";       var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 
-?>

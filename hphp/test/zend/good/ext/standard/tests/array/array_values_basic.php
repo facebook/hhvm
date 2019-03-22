@@ -18,5 +18,3 @@ $input = array('zero', 'one', 'two', 'three' => 3, 10 => 'ten');
 var_dump( array_values($input) );
 
 echo "Done";
-?>
-

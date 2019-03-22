@@ -14,4 +14,3 @@ pass::do_show();
 pass::show();
 
 echo "Done\n"; // shouldn't be displayed
-?>

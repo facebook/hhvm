@@ -47,11 +47,8 @@ FILE;
 file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
-?>
-===Done===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===Done===\n";
+error_reporting(0);
 $pwd = getcwd();
 $f = "parse_ini_file_variation3";
 $iniFile = "php.ini";
@@ -68,4 +65,3 @@ foreach($newdirs as $newdir) {
    rmdir($newdir);
 }
 
-?>

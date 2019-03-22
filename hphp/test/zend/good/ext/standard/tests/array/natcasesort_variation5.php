@@ -15,4 +15,3 @@ var_dump( natcasesort(&$unsorted_hex_array) );
 var_dump($unsorted_hex_array);
 
 echo "Done";
-?>

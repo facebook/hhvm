@@ -35,4 +35,3 @@ A::staticTest();
 $a = new a;
 $a->nonstaticTest();
 
-?>

@@ -8,5 +8,4 @@ if ($doc->name["attr"] == "foo") {
 } else {
          print "Error\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

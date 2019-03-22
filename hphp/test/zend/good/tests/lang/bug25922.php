@@ -12,4 +12,3 @@ function test()
 	echo "Undefined index here: '{$data['HTTP_HEADER']}'\n";
 }
 test();
-?>

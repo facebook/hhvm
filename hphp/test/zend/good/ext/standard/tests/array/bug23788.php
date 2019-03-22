@@ -5,4 +5,3 @@ $foo = array(&$numeric, &$bool);
 var_dump($foo);
 str_replace("abc", "def", $foo);
 var_dump($foo);
-?>

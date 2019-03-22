@@ -27,4 +27,3 @@ var_dump( array_intersect_assoc($arr_normal, $arr_binary) );
 var_dump( array_intersect_assoc($arr_binary, $arr_binary) );
 
 echo "Done";
-?>

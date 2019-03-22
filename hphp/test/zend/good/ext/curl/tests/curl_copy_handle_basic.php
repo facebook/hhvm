@@ -12,5 +12,4 @@ curl_setopt($ch, CURLOPT_HEADER, 0);
 $ch2 = curl_copy_handle($ch);
 
 var_dump(curl_getinfo($ch) === curl_getinfo($ch2));
-?>
-===DONE===
+echo "===DONE===\n";

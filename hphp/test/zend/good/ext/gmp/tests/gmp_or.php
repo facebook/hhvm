@@ -19,4 +19,3 @@ var_dump(gmp_or(1, array()));
 var_dump(gmp_or(array(), array()));
 
 echo "Done\n";
-?>

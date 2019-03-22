@@ -2,4 +2,3 @@
 
 Interface AutoInterface {}
 
-?>

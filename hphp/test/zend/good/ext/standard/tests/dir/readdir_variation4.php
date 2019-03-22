@@ -71,10 +71,7 @@ sort(&$contents);
 var_dump($contents);
 
 closedir($dir_handle);
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $dir_path = dirname(__FILE__) . "/readdir_variation4/";
 rmdir($dir_path);
-?>

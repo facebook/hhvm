@@ -5,4 +5,3 @@ while($a=fgetcsv($fp,100,"\t")) {
 	echo join(",",$a)."\n";
 }
 fclose($fp);
-?>

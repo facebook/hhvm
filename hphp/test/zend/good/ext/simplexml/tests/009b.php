@@ -12,6 +12,4 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 var_dump($sxe->children());
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

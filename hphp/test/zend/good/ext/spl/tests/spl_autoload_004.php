@@ -20,6 +20,4 @@ var_dump(spl_autoload_functions());
 // check
 var_dump(class_exists("TestClass", true));
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

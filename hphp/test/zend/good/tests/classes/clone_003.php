@@ -28,4 +28,3 @@ print_r($obj);
 echo "Clown\n";
 print_r($copy);
 echo "Done\n";
-?>

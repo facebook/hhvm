@@ -30,4 +30,3 @@ foreach($generator() as $something) {
 $generator = test2(array( 1, 2, 3 ) );
 
 echo "okey\n";
-?>

@@ -11,4 +11,3 @@ echo $s->current();
 $s->next();
 echo $s->current();
 var_dump($s->valid());
-?>

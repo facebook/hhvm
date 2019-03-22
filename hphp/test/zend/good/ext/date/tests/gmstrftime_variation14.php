@@ -28,5 +28,4 @@ foreach($inputs as $key =>$value) {
       var_dump( gmstrftime($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

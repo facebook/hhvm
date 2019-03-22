@@ -68,4 +68,3 @@ foreach($arrays as $array) {
 }
 
 echo "Done";
-?>

@@ -111,5 +111,4 @@ foreach($inputs as $valueType =>$value) {
 
 fclose($fp);
 
-?>
-===DONE===
+echo "===DONE===\n";

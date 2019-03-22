@@ -23,4 +23,3 @@ $gid = -999;
 var_dump( posix_getgrgid($gid));
 
 echo "Done";
-?>

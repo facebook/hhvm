@@ -19,4 +19,3 @@ echo "Comment Content: " . $commentnode->data . "\n";
 
 echo "\n" . $document->saveXML();
 
-?>

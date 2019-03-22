@@ -5,4 +5,3 @@
   class B extends A {
       function A() { }
   }
-?>

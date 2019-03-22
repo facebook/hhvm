@@ -52,5 +52,5 @@ foreach ($colors as $color) {
 }
 dump($pixel->getHSL());
 dump($pixel->getColor());
-?>
-==DONE==
+
+echo "==DONE==\n";

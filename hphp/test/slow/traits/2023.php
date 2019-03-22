@@ -17,4 +17,3 @@ class MyClass {
 	var_dump($t);
 	$t = someFun();
 	var_dump($t);
-?>

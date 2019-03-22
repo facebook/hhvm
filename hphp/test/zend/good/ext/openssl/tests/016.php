@@ -17,4 +17,3 @@ var_dump(openssl_public_decrypt($encrypted, &$output5, array($pubkey)));
 var_dump($output5);
 var_dump(openssl_public_decrypt($encrypted, &$output6, array($pubkey, "")));
 var_dump($output6);
-?>

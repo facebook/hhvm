@@ -20,4 +20,3 @@ class bar {
 $o = new bar;
 var_dump(clone $o);
 
-?>

@@ -24,4 +24,3 @@ dump($dom->getElementsByTagName('bar'));
 dump($doc->getElementsByTagName('bar'));
 dump($dom->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
 dump($doc->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
-?>

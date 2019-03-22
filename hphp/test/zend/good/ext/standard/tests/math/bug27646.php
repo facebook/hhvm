@@ -26,4 +26,3 @@ var_dump($f);
 var_dump(serialize($f));
 var_dump(unserialize(serialize($f)));
 
-?>

@@ -5,4 +5,3 @@ namespace {
     use function foo\BAR;
 }
 
-?>

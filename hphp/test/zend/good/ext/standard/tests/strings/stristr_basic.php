@@ -16,5 +16,4 @@ var_dump( stristr("teSt", "test") );
 
 var_dump( stristr("Test String", "String", false) );
 var_dump( stristr("Test String", "String", true) );
-?>
-===DONE===
+echo "===DONE===\n";

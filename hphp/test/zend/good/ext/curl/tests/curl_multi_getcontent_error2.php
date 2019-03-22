@@ -36,4 +36,3 @@
 	echo $results1;
 	echo $results2;
 
-?>

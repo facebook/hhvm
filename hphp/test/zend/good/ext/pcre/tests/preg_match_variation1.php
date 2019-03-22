@@ -9,5 +9,4 @@
 $string = "-1";
 preg_match('/[\-\+]?[0-9\.]*/', $string, &$string);
 var_dump($string);
-?>
-===Done===
+echo "===Done===";

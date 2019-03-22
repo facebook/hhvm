@@ -23,4 +23,3 @@ $data = 'string_val';
 try { var_dump( xml_parse_into_struct(null, $data) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

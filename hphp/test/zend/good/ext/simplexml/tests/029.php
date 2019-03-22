@@ -20,5 +20,4 @@ foreach($people as $person)
 	var_dump(count($person));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

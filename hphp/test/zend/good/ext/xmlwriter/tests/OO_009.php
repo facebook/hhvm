@@ -26,4 +26,3 @@ $xw->endDocument();
 // Force to write and empty the buffer
 $output = $xw->flush(true);
 print $output;
-?>

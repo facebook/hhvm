@@ -56,4 +56,3 @@ foreach($heredoc_strings as $string)  {
 }
 
 echo "Done\n";
-?>

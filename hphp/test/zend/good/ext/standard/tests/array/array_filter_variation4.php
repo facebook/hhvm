@@ -53,5 +53,4 @@ function callback4($input)
 echo "-- Callback function with parameter and return --\n";
 var_dump( array_filter($input, "callback4") );
 
-echo "Done"
-?>
+echo "Done";

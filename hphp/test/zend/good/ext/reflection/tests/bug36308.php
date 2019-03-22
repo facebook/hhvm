@@ -12,4 +12,3 @@ class Extended extends Base {
 $reflect = new ReflectionClass('Extended');
 $props = $reflect->getProperties();
 echo $props[0]->getDocComment();
-?>

@@ -63,5 +63,4 @@ echo "via A:\n";
 A::myCatch();
 echo "via B:\n";
 B::myCatch();
-?>
-==DONE==
+echo "==DONE==";

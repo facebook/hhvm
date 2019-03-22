@@ -12,4 +12,3 @@ $doc->preserveWhiteSpace = false;
 $doc->load(dirname(__FILE__)."/book.xml");
 echo $doc->saveXML();
 
-?>

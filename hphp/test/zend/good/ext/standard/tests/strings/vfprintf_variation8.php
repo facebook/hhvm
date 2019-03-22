@@ -76,5 +76,4 @@ echo "\n";
 
 unlink($data_file);
  
-?>
-===DONE===
+echo "===DONE===\n";

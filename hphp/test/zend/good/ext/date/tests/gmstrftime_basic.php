@@ -17,5 +17,4 @@ var_dump( gmstrftime($format, $timestamp) );
 // Calling gmstrftime() with mandatory arguments
 var_dump( gmstrftime($format) );
 
-?>
-===DONE===
+echo "===DONE===\n";

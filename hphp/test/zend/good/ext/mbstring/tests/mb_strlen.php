@@ -63,9 +63,3 @@ echo $r."\n";
 mb_internal_encoding('EUC-JP');
 $r = mb_strlen($euc_jp, 'BAD_NAME');
 echo $r."\n";
-
-
-
-
-?>
-

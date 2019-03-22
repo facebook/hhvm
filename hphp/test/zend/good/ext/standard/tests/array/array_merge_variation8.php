@@ -21,5 +21,3 @@ var_dump(array_merge($arr1[3], $arr2));
 var_dump(array_merge($arr2, $arr1[3]));
 
 echo "Done";
-?>
-

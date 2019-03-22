@@ -11,4 +11,3 @@ $aDOM->documentElement->appendChild($aDOM->importNode($data));
 
 echo $aDOM->saveXML();
 
-?>

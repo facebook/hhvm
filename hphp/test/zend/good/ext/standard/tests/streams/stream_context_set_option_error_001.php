@@ -6,4 +6,3 @@ var_dump(stream_context_set_option($context, 'http'));
 
 // Array of options
 var_dump(stream_context_set_option($context, array(), 'foo', 'bar'));
-?>

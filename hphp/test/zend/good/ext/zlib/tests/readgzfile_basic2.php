@@ -17,5 +17,4 @@ var_dump(readgzfile( $filename ) );
 
 unlink($filename);
 rmdir($dirname);
-?>
-===DONE===
+echo "===DONE===\n";

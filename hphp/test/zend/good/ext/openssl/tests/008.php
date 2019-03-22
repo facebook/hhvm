@@ -38,4 +38,3 @@ var_dump(strcmp($output, $output2));
 var_dump(strcmp($output, $output3));
 var_dump(strcmp($output, $output4));	// different
 var_dump(strcmp($output, $output5));	// different
-?>

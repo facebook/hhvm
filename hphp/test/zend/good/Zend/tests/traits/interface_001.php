@@ -17,4 +17,3 @@ class bar implements baz {
 new bar;
 print "OK\n";
 
-?>

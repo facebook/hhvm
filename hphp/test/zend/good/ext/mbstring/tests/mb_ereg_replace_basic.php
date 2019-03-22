@@ -36,4 +36,3 @@ $result_4 = mb_ereg_replace($regex2, b'_____', $string_mb);
 var_dump(bin2hex($result_4));
 
 echo "Done";
-?>

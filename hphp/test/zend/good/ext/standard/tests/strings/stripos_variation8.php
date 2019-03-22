@@ -31,4 +31,3 @@ for($index = 0; $index < count($needles); $index++) {
   $count++;
 }
 echo "*** Done ***";
-?>

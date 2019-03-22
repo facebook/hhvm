@@ -4,7 +4,5 @@
   $pid = posix_getpid();	
   $pgid = posix_getpgid($pid);
   
-  var_dump($pgid); 
-  
-?>
-===DONE====
+  var_dump($pgid);
+echo "===DONE====";

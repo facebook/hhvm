@@ -11,4 +11,3 @@ class myZip extends ZipArchive {
 }
 
 $z = new myZip;
-?>

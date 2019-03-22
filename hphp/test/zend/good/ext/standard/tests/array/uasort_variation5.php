@@ -74,5 +74,4 @@ echo "-- Sorting Heredoc String values --\n";
 var_dump( uasort(&$heredoc_values, 'cmp_function') );  // expecting: bool(true)
 var_dump($heredoc_values);
 
-echo "Done"
-?>
+echo "Done";

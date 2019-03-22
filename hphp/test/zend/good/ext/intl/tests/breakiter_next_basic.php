@@ -11,5 +11,4 @@ var_dump($bi->next(2));
 var_dump($bi->next(-1));
 var_dump($bi->next(0));
 var_dump($bi->next(NULL));
-?>
-==DONE==
+echo "==DONE==";

@@ -6,4 +6,3 @@ if ($test === false) {
 	die("skip UTF-8 is not supported?");
 }
 
-?>

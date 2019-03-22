@@ -14,4 +14,3 @@ $t = new _t("Asia/Tokyo");
 var_dump($t->getName());
 $c = clone $t;
 var_dump($c->getName());
-?>

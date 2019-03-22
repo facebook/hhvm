@@ -25,5 +25,4 @@ echo "\$array1: ";
 var_dump(current(&$array1));
 echo "\$array2: ";
 var_dump(current(&$array2));
-?>
-===DONE===
+echo "===DONE===\n";

@@ -10,5 +10,4 @@ class c extends b {
 	}
 }
 $c = new c();
-?>
-===DONE===
+echo "===DONE===\n";

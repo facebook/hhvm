@@ -11,4 +11,3 @@ test::$ar[] = 1;
 var_dump(test::$ar);
 
 echo "Done\n";
-?>

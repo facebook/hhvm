@@ -55,5 +55,4 @@ class DerivedPriv extends TestPriv
 
 DerivedPriv::f();
 
-?>
-===DONE===
+echo "===DONE===\n";

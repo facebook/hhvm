@@ -28,5 +28,4 @@ foreach($file_types_array as $key => $filename) {
       var_dump( getimagesize(dirname(__FILE__)."/$filename", &$info) );
       var_dump( $info );
 };
-?>
-===DONE===
+echo "===DONE===\n";

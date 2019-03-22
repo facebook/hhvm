@@ -9,4 +9,3 @@ $cloned->setImageFormat ('png');
 
 var_dump ($cloned->getImageLength ());
 
-?>

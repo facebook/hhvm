@@ -14,5 +14,4 @@ echo "\n-- Testing ord() function with more than expected no. of arguments --\n"
 $extra_arg = 10;
 try { var_dump( ord(72, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

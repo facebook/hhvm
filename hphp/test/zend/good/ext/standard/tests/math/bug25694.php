@@ -11,4 +11,3 @@ echo "round 3.025 = " . round(3.025, 2) . "\n";
 echo "number format 3.025 = " . number_format(3.025, 2) . "\n\n";
 echo "round 4.025 = " . round(4.025, 2) . "\n";
 echo "number format 4.025 = " . number_format(4.025, 2) . "\n\n";
-?>

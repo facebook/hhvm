@@ -9,4 +9,3 @@
 $string = 'This is a string. It contains numbers (0-9) as well as parentheses and some other things!';
 $new_string = preg_replace(array('/\b\w{1}s/', '/(\d{1})-(\d{1})/', '/[\(!\)]/'), array('test', '$1 to $2', '*'), $string);
 print $new_string;
-?>

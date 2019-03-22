@@ -16,4 +16,3 @@ var_dump(readlink($tmp_link2));
 @unlink($tmp_link2);
 
 echo "Done\n";
-?>

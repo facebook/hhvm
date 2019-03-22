@@ -21,5 +21,4 @@ foreach ($modes as $mode) {
     }
     echo "\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -46,5 +46,4 @@ foreach($formats as $format) {
   $counter++;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

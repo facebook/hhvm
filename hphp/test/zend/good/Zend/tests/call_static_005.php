@@ -9,4 +9,3 @@ class foo {
 $a = 'foo::';
 $a();
 
-?>

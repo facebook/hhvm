@@ -34,4 +34,3 @@ foreach($strings_with_nulls as $string)  {
 }
 
 echo "Done\n";
-?>

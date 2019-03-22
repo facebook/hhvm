@@ -57,4 +57,3 @@ $stream = null;
 try { $stream = $db->openBlob(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump($stream);
 echo "Done\n";
-?>

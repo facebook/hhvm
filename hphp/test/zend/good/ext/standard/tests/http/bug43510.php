@@ -17,4 +17,3 @@ foreach(array('r', 'rb') as $mode) {
 
 http_server_kill($pid);
 
-?>

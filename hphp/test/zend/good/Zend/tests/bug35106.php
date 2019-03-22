@@ -6,4 +6,3 @@ foreach($a as $i){
     foreach($a as $p);
 }
 echo "\n";
-?>

@@ -18,5 +18,4 @@ end(&$array);
 var_dump(current(&$array));
 next(&$array);
 var_dump(current(&$array));
-?>
-===DONE===
+echo "===DONE===\n";

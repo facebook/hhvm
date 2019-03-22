@@ -87,7 +87,4 @@ foreach($values as $index) {
 fclose($file_handle);
 
 echo "Done\n";
-?>
-
-?>
-===Done===
+echo "===Done===";

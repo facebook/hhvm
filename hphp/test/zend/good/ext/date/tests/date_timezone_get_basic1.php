@@ -22,5 +22,4 @@ date_timezone_set($object, $la_time);
 $tz = date_timezone_get($object); 
 var_dump( timezone_name_get($tz) );
 
-?>
-===DONE===
+echo "===DONE===\n";

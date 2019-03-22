@@ -13,4 +13,3 @@ var_dump(password_hash("foo", PASSWORD_BCRYPT, array("salt" => 123)));
 
 var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => "foo")));
 
-?>

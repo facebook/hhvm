@@ -20,5 +20,4 @@ $arr4 = array("four", "0.5" => "five", 6 => 6, "seven" => 7);
 var_dump( array_udiff_assoc($arr1, $arr2, $arr3, $arr4, $key_compare_function) );
 
 
-?>
-===DONE===
+echo "===DONE===\n";

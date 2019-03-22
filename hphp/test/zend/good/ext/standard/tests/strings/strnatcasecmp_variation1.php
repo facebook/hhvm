@@ -38,5 +38,4 @@ str_dump("Hello\0world", "Helloworld");
 str_dump("\x0", "\0");
 str_dump($a, $b);
 
-?>
-===DONE===
+echo "===DONE===\n";

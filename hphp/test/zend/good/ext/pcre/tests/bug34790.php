@@ -6,4 +6,3 @@ function func1(){
 }
 $words = func1();
 var_dump($words);
-?>

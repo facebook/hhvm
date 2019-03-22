@@ -36,5 +36,4 @@ echo "Boolean test: " . (isset($b) ? "YES": "NO") . "\n";
 echo "Null test: " . (isset($n) ? "YES": "NO") . "\n";
 echo "Object test: " . (isset($obj) ? "YES": "NO") . "\n";
 echo "Resource test: " . (isset($res) ? "YES": "NO") . "\n";
-?>
-===DONE===
+echo "===DONE===\n";

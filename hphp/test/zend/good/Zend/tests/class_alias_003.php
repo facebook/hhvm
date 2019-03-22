@@ -13,4 +13,3 @@ class foo {
 $a = new foo;
 var_dump($a->test());
 
-?>

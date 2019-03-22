@@ -78,4 +78,3 @@ foreach($values as $value) {
 
 xml_parser_free($parser);
 echo "Done";
-?>

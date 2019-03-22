@@ -32,4 +32,3 @@ gc_collect_cycles();
 
 print_r(exif_read_data(__DIR__.'/bug68799.jpg'));
 
-?>

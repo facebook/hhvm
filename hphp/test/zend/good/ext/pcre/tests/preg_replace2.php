@@ -11,4 +11,3 @@ var_dump(preg_replace(array('/\s+/', '~[b-d]~'), array('$'), array('x y', 'bd bc
 
 echo "==done==\n";
 
-?>

@@ -10,4 +10,3 @@ try { iterator_to_array($iterator,'test','test'); } catch (Exception $e) { echo 
 
 iterator_to_array('test','test');
 
-?>

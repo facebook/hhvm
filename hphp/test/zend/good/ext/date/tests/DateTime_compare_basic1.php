@@ -45,5 +45,4 @@ date_modify($obj4, "+1 day");
 var_dump($obj1 == $obj2);
 var_dump($obj1 == $obj3);
 var_dump($obj1 == $obj4);
-?>
-===DONE===
+echo "===DONE===\n";

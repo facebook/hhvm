@@ -26,5 +26,4 @@ function f_exists($file) {
       echo "$file doesn't exist\n";
    }
 } 
-?>
-===DONE===
+echo "===DONE===\n";

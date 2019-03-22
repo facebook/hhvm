@@ -9,5 +9,4 @@
   	echo "TEST PASSED\n";
   }		 
   
-?>
-===DONE===
+echo "===DONE===\n";

@@ -24,4 +24,3 @@ foreach ($funcs as $test) {
 	clearstatcache();
 }
 
-?>

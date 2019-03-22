@@ -12,4 +12,3 @@ print('Serialized array: '.$str."\n");
 $b      = unserialize($str);
 print('Unserialized array: ')   ;
 var_dump($b);
-?>

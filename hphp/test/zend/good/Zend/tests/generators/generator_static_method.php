@@ -17,4 +17,3 @@ foreach (ExtendedTest::gen() as $i) {
     var_dump($i);
 }
 
-?>

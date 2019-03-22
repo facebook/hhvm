@@ -27,5 +27,4 @@ var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, &$fp_copy) );
 var_dump( $fp_copy );
 fclose($fp);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -9,4 +9,3 @@ class C {
   use T;
 }
 C::F();
-?>

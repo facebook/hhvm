@@ -26,4 +26,3 @@ class TestChildClass extends TestParentClass
         TestParentClass::method insteadof TestTrait;
     }
 }
-?>

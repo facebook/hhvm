@@ -31,4 +31,3 @@ echo iA2::cA;
 echo A2::cA;
 echo iB2::cA;
 echo B2::cA;
-?>

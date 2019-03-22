@@ -32,4 +32,3 @@ chdir($script_directory);
 rmdir($test_dirname);
 unlink($filepath);
 
-?>

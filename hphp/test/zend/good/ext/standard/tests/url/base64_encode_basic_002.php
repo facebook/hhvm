@@ -36,6 +36,4 @@ foreach($values as $str) {
 
   	$counter ++;
 }
-
-?>
-===Done===
+echo "===Done===";

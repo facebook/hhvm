@@ -9,4 +9,3 @@ $name = "prop";
 $t->$name = 1;
 
 echo "Done\n";
-?>

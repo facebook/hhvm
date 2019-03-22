@@ -21,4 +21,3 @@ $o->callPrivateAlias();
 $o->sayHelloWorld();
 
 
-?>

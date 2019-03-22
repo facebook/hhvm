@@ -38,4 +38,3 @@ var_dump($inf==='500');
 var_dump($inf==='abc');
 var_dump($inf===$inf);
 
-?>

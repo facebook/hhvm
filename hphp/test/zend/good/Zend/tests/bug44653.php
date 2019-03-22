@@ -17,4 +17,3 @@ A::fooBar();
 B::fooBar();
 fooBar();
 \B\fooBar();
-?>

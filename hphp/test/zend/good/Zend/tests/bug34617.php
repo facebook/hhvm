@@ -8,4 +8,3 @@ function boom()
     xml_parser_free($reader);
 }
 boom();
-?>

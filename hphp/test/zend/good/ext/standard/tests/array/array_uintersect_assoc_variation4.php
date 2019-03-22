@@ -93,5 +93,4 @@ foreach($inputs as $key =>$value) {
       var_dump( array_uintersect_assoc($arr1, $arr2, $value, $data_compare_function ) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

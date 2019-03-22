@@ -14,5 +14,3 @@ function printShiftRange($v, $start, $end)
                $v, $v, $i, $v >> $i, $i, $v << $i);
     }
 }
-
-?>

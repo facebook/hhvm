@@ -24,5 +24,4 @@ echo "===CHILD===\n";
 $obj = new ChildClass;
 $obj->printVars();
 
-?>
-===DONE===
+echo "===DONE===\n";

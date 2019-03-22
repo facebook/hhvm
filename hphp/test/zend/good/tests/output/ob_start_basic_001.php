@@ -6,4 +6,3 @@
 
 var_dump(ob_start());
 
-?>

@@ -54,4 +54,3 @@ unset($printer);
 $error();
 
 echo "Done\n";
-?>

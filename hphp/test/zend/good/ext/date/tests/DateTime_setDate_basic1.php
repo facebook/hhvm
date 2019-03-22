@@ -18,5 +18,4 @@ $datetime->setDate(2008, 02, 01);
 
 echo $datetime->format(DATE_RFC2822) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

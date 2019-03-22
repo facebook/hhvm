@@ -97,4 +97,3 @@ fclose($fp);
 var_dump($myvar);
 
 echo "Done\n";
-?>

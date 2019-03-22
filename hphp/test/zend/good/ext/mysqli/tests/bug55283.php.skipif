@@ -30,4 +30,3 @@ if (($row[1] == 'NO') || ($row[1] == 'DISABLED'))
 	die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
 
 $link->close();
-?>

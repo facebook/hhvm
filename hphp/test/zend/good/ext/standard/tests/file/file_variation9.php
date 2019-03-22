@@ -26,4 +26,3 @@ foreach ($contents as $content) {
 }
 
 echo "\n*** Done ***\n";
-?>

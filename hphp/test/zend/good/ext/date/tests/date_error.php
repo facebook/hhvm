@@ -18,6 +18,4 @@ try { var_dump (date()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getM
 echo "\n-- Testing date function with more than expected no. of arguments --\n";
 $extra_arg = true;
 try { var_dump (checkdate($format, $timestamp, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===DONE=== 
+echo "===DONE=== ";

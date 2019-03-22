@@ -19,5 +19,4 @@
 
 	var_dump($projects->offsetExists(1));
 	var_dump($projects->offsetExists('2'));
-?>
-===DONE===
+echo "===DONE===\n";

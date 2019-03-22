@@ -8,4 +8,3 @@ class MySQL implements DB {
     public function query($query, ...$params) { }
 }
 
-?>

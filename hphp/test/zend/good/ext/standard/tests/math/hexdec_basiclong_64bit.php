@@ -22,5 +22,4 @@ foreach ($hexLongStrs as $strVal) {
    var_dump(hexdec($strVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

@@ -8,4 +8,3 @@ $t = new test;
 $t->prop = 1;
 
 echo "Done\n";
-?>

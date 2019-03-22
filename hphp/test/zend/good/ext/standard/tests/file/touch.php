@@ -28,4 +28,3 @@ var_dump(touch("/no/such/file/or/directory"));
 @unlink($filename);
 
 echo "Done\n";
-?>

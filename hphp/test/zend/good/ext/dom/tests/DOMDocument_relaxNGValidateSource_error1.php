@@ -26,4 +26,3 @@ $doc->loadXML($bad_xml);
 $result = $doc->relaxNGValidateSource($rng);
 var_dump($result);
 
-?>

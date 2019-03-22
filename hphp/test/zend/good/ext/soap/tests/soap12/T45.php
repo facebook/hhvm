@@ -23,4 +23,3 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </env:Envelope>
 EOF;
 include "soap12-test.inc";
-?>

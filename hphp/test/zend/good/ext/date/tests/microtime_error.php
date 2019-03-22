@@ -25,5 +25,4 @@ foreach ($bad_args as $bad_arg) {
 	try { var_dump(microtime($bad_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

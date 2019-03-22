@@ -12,4 +12,3 @@ $res_b = sscanf($foo, $fmt);
 
 var_dump($res_a);
 var_dump($res_b);
-?>

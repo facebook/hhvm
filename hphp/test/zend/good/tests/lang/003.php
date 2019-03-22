@@ -11,4 +11,3 @@ switch($a) {
 		echo "bad";
 		break;
 }
-?>

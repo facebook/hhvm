@@ -4,4 +4,3 @@ $var = <<<"MYLABEL"
 test: $test
 MYLABEL;
 echo $var;
-?>

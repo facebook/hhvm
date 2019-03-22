@@ -7,4 +7,3 @@ class C1 {
 		T1::foo as abstract;
 	}
 }
-?>

@@ -12,4 +12,3 @@ $email  = 'wazAbCdeEfGh';
 var_dump(stristr($email, 97));
 var_dump(stristr($email, 97, 1));
 
-?>

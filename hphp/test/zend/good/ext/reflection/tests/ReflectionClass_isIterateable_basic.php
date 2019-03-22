@@ -21,4 +21,3 @@ foreach ($classes as $class) {
 	echo "Is $class iterateable? ";
 	dump_iterateable($class);
 }
-?>

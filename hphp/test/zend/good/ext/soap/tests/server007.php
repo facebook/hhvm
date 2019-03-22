@@ -10,4 +10,3 @@ $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction(array("Sub","Add"));
 var_dump($server->getfunctions());
 echo "ok\n";
-?>

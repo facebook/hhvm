@@ -18,4 +18,3 @@ $n = gmp_nextprime(new stdclass());
 var_dump(gmp_strval($n));
 	
 echo "Done\n";
-?>

@@ -14,4 +14,3 @@ x::x,
 namespace\x::x);
 \var_dump(\defined('foo\x\x'));
 
-?>

@@ -50,4 +50,3 @@
 		printf("[015] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
-?>

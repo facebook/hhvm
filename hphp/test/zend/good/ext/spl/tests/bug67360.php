@@ -7,4 +7,3 @@ $Iterator = $ArrayObject->getIterator();
 var_dump(count($Iterator) === count($array));
 var_dump(iterator_to_array($Iterator));
 
-?>

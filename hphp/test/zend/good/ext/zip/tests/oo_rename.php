@@ -39,4 +39,3 @@ dump_entries_name($zip);
 $zip->close();
 
 @unlink($file);
-?>

@@ -17,4 +17,3 @@ $doc = new DOMDocument();
 $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);
 var_dump($node->C14N());
-?>

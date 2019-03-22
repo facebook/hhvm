@@ -11,4 +11,3 @@ class test extends base {
   public function __clone() {}
 }
 
-?>

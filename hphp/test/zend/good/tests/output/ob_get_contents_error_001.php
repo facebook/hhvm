@@ -15,4 +15,3 @@ ob_start();
 try { var_dump(ob_get_contents("bob2",345)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

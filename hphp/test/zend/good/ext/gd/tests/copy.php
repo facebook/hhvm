@@ -94,4 +94,3 @@ $p3 = imagecolorat($dst_tc, 4,4) == 0x00ff00;
 if ($p1 && $p2 && $p3) {
 	echo "P/TC: ok\n";
 }
-?>

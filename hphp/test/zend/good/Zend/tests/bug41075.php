@@ -22,4 +22,3 @@ try {
 }
 
 echo "Done\n";
-?>

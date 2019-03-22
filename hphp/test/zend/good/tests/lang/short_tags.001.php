@@ -1,4 +1,3 @@
 <?
 echo "Used a short tag\n";
-?>
-Finished
+echo "Finished";

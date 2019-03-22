@@ -10,4 +10,3 @@ var_dump($iterator->getSubIterator(-1));
 var_dump($iterator->getSubIterator(0)->getArrayCopy());
 var_dump($iterator->getSubIterator(1)->getArrayCopy());
 var_dump($iterator->getSubIterator(2));
-?>

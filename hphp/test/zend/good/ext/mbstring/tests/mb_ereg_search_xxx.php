@@ -23,5 +23,3 @@
 		do_tests( $enc, '' );
 		do_tests( $enc, 'x' );
 	}
-?>
-

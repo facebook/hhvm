@@ -44,4 +44,3 @@ function print_node_list($nodelist)
   }
 }
 
-?>

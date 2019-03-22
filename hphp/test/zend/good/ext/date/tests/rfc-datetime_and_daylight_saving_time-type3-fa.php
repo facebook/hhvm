@@ -43,4 +43,3 @@ $interval_spec = 'P1D';
 $interval = new DateInterval($interval_spec);
 echo 'fa6 ' . $start->format($date_format) . " + $interval_spec = "
 	. $start->add($interval)->format($date_format) . "\n";
-?>

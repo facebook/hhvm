@@ -15,4 +15,3 @@ class bar extends baz {
 $x = new bar;
 var_dump($x->test());
 
-?>

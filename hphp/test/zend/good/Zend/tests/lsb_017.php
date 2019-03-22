@@ -16,5 +16,4 @@ class D extends A {
 }
 
 echo A::test(B::test(C::test(D::test())))."\n";
-?>
-==DONE==
+echo "==DONE==";

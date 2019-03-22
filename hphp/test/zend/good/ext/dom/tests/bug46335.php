@@ -22,4 +22,3 @@ print "Text: $node->textContent\n";
 $matched = $node->splitText($start);
 $matched->splitText($length);
 print "splitText (UTF-8): $matched->textContent\n";
-?>

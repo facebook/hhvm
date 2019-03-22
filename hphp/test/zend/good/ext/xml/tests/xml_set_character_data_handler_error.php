@@ -21,4 +21,3 @@ echo "\n-- Testing xml_set_character_data_handler() function with less than expe
 try { var_dump( xml_set_character_data_handler(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

@@ -16,5 +16,4 @@ $variation = array(
 foreach ( $variation as $var ) {
   var_dump(gzfile( $filename, $var  ) );
 }
-?>
-===DONE===
+echo "===DONE===\n";

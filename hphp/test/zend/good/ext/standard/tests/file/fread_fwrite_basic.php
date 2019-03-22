@@ -51,4 +51,3 @@ fclose($h);
 unlink($outputfile);
 
 echo "Done";
-?>

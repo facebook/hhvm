@@ -16,4 +16,3 @@ class Child extends Parents {
 $obj = new Child();
 serialize($obj);
 
-?>

@@ -40,6 +40,4 @@ foreach ($it as $v) {
 	}
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

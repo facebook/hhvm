@@ -8,5 +8,4 @@ $string = "My\nName\nIs\nStrange";
 preg_match("/M(.*)/", $string, &$matches);
 
 var_dump($matches);
-?>
-===Done===
+echo "===Done===";

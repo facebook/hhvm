@@ -24,4 +24,3 @@ $im = new Imagick("magick:rose");
 $im->cropThumbnailImage(200, 10);
 var_dump($im->getImageGeometry());
 
-?>

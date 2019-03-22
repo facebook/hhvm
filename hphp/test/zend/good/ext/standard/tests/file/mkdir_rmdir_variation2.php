@@ -27,9 +27,6 @@ var_dump( mkdir("$file_path/mkdir_variation2/test1", 0777, true) );
 var_dump( chmod("$file_path/mkdir_variation2/", 0777) );  // chmod to enable removing test1 directory
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 rmdir(dirname(__FILE__)."/mkdir_variation2/test/");
 rmdir(dirname(__FILE__)."/mkdir_variation2/");
-?>

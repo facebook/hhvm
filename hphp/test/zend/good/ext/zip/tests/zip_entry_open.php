@@ -5,4 +5,3 @@ echo zip_entry_open($zip, $entry, "r") ? "OK" : "Failure";
 zip_entry_close($entry);
 zip_close($zip);
 
-?>

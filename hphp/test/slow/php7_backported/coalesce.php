@@ -47,4 +47,3 @@ function f($x)
 }
 
 $a = f(null) ?? f(1) ?? f(2);
-?>

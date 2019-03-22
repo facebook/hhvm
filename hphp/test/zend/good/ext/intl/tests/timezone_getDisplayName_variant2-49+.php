@@ -14,6 +14,4 @@ var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT_GMT));
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_LONG_GMT));
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT_COMMONLY_USED));
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_GENERIC_LOCATION));
-
-?>
-==DONE==
+echo "==DONE==";

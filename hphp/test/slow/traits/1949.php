@@ -15,4 +15,3 @@ class MyHelloWorld extends Base{
 }
 $o = new MyHelloWorld();
 $o->sayHello();
-?>

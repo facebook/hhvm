@@ -19,4 +19,3 @@ echo "\n-- Position of Internal Pointer in Passed Array: --\n";
 echo key(&$stack) . " => " . current (&$stack) . "\n";
 
 echo "Done";
-?>

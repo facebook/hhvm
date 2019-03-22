@@ -23,5 +23,3 @@ echo "\n-- Position of Internal Pointer in Passed Array: --\n";
 echo key(&$array_arg) . " => " . current (&$array_arg) . "\n";
 
 echo "Done";
-?>
-

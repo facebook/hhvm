@@ -29,4 +29,3 @@ for ($i = 0; $i <=6; ++$i) {
 var_dump(iconv_strrpos("string", ""));
 var_dump(iconv_strrpos("", "string"));
 
-?>

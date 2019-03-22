@@ -20,4 +20,3 @@ var_dump(gmstrftime("%q", $t));
 var_dump(gmstrftime("blah", $t));
 
 echo "Done\n";
-?>

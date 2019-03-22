@@ -14,5 +14,4 @@ $method = $parameter->getDeclaringFunction ();
 unset ($parameter);
 echo $method->getName ()."\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

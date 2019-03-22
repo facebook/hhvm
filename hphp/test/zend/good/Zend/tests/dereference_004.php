@@ -18,4 +18,3 @@ class foo {
 $fo = new foo;
 var_dump($fo()[0]);
 
-?>

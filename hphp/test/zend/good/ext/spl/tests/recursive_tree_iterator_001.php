@@ -41,5 +41,4 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 	echo "[$k] => $v\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

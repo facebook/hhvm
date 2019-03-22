@@ -87,5 +87,4 @@ $array_arg = array(
 var_dump( uasort(&$array_arg, 'multiple_cmp') );
 var_dump($array_arg);
 
-echo "Done"
-?>
+echo "Done";

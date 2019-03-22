@@ -22,4 +22,3 @@
 		printf("[004] Expecting string/'', got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
-?>

@@ -23,4 +23,3 @@ try { var_dump( addslashes($str, $extra_arg) ); } catch (Exception $e) { echo "\
 var_dump( $str );
 
 echo "Done\n";
-?>

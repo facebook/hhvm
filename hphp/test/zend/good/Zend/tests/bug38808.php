@@ -8,4 +8,3 @@ $a =& $b;
 echo $current(&$a)."\n";
 $next(&$a);
 echo $current(&$a)."\n";
-?>

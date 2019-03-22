@@ -16,4 +16,3 @@ class B extends A {
 var_dump(get_class_vars('A'));
 var_dump(get_class_vars('B'));
 
-?>

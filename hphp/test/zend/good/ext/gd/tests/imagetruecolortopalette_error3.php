@@ -7,4 +7,3 @@ try { imagetruecolortopalette($image, true, $resource); } catch (Exception $e) {
 try { imagetruecolortopalette($image, true, array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 imagetruecolortopalette($image, true, null);
 
-?>

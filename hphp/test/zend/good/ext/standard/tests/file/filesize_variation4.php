@@ -70,10 +70,7 @@ fclose( fopen($filename, "w") );
 var_dump( filesize($filename) );  //0 bytes
 
 echo "*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation4.tmp");
 unlink($file_path."/filesize_variation4_empty.tmp");
-?>

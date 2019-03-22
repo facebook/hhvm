@@ -93,5 +93,4 @@ foreach($inputs as $key =>$value) {
       var_dump( array_udiff_uassoc($arr1, $value, $data_comp_func, $key_comp_func) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

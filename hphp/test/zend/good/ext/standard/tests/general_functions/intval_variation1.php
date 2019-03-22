@@ -104,5 +104,4 @@ foreach($inputs as $key =>$value) {
       var_dump( intval($value, $base) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

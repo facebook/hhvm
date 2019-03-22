@@ -93,5 +93,4 @@ var_dump( array_filter($input, "always_true") );
 // with always_false callback function
 var_dump( array_filter($input, "always_false") );
 
-echo "Done"
-?>
+echo "Done";

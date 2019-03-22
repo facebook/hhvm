@@ -15,4 +15,3 @@ echo $date->format('Y-m-d H:i:s T/e - U') . "\n";
 
 $date = new DateTime('2010-03-14 03:30:00');
 echo $date->format('Y-m-d H:i:s T/e - U') . "\n";
-?>

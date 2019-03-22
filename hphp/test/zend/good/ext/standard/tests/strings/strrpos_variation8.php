@@ -20,4 +20,3 @@ for($offset = -1; $offset <= strlen($haystack); $offset++ ) {
   $count++;
 }
 echo "*** Done ***";
-?>

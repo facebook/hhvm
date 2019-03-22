@@ -25,5 +25,4 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_diff_ukey($value, $input_array, 'key_compare_func') );
       var_dump( array_diff_ukey($input_array, $value, 'key_compare_func') );
 }
-?>
-===DONE===
+echo "===DONE===\n";

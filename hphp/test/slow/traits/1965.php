@@ -15,4 +15,3 @@ class C {
 }
 $o = new C;
 $o->printProps();
-?>

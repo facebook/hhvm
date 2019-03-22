@@ -33,4 +33,3 @@ var_dump(sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
-?>

@@ -31,5 +31,4 @@ foreach( $time_date as $date => $time ){
 	var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, -90, 0 ) );		
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

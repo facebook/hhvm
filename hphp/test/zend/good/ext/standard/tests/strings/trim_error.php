@@ -23,5 +23,4 @@ var_dump(trim($hello, "a.."));
 var_dump(trim($hello, "z..a"));
 var_dump(trim($hello, "a..b..c"));
 
-?>
-===DONE===
+echo "===DONE===\n";

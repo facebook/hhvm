@@ -6,4 +6,3 @@ try { var_dump(imap_utf8(array(1,2))); } catch (Exception $e) { echo "\n".'Warni
 var_dump(imap_utf8("test"));
 
 echo "Done\n";
-?>

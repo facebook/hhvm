@@ -11,4 +11,3 @@ $prop = null;
 
 $a->$prop = 2;
 
-?>

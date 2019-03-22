@@ -27,4 +27,3 @@ $object = new stdclass();
 try { var_dump( is_a($object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

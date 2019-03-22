@@ -19,6 +19,4 @@ ksort(&$vals2);
 var_dump($vals);
 var_dump($vals2);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

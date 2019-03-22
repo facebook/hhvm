@@ -4,4 +4,3 @@ $a = new stdClass;
 
 $a::$a();
 
-?>

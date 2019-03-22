@@ -11,5 +11,4 @@ foreach ($strVals as $strVal) {
    var_dump(bin2hex(~$strVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

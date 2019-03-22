@@ -11,4 +11,3 @@ var_dump (2e23 == round (2e23, -23, PHP_ROUND_HALF_UP));
 var_dump (1e23 == round (1e23, -23, PHP_ROUND_HALF_UP));
 var_dump (2e24 == round (2e24, -24, PHP_ROUND_HALF_UP));
 var_dump (1e24 == round (1e24, -24, PHP_ROUND_HALF_UP));
-?>

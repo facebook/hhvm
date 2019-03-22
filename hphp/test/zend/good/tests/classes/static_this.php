@@ -22,5 +22,4 @@ class TestClass
 $obj = new TestClass;
 TestClass::Test2(new stdClass);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -63,5 +63,4 @@ $input = array(
    
 var_dump( array_flip($input) );
 
-echo "Done"
-?>
+echo "Done";

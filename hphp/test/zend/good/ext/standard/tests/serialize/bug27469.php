@@ -6,4 +6,3 @@ echo serialize($obj)."\n";
 var_dump($obj);
 echo serialize($obj)."\n";
 var_dump($obj);
-?>

@@ -6,4 +6,3 @@
         die("skip en_US.UTF-8 locale not supported.");
     }
 
-?>

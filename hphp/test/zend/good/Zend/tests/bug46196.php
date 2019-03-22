@@ -16,5 +16,4 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
     return true;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

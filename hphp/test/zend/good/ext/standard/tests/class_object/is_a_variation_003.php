@@ -13,4 +13,3 @@ class caseSensitivityTestChild extends caseSensitivityTest {}
 var_dump(is_a(new caseSensitivityTestChild, 'caseSensitivityTEST'));
 
 echo "Done";
-?>

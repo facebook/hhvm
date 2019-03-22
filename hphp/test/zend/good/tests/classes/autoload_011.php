@@ -8,4 +8,3 @@
   class C extends UndefBase
   {
   }
-?>

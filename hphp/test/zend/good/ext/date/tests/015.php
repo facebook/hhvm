@@ -9,4 +9,3 @@ var_dump($dto->getTimezone()->getName());
 unset($dto);
 var_dump($tzold->getName());
 echo "Done\n";
-?>

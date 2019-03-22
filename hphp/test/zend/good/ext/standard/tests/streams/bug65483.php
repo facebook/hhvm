@@ -11,4 +11,3 @@ var_dump(stream_get_contents($fd, -1, 0));
 
 fclose($fd);
 
-?>

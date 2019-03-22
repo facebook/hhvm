@@ -43,4 +43,3 @@ var_dump( ltrim($str, "\nusi") );
 
 echo "\nDone\n";
 
-?>

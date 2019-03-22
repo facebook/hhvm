@@ -7,4 +7,3 @@ var_dump(gettext('Basic test'));
 bindtextdomain('messages', './locale');
 var_dump(gettext('Basic test'));
 
-?>

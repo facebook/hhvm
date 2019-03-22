@@ -43,4 +43,3 @@ echo "-- Result of comparing more than two arrays: --\n";
 var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string_float));
 
 echo "Done";
-?>

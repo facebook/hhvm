@@ -25,4 +25,3 @@ if (!mysqli_query($link, 'CREATE TABLE '.$test_table_name.'(id INT DEFAULT 0, la
 if (!mysqli_query($link, "INSERT INTO ".$test_table_name."(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')")) {
 	printf("[%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 }
-?>

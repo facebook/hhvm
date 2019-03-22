@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(log10($longVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

@@ -61,10 +61,7 @@ foreach ($content as $file_name) {
 	// suppress errors as won't be able to remove "." and ".." entries
 	@unlink($dir_path . $file_name);
 }
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $dir_path = dirname(__FILE__) . "/scandir_variation8";
 rmdir($dir_path);
-?>

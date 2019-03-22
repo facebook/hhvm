@@ -17,5 +17,3 @@ var_dump( array_map("cb2", $arr,$arr));
 var_dump( array_map(null,  $arr));
 var_dump( array_map(null, $arr, $arr));
 echo "Done";
-?>
-

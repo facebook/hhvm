@@ -12,4 +12,3 @@ class B
 
 $obj = new B();
 $obj->go();
-?>

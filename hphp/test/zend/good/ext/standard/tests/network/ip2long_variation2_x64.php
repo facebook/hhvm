@@ -20,5 +20,4 @@ foreach($ips as $ip) {
 	var_dump(ip2long($ip));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

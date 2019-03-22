@@ -19,5 +19,4 @@ echo "\n-- Testing sscanf() function with more than expected no. of arguments --
 
 var_dump( sscanf($str, $format, &$str1, &$str2, &$extra_str) );
 
-?>
-===DONE===
+echo "===DONE===\n";

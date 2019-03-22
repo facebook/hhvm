@@ -6,4 +6,3 @@ class foo {
 } 
 
 new foo(array(new stdClass)); 
-?>

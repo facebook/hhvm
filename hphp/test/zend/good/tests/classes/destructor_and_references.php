@@ -18,4 +18,3 @@ class once {}
 
 $o = new once;
 echo "Done\n";
-?>

@@ -29,4 +29,3 @@ var_dump($title->hasChildNodes());
 echo "Text has child nodes: ";
 var_dump($text->hasChildNodes());
 
-?>

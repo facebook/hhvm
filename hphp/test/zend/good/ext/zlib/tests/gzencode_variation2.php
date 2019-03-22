@@ -14,5 +14,4 @@ var_dump(bin2hex(gzencode($data, -1)));
 var_dump(bin2hex(gzencode($data, -1, FORCE_GZIP)));  
 var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 
-?>
-===DONE===
+echo "===DONE===\n";

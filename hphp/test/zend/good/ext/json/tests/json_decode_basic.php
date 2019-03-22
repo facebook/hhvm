@@ -37,6 +37,4 @@ foreach($inputs as $input) {
    var_dump(json_decode($input, TRUE)); 
   $count ++;
 }
-
-?>
-===Done===
+echo "===Done===";

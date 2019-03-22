@@ -10,4 +10,3 @@ var_dump($b);
 $a = pack("H","1");
 $b = unpack("H", $a);
 var_dump($b);
-?>

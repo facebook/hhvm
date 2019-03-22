@@ -20,4 +20,3 @@ foreach ($b as $size) {
 	var_dump($s === gzuncompress(gzcompress($s)));
 	var_dump($s === gzinflate(substr(gzencode($s), 10, -8)));
 }
-?>

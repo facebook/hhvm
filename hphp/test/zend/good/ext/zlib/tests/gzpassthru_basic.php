@@ -9,5 +9,4 @@ var_dump(gzpassthru($h));
 var_dump(gzpassthru($h));
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

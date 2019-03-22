@@ -28,4 +28,3 @@ echo $a->var2,"\n";
 echo $a->func1(),"\n";
 echo $a->func2(),"\n";
 
-?>

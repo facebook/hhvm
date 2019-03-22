@@ -89,5 +89,4 @@ $sub->notify();
 $sub->attach($ob3);
 
 $sub->notify();
-?>
-===DONE===
+echo "===DONE===\n";

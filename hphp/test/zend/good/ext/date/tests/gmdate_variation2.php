@@ -95,5 +95,4 @@ foreach($inputs as $key =>$value) {
       try { var_dump( gmdate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

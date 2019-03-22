@@ -27,4 +27,3 @@ echo "\$mode = 1:               ";
 var_dump(count($array_multi, 1));
 
 echo "Done";
-?>

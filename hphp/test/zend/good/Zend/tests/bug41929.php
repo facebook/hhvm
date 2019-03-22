@@ -15,4 +15,3 @@ class D extends C {
 
 $myD = new D;
 $myD->doLoop();
-?>

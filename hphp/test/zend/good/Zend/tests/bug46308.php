@@ -25,4 +25,3 @@ main::$dummy        = new dummy();
 main::$dataAccessor = new relay();
 main::$dataAccessor->bar;
 echo "ok\n";
-?>

@@ -34,4 +34,3 @@ try {
 }
 var_dump($ret);
 echo "ok\n";
-?>

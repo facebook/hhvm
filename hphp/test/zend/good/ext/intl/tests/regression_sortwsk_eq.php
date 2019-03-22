@@ -32,4 +32,3 @@ function ut_main()
 
 require_once( 'ut_common.inc' );
 ut_run();
-?>

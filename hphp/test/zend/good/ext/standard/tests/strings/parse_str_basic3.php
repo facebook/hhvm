@@ -72,5 +72,4 @@ $str = "arr[1][2][3]=sid&arr[1][2][6]=fred";
 var_dump(parse_str($str, &$res));
 var_dump($res);
 
-?>
-===DONE===
+echo "===DONE===\n";

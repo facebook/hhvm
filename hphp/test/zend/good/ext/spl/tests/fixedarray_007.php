@@ -17,4 +17,3 @@ foreach ($a as $c) {
 
 print "ok\n";
 
-?>

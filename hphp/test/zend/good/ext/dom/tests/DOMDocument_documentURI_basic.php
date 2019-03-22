@@ -21,4 +21,3 @@ echo "Set documentURI to a URL, reading again:\n";
 var_dump( $test );
 
 echo "Done\n";
-?>

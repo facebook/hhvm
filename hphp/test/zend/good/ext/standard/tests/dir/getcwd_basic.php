@@ -17,10 +17,7 @@ mkdir($directory);
 var_dump(getcwd());
 chdir($directory);
 var_dump(getcwd());
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $directory = dirname(__FILE__) . "/getcwd_basic";
 rmdir($directory);
-?>

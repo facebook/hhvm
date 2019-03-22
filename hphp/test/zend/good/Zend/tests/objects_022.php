@@ -24,4 +24,3 @@ $foo->testBar(new bar);
 $foo->testBaz(new baz);
 $foo->testFoo(new stdClass); // Catchable fatal error
 
-?>

@@ -15,4 +15,3 @@ class C {
 }
 $x = new C();
 $x->foo();
-?>

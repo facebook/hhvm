@@ -14,4 +14,3 @@ foreach ($i as $name=>$value) {
 	var_dump($name, $value);
 }
 var_dump($i->replacement);
-?>

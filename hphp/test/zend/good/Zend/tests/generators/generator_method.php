@@ -19,4 +19,3 @@ foreach ($test as $value) {
     var_dump($value);
 }
 
-?>

@@ -47,12 +47,8 @@ writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", array( 9, 6, 2.5502, 24, "foo
 // Close handle
 fclose( $fp );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = 'vfprintf_variation1.phpt.txt';
 unlink( $file );
 
-?>

@@ -18,4 +18,3 @@ foreach (array("E", "I", "P", "g", "i", "q") as $c)
     }
 }
 echo 'OK';
-?>

@@ -9,6 +9,3 @@ echo $euc_jp;
 $output = ob_get_clean();
 
 var_dump( $output );
-
-?>
-

@@ -12,5 +12,4 @@ foreach ($sizes as $size) {
 
 gzclose($h);
 unlink($f);
-?>
-===DONE===
+echo "===DONE===\n";

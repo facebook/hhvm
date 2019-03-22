@@ -11,4 +11,3 @@ echo "\n-- Testing array_merge_recursive() function with Zero arguments --\n";
 try { var_dump( array_merge_recursive() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

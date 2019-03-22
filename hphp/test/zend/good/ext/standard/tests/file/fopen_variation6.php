@@ -30,5 +30,4 @@ echo "\n";
 
 unlink($absfile);
 unlink($relfile);
-?>
-===DONE===
+echo "===DONE===\n";

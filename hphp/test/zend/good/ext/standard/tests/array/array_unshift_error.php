@@ -15,4 +15,3 @@ echo "\n-- Testing array_unshift() function with less than expected no. of argum
 $array = array(1, 2);
 try { var_dump( array_unshift(&$array) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
-?>

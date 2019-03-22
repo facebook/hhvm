@@ -18,4 +18,3 @@
   } // of Foo
 
   $o = new Foo;
-?>

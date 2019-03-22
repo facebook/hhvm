@@ -23,5 +23,4 @@ echo "\n-- Testing gmdate() function with English ordinal suffix --\n";
 var_dump( gmdate('S') );
 var_dump( gmdate('S', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

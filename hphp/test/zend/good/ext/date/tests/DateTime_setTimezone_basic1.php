@@ -17,5 +17,4 @@ $la_time = new DateTimezone("America/Los_Angeles");
 $datetime->setTimezone($la_time);
 echo "New timezone: " . date_timezone_get($datetime)->getName() . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

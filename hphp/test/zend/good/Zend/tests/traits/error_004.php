@@ -7,4 +7,3 @@ class A {
 	use abc;
 }
 
-?>

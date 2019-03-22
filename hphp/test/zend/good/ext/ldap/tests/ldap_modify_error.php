@@ -37,12 +37,10 @@ $entry2 = $entry;
 $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_modify($link, "dc=my-domain,$base", $entry2));
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
-?>

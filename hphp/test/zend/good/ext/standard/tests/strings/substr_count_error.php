@@ -23,4 +23,3 @@ var_dump( substr_count($str, "i", NULL, NULL) );
 	
 echo "Done\n";	
 
-?>

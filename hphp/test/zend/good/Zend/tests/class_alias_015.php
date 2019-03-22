@@ -9,4 +9,3 @@ class bar {
 
 \var_dump(new namespace\baz);
 
-?>

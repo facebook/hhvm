@@ -21,4 +21,3 @@ try { var_dump( ucwords($str, $extra_arg, $extra_arg) ); } catch (Exception $e) 
 var_dump($str);
 
 echo "Done\n";
-?>

@@ -91,5 +91,4 @@ $array_arg = array(
 );
 var_dump( usort(&$array_arg, 'cmp_function') );
 var_dump($array_arg);
-?>
-===DONE===
+echo "===DONE===\n";

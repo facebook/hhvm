@@ -12,5 +12,4 @@ $mh = curl_multi_init();
 echo curl_multi_select($mh)."\n";
 
 curl_multi_close($mh);
-?>
-===DONE===
+echo "===DONE===\n";

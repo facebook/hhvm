@@ -12,4 +12,3 @@ $mysqli->close();
 echo $result->num_rows;
 
 echo "Done\n";
-?>

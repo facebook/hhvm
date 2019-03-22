@@ -25,4 +25,3 @@ assert(0);
  
 echo "not reached\n";
  
-?>

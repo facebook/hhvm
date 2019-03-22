@@ -48,4 +48,3 @@ for($index = 0; $index < count($glues); $index ++) {
 }
 
 echo "Done\n";
-?>

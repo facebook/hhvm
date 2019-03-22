@@ -51,5 +51,4 @@ echo "\nTry with double decode TRUE\n";
 echo  "Test 28: " . htmlspecialchars ($s1, ENT_NOQUOTES, "ISO-8859-1", true);
 echo  "Test 29: " . htmlspecialchars ($s2, ENT_NOQUOTES, "ISO-8859-1", true);
 
-?>
-===DONE===
+echo "===DONE===\n";

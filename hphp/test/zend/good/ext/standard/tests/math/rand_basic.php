@@ -77,4 +77,3 @@ for ($x = 0; $x < count($min); $x++) {
 		echo "PASSED range min = ", intval($min[$x]), " max = 100\n"; 
 	}	
 }
-?>

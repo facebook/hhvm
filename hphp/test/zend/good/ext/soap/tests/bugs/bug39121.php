@@ -31,4 +31,3 @@ EOF;
 
 $client = new LocalSoapClient(NULL, array('location'=>'test://','uri'=>'test://'));
 print_r($client->getDIDAreaResponse());
-?>

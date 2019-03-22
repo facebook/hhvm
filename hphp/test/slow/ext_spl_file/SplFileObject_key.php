@@ -15,4 +15,3 @@ $s->fgets();
 echo $s->key(), "\n";
 $s->fgets();
 echo $s->key(), "\n";
-?>

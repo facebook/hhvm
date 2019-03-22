@@ -4,5 +4,4 @@ try {
 } catch (InvalidArgumentException $e) {
 	echo "InvalidArgumentException thrown\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -6,4 +6,3 @@ $htmldoc = new DOMDocument();
 $htmldoc->loadHTML($html);
 $htmldoc->formatOutput = true;
 echo $htmldoc->saveHTML();
-?>

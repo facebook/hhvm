@@ -3,4 +3,3 @@ require_once('skipif.inc');
 if (version_compare(LIBXML_DOTTED_VERSION, "2.6.20", "<")) {
     print "skip libxml version " . LIBXML_DOTTED_VERSION;
 }   
-?>

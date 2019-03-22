@@ -6,4 +6,3 @@ $a->setSize(NULL);
 
 print "ok\n";
 
-?>

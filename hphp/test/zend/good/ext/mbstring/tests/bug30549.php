@@ -12,4 +12,3 @@ function test($enc, $map) {
 		printf("0x%04x, 0x%04x\n", $toc, $unic);
 	}
 }
-?>

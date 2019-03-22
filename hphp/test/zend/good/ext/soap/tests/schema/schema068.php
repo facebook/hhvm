@@ -8,4 +8,3 @@ $schema = <<<EOF
 EOF;
 test_schema($schema,'type="tns:testType"',(object)array("str"=>"str","int"=>4));
 echo "ok";
-?>

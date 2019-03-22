@@ -67,4 +67,3 @@ while ($fp && !feof($fp)) {
 fclose($fp);
 
 unlink($tn);
-?>

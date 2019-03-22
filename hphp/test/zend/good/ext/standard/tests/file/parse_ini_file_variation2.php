@@ -41,5 +41,4 @@ file_put_contents($output_file, $iniFile);
 $a = parse_ini_file($output_file, true);
 var_dump($a);
 unlink($output_file);
-?>
-===DONE===
+echo "===DONE===\n";

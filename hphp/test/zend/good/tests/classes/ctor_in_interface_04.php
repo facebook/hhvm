@@ -18,4 +18,3 @@ class derived extends implem
 	}
 }
 
-?>

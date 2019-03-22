@@ -20,4 +20,3 @@ pass::do_show();
 fail::do_show();
 
 echo "Done\n"; // shouldn't be displayed
-?>

@@ -8,4 +8,3 @@
 	{
 	    echo $e->getMessage();
 	}
-?>

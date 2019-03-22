@@ -37,6 +37,4 @@ fclose($fp);
 echo "\n-- Testing escapeshellarg() function with a array supplied for argument --\n";
 $arg = array(1,2,3); 
 try { var_dump( escapeshellarg($arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

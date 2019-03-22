@@ -27,4 +27,3 @@ ctype_test_002("ctype_punct");
 ctype_test_002("ctype_space");
 ctype_test_002("ctype_xdigit");
 
-?>

@@ -2,4 +2,3 @@
 
 trait AutoTrait {}
 
-?>

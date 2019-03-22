@@ -27,4 +27,3 @@ var_dump(array_filter(array(), array()));
 var_dump(array_filter($array1, 1));
 
 echo '== DONE ==';
-?>

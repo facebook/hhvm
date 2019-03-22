@@ -27,4 +27,3 @@ var_dump( array_pad($input, $pad_size, $pad_value) );  // positive 'pad_value'
 var_dump( array_pad($input, -$pad_size, $pad_value) );  // negative 'pad_value'
 
 echo "Done";
-?>

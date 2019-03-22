@@ -35,6 +35,4 @@ var_dump(current(&$a));
 var_dump(next(&$a));
 current_variation5($a);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -18,4 +18,3 @@ $bar1->echoName();
 $List->echoName();
 
 print ($names==array('constructor','outside','outside')) ? 'success':'failure';
-?>

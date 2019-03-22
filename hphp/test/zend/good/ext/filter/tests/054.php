@@ -7,4 +7,3 @@ var_dump(
 	filter_var_array($data, array('foo' => array('filter' => FILTER_DEFAULT), 'bar' => array('filter' => FILTER_DEFAULT)))
 );
 
-?>

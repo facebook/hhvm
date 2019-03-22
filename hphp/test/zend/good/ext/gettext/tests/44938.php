@@ -26,5 +26,4 @@ var_dump(dgettext($overflown, $msgid));
 var_dump(dgettext($domain, $overflown));
 
 var_dump(textdomain($overflown));
-?>
-==DONE==
+echo "==DONE==";

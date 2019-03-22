@@ -15,4 +15,3 @@ $bar = new Bar;
 type_hint_foo($foo);
 type_hint_foo($bar);
 
-?>

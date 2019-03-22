@@ -20,4 +20,3 @@ var_dump($im->getImageGeometry());
   echo "fail\n";
 }
 
-?>

@@ -13,4 +13,3 @@ $valid = openssl_verify($ct, $signature, $pukeyid, OPENSSL_ALGO_SHA1);
 echo "Signature validity: " . $valid . "\n";
 
 
-?>

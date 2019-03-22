@@ -26,5 +26,4 @@ foreach($inputs as $key =>$value) {
 	  var_dump( localtime($value, $is_associative) );
 }
 	  
-?>
-===DONE===
+echo "===DONE===\n";

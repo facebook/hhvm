@@ -18,5 +18,4 @@ var_dump( gmdate($format, $timestamp) );
 // Calling gmdate() with mandatory arguments
 var_dump( gmdate($format) );
 
-?>
-===DONE===
+echo "===DONE===\n";

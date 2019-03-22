@@ -6,4 +6,3 @@ class foo {
 class bar extends foo {
 }
 ReflectionClass::export("bar");
-?>

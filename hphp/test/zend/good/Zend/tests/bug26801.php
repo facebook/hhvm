@@ -13,5 +13,4 @@ switch ($a[0]) {
 		break;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

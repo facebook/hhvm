@@ -24,4 +24,3 @@ foreach($formats as $format) {
 	}
 	echo "\n";
 }
-?>

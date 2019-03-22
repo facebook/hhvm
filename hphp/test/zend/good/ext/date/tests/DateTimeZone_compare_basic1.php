@@ -33,5 +33,4 @@ var_dump($obj2 == $obj3);
 var_dump($obj2 == $obj4);
 var_dump($obj3 == $obj4);
 
-?>
-===DONE===
+echo "===DONE===\n";

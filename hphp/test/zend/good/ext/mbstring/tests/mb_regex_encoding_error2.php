@@ -14,4 +14,3 @@ var_dump(mb_regex_encoding('unknown'));
 
 
 echo "Done";
-?>

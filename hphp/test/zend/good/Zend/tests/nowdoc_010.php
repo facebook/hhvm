@@ -19,4 +19,3 @@ ENDOFNOWDOC;
 
 print "{$x}";
 
-?>

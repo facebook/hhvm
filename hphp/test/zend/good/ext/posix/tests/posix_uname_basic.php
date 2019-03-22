@@ -4,6 +4,4 @@
   $uname = posix_uname();  
   unset($uname['domainname']);  
   print_r($uname);
-  
-?>
-===DONE====
+echo "===DONE====";

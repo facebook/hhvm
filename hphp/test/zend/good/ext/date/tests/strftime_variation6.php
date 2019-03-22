@@ -30,5 +30,4 @@ foreach($inputs as $key =>$value) {
       var_dump( strftime($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

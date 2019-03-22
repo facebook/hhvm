@@ -34,4 +34,3 @@ foreach($needles as $needle) {
   var_dump( strrchr($special_chars_str, $needle) );
 }
 echo "*** Done ***";
-?>

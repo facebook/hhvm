@@ -22,4 +22,3 @@ var_dump(ZendGoodZendTestsBug54265Modified::$my_var);
 abstract final class ZendGoodZendTestsBug54265Modified {
   public static $my_var;
 }
-?>

@@ -13,5 +13,4 @@ $str = 'string_val';
 $delim_char = '/';
 $extra_arg = 10;
 try { var_dump(preg_quote($str, $delim_char, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-echo "Done"
-?>
+echo "Done";

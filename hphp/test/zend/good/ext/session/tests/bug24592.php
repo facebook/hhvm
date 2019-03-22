@@ -10,4 +10,3 @@ $_SESSION['foo'] = $foo;
 $_SESSION['bar'] = $bar;
                                         
 var_dump($_SESSION);
-?>

@@ -18,4 +18,3 @@ echo "Output = " . var_export($s_output, True) . "\n";
 echo "Count  = $i_count\n";
 var_dump(preg_last_error() === PREG_NO_ERROR);
 
-?>

@@ -36,4 +36,3 @@
 
   echo "Is C::C() callable?\n";
   var_dump(is_callable(array($c, "C")));
-?>

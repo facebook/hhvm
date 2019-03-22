@@ -24,4 +24,3 @@ var_dump( chop($str, $charlist) );
 var_dump( chop($str, '!') );
 
 echo "Done\n";
-?>

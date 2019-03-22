@@ -11,4 +11,3 @@ var_dump(gmp_init("foo",3));
 var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
 
 echo "Done\n";
-?>

@@ -1,4 +1,4 @@
- <?hh
+<?hh
 
 function foo(): int {
   $x = coroutine function() {

@@ -18,4 +18,3 @@ var_dump($regexIterator->getMode() === RegexIterator::ALL_MATCHES);
 $regexIterator->setMode(RegexIterator::SPLIT);
 var_dump($regexIterator->getMode() === RegexIterator::SPLIT);
 
-?>

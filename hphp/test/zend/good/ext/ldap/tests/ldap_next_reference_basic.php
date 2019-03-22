@@ -18,8 +18,7 @@ $ref = ldap_first_reference($link, $result);
 var_dump($ref2 = ldap_next_reference($link, $ref));
 ldap_parse_reference($link, $ref2, $refs);
 var_dump($refs);
-?>
-===DONE===
+echo "===DONE===\n";
 <?php
 include "connect.inc";
 
@@ -29,4 +28,3 @@ ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, array(array("oid" => "2.16.840.
 ldap_delete($link, "cn=userref,$base");
 ldap_delete($link, "cn=userref2,$base");
 remove_dummy_data($link, $base);
-?>

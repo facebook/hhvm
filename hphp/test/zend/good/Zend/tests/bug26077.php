@@ -1,4 +1,3 @@
 <?php
 class foo {} new foo();
-?>
-===DONE===
+echo "===DONE===\n";

@@ -3,7 +3,5 @@
   	
   $pid = posix_getpid();
   
-  var_dump($pid); 
-  
-?>
-===DONE====
+  var_dump($pid);
+echo "===DONE====";

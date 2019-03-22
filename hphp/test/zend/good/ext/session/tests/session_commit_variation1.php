@@ -21,4 +21,3 @@ var_dump(session_destroy());
 
 echo "Done";
 ob_end_flush();
-?>

@@ -13,4 +13,3 @@ while ($tmp = $list->current()) {
   echo $tmp;
   $list->next();
 }
-?>

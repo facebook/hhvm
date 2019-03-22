@@ -41,4 +41,3 @@ $b=&$int;
 array_splice (&$input_array,-1,1,$b);
 var_dump ($input_array);
 echo "Done\n";
-?>

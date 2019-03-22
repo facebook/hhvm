@@ -17,4 +17,3 @@ var_dump(openssl_public_encrypt($data, &$encrypted, $obj));
 var_dump(openssl_public_encrypt($obj, &$encrypted, $pubkey));
 openssl_private_decrypt($encrypted, &$output, $privkey);
 var_dump($output);
-?>

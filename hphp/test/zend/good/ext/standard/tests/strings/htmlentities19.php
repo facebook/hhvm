@@ -11,4 +11,3 @@ foreach ($tests as $test) {
     $a = htmlspecialchars($test, ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8");
 	var_dump($a, bin2hex($a));
 }
-?>

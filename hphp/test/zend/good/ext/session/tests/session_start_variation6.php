@@ -26,4 +26,3 @@ var_dump($_SESSION);
 session_destroy();
 echo "Done";
 ob_end_flush();
-?>

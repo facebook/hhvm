@@ -12,4 +12,3 @@ list($e) = print '';
 
 var_dump($a, $b, $c, $d, $e);
 
-?>

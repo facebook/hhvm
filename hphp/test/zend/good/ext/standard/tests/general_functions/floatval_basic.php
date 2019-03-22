@@ -44,5 +44,4 @@ foreach ($valid_floats as $key => $value ) {
    var_dump( doubleval($value) );
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

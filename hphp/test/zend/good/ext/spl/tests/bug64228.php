@@ -12,4 +12,3 @@ foreach ($i as $key => $value) {
 
 sort(&$dirs);
 print_r($dirs);
-?>

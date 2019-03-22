@@ -39,6 +39,4 @@ foreach ($dir as $file) {
 	print "$file\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

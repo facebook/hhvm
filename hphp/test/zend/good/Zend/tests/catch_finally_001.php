@@ -17,4 +17,3 @@ function foo ($throw = FALSE) {
 foo();
 echo "\n";
 foo(true);
-?>

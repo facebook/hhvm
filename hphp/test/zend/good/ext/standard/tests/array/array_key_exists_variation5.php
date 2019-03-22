@@ -23,5 +23,3 @@ echo "\n-- \$search arg points to sub-array --\n";
 var_dump(array_key_exists(0, $multi_array['sub1']));
 
 echo "Done";
-?>
-

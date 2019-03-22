@@ -5,4 +5,3 @@ trait abc {
 
 new abc;
 
-?>

@@ -28,4 +28,3 @@ $data2{4} = 0;
 var_dump(gzinflate($data2));
 
 echo "Done\n";
-?>

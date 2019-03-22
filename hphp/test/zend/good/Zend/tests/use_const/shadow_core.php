@@ -7,4 +7,3 @@ use const foo\PHP_VERSION;
 var_dump(PHP_VERSION);
 echo "Done\n";
 
-?>

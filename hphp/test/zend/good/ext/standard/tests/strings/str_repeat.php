@@ -55,4 +55,3 @@ try { var_dump( str_repeat($input[0], 3, 4) ); } catch (Exception $e) { echo "\n
 var_dump( str_repeat($input[0], -1) );
 
 echo "Done\n";
-?>

@@ -12,4 +12,3 @@
 	mysqli_close($link);
 	@mysqli_stmt_close($stmt1);
 	printf("Ok\n");
-?>

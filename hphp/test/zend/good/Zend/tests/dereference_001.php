@@ -37,4 +37,3 @@ function e() {
 }
 var_dump(e()['b']); // string(3) "bar"
 
-?>

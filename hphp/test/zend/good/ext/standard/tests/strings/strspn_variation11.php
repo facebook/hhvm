@@ -72,5 +72,4 @@ foreach($strings as $str) {
   $count++;
 }
 
-echo "Done"
-?>
+echo "Done";

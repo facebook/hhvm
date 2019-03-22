@@ -17,10 +17,11 @@ function rebind_proc ($ds, $ldap_url) {
 $link = ldap_connect_and_bind($host, $port, ZendGoodExtLdapTestsLdapSetRebindProcBasic::$user, ZendGoodExtLdapTestsLdapSetRebindProcBasic::$passwd, ZendGoodExtLdapTestsLdapSetRebindProcBasic::$protocol_version);
 var_dump(ldap_set_rebind_proc($link, "rebind_proc"));
 var_dump(ldap_set_rebind_proc($link, ""));
+
 abstract final class ZendGoodExtLdapTestsLdapSetRebindProcBasic {
   public static $user;
   public static $passwd;
   public static $protocol_version;
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

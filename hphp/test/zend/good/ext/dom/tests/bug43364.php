@@ -32,4 +32,3 @@ $doc->xinclude();
 $count = loopElements(array($doc->documentElement));
 
 var_dump($count);
-?>

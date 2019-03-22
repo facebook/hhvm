@@ -28,4 +28,3 @@ if (count($dirs) != count($globdirs)) {
 } else {
 	echo "OK\n";
 }
-?>

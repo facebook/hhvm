@@ -21,4 +21,3 @@
 		echo "ok 2\n";
 	}
 	echo "done\n";
-?>

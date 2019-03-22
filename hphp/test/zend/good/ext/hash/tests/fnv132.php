@@ -192,4 +192,3 @@ foreach($tests as $test) {
 if($pass) {
     echo "PASS";
 }
-?>

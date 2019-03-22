@@ -33,4 +33,3 @@ var_dump($_SESSION);
 session_destroy();
 
 ob_end_flush();
-?>

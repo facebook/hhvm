@@ -38,4 +38,3 @@ class BaseL1 extends Level1Direct {
 }
 
 echo 'DONE';
-?>

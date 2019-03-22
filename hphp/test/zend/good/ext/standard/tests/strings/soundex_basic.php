@@ -20,6 +20,5 @@ var_dump(soundex("Lloyd")       == soundex("Ladd"));      // L300
 var_dump(soundex("Lukasiewicz") == soundex("Lissajous")); // L222
 
 var_dump(soundex("Lukasiewicz") == soundex("Ghosh"));
-var_dump(soundex("Hilbert") == soundex("Ladd"));  
-?> 
-===DONE===
+var_dump(soundex("Hilbert") == soundex("Ladd"));
+echo "===DONE===\n";

@@ -17,5 +17,4 @@ test($x);
 abstract final class ZendGoodZendTestsBug46106 {
   public static $foo;
 }
-?>
-DONE
+echo "DONE";

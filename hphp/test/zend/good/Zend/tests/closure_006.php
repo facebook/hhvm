@@ -10,4 +10,3 @@ $closure = $getClosure (2);
 $closure ();
 
 echo "Done\n";
-?>

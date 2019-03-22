@@ -7,4 +7,3 @@ foo{$abc}baz
 foo\{$abc}baz
 foo\{ $abc}baz
 TEST;
-?>

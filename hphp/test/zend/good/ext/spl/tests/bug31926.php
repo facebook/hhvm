@@ -7,4 +7,3 @@ foreach($it as $key => $val) {
    var_dump($key, $val);
 }
 
-?>

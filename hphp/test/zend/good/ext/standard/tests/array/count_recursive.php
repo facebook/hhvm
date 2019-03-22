@@ -122,4 +122,3 @@ echo "\nDone";
 /* closing the resource handles */
 fclose( $resource1 );
 closedir( $resource2 );
-?>

@@ -5,4 +5,3 @@ function __autoload($name) {
 $a = "../BUG";
 $x = new $a;
 echo "BUG\n";
-?>

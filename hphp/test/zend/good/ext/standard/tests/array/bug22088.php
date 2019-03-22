@@ -10,4 +10,3 @@ $last = array_shift (&$a);
 $a[] = 'a';
 var_dump($a);
 
-?>

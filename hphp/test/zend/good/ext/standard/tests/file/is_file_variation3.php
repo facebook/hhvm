@@ -33,9 +33,6 @@ foreach( $filenames as $filename ) {
 fclose($file_handle);
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/is_file_variation3.tmp");
-?>

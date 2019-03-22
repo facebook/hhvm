@@ -14,4 +14,3 @@ class baz
 
 $obj = new baz();
 echo $obj->zoo, "\n";
-?>

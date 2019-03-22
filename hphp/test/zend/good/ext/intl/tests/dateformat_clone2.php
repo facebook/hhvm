@@ -21,4 +21,3 @@ $res_str .= "\nResult of clone formatting timestamp=0 is :  \n$formatted";
 
 echo $res_str;
 
-?>

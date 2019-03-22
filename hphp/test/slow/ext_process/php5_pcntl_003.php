@@ -24,4 +24,3 @@ var_dump(count($old));
 pcntl_sigprocmask(SIG_SETMASK, array(), &$old);
 var_dump(count($old));
 
-?>

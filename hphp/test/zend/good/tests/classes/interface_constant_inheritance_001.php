@@ -8,4 +8,3 @@ interface I2 extends I1 {
 }
 
 echo "Done\n";
-?>

@@ -17,4 +17,3 @@
   $c = fribidi_log2vis($c, FRIBIDI_AUTO, FRIBIDI_CHARSET_UTF8);
 
   var_dump(array($a, $b, $c));
-?>

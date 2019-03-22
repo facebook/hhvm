@@ -12,5 +12,4 @@ $deflated = gzdeflate($serialized, 9);
 $inflated = gzinflate($deflated);
 
 echo strlen($inflated),"\n";
-?>
-Done
+echo "Done";

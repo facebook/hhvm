@@ -23,5 +23,4 @@ $h = gzopen($filename, $mode);
 gzpassthru($h);
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

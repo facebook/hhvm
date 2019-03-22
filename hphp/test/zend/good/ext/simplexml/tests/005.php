@@ -27,4 +27,3 @@ var_dump(trim($sxe->elem1->elem2->elem3->elem4));
 
 echo "---Done---\n";
 
-?>

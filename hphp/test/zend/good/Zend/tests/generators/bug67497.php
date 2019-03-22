@@ -10,5 +10,4 @@ function gen() {
 $values = gen();
 $values->next();
 
-?>
-===DONE===
+echo "===DONE===\n";

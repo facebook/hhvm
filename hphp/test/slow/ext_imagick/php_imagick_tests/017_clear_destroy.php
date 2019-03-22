@@ -20,4 +20,3 @@ $im->destroy ();
 
 echo 'success';
 
-?>

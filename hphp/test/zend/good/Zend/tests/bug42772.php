@@ -9,4 +9,3 @@ class Foo {
 
 $foo = (string)new Foo();
 var_dump(Foo::$foo);
-?>

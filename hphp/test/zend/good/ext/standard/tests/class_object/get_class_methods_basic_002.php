@@ -62,4 +62,3 @@ D::testFromD();
 X::testFromX();
 
 echo "Done";
-?>

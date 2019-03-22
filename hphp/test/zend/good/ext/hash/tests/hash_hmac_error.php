@@ -20,6 +20,4 @@ var_dump(hash_hmac('crc32', $data, $key, false, $extra_arg));
 
 echo "\n-- Testing hash_hmac() function with invalid hash algorithm --\n";
 var_dump(hash_hmac('foo', $data, $key));
-
-?>
-===Done===
+echo "===Done===";

@@ -11,4 +11,3 @@
   catch (ReflectionException $e) {
       echo $e->getMessage();
   }
-?>

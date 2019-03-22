@@ -8,5 +8,4 @@ class MySQL implements DB {
     public function query($query, ...$params) { }
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

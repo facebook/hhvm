@@ -52,4 +52,3 @@ $dafna = new dafna_class();
 print $name=call_user_func(array(&$dafna,"GetMyName"));
 print "\n";
 
-?>

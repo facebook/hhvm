@@ -17,4 +17,3 @@ var_dump(each(&$a));
 
 
 echo "Done\n";
-?>

@@ -11,5 +11,4 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 var_dump( image_type_to_mime_type(IMAGETYPE_ICO) );
 var_dump( image_type_to_mime_type(IMAGETYPE_SWC) );
-?>
-===DONE===
+echo "===DONE===\n";

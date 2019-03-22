@@ -30,5 +30,4 @@ $encoded_words = array(
     var_dump(bin2hex(mb_decode_mimeheader($word)));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

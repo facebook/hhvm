@@ -16,4 +16,3 @@ $a->foo();
 throw new Exception();
 
 echo "Done\n";
-?>

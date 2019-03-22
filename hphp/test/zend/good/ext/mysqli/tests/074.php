@@ -12,4 +12,3 @@
 	$result = $mysqli->query("SELECT @@autocommit");
 	var_dump($result->fetch_row());
 
-?>

@@ -29,4 +29,3 @@ echo "-- checking binary safe array with two parameter callback function --\n";
 try { var_dump( array_map(b"callback2", $arr1) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "Done";
-?>

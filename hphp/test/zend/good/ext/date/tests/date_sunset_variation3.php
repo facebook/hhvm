@@ -95,5 +95,4 @@ foreach($inputs as $key =>$value) {
       
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

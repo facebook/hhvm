@@ -99,12 +99,9 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
+error_reporting(0);
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/chdir_basic";
 
 rmdir($dir_path);
-?>

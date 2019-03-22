@@ -15,4 +15,3 @@ $s->seek(2);
 echo $s->current();
 $s->next();
 echo $s->current();
-?>

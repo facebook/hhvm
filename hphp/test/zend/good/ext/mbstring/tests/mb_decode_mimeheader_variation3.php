@@ -13,5 +13,4 @@ $encoded_word = "=?UTF-8?B?zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPh
 var_dump(bin2hex(mb_decode_mimeheader($encoded_word)));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

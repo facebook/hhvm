@@ -9,5 +9,4 @@ echo "*** Testing get_loaded_extensions() : basic functionality ***\n";
 echo "Get loaded extensions\n";
 var_dump(get_loaded_extensions());
 
-?>
-===DONE===
+echo "===DONE===\n";

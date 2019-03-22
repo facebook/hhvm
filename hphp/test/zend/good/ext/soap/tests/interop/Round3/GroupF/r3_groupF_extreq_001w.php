@@ -5,4 +5,3 @@ echo $client->__getlastrequest();
 //$HTTP_RAW_POST_DATA = $client->__getlastrequest();
 //include("round3_groupF_extreq.inc");
 echo "ok\n";
-?>

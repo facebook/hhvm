@@ -48,4 +48,3 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
-?>

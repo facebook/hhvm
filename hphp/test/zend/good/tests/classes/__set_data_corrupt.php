@@ -19,4 +19,3 @@ class foo {
 }
 $f = new foo;
 $f->bar();
-?>

@@ -34,5 +34,4 @@ first::$a->who();
 first::$b->who();
 
 echo "\n";
-?>
-===DONE===
+echo "===DONE===\n";

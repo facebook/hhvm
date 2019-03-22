@@ -14,4 +14,3 @@ foreach (spl_autoload_functions() AS $func)
 }
 
 print_r(spl_autoload_functions());
-?>

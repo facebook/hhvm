@@ -19,5 +19,4 @@ $prop1 = new ReflectionProperty($a, 'defprop');
 $prop2 = new ReflectionProperty($a, 'myprop');
 var_dump($prop1->isDefault());
 var_dump($prop2->isDefault());
-?>
-==DONE==
+echo "==DONE==";

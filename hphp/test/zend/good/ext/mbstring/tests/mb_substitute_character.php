@@ -22,4 +22,3 @@ var_dump(mb_substitute_character());
 var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
 var_dump(mb_substitute_character('BAD_NAME'));
-?>

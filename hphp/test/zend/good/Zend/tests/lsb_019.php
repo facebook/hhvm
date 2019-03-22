@@ -35,4 +35,3 @@ echo ChildClass1::testStaticFunction() . "\n";
 
 echo ChildClass2::testStaticVar() . "\n";
 echo ChildClass2::testStaticFunction() . "\n";
-?>

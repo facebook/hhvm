@@ -27,4 +27,3 @@ openssl_x509_export($crt, &$str, false);
 if (strpos($str, 'X509v3 extensions:')) {
 	echo "Ok\n";
 }
-?>

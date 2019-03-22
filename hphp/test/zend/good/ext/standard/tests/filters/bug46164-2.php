@@ -16,4 +16,3 @@ $filter = stream_filter_append($fd, 'user_filter');
 fwrite($fd, "foo");
 fflush($fd);
 var_dump(fclose($fd));
-?>

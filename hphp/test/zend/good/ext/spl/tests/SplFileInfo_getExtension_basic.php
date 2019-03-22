@@ -6,12 +6,9 @@ foreach ($exts as $ext) {
     $info = new SplFileInfo($file . $ext);
     var_dump($info->getExtension(), pathinfo($file . $ext, PATHINFO_EXTENSION));
 }
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file = md5('SplFileInfo::getExtension');
 $exts = array('.txt', '.extension', '..', '.', '');
 foreach ($exts as $ext) {
     unlink($file . $ext);
 }
-?>

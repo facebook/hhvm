@@ -11,5 +11,4 @@ var_dump($db->createAggregate ('TESTAGGREGATE3', 'aggregate_step', 'aggregate_fi
 
 $db->close();
 
-echo "Done"
-?>
+echo "Done";

@@ -66,4 +66,3 @@ $obj->c = &$ext;
 check($obj);
 
 echo "Done";
-?>

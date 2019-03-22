@@ -13,4 +13,3 @@ $xml = simplexml_load_string($xmlstr);
 iterate($xml->unknown);
 
 echo "Done\n";
-?>

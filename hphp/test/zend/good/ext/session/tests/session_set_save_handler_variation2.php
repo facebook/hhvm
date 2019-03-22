@@ -18,4 +18,3 @@ var_dump(session_set_save_handler("open", "close", "read", "write", "destroy", "
 var_dump(session_destroy());
 
 ob_end_flush();
-?>

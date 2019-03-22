@@ -6,4 +6,3 @@ class foo
 	public $public = 'public';
 }
 var_export((array) new foo);
-?>

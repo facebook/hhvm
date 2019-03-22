@@ -31,4 +31,3 @@ var_dump( strtok($str));
 var_dump( $str );
 
 echo "Done\n";
-?>

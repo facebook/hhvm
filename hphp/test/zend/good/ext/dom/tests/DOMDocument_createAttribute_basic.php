@@ -11,4 +11,3 @@ $node->appendChild($test_attribute);
 
 echo $doc->saveXML();
 
-?>

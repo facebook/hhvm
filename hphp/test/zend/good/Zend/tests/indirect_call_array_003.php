@@ -21,4 +21,3 @@ $arr = array($foo, 'abc');
 $arr();
 
 
-?>

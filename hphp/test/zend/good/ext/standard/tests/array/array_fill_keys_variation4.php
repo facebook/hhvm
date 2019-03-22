@@ -43,4 +43,3 @@ var_dump( array_fill_keys($array, $unset_var) );
 
 fclose($fp);
 echo "Done";
-?>

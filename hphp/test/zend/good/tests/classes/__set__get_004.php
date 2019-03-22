@@ -26,5 +26,4 @@ $foo->bar = $bar;
 var_dump($bar->baz);
 var_dump($foo->bar->baz);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -29,5 +29,4 @@ var_dump((array)$people);
 var_dump((object)$foo);
 var_dump((object)$people);
 
-?>
-===DONE===
+echo "===DONE===\n";

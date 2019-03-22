@@ -149,4 +149,3 @@ try { var_dump( basename( $object, $object ) ); } catch (Exception $e) { echo "\
 try { var_dump( basename( "bar", $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>

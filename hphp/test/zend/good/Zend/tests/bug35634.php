@@ -26,4 +26,3 @@ if (defined("pass3")) {
   print "ok\n";
 }
 
-?>

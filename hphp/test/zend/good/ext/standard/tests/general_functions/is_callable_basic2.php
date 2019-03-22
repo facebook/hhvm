@@ -123,5 +123,4 @@ foreach($objects as $object) {
 abstract final class ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2 {
   public static $loop_counter;
 }
-?>
-===DONE===
+echo "===DONE===\n";

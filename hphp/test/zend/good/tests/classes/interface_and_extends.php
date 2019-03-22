@@ -15,5 +15,4 @@ class Tester extends Test
 $o = new Tester;
 $o->show();
 
-?>
-===DONE===
+echo "===DONE===\n";

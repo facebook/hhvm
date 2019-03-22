@@ -9,4 +9,3 @@ $result[] = array_diff_key($array1, $array2, $array3);
 
 var_dump($result);
 
-?>

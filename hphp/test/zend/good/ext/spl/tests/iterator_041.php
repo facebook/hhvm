@@ -81,6 +81,4 @@ class MyArrayIterator extends ArrayIterator
 MyArrayIterator::test('iterator_to_array');
 MyArrayIterator::test('iterator_count', array(3 => 6));
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

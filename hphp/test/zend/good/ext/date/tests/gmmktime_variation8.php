@@ -28,5 +28,4 @@ $year = 0x7D8;
 
 echo "\n-- Testing gmmktime() function with supplying hexa decimal values to arguments --\n";
 var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year) );
-?>
-===DONE===
+echo "===DONE===\n";

@@ -16,4 +16,3 @@ class bar implements Serializable {
 var_dump($o = serialize(new bar));
 var_dump(unserialize($o));
 
-?>

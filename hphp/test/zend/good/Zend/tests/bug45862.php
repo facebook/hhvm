@@ -23,4 +23,3 @@ echo "\n From child scope\n";
 $child = new Child();
 $child->test();
 
-?>

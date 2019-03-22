@@ -45,4 +45,3 @@ foreach ($methods as $method) {
 }
 
 echo "Done";
-?>

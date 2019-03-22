@@ -15,5 +15,4 @@ try { var_dump( stripcslashes() ); } catch (Exception $e) { echo "\n".'Warning: 
 echo "\n-- Testing stripcslashes() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
 try { var_dump( stripcslashes("abc def", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

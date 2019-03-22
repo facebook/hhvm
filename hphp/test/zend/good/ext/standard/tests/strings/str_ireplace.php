@@ -43,4 +43,3 @@ var_dump($Data = str_ireplace("\n", "<br>", $Data));
 
 
 echo "Done\n";
-?>

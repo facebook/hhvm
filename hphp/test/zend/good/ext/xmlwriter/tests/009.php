@@ -25,4 +25,3 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 $output = xmlwriter_flush($xw, true);
 print $output;
-?>

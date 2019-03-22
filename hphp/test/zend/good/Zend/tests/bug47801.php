@@ -22,4 +22,3 @@ $a->getFoo();
 $b = new B();
 $b->getFoo();
 
-?>

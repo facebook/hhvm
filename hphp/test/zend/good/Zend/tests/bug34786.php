@@ -11,4 +11,3 @@ error_reporting(1);
 echo "before: ".error_reporting()."\n";
 @foo(1,@bar(),3);
 echo "after: ".error_reporting()."\n";
-?>

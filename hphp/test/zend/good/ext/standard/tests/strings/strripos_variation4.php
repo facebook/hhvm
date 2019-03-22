@@ -23,5 +23,4 @@ var_dump( strripos($special_chars_str, "$*") );
 var_dump( strripos($special_chars_str, "$*", 10) );
 var_dump( strripos($special_chars_str, "(speCIal)") );
 
-?>
-===DONE===
+echo "===DONE===\n";

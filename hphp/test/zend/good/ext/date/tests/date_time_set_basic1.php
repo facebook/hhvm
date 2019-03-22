@@ -30,5 +30,4 @@ echo "After modification4 " . date_format($datetime, DATE_RFC2822) . "\n";
 date_time_set($datetime, 54, 25);
 echo "After modification5 " . date_format($datetime, DATE_RFC2822) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

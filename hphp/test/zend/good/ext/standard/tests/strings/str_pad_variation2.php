@@ -79,5 +79,4 @@ foreach($pad_lengths as $pad_length) {
 
 fclose($file_handle);  //closing the file handle
 
-?>
-===DONE===
+echo "===DONE===\n";

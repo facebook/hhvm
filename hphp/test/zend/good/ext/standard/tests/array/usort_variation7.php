@@ -24,5 +24,4 @@ $array_arg = array("b" => "Banana", "m" => "Mango", "a" => "Apple", "p" => "Pine
 echo "\n-- Anonymous 'cmp_function' with parameters passed by reference --\n";
 var_dump( usort(&$array_arg, $cmp_function_ref) );
 var_dump($array_arg);
-?>
-===DONE===
+echo "===DONE===\n";

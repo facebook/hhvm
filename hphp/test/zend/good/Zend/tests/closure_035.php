@@ -13,4 +13,3 @@ $x->a = function () use ($x) {
 
 var_dump(($x->a)());
 
-?>

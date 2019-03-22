@@ -46,7 +46,5 @@ if (count($user) == 2 && in_array("foo", $user) && in_array("helloworld", $user)
 } else {
 	echo "TEST FAILED: missing elements from 'user' array\n";
 	var_dump($user);
-}	
-
-?>
-===Done===
+}
+echo "===Done===";

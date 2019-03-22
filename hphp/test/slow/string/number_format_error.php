@@ -16,4 +16,3 @@ var_dump($badstr);
 // leak memory :)
 $tmp = iptcparse($badstr);
 var_dump($tmp);
-?>

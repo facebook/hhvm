@@ -14,5 +14,4 @@ try { var_dump( strlen() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 echo "\n-- Testing strlen() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
 try { var_dump( strlen("abc def", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

@@ -22,5 +22,4 @@ var_dump($r->getMethod('bla')->isAbstract());
 $o=new BlaMore;
 $o->bla();
 
-?>
-===DONE===
+echo "===DONE===\n";

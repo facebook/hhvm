@@ -18,4 +18,3 @@ proc_close($process2);
 
 echo "Done\n";
 
-?>

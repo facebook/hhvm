@@ -6,5 +6,3 @@ stream_filter_append($fp, 'bzip2.compress', STREAM_FILTER_WRITE);
 stream_filter_append($fp, 'convert.base64-encode', STREAM_FILTER_WRITE);
 fwrite($fp, $text);
 fclose($fp);
-
-?> 

@@ -29,4 +29,3 @@ $n = gmp_init("0");
 var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
-?>

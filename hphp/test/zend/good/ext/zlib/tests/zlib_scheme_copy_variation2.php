@@ -37,5 +37,4 @@ else {
 }
 unlink($inputFileName);
 unlink($outputFileName);
-?>
-===DONE===
+echo "===DONE===\n";

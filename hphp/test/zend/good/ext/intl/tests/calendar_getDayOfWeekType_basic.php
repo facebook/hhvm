@@ -11,6 +11,4 @@ var_dump(
 		$intlcal->getDayOfWeekType(IntlCalendar::DOW_FRIDAY),
 		$intlcal->getDayOfWeekType(IntlCalendar::DOW_SATURDAY)
 );
-
-?>
-==DONE==
+echo "==DONE==";

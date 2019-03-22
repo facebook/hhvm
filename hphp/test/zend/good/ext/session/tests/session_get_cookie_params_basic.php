@@ -18,4 +18,3 @@ var_dump(session_get_cookie_params());
 
 echo "Done";
 ob_end_flush();
-?>

@@ -56,4 +56,3 @@ $r = $o->get_class_name_obj2();
 var_dump($r);
 
 
-?>

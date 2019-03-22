@@ -88,5 +88,4 @@ foreach($inputs as $key =>$value) {
       var_dump( array_product($value) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

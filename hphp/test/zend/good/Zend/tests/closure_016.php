@@ -28,4 +28,3 @@ var_dump(is_callable(array($test,"__invoke"), true, &$name));
 echo $name."\n";
 var_dump(is_callable(array($test,"__invoke"), false, &$name));
 echo $name."\n";
-?>

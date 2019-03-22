@@ -79,4 +79,3 @@ $ucontainer->b = "container->a.changed";
 var_dump($ucontainer);
 
 echo "Done";
-?>

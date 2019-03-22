@@ -11,5 +11,4 @@ foreach ($intervals as $interval) {
 }
 
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

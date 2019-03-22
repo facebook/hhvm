@@ -22,4 +22,3 @@ foreach($offsets as $i) {
 	echo"--ASCII String:--\n";
 	var_dump(mb_strpos(b'This is na English ta', b'a', $i));
 }
-?>

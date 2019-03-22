@@ -18,4 +18,3 @@ var_dump( stripos($empty_string, FALSE) );
 var_dump( stripos($empty_string, NULL) );
 
 echo "*** Done ***";
-?>

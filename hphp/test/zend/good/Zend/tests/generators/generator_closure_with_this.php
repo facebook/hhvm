@@ -13,4 +13,3 @@ $gen = $genFactory();
 $gen->next();
 var_dump($gen->current());
 
-?>

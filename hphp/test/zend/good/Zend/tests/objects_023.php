@@ -7,4 +7,3 @@ new $arr[1]();
 
 print "ok\n";
 
-?>

@@ -5,4 +5,3 @@ class A  {
 }
 var_dump(constant('A::B1'));
 
-?>

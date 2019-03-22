@@ -44,4 +44,3 @@ var_dump(filter_var("http://www.example.com/index.html", FILTER_VALIDATE_URL, FI
 var_dump(filter_var("http://www.example.com/index.php?a=b&c=d", FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED));
 
 echo "Done\n";
-?>

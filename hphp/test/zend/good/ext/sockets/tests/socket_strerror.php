@@ -3,4 +3,3 @@
     for ($i=0;$i<=132;$i++) {
         var_dump(socket_strerror($i));
     }
-?>

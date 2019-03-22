@@ -12,4 +12,3 @@ xmlwriter_end_document($xw);
 
 $output = xmlwriter_flush($xw, true);
 print $output;
-?>

@@ -21,4 +21,3 @@ try { var_dump(openssl_verify(new stdClass, new stdClass, array(), 10000)); } ca
 
 echo "Done\n";
 
-?>

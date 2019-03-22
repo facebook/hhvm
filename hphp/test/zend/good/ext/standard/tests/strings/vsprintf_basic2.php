@@ -24,4 +24,3 @@ var_dump( vsprintf($format2,$arg2) );
 var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
-?>

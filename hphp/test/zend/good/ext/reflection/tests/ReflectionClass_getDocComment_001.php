@@ -46,4 +46,3 @@ foreach ($classes as $class) {
 }
 
 
-?>

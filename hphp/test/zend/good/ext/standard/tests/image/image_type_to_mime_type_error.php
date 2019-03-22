@@ -15,5 +15,4 @@ try { var_dump( image_type_to_mime_type() ); } catch (Exception $e) { echo "\n".
 //Test image_type_to_mime_type with one more than the expected number of arguments
 echo "\n-- Testing image_type_to_mime_type() function with more than expected no. of arguments --\n";
 try { var_dump( image_type_to_mime_type($imagetype, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

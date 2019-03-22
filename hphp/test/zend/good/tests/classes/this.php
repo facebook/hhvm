@@ -43,5 +43,4 @@ print $object->prop; // still shows 'Hello'
 $object->retrieve($other);
 print $other->prop;  // shows 'Hello'
 
-?>
-===DONE===
+echo "===DONE===\n";

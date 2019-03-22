@@ -23,5 +23,3 @@ echo "\n-- \$offset is minimum integer value --\n";
 var_dump(array_slice($input, -PHP_INT_MAX));
 
 echo "Done";
-?>
-

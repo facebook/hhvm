@@ -24,4 +24,3 @@ if ($arr['blue'] == 2) {
 imagedestroy($tile);
 imagedestroy($im);
 echo $r;
-?>

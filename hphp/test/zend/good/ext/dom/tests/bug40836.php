@@ -18,4 +18,3 @@ $contentNode = $entry->getElementsByTagName("content")->item(0)->firstChild;
 $dateNode = $entry->getElementsByTagName("updated")->item(0)->firstChild;
 $contentNode->firstChild->insertBefore($dateNode);
 echo $dom->saveXML();
-?>

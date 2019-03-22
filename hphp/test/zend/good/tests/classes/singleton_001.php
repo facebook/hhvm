@@ -25,4 +25,3 @@ SingletonCounter::Instance()->increment_and_print();
 SingletonCounter::Instance()->increment_and_print();
 SingletonCounter::Instance()->increment_and_print();
 
-?>

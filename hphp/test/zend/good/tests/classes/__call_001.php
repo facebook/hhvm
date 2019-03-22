@@ -14,4 +14,3 @@ $foo = new Caller();
 $a = $foo->test(1, '2', 3.4, true);
 var_dump($a);
 
-?>

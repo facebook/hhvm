@@ -32,5 +32,4 @@ echo "\n-- Testing strcspn() function with less than expected no. of arguments -
 $str = 'string_val';
 try { var_dump( strcspn($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-echo "Done"
-?>
+echo "Done";

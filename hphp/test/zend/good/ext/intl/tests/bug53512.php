@@ -8,4 +8,3 @@ foreach ($badvals as $val) {
 	var_dump(intl_get_error_message());
 }
 
-?>

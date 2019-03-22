@@ -23,5 +23,4 @@ try {
 
 
 
-?>
-===DONE===
+echo "===DONE===\n";

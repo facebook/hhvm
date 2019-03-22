@@ -44,5 +44,4 @@ for($count = 0; $count < count($values); $count++) {
   var_dump( chunk_split($str, $chunklen, $values[$count]) );
 }
 
-echo "Done"
-?>
+echo "Done";

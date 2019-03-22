@@ -17,4 +17,3 @@ $encoding = 'unknown-encoding';
 var_dump(mb_strlen($string, $encoding));
 
 echo "Done";
-?>

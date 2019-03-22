@@ -13,5 +13,4 @@ try { var_dump(floor($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'W
 
 echo "\n-- Too few arguments --\n";
 try { var_dump(floor()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===Done===
+echo "===Done===";

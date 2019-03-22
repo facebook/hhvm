@@ -24,5 +24,4 @@ unset($atts[0]);
 var_dump(isset($atts[0]));
 var_dump(isset($atts[TRUE]));
 
-?>
-===DONE===
+echo "===DONE===\n";

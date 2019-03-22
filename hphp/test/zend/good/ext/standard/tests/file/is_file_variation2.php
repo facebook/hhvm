@@ -21,11 +21,8 @@ var_dump( is_file($file_path."/is_file_variation2_link.tmp") );  // expected: tr
 clearstatcache();
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/is_file_variation2_symlink.tmp");
 unlink($file_path."/is_file_variation2_link.tmp");
 unlink($file_path."/is_file_variation2.tmp");
-?>

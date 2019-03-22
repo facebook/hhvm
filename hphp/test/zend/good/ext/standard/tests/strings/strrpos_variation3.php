@@ -22,4 +22,3 @@ var_dump( strrpos($multi_line_str, "") );
 var_dump( strrpos($multi_line_str, " ") );
 
 echo "*** Done ***";
-?>

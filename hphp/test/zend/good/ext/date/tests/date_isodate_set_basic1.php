@@ -25,5 +25,4 @@ echo "Week 30 day 3 of 2009 is \"" . date_format($datetime, "D M j") . "\"\n";
 date_isodate_set($datetime, 2008, 30, 3);
 echo "..same day last year was \"" . date_format($datetime, "D M j") . "\"\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

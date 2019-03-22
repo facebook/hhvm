@@ -30,4 +30,3 @@ function x() {
 }
 var_dump(x()['two']);
 
-?>

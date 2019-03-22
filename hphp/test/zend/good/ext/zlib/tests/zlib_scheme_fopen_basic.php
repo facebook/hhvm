@@ -4,5 +4,4 @@ $srcFile = "compress.zlib://$inputFileName";
 $h = fopen($srcFile, 'r');
 fpassthru($h);
 fclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

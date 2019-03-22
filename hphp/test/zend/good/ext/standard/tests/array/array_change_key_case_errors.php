@@ -9,4 +9,3 @@ try { var_dump( array_change_key_case() ); } catch (Exception $e) { echo "\n".'W
 try { var_dump( array_change_key_case($item, $item["one"], "CASE_UPPER") );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // more than expected numbers
 
 echo "end\n";
-?>

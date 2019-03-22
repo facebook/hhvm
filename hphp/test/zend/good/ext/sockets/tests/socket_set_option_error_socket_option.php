@@ -6,7 +6,5 @@ if (!$socket) {
 
 socket_set_option( $socket, SOL_SOCKET, 1, 1);
 socket_close($socket);
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__) . '/006_root_check.tmp');

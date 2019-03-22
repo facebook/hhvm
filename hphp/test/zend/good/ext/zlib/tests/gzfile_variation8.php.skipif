@@ -1,3 +1,2 @@
 <?php
 if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>

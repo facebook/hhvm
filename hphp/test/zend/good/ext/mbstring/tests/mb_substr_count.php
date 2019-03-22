@@ -23,4 +23,3 @@
 
 	$a = str_repeat("abcacbabca", 100);
 	var_dump(@mb_substr_count($a, "bca"));
-?>

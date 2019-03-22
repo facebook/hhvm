@@ -16,5 +16,3 @@ for( $i=0; $i<10; $i++ ) {
 	}
 }
 echo 'DONE', PHP_EOL;
-?>
-

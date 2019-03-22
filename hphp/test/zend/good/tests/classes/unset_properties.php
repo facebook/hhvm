@@ -120,6 +120,3 @@ var_export(isset($o->privateProperty));
 echo "\n";
 echo $o->getPrivateProperty();
 echo "\n\n";
-
-?>
-

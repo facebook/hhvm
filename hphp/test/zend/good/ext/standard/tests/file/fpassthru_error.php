@@ -19,4 +19,3 @@ try { var_dump( fpassthru("", "") ); } catch (Exception $e) { echo "\n".'Warning
 
 echo "\n*** Done ***\n";
 
-?>

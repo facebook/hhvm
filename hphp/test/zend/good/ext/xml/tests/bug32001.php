@@ -154,4 +154,3 @@ foreach ($suite as $testcase) {
 }
 
 // vim600: sts=4 sw=4 ts=4 encoding=UTF-8
-?>

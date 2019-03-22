@@ -15,4 +15,3 @@ var_dump(method_exists(new casesensitivitytest, 'myMetHOD'));
 var_dump(method_exists('casesensiTivitytest', 'myMetHOD'));
 
 echo "Done";
-?>

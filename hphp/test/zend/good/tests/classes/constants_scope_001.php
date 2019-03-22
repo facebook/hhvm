@@ -22,4 +22,3 @@ class ErrorCodesDerived extends ErrorCodes {
 ErrorCodes::print_fatal_error_codes();
 ErrorCodesDerived::print_fatal_error_codes();
 
-?>

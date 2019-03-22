@@ -8,4 +8,3 @@ $fragment->appendXML('<foo id="baz">bar</foo>');
 $root->appendChild($fragment);
 
 print $document->saveXML();
-?>

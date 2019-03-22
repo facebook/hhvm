@@ -16,5 +16,4 @@ try { var_dump( array_diff_key($array1) ); } catch (Exception $e) { echo "\n".'W
 // Testing array_diff_key with no arguments
 echo "\n-- Testing array_diff_key() function with no arguments --\n";
 try { var_dump( array_diff_key() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

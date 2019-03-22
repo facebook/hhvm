@@ -12,4 +12,3 @@ $proc = new XSLTProcessor;
 $proc->importStyleSheet($xsl);
 
 echo $proc->transformToXML($xml);
-?>

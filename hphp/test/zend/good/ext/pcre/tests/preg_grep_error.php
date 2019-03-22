@@ -18,5 +18,4 @@ try { var_dump(preg_grep($regex, $input, $flags, $extra_arg)); } catch (Exceptio
 echo "\n-- Testing preg_grep() function with less than expected no. of arguments --\n";
 $regex = 'string_val';
 try { var_dump(preg_grep($regex)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-echo "Done"
-?>
+echo "Done";

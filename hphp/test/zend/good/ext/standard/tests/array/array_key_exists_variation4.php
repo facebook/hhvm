@@ -18,5 +18,3 @@ $search = &$array;
 var_dump(array_key_exists('one', $search));
 
 echo "Done";
-?>
-

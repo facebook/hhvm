@@ -32,4 +32,3 @@ var_dump(array_diff_assoc($array_string_key, $array_numeric_key));
 
 
 echo "Done";
-?>

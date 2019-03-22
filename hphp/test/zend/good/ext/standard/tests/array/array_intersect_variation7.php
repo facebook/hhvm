@@ -83,4 +83,3 @@ foreach($arrays as $arr1) {
 fclose($fp);
 
 echo "Done";
-?>

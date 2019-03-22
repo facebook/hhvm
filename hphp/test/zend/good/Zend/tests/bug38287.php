@@ -30,4 +30,3 @@ class something {
     var_dump(self::get_object()->vars);
   }
 }
-?>

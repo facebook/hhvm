@@ -10,5 +10,4 @@ var_dump(gzread($h1, 15));
 gzclose($h1);
 var_dump(gzread($h2, 50));
 // deliberately do not close $h2
-?>
-===DONE===
+echo "===DONE===\n";

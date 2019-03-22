@@ -7,4 +7,3 @@ if ($fileInfo->isLink()) {
 	echo $fileInfo->getLinkTarget() == __FILE__ ? 'same' : 'different',PHP_EOL;
 }
 var_dump(unlink($link));
-?>

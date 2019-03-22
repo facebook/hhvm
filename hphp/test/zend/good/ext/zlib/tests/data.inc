@@ -1,4 +1,3 @@
-
 <?php
 $data = <<<QUOTE
 To be or not to be, that is the question;
@@ -85,4 +84,3 @@ That summons thee to heaven or to hell.
 
 QUOTE;
 
-?>

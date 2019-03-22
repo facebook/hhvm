@@ -10,6 +10,4 @@ echo "*** Testing array_multisort() : Testing with empty array ***\n";
 $arr = array();
 var_dump(array_multisort(&$arr));
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

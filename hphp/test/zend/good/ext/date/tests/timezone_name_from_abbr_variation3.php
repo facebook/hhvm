@@ -102,5 +102,4 @@ foreach($inputs as $variation =>$isdst) {
 // closing the resource
 fclose( $file_handle );
 
-?>
-===DONE===
+echo "===DONE===\n";

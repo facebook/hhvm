@@ -54,4 +54,3 @@ session_start();
 $_SESSION['E'] = 'F';
 // Don't try to destroy this time!
 
-?>

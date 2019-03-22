@@ -14,4 +14,3 @@ $stdClass = new StdClass();
 dump_iterateable($basicClass);
 dump_iterateable($stdClass);
 
-?>

@@ -26,4 +26,3 @@ $glue = 'string_val';
 var_dump( join($glue));
 
 echo "Done\n";
-?>

@@ -1,3 +1,2 @@
 <?php
 if (!extension_loaded('dom')) die("skip this test needs --enable-dom");
-?>

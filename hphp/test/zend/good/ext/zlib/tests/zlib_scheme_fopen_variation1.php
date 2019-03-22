@@ -7,5 +7,4 @@ echo "file=$compressedFile\n\n";
 $h = fopen($compressedFile, 'r');
 fpassthru($h);
 fclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

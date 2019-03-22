@@ -14,6 +14,4 @@ foreach($obj as $ak=>$av) {
 	}
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -32,5 +32,4 @@ $a->whee5();
 
 TestClass::whee5();
 
-?>
-===DONE===
+echo "===DONE===\n";

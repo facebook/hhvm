@@ -647,4 +647,3 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   return $result;
 }
 
-?>

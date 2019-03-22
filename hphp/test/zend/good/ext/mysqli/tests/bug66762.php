@@ -11,5 +11,4 @@
 
 	unset($mysqli);
 	var_dump($read_stmt->bind_result($data));
-?>
-done!
+echo "done!";

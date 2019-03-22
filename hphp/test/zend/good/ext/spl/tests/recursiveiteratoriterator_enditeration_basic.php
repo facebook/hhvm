@@ -16,4 +16,3 @@ $iterator = new EndIterationRecursiveIteratorIterator($sub_iterator);
 foreach ($iterator as $element) {
   var_dump($element);
 }
-?>

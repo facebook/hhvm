@@ -10,4 +10,3 @@
 	var_dump(gd_info());
 	
 	echo "\nDone\n";
-?>

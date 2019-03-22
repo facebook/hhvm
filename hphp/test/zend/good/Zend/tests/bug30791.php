@@ -20,4 +20,3 @@ $c = unserialize(serialize($b));
 echo $c,"\n";
 var_dump($c);
 
-?>

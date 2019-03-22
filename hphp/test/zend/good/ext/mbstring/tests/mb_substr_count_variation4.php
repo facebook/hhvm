@@ -24,4 +24,3 @@ var_dump(mb_substr_count($string_mb, $needle_mb, 'utf-8'));
 
 
 echo "Done";
-?>

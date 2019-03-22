@@ -23,4 +23,3 @@ var_dump(array_push(&$array[3], 'a'));
 var_dump($array);
 
 echo "Done";
-?>

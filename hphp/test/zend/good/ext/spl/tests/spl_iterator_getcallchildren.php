@@ -16,5 +16,4 @@ try {
 var_dump($output);
 
 
-?>
-===DONE===
+echo "===DONE===\n";

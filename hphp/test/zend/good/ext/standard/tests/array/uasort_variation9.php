@@ -41,5 +41,4 @@ echo "-- Passing string values to 'cmp_function' --\n";
 var_dump( uasort(&$string_values, 'cmp') );
 var_dump($string_values);
 
-echo "Done"
-?>
+echo "Done";

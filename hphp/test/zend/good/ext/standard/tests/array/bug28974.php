@@ -20,4 +20,3 @@ echo 'print_r(array_splice($c,2,2147483646));'."\n";
 print_r(array_splice(&$c,2,2147483646));
 echo "\$c is :";
 print_r($c);
-?>

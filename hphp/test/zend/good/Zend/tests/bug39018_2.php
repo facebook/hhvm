@@ -9,4 +9,3 @@ print @($foo[100] + $foo[130]);
 
 print "\nDone\n";
 
-?>

@@ -25,5 +25,4 @@ function traverse_xml($xml, $pad = '')
 $people = simplexml_load_string($xml);
 traverse_xml($people);
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -18,5 +18,4 @@ if (strcmp(bin2hex($md5_raw), $md5) == 0 ) {
 	var_dump($md5_raw, $md5);
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

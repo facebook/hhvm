@@ -5,4 +5,3 @@ if (date('T') == 'GMT') {
 }
 echo date("r\n", strtotime("Sep 04 16:39:45 2001"));
 echo date("r\n", strtotime("Sep 04 2001 16:39:45"));	
-?>

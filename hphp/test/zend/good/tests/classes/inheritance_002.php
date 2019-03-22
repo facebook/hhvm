@@ -50,4 +50,3 @@ $cm= new Child_mx1();
 
 echo "### Mixed style 2\n";
 $cm= new Child_mx2();
-?>

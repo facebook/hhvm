@@ -5,4 +5,3 @@ class fail {
 }
 
 echo "Done\n"; // Shouldn't be displayed
-?>

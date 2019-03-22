@@ -102,4 +102,3 @@ if (sodium_crypto_aead_aes256gcm_is_available()) {
 	var_dump(false);
 	var_dump(true);
 }
-?>

@@ -25,4 +25,3 @@ $contents = stream_get_contents($fp);
 var_dump($contents);
 fclose($fp);
 
-?>

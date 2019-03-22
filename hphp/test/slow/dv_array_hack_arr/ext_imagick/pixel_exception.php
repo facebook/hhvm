@@ -33,5 +33,5 @@ try {
 } catch (ImagickPixelException $ex) {
   echo "isPixelSimilar\n";
 }
-?>
-==DONE==
+
+echo "==DONE==\n";

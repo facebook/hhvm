@@ -41,11 +41,8 @@ foreach($files_arr as $file) {
 }
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/fileinode_variation3";
 unlink($dir_name."/fileinode_variation3.tmp");
 rmdir($dir_name);
-?>

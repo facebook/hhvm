@@ -5,4 +5,3 @@ header("X-Foo3: c\r\n ");
 header("X-Foo4: d\r ");
 header("X-Foo5: e\rSet-Cookie: ID=123");
 echo 'foo';
-?>

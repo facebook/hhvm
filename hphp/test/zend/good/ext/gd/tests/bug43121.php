@@ -9,4 +9,3 @@ ImageFill( $im, 0, 0, IMG_COLOR_TILED );
 ImageDestroy( $im );
 
 print "OK";
-?>

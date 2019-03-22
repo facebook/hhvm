@@ -13,4 +13,3 @@ var_dump(filter_var("5f::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 var_dump(filter_var("5f::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_RES_RANGE));
 var_dump(filter_var("3ff3::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 var_dump(filter_var("3ff3::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_RES_RANGE));
-?>

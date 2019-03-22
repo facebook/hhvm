@@ -117,4 +117,3 @@ foreach($vars as $var) {
 fclose($fp);
 
 echo "Done";
-?>

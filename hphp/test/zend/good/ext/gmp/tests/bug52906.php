@@ -18,4 +18,3 @@ foreach($vals as $data) {
 	echo "\n";
 }
 echo "Done\n";
-?>

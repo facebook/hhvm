@@ -26,4 +26,3 @@ class implem13 implements constr1, constr3
 	{
 	}
 }
-?>

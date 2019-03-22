@@ -22,5 +22,4 @@ $timestamp = -12.3456789000e10;
 var_dump( localtime($timestamp) );
 var_dump( localtime($timestamp, $is_associative) );
 
-?>
-===DONE===
+echo "===DONE===\n";

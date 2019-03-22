@@ -8,4 +8,3 @@ function foo ($a) {
 }
 
 foo("finally");
-?>

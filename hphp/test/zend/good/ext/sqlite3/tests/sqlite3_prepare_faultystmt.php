@@ -6,4 +6,3 @@ $db->exec("INSERT INTO foo (id, bar) VALUES (1, 'This is a test')");
 $stmt = $db->prepare('SELECT foo FROM bar');
 
 var_dump($stmt);
-?>

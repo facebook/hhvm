@@ -76,6 +76,4 @@ foreach($delimiters as $delimiter) {
 }
 
 fclose($file_handle);  //closing the file handle
-
-?>
-===Done===
+echo "===Done===";

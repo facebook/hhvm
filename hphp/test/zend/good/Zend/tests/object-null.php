@@ -10,4 +10,3 @@ var_dump($b != null);
 var_dump($b == null);
 var_dump($b !== null);
 var_dump($b === null);
-?>

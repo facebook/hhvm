@@ -13,4 +13,3 @@ foreach ($tests as $test) {
 	printf("%-10s => %s\n", $test, date(DATE_ISO8601, $t));
 }
 
-?>

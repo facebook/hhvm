@@ -9,4 +9,3 @@ $test = new test();
 $test->test();
 
 echo "Done\n";
-?>

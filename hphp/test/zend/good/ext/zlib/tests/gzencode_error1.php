@@ -44,6 +44,4 @@ try { var_dump(gzencode($data, $testclass)); } catch (Exception $e) { echo "\n".
 var_dump(gzencode($data, -1, 99.99));
 try { var_dump(gzencode($data, -1, $testclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gzencode($data, "a very none numeric string\n")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

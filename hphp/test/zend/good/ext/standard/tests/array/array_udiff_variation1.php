@@ -92,5 +92,4 @@ foreach($inputs as $key =>$value) {
       var_dump( array_udiff($value, $arr2, $data_comp_func) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

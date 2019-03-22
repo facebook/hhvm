@@ -18,4 +18,3 @@ class bar extends foo {
 
 $x= new bar();
 var_dump($x);
-?>

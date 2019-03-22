@@ -12,4 +12,3 @@ class MY_CLASS {
 }
 $a = new MY_CLASS;
 $a->falaOi();
-?>

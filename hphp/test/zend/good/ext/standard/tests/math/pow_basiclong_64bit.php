@@ -21,5 +21,4 @@ foreach ($longVals as $longVal) {
    }
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

@@ -10,6 +10,4 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //29
 var_dump(intlcal_roll($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH, false));
 var_dump($intlcal->get(IntlCalendar::FIELD_MONTH)); //1 (Feb)
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //28
-
-?>
-==DONE==
+echo "==DONE==";

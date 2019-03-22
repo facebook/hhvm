@@ -26,4 +26,3 @@
 	var_dump(mysqli_error($link));
 
 	print "done!";
-?>

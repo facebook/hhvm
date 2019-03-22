@@ -11,5 +11,4 @@ $result = get_extension_funcs("standard");
 var_dump(gettype($result));
 var_dump(in_array("cos", $result));
 
-?>
-===DONE===
+echo "===DONE===\n";

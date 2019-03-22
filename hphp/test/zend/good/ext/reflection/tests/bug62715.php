@@ -12,4 +12,3 @@ foreach ($r->getParameters() as $p) {
         var_dump($p->getDefaultValue());
     }
 }
-?>

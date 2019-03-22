@@ -28,7 +28,5 @@ if (imap_base64($base64) == $hex) {
 	echo "TEST PASSED\n";
 } else {
 	echo "TEST FAILED";
-}		
-
-?>
-===Done===
+}
+echo "===Done===";

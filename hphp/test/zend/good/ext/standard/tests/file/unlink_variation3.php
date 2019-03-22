@@ -35,4 +35,3 @@ var_dump( unlink($filename) );
 var_dump( file_exists($filename) );  // confirm file is deleted
 
 echo "Done\n";
-?>

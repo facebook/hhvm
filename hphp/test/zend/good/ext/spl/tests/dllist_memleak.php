@@ -12,6 +12,4 @@ $dll->next();
 $dll->next();
 echo $dll->current()."\n";
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -18,4 +18,3 @@ class z extends domDocument{
 $z=new z();
 var_dump($z->p_array);
 var_dump($z->p_variable);
-?>

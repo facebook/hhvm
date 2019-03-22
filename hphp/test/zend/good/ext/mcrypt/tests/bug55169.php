@@ -6,4 +6,3 @@ for( $i=1; $i<=64; $i = $i*2 ){
   echo ' Hex: '. bin2hex( $random ) . PHP_EOL;
   echo PHP_EOL;
 }
-?>

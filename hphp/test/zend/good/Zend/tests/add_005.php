@@ -10,4 +10,3 @@ $c = $d + $i;
 var_dump($c);
 
 echo "Done\n";
-?>

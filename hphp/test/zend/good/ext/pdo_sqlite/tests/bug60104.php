@@ -9,4 +9,3 @@ function setUp()
 setUp();
 setUp();
 echo "done";
-?>

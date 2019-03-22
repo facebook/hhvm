@@ -10,5 +10,4 @@ try { var_dump(ldap_list($link, $link)); } catch (Exception $e) { echo "\n".'War
 
 // Too many parameters
 try { var_dump(ldap_list($link, "$base", "(objectClass=*)", array(), 0, 0, 0, 0 , "Additional data")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

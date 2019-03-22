@@ -7,5 +7,4 @@ $params = $reflect->getParameters();
 foreach($params as $key => $value) {
 	var_dump($value->getPosition());
 }
-?>
-==DONE==
+echo "==DONE==";

@@ -23,5 +23,3 @@ echo "\n-- New position: --\n";
 echo key(&$arr) . " => " . current(&$arr) . "\n";
 
 echo "Done";
-?>
-

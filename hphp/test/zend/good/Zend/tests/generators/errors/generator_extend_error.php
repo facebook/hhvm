@@ -2,4 +2,3 @@
 
 class ExtendedGenerator extends Generator { }
 
-?>

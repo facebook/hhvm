@@ -45,5 +45,4 @@ $c = new C;
 $c->unsetPrivate();
 $c->p = 'this will fail';
 var_dump($c);
-?>
-==Done==
+echo "==Done==";

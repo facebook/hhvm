@@ -55,6 +55,4 @@ foreach ($pq3 as $k=>$v) {
     echo "$k=>".print_r($v, 1)."\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

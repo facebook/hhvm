@@ -31,4 +31,3 @@ $initial = null;
 var_dump(array_reduce($array, 'reduce_null', $initial), $initial);
 
 echo "\nDone";
-?> 

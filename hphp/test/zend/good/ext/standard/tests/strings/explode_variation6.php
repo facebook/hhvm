@@ -35,5 +35,4 @@ function test_explode($delim, $string, $limit)
 		var_dump(bin2hex($v));
 	}	
 }
-?>
-===DONE===
+echo "===DONE===\n";

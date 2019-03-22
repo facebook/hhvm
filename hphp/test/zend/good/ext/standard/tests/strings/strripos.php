@@ -12,4 +12,3 @@
 	var_dump(@strripos("a", ""));
 	var_dump(@strripos("", "a"));
 	var_dump(@strripos("\\\\a", "\\a"));
-?>

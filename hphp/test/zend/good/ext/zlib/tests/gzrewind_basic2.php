@@ -13,5 +13,4 @@ var_dump(gztell($h));
 echo "first 20 characters=".gzread($h,20)."\n";
 
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

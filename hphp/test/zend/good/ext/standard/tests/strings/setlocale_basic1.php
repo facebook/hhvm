@@ -102,4 +102,3 @@ if(trim($currency_symbol[$value]) == $new_currency){
 }
 
 echo "\nDone\n";
-?>

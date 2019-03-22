@@ -62,4 +62,3 @@ var_dump( array_rand($input, 6) );
 
 
 echo "Done";
-?>

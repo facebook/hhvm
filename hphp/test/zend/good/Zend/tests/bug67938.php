@@ -18,4 +18,3 @@ $obj = new Test;
 $obj->foo();
 $obj->bar([]);
 
-?>

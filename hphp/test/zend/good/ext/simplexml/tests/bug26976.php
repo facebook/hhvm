@@ -15,4 +15,3 @@ echo $root->child[1], "\n";
 echo $root->child[2], "\n";
 echo $root->child[3], "\n";
 
-?>

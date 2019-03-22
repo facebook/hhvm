@@ -29,5 +29,4 @@ foreach($inputs as $key =>$value) {
       var_dump( gmdate($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

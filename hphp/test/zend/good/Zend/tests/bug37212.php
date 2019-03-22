@@ -34,5 +34,4 @@ $B->copyValue($C);
 
 var_dump($B);
 
-?>
-===DONE===
+echo "===DONE===\n";

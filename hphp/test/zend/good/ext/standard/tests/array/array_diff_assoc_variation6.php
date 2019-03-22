@@ -71,4 +71,3 @@ foreach($inputs as $input) {
   $iterator++;
 };
 echo "Done";
-?>

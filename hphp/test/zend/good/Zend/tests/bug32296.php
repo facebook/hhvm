@@ -28,4 +28,3 @@ $a = new square();
 $a->buggy();
 print_r(get_class_methods("square"));
 print_r(get_class_methods($a));
-?>

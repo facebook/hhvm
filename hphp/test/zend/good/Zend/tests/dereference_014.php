@@ -22,4 +22,3 @@ var_dump($h);
 $h = foo::b()[1]->b;
 var_dump($h);
 
-?>

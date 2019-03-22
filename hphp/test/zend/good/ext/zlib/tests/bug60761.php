@@ -38,4 +38,3 @@ var_dump($lens); // show lengths to help triage in case of failure
  
 // expected headers since its CGI
 
-?>

@@ -8,5 +8,4 @@ print_r($xml);
 
 $xml = new SimpleXMLElement('<foo><bar/><baz/></foo>');
 print_r($xml);
-?>
-===DONE===
+echo "===DONE===\n";

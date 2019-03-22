@@ -76,6 +76,4 @@ for($i = 1; $i < 4; $i++)
 	print $l->current() . "\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

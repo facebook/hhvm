@@ -23,4 +23,3 @@ echo imagecolorexactalpha($im, 255,200,0,100) . "\n";
 echo imagecolorexact($im, 12,12,12) . "\n";
 
 imagedestroy($im);
-?>

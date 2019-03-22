@@ -17,5 +17,4 @@ var_dump(filetype($srcFile));
 echo "fileatime=";
 var_dump(fileatime($srcFile));
 
-?>
-===DONE===
+echo "===DONE===\n";

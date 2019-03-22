@@ -32,4 +32,3 @@ file_put_contents($file, "<?php\n\$i=2;\n");
 include($file);
 echo $i . "\n";
 
-?>

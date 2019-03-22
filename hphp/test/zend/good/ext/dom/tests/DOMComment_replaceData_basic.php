@@ -13,4 +13,3 @@ $comment->replaceData(0,50,'replaced');
 $dom->appendChild($comment);
 echo $dom->saveXML();
 
-?>

@@ -1,1 +1,1 @@
-<?php if (!extension_loaded("session")) die("skip session extension required"); ?>
+<?php if (!extension_loaded("session")) die("skip session extension required");

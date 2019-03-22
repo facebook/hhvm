@@ -24,4 +24,3 @@ var_dump(sha1_file($filename, true));
 sha1_file($filename);
 
 echo "Done\n";
-?>

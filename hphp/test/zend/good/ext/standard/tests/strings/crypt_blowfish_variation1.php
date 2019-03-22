@@ -17,4 +17,3 @@ foreach($salts as $i=>$salt) {
   }
 }
 
-?>

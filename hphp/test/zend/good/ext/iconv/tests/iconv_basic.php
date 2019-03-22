@@ -37,4 +37,3 @@ var_dump(bin2hex(iconv('SJIS', 'UTF-8', $sjis_string)));
 var_dump(bin2hex(iconv('EUC-JP', 'UTF-8', $euc_jp_string)));
 
 echo "Done";
-?>

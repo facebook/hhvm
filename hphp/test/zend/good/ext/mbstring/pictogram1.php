@@ -93,4 +93,3 @@ var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xe8\x2d", "UTF-8-Mobile#DOCOMO", 
 var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xe8\x2d", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xee\x70", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));//
 
-?>

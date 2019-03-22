@@ -169,4 +169,3 @@ echo "\nDone";
 
 fclose($resource1);
 closedir($resource2);
-?>

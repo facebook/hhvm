@@ -11,7 +11,4 @@ $intlcal = new IntlGregorianCalendar(2012, 1, 28);
 var_dump(intlcal_roll($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH, 2));
 var_dump($intlcal->get(IntlCalendar::FIELD_MONTH)); //1 (Feb)
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //1
-
-
-?>
-==DONE==
+echo "==DONE==";

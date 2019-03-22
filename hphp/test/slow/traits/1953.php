@@ -12,4 +12,3 @@ class MyHelloWorld{
 }
 $o = new MyHelloWorld();
 $o->falaTchau();
-?>

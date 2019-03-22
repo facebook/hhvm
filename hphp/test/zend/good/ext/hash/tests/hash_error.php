@@ -17,6 +17,4 @@ try { var_dump(hash('adler32', '', false, $extra_arg)); } catch (Exception $e) {
 
 echo "\n-- Testing hash() function with invalid hash algorithm --\n";
 var_dump(hash('foo', ''));
-
-?>
-===Done===
+echo "===Done===";

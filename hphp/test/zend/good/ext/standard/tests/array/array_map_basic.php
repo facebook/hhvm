@@ -36,4 +36,3 @@ echo "-- With string array --\n";
 var_dump( array_map('concatenate', $arr1, $arr2) );
 
 echo "Done";
-?>

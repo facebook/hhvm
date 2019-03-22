@@ -28,4 +28,3 @@ $mDimensional = array(
 
 echo http_build_query($mDimensional) . PHP_EOL;
 echo http_build_query($mDimensional, 'prefix_');
-?>

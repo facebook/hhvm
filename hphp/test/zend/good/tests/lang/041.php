@@ -9,5 +9,4 @@ $wrongClassname  =  'B';
 echo $classname::$b."\n";
 echo $wrongClassname::$b."\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

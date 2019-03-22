@@ -14,5 +14,4 @@ echo "*** Testing readdir() : usage variations ***\n";
 var_dump($fp = fopen(__FILE__, "r"));
 var_dump( readdir($fp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

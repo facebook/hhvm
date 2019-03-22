@@ -21,5 +21,4 @@ while ($reader->read()) {
     }
 }
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";

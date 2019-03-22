@@ -19,5 +19,4 @@ var_dump(iconv_strlen($string_ascii));
 
 echo "\n-- Multibyte String --\n";
 var_dump(iconv_strlen($string_mb, 'UTF-8'));
-?>
-===DONE===
+echo "===DONE===\n";

@@ -15,4 +15,3 @@ var_dump(substr_count($a, "bca", 200, 50));
 
 echo "Done\n";	
 
-?>

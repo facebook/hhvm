@@ -45,4 +45,3 @@ foreach($array_type as $type) {
 }
 
 echo "Done\n";
-?>

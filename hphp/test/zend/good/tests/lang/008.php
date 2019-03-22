@@ -13,4 +13,3 @@ function Test()
 
 Test();
 
-?>

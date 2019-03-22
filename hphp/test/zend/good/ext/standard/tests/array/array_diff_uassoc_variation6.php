@@ -28,5 +28,4 @@ echo "\n-- Result of comparing floating points and strings containing floating p
 var_dump( array_diff_uassoc($arr_float, $arr_string_float, "key_compare_func") );
 var_dump( array_diff_uassoc($arr_string_float, $arr_float, "key_compare_func") );
 
-?>
-===DONE===
+echo "===DONE===\n";

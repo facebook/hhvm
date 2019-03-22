@@ -25,5 +25,4 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = abs($values[$i]);
 	var_dump($res);
 }
-?>
-===Done===
+echo "===Done===";

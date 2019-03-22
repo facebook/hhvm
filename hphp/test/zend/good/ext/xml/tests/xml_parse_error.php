@@ -22,4 +22,3 @@ echo "\n-- Testing xml_parse() function with less than expected no. of arguments
 try { var_dump( xml_parse(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
-?>

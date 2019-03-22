@@ -25,6 +25,4 @@ function __autoload($cname) {
     var_dump($cname);
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

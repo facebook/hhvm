@@ -76,4 +76,3 @@ var_dump(bin2hex(mb_convert_encoding("&#X10ffff;", "UTF-8", "HTML-ENTITIES")));
 var_dump(bin2hex(mb_convert_encoding("&#X110000;", "UTF-8", "HTML-ENTITIES")));
 var_dump(bin2hex(mb_convert_encoding("&#1114111;", "UTF-8", "HTML-ENTITIES")));
 var_dump(bin2hex(mb_convert_encoding("&#1114112;", "UTF-8", "HTML-ENTITIES")));
-?>

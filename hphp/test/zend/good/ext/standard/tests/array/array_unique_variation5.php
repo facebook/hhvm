@@ -16,4 +16,3 @@ $input = array( 1 => "one", 2 => "two", 2 => "2", 3 => "three", 1 => "1", "1", "
 var_dump( array_unique($input) );
 
 echo "Done";
-?>

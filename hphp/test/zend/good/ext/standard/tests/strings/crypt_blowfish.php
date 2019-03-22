@@ -39,4 +39,3 @@ foreach($tests as $test) {
   $i++;
 }
 
-?>

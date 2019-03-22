@@ -19,5 +19,4 @@ var_dump( array_sum($input) );
 $input = array('a' => 20, "b" => 50, 'c' => 0, 'd' => -30, "e" => 100);
 echo "-- with string keys --\n";
 var_dump( array_sum($input) );
-echo "Done"
-?>
+echo "Done";

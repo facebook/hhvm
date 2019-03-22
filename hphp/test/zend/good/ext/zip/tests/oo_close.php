@@ -12,4 +12,3 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 } else {
 	echo "failed\n";
 }
-?>

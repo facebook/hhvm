@@ -6,4 +6,3 @@
       const BASE_CONST = 'hello';
   }
   var_dump(C::CONST_1, C::CONST_2);
-?>

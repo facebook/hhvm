@@ -24,4 +24,3 @@ if ($res === TRUE) {
 	echo "zip_readfile could not read from " . $zipname . " : " . $filename;
 }
 
-?>

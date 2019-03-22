@@ -14,5 +14,4 @@ echo "SELECTING results\n";
 var_dump($db->querySingle("SELECT id FROM test WHERE id = 'a'"));
 var_dump($db->querySingle("SELECT id, time FROM test WHERE id = 'a'", true));
 
-echo "Done"
-?>
+echo "Done";

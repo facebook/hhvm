@@ -28,5 +28,4 @@ foreach($strings as $string) {
   var_dump(bin2hex($string));
   $count ++;
 }  
-?>
-===DONE===
+echo "===DONE===\n";

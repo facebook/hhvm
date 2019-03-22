@@ -45,6 +45,4 @@ while($it->valid())
 	$it->next();
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

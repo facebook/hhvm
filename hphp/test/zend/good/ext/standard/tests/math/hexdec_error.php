@@ -18,4 +18,3 @@ try { hexdec('0x123abc',true); } catch (Exception $e) { echo "\n".'Warning: '.$e
 echo "\n-- Incorrect input --\n";
 hexdec(new classA());
 
-?>

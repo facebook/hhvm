@@ -25,5 +25,4 @@ var_dump(key(&$array));
 echo "\n-- Past end of the array --\n";
 next(&$array);
 var_dump(key(&$array));
-?>
-===DONE===
+echo "===DONE===\n";

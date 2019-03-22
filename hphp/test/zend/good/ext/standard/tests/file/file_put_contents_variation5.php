@@ -42,5 +42,4 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation5 {
   public static $scriptLocFile;
   public static $filename;
 }
-?>
-===DONE===
+echo "===DONE===\n";

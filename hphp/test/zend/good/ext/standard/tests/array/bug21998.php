@@ -10,4 +10,3 @@ var_dump(key(&$a));
 var_dump(array_pop(&$a));
 var_dump(key(&$a));
 
-?>

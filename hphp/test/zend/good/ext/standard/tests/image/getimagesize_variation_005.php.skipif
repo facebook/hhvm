@@ -2,4 +2,3 @@
 	if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
 		die("skip zlib extension is not available or SWC not supported");
 	}
-?>

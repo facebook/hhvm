@@ -9,4 +9,3 @@
 	var_dump(md5(strrev($str)));
 	var_dump(strrev(NULL));
 	var_dump(strrev(""));
-?>

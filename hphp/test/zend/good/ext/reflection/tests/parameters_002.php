@@ -65,6 +65,4 @@ check_params(new ReflectionFunction('test'));
 
 check_params(new ReflectionMethod('test::test'));
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

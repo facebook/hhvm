@@ -10,4 +10,3 @@ foreach($dp as $dt) {
     echo $dt->format('r') . "\n"; // Sun, 12 Dec 2010 00:00:00 +0100
 }
 echo $start->format('r'), "\n\n";
-?>

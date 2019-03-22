@@ -26,4 +26,3 @@ class hariCow extends FIIFO {
 $db = new hariCow;
 
 echo $db;
-?>

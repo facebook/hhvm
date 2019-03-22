@@ -15,4 +15,3 @@ $table = array("AB" => "Alberta",
 "YT" => "Territoire du Yukon");
 asort(&$table, SORT_LOCALE_STRING);
 var_dump($table);
-?>

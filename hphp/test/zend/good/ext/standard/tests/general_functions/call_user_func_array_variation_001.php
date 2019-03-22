@@ -30,4 +30,3 @@ $ref = &$arg[0];
 call_user_func_array('by_ref', $arg);
 var_dump($arg);
 
-?>

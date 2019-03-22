@@ -10,4 +10,3 @@ foreach (xrange(10, 20, 2) as $i) {
 	var_dump($i);
 }
 
-?>

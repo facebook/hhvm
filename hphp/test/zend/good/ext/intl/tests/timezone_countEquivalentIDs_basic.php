@@ -5,5 +5,4 @@ var_dump($count >= 2);
 
 $count2 = intltz_count_equivalent_ids('Europe/Lisbon');
 var_dump($count2 == $count);
-?>
-==DONE==
+echo "==DONE==";

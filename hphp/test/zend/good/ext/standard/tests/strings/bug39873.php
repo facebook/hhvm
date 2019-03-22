@@ -3,4 +3,3 @@
 	$num = 0+"1234.56";  
 	echo number_format($num,2);
 	echo "\n";
-?>

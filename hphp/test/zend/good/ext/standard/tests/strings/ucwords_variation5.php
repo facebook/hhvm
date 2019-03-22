@@ -12,4 +12,3 @@ var_dump(ucwords('testing empty delimiters', ''));
 var_dump(ucwords('testing ranges', 'a..e'));
 
 echo "Done\n";
-?>

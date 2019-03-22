@@ -5,4 +5,3 @@ $doctype = $imp->createDocumentType("html",
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
 $doc = $imp->createDocument(null, 'html', $doctype);
 echo $doc->saveHTML();
-?>

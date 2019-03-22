@@ -26,5 +26,4 @@ while ($reader->read()) {
 }
 $reader->close();
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";

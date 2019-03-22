@@ -56,4 +56,3 @@ echo "OK!\n";
 
 @unlink($key_file_name);
 
-?>

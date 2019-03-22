@@ -4,4 +4,3 @@ class parent {
 }
 
 echo "Done\n";
-?>

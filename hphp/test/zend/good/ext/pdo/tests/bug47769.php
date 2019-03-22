@@ -20,4 +20,3 @@ $test = new test('sqlite::memory:');
 $test->quote('foo');
 $test->isProtected();
 
-?>

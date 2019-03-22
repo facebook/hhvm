@@ -32,11 +32,7 @@ $return_value = fflush($file_handle);
 var_dump( is_bool($return_value) );
 fclose($file_handle);
 echo "\n*** Done ***";
-?>
-
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = "$file_path/fflush_basic.tmp";
 unlink($filename);
-?>

@@ -17,4 +17,3 @@ call_user_func(array('bar', 'test'));
 $a = new bar;
 call_user_func(array($a, 'test2'));
 
-?>

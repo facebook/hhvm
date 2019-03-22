@@ -21,5 +21,3 @@ echo "\n-- \$input is a sub-array --\n";
 var_dump(array_slice($input[2], 1, 2));
 
 echo "Done";
-?>
-

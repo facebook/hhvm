@@ -13,4 +13,3 @@ class Foo extends OAuth
 $foo = new Foo('key', 'secret');
 var_dump($foo->getFoo());
 
-?>

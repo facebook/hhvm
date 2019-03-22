@@ -25,5 +25,4 @@ echo "-- Anonymous 'cmp_function' with parameters passed by reference --\n";
 var_dump( uasort(&$array_arg, $cmp_function_ref) );
 var_dump($array_arg);
 
-echo "Done"
-?>
+echo "Done";

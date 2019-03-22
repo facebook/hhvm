@@ -40,5 +40,4 @@ echo "===DUMP===\n";
 var_dump(get_class($sxe));
 var_dump(trim($sxe->elem1));
 
-?>
-===DONE===
+echo "===DONE===\n";

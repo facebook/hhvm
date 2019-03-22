@@ -25,4 +25,3 @@ $b->t = "foo";
 echo $a->p->t;
 $a->p->t = "bar";
 echo $a->p->t;
-?>

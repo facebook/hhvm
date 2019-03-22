@@ -12,4 +12,3 @@ var_dump($clone);
 var_dump($clone->asXML());
 
 echo "Done\n";
-?>

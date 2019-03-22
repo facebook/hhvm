@@ -4,4 +4,3 @@ class Foo {
 	const B = "ok";
 }
 echo Foo::A."\n";
-?>

@@ -8,4 +8,3 @@ class test {
 set_error_handler(array(new test(), "hdlr"));
 
 trigger_error("test");
-?>

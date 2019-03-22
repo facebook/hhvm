@@ -28,4 +28,3 @@ foreach($invalid as $id) {
     }
 }
 
-?>

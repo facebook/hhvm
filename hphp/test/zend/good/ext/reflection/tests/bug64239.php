@@ -15,4 +15,3 @@ print_r($obj->getMethods());
 print_r(($method = $obj->getMethod("Bmethod")));
 var_dump($method->getName());
 var_dump($method->getShortName());
-?>

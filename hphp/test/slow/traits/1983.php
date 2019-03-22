@@ -16,4 +16,3 @@ trait SayWorld {
 }
 $o = new MyHelloWorld();
 $o->sayHello();
-?>

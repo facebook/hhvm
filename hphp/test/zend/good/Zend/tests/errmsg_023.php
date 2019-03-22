@@ -9,4 +9,3 @@ class test extends test1 {
 }
 
 echo "Done\n";
-?>

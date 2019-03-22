@@ -84,4 +84,3 @@
 	echo "Link closed";
 	var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1'));
 	print "done!";
-?>

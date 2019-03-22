@@ -10,4 +10,3 @@ var_dump($db->close());
 
 print "done";
 
-?>

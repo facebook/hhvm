@@ -48,4 +48,3 @@ unlink($file3);
 /* To test this PEAR package should be installed */
 
 echo "\n*** Done ***\n";
-?>

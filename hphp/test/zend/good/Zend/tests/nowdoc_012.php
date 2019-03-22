@@ -12,4 +12,3 @@ Now let's finish it
 ENDOFNOWDOC;
 print "{$x}\n";
 
-?>

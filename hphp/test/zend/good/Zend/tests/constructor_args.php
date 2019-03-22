@@ -12,4 +12,3 @@ final class foo extends bar implements foobar {
 }
 new foo;
 print "ok!";
-?>

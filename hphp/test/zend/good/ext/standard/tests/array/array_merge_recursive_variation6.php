@@ -29,4 +29,3 @@ var_dump( array_merge_recursive($arr1_numeric_key, $arr2) );
 var_dump( array_merge_recursive($arr1_string_key, $arr2) );
 
 echo "Done";
-?>

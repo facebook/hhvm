@@ -7,4 +7,3 @@ $iterator = new RecursiveIteratorIterator($sub_iterator);
 
 var_dump($iterator->getSubIterator() === $sub_iterator);
 var_dump($iterator->getSubIterator() === $not_sub_iterator);
-?>

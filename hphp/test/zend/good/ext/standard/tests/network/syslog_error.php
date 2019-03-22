@@ -20,5 +20,4 @@ echo "\n-- Testing syslog() function with less than expected no. of arguments --
 $priority = 10;
 try { var_dump( syslog($priority) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -49,5 +49,4 @@ print_r(file_get_contents($data_file));
 echo "\n";
 
 unlink($data_file); 
-?>
-===DONE===
+echo "===DONE===\n";

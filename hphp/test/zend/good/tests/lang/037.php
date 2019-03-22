@@ -22,4 +22,3 @@ class chld extends par {
 $obj = new chld();
 $obj->displayMe();
 
-?>

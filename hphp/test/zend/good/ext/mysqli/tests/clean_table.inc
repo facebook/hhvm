@@ -11,4 +11,3 @@ if (!mysqli_query($link, 'DROP TABLE IF EXISTS '.$test_table_name)) {
 }
 
 mysqli_close($link);
-?>

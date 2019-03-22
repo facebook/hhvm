@@ -13,4 +13,3 @@
 	echo "\n";
 	echo strip_tags('TESTS ?!!?!?!!!?!!');
 	echo "\n";
-?>

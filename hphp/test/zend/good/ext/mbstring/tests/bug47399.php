@@ -4,4 +4,3 @@ foreach (array("Shift_JIS", "CP932") as $enc) {
         var_dump(mb_check_encoding("\x81".pack("c", $a), $enc));
     }
 }
-?>

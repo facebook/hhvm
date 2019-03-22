@@ -18,4 +18,3 @@ $encoding = 'unknown-encoding';
 var_dump(iconv_strrpos($haystack, $needle , $encoding));
 
 echo "Done";
-?>

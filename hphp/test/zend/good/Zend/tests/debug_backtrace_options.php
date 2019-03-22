@@ -39,4 +39,3 @@ class foo {
 foo::statCall("doit", "debug_print_backtrace");
 foo::statCall("doit", "backtrace_print");
 
-?>

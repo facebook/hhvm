@@ -22,6 +22,4 @@ foreach($streams as $original => $stream)
 	}
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

@@ -16,4 +16,3 @@ function b() {
 
 var_dump(b()[1]);
 
-?>

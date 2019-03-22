@@ -14,4 +14,3 @@ var_dump($output);
 if ($iswin) {
 	unlink($f);
 }
-?>

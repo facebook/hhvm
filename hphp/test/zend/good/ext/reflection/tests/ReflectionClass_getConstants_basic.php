@@ -18,4 +18,3 @@ foreach($classes as $class) {
 	$rc = new ReflectionClass($class);
 	var_dump($rc->getConstants());
 }
-?>

@@ -30,4 +30,3 @@ session_set_save_handler($handler);
 session_start();
 
 ob_end_flush();
-?>

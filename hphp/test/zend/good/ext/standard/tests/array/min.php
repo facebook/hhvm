@@ -13,4 +13,3 @@ var_dump(min(1, true, false, true));
 var_dump(min(0, true, false, true));
 
 echo "Done\n";
-?>

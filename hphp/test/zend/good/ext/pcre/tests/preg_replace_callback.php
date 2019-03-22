@@ -17,4 +17,3 @@ $output = parseTagsRecursive($input);
 
 echo $output, "\n";
 
-?>

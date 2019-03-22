@@ -10,5 +10,4 @@ try { similar_text("abc", "def", &$percent, $extra_arg); } catch (Exception $e) 
 
 echo "\n-- Testing similar_text() function with less than expected no. of arguments --\n";
 try { similar_text("abc"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-?>
-===DONE===
+echo "===DONE===\n";

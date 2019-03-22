@@ -37,5 +37,4 @@ var_dump($db);
 $db = new hariCow;
 
 var_dump($db);
-?>
-===DONE===
+echo "===DONE===\n";

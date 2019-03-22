@@ -48,4 +48,3 @@ $bar = new bar;
 $bar->test();
 
 echo "Done\n";
-?>

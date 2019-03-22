@@ -78,4 +78,3 @@ catch ( ImagickException $e )
 {
   echo $e->getMessage() . "\n";
 }
-?>

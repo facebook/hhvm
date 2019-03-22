@@ -12,4 +12,3 @@ var_dump(strip_tags('<! a>'));
 
 var_dump(strip_tags('<? ax'));
 
-?>

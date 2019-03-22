@@ -41,4 +41,3 @@ Class C {
     return true;
   }
 }
-?>

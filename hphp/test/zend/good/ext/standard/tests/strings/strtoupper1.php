@@ -54,4 +54,3 @@ try { var_dump( strtoupper() ); /* Zero arguments */ } catch (Exception $e) { ec
 try { var_dump( strtoupper("a", "b") ); /* Arguments > Expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "*** Done ***";
-?>

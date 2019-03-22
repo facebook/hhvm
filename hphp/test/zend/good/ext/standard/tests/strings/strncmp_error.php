@@ -21,4 +21,3 @@ try { var_dump( strncmp($str1, $str2, $len, $extra_arg) ); } catch (Exception $e
 $len = -10;
 var_dump( strncmp($str1, $str2, $len) );
 echo "*** Done ***\n";
-?>

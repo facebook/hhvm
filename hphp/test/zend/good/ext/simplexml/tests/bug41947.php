@@ -6,5 +6,4 @@ $gchild = $xml->xpath("//grandchild");
 if (count($gchild) > 0) {
     echo $gchild[0]."\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";

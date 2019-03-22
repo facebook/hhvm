@@ -29,4 +29,3 @@ $cert = str_replace("\\n", "\n", $csr);
 $arr = openssl_x509_parse($cert);
 var_dump($arr['hash']);
 echo "Done";
-?>

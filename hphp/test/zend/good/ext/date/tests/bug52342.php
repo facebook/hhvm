@@ -11,4 +11,3 @@ echo date('d.m.Y H:i', $from->getTimestamp()), "\n"; //C
 $from->add(new DateInterval('P0D'));
 echo $from->getTimestamp(), "\n"; //B
 echo date('d.m.Y H:i', $from->getTimestamp()), "\n"; //C
-?>

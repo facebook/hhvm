@@ -49,4 +49,3 @@ var_dump($dt->getOffset());
 
 $dt = DateTime::createFromFormat('O', 'invalid');
 var_dump($dt);
-?>

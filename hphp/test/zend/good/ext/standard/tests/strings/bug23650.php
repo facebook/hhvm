@@ -11,4 +11,3 @@ HERE;
 
 echo strip_tags($str);
 echo strip_tags($str, '<abc>');
-?>

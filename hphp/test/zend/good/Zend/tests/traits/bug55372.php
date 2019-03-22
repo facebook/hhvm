@@ -19,4 +19,3 @@ class foo {
 
 $x = new foo;
 $x->testMethod();
-?>

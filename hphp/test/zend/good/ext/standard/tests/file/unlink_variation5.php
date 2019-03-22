@@ -24,4 +24,3 @@ for($mode = 0000; $mode <= 0777; $mode++ ) {
 }
 
 echo "Done\n";
-?>

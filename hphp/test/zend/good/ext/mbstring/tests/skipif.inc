@@ -11,4 +11,3 @@ if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
 if (!extension_loaded("mbstring")) {
     die("skip\n");
 }
-?>

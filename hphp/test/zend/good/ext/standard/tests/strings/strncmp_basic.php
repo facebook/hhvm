@@ -25,4 +25,3 @@ var_dump( strncmp($str, "Hi", 5) );  //expected: value < 0
 var_dump( strncmp("Hi", $str, 5) );  //expected: value > 0
 
 echo "*** Done ***";
-?>

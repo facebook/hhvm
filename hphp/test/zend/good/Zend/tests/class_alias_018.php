@@ -21,4 +21,3 @@ var_dump(is_subclass_of(new baz, 'foo'));
 var_dump(is_subclass_of(new baz, 'bar'));
 var_dump(is_subclass_of(new baz, 'baz'));
 
-?>

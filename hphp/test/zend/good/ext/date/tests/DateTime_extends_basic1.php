@@ -29,5 +29,4 @@ $d->setTime(10, 45, 30);
 echo "\n-- Invoke __toString again --\n";
 echo $d . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -79,4 +79,3 @@ function http_server_kill($pid) {
 	pcntl_waitpid($pid, $status);
 }
 
-?>

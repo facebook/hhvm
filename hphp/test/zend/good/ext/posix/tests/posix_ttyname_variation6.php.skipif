@@ -2,4 +2,3 @@
 if (!extension_loaded('posix')) {
     die('SKIP The posix extension is not loaded.');
 }
-?>

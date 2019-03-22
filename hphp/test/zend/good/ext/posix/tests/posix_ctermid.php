@@ -1,4 +1,3 @@
 <?php
     var_dump(posix_ctermid());
-?>
-===DONE===
+echo "===DONE===\n";

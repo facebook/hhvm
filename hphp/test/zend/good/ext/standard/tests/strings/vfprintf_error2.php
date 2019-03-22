@@ -18,12 +18,8 @@ try { var_dump( vfprintf() ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 // Close handle
 fclose($fp);
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-
+echo "===DONE===\n";
+error_reporting(0);
 $file = 'vfprintf_error2.phpt.txt';
 unlink( $file );
 
-?>

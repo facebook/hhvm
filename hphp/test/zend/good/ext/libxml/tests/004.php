@@ -20,4 +20,3 @@ foreach ($ctxs as $ctx) {
 
 echo "Done\n";
 
-?>

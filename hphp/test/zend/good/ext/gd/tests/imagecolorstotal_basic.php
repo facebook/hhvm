@@ -14,6 +14,4 @@ echo 'Total colors in image: ' . imagecolorstotal($im);
 
 // Free image
 imagedestroy($im);
-?>
-
-===DONE===
+echo "\n===DONE===\n";

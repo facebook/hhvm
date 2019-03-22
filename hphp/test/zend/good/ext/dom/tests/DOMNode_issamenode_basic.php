@@ -21,5 +21,4 @@ if($nodelist->item(0)->isSameNode($node))
 else
 	echo "EXPECTING NOT SAME NODE, PASSED\n" ; 
 	
-?>
-===DONE===
+echo "===DONE===\n";

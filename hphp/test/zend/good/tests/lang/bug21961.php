@@ -48,4 +48,3 @@ class bar extends man
 $x = new man;
 $x->getdrunk('The old Tavern');
 var_dump($x->bars[0]->whosdrunk());
-?>

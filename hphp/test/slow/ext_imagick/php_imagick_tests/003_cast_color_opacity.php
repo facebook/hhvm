@@ -22,4 +22,3 @@ try {
     $e->getMessage() . PHP_EOL;
 }
 
-?>

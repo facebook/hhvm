@@ -16,5 +16,4 @@ var_dump(nl_langinfo(MON_4));
 var_dump(nl_langinfo(RADIXCHAR));
 
 setlocale(LC_ALL, $original); 
-?>
-===DONE===
+echo "===DONE===\n";

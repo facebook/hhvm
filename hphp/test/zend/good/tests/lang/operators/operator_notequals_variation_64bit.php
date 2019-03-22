@@ -51,5 +51,4 @@ if ($failed == false) {
    echo "Test Passed\n";
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

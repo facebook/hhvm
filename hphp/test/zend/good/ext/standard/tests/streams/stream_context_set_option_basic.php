@@ -14,4 +14,3 @@ $options = array(
 var_dump(stream_context_set_option($context, $options));
 
 var_dump(stream_context_get_options($context));
-?>

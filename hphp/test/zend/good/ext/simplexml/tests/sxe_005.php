@@ -24,5 +24,4 @@ var_dump(count($sxe));
 var_dump(count($sxe->elem1));
 var_dump(count($sxe->elem2));
 
-?>
-===DONE===
+echo "===DONE===\n";

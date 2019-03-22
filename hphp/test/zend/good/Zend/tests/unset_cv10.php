@@ -5,4 +5,3 @@ echo $x;
 $a->offsetUnset('x');
 echo $x;
 echo "ok\n";
-?>

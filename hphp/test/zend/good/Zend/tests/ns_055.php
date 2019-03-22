@@ -18,4 +18,3 @@ $ex = new \Exception();
 $foo->test1($foo);
 $foo->test2($foo);
 $foo->test3($ex);
-?>

@@ -7,5 +7,4 @@
 echo "*** Testing read_exif_data() : basic functionality ***\n";
 
 print_r(read_exif_data(dirname(__FILE__).'/test2.jpg'));
-?>
-===Done===
+echo "===Done===";

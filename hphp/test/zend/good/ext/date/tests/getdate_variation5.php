@@ -31,5 +31,4 @@ foreach($inputs as $timezone) {
       date_default_timezone_set($timezone);
       var_dump( getdate(0) );
 };
-?>
-===DONE===
+echo "===DONE===\n";

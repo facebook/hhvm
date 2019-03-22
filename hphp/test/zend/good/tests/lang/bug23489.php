@@ -14,5 +14,4 @@ class Test {
 }
 
 $t = new Test;
-?>
-failure
+echo "failure";

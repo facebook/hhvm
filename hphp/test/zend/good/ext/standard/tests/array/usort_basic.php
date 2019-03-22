@@ -49,5 +49,4 @@ $string_key_arg = array('one' => 4, 'two' => 2, 'three' => 1, 'four' => 10);
 echo "\n-- Associative array with string keys --\n";
 var_dump( usort(&$string_key_arg, 'cmp') );
 var_dump($string_key_arg);
-?>
-===DONE===
+echo "===DONE===\n";

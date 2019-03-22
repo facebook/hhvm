@@ -7,6 +7,4 @@ $mf = new MessageFormatter('en_US',
 	
 var_dump($mf->format(array(2.3, "foo" => 1.3)));
 var_dump($mf->format(array("foo" => 1.3, 0 => 2.3)));
-
-?>
-==DONE==
+echo "==DONE==";

@@ -53,4 +53,3 @@ foreach ($fields as $field) {
 } // end of foreach
 
 echo "Done\n";
-?>

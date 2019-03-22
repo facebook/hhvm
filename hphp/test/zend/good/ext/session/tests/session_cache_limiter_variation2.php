@@ -21,4 +21,3 @@ var_dump(session_cache_limiter());
 
 echo "Done";
 ob_end_flush();
-?>

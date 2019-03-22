@@ -16,4 +16,3 @@ echo $start->format('Y-m-d H:i:s'),PHP_EOL;
 $start->setTime(8, 0, 0);
 echo $start->format('Y-m-d H:i:s'),PHP_EOL;
 //jumped to next Sunday again
-?>

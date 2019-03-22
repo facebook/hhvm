@@ -31,5 +31,4 @@ $result = vprintf($format3,$arg3);
 echo "\n";
 var_dump($result);
 
-?>
-===DONE===
+echo "===DONE===\n";

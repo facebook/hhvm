@@ -31,5 +31,4 @@ echo "\n-- Testing gmdate() function with number of days in a month format --\n"
 var_dump( gmdate('t') );
 var_dump( gmdate('t', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

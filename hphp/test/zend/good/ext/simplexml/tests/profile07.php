@@ -12,4 +12,3 @@ $myattr = $root->child->attributes('reserved-ns');
 echo $rsattr['attribute'];
 echo $myattr['attribute'];
 echo "\n---Done---\n";
-?>

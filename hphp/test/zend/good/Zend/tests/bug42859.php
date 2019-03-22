@@ -4,4 +4,3 @@ class Ex {}
 
 use Blah\Exception;
 use Blah\Ex;
-?>

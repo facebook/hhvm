@@ -1,3 +1,2 @@
 <?php
 /* dummy include*/
-?>

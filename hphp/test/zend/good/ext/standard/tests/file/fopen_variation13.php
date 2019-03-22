@@ -43,5 +43,5 @@ function runtest() {
 	rmdir($tempDir);
 
 }
-?>
-===DONE===
+
+echo "===DONE===\n";

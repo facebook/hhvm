@@ -6,4 +6,3 @@ $result = imagecolordeallocate($image, $white);
 
 var_dump($result);
 
-?>

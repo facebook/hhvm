@@ -13,4 +13,3 @@ $base=new Base();
 print_r($base->getFields(new Base()));
 $child=new Child();
 print_r($child->getFields(new Base()));
-?>

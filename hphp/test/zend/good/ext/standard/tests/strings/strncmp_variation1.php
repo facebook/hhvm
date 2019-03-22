@@ -19,4 +19,3 @@ for($ASCII = 97; $ASCII <= 122; $ASCII++) {
   var_dump( strncmp( chr($ASCII), chr($ASCII - 32), 1 ) );  //comparing lowercase letters with uppercase letters; exp: value > 0
 }
 echo "*** Done ***";
-?>

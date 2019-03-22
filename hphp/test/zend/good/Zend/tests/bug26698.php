@@ -61,5 +61,4 @@ $p = new Proxy();
 $p->callOne();
 $p->callTwo();
 $p->callThree();
-?>
-===DONE===
+echo "===DONE===\n";

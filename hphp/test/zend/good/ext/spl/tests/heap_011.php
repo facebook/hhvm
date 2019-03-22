@@ -22,4 +22,3 @@ $h->insert(6);
 $h->insert(5);
 $h->insert(2);
 var_dump($h->top());
-?>

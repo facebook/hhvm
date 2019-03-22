@@ -12,6 +12,4 @@ var_dump(imap_8bit("String with space at end "));
 var_dump(imap_8bit("String with tabs \t\t in middle"));
 var_dump(imap_8bit("String with tab at end \t"));
 var_dump(imap_8bit("\x00\x01\x02\x03\x04\xfe\xff\x0a\x0d"));
-
-?>
-===Done===
+echo "===Done===";

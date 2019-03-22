@@ -16,5 +16,4 @@ $summer = date_create('2008-07-02 14:25:41');
 echo "Winter offset: " . date_offset_get($winter) / 3600 . " hours\n"; 
 echo "Summer offset: " . date_offset_get($summer) / 3600 . " hours\n"; 
 
-?>
-===DONE===
+echo "===DONE===\n";

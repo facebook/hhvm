@@ -25,4 +25,3 @@ class Person {
 $person = new Person("John", "New York");
 $person->getName()->display();
 
-?>

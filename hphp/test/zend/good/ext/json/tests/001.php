@@ -18,5 +18,4 @@ var_dump(json_decode('{ "": { "": "" } }'));
 var_dump(json_decode('{ "": { "": "" }'));
 var_dump(json_decode('{ "": "": "" } }'));
 
-?>
-===DONE===
+echo "===DONE===\n";

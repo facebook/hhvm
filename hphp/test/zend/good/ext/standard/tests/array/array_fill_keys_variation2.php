@@ -42,4 +42,3 @@ var_dump(array_fill_keys($refArray, $simpleStr));
 
 fclose($fp);
 echo "Done";
-?>

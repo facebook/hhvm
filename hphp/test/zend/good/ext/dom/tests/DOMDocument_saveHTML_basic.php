@@ -9,4 +9,3 @@ $title = $head->appendChild($title);
 $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 echo $doc->saveHTML();
-?>

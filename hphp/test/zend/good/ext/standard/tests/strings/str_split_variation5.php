@@ -81,5 +81,4 @@ foreach($heredoc_array as $str) {
   $count++;
 };
  
-echo "Done"
-?>
+echo "Done";

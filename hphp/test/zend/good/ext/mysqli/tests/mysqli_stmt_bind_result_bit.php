@@ -141,8 +141,5 @@
 	mysqli_close($link_ins);
 	mysqli_close($link_sel);
 	print "done!";
-?>
-<?php error_reporting(0); ?>
-<?php
-	$test_table_name = 'test_mysqli_stmt_bind_result_bit_table_1'; require_once("clean_table.inc");
-?>
+error_reporting(0);
+$test_table_name = 'test_mysqli_stmt_bind_result_bit_table_1'; require_once("clean_table.inc");

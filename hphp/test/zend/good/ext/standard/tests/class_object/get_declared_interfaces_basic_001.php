@@ -27,4 +27,3 @@ Interface I {}
 var_dump(in_array('I', get_declared_interfaces()));
 
 echo "Done";
-?>

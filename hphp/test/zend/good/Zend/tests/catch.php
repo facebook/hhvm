@@ -15,4 +15,3 @@ try {
 } catch (Exception $e) {
 	echo "ok\n";
 }
-?>

@@ -24,4 +24,3 @@ for($index = 0; $index < count($haystacks); $index++ ) {
   var_dump( strrpos($haystacks[$index], "\0", $index) );
 }
 echo "*** Done ***";
-?>

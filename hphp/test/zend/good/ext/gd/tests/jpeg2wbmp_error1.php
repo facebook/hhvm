@@ -15,9 +15,6 @@ imagedestroy($im);
 
 jpeg2wbmp($file, $file2, 20, 120, 9);
 jpeg2wbmp($file, $file2, 20, 120, -1);
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 unlink(dirname(__FILE__) .'/simpletext.jpg');
 unlink(dirname(__FILE__) .'/simpletext.wbmp');
-?>

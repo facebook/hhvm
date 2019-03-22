@@ -36,5 +36,4 @@ catch (Exception $e)
 	echo "CAUGHT\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

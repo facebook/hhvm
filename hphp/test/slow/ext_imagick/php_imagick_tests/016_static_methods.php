@@ -10,4 +10,3 @@ echo gettype ($im->queryFonts ()) . PHP_EOL;
 
 echo 'success';
 
-?>

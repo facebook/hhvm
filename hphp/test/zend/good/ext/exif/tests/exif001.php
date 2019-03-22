@@ -5,4 +5,3 @@
             copy of test1.jpg as a thumbnail.
 */
 var_dump(exif_read_data(dirname(__FILE__).'/test2.jpg','',true,false));
-?>

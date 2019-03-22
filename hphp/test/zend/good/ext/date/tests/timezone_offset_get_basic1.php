@@ -21,5 +21,4 @@ var_dump(timezone_offset_get($tz, $date));
 $tz = timezone_open("America/Los_Angeles");
 var_dump(timezone_offset_get($tz, $date));
 
-?>
-===DONE===
+echo "===DONE===\n";

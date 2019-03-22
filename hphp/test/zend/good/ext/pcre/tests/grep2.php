@@ -14,4 +14,3 @@ var_dump(preg_last_error() == PREG_NO_ERROR);
 var_dump(preg_grep('@^[a-z]+@', $array));
 var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
 
-?>

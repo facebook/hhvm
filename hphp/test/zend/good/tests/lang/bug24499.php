@@ -12,4 +12,3 @@ $id = new Id();
 @$obj->foo = "bar";
 $id->tester($obj);
 print_r($obj);
-?>

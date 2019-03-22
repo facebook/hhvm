@@ -12,4 +12,3 @@ $c = new foo;
 
 $a = clone $c->b[1];
 
-?>

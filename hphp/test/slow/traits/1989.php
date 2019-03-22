@@ -15,4 +15,3 @@ class Talker {
 }
 $talker = new Talker();
 $talker->fala();
-?>

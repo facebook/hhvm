@@ -105,5 +105,4 @@ foreach($inputs as $key =>$value) {
 };
 unlink($filename);
 
-?>
-===DONE===
+echo "===DONE===\n";

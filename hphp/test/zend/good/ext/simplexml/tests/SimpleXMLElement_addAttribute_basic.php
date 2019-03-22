@@ -4,4 +4,3 @@
 	
 	var_dump($simple->attributes());
 	echo "Done";
-?>

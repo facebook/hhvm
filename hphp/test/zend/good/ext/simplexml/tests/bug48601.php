@@ -10,4 +10,3 @@ if (! is_array($nodes)) {
    echo "Result Count: " . count($nodes) . "\n";
 }
 
-?>

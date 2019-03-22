@@ -22,4 +22,3 @@ $array1 = array(1, array(2, 3, array(5)), array(4));
 var_dump( array_map('square_recur_single_array', $array1));
 
 echo "Done";
-?>

@@ -24,4 +24,3 @@ try { var_dump( chop($str, $charlist, $extra_arg) ); } catch (Exception $e) { ec
 var_dump( $str );
 
 echo "Done\n";
-?>

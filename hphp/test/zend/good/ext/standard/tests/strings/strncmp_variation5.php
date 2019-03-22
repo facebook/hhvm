@@ -92,4 +92,3 @@ for($index = 0; $index < count($lengths); $index ++) {
 fclose($file_handle);
 
 echo "*** Done ***\n";
-?>

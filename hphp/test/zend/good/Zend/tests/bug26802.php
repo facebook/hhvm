@@ -26,5 +26,4 @@ $method = 'foo_func';
 foo::$method();
 
 
-?>
-===DONE===
+echo "===DONE===\n";

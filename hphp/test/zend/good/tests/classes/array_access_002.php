@@ -78,5 +78,4 @@ unset($obj[7]);
 unset($obj['8th']);
 var_dump($obj->a);
 
-?>
-===DONE===
+echo "===DONE===\n";

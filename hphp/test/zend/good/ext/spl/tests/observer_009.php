@@ -18,6 +18,4 @@ foreach ($storageB as $object) {
         echo ' x ';
 }
 echo "\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

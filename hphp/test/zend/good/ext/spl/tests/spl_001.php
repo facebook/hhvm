@@ -13,5 +13,4 @@ foreach($ar as $v)
 	var_dump($v);
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

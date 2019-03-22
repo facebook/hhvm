@@ -37,5 +37,4 @@ $float_input = array(
 echo "-- Mixed float array --\n";
 var_dump( array_sum($float_input) );
                      
-echo "Done"
-?>
+echo "Done";

@@ -34,4 +34,3 @@ foreach( $str_array as $arr )  {
 }
 
 echo "Done\n";
-?>

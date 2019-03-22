@@ -23,4 +23,3 @@ abstract class this_is_an_abstract_class {
 final class this_is_a_final_class {
  }
 var_dump(get_declared_user_traits());
-?>

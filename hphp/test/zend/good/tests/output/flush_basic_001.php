@@ -16,4 +16,3 @@ ob_end_clean();
 echo "Outside of any user buffers\n";
 var_dump(flush());
 
-?>

@@ -72,4 +72,3 @@ echo "\nThe output array is:\n";
 var_dump( $heredoc_asso_array );  
 
 echo "Done";
-?>

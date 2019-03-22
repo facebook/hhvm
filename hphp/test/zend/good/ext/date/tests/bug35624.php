@@ -8,4 +8,3 @@ foreach ($days as $day) {
 	echo date("D", strtotime(ucfirst($day)));
 	echo "\n";
 }
-?>

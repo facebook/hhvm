@@ -28,4 +28,3 @@ $str2 = decbin( ord( chr(256) ));
 var_dump( strncmp($str1, $str2, 8) >  0 );  //comparing all the 8-bits; expected: int(1)
 
 echo "\n*** Done ***\n";
-?>

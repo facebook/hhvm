@@ -6,4 +6,3 @@ class Foo {
 
 $o = new Foo;
 $o->a($o);
-?>

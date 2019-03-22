@@ -66,4 +66,3 @@ $a[2] = &$ext;
 check($a);
 
 echo "Done";
-?>

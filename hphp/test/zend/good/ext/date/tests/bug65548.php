@@ -15,4 +15,3 @@ var_dump($iToday === $mToday);
 var_dump($iToday < $mTomorrow);
 var_dump($iToday == $mTomorrow);
 var_dump($iToday > $mTomorrow);
-?>

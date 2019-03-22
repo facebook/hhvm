@@ -11,4 +11,3 @@ try { iterator_count($iterator,'1'); } catch (Exception $e) { echo "\n".'Warning
 iterator_count('1');
 
 
-?>

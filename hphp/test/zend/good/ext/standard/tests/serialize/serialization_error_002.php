@@ -35,4 +35,3 @@ var_dump(isSerialized($garbage));
 var_dump(isSerialized($serialized_false));
 
 echo "Done";
-?>

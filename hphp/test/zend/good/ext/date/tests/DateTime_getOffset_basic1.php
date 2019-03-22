@@ -16,5 +16,4 @@ $summer = new DateTime('2008-07-02 14:25:41');
 echo "Winter offset: " . $winter->getOffset() / 3600 . " hours\n"; 
 echo "Summer offset: " . $summer->getOffset() / 3600 . " hours\n"; 
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -8,5 +8,4 @@ var_dump(gzread($h, -1));
 var_dump(gzread($h, 8));
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";

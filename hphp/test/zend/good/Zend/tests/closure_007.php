@@ -26,4 +26,3 @@ $closure();
 $a->printX();
 
 echo "Done\n";
-?>

@@ -37,4 +37,3 @@ foreach($src_filenames as $src_filename) {
 rmdir("$file_path/rename_variation"); 
 
 echo "Done\n";
-?>

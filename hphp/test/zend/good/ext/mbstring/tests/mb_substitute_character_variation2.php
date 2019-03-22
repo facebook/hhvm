@@ -20,5 +20,4 @@ mb_substitute_character(280); //not valid in ISO-8859-1
 var_dump(bin2hex(mb_convert_encoding($string_mb, "ISO-8859-1", "UTF-8")));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

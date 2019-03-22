@@ -10,4 +10,3 @@ class C {
 }
 
 echo "okey";
-?>

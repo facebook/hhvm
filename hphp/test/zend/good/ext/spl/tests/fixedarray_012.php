@@ -10,4 +10,3 @@ try {
 
 print "ok\n";
 
-?>

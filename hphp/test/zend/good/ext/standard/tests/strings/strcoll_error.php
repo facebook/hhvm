@@ -15,6 +15,4 @@ try { var_dump( strcoll("Hello World") );   } catch (Exception $e) { echo "\n".'
 echo "\n-- Testing strcoll() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
 try { var_dump( strcoll("Hello World",  "World", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-?>
-===Done===
+echo "===Done===";

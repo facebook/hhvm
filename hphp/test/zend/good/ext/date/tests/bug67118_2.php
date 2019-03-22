@@ -14,5 +14,4 @@ class Foo extends DateTime {
 }
 $date = '12 Sep 2007 15:49:12 UT';
 var_dump(new Foo($date));
-?>
-Done
+echo "Done";

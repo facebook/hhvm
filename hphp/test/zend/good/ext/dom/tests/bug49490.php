@@ -7,4 +7,3 @@ $xp->registerNamespace('prefix', 'urn:b');
 
 echo($xp->query('//prefix:root', null, false)->length . "\n");
 
-?>

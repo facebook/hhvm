@@ -10,4 +10,3 @@ echo gmdate('Y-m-d H:i:s', strtotime("2002-06-25 14:18:48.543728-0300"))."\n";
 echo gmdate('Y-m-d H:i:s', strtotime("2002-06-25 14:18:48.543728+0300"))."\n";
 echo gmdate('Y-m-d H:i:s', strtotime("2002-06-25 14:18:48.543728-0330"))."\n";
 echo gmdate('Y-m-d H:i:s', strtotime("2002-06-25 14:18:48.543728+0330"))."\n";
-?>

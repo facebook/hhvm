@@ -7,4 +7,3 @@ class MyCollection extends MongoCollection
 	}
 }
 var_dump(MyCollection::toIndexString(null));
-?>

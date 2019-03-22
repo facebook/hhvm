@@ -13,4 +13,3 @@ class foo
 $foo = new foo();
 $data = serialize($foo);
 var_dump(str_replace("\0", '\0', $data));
-?>

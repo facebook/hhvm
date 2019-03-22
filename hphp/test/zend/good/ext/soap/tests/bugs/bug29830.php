@@ -15,4 +15,3 @@ $functions = $server->getFunctions();
 foreach($functions as $func) {
   echo $func . "\n";
 }
-?>

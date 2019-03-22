@@ -92,4 +92,3 @@ function p1()
 
 p1();
 echo "ok\n";
-?>

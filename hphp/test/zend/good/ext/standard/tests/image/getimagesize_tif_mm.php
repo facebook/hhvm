@@ -9,5 +9,4 @@ echo "*** Testing getimagesize() : tiff_mm format ***\n";
 var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", &$arr));
 var_dump($arr);
 
-?>
-===DONE===
+echo "===DONE===\n";

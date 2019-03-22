@@ -37,4 +37,3 @@ var_dump(bzerrstr($fd2));
 var_dump(bzerrno($fd2));
 
 echo "Done\n";
-?>

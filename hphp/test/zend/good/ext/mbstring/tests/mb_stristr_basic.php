@@ -39,5 +39,4 @@ echo "\n-- Multibyte string: needle doesn't exist --\n";
 $needle2 = base64_decode("zrzOvs6/");
 var_dump(mb_stristr($string_mb, $needle2));
 
-?>
-===DONE===
+echo "===DONE===\n";

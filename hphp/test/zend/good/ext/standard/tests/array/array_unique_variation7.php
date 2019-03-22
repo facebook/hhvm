@@ -16,4 +16,3 @@ $input = array( b"1", b"hello", "world", "str1" => "hello", "str2" => "world");
 var_dump( array_unique($input) );
 
 echo "Done";
-?>

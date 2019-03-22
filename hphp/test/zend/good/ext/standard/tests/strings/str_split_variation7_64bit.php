@@ -34,5 +34,4 @@ for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count + 1)." --\n";
   var_dump( str_split($str, $values[$count]) );
 }
-echo "Done"
-?>
+echo "Done";

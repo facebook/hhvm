@@ -27,4 +27,3 @@
 	var_dump($mysqli->error);
 
 	print "done!";
-?>

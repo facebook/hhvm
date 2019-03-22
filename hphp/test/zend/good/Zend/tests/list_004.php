@@ -7,4 +7,3 @@ list(,$a) = $b;
 
 var_dump($a, $b);
 
-?>

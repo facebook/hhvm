@@ -13,4 +13,3 @@ $function = new \ReflectionFunction('A\\B\\foo');
 \var_dump($function->getName());
 \var_dump($function->getNamespaceName());
 \var_dump($function->getShortName());
-?>

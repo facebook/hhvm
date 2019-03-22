@@ -16,4 +16,3 @@ class TestObject implements Iterator
 $array_object = new TestObject();
 
 foreach ((true ? $array_object : $array_object) as $item) echo "$item\n";
-?>

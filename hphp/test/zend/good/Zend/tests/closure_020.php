@@ -18,4 +18,3 @@ $foo = new foo;
 $y = $foo->x();
 var_dump($y()->test);
 
-?>

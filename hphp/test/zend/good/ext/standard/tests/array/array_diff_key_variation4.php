@@ -21,5 +21,4 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_diff_key($input_array, $value) );
       var_dump( array_diff_key($value, $input_array) );
 }
-?>
-===DONE===
+echo "===DONE===\n";

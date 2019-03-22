@@ -7,10 +7,7 @@ hi there 2";
 file_put_contents(dirname(__FILE__) . '/test2.php', $text);
 include dirname(__FILE__) . '/test1.php';
 include dirname(__FILE__) . '/test2.php';
-?>
-==DONE==
-<?php error_reporting(0); ?>
-<?php
+echo "==DONE==\n";
+error_reporting(0);
 unlink(dirname(__FILE__) . '/test1.php');
 unlink(dirname(__FILE__) . '/test2.php');
-?>

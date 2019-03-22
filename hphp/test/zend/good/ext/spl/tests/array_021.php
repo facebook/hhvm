@@ -20,5 +20,4 @@ catch (Exception $e)
 	echo "got exception\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

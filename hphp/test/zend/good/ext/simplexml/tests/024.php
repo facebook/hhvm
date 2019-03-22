@@ -28,5 +28,4 @@ test('elem[2]/@attr2');
 abstract final class ZendGoodExtSimplexmlTests024 {
   public static $sxe;
 }
-?>
-===DONE===
+echo "===DONE===\n";

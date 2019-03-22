@@ -21,4 +21,3 @@ var_dump( array_reverse($array, true) );  // expects the keys to be preserved
 var_dump( array_reverse($array, false) );  // expects the keys not to be preserved
 
 echo "Done";
-?>

@@ -7,4 +7,3 @@ class autoload_implements implements autoload_interface {
 	}
 }
 
-?>

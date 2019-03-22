@@ -62,5 +62,4 @@ $empty_array = array();
 echo "\n-- Sorting empty array --\n";
 var_dump( usort(&$empty_array, 'cmp_function') );
 var_dump($empty_array);
-?>
-===DONE===
+echo "===DONE===\n";

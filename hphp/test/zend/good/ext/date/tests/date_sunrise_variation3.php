@@ -92,5 +92,4 @@ foreach($inputs as $key =>$value) {
       try { var_dump( date_sunrise($time, SUNFUNCS_RET_DOUBLE, $value, $longitude, $zenith, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       try { var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $value, $longitude, $zenith, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
-?>
-===DONE===
+echo "===DONE===\n";

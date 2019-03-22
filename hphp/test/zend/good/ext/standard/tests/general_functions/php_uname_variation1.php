@@ -62,5 +62,4 @@ foreach($values as $key => $value) {
       var_dump( php_uname($value) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

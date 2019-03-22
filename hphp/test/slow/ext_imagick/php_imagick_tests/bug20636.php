@@ -9,4 +9,3 @@ try {
     echo "success\n";
 }
 
-?>

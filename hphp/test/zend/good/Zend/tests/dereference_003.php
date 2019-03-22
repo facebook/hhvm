@@ -31,4 +31,3 @@ var_dump($foo->b()[1][0]->a()[0]->x);
 var_dump($foo->c()[0]);
 var_dump($foo->d()[0]);
 
-?>

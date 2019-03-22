@@ -28,6 +28,4 @@ foreach($it as $val=>$key)
 	echo "$val=>$key\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";

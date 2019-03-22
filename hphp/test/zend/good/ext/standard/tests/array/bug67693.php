@@ -10,4 +10,3 @@ array_push(&$array, 0);
 var_dump($array);
 
 echo"\nDone";
-?>

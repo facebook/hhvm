@@ -45,4 +45,3 @@ function run_test($file) {
 
 
 echo "\n*** Done ***\n";
-?>

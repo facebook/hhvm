@@ -6,4 +6,3 @@ var_dump( $i );
 
 $i = DateTimeImmutable::createFromMutable( date_create_immutable( $current ) );
 var_dump( $i );
-?>

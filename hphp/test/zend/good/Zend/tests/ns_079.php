@@ -3,5 +3,4 @@ namespace foo {
     namespace oops {
     }
 }
-?>
-===DONE===
+echo "===DONE===\n";

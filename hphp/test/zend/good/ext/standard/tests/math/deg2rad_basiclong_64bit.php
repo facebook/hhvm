@@ -17,5 +17,4 @@ foreach ($longVals as $longVal) {
    var_dump(deg2rad($longVal));
 }
    
-?>
-===DONE===
+echo "===DONE===\n";

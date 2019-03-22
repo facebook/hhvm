@@ -37,5 +37,4 @@ $sxe->addChild('test4', 'myval');
 $sxe->addChild('s:test5', 'myval');
 
 echo $sxe->asXML();
-?>
-===DONE===
+echo "===DONE===\n";

@@ -18,6 +18,4 @@ class Class2
 }
 
 $foo = new Class2();
-
-?>
-Alive!
+echo "Alive!";

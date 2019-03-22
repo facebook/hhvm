@@ -25,4 +25,3 @@ var_dump(in_array('AutoTrait', get_declared_traits()));
 
 echo "\nDONE\n";
 
-?>

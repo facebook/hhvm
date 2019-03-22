@@ -9,4 +9,3 @@
 	var_dump(is_dir($toname)); // Expected: true
 	rmdir($toname);
 	var_dump(is_dir($toname)); // Expected: false
-?>

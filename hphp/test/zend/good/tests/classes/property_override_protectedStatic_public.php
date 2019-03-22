@@ -23,4 +23,3 @@
   $b = new B;
   $b->showA();
   $b->showB();
-?>

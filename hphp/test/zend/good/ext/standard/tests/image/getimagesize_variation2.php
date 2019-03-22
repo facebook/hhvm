@@ -74,5 +74,4 @@ foreach($values as $key => $value) {
       var_dump(bin2hex($value["APP0"]));
 };
 
-?>
-===DONE===
+echo "===DONE===\n";

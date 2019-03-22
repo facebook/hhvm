@@ -20,4 +20,3 @@ foreach ( new DatePeriod( $db2, $di, $de ) as $dt )
     echo $dt->modify( "3 tuesday" )->format( "l Y-m-d\n" );
 	echo $dt->format( "l Y-m-d\n\n" );
 }
-?>

@@ -9,4 +9,3 @@ try {
 	echo $e->getMessage();
 }
 
-?>

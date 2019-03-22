@@ -6,4 +6,3 @@ $doc = new DOMDocument();
 $doc->loadXML($xml);
 $doctype = $doc->doctype;
 var_dump($doctype->systemId);
-?>

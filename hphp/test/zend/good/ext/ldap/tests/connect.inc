@@ -71,4 +71,3 @@ function remove_dummy_data($link, $base) {
 	ldap_delete($link, "cn=userB,$base");
 	ldap_delete($link, "o=test,$base");
 }
-?>

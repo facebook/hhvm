@@ -32,5 +32,4 @@ $inputs = array(
 var_dump(array_multisort(&$inputs));
 var_dump($inputs);
 
-?>
-===DONE===
+echo "===DONE===\n";

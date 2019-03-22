@@ -19,4 +19,3 @@ echo "\n-- Incorrect input --\n";
 octdec(new classA());
 
 
-?>

@@ -24,4 +24,3 @@ var_dump( stripos($special_chars_str, "$*", 10) );
 var_dump( stripos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
-?>

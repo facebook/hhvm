@@ -31,5 +31,4 @@ echo "\n-- Testing gmdate() function with 2 digit representation year format --\
 var_dump( gmdate('y') );
 var_dump( gmdate('y', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";

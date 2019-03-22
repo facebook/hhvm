@@ -13,4 +13,3 @@ class Test2 extends Test1 {
 }
 Test1::test();
 Test2::test();
-?>

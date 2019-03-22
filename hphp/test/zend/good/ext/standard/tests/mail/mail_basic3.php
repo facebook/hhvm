@@ -16,5 +16,4 @@ $message = 'A Message';
 
 echo "-- failure --\n";
 var_dump( mail($to, $subject, $message) );
-?>
-===DONE===
+echo "===DONE===\n";

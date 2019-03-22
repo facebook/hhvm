@@ -29,5 +29,4 @@ $o = new TestChild;
 $o->test();
 $o->a = "b";
 echo $o->a;
-?>
-==DONE==
+echo "==DONE==";

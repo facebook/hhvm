@@ -8,5 +8,4 @@ try { var_dump(gzgetc( $h, $extra_arg ) ); } catch (Exception $e) { echo "\n".'W
 try { var_dump(gzgetc() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";

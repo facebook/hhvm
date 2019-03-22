@@ -16,4 +16,3 @@ $t = count($obj);
 $a = array();
 $b =& $a['test'];
 var_dump($a);
-?>

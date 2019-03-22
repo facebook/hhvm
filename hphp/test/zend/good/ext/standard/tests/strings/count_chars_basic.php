@@ -18,5 +18,4 @@ var_dump(count_chars($string, 3));
 var_dump(bin2hex(count_chars($string, 4)));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

@@ -7,4 +7,3 @@ foreach ( $domains as $domain )
         echo "Hosts: " . count( $hosts ) . ", weights: " . count( $weights ) . "\n";
     }
 }
-?>

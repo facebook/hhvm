@@ -16,4 +16,3 @@ for($len = strlen($str1); $len >= 0; $len--) {
   var_dump( strncmp($str1, $str2, $len) );
 }
 echo "*** Done ***\n";
-?>

@@ -5,4 +5,3 @@ $comment = new DOMComment("This is the first comment.");
 $comment->__construct("This is the second comment.");
 $comment = $element->appendChild($comment);
 print $dom->saveXML();
-?>

@@ -2,4 +2,3 @@
 
 $a = clone array();
 
-?>

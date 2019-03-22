@@ -23,4 +23,3 @@ $r->setPregFlags(PREG_OFFSET_CAPTURE);
 echo $r->getPregFlags();
 
 
-?>

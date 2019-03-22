@@ -18,5 +18,4 @@ $numeric = SORT_NUMERIC;
 var_dump( array_multisort(&$ar1, &$asc, &$regular, &$ar2, &$asc, &$numeric) );
 var_dump($ar1, $ar2);
 
-?>
-===DONE===
+echo "===DONE===\n";

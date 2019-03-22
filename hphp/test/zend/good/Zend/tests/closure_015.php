@@ -9,4 +9,3 @@ print (string) $x;
 print "\n";
 print $x;
 print "\n";
-?>

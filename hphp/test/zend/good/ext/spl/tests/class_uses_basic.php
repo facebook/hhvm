@@ -15,5 +15,4 @@ var_dump(class_uses(new bar));
 var_dump(class_uses('bar'));
 
 
-?>
-===DONE===
+echo "===DONE===\n";

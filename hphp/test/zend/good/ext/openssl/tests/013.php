@@ -13,4 +13,3 @@ openssl_open($sealed, &$output3, $ekeys[2], $priv_key);
 var_dump($output3);
 openssl_open($sealed, &$output4, $wrong, $priv_key);
 var_dump($output4);
-?>

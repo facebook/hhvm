@@ -17,4 +17,3 @@ var_dump(ldap_dn2ufn("bob,dc=example,dc=com"));
 
 echo "Done\n";
 
-?>

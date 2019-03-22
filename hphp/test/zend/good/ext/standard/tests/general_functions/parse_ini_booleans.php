@@ -6,4 +6,3 @@ var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 
-?>

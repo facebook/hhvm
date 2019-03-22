@@ -8,4 +8,3 @@
 
 	$mysql->close();
 	echo "OK\n";
-?>

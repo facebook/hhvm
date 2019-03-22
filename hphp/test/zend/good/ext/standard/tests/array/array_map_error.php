@@ -19,4 +19,3 @@ $arr3 = array(5, 6);
 var_dump( array_map('callback2', $arr1, $arr2, $arr3) );
 
 echo "Done";
-?>

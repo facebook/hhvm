@@ -8,4 +8,3 @@ var_dump(strncmp("qwerty", "qwerty123", 6));
 var_dump(strncmp("qwerty", "qwerty123", 7));
 
 echo "Done\n";
-?>

@@ -19,4 +19,3 @@ class Bar extends Foo {
 
 $o = new Bar;
 $o->aPublicMethod();
-?>

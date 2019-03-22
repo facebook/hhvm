@@ -6,4 +6,3 @@ $url = "fakeURL";
 $ip = gethostbyname($url);
 if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
 
-?>

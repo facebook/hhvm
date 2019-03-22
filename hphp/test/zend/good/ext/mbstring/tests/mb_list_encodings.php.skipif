@@ -1,1 +1,1 @@
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php extension_loaded('mbstring') or die('skip mbstring not available');

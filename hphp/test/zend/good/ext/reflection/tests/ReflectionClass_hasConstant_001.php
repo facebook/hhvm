@@ -21,4 +21,3 @@ echo "Check inherited constant: ";
 var_dump($rd->hasConstant("myConst"));
 echo "Check absent constant: ";
 var_dump($rd->hasConstant("doesntExist"));
-?>

@@ -24,5 +24,4 @@ $extra_arg = 10;
 echo "-- Testing chunk_split() function with more than expected no. of arguments --";
 try { var_dump( chunk_split($str, $chunklen, $ending, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-echo "Done"
-?>
+echo "Done";

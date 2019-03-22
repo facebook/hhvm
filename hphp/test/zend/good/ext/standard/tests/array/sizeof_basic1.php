@@ -38,4 +38,3 @@ echo "COUNT_RECURSIVE mode: ";
 var_dump( sizeof($floatval, COUNT_RECURSIVE) );
 
 echo "Done";
-?>

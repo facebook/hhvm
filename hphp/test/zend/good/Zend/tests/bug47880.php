@@ -7,4 +7,3 @@ class bomb {
 }
 call_user_func_array(array('bomb', 'go'), array(0));
 echo "ok\n";
-?>

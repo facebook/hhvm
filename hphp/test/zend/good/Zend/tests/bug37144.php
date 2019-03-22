@@ -8,4 +8,3 @@ foo()->bar[1] = "123";
 foo()->bar[0]++;
 unset(foo()->bar[0]);
 echo "ok\n";
-?>

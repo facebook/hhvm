@@ -8,4 +8,3 @@ var_dump($doc->preserveWhiteSpace);
 $doc->preserveWhiteSpace = false;
 var_dump($doc->preserveWhiteSpace);
 
-?>

@@ -42,6 +42,3 @@ $test->nonExisting       = 'value';
 $test->publicProperty	 = 'value';
 $test->protectedProperty = 'value';
 $test->privateProperty   = 'value';
-
-?>
-

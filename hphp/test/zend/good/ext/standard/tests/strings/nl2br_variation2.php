@@ -39,4 +39,3 @@ foreach( $strings as $str ){
   $count ++ ;
 }
 echo "Done";
-?>

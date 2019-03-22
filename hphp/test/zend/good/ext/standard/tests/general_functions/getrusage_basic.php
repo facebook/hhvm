@@ -16,5 +16,4 @@ if (!is_array($dat)) {
 // echo the fields which are common to all platforms 
 echo "User time used (seconds) " . $dat["ru_utime.tv_sec"] . "\n";
 echo "User time used (microseconds) " . $dat["ru_utime.tv_usec"] . "\n"; 
-?>
-===DONE===
+echo "===DONE===\n";

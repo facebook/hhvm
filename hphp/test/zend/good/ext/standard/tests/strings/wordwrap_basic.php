@@ -31,4 +31,3 @@ $width = 10;
 $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 echo "Done\n";
-?>

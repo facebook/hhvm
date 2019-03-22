@@ -25,4 +25,3 @@ var_dump(fileatime("/no/such/file/or/dir"));
 var_dump(filectime("/no/such/file/or/dir"));
 
 echo "Done\n";
-?>

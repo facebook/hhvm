@@ -29,5 +29,4 @@ for ($i = $length; $i > 0; $i--) {
     var_dump(prev(&$array2));
 }
 
-?>
-===DONE===
+echo "===DONE===\n";

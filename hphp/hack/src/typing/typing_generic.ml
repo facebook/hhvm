@@ -20,12 +20,12 @@ module ShapeMap = Nast.ShapeMap
 module IsGeneric: sig
 
   (* Give back the position and name of a generic type parameter if found *)
-  val ty: TypecheckerOptions.t -> 'phase ty -> (Pos.t * string) option
+  val ty: 'phase ty -> (Pos.t * string) option
 end = struct
 
   exception Found of Reason.t * string
 
-  let ty : type a . TypecheckerOptions.t -> a ty -> _ = fun tcopt x ->
+  let ty : type a . a ty -> _ = fun x ->
     let rec ty : type a. a ty -> _ = fun (r, t) ->
       match t with
       | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
@@ -48,10 +48,7 @@ end = struct
           | AKdarray (tk, tv)
           | AKmap (tk, tv) -> ty tk; ty tv
         end
-      | Tvar _ ->
-        if TypecheckerOptions.new_inference tcopt
-        then () (* TODO: T36856670 *)
-        else assert false (* Expansion got rid of Tvars ... *)
+      | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
       | Toption x -> ty x
       | Tfun fty ->
           List.iter (List.map fty.ft_params (fun x -> x.fp_type)) ty;
@@ -87,7 +84,7 @@ end
 let no_generic p local_var_id env =
   let ty = Env.get_local env local_var_id in
   let ty = Typing_expand.fully_expand env ty in
-  match IsGeneric.ty env.Env.genv.Env.tcopt ty with
+  match IsGeneric.ty ty with
   | None -> env, false
   | Some (_, x) ->
       Errors.generic_static p x;

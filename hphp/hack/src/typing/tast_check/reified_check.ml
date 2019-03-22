@@ -67,7 +67,7 @@ let verify_targ_valid_for_reified_tparam env tparam targ =
   | Nast.Reified
   | Nast.SoftReified ->
     let ty = Env.hint_to_ty env targ in
-    begin match Typing_generic.IsGeneric.ty (Tast_env.get_tcopt env) ty with
+    begin match Typing_generic.IsGeneric.ty ty with
     | Some resolved_targ ->
       begin match (Tast_env.get_reified env (snd resolved_targ)) with
       | Nast.Erased -> Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ "not reified"

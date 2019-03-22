@@ -345,7 +345,7 @@ and class_member class_type tcopt root static env (_member_name, member) =
     let lazy (reason, _ as ty) = member.ce_type in
     let var_type_pos = Reason.to_pos reason in
     let class_pos = Cls.pos class_type in
-    match TGen.IsGeneric.ty tcopt ty with
+    match TGen.IsGeneric.ty ty with
     | None -> ()
     | Some (generic_pos, _generic_name) ->
     Errors.static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos

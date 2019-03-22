@@ -960,7 +960,8 @@ static void pagein_self(void) {
           if (to - from >  maxHugeHotTextBytes) {
             to = from + maxHugeHotTextBytes;
           }
-          if (to <= (void*)hugifyText) {
+          // Check that hugifyText() does not start in hot text.
+          if (to <= (void*)hugifyText || from > (void*)hugifyText) {
             mapped_huge = true;
             hugifyText(from, to);
           }

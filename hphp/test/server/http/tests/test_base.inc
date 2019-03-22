@@ -1,7 +1,7 @@
 <?hh
 
-$LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../../util/server_tests.inc';
+ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
 
 function runTest($testController, $customArgs = '', $repoArgs = '') {
   $pid = posix_getpid();
